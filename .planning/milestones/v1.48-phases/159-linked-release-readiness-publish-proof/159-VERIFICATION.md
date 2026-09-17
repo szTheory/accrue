@@ -1,39 +1,15 @@
 ---
 phase: 159-linked-release-readiness-publish-proof
-verified: 2026-05-31T18:26:27Z
-status: gaps_found
-score: 4/9 must-haves verified
+verified: 2026-06-01T17:25:00Z
+status: passed
+score: 9/9 must-haves verified
 overrides_applied: 0
-gaps:
-  - truth: "Maintainer can verify the next linked release line after 1.3.0 has coherent package versions, changelog entries, Release Please state, git tags, and runbook instructions across accrue, accrue_admin, and accrue_portal."
-    status: failed
-    reason: "No open combined Release Please PR exists for a version after 1.3.0; verification target line does not exist yet."
-    artifacts:
-      - path: ".planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md"
-        issue: "PR_NUMBER/TARGET_VERSION fields remain unpopulated for a post-1.3.0 line."
-    missing:
-      - "A live combined Release Please PR for a target version > 1.3.0"
-      - "Successful verify_release_pr_scope evidence for that PR/version pair"
-  - truth: "The linked Hex release is published in documented order and canonical proof is recorded in planning, changelogs, and release notes."
-    status: failed
-    reason: "No valid Release Please publish RUN_ID exists for a post-1.3.0 line; post-publish proof capture cannot be truthfully completed."
-    artifacts:
-      - path: ".planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md"
-        issue: "RUN_ID is empty and post-publish sections are placeholders for the next line."
-      - path: "scripts/ci/capture_linked_release_proof.sh"
-        issue: "Script is ready, but cannot run successfully without an actual merged release PR and successful release run for >1.3.0."
-    missing:
-      - "A successful release-please workflow run for target > 1.3.0"
-      - "Captured proof block from capture_linked_release_proof.sh for that run"
-  - truth: "Phase completion requires all three package tags, GitHub releases, Hex package versions, HexDocs pages, and host Hex smoke to agree with one target version."
-    status: failed
-    reason: "Host Hex smoke evidence is currently FAIL in ledger notes and no new post-1.3.0 line exists to reconcile."
-    artifacts:
-      - path: ".planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md"
-        issue: "Host Hex smoke is recorded as failed due to local host route conflict."
-    missing:
-      - "Passing host Hex smoke in clean release-proof context"
-      - "Full post-publish reconciliation for one target version > 1.3.0"
+gaps: []
+re_verification:
+  previous_status: gaps_found
+  closure_phase: 162
+  result: passed
+  evidence: "The appended 2026-06-01 proof block binds PR 30, target 1.4.0, and run 26769626329; all package tags, GitHub releases, Hex versions, HexDocs pages, host Hex smoke, and release-notes checks agree. Phase 162 independently records REL-01 through REL-03 as passed."
 ---
 
 # Phase 159: Linked Release Readiness + Publish Proof Verification Report

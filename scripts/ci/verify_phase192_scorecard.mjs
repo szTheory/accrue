@@ -2,18 +2,27 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import test from "node:test";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
+import { isMainModule } from "./main_module.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
-const PHASE192_DIR = ".planning/phases/192-idempotent-verification-sign-off";
+// CR-02: both 192-idempotent-verification-sign-off and 187-audit-baseline are
+// archived (this script is dormant, never wired into CI). PHASE192_DIR is used
+// below only to build the conventional evidence-ref PREFIX for text matching,
+// so it stays a bare slug (not a bare `.planning/phases/...` literal) and the
+// real filesystem reads are routed through the archive-aware resolver.
+const PHASE192_SLUG = "192-idempotent-verification-sign-off";
+const PHASE192_DIR = `.planning/phases/${PHASE192_SLUG}`;
 
 const DEFAULT_INPUTS = {
-  baselinePath: path.join(REPO_ROOT, ".planning/phases/187-audit-baseline/baseline.cells.json"),
-  finalCellsPath: path.join(REPO_ROOT, PHASE192_DIR, "final.cells.json"),
-  deltaPath: path.join(REPO_ROOT, PHASE192_DIR, "scorecard.delta.json"),
-  regressionsPath: path.join(REPO_ROOT, PHASE192_DIR, "regressions.ndjson"),
-  manifestPath: path.join(REPO_ROOT, PHASE192_DIR, "artifacts.manifest.json"),
+  baselinePath: resolvePhaseEvidencePath("187-audit-baseline", "baseline.cells.json", { root: REPO_ROOT }),
+  finalCellsPath: resolvePhaseEvidencePath(PHASE192_SLUG, "final.cells.json", { root: REPO_ROOT }),
+  deltaPath: resolvePhaseEvidencePath(PHASE192_SLUG, "scorecard.delta.json", { root: REPO_ROOT }),
+  regressionsPath: resolvePhaseEvidencePath(PHASE192_SLUG, "regressions.ndjson", { root: REPO_ROOT }),
+  manifestPath: resolvePhaseEvidencePath(PHASE192_SLUG, "artifacts.manifest.json", { root: REPO_ROOT }),
 };
 
 const DIMENSIONS = new Map([
@@ -743,7 +752,24 @@ export function main(argv = process.argv.slice(2)) {
   return result;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// D-31: this file previously registered no real node:test case -- with no
+// entrypoint guard at all, main() ran unconditionally on import under
+// `node --test`, reading the real archived Phase 192 evidence and passing
+// (exit 0) with the only TAP line being the file path itself: a vacuous
+// green, not an asserted one. Guard fix and first real test land in the same
+// commit (D-31). The file already carries a full self-test battery
+// (runSelfTest, wired to --self-test on the CLI) exercising eight positive
+// and negative fixture scenarios; wrap it in a real node:test case rather
+// than duplicating that coverage.
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("Phase 192 scorecard self-test passes every fixture scenario (positive pass plus score/coverage/evidence/regression negative controls)", () => runSelfTest());
+} else if (invokedAsEntrypoint) {
   try {
     main();
   } catch (error) {

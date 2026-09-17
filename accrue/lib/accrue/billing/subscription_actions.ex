@@ -361,11 +361,13 @@ defmodule Accrue.Billing.SubscriptionActions do
             %{id: existing_item.processor_id, price: new_price_id}
             |> maybe_put_quantity(validated[:quantity])
 
-          stripe_params = %{
-            items: [item_params],
-            proration_behavior: Atom.to_string(validated[:proration]),
-            expand: ["latest_invoice.payment_intent"]
-          }
+          stripe_params =
+            %{
+              items: [item_params],
+              proration_behavior: Atom.to_string(validated[:proration]),
+              expand: ["latest_invoice.payment_intent"]
+            }
+            |> put_if(:proration_date, validated[:proration_date])
 
           Repo.transact(fn ->
             with {:ok, stripe_sub} <-
@@ -532,13 +534,17 @@ defmodule Accrue.Billing.SubscriptionActions do
           [%{id: item.processor_id, price: pid}]
       end
 
-    stripe_params = %{
-      customer: sub.customer.processor_id,
-      subscription: sub.processor_id,
-      subscription_details: %{
+    subscription_details =
+      %{
         items: items,
         proration_behavior: Atom.to_string(proration)
       }
+      |> put_if(:proration_date, Keyword.get(opts, :proration_date))
+
+    stripe_params = %{
+      customer: sub.customer.processor_id,
+      subscription: sub.processor_id,
+      subscription_details: subscription_details
     }
 
     with {:ok, adapter} <- resolve_adapter(sub),
@@ -1291,8 +1297,8 @@ defmodule Accrue.Billing.SubscriptionActions do
           amount: Accrue.Money.new(SubscriptionProjection.get(line, :amount) || 0, currency),
           quantity: SubscriptionProjection.get(line, :quantity),
           period: period_tuple(SubscriptionProjection.get(line, :period)),
-          proration?: SubscriptionProjection.get(line, :proration) == true,
-          price_id: line |> SubscriptionProjection.get(:price) |> price_id_of()
+          proration?: proration_line?(line),
+          price_id: line_price_id(line)
         }
       end
 
@@ -1322,6 +1328,35 @@ defmodule Accrue.Billing.SubscriptionActions do
   defp price_id_of(nil), do: nil
   defp price_id_of(str) when is_binary(str), do: str
   defp price_id_of(%{} = m), do: SubscriptionProjection.get(m, :id)
+
+  defp line_price_id(line) do
+    legacy_price = SubscriptionProjection.get(line, :price)
+
+    pricing =
+      SubscriptionProjection.get(line, :pricing) ||
+        line |> SubscriptionProjection.get(:extra) |> get_nested(:pricing)
+
+    price_details = get_nested(pricing, :price_details)
+
+    price_id_of(legacy_price) || price_id_of(get_nested(price_details, :price))
+  end
+
+  defp proration_line?(line) do
+    legacy_proration = SubscriptionProjection.get(line, :proration)
+
+    parent =
+      SubscriptionProjection.get(line, :parent) ||
+        line |> SubscriptionProjection.get(:extra) |> get_nested(:parent)
+
+    details =
+      get_nested(parent, :invoice_item_details) ||
+        get_nested(parent, :subscription_item_details)
+
+    legacy_proration == true || get_nested(details, :proration) == true
+  end
+
+  defp get_nested(map, key) when is_map(map), do: SubscriptionProjection.get(map, key)
+  defp get_nested(_, _), do: nil
 
   defp period_tuple(nil), do: nil
 

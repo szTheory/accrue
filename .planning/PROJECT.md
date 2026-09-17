@@ -33,11 +33,42 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest fully shipped milestone: v1.59 — Account-Scoped Multi-Rail & Offline Entitlements, shipped 2026-08-05.** Accrue supports concurrent Stripe and Apple rail evidence through one revisioned account projection, provider-honest lifecycle management, device-bound ES256 offline proof, host Apple ingress/repair, and deterministic first-adopter proof. Crosswake runtime capability remains `feasibility_blocked` pending physical-device evidence.
+**Latest fully shipped milestone: v1.61 — CI Evidence & Critical-Path Hardening, shipped 2026-09-12.** Required release and Admin failures now have trace-backed incident classification; CI has a privacy-safe, repository-bound baseline and explicit provider proof states; and the retained critical-path candidate reduced the measured median from 2,083 seconds to 1,125 seconds without removing required release, host, browser, artifact, or provider evidence. Crosswake runtime capability remains `feasibility_blocked` pending physical-device evidence.
 
 **Phase 223 complete (2026-08-06):** the reusable iOS-compatible SwiftPM offline client now preserves canonical ES256 proof verification, authenticated atomic cache recovery, durable observed-time rollback protection, bounded compact-proof/JSON admission, host-owned reconnect and display seams, and deterministic package/iOS/reference evidence. IOS-01 through IOS-03 verified 28/28 must-haves; Phase 224 owns the Crosswake host-command bridge seam. Advisory code review recorded a follow-up cached-read versus concurrent signed-denial race in `223-REVIEW.md`; it must be resolved before relying on concurrent-cache behavior beyond the verified scenario coverage.
 
-## Next Milestone Goals
+**Phase 226 complete (2026-08-12):** maintainers now have a durable, privacy-safe comparable-run baseline with repository-bound GitHub Actions evidence, explicit provider proof states, and owner-first host/browser setup diagnostics. BASE-01, BASE-02, and OWN-01 verified 5/5 must-haves; Phase 227 owns the measured critical-path improvement.
+
+**Phase 228 complete (2026-09-11; re-verified 2026-09-12):** the Stripe webhook-signing CI boot contract now maps a securely supplied signing secret into the runtime rotation list and fails closed when it is absent. The phase's single boot-repair authorization sealed an honest `failed/selected_assertions_failed` result with no retry; later recurring provider work repaired the exposed live contracts, and run `34731755425` proved 2/2 selected Stripe tests with 0 skipped on code SHA `0e5378fa`.
+
+**Phase 227 complete (2026-09-12):** the exact candidate removed only the redundant `admin-drift-docs` dependency from host integration. Three successful, first-attempt workflow-dispatch runs at one candidate SHA measured 1,179s, 1,125s, and 1,079s (median 1,125s), clearing the frozen 1,666s median and 2,602s maximum thresholds while retaining required release, host, browser, provider, artifact, negative-control, and rollback evidence. PATH-01, PATH-02, SAFE-01, and SAFE-02 are verified 11/11; all v1.61 implementation phases and 10/10 requirements are complete, ready for milestone closeout.
+
+## Current Milestone: v1.62 Release Integration & Repository Hygiene
+
+**Goal:** Reconcile the completed v1.61 lineage with `main` into a clean, reviewable, fully verified release candidate, then stop before cleanup becomes churn.
+
+**Target features:**
+- Canonical branch, tag, worktree, CI, and planning truth established without rewriting history.
+- The diverged `main` and v1.61 histories integrated through a reviewable candidate that includes the four post-archive closure commits.
+- Local and GitHub release gates proven, with every ship window resolved or explicitly waived and release automation ready for review.
+- Evidence-backed cleanup limited to demonstrated release, maintenance, documentation, or comprehension risk.
+
+**Key context:** This milestone is justified by a concrete operational failure: remote `main` and the v1.61 lineage have diverged substantially, the local `main` ref is stale and independently divergent, four audit-closure commits are not published, and the required live-CI monitor is unavailable. SEED-003 is selected. No product capability is being added.
+
+**Guardrails:** No feature work, force-push, tag movement, destructive cleanup, broad rename/reformat, speculative refactor, required-check weakening, merge to `main`, Release Please merge, or package publication without the workflow's explicit authorization gates. Preserve user-owned untracked files until classified. Stop once the candidate is green and remaining findings are subjective nits.
+
+## Shipped Milestone: v1.61 CI Evidence & Critical-Path Hardening
+
+**Goal (achieved):** Restore trustworthy required CI evidence, then reduce proven critical-path waste without weakening release, host, browser, or provider proof for Accrue adopters.
+
+**Target features:**
+- A diagnosed and repaired required-lane baseline that distinguishes deterministic defects from genuine intermittent infrastructure or lifecycle failures.
+- Durable CI timing, cache, provider-state, rerun, and root-cause summaries that make later topology or cache changes evidence-led.
+- One measured critical-path improvement and explicit host/browser setup ownership, with the existing proof semantics and stable required-check identity retained.
+
+**Key context:** Live Actions history shows green PR/push runs are bottlenecked by staged release → host integration → Playwright work rather than runner queueing. Recent four-cell release failures are one root cause amplified by the matrix; the Admin browser timeout must be trace-first investigated, not masked by retries. SEED-003 hygiene applies. This is stable-core maintenance/release-readiness work, not a new product feature, StoreKit effort, Crosswake change, or parked-admin-ratchet revival.
+
+**Guardrails:** No test deletion, matrix collapse, branch-protection edit, cache rewrite, or required-gate demotion without recorded baseline evidence and a negative-control proof. Provider lanes remain visibly classified as proved, skipped, or advisory. Physical iPhone/StoreKit and Crosswake runtime work remain host/external-owner scope.
 
 **v1.60 override closeout (2026-08-08):** Phases 223–224 validated the reusable iOS offline client and the Crosswake host-command bridge seam. HOST-01..03 and READY-01..02 remain deferred: the host-local StoreKit adapter, StoreKit Test proof, release/readiness truth, and physical-device gate were not delivered and must be explicitly re-scoped before work resumes.
 
@@ -637,8 +668,49 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] Project verified rail evidence into one account snapshot with resource-aware management and duplicate-purchase prevention.
-- [ ] Verify, link, reconcile, quarantine, and repair Apple subscription evidence without heuristic ownership transfer.
+- [ ] Reconcile `main` and the completed v1.61 lineage without rewriting published history or moving the v1.61 tag.
+- [ ] Produce a clean release candidate that passes local CI-equivalent and required GitHub Actions gates.
+- [ ] Resolve or explicitly waive ship windows, classify untracked/stale artifacts, and perform only objective release-risk cleanup.
+- [ ] Prepare the resulting integration and Release Please PRs for maintainer review without merging or publishing packages.
+
+### Validated v1.62 (Phase 229 complete 2026-09-15)
+
+Evidence-backed repository truth and recovery safety — 3/3 requirements satisfied in Phase 229.
+
+- ✓ Establish one evidence-backed repository truth for local and remote refs, tags, worktrees, open PRs, release branches, and CI observability. — Phase 229 (REPO-01)
+- ✓ Freeze recoverable state before observation, with a verifiable private capsule and an atomic publish transaction. — Phase 229 (REPO-02)
+- ✓ Observe CI read-only against an exact SHA, with bounded polling and distinct no-match/ambiguity/unavailable/timeout failures. — Phase 229 (REPO-03)
+
+Acceptance was fully executable: 58 automated UAT tests, zero human-verification
+checkpoints, and seven hermetic suites shifted left into the merge-blocking
+`docs-contracts-shift-left` CI job. Strict verification of the *published* capsule is
+deliberately excluded from CI — it is a point-in-time check that fails on any
+planning-doc update (see `229-VERIFICATION.md` § Operating Constraint).
+
+### Validated v1.61 (Phase 227 complete 2026-09-12)
+
+Measured critical-path improvement and safety — 4/4 requirements satisfied in Phase 227.
+
+- ✓ **PATH-01** — The measured staged critical path, selected redundant dependency, before-state evidence, and literal rollback are durable and reproducible.
+- ✓ **PATH-02** — Three immutable qualifying observations validate a lower critical-path median without removing required release, host, browser, or provider proof.
+- ✓ **SAFE-01** — Required-check identities, artifacts, exact job roles, provider separation, and aggregate fan-in remain enforced.
+- ✓ **SAFE-02** — Negative controls, bounded authority, fail-closed accounting, and a verified rollback path prevent retries or relabeling from masking failures.
+
+### Validated v1.61 (Phase 225 complete 2026-08-09)
+
+Required-lane reliability — 3/3 requirements satisfied in Phase 225.
+
+- ✓ **REL-01** — Required CI failures have trace-backed deterministic, isolation, lifecycle, or infrastructure classifications.
+- ✓ **REL-02** — Repaired release and Admin checks retain meaningful assertions and failure artifacts.
+- ✓ **REL-03** — Identical release-matrix failures are handled as one root-cause incident while required and advisory cells remain distinct.
+
+### Validated v1.61 (Phase 226 complete 2026-08-12)
+
+CI baseline and proof semantics — 3/3 requirements satisfied in Phase 226.
+
+- ✓ **BASE-01** — A durable privacy-safe comparable-run baseline records timing, reruns, cache/setup cost, provider state, root-failure signatures, and repository-bound immutable evidence.
+- ✓ **BASE-02** — Required, skipped, advisory, failed, stale, and non-run provider states remain visibly distinct and cannot be promoted into release proof.
+- ✓ **OWN-01** — Host and CI setup ownership is explicit, with stable diagnostics for Node, browser, Playwright, database, and fixture failure modes.
 
 ### Validated v1.59 (Phase 220 complete 2026-08-05)
 
@@ -807,6 +879,17 @@ Admin global search — 4/4 satisfied.
 
 ... (rest of requirements unchanged) ...
 
+## Key Decisions
+
+| Decision | Outcome |
+| --- | --- |
+| Treat identical matrix-cell failures as one root-cause incident while retaining each required check identity and artifact. | ✓ Good — Phase 225 repaired the shared causes and preserved the required/advisory distinction. |
+| Bind CI evidence to repository, immutable run/job URLs, workflow topology, timestamps, and explicit provider proof state before comparing performance. | ✓ Good — Phase 226 produced a reproducible 20-path baseline and fail-closed evidence contracts. |
+| Keep the one-edge host-integration dependency change only if three independent attempt-1 observations satisfy the frozen median and maximum thresholds. | ✓ Good — Phase 227 retained the candidate at a 1,125-second median and closed its bounded authority. |
+| Never reinterpret a failed or skipped provider lane as proof, and never retry without new authorization. | ✓ Good — Phase 228 preserved the initial failed record; later separately authorized recurring proof closed the Stripe fidelity gaps honestly. |
+| Treat v1.62 as release integration and repository hygiene, not feature development or a general refactor. | — Pending — scope ends when the release candidate is green and further findings are subjective. |
+| Preserve published history and the v1.61 tag; reconcile through a reviewable integration candidate rather than force-push or tag movement. | — Pending — exact merge topology is determined from Phase 229 evidence. |
+
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
@@ -825,4 +908,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-08 after v1.60 override closeout.*
+*Last updated: 2026-09-15 after Phase 229.*

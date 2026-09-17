@@ -3,6 +3,7 @@ defmodule Accrue.Docs.ReleaseGuidanceTest do
 
   @releasing_path Path.expand("../../../../RELEASING.md", __DIR__)
   @guide_path Path.expand("../../../../guides/testing-live-stripe.md", __DIR__)
+  @workflow_path Path.expand("../../../../.github/workflows/ci.yml", __DIR__)
   @contributing_path Path.expand("../../../../CONTRIBUTING.md", __DIR__)
 
   test "release guidance separates deterministic, provider-parity, and advisory lanes" do
@@ -30,14 +31,15 @@ defmodule Accrue.Docs.ReleaseGuidanceTest do
 
   test "provider parity guide stays explicit about test mode and advisory status" do
     guide = File.read!(@guide_path)
+    workflow = File.read!(@workflow_path)
 
     assert guide =~ "provider-parity checks"
     assert guide =~ "Stripe test mode"
     assert guide =~ "STRIPE_TEST_SECRET_KEY"
-    assert guide =~ "continue-on-error: true"
-    assert guide =~ "advisory"
+    assert workflow =~ "continue-on-error: ${{ matrix.support == 'advisory' }}"
+    assert workflow =~ "support: 'advisory'"
     assert guide =~ "does not replace Fake"
-    assert guide =~ "release-gate"
+    assert workflow =~ "release-gate:"
     assert guide =~ "host-integration"
     assert guide =~ "signed webhook verification and runtime secrets still remain required"
 

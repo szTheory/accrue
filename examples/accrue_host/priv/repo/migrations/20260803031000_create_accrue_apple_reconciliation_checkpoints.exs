@@ -6,6 +6,7 @@ defmodule Accrue.Repo.Migrations.CreateAccrueAppleReconciliationCheckpoints do
              primary_key: false
            ) do
       add(:id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()"))
+
       add(
         :lineage_id,
         Accrue.Migration.references(:accrue_entitlement_apple_lineages,
@@ -15,6 +16,7 @@ defmodule Accrue.Repo.Migrations.CreateAccrueAppleReconciliationCheckpoints do
         ),
         null: false
       )
+
       add(:environment, :string, null: false)
       add(:query_fingerprint, :string)
       add(:pending_revision, :string)

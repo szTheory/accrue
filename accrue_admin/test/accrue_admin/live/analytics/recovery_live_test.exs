@@ -3,6 +3,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
   alias Accrue.Billing.{Customer, Subscription}
   alias Accrue.Events
+  alias Accrue.Events.Event
   alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
@@ -229,6 +230,34 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       {:ok, view, _html} = live(conn, "/billing/analytics/recovery")
       html = render_patch(view, "/billing/analytics/recovery?window=7d")
       assert active_window_label(html) =~ "7 days"
+    end
+
+    test "window change re-queries KPI values rather than only changing the active button", %{
+      conn: conn
+    } do
+      ten_days_ago = DateTime.utc_now() |> DateTime.add(-10, :day)
+
+      TestRepo.insert!(%Event{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: "sub_window_boundary",
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"mrr_value_cents" => 10_000, "currency" => "usd"},
+        inserted_at: ten_days_ago
+      })
+
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      {:ok, view, html_30d} = live(conn, "/billing/analytics/recovery?window=30d")
+
+      assert active_window_label(html_30d) =~ "30 days"
+      assert html_30d =~ "$150.00"
+
+      html_7d = render_patch(view, "/billing/analytics/recovery?window=7d")
+
+      assert active_window_label(html_7d) =~ "7 days"
+      assert html_7d =~ "$50.00"
+      refute html_7d =~ "$150.00"
     end
 
     test "window links preserve unrelated query params on the live route", %{conn: conn} do

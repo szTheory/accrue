@@ -24,8 +24,34 @@ The `1.0.x` line treats the documented public facade as the SemVer boundary: gen
 10. **Last verified line.** Update the line below whenever `release-please-config.json`, `.release-please-manifest.json`, or `.github/workflows/release-please.yml` change.
 
 **Last verified against** `release-please-config.json`, `.release-please-manifest.json`,
-and `.github/workflows/release-please.yml` on **2026-06-01** (UTC). Update this line when
-automation semantics change.
+and `.github/workflows/release-please.yml` on **2026-09-16** (UTC), commit `0327347a`. Update
+this line when automation semantics change.
+
+### Release PR readiness proof (REL-05)
+
+`scripts/ci/verify_release_pr_readiness.sh` runs `release-please release-pr --dry-run`
+exactly once against the real repository on GitHub and asserts six things about the plan it
+would produce: the CLI exits 0; no commit-window truncation warning was logged; the planned
+update count matches the expected number for this repository; all three packages land on the
+same target version; that version is stable semver; and it compares greater than the current
+manifest version. It is **side-effect free** — the dry run only reads config, releases, and
+commit history, and creates no PR, branch, tag, release, or comment. It requires a
+repo-scoped token (`GH_TOKEN` or `GITHUB_TOKEN`) and reads `release-please-config.json` and
+`.release-please-manifest.json` **from the pushed branch on GitHub**, not from the working
+tree — so a config change is only provable once it is pushed. Run it locally via
+`GH_TOKEN=$(gh auth token) bash scripts/ci/verify_release_pr_readiness.sh`; it is wired as a
+merge-blocking CI step in `release-manifest-ssot` (see below).
+
+Two configuration keys back the proof:
+
+- `commit-search-depth: 2000` — a pure safety ceiling on how many commits release-please
+  walks looking for the last release SHA of every tracked package; the walk breaks early once
+  every package's release SHA is seen, so raising the ceiling costs nothing in steady state,
+  and the readiness proof fails closed if the walk is ever truncated regardless.
+- `group-pull-request-title-pattern: "chore: release accrue-monorepo ${version}"` — a grouped
+  PR title that cannot yield a version silently skips GitHub Release and tag creation
+  (upstream release-please issues #2306/#2712); interpolating `${version}` avoids that class
+  of silent skip.
 
 ## Routine linked releases (Release Please + Hex)
 

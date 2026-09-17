@@ -46,7 +46,9 @@ defmodule Accrue.Repo.Migrations.CreateAccrueEntitlementCompatibilityEvidence do
       timestamps(type: :utc_datetime_usec)
     end
 
-    create Accrue.Migration.index(:accrue_entitlement_compatibility_audits, [:account_id, :action],
+    create Accrue.Migration.index(
+             :accrue_entitlement_compatibility_audits,
+             [:account_id, :action],
              name: :accrue_entitlement_compatibility_audits_account_action_index
            )
   end

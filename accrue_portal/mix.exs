@@ -76,7 +76,7 @@ defmodule AccruePortal.MixProject do
 
   defp accrue_dep do
     if System.get_env("ACCRUE_PORTAL_HEX_RELEASE") == "1" do
-      {:accrue, "== #{@version}"}
+      {:accrue, "~> #{@version}"}
     else
       {:accrue, path: "../accrue"}
     end

@@ -1,23 +1,38 @@
 #!/usr/bin/env bash
-# Wait for the latest GitHub Actions "CI" workflow run on a branch (default: main).
-# Requires: gh CLI, authenticated for this repo (gh auth login).
+# Compatibility entry point for the structured, bounded CI monitor.
 set -euo pipefail
 
-branch="${1:-main}"
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$repo_root"
+branch="main"
 
-if ! command -v gh >/dev/null 2>&1; then
-  echo "watch_ci: gh CLI not found; install https://cli.github.com/" >&2
-  exit 1
+# Preserve the documented optional branch positional while allowing monitor flags.
+if [[ $# -gt 0 && "$1" != --* ]]; then
+  branch="$1"
+  shift
 fi
 
-run_id="$(gh run list --branch "$branch" --workflow CI --limit 1 --json databaseId --jq '.[0].databaseId')"
-if [[ -z "$run_id" || "$run_id" == "null" ]]; then
-  echo "watch_ci: no CI runs found for branch ${branch}" >&2
-  exit 1
+has_option() {
+  local option="$1"
+  shift
+  local argument
+  for argument in "$@"; do
+    [[ "$argument" == "$option" ]] && return 0
+  done
+  return 1
+}
+
+monitor_args=()
+if [[ -n "$branch" ]] && ! has_option --sha "$@"; then
+  monitor_args+=(--branch "$branch")
+fi
+if ! has_option --workflow "$@"; then
+  monitor_args+=(--workflow CI)
+fi
+if ! has_option --timeout-seconds "$@"; then
+  monitor_args+=(--timeout-seconds 900)
+fi
+if ! has_option --poll-seconds "$@"; then
+  monitor_args+=(--poll-seconds 10)
 fi
 
-echo "watch_ci: watching run ${run_id} (branch ${branch})…"
-gh run watch "$run_id" --exit-status
-echo "watch_ci: run ${run_id} finished successfully"
+exec node "$repo_root/scripts/ci/ci_monitor.cjs" watch --repo szTheory/accrue "${monitor_args[@]}" "$@"

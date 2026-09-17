@@ -1,10 +1,13 @@
 ---
-status: partial
+status: complete
 phase: 178-e-seed-expressiveness-state-coverage
 source: [178-VERIFICATION.md]
 started: 2026-06-04T21:29:45Z
-updated: 2026-06-04T21:29:45Z
+updated: 2026-09-12T20:12:00Z
+superseded_by: [192-idempotent-verification-sign-off, 200-idempotent-verification-sign-off]
 ---
+
+> **Resolution (2026-09-12):** Complete via later comprehensive state coverage. Phase 192 explicitly accepts populated, empty, error, permission-denied, disconnected/reconnecting, mobile-navigation, interactive-open, and disabled/read-only states in light/dark; Phase 200 repeats the deterministic page-flow, axe, Storybook, and maintainer gates with zero regressions.
 
 ## Current Test
 

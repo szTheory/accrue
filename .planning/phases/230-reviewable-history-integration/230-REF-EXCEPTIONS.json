@@ -1,0 +1,77 @@
+{
+  "row_count": 8,
+  "refs": [
+    {
+      "ref": "refs/heads/fix/release-boot-env-resolver",
+      "object": "3f8338cdb7ce54d3ca49f703565c1048b68f7646",
+      "class": "owned",
+      "reason": "PR #44 branch carrying the adopter boot-env-resolver fix, pushed to origin ahead of this plan; not present in the Phase 229 frozen ref authority. Its four useful commits already exist on the milestone line by exact patch-id match (D-10), so nothing is lost if this branch retires.",
+      "declared_by_phase": "230",
+      "retirement_trigger": "Retire this row when PR #44 is closed per D-10 and refs/heads/fix/release-boot-env-resolver no longer exists locally.",
+      "published_elsewhere": true
+    },
+    {
+      "ref": "refs/tags/accrue-v1.5.1",
+      "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+      "class": "owned",
+      "reason": "Release Please tag for the accrue package's 1.5.1 release on origin/main, fetched during this milestone's discussion session (D-00). Not present in the Phase 229 frozen ref authority, which predates the fetch.",
+      "declared_by_phase": "230",
+      "retirement_trigger": "Retire this row the next time the ref authority is recaptured with this tag included as canonical.",
+      "published_elsewhere": true
+    },
+    {
+      "ref": "refs/tags/accrue_admin-v1.5.1",
+      "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+      "class": "owned",
+      "reason": "Release Please tag for the accrue_admin package's 1.5.1 release on origin/main, fetched during this milestone's discussion session (D-00). Not present in the Phase 229 frozen ref authority, which predates the fetch.",
+      "declared_by_phase": "230",
+      "retirement_trigger": "Retire this row the next time the ref authority is recaptured with this tag included as canonical.",
+      "published_elsewhere": true
+    },
+    {
+      "ref": "refs/tags/accrue_portal-v1.5.1",
+      "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+      "class": "owned",
+      "reason": "Release Please tag for the accrue_portal package's 1.5.1 release on origin/main, fetched during this milestone's discussion session (D-00). Not present in the Phase 229 frozen ref authority, which predates the fetch.",
+      "declared_by_phase": "230",
+      "retirement_trigger": "Retire this row the next time the ref authority is recaptured with this tag included as canonical.",
+      "published_elsewhere": true
+    },
+    {
+      "ref": "refs/remotes/origin/main",
+      "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+      "class": "remote_tracking",
+      "reason": "D-00a: an in-session git fetch advanced origin/main from 8f3135f7 to d30fc25d (Release Please's 1.5.1 merge). Fast-forward, already satisfied by the typed partition's ancestry rule for remote_tracking -- recorded here per D-00a so the movement does not pass unrecorded, not because the gate requires this row.",
+      "declared_by_phase": "230",
+      "retirement_trigger": "Retire this row the next time the ref authority is recaptured with origin/main at or beyond this value.",
+      "published_elsewhere": true
+    },
+    {
+      "ref": "refs/remotes/origin/HEAD",
+      "object": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1",
+      "class": "remote_tracking",
+      "reason": "D-00a: the same in-session git fetch advanced the cached origin/HEAD symbolic ref target from 8f3135f7 to d30fc25d alongside origin/main. Fast-forward, already satisfied by the typed partition's ancestry rule for remote_tracking -- recorded here per D-00a so the movement does not pass unrecorded, not because the gate requires this row.",
+      "declared_by_phase": "230",
+      "retirement_trigger": "Retire this row the next time the ref authority is recaptured with origin/HEAD at or beyond this value.",
+      "published_elsewhere": true
+    },
+    {
+      "ref": "refs/heads/integration/v1.62-candidate",
+      "object": "bab50d92be2695b12d5853e7d578e600376e73d0",
+      "class": "owned",
+      "reason": "D-01/D-31: the reviewable v1.62 integration candidate -- a single --no-ff merge commit uniting the milestone tip (8b248d9c) with origin/main (d30fc25d), carrying the v1.61 tag and all four audit-closure commits, plus two Plan 230-05 post-merge commits (toolchain pin/lockfile re-resolution and a config_test.exs regression) declared in 230-INTEGRATION-DISPOSITION.json post_merge_commits. Built entirely with git plumbing (merge-tree --write-tree, commit-tree); never pushed. Not present in the Phase 229 frozen ref authority.",
+      "declared_by_phase": "230",
+      "retirement_trigger": "Retire this row when the Phase 232 integration PR built from this candidate merges to main and the branch is deleted.",
+      "published_elsewhere": false
+    },
+    {
+      "ref": "refs/heads/review/v1.62-candidate-code-only",
+      "object": "0595d1ddec28523bf4b499262d6cf641b3f822d7",
+      "class": "owned",
+      "reason": "D-04: a code-only sibling review branch giving the reviewer a source-only read (recomputed: 114 files) instead of the full milestone-vs-merge-base diff (recomputed: 337 files, 223 .planning/-only). Built via git plumbing by stripping .planning/ entirely from the candidate's live tree (read-tree, rm --cached -r .planning, write-tree, commit-tree), parented on origin/main; never pushed. Not present in the Phase 229 frozen ref authority.",
+      "declared_by_phase": "230",
+      "retirement_trigger": "Retire this row when the Phase 232 integration PR built from integration/v1.62-candidate merges to main and refs/heads/review/v1.62-candidate-code-only is deleted.",
+      "published_elsewhere": false
+    }
+  ]
+}

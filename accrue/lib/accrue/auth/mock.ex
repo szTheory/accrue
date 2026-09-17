@@ -100,7 +100,7 @@ defmodule Accrue.Auth.Mock do
   defp read_key(_value, _atom_key, _string_key), do: nil
 
   defp ensure_test_env! do
-    if Application.get_env(:accrue, :env, Mix.env()) == :prod do
+    if Accrue.Env.current() == :prod do
       raise Accrue.ConfigError,
         key: :auth_adapter,
         message: "Accrue.Auth.Mock is test-only; configure a real :auth_adapter for production."

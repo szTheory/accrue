@@ -1,10 +1,10 @@
 ---
 phase: 175-b-persona-driven-ia-spine
-verified: 2026-06-04T09:20:47Z
-status: human_needed
+verified: 2026-09-12T20:12:00Z
+status: passed
 score: 5/5 must-haves verified
 overrides_applied: 0
-human_verification:
+historical_human_verification:
   - test: "Sidebar collapsible groups collapse and expand in the browser; localStorage state persists on refresh"
     expected: "Recovery/Developer/Catalog groups collapse with animated chevron rotation; state survives page reload; Billing group has no toggle"
     why_human: "SidebarCollapse JS hook interaction and CSS animation cannot be verified by grep"
@@ -20,6 +20,12 @@ human_verification:
   - test: "Webhook detail → Event detail → affected entity link navigation thread is fully clickable"
     expected: "A webhook with derived events shows event links in Related card pointing to /events/:id; EventLive renders event type, actor, subject, and a 'Source webhook' link; the entity link routes to the correct entity screen"
     why_human: "Navigation chain across three screens requires a browser with seed data"
+re_verification:
+  previous_status: human_needed
+  superseded_by: [192-idempotent-verification-sign-off, 200-idempotent-verification-sign-off]
+  evidence:
+    - "Phase 192 maintainer ACCEPT: curated job-oriented gallery plus focus, Escape, patch-focus, and actionability traces"
+    - "Phase 200 maintainer ACCEPT: 30,348 final cells, 0 regressions, 0 blocking repairs"
 ---
 
 # Phase 175: B — Persona-Driven IA Spine Verification Report

@@ -34,7 +34,7 @@ defmodule Accrue.LiveStripe.Charge3DSLiveTest do
 
   See `guides/testing-live-stripe.md` for the full local + CI workflow.
   """
-  use ExUnit.Case, async: false
+  use Accrue.RepoCase, async: false
 
   @moduletag :live_stripe
   @moduletag timeout: 60_000
@@ -126,9 +126,9 @@ defmodule Accrue.LiveStripe.Charge3DSLiveTest do
                payment_method: @threeds_required_pm
              )
 
-    # Stripe returns string-keyed maps after translate_resource; tolerate
-    # either key shape because the wrapper preserves the original map.
-    assert (pi[:status] || pi["status"]) == "requires_action"
+    # LatticeStripe normalizes known fields while the wrapper can also preserve
+    # raw map shapes, so accept either representation at this boundary.
+    assert (pi[:status] || pi["status"]) in [:requires_action, "requires_action"]
 
     assert (pi[:client_secret] || pi["client_secret"]) != nil
 

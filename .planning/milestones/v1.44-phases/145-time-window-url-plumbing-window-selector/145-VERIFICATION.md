@@ -1,17 +1,24 @@
 ---
 phase: 145-time-window-url-plumbing-window-selector
-verified: 2026-05-27T21:30:00Z
-status: human_needed
-score: 8/9 must-haves verified
+verified: 2026-09-12T20:12:00Z
+status: passed
+score: 9/9 must-haves verified
 overrides_applied: 0
 deferred:
   - truth: "analytics.md documents outcome-event-timestamp attribution and UTC-only window semantics (SC4 docs half)"
     addressed_in: "Phase 148"
     evidence: "Phase 148 success criteria SC3: 'adopter visits accrue/guides/analytics.md and finds... cutoff-date semantics with the Showing data since YYYY-MM-DD UI badge explanation'"
-human_verification:
+historical_human_verification:
   - test: "Click the 7d / 30d / 90d preset buttons in a real browser session on /billing/analytics/recovery"
     expected: "Funnel counts and KPI card values reload to reflect the narrowed window; URL updates to ?window=7d / ?window=30d / ?window=90d; browser back-button restores the prior window"
     why_human: "render_patch confirms handle_params fires and the active button updates, but cannot verify that the DB query results actually change the displayed KPI numbers in the rendered HTML. The live DB fixture seeds events into the current 30d window; asserting that 7d returns different counts requires time-gated seed data not present in tests."
+re_verification:
+  previous_status: human_needed
+  gaps_closed:
+    - "Rendered KPI values now have a time-gated boundary fixture proving 30d and 7d return different values after render_patch"
+  evidence:
+    - "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs"
+    - "Focused RecoveryLive run: 17 tests, 0 failures (2026-09-12)"
 ---
 
 # Phase 145: Time-window URL plumbing + WindowSelector Verification Report

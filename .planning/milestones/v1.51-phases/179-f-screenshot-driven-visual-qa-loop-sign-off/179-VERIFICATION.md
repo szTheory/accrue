@@ -1,10 +1,10 @@
 ---
 phase: 179-f-screenshot-driven-visual-qa-loop-sign-off
-verified: 2026-06-05T00:40:00Z
-status: human_needed
+verified: 2026-09-12T20:12:00Z
+status: passed
 score: 6/6
 overrides_applied: 0
-human_verification:
+historical_human_verification:
   - test: "Full 4-cell screenshot capture (84 PNGs) + vision-LLM scoring all dimensions >= 2"
     expected: "84 PNGs produced in test-results/admin-visuals/; findings.ndjson shows every dimension score >= 2 across all 21 screens x 4 cells"
     why_human: "Requires live Phoenix server at localhost:4000 and ANTHROPIC_API_KEY environment variable; cannot be run autonomously"
@@ -17,6 +17,13 @@ human_verification:
   - test: "SIGN-OFF.md After-column filled and Section 9 checklist completed"
     expected: "All 11 checklist items checked, After-column scores populated from findings.ndjson, date filled in header"
     why_human: "Depends on the photographic run completing"
+re_verification:
+  previous_status: human_needed
+  superseded_by: [192-idempotent-verification-sign-off, 200-idempotent-verification-sign-off]
+  evidence:
+    - "Phase 192 maintainer decision ACCEPT with 21,276 comparable final cells and zero regressions"
+    - "Phase 200 maintainer-approved all-or-nothing gate: 30,348 final cells, zero regressions, zero blocking repairs, all deterministic guardrails passed"
+  note: "The original ANTHROPIC_API_KEY-dependent scoring was not retroactively claimed; the later deterministic sign-off packages supersede it."
 ---
 
 # Phase 179: Screenshot-Driven Visual QA Loop & Sign-off — Verification Report

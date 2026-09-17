@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "candidate_ref": "refs/heads/integration/v1.62-candidate",
+  "candidate_object": "3f42158d5cd3ffb7134685ae2856074cf544e008",
+  "parents": {
+    "first_parent": "47c75bfd9975063e6804fb636d9f5c3bf4d156bf",
+    "second_parent": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1"
+  },
+  "pre_integration_refs": {
+    "refs/heads/gsd/milestone-v1.62-release-integration-hygiene": "47c75bfd9975063e6804fb636d9f5c3bf4d156bf",
+    "refs/remotes/origin/main": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1"
+  },
+  "expected_reverted_tree": "523dda45abd2cad38213941ccda8aa4a97474018",
+  "supersedes": {
+    "candidate_object": "f524f2a6b16d3576829632ab6fa77d24b718e6f7",
+    "artifact": "231-ROLLBACK-POINT.json",
+    "cause": "the superseded candidate (f524f2a6) predates this phase's re-cut, which reunifies the milestone line (now 108 commits past the 231-recorded milestone-at-cut, including two more co-touched paths -- .tool-versions and accrue_portal/mix.exs, per DRIFT-1) with the currently published release state (origin/main d30fc25d, 1.5.1) via a fresh merge-plus-two-cherry-pick construction that reproduces the exact shape 231-ROLLBACK-POINT.json records"
+  },
+  "toolchain_pin": {
+    "path": ".tool-versions",
+    "sha256": "a3e578a5e22a66539e85d5961d42f76d2243f24e6b6f8c97ef7ac5ae5d7783d7",
+    "matches_superseded": true
+  },
+  "restore_argv": [
+    ["git", "revert", "-m", "1", "--no-edit", "3f42158d5cd3ffb7134685ae2856074cf544e008"]
+  ]
+}

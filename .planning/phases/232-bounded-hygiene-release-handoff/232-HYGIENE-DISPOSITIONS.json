@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "repository": "szTheory/accrue",
+  "candidate_object": "2cc876c6a74301e23009adb4080af7ba78c3de6c",
+  "observed_at": "2026-09-17T12:13:19-04:00",
+  "evidence_command": [
+    "git",
+    "status",
+    "--porcelain",
+    "-uall"
+  ],
+  "rows": [
+    {
+      "kind": "debug_session",
+      "name": "tampered-review",
+      "disposition": "retained",
+      "reason": "Local-only negative-control test artifact (`tamper: same file count, different content`) used to prove the D-07 blob-identity revert check catches a same-file-count-different-content class of silent revert. Local-only by design and must stay local; flagged explicitly so a future reader does not wonder why it exists."
+    },
+    {
+      "kind": "debug_session",
+      "name": "tampered-review-2",
+      "disposition": "retained",
+      "reason": "Local-only negative-control test artifact (`tamper v2`), sibling of tampered-review. Local-only by design and must stay local; flagged explicitly so a future reader does not wonder why it exists."
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/fix/chimeway-opaque-recipient",
+      "disposition": "retained",
+      "reason": "Active fix branch with an open local tracking branch at the same commit; not superseded by any other ref.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/fix/chimeway-opaque-recipient-release",
+      "disposition": "retained",
+      "reason": "Active fix/release branch with an open local tracking branch at the same commit; not superseded by any other ref.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/fix/getfluent-1.5.1",
+      "disposition": "retained",
+      "reason": "Adopter-named ref. Renaming this branch and its origin peer is maintainer-decided as fail-forward and deferred to a future capsule mint (232-CONTEXT.md deferred list); retained as-is for this phase, not superseded.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/fix/release-boot-env-resolver",
+      "disposition": "retained",
+      "reason": "Active fix branch with an open local tracking branch at the same commit; not superseded by any other ref.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/fix/release-otp-28-1",
+      "disposition": "retained",
+      "reason": "Active fix branch with an open local tracking branch at the same commit; not superseded by any other ref.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/gsd/phase-225-required-lane-signal-repair",
+      "disposition": "retained",
+      "reason": "Active GSD work branch; local tracking branch is ahead by 4 commits (unpushed local work), not superseded by any other ref.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/integration/v1.62-candidate",
+      "disposition": "retained",
+      "reason": "The v1.62 candidate integration branch this same phase's re-cut work actively re-cuts and re-gates (232-CONTEXT.md D-01..D-12); actively governed by this phase, not superseded.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/integration/v1.62-candidate-recut",
+      "disposition": "retained",
+      "reason": "Published by plan 232-09 as the fresh-supersession re-cut candidate after this record was first captured; it is the head this phase hands off for review. Retained under the phase-wide classification-only decision -- no remote ref is deleted, renamed, or force-pushed.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/main",
+      "disposition": "retained",
+      "reason": "Primary trunk; the repository's default branch.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/phase-226-baseline-5da8e6b88735",
+      "disposition": "retained",
+      "reason": "Re-verified 2026-09-16: actively referenced by tracked automation code -- collect_integration_disposition.mjs:528 exports `PUBLISHED_ELSEWHERE_REF = \"origin/phase-226-baseline-5da8e6b88735\"`, and render_integration_disposition.mjs's own test suite asserts this exact ref name renders. Deleting it would break a live code reference, not just tidy history.",
+      "authorization_required": false
+    },
+    {
+      "kind": "remote_branch",
+      "name": "origin/release-please--branches--main",
+      "disposition": "retained",
+      "reason": "Active Release Please working branch; local tracking branch `release-please--branches--main` and dependent local branch `repair/release-pr39` both track this ref. Per prompts/GSD-REPO-HYGIENE.md, stale release-please branches are only deleted when they have no open PR -- deletion status not evaluated in this classification-only phase.",
+      "authorization_required": false
+    },
+    {
+      "kind": "untracked_path",
+      "name": ".planning/milestone.lock",
+      "disposition": "retained",
+      "reason": "live GSD session lock for the currently-executing plan (PID-keyed, ephemeral); operational runtime state, not intended for version control."
+    },
+    {
+      "kind": "untracked_path",
+      "name": ".planning/phases/200-idempotent-verification-sign-off/200-SIGN-OFF.md",
+      "disposition": "authorized_for_removal",
+      "reason": "Degraded shadow of the committed archive copy at .planning/milestones/v1.54-phases/200-idempotent-verification-sign-off/200-SIGN-OFF.md. phase_evidence_path.mjs:29 resolves the active (unarchived) path first, so a local phase-200 verifier run reads this untracked copy instead of the good archived one. This file is byte-identical to its archive counterpart (sha256 re-verified 2026-09-16), but it is part of the same degraded-shadow directory as its four siblings and shares their removal rationale: local reads must resolve to the archive, not a stale duplicate directory.",
+      "content_hash": "e18cc311b9157047a1ffd848e8a227564f197c454e1872258397f51604d4ecfa",
+      "supersedes_or_duplicates": ".planning/milestones/v1.54-phases/200-idempotent-verification-sign-off/200-SIGN-OFF.md"
+    },
+    {
+      "kind": "untracked_path",
+      "name": ".planning/phases/200-idempotent-verification-sign-off/200-STORYBOOK-COVERAGE.md",
+      "disposition": "authorized_for_removal",
+      "reason": "Degraded shadow of the committed archive copy. Re-verified 2026-09-16 via sha256 diff: this untracked copy's hash differs from the archived one -- it is a strictly worse, superseded duplicate that shadows the good archive under phase_evidence_path.mjs's active-path-first resolution.",
+      "content_hash": "b016d86e4837a0a8a2539273d4687a7ea4c682ad3532aaeebcb3eae35dc4bfd7",
+      "supersedes_or_duplicates": ".planning/milestones/v1.54-phases/200-idempotent-verification-sign-off/200-STORYBOOK-COVERAGE.md"
+    },
+    {
+      "kind": "untracked_path",
+      "name": ".planning/phases/200-idempotent-verification-sign-off/200-VERIFICATION.md",
+      "disposition": "authorized_for_removal",
+      "reason": "Degraded shadow of the committed archive copy. Re-verified 2026-09-16: the row for `node accrue_admin/e2e/phase200-judge.mjs` reads `pending-after-report-generation` in this untracked copy versus `passed` in the archived one -- a live local-vs-CI truth divergence caused by phase_evidence_path.mjs's active-path-first resolution reading this worse copy locally while CI reads the good archived one.",
+      "content_hash": "27e9a3a62588ac035fa31806a35a4825dafb7637ec32a967fb35777302c9d127",
+      "supersedes_or_duplicates": ".planning/milestones/v1.54-phases/200-idempotent-verification-sign-off/200-VERIFICATION.md"
+    },
+    {
+      "kind": "untracked_path",
+      "name": ".planning/phases/200-idempotent-verification-sign-off/artifacts.manifest.json",
+      "disposition": "authorized_for_removal",
+      "reason": "Degraded shadow of the committed archive copy. Re-verified 2026-09-16: this untracked copy's evidence array omits the `200-SCORECARD.md` entry present in the archived manifest and its own evidence-entry hashes differ, confirming it is the same worse duplicate, not an independent artifact.",
+      "content_hash": "a5fec460c239520d47b1b56f250a2698544c70309e7c3866a64f2bfd07c2ceaf",
+      "supersedes_or_duplicates": ".planning/milestones/v1.54-phases/200-idempotent-verification-sign-off/artifacts.manifest.json"
+    },
+    {
+      "kind": "untracked_path",
+      "name": ".planning/phases/200-idempotent-verification-sign-off/judge.findings.json",
+      "disposition": "authorized_for_removal",
+      "reason": "Degraded shadow of the committed archive copy. Re-verified 2026-09-16 via sha256 diff: this untracked copy is byte-identical to the archived one, but it is part of the same degraded-shadow directory as its four siblings and shares their removal rationale: local reads must resolve to the archive, not a stale duplicate directory.",
+      "content_hash": "63f78a1e2140ed090cfb92b94d81632b6559e2b834ce73ae301f095c518db668",
+      "supersedes_or_duplicates": ".planning/milestones/v1.54-phases/200-idempotent-verification-sign-off/judge.findings.json"
+    },
+    {
+      "kind": "untracked_path",
+      "name": ".planning/state.json",
+      "disposition": "retained",
+      "reason": "GSD's live per-session state cache, regenerated on each run; operational runtime state alongside STATE.md, not intended for version control."
+    },
+    {
+      "kind": "untracked_path",
+      "name": ".planning/v1.61-v1.61-MILESTONE-AUDIT.md",
+      "disposition": "superseded",
+      "reason": "Re-verified 2026-09-16: the doubled `vX.Y-vX.Y-` filename prefix is not a typo -- it is an established repo convention (v1.33, v1.34, v1.35, v1.36, v1.39, v1.59 all carry the same doubled prefix and are tracked). This copy (mtime 2026-08-12) is superseded on recency by the committed `.planning/v1.61-MILESTONE-AUDIT.md` (last commit 2026-09-12), which postdates it.",
+      "supersedes_or_duplicates": ".planning/v1.61-MILESTONE-AUDIT.md"
+    },
+    {
+      "kind": "untracked_path",
+      "name": ".tool-versions",
+      "disposition": "superseded",
+      "reason": "Acted on 2026-09-16 by plan 232-08 finding 3 (commit 45b26ba5f838984d1f642cd603d5e6837c276b77): now git-tracked on this branch, reversing the prior never-git-tracked intent (D-50). The untracked_path row this record described no longer exists as an untracked item -- it is superseded by the now-tracked file at the same path. Tracking reversal confirmed per this plan's checkpoint task.",
+      "supersedes_or_duplicates": "the now-tracked .tool-versions (commit 45b26ba5f838984d1f642cd603d5e6837c276b77)"
+    },
+    {
+      "kind": "untracked_path",
+      "name": "scripts/ci/stripe_test_fixtures.mjs",
+      "disposition": "superseded",
+      "reason": "Acted on 2026-09-16 by plan 232-08 finding 1 (commit 70ea09b14237f3aa381825ab62ca9de5a32ec738): committed into the tree with the shared main_module.mjs guard applied and a real node:test registration added, per the tracked provider_proof_automation.mjs RELEVANT_PATHS allowlist that already named it. The untracked_path row this record described no longer exists as an untracked item -- it is superseded by the now-tracked, guard-covered file at the same path.",
+      "supersedes_or_duplicates": "the now-tracked scripts/ci/stripe_test_fixtures.mjs (commit 70ea09b14237f3aa381825ab62ca9de5a32ec738)"
+    },
+    {
+      "kind": "untracked_path",
+      "name": "scripts/ci/verify_stripe_test_fixtures.mjs",
+      "disposition": "superseded",
+      "reason": "Acted on 2026-09-16 by plan 232-08 finding 1 (commit 70ea09b14237f3aa381825ab62ca9de5a32ec738): committed into the tree with the shared main_module.mjs guard applied (it previously had no entrypoint guard at all) and its four assertion cases registered as real node:test entries, per the tracked provider_proof_automation.mjs RELEVANT_PATHS allowlist that already named it. The untracked_path row this record described no longer exists as an untracked item -- it is superseded by the now-tracked, guard-covered file at the same path.",
+      "supersedes_or_duplicates": "the now-tracked scripts/ci/verify_stripe_test_fixtures.mjs (commit 70ea09b14237f3aa381825ab62ca9de5a32ec738)"
+    },
+    {
+      "kind": "worktree",
+      "name": "gsd/milestone-v1.62-release-integration-hygiene",
+      "disposition": "retained",
+      "reason": "Re-verified 2026-09-16: `git worktree list --porcelain` reports exactly one worktree -- this checkout, on the milestone branch, with a clean working tree apart from the classified untracked paths above. HYG-01's worktree clause is vacuous: there is nothing to clean up here, stated positively rather than left blank."
+    }
+  ]
+}

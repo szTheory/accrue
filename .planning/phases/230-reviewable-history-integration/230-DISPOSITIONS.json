@@ -1,0 +1,5324 @@
+{
+  "schema_version": 1,
+  "repository": "szTheory/accrue",
+  "candidate": {
+    "ref": "refs/heads/integration/v1.62-candidate",
+    "object": "bab50d92be2695b12d5853e7d578e600376e73d0",
+    "committed_at": "2026-09-15T15:36:35-04:00"
+  },
+  "local_main": "5c01f4bc38d4d38e8e080bde0e608e26ca9b5442",
+  "excluded_commit_count": 80,
+  "rows": [
+    {
+      "commit": "0720de884fb02b0b3c782f7a73518fa56f5f3003",
+      "subject": "feat(226-05): separate CI queue and proof derivations",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "0f48298b9f8414ff179d864ea461162d04b44210",
+      "subject": "docs(226): plan remaining baseline proof gaps",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "18fe2d00d3f0dccd7fea3be8da508c03d31a9421",
+      "subject": "docs(226-04): complete CI baseline proof semantics plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "1a3367bb55ccb06886febb7d72d74c7b4efad5b4",
+      "subject": "docs(226): add proof-semantics gap closure plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "1d438b514006b95d89df6f44c644a5bcdf670e40",
+      "subject": "test(226-08): add public forged-job rejection cases",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "20d9b008430fb91b3293fe0e02e308d14e4f0185",
+      "subject": "feat(226-09): bind CI topology to workflow policy",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "23d4453962442e442ee3dabfc7242b1d4b3af7a9",
+      "subject": "test(226-07): exhaust canonical contract mutations",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "282051d4bea242a3a2429fd427e4c28f8f928275",
+      "subject": "feat(226-04): make baseline capture manifest-driven",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "2b20f0019f1e088d90926dbd93134bffff40c6b9",
+      "subject": "docs(226): correct phase plan count",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "2b4686f69d573486ed35389e162981c49168c51d",
+      "subject": "test(226-01): lock proof and privacy semantics",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "2c440ab5c50f2f4f014b5963c7d3ecd5b1889a9c",
+      "subject": "test(226-07): add failing canonical privacy gate",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "397cd145f022a63b056fda657232c05a69f19ad8",
+      "subject": "docs(226-02): complete measured baseline plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "39b36e1f223a0af0fd73f716175c72fdf4516725",
+      "subject": "docs(phase-226): update tracking after wave 3",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "3fecff132b74ed420f4d8fd8523c8b83e060858e",
+      "subject": "docs(phase-226): revert premature Complete requirements after gaps found",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 3,
+      "patch_id_occurrences_candidate": 2,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "42773cb84e70c87f5b72f748817395659bad2d09",
+      "subject": "docs(phase-226): revert premature Complete requirements after gaps found",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "44f7ca9eb5b80bc3b9f60f193c9c7818217fa01a",
+      "subject": "docs(226-02): publish measured three-run baseline",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "49f7a2bc54af31db98c3c9392003f306c89d5753",
+      "subject": "docs(226): finalize gap closure planning",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "4c935c8c1eedaa59e381e5e575f929c55da426d8",
+      "subject": "docs(226-08): finalize proof semantics plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "4dff086a16c8efc75fbc32657b289d2a1aae628b",
+      "subject": "feat(226-04): enforce fail-closed CI baseline proof",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "53d18ba3a98f863b30d49da6fc254e846b57bc5f",
+      "subject": "docs(226-08): record policy-binding coverage",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "54e5a3f8663bd19836a8065998eff471e888d5c3",
+      "subject": "docs(226): create gap closure plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "55135ce25082934b2f1175eca4b3b084169727c0",
+      "subject": "docs(226-10): complete ci baseline proof semantics plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "557d3f5112231030d43b791aeaf8efe2e8c2caa8",
+      "subject": "docs(226): add validation strategy",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "57c8aa001f7d2ed2f7d138235b647918cebc6064",
+      "subject": "feat(226-07): enforce canonical schema privacy",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "5ae535a47391aeacffd2663faaba17b93e17b7f7",
+      "subject": "docs(226-06): complete corrected baseline publication plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "5b580ba6b52b89bb299854e63cf6e1b2c6cc4705",
+      "subject": "feat(226-10): authenticate staged chain duration",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "5bf903140248f5d0bf3acdbbbb926deca9e67344",
+      "subject": "docs(226): capture phase context",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "5c01f4bc38d4d38e8e080bde0e608e26ca9b5442",
+      "subject": "docs(226): record failed-cohort verification and diagnosis",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "5da8e6b887354eded1b6dc25968ad7679d6bbd83",
+      "subject": "docs(226-01): complete CI baseline tracer plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "origin/phase-226-baseline-5da8e6b88735"
+    },
+    {
+      "commit": "60910cc3a5fdcf47a5f03f6339366f20a20002d2",
+      "subject": "docs(226): finalize gap-closure plans",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "6540f6e46096a021adbaac41d6296389a7265eeb",
+      "subject": "fix(226-06): regenerate corrected CI baseline evidence",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "657f28ca926752b6561c37568a1e1736cbf6c21c",
+      "subject": "docs(226-10): update phase completion state",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "661274631d9d5a90ecd522d07adfff75a843c25b",
+      "subject": "docs(226): research CI baseline proof semantics",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "66cf6d8c856dd5c92b229bbb0d1f3f6e6dcf3c7b",
+      "subject": "feat(226-01): add metadata-only CI baseline tracer",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "6707b38e9ff8cabdcca5fe75db602d3977d3ffd7",
+      "subject": "docs(226-07): complete canonical privacy plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "697771824daaaf5f574cd893106072894d6d3a51",
+      "subject": "docs(226): create gap closure plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "6b0e78e5d9d199922f946971440d85469ea03ebb",
+      "subject": "docs(state): record phase 226 context session",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "6f3e613d61b38e70e8f8aa9501697d683c25b9a0",
+      "subject": "test(226-09): add workflow and proof completeness red gates",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "6f9d92d94709220952f53f99ce2956019a8a0739",
+      "subject": "feat(226-08): bind candidate jobs to workflow policy",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "70c546a3a83834f3c1b62de312e667d66996cfe5",
+      "subject": "docs(phase-226): record verification gaps",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "74d8a4668fe10f711609d545ecd15afd62c36e2a",
+      "subject": "docs(226): add code review report",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "766d16c3e351e20e8c3e903855ce044162728d72",
+      "subject": "docs(226): add code review report",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "79f463028e38362da3ca29c4b6ed4608d52d143a",
+      "subject": "test(226-01): add failing CI baseline contract",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "7e353457b0ae4ba539a8243b3d9bafc4188ff197",
+      "subject": "docs(phase-226): record verification gaps",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "7f74310bfce59b6bf2284987148b1fc5976a30b4",
+      "subject": "docs(226): create phase plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "804f6869cfb787fe25a685de8138d32d918ad13e",
+      "subject": "docs(226-05): complete baseline proof semantics plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "86a982d1ea6738c65d6f459c4909f7e5bce047b3",
+      "subject": "fix(226): revise plans based on checker feedback",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "88216a2a53ddd643034d1a38a09791027eaa0af1",
+      "subject": "docs(226): record CI promotion checkpoint",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "896927fd504e8f100975c8dc4394727493f54270",
+      "subject": "feat(226-09): require workflow and complete release proof",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "8a6f3aa9e1c0d904ad8e193b1d2382209998209d",
+      "subject": "docs(226-05): record canonical migration stub",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "8b5b9caf22522d8109e5fa0a1a394aa881063c3f",
+      "subject": "docs(226-09): complete CI baseline proof semantics plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "8d4ca2a386f7d7896f46b42c4461a9ca11eab272",
+      "subject": "feat(226-04): repair canonical CI evidence cohort",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "8d7cfbdab5f5ca5c48b70f2670bea1e3f9042f45",
+      "subject": "test(226-03): add failing topology contract",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "8fdb2426e71af1efd5e954dd10620c1a9e8b1346",
+      "subject": "docs(phase-226): revert premature Complete requirements after gaps found",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 3,
+      "patch_id_occurrences_candidate": 2,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "90060cbeb4a0b65e04021ce196f715386cc5cb7b",
+      "subject": "docs(226): add code review report",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "912034a710d16d2e1ad624c6d82effd9f10d3b75",
+      "subject": "docs(226): create gap closure plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "916343bc2e82cd75a96f5c52f4dcc68e9c7b361d",
+      "subject": "test(226-10): add derived duration red gates",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "9cd5dafc470fad32cb89df2f11c128b9868a3404",
+      "subject": "feat(226-11): bind collector proof to main ref",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "a47c52964cea8329851f2e6af8c6ee5e3bf12a7e",
+      "subject": "docs(226): finalize gap closure plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "a9b7f868a1f7db90b3560df7d505509d7cc737c2",
+      "subject": "test(226-08): cover policy and proof forgeries",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "ad55ae3c5286e3ffba3de65610e9237c4a5e146f",
+      "subject": "test(226-05): cover provider failure semantics",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "afddc87c5245bd1abb97dcac735aef0a2938bdf5",
+      "subject": "docs(quick-260915-dpd): Fix eager Mix.env/0 evaluation in Accrue auth modules that crashes OTP releases at boot",
+      "disposition": "carried-on-candidate",
+      "superseded_by": [
+        "afddc87c5245bd1abb97dcac735aef0a2938bdf5"
+      ],
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 0,
+      "patch_id_occurrences_candidate": 1,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "b1c12639344034409c3b9a69f227fdadee6ea088",
+      "subject": "docs(226-06): certify CI baseline gap closure",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "b4937986db263b7ceea6a0aaa777b603aac92fef",
+      "subject": "docs(226-09): update phase execution state",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "c12af3493b705b4dbc17e80bf5f4298db95b9bf0",
+      "subject": "docs(226): create phase plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "c76198a5574f2de01ef1063afd0ab218f97d99f5",
+      "subject": "test(226-09): add policy-driven topology red gates",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "ccdb2b264f49ecfea3374c8fb108a1b4c17f38f1",
+      "subject": "docs(226): add code review report",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "ccfe752e8400ceaaca5e13aa4cb1ad85d5108289",
+      "subject": "docs(phase-226): revert premature Complete requirements after gaps found",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 3,
+      "patch_id_occurrences_candidate": 2,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "d8579ceb83a40d2613156771111ee4e1b4398432",
+      "subject": "docs(226-08): complete proof semantics plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "dba3633bcc594363c10853abb7790829f2683b16",
+      "subject": "ci(226-03): gate baseline semantics without topology drift",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "df6f193516e9bc65f40c48a770a5cea17e82add1",
+      "subject": "test(226-10): add derived signature red gates",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "dfde44eeb4f559d0f633b0523a6b1498137e1eef",
+      "subject": "docs(226-02): record comparable CI dispatch cohort",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "e0a31b35a028653dff38f0ca0b17538b9cfbe623",
+      "subject": "docs(226): create CI baseline proof semantics plans",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "ed7b114d0f42b1502f505d8783c4e2bef977094d",
+      "subject": "docs(226-03): complete baseline proof semantics plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "ee3df1ca181cc8c99deb252b615c9ff9b414444d",
+      "subject": "docs(226-03): document CI and host setup ownership",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "f1ed0ee07c50b4845b850fcdfde5a04183b2da73",
+      "subject": "docs(226): map CI baseline patterns",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "f4aa40afd0a3475172f6c8ff0c337aa6e8bc5655",
+      "subject": "feat(226-05): validate exact collector records",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "fb94b3d959a76015d5c87b1ac94a3a247ba90527",
+      "subject": "docs(226): create gap closure plan",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "fc6463ee7bab6fac17a93f9d7385872a6ad63855",
+      "subject": "docs(226): add code review report",
+      "disposition": "excluded-superseded",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "fd530ea1f655b764f951ae94fc49f5fd6016e26a",
+      "subject": "test(226-05): add collector record contract red gate",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    },
+    {
+      "commit": "ffed6a22f2ce5025ce90c40a4269f5e47b62d105",
+      "subject": "feat(226-10): derive failure signatures from jobs",
+      "disposition": "excluded-rejected",
+      "superseded_by": "no-equivalent",
+      "supersession_evidence": {
+        "tree_level": {
+          "command": [
+            "git",
+            "cat-file",
+            "-e",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:<path>"
+          ],
+          "files": [
+            {
+              "path": "scripts/ci/capture_ci_baseline.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/collect_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/verify_ci_baseline_contract.sh",
+              "exists_on_candidate": false,
+              "superseded_by_path": "scripts/ci/verify_ci_baseline.mjs"
+            },
+            {
+              "path": "scripts/ci/ci_baseline_workflow_policy.json",
+              "exists_on_candidate": false,
+              "superseded_by_path": null
+            }
+          ],
+          "plan_inventory": {
+            "command": [
+              "git",
+              "ls-tree",
+              "-r",
+              "--name-only",
+              "<ref>"
+            ],
+            "abandoned_line_max_plan": 11,
+            "milestone_line_max_plan": 21
+          }
+        },
+        "requirement_level": {
+          "command": [
+            "git",
+            "show",
+            "bab50d92be2695b12d5853e7d578e600376e73d0:.planning/milestones/v1.61-REQUIREMENTS.md"
+          ],
+          "file": ".planning/milestones/v1.61-REQUIREMENTS.md",
+          "requirements": [
+            {
+              "id": "BASE-01",
+              "matched_text": "| BASE-01 | Phase 226 | Complete |"
+            },
+            {
+              "id": "BASE-02",
+              "matched_text": "| BASE-02 | Phase 226 | Complete |"
+            }
+          ]
+        }
+      },
+      "patch_id_occurrences_main": 1,
+      "patch_id_occurrences_candidate": 0,
+      "published_elsewhere": "none"
+    }
+  ],
+  "pr_44": {
+    "number": 44,
+    "head_ref": "fix/release-boot-env-resolver",
+    "head_object": "3f8338cdb7ce54d3ca49f703565c1048b68f7646",
+    "base_ref": "main",
+    "base_object": "5c01f4bc38d4d38e8e080bde0e608e26ca9b5442",
+    "state": "closed",
+    "mergeable": "MERGEABLE",
+    "ahead_of_base": 4,
+    "behind_base": 0,
+    "matched_commits": [
+      {
+        "pr_branch_commit": "3f8338cdb7ce54d3ca49f703565c1048b68f7646",
+        "milestone_commit": "5653216c6f5d012eaef71f48a8ffb746c1aee8c3",
+        "patch_id": "99053db47b51b52ba73b0ec329ffd036bf93b7bb"
+      },
+      {
+        "pr_branch_commit": "88b5b377a4ae901ca78afb172afd3341630a8914",
+        "milestone_commit": "2de4389b44f03c512fdc06a23b0ee75156d34314",
+        "patch_id": "0b4c04dea9a5e82f64289407b85ab367a42234ae"
+      },
+      {
+        "pr_branch_commit": "a08eb5e2aa30e81f1ff8fbe1a3158243b6ecf4b7",
+        "milestone_commit": "9eae363a8af44896cba76e7850b220ac5caec0f5",
+        "patch_id": "e942f8e7922cc423bdbd8ad2e81c563fa949da99"
+      },
+      {
+        "pr_branch_commit": "b3d566c9e58bfea742e16a77c8e48c1ad98a2628",
+        "milestone_commit": "173607d9e59b249a2e61ce8fd1d517018c36b1cd",
+        "patch_id": "8e56e72fe2d757f52dfcbe16d6bc4a6824dd7160"
+      }
+    ],
+    "disposition": "close-unmerged-no-comment",
+    "note": "Head is local main plus 4 commits; merging would have permanently published all locally-excluded abandoned Phase-226 commits onto main. All 4 useful commits are already on the milestone branch as exact patch-id matches, so nothing is lost by closing unmerged (D-10). STATE.md prior description of this PR as \"four commits cherry-picked off main\" described intent, not the pushed branch; the correction to STATE.md is Plan 230-07 Task 3. Closed unmerged by this plan (Task 2) via gh pr close 44. Maintainer-authorized deviation from the D-10 default: NO comment was posted (Plan 230-07 checkpoint resolution) to avoid any possibility of leaking identifiers in public GitHub content; the superseding-SHA evidence instead lives only in this committed ledger (matched_commits below) and in scripts/ci/README.md, never in a public PR comment.",
+    "command": [
+      "gh",
+      "pr",
+      "close",
+      "44",
+      "--repo",
+      "szTheory/accrue"
+    ],
+    "exit_code": 0
+  }
+}

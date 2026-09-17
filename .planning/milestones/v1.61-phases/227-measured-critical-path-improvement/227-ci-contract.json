@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "workflow_sha256": "2622f7d8cb3d20ae68cec19db9f57bf8b88151e712cdbb360e9db03642772fb0",
+  "workflow_compatibility": {
+    "version": 2,
+    "restored_sha256": "2622f7d8cb3d20ae68cec19db9f57bf8b88151e712cdbb360e9db03642772fb0",
+    "candidate_sha256": "7edeebd139f653b45ba6cd81b7a1024c76fd3d988c8cb11ce552e695ac69be70"
+  },
+  "jobs": {
+    "host-integration": { "name": "Host integration (required deterministic gate)", "needs": ["docs-contracts-shift-left"] },
+    "playwright-e2e": { "name": "Playwright E2E shard ${{ matrix.shard }}/${{ strategy.job-total }}", "needs": ["host-integration"] },
+    "admin-drift-docs": { "name": "Admin drift and docs", "needs": ["release-gate"] },
+    "annotation-sweep": { "name": "Annotation sweep", "needs": ["release-manifest-ssot", "docs-contracts-shift-left", "release-gate", "phase18-tax-gate", "admin-drift-docs", "admin-group-contracts", "admin-hardening-guardrails", "admin-phase200-guardrails", "admin-ui-ratchet-guardrails", "host-integration", "playwright-e2e", "host-docker-smoke"] }
+  },
+  "inverse_rollback": { "host_integration_needs": ["admin-drift-docs", "docs-contracts-shift-left"] },
+  "artifacts": ["accrue-host-ci-setup-facts", "accrue-host-playwright-report", "accrue-host-playwright-traces", "accrue-host-phase15-screenshots", "accrue-host-server-log", "playwright-e2e-report-shard-${{ matrix.shard }}", "playwright-e2e-traces-shard-${{ matrix.shard }}", "live-stripe-proof"],
+  "frozen_inputs": {
+    "226-CI-BASELINE.md": "5fbde56db7ed6dac1677b7ef70841b79faecfb63598f5bddab4f8e8955e67350",
+    "226-CI-BASELINE.ndjson": "768e67bfd957e2aae064706fc7a72c7b6b7b623b9d8daff3b99347cc171f5531",
+    "schema-v1.json": "6d1933829a7eb9246a5aec078ce27a2bd817ab7b59a6ec57253bd314cccf9688"
+  },
+  "thresholds": { "keep_median_seconds": 1666, "maximum_observation_seconds": 2602 },
+  "dispatch_input": { "name": "run_live_stripe", "type": "boolean", "required": true, "default": true, "measurement_value": false },
+  "measurement_topology": { "event_class": "workflow_dispatch", "run_attempt": 1, "candidate_fingerprint": "phase-227-gap-dispatch-false-v2", "workflow_revision_prefix": "sha256:", "provider_state": "non_run" },
+  "proof_vector": {
+    "required_job_identities": ["release-gate", "docs-and-bash-contracts-shift-left", "admin-drift-and-docs", "admin-group-contracts-phase-190", "admin-hardening-guardrails-phase-192", "admin-phase-200-deterministic-guardrails", "host-integration", "playwright-e2e-shard-1-3", "playwright-e2e-shard-2-3", "playwright-e2e-shard-3-3", "host-docker-boot-smoke", "annotation-sweep"],
+    "advisory_outcomes": { "sigra": "advisory", "parked_ratchet": "advisory" },
+    "provider_proof": "separately-linked latest proved provider proof",
+    "expected_artifacts": ["accrue-host-phase15-screenshots"],
+    "required_job_roles": ["release-gate", "docs-and-bash-contracts-shift-left", "admin-drift-and-docs", "admin-group-contracts-phase-190", "admin-hardening-guardrails-phase-192", "admin-phase-200-deterministic-guardrails", "host-integration", "playwright-e2e-shard-1-3", "playwright-e2e-shard-2-3", "playwright-e2e-shard-3-3", "host-docker-boot-smoke", "annotation-sweep"]
+  },
+  "run_budget": { "final_candidate_attempts": 3, "allow_reruns": false, "allow_replacements": false },
+  "failure_classes": ["candidate_regression", "deterministic_required_lane_failure", "external_or_runner_blocked", "inconclusive"],
+  "v3_authority": {"budget_id": "phase-227-gap-dispatch-false-v3", "remote_effects_default": "disabled", "candidate_ceiling": 3, "conditional_restoration_ceiling": 1, "reservation_required": true, "preflight_required_before_activation": true},
+  "rollback_states": ["rollback_required", "rollback_applied", "rollback_verified", "rollback_applied_unverified"]
+}

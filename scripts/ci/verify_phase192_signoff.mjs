@@ -1,12 +1,22 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import test from "node:test";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
+import { isMainModule } from "./main_module.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
-const PHASE192_DIR = ".planning/phases/192-idempotent-verification-sign-off";
-const DEFAULT_SIGNOFF_PATH = path.join(REPO_ROOT, PHASE192_DIR, "192-SIGN-OFF.md");
+// CR-02: 192-idempotent-verification-sign-off is archived (this script is
+// dormant, never wired into CI). PHASE192_DIR is used below only to build the
+// conventional evidence-ref PREFIX for text matching/generated markdown, so it
+// stays a bare slug (not a bare `.planning/phases/...` literal) and the one
+// real filesystem read (DEFAULT_SIGNOFF_PATH) is routed through the
+// archive-aware resolver.
+const PHASE192_SLUG = "192-idempotent-verification-sign-off";
+const PHASE192_DIR = `.planning/phases/${PHASE192_SLUG}`;
+const DEFAULT_SIGNOFF_PATH = resolvePhaseEvidencePath(PHASE192_SLUG, "192-SIGN-OFF.md", { root: REPO_ROOT });
 
 const REQUIRED_ARTIFACTS = [
   "final.cells.json",
@@ -376,8 +386,8 @@ export function verifyPhase192Signoff(options = {}) {
 
 function positiveMarkdown() {
   const trace = (name) => `.planning/phases/192-idempotent-verification-sign-off/traces/${name}.zip`;
-  const screenshot = ".planning/phases/192-idempotent-verification-sign-off/gallery/dashboard-health-light.png";
-  const manifest = ".planning/phases/192-idempotent-verification-sign-off/artifacts.manifest.json";
+  const screenshot = ".planning/phases/192-idempotent-verification-sign-off/gallery/dashboard-health-light.png"; // archive-sweep-exempt: sample sign-off markdown text for this file's own fixtures, never read from disk
+  const manifest = ".planning/phases/192-idempotent-verification-sign-off/artifacts.manifest.json"; // archive-sweep-exempt: sample sign-off markdown text for this file's own fixtures, never read from disk
 
   return `# Phase 192 Maintainer Sign-Off
 
@@ -514,7 +524,22 @@ export function main(argv = process.argv.slice(2)) {
   return result;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// D-31: this file previously registered no real node:test case -- no
+// entrypoint guard existed at all, so main() ran unconditionally on import,
+// reading the real archived Phase 192 sign-off doc and exiting 0 with the
+// only TAP line being the file path itself. Guard fix and first real test
+// land in the same commit. Wrap the file's existing runSelfTest() -- already
+// a five-scenario positive/negative fixture battery wired to --self-test on
+// the CLI -- in a real node:test case rather than duplicating that coverage.
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("Phase 192 sign-off self-test passes every fixture scenario (positive pass plus artifact/gallery/checklist/trace negative controls)", () => runSelfTest());
+} else if (invokedAsEntrypoint) {
   try {
     main();
   } catch (error) {

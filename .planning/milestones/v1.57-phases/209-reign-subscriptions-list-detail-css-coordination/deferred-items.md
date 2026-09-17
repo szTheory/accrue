@@ -11,15 +11,15 @@ failures unrelated to this plan's `files_modified`
 All 7 traced via `git log -- <file>` to source files last modified by prior,
 unrelated work — none touched by Plan 01/02/03 of Phase 209:
 
-| # | Test | Source file at fault | Last touched by (unrelated commit) |
-|---|------|----------------------|-------------------------------------|
-| 1 | `Timeline related resources keep item rhythm...` (`DisplayComponentsTest`) | `lib/accrue_admin/components/related_resources.ex` (renders `class="ax-card ax-related ax-related-resources"`; test expects exactly `class="ax-card ax-related"`) | `b29b2703 fix(208-04): resolve eleventh ratchet UI findings` |
-| 2 | `Phase 200 Storybook dark shim mirrors every dark ax token from theme css` (`ThemeTest`) | `assets/css/theme.css` | `42e2be0b refactor(260718-u1s): single-source admin dark --ax-* set` |
-| 3 | `renders RelatedResources card with coupon link and events link` (`PromotionCodeLiveTest`) | same `related_resources.ex` class mismatch as #1 | `b29b2703 fix(208-04)` |
-| 4 | `renders RelatedResources card with promotion codes and events links` (`CouponLiveTest`) | same `related_resources.ex` class mismatch as #1 | `b29b2703 fix(208-04)` |
-| 5 | `subscription queries use status-safe list filters` (`Queries.QueryModulesTest`) | `lib/accrue_admin/queries/*.ex` | `c696cd92 fix(208-04): resolve third ratchet UI findings` |
-| 6 | `admin sessions mount the billing page` (`AuthHookTest`) | `lib/accrue_admin/live/dashboard_live.ex` (`Copy.dashboard_display_headline/0` text no longer matches rendered dashboard) | `5a373e38 fix(208-04): resolve round 96 ratchet findings` |
-| 7 | `renders RelatedResources card with events link` (`ConnectAccountLiveTest`) | same `related_resources.ex` class mismatch as #1 | `b29b2703 fix(208-04)` |
+| # | Test | Source file at fault | Last touched by (unrelated commit) | Status |
+|---|------|----------------------|-------------------------------------|--------|
+| 1 | `Timeline related resources keep item rhythm...` (`DisplayComponentsTest`) | `lib/accrue_admin/components/related_resources.ex` (renders `class="ax-card ax-related ax-related-resources"`; test expects exactly `class="ax-card ax-related"`) | `b29b2703 fix(208-04): resolve eleventh ratchet UI findings` | resolved |
+| 2 | `Phase 200 Storybook dark shim mirrors every dark ax token from theme css` (`ThemeTest`) | `assets/css/theme.css` | `42e2be0b refactor(260718-u1s): single-source admin dark --ax-* set` | resolved |
+| 3 | `renders RelatedResources card with coupon link and events link` (`PromotionCodeLiveTest`) | same `related_resources.ex` class mismatch as #1 | `b29b2703 fix(208-04)` | resolved |
+| 4 | `renders RelatedResources card with promotion codes and events links` (`CouponLiveTest`) | same `related_resources.ex` class mismatch as #1 | `b29b2703 fix(208-04)` | resolved |
+| 5 | `subscription queries use status-safe list filters` (`Queries.QueryModulesTest`) | `lib/accrue_admin/queries/*.ex` | `c696cd92 fix(208-04): resolve third ratchet UI findings` | resolved |
+| 6 | `admin sessions mount the billing page` (`AuthHookTest`) | `lib/accrue_admin/live/dashboard_live.ex` (`Copy.dashboard_display_headline/0` text no longer matches rendered dashboard) | `5a373e38 fix(208-04): resolve round 96 ratchet findings` | resolved |
+| 7 | `renders RelatedResources card with events link` (`ConnectAccountLiveTest`) | same `related_resources.ex` class mismatch as #1 | `b29b2703 fix(208-04)` | resolved |
 
 ## Root cause hypothesis
 

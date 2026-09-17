@@ -1602,13 +1602,7 @@ defmodule Accrue.Config do
       String.contains?(message, "could not start migration")
   end
 
-  defp safe_mix_env do
-    try do
-      Mix.env()
-    rescue
-      _ -> :prod
-    end
-  end
+  defp safe_mix_env, do: Accrue.Env.mix_env()
 
   # --- custom validators (referenced by @schema) -----------------------
 

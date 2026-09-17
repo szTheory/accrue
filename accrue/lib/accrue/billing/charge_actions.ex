@@ -109,6 +109,7 @@ defmodule Accrue.Billing.ChargeActions do
         customer: customer.processor_id,
         payment_method: pm_id,
         confirm: true,
+        automatic_payment_methods: %{enabled: true, allow_redirects: "never"},
         expand: ["balance_transaction", "payment_intent"]
       }
       |> put_if_present(:description, Keyword.get(opts, :description))

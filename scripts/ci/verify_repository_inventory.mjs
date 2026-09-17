@@ -1,0 +1,1240 @@
+#!/usr/bin/env node
+
+import assert from "node:assert/strict";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
+import {
+  collectRepositoryInventory,
+  createRepositoryValidationContext,
+  isPreservationRef,
+  normalizeRemoteFact,
+  preservationPrefix,
+  validateInventory
+} from "./collect_repository_inventory.mjs";
+import { renderRepositoryInventory } from "./render_repository_inventory.mjs";
+
+const SHA = /^[a-f0-9]{40}$/;
+const DIGEST = /^[a-f0-9]{64}$/;
+const DEFAULT_PRESERVATION_PHASE = "229";
+const BOOLEAN_FLAGS = new Set([
+  "fixtures", "require-recovery", "require-all-ref-recovery", "require-typed-artifacts",
+  "require-local-only", "require-complete-categories", "require-edge-cases",
+  "require-privacy-controls", "require-determinism", "require-command-provenance",
+  "require-workflow-metadata-authorization", "require-handoff-attestation",
+  "require-typed-ref-continuity"
+]);
+const VALUE_OPTIONS = new Set([
+  "records", "rendered", "expected-repository", "repository-root", "recovery-manifest",
+  "expected-manifest-sha256", "recovery-bundle", "artifact-authorization",
+  "collection-attestation", "handoff-attestation", "preservation-phase", "ref-exceptions"
+]);
+const REMOTE_KEYS = ["remote_main", "pull_requests", "release_branches", "actions"];
+const ROLE_REFS = { local_main: "refs/heads/main", cached_origin_main: "refs/remotes/origin/main", v161_tag: "refs/tags/v1.61" };
+const PLANNING_FACTS = { milestone: ".planning/MILESTONES.md", state: ".planning/STATE.md" };
+const MAX_LOCAL_AUTHORITY_BYTES = 512 * 1024;
+const MAX_BUNDLE_BYTES = 1024 * 1024 * 1024;
+const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex");
+const encodedRef = (phase, name) => `${preservationPrefix(phase)}${Buffer.from(name).toString("hex")}`;
+const fail = (message) => { throw new Error(message); };
+
+function git(repo, args, options = {}) {
+  const result = spawnSync("git", ["-C", repo, ...args], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000, ...options });
+  if (result.error || result.status !== 0) fail(`git ${args[0]} failed: ${(result.stderr || result.error?.message || "unknown error").trim()}`);
+  return result.stdout.trim();
+}
+
+function exactMap(rows, label, keyOf, valueOf) {
+  const result = new Map();
+  for (const row of rows) {
+    const key = keyOf(row);
+    if (result.has(key)) fail(`${label} contains duplicate mapping: ${key}`);
+    result.set(key, valueOf(row));
+  }
+  return result;
+}
+
+function assertSameMap(authorityName, authority, candidateName, candidate) {
+  const missing = [...authority.keys()].filter((key) => !candidate.has(key)).sort();
+  const extra = [...candidate.keys()].filter((key) => !authority.has(key)).sort();
+  const changed = [...authority.keys()].filter((key) => candidate.has(key) && candidate.get(key) !== authority.get(key)).sort();
+  if (missing.length || extra.length || changed.length) fail(`${candidateName} recovery set differs from ${authorityName}: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] changed=[${changed.join(", ")}]`);
+}
+
+function assertSameMultiset(authorityName, authority, candidateName, candidate, keyOf) {
+  const expected = authority.map(keyOf).sort();
+  const actual = candidate.map(keyOf).sort();
+  if (expected.length !== actual.length || expected.some((value, index) => value !== actual[index])) {
+    fail(`${candidateName} differs from ${authorityName}: expected=[${expected.join(", ")}] actual=[${actual.join(", ")}]`);
+  }
+}
+
+function assertCapturedRefContinuity(authority, candidate, activeRef, capturedObject, repositoryRoot) {
+  // The private manifest freezes every ref at capsule-mint time, but the active
+  // execution ref keeps advancing while the phase runs, so the capsule is
+  // normally many commits older than the capture it is verified against. Exact
+  // equality is therefore required for every frozen ref EXCEPT the active one,
+  // which instead must prove same-ref ancestry: the frozen object has to still
+  // be reachable from the captured commit. That rejects a substituted or
+  // rewritten active ref while accepting an honestly advanced one.
+  const missing = [...authority.keys()].filter((key) => !candidate.has(key)).sort();
+  const extra = [...candidate.keys()].filter((key) => !authority.has(key)).sort();
+  const changed = [...authority.keys()].filter((key) => key !== activeRef && candidate.has(key) && candidate.get(key) !== authority.get(key)).sort();
+  if (missing.length || extra.length || changed.length) {
+    fail(`captured canonical non-preservation refs recovery set differs from private manifest: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] changed=[${changed.join(", ")}]`);
+  }
+  if (!activeRef) return;
+  if (!authority.has(activeRef)) fail("active execution ref was not frozen by the private manifest");
+  const frozenObject = authority.get(activeRef);
+  const capturedActive = candidate.get(activeRef);
+  if (capturedActive !== capturedObject) fail("captured active execution ref must equal the captured commit");
+  if (frozenObject === capturedActive) return;
+  const exists = spawnSync("git", ["-C", repositoryRoot, "cat-file", "-e", `${frozenObject}^{commit}`], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+  if (exists.error || exists.status !== 0) fail("manifest-frozen active execution ref does not exist as a live commit object");
+  const ancestry = spawnSync("git", ["-C", repositoryRoot, "merge-base", "--is-ancestor", frozenObject, capturedActive], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+  if (ancestry.error || ancestry.status !== 0) fail("manifest-frozen active execution ref must be an ancestor of the captured active commit");
+}
+
+function assertCanonicalRefContinuity(authority, candidate, activeRef, activeObject) {
+  const missing = [...authority.keys()].filter((key) => !candidate.has(key)).sort();
+  const extra = [...candidate.keys()].filter((key) => !authority.has(key)).sort();
+  const changed = [...authority.keys()].filter((key) => key !== activeRef && candidate.has(key) && candidate.get(key) !== authority.get(key)).sort();
+  if (missing.length || extra.length || changed.length) {
+    fail(`canonical non-preservation refs recovery set differs from private manifest: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] changed=[${changed.join(", ")}]`);
+  }
+  if (activeRef) {
+    if (!authority.has(activeRef)) fail("active execution ref was not frozen by the private manifest");
+    if (candidate.get(activeRef) !== activeObject) fail("active execution ref must match the recorded milestone branch object");
+  }
+}
+
+const REF_EXCEPTION_CLASSES = new Set(["owned", "remote_tracking", "preservation"]);
+const REF_EXCEPTION_FIELDS = new Set(["ref", "object", "class", "reason", "declared_by_phase", "retirement_trigger", "published_elsewhere"]);
+
+function classifyTypedRef(name) {
+  if (isPreservationRef(name)) return "preservation";
+  if (name.startsWith("refs/heads/") || name.startsWith("refs/tags/")) return "owned";
+  if (name.startsWith("refs/remotes/")) return "remote_tracking";
+  return null;
+}
+
+function partitionByTypedClass(rows, nameOf) {
+  const buckets = { owned: [], remote_tracking: [], preservation: [] };
+  for (const row of rows) {
+    const cls = classifyTypedRef(nameOf(row));
+    if (!cls) fail(`typed ref continuity cannot classify ref ontology: ${nameOf(row)}`);
+    buckets[cls].push(row);
+  }
+  return buckets;
+}
+
+function readCommittedJson(filePath, label) {
+  if (typeof filePath !== "string" || !filePath) fail(`${label} path is required`);
+  let stat;
+  try { stat = fs.lstatSync(filePath); } catch { fail(`${label} must be an existing regular file`); }
+  if (!stat.isFile()) fail(`${label} must be a regular file, not a symbolic link or non-regular alias`);
+  try { return JSON.parse(fs.readFileSync(filePath, "utf8")); } catch { fail(`${label} must contain valid JSON`); }
+}
+
+function readRefExceptions(refExceptionsPath) {
+  const raw = readCommittedJson(refExceptionsPath, "ref exceptions ledger");
+  // 230-06: the ledger is wrapped as { row_count, refs } so the row count is a
+  // literal integer asserted against the recomputed array length, never a
+  // non-empty check (D-37) -- a bare array (pre-230-06 shape) is still
+  // accepted for backward compatibility but skips the row_count assertion.
+  const rows = Array.isArray(raw) ? raw : raw?.refs;
+  if (!Array.isArray(rows)) fail("ref exceptions ledger must be an array of rows, or an object with a refs array");
+  if (!Array.isArray(raw) && raw && typeof raw === "object") {
+    if (!Number.isInteger(raw.row_count)) fail("ref exceptions ledger row_count must be a literal integer");
+    if (raw.row_count !== rows.length) fail(`ref exceptions ledger row_count=${raw.row_count} differs from actual row count=${rows.length}`);
+  }
+  const seen = new Set();
+  for (const row of rows) {
+    if (!row || typeof row !== "object" || Array.isArray(row)) fail("ref exceptions ledger row must be an object");
+    for (const key of Object.keys(row)) if (!REF_EXCEPTION_FIELDS.has(key)) fail(`ref exceptions ledger row contains forbidden field: ${key}`);
+    for (const key of REF_EXCEPTION_FIELDS) if (!(key in row)) fail(`ref exceptions ledger row is missing required field: ${key}`);
+    if (typeof row.ref !== "string" || !row.ref.startsWith("refs/")) fail("ref exceptions ledger row ref must be a safe ref name");
+    if (typeof row.object !== "string" || !SHA.test(row.object)) fail("ref exceptions ledger row object must be a full lowercase SHA");
+    if (!REF_EXCEPTION_CLASSES.has(row.class)) fail("ref exceptions ledger row class must be owned, remote_tracking, or preservation");
+    if (typeof row.reason !== "string" || !row.reason.trim()) fail("ref exceptions ledger row reason must be non-empty prose");
+    if (row.declared_by_phase !== "230") fail('ref exceptions ledger row declared_by_phase must be "230"');
+    if (typeof row.retirement_trigger !== "string" || !row.retirement_trigger.trim()) fail("ref exceptions ledger row retirement_trigger must be non-empty prose");
+    if (typeof row.published_elsewhere !== "boolean") fail("ref exceptions ledger row published_elsewhere must be a literal boolean");
+    if (seen.has(row.ref)) fail("ref exceptions ledger contains duplicate ref rows");
+    seen.add(row.ref);
+  }
+  return rows;
+}
+
+function assertOwnedTypedContinuity(frozen, live, declaredExtra, activeRef, repositoryRoot) {
+  // The active local branch advances on every task commit, so it inherits the
+  // same ancestry-not-equality treatment assertCapturedRefContinuity already
+  // gives the single hardcoded active ref -- exact equality here would make
+  // typed continuity permanently red the moment this plan commits anything,
+  // which is exactly the "permanently red gate" D-26 rejects. Every other
+  // owned ref (including every other branch and every tag) stays exact.
+  const missing = [...frozen.keys()].filter((key) => !live.has(key)).sort();
+  const changed = [...frozen.keys()].filter((key) => key !== activeRef && live.has(key) && live.get(key) !== frozen.get(key)).sort();
+  const extra = [...live.keys()].filter((key) => !frozen.has(key) && !declaredExtra.has(key)).sort();
+  if (missing.length || extra.length || changed.length) fail(`owned refs typed continuity differs from frozen authority: missing=[${missing.join(", ")}] extra=[${extra.join(", ")}] changed=[${changed.join(", ")}]`);
+  if (activeRef && frozen.has(activeRef) && live.has(activeRef) && frozen.get(activeRef) !== live.get(activeRef)) {
+    const frozenObject = frozen.get(activeRef); const liveObject = live.get(activeRef);
+    const exists = spawnSync("git", ["-C", repositoryRoot, "cat-file", "-e", `${frozenObject}^{commit}`], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+    const ancestor = exists.status === 0 && spawnSync("git", ["-C", repositoryRoot, "merge-base", "--is-ancestor", frozenObject, liveObject], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+    if (!ancestor || ancestor.status !== 0) fail(`owned refs typed continuity differs from frozen authority: missing=[] extra=[] changed=[${activeRef}]`);
+  }
+}
+
+function assertRemoteTrackingTypedContinuity(frozen, live, repositoryRoot) {
+  const missing = [...frozen.keys()].filter((key) => !live.has(key)).sort();
+  if (missing.length) fail(`remote-tracking refs typed continuity differs from frozen authority: missing=[${missing.join(", ")}] extra=[] changed=[]`);
+  const changed = [];
+  for (const key of frozen.keys()) {
+    const frozenObject = frozen.get(key);
+    const liveObject = live.get(key);
+    if (frozenObject === liveObject) continue;
+    const exists = spawnSync("git", ["-C", repositoryRoot, "cat-file", "-e", `${frozenObject}^{commit}`], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+    const ancestor = exists.status === 0 && spawnSync("git", ["-C", repositoryRoot, "merge-base", "--is-ancestor", frozenObject, liveObject], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+    if (!ancestor || ancestor.status !== 0) changed.push(key);
+  }
+  if (changed.length) fail(`remote-tracking refs typed continuity differs from frozen authority: missing=[] extra=[] changed=[${changed.sort().join(", ")}]`);
+}
+
+function assertPreservationTypedContinuity(frozen, live) {
+  const missing = [...frozen.keys()].filter((key) => !live.has(key)).sort();
+  const changed = [...frozen.keys()].filter((key) => live.has(key) && live.get(key) !== frozen.get(key)).sort();
+  if (missing.length || changed.length) fail(`preservation refs typed continuity differs from frozen authority: missing=[${missing.join(", ")}] extra=[] changed=[${changed.join(", ")}]`);
+}
+
+// Typed ref continuity (D-26/D-27/D-28): partitions every live ref by ontology
+// so a phase-parameterized preservation capsule cannot self-invalidate strict
+// verification, and a monotone remote-tracking cache advancing under a
+// release bot's control does not require exact equality. Only the comparison
+// operator changes per class -- missing=[] stays absolute for all three, and
+// a non-fast-forward refs/remotes/* move still fails loudly. The
+// declared-additions ledger (230-REF-EXCEPTIONS.json) exists to excuse new
+// *owned* refs only (refs/heads/*, refs/tags/*) -- new preservation refs from
+// a later phase are unconditionally legitimate by construction (that is the
+// entire point of the phase-parameterized prefix), and remote-tracking drift
+// is already bounded by ancestry, never by a waiver row (see prohibitions).
+export function assertTypedRefContinuity(inventory, context, { repositoryRoot = process.cwd(), refExceptions, refExceptionsPath } = {}) {
+  const checked = validateInventory(inventory, context);
+  const exceptions = Array.isArray(refExceptions) ? refExceptions : readRefExceptions(refExceptionsPath);
+  const frozenAll = partitionByTypedClass(checked.refs.all, (row) => row.name);
+  const liveRows = [...directRefMap(repositoryRoot).entries()].map(([name, object]) => ({ name, object }));
+  const liveAll = partitionByTypedClass(liveRows, (row) => row.name);
+
+  const frozenOwned = exactMap(frozenAll.owned, "frozen owned refs", (row) => row.name, (row) => row.object);
+  const liveOwned = exactMap(liveAll.owned, "live owned refs", (row) => row.name, (row) => row.object);
+  const ownedExceptionRows = exceptions.filter((row) => row.class === "owned");
+  const ownedExceptionRefs = new Set(ownedExceptionRows.map((row) => row.ref));
+  for (const row of ownedExceptionRows) {
+    if (!liveOwned.has(row.ref)) fail(`230-REF-EXCEPTIONS.json row does not resolve live: ${row.ref}`);
+    if (liveOwned.get(row.ref) !== row.object) fail(`230-REF-EXCEPTIONS.json row object does not match live: ${row.ref}`);
+  }
+  assertOwnedTypedContinuity(frozenOwned, liveOwned, ownedExceptionRefs, checked.capture.active_ref, repositoryRoot);
+  const liveOwnedAdditions = [...liveOwned.keys()].filter((key) => !frozenOwned.has(key)).map((ref) => ({ ref, object: liveOwned.get(ref) }));
+  assertSameMultiset("230-REF-EXCEPTIONS.json owned rows", ownedExceptionRows, "live owned declared-addition set", liveOwnedAdditions, (row) => `${row.ref}\0${row.object}`);
+
+  const frozenRemote = exactMap(frozenAll.remote_tracking, "frozen remote-tracking refs", (row) => row.name, (row) => row.object);
+  const liveRemote = exactMap(liveAll.remote_tracking, "live remote-tracking refs", (row) => row.name, (row) => row.object);
+  assertRemoteTrackingTypedContinuity(frozenRemote, liveRemote, repositoryRoot);
+
+  const frozenPreservation = exactMap(frozenAll.preservation, "frozen preservation refs", (row) => row.name, (row) => row.object);
+  const livePreservation = exactMap(liveAll.preservation, "live preservation refs", (row) => row.name, (row) => row.object);
+  assertPreservationTypedContinuity(frozenPreservation, livePreservation);
+  return true;
+}
+
+function directRefMap(repo) {
+  const output = git(repo, ["for-each-ref", "--format=%(refname) %(objectname)", "refs"]);
+  const rows = output ? output.split("\n").map((line) => {
+    const separator = line.indexOf(" ");
+    return { ref: line.slice(0, separator), object: line.slice(separator + 1) };
+  }) : [];
+  for (const row of rows) if (!row.ref.startsWith("refs/") || !SHA.test(row.object)) fail("live ref authority contains an invalid row");
+  return exactMap(rows, "live refs", (row) => row.ref, (row) => row.object);
+}
+
+function liveCaptureAuthority(inventory, repositoryRoot) {
+  const symbolic = spawnSync("git", ["-C", repositoryRoot, "symbolic-ref", "-q", "HEAD"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+  if (symbolic.error || symbolic.status !== 0 || !symbolic.stdout.trim()) fail("strict verification requires a live symbolic active ref");
+  const activeRef = symbolic.stdout.trim();
+  if (inventory.capture.active_ref !== activeRef || inventory.capture.primary_worktree.branch !== activeRef) fail("captured active ref and primary worktree branch must match the live symbolic ref identity");
+  const capturedObject = inventory.capture.commit;
+  const exists = spawnSync("git", ["-C", repositoryRoot, "cat-file", "-e", `${capturedObject}^{commit}`], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+  if (exists.error || exists.status !== 0) fail("captured active commit does not exist as a live commit object");
+  const liveObject = git(repositoryRoot, ["rev-parse", `${activeRef}^{commit}`]);
+  const ancestry = spawnSync("git", ["-C", repositoryRoot, "merge-base", "--is-ancestor", capturedObject, liveObject], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000 });
+  if (ancestry.error || ancestry.status !== 0) fail("captured active commit must be an ancestor of the live same-ref object");
+  return { activeRef, capturedObject, liveObject };
+}
+
+function privateManifest(manifestPath, expectedDigest, context, preservationPhase = DEFAULT_PRESERVATION_PHASE) {
+  if (typeof manifestPath !== "string" || !manifestPath) fail("--recovery-manifest requires a non-empty private manifest path");
+  if (typeof expectedDigest !== "string" || !DIGEST.test(expectedDigest)) fail("--expected-manifest-sha256 requires a full lowercase SHA-256 digest");
+  if (typeof process.geteuid !== "function") fail("private recovery manifest ownership cannot be validated");
+  let descriptor;
+  try {
+    descriptor = fs.openSync(manifestPath, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+    const stat = fs.fstatSync(descriptor);
+    if (!stat.isFile()) fail("private recovery manifest must be a regular file");
+    if (stat.uid !== process.geteuid()) fail("private recovery manifest must be owned by the current effective user");
+    if ((stat.mode & 0o077) !== 0) fail("private recovery manifest permissions must be 0600 or stricter");
+    const bytes = fs.readFileSync(descriptor);
+    if (sha256(bytes) !== expectedDigest) fail("private recovery manifest digest does not match the independent expected SHA-256 anchor");
+    const value = JSON.parse(bytes.toString("utf8"));
+    if (value?.schema_version !== 1 || value.recovery_verified !== true || value.repository !== context.expectedRepository || !Array.isArray(value.refs)) fail("private recovery manifest identity or schema is invalid");
+    if (typeof value.bundle_sha256 !== "string" || !DIGEST.test(value.bundle_sha256)) fail("private recovery manifest bundle digest is invalid");
+    const refs = exactMap(value.refs, "private manifest", (row) => row.original_ref, (row) => row.object);
+    for (const row of value.refs) {
+      if (typeof row.original_ref !== "string" || !row.original_ref.startsWith("refs/") || !SHA.test(row.object || "")) fail("private recovery manifest contains an invalid ref mapping");
+      if (row.encoded_ref !== encodedRef(preservationPhase, row.original_ref)) fail("private recovery manifest contains a wrong encoded preservation ref");
+      if (row.restore_argv !== undefined && (!Array.isArray(row.restore_argv) || row.restore_argv.length !== 4 || row.restore_argv[0] !== "git" || row.restore_argv[1] !== "update-ref" || row.restore_argv[2] !== row.original_ref || row.restore_argv[3] !== row.object)) fail("private recovery manifest restore argv is invalid");
+    }
+    if (!refs.size) fail("private recovery manifest must contain at least one ref mapping");
+    return { value, refs };
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+  }
+}
+
+function statIdentity(stat) {
+  return [stat.dev, stat.ino, stat.mode, stat.uid, stat.gid, stat.size, stat.mtimeNs].map(String).join(":");
+}
+
+function readStableJson(filePath, label, maximum = MAX_LOCAL_AUTHORITY_BYTES) {
+  if (typeof process.geteuid !== "function") fail(`${label} ownership cannot be validated`);
+  let descriptor;
+  try {
+    descriptor = fs.openSync(filePath, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+    const stat = fs.fstatSync(descriptor, { bigint: true });
+    if (!stat.isFile()) fail(`${label} must be a no-follow regular file`);
+    if (stat.uid !== BigInt(process.geteuid())) fail(`${label} must be owned by the current effective user`);
+    if ((stat.mode & 0o077n) !== 0n) fail(`${label} permissions must be 0600 or stricter`);
+    const bytes = descriptorBytes(descriptor, stat.size, maximum, label);
+    const afterStat = fs.fstatSync(descriptor, { bigint: true });
+    if (statIdentity(afterStat) !== statIdentity(stat)) fail(`${label} changed while reading its stable descriptor`);
+    return JSON.parse(bytes.toString("utf8"));
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+  }
+}
+
+function descriptorBytes(descriptor, size, maximum, label) {
+  if (size < 0n || size > BigInt(maximum)) fail(`${label} exceeds its bounded input size`);
+  const bytes = Buffer.alloc(Number(size));
+  let offset = 0;
+  while (offset < bytes.length) {
+    const read = fs.readSync(descriptor, bytes, offset, bytes.length - offset, offset);
+    if (read === 0) fail(`${label} changed while reading its stable descriptor`);
+    offset += read;
+  }
+  return bytes;
+}
+
+function runBundleGit(repo, action, bundlePath, expectedIdentity) {
+  const descriptorBacked = process.platform !== "win32" && fs.existsSync("/dev/fd");
+  const gitPath = descriptorBacked ? "/dev/fd/3" : bundlePath;
+  let childDescriptor;
+  try {
+    if (descriptorBacked) {
+      childDescriptor = fs.openSync(bundlePath, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+      if (statIdentity(fs.fstatSync(childDescriptor, { bigint: true })) !== expectedIdentity) fail(`recovery bundle identity changed before git bundle ${action}`);
+    }
+    const result = spawnSync("git", ["-C", repo, "bundle", action, gitPath], {
+      encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 1_000_000,
+      ...(descriptorBacked ? { stdio: ["ignore", "pipe", "pipe", childDescriptor] } : {})
+    });
+    if (result.error || result.status !== 0) fail(`git bundle ${action} failed: ${(result.stderr || result.error?.message || "unknown error").trim()}`);
+    return result.stdout.trim();
+  } finally {
+    if (childDescriptor !== undefined) fs.closeSync(childDescriptor);
+  }
+}
+
+function bundleMap(repo, bundlePath, expectedDigest, { afterInitialDigest } = {}) {
+  if (typeof bundlePath !== "string" || !bundlePath) fail("--recovery-bundle requires a non-empty bundle path");
+  if (typeof process.geteuid !== "function") fail("recovery bundle ownership cannot be validated");
+  let beforePath; let descriptor;
+  try {
+    try { beforePath = fs.lstatSync(bundlePath, { bigint: true }); } catch { fail("--recovery-bundle must identify an existing regular file"); }
+    if (!beforePath.isFile()) fail("recovery bundle must be a no-follow regular file, not a symbolic link or non-regular alias");
+    descriptor = fs.openSync(bundlePath, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+    const beforeDescriptor = fs.fstatSync(descriptor, { bigint: true });
+    if (!beforeDescriptor.isFile() || statIdentity(beforeDescriptor) !== statIdentity(beforePath)) fail("recovery bundle identity changed while opening without following links");
+    if (beforeDescriptor.uid !== BigInt(process.geteuid())) fail("recovery bundle must be owned by the current effective user");
+    if ((beforeDescriptor.mode & 0o077n) !== 0n) fail("recovery bundle permissions must be 0600 or stricter");
+    const firstDigest = sha256(descriptorBytes(descriptor, beforeDescriptor.size, MAX_BUNDLE_BYTES, "recovery bundle"));
+    if (firstDigest !== expectedDigest) fail("recovery bundle digest differs from the private manifest");
+    afterInitialDigest?.();
+    const expectedIdentity = statIdentity(beforeDescriptor);
+    runBundleGit(repo, "verify", bundlePath, expectedIdentity);
+    const listed = runBundleGit(repo, "list-heads", bundlePath, expectedIdentity);
+    const afterDescriptor = fs.fstatSync(descriptor, { bigint: true });
+    let afterPath;
+    try { afterPath = fs.lstatSync(bundlePath, { bigint: true }); } catch { fail("recovery bundle path disappeared during verification"); }
+    const secondDigest = sha256(descriptorBytes(descriptor, afterDescriptor.size, MAX_BUNDLE_BYTES, "recovery bundle"));
+    if (!afterPath.isFile() || statIdentity(afterDescriptor) !== statIdentity(beforeDescriptor) || statIdentity(afterPath) !== statIdentity(beforePath) || secondDigest !== firstDigest) fail("recovery bundle identity or bytes changed during verification");
+    const rows = listed.split("\n").filter(Boolean).map((line) => {
+    const match = /^([a-f0-9]{40}) (refs\/.+)$/.exec(line);
+    if (!match) fail("recovery bundle contains an invalid head row");
+    return { object: match[1], ref: match[2] };
+    });
+    return exactMap(rows, "bundle heads", (row) => row.ref, (row) => row.object);
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+  }
+}
+
+function encodedMap(repo, preservationPhase = DEFAULT_PRESERVATION_PHASE) {
+  const prefix = preservationPrefix(preservationPhase);
+  const output = git(repo, ["for-each-ref", "--format=%(refname) %(objectname)", prefix]);
+  const rows = output ? output.split("\n").map((line) => {
+    const separator = line.indexOf(" ");
+    return { ref: line.slice(0, separator), object: line.slice(separator + 1) };
+  }) : [];
+  for (const row of rows) if (!row.ref.startsWith(prefix) || !SHA.test(row.object)) fail("encoded preservation ref listing is invalid");
+  return exactMap(rows, "encoded preservation refs", (row) => row.ref, (row) => row.object);
+}
+
+export function assertStrictRecovery(inventory, context, { repositoryRoot = process.cwd(), recoveryManifest, expectedManifestSha256, recoveryBundle, requireAllRefs = false, preservationPhase = DEFAULT_PRESERVATION_PHASE } = {}) {
+  const checked = validateInventory(inventory, context);
+  const manifest = privateManifest(recoveryManifest, expectedManifestSha256, context, preservationPhase);
+  const bundle = bundleMap(repositoryRoot, recoveryBundle, manifest.value.bundle_sha256);
+  const publicRecovery = exactMap(checked.recovery.refs, "committed recovery rows", (row) => row.original_ref, (row) => row.object);
+  const expectedEncoded = exactMap(manifest.value.refs, "manifest encoded refs", (row) => row.encoded_ref, (row) => row.object);
+  assertSameMap("private manifest", manifest.refs, "original bundle heads", bundle);
+  assertSameMap("private manifest", manifest.refs, "committed recovery rows", publicRecovery);
+  assertSameMap("private manifest encoded refs", expectedEncoded, "local encoded preservation refs", encodedMap(repositoryRoot, preservationPhase));
+  if (checked.recovery.manifest_sha256 !== expectedManifestSha256) fail("committed recovery manifest digest differs from the independent expected anchor");
+  if (checked.recovery.bundle_sha256 !== manifest.value.bundle_sha256) fail("committed recovery bundle digest differs from the private manifest");
+  if (requireAllRefs) {
+    const canonicalPreservation = exactMap(checked.refs.all.filter((row) => isPreservationRef(row.name)), "canonical preservation refs", (row) => row.name, (row) => row.object);
+    const canonical = exactMap(checked.refs.all.filter((row) => !isPreservationRef(row.name)), "canonical non-preservation refs", (row) => row.name, (row) => row.object);
+    const { activeRef, liveObject } = liveCaptureAuthority(checked, repositoryRoot);
+    assertSameMap("private manifest encoded refs", expectedEncoded, "canonical preservation refs", canonicalPreservation);
+    assertCapturedRefContinuity(manifest.refs, canonical, activeRef, checked.capture.commit, repositoryRoot);
+    assertCanonicalRefContinuity(exactMap(checked.refs.all, "captured canonical refs", (row) => row.name, (row) => row.object), directRefMap(repositoryRoot), activeRef, liveObject);
+  }
+  return true;
+}
+
+function assertCommandProvenance(inventory, context) {
+  for (const key of REMOTE_KEYS) {
+    const fact = inventory.remotes[key];
+    normalizeRemoteFact(fact, context, { plural: key !== "remote_main" });
+    if (key === "remote_main") {
+      if (fact.request !== `GET /repos/${context.expectedRepository}/git/ref/heads/main`) fail("command provenance for remote_main must use the exact main-ref GET");
+      continue;
+    }
+    const requests = fact.requests;
+    if (!Array.isArray(requests) || requests.length === 0 || requests.length > 10) fail(`command provenance for ${key} must use one through ten bounded pages`);
+    const suffix = key === "pull_requests" ? "pulls?state=open&per_page=100&page="
+      : key === "release_branches" ? "git/matching-refs/heads/release/?per_page=100&page="
+        : "actions/runs?per_page=100&page=";
+    requests.forEach((request, index) => {
+      const expected = `GET /repos/${context.expectedRepository}/${suffix}${index + 1}`;
+      if (request !== expected) fail(`command provenance for ${key} must be an exact contiguous ordered page sequence`);
+    });
+    if (fact.available === true) {
+      const completedPages = requests.length - 1;
+      if (fact.shas.length < completedPages * 100 || fact.shas.length >= requests.length * 100 || fact.shas.length > 1_000) fail(`command provenance for ${key} lacks terminal-page proof`);
+    }
+  }
+  return true;
+}
+
+function assertWorkflowMetadataAuthorization(inventory, authorizationPath) {
+  const changes = inventory.artifacts.authorized_workflow_metadata;
+  const expected = [".planning/milestone.lock", ".planning/state.json"];
+  if (!Array.isArray(changes) || changes.length !== expected.length || changes.map((row) => row.path).sort().join("\0") !== expected.join("\0")) fail("workflow metadata authorization must remain exact-path bounded");
+  if (authorizationPath) {
+    const record = readStableJson(authorizationPath, "workflow metadata authorization");
+    if (record?.schema_version !== 1 || record.purpose !== "phase229_workflow_metadata_refresh" || !Array.isArray(record.changes)) fail("workflow metadata authorization record is invalid");
+    const key = (row) => [row.path, row.type, row.before_sha256, row.after_sha256, row.state].join("\0");
+    const authority = record.changes.map(key).sort();
+    const candidate = changes.map(key).sort();
+    if (authority.length !== candidate.length || authority.some((value, index) => value !== candidate[index])) fail("committed workflow metadata authorization differs from the fixed authorization input");
+  }
+  return true;
+}
+
+function assertHandoffAttestation(inventory, context, { handoffAttestationPath, recordsPath, renderedPath, recoveryBundle, expectedManifestSha256, artifactAuthorizationPath, collectionAttestationPath } = {}) {
+  if (!handoffAttestationPath) fail("--handoff-attestation is required");
+  const record = readStableJson(handoffAttestationPath, "handoff attestation");
+  const required = ["schema_version", "purpose", "repository", "observed_at", "capture", "manifest_sha256", "bundle_sha256", "authorization_sha256", "collection_attestation_sha256", "records_sha256", "rendered_sha256", "before_capsule_digest", "before_workspace_digest", "result"];
+  for (const key of required) if (!(key in record)) fail(`handoff attestation is missing required field: ${key}`);
+  if (record.schema_version !== 2 || record.purpose !== "phase229_final_handoff_invariants" || record.result !== "PASS") fail("handoff attestation schema or result is invalid");
+  if (record.repository !== context.expectedRepository) fail("handoff attestation repository differs from the expected repository");
+  if (record.capture.active_ref !== inventory.capture.active_ref || record.capture.commit !== inventory.capture.commit) fail("handoff attestation capture binding differs from the committed inventory");
+  if (record.manifest_sha256 !== expectedManifestSha256) fail("handoff attestation manifest digest differs from the independent expected anchor");
+  if (recoveryBundle && record.bundle_sha256 !== sha256(fs.readFileSync(recoveryBundle))) fail("handoff attestation bundle digest differs from the recovery bundle");
+  if (recordsPath && record.records_sha256 !== sha256(fs.readFileSync(recordsPath))) fail("handoff attestation records digest differs from the published canonical records");
+  if (renderedPath && record.rendered_sha256 !== sha256(fs.readFileSync(renderedPath))) fail("handoff attestation rendered digest differs from the published canonical Markdown");
+  if (artifactAuthorizationPath && record.authorization_sha256 !== sha256(fs.readFileSync(artifactAuthorizationPath))) fail("handoff attestation authorization digest differs from the fixed authorization input");
+  if (collectionAttestationPath && record.collection_attestation_sha256 !== sha256(fs.readFileSync(collectionAttestationPath))) fail("handoff attestation collection-attestation digest differs from the final capture attestation");
+  return true;
+}
+
+function assertTypedArtifacts(inventory) {
+  const entries = inventory.artifacts.entries;
+  if (!entries.length) fail("typed artifact evidence must not be empty");
+  const keys = entries.map((entry) => `${entry.path}\0${entry.type}\0${entry.sha256}`);
+  if (new Set(entries.map((entry) => entry.path)).size !== entries.length) fail("typed artifact paths must be unique");
+  if (keys.join("\n") !== [...keys].sort().join("\n")) fail("typed artifact evidence must use canonical deterministic ordering");
+  return true;
+}
+
+function directWorktreeRecords(repositoryRoot) {
+  const listed = spawnSync("git", ["-C", repositoryRoot, "worktree", "list", "--porcelain"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 512 * 1024 });
+  if (listed.error || listed.status !== 0) fail("git worktree list failed while verifying complete categories");
+  const rows = []; let current = null;
+  const finish = () => {
+    if (!current) return;
+    if (!current.path || !SHA.test(current.sha || "") || (!current.branch && !current.detached)) fail("git worktree authority contains an incomplete record");
+    const status = spawnSync("git", ["-C", current.path, "status", "--porcelain"], { encoding: "utf8", shell: false, timeout: 15_000, maxBuffer: 512 * 1024 });
+    if (status.error || status.status !== 0) fail("git worktree status failed while verifying complete categories");
+    rows.push({ path: current.path, fullBranch: current.detached ? "detached" : current.branch, branch: current.detached ? "detached" : current.branch.replace(/^refs\/heads\//, ""), sha: current.sha, dirty: Boolean(status.stdout) });
+    current = null;
+  };
+  for (const line of listed.stdout.split("\n")) {
+    if (!line) { finish(); continue; }
+    if (line.startsWith("worktree ")) { finish(); current = { path: line.slice(9) }; }
+    else if (!current) fail("git worktree authority record has no header");
+    else if (line.startsWith("HEAD ")) current.sha = line.slice(5);
+    else if (line.startsWith("branch ")) current.branch = line.slice(7);
+    else if (line === "detached") current.detached = true;
+    else if (line === "bare") fail("bare worktrees cannot be reconciled as inventory worktrees");
+    else fail("git worktree authority contains an unsupported record");
+  }
+  finish();
+  if (!rows.length) fail("git worktree authority contains no worktrees");
+  return rows;
+}
+
+function directWorktrees(repositoryRoot) {
+  return directWorktreeRecords(repositoryRoot).map(({ branch, sha, dirty }) => ({ branch, sha, dirty }));
+}
+
+function directShipWindows(repositoryRoot) {
+  const filename = path.join(repositoryRoot, ".planning/WINDOWS.md");
+  const contents = fs.readFileSync(filename, "utf8");
+  if (Buffer.byteLength(contents, "utf8") > 512 * 1024) fail("ship-window authority exceeds its bounded input size");
+  const count = (name) => {
+    const match = new RegExp(`^${name}:\\s*(\\d+)\\s*$`, "m").exec(contents);
+    if (!match) fail(`ship-window authority is missing ${name}`);
+    return Number(match[1]);
+  };
+  const header = "| id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |";
+  const start = contents.indexOf(header);
+  if (start < 0) fail("ship-window authority is malformed");
+  const rows = [];
+  for (const line of contents.slice(start + header.length).trimStart().split("\n")) {
+    if (!line.startsWith("|")) break;
+    const columns = line.split("|").slice(1, -1).map((item) => item.trim());
+    if (columns.every((item) => /^-+$/.test(item))) continue;
+    if (columns.length !== 10 || !/^\d+$/.test(columns[0]) || !["open", "waived", "fixed"].includes(columns[6])) fail("ship-window authority contains an invalid row");
+    rows.push({ id: Number(columns[0]), status: columns[6] });
+  }
+  const ids = new Set();
+  for (const row of rows) { if (ids.has(row.id)) fail("ship-window authority contains duplicate IDs"); ids.add(row.id); }
+  if (count("total_count") !== rows.length || count("open_count") !== rows.filter((row) => row.status === "open").length || count("waived_count") !== rows.filter((row) => row.status === "waived").length || count("fixed_count") !== rows.filter((row) => row.status === "fixed").length) fail("ship-window authority counts are inconsistent");
+  return rows.sort((left, right) => left.id - right.id).map((row) => `${row.id}:${row.status}`);
+}
+
+function directPlanningFact(repositoryRoot, relative) {
+  const filename = path.join(repositoryRoot, relative);
+  let beforePath;
+  try { beforePath = fs.lstatSync(filename, { bigint: true }); } catch (error) {
+    if (error?.code === "ENOENT") return "absent";
+    fail(`planning authority ${relative} cannot be inspected without following links`);
+  }
+  if (!beforePath.isFile()) fail(`planning authority ${relative} must be a no-follow regular file`);
+  let descriptor;
+  try {
+    descriptor = fs.openSync(filename, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+    const beforeDescriptor = fs.fstatSync(descriptor, { bigint: true });
+    if (!beforeDescriptor.isFile() || statIdentity(beforeDescriptor) !== statIdentity(beforePath)) fail(`planning authority ${relative} changed while opening without following links`);
+    const bytes = descriptorBytes(descriptor, beforeDescriptor.size, MAX_LOCAL_AUTHORITY_BYTES, `planning authority ${relative}`);
+    const afterDescriptor = fs.fstatSync(descriptor, { bigint: true });
+    let afterPath;
+    try { afterPath = fs.lstatSync(filename, { bigint: true }); } catch { fail(`planning authority ${relative} disappeared while hashing`); }
+    if (!afterPath.isFile() || statIdentity(afterDescriptor) !== statIdentity(beforeDescriptor) || statIdentity(afterPath) !== statIdentity(beforePath)) fail(`planning authority ${relative} changed while hashing`);
+    return sha256(bytes);
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+  }
+}
+
+function assertPlanningAuthority(inventory, repositoryRoot) {
+  for (const [field, relative] of Object.entries(PLANNING_FACTS)) {
+    const recorded = inventory.planning[field];
+    if (recorded !== "absent" && (typeof recorded !== "string" || !DIGEST.test(recorded))) fail(`planning.${field} must be a lowercase SHA-256 digest or exact absent marker`);
+    const actual = directPlanningFact(repositoryRoot, relative);
+    if (recorded !== actual) fail(`planning.${field} differs from independent ${relative} authority`);
+  }
+  return true;
+}
+
+function assertCompleteCategories(inventory, context, { repositoryRoot = process.cwd() } = {}) {
+  const all = new Map(inventory.refs.all.map((row) => [row.name, row.object]));
+  for (const [role, ref] of Object.entries(ROLE_REFS)) if (all.get(ref) !== inventory.refs[role]) fail(`complete categories require ${role} to match ${ref}`);
+  if (![...all.values()].includes(inventory.refs.milestone_branch)) fail("complete categories require the milestone branch object in refs.all");
+  if (!Array.isArray(inventory.worktrees) || inventory.worktrees.length === 0 || !inventory.planning || !Array.isArray(inventory.planning.ship_windows)) fail("complete local categories are required");
+  const capture = liveCaptureAuthority(inventory, repositoryRoot);
+  const liveRecords = directWorktreeRecords(repositoryRoot);
+  const primaryPath = fs.realpathSync(git(repositoryRoot, ["rev-parse", "--show-toplevel"]));
+  const livePrimary = liveRecords.filter((row) => fs.realpathSync(row.path) === primaryPath);
+  if (livePrimary.length !== 1 || livePrimary[0].fullBranch !== capture.activeRef || livePrimary[0].sha !== capture.liveObject) fail("live primary worktree identity does not match the active symbolic ref");
+  const activeBranch = capture.activeRef.replace(/^refs\/heads\//, "");
+  const capturedPrimary = inventory.worktrees.filter((row) => row.branch === activeBranch && row.sha === capture.capturedObject);
+  if (capturedPrimary.length !== 1) fail("canonical worktrees must contain exactly one captured primary identity");
+  const expectedLiveWorktrees = inventory.worktrees.map((row) => row === capturedPrimary[0] ? { ...row, sha: capture.liveObject } : row);
+  assertSameMultiset("captured worktrees with same-primary ancestry", expectedLiveWorktrees, "direct git worktree authority", liveRecords, (row) => `${row.branch}\0${row.sha}\0${row.dirty ? "1" : "0"}`);
+  assertSameMultiset("bounded .planning/WINDOWS.md authority", directShipWindows(repositoryRoot), "canonical ship windows", inventory.planning.ship_windows, String);
+  assertPlanningAuthority(inventory, repositoryRoot);
+  for (const key of REMOTE_KEYS) normalizeRemoteFact(inventory.remotes[key], context, { plural: key !== "remote_main" });
+  return true;
+}
+
+function assertEdgeCases(inventory) {
+  if (inventory.artifacts.empty_directory_policy !== "not_surfaced_by_git") fail("edge-case empty-directory policy is required");
+  for (const key of REMOTE_KEYS.filter((item) => item !== "remote_main")) {
+    const fact = inventory.remotes[key];
+    if (fact.available === true && !Array.isArray(fact.shas)) fail(`edge-case plural category ${key} must preserve zero/one/many arrays`);
+    if (fact.available === false && (fact.sha !== undefined || fact.shas !== undefined || !fact.reason)) fail(`edge-case unavailable category ${key} must retain only its bounded reason`);
+  }
+  return true;
+}
+
+function assertPrivacyControls(inventory, rendered, privateValues = []) {
+  const forbiddenKey = /(^|_)(actor|token|secret|payload|raw|logs?|bundle_path|manifest_path)($|_)/i;
+  const forbiddenLocation = (value) => path.posix.isAbsolute(value)
+    || path.win32.isAbsolute(value)
+    || /^[A-Za-z]:/.test(value)
+    || /^file:/i.test(value);
+  const visit = (value, trail = "inventory") => {
+    if (Array.isArray(value)) return value.forEach((item, index) => visit(item, `${trail}[${index}]`));
+    if (value && typeof value === "object") return Object.entries(value).forEach(([key, item]) => {
+      if (forbiddenKey.test(key)) fail(`privacy controls reject forbidden field: ${trail}.${key}`);
+      visit(item, `${trail}.${key}`);
+    });
+    if (typeof value === "string" && (forbiddenLocation(value) || /[\x00-\x1f\x7f]/.test(value))) fail(`privacy controls reject private path or control data at ${trail}`);
+  };
+  visit(inventory);
+  for (const value of privateValues.filter(Boolean)) if (JSON.stringify(inventory).includes(value) || rendered.includes(value)) fail("private recovery location leaked into committed evidence");
+  return true;
+}
+
+function permutedInventory(inventory) {
+  const value = structuredClone(inventory);
+  value.recovery.refs.reverse();
+  value.artifacts.entries.reverse();
+  if (value.artifacts.authorized_workflow_metadata) value.artifacts.authorized_workflow_metadata.reverse();
+  value.refs.all.reverse();
+  value.worktrees.reverse();
+  value.planning.ship_windows.reverse();
+  for (const key of REMOTE_KEYS) if (Array.isArray(value.remotes[key].shas)) value.remotes[key].shas.reverse();
+  return value;
+}
+
+function assertDeterminism(inventory, context, renderer = renderRepositoryInventory) {
+  const first = renderer(inventory, context);
+  const second = renderer(structuredClone(inventory), context);
+  const permuted = renderer(permutedInventory(inventory), context);
+  if (first !== second || first !== permuted) fail("deterministic rendering must be byte-identical across repeated and permuted inputs");
+  return true;
+}
+
+function applyStrictFlags(inventory, context, parsed) {
+  const recoveryOptions = { repositoryRoot: parsed.values["repository-root"] || process.cwd(), recoveryManifest: parsed.values["recovery-manifest"], expectedManifestSha256: parsed.values["expected-manifest-sha256"], recoveryBundle: parsed.values["recovery-bundle"], requireAllRefs: parsed.flags.has("require-all-ref-recovery"), preservationPhase: parsed.values["preservation-phase"] || DEFAULT_PRESERVATION_PHASE };
+  if (parsed.flags.has("require-recovery") || parsed.flags.has("require-all-ref-recovery")) assertStrictRecovery(inventory, context, recoveryOptions);
+  if (parsed.flags.has("require-typed-artifacts")) assertTypedArtifacts(inventory);
+  if (parsed.flags.has("require-local-only") && inventory.mode !== "local_only") fail("local-only inventory is required");
+  if (parsed.flags.has("require-complete-categories")) assertCompleteCategories(inventory, context, { repositoryRoot: recoveryOptions.repositoryRoot });
+  if (parsed.flags.has("require-edge-cases")) assertEdgeCases(inventory);
+  if (parsed.flags.has("require-command-provenance")) assertCommandProvenance(inventory, context);
+  if (parsed.flags.has("require-workflow-metadata-authorization")) assertWorkflowMetadataAuthorization(inventory, parsed.values["artifact-authorization"]);
+  const rendered = renderRepositoryInventory(inventory, context);
+  if (parsed.flags.has("require-privacy-controls")) assertPrivacyControls(inventory, rendered, [parsed.values["recovery-manifest"], parsed.values["recovery-bundle"]]);
+  if (parsed.flags.has("require-determinism")) assertDeterminism(inventory, context);
+  if (parsed.flags.has("require-handoff-attestation")) assertHandoffAttestation(inventory, context, {
+    handoffAttestationPath: parsed.values["handoff-attestation"],
+    recordsPath: parsed.values.records,
+    renderedPath: parsed.values.rendered,
+    recoveryBundle: parsed.values["recovery-bundle"],
+    expectedManifestSha256: parsed.values["expected-manifest-sha256"],
+    artifactAuthorizationPath: parsed.values["artifact-authorization"],
+    collectionAttestationPath: parsed.values["collection-attestation"]
+  });
+  if (parsed.flags.has("require-typed-ref-continuity")) assertTypedRefContinuity(inventory, context, { repositoryRoot: recoveryOptions.repositoryRoot, refExceptionsPath: parsed.values["ref-exceptions"] });
+}
+
+function createBundle(repo, bundle, refs) {
+  fs.rmSync(bundle, { force: true });
+  const result = spawnSync("git", ["-C", repo, "bundle", "create", bundle, ...refs], { encoding: "utf8", shell: false });
+  assert.equal(result.status, 0, result.stderr);
+  fs.chmodSync(bundle, 0o600);
+}
+
+function writeManifest(fixture) {
+  fs.writeFileSync(fixture.manifestPath, `${JSON.stringify(fixture.manifest)}\n`, { mode: 0o600 });
+  fs.chmodSync(fixture.manifestPath, 0o600);
+  fixture.expectedManifestSha256 = sha256(fs.readFileSync(fixture.manifestPath));
+}
+
+function recoveryFixture({ single = false } = {}) {
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "phase229-recovery-barrier-"));
+  const repo = path.join(scratch, "repo");
+  fs.mkdirSync(repo);
+  git(repo, ["init", "-q"]);
+  git(repo, ["config", "user.email", "phase229@example.invalid"]);
+  git(repo, ["config", "user.name", "phase229"]);
+  fs.mkdirSync(path.join(repo, ".planning"));
+  fs.writeFileSync(path.join(repo, ".planning/milestone.lock"), "before-lock\n");
+  fs.writeFileSync(path.join(repo, ".planning/state.json"), "before-state\n");
+  fs.writeFileSync(path.join(repo, ".planning/WINDOWS.md"), [
+    "---", "open_count: 1", "waived_count: 0", "fixed_count: 1", "total_count: 2", "---", "",
+    "| id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| 1 | 229 | deviation | fixture | | first | open | | now | |",
+    "| 2 | 229 | deviation | fixture | | second | fixed | | now | |", ""
+  ].join("\n"));
+  fs.writeFileSync(path.join(repo, "tracked"), "fixture\n");
+  git(repo, ["add", "tracked", ".planning/WINDOWS.md"]);
+  git(repo, ["commit", "-qm", "fixture"]);
+  git(repo, ["branch", "-M", "main"]);
+  const object = git(repo, ["rev-parse", "HEAD"]);
+  if (!single) {
+    git(repo, ["branch", "secondary"]);
+    git(repo, ["update-ref", "refs/custom/phase229$(not-executed)", object]);
+    git(repo, ["update-ref", "refs/remotes/origin/main", object]);
+    git(repo, ["tag", "v1.61", object]);
+  }
+  const originalRows = git(repo, ["for-each-ref", "--format=%(refname) %(objectname)", "refs"]).split("\n").filter(Boolean).map((line) => {
+    const separator = line.indexOf(" ");
+    return { original_ref: line.slice(0, separator), object: line.slice(separator + 1) };
+  });
+  for (const row of originalRows) git(repo, ["update-ref", encodedRef(DEFAULT_PRESERVATION_PHASE, row.original_ref), row.object]);
+  const bundle = path.join(scratch, "recovery.bundle");
+  createBundle(repo, bundle, originalRows.map((row) => row.original_ref));
+  const beforeLock = sha256("before-lock\n"); const beforeState = sha256("before-state\n");
+  fs.writeFileSync(path.join(repo, ".planning/milestone.lock"), "after-lock\n");
+  fs.writeFileSync(path.join(repo, ".planning/state.json"), "after-state\n");
+  const afterLock = sha256("after-lock\n"); const afterState = sha256("after-state\n");
+  const manifest = {
+    schema_version: 1, repository: "szTheory/accrue", recovery_verified: true,
+    bundle_sha256: sha256(fs.readFileSync(bundle)),
+    refs: originalRows.map((row) => ({ ...row, object_type: "commit", encoded_ref: encodedRef(DEFAULT_PRESERVATION_PHASE, row.original_ref), bundle_member: true, restore_argv: ["git", "update-ref", row.original_ref, row.object] })),
+    artifacts: [
+      { path: ".planning/milestone.lock", type: "regular", sha256: beforeLock },
+      { path: ".planning/state.json", type: "regular", sha256: beforeState }
+    ],
+    empty_directory_policy: "not_surfaced_by_git"
+  };
+  const manifestPath = path.join(scratch, "manifest.json");
+  const fixture = { scratch, repo, bundle, manifestPath, manifest, originalRows, object };
+  writeManifest(fixture);
+  const attestation = {
+    schema_version: 1, purpose: "phase229_final_capture", observed_at: "2026-09-13T00:00:00.000Z",
+    artifacts: [
+      { path: ".planning/milestone.lock", type: "regular", before_sha256: beforeLock, after_sha256: afterLock, state: "workflow_metadata_refreshed" },
+      { path: ".planning/state.json", type: "regular", before_sha256: beforeState, after_sha256: afterState, state: "workflow_metadata_refreshed" }
+    ]
+  };
+  const attestationPath = path.join(scratch, "attestation.json");
+  fs.writeFileSync(attestationPath, JSON.stringify(attestation), { mode: 0o600 });
+  return { ...fixture, attestationPath, attestation };
+}
+
+function strictInventory(fixture, { mode = "local_only" } = {}) {
+  const sha = (letter) => letter.repeat(40);
+  const original = fixture.manifest.refs.map((row) => ({ name: row.original_ref, object: row.object, role: row.original_ref === "refs/heads/main" ? "local_main" : row.original_ref === "refs/remotes/origin/main" ? "cached_origin_main" : row.original_ref === "refs/tags/v1.61" ? "v161_tag" : "other" }));
+  const preservation = fixture.manifest.refs.map((row) => ({ name: row.encoded_ref, object: row.object, role: "phase229_preservation" }));
+  const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+  return validateInventory({
+    schema_version: 2, repository: "szTheory/accrue", mode,
+    capture: {
+      captured_at: "2026-09-13T00:00:00.000Z",
+      active_ref: "refs/heads/main",
+      commit: fixture.object,
+      primary_worktree: { branch: "refs/heads/main", head: fixture.object }
+    },
+    recovery: { verified: true, manifest_sha256: fixture.expectedManifestSha256, bundle_sha256: fixture.manifest.bundle_sha256, refs: fixture.manifest.refs.map(({ original_ref, object, encoded_ref, bundle_member }) => ({ original_ref, object, encoded_ref, bundle_member })) },
+    artifacts: {
+      empty_directory_policy: "not_surfaced_by_git",
+      entries: [
+        { path: "empty", type: "empty_directory", sha256: "not_surfaced" },
+        { path: "link", type: "symlink", sha256: "d".repeat(64) },
+        { path: "nested/file.txt", type: "regular", sha256: "c".repeat(64) }
+      ],
+      authorized_workflow_metadata: [
+        { path: ".planning/milestone.lock", type: "regular", before_sha256: "1".repeat(64), after_sha256: "2".repeat(64), state: "workflow_metadata_refreshed" },
+        { path: ".planning/state.json", type: "regular", before_sha256: "3".repeat(64), after_sha256: "4".repeat(64), state: "workflow_metadata_refreshed" }
+      ]
+    },
+    refs: { local_main: fixture.object, cached_origin_main: fixture.object, milestone_branch: fixture.object, v161_tag: fixture.object, all: [...original, ...preservation] },
+    remotes: {
+      remote_main: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/git/ref/heads/main", available: true, state: "observed", sha: sha("a") },
+      pull_requests: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1"], available: true, state: "observed", shas: [] },
+      release_branches: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1"], available: true, state: "observed", shas: [sha("b"), sha("c")] },
+      actions: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"], available: false, state: "unavailable", reason: "network" }
+    },
+    planning: { ship_windows: ["1:open", "2:fixed"], milestone: "absent", state: "absent" },
+    worktrees: directWorktrees(fixture.repo)
+  }, context);
+}
+
+function strictOptions(fixture, requireAllRefs = true) {
+  return { repositoryRoot: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, requireAllRefs };
+}
+
+function assertRecoveryFailure(mutate, expected) {
+  const fixture = recoveryFixture(); let calls = 0;
+  try {
+    mutate(fixture);
+    assert.throws(() => collectRepositoryInventory({ repo: fixture.repo, recoveryManifest: fixture.manifestPath, expectedManifestSha256: fixture.expectedManifestSha256, recoveryBundle: fixture.bundle, finalCaptureAttestation: fixture.attestationPath, expectedRepository: "szTheory/accrue", observeRemote: true, adapter: { get: () => { calls += 1; return { object: { sha: "a".repeat(40) } }; } } }), expected);
+    assert.equal(calls, 0, "recovery validation must finish before remote observation");
+  } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+}
+
+function verifyStrictRecoveryControls(context) {
+  const fixture = recoveryFixture();
+  try {
+    const secondaryWorktree = path.join(fixture.scratch, "secondary-worktree");
+    git(fixture.repo, ["worktree", "add", "-q", secondaryWorktree, "secondary"]);
+    const inventory = strictInventory(fixture);
+    assert.equal(assertStrictRecovery(inventory, context, strictOptions(fixture)), true, "complete many-ref recovery must pass");
+    const missing = structuredClone(inventory); missing.recovery.refs.pop();
+    assert.throws(() => assertStrictRecovery(missing, context, strictOptions(fixture)), /committed recovery rows recovery set differs/);
+    const extra = structuredClone(inventory); extra.recovery.refs.push({ original_ref: "refs/heads/extra", object: "e".repeat(40), encoded_ref: encodedRef(DEFAULT_PRESERVATION_PHASE, "refs/heads/extra"), bundle_member: true });
+    assert.throws(() => assertStrictRecovery(extra, context, strictOptions(fixture)), /committed recovery rows recovery set differs/);
+    const duplicate = structuredClone(inventory); duplicate.recovery.refs.push(structuredClone(duplicate.recovery.refs[0]));
+    assert.throws(() => assertStrictRecovery(duplicate, context, strictOptions(fixture)), /unique|duplicate/);
+    const wrongObject = structuredClone(inventory); wrongObject.recovery.refs[0].object = "f".repeat(40);
+    assert.throws(() => assertStrictRecovery(wrongObject, context, strictOptions(fixture)), /committed recovery rows recovery set differs/);
+    const wrongEncoded = structuredClone(inventory); wrongEncoded.recovery.refs[0].encoded_ref = encodedRef(DEFAULT_PRESERVATION_PHASE, "refs/heads/wrong");
+    assert.throws(() => assertStrictRecovery(wrongEncoded, context, strictOptions(fixture)), /encoded_ref/);
+    const missingCanonical = structuredClone(inventory); missingCanonical.refs.all = missingCanonical.refs.all.filter((row) => row.name !== fixture.manifest.refs.at(-1).original_ref);
+    assert.throws(() => assertStrictRecovery(missingCanonical, context, strictOptions(fixture)), /canonical non-preservation refs recovery set differs/);
+    fs.writeFileSync(path.join(fixture.repo, "canonical.json"), "canonical pair at B\n");
+    fs.writeFileSync(path.join(fixture.repo, "canonical.md"), "canonical pair at B\n");
+    git(fixture.repo, ["add", "canonical.json", "canonical.md"]); git(fixture.repo, ["commit", "-qm", "commit canonical pair at B"]);
+    fs.writeFileSync(path.join(fixture.repo, "phase-artifact"), "later phase artifact at C\n");
+    git(fixture.repo, ["add", "phase-artifact"]); git(fixture.repo, ["commit", "-qm", "commit later phase artifact at C"]);
+    const liveObject = git(fixture.repo, ["rev-parse", "HEAD"]);
+    assert.notEqual(liveObject, fixture.object, "the fixture must verify after two later active-branch commits");
+    assert.equal(assertStrictRecovery(inventory, context, strictOptions(fixture)), true, "capture at A remains valid after canonical B and later phase C commits");
+    assert.equal(assertCompleteCategories(inventory, context, { repositoryRoot: fixture.repo }), true, "complete categories tolerate only the captured primary worktree advancing from A to C");
+
+    const withCaptureObject = (source, object) => {
+      const candidate = structuredClone(source);
+      candidate.capture.commit = object;
+      candidate.capture.primary_worktree.head = object;
+      candidate.refs.milestone_branch = object;
+      candidate.refs.local_main = object;
+      candidate.refs.all.find((row) => row.name === "refs/heads/main").object = object;
+      candidate.worktrees.find((row) => row.branch === "main").sha = object;
+      return candidate;
+    };
+    const missingCapture = withCaptureObject(inventory, "f".repeat(40));
+    assert.throws(() => assertStrictRecovery(missingCapture, context, strictOptions(fixture)), /does not exist as a live commit object/);
+    const tree = git(fixture.repo, ["rev-parse", `${fixture.object}^{tree}`]);
+    const siblingCapture = git(fixture.repo, ["commit-tree", tree, "-p", fixture.object], { input: "sibling capture\n" });
+    assert.throws(() => assertStrictRecovery(withCaptureObject(inventory, siblingCapture), context, strictOptions(fixture)), /must be an ancestor/);
+    const descendantCapture = git(fixture.repo, ["commit-tree", tree, "-p", liveObject], { input: "future descendant\n" });
+    assert.throws(() => assertStrictRecovery(withCaptureObject(inventory, descendantCapture), context, strictOptions(fixture)), /must be an ancestor/);
+    const wrongRef = structuredClone(inventory);
+    wrongRef.capture.active_ref = "refs/heads/secondary";
+    wrongRef.capture.primary_worktree.branch = "refs/heads/secondary";
+    assert.throws(() => assertStrictRecovery(wrongRef, context, strictOptions(fixture)), /must match the live symbolic ref identity/);
+    const wrongPrimary = structuredClone(inventory);
+    wrongPrimary.capture.primary_worktree.branch = "refs/heads/secondary";
+    assert.throws(() => assertStrictRecovery(wrongPrimary, context, strictOptions(fixture)), /capture active ref and primary worktree identity must agree/);
+    const rewrittenObject = git(fixture.repo, ["commit-tree", tree], { input: "rewritten root\n" });
+    git(fixture.repo, ["update-ref", "refs/heads/main", rewrittenObject, liveObject]);
+    assert.throws(() => assertStrictRecovery(inventory, context, strictOptions(fixture)), /must be an ancestor/);
+    git(fixture.repo, ["update-ref", "refs/heads/main", liveObject, rewrittenObject]);
+
+    const driftedInactive = structuredClone(inventory);
+    driftedInactive.refs.all.find((row) => row.name === "refs/heads/secondary").object = liveObject;
+    assert.throws(() => assertStrictRecovery(driftedInactive, context, strictOptions(fixture)), /changed=\[refs\/heads\/secondary\]/);
+    fs.writeFileSync(path.join(secondaryWorktree, "inactive-change"), "must remain exact\n");
+    git(secondaryWorktree, ["add", "inactive-change"]); git(secondaryWorktree, ["commit", "-qm", "advance inactive worktree"]);
+    assert.throws(() => assertCompleteCategories(inventory, context, { repositoryRoot: fixture.repo }), /direct git worktree authority differs/);
+    const encodedExtra = `${preservationPrefix(DEFAULT_PRESERVATION_PHASE)}6578747261`;
+    git(fixture.repo, ["update-ref", encodedExtra, fixture.object]);
+    assert.throws(() => assertStrictRecovery(inventory, context, strictOptions(fixture)), /local encoded preservation refs recovery set differs/);
+    git(fixture.repo, ["update-ref", "-d", encodedExtra]);
+    const subset = fixture.originalRows.slice(0, -1);
+    createBundle(fixture.repo, fixture.bundle, subset.map((row) => row.original_ref));
+    fixture.manifest.bundle_sha256 = sha256(fs.readFileSync(fixture.bundle));
+    writeManifest(fixture);
+    const absentHead = structuredClone(inventory);
+    absentHead.recovery.manifest_sha256 = fixture.expectedManifestSha256;
+    absentHead.recovery.bundle_sha256 = fixture.manifest.bundle_sha256;
+    assert.throws(() => assertStrictRecovery(absentHead, context, strictOptions(fixture)), /original bundle heads recovery set differs/);
+  } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+
+  const foreign = recoveryFixture();
+  try {
+    foreign.manifest.repository = "other/repository"; writeManifest(foreign);
+    assert.throws(() => assertStrictRecovery(strictInventory(foreign), context, strictOptions(foreign)), /identity or schema/);
+  } finally { fs.rmSync(foreign.scratch, { recursive: true, force: true }); }
+
+  const single = recoveryFixture({ single: true });
+  try {
+    const inventory = strictInventory(single);
+    assert.equal(assertStrictRecovery(inventory, context, strictOptions(single)), true, "complete single-ref recovery must pass exact equality");
+    for (const [field, value, expected] of [
+      ["recoveryManifest", null, /non-empty private manifest path/], ["recoveryManifest", "", /non-empty private manifest path/],
+      ["expectedManifestSha256", null, /full lowercase SHA-256/], ["expectedManifestSha256", "", /full lowercase SHA-256/],
+      ["recoveryBundle", null, /non-empty bundle path/], ["recoveryBundle", "", /non-empty bundle path/]
+    ]) assert.throws(() => assertStrictRecovery(inventory, context, { ...strictOptions(single), [field]: value }), expected);
+  } finally { fs.rmSync(single.scratch, { recursive: true, force: true }); }
+}
+
+function verifyStrictFlagControls(context) {
+  const fixture = recoveryFixture();
+  try {
+    const inventory = strictInventory(fixture);
+    assert.equal(assertTypedArtifacts(inventory), true);
+    const unordered = structuredClone(inventory); unordered.artifacts.entries.reverse();
+    assert.throws(() => assertTypedArtifacts(unordered), /canonical deterministic ordering/);
+    assert.equal(assertCompleteCategories(inventory, context, { repositoryRoot: fixture.repo }), true);
+    const incomplete = structuredClone(inventory); incomplete.refs.local_main = "f".repeat(40);
+    assert.throws(() => assertCompleteCategories(incomplete, context), /local_main/);
+    assert.equal(assertEdgeCases(inventory), true);
+    const edge = structuredClone(inventory); edge.artifacts.empty_directory_policy = "implicit";
+    assert.throws(() => assertEdgeCases(edge), /empty-directory policy/);
+    assert.equal(assertCommandProvenance(inventory, context), true);
+    const provenance = structuredClone(inventory); provenance.remotes.actions.requests = ["GET /repos/other/repository/actions/runs?per_page=100&page=1"];
+    assert.throws(() => assertCommandProvenance(provenance, context), /provenance|ordered repository-bound/);
+    const rendered = renderRepositoryInventory(inventory, context);
+    assert.equal(assertPrivacyControls(inventory, rendered), true);
+    const privatePath = structuredClone(inventory); privatePath.planning.state = "/Users/private/state.json";
+    assert.throws(() => assertPrivacyControls(privatePath, rendered), /private path/);
+    assert.equal(assertDeterminism(inventory, context), true);
+    let counter = 0;
+    assert.throws(() => assertDeterminism(inventory, context, () => `render-${counter += 1}`), /byte-identical/);
+    assert.equal(inventory.mode, "local_only");
+    const live = structuredClone(inventory); live.mode = "live_remote";
+    assert.throws(() => { if (live.mode !== "local_only") fail("local-only inventory is required"); }, /local-only/);
+    assert.equal(assertWorkflowMetadataAuthorization(inventory), true);
+    const noAuthorization = structuredClone(inventory); delete noAuthorization.artifacts.authorized_workflow_metadata;
+    assert.throws(() => assertWorkflowMetadataAuthorization(noAuthorization), /exact-path bounded/);
+  } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+}
+
+function verifyIndependentPlanningAuthority() {
+  const fixture = recoveryFixture();
+  try {
+    const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+    const inventory = strictInventory(fixture);
+    assert.equal(assertCompleteCategories(inventory, context, { repositoryRoot: fixture.repo }), true, "exact absence for both planning authorities must pass");
+    const fabricated = structuredClone(inventory);
+    fabricated.planning.milestone = "fabricated";
+    fabricated.planning.state = "fabricated";
+    assert.throws(
+      () => assertCompleteCategories(fabricated, context, { repositoryRoot: fixture.repo }),
+      /planning|MILESTONES|STATE/,
+      "fabricated planning strings must not substitute for independently hashed files or exact absence"
+    );
+    const milestonesPath = path.join(fixture.repo, PLANNING_FACTS.milestone);
+    const statePath = path.join(fixture.repo, PLANNING_FACTS.state);
+    fs.writeFileSync(milestonesPath, "milestones authority\n");
+    fs.writeFileSync(statePath, "state authority\n");
+    const present = structuredClone(inventory);
+    present.planning.milestone = sha256("milestones authority\n");
+    present.planning.state = sha256("state authority\n");
+    assert.equal(assertCompleteCategories(present, context, { repositoryRoot: fixture.repo }), true, "independently hashed planning files must pass");
+    const swapped = structuredClone(present);
+    [swapped.planning.milestone, swapped.planning.state] = [swapped.planning.state, swapped.planning.milestone];
+    assert.throws(() => assertCompleteCategories(swapped, context, { repositoryRoot: fixture.repo }), /differs from independent/);
+    const stale = structuredClone(present); stale.planning.state = "0".repeat(64);
+    assert.throws(() => assertCompleteCategories(stale, context, { repositoryRoot: fixture.repo }), /differs from independent/);
+    fs.writeFileSync(statePath, "changed state authority\n");
+    assert.throws(() => assertCompleteCategories(present, context, { repositoryRoot: fixture.repo }), /differs from independent/);
+    fs.rmSync(statePath);
+    assert.throws(() => assertCompleteCategories(present, context, { repositoryRoot: fixture.repo }), /differs from independent/);
+    fs.rmSync(milestonesPath);
+    fs.symlinkSync("../tracked", milestonesPath);
+    const symlinked = structuredClone(inventory); symlinked.planning.milestone = sha256("fixture\n");
+    assert.throws(() => assertCompleteCategories(symlinked, context, { repositoryRoot: fixture.repo }), /no-follow regular file/);
+    fs.rmSync(milestonesPath);
+    fs.writeFileSync(milestonesPath, "");
+    const empty = structuredClone(inventory); empty.planning.milestone = sha256(Buffer.alloc(0));
+    assert.equal(assertCompleteCategories(empty, context, { repositoryRoot: fixture.repo }), true, "an empty regular file digest remains distinct from absence");
+  } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+}
+
+function verifyNoFollowBundleAuthority() {
+  const fixture = recoveryFixture();
+  try {
+    const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+    const inventory = strictInventory(fixture);
+    assert.equal(assertStrictRecovery(inventory, context, strictOptions(fixture)), true, "one stable restrictive bundle identity must pass");
+    const alias = path.join(fixture.scratch, "bundle-alias");
+    fs.symlinkSync(fixture.bundle, alias);
+    assert.throws(
+      () => assertStrictRecovery(inventory, context, { ...strictOptions(fixture), recoveryBundle: alias }),
+      /symbolic link|no-follow|symlink/,
+      "standalone strict recovery must never follow a bundle symlink"
+    );
+    const directory = path.join(fixture.scratch, "bundle-directory");
+    fs.mkdirSync(directory);
+    assert.throws(() => bundleMap(fixture.repo, directory, fixture.manifest.bundle_sha256), /no-follow regular file/);
+    fs.chmodSync(fixture.bundle, 0o644);
+    assert.throws(() => bundleMap(fixture.repo, fixture.bundle, fixture.manifest.bundle_sha256), /permissions must be 0600 or stricter/);
+    fs.chmodSync(fixture.bundle, 0o600);
+    const originalGeteuid = process.geteuid;
+    try {
+      Object.defineProperty(process, "geteuid", { configurable: true, value: () => originalGeteuid() + 1 });
+      assert.throws(() => bundleMap(fixture.repo, fixture.bundle, fixture.manifest.bundle_sha256), /owned by the current effective user/);
+    } finally { Object.defineProperty(process, "geteuid", { configurable: true, value: originalGeteuid }); }
+    const replacement = path.join(fixture.scratch, "replacement.bundle");
+    fs.copyFileSync(fixture.bundle, replacement); fs.chmodSync(replacement, 0o600);
+    assert.throws(() => bundleMap(fixture.repo, fixture.bundle, fixture.manifest.bundle_sha256, { afterInitialDigest() {
+      fs.renameSync(replacement, fixture.bundle);
+    } }), /identity changed before git bundle|identity or bytes changed during verification/);
+  } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+}
+
+export function verifyFixtures() {
+  const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+  verifyStrictRecoveryControls(context);
+  verifyStrictFlagControls(context);
+  assertRecoveryFailure(({ bundle }) => fs.appendFileSync(bundle, "tamper"), /digest/);
+  assertRecoveryFailure((fixture) => {
+    fs.writeFileSync(path.join(fixture.repo, "tracked"), "replacement\n"); git(fixture.repo, ["add", "tracked"]); git(fixture.repo, ["commit", "-qm", "replacement"]);
+    const object = git(fixture.repo, ["rev-parse", "HEAD"]); const originalRef = "refs/heads/main";
+    git(fixture.repo, ["update-ref", encodedRef(DEFAULT_PRESERVATION_PHASE, originalRef), object]); createBundle(fixture.repo, fixture.bundle, fixture.originalRows.map((row) => row.original_ref));
+    fixture.manifest.bundle_sha256 = sha256(fs.readFileSync(fixture.bundle)); fixture.manifest.refs.find((row) => row.original_ref === originalRef).object = object;
+    fs.writeFileSync(fixture.manifestPath, JSON.stringify(fixture.manifest)); fs.chmodSync(fixture.manifestPath, 0o600);
+  }, /manifest digest/);
+  assertRecoveryFailure(({ manifestPath }) => fs.chmodSync(manifestPath, 0o644), /permissions/);
+  { const originalGeteuid = process.geteuid; try { Object.defineProperty(process, "geteuid", { configurable: true, value: undefined }); assertRecoveryFailure(() => {}, /ownership cannot be validated/); } finally { Object.defineProperty(process, "geteuid", { configurable: true, value: originalGeteuid }); } }
+  assertRecoveryFailure((fixture) => { fixture.expectedManifestSha256 = "0".repeat(64); }, /manifest digest/);
+  assertRecoveryFailure((fixture) => { fixture.expectedManifestSha256 = undefined; }, /expected recovery manifest SHA-256/);
+  assertRecoveryFailure(({ repo }) => git(repo, ["update-ref", "-d", encodedRef(DEFAULT_PRESERVATION_PHASE, "refs/heads/main")]), /git rev-parse failed/);
+  assertRecoveryFailure(({ manifestPath }) => { const manifest = JSON.parse(fs.readFileSync(manifestPath)); manifest.refs[0].object = "f".repeat(40); fs.writeFileSync(manifestPath, JSON.stringify(manifest)); }, /digest|preservation target|bundle/);
+  assertRecoveryFailure(({ attestationPath }) => { const attestation = JSON.parse(fs.readFileSync(attestationPath)); attestation.observed_at = "not-a-time"; fs.writeFileSync(attestationPath, JSON.stringify(attestation)); }, /observed_at/);
+  assertRecoveryFailure(({ attestationPath }) => { const attestation = JSON.parse(fs.readFileSync(attestationPath)); attestation.artifacts.pop(); fs.writeFileSync(attestationPath, JSON.stringify(attestation)); }, /cover every frozen artifact|exactly two/);
+  verifyRenderedRecoveryProcedureControls();
+  verifyTypedRefContinuity();
+}
+
+function verifyRenderedRecoveryProcedureControls() {
+  const fixture = recoveryFixture();
+  try {
+    const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+    const inventory = strictInventory(fixture);
+    const rendered = renderRepositoryInventory(inventory, context);
+    assert.match(
+      rendered,
+      /```sh\nPHASE229_BUNDLE="\$\{PHASE229_BUNDLE:\?supply the private recovery bundle path at runtime\}"\nexport PHASE229_BUNDLE\ngit bundle verify "\$PHASE229_BUNDLE"/,
+      "recovery instructions must assign and export the runtime bundle before verification"
+    );
+    const block = /## Recovery procedure[\s\S]*?```sh\n([\s\S]*?)\n```/.exec(rendered)?.[1];
+    assert.ok(block, "renderer must emit one executable recovery shell block");
+    const fetchLines = block.split("\n").filter((line) => line.startsWith("git fetch "));
+    assert.equal(fetchLines.length, fixture.manifest.refs.length, "every original ref has one fetch step");
+    assert.ok(fetchLines.every((line) => !line.includes(preservationPrefix(DEFAULT_PRESERVATION_PHASE))), "restore fetches actual original bundle heads, never encoded preservation refs");
+    for (const row of fixture.manifest.refs) {
+      assert.ok(fetchLines.some((line) => line.endsWith(`'${row.original_ref}'`)), `restore procedure fetches ${row.original_ref}`);
+      assert.ok(git(fixture.repo, ["bundle", "list-heads", fixture.bundle]).split("\n").includes(`${row.object} ${row.original_ref}`), `bundle contains ${row.original_ref}`);
+    }
+
+    const restore = path.join(fixture.scratch, "restore");
+    fs.mkdirSync(restore);
+    git(restore, ["init", "-q"]);
+    const executed = spawnSync("sh", ["-eu", "-c", block], {
+      cwd: restore,
+      encoding: "utf8",
+      shell: false,
+      env: { ...process.env, PHASE229_BUNDLE: fixture.bundle }
+    });
+    assert.equal(executed.status, 0, executed.stderr);
+    for (const row of fixture.manifest.refs) assert.equal(git(restore, ["rev-parse", `${row.original_ref}^{object}`]), row.object, `exact procedure restores ${row.original_ref}`);
+
+    assert.match(rendered, /\| pull_requests \| observed-empty \| — \|/, "confirmed empty plural categories render distinctly");
+    assert.ok(rendered.includes(`| release_branches | observed | \`${"b".repeat(40)}\` |`), "first plural SHA is rendered");
+    assert.ok(rendered.includes(`| release_branches | observed | \`${"c".repeat(40)}\` |`), "second plural SHA is rendered");
+    assert.match(rendered, /\| actions \| unavailable:network \| — \|/, "unavailable categories retain their reason");
+    assert.equal(rendered.includes(fixture.scratch), false, "private fixture locations never enter Markdown");
+
+    const equalPrimaryKeys = structuredClone(inventory);
+    equalPrimaryKeys.worktrees.push({ ...equalPrimaryKeys.worktrees[0], dirty: true });
+    assert.equal(renderRepositoryInventory(equalPrimaryKeys, context), renderRepositoryInventory(permutedInventory(equalPrimaryKeys), context), "equal primary keys retain deterministic secondary ordering");
+  } finally { fs.rmSync(fixture.scratch, { recursive: true, force: true }); }
+}
+
+function typedRefFixtureRepo() {
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "phase230-typed-ref-"));
+  const repo = path.join(scratch, "repo");
+  fs.mkdirSync(repo);
+  git(repo, ["init", "-q", "-b", "main"]);
+  git(repo, ["config", "user.email", "phase230@example.invalid"]);
+  git(repo, ["config", "user.name", "phase230"]);
+  fs.writeFileSync(path.join(repo, "tracked"), "fixture\n");
+  git(repo, ["add", "tracked"]);
+  git(repo, ["commit", "-qm", "fixture"]);
+  const base = git(repo, ["rev-parse", "HEAD"]);
+  git(repo, ["update-ref", "refs/remotes/origin/main", base]);
+  const preserved = encodedRef(DEFAULT_PRESERVATION_PHASE, "refs/heads/main");
+  git(repo, ["update-ref", preserved, base]);
+  const frozenAll = [
+    { name: "refs/heads/main", object: base, role: "local_main" },
+    { name: "refs/remotes/origin/main", object: base, role: "cached_origin_main" },
+    { name: preserved, object: base, role: "phase229_preservation" }
+  ];
+  return { scratch, repo, base, preserved, frozenAll };
+}
+
+function typedContinuityInventory(fixture, refsAllOverride) {
+  const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+  const sha = (letter) => letter.repeat(40);
+  return validateInventory({
+    schema_version: 2, repository: "szTheory/accrue", mode: "local_only",
+    capture: {
+      captured_at: "2026-09-13T00:00:00.000Z",
+      active_ref: "refs/heads/main",
+      commit: fixture.base,
+      primary_worktree: { branch: "refs/heads/main", head: fixture.base }
+    },
+    recovery: {
+      verified: true, manifest_sha256: "1".repeat(64), bundle_sha256: "2".repeat(64),
+      refs: [{ original_ref: "refs/heads/main", object: fixture.base, encoded_ref: fixture.preserved, bundle_member: true }]
+    },
+    artifacts: { empty_directory_policy: "not_surfaced_by_git", entries: [] },
+    refs: { local_main: fixture.base, cached_origin_main: fixture.base, milestone_branch: fixture.base, v161_tag: fixture.base, all: refsAllOverride || fixture.frozenAll },
+    remotes: {
+      remote_main: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", request: "GET /repos/szTheory/accrue/git/ref/heads/main", available: false, state: "unavailable", reason: "network" },
+      pull_requests: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/pulls?state=open&per_page=100&page=1"], available: false, state: "unavailable", reason: "network" },
+      release_branches: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/git/matching-refs/heads/release/?per_page=100&page=1"], available: false, state: "unavailable", reason: "network" },
+      actions: { repository: "szTheory/accrue", observed_at: "2026-09-13T00:00:00.000Z", requests: ["GET /repos/szTheory/accrue/actions/runs?per_page=100&page=1"], available: false, state: "unavailable", reason: "network" }
+    },
+    planning: { ship_windows: [], milestone: "absent", state: "absent" },
+    worktrees: [{ branch: "main", sha: fixture.base, dirty: false }]
+  }, context);
+}
+
+function verifyTypedRefContinuity() {
+  const context = createRepositoryValidationContext({ expectedRepository: "szTheory/accrue" });
+  const fixture = typedRefFixtureRepo();
+  try {
+    const inventory = typedContinuityInventory(fixture);
+    assert.equal(assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), true, "baseline typed continuity must pass with no exceptions");
+
+    // Fast-forward remote-tracking movement passes without any declaration.
+    // Advance origin/main only (never the checked-out refs/heads/main) via a
+    // detached commit-tree so the "owned" class stays untouched by this step.
+    const baseTree = git(fixture.repo, ["rev-parse", `${fixture.base}^{tree}`]);
+    const advanced = git(fixture.repo, ["commit-tree", baseTree, "-p", fixture.base], { input: "second\n" });
+    git(fixture.repo, ["update-ref", "refs/remotes/origin/main", advanced]);
+    assert.equal(assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), true, "fast-forwarded remote-tracking ref must pass under ancestry");
+
+    // Non-fast-forward (rewound/forked) remote-tracking movement must still fail loudly.
+    const tree = git(fixture.repo, ["rev-parse", `${fixture.base}^{tree}`]);
+    const forked = git(fixture.repo, ["commit-tree", tree], { input: "forked origin/main\n" });
+    git(fixture.repo, ["update-ref", "refs/remotes/origin/main", forked]);
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), /remote-tracking refs typed continuity differs.*changed=\[/, "non-fast-forward remote-tracking movement must fail with changed=[");
+    git(fixture.repo, ["update-ref", "refs/remotes/origin/main", fixture.base]);
+
+    // An undeclared new owned ref must fail with extra=[...].
+    git(fixture.repo, ["branch", "extra"]);
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), /owned refs typed continuity differs.*extra=\[refs\/heads\/extra\]/, "undeclared new owned ref must fail with extra=[");
+
+    // A declared addition with the matching object passes.
+    const extraObject = git(fixture.repo, ["rev-parse", "refs/heads/extra"]);
+    const declared = [{ ref: "refs/heads/extra", object: extraObject, class: "owned", reason: "fixture addition", declared_by_phase: "230", retirement_trigger: "fixture retires when merged", published_elsewhere: false }];
+    assert.equal(assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: declared }), true, "a declared owned addition must pass");
+
+    // A declared row whose ref does not resolve live must fail.
+    const absentDeclared = [{ ref: "refs/heads/absent-forever", object: "e".repeat(40), class: "owned", reason: "fixture absent", declared_by_phase: "230", retirement_trigger: "never reached", published_elsewhere: false }];
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [...declared, ...absentDeclared] }), /does not resolve live/, "a declared row whose ref is absent live must fail");
+    git(fixture.repo, ["branch", "-D", "extra"]);
+
+    // A missing frozen ref (any class) must fail with missing=[...].
+    git(fixture.repo, ["branch", "-M", "main", "renamed"]);
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), /owned refs typed continuity differs.*missing=\[refs\/heads\/main\]/, "a frozen owned ref absent live must fail with missing=[");
+    git(fixture.repo, ["branch", "-M", "renamed", "main"]);
+
+    // A changed preservation ref value must fail.
+    git(fixture.repo, ["update-ref", fixture.preserved, forked, fixture.base]);
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), /preservation refs typed continuity differs.*changed=\[/, "a preservation ref whose value changed must fail");
+    git(fixture.repo, ["update-ref", fixture.preserved, fixture.base, forked]);
+
+    // A new preservation ref from a later phase is unconditionally legitimate -- no declaration needed.
+    git(fixture.repo, ["update-ref", encodedRef("230", "refs/heads/main"), fixture.base]);
+    assert.equal(assertTypedRefContinuity(inventory, context, { repositoryRoot: fixture.repo, refExceptions: [] }), true, "a new later-phase preservation ref must pass without any ledger declaration");
+  } finally {
+    fs.rmSync(fixture.scratch, { recursive: true, force: true });
+  }
+
+  // Ledger validation: empty retirement_trigger is rejected.
+  const ledgerFixture = typedRefFixtureRepo();
+  try {
+    const inventory = typedContinuityInventory(ledgerFixture);
+    const ledgerPath = path.join(ledgerFixture.scratch, "230-REF-EXCEPTIONS.json");
+    const badRow = [{ ref: "refs/heads/main", object: ledgerFixture.base, class: "owned", reason: "fixture", declared_by_phase: "230", retirement_trigger: "", published_elsewhere: false }];
+    fs.writeFileSync(ledgerPath, JSON.stringify(badRow));
+    assert.throws(() => assertTypedRefContinuity(inventory, context, { repositoryRoot: ledgerFixture.repo, refExceptionsPath: ledgerPath }), /retirement_trigger must be non-empty/, "an empty retirement_trigger must be rejected");
+  } finally {
+    fs.rmSync(ledgerFixture.scratch, { recursive: true, force: true });
+  }
+}
+
+function options(argv) {
+  const flags = new Set(); const values = {};
+  for (let index = 0; index < argv.length; index += 1) {
+    const token = argv[index]; if (!token.startsWith("--")) fail(`unexpected argument: ${token}`);
+    const key = token.slice(2);
+    if (BOOLEAN_FLAGS.has(key)) { flags.add(key); continue; }
+    if (!VALUE_OPTIONS.has(key)) fail(`unknown option: --${key}`);
+    if (index + 1 >= argv.length || argv[index + 1].startsWith("--")) fail(`--${key} requires a value`);
+    if (key in values) fail(`--${key} may be provided only once`);
+    values[key] = argv[++index];
+  }
+  return { flags, values };
+}
+
+async function main() {
+  const parsed = options(process.argv.slice(2)); const expectedRepository = parsed.values["expected-repository"];
+  if (!expectedRepository) fail("--expected-repository is required");
+  if (parsed.flags.has("fixtures")) { verifyFixtures(); console.log("repository inventory fixtures: PASS"); return; }
+  const { records, rendered } = parsed.values;
+  if (!records || !rendered) fail("--records and --rendered are required outside fixture mode");
+  const context = createRepositoryValidationContext({ expectedRepository });
+  const inventory = validateInventory(JSON.parse(fs.readFileSync(records, "utf8")), context);
+  applyStrictFlags(inventory, context, parsed);
+  assert.equal(fs.readFileSync(rendered, "utf8"), renderRepositoryInventory(inventory, context), "rendered Markdown must be byte-reproducible");
+  console.log("repository inventory verification: PASS");
+}
+
+// D-29/231-REVIEW IN-01: this file previously had no entrypoint guard at all
+// -- main() ran unconditionally on import whenever NODE_TEST_CONTEXT was
+// unset. isMainModule() throws (never returns a silent false) when there is
+// no invoking entrypoint; that throw is caught here and treated as "not the
+// entrypoint" so an ambiguous import stays side-effect-free instead of
+// crashing (see main_module.mjs, D-29).
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("strict repository inventory flags enforce independent negative controls", () => verifyFixtures());
+  test("rendered recovery procedure restores original bundle heads safely", () => verifyRenderedRecoveryProcedureControls());
+  test("CR-08 complete categories derive planning digests independently", () => verifyIndependentPlanningAuthority());
+  test("WR-02 standalone recovery rejects followed bundle aliases", () => verifyNoFollowBundleAuthority());
+  test("typed ref continuity partitions owned/remote-tracking/preservation refs correctly", () => verifyTypedRefContinuity());
+} else if (invokedAsEntrypoint) {
+  main().catch((error) => { console.error(`repository inventory fixtures: FAIL: ${error.message}`); process.exitCode = 1; });
+}

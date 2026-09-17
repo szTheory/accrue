@@ -27,10 +27,10 @@ require_absent_regex() {
 
 requirements_file="$ROOT_DIR/.planning/REQUIREMENTS.md"
 
-if [[ ! -f "$requirements_file" ]]; then
-  # POS-03 was defined and completed by v1.48.  Later milestones may omit the
-  # standing posture anchors entirely, so the state file's current milestone is
-  # not a reliable authority for this long-lived contract.
+# POS-03 was defined and completed by v1.48. Later milestone requirement files
+# can exist while intentionally omitting that standing posture anchor, so they
+# are not a reliable authority for this long-lived contract.
+if [[ ! -f "$requirements_file" ]] || ! grep -Fq "POS-03" "$requirements_file"; then
   requirements_file="$ROOT_DIR/.planning/milestones/v1.48-REQUIREMENTS.md"
 fi
 

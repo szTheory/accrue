@@ -3,12 +3,17 @@ import os from "node:os";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
+import assert from "node:assert/strict";
+import test from "node:test";
 import { verifyFrozenRatchetLedger } from "./verify_ratchet_ledger.mjs";
+import { isMainModule } from "./main_module.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
-export const PHASE208_DIR = ".planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept";
+// Phase 208 is archived (v1.56 milestone); D-22 standing invariant requires
+// archive-aware resolution rather than the stale pre-archive active-phase path.
+export const PHASE208_DIR = ".planning/milestones/v1.56-phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept";
 export const DEFAULT_SIGNOFF_PATH = path.join(REPO_ROOT, PHASE208_DIR, "UI-RATCHET-SIGN-OFF.md");
 
 export const VALID_STATUS_VALUES = new Set(["PASS", "BLOCKED", "PENDING", "N/A"]);
@@ -569,7 +574,7 @@ function validSignoffMarkdown(overrides = {}) {
 | Check | Status | Result | Evidence |
 | --- | --- | --- | --- |
 | proven slice | PASS | SLICES.foundation reached CONVERGED (2 dry rounds). | accrue_admin/e2e/ratchet/rounds.ndjson |
-| score floor | PASS | All foundation score-floor rows are covered at score >= 2. | .planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/208-VALIDATION.md |
+| score floor | PASS | All foundation score-floor rows are covered at score >= 2. | ${PHASE208_DIR}/208-VALIDATION.md |
 
 ## Ledger Baseline Summary
 
@@ -583,7 +588,7 @@ function validSignoffMarkdown(overrides = {}) {
 | Check | Status | Result | Evidence |
 | --- | --- | --- | --- |
 | ratchet finding regressions | ${status.regressions} | PASS - finding-regressions.ndjson is 0 bytes | accrue_admin/e2e/ratchet/finding-regressions.ndjson |
-| Phase 200 regressions | PASS | regressions.ndjson is 0 bytes. | .planning/phases/208-prove-convergence-on-the-representative-slice-wire-ci-accept/208-VALIDATION.md |
+| Phase 200 regressions | PASS | regressions.ndjson is 0 bytes. | ${PHASE208_DIR}/208-VALIDATION.md |
 
 ## CI Gate Evidence
 
@@ -847,7 +852,49 @@ export function main(argv = process.argv.slice(2)) {
   return result;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// D-31: this file previously registered no real node:test case -- the broken
+// file-URL-template guard always evaluated false, so its only TAP line was
+// the file path itself. Guard fix and first real test land in the same
+// commit. Per CONTEXT.md D-21/D-27 the ratchet ledger is not frozen today,
+// so the end-to-end verifyUiRatchetSignoff()/verifyFrozenRatchetLedger()
+// path fails on the merits -- this test deliberately exercises two small
+// pure helpers (validEvidenceRef, parseDecisionLine) instead, so plan 232-02
+// does not depend on un-parking the ratchet (plan 232-06 owns that).
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("validEvidenceRef accepts an allowlisted repo-relative ref and rejects a path-escaping or absolute one", () => {
+    assert.equal(validEvidenceRef("scripts/ci/verify_ui_ratchet_signoff.mjs"), true);
+    assert.equal(validEvidenceRef("accrue_admin/e2e/ratchet/ledger.baseline.json"), true);
+    // Negative controls: inverting each rejection rule must still reject --
+    // an absolute path, a path-traversal segment, and a ref outside every
+    // allowlisted root must never be accepted.
+    assert.equal(validEvidenceRef("/etc/passwd"), false);
+    assert.equal(validEvidenceRef("scripts/ci/../../etc/passwd"), false);
+    assert.equal(validEvidenceRef("not/an/allowlisted/root.md"), false);
+  });
+
+  test("parseDecisionLine requires exactly one well-formed ACCEPT line and reports a failure otherwise", () => {
+    const failures = { decision: [] };
+    const good = parseDecisionLine(
+      "## Something\n\nFinal maintainer decision: ACCEPT (maintainer approved 2026-09-16). Evidence source: 208-VALIDATION.md\n",
+      failures
+    );
+    assert.equal(good.decision, "ACCEPT");
+    assert.equal(failures.decision.length, 0);
+
+    // Negative control: inverting the well-formed line to a malformed one
+    // (wrong date grammar) must be rejected, not silently accepted as ACCEPT.
+    const badFailures = { decision: [] };
+    const bad = parseDecisionLine("Final maintainer decision: ACCEPT (approved sometime). Evidence source: x\n", badFailures);
+    assert.equal(bad.decision, null);
+    assert.ok(badFailures.decision.length > 0);
+  });
+} else if (invokedAsEntrypoint) {
   try {
     main();
   } catch (error) {

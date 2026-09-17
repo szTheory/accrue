@@ -78,6 +78,12 @@ require_fixed "$ci_file" "phase192-generated-evidence"
 phase192_job="$(job_body "admin-hardening-guardrails")"
 [ -n "$phase192_job" ] || fail "could not extract admin-hardening-guardrails job"
 phase192_run_lines="$(printf '%s\n' "$phase192_job" | grep -E '^[[:space:]]*run:' || true)"
+generated_evidence_step="$(printf '%s\n' "$phase192_job" | awk '
+  /name: Upload Phase 192 generated evidence/ { in_step = 1 }
+  in_step { print }
+  in_step && /if-no-files-found:/ { exit }
+')"
+[ -n "$generated_evidence_step" ] || fail "could not extract Phase 192 generated-evidence step"
 
 for needle in \
   "if: github.event_name != 'schedule'" \
@@ -109,15 +115,21 @@ for needle in \
   "phase192-admin-playwright-evidence" \
   "path: accrue_admin/test-results" \
   "phase192-generated-evidence" \
-  ".planning/phases/192-idempotent-verification-sign-off/final.cells.json" \
-  ".planning/phases/192-idempotent-verification-sign-off/scorecard.delta.json" \
-  ".planning/phases/192-idempotent-verification-sign-off/regressions.ndjson" \
-  ".planning/phases/192-idempotent-verification-sign-off/artifacts.manifest.json" \
-  ".planning/phases/192-idempotent-verification-sign-off/192-SCORECARD.md" \
-  "if-no-files-found: ignore"
+  ".planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/final.cells.json" \
+  ".planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/scorecard.delta.json" \
+  ".planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/regressions.ndjson" \
+  ".planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/artifacts.manifest.json" \
+  ".planning/milestones/v1.53-phases/192-idempotent-verification-sign-off/192-SCORECARD.md"
 do
   require_source_fixed "admin-hardening-guardrails job" "$phase192_job" "$needle"
 done
+
+require_source_fixed "Phase 192 generated-evidence step" "$generated_evidence_step" "if: always()"
+require_source_fixed "Phase 192 generated-evidence step" "$generated_evidence_step" "if-no-files-found: error"
+require_source_absent_regex \
+  "Phase 192 generated-evidence step" \
+  "$generated_evidence_step" \
+  '\\.planning/phases/192-idempotent-verification-sign-off/'
 
 require_source_regex "admin-hardening-guardrails job" "$phase192_job" 'name: Phase 192 CI contract'
 require_source_regex "admin-hardening-guardrails job" "$phase192_job" 'name: Phase 192 local guardrail contract'

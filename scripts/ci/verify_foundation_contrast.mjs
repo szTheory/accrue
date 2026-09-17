@@ -1,10 +1,9 @@
 #!/usr/bin/env node
+import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-
-const root = process.env.ROOT_DIR || process.cwd();
-const themePath = path.join(root, "accrue_admin/assets/css/theme.css");
-const css = fs.readFileSync(themePath, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 const scopes = {
   light: /html\.accrue-admin\s*\{([\s\S]*?)\n\}/,
@@ -35,16 +34,6 @@ const brandTokens = {
   "--ax-accent": "#5D79F6",
   "--ax-accent-contrast": "#FFFFFF"
 };
-
-const lightTokens = extract(css.match(scopes.light)[1]);
-const themeTokens = Object.fromEntries(
-  Object.entries(scopes).map(([name, regex]) => {
-    const match = css.match(regex);
-    if (!match) throw new Error(`[foundation_contrast] missing ${name} scope`);
-    const tokens = name === "light" ? {...brandTokens, ...lightTokens} : {...brandTokens, ...lightTokens, ...extract(match[1])};
-    return [name, tokens];
-  })
-);
 
 function hexToRgb(hex) {
   const clean = hex.replace("#", "");
@@ -109,30 +98,65 @@ const basePairs = [
 ];
 
 const statuses = ["success", "warning", "danger", "info", "neutral"];
-const failures = [];
 
-for (const [theme, tokens] of Object.entries(themeTokens)) {
-  const pairs = [...basePairs];
-  for (const status of statuses) {
-    pairs.push([`${status} status`, `--ax-status-${status}-text`, `--ax-status-${status}-bg`, 4.5]);
-    pairs.push([`${status} solid`, `--ax-status-${status}-on-solid`, `--ax-status-${status}-solid`, 4.5]);
-  }
+// D-29: theme.css is only read when main() actually runs, never as a side
+// effect of importing this module -- the prior top-level `fs.readFileSync`
+// crashed a bare import outside the repository root (and ran on every
+// import regardless of entrypoint).
+export function main() {
+  const root = process.env.ROOT_DIR || process.cwd();
+  const themePath = path.join(root, "accrue_admin/assets/css/theme.css");
+  const css = fs.readFileSync(themePath, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
-  for (const [label, fgToken, bgToken, min] of pairs) {
-    const fg = resolve(tokens[fgToken], tokens);
-    const bg = resolve(tokens[bgToken], tokens);
-    if (!fg || !bg) continue;
-    const ratio = contrastRatio(fg, bg);
-    if (ratio < min) {
-      failures.push(`${theme} ${label} ${fgToken}/${bgToken}: ${ratio.toFixed(2)} < ${min}`);
+  const lightTokens = extract(css.match(scopes.light)[1]);
+  const themeTokens = Object.fromEntries(
+    Object.entries(scopes).map(([name, regex]) => {
+      const match = css.match(regex);
+      if (!match) throw new Error(`[foundation_contrast] missing ${name} scope`);
+      const tokens = name === "light" ? {...brandTokens, ...lightTokens} : {...brandTokens, ...lightTokens, ...extract(match[1])};
+      return [name, tokens];
+    })
+  );
+
+  const failures = [];
+  for (const [theme, tokens] of Object.entries(themeTokens)) {
+    const pairs = [...basePairs];
+    for (const status of statuses) {
+      pairs.push([`${status} status`, `--ax-status-${status}-text`, `--ax-status-${status}-bg`, 4.5]);
+      pairs.push([`${status} solid`, `--ax-status-${status}-on-solid`, `--ax-status-${status}-solid`, 4.5]);
+    }
+
+    for (const [label, fgToken, bgToken, min] of pairs) {
+      const fg = resolve(tokens[fgToken], tokens);
+      const bg = resolve(tokens[bgToken], tokens);
+      if (!fg || !bg) continue;
+      const ratio = contrastRatio(fg, bg);
+      if (ratio < min) {
+        failures.push(`${theme} ${label} ${fgToken}/${bgToken}: ${ratio.toFixed(2)} < ${min}`);
+      }
     }
   }
+
+  if (failures.length) {
+    console.error(`[foundation_contrast] ${failures.length} contrast failure(s)`);
+    for (const failure of failures) console.error(`[foundation_contrast] ${failure}`);
+    process.exit(1);
+  }
+
+  console.log("[foundation_contrast] semantic role contrast checks passed");
 }
 
-if (failures.length) {
-  console.error(`[foundation_contrast] ${failures.length} contrast failure(s)`);
-  for (const failure of failures) console.error(`[foundation_contrast] ${failure}`);
-  process.exit(1);
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
 }
-
-console.log("[foundation_contrast] semantic role contrast checks passed");
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("contrastRatio computes the known black/white ratio and rejects a same-color pair", () => {
+    assert.equal(Math.round(contrastRatio([0, 0, 0], [255, 255, 255]) * 100) / 100, 21);
+    assert.equal(contrastRatio([10, 10, 10], [10, 10, 10]), 1);
+  });
+} else if (invokedAsEntrypoint) {
+  main();
+}

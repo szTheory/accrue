@@ -1,0 +1,9 @@
+{
+  "command": "node --test scripts/ci/verify_ci_critical_path.test.mjs",
+  "exitCode": 1,
+  "targetTest": "rejects forged duplicate push cohort through public verification",
+  "targetFile": "scripts/ci/verify_ci_critical_path.test.mjs",
+  "expected": "verifyComparisonEvidence throws for three copies of one push run with forged role data",
+  "actual": "Missing expected exception.",
+  "output": "TAP version 13\n# Subtest: rejects forged duplicate push cohort through public verification\nnot ok 1 - rejects forged duplicate push cohort through public verification\n  ---\n  failureType: 'testCodeFailure'\n  error: 'Missing expected exception.'\n  ...\n1..1\n# tests 1\n# pass 0\n# fail 1\n"
+}

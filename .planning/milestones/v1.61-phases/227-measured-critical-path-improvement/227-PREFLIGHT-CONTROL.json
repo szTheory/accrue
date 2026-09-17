@@ -1,0 +1,23 @@
+{
+  "kind": "phase227_preflight",
+  "status": "passed",
+  "candidate_sha": "1e978c843bb37ae6a7d0e34145e15feeeba51cfc",
+  "candidate_tree": "48d4805d06cf743cff5c675689c4681253413c18",
+  "parent_sha": "6ebdcd5feb25235b9f577d851f96a77a6378a67c",
+  "parent_tree": "97206b08b0701afbac95f4366b57cbee813accc5",
+  "changed_files": [
+    "scripts/ci/verify_ci_critical_path.test.mjs"
+  ],
+  "expected_state": "inverse_rollback",
+  "wrapper_sha256": "sha256:97aab58a9a70bb40dbccc2f0d89cabadd53e6a8e4facba1a30a71260d2d6e899",
+  "remote_effects": "none",
+  "check_results": {
+    "node_syntax": "passed",
+    "node_tests": "passed",
+    "fixtures": "passed",
+    "workflow": "passed",
+    "accrue_format": "passed",
+    "accrue_test": "passed",
+    "prohibited_invocations": 0
+  }
+}

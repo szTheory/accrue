@@ -1,6 +1,9 @@
+import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { isMainModule } from "./main_module.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,7 +76,7 @@ function readNdjson(filePath) {
     });
 }
 
-function normalizeTag(value) {
+export function normalizeTag(value) {
   if (!value) return null;
 
   const normalized = String(value)
@@ -134,74 +137,95 @@ function failWithReport(sections) {
   process.exit(1);
 }
 
-const specSource = readFile(SPEC_PATH);
-const helperSource = readFile(HELPER_PATH);
-const combinedSource = `${specSource}\n${helperSource}`;
-const handoffSource = readFile(HANDOFF_PATH);
+// D-29: every path below is only read when main() actually runs, never as
+// a side effect of importing this module (the prior top-level code ran
+// unconditionally on any import, including from another verifier's test).
+export function main() {
+  const specSource = readFile(SPEC_PATH);
+  const helperSource = readFile(HELPER_PATH);
+  const combinedSource = `${specSource}\n${helperSource}`;
+  const handoffSource = readFile(HANDOFF_PATH);
 
-const owner191 = readNdjson(LEDGER_PATH).filter((row) => String(row.owner_phase) === "191");
-const high = owner191.filter((row) => row.severity === "high");
-const medium = owner191.filter((row) => row.severity === "medium");
+  const owner191 = readNdjson(LEDGER_PATH).filter((row) => String(row.owner_phase) === "191");
+  const high = owner191.filter((row) => row.severity === "high");
+  const medium = owner191.filter((row) => row.severity === "medium");
 
-const specIds = idsIn(specSource);
-const combinedIds = idsIn(combinedSource);
+  const specIds = idsIn(specSource);
+  const combinedIds = idsIn(combinedSource);
 
-const missingHighDirectIds = high.filter((defect) => !specIds.has(defect.id)).map(formatDefect);
-const missingMediumCoverage = medium
-  .filter((defect) => {
-    if (combinedIds.has(defect.id)) return false;
+  const missingHighDirectIds = high.filter((defect) => !specIds.has(defect.id)).map(formatDefect);
+  const missingMediumCoverage = medium
+    .filter((defect) => {
+      if (combinedIds.has(defect.id)) return false;
 
-    const tags = defectTags(defect);
-    return tags.length === 0 || !tags.some((tag) => sourceHasMarker(combinedSource, tag));
-  })
-  .map(formatDefect);
+      const tags = defectTags(defect);
+      return tags.length === 0 || !tags.some((tag) => sourceHasMarker(combinedSource, tag));
+    })
+    .map(formatDefect);
 
-const missingD30InHandoff = D30_CATEGORIES.filter(({ category }) => {
-  return !normalizedSource(handoffSource).includes(normalizedText(category));
-}).map(({ category }) => category);
+  const missingD30InHandoff = D30_CATEGORIES.filter(({ category }) => {
+    return !normalizedSource(handoffSource).includes(normalizedText(category));
+  }).map(({ category }) => category);
 
-const missingD30Coverage = D30_CATEGORIES.filter(({ markers }) => {
-  return !markers.some((marker) => sourceHasMarker(combinedSource, marker));
-}).map(({ category, markers }) => `${category} (${markers.join(" or ")})`);
+  const missingD30Coverage = D30_CATEGORIES.filter(({ markers }) => {
+    return !markers.some((marker) => sourceHasMarker(combinedSource, marker));
+  }).map(({ category, markers }) => `${category} (${markers.join(" or ")})`);
 
-const severityCounts = owner191.reduce((acc, defect) => {
-  acc[defect.severity] = (acc[defect.severity] || 0) + 1;
-  return acc;
-}, {});
+  const severityCounts = owner191.reduce((acc, defect) => {
+    acc[defect.severity] = (acc[defect.severity] || 0) + 1;
+    return acc;
+  }, {});
 
-const tagCounts = owner191.reduce((acc, defect) => {
-  for (const tag of defectTags(defect)) acc[tag] = (acc[tag] || 0) + 1;
-  return acc;
-}, {});
+  const tagCounts = owner191.reduce((acc, defect) => {
+    for (const tag of defectTags(defect)) acc[tag] = (acc[tag] || 0) + 1;
+    return acc;
+  }, {});
 
-console.log(`Phase 191 AX187 owner count: ${owner191.length}`);
-console.log(`Severity split: high=${severityCounts.high || 0}, medium=${severityCounts.medium || 0}`);
-console.log(`Direct high-severity coverage: ${high.length - missingHighDirectIds.length}/${high.length}`);
-console.log(`Medium ID/tag coverage: ${medium.length - missingMediumCoverage.length}/${medium.length}`);
-console.log(`Normalized overlay tags: ${JSON.stringify(tagCounts)}`);
+  console.log(`Phase 191 AX187 owner count: ${owner191.length}`);
+  console.log(`Severity split: high=${severityCounts.high || 0}, medium=${severityCounts.medium || 0}`);
+  console.log(`Direct high-severity coverage: ${high.length - missingHighDirectIds.length}/${high.length}`);
+  console.log(`Medium ID/tag coverage: ${medium.length - missingMediumCoverage.length}/${medium.length}`);
+  console.log(`Normalized overlay tags: ${JSON.stringify(tagCounts)}`);
 
-if (
-  owner191.length !== 178 ||
-  high.length !== 70 ||
-  medium.length !== 108 ||
-  missingHighDirectIds.length > 0 ||
-  missingMediumCoverage.length > 0 ||
-  missingD30InHandoff.length > 0 ||
-  missingD30Coverage.length > 0
-) {
-  failWithReport([
-    {
-      title: "Unexpected ledger counts",
-      items:
-        owner191.length === 178 && high.length === 70 && medium.length === 108
-          ? []
-          : [`owner=${owner191.length}, high=${high.length}, medium=${medium.length}`],
-    },
-    { title: "High-severity rows missing direct spec AX187 IDs", items: missingHighDirectIds },
-    { title: "Medium rows missing AX187 ID or normalized overlay-tag coverage", items: missingMediumCoverage },
-    { title: "D-30 categories missing from handoff source", items: missingD30InHandoff },
-    { title: "D-30 categories missing from Phase 191 spec/helper markers", items: missingD30Coverage },
-  ]);
+  if (
+    owner191.length !== 178 ||
+    high.length !== 70 ||
+    medium.length !== 108 ||
+    missingHighDirectIds.length > 0 ||
+    missingMediumCoverage.length > 0 ||
+    missingD30InHandoff.length > 0 ||
+    missingD30Coverage.length > 0
+  ) {
+    failWithReport([
+      {
+        title: "Unexpected ledger counts",
+        items:
+          owner191.length === 178 && high.length === 70 && medium.length === 108
+            ? []
+            : [`owner=${owner191.length}, high=${high.length}, medium=${medium.length}`],
+      },
+      { title: "High-severity rows missing direct spec AX187 IDs", items: missingHighDirectIds },
+      { title: "Medium rows missing AX187 ID or normalized overlay-tag coverage", items: missingMediumCoverage },
+      { title: "D-30 categories missing from handoff source", items: missingD30InHandoff },
+      { title: "D-30 categories missing from Phase 191 spec/helper markers", items: missingD30Coverage },
+    ]);
+  }
+
+  console.log("Phase 191 AX187 coverage audit passed.");
 }
 
-console.log("Phase 191 AX187 coverage audit passed.");
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("normalizeTag lowercases, hyphenates, and applies the known aliases", () => {
+    assert.equal(normalizeTag("Live Patch Focus"), "live-focus");
+    assert.equal(normalizeTag("  Copy!! "), "microcopy");
+    assert.equal(normalizeTag(""), null);
+  });
+} else if (invokedAsEntrypoint) {
+  main();
+}

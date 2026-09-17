@@ -1,6 +1,9 @@
 {
   "name": "accrue-host-e2e",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "e2e": "env -u NO_COLOR playwright test",
     "e2e:a11y": "env -u NO_COLOR playwright test e2e/verify01-admin-a11y.spec.js",

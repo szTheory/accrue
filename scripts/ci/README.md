@@ -1,6 +1,262 @@
 # scripts/ci — contributor map
 
+## Phase 226 CI evidence: read this first
+
+Phase 226 keeps one durable baseline and two small, privacy-safe runtime records. Read every incident in this order: **fact**, **literal state**, **owner**, **next command**, then the linked evidence artifact or log. A green job conclusion is a raw fact; it is not provider proof by itself.
+
+| Evidence | What it answers | Command |
+| --- | --- | --- |
+| [CI baseline](../../.planning/milestones/v1.61-phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md) and [NDJSON record](../../.planning/milestones/v1.61-phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson) | Which fixed workflow cohort was measured, where time went, and which critical-path claim is comparable | `node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue` |
+| `live-stripe-proof` Actions artifact | Whether the selected Stripe test-mode suite produced proof for its own SHA | `node scripts/ci/verify_provider_proof.mjs --fixtures` |
+| `accrue-host-ci-setup-facts` Actions artifact | Whether the host or CI owns the setup failure and the narrow repair command | `bash scripts/ci/verify_ci_setup_diagnostics.sh` |
+
+Run the complete contract before changing any of these surfaces:
+
+```bash
+node scripts/ci/verify_ci_baseline.mjs --fixtures --expected-repository acme/accrue && \
+node scripts/ci/verify_ci_baseline.mjs --records .planning/milestones/v1.61-phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.ndjson --rendered .planning/milestones/v1.61-phases/226-ci-baseline-proof-semantics/226-CI-BASELINE.md --expected-repository szTheory/accrue && \
+node scripts/ci/verify_provider_proof.mjs --fixtures && \
+bash scripts/ci/verify_ci_setup_diagnostics.sh && \
+bash scripts/ci/verify_phase225_required_lane_evidence.sh
+```
+
+Provider triage is literal: `proved` means the selected suite executed, selected tests, passed, and wrote its manifest. `misconfigured` means configuration, fixtures, or selection was absent; `failed` means selected assertions failed; `blocked` means the runner or upstream could not complete; `skipped` is an intentional bypass with a reason; `non_run` means a PR or push has no provider proof for that SHA. Start a local repair with `cd accrue && mix test.live`. Setup codes and their owners are listed in the [host setup matrix](../../examples/accrue_host/README.md#phase-226-setup-ownership).
+
+## Phase 228 zero-human provider proof
+
+## Phase 229 repository truth and read-only CI observation
+
+The Phase 229 [canonical JSON inventory](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json) is the factual authority; its [Markdown diagnostic](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md) is a deterministic projection. Verify both, including recovery, privacy, determinism, and command provenance, with:
+
+| Evidence | What it answers | Command |
+| --- | --- | --- |
+| [Phase 229 repository inventory](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json), [deterministic diagnostic](../../.planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md), and exact-SHA CI monitor | Which repository objects were observed and preserved, and how to inspect the fixed repository's CI state without mutation | `node scripts/ci/ci_monitor.cjs list --repo szTheory/accrue` |
+
+<!-- phase229-strict-verification:start -->
+```bash
+test -n "${PHASE229_PRIVATE_MANIFEST:-}" && \
+test -n "${PHASE229_MANIFEST_SHA256:-}" && \
+test -n "${PHASE229_RECOVERY_BUNDLE:-}" && \
+node scripts/ci/verify_repository_inventory.mjs \
+  --records .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json \
+  --rendered .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md \
+  --expected-repository szTheory/accrue \
+  --recovery-manifest "$PHASE229_PRIVATE_MANIFEST" \
+  --expected-manifest-sha256 "$PHASE229_MANIFEST_SHA256" \
+  --recovery-bundle "$PHASE229_RECOVERY_BUNDLE" \
+  --require-recovery --require-all-ref-recovery --require-typed-artifacts \
+  --require-complete-categories --require-edge-cases --require-command-provenance \
+  --require-privacy-controls --require-determinism \
+  --require-workflow-metadata-authorization
+```
+<!-- phase229-strict-verification:end -->
+
+The final Phase 229 handoff uses one allowlisted wrapper to snapshot the private capsule and protected workspace identities around the complete recapture and verification chain. Supply the five private values only in the maintainer shell. The `--records`/`--rendered` arguments must equal the fixed canonical repository paths shown below; the wrapper rejects any manifest, bundle, capsule, or attestation alias before touching either output, generates both as exclusive same-directory temporaries, verifies them there, and publishes the pair with an atomic rename-and-rollback transaction. The attestation must name a direct capsule sibling that does not yet exist; the wrapper creates it exclusively as a current-owner mode-`0600` file only after every comparison passes, and its schema-2 body binds the exact capture, manifest, bundle, authorization, collection-attestation, records, and rendered digests plus the before-capsule/before-workspace snapshot digests. The wrapper derives the fixed workflow-metadata authorization internally from the same capture the collector uses and passes it to both the collector and the strict verifier; `verify_repository_inventory.mjs --artifact-authorization ... --handoff-attestation ... --require-handoff-attestation` independently recomputes every one of those bindings.
+
+```bash
+test -n "${PHASE229_CAPSULE_DIR:-}" && \
+test -n "${PHASE229_PRIVATE_MANIFEST:-}" && \
+test -n "${PHASE229_MANIFEST_SHA256:-}" && \
+test -n "${PHASE229_RECOVERY_BUNDLE:-}" && \
+test -n "${PHASE229_FINAL_ATTESTATION:-}" && \
+node scripts/ci/verify_phase229_handoff_invariants.mjs \
+  --run-final-chain \
+  --repository-root . \
+  --capsule-directory "$PHASE229_CAPSULE_DIR" \
+  --recovery-manifest "$PHASE229_PRIVATE_MANIFEST" \
+  --expected-manifest-sha256 "$PHASE229_MANIFEST_SHA256" \
+  --recovery-bundle "$PHASE229_RECOVERY_BUNDLE" \
+  --attestation "$PHASE229_FINAL_ATTESTATION" \
+  --records .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json \
+  --rendered .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md \
+  --expected-repository szTheory/accrue
+```
+
+The wrapper accepts no arbitrary child command. It only runs the Phase 229 preservation, bounded collection, deterministic rendering, gap/verifier/monitor/documentation checks, and real-capsule strict verification. It never fetches or refreshes refs, integrates history, cleans files or refs, mutates CI or pull requests, resolves ship windows, pushes, merges, or publishes.
+
+The monitor is the single supported read-only observation implementation. Every command fixes the repository to `szTheory/accrue`; no command dispatches, reruns, cancels, or otherwise mutates Actions, refs, PRs, or providers.
+
+When capturing a recovery-gated inventory, the collector requires the actual external bundle and a private final-capture attestation in addition to the private manifest. Set these three locations and the exact manifest SHA-256 only in the maintainer shell; paths and manifest contents are never written into committed evidence. The original manifest digest is anchored in the committed canonical inventory. Before parsing the manifest, touching the bundle, validating an attestation, reading supplemental authorization, or making a remote adapter call, the collector requires that independent expected digest; verifies the manifest is a current-effective-user-owned regular file with no group/other permissions (mode `0600` or stricter); and compares its bytes to that digest. It then independently checks the bundle SHA-256 against the trusted manifest, runs bounded `git bundle verify`, lists actual bundle heads for every frozen original ref/object, checks each encoded preservation ref, and validates timestamped typed pre/post artifact invariants. The attestation permits changed hashes only for `.planning/milestone.lock` and `.planning/state.json`; every other frozen artifact must retain its exact type and hash.
+
+```bash
+node scripts/ci/collect_repository_inventory.mjs \
+  --repo szTheory/accrue \
+  --recovery-manifest "$PHASE229_RECOVERY_MANIFEST" \
+  --expected-manifest-sha256 "$PHASE229_MANIFEST_SHA256" \
+  --recovery-bundle "$PHASE229_BUNDLE" \
+  --final-capture-attestation "$PHASE229_FINAL_CAPTURE_ATTESTATION" \
+  --artifact-authorization "$PHASE229_WORKFLOW_METADATA_AUTHORIZATION" \
+  --observe-remote \
+  --out .planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json
+```
+
+| Mode | Read-only command | Evidence returned |
+| --- | --- | --- |
+| List | `node scripts/ci/ci_monitor.cjs list --repo szTheory/accrue` | Repository-bound recent runs with full head SHA. |
+| Inspect | `node scripts/ci/ci_monitor.cjs inspect --repo szTheory/accrue --sha FULL_SHA` | One exact-SHA run and sanitized failing-job/step details. |
+| Watch | `node scripts/ci/ci_monitor.cjs watch --repo szTheory/accrue --sha FULL_SHA --timeout-seconds 900 --poll-seconds 10` | Exact-SHA polling bounded by explicit timeout and polling limits. |
+
+### Supported `watch_ci.sh` compatibility path
+
+`watch_ci.sh` is a thin compatibility entry, not a second implementation. It performs one `exec` into `ci_monitor.cjs watch`; it never queries GitHub independently. The wrapper fixes the repository to `szTheory/accrue` and supplies these deterministic defaults: branch `main`, workflow `CI`, timeout `900` seconds, and poll interval `10` seconds. The monitor resolves the selected branch/workflow run to one full SHA before polling, and locally filters returned rows so another workflow on the same branch cannot become the default target.
+
+| Invocation | Deterministic selection |
+| --- | --- |
+| `bash scripts/ci/watch_ci.sh` | `szTheory/accrue`, branch `main`, workflow `CI`, timeout `900`, poll `10` |
+| `bash scripts/ci/watch_ci.sh feature-branch` | The positional branch with workflow `CI` and the same bounds |
+| `bash scripts/ci/watch_ci.sh --sha FULL_SHA` | The explicit full SHA takes precedence and bypasses branch resolution; workflow remains `CI` |
+| `bash scripts/ci/watch_ci.sh --workflow Release` | Branch `main` with the explicit workflow override and the same bounds |
+
+Compatible explicit `--workflow`, `--timeout-seconds`, and `--poll-seconds` values replace only their corresponding defaults. After a run is resolved, JSON or text output retains `szTheory/accrue` and the exact full SHA. A completed `success` exits `0`. Completed `failure`, `cancelled`, `action_required`, `stale`, `skipped`, `timed_out`, `neutral`, or unknown non-success conclusions render that repository/SHA result and exit `69`.
+
+Other failures remain distinguishable: malformed usage exits `64`, no match exits `65`, ambiguity exits `66`, unavailable or malformed/null GitHub responses exit `67`, and a bounded polling deadline exits `68`. Exact-SHA errors include `szTheory/accrue` and the requested full SHA; a branch lookup that fails before resolution cannot invent a SHA.
+
+Actions success is not live-provider proof: provider proof remains a separate, explicit state, and stays `provider_proof: non_run` without independent provider evidence. Remote facts that cannot be read remain explicitly unavailable rather than being substituted with cached or local values. All monitor and wrapper operations are read-only: CI execution, workflow dispatch/rerun/cancel, ship-window resolution, history integration, PR/ref mutation, cleanup, and publication are outside Phase 229. Preservation refs and their verified bundle are established locally before any refresh; the committed inventory deliberately omits the external bundle location.
+
+After the one-time credential bootstrap, Stripe provider proof runs daily and
+after pushes that change the provider-proof contract. Pull requests and
+unrelated pushes do not spend provider API quota. A failure preserves the
+sanitized `live-stripe-proof` artifact and creates or updates one deduplicated
+GitHub issue; the next proved run closes that issue. CI does not retry provider
+failures automatically.
+
+The completed bootstrap accepted the Stripe endpoint signing secret on stdin,
+never printed the value, validated all credential-free contracts first, checked
+the required Actions secret names, and dispatched exactly one authorized proof.
+The invocation is retained for provenance only; its archived evidence path is
+intentionally occupied and the closed authority must not be rerun:
+
+```bash
+read -rs ACCRUE_STRIPE_WEBHOOK_SECRET
+printf '%s' "$ACCRUE_STRIPE_WEBHOOK_SECRET" | \
+  node scripts/ci/bootstrap_stripe_provider_proof.mjs \
+    --authorize-one-proof \
+    --repo szTheory/accrue \
+    --ref PUSHED_NAMED_REF \
+    --evidence-out .planning/milestones/v1.61-phases/228-repair-stripe-webhook-signing-ci-boot-contract-under-a-fresh/228-BOOTSTRAP-EVIDENCE.json
+unset ACCRUE_STRIPE_WEBHOOK_SECRET
+```
+
+The bootstrap evidence contains
+only names, booleans, counts, SHA, ref, and run URL. Rehearse both automation
+surfaces without credentials or network mutation:
+
+```bash
+node scripts/ci/bootstrap_stripe_provider_proof.mjs --self-test
+node scripts/ci/provider_proof_automation.mjs --self-test
+```
+
+## Phase 230 reviewable history integration
+
+The Phase 230 [integration disposition](../../.planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.json) is a fourth collect/render/verify triad instance answering "what did the v1.62 integration candidate merge decide on my behalf, and where did every excluded commit go?" in under a minute. Its [deterministic diagnostic](../../.planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.md) leads with decisions adopted silently, then every hazard the merge produced classified from a closed enumeration, then the Phase-231-owned lanes explicitly excluded from this phase's scope, then the Phase-232 handoffs this phase deliberately recorded but did not act on, then convergent-identical rows collapsed last since they owe nothing. The companion [excluded-commit ledger](../../.planning/phases/230-reviewable-history-integration/230-DISPOSITIONS.json) and its [rendered ledger](../../.planning/phases/230-reviewable-history-integration/230-DISPOSITIONS.md) give every commit reachable from local `main` and not reachable from the candidate exactly one evidence-backed disposition, greppable by full 40-hex SHA.
+
+A code-only sibling review branch, `review/v1.62-candidate-code-only` (declared in [230-REF-EXCEPTIONS.json](../../.planning/phases/230-reviewable-history-integration/230-REF-EXCEPTIONS.json), never pushed), is proved byte-identical to the candidate on every non-`.planning/` path -- read it with `git log --first-parent` for the reviewer's actual ~114-file source surface instead of the ~337-file milestone-vs-merge-base diff.
+
+| Evidence | What it answers | Command |
+| --- | --- | --- |
+| [Phase 230 integration disposition](../../.planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.json), [rendered diagnostic](../../.planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.md), [excluded-commit ledger](../../.planning/phases/230-reviewable-history-integration/230-DISPOSITIONS.json), and [rendered ledger](../../.planning/phases/230-reviewable-history-integration/230-DISPOSITIONS.md) | What the merge decided silently on the reviewer's behalf, whether every hazard and every excluded commit has an evidence-backed disposition, and where an excluded commit went | `node scripts/ci/verify_integration_disposition.mjs --records .planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.json --rendered .planning/phases/230-reviewable-history-integration/230-INTEGRATION-DISPOSITION.md --dispositions .planning/phases/230-reviewable-history-integration/230-DISPOSITIONS.json --candidate integration/v1.62-candidate --expected-repository szTheory/accrue --require-ancestry --require-scope --require-hazard-universe --require-excluded-ledger --require-post-merge-scope --require-determinism` |
+
+<!-- phase230-integration-disposition:start -->
+The rendered disposition Markdown is fenced with a stable `phase230-integration-disposition` start/end marker pair so a later phase can splice the rendered block into the integration PR body without re-deriving the content.
+<!-- phase230-integration-disposition:end -->
+
+```bash
+node --test scripts/ci/collect_integration_disposition.mjs && \
+node --test scripts/ci/render_integration_disposition.mjs && \
+node scripts/ci/verify_integration_disposition.mjs --fixtures --expected-repository szTheory/accrue --require-hazard-universe && \
+node scripts/ci/verify_phase230_archive_invariants.mjs --fixtures && \
+node scripts/ci/verify_phase230_archive_invariants.mjs
+```
+
+## Phase 231 exact-SHA release gate proof
+
+The maintainer's actual question at the end of this phase is "can this SHA ship, and what is still unproven?" Read it in under a minute: the candidate was re-cut from current milestone HEAD because the prior candidate object predated its own gating verifiers (it lacked the very checks GATE-01/GATE-02 must run), so `integration/v1.62-candidate` now points at a fresh merge that carries them. GATE-01 is a local proof: the repository's own declared merge-blocking cohort, executed from a scratch clone at the candidate's exact SHA. GATE-02 is a real GitHub Actions proof for that same SHA, but it is explicitly `workflow_dispatch`-class -- obtained by pushing the branch and dispatching `ci.yml` directly, never by opening a pull request. Phase 232 will produce a second, distinct `pull_request`-class check-run set for the same SHA; do not read the `workflow_dispatch` proof recorded here as if it were that pull-request proof, six months from now or otherwise. GATE-03 re-derives every one of the ten `.planning/WINDOWS.md` ship windows at the candidate SHA and drives each to `fixed` or `waived` with an owner, rationale, release impact, and current evidence.
+
+| Evidence | What it answers | Command |
+| --- | --- | --- |
+| [Recut candidate rollback point](../../.planning/phases/231-exact-sha-release-gate-proof/231-ROLLBACK-POINT.json) | What the re-cut changed relative to the superseded candidate and how to undo it with a proven, executed revert | `node scripts/ci/verify_recut_candidate.mjs --repo . --record .planning/phases/231-exact-sha-release-gate-proof/231-ROLLBACK-POINT.json --candidate integration/v1.62-candidate --expected-repository szTheory/accrue --require-shape --require-ancestry --require-revert-proof --require-toolchain --require-supersession` |
+| [GATE-01 cohort evidence](../../.planning/phases/231-exact-sha-release-gate-proof/231-GATE-01-EVIDENCE.json) and [rendered diagnostic](../../.planning/phases/231-exact-sha-release-gate-proof/231-GATE-01-EVIDENCE.md) | Which declared merge-blocking gates ran in a fresh, cache-free clean checkout at the exact candidate SHA, and with what exit codes | `node scripts/ci/verify_gate01_cohort.mjs --repo . --records .planning/phases/231-exact-sha-release-gate-proof/231-GATE-01-EVIDENCE.json --rendered .planning/phases/231-exact-sha-release-gate-proof/231-GATE-01-EVIDENCE.md --candidate integration/v1.62-candidate --expected-repository szTheory/accrue --require-cohort-completeness --require-declaration-drift --require-clean-checkout --require-determinism` |
+| [GATE-02 evidence](../../.planning/phases/231-exact-sha-release-gate-proof/231-GATE-02-EVIDENCE.ndjson) and [rendered diagnostic](../../.planning/phases/231-exact-sha-release-gate-proof/231-GATE-02-EVIDENCE.md) | Which required GitHub Actions jobs ran for the exact candidate SHA, under which event class (`workflow_dispatch`, not `pull_request`), with which provider states | `node scripts/ci/verify_ci_baseline.mjs --records .planning/phases/231-exact-sha-release-gate-proof/231-GATE-02-EVIDENCE.ndjson --rendered .planning/phases/231-exact-sha-release-gate-proof/231-GATE-02-EVIDENCE.md --expected-repository szTheory/accrue --expect-event-class workflow_dispatch --require-required-job-set --require-event-class --require-exit-codes` |
+| [Window dispositions](../../.planning/phases/231-exact-sha-release-gate-proof/231-WINDOW-DISPOSITIONS.json) and [rendered diagnostic](../../.planning/phases/231-exact-sha-release-gate-proof/231-WINDOW-DISPOSITIONS.md) | Whether every former `.planning/WINDOWS.md` ship window is fixed or waived, with owner, rationale, release impact, and current re-derived evidence | `node scripts/ci/verify_window_dispositions.mjs --repo . --records .planning/phases/231-exact-sha-release-gate-proof/231-WINDOW-DISPOSITIONS.json --rendered .planning/phases/231-exact-sha-release-gate-proof/231-WINDOW-DISPOSITIONS.md --candidate integration/v1.62-candidate --expected-repository szTheory/accrue --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism` |
+| [Integration PR body](../../.planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md) | Whether the committed REL-04 pull-request body leads with risk, separates provenance from behavior, carries an inline rollback command, makes every claim falsifiable by a code span or link, stays inside a density band, and leaks no filesystem path or adopter name. Checks shape, not currency -- the head SHA moves with each re-cut, and a contract that went red on every re-cut would be re-pointed reflexively rather than read. | `node scripts/ci/verify_pr_body_contract.mjs --body .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md --expected-repository szTheory/accrue --require-sections --require-density --require-falsifiability` |
+
+<!-- phase231-window-dispositions:start -->
+The rendered window-dispositions Markdown is fenced with a stable `phase231-window-dispositions` start/end marker pair so Phase 232 can splice the rendered block into the integration PR body without re-deriving the content.
+<!-- phase231-window-dispositions:end -->
+
+<!-- phase231-gate01-cohort:start -->
+The rendered GATE-01 cohort Markdown is fenced with a stable `phase231-gate01-cohort` start/end marker pair so Phase 232 can splice the rendered block into the integration PR body without re-deriving the content.
+<!-- phase231-gate01-cohort:end -->
+
+## Module-boundary guard convention
+
+Every `scripts/ci/*.mjs` file with a CLI entrypoint must import `isMainModule` from `./main_module.mjs` and guard its `main()`/self-test dispatch with `isMainModule(import.meta.url)`. Do not compare `process.argv[1]` against a URL-derived path by hand -- the two idioms that convention replaces (`argv[1] === new URL(import.meta.url).pathname` and `` import.meta.url === `file://${argv[1]}` ``) both silently evaluate `false` when the repository checkout path contains a space, so a merge-blocking gate's `main()` never runs, the script prints nothing, and it exits `0`. `main_module.mjs` resolves both sides through `realpathSync` so a space, symlink, or relative `argv[1]` all still compare correctly, and it throws rather than returning a silent false when `process.argv[1]` is empty. `scripts/ci/verify_ci_script_contract.mjs` (landed in plan 232-03) is the gate that enforces this convention across every file in this directory -- see `## Phase 232` below.
+
+A file guard-migrated in-place must also audit its own child `spawnSync`/dynamic-`import()` call sites that target another guard-migrated file: `NODE_TEST_CONTEXT` is inherited from the parent process by default, and node:test's recursion guard treats mere key PRESENCE (even an empty string) as "already inside a test run", silently skipping the nested invocation. A spawn that expects the child to run its real CLI (e.g. a deliberately-bad-args negative control expecting a non-zero exit) must delete (not blank) `NODE_TEST_CONTEXT` from the child's `env` first.
+
+## Phase 232
+
+Two new merge-blocking steps in `docs-contracts-shift-left` close plan 232-03's `D-32`/`D-34` invariants:
+
+- **`CI baseline triad units and fixture contract (D-34)`** -- runs `node --test --test-reporter=tap` over `collect_ci_baseline.mjs`, `render_ci_baseline.mjs`, and `verify_ci_baseline.mjs` (all three now pass; two previously failed on any direct `node --test` invocation before this plan's guard migration), then `node scripts/ci/verify_ci_baseline.mjs --fixtures --require-required-job-set --expected-repository szTheory/accrue`. `--require-required-job-set` is the one strict flag on this verifier that is safe to combine with `--fixtures` without also supplying `--records`: it reads the live `ci.yml` directly.
+- **`CI script contract (D-32)`** -- `node scripts/ci/verify_ci_script_contract.mjs`, the meta-verifier that enforces the module-boundary guard convention above and a non-vacuity contract across the whole `scripts/ci/*.mjs` cohort. Run: `node --test --test-reporter=tap scripts/ci/verify_ci_script_contract.mjs && node scripts/ci/verify_ci_script_contract.mjs --fixtures --expected-repository szTheory/accrue --require-guard-coverage --require-non-vacuity --require-cohort-floor && node scripts/ci/verify_ci_script_contract.mjs --repo . --expected-repository szTheory/accrue --require-guard-coverage --require-non-vacuity --require-cohort-floor`. Flags: `--fixtures` (hermetic self-test with synthetic conforming/vacuous/guard-less/failing files, no repo I/O), `--repo <path>` (defaults to cwd), `--expected-repository <owner/repo>` (required, compared against the repo's own `origin` remote URL), `--require-guard-coverage` (every cohort file imports `isMainModule` from `./main_module.mjs`, is a `*.test.mjs` file, or carries a one-line-reasoned entry in the file's committed `LIBRARY_MODULE_ALLOWLIST`), `--require-non-vacuity` (every cohort file exits 0 under `node --test --test-reporter=tap` and registers at least one TAP entry whose name is not the file's own path), `--require-cohort-floor` (the live `git ls-files 'scripts/ci/*.mjs'` count must not drop below a committed floor -- 41 at authoring time, re-measured live on every run, never trusted from a cached count -- so a short or empty glob can never be silently reported as a completeness pass). The real (non-`--fixtures`) `--repo .` invocation is the point: a fixtures-only wiring would only prove the verifier's own logic against synthetic inputs, repeating the exact D-16 "documented but never executed" defect this plan's window-dispositions work closed elsewhere.
+
+## Phase 227 bounded critical-path measurement
+
+Phase 227's bounded candidate cohort is terminally **kept**. The exact-three
+repository-bound observations are recorded in the generated comparison report;
+the candidate workflow remains active and the temporary candidate ref has been
+removed. No command in this section authorizes a dispatch, rerun, replacement,
+or remote ref operation.
+
+```bash
+node scripts/ci/verify_ci_critical_path.mjs --verify-live-actions \
+  --evidence .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
+  --rendered .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md \
+  --contract .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-ci-contract.json \
+  --expected-repository szTheory/accrue \
+  --require-activation-evidence .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-CANDIDATE-PREFLIGHT.json \
+  --require-kept
+```
+
+Verify the generated report byte-for-byte and the current candidate workflow
+state separately:
+
+```bash
+node scripts/ci/verify_ci_critical_path.mjs --render-evidence \
+  --evidence .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.ndjson \
+  --rendered .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-CI-CRITICAL-PATH.md \
+  --contract .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-ci-contract.json \
+  --expected-repository szTheory/accrue
+
+node scripts/ci/verify_ci_critical_path.mjs --verify-workflow \
+  --workflow .github/workflows/ci.yml \
+  --contract .planning/milestones/v1.61-phases/227-measured-critical-path-improvement/227-ci-contract.json \
+  --expected-state candidate
+```
+
+The terminal report is a deterministic projection of the append-only, sanitized
+ledger; its command above only verifies bytes and never edits the NDJSON source.
+It retains the frozen 2,083-second baseline median, 2,602-second p95, 1,666-second
+keep threshold, all three candidate observations, controls, exclusions,
+reservation/consumption bindings, and literal provider separation. A green
+workflow is not provider proof: the retained candidate provider state is
+`non_run` because `run_live_stripe: false`.
+
+If a formally authorized future supersession rejects this kept decision, apply
+only the literal inverse recorded in the report (restore
+`needs: [admin-drift-docs, docs-contracts-shift-left]`) and begin a separately
+approved evidence process. This closed authority grants no self-service
+rollback, rerun, replacement, dispatch, or ref creation.
+
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
+
+### Triage: Phase 225 required-lane incidents
+
+- **Release webhook test-isolation signal:** run `cd accrue && mix test test/accrue/webhook/ingest_test.exs --warnings-as-errors`. The responsible source is `accrue/test/accrue/webhook/ingest_test.exs`; it must assert facts owned by its created webhook event rather than suite-global tables.
+- **Admin page-flow budget signal:** run `bash scripts/ci/verify_phase192_admin_guardrails.sh`. The responsible source is `accrue_admin/e2e/admin-page-flow-phase191.spec.js`; it owns the bounded browser traversal, not CI retries or topology.
+
+For classification, immutable Actions evidence links, current proof status, and the required/advisory distinction, see [Phase 225's causal index](../../.planning/milestones/v1.61-phases/225-required-lane-signal-repair/225-CI-INCIDENTS.md). Keep raw logs, reports, traces, screenshots, and payloads in Actions artifacts.
 
 ## v1.59 first-adopter release contract
 
@@ -29,9 +285,14 @@ changes.
 
 **After a push:** from the repo root, **`bash scripts/ci/watch_ci.sh`** waits on the latest GitHub Actions **CI** run for **`main`** (optional branch argument). Requires the **`gh`** CLI and auth (`gh auth login`).
 
-## Executable acceptance ratchet (Phase 218+)
+## Executable acceptance ratchet (Phase 228+ strict enforcement)
 
-`verify_executable_uat_contract.mjs` remains available for phase-scoped acceptance checks. The former project-wide historical scan is parked with the archived v1.59 phase tree; it should be re-enabled only when a new milestone explicitly adopts the executable-UAT contract.
+Backend phases opt into the reusable zero-human policy with
+`automation_contract: backend-zero-human` in plan frontmatter. Opted-in plans
+must use automated task verification and may not contain checkpoints,
+`<human-check>`, `why_human`, or `human_verification`. CI scans all opted-in
+phases; complete Phase 228+ phases must also have reproducible executable-UAT
+artifacts and no manual verification section.
 
 Generate or refresh a phase artifact after its executable checks and verifier pass:
 
@@ -39,7 +300,9 @@ Generate or refresh a phase artifact after its executable checks and verifier pa
 node scripts/ci/verify_executable_uat_contract.mjs --phase 218 --write
 ```
 
-Use `--all-since 218` to reproduce CI. Live provider checks are added as scheduled automation only when credentials exist and upstream-drift coverage has recurring value; they do not create manual UAT.
+Use `--all-opted-in` to reproduce CI. `--all-since 218` remains available for
+legacy milestone archaeology. Live provider checks are recurring automation,
+not manual UAT.
 
 ## ADOPT gates (v1.7 adoption milestone)
 
@@ -151,6 +414,20 @@ Surface-to-script map:
 - If you edit `accrue/README.md`, `accrue/guides/first_hour.md`, `accrue/guides/testing.md`, or `guides/testing-live-stripe.md`, expect `verify_package_docs.sh`.
 - If you edit `examples/accrue_host/README.md`, expect `verify_verify01_readme_contract.sh` plus `verify_package_docs.sh` for shared structural pins.
 - If you edit `examples/accrue_host/docs/adoption-proof-matrix.md`, expect `verify_adoption_proof_matrix.sh`.
+
+### Local required-lane preflight
+
+Before pushing a release-sensitive repair, run:
+
+```bash
+bash scripts/ci/verify_release_preflight.sh
+```
+
+It runs the deterministic docs-contract bundle plus local format, compile,
+tests, Credo, Dialyzer, and ExDoc checks for `accrue` and `accrue_admin`, and
+format, compile, and test checks for `accrue_portal`.
+It does not replace GitHub's clean-host matrix, service-container, browser, or
+artifact proof, so a fresh Actions run remains required for release evidence.
 
 ## PRS gates (v1.22 production path discoverability)
 

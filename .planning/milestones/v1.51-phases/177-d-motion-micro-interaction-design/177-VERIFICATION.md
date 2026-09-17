@@ -1,16 +1,22 @@
 ---
 phase: 177-d-motion-micro-interaction-design
-verified: 2026-06-04T19:18:24Z
-status: human_needed
+verified: 2026-09-12T20:12:00Z
+status: passed
 score: 9/9 must-haves verified
 overrides_applied: 0
-human_verification:
+historical_human_verification:
   - test: "Run `npx playwright test e2e/reduced-motion.spec.js` from accrue_admin after starting a dev server (`mix phx.server`)"
     expected: "All 10 tests pass: the 2 pre-existing D-15 button tests + the 8 new Phase 177 tests (2 for dropdown, 2 for palette, 2 for drawer token, 1 structural no-travel test + the existing 1)"
     why_human: "Playwright tests require a live Phoenix server (`/__e2e__/login` helper + DOM inspection). Cannot run without starting the app. The spec file is structurally correct and all ExUnit CI gates pass — runtime execution is the remaining gate."
   - test: "Visually observe the 9 animated surfaces in a browser (drawer open/close, dropdown open, More ▾ toggle, nav group expand/collapse, palette Cmd-K open/close, tabs active change, toast push/dismiss, skeleton→content, badge state change)"
     expected: "Motion reads as functional and restrained — not janky or decorative. Enter is gentle (ease-out, longer), exit is snappy (ease-in, 140ms). No animation fires that was not in the motion contract."
     why_human: "Visual motion quality (does it look right, feel right, not janky?) cannot be verified by grep or computed-style assertions. This is Phase 179's explicit trace/video review responsibility; however, the first live-browser pass belongs here."
+re_verification:
+  previous_status: human_needed
+  superseded_by: [192-idempotent-verification-sign-off, 200-idempotent-verification-sign-off]
+  evidence:
+    - "Phase 192 trace references cover focus trap/restore, Escape, outside click, scrolling, LiveView patch focus, and actionability"
+    - "Phase 200 reduced-motion and Phase 199 interaction-regression guardrails passed; maintainer decision ACCEPT"
 ---
 
 # Phase 177: D — Motion & Micro-interaction Design Verification Report

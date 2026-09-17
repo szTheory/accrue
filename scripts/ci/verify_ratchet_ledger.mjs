@@ -45,7 +45,9 @@ import os from "node:os";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
+import test from "node:test";
 import * as regionTags from "../../accrue_admin/e2e/ratchet/region-tags.js";
+import { isMainModule } from "./main_module.mjs";
 
 const { isAdmissibleToken } = regionTags;
 
@@ -1126,7 +1128,25 @@ function main() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// D-31: this file previously registered no real node:test case -- the broken
+// file-URL-template guard always evaluated false, so under node --test the
+// unconditional main() (which reads the real committed accrue_admin ratchet
+// evidence) never ran and the file crashed vacuously as the else-branch here
+// was unreachable, leaving the file path itself as the only TAP line. Guard
+// fix and first real test land in the same commit. Wrap the file's existing
+// runSelfTest() -- already an extensive positive/negative fixture battery
+// wired to --self-test on the CLI, explicitly documented as never touching
+// the real committed accrue_admin/e2e/ratchet/ paths -- in a real node:test
+// case rather than duplicating that coverage.
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("verify_ratchet_ledger self-test passes every fixture scenario (mkdtemp-only, never touches the real committed ledger)", () => runSelfTest());
+} else if (invokedAsEntrypoint) {
   try {
     main();
   } catch (error) {

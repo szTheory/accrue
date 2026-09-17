@@ -515,7 +515,7 @@ defmodule Accrue.Processor.Stripe do
     # directly. lattice_stripe 1.0 does not expose LatticeStripe.Charge.create
     # so we route through PaymentIntent.create with confirmation_method: :automatic
     # and immediate confirm.
-    params = ensure_expand(params, ["balance_transaction"])
+    params = normalize_payment_intent_expands(params)
     stripe_opts = stripe_opts(:create_charge, subject_of(params, "ch"), opts)
     client = build_client!(opts)
 
@@ -801,8 +801,74 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
-  # Connect — Account Links + Login Links
+  # Connect — Accounts, Account Links + Login Links
   # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_account(params, opts) when is_map(params) and is_list(opts) do
+    client = build_platform_client!(opts)
+    stripe_opts = stripe_opts(:create_account, subject_of(params, "acct"), opts)
+
+    client
+    |> LatticeStripe.Account.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def retrieve_account(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_platform_client!(opts)
+
+    client
+    |> LatticeStripe.Account.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def update_account(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_platform_client!(opts)
+    stripe_opts = stripe_opts(:update_account, id, opts)
+
+    client
+    |> LatticeStripe.Account.update(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def delete_account(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_platform_client!(opts)
+
+    client
+    |> LatticeStripe.Account.delete(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def reject_account(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_platform_client!(opts)
+    reason = params[:reason] || params["reason"]
+
+    reason_atom =
+      case reason do
+        "fraud" -> :fraud
+        "terms_of_service" -> :terms_of_service
+        "other" -> :other
+      end
+
+    client
+    |> LatticeStripe.Account.reject(id, reason_atom, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def list_accounts(params, opts) when is_map(params) and is_list(opts) do
+    client = build_platform_client!(opts)
+
+    client
+    |> LatticeStripe.Account.list(stringify_keys(params), stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
 
   @impl Accrue.Processor
   def create_account_link(params, opts) when is_map(params) and is_list(opts) do
@@ -882,11 +948,28 @@ defmodule Accrue.Processor.Stripe do
           value
       end
 
-    LatticeStripe.Client.new!(
-      api_key: key,
-      api_version: resolve_api_version(opts),
-      stripe_account: nil
-    )
+    client_opts =
+      opts
+      |> Keyword.take([
+        :base_url,
+        :files_base_url,
+        :finch,
+        :json_codec,
+        :max_retries,
+        :operation_timeouts,
+        :require_explicit_proration,
+        :retry_strategy,
+        :telemetry_enabled,
+        :timeout,
+        :transport
+      ])
+      |> Keyword.merge(
+        api_key: key,
+        api_version: resolve_api_version(opts),
+        stripe_account: nil
+      )
+
+    LatticeStripe.Client.new!(client_opts)
   end
 
   # ---------------------------------------------------------------------------
@@ -944,6 +1027,24 @@ defmodule Accrue.Processor.Stripe do
       Map.get(params, :expand) || Map.get(params, "expand") || []
 
     expand = Enum.uniq(existing ++ paths)
+
+    params
+    |> Map.delete("expand")
+    |> Map.put(:expand, expand)
+  end
+
+  # `create_charge/2` is implemented with Stripe's PaymentIntent endpoint.
+  # Callers still request Charge-shaped expansions, so translate them to the
+  # equivalent PaymentIntent path and discard the self-referential
+  # `payment_intent` expansion that Stripe rejects.
+  defp normalize_payment_intent_expands(params) do
+    existing = Map.get(params, :expand) || Map.get(params, "expand") || []
+
+    expand =
+      existing
+      |> Enum.reject(&(&1 in ["balance_transaction", "payment_intent"]))
+      |> Kernel.++(["latest_charge.balance_transaction"])
+      |> Enum.uniq()
 
     params
     |> Map.delete("expand")

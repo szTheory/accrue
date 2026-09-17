@@ -1,10 +1,10 @@
 ---
 phase: 178-e-seed-expressiveness-state-coverage
-verified: 2026-06-04T21:27:43Z
-status: human_needed
+verified: 2026-09-12T20:12:00Z
+status: passed
 score: 7/7 must-haves verified
 overrides_applied: 0
-human_verification:
+historical_human_verification:
   - test: "Loading/poll-banner state visual — double-seed + 5s browser wait"
     expected: "newer_count banner ('N new rows — click to load') appears at top of DataTable after seeding twice without reset and waiting 5s for poll_interval to fire"
     why_human: "Requires live browser timing; cannot verify with grep or synchronous test run; Phase 179 owns the screenshot and timing"
@@ -14,6 +14,12 @@ human_verification:
   - test: "Every STATE-MATRIX non-N/A cell reachable via single click-through in a running dev environment"
     expected: "Developer can run mix ecto.reset in examples/accrue_host, navigate to each screen, and land in every seeded state (populated, dunning, JPY, long-name, overflow) without using hand-picked IDs"
     why_human: "End-to-end dev-environment navigation cannot be verified programmatically; seeding evidence exists but human must confirm click-path correctness matches matrix descriptions"
+re_verification:
+  previous_status: human_needed
+  superseded_by: [192-idempotent-verification-sign-off, 200-idempotent-verification-sign-off]
+  evidence:
+    - "Phase 192 curated gallery accepts the required edge-state families in light/dark and mobile variants"
+    - "Phase 200 reports 9,072 page-flow evidence rows, axe coverage, and maintainer ACCEPT"
 ---
 
 # Phase 178: E — Seed Expressiveness & State Coverage Verification Report

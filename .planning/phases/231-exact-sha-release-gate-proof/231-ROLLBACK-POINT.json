@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "candidate_ref": "refs/heads/integration/v1.62-candidate",
+  "candidate_object": "85aed0629194be5409d3f3f8caa87cea8d584134",
+  "parents": {
+    "first_parent": "8a3bdd60e3cddc603dce2562e90a78e61b841c3b",
+    "second_parent": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1"
+  },
+  "pre_integration_refs": {
+    "refs/heads/gsd/milestone-v1.62-release-integration-hygiene": "8a3bdd60e3cddc603dce2562e90a78e61b841c3b",
+    "refs/remotes/origin/main": "d30fc25dbf6ba551792c66ff451b4b93c0af4bf1"
+  },
+  "expected_reverted_tree": "78490c13ccec22f3da09e094c5387f84d97be17e",
+  "supersedes": {
+    "candidate_object": "bab50d92be2695b12d5853e7d578e600376e73d0",
+    "artifact": "230-ROLLBACK-POINT.json",
+    "cause": "the superseded candidate predated the Phase 230 verifiers scripts/ci/verify_integration_disposition.mjs and scripts/ci/verify_phase230_archive_invariants.mjs that GATE-01 and GATE-02 must execute, so it could not itself be proved releasable"
+  },
+  "toolchain_pin": {
+    "path": ".tool-versions",
+    "sha256": "a3e578a5e22a66539e85d5961d42f76d2243f24e6b6f8c97ef7ac5ae5d7783d7",
+    "matches_superseded": true
+  },
+  "restore_argv": [
+    ["git", "revert", "-m", "1", "--no-edit", "85aed0629194be5409d3f3f8caa87cea8d584134"]
+  ]
+}

@@ -10,7 +10,7 @@ requires:
 provides:
   - location-aware breadcrumb trail (Account / ... / current) on 5 accrue_portal sub-pages
   - clickable topbar brand (logo/wordmark) linking to portal home on every portal page
-  - "Update payment method" CTA link inside the /app/billing dunning banner (examples/accrue_host demo)
+  - '"Update payment method" CTA link inside the /app/billing dunning banner (examples/accrue_host demo)'
 affects: [accrue_portal, examples/accrue_host]
 
 tech-stack:

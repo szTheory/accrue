@@ -21,6 +21,8 @@ Both predate Phase 5 (verified via git blame to commit 8a2a70e,
 Phase 04 P07). Fix should land in a follow-up quick task, not
 as a Phase 5 deviation.
 
+  status: resolved
+
 ## Pre-existing dialyzer failures (not caused by Phase 05)
 
 3. **`lib/mix/tasks/accrue.webhooks.replay.ex:84,101,110,112`** —

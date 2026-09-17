@@ -1,16 +1,22 @@
 ---
 phase: 176-c-systematic-per-screen-rubric-uplift
-verified: 2026-06-04T13:00:00Z
-status: human_needed
+verified: 2026-09-12T20:12:00Z
+status: passed
 score: 4/4 must-haves verified
 overrides_applied: 0
-human_verification:
+historical_human_verification:
   - test: "Visually confirm each of the 21 screens scores ≥2 on all 10 rubric dimensions in both light and dark themes"
     expected: "Every screen shows correct visual hierarchy, contrast, spacing, and brand expression in both themes at desktop width"
     why_human: "Code-level scoring confirms structure; photographic proof across light/dark × desktop/mobile requires Phase 179 screenshot QA sweep — code scores ≥2 on all dims for all 21 screens"
   - test: "Visually confirm every admin screen is usable at 360px width (mobile) — no horizontal overflow, card layout active"
     expected: "Tables collapse to cards below 768px, detail grids stack to single column, no element overflows the 360px viewport"
     why_human: "The CSS breakpoint fix and card_fields wiring are structurally correct at code level; actual rendering at 360px requires a browser viewport check — full visual proof is Phase 179 scope"
+re_verification:
+  previous_status: human_needed
+  superseded_by: [192-idempotent-verification-sign-off, 200-idempotent-verification-sign-off]
+  evidence:
+    - "Phase 192 maintainer ACCEPT covers light/dark and layout-risk mobile flows"
+    - "Phase 200 page-flow/axe, Storybook, theme boot, and 30,348-cell scorecard gates passed"
 ---
 
 # Phase 176: C — Systematic Per-Screen Rubric Uplift Verification Report
