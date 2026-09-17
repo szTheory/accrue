@@ -80,7 +80,7 @@ if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
       fs.writeFileSync(path.join(phaseDir, "evidence.json"), "{}");
       const resolved = resolvePhaseEvidencePath("999-fixture-phase", "evidence.json", { root: temp });
       assert.equal(resolved, path.join(phaseDir, "evidence.json"));
-      assert.equal(repositoryRelativePhaseEvidencePath("999-fixture-phase", "evidence.json", { root: temp }), ".planning/phases/999-fixture-phase/evidence.json");
+      assert.equal(repositoryRelativePhaseEvidencePath("999-fixture-phase", "evidence.json", { root: temp }), ".planning/phases/999-fixture-phase/evidence.json"); // archive-sweep-exempt: synthetic fixture phase created under a temp root by this test, never a live repository read
       assert.throws(() => resolvePhaseEvidencePath("999-fixture-phase", "../escape.json", { root: temp }), /must not contain/);
       assert.throws(() => resolvePhaseEvidencePath("999-fixture-phase", "missing.json", { root: temp }), /missing phase evidence/);
     } finally {
