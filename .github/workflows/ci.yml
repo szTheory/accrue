@@ -267,6 +267,24 @@ jobs:
           node --test scripts/ci/verify_hygiene_dispositions.mjs &&
           node scripts/ci/verify_hygiene_dispositions.mjs --fixtures --expected-repository szTheory/accrue --require-completeness --require-soundness --require-determinism
 
+      # Phase 232 (REL-04): the integration PR body is a committed artifact,
+      # so the contract over it is merge-blocking like every other document
+      # contract in this job. It checks SHAPE, not currency -- risk-first
+      # heading, the provenance-versus-behavior sentence, an inline rollback
+      # command, per-claim falsifiability, a density band, and no leaked
+      # filesystem path or adopter name. It deliberately does NOT assert the
+      # head SHA is current: the candidate is re-cut across plans, and a
+      # contract that went red on every re-cut would be re-pointed reflexively
+      # rather than read. Currency is the re-cut's own job (see the superseded-
+      # target guard in verify_release_pr_readiness.sh).
+      - name: Integration PR body contract (REL-04)
+        run: >-
+          node --test scripts/ci/verify_pr_body_contract.mjs &&
+          node scripts/ci/verify_pr_body_contract.mjs
+          --body .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md
+          --expected-repository szTheory/accrue
+          --require-sections --require-density --require-falsifiability
+
       # Phase 232: the ci_baseline triad existed since Phase 226 but was
       # never wired here, and two of its three files failed `node --test`
       # (D-34). Plan 232-03 fixed the guards and non-vacuity before this
