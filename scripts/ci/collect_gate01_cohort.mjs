@@ -268,11 +268,24 @@ function main() {
   fs.writeFileSync(out, `${JSON.stringify(evidence, null, 2)}\n`, { mode: 0o600 });
 }
 
-if (!process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
+// isMainModule() throws (never returns a silent false) when there is no
+// invoking entrypoint (e.g. a dynamic `import()` from a `node -e` inline-eval
+// script with no argv[1]). That throw must not crash a bare import -- it is
+// caught here and treated as "not the entrypoint", matching the established
+// pattern in collect_ci_baseline.mjs / collect_window_dispositions.mjs /
+// verify_ci_baseline.mjs (232-06 regression repair).
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+
+if (!process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
   try { main(); } catch (error) { console.error(`gate01 cohort collect: FAIL: ${error.message}`); process.exitCode = 1; }
 }
 
-if (process.env.NODE_TEST_CONTEXT && isMainModule(import.meta.url)) {
+if (process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
   const GOOD_CI_YML = [
     "# Merge-blocking on pull_request: `job-a`, `job-b`,",
     "# `annotation-sweep`.",
