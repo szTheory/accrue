@@ -12,6 +12,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { isMainModule } from "./main_module.mjs";
 import { resolvePhaseEvidencePath, repositoryRoot } from "./phase_evidence_path.mjs";
+// Single source of truth for path sanitization -- imported, not re-declared,
+// so this file cannot drift from the canonical pattern (HYG-01 prohibition:
+// "do not mint a third path-sanitization pattern").
+import { UNSAFE_PATH_PATTERN } from "./collect_window_dispositions.mjs";
+
+// NUL row-key separator, built at runtime so no raw NUL byte ever lands in this
+// source file (a literal NUL makes git classify the file as binary).
+const ROW_KEY_SEP = String.fromCharCode(0);
 
 const SHA = /^[a-f0-9]{40}$/;
 const REPOSITORY = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
@@ -60,10 +68,10 @@ export function run(repo, args) { const result = spawnSync("git", ["-C", repo, .
 // -- this is the same regex text reused, not a third, independently
 // invented pattern. See 232-07-SUMMARY.md, "Deviations", for the full
 // rationale.
-const sanitizeLeakCheck = /(^\/|\/Users\/|\/home\/|\$HOME)/;
+
 function sanitizeStrings(row, label) {
   for (const [key, value] of Object.entries(row)) {
-    if (typeof value === "string" && sanitizeLeakCheck.test(value)) fail(`${label}.${key} must not contain an absolute path or home-directory reference`);
+    if (typeof value === "string" && UNSAFE_PATH_PATTERN.test(value)) fail(`${label}.${key} must not contain an absolute path or home-directory reference`);
   }
 }
 
@@ -125,7 +133,7 @@ export function validateHygieneDispositions(record) {
   record.rows.forEach((row, index) => validateHygieneRow(row, `rows[${index}]`));
   const seen = new Set();
   for (const row of record.rows) {
-    const key = `${row.kind} ${row.name}`;
+    const key = `${row.kind}${ROW_KEY_SEP}${row.name}`;
     if (seen.has(key)) fail(`disposition.rows contains a duplicate (kind, name): ${row.kind}/${row.name}`);
     seen.add(key);
   }

@@ -47,7 +47,7 @@ function run(repo, args) { const result = spawnSync("git", ["-C", repo, ...args]
 // committed evidence artifact. Applied to every string leaf (including argv
 // array elements) of a validated row, not just current_evidence, so a
 // forbidden value in any field is caught the same way.
-const UNSAFE_PATH_PATTERN = /(^\/|\/Users\/|\/home\/|\$HOME)/;
+export const UNSAFE_PATH_PATTERN = /(^\/|\/Users\/|\/home\/|\$HOME)/;
 function sanitizeStrings(row, label) {
   for (const [key, value] of Object.entries(row)) {
     if (typeof value === "string" && UNSAFE_PATH_PATTERN.test(value)) fail(`${label}.${key} must not contain an absolute path or home-directory reference`);
