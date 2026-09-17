@@ -53,21 +53,23 @@ function repository(value, label) { if (typeof value !== "string" || !REPOSITORY
 function timestamp(value, label) { if (typeof value !== "string" || !ISO.test(value)) fail(`${label} must be an ISO-8601 timestamp with a UTC offset`); return value; }
 export function run(repo, args) { const result = spawnSync("git", ["-C", repo, ...args], { encoding: "utf8", shell: false, timeout: 20000, maxBuffer: 5_000_000 }); if (result.error || result.status !== 0) fail(`git ${args[0]} failed: ${(result.stderr || result.error?.message || "unknown error").trim().slice(0, 400)}`); return result.stdout.trim(); }
 
-// D-31 provenance (verbatim reuse, not a third pattern): this is the exact
-// regex text of collect_window_dispositions.mjs's UNSAFE_PATH_PATTERN --
-// the broader of the two pre-existing sanitization patterns in this repo,
-// chosen per 232-PATTERNS.md's explicit recommendation because it also
-// catches a bare leading "/", which a hygiene classifier enumerating
-// filesystem paths is more likely to emit than either prior triad. It is
-// NOT re-exported from collect_window_dispositions.mjs (that file is
-// outside this plan's files_modified scope, so it cannot be edited to add
-// an `export` keyword) and it is deliberately bound under a name outside
-// the `PATTERN`/`_RE` suffix convention the two pre-existing patterns use,
-// so Task 1's own <verify> census
-// (`grep -c 'const .*PATTERN\|const .*_RE'`) continues to report exactly 2
-// -- this is the same regex text reused, not a third, independently
-// invented pattern. See 232-07-SUMMARY.md, "Deviations", for the full
-// rationale.
+// D-31 provenance: sanitization here is the SAME pattern object as the
+// window-disposition triad's, imported at the top of this file --
+// `UNSAFE_PATH_PATTERN` from collect_window_dispositions.mjs. It is the
+// broader of the two pre-existing sanitization patterns in this repo, chosen
+// per 232-PATTERNS.md because it also catches a bare leading "/", which a
+// hygiene classifier enumerating filesystem paths is more likely to emit
+// than either prior triad.
+//
+// History worth keeping, because the failure mode is instructive: plan
+// 232-07 originally COPIED this regex's text under a name deliberately
+// chosen to fall outside the `PATTERN`/`_RE` suffix convention, so that its
+// own census grep would keep reporting exactly two sanitization patterns
+// while a third one in fact existed. That is gaming a check rather than
+// satisfying it. It was corrected later in the phase by exporting the
+// canonical constant and importing it here -- one pattern, one definition,
+// and a census that now tells the truth because there is nothing to hide
+// from it. See 232-07-SUMMARY.md, "Deviations".
 
 function sanitizeStrings(row, label) {
   for (const [key, value] of Object.entries(row)) {
