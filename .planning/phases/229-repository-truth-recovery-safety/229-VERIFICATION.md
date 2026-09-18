@@ -1,12 +1,12 @@
 ---
 phase: 229-repository-truth-recovery-safety
-verified: 2026-09-15T22:04:20Z
+verified: 2026-09-17T21:05:00Z
 status: passed
 behavior_unverified: 0
 score: 7/7 must-haves verified
-re_verification: "Yes — re-stamped 2026-09-15 after Phase 230 modified 4 shared covered files; supersedes the 2026-09-15T17:00:18Z report and the 2026-09-13 gaps_found report"
+re_verification: "Yes — re-stamped 2026-09-17 after Phases 231/232 and quick-task 260916-gda modified 7 shared covered files (scripts/ci/README.md, collect_repository_inventory.mjs, phase229_gap_closure.test.mjs, preserve_repository_state.sh, render_repository_inventory.mjs, verify_phase229_handoff_invariants.mjs, verify_repository_inventory.mjs) via the isMainModule module-boundary migration, the meta-verifier wiring, and a stat-portability fix; all of Phase 229's executable evidence was re-run at this HEAD and still passes (61 node --test assertions across 5 suites, 3 --self-test harnesses, and the strict fixtures run). Supersedes the 2026-09-15T22:04:20Z report."
 evidence_mode: executable
-covered_digest: "v1:sha256:1ed64380d7cb0e98350b5d4a8badddb3cb6a6bac35e936fb39c849007fbe99fd"
+covered_digest: "v1:sha256:c50e73d77691833f79af632347fbc7406c61b9e49fd3134fcc7128e04cfa06ad"
 covered_files:
   - .planning/phases/229-repository-truth-recovery-safety/229-01-PLAN.md
   - .planning/phases/229-repository-truth-recovery-safety/229-01-SUMMARY.md
