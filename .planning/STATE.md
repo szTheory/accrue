@@ -211,6 +211,7 @@ None yet.
 | 260916-hl9 | Resolve the sibling dependency-operator contradiction between CLAUDE.md and the code, and make it machine-enforced | 2026-09-16 | 9f309871 | [260916-hl9-resolve-the-sibling-dependency-operator-](./quick/260916-hl9-resolve-the-sibling-dependency-operator-/) |
 | 260917-l7v | Shift left seven phase-232 session failure modes into merge-blocking CI guards (SL-A through SL-G) | 2026-09-17 | b42c64a5 | [260917-l7v-shift-left-phase-232-session-lessons-int](./quick/260917-l7v-shift-left-phase-232-session-lessons-int/) |
 | 260918-rpt | Fix release-PR title generation (grouped ${version} with no root package) that made release 1.6.0 tag nothing while reporting success; add a merge-blocking round-trip guard | 2026-09-18 | 11cf1e02 | [260918-rpt-fix-release-pr-title-generation](./quick/260918-rpt-fix-release-pr-title-generation/) |
+| 260918-e8m | Correct v1.62 ROADMAP doc-truth drift before archive: two Phase 231 success criteria claimed green gates the candidate SHA never earned, plus a stale 16/20 plan count | 2026-09-18 | 62c5c6a0 | [260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be](./quick/260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be/) |
 
 ## Deferred Items
 
