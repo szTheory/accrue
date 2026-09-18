@@ -3,7 +3,6 @@
   "separate-pull-requests": false,
   "include-component-in-tag": true,
   "commit-search-depth": 2000,
-  "group-pull-request-title-pattern": "chore: release accrue-monorepo ${version}",
   "plugins": [
     {
       "type": "linked-versions",

@@ -494,6 +494,12 @@ jobs:
       - name: Verify linked release contract
         run: bash scripts/ci/verify_release_contract.sh
 
+      # Phase 232 follow-up: release 1.6.0 tagged NOTHING while reporting
+      # success because the grouped release-PR title lost its version and
+      # failed PullRequestTitle.parse. The script explains the mechanism.
+      - name: Verify grouped release-PR title round-trips
+        run: bash scripts/ci/verify_release_pr_title_roundtrip.sh
+
       # Phase 232 (D-39, REL-05): side-effect-free proof that Release Please
       # is ready to produce a version-and-changelog-consistent release PR.
       # Gated on token availability so a fork PR without repo secrets does
