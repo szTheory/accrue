@@ -221,20 +221,53 @@ export function assertFixedPoint(pairs) {
 
 // -- CHECK 3: digest truth -------------------------------------------------------
 
+// The `covered_digest` field is NOT this guard's to define. It is GSD's
+// covered-input fingerprint (#4155): the GSD runtime reads the same field, under
+// the same `v1:sha256:` version tag, to decide whether a phase is `passed` or
+// permanently `stale`. An independent formula here -- even a perfectly
+// deterministic one -- makes this guard a SECOND writer to a field that already
+// has an owner, and `FINGERPRINT_VERSION` cannot arbitrate between them because
+// both would stamp `v1`. That is exactly what shipped in the first cut of this
+// file: a rolling `path \0 bytes \0` hash that agreed with itself and with
+// nothing else, which read phase 232 as matching while GSD read it as stale
+// forever. The formula below is GSD's, reproduced byte-for-byte from
+// gsd-core/bin/lib/verification.cjs#computeCoveredDigest:
+//
+//   canonicalize (posix-normalize -> de-dup -> sort)
+//   per file:   parts.push(`${rel}\n${sha256(bytes)}\n`)
+//   aggregate:  sha256(`v1\n` + parts.join("")) over utf-8
+//
+// If GSD bumps FINGERPRINT_VERSION, this function must be updated in lockstep or
+// removed -- never left to stamp a stale `v1` under a new definition.
+const FINGERPRINT_VERSION = 1;
+
+function canonicalizeCoveredFiles(files) {
+  return Array.from(new Set(files.map((f) => path.posix.normalize(String(f).split(path.sep).join("/"))))).sort();
+}
+
 export function computeDigest(repo, coveredFiles) {
   if (!Array.isArray(coveredFiles) || coveredFiles.length === 0) {
     fail("covered_files is empty -- refusing to compute a digest over zero files");
   }
-  const hash = crypto.createHash("sha256");
-  for (const relativePath of [...coveredFiles].sort()) {
-    const absolute = path.join(repo, relativePath);
-    if (!fs.existsSync(absolute)) fail(`covered file missing on disk: ${relativePath}`);
-    hash.update(Buffer.from(relativePath, "utf8"));
-    hash.update(Buffer.from([0]));
-    hash.update(fs.readFileSync(absolute));
-    hash.update(Buffer.from([0]));
+  const uniqueSorted = canonicalizeCoveredFiles(coveredFiles);
+  if (uniqueSorted.length === 0) {
+    fail("covered_files canonicalized to zero entries -- refusing to compute a digest over zero files");
   }
-  return `v1:sha256:${hash.digest("hex")}`;
+  const parts = [];
+  for (const rel of uniqueSorted) {
+    if (rel === "" || rel === ".." || rel.startsWith("../") || path.isAbsolute(rel)) {
+      fail(`covered file escapes the repository root: ${rel}`);
+    }
+    const absolute = path.resolve(repo, rel);
+    if (!fs.existsSync(absolute)) fail(`covered file missing on disk: ${rel}`);
+    const fileHash = crypto.createHash("sha256").update(fs.readFileSync(absolute)).digest("hex");
+    parts.push(`${rel}\n${fileHash}\n`);
+  }
+  const aggregate = crypto
+    .createHash("sha256")
+    .update(`v${FINGERPRINT_VERSION}\n${parts.join("")}`, "utf-8")
+    .digest("hex");
+  return `v${FINGERPRINT_VERSION}:sha256:${aggregate}`;
 }
 
 export function assertDigestMatch(repo, verificationArtifacts) {
@@ -410,12 +443,63 @@ const SCENARIOS = [
     }
   ],
   [
+    "computeDigest reproduces GSD's covered-input fingerprint exactly (golden vector)",
+    () => {
+      // NOT `computeDigest(...) === computeDigest(...)`: that is a self-referential
+      // oracle -- it holds for ANY deterministic formula, including the wrong one
+      // this file originally shipped. The constant below was cross-checked against
+      // the GSD runtime's own computeCoveredDigest (gsd-core/bin/lib/verification.cjs)
+      // for the single file "covered.txt" containing "hello\n". If a future edit to
+      // computeDigest changes the formula, this fails -- which is the point: GSD
+      // reads the same `covered_digest` field under the same v1 tag, and a second
+      // definition of v1 makes every fingerprinted phase permanently stale.
+      withScratch((dir) => {
+        fs.writeFileSync(path.join(dir, "covered.txt"), "hello\n");
+        assert.strictEqual(
+          computeDigest(dir, ["covered.txt"]),
+          "v1:sha256:7611c9ba460e3089f57dd59c63321e6c5065b0d6bf5ac037dda0224bcbed6256"
+        );
+      });
+    }
+  ],
+  [
+    "computeDigest canonicalizes like GSD does -- de-duplicated, posix-normalized, sorted",
+    () => {
+      withScratch((dir) => {
+        fs.writeFileSync(path.join(dir, "covered.txt"), "hello\n");
+        // Same single distinct file expressed three ways must fold to the same
+        // digest as the canonical one-entry list, because GSD folds them too.
+        assert.strictEqual(
+          computeDigest(dir, ["./covered.txt", "covered.txt", "a/../covered.txt"]),
+          "v1:sha256:7611c9ba460e3089f57dd59c63321e6c5065b0d6bf5ac037dda0224bcbed6256"
+        );
+      });
+    }
+  ],
+  [
     "a covered_digest matching a freshly computed digest over real files on disk passes",
     () => {
       withScratch((dir) => {
         fs.writeFileSync(path.join(dir, "covered.txt"), "hello\n");
         const digest = computeDigest(dir, ["covered.txt"]);
         assert.doesNotThrow(() => assertDigestMatch(dir, [{ relativePath: "fixtures/V.md", coveredFiles: ["covered.txt"], coveredDigest: digest }]));
+      });
+    }
+  ],
+  [
+    "a covered_digest computed under the SUPERSEDED rolling-hash formula is rejected",
+    () => {
+      withScratch((dir) => {
+        fs.writeFileSync(path.join(dir, "covered.txt"), "hello\n");
+        // The formula this file originally shipped: sha256 over `path \0 bytes \0`
+        // streamed into one rolling hash, stamped -- fatally -- as the same `v1`.
+        const legacy = crypto.createHash("sha256");
+        legacy.update(Buffer.from("covered.txt", "utf8"));
+        legacy.update(Buffer.from([0]));
+        legacy.update(fs.readFileSync(path.join(dir, "covered.txt")));
+        legacy.update(Buffer.from([0]));
+        const stale = `v1:sha256:${legacy.digest("hex")}`;
+        assert.throws(() => assertDigestMatch(dir, [{ relativePath: "fixtures/V.md", coveredFiles: ["covered.txt"], coveredDigest: stale }]));
       });
     }
   ],

@@ -56,14 +56,18 @@ covered_files:
   - "scripts/ci/verify_phase230_archive_invariants.mjs"
   - "scripts/ci/verify_pr_body_contract.mjs"
   - "scripts/ci/verify_release_pr_readiness.sh"
-covered_digest: "v1:sha256:40f60e4bfeb2914e349fc9a304470b6c9dff54f428a720b7760812f11f440aa8"
-# SL-G (quick task 260917-l7v): re-measured via scripts/ci/verify_artifact_fixed_point.mjs's
-# computeDigest() -- sha256 over `path \0 bytes \0` per covered_files entry, sorted path
-# order, prefixed v1:sha256: -- after this task's own edits to .github/workflows/ci.yml and
-# 232-UAT.md (regenerated: started:/updated: now derive from SUMMARY completed: dates, not
-# this file's own verified: field, which is what broke the DERIVES-then-COVERS cycle this
-# digest used to close by hand). Recompute and commit this value whenever any covered_files
-# entry's bytes change -- the guard's --require-digest-match check enforces it.
+covered_digest: "v1:sha256:4b821389a394e8c787e4ec32085f1efe193d2bf55d94b9e0cdf65094df5df52a"
+# covered_digest is GSD's covered-input fingerprint (#4155), not this repo's to redefine:
+# canonicalize covered_files (posix-normalize, de-dup, sort), hash each file's bytes,
+# aggregate sha256 over `v1\n` + `<rel>\n<sha256(bytes)>\n` per entry.
+# CORRECTED 2026-09-17: the first cut of this stamp was computed by
+# scripts/ci/verify_artifact_fixed_point.mjs's own formula -- a rolling sha256 over
+# `path \0 bytes \0` -- which emitted the SAME `v1:sha256:` tag over a DIFFERENT
+# definition. The guard read this phase as matching while the GSD runtime read it as
+# permanently stale, and no amount of re-verification could have cleared it. The guard
+# now reproduces GSD's formula byte-for-byte, pinned by a golden vector and a negative
+# control over the superseded formula. Recompute and commit this value whenever any
+# covered_files entry's bytes change -- --require-digest-match enforces it.
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:
