@@ -51,7 +51,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   2. A maintainer can recover each pre-existing divergent local ref and user-owned untracked artifact after synchronization work, with no force-push, tag movement, or unrecorded deletion.
   3. A maintainer can use one supported command path to list, inspect, and monitor GitHub Actions runs whose failure output identifies the exact repository SHA.
 
-**Plans**: 16/20 plans executed
+**Plans**: 20/20 plans executed
 
 ### Phase 230: Reviewable History Integration
 
@@ -99,8 +99,8 @@ Plans:
 **Requirements**: GATE-01, GATE-02, GATE-03
 **Success Criteria** (what must be TRUE):
 
-  1. A fresh clean checkout of the exact candidate completes the repository's local CI-equivalent gates without ignored caches, credentials, or another worktree.
-  2. A maintainer can inspect green required GitHub Actions checks for that exact SHA while each provider lane remains explicitly `proved`, `skipped`, `failed`, or `advisory`.
+  1. A fresh clean checkout of the exact candidate produces honest, re-verifiable, per-lane proof of the repository's local CI-equivalent gates — recorded argv and exit codes under the closed `proved`/`failed`/`skipped`/`advisory`/`non_run` lexicon, with no aggregate green/passing boolean — without ignored caches, credentials, or another worktree.
+  2. A maintainer can inspect honest per-lane status with recorded evidence for the required GitHub Actions checks at that exact SHA, each provider lane remaining explicitly `proved`, `failed`, `skipped`, `advisory`, or `non_run`; a green Actions conclusion alone is not accepted as provider proof.
   3. A maintainer can inspect current evidence, owner, rationale, and release impact for every former ship window, with each fixed or explicitly waived and none unexplained.
 
 **Plans**: 6 plans
