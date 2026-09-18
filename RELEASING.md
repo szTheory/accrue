@@ -42,16 +42,30 @@ tree — so a config change is only provable once it is pushed. Run it locally v
 `GH_TOKEN=$(gh auth token) bash scripts/ci/verify_release_pr_readiness.sh`; it is wired as a
 merge-blocking CI step in `release-manifest-ssot` (see below).
 
-Two configuration keys back the proof:
+One configuration key backs the proof:
 
 - `commit-search-depth: 2000` — a pure safety ceiling on how many commits release-please
   walks looking for the last release SHA of every tracked package; the walk breaks early once
   every package's release SHA is seen, so raising the ceiling costs nothing in steady state,
   and the readiness proof fails closed if the walk is ever truncated regardless.
-- `group-pull-request-title-pattern: "chore: release accrue-monorepo ${version}"` — a grouped
-  PR title that cannot yield a version silently skips GitHub Release and tag creation
-  (upstream release-please issues #2306/#2712); interpolating `${version}` avoids that class
-  of silent skip.
+
+### Why there is deliberately no `group-pull-request-title-pattern`
+
+This repo **must not** set `group-pull-request-title-pattern` while every tracked package
+lives under a subdirectory. release-please's Merge plugin takes the `${version}` for the
+grouped title from the release candidate whose path is exactly `.`. This monorepo has no
+package at `.` — only `accrue`, `accrue_admin` and `accrue_portal` — so that version is
+`undefined` and `${version}` renders empty.
+
+The resulting title (`chore: release accrue-monorepo`) then fails `PullRequestTitle.parse`
+at release time, so release-please logs `Bad pull request title`, creates **no tags and no
+GitHub Releases**, and blocks every subsequent release PR with `There are untagged, merged
+release PRs outstanding` — all while the workflow still reports success.
+
+That is not hypothetical: it is exactly what happened to release `1.6.0` (PR #46), which had
+to be unwedged by hand. Leaving the key unset gives the default `chore: release ${branch}`
+title, which parses correctly; the version comes from the PR body, not the title.
+`scripts/ci/verify_release_pr_title_roundtrip.sh` enforces this and is merge-blocking.
 
 ## Routine linked releases (Release Please + Hex)
 
