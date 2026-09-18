@@ -120,7 +120,39 @@ export function validateBackendZeroHumanPlan(source, file = "PLAN.md") {
   return true;
 }
 
-function renderAutomatedUat(phaseDir) {
+// SL-G (quick task 260917-l7v): started:/updated: used to be sourced from
+// VERIFICATION.md's `verified:` field -- but VERIFICATION.md's own
+// `covered_digest` covers this generated UAT artifact, so that was a
+// DERIVES-then-COVERS cycle: every verifier run bumps `verified:`, which
+// rewrites the UAT, which re-stales the digest, which requires another
+// verifier run. Source the timestamps from the phase's own SUMMARY
+// `completed:` dates instead -- those are written once when a plan finishes
+// and do not change on a later verification re-run, so regenerating this
+// artifact is a fixed point (see scripts/ci/verify_artifact_fixed_point.mjs).
+// `completed:` lives at the frontmatter top level in some phases' SUMMARY
+// convention and nested under `metrics:` in others (e.g. phase 229) -- match
+// at any indentation rather than assuming one schema.
+function anyIndentScalar(metadata, key) {
+  const match = metadata.match(new RegExp(`^\\s*${key}:\\s*["']?([^\\n"']+)["']?\\s*$`, "m"));
+  return match?.[1]?.trim();
+}
+
+function summaryTimestamps(phaseDir, entries) {
+  const files = [...new Set(entries.map(({ file }) => file))].sort();
+  const dates = files.map((file) => {
+    const source = fs.readFileSync(path.join(phaseDir, file), "utf8");
+    const metadata = frontmatter(source, file);
+    const completed = anyIndentScalar(metadata, "completed");
+    if (!completed) {
+      fail(`${file}: completed date is required for deterministic UAT derivation (SUMMARY dates are outside VERIFICATION's covered set; verified: is not)`);
+    }
+    return completed;
+  });
+  dates.sort();
+  return { started: dates[0], updated: dates[dates.length - 1] };
+}
+
+export function renderAutomatedUat(phaseDir) {
   const entries = coverageEntries(phaseDir);
   if (entries.length === 0) fail(`${phaseDir}: no executable coverage to generate UAT`);
 
@@ -136,8 +168,7 @@ function renderAutomatedUat(phaseDir) {
   if (scalar(verificationMetadata, "behavior_unverified") !== "0") {
     fail(`${verificationFile}: behavior_unverified must be 0 before automated UAT generation`);
   }
-  const verifiedAt = scalar(verificationMetadata, "verified");
-  if (!verifiedAt) fail(`${verificationFile}: verified timestamp is required for deterministic UAT`);
+  const { started, updated } = summaryTimestamps(phaseDir, entries);
   const phase = path.basename(phaseDir).match(/^(\d+(?:\.\d+)?)/)?.[1];
   if (!phase) fail(`${phaseDir}: cannot derive phase number`);
 
@@ -155,7 +186,7 @@ function renderAutomatedUat(phaseDir) {
     return `### ${index + 1}. ${description}\nsource: automated\nverification: ${refs.join(" | ")}\nresult: [${result}]`;
   });
 
-  return `---\nstatus: complete\nphase: ${phase}\nsource: executable-summary-coverage\nstarted: ${verifiedAt}\nupdated: ${verifiedAt}\n---\n\n# Phase ${phase} Automated UAT\n\nEvery acceptance item below is produced from committed executable coverage. No post-hoc human verification is required.\n\n## Tests\n\n${tests.join("\n\n")}\n\n## Summary\n\ntotal: ${tests.length}\npassed: ${tests.filter((test) => /result: \[pass\]/.test(test)).length}\nissues: ${tests.filter((test) => /result: \[issue\]/.test(test)).length}\npending: 0\nskipped: 0\nblocked: 0\n`;
+  return `---\nstatus: complete\nphase: ${phase}\nsource: executable-summary-coverage\nstarted: ${started}\nupdated: ${updated}\n---\n\n# Phase ${phase} Automated UAT\n\nEvery acceptance item below is produced from committed executable coverage. No post-hoc human verification is required.\n\n## Tests\n\n${tests.join("\n\n")}\n\n## Summary\n\ntotal: ${tests.length}\npassed: ${tests.filter((test) => /result: \[pass\]/.test(test)).length}\nissues: ${tests.filter((test) => /result: \[issue\]/.test(test)).length}\npending: 0\nskipped: 0\nblocked: 0\n`;
 }
 
 export function generateAutomatedUat(phaseDir) {
@@ -352,7 +383,7 @@ function selfTest() {
   const phaseTemp = path.join(temp, "218-test");
   try {
     fs.mkdirSync(phaseTemp);
-    const summary = `---\nstatus: complete\ncoverage:\n  - id: D1\n    verification:\n      - kind: integration\n        ref: "mix test"\n        status: pass\n    human_judgment: false\n---\n`;
+    const summary = `---\nstatus: complete\ncompleted: 2026-08-03\ncoverage:\n  - id: D1\n    verification:\n      - kind: integration\n        ref: "mix test"\n        status: pass\n    human_judgment: false\n---\n`;
     const verification = `---\nstatus: passed\nbehavior_unverified: 0\nverified: 2026-08-03T00:00:00Z\n---\n`;
     fs.writeFileSync(path.join(phaseTemp, "218-01-SUMMARY.md"), summary);
     fs.writeFileSync(path.join(phaseTemp, "218-VERIFICATION.md"), verification);
@@ -416,16 +447,32 @@ function selfTest() {
 
     fs.rmSync(path.join(phaseTemp, "218-02-SUMMARY.md"));
     fs.writeFileSync(
-      path.join(phaseTemp, "218-VERIFICATION.md"),
-      verification.replace("verified: 2026-08-03T00:00:00Z\n", "")
+      path.join(phaseTemp, "218-01-SUMMARY.md"),
+      summary.replace("completed: 2026-08-03\n", "")
     );
     rejected = false;
     try {
       generateAutomatedUat(phaseTemp);
     } catch (error) {
-      rejected = /verified timestamp is required/.test(error.message);
+      rejected = /completed date is required/.test(error.message);
     }
-    if (!rejected) fail("self-test: nondeterministic UAT timestamp fallback was not rejected");
+    if (!rejected) fail("self-test: missing SUMMARY completed date was not rejected");
+    fs.writeFileSync(path.join(phaseTemp, "218-01-SUMMARY.md"), summary);
+
+    // SL-G: regenerating the UAT is a byte-level no-op -- started:/updated:
+    // come from the SUMMARY's own completed: date, which does not change when
+    // VERIFICATION.md is re-verified (bumping a later verified: value must
+    // not perturb the UAT this generates).
+    generateAutomatedUat(phaseTemp);
+    const beforeRewrite = fs.readFileSync(uatFile, "utf8");
+    fs.writeFileSync(
+      path.join(phaseTemp, "218-VERIFICATION.md"),
+      verification.replace("verified: 2026-08-03T00:00:00Z", "verified: 2026-08-04T12:00:00Z")
+    );
+    generateAutomatedUat(phaseTemp);
+    const afterRewrite = fs.readFileSync(uatFile, "utf8");
+    assert.equal(afterRewrite, beforeRewrite, "self-test: re-verifying (bumping verified:) must not change the generated UAT");
+    fs.writeFileSync(path.join(phaseTemp, "218-VERIFICATION.md"), verification);
 
     const automatedPlan = `---\nautomation_contract: backend-zero-human\n---\n<tasks>\n<task type="auto"><verify><automated>mix test</automated></verify></task>\n</tasks>\n`;
     assert.equal(validateBackendZeroHumanPlan(automatedPlan), true);

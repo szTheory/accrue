@@ -37,10 +37,18 @@ on:
     # `guides/testing-live-stripe.md`.
     - cron: '0 6 * * *'
 
+# SL-F (quick task 260917-l7v) widened this block by exactly one entry:
+# verify_pr_body_currency.mjs reads a pull request body to prove the committed
+# copy matches the published one. Never `pull-requests: write`, and never
+# convert a trigger to `pull_request_target` -- SL-A's
+# --require-no-pull-request-target goes red if anyone does, which is the
+# intended interlock. verify_provider_proof.mjs asserts this block verbatim,
+# so any further widening must be argued there too, not just here.
 permissions:
   actions: read
   checks: read
   contents: read
+  pull-requests: read
 
 jobs:
   provider-proof-trigger:
@@ -151,6 +159,49 @@ jobs:
           node --test --test-reporter=tap scripts/ci/verify_pipefail_grep_idiom.mjs &&
           node scripts/ci/verify_pipefail_grep_idiom.mjs --fixtures --require-idiom-ban &&
           node scripts/ci/verify_pipefail_grep_idiom.mjs --repo . --require-idiom-ban
+
+      # Quick task 260917-l7v (SL-G): 232-UAT.md's started:/updated: used to
+      # be derived from 232-VERIFICATION.md's verified: field, while
+      # VERIFICATION's covered_digest covers the UAT artifact -- a
+      # DERIVES-then-COVERS cycle where every verifier run re-staled the
+      # digest it had just satisfied. The cycle is broken at its source
+      # (verify_executable_uat_contract.mjs now derives those timestamps from
+      # the phase's own SUMMARY completed: dates), and this guard proves it:
+      # cycle detection over declared derived_from:/covered_files: edges,
+      # byte-level regeneration fixed-point, and covered_digest truth against
+      # the actual covered files -- closing the hand-written-digest escape
+      # hatch that broke the cycle by hand before this task.
+      - name: Artifact fixed-point and derivation-cycle guard (SL-G)
+        run: >-
+          node --test --test-reporter=tap scripts/ci/verify_artifact_fixed_point.mjs &&
+          node scripts/ci/verify_artifact_fixed_point.mjs --fixtures --require-acyclic --require-fixed-point --require-digest-match &&
+          node scripts/ci/verify_artifact_fixed_point.mjs --repo . --require-acyclic --require-fixed-point --require-digest-match
+
+      # Quick task 260917-l7v (SL-C): repo-wide census of a sensitive
+      # third-party reference, replacing a per-file `grep -c <one file> -> 0`
+      # check that under-measured its own subject. Primary invariant is the
+      # scope lock (the reference may appear only under `.planning/`, never in
+      # anything that would reach a published Hex tarball); the count ratchet
+      # is secondary and one-directional. Uses no CI secrets, so it behaves
+      # identically on fork pull requests. All output is redacted.
+      # Quick task 260917-l7v (SL-F): a committed pull-request body must match
+      # the live body it represents. Fails closed on a missing credential --
+      # never skips, because skip-when-unavailable is how a gate goes vacuous.
+      # Expect a TRUE transient red when a body edit is committed before
+      # `gh pr edit <n> --body-file <path>` is run; the gate prints that command.
+      - name: Committed PR body matches the live PR body (SL-F)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          node --test --test-reporter=tap scripts/ci/verify_pr_body_currency.mjs &&
+          node scripts/ci/verify_pr_body_currency.mjs --fixtures --require-currency &&
+          node scripts/ci/verify_pr_body_currency.mjs --repo . --expected-repository szTheory/accrue --require-currency --min-declared 1
+
+      - name: Sensitive token census (SL-C)
+        run: >-
+          node --test --test-reporter=tap scripts/ci/verify_sensitive_token_census.mjs &&
+          node scripts/ci/verify_sensitive_token_census.mjs --fixtures --require-scope-lock --require-ratchet --require-no-cleartext &&
+          node scripts/ci/verify_sensitive_token_census.mjs --repo . --census .planning/hygiene/sensitive-token-census.json --require-scope-lock --require-ratchet --require-no-cleartext
 
       - name: Set up BEAM for reference-scenario verification
         uses: erlef/setup-beam@v1

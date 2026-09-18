@@ -56,7 +56,12 @@ function stepRegion(job, stepId) {
 
 function assertWorkflowContract(workflow) {
   const permissions = workflow.match(/^permissions:\n((?:  [a-z-]+: [a-z]+\n)+)/m)?.[1];
-  assert.equal(permissions, "  actions: read\n  checks: read\n  contents: read\n", "top-level permissions must remain exactly read-only");
+  // Widened once, deliberately, by quick task 260917-l7v (SL-F): reading a
+  // pull request body needs `pull-requests: read`. Everything here stays
+  // READ-only -- no `write` scope may ever be added to this string without a
+  // recorded argument, which is the whole point of asserting it verbatim.
+  assert.equal(permissions, "  actions: read\n  checks: read\n  contents: read\n  pull-requests: read\n", "top-level permissions must remain exactly read-only");
+  assert.ok(!/: *write/.test(permissions), "no write scope may appear in the top-level permissions block");
   for (const jobId of ["host-integration", "playwright-e2e", "release-gate", "provider-proof-trigger", "live-stripe", "provider-proof-incident"]) {
     jobBody(workflow, jobId);
   }

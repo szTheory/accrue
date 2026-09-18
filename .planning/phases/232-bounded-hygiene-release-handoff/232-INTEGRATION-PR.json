@@ -1,6 +1,7 @@
 {
   "schema": 1,
   "repository": "szTheory/accrue",
+  "pr": 45,
   "claims": [
     {
       "id": "C1",
@@ -155,7 +156,7 @@
         "- This PR does not merge a Release Please PR, publish to Hex, or move a tag; it only opens (or updates) one integration pull request for review.",
         "  Unchanged before and after: `gh pr list --state open --search \"chore: release\"` and `git ls-remote --tags origin | wc -l`.",
         "",
-        "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+        "\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)"
       ]
     }
   ]

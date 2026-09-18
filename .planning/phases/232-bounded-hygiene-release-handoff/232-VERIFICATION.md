@@ -56,7 +56,18 @@ covered_files:
   - "scripts/ci/verify_phase230_archive_invariants.mjs"
   - "scripts/ci/verify_pr_body_contract.mjs"
   - "scripts/ci/verify_release_pr_readiness.sh"
-covered_digest: "v1:sha256:0a8d3dcf5c641e9f5763101fd4e1cb03c0a4a11f7cdcbf99b8665dc14c6d7474"
+covered_digest: "v1:sha256:538c699258c5ab4c17af8c5cf6ea81e79dd9ceb4f488f75b23ddf2665f168948"
+# covered_digest is GSD's covered-input fingerprint (#4155), not this repo's to redefine:
+# canonicalize covered_files (posix-normalize, de-dup, sort), hash each file's bytes,
+# aggregate sha256 over `v1\n` + `<rel>\n<sha256(bytes)>\n` per entry.
+# CORRECTED 2026-09-17: the first cut of this stamp was computed by
+# scripts/ci/verify_artifact_fixed_point.mjs's own formula -- a rolling sha256 over
+# `path \0 bytes \0` -- which emitted the SAME `v1:sha256:` tag over a DIFFERENT
+# definition. The guard read this phase as matching while the GSD runtime read it as
+# permanently stale, and no amount of re-verification could have cleared it. The guard
+# now reproduces GSD's formula byte-for-byte, pinned by a golden vector and a negative
+# control over the superseded formula. Recompute and commit this value whenever any
+# covered_files entry's bytes change -- --require-digest-match enforces it.
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:

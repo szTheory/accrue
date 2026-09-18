@@ -51,3 +51,10 @@ prompts/accrue-brand-book.md
 # Claude Code local scheduler lock — machine-local runtime state (session id / pid),
 # not shared repo state.
 .claude/scheduled_tasks.lock
+
+# GSD-derived phase/milestone state, regenerated on every GSD step. .planning/STATE.md
+# is the committed authority; this file is a projection of it and of ROADMAP.md, and
+# .planning/STATE.md itself names it as one of the two files "permitted to move" after
+# an inventory capture. Committing a projection of a committed authority is the
+# derivation cycle scripts/ci/verify_artifact_fixed_point.mjs exists to forbid.
+.planning/state.json

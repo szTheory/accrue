@@ -28,7 +28,10 @@ defmodule Accrue.Processor.StripeConnectContractTest do
         Application.delete_env(:accrue, :stripe_secret_key)
       end
 
-      if Process.whereis(Transport), do: Agent.stop(Transport)
+      # Same TOCTOU race as stripe_entitlements_contract_test.exs: the linked
+      # Agent is already dying when this callback runs, so whereis-then-stop can
+      # exit with :noproc and fail an otherwise-passing test.
+      stop_transport(Process.whereis(Transport))
     end)
 
     :ok
@@ -128,6 +131,14 @@ defmodule Accrue.Processor.StripeConnectContractTest do
       |> Enum.map(&elem(&1, 1))
 
     assert expansions == ["latest_charge.balance_transaction"]
+  end
+
+  defp stop_transport(nil), do: :ok
+
+  defp stop_transport(pid) when is_pid(pid) do
+    Agent.stop(pid)
+  catch
+    :exit, _ -> :ok
   end
 
   defp put_responses(responses) do

@@ -162,6 +162,16 @@ export function renderBody(sidecar) {
   if (!Array.isArray(sidecar.body) || sidecar.body.length === 0) fail("sidecar.body must be a non-empty array of blocks");
   const claims = new Map((sidecar.claims || []).map((claim) => [claim.id, claim]));
   const lines = [];
+  // SL-F declaration. The sidecar stays the single authority: if a body is
+  // published as a pull request, the sidecar says which one and the renderer
+  // emits the marker, rather than the marker being hand-added to the markdown
+  // and breaking the byte-exact join. verify_pr_body_currency.mjs strips this
+  // line again before comparing against the live body, which does not carry it.
+  if (sidecar.pr !== undefined) {
+    if (!Number.isInteger(sidecar.pr) || sidecar.pr <= 0) fail("sidecar.pr must be a positive integer pull request number");
+    if (typeof sidecar.repository !== "string" || sidecar.repository === "") fail("sidecar.pr requires sidecar.repository");
+    lines.push(`<!-- pr: https://github.com/${sidecar.repository}/pull/${sidecar.pr} -->`, "");
+  }
   for (const block of sidecar.body) {
     if (block.kind === "markdown") {
       if (!Array.isArray(block.lines)) fail("a markdown block has no lines array");
@@ -245,13 +255,35 @@ function scenarioValidatorsRejectFlagLikeAndTraversal() {
   assert.doesNotThrow(() => VALIDATORS.sha("9b50ce6a080b684263de6c53d54e0726df077fa2", "C1.approving_sha"));
 }
 
+function scenarioRendersPrDeclaration() {
+  const sidecar = sampleSidecar();
+  sidecar.pr = 45;
+  const lines = renderBody(sidecar).split("\n");
+  assert.equal(lines[0], "<!-- pr: https://github.com/szTheory/accrue/pull/45 -->");
+  assert.equal(lines[1], "");
+}
+
+function scenarioRejectsMalformedPr() {
+  for (const bad of [0, -1, "45", 4.5]) {
+    const sidecar = sampleSidecar();
+    sidecar.pr = bad;
+    assert.throws(() => renderBody(sidecar), /sidecar\.pr must be a positive integer/);
+  }
+  const noRepo = sampleSidecar();
+  noRepo.pr = 45;
+  delete noRepo.repository;
+  assert.throws(() => renderBody(noRepo), /sidecar\.pr requires sidecar\.repository/);
+}
+
 const SCENARIOS = [
   ["the projection is deterministic and emits a pasteable command plus the claim id marker", scenarioRendersDeterministically],
   ["an unknown claim kind fails the render, naming the frozen table's keys", scenarioUnknownKindInRender],
   ["a body block referencing a claim id absent from the sidecar fails the render", scenarioBodyReferencesMissingClaim],
   ["an unknown body block kind fails the render", scenarioUnknownBlockKind],
   ["a sidecar with an empty body fails the render", scenarioEmptyBodyFails],
-  ["the pure validators reject flag-like values, range syntax, traversal, and non-integer expectations", scenarioValidatorsRejectFlagLikeAndTraversal]
+  ["the pure validators reject flag-like values, range syntax, traversal, and non-integer expectations", scenarioValidatorsRejectFlagLikeAndTraversal],
+  ["a sidecar declaring pr emits the SL-F declaration as the first two lines", scenarioRendersPrDeclaration],
+  ["a sidecar declaring a malformed pr, or a pr without a repository, is rejected rather than rendered", scenarioRejectsMalformedPr]
 ];
 
 export function verifyFixtures() {
