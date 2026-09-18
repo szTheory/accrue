@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## [1.6.0](https://github.com/szTheory/accrue/compare/accrue-v1.5.1...accrue-v1.6.0) (2026-09-18)
+
+
+### Features
+
+* **accrue:** add canonical Accrue.Env resolver ([2de4389](https://github.com/szTheory/accrue/commit/2de4389b44f03c512fdc06a23b0ee75156d34314))
+
+
+### Bug Fixes
+
+* **227:** WR-01 validate automation per task ([d07fcc0](https://github.com/szTheory/accrue/commit/d07fcc08753e427b39b64bbd95ea5b8e110614cf))
+* **232-08:** remove degraded phase-200 shadow directory (finding 2) ([3743f8a](https://github.com/szTheory/accrue/commit/3743f8a85c5f39b5cf5a497a785edb5837067b19))
+* **232-10:** repair two real regressions found by re-gating the re-cut SHA ([11d4218](https://github.com/szTheory/accrue/commit/11d421830f8d2672ea960e615e26916703a469be))
+* activate live proration subscription ([6ee7e98](https://github.com/szTheory/accrue/commit/6ee7e985f01eecab4e3824f981ba88214434df05))
+* align live Stripe provider contracts ([3e9d6cb](https://github.com/szTheory/accrue/commit/3e9d6cbc2affe13ef932a0ef7d1390babec4a8c9))
+* finalize live Stripe payment fixtures ([9bd7e4f](https://github.com/szTheory/accrue/commit/9bd7e4f65fc09a638478bf62917b60ad6928bdf7))
+* normalize typed Stripe invoice lines ([0e5378f](https://github.com/szTheory/accrue/commit/0e5378faabbe98dcded89e88fb2851934ba26916))
+* pay initial live proration invoice ([ed4aaa8](https://github.com/szTheory/accrue/commit/ed4aaa887f61c11d1dd83735d5f773eb16dd6d8c))
+* prove Stripe proration fidelity ([1d909ad](https://github.com/szTheory/accrue/commit/1d909ada4b43a68b36d8b4e7548da4f249a4ee15))
+* resolve milestone verification gaps ([87e0ebf](https://github.com/szTheory/accrue/commit/87e0ebf512bce76208140017eba20ecc83688ba0))
+* restore format and kept verifier guard ([ac2814f](https://github.com/szTheory/accrue/commit/ac2814fc9c2790815b191156f83b6059ccd75823))
+* scope live proration invoice ([44a825a](https://github.com/szTheory/accrue/commit/44a825a2c028d5c805ae699dc7e1c2e3b268d48c))
+* **test:** close the TOCTOU race that turns Agent teardown into a red trunk ([f2fecaa](https://github.com/szTheory/accrue/commit/f2fecaa76698545952999d437519e5bdff44373b))
+
 ## [1.5.1](https://github.com/szTheory/accrue/compare/accrue-v1.5.0...accrue-v1.5.1) (2026-08-30)
 
 ### Bug Fixes
