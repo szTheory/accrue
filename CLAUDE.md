@@ -208,6 +208,61 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 
 
 
+## Agent Working Discipline
+
+Hard-won from real incidents in this repo. These are not style preferences.
+
+### Never run a destructive git command while work is uncommitted
+
+`git reset --hard`, `git checkout -- <path>`, and `git clean -fd` silently
+discard uncommitted working-tree changes. On 2026-09-18 a `git reset --hard
+HEAD~1`, used only to drop a throwaway probe commit, wiped 612 files of
+finished, gate-passing work. Earlier in the same session a `git checkout --`
+on four files silently reverted part of the same change set.
+
+- **Commit verified work the moment it passes.** Do not accumulate a large
+  uncommitted change set "until the end". A finished, green change sitting
+  uncommitted is the only thing that can be lost.
+- To drop a commit but keep the tree, use `git reset --soft`. Reach for
+  `--hard` only with a clean tree, and say why.
+- **Never exercise git behavior (hooks, resets, merges) in the live working
+  tree.** Use `mktemp -d` + `git init`, or a scratch worktree. This is why
+  `verify_no_home_paths.sh --self-test` builds a throwaway repo.
+
+### A check that finds nothing must be proved able to find something
+
+This repo already enforces the principle in code -- the sensitive-token census
+fails an entry whose pattern matches zero occurrences ("a pattern that matches
+nothing cannot be evidence of anything"), and every `scripts/ci` verifier ships
+`--self-test` / `--fixtures` with negative controls. Apply the same standard to
+ad-hoc verification during a session.
+
+- A `0 results` outcome is only evidence of absence once the same command has
+  been shown to return a hit on a known-positive input.
+- **Known footgun:** `git grep -c -- "<pattern>"` puts `--` before the pattern,
+  so git parses it as a pathspec and reports nothing. It returns clean on a
+  dirty repo. Use `git grep -c -e "<pattern>"` or `git grep -lI -i -e
+  "<pattern>"`. This exact mistake masked the data loss above for several
+  steps.
+
+### A guard must never spell out what it guards against
+
+A PII or secret check that hardcodes the username, token, or name it blocks
+re-introduces that string in a file that ships. Derive it at runtime (e.g.
+`basename "$HOME"`), match a generic class against an allowlist, or keep the
+pattern bracket-escaped and digest-pinned the way
+`.planning/hygiene/sensitive-token-census.json` does. Redact offending values
+in the guard's own output.
+
+### Milestone close breaks contracts that read `.planning/phases/`
+
+`/gsd-complete-milestone` archives phase directories into
+`.planning/milestones/<version>-phases/`. Any verifier resolving
+`.planning/phases/<current_phase>-*` or a recorded `covered_files` path fails
+on that correct, routine move. Add an archive-aware fallback rather than
+reverting the archive, and keep the *recorded* path string in any digest so
+archival alone cannot perturb a fingerprint.
+
 <!-- GSD:profile-start -->
 ## Developer Profile
 
