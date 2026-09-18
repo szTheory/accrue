@@ -1,40 +1,38 @@
 ---
-gsd_state_version: "1.0"
+gsd_state_version: 1.0
 milestone: v1.62
 milestone_name: Release Integration & Repository Hygiene
-current_phase: 232
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 232 complete — all phases complete
-last_updated: "2026-09-17T19:14:00.687Z"
-last_activity: 2026-09-17
-last_activity_desc: Phase 232 complete
-state_head: 4e7715f772d763d7fe6c31f426ee6fafcc66becd
+last_updated: "2026-09-18T15:14:54.513Z"
+last_activity: 2026-09-18
+last_activity_desc: Milestone v1.62 completed and archived
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 44
   completed_plans: 44
   percent: 100
+current_phase: 232
+state_head: 4e7715f772d763d7fe6c31f426ee6fafcc66becd
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-15)
+See: `.planning/PROJECT.md` (updated 2026-09-18)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 232 — Bounded Hygiene & Release Handoff
+**Current focus:** Planning next milestone. v1.62 shipped a *reviewable, per-lane-proved* release candidate, not a green one — the candidate SHA is red on `docs-contracts-shift-left`, `release-gate`, and `phase18-tax-gate`, with fixes already on the milestone line. Written path forward: push the phase-close commits, re-run CI at the new head, confirm the gates, merge PR #45, then run Release Please.
 
 ## Current Position
 
-Phase: 232
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-09-17 — Phase 232 complete
-
-Progress: [██████████] 100% (2/4 phases complete; 27/27 plans in Phases 229-230)
+Phase: Milestone v1.62 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-09-18 — Milestone v1.62 completed and archived
 
 ## Performance Metrics
 
@@ -190,6 +188,7 @@ None yet.
   `accrue_admin/lib` (`use Mailglass.Mailable`, `Mailglass.Message`, `Mailglass.Renderer`).
   "Stays capped, documented" is a legitimate outcome; the README half is cheap and standalone.
   See `.planning/seeds/SEED-008-mailglass-downstream-major-cap.md`.
+
 - **Pre-existing, out of scope for Phase 230:** `.github/workflows/ci.yml:611` matches phase 190's
   PRE-ARCHIVE path (`.planning/phases/190-…`) inside a `grep -Eq` against a changed-files listing.
   Phase 190 is archived, so that alternation branch no longer matches anything and the relevance
@@ -199,8 +198,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- Remote `main` and the v1.61 lineage have diverged; the local `main` ref is stale and independently divergent.
-- Four audit-closure commits are not published, and the required live-CI monitor is unavailable; both need honest evidence or an explicit waiver before release handoff.
+- **Resolved by v1.62:** the `main`/v1.61 divergence, the stale local `main` ref, the four unpublished audit-closure commits, and the unavailable live-CI monitor. All are reconciled into the integration candidate with committed evidence.
+- **Open:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
+- **Open (maintainer decision):** the adopter name `getfluent` appears in 34 places across 16 files on the published candidate branch, as public branch `refs/heads/fix/getfluent-1.5.1`, and as head of merged public PR #41. No credential, token, PII, or vulnerability — a business-relationship disclosure, classified *retained / maintainer-decided*.
+- **Open (coverage):** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
 
 ### Quick Tasks Completed
 
@@ -219,6 +220,7 @@ None yet.
 |---|---|---|
 | requirement | HOST-01..03 | Deferred at v1.60 override closeout |
 | requirement | READY-01..02 | Deferred at v1.60 override closeout |
+| seed | SEED-008-mailglass-downstream-major-cap | dormant — acknowledged and deferred at v1.62 override closeout (2026-09-18) |
 
 ## Post-v1.48 Pause Rule
 
@@ -371,3 +373,7 @@ leave them. Renaming would invalidate the frozen manifest (the old names are
 baked into an immutable capsule pinned by the committed inventory's
 manifest_sha256), so it is only free when a NEW capsule is minted. Revisit then.
 Convention going forward: no adopter, customer or personal names in ref names.
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

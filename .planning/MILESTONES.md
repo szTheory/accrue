@@ -1,12 +1,37 @@
 # Milestones
 
-## v1.62 Release Integration & Repository Hygiene (In progress; Phase 230 complete 2026-09-15)
+## v1.62 Release Integration & Repository Hygiene (Shipped: 2026-09-18)
 
-**Status:** Executing. Phase 230 (Reviewable History Integration) is complete; Phases 231 (Exact-SHA Release Gate Proof) and 232 (Bounded Hygiene & Release Handoff) remain.
+**Phases completed:** 4 phases, 44 plans (229: 20, 230: 7, 231: 6, 232: 11)
 
-**Phase 230 outcome:** Built `integration/v1.62-candidate` -- a single `--no-ff` merge commit (`4d45002cafb3846810b84ff1afd84e7418476c50`, live tip `bab50d92be2695b12d5853e7d578e600376e73d0` after two declared post-merge commits) -- reconciling remote `main` (`d30fc25d`) with the full v1.61 lineage and the four post-archive closure commits, without rewriting published history or moving the `v1.61` tag. Recomputed scope: 337 files changed (223 `.planning/`-only, 114 source), 527 commits (265 `.planning/`-only). The excluded-commit ledger (`230-DISPOSITIONS.json`) records exactly 80 abandoned local-`main` commits (27 `excluded-rejected`, 53 `excluded-superseded`) each with a tree- and requirement-level supersession proof, plus one `carried-on-candidate` row and one `published_elsewhere` row. The declared-additions ref-exceptions ledger carries `row_count: 8`. PR #44 (the superseded `fix/release-boot-env-resolver` branch, whose pushed head was local `main` plus 4 commits, not a clean cherry-pick) is closed unmerged with no public comment posted (maintainer-authorized privacy deviation from the D-10 default) -- its four useful commits are already on the candidate as exact patch-id matches. A code-only sibling review branch (`review/v1.62-candidate-code-only`) narrows the reviewer's read surface to 114 source files. `origin/main` is unchanged throughout; nothing was pushed, merged, or force-pushed.
+**Key accomplishments:**
 
-**D-34 handoff to Phase 232:** the canonical worktree `dirty` boolean is currently pinned `true`; Phase 232 fully cleaning the tree will flip it `true` -> `false`, which will fail strict re-verification of any capsule minted against the current state. Expected transition, not a defect.
+- **Repository truth & recovery safety (229).** One committed, privacy-safe inventory covering local and remote `main`, the v1.61 lineage and tag, release branches, worktrees, open PRs, untracked paths, ten ship windows, and planning state — with all 109 frozen refs independently verified in the actual bundle. Recovery is a physically isolated, exclusively published, mode-0600 out-of-repo capsule using argv-array restoration (never shell command text) so hostile ref names cannot execute. A read-only, repository-bound Actions monitor lists, inspects, and watches under hard timeout and polling bounds, surfacing every completed non-success through exit 69.
+- **Reviewable history integration (230).** `integration/v1.62-candidate` built as a single `--no-ff` merge by pure git plumbing, uniting the diverged `origin/main` with the full v1.61 lineage and all four post-archive closure commits — no push, no force-push, no tag movement. The excluded-commit ledger disposes all 80 abandoned local-`main` commits with tree- and requirement-level supersession proofs (never `git cherry`), and the rollback point was proved by execution in a fresh scratch clone. Superseded PR #44 closed unmerged.
+- **Exact-SHA release gate proof (231).** 19 declared lanes recorded under a closed `proved`/`failed`/`skipped`/`advisory`/`non_run` lexicon with **no aggregate green/passing boolean by design** — 11 proved, 1 real failure, 1 advisory, 6 non-run each with a named reason — backed by a real `workflow_dispatch` run (`35100620086`) recorded with its actual `conclusion: failure`. Every former ship window re-derived and disposed as fixed or explicitly waived.
+- **Bounded hygiene & release handoff (232).** A shared realpath-resolved module-boundary guard (`isMainModule`) migrated across the `scripts/ci` cohort with its self-tests merge-blocking; the window-disposition renderer's fall-through if-chain replaced by a total, fail-closed `(disposition, state)` pair map so a failing lane can no longer be laundered as ship-safe; all 24 live untracked paths, worktrees, debug sessions, and remote branches classified with the no-deletion decision encoded as an unrepresentable schema constraint; a live Release Please readiness proof (1.5.1 → 1.6.0 lockstep across all three packages, 7 planned updates, zero truncation); and PR #45 written against a machine-checkable PR-body contract.
+
+**Delivered:** A reviewable, provenance-backed, per-lane-proved v1.62 release candidate with reproducible repository truth and recoverable state — reconciled without rewriting one byte of published history.
+
+**Not delivered, by design:** a *green* candidate. Phase 231's charter was to prove releasability from honest evidence, not to achieve it. The frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but landing them in the frozen candidate would require a ref rewrite that invariant D-47 forbids. **Path forward:** push the phase-close commits, re-run CI at the new head, confirm the gates, merge PR #45, then run Release Please.
+
+**Verification:** Override closeout. All 4 phases `passed` with `behavior_unverified: 0` and `gaps: []`; three carry re-verification stamps after shared covered files moved under later phases (229 re-ran 61 assertions across 5 suites, 230 re-ran 51 across 4, 231 re-ran 135 across 10 plus four strict fixture runs). Milestone audit status `tech_debt`: 14/14 requirements, 4/4 phases, 5/5 integration seams, 1/1 E2E flow, **0 blockers**, 0 orphaned requirements. Anti-pattern scan clean.
+
+**Known verification overrides:** 1 (see STATE.md Deferred Items) — dormant **SEED-008** (`mailglass ~> 1.0` caps every downstream consumer at 1.x), acknowledged and deferred.
+
+### Known Gaps / Carried Debt
+
+- Candidate SHA red on its own merge-blocking cohort (above). The entire distance between this milestone and an actual release.
+- **Snapshot records bound to mutable state**, twice: 230 pinned a disposition to a branch *name* instead of a 40-hex object (the re-cut moved it); 231 asserted an exact 1:1 join against an *append-only* ledger (232 appended rows 11-14). Neither invalidates a behavior; both belong in next-milestone conventions.
+- **PR-body drift on PR #45**, twice from one root cause — a committed file asserting byte-equality with a remote surface the commit cannot update. Fix structurally (`gh pr edit --body-file` after push, or restate head-relative), not a third patch.
+- **`getfluent` in public refs** — 34 occurrences across 16 files on the published candidate branch, plus public branch `refs/heads/fix/getfluent-1.5.1` and merged public PR #41. No credential, token, PII, or vulnerability; a business-relationship disclosure classified *retained / maintainer-decided* and still open as a standalone decision.
+- **`231-REVIEW.md` debt:** WR-01 (`--expected-repository` accepted but never checked), WR-02 (`--require-event-class`/`--require-exit-codes` vacuously pass on zero run-kind records), WR-03 (`OUT_OF_COHORT_LANES` hand-maintained with no live drift check).
+- **Nyquist coverage partial:** 229 genuine PARTIAL, 230 MISSING, 231/232 `draft` (never reconciled, so their `nyquist_compliant: false` is not authoritative). Discovery only; nothing auto-run.
+- **Pre-existing, unowned:** `.github/workflows/ci.yml:611` matches archived phase 190's PRE-ARCHIVE path, so that relevance-gate alternation has quietly stopped firing.
+
+**Stats:** 291 files changed, +62,618/-585 across 400 commits; 2026-09-13 → 2026-09-18.
+
+**Archives:** [`milestones/v1.62-ROADMAP.md`](milestones/v1.62-ROADMAP.md), [`milestones/v1.62-REQUIREMENTS.md`](milestones/v1.62-REQUIREMENTS.md), [`milestones/v1.62-MILESTONE-AUDIT.md`](milestones/v1.62-MILESTONE-AUDIT.md), [`milestones/v1.62-phases/`](milestones/v1.62-phases/).
 
 ---
 

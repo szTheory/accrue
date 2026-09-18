@@ -1708,12 +1708,61 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 ---
 
+## Milestone: v1.62 — Release Integration & Repository Hygiene
+
+**Shipped:** 2026-09-18
+**Phases:** 4 | **Plans:** 44
+
+### What Was Built
+
+- Reproducible repository truth: one committed inventory covering local/remote `main`, the v1.61 lineage and tag, release branches, worktrees, open PRs, untracked paths, ship windows, and planning state — plus immutable, mode-0600 out-of-repo recovery capsules with executably re-proved rollback points.
+- A provenance-backed integration candidate (`integration/v1.62-candidate`) built by pure git plumbing with five live ancestry gates, an 80-commit excluded-set ledger disposed at tree and requirement level, and a scratch-clone-executed revert proof — without pushing to `main` or moving the v1.61 tag.
+- Exact-SHA release gate evidence: 19 declared lanes recorded under a closed `proved`/`failed`/`skipped`/`advisory`/`non_run` lexicon with no aggregate green boolean, backed by a real `workflow_dispatch` run recorded with its actual `failure` conclusion.
+- Bounded hygiene and release handoff: a shared realpath-resolved module-boundary guard migrated across the `scripts/ci` cohort, a total fail-closed `(disposition, state)` bucket map that can no longer launder a failing lane as ship-safe, a live Release Please readiness proof, and PR #45.
+
+### What Worked
+
+- Five collect/render/verify evidence triads with exact-multiset comparison meant add/remove/rename/type/digest drift fell out of one assertion instead of a bespoke diff per artifact.
+- The no-transcription rule (D-15) paid for itself repeatedly: every plan-authored file list had rotted by execution time, and re-deriving the census live found 4 no-guard files where the plan said 1, and 8 vacuous tests where it said 3.
+- Honest lexicons beat green booleans. Because the schema had no way to express "overall pass," a genuinely red candidate could be recorded accurately instead of being rounded up — and the audit could then say plainly that the milestone is closeable but not releasable.
+- Every plan's own real-repository acceptance criterion was treated as the authority over its declared file scope, which forced 12 deferred guard migrations to land inside the plan that actually needed them.
+
+### What Was Inefficient
+
+- Three of four phases needed re-verification stamps because later phases edited shared covered files and staled the fingerprints — the same closeout tax v1.61 recorded and did not fix.
+- The candidate was re-cut twice (231, then 232), and the second re-cut discovered mid-flight that updating the published branch required a prohibited force-push, forcing a new branch and a maintainer checkpoint.
+- PR #45's body drifted from its committed source twice, from one root cause, and was patched rather than fixed structurally both times.
+- Quick-task `260916-gda` corrected gate wording in REQUIREMENTS.md but not in ROADMAP.md, so the milestone's own planning surface contradicted itself until the audit caught it one commit before archive.
+
+### Patterns Established
+
+- **Bind snapshots to immutable objects.** A record pinned to a branch *name* or asserting a 1:1 join against an *append-only* ledger is correct only at mint time. Pin the 40-hex object; make append-only joins prefix-tolerant.
+- **Never assert byte-equality with a remote surface the commit cannot update.** Either push the surface in the same step or restate the claim head-relative.
+- A `disposition` value must not be able to imply ship-safety independently of its `state`; encode the pair as a total map that fails closed on any unmapped combination.
+- `NODE_TEST_CONTEXT` must be *deleted*, not blanked, when spawning a guard-migrated script — `node:test` treats mere key presence as "already inside a test run" and silently turns a negative control's expected failure into a false pass.
+
+### Key Lessons
+
+1. Proving releasability and achieving it are different deliverables. Naming which one a milestone owns, up front, is what let this one close honestly on a red candidate.
+2. A documentation-truth defect in a file about to be archived is a permanent one — archive-time audits earn their cost.
+3. Corrections must be carried to every surface that carries the claim; fixing REQUIREMENTS.md and not ROADMAP.md is a half-fix that reads as a contradiction.
+4. Verification fingerprints over shared, still-moving files guarantee re-stamping at closeout. This is now the second consecutive milestone to pay it.
+
+### Cost Observations
+
+- Model mix: not reliably recorded.
+- Sessions: multi-session, 2026-09-13 → 2026-09-18 (400 commits, 291 files, +62,618/-585).
+- Notable: 20 of 44 plans went to Phase 229 alone — establishing trustworthy repository truth cost more than everything built on top of it, and the blockers that mattered surfaced only against the *real* capsule, never against generated fixtures.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.62 | multi (2026-09-13→09-18) | 4 | **REPO/INTG/GATE/HYG/REL** — established reproducible repository + recovery truth, built a provenance-backed integration candidate without rewriting published history, recorded exact-SHA gate status per lane under a closed lexicon with no aggregate green boolean, and handed off bounded evidence-backed cleanup as PR #45. Audit `tech_debt`: 14/14 requirements, 4/4 phases, 5/5 integration seams, 1/1 flow, 0 blockers. Override closeout: 1 acknowledged deferral (dormant SEED-008). Candidate SHA honestly recorded **red** — releasing is the next milestone's work. |
 | v1.61 | multi (2026-08-08→09-12) | 4 | **REL/BASE/PATH/SAFE** — repaired required-lane causes, froze a repository-bound 20-path baseline, kept a one-edge exact-three candidate at a 1,125s median, and repaired Stripe boot/live fidelity. Verified closeout: 10/10 requirements, 4/4 phases, 13/13 automated UAT checks, 0 overrides. |
 | v1.59 | multi (2026-07-31→08-05) | 8 | **MULTI-RAIL/OFFLINE** — concurrent Stripe/Apple account projection, strict Apple intake/repair, device-bound offline proof/recovery, and first-adopter release proof. Audit `tech_debt`: 29/29 requirements, 11/11 integrations, 5/5 flows, and Nyquist validation passed; Crosswake runtime remains intentionally feasibility-blocked. |
 | v1.58 | multi (2026-07-30→07-31) | 5 | **BUMP/SYNC/DOCS** — moved all packages to `lattice_stripe ~> 2.0`, shipped client-backed advisory entitlements with static/runtime grant isolation, surfaced diagnostics in the existing admin detail, and closed writer/pagination truth through two audit-driven decimal phases. Audit `tech_debt`: 11/11 requirements and 5/5 flows pass. |

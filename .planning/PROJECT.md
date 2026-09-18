@@ -33,7 +33,9 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest fully shipped milestone: v1.61 — CI Evidence & Critical-Path Hardening, shipped 2026-09-12.** Required release and Admin failures now have trace-backed incident classification; CI has a privacy-safe, repository-bound baseline and explicit provider proof states; and the retained critical-path candidate reduced the measured median from 2,083 seconds to 1,125 seconds without removing required release, host, browser, artifact, or provider evidence. Crosswake runtime capability remains `feasibility_blocked` pending physical-device evidence.
+**Latest fully shipped milestone: v1.62 — Release Integration & Repository Hygiene, shipped 2026-09-18.** The repository now has reproducible branch/worktree/artifact/ship-window truth with immutable recovery capsules, a provenance-backed integration candidate built without rewriting published history, exact-SHA release-gate evidence recorded per lane with no aggregate green boolean, and evidence-backed cleanup handed off as PR #45. The candidate SHA is honestly recorded as **red** on `docs-contracts-shift-left`, `release-gate`, and `phase18-tax-gate`; fixes exist on the milestone line and land at the new head, so v1.62 delivers a *reviewable, provably-measured* release candidate, not a green one.
+
+**Prior fully shipped milestone: v1.61 — CI Evidence & Critical-Path Hardening, shipped 2026-09-12.** Required release and Admin failures now have trace-backed incident classification; CI has a privacy-safe, repository-bound baseline and explicit provider proof states; and the retained critical-path candidate reduced the measured median from 2,083 seconds to 1,125 seconds without removing required release, host, browser, artifact, or provider evidence. Crosswake runtime capability remains `feasibility_blocked` pending physical-device evidence.
 
 **Phase 223 complete (2026-08-06):** the reusable iOS-compatible SwiftPM offline client now preserves canonical ES256 proof verification, authenticated atomic cache recovery, durable observed-time rollback protection, bounded compact-proof/JSON admission, host-owned reconnect and display seams, and deterministic package/iOS/reference evidence. IOS-01 through IOS-03 verified 28/28 must-haves; Phase 224 owns the Crosswake host-command bridge seam. Advisory code review recorded a follow-up cached-read versus concurrent signed-denial race in `223-REVIEW.md`; it must be resolved before relying on concurrent-cache behavior beyond the verified scenario coverage.
 
@@ -43,9 +45,9 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Phase 227 complete (2026-09-12):** the exact candidate removed only the redundant `admin-drift-docs` dependency from host integration. Three successful, first-attempt workflow-dispatch runs at one candidate SHA measured 1,179s, 1,125s, and 1,079s (median 1,125s), clearing the frozen 1,666s median and 2,602s maximum thresholds while retaining required release, host, browser, provider, artifact, negative-control, and rollback evidence. PATH-01, PATH-02, SAFE-01, and SAFE-02 are verified 11/11; all v1.61 implementation phases and 10/10 requirements are complete, ready for milestone closeout.
 
-## Current Milestone: v1.62 Release Integration & Repository Hygiene
+## Shipped Milestone: v1.62 Release Integration & Repository Hygiene (**shipped & archived 2026-09-18**)
 
-**Goal:** Reconcile the completed v1.61 lineage with `main` into a clean, reviewable, fully verified release candidate, then stop before cleanup becomes churn.
+**Goal (achieved):** Reconcile the completed v1.61 lineage with `main` into a clean, reviewable, fully verified release candidate, then stop before cleanup becomes churn.
 
 **Target features:**
 - Canonical branch, tag, worktree, CI, and planning truth established without rewriting history.
@@ -56,6 +58,15 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 **Key context:** This milestone is justified by a concrete operational failure: remote `main` and the v1.61 lineage have diverged substantially, the local `main` ref is stale and independently divergent, four audit-closure commits are not published, and the required live-CI monitor is unavailable. SEED-003 is selected. No product capability is being added.
 
 **Guardrails:** No feature work, force-push, tag movement, destructive cleanup, broad rename/reformat, speculative refactor, required-check weakening, merge to `main`, Release Please merge, or package publication without the workflow's explicit authorization gates. Preserve user-owned untracked files until classified. Stop once the candidate is green and remaining findings are subjective nits.
+
+**Closeout (override_closeout, 2026-09-18):** Phases 229–232 completed across 44 plans; all four verify `passed` with `behavior_unverified: 0` and `gaps: []`. The milestone audit scored 14/14 requirements, 4/4 phases, 5/5 integration seams, and 1/1 E2E flow with **zero blockers**, status `tech_debt`. One open artifact — dormant **SEED-008** (`mailglass ~> 1.0` downstream major cap) — was acknowledged and deferred, recorded in `STATE.md` Deferred Items.
+
+**Carried forward (decided, not lost):**
+- The candidate SHA is red on its own merge-blocking cohort. Path forward is already written down: push the phase-close commits, re-run CI at the new head, confirm the gates, merge PR #45, then run Release Please.
+- Two instances of the same structural mistake — snapshot records bound to mutable state (a branch *name* instead of a 40-hex object; a 1:1 join asserted against an *append-only* ledger). Worth promoting to a convention rather than rediscovering.
+- PR-body drift on PR #45 recurred twice from one root cause: a committed file asserting byte-equality with a remote surface the commit cannot update. Fix structurally (`gh pr edit --body-file` after push, or restate head-relative).
+- `getfluent` appears in 34 places across 16 files on the published candidate branch, as public branch `refs/heads/fix/getfluent-1.5.1`, and as head of merged public PR #41. No credential, token, PII, or vulnerability — a business-relationship disclosure, classified *retained / maintainer-decided* and still open as a standalone decision.
+- Nyquist coverage is partial: 229 genuine PARTIAL, 230 MISSING, 231/232 `draft` (never reconciled). Discovery only; nothing auto-run.
 
 ## Shipped Milestone: v1.61 CI Evidence & Critical-Path Hardening
 
@@ -908,4 +919,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-15 after Phase 229.*
+*Last updated: 2026-09-18 after v1.62 milestone.*
