@@ -4,6 +4,9 @@
 
 ## [1.6.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.5.1...accrue_portal-v1.6.0) (2026-09-18)
 
+### Notes
+
+* Compatibility only: the linked 1.6.0 release accepts the core canonical `Accrue.Env` resolver and the live Stripe provider-contract fixes. The core `accrue` package owns those capabilities; this package owns only its existing UI surface.
 
 ### Features
 
