@@ -1,8 +1,9 @@
 ---
 phase: 230-reviewable-history-integration
-verified: 2026-09-15T21:50:00Z
+verified: 2026-09-17T22:10:00Z
 status: passed
 score: 3/3 must-haves verified
+re_verification: "Yes — re-stamped 2026-09-17. The covered-input fingerprint went stale because Phases 231/232 modified shared covered files (.github/workflows/ci.yml, scripts/ci/README.md, collect_repository_inventory.mjs, preserve_repository_state.sh, verify_repository_inventory.mjs). All of Phase 230's CI-gated executable evidence was re-run at this HEAD and still passes (51 node --test assertions across 4 suites). One declared phase-time proof no longer reproduces for a structural reason recorded under advisory below. Supersedes the 2026-09-15T21:50:00Z report."
 covered_files:
   - ".github/workflows/ci.yml"
   - ".planning/phases/230-reviewable-history-integration/230-01-PLAN.md"
@@ -35,17 +36,19 @@ covered_files:
   - "scripts/ci/verify_integration_disposition.mjs"
   - "scripts/ci/verify_phase230_archive_invariants.mjs"
   - "scripts/ci/verify_repository_inventory.mjs"
-covered_digest: "v1:sha256:fe0d0cef4313d1da5c9316e0bfeec4bc28c6c33f929a2aaf3538be94ac5dc548"
+covered_digest: "v1:sha256:15a59afcb1873d68f01dd74ba5e7e49d49967c6dbefca2a15f5f6e6d7dbbebc8"
 behavior_unverified: 0
 overrides_applied: 0
+advisory:
+  - "230-INTEGRATION-DISPOSITION.json binds its candidate to the mutable ref NAME refs/heads/integration/v1.62-candidate (recorded object 4d45002c). Phase 232 re-cut that branch; the name now resolves to c1397fe9 and 4d45002c is not an ancestor of it. The strict verifier therefore cannot reproduce at HEAD: live scope reads total_changed_files=449 against recorded=337, and re-running with --candidate 4d45002c is rejected because the verifier requires the recorded ref NAME to match. What is unverifiable is a phase-time snapshot measurement, not a behavior — every behavioral assertion this phase makes is in CI and green at this HEAD, so behavior_unverified stays 0. Structural lesson, already fixed forward in the D-16 step of .github/workflows/ci.yml: bind a disposition record to a literal 40-hex object, never to a branch name."
 ---
 
 # Phase 230: Reviewable History Integration Verification Report
 
 **Phase Goal:** Maintainers can review one reversible integration candidate that reconciles remote `main`, intended v1.61 work, and all four post-archive audit-closure commits without rewriting published history.
-**Verified:** 2026-09-15T21:50:00Z
+**Verified:** 2026-09-17T22:10:00Z
 **Status:** passed
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — re-stamped 2026-09-17; see `re_verification` and `advisory` in the frontmatter.
 
 ## Goal Achievement
 

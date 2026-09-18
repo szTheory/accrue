@@ -1,8 +1,9 @@
 ---
 phase: 231-exact-sha-release-gate-proof
-verified: 2026-09-16T16:00:00Z
+verified: 2026-09-17T22:10:00Z
 status: passed
 score: 6/6 must-haves verified
+re_verification: "Yes — re-stamped 2026-09-17. The covered-input fingerprint went stale because Phase 232 and quick-task 260916-gda modified shared covered files (.github/workflows/ci.yml, .planning/REQUIREMENTS.md, .planning/WINDOWS.md, scripts/ci/README.md, and six collectors/renderers/verifiers). All of Phase 231's CI-gated executable evidence was re-run at this HEAD and still passes (135 node --test assertions across 10 suites, plus all four strict fixture runs). One declared phase-time proof no longer reproduces for a structural reason recorded under advisory below. Supersedes the 2026-09-16T16:00:00Z report."
 behavior_unverified: 0
 covered_files:
   - ".github/workflows/ci.yml"
@@ -42,16 +43,18 @@ covered_files:
   - "scripts/ci/verify_gate01_cohort.mjs"
   - "scripts/ci/verify_recut_candidate.mjs"
   - "scripts/ci/verify_window_dispositions.mjs"
-covered_digest: "v1:sha256:0058452ad3c9c9395a1e41530d1a6104a7881a8b4fd77c04a19456f325e4e9a2"
+covered_digest: "v1:sha256:10f8b5dcb1d9465110544c1db9113aa6cb364b7985120922c13d6c7287349ca0"
+advisory:
+  - "231-WINDOW-DISPOSITIONS.json records the 10 ship windows open at 2026-09-15T22:53:02-04:00 and asserts --require-row-join as an exact 1:1 join against .planning/WINDOWS.md. That ledger is append-only and Phase 232 added rows 11-14, so the join now reports missing=[11, 12, 13, 14] extra=[] changed=[] and cannot reproduce at HEAD by construction. What is unverifiable is a phase-time snapshot measurement, not a behavior — every behavioral assertion this phase makes is in CI and green at this HEAD, so behavior_unverified stays 0. Structural lesson: an exact 1:1 join against append-only state is a gate that is correct only at mint time. Scope the join to the rows the record itself claims, or pin the ledger revision the record was minted against."
 ---
 
 # Phase 231: Exact-SHA Release Gate Proof Verification Report
 
 **Phase Goal:** Establish one exact integration-candidate SHA and prove it releasable **from complete, honest evidence** — GATE-01 (fresh clean local checkout of the declared merge-blocking cohort), GATE-02 (real GitHub Actions proof at the exact SHA with explicit, non-fabricated provider-state semantics), GATE-03 (every open ship window fixed-or-waived with current evidence).
 
-**Verified:** 2026-09-16
+**Verified:** 2026-09-17T22:10:00Z
 **Status:** passed
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — re-stamped 2026-09-17; see `re_verification` and `advisory` in the frontmatter.
 
 ## Central Judgment: What Did This Phase Actually Promise?
 
