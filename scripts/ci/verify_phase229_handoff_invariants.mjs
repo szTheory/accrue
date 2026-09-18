@@ -13,8 +13,8 @@ import { isMainModule } from "./main_module.mjs";
 const REPOSITORY = "szTheory/accrue";
 const SHA256 = /^[0-9a-f]{64}$/;
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const CANONICAL_RECORDS = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json";
-const CANONICAL_RENDERED = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md";
+const CANONICAL_RECORDS = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json";  // archive-sweep-exempt: canonical publication TARGET of the one-shot final chain -- evidence is written to the active phase directory, never read back from an archive
+const CANONICAL_RENDERED = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md";  // archive-sweep-exempt: canonical publication TARGET of the one-shot final chain -- evidence is written to the active phase directory, never read back from an archive
 const fail = (message) => { throw new Error(message); };
 const sha256 = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex");
 const modeOf = (stat) => stat.mode & 0o7777;
@@ -239,7 +239,7 @@ function applyTestMutation(repo, capsule, boundary) {
     case "untracked": fs.writeFileSync(path.join(repo, "phase229-test-untracked"), "untracked\n"); break;
     case "ref": spawnSync("git", ["-C", repo, "tag", "-f", "phase229-test-mutation-tag", "HEAD"], { encoding: "utf8" }); break;
     case "worktree": spawnSync("git", ["-C", repo, "branch", "-f", "phase229-test-mutation-branch", "HEAD"], { encoding: "utf8" }); break;
-    case "output-tamper": for (const name of ["229-REPOSITORY-INVENTORY.json", "229-REPOSITORY-INVENTORY.md"]) { const target = path.join(repo, ".planning/phases/229-repository-truth-recovery-safety", name); if (fs.existsSync(target)) fs.appendFileSync(target, "tamper\n"); } break;
+    case "output-tamper": for (const name of ["229-REPOSITORY-INVENTORY.json", "229-REPOSITORY-INVENTORY.md"]) { const target = path.join(repo, ".planning/phases/229-repository-truth-recovery-safety", name); if (fs.existsSync(target)) fs.appendFileSync(target, "tamper\n"); } break;  // archive-sweep-exempt: synthetic fixture path under an mkdtemp repo built with the active layout, never a live read of archived evidence
     case "capsule": fs.writeFileSync(path.join(capsule, "phase229-test-capsule-mutation"), "mutation\n"); break;
     case "attestation": for (const entry of fs.readdirSync(capsule)) { if (entry.endsWith(".json") && entry !== "manifest.json") { try { fs.appendFileSync(path.join(capsule, entry), "\n// tamper"); } catch { /* ignore */ } } } break;
     default: return;

@@ -203,7 +203,7 @@ function documentedStrictFixture() {
   const repo = path.join(scratch, "repo");
   const capsule = path.join(scratch, "capsule");
   const scripts = path.join(repo, "scripts/ci");
-  const evidence = path.join(repo, ".planning/phases/229-repository-truth-recovery-safety");
+  const evidence = path.join(repo, ".planning/phases/229-repository-truth-recovery-safety");  // archive-sweep-exempt: synthetic fixture path under an mkdtemp repo built with the active layout, never a live read of archived evidence
   fs.mkdirSync(repo); fs.mkdirSync(capsule); fs.mkdirSync(scripts, { recursive: true }); fs.mkdirSync(evidence, { recursive: true });
   git(repo, ["init", "-q", "-b", "main"]);
   git(repo, ["config", "user.email", "phase229@example.invalid"]);
@@ -384,8 +384,8 @@ test("final handoff workspace snapshots reject real untracked ref and worktree d
   }
 });
 
-const CANONICAL_RECORDS_RELATIVE = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json";
-const CANONICAL_RENDERED_RELATIVE = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md";
+const CANONICAL_RECORDS_RELATIVE = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.json";  // archive-sweep-exempt: synthetic fixture path under an mkdtemp repo built with the active layout, never a live read of archived evidence
+const CANONICAL_RENDERED_RELATIVE = ".planning/phases/229-repository-truth-recovery-safety/229-REPOSITORY-INVENTORY.md";  // archive-sweep-exempt: synthetic fixture path under an mkdtemp repo built with the active layout, never a live read of archived evidence
 const TEST_OWNED_MARKER = ".phase229-test-owned";
 
 // `activeBranch` models the real phase shape, where the active execution ref is a milestone
@@ -395,7 +395,7 @@ function finalChainFixture({ activeBranch } = {}) {
   const repo = path.join(scratch, "repo");
   const capsule = path.join(scratch, "capsule");
   fs.mkdirSync(repo); fs.mkdirSync(capsule);
-  fs.mkdirSync(path.join(repo, ".planning/phases/229-repository-truth-recovery-safety"), { recursive: true });
+  fs.mkdirSync(path.join(repo, ".planning/phases/229-repository-truth-recovery-safety"), { recursive: true });  // archive-sweep-exempt: synthetic fixture path under an mkdtemp repo built with the active layout, never a live read of archived evidence
   git(repo, ["init", "-q", "-b", "main"]);
   git(repo, ["config", "user.email", "phase229@example.invalid"]);
   git(repo, ["config", "user.name", "phase229"]);
@@ -585,7 +585,7 @@ test("CR-03 published canonical pair stays strictly verifiable after its own com
   const fixture = finalChainFixture();
   const recordsPath = path.join(fixture.repo, CANONICAL_RECORDS_RELATIVE);
   const renderedPath = path.join(fixture.repo, CANONICAL_RENDERED_RELATIVE);
-  const summaryRelative = ".planning/phases/229-repository-truth-recovery-safety/229-20-SUMMARY.md";
+  const summaryRelative = ".planning/phases/229-repository-truth-recovery-safety/229-20-SUMMARY.md";  // archive-sweep-exempt: synthetic fixture path under an mkdtemp repo built with the active layout, never a live read of archived evidence
   try {
     const published = runFinalChainCli(fixture);
     assert.equal(published.status, 0, `${published.stderr}\n${published.stdout}`);

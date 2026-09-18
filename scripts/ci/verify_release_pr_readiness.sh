@@ -92,8 +92,15 @@ echo "verify_release_pr_readiness: target branch: $TARGET_BRANCH"
 # impossible. `232-ROLLBACK-POINT.json` records the object the current re-cut
 # superseded; if the target's remote tip still resolves to it, the default
 # above (or the override) was never re-pointed after a re-cut.
-ROLLBACK_RECORD="$ROOT_DIR/.planning/phases/232-bounded-hygiene-release-handoff/232-ROLLBACK-POINT.json"
-if [[ -f "$ROLLBACK_RECORD" ]]; then
+# Resolved, not hardcoded: milestone close moves phase evidence from
+# `.planning/phases/` to `.planning/milestones/<version>-phases/`, and a
+# frozen literal would turn this guard into a silent no-op the moment
+# v1.62 was archived. A failed resolve leaves the variable empty, which
+# preserves the pre-existing "record absent -> skip assertion 0" shape
+# rather than aborting under `set -e`.
+ROLLBACK_RELATIVE="$(node "$ROOT_DIR"/scripts/ci/phase_evidence_path.mjs 232-bounded-hygiene-release-handoff 232-ROLLBACK-POINT.json 2>/dev/null || true)"
+ROLLBACK_RECORD="${ROLLBACK_RELATIVE:+$ROOT_DIR/$ROLLBACK_RELATIVE}"
+if [[ -n "$ROLLBACK_RECORD" && -f "$ROLLBACK_RECORD" ]]; then
   SUPERSEDED_OBJECT=$(jq -r '.supersedes.candidate_object // empty' "$ROLLBACK_RECORD")
   TARGET_TIP=$(GH_TOKEN="$TOKEN" gh api "repos/${REPO}/commits/${TARGET_BRANCH}" --jq '.sha' 2>/dev/null) ||
     fail "target branch '$TARGET_BRANCH' does not resolve on the remote -- an unresolvable target must never read as a pass"

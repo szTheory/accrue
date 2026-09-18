@@ -141,8 +141,8 @@ jobs:
           node --test --test-reporter=tap scripts/ci/verify_pr_claims.mjs &&
           node scripts/ci/verify_pr_claims.mjs --fixtures --require-claims --require-render-join --require-remote-refs --require-no-pull-request-target &&
           node scripts/ci/verify_pr_claims.mjs --repo .
-          --claims .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.json
-          --body .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md
+          --claims "$(node scripts/ci/phase_evidence_path.mjs 232-bounded-hygiene-release-handoff 232-INTEGRATION-PR.json)"
+          --body "$(node scripts/ci/phase_evidence_path.mjs 232-bounded-hygiene-release-handoff 232-INTEGRATION-PR.md)"
           --expected-repository szTheory/accrue
           --require-claims --require-render-join --require-remote-refs --require-no-pull-request-target
           --min-executed 1
@@ -369,8 +369,8 @@ jobs:
       - name: Committed window dispositions at the pinned candidate SHA (D-16)
         run: >-
           node scripts/ci/verify_window_dispositions.mjs --repo .
-          --records .planning/phases/232-bounded-hygiene-release-handoff/232-WINDOW-DISPOSITIONS.json
-          --rendered .planning/phases/232-bounded-hygiene-release-handoff/232-WINDOW-DISPOSITIONS.md
+          --records "$(node scripts/ci/phase_evidence_path.mjs 232-bounded-hygiene-release-handoff 232-WINDOW-DISPOSITIONS.json)"
+          --rendered "$(node scripts/ci/phase_evidence_path.mjs 232-bounded-hygiene-release-handoff 232-WINDOW-DISPOSITIONS.md)"
           --expected-repository szTheory/accrue
           --candidate c1397fe9127a9b4b2b1d3a0758d57879b14f4604
           --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism
@@ -412,7 +412,7 @@ jobs:
         run: >-
           node --test scripts/ci/verify_pr_body_contract.mjs &&
           node scripts/ci/verify_pr_body_contract.mjs
-          --body .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md
+          --body "$(node scripts/ci/phase_evidence_path.mjs 232-bounded-hygiene-release-handoff 232-INTEGRATION-PR.md)"
           --expected-repository szTheory/accrue
           --require-sections --require-density
 

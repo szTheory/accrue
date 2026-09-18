@@ -133,6 +133,33 @@ function readRepoFile(repo, relative, where) {
   return path.join(repo, relative);
 }
 
+// Milestone close moves phase evidence from `.planning/phases/<slug>/...` to
+// `.planning/milestones/<version>-phases/<slug>/...`. A CONTENT claim is about
+// the bytes, not the shelf they sit on, so an archived target still resolves.
+// The recorded `claim.path` string is never rewritten -- archival alone must
+// not perturb how a claim reads, only where its bytes are found.
+//
+// `path_exists` deliberately does NOT get this fallback. Those claims assert a
+// path is ABSENT from the active tree (C6: `.planning/phases/200-...`,
+// expected=false); resolving them through the archive would find the archived
+// copy and flip a correct negative claim into a false positive -- turning the
+// guard into the opposite of what it was written to prove.
+function resolveContentTarget(repo, relative, where) {
+  const direct = readRepoFile(repo, relative, where);
+  if (fs.existsSync(direct)) return direct;
+  const prefix = ".planning/phases/";
+  if (!relative.startsWith(prefix)) return direct;
+  const milestonesRoot = path.join(repo, ".planning", "milestones");
+  if (!fs.existsSync(milestonesRoot)) return direct;
+  const matches = fs.readdirSync(milestonesRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.endsWith("-phases"))
+    .map((entry) => path.join(milestonesRoot, entry.name, relative.slice(prefix.length)))
+    .filter((candidate) => fs.existsSync(candidate))
+    .sort();
+  if (matches.length > 1) fail(`${where}: archived target resolves ambiguously across milestones: ${relative}`);
+  return matches[0] || direct;
+}
+
 // -- the frozen evaluator table -------------------------------------------
 //
 // Keyed identically to render_pr_claims.mjs's CLAIM_KINDS (a key-set
@@ -154,12 +181,12 @@ export const EVALUATORS = Object.freeze({
     return fs.existsSync(readRepoFile(repo, claim.path, `${claim.id}.path`));
   },
   file_sha256(repo, claim) {
-    const target = readRepoFile(repo, claim.path, `${claim.id}.path`);
+    const target = resolveContentTarget(repo, claim.path, `${claim.id}.path`);
     if (!fs.existsSync(target)) fail(`${claim.id}: file_sha256 target does not exist: ${claim.path}`);
     return crypto.createHash("sha256").update(fs.readFileSync(target)).digest("hex");
   },
   fixed_string_count(repo, claim) {
-    const target = readRepoFile(repo, claim.path, `${claim.id}.path`);
+    const target = resolveContentTarget(repo, claim.path, `${claim.id}.path`);
     if (!fs.existsSync(target)) fail(`${claim.id}: fixed_string_count target does not exist: ${claim.path}`);
     const text = fs.readFileSync(target, "utf8");
     return text.split("\n").filter((line) => line.includes(claim.needle)).length;
@@ -676,7 +703,40 @@ function scenarioNonRefFieldsAreNeverInspected() {
   assert.equal(assertRemoteRefsExplicit(claims), 0);
 }
 
+// SL-C: milestone close relocates phase evidence, and a content claim must
+// survive that move while a negative `path_exists` claim must NOT. Both halves
+// are asserted here because the fallback is only correct if it is asymmetric --
+// a fallback applied uniformly would silently invert C6-shaped claims.
+function scenarioArchivedContentResolvesButPathExistsDoesNot() {
+  withScratch((dir) => {
+    const archived = path.join(dir, ".planning", "milestones", "v9.99-phases", "998-fixture-archived-phase");
+    fs.mkdirSync(archived, { recursive: true });
+    fs.writeFileSync(path.join(archived, "evidence.log"), "alpha\nbeta alpha\n");
+    const recorded = ".planning/phases/998-fixture-archived-phase/evidence.log"; // archive-sweep-exempt: synthetic fixture slug created under an mkdtemp root by this scenario, never a live repository read
+    const digest = crypto.createHash("sha256").update(fs.readFileSync(path.join(archived, "evidence.log"))).digest("hex");
+
+    // Positive control: the active path is gone, yet both content evaluators
+    // reach the archived bytes through the recorded (un-rewritten) path.
+    assert.equal(fs.existsSync(path.join(dir, recorded)), false, "the active path must really be absent, or this proves nothing");
+    assert.equal(EVALUATORS.file_sha256(dir, { id: "A1", path: recorded }), digest);
+    assert.equal(EVALUATORS.fixed_string_count(dir, { id: "A2", path: recorded, needle: "alpha" }), 2);
+
+    // Negative control: `path_exists` must stay blind to the archive, so a
+    // claim asserting the active tree no longer carries the phase keeps
+    // measuring false.
+    assert.equal(EVALUATORS.path_exists(dir, { id: "A3", path: recorded }), false);
+    assert.equal(EVALUATORS.path_exists(dir, { id: "A4", path: ".planning/phases/998-fixture-archived-phase" }), false); // archive-sweep-exempt: synthetic fixture slug created under an mkdtemp root by this scenario, never a live repository read
+
+    // A content target that exists nowhere still fails closed.
+    assert.throws(
+      () => EVALUATORS.file_sha256(dir, { id: "A5", path: ".planning/phases/998-fixture-archived-phase/absent.log" }), // archive-sweep-exempt: synthetic fixture slug created under an mkdtemp root by this scenario, never a live repository read
+      /file_sha256 target does not exist/
+    );
+  });
+}
+
 const SCENARIOS = [
+  ["SL-C: an archived phase-evidence target still resolves for content claims, while path_exists stays blind to the archive", scenarioArchivedContentResolvesButPathExistsDoesNot],
   ["an unknown claim kind fails, naming the kind and the frozen table's keys, and is never skipped", scenarioUnknownKindIsNeverSkipped],
   ["a claim violating its kind's argument schema fails before any evaluator runs", scenarioSchemaViolationFailsBeforeAnyEvaluator],
   ["an argument value matching /^-/ fails at validation, before any argv is built, and nothing is executed", scenarioFlagLikeValueRejectedBeforeArgvIsBuilt],
