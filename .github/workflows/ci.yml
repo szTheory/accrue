@@ -37,10 +37,18 @@ on:
     # `guides/testing-live-stripe.md`.
     - cron: '0 6 * * *'
 
+# SL-F (quick task 260917-l7v) widened this block by exactly one entry:
+# verify_pr_body_currency.mjs reads a pull request body to prove the committed
+# copy matches the published one. Never `pull-requests: write`, and never
+# convert a trigger to `pull_request_target` -- SL-A's
+# --require-no-pull-request-target goes red if anyone does, which is the
+# intended interlock. verify_provider_proof.mjs asserts this block verbatim,
+# so any further widening must be argued there too, not just here.
 permissions:
   actions: read
   checks: read
   contents: read
+  pull-requests: read
 
 jobs:
   provider-proof-trigger:
@@ -176,6 +184,19 @@ jobs:
       # anything that would reach a published Hex tarball); the count ratchet
       # is secondary and one-directional. Uses no CI secrets, so it behaves
       # identically on fork pull requests. All output is redacted.
+      # Quick task 260917-l7v (SL-F): a committed pull-request body must match
+      # the live body it represents. Fails closed on a missing credential --
+      # never skips, because skip-when-unavailable is how a gate goes vacuous.
+      # Expect a TRUE transient red when a body edit is committed before
+      # `gh pr edit <n> --body-file <path>` is run; the gate prints that command.
+      - name: Committed PR body matches the live PR body (SL-F)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          node --test --test-reporter=tap scripts/ci/verify_pr_body_currency.mjs &&
+          node scripts/ci/verify_pr_body_currency.mjs --fixtures --require-currency &&
+          node scripts/ci/verify_pr_body_currency.mjs --repo . --expected-repository szTheory/accrue --require-currency --min-declared 1
+
       - name: Sensitive token census (SL-C)
         run: >-
           node --test --test-reporter=tap scripts/ci/verify_sensitive_token_census.mjs &&

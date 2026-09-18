@@ -36,7 +36,7 @@ covered_files:
   - "scripts/ci/verify_integration_disposition.mjs"
   - "scripts/ci/verify_phase230_archive_invariants.mjs"
   - "scripts/ci/verify_repository_inventory.mjs"
-covered_digest: "v1:sha256:a7527b8877465a8c26690c47ca66916a0e77511641624a40d236159e3b45307b"
+covered_digest: "v1:sha256:7ab86281ea9dc8ac9143a79888a9d182f47ad91584c453448fe8a0233c01e44e"
 behavior_unverified: 0
 overrides_applied: 0
 advisory:

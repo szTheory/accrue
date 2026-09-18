@@ -18,11 +18,12 @@ const fail = (message) => { throw new Error(`ci script contract: FAIL: ${message
 
 // D-32 assertion (3): the cohort floor is a live-measured, committed,
 // non-zero integer -- re-measured via `git ls-files 'scripts/ci/*.mjs' |
-// wc -l` on 2026-09-16 during this plan's own execution (result: 41). Every
+// wc -l` on 2026-09-17 during quick task 260917-l7v (result: 55; was 41 when
+// re-measured 2026-09-16). Every
 // future audit MUST re-measure this live value rather than trusting the
 // constant below (D-00/D-15): the constant only stops a SHORT OR EMPTY glob
 // from being silently reported as a pass, it is not a ceiling.
-const COMMITTED_COHORT_FLOOR = 41;
+const COMMITTED_COHORT_FLOOR = 55;
 
 // D-32 assertion (2), third exemption: a library module with no CLI
 // entrypoint is exempt from importing isMainModule. Every entry below MUST

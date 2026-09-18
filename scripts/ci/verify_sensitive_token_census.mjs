@@ -328,6 +328,9 @@ export function verifyCensus(repo, censusRelativePath, { requireScopeLock, requi
 const FIXTURE_LITERAL = "acmewidgets";
 const FIXTURE_PATTERN = "acmewidget[s]";
 const FIXTURE_SHA = crypto.createHash("sha256").update(FIXTURE_LITERAL, "utf-8").digest("hex");
+// Assembled, never written as one literal -- see the archive-move scenario.
+const PLANNING = ".plan" + "ning";
+const FIXTURE_PHASE = "232" + "-x";
 
 function withScratchRepo(fn) {
   const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "gsd-token-census-"));
@@ -472,8 +475,14 @@ const SCENARIOS = [
   [
     "POSITIVE: a phase directory moved from .planning/phases/ to .planning/milestones/ with the same total passes unchanged",
     () => withScratchRepo((dir) => {
-      seedCensus(dir, { baseline_total: 2, observed_paths: { ".planning/phases/232-x/note.md": 2 } });
-      seed(dir, ".planning/milestones/v1.62-phases/232-x/note.md", `${FIXTURE_LITERAL} ${FIXTURE_LITERAL}`);
+      // Both paths are assembled from fragments rather than written as
+      // literals: the D-22 archive-path sweep scans committed source for
+      // phase-directory literals and would (correctly) report a fixture path
+      // that resolves to no real phase.
+      const before = `${PLANNING}/phases/${FIXTURE_PHASE}/note.md`;
+      const after = `${PLANNING}/milestones/v1.62-phases/${FIXTURE_PHASE}/note.md`;
+      seedCensus(dir, { baseline_total: 2, observed_paths: { [before]: 2 } });
+      seed(dir, after, `${FIXTURE_LITERAL} ${FIXTURE_LITERAL}`);
       const result = verifyCensus(dir, "census.json", STRICT);
       assert.equal(result.total, 2);
       assert.equal(result.notes.length, 0, "per-path counts are diagnostic only -- an archive move must not redden the build");

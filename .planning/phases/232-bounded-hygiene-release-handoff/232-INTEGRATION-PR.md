@@ -1,3 +1,5 @@
+<!-- pr: https://github.com/szTheory/accrue/pull/45 -->
+
 ## What a reviewer would reject this for
 
 - One required lane is still red at this head -- `docs-contracts-shift-left` -- and it is red for exactly one reason: this phase has not minted its own executable-UAT artifact yet.
