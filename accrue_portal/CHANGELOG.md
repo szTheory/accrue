@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## [1.6.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.5.1...accrue_portal-v1.6.0) (2026-09-18)
+
+### Notes
+
+* Compatibility only: the linked 1.6.0 release accepts the core release-safe environment resolution and the live Stripe provider-contract fixes. The core `accrue` package owns those capabilities; this package owns only its existing UI surface.
+
+### Features
+
+* **230-05:** pin toolchain and re-resolve sibling lockfiles for Decimal 3 ([a81c8fb](https://github.com/szTheory/accrue/commit/a81c8fba6f25d9006fdc910d33bb85100e23cd43))
+
+
+### Bug Fixes
+
+* **232-08:** remove degraded phase-200 shadow directory (finding 2) ([3743f8a](https://github.com/szTheory/accrue/commit/3743f8a85c5f39b5cf5a497a785edb5837067b19))
+* **quick-260916-hl9:** use same-minor operator for accrue_portal sibling dep ([afff201](https://github.com/szTheory/accrue/commit/afff2018f7ee80ba92ce6dc9567ac984391fc6ff))
+
 ## [1.5.1](https://github.com/szTheory/accrue/compare/accrue_portal-v1.5.0...accrue_portal-v1.5.1) (2026-08-30)
 
 ### Notes
