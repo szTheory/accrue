@@ -39,9 +39,14 @@ defmodule Accrue.Processor.StripeEntitlementsContractTest do
         Application.delete_env(:accrue, :stripe_secret_key)
       end
 
-      if Process.whereis(EntitlementsTransport) do
-        Agent.stop(EntitlementsTransport)
-      end
+      # The Agent is started with Agent.start_link/2 from the test process, so it
+      # is already being torn down by the time this on_exit callback runs in a
+      # separate process. Looking the name up and then stopping it is a TOCTOU
+      # race: the name can still be registered on the whereis and gone by the
+      # stop, which exits the callback with :noproc and fails whichever test
+      # happened to run last. Stop the pid, and treat an already-dead Agent as
+      # the success it is.
+      stop_transport(Process.whereis(EntitlementsTransport))
     end)
 
     :ok
@@ -133,6 +138,14 @@ defmodule Accrue.Processor.StripeEntitlementsContractTest do
              )
 
     assert length(requests()) == 2
+  end
+
+  defp stop_transport(nil), do: :ok
+
+  defp stop_transport(pid) when is_pid(pid) do
+    Agent.stop(pid)
+  catch
+    :exit, _ -> :ok
   end
 
   defp put_responses(responses) do
