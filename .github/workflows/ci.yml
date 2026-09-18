@@ -169,6 +169,19 @@ jobs:
           node scripts/ci/verify_artifact_fixed_point.mjs --fixtures --require-acyclic --require-fixed-point --require-digest-match &&
           node scripts/ci/verify_artifact_fixed_point.mjs --repo . --require-acyclic --require-fixed-point --require-digest-match
 
+      # Quick task 260917-l7v (SL-C): repo-wide census of a sensitive
+      # third-party reference, replacing a per-file `grep -c <one file> -> 0`
+      # check that under-measured its own subject. Primary invariant is the
+      # scope lock (the reference may appear only under `.planning/`, never in
+      # anything that would reach a published Hex tarball); the count ratchet
+      # is secondary and one-directional. Uses no CI secrets, so it behaves
+      # identically on fork pull requests. All output is redacted.
+      - name: Sensitive token census (SL-C)
+        run: >-
+          node --test --test-reporter=tap scripts/ci/verify_sensitive_token_census.mjs &&
+          node scripts/ci/verify_sensitive_token_census.mjs --fixtures --require-scope-lock --require-ratchet --require-no-cleartext &&
+          node scripts/ci/verify_sensitive_token_census.mjs --repo . --census .planning/hygiene/sensitive-token-census.json --require-scope-lock --require-ratchet --require-no-cleartext
+
       - name: Set up BEAM for reference-scenario verification
         uses: erlef/setup-beam@v1
         with:

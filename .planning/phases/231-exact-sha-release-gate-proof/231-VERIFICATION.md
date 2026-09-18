@@ -43,7 +43,7 @@ covered_files:
   - "scripts/ci/verify_gate01_cohort.mjs"
   - "scripts/ci/verify_recut_candidate.mjs"
   - "scripts/ci/verify_window_dispositions.mjs"
-covered_digest: "v1:sha256:10f8b5dcb1d9465110544c1db9113aa6cb364b7985120922c13d6c7287349ca0"
+covered_digest: "v1:sha256:347b68a56b959e37116db2b3bd0bc9f55adabbf9b236ed17166650c24a50b337"
 advisory:
   - "231-WINDOW-DISPOSITIONS.json records the 10 ship windows open at 2026-09-15T22:53:02-04:00 and asserts --require-row-join as an exact 1:1 join against .planning/WINDOWS.md. That ledger is append-only and Phase 232 added rows 11-14, so the join now reports missing=[11, 12, 13, 14] extra=[] changed=[] and cannot reproduce at HEAD by construction. What is unverifiable is a phase-time snapshot measurement, not a behavior — every behavioral assertion this phase makes is in CI and green at this HEAD, so behavior_unverified stays 0. Structural lesson: an exact 1:1 join against append-only state is a gate that is correct only at mint time. Scope the join to the rows the record itself claims, or pin the ledger revision the record was minted against."
 ---

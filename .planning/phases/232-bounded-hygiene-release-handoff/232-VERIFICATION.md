@@ -56,7 +56,7 @@ covered_files:
   - "scripts/ci/verify_phase230_archive_invariants.mjs"
   - "scripts/ci/verify_pr_body_contract.mjs"
   - "scripts/ci/verify_release_pr_readiness.sh"
-covered_digest: "v1:sha256:4b821389a394e8c787e4ec32085f1efe193d2bf55d94b9e0cdf65094df5df52a"
+covered_digest: "v1:sha256:9f1cded811a73d9d5bc12c298957fb0cd1c3214914e71a890e08d736e0cb4305"
 # covered_digest is GSD's covered-input fingerprint (#4155), not this repo's to redefine:
 # canonicalize covered_files (posix-normalize, de-dup, sort), hash each file's bytes,
 # aggregate sha256 over `v1\n` + `<rel>\n<sha256(bytes)>\n` per entry.
