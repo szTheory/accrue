@@ -263,6 +263,32 @@ on that correct, routine move. Add an archive-aware fallback rather than
 reverting the archive, and keep the *recorded* path string in any digest so
 archival alone cannot perturb a fingerprint.
 
+**Run the sweep; do not fix these one red CI run at a time.** The detector
+already exists and enumerates every site in one pass:
+
+```
+node scripts/ci/verify_phase230_archive_invariants.mjs --repo .
+```
+
+Run it immediately after any milestone archive, before pushing. Route each
+real read through `scripts/ci/phase_evidence_path.mjs` -- as an import
+(`resolvePhaseEvidencePath`) in JS, or as the CLI form
+`node scripts/ci/phase_evidence_path.mjs <slug> <artifact>` in YAML and bash.
+A literal that is genuinely not a live read (a synthetic `mkdtemp` fixture
+path, a write target, pattern text matched against a listing) takes a
+same-line `archive-sweep-exempt: <reason>` marker instead.
+
+Two traps this class hides:
+
+- **An archive fallback must not be applied uniformly.** A claim asserting a
+  path is *absent* from the active tree (`path_exists`, expected `false`)
+  inverts into a false positive if it resolves through the archive. Give the
+  fallback to content reads only, and assert both halves in the test.
+- **Editing a covered file re-mints a fingerprint.** After fixing these,
+  `verify_artifact_fixed_point.mjs` will correctly flag `covered_digest`
+  drift for any `covered_files` entry you touched. Recompute it with the
+  module's own `scanArtifact` + `computeDigest`, never by hand.
+
 <!-- GSD:profile-start -->
 ## Developer Profile
 
