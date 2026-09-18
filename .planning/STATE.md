@@ -210,6 +210,7 @@ None yet.
 | 260916-gda | Close phase-231 loose ends: STATE.md standing sections, gap-closure TAP harness, 229-UAT regen, CR-01 window-disposition invariant, WR-01 expected-repository validation, REQUIREMENTS.md gate wording | 2026-09-16 | f5b6d390 | [260916-gda-close-phase-231-loose-ends-state-md-stan](./quick/260916-gda-close-phase-231-loose-ends-state-md-stan/) |
 | 260916-hl9 | Resolve the sibling dependency-operator contradiction between CLAUDE.md and the code, and make it machine-enforced | 2026-09-16 | 9f309871 | [260916-hl9-resolve-the-sibling-dependency-operator-](./quick/260916-hl9-resolve-the-sibling-dependency-operator-/) |
 | 260917-l7v | Shift left seven phase-232 session failure modes into merge-blocking CI guards (SL-A through SL-G) | 2026-09-17 | b42c64a5 | [260917-l7v-shift-left-phase-232-session-lessons-int](./quick/260917-l7v-shift-left-phase-232-session-lessons-int/) |
+| 260918-rpt | Fix release-PR title generation (grouped ${version} with no root package) that made release 1.6.0 tag nothing while reporting success; add a merge-blocking round-trip guard | 2026-09-18 | 11cf1e02 | [260918-rpt-fix-release-pr-title-generation](./quick/260918-rpt-fix-release-pr-title-generation/) |
 
 ## Deferred Items
 
