@@ -209,6 +209,7 @@ None yet.
 | 260915-dpd | Fix eager Mix.env/0 evaluation in Accrue auth modules that crashes OTP releases at boot | 2026-09-15 | 5653216c | [260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue](./quick/260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue/) |
 | 260916-gda | Close phase-231 loose ends: STATE.md standing sections, gap-closure TAP harness, 229-UAT regen, CR-01 window-disposition invariant, WR-01 expected-repository validation, REQUIREMENTS.md gate wording | 2026-09-16 | f5b6d390 | [260916-gda-close-phase-231-loose-ends-state-md-stan](./quick/260916-gda-close-phase-231-loose-ends-state-md-stan/) |
 | 260916-hl9 | Resolve the sibling dependency-operator contradiction between CLAUDE.md and the code, and make it machine-enforced | 2026-09-16 | 9f309871 | [260916-hl9-resolve-the-sibling-dependency-operator-](./quick/260916-hl9-resolve-the-sibling-dependency-operator-/) |
+| 260917-l7v | Shift left seven phase-232 session failure modes into merge-blocking CI guards (SL-A through SL-G) | 2026-09-17 | b42c64a5 | [260917-l7v-shift-left-phase-232-session-lessons-int](./quick/260917-l7v-shift-left-phase-232-session-lessons-int/) |
 
 ## Deferred Items
 
