@@ -236,7 +236,7 @@ end
 Update the Fake ID prefixes to match D-20 exactly: `cus_fake_`, `sub_fake_`, `in_fake_`, `pi_fake_`, `pm_fake_` with a 5-digit zero-padded counter. Define them as module attributes so they're greppable.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix test test/accrue/processor/fake_test.exs test/accrue/processor/behaviour_test.exs</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix test test/accrue/processor/fake_test.exs test/accrue/processor/behaviour_test.exs</automated>
   </verify>
   <acceptance_criteria>
     - `mix test test/accrue/processor/fake_test.exs` reports all passing
@@ -331,7 +331,7 @@ Update the Fake ID prefixes to match D-20 exactly: `cus_fake_`, `sub_fake_`, `in
 Note: If calling `LatticeStripe.Customers.create/1` at Phase 1 requires a live Stripe key or test-mode key, the actual wire calls stay untested in Phase 1 — only `ErrorMapper` and the facade-lockdown test run. Phase 3 will add integration tests against Stripe test mode. This is fine: PROC-02 (real Stripe delegation) is a Phase 3 requirement, not Phase 1. Phase 1 only requires PROC-01 (behaviour), PROC-03 (Fake), and PROC-07 (error mapping) — all three are satisfied by this plan.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix test test/accrue/processor/stripe_test.exs && mix compile --warnings-as-errors</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix test test/accrue/processor/stripe_test.exs && mix compile --warnings-as-errors</automated>
   </verify>
   <acceptance_criteria>
     - `mix test test/accrue/processor/stripe_test.exs` reports all tests passing

@@ -814,7 +814,7 @@ For the FunnelChart component test, use `Phoenix.LiveViewTest` (already a transi
 - **`Application.put_env(:accrue, :default_currency, :jpy)`** is the canonical JPY-regression setup (sole precedent: `accrue/test/accrue/config_test.exs:134`). Pair with `on_exit` cleanup via the file-local auth-adapter pattern at `recovery_live_test.exs:26-29` for the restore-prior-state idiom.
 
 ### File Created
-`/Users/jon/projects/accrue/.planning/phases/144-funnel-query-viz-campaign-anchor-retrofit-money-formatter-po/144-PATTERNS.md`
+`/Users/dev/projects/accrue/.planning/phases/144-funnel-query-viz-campaign-anchor-retrofit-money-formatter-po/144-PATTERNS.md`
 
 ### Ready for Planning
 Pattern mapping complete. The planner can now produce per-task `<read_first>` blocks with precise file paths and line ranges: every load-bearing edit either copies from a same-module sibling function (analytics + retrofit + LiveView mount/render) or mirrors a tight functional-component shell (FunnelChart ↔ KpiCard). The only no-analog file is the new component unit test, which falls back to the stdlib `Phoenix.LiveViewTest.render_component/2` shape — flag explicitly so reviewers don't expect a project-specific precedent.

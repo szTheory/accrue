@@ -225,7 +225,7 @@ introduced. All changes are CSS presentation, CI script logic, copy strings, and
 ## Self-Check: PASSED
 
 Files exist:
-- FOUND: `/Users/jon/projects/accrue/.planning/phases/188-foundations-hardening/188-08-SUMMARY.md`
+- FOUND: `/Users/dev/projects/accrue/.planning/phases/188-foundations-hardening/188-08-SUMMARY.md`
 - FOUND: `accrue_admin/assets/css/app.css` (committed in 689f55ca)
 - FOUND: `accrue_admin/priv/static/accrue_admin.css` (committed in ede1354d)
 - FOUND: `accrue_admin/lib/accrue_admin/copy/subscription.ex` (committed in ede1354d)

@@ -6,7 +6,7 @@
 
 | Field | Value |
 | --- | --- |
-| Checkout | `/Users/jon/projects/crosswake-accrue-bridge` |
+| Checkout | `/Users/dev/projects/crosswake-accrue-bridge` |
 | Sanitized remote | `https://github.com/szTheory/crosswake.git` |
 | Delivery lane | Alpha-owned short-lived branch `chore/accrue-host-command-bridge` |
 | Upstream base revision | `932b4f32bf087b8e4c0c36c3e54b1031839e867d` |

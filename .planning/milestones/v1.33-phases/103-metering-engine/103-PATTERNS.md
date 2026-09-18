@@ -28,7 +28,7 @@
 
 **Analog:** `accrue/lib/accrue/billing/meter_event_actions.ex`
 
-**Imports and dependency shape** ([meter_event_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/meter_event_actions.ex:28)):
+**Imports and dependency shape** ([meter_event_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/meter_event_actions.ex:28)):
 ```elixir
 require Logger
 
@@ -41,7 +41,7 @@ alias Accrue.Processor
 alias Accrue.Repo
 ```
 
-**Durable outbox + external side effect split** ([meter_event_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/meter_event_actions.ex:81)):
+**Durable outbox + external side effect split** ([meter_event_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/meter_event_actions.ex:81)):
 ```elixir
 with :ok <- validate_backdating_window(ts),
      {:ok, row} <-
@@ -53,7 +53,7 @@ with :ok <- validate_backdating_window(ts),
       case Processor.__impl__().report_meter_event(row) do
 ```
 
-**Idempotent pre-check before transaction** ([meter_event_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/meter_event_actions.ex:164)):
+**Idempotent pre-check before transaction** ([meter_event_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/meter_event_actions.ex:164)):
 ```elixir
 case Repo.get_by(MeterEvent, identifier: identifier) do
   %MeterEvent{} = existing ->
@@ -75,7 +75,7 @@ end
 
 **Analog:** `accrue/lib/accrue/jobs/meter_events_reconciler.ex`
 
-**Worker shell** ([meter_events_reconciler.ex](/Users/jon/projects/accrue/accrue/lib/accrue/jobs/meter_events_reconciler.ex:35)):
+**Worker shell** ([meter_events_reconciler.ex](/Users/dev/projects/accrue/accrue/lib/accrue/jobs/meter_events_reconciler.ex:35)):
 ```elixir
 use Oban.Worker, queue: :accrue_meters, max_attempts: 3
 
@@ -87,7 +87,7 @@ def perform(%Oban.Job{} = job) do
 end
 ```
 
-**Grace-window batch scan** ([meter_events_reconciler.ex](/Users/jon/projects/accrue/accrue/lib/accrue/jobs/meter_events_reconciler.ex:60)):
+**Grace-window batch scan** ([meter_events_reconciler.ex](/Users/dev/projects/accrue/accrue/lib/accrue/jobs/meter_events_reconciler.ex:60)):
 ```elixir
 cutoff = DateTime.add(Clock.utc_now(), -@grace_seconds, :second)
 
@@ -100,7 +100,7 @@ pending =
   |> Repo.all()
 ```
 
-**Per-row retry with bounded failure transition** ([meter_events_reconciler.ex](/Users/jon/projects/accrue/accrue/lib/accrue/jobs/meter_events_reconciler.ex:71)):
+**Per-row retry with bounded failure transition** ([meter_events_reconciler.ex](/Users/dev/projects/accrue/accrue/lib/accrue/jobs/meter_events_reconciler.ex:71)):
 ```elixir
 for row <- pending do
   case Processor.__impl__().report_meter_event(row) do
@@ -116,7 +116,7 @@ for row <- pending do
 end
 ```
 
-**Operation-id restoration** ([middleware.ex](/Users/jon/projects/accrue/accrue/lib/accrue/oban/middleware.ex:48)):
+**Operation-id restoration** ([middleware.ex](/Users/dev/projects/accrue/accrue/lib/accrue/oban/middleware.ex:48)):
 ```elixir
 def put(%Oban.Job{id: id, attempt: attempt, args: args}) do
   Accrue.Actor.put_operation_id("oban-#{id}-#{attempt}")
@@ -136,7 +136,7 @@ end
 
 **Analog:** `accrue/lib/accrue/webhook/default_handler.ex`
 
-**Webhook-first convergence contract** ([default_handler.ex](/Users/jon/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex:13)):
+**Webhook-first convergence contract** ([default_handler.ex](/Users/dev/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex:13)):
 ```elixir
 1. Derives `evt_ts` from the raw event `created` unix timestamp.
 2. Loads the local row by processor id.
@@ -147,7 +147,7 @@ end
 7. Record an `accrue_events` row in the same `Repo.transact/1`.
 ```
 
-**Braintree type normalization** ([default_handler.ex](/Users/jon/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex:127)):
+**Braintree type normalization** ([default_handler.ex](/Users/dev/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex:127)):
 ```elixir
 case normalize_braintree_type(type) do
   {:ok, normalized_type} ->
@@ -156,14 +156,14 @@ case normalize_braintree_type(type) do
          }) do
 ```
 
-**Dispatch pattern for synthetic/local events** ([default_handler.ex](/Users/jon/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex:244)):
+**Dispatch pattern for synthetic/local events** ([default_handler.ex](/Users/dev/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex:244)):
 ```elixir
 defp dispatch("accrue.portal.checkout.completed", evt_id, evt_ts, obj) do
   reduce_portal_checkout_completed(evt_id, evt_ts, obj)
 end
 ```
 
-**Braintree invoice convergence via canonical fetch, not raw payload trust** ([default_handler.ex](/Users/jon/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex:661)):
+**Braintree invoice convergence via canonical fetch, not raw payload trust** ([default_handler.ex](/Users/dev/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex:661)):
 ```elixir
 fetch_type = if processor_name() == "braintree", do: :subscription, else: :invoice
 
@@ -185,7 +185,7 @@ reduce_row(:invoice, stripe_id, evt_ts, evt_id, fn row ->
 
 **Analog:** `accrue/lib/accrue/billing/charge_actions.ex`
 
-**Typed no-default-PM failure** ([charge_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/charge_actions.ex:84)):
+**Typed no-default-PM failure** ([charge_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/charge_actions.ex:84)):
 ```elixir
 {:error,
  %Accrue.Error.NoDefaultPaymentMethod{
@@ -194,21 +194,21 @@ reduce_row(:invoice, stripe_id, evt_ts, evt_id, fn row ->
      "Accrue.Billing.charge/3 requires an explicit :payment_method or " <>
 ```
 
-**Deterministic idempotency key derivation** ([charge_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/charge_actions.ex:100)):
+**Deterministic idempotency key derivation** ([charge_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/charge_actions.ex:100)):
 ```elixir
 op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
 subject_uuid = Idempotency.subject_uuid(:create_charge, op_id)
 idem_key = Idempotency.key(:create_charge, subject_uuid, op_id)
 ```
 
-**External charge before local persistence** ([charge_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/charge_actions.ex:118)):
+**External charge before local persistence** ([charge_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/charge_actions.ex:118)):
 ```elixir
 # Call the processor OUTSIDE the Repo.transact so we can branch on
 # SCA/3DS shape without persisting a half-baked Charge row
 case Processor.__impl__().create_charge(params, stripe_opts) do
 ```
 
-**Replay-safe local insert** ([charge_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/charge_actions.ex:245)):
+**Replay-safe local insert** ([charge_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/charge_actions.ex:245)):
 ```elixir
 case Repo.get(Charge, subject_uuid) do
   %Charge{} = existing -> {:ok, existing}
@@ -227,7 +227,7 @@ end
 
 **Analog:** `accrue/test/accrue/billing/invoice_projection_test.exs` and `invoice_projection_braintree_refund_test.exs`
 
-**Braintree invoice decomposition expectations** ([invoice_projection_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/invoice_projection_test.exs:217)):
+**Braintree invoice decomposition expectations** ([invoice_projection_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/invoice_projection_test.exs:217)):
 ```elixir
 {:ok, %{invoice_attrs: attrs, item_attrs: items}} =
   InvoiceProjection.decompose(braintree_sub)
@@ -237,7 +237,7 @@ assert attrs.status == :paid
 assert attrs.billing_reason == "subscription_cycle"
 ```
 
-**Single local line item from Braintree transaction truth** ([invoice_projection_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/invoice_projection_test.exs:250)):
+**Single local line item from Braintree transaction truth** ([invoice_projection_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/invoice_projection_test.exs:250)):
 ```elixir
 assert length(items) == 1
 [item] = items
@@ -246,7 +246,7 @@ assert item.description == "Braintree subscription sub_12345"
 assert item.price_ref == "basic_plan"
 ```
 
-**Derived rollups without rewriting parent sale truth** ([invoice_projection_braintree_refund_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/invoice_projection_braintree_refund_test.exs:27)):
+**Derived rollups without rewriting parent sale truth** ([invoice_projection_braintree_refund_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/invoice_projection_braintree_refund_test.exs:27)):
 ```elixir
 {:ok, %{invoice_attrs: attrs}} = InvoiceProjection.decompose(braintree_sub)
 
@@ -266,14 +266,14 @@ assert Map.has_key?(attrs, :refund_progress)
 
 **Analog:** `accrue/lib/accrue/errors.ex`
 
-**Typed exceptions with user-safe messages** ([errors.ex](/Users/jon/projects/accrue/accrue/lib/accrue/errors.ex:161)):
+**Typed exceptions with user-safe messages** ([errors.ex](/Users/dev/projects/accrue/accrue/lib/accrue/errors.ex:161)):
 ```elixir
 defmodule Accrue.Error.InvalidState do
   defexception [:current, :attempted, :message]
 end
 ```
 
-**Domain-specific typed error precedent** ([errors.ex](/Users/jon/projects/accrue/accrue/lib/accrue/errors.ex:213)):
+**Domain-specific typed error precedent** ([errors.ex](/Users/dev/projects/accrue/accrue/lib/accrue/errors.ex:213)):
 ```elixir
 defmodule Accrue.Error.NoDefaultPaymentMethod do
   defexception [:customer_id, :message]
@@ -290,14 +290,14 @@ end
 
 **Analog:** `accrue/lib/accrue/telemetry/ops.ex` and `metrics.ex`
 
-**High-signal ops namespace only** ([ops.ex](/Users/jon/projects/accrue/accrue/lib/accrue/telemetry/ops.ex:41)):
+**High-signal ops namespace only** ([ops.ex](/Users/dev/projects/accrue/accrue/lib/accrue/telemetry/ops.ex:41)):
 ```elixir
 def emit(suffix, measurements, metadata)
     when is_list(suffix) and is_map(measurements) and is_map(metadata) do
   event = [:accrue, :ops] ++ suffix
 ```
 
-**Automatic correlation metadata** ([ops.ex](/Users/jon/projects/accrue/accrue/lib/accrue/telemetry/ops.ex:63)):
+**Automatic correlation metadata** ([ops.ex](/Users/dev/projects/accrue/accrue/lib/accrue/telemetry/ops.ex:63)):
 ```elixir
 merged_metadata =
   Map.put_new_lazy(metadata, :operation_id, fn ->
@@ -305,13 +305,13 @@ merged_metadata =
   end)
 ```
 
-**Low-cardinality metrics posture** ([metrics.ex](/Users/jon/projects/accrue/accrue/lib/accrue/telemetry/metrics.ex:33)):
+**Low-cardinality metrics posture** ([metrics.ex](/Users/dev/projects/accrue/accrue/lib/accrue/telemetry/metrics.ex:33)):
 ```elixir
 Tags on the default counters are restricted to low-cardinality fields
 (`:status`, `:source`, `:type`, `:stripe_status`).
 ```
 
-**Existing meter failure metric precedent** ([metrics.ex](/Users/jon/projects/accrue/accrue/lib/accrue/telemetry/metrics.ex:68)):
+**Existing meter failure metric precedent** ([metrics.ex](/Users/dev/projects/accrue/accrue/lib/accrue/telemetry/metrics.ex:68)):
 ```elixir
 counter("accrue.ops.meter_reporting_failed.count", tags: [:source])
 counter("accrue.ops.charge_failed.count")
@@ -326,7 +326,7 @@ counter("accrue.ops.revenue_loss.count")
 ## Shared Patterns
 
 ### Unique jobs are advisory, local records are canonical
-**Source:** [103-CONTEXT.md](/Users/jon/projects/accrue/.planning/phases/103-metering-engine/103-CONTEXT.md:64), [meter_event_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/meter_event_actions.ex:21)
+**Source:** [103-CONTEXT.md](/Users/dev/projects/accrue/.planning/phases/103-metering-engine/103-CONTEXT.md:64), [meter_event_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/meter_event_actions.ex:21)
 
 Planner should require:
 - a local unique renewal-window row per `subscription + period_start + period_end`
@@ -334,22 +334,22 @@ Planner should require:
 - recovery logic that safely re-enqueues from local state
 
 ### Webhook-first, cron-backstop second
-**Source:** [103-CONTEXT.md](/Users/jon/projects/accrue/.planning/phases/103-metering-engine/103-CONTEXT.md:39), [meter_events_reconciler.ex](/Users/jon/projects/accrue/accrue/lib/accrue/jobs/meter_events_reconciler.ex:54), [default_handler.ex](/Users/jon/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex:13)
+**Source:** [103-CONTEXT.md](/Users/dev/projects/accrue/.planning/phases/103-metering-engine/103-CONTEXT.md:39), [meter_events_reconciler.ex](/Users/dev/projects/accrue/accrue/lib/accrue/jobs/meter_events_reconciler.ex:54), [default_handler.ex](/Users/dev/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex:13)
 
 Planner should treat the scheduler as stale-window detection only. Renewal and charge processing should primarily converge from webhook-derived cycle advancement.
 
 ### Local ledger first, gateway settlement second
-**Source:** [103-CONTEXT.md](/Users/jon/projects/accrue/.planning/phases/103-metering-engine/103-CONTEXT.md:52), [invoice_projection_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/invoice_projection_test.exs:217)
+**Source:** [103-CONTEXT.md](/Users/dev/projects/accrue/.planning/phases/103-metering-engine/103-CONTEXT.md:52), [invoice_projection_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/invoice_projection_test.exs:217)
 
 Planner should split work so invoice-item/local-ledger persistence lands before Braintree sale orchestration, with the sale linked back to local invoice and aggregate rows.
 
 ### Typed errors and low-noise telemetry
-**Source:** [103-CONTEXT.md](/Users/jon/projects/accrue/.planning/phases/103-metering-engine/103-CONTEXT.md:64), [errors.ex](/Users/jon/projects/accrue/accrue/lib/accrue/errors.ex:161), [ops.ex](/Users/jon/projects/accrue/accrue/lib/accrue/telemetry/ops.ex:1)
+**Source:** [103-CONTEXT.md](/Users/dev/projects/accrue/.planning/phases/103-metering-engine/103-CONTEXT.md:64), [errors.ex](/Users/dev/projects/accrue/accrue/lib/accrue/errors.ex:161), [ops.ex](/Users/dev/projects/accrue/accrue/lib/accrue/telemetry/ops.ex:1)
 
 Planner should avoid “retry everything” flows. Distinguish retryable processor failures from customer-repair states using typed errors and emit ops telemetry once per durable transition.
 
 ### Recent Braintree plan granularity
-**Source:** [100-PLAN.md](/Users/jon/projects/accrue/.planning/milestones/v1.32-phases/100-billing-portal-semantics/100-PLAN.md:1), [099-01-PLAN.md](/Users/jon/projects/accrue/.planning/milestones/v1.32-phases/099-refunds-and-invoice-parity/099-01-PLAN.md:1), [099-02-PLAN.md](/Users/jon/projects/accrue/.planning/milestones/v1.32-phases/099-refunds-and-invoice-parity/099-02-PLAN.md:1)
+**Source:** [100-PLAN.md](/Users/dev/projects/accrue/.planning/milestones/v1.32-phases/100-billing-portal-semantics/100-PLAN.md:1), [099-01-PLAN.md](/Users/dev/projects/accrue/.planning/milestones/v1.32-phases/099-refunds-and-invoice-parity/099-01-PLAN.md:1), [099-02-PLAN.md](/Users/dev/projects/accrue/.planning/milestones/v1.32-phases/099-refunds-and-invoice-parity/099-02-PLAN.md:1)
 
 Planner should mirror these conventions:
 - frontmatter with `wave`, `depends_on`, `files_modified`, `requirements`, `must_haves`, and `key_links`

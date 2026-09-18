@@ -66,7 +66,7 @@ coverage:
 
 - `bash -n scripts/ci/preserve_repository_state.sh && bash scripts/ci/preserve_repository_state.sh --self-test` — passed.
 - The self-test validates all three outputs, final bundle verification, public/private digest agreement, mode 0600, hostile-ref restoration, collision/alias/symlink rejection, single-ref success, empty-ref failure, and temporary-state cleanup.
-- SHA-256 values for every file in `/Users/jon/projects/accrue-phase229-recovery.9vAj86/` matched the pre-task snapshot.
+- SHA-256 values for every file in `/Users/dev/projects/accrue-phase229-recovery.9vAj86/` matched the pre-task snapshot.
 
 ## Files Created/Modified
 

@@ -323,17 +323,17 @@ None — no backlog items matched Phase 3.
 **Downstream agents MUST read these before planning or implementing.**
 
 ### Project governance
-- `/Users/jon/projects/accrue/CLAUDE.md` — tech stack pins, conditional-compile pattern, Oban CE vs Pro constraint, host-owned supervision ("Accrue does not start Oban / ChromicPDF"), monorepo layout
-- `/Users/jon/projects/accrue/.planning/PROJECT.md` — vision, core value, "real SaaS on day one" constraint, zero-breaking-change-pain for v1.x
-- `/Users/jon/projects/accrue/.planning/REQUIREMENTS.md` — Phase 3 requirement IDs: PROC-02, BILL-03..10, BILL-17..26, WH-09, TEST-08
-- `/Users/jon/projects/accrue/.planning/ROADMAP.md` — Phase 3 goal, 6 success criteria, depends-on Phase 2
+- `/Users/dev/projects/accrue/CLAUDE.md` — tech stack pins, conditional-compile pattern, Oban CE vs Pro constraint, host-owned supervision ("Accrue does not start Oban / ChromicPDF"), monorepo layout
+- `/Users/dev/projects/accrue/.planning/PROJECT.md` — vision, core value, "real SaaS on day one" constraint, zero-breaking-change-pain for v1.x
+- `/Users/dev/projects/accrue/.planning/REQUIREMENTS.md` — Phase 3 requirement IDs: PROC-02, BILL-03..10, BILL-17..26, WH-09, TEST-08
+- `/Users/dev/projects/accrue/.planning/ROADMAP.md` — Phase 3 goal, 6 success criteria, depends-on Phase 2
 
 ### Prior Phase contexts (MUST coherently extend)
-- `/Users/jon/projects/accrue/.planning/phases/01-foundations/01-CONTEXT.md` — Phase 1 D-01..45 locked decisions (Money, error hierarchy, Fake processor with test clock, dual API, Events.record_multi, actor pdict, telemetry depth, mailer semantic API, PDF Shape B, Auth behaviour, conditional-compile Sigra)
-- `/Users/jon/projects/accrue/.planning/phases/02-schemas-webhook-plumbing/02-CONTEXT.md` — Phase 2 D2-01..37 locked decisions (polymorphic Customer, Billable macro, metadata strict Stripe-compat, data jsonb put_data/patch_data, optimistic_lock, deterministic idempotency keys, Stripe API version override, webhook plug pipeline, transactional persist + Oban dispatch, DefaultHandler re-fetch canonical, DLQ status column, Pruner)
+- `/Users/dev/projects/accrue/.planning/phases/01-foundations/01-CONTEXT.md` — Phase 1 D-01..45 locked decisions (Money, error hierarchy, Fake processor with test clock, dual API, Events.record_multi, actor pdict, telemetry depth, mailer semantic API, PDF Shape B, Auth behaviour, conditional-compile Sigra)
+- `/Users/dev/projects/accrue/.planning/phases/02-schemas-webhook-plumbing/02-CONTEXT.md` — Phase 2 D2-01..37 locked decisions (polymorphic Customer, Billable macro, metadata strict Stripe-compat, data jsonb put_data/patch_data, optimistic_lock, deterministic idempotency keys, Stripe API version override, webhook plug pipeline, transactional persist + Oban dispatch, DefaultHandler re-fetch canonical, DLQ status column, Pruner)
 
 ### External library docs (fetch via Context7 or WebFetch at plan time)
-- `lattice_stripe ~> 1.0` source at `/Users/jon/projects/lattice_stripe/` — specifically:
+- `lattice_stripe ~> 1.0` source at `/Users/dev/projects/lattice_stripe/` — specifically:
   - `lib/lattice_stripe/subscription.ex` — Subscription API surface, including `items[]`, `cancel_at_period_end`, `pause_collection`
   - `lib/lattice_stripe/invoice.ex` — Invoice workflow endpoints (`finalize_invoice`, `void_invoice`, `mark_uncollectible`, `pay`, `send_invoice`, `upcoming`)
   - `lib/lattice_stripe/payment_intent.ex` — PI status enum, `next_action.type`, `client_secret`
@@ -397,7 +397,7 @@ None — no backlog items matched Phase 3.
 <code_context>
 ## Existing Code Insights
 
-Phase 3 builds on the Phase 2 schema + webhook layer shipped in `/Users/jon/projects/accrue/accrue/`:
+Phase 3 builds on the Phase 2 schema + webhook layer shipped in `/Users/dev/projects/accrue/accrue/`:
 
 ### Reusable Assets (from Phase 1 + Phase 2)
 - `Accrue.Money` + `Accrue.Ecto.Money` — used for every money column added in Phase 3 (`stripe_fee_amount`, `stripe_fee_refunded_amount`, `merchant_loss_amount`, invoice rollups, charge amounts)

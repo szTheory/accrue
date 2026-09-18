@@ -40,8 +40,8 @@ Output: automated verification results and a human checkpoint for secret availab
 </objective>
 
 <execution_context>
-@/Users/jon/.codex/get-shit-done/workflows/execute-plan.md
-@/Users/jon/.codex/get-shit-done/templates/summary.md
+@/Users/dev/.codex/get-shit-done/workflows/execute-plan.md
+@/Users/dev/.codex/get-shit-done/templates/summary.md
 </execution_context>
 
 <context>

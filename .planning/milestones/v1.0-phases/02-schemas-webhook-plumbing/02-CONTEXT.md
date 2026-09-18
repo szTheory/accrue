@@ -160,11 +160,11 @@ None — no backlog items matched Phase 2.
 **Downstream agents MUST read these before planning or implementing.**
 
 ### Project governance
-- `/Users/jon/projects/accrue/CLAUDE.md` — tech stack pins (Elixir 1.17+, Ecto 3.13+, Oban 2.21 CE, `lattice_stripe ~> 0.2`), Oban CE vs Pro constraint (no `DynamicPruner`), monorepo layout
-- `/Users/jon/projects/accrue/.planning/PROJECT.md` — vision, zero-breaking-change-pain constraint
-- `/Users/jon/projects/accrue/.planning/REQUIREMENTS.md` — Phase 2 requirement IDs: BILL-01, BILL-02, PROC-04, PROC-06, WH-01..07, WH-10..12, WH-14, EVT-04, TEST-09
-- `/Users/jon/projects/accrue/.planning/ROADMAP.md` — Phase 2 goal, success criteria, depends-on Phase 1
-- `/Users/jon/projects/accrue/.planning/phases/01-foundations/01-CONTEXT.md` — Phase 1 locked decisions (D-01..45) that Phase 2 builds on: dual API (D-05), error structs (D-06), SignatureError raises (D-08), Events.record_multi (D-13), actor pdict (D-15), telemetry depth (D-17), Fake processor (D-19), Processor.Stripe facade (D-07)
+- `/Users/dev/projects/accrue/CLAUDE.md` — tech stack pins (Elixir 1.17+, Ecto 3.13+, Oban 2.21 CE, `lattice_stripe ~> 0.2`), Oban CE vs Pro constraint (no `DynamicPruner`), monorepo layout
+- `/Users/dev/projects/accrue/.planning/PROJECT.md` — vision, zero-breaking-change-pain constraint
+- `/Users/dev/projects/accrue/.planning/REQUIREMENTS.md` — Phase 2 requirement IDs: BILL-01, BILL-02, PROC-04, PROC-06, WH-01..07, WH-10..12, WH-14, EVT-04, TEST-09
+- `/Users/dev/projects/accrue/.planning/ROADMAP.md` — Phase 2 goal, success criteria, depends-on Phase 1
+- `/Users/dev/projects/accrue/.planning/phases/01-foundations/01-CONTEXT.md` — Phase 1 locked decisions (D-01..45) that Phase 2 builds on: dual API (D-05), error structs (D-06), SignatureError raises (D-08), Events.record_multi (D-13), actor pdict (D-15), telemetry depth (D-17), Fake processor (D-19), Processor.Stripe facade (D-07)
 
 ### External library docs (fetch via Context7 or WebFetch at plan time)
 - `Plug.Parsers` `body_reader` custom-body-reader docs — https://hexdocs.pm/plug/Plug.Parsers.html#module-custom-body-reader — the canonical raw-body tee pattern (D2-19). Stable across Plug 1.16+, current 1.19.1.

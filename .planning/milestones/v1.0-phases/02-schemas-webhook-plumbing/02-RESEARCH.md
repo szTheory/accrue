@@ -112,7 +112,7 @@ Phase 2 is heavily constrained by the 37 decisions already locked in `02-CONTEXT
 |----|-------------|------------------|
 | BILL-01 | Polymorphic `Accrue.Billing.Customer` with `owner_type`/`owner_id`, `data` jsonb, metadata | Decided via D2-01..03, D2-07..10. `has_one :where` confirmed for Ecto 3.13.5 (Standard Stack §Ecto). |
 | BILL-02 | `use Accrue.Billable` macro | Decided via D2-04..06. Hybrid macro emits one `has_one :where` + reflection + `customer/1` delegate. |
-| PROC-04 | Deterministic idempotency keys | Decided via D2-11..13. `lattice_stripe 0.2` client.ex confirms `:idempotency_key` opt on `req.opts` is respected (verified in source at `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/client.ex:251`). |
+| PROC-04 | Deterministic idempotency keys | Decided via D2-11..13. `lattice_stripe 0.2` client.ex confirms `:idempotency_key` opt on `req.opts` is respected (verified in source at `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/client.ex:251`). |
 | PROC-06 | Per-request API version override | Decided via D2-14..15. `lattice_stripe 0.2` client.ex line 176 confirms `:stripe_version` opt is respected. |
 | WH-01 | Raw-body capture scoped to webhook routes only | Decided via D2-19..22. `Plug.Parsers` `body_reader` pattern verified from official Plug docs. |
 | WH-02 | Signature verification with multi-secret rotation | **RESOLVED by `LatticeStripe.Webhook.construct_event!/4`** — implements multi-secret verification natively. Accrue wraps and re-raises. |
@@ -169,7 +169,7 @@ Phase 2 is heavily constrained by the 37 decisions already locked in `02-CONTEXT
 | `:mox` | `~> 1.2` | Mocking `Accrue.Processor` behaviour in tests (already set up in Phase 1) |
 | `:stream_data` | `~> 1.3` | Property tests for metadata validation rules (key count, value length) |
 
-### Verified `lattice_stripe 0.2` capabilities [VERIFIED: source read at `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/webhook.ex` and `.../client.ex`]
+### Verified `lattice_stripe 0.2` capabilities [VERIFIED: source read at `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/webhook.ex` and `.../client.ex`]
 
 ```elixir
 # Exactly what Accrue.Webhook.Plug needs — already shipped in lattice_stripe 0.2:
@@ -488,7 +488,7 @@ def create_customer(attrs, opts) do
 end
 ```
 
-**Verified:** [VERIFIED: source `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/client.ex:251`] — `resolve_idempotency_key/3` gives precedence to `Keyword.get(opts, :idempotency_key)` over `generate_idempotency_key`, so passing `:idempotency_key` in the request opts fully overrides lattice_stripe's default random-UUID generator.
+**Verified:** [VERIFIED: source `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/client.ex:251`] — `resolve_idempotency_key/3` gives precedence to `Keyword.get(opts, :idempotency_key)` over `generate_idempotency_key`, so passing `:idempotency_key` in the request opts fully overrides lattice_stripe's default random-UUID generator.
 
 ### Pattern 5: `accrue_webhook/2` router macro (D2-16, WH-01)
 
@@ -1082,8 +1082,8 @@ This phase is code/config only — no new external CLI tools or services require
 
 ### Primary (HIGH confidence)
 
-- **`LatticeStripe.Webhook` source** — `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/webhook.ex` (315 lines read) — confirms multi-secret rotation, timing-safe compare, replay-tolerance, test signature helper, `Event.from_map/1` projection
-- **`LatticeStripe.Client` source** — `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/client.ex` lines 154–262 — confirms `:idempotency_key` and `:stripe_version` opts are passthrough respected
+- **`LatticeStripe.Webhook` source** — `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/webhook.ex` (315 lines read) — confirms multi-secret rotation, timing-safe compare, replay-tolerance, test signature helper, `Event.from_map/1` projection
+- **`LatticeStripe.Client` source** — `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/client.ex` lines 154–262 — confirms `:idempotency_key` and `:stripe_version` opts are passthrough respected
 - **`Plug.Parsers` official docs** — https://hexdocs.pm/plug/Plug.Parsers.html#module-custom-body-reader — `CacheBodyReader` reference implementation
 - **`Oban.insert/3` Multi-aware API** — https://hexdocs.pm/oban/Oban.html#insert/3 — confirmed signature
 - **`Ecto.Schema.has_one/3` `:where` option** — https://hexdocs.pm/ecto/Ecto.Schema.html#has_one/3 — confirmed for Ecto 3.13.5
@@ -1133,7 +1133,7 @@ This phase is code/config only — no new external CLI tools or services require
 
 ### File Created
 
-`/Users/jon/projects/accrue/.planning/phases/02-schemas-webhook-plumbing/02-RESEARCH.md`
+`/Users/dev/projects/accrue/.planning/phases/02-schemas-webhook-plumbing/02-RESEARCH.md`
 
 ### Confidence Assessment
 

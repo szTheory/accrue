@@ -685,7 +685,7 @@ current plans and are retained here only as traceable decision records.
 
 ### Tertiary (LOW confidence)
 
-- GSD `research-plan` and `research-store` seams were available through `/Users/jon/.claude/gsd-core/bin/gsd-tools.cjs`; the `/Users/jon/.codex` and `/Users/jon/.cursor` shims failed because package metadata was missing, and the global `gsd-tools` bridge did not expose `research-plan`. [VERIFIED: command output]
+- GSD `research-plan` and `research-store` seams were available through `/Users/dev/.claude/gsd-core/bin/gsd-tools.cjs`; the `/Users/dev/.codex` and `/Users/dev/.cursor` shims failed because package metadata was missing, and the global `gsd-tools` bridge did not expose `research-plan`. [VERIFIED: command output]
 
 ## Metadata
 

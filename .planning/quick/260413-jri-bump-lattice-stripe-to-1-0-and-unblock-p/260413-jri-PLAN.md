@@ -57,7 +57,7 @@ If compile or tests fail, audit these call sites for 1.0 API shifts before attem
 Research confirmed all of these exist in 1.0 with identical signatures — this audit list is a safety net only.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix deps.get && mix compile --warnings-as-errors && mix test</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix deps.get && mix compile --warnings-as-errors && mix test</automated>
   </verify>
   <done>
 accrue/mix.exs shows `{:lattice_stripe, "~> 1.0"},`; `mix compile --warnings-as-errors` exits 0; `mix test` reports `197 tests, 20 properties, 0 failures`; `accrue/mix.lock` shows a lattice_stripe 1.x entry.
@@ -120,7 +120,7 @@ After all edits, run the following greps to confirm cleanup (all must return zer
 - `grep -rn "external Phase 0" .planning/ CLAUDE.md`
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue && ! grep -rn "0.3 Billing" .planning/ CLAUDE.md && ! grep -rn "Blocked on lattice_stripe" .planning/ && ! grep -rn "external Phase 0" .planning/ CLAUDE.md && grep -q 'lattice_stripe, "~> 1.0"' accrue/mix.exs</automated>
+    <automated>cd /Users/dev/projects/accrue && ! grep -rn "0.3 Billing" .planning/ CLAUDE.md && ! grep -rn "Blocked on lattice_stripe" .planning/ && ! grep -rn "external Phase 0" .planning/ CLAUDE.md && grep -q 'lattice_stripe, "~> 1.0"' accrue/mix.exs</automated>
   </verify>
   <done>
 CLAUDE.md lattice_stripe row shows `~> 1.0` with the new rationale; ROADMAP.md has no "External Dependency: Phase 0" section, Phase 3 depends only on Phase 2 and shows "Not started" status, Phase 4 details include the residual lattice_stripe gaps note; STATE.md Blockers section no longer contains the lattice_stripe 0.3 bullet; all three grep sentinel searches return empty.
@@ -130,7 +130,7 @@ CLAUDE.md lattice_stripe row shows `~> 1.0` with the new rationale; ROADMAP.md h
 </tasks>
 
 <verification>
-Full quick task verification (run from `/Users/jon/projects/accrue`):
+Full quick task verification (run from `/Users/dev/projects/accrue`):
 1. `cd accrue && mix compile --warnings-as-errors` → exit 0
 2. `cd accrue && mix test` → `197 tests, 20 properties, 0 failures`
 3. `grep -rn "0.3 Billing" .planning/ CLAUDE.md accrue/lib accrue/test` → no hits

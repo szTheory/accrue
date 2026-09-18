@@ -47,10 +47,10 @@ completed: 2026-05-31
 
 ## Accomplishments
 
-- Added [`scripts/ci/verify_stable_core_posture.sh`](/Users/jon/projects/accrue/scripts/ci/verify_stable_core_posture.sh) as the dedicated stable-core posture contract with narrow positive anchors and negative retired-term guards.
-- Extended [`scripts/ci/verify_release_notes_contract.sh`](/Users/jon/projects/accrue/scripts/ci/verify_release_notes_contract.sh) with posture-token and canonical-guide pointer checks.
-- Added a standalone `Stable-core posture contract` step in [`ci.yml`](/Users/jon/projects/accrue/.github/workflows/ci.yml) under `docs-contracts-shift-left`.
-- Documented POS gate mapping and triage in [`scripts/ci/README.md`](/Users/jon/projects/accrue/scripts/ci/README.md).
+- Added [`scripts/ci/verify_stable_core_posture.sh`](/Users/dev/projects/accrue/scripts/ci/verify_stable_core_posture.sh) as the dedicated stable-core posture contract with narrow positive anchors and negative retired-term guards.
+- Extended [`scripts/ci/verify_release_notes_contract.sh`](/Users/dev/projects/accrue/scripts/ci/verify_release_notes_contract.sh) with posture-token and canonical-guide pointer checks.
+- Added a standalone `Stable-core posture contract` step in [`ci.yml`](/Users/dev/projects/accrue/.github/workflows/ci.yml) under `docs-contracts-shift-left`.
+- Documented POS gate mapping and triage in [`scripts/ci/README.md`](/Users/dev/projects/accrue/scripts/ci/README.md).
 
 ## Task Commits
 

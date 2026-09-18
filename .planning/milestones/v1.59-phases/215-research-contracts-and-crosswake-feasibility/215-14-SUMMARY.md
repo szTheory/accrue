@@ -79,7 +79,7 @@ status: complete
 - `bash scripts/ci/verify_v159_authority.sh` — passed.
 - `bash scripts/ci/verify_entitlement_source_matrix.sh` — passed.
 - `cd accrue && mix accrue.entitlements.decision_cases --check` — passed.
-- `node /Users/jon/.codex/gsd-core/bin/gsd-tools.cjs query check.api-coverage-verify-pre 215` — passed; no external API integration declared.
+- `node /Users/dev/.codex/gsd-core/bin/gsd-tools.cjs query check.api-coverage-verify-pre 215` — passed; no external API integration declared.
 - Byte-drift check for the report, device evidence, and warning-only Elixir files — passed.
 
 ## Decisions Made

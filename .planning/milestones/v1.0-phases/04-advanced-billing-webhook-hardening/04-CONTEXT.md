@@ -231,7 +231,7 @@ Downstream researcher and planner pick defaults for the following gray areas —
 - `.planning/ROADMAP.md` §"Phase 4: Advanced Billing + Webhook Hardening" — goal, requirements, success criteria, lattice_stripe gap note (now stale per D4-01)
 - `.planning/REQUIREMENTS.md` — BILL-11/12/13/14/15/16/27/28, CHKT-01/02/03/04/05/06, WH-08/13, EVT-05/06/10, OBS-03/04/05
 - `.planning/PROJECT.md` — vision, constraints, core value, release model
-- `/Users/jon/projects/accrue/CLAUDE.md` — tech stack pins (note: `lattice_stripe ~> 1.0` pin must bump to `~> 1.1` per D4-01)
+- `/Users/dev/projects/accrue/CLAUDE.md` — tech stack pins (note: `lattice_stripe ~> 1.0` pin must bump to `~> 1.1` per D4-01)
 
 ### Prior phase decisions that constrain Phase 4
 - `.planning/phases/01-foundations/01-CONTEXT.md` — Fake processor strategy, Mox, dual bang/tuple API (D-05), `Accrue.Error` shape
@@ -239,13 +239,13 @@ Downstream researcher and planner pick defaults for the following gray areas —
 - `.planning/phases/03-core-subscription-lifecycle/03-CONTEXT.md` — D3-01 (status enum verbatim), D3-04 (predicate enforcement), D3-12 (`intent_result/1` processor callback), D3-16 (minimal coupons schema — Phase 4 expands), D3-17 (user-path vs webhook-path changesets), D3-18 (workflow actions inside `Repo.transact/2`), `operation_id` pdict propagation
 
 ### lattice_stripe (sibling repo — read before implementing BILL-13 + CHKT-02)
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/billing/meter.ex` — `LatticeStripe.Billing.Meter` resource (Phase 20 complete on main)
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/billing/meter_event.ex` — `MeterEvent` resource including two-layer idempotency (body-level `identifier` + HTTP `idempotency_key`)
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/billing/meter_event_adjustment.ex` — adjustments
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/billing_portal/session.ex` — `BillingPortal.Session` with FlowData guards (Phase 21 complete on main)
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/request.ex` — generic request escape hatch (NOT used per D4-01, but documented for awareness)
-- `/Users/jon/projects/lattice_stripe/guides/metering.md` — contains an `AccrueLike.UsageReporter` recipe; read before finalizing `report_usage/3` design to save rediscovering the idempotency contract
-- `/Users/jon/projects/lattice_stripe/CHANGELOG.md` — v1.0.0 release notes, pending v1.1.0 content
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/billing/meter.ex` — `LatticeStripe.Billing.Meter` resource (Phase 20 complete on main)
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/billing/meter_event.ex` — `MeterEvent` resource including two-layer idempotency (body-level `identifier` + HTTP `idempotency_key`)
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/billing/meter_event_adjustment.ex` — adjustments
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/billing_portal/session.ex` — `BillingPortal.Session` with FlowData guards (Phase 21 complete on main)
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/request.ex` — generic request escape hatch (NOT used per D4-01, but documented for awareness)
+- `/Users/dev/projects/lattice_stripe/guides/metering.md` — contains an `AccrueLike.UsageReporter` recipe; read before finalizing `report_usage/3` design to save rediscovering the idempotency contract
+- `/Users/dev/projects/lattice_stripe/CHANGELOG.md` — v1.0.0 release notes, pending v1.1.0 content
 
 ### Stripe official documentation
 - https://docs.stripe.com/billing/subscriptions/usage-based/recording-usage-api — BILL-13 primary reference

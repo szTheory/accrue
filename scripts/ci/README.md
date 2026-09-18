@@ -543,3 +543,38 @@ Stderr lines from `verify_package_docs.sh` are prefixed with `[verify_package_do
 - The ledger is append-only: the script records workflow ordering, git tags, GitHub release URLs, and Hex API truth for `accrue`, `accrue_admin`, and `accrue_portal`.
 - The current proof chain is `verify_release_manifest_alignment.sh` -> `capture_linked_release_proof.sh` -> `accrue_host_hex_smoke.sh`, with all outcomes recorded in the Phase 159 ledger.
 - If partial publish or post-publish verification fails, do not immediately retry, revert, or retire. Instead, use the structured recovery append path to record the failure in `159-VERIFICATION.md` before taking corrective action. See `.planning/phases/162-close-gap-rel-01-rel-03-linked-release-proof/162-VERIFICATION.md` for a non-authoritative index of this recovery flow.
+
+## PII guard: `verify_no_home_paths.sh` + `.githooks/pre-commit`
+
+`scripts/ci/verify_no_home_paths.sh` fails when tracked or staged content embeds
+an absolute home directory (`/Users/<x>`, `/home/<x>`) whose user segment is not
+a generic placeholder. It runs merge-blocking in `docs-contracts-shift-left` as
+`--self-test` (fixture-driven positive and negative controls) then `--repo`.
+
+`.githooks/pre-commit` runs the same check against the index, plus a
+runtime-only check for the committing machine's own `$HOME`, plus the
+`sensitive-token-census` ratchet. Enable it once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+The hook is local and bypassable with `--no-verify`; the CI lane is the
+enforcing gate.
+
+**Design constraint — these files must never name what they guard.** A guard
+that spells out the username or adopter token it blocks re-introduces exactly
+the string being scrubbed, in a file that ships. So:
+
+- the committing machine's username is derived at runtime from `$HOME` and is
+  never written to disk;
+- home paths are matched as a **class** against a placeholder allowlist, never
+  by naming a person;
+- the retired adopter token lives only in
+  `.planning/hygiene/sensitive-token-census.json`, bracket-escaped
+  (`a[d]opter-app`) and sha256-pinned, with `--require-no-cleartext` asserting
+  the census itself never spells it out;
+- offending values are redacted (`/Users/<redacted>`) in all guard output.
+
+Adding a placeholder to the allowlist is a one-line edit to `ALLOWED_USERS`;
+prefer that over weakening the pattern.

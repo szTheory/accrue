@@ -1061,7 +1061,7 @@ Both threats are surfaced + mitigated within the same phase — no follow-up nee
 
 ### Primary (HIGH confidence)
 
-- **Source files read** (all in `/Users/jon/projects/accrue/`):
+- **Source files read** (all in `/Users/dev/projects/accrue/`):
   - `accrue/lib/accrue/analytics/dunning.ex` (full, 73 lines)
   - `accrue/lib/accrue/webhook/default_handler.ex` (lines 740-905, 1885-1924)
   - `accrue/lib/accrue/events.ex` (lines 100-160)
@@ -1134,7 +1134,7 @@ None — every load-bearing claim is verified against source code or planning do
 
 ### File Created
 
-`/Users/jon/projects/accrue/.planning/phases/144-funnel-query-viz-campaign-anchor-retrofit-money-formatter-po/144-RESEARCH.md`
+`/Users/dev/projects/accrue/.planning/phases/144-funnel-query-viz-campaign-anchor-retrofit-money-formatter-po/144-RESEARCH.md`
 
 ### Confidence Assessment
 

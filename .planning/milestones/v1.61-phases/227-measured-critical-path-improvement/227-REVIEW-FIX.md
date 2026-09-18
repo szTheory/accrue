@@ -1,7 +1,7 @@
 ---
 phase: 227
 fixed_at: 2026-09-12T17:14:15Z
-review_path: /Users/jon/projects/accrue/.planning/phases/227-measured-critical-path-improvement/227-REVIEW.md
+review_path: /Users/dev/projects/accrue/.planning/phases/227-measured-critical-path-improvement/227-REVIEW.md
 iteration: 3
 findings_in_scope: 2
 fixed: 2
@@ -12,7 +12,7 @@ status: all_fixed
 # Phase 227: Code Review Fix Report
 
 **Fixed at:** 2026-09-12T17:14:15Z
-**Source review:** `/Users/jon/projects/accrue/.planning/phases/227-measured-critical-path-improvement/227-REVIEW.md`
+**Source review:** `/Users/dev/projects/accrue/.planning/phases/227-measured-critical-path-improvement/227-REVIEW.md`
 **Iteration:** 3
 
 **Summary:**

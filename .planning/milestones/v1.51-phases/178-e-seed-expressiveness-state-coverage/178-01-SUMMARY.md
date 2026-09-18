@@ -80,8 +80,8 @@ completed: "2026-06-04"
 
 ## Files Created/Modified
 
-- `/Users/jon/projects/accrue/.planning/phases/178-e-seed-expressiveness-state-coverage/STATE-MATRIX.md` — 21-row screen×state matrix, 119 lines, Phase 179 QA contract
-- `/Users/jon/projects/accrue/accrue_admin/test/accrue_admin/e2e_fixtures_test.exs` — 8 RED tests for SEED-01 and SEED-02 contracts
+- `/Users/dev/projects/accrue/.planning/phases/178-e-seed-expressiveness-state-coverage/STATE-MATRIX.md` — 21-row screen×state matrix, 119 lines, Phase 179 QA contract
+- `/Users/dev/projects/accrue/accrue_admin/test/accrue_admin/e2e_fixtures_test.exs` — 8 RED tests for SEED-01 and SEED-02 contracts
 
 ## Decisions Made
 

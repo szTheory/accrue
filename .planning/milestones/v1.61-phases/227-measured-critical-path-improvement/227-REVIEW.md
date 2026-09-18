@@ -35,7 +35,7 @@ The six-file scope was reviewed, including the task-local backend contract, deta
 
 ### CR-01: BLOCKER — A successful candidate can be relabeled nonqualifying to force rollback
 
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:460`
+**File:** `/Users/dev/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:460`
 
 **Issue:** The validator requires success, complete required jobs, and required artifacts only for `classification: "qualifying"` (lines 465–468). For `"nonqualifying"`, it accepts any non-empty job conclusions and does not require an actual failed required job, failed workflow conclusion, or missing required artifact. The rollback branch then accepts the label alone as evidence (lines 524–526). Replacing a current all-success candidate's classification with `nonqualifying` and changing the decision to rollback is accepted by `verifyFinalDecision`, so append-only evidence can falsely discard a qualifying cohort.
 
@@ -43,7 +43,7 @@ The six-file scope was reviewed, including the task-local backend contract, deta
 
 ### CR-02: BLOCKER — `rollback_verified` is not bound to a successful restoration proof
 
-**File:** `/Users/jon/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:520`
+**File:** `/Users/dev/projects/accrue/scripts/ci/verify_ci_critical_path.mjs:520`
 
 **Issue:** All non-kept states take the same branch. It permits `state: "rollback_verified"` with `restoration_authority: "closed_unspent"` and zero restoration records (lines 520–529); it never requires a restoration terminal record, provider proof, or successful required-job vector for that state. I reproduced this by changing the current final decision to `rollback_verified` while retaining no restoration records; `verifyFinalDecision` returned `rollback_verified`. This can falsely represent the rollback as proved.
 

@@ -1,7 +1,7 @@
 ---
 phase: 218
 fixed_at: 2026-08-03T15:49:10Z
-review_path: /Users/jon/projects/accrue/.planning/phases/218-apple-observation-and-repair/218-REVIEW.md
+review_path: /Users/dev/projects/accrue/.planning/phases/218-apple-observation-and-repair/218-REVIEW.md
 iteration: 1
 findings_in_scope: 6
 fixed: 6
@@ -12,7 +12,7 @@ status: all_fixed
 # Phase 218: Code Review Fix Report
 
 **Fixed at:** 2026-08-03T15:49:10Z
-**Source review:** `/Users/jon/projects/accrue/.planning/phases/218-apple-observation-and-repair/218-REVIEW.md`
+**Source review:** `/Users/dev/projects/accrue/.planning/phases/218-apple-observation-and-repair/218-REVIEW.md`
 **Iteration:** 1
 
 **Summary:**

@@ -56,7 +56,7 @@ Output: A rewritten `examples/accrue_host/priv/repo/seeds/phase191_flow_states.e
 @.planning/STATE.md
 
 # Source of truth — Part C is the spec
-@/Users/jon/.claude/plans/i-just-got-an-ethereal-harbor.md
+@/Users/dev/.claude/plans/i-just-got-an-ethereal-harbor.md
 
 # The file being rewritten (study the upsert/upsert_processor helpers ~38-60 and the page-customer loop ~316-334)
 @examples/accrue_host/priv/repo/seeds/phase191_flow_states.exs

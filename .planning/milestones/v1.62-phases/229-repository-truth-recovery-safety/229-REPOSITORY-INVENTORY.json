@@ -35,7 +35,7 @@
         "bundle_member": true
       },
       {
-        "original_ref": "refs/heads/fix/getfluent-1.5.1",
+        "original_ref": "refs/heads/fix/adopter-app-1.5.1",
         "object": "dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe",
         "encoded_ref": "refs/accrue-preserve/phase-229/726566732f68656164732f6669782f676574666c75656e742d312e352e31",
         "bundle_member": true
@@ -89,7 +89,7 @@
         "bundle_member": true
       },
       {
-        "original_ref": "refs/remotes/origin/fix/getfluent-1.5.1",
+        "original_ref": "refs/remotes/origin/fix/adopter-app-1.5.1",
         "object": "dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe",
         "encoded_ref": "refs/accrue-preserve/phase-229/726566732f72656d6f7465732f6f726967696e2f6669782f676574666c75656e742d312e352e31",
         "bundle_member": true
@@ -1290,7 +1290,7 @@
         "role": "other"
       },
       {
-        "name": "refs/heads/fix/getfluent-1.5.1",
+        "name": "refs/heads/fix/adopter-app-1.5.1",
         "object": "dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe",
         "role": "other"
       },
@@ -1335,7 +1335,7 @@
         "role": "other"
       },
       {
-        "name": "refs/remotes/origin/fix/getfluent-1.5.1",
+        "name": "refs/remotes/origin/fix/adopter-app-1.5.1",
         "object": "dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe",
         "role": "other"
       },

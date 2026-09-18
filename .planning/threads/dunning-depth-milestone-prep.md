@@ -55,7 +55,7 @@ Build a small self-contained `Accrue.Dunning.Campaign` (Oban-driven, reuses
 adapter behind an `Accrue.Dunning.Engine` behaviour. **Do NOT hard-depend on Chimeway.**
 
 Chimeway maturity (verified): **published on Hex at `1.0.0`** (owner `sztheory`,
-2026-05-08); local `/Users/jon/projects/chimeway/mix.exs` version string is **stale
+2026-05-08); local `/Users/dev/projects/chimeway/mix.exs` version string is **stale
 at `0.1.0`** while tags are at `v1.2`. It is a genuine durable journey engine
 (workflow_run/step/transition schemas, `:waiting`/`suspended_until`, signal-driven
 cancel, Oban dispatch, built-in idempotency, 64 test files incl. reliability suites).
@@ -146,7 +146,7 @@ config; provider-native dunning-email coordination beyond a doc warning.
 - `accrue_portal/lib/accrue_portal/live/{home_live,subscriptions_live,add_payment_method_live}.ex` (recovery banner target)
 - `accrue_admin/lib/accrue_admin/live/{subscription_live,customer_live}.ex` (admin dunning state)
 - `.planning/seeds/SEED-002-ecosystem-integrations.md` (#1 Chimeway+Mailglass)
-- Chimeway: `/Users/jon/projects/chimeway/lib/chimeway.ex`, `lib/chimeway/workflows.ex`, `lib/chimeway/notifier.ex`, `guides/flows/multi-step-journeys.md`, `mix.exs` (stale 0.1.0)
+- Chimeway: `/Users/dev/projects/chimeway/lib/chimeway.ex`, `lib/chimeway/workflows.ex`, `lib/chimeway/notifier.ex`, `guides/flows/multi-step-journeys.md`, `mix.exs` (stale 0.1.0)
 - `prompts/payments_domain_field_guide.md` (§"The dunning flow"), `prompts/The definitive Stripe library gap in Elixir - a master research document.md`
 
 ## Next Steps

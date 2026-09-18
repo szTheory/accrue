@@ -817,7 +817,7 @@ Extended toolchain per OSS-02: `mix format --check-formatted && mix compile --wa
 
 ## Project Constraints (from CLAUDE.md)
 
-Extracted from `/Users/jon/projects/accrue/CLAUDE.md`. The planner must treat these with the same authority as CONTEXT.md locked decisions.
+Extracted from `/Users/dev/projects/accrue/CLAUDE.md`. The planner must treat these with the same authority as CONTEXT.md locked decisions.
 
 1. **Tech stack floor:** Elixir 1.17+, OTP 27+, Phoenix 1.8+, Ecto 3.12+, PostgreSQL 14+. No legacy support.
 2. **Release model:** ship complete. First public release is v1.0. Internal phases are build milestones, not public releases.
@@ -854,9 +854,9 @@ Extracted from `/Users/jon/projects/accrue/CLAUDE.md`. The planner must treat th
 - [CITED] `https://github.com/akoutmos/mjml_eex` — `use MjmlEEx, mjml_template:` is the idiomatic usage pattern
 - [CITED] `https://github.com/akoutmos/mjml_eex/blob/master/lib/engines/mjml.ex` — `MjmlEEx.Engines.Mjml` is an `EEx.Engine`, NOT a `Phoenix.Template.Engine`
 - [CITED] `https://hexdocs.pm/phoenix_swoosh/Phoenix.Swoosh.html` — `formats:` map + `render_body/3`
-- [CITED] `/Users/jon/projects/accrue/CLAUDE.md` — tech stack pins, conditional compile 4-step, config boundaries, test library decision
-- [CITED] `/Users/jon/projects/accrue/.planning/phases/01-foundations/01-CONTEXT.md` — all 45 locked decisions D-01..D-45
-- [CITED] `/Users/jon/projects/accrue/.planning/REQUIREMENTS.md` — phase 1 requirement IDs
+- [CITED] `/Users/dev/projects/accrue/CLAUDE.md` — tech stack pins, conditional compile 4-step, config boundaries, test library decision
+- [CITED] `/Users/dev/projects/accrue/.planning/phases/01-foundations/01-CONTEXT.md` — all 45 locked decisions D-01..D-45
+- [CITED] `/Users/dev/projects/accrue/.planning/REQUIREMENTS.md` — phase 1 requirement IDs
 
 ### Secondary (MEDIUM confidence)
 - [VERIFIED] `elixir --version` on dev machine — 1.19.5 / OTP 28

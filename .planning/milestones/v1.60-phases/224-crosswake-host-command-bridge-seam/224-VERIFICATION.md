@@ -73,10 +73,10 @@ re_verification:
 
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Exact source identity/bindings | `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh source-gate` | Exit 0, `reviewed_patch` | ✓ PASS |
-| Trusted sender, validation, replay, navigation, and factory tests | `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh trusted-frame` | Exit 0; 17 `HostCommandAdmissionTests` passed | ✓ PASS |
+| Exact source identity/bindings | `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh source-gate` | Exit 0, `reviewed_patch` | ✓ PASS |
+| Trusted sender, validation, replay, navigation, and factory tests | `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh trusted-frame` | Exit 0; 17 `HostCommandAdmissionTests` passed | ✓ PASS |
 | Runner fails closed for substituted/shell-bearing target | `bash scripts/ci/test_verify_crosswake_host_commands.sh` | Exit 0; both altered targets rejected before Swift | ✓ PASS |
-| Full native/tracer/evidence conformance | `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full` | Exit 0; 31 native tests, tracer consumer, audit/evidence digest, and blocked-status assertions passed | ✓ PASS |
+| Full native/tracer/evidence conformance | `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full` | Exit 0; 31 native tests, tracer consumer, audit/evidence digest, and blocked-status assertions passed | ✓ PASS |
 | Capability status remains deliberately non-runtime | `jq -e '.overall_status == "feasibility_blocked" and all(.capabilities[]; .status == "feasibility_blocked")' examples/crosswake_tracer/capability-report.json` | `true` | ✓ PASS |
 
 ### Probe Execution

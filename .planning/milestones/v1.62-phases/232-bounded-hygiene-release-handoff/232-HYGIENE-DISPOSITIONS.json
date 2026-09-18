@@ -38,7 +38,7 @@
     },
     {
       "kind": "remote_branch",
-      "name": "origin/fix/getfluent-1.5.1",
+      "name": "origin/fix/adopter-app-1.5.1",
       "disposition": "retained",
       "reason": "Adopter-named ref. Renaming this branch and its origin peer is maintainer-decided as fail-forward and deferred to a future capsule mint (232-CONTEXT.md deferred list); retained as-is for this phase, not superseded.",
       "authorization_required": false

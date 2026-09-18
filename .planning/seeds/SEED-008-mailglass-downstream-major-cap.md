@@ -6,7 +6,7 @@ planted_during: v1.62 Release Integration & Repository Hygiene — Phase 230 (re
 trigger_when: A downstream adopter needs mailglass 2.x behavior, OR Accrue's own email work reopens, OR a maintainer decides to publish the cap as a documented constraint
 target_version: "mailglass 2.x (2.5.0 published 2026-08-20)"
 scope: small-to-medium
-source: cross-project request from the GetFluent session, 2026-09-15
+source: cross-project request from the Adopter-App session, 2026-09-15
 ---
 
 # SEED-008: `mailglass ~> 1.0` caps every downstream consumer at 1.x
@@ -77,9 +77,9 @@ packages, three API surfaces to diff, and the email regression suite to re-green
 
 ## Origin
 
-Raised 2026-09-15 by the GetFluent session as request AC-REQ-A, while Accrue was
+Raised 2026-09-15 by the Adopter-App session as request AC-REQ-A, while Accrue was
 mid-execution on v1.62 Phase 230. Their writeup lives outside this repo at
-`~/getfluent/getfluent-app/lib-requests/2026-09-15-accrue.md`.
+`~/adopter-app/adopter-app-app/lib-requests/2026-09-15-accrue.md`.
 
 Their motivating incident is context, not a requirement on Accrue: they sent zero email
 for twelve days behind a From address on a domain they did not own, which the provider

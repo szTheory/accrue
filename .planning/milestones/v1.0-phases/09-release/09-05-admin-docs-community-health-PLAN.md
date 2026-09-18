@@ -51,8 +51,8 @@ Output: admin README/changelog/docs config, Hex-safe `accrue` dependency strateg
 </objective>
 
 <execution_context>
-@/Users/jon/.codex/get-shit-done/workflows/execute-plan.md
-@/Users/jon/.codex/get-shit-done/templates/summary.md
+@/Users/dev/.codex/get-shit-done/workflows/execute-plan.md
+@/Users/dev/.codex/get-shit-done/templates/summary.md
 </execution_context>
 
 <context>

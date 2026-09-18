@@ -83,7 +83,7 @@ status: complete
 ## Verification
 
 - PASS — `swift test --package-path packages/crosswake-shell-core-ios` (23 tests).
-- PASS — `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh source-gate`.
+- PASS — `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh source-gate`.
 - PASS — `... verify_crosswake_host_commands.sh admission`.
 - PASS — `... verify_crosswake_host_commands.sh lifecycle`.
 

@@ -109,7 +109,7 @@ No `TBD`, `FIXME`, or `XXX` markers found in phase-modified files. No unreferenc
 overrides:
   - must_have: "Post-v1.44 active campaigns surface the triggering invoice's failure_message in the Last failure reason column"
     reason: "invoice.payment_failed ledger events do not store failure_message/failure_code without an additional Stripe API call (ruled out per D-07, RESEARCH.md Open Question 1). The column shows — for all campaigns in v1.44; the Phase 148 or later phase can add Stripe Charge enrichment. Infrastructure (invoice_id stored, bridge wired) is complete."
-    accepted_by: "jon"
+    accepted_by: "maintainer"
     accepted_at: "ISO timestamp"
 ```
 

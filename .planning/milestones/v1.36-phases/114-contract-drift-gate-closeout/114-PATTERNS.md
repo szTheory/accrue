@@ -16,9 +16,9 @@
 
 | Pattern | Evidence |
 |---|---|
-| Wave 1 closes the canonical/runtime truth first | [112-01-PLAN.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-01-PLAN.md:1), [113-01-PLAN.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-PLAN.md:1) |
-| Wave 2 mirrors that truth into docs/UI/host surfaces | [112-03-PLAN.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-03-PLAN.md:1), [113-02-PLAN.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-02-PLAN.md:1) |
-| Wave 3 adds drift gates and targeted proof after wording settles | [112-02-PLAN.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-02-PLAN.md:1), [113-03-PLAN.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-03-PLAN.md:1) |
+| Wave 1 closes the canonical/runtime truth first | [112-01-PLAN.md](/Users/dev/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-01-PLAN.md:1), [113-01-PLAN.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-PLAN.md:1) |
+| Wave 2 mirrors that truth into docs/UI/host surfaces | [112-03-PLAN.md](/Users/dev/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-03-PLAN.md:1), [113-02-PLAN.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-02-PLAN.md:1) |
+| Wave 3 adds drift gates and targeted proof after wording settles | [112-02-PLAN.md](/Users/dev/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-02-PLAN.md:1), [113-03-PLAN.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-03-PLAN.md:1) |
 
 Recommended Phase 114 sizing:
 
@@ -28,7 +28,7 @@ Recommended Phase 114 sizing:
 
 ## Frontmatter Conventions
 
-Copy the plan frontmatter shape from [113-01-PLAN.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-PLAN.md:1):
+Copy the plan frontmatter shape from [113-01-PLAN.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-PLAN.md:1):
 
 ```yaml
 phase: 113-cancellation-semantics-closure
@@ -67,7 +67,7 @@ Stable conventions across 109-113:
 
 ## Verification Style
 
-- Pair every task with one automated command. This is consistent in [112-VALIDATION.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-VALIDATION.md:1), [113-VALIDATION.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-VALIDATION.md:1), and [110-VALIDATION.md](/Users/jon/projects/accrue/.planning/milestones/v1.35-phases/110-lifecycle-semantics-self-serve-clarity/110-VALIDATION.md:1).
+- Pair every task with one automated command. This is consistent in [112-VALIDATION.md](/Users/dev/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-VALIDATION.md:1), [113-VALIDATION.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-VALIDATION.md:1), and [110-VALIDATION.md](/Users/dev/projects/accrue/.planning/milestones/v1.35-phases/110-lifecycle-semantics-self-serve-clarity/110-VALIDATION.md:1).
 - Use ExUnit for runtime semantics and bash/`rg` gates for fixed wording or matrix drift. Phase 114 should preserve that split instead of introducing a mega-verifier.
 - Keep verification commands focused and local to the touched seam. Full bundle commands belong in the plan-level `<verification>` section and the phase `*-VALIDATION.md`, not in every task.
 - Validation files use this frontmatter shape:
@@ -99,7 +99,7 @@ created: 2026-05-06
   - pattern compliance against `*-PATTERNS.md`
   - research/context resolution
 
-Best analogs: [112-PLAN-CHECK.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-PLAN-CHECK.md:1), [109-PLAN-CHECK.md](/Users/jon/projects/accrue/.planning/milestones/v1.35-phases/109-support-contract-truth/109-PLAN-CHECK.md:1).
+Best analogs: [112-PLAN-CHECK.md](/Users/dev/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-PLAN-CHECK.md:1), [109-PLAN-CHECK.md](/Users/dev/projects/accrue/.planning/milestones/v1.35-phases/109-support-contract-truth/109-PLAN-CHECK.md:1).
 
 ## Summary Artifact Pattern
 
@@ -128,14 +128,14 @@ Best analogs: [112-PLAN-CHECK.md](/Users/jon/projects/accrue/.planning/phases/11
   - `Next Phase Readiness`
   - `Self-Check`
 
-Best analogs: [113-01-SUMMARY.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-SUMMARY.md:1), [113-02-SUMMARY.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-02-SUMMARY.md:1), [113-03-SUMMARY.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-03-SUMMARY.md:1).
+Best analogs: [113-01-SUMMARY.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-SUMMARY.md:1), [113-02-SUMMARY.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-02-SUMMARY.md:1), [113-03-SUMMARY.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-03-SUMMARY.md:1).
 
 ## Closeout Patterns From 112/113
 
 - Closeout phases end with explicit verification and review artifacts, not just summaries.
-- `*-VERIFICATION.md` should score observable truths against the phase goal and cite concrete evidence links. Best analogs: [112-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-VERIFICATION.md:1), [111-VERIFICATION.md](/Users/jon/projects/accrue/.planning/milestones/v1.35-phases/111-webhook-operator-closure/111-VERIFICATION.md:1).
-- `*-REVIEW.md` should be terse YAML + findings summary. Phase 113 shows the preferred “review findings first, remediation second” closeout pattern even when the final status is clean: [113-REVIEW.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-REVIEW.md:1).
-- Auto-fixed issues belong in the plan summary under `Deviations from Plan`, with the fix constrained to the planned seam. Best analogs: [112-REVIEW.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-REVIEW.md:1), [113-01-SUMMARY.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-SUMMARY.md:1).
+- `*-VERIFICATION.md` should score observable truths against the phase goal and cite concrete evidence links. Best analogs: [112-VERIFICATION.md](/Users/dev/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-VERIFICATION.md:1), [111-VERIFICATION.md](/Users/dev/projects/accrue/.planning/milestones/v1.35-phases/111-webhook-operator-closure/111-VERIFICATION.md:1).
+- `*-REVIEW.md` should be terse YAML + findings summary. Phase 113 shows the preferred “review findings first, remediation second” closeout pattern even when the final status is clean: [113-REVIEW.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-REVIEW.md:1).
+- Auto-fixed issues belong in the plan summary under `Deviations from Plan`, with the fix constrained to the planned seam. Best analogs: [112-REVIEW.md](/Users/dev/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-REVIEW.md:1), [113-01-SUMMARY.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-SUMMARY.md:1).
 
 ## Phase 114-Specific Reuse
 
@@ -150,11 +150,11 @@ Best analogs: [113-01-SUMMARY.md](/Users/jon/projects/accrue/.planning/phases/11
 
 | Artifact | Closest planning analog |
 |---|---|
-| `114-01-PLAN.md` | [113-01-PLAN.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-PLAN.md:1) |
-| `114-02-PLAN.md` | [113-02-PLAN.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-02-PLAN.md:1) |
-| `114-03-PLAN.md` | [113-03-PLAN.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-03-PLAN.md:1) |
-| `114-VALIDATION.md` | [113-VALIDATION.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-VALIDATION.md:1) |
-| `114-PLAN-CHECK.md` | [112-PLAN-CHECK.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-PLAN-CHECK.md:1) |
-| `114-0x-SUMMARY.md` | [113-0x-SUMMARY.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-SUMMARY.md:1) |
-| `114-VERIFICATION.md` | [112-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-VERIFICATION.md:1) |
-| `114-REVIEW.md` | [113-REVIEW.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-REVIEW.md:1) |
+| `114-01-PLAN.md` | [113-01-PLAN.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-PLAN.md:1) |
+| `114-02-PLAN.md` | [113-02-PLAN.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-02-PLAN.md:1) |
+| `114-03-PLAN.md` | [113-03-PLAN.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-03-PLAN.md:1) |
+| `114-VALIDATION.md` | [113-VALIDATION.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-VALIDATION.md:1) |
+| `114-PLAN-CHECK.md` | [112-PLAN-CHECK.md](/Users/dev/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-PLAN-CHECK.md:1) |
+| `114-0x-SUMMARY.md` | [113-0x-SUMMARY.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-01-SUMMARY.md:1) |
+| `114-VERIFICATION.md` | [112-VERIFICATION.md](/Users/dev/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-VERIFICATION.md:1) |
+| `114-REVIEW.md` | [113-REVIEW.md](/Users/dev/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-REVIEW.md:1) |

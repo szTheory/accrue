@@ -11,7 +11,7 @@ Sanitized schema-v2 repository evidence. This is a deterministic projection: no 
 | refs/heads/docs/architecture-guides | `e599d5ce36867b18404f1bc4e08c2934ba949d1f` | refs/accrue-preserve/phase-229/726566732f68656164732f646f63732f6172636869746563747572652d677569646573 | yes |
 | refs/heads/fix/chimeway-opaque-recipient-release | `29c0986b8970ebfec3b1df1481f1a288f5283fee` | refs/accrue-preserve/phase-229/726566732f68656164732f6669782f6368696d657761792d6f70617175652d726563697069656e742d72656c65617365 | yes |
 | refs/heads/fix/chimeway-opaque-recipient | `0752b8d0b59eb53936498daa4bb0be4b14ffd0e4` | refs/accrue-preserve/phase-229/726566732f68656164732f6669782f6368696d657761792d6f70617175652d726563697069656e74 | yes |
-| refs/heads/fix/getfluent-1.5.1 | `dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe` | refs/accrue-preserve/phase-229/726566732f68656164732f6669782f676574666c75656e742d312e352e31 | yes |
+| refs/heads/fix/adopter-app-1.5.1 | `dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe` | refs/accrue-preserve/phase-229/726566732f68656164732f6669782f676574666c75656e742d312e352e31 | yes |
 | refs/heads/fix/release-otp-28-1 | `72118f05cbe2f490e329f9f067d88f850246c321` | refs/accrue-preserve/phase-229/726566732f68656164732f6669782f72656c656173652d6f74702d32382d31 | yes |
 | refs/heads/gsd/milestone-v1.62-release-integration-hygiene | `dc4f6b91742136bcd8816651595eb80814f3f3c5` | refs/accrue-preserve/phase-229/726566732f68656164732f6773642f6d696c6573746f6e652d76312e36322d72656c656173652d696e746567726174696f6e2d68796769656e65 | yes |
 | refs/heads/gsd/phase-225-required-lane-signal-repair | `57c61a9a48f1ae84f7b3c3f45333eb6e5fb7261c` | refs/accrue-preserve/phase-229/726566732f68656164732f6773642f70686173652d3232352d72657175697265642d6c616e652d7369676e616c2d726570616972 | yes |
@@ -20,7 +20,7 @@ Sanitized schema-v2 repository evidence. This is a deterministic projection: no 
 | refs/heads/repair/release-pr39 | `8a490a78524e2f1163b45612391bb53d2f9f9824` | refs/accrue-preserve/phase-229/726566732f68656164732f7265706169722f72656c656173652d70723339 | yes |
 | refs/remotes/origin/fix/chimeway-opaque-recipient-release | `29c0986b8970ebfec3b1df1481f1a288f5283fee` | refs/accrue-preserve/phase-229/726566732f72656d6f7465732f6f726967696e2f6669782f6368696d657761792d6f70617175652d726563697069656e742d72656c65617365 | yes |
 | refs/remotes/origin/fix/chimeway-opaque-recipient | `0752b8d0b59eb53936498daa4bb0be4b14ffd0e4` | refs/accrue-preserve/phase-229/726566732f72656d6f7465732f6f726967696e2f6669782f6368696d657761792d6f70617175652d726563697069656e74 | yes |
-| refs/remotes/origin/fix/getfluent-1.5.1 | `dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe` | refs/accrue-preserve/phase-229/726566732f72656d6f7465732f6f726967696e2f6669782f676574666c75656e742d312e352e31 | yes |
+| refs/remotes/origin/fix/adopter-app-1.5.1 | `dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe` | refs/accrue-preserve/phase-229/726566732f72656d6f7465732f6f726967696e2f6669782f676574666c75656e742d312e352e31 | yes |
 | refs/remotes/origin/fix/release-otp-28-1 | `72118f05cbe2f490e329f9f067d88f850246c321` | refs/accrue-preserve/phase-229/726566732f72656d6f7465732f6f726967696e2f6669782f72656c656173652d6f74702d32382d31 | yes |
 | refs/remotes/origin/gsd/phase-225-required-lane-signal-repair | `b2f5961077ad0982dd1cfee1c807108a9710a9cb` | refs/accrue-preserve/phase-229/726566732f72656d6f7465732f6f726967696e2f6773642f70686173652d3232352d72657175697265642d6c616e652d7369676e616c2d726570616972 | yes |
 | refs/remotes/origin/HEAD | `8f3135f781a324fc0b8d3c460883b1d572bf6e02` | refs/accrue-preserve/phase-229/726566732f72656d6f7465732f6f726967696e2f48454144 | yes |
@@ -132,8 +132,8 @@ git fetch "$PHASE229_BUNDLE" 'refs/heads/fix/chimeway-opaque-recipient-release'
 git update-ref 'refs/heads/fix/chimeway-opaque-recipient-release' '29c0986b8970ebfec3b1df1481f1a288f5283fee'
 git fetch "$PHASE229_BUNDLE" 'refs/heads/fix/chimeway-opaque-recipient'
 git update-ref 'refs/heads/fix/chimeway-opaque-recipient' '0752b8d0b59eb53936498daa4bb0be4b14ffd0e4'
-git fetch "$PHASE229_BUNDLE" 'refs/heads/fix/getfluent-1.5.1'
-git update-ref 'refs/heads/fix/getfluent-1.5.1' 'dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe'
+git fetch "$PHASE229_BUNDLE" 'refs/heads/fix/adopter-app-1.5.1'
+git update-ref 'refs/heads/fix/adopter-app-1.5.1' 'dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe'
 git fetch "$PHASE229_BUNDLE" 'refs/heads/fix/release-otp-28-1'
 git update-ref 'refs/heads/fix/release-otp-28-1' '72118f05cbe2f490e329f9f067d88f850246c321'
 git fetch "$PHASE229_BUNDLE" 'refs/heads/gsd/milestone-v1.62-release-integration-hygiene'
@@ -150,8 +150,8 @@ git fetch "$PHASE229_BUNDLE" 'refs/remotes/origin/fix/chimeway-opaque-recipient-
 git update-ref 'refs/remotes/origin/fix/chimeway-opaque-recipient-release' '29c0986b8970ebfec3b1df1481f1a288f5283fee'
 git fetch "$PHASE229_BUNDLE" 'refs/remotes/origin/fix/chimeway-opaque-recipient'
 git update-ref 'refs/remotes/origin/fix/chimeway-opaque-recipient' '0752b8d0b59eb53936498daa4bb0be4b14ffd0e4'
-git fetch "$PHASE229_BUNDLE" 'refs/remotes/origin/fix/getfluent-1.5.1'
-git update-ref 'refs/remotes/origin/fix/getfluent-1.5.1' 'dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe'
+git fetch "$PHASE229_BUNDLE" 'refs/remotes/origin/fix/adopter-app-1.5.1'
+git update-ref 'refs/remotes/origin/fix/adopter-app-1.5.1' 'dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe'
 git fetch "$PHASE229_BUNDLE" 'refs/remotes/origin/fix/release-otp-28-1'
 git update-ref 'refs/remotes/origin/fix/release-otp-28-1' '72118f05cbe2f490e329f9f067d88f850246c321'
 git fetch "$PHASE229_BUNDLE" 'refs/remotes/origin/gsd/phase-225-required-lane-signal-repair'
@@ -484,7 +484,7 @@ git update-ref 'refs/tags/v1.9' '25217144e1cd9413ec9ed39d3864d585e762ad22'
 | refs/heads/docs/architecture-guides | `e599d5ce36867b18404f1bc4e08c2934ba949d1f` | other |
 | refs/heads/fix/chimeway-opaque-recipient-release | `29c0986b8970ebfec3b1df1481f1a288f5283fee` | other |
 | refs/heads/fix/chimeway-opaque-recipient | `0752b8d0b59eb53936498daa4bb0be4b14ffd0e4` | other |
-| refs/heads/fix/getfluent-1.5.1 | `dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe` | other |
+| refs/heads/fix/adopter-app-1.5.1 | `dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe` | other |
 | refs/heads/fix/release-otp-28-1 | `72118f05cbe2f490e329f9f067d88f850246c321` | other |
 | refs/heads/gsd/milestone-v1.62-release-integration-hygiene | `024eaeca37105a8c17f3db94d01bfa25e57428ff` | other |
 | refs/heads/gsd/phase-225-required-lane-signal-repair | `57c61a9a48f1ae84f7b3c3f45333eb6e5fb7261c` | other |
@@ -493,7 +493,7 @@ git update-ref 'refs/tags/v1.9' '25217144e1cd9413ec9ed39d3864d585e762ad22'
 | refs/heads/repair/release-pr39 | `8a490a78524e2f1163b45612391bb53d2f9f9824` | other |
 | refs/remotes/origin/fix/chimeway-opaque-recipient-release | `29c0986b8970ebfec3b1df1481f1a288f5283fee` | other |
 | refs/remotes/origin/fix/chimeway-opaque-recipient | `0752b8d0b59eb53936498daa4bb0be4b14ffd0e4` | other |
-| refs/remotes/origin/fix/getfluent-1.5.1 | `dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe` | other |
+| refs/remotes/origin/fix/adopter-app-1.5.1 | `dba9a75daa4c8ca1f3213dd2de43efbbde1f5dfe` | other |
 | refs/remotes/origin/fix/release-otp-28-1 | `72118f05cbe2f490e329f9f067d88f850246c321` | other |
 | refs/remotes/origin/gsd/phase-225-required-lane-signal-repair | `b2f5961077ad0982dd1cfee1c807108a9710a9cb` | other |
 | refs/remotes/origin/HEAD | `8f3135f781a324fc0b8d3c460883b1d572bf6e02` | other |

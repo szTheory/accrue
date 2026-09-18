@@ -173,7 +173,7 @@ This phase does NOT: open the integration PR, merge anything to `main`, push `ma
 - Opening the integration PR, the risk summary, rollback instructions, and Release Please readiness — Phase 232 (REL-04/REL-05).
 - Fresh clean-checkout local gates, exact-SHA GitHub check proof, and ship-window resolution — Phase 231 (GATE-01/02/03).
 - Deleting local `main`, `origin/phase-226-baseline-5da8e6b88735`, stale worktrees, or any untracked file; classifying untracked artifacts — Phase 232 (HYG-01).
-- Renaming the two adopter-named refs (`fix/getfluent-1.5.1` and its origin peer) — already maintainer-decided as fail-forward; only free when a new capsule is minted, so revisit at the Phase-230 capsule mint if desired.
+- Renaming the two adopter-named refs (`fix/adopter-app-1.5.1` and its origin peer) — already maintainer-decided as fail-forward; only free when a new capsule is minted, so revisit at the Phase-230 capsule mint if desired.
 - Pinning `commit-search-depth` in the release-please workflow — Phase 232.
 - Package publication — outside v1.62 entirely.
 

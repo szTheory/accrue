@@ -54,7 +54,7 @@ status: complete
 - `cd examples/crosswake_tracer && swift test --filter CapabilityReportTests && swift test`
 - `bash scripts/ci/verify_v159_authority.sh`
 - `bash scripts/ci/verify_entitlement_source_matrix.sh`
-- `node /Users/jon/.codex/gsd-core/bin/gsd-tools.cjs query check.api-coverage-verify-pre 215`
+- `node /Users/dev/.codex/gsd-core/bin/gsd-tools.cjs query check.api-coverage-verify-pre 215`
 - `cd accrue && mix accrue.entitlements.decision_cases --check && mix test test/accrue/entitlements/decision_cases_test.exs test/property/entitlement_decision_cases_property_test.exs test/accrue/entitlements/offline_golden_vectors_test.exs`
 - Byte-drift checks passed for entitlement JSON corpora, `capability-report.json`, and `physical-device-evidence.md`.
 

@@ -70,7 +70,7 @@ coverage:
         ref: "bash scripts/ci/verify_processor_support_matrix.sh"
         status: pass
       - kind: other
-        ref: "node /Users/jon/.codex/gsd-core/bin/gsd-tools.cjs query roadmap.get-phase 214"
+        ref: "node /Users/dev/.codex/gsd-core/bin/gsd-tools.cjs query roadmap.get-phase 214"
         status: pass
     human_judgment: false
 duration: 41min

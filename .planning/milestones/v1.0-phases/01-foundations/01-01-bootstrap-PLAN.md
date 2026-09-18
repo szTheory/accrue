@@ -170,7 +170,7 @@ Mox mocks to define (Wave 1 behaviours — mocks are declared now but guarded by
     .gitignore
   </files>
   <action>
-Create the core `accrue/` mix project at `/Users/jon/projects/accrue/accrue/`. This is NOT `mix new` — the layout is non-umbrella sibling so hand-write files to match D-42.
+Create the core `accrue/` mix project at `/Users/dev/projects/accrue/accrue/`. This is NOT `mix new` — the layout is non-umbrella sibling so hand-write files to match D-42.
 
 1. `accrue/mix.exs`:
    - `@version "0.1.0"` at top of module (required for Release Please per CLAUDE.md §Release Please).
@@ -254,10 +254,10 @@ Create the core `accrue/` mix project at `/Users/jon/projects/accrue/accrue/`. T
 
 Decision D-42 (sibling, non-umbrella): do NOT create an umbrella root `mix.exs`. The monorepo root has no `mix.exs`, only `LICENSE` and shared docs/CI config.
 
-Run `cd /Users/jon/projects/accrue/accrue && mix deps.get` and confirm resolution succeeds. If any version conflict surfaces, STOP and report — do not downgrade pins without user decision.
+Run `cd /Users/dev/projects/accrue/accrue && mix deps.get` and confirm resolution succeeds. If any version conflict surfaces, STOP and report — do not downgrade pins without user decision.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix deps.get && mix compile --warnings-as-errors 2>&1 | tail -30</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix deps.get && mix compile --warnings-as-errors 2>&1 | tail -30</automated>
   </verify>
   <acceptance_criteria>
     - `accrue/mix.exs` exists with `@version "0.1.0"` and `app: :accrue`
@@ -309,19 +309,19 @@ Run `cd /Users/jon/projects/accrue/accrue && mix deps.get` and confirm resolutio
 2. `accrue_admin/lib/accrue_admin.ex`: stub module with `@moduledoc` pointing at Phase 7.
 3. `accrue_admin/config/*.exs`: trio matching accrue (bare `import Config` + env split).
 4. `accrue_admin/test/test_helper.exs`: `ExUnit.start()` one-liner.
-5. **Root `LICENSE`** (at `/Users/jon/projects/accrue/LICENSE`): full MIT license text with `Copyright (c) 2026 Accrue contributors`. This is the canonical monorepo LICENSE. Per D-42, no per-package copy is needed at this phase (the `package/0` `licenses: ["MIT"]` metadata is sufficient for Hex; Phase 9 may add symlinks).
+5. **Root `LICENSE`** (at `/Users/dev/projects/accrue/LICENSE`): full MIT license text with `Copyright (c) 2026 Accrue contributors`. This is the canonical monorepo LICENSE. Per D-42, no per-package copy is needed at this phase (the `package/0` `licenses: ["MIT"]` metadata is sufficient for Hex; Phase 9 may add symlinks).
 
-Run `cd /Users/jon/projects/accrue/accrue_admin && mix deps.get` to confirm the path dep resolves. `mix compile` may produce warnings from accrue if its behaviours aren't defined yet — that's expected at Wave 0; we only require `deps.get` success and a bare compile here.
+Run `cd /Users/dev/projects/accrue/accrue_admin && mix deps.get` to confirm the path dep resolves. `mix compile` may produce warnings from accrue if its behaviours aren't defined yet — that's expected at Wave 0; we only require `deps.get` success and a bare compile here.
   </action>
   <verify>
-    <automated>test -f /Users/jon/projects/accrue/LICENSE && grep -q "MIT License" /Users/jon/projects/accrue/LICENSE && cd /Users/jon/projects/accrue/accrue_admin && mix deps.get 2>&1 | tail -10</automated>
+    <automated>test -f /Users/dev/projects/accrue/LICENSE && grep -q "MIT License" /Users/dev/projects/accrue/LICENSE && cd /Users/dev/projects/accrue/accrue_admin && mix deps.get 2>&1 | tail -10</automated>
   </verify>
   <acceptance_criteria>
-    - `/Users/jon/projects/accrue/LICENSE` contains the literal string "MIT License" and "Copyright (c) 2026"
+    - `/Users/dev/projects/accrue/LICENSE` contains the literal string "MIT License" and "Copyright (c) 2026"
     - `accrue_admin/mix.exs` contains `{:accrue, path: "../accrue"}`
     - `accrue_admin/mix.exs` contains `@version "0.1.0"`
     - `cd accrue_admin && mix deps.get` exits 0 with `:accrue` listed as resolved
-    - No umbrella `mix.exs` file at monorepo root (`test ! -f /Users/jon/projects/accrue/mix.exs`)
+    - No umbrella `mix.exs` file at monorepo root (`test ! -f /Users/dev/projects/accrue/mix.exs`)
   </acceptance_criteria>
   <done>Sibling monorepo layout (D-42) in place, MIT LICENSE at root (OSS-11), admin resolves core via path dep.</done>
 </task>
@@ -373,7 +373,7 @@ Run `cd /Users/jon/projects/accrue/accrue_admin && mix deps.get` to confirm the 
 Note on D-20 / TEST-01: the Fake processor itself is a Plan 04 artifact. This task only makes the harness able to accept Plan 04's mocks once they exist.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix test 2>&1 | tail -20</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix test 2>&1 | tail -20</automated>
   </verify>
   <acceptance_criteria>
     - `mix test` reports "1 test, 0 failures" (the accrue_test.exs smoke test)

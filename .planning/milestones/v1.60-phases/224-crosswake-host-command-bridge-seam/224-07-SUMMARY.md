@@ -83,8 +83,8 @@ status: complete
 
 ## Verification
 
-- `swift test --package-path /Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios --filter HostCommandAdmissionTests` — pass (17 tests).
-- `swift test --package-path /Users/jon/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios` — pass (31 tests).
+- `swift test --package-path /Users/dev/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios --filter HostCommandAdmissionTests` — pass (17 tests).
+- `swift test --package-path /Users/dev/projects/crosswake-accrue-bridge/packages/crosswake-shell-core-ios` — pass (31 tests).
 - Command-safe `source-gate`, `trusted-frame`, and `full` modes — pass.
 - Accrue tracer, evidence digest, and all-capabilities-`feasibility_blocked` assertion — pass.
 - Authorized Crosswake checkout is clean at `789175f219de03047456e098fedf4a97891feff2`, descended from immutable base `932b4f32bf087b8e4c0c36c3e54b1031839e867d`.

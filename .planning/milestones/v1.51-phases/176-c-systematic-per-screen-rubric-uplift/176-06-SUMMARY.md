@@ -135,7 +135,7 @@ All structural spot-checks from Plan 176-06 Task 2:
 
 **3. [Rule 3 - Blocking] Path.wildcard glob path miscalculation**
 - **Found during:** Task 1b (Nyquist guard initial test run)
-- **Issue:** `Path.expand("../../../../lib/accrue_admin/live/**/*_live.ex", __DIR__)` resolved to `/Users/jon/projects/accrue/lib/accrue_admin/live/...` (went too far up in directory tree).
+- **Issue:** `Path.expand("../../../../lib/accrue_admin/live/**/*_live.ex", __DIR__)` resolved to `/Users/dev/projects/accrue/lib/accrue_admin/live/...` (went too far up in directory tree).
 - **Fix:** Changed to `Path.expand("../../../lib/accrue_admin/live", __DIR__)` and appended `"/**/*_live.ex"` separately. Verified against 21 live files.
 - **Files modified:** `data_table_test.exs`
 - **Commit:** 079d0858

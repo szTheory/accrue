@@ -3,7 +3,7 @@ quick_id: 260622-fql
 slug: admin-header-microcopy-voice
 date: 2026-06-22
 validate: true
-approved_plan: /Users/jon/.claude/plans/i-just-got-an-ethereal-harbor.md
+approved_plan: /Users/dev/.claude/plans/i-just-got-an-ethereal-harbor.md
 supersedes_todo: .planning/todos/260622-admin-page-header-microcopy-audit.md
 ---
 

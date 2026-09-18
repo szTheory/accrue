@@ -313,7 +313,7 @@ end
    Oban testing: `use Oban.Testing, repo: Accrue.TestRepo` in the test module. Plan 03's `Accrue.TestRepo` is already defined by Wave 2 execution order (this plan runs in the same wave — execute-phase handles the in-wave ordering).
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix test test/accrue/mailer_test.exs && mix compile --warnings-as-errors</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix test test/accrue/mailer_test.exs && mix compile --warnings-as-errors</automated>
   </verify>
   <acceptance_criteria>
     - `mix test test/accrue/mailer_test.exs` reports all passing
@@ -411,7 +411,7 @@ end
    - Test 4: Telemetry test: attach handler, call render, assert `:start` and `:stop` fired with `size: :a4` metadata.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix test test/accrue/pdf_test.exs && mix compile --warnings-as-errors</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix test test/accrue/pdf_test.exs && mix compile --warnings-as-errors</automated>
   </verify>
   <acceptance_criteria>
     - `mix test test/accrue/pdf_test.exs` reports all passing (no Chrome binary required)
@@ -518,7 +518,7 @@ end
 **No config file edits in this task** — Plan 01 already set `config :accrue, :env, Mix.env()` in `config/config.exs`, and Plan 02 already has `:auth_adapter` in the Config schema. This plan only READS those.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix test test/accrue/auth_test.exs && mix compile --warnings-as-errors</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix test test/accrue/auth_test.exs && mix compile --warnings-as-errors</automated>
   </verify>
   <acceptance_criteria>
     - `mix test test/accrue/auth_test.exs` reports all passing

@@ -364,7 +364,7 @@ after the tree goes clean, not before.
 
 ### Adopter-named refs: closed (2026-09-18)
 
-`fix/getfluent-1.5.1` named one of the maintainer's own downstream apps, not a
+`fix/adopter-app-1.5.1` named one of the maintainer's own downstream apps, not a
 third-party client. The branch is deleted from origin; the only residue is the
 head-ref name recorded on merged PR #41 (immutable GitHub metadata) and
 planning-doc text. Nothing reached `accrue/lib`, `accrue_admin`, the guides, or

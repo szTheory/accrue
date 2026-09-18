@@ -23,7 +23,7 @@
 
 Use the existing workflow as the base shape. Phase 11 should extend this file rather than invent a second mandatory gate.
 
-**Trigger + ordered job shell** ([.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L1) and [.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L15)):
+**Trigger + ordered job shell** ([.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L1) and [.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L15)):
 ```yaml
 name: CI
 
@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-24.04
 ```
 
-**Service + matrix + env pattern** ([.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L20), [.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L35), [.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L73)):
+**Service + matrix + env pattern** ([.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L20), [.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L35), [.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L73)):
 ```yaml
 services:
   postgres:
@@ -69,7 +69,7 @@ env:
   PGHOST: localhost
 ```
 
-**Step ordering pattern for blocking checks** ([.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L84)):
+**Step ordering pattern for blocking checks** ([.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L84)):
 ```yaml
 steps:
   - uses: actions/checkout@v6
@@ -84,7 +84,7 @@ steps:
     run: mix local.hex --force
 ```
 
-**Cache + split restore/save PLT pattern** ([.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L96), [.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L119), [.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L137)):
+**Cache + split restore/save PLT pattern** ([.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L96), [.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L119), [.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L137)):
 ```yaml
 - name: Restore accrue deps cache
   uses: actions/cache@v5
@@ -101,7 +101,7 @@ steps:
   uses: actions/cache/save@v5
 ```
 
-**Advisory job pattern to keep live Stripe non-blocking** ([.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L222)):
+**Advisory job pattern to keep live Stripe non-blocking** ([.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L222)):
 ```yaml
 live-stripe:
   name: Live Stripe (advisory)
@@ -110,7 +110,7 @@ live-stripe:
   continue-on-error: true
 ```
 
-**Artifact upload pattern for failures** ([.github/workflows/accrue_admin_browser.yml](/Users/jon/projects/accrue/.github/workflows/accrue_admin_browser.yml#L78)):
+**Artifact upload pattern for failures** ([.github/workflows/accrue_admin_browser.yml](/Users/dev/projects/accrue/.github/workflows/accrue_admin_browser.yml#L78)):
 ```yaml
 - name: Upload Playwright report
   if: failure()
@@ -135,7 +135,7 @@ live-stripe:
 
 Use the admin Playwright config almost verbatim, changing only the host app port, server command, project list, and output paths.
 
-**Imports + base URL + reporter pattern** ([accrue_admin/playwright.config.js](/Users/jon/projects/accrue/accrue_admin/playwright.config.js#L1)):
+**Imports + base URL + reporter pattern** ([accrue_admin/playwright.config.js](/Users/dev/projects/accrue/accrue_admin/playwright.config.js#L1)):
 ```javascript
 // @ts-check
 const { defineConfig, devices } = require("@playwright/test");
@@ -152,7 +152,7 @@ module.exports = defineConfig({
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : [["list"]],
 ```
 
-**Failure artifact + webServer pattern** ([accrue_admin/playwright.config.js](/Users/jon/projects/accrue/accrue_admin/playwright.config.js#L14)):
+**Failure artifact + webServer pattern** ([accrue_admin/playwright.config.js](/Users/dev/projects/accrue/accrue_admin/playwright.config.js#L14)):
 ```javascript
   use: {
     baseURL,
@@ -167,7 +167,7 @@ module.exports = defineConfig({
   },
 ```
 
-**Project definition pattern** ([accrue_admin/playwright.config.js](/Users/jon/projects/accrue/accrue_admin/playwright.config.js#L25)):
+**Project definition pattern** ([accrue_admin/playwright.config.js](/Users/dev/projects/accrue/accrue_admin/playwright.config.js#L25)):
 ```javascript
   projects: [
     {
@@ -191,7 +191,7 @@ For Phase 11, keep the single required blocking project from the UI contract: de
 
 Keep the host package file minimal and Playwright-only.
 
-**Minimal script + dependency pattern** ([accrue_admin/package.json](/Users/jon/projects/accrue/accrue_admin/package.json#L1)):
+**Minimal script + dependency pattern** ([accrue_admin/package.json](/Users/dev/projects/accrue/accrue_admin/package.json#L1)):
 ```json
 {
   "name": "accrue-admin-e2e",
@@ -214,7 +214,7 @@ Phase 11 should copy this structure into `examples/accrue_host/package.json`, re
 
 This is the closest flow match because it already covers the exact host user/admin browser path the phase wants. Port its helper functions and assertions into Playwright Test's `test()` format.
 
-**Imports + fixture bootstrap pattern** ([scripts/ci/accrue_host_browser_smoke.cjs](/Users/jon/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L3)):
+**Imports + fixture bootstrap pattern** ([scripts/ci/accrue_host_browser_smoke.cjs](/Users/dev/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L3)):
 ```javascript
 const fs = require("node:fs");
 const path = require("node:path");
@@ -232,7 +232,7 @@ const fixture = JSON.parse(fs.readFileSync(path.resolve(fixturePath), "utf8"));
 
 In the new spec, swap `chromium` bootstrap for Playwright Test fixtures (`test`, `page`, `context`), but keep the same env-driven fixture loading.
 
-**Login helper pattern** ([scripts/ci/accrue_host_browser_smoke.cjs](/Users/jon/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L16)):
+**Login helper pattern** ([scripts/ci/accrue_host_browser_smoke.cjs](/Users/dev/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L16)):
 ```javascript
 async function login(page, email) {
   await page.goto(`${baseURL}/users/log-in`);
@@ -254,7 +254,7 @@ async function login(page, email) {
 }
 ```
 
-**LiveView readiness + accessible assertion style** ([scripts/ci/accrue_host_browser_smoke.cjs](/Users/jon/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L53)):
+**LiveView readiness + accessible assertion style** ([scripts/ci/accrue_host_browser_smoke.cjs](/Users/dev/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L53)):
 ```javascript
 await login(page, fixture.normal_email);
 await expect(page.getByRole("link", { name: "Go to billing" })).toBeVisible();
@@ -270,7 +270,7 @@ await page.waitForFunction(
 await expect(page.getByText("No billing activity yet")).toBeVisible();
 ```
 
-**Primary user flow pattern** ([scripts/ci/accrue_host_browser_smoke.cjs](/Users/jon/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L76)):
+**Primary user flow pattern** ([scripts/ci/accrue_host_browser_smoke.cjs](/Users/dev/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L76)):
 ```javascript
 await page.locator("[data-plan-id='price_basic'] button", { hasText: "Start subscription" }).click();
 await expect(page.getByText("Subscription started.")).toBeVisible();
@@ -283,7 +283,7 @@ await page.getByRole("button", { name: "Confirm cancellation" }).click();
 await expect(page.getByText("Subscription canceled.")).toBeVisible();
 ```
 
-**Admin replay flow pattern** ([scripts/ci/accrue_host_browser_smoke.cjs](/Users/jon/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L93)):
+**Admin replay flow pattern** ([scripts/ci/accrue_host_browser_smoke.cjs](/Users/dev/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L93)):
 ```javascript
 await context.clearCookies();
 await login(page, fixture.admin_email);
@@ -304,7 +304,7 @@ await expect(page.getByRole("cell", { name: "admin.webhook.replay.completed" }))
 
 Use this file for Playwright Test structure, request-fixture seeding, and `test.describe` / `test.beforeEach` organization.
 
-**Spec structure pattern** ([accrue_admin/e2e/phase7-uat.spec.js](/Users/jon/projects/accrue/accrue_admin/e2e/phase7-uat.spec.js#L1)):
+**Spec structure pattern** ([accrue_admin/e2e/phase7-uat.spec.js](/Users/dev/projects/accrue/accrue_admin/e2e/phase7-uat.spec.js#L1)):
 ```javascript
 const { test, expect } = require("@playwright/test");
 
@@ -327,7 +327,7 @@ test.describe("Phase 7 browser UAT", () => {
 
 This script already owns host setup, drift checking, bounded boot, and browser orchestration. Phase 11 should preserve its staged shell structure and swap the raw browser runner for a Playwright command.
 
-**Shell safety + repo bootstrap pattern** ([scripts/ci/accrue_host_uat.sh](/Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh#L19)):
+**Shell safety + repo bootstrap pattern** ([scripts/ci/accrue_host_uat.sh](/Users/dev/projects/accrue/scripts/ci/accrue_host_uat.sh#L19)):
 ```bash
 set -euo pipefail
 
@@ -337,7 +337,7 @@ port="${ACCRUE_HOST_PORT:-4100}"
 browser_port="${ACCRUE_HOST_BROWSER_PORT:-4101}"
 ```
 
-**Installer + generated drift blocker pattern** ([scripts/ci/accrue_host_uat.sh](/Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh#L35)):
+**Installer + generated drift blocker pattern** ([scripts/ci/accrue_host_uat.sh](/Users/dev/projects/accrue/scripts/ci/accrue_host_uat.sh#L35)):
 ```bash
 echo "--- documented setup: deps + installer idempotence ---"
 mix deps.get
@@ -360,7 +360,7 @@ if [ "${ACCRUE_HOST_ALLOW_GENERATED_DRIFT:-}" != "1" ]; then
 fi
 ```
 
-**Compile + targeted suite + full suite pattern** ([scripts/ci/accrue_host_uat.sh](/Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh#L57)):
+**Compile + targeted suite + full suite pattern** ([scripts/ci/accrue_host_uat.sh](/Users/dev/projects/accrue/scripts/ci/accrue_host_uat.sh#L57)):
 ```bash
 echo "--- compile gate ---"
 mix compile --warnings-as-errors
@@ -384,7 +384,7 @@ echo "--- full host regression suite ---"
 MIX_ENV=test mix test --warnings-as-errors
 ```
 
-**Bounded server smoke + cleanup trap pattern** ([scripts/ci/accrue_host_uat.sh](/Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh#L82)):
+**Bounded server smoke + cleanup trap pattern** ([scripts/ci/accrue_host_uat.sh](/Users/dev/projects/accrue/scripts/ci/accrue_host_uat.sh#L82)):
 ```bash
 log_file="$(mktemp)"
 cleanup() {
@@ -400,7 +400,7 @@ PORT="$port" MIX_ENV=dev mix phx.server >"$log_file" 2>&1 &
 server_pid=$!
 ```
 
-**Browser stage pattern to preserve while swapping in Playwright Test** ([scripts/ci/accrue_host_uat.sh](/Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh#L135)):
+**Browser stage pattern to preserve while swapping in Playwright Test** ([scripts/ci/accrue_host_uat.sh](/Users/dev/projects/accrue/scripts/ci/accrue_host_uat.sh#L135)):
 ```bash
 fixture_file="$(mktemp)"
 browser_log_file="$(mktemp)"
@@ -419,7 +419,7 @@ Phase 11 should keep this seeded-fixture and server-log pattern, then run host P
 ## Shared Patterns
 
 ### Playwright Failure Artifacts
-**Source:** [accrue_admin/playwright.config.js](/Users/jon/projects/accrue/accrue_admin/playwright.config.js#L13), [.github/workflows/accrue_admin_browser.yml](/Users/jon/projects/accrue/.github/workflows/accrue_admin_browser.yml#L78)
+**Source:** [accrue_admin/playwright.config.js](/Users/dev/projects/accrue/accrue_admin/playwright.config.js#L13), [.github/workflows/accrue_admin_browser.yml](/Users/dev/projects/accrue/.github/workflows/accrue_admin_browser.yml#L78)
 **Apply to:** `examples/accrue_host/playwright.config.js`, `.github/workflows/ci.yml`
 ```javascript
 reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : [["list"]],
@@ -441,7 +441,7 @@ use: {
 ```
 
 ### Host Browser Fixture Seeding
-**Source:** [scripts/ci/accrue_host_uat.sh](/Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh#L158), [scripts/ci/accrue_host_seed_e2e.exs](/Users/jon/projects/accrue/scripts/ci/accrue_host_seed_e2e.exs#L10)
+**Source:** [scripts/ci/accrue_host_uat.sh](/Users/dev/projects/accrue/scripts/ci/accrue_host_uat.sh#L158), [scripts/ci/accrue_host_seed_e2e.exs](/Users/dev/projects/accrue/scripts/ci/accrue_host_seed_e2e.exs#L10)
 **Apply to:** `scripts/ci/accrue_host_uat.sh`, `examples/accrue_host/e2e/phase11-host-gate.spec.js`
 ```bash
 fixture_file="$(mktemp)"
@@ -454,7 +454,7 @@ fixture_path = System.fetch_env!("ACCRUE_HOST_E2E_FIXTURE")
 ```
 
 ### Accessible Browser Assertions
-**Source:** [scripts/ci/accrue_host_browser_smoke.cjs](/Users/jon/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L53), [accrue_admin/e2e/phase7-uat.spec.js](/Users/jon/projects/accrue/accrue_admin/e2e/phase7-uat.spec.js#L31)
+**Source:** [scripts/ci/accrue_host_browser_smoke.cjs](/Users/dev/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs#L53), [accrue_admin/e2e/phase7-uat.spec.js](/Users/dev/projects/accrue/accrue_admin/e2e/phase7-uat.spec.js#L31)
 **Apply to:** `examples/accrue_host/e2e/phase11-host-gate.spec.js`
 ```javascript
 await expect(page.getByRole("heading", { name: "Choose a plan" })).toBeVisible();
@@ -465,7 +465,7 @@ await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBe
 Prefer `getByRole`, `getByText`, and existing accessible copy. Only keep `data-plan-id` / `data-role` selectors where the UI already exposes them as stable action hooks.
 
 ### Drift and Warning Blocking
-**Source:** [scripts/ci/accrue_host_uat.sh](/Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh#L44), [.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L107)
+**Source:** [scripts/ci/accrue_host_uat.sh](/Users/dev/projects/accrue/scripts/ci/accrue_host_uat.sh#L44), [.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L107)
 **Apply to:** `.github/workflows/ci.yml`, `scripts/ci/accrue_host_uat.sh`
 ```bash
 if ! git -C "$repo_root" diff --quiet -- \
@@ -484,7 +484,7 @@ fi
 ```
 
 ### Keep Live Stripe Advisory
-**Source:** [.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml#L222)
+**Source:** [.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml#L222)
 **Apply to:** `.github/workflows/ci.yml`
 ```yaml
 if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'

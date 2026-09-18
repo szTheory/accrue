@@ -145,7 +145,7 @@ accrue/
 **Example:**
 
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/lib/accrue/processor/capabilities.ex
+# Source: /Users/dev/projects/accrue/accrue/lib/accrue/processor/capabilities.ex
 label = Accrue.Processor.Capabilities.support_label([:billing_portal, :create])
 
 unless Accrue.Processor.Capabilities.supports?(capabilities, [:billing_portal, :create]) do
@@ -162,7 +162,7 @@ end
 **Example:**
 
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/test/accrue/docs/processor_support_matrix_test.exs
+# Source: /Users/dev/projects/accrue/accrue/test/accrue/docs/processor_support_matrix_test.exs
 assert {output, 0} =
          System.cmd("bash", [script], cd: root, stderr_to_stdout: true)
 
@@ -235,7 +235,7 @@ Verified patterns from existing repo sources:
 ### Capability-Gated Public Support
 
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/lib/accrue/processor/capabilities.ex
+# Source: /Users/dev/projects/accrue/accrue/lib/accrue/processor/capabilities.ex
 def first_party_supported?(capabilities, path)
     when is_map(capabilities) and is_list(path) do
   support_label(path) == "all first-party" and supports?(capabilities, path)
@@ -245,7 +245,7 @@ end
 ### Docs Contract Test Pattern
 
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/test/accrue/docs/processor_support_matrix_test.exs
+# Source: /Users/dev/projects/accrue/accrue/test/accrue/docs/processor_support_matrix_test.exs
 test "processor support matrix script passes" do
   root = repo_root()
   script = Path.join(root, "scripts/ci/verify_processor_support_matrix.sh")

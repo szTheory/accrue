@@ -56,7 +56,7 @@ covered_files:
   - "scripts/ci/verify_phase230_archive_invariants.mjs"
   - "scripts/ci/verify_pr_body_contract.mjs"
   - "scripts/ci/verify_release_pr_readiness.sh"
-covered_digest: "v1:sha256:1ddf06f1df89a91040e1fbab65aed1724fe41121a900f63be7bf662bd9707c75"
+covered_digest: "v1:sha256:0df8a680d9dc07bc35ee5fbd89effba96ca7e08b6f822940e88ae286bcad78df"
 # covered_digest is GSD's covered-input fingerprint (#4155), not this repo's to redefine:
 # canonicalize covered_files (posix-normalize, de-dup, sort), hash each file's bytes,
 # aggregate sha256 over `v1\n` + `<rel>\n<sha256(bytes)>\n` per entry.
@@ -83,10 +83,10 @@ re_verification:
 gaps: []
 deferred: []
 advisory:
-  - finding: "The adopter name `getfluent` appears in 34 places across 16 files already published on `origin/integration/v1.62-candidate-recut`, and -- more consequentially -- as the public remote branch `refs/heads/fix/getfluent-1.5.1` and as the head branch of MERGED public PR #41. Phase 232 did not create this and cannot close it."
+  - finding: "The adopter name `adopter-app` appears in 34 places across 16 files already published on `origin/integration/v1.62-candidate-recut`, and -- more consequentially -- as the public remote branch `refs/heads/fix/adopter-app-1.5.1` and as the head branch of MERGED public PR #41. Phase 232 did not create this and cannot close it."
     category: security
-    reason: "Escalate to the maintainer as a standalone disclosure decision, NOT as a phase-232 remediation. The datum is a business-relationship disclosure (an org named getfluent is/was an Accrue adopter, and a 1.5.1 fix was cut for them) -- no credential, no token, no PII, no vulnerability. Scrubbing 232-UAT.md and 232-11-SUMMARY.md would be security theater: it leaves the branch ref, the merged PR, and 32 other occurrences across phases 229/230/231, .planning/STATE.md and .planning/seeds/ untouched. The only remediation that would move the needle (delete or rename the remote branch) is forbidden by this phase's own structural invariant D-47 and is already classified `retained / maintainer-decided` in 232-HYGIENE-DISPOSITIONS.md."
-    evidence_status: "reproduced -- `git ls-remote --heads origin | grep getfluent` -> `refs/heads/fix/getfluent-1.5.1`; `gh pr view 41` -> state MERGED, headRefName `fix/getfluent-1.5.1`, mergedAt 2026-08-30; `git grep -c getfluent origin/integration/v1.62-candidate-recut` -> 34 occurrences across 16 files"
+    reason: "Escalate to the maintainer as a standalone disclosure decision, NOT as a phase-232 remediation. The datum is a business-relationship disclosure (an org named adopter-app is/was an Accrue adopter, and a 1.5.1 fix was cut for them) -- no credential, no token, no PII, no vulnerability. Scrubbing 232-UAT.md and 232-11-SUMMARY.md would be security theater: it leaves the branch ref, the merged PR, and 32 other occurrences across phases 229/230/231, .planning/STATE.md and .planning/seeds/ untouched. The only remediation that would move the needle (delete or rename the remote branch) is forbidden by this phase's own structural invariant D-47 and is already classified `retained / maintainer-decided` in 232-HYGIENE-DISPOSITIONS.md."
+    evidence_status: "reproduced -- `git ls-remote --heads origin | grep adopter-app` -> `refs/heads/fix/adopter-app-1.5.1`; `gh pr view 41` -> state MERGED, headRefName `fix/adopter-app-1.5.1`, mergedAt 2026-08-30; `git grep -c adopter-app origin/integration/v1.62-candidate-recut` -> 34 occurrences across 16 files"
   - finding: "232-11-SUMMARY.md coverage block D3's verification ref 2 records `status: pass` for `diff <(gh pr view 45 --json body -q .body) 232-INTEGRATION-PR.md -> identical but for one trailing newline`. That no longer reproduces: 54c59b30 generalized the committed body's Evidence-SHA head-delta line without a corresponding `gh pr edit`, so the live PR #45 body and the committed file now differ on line 21."
     category: other
     reason: "WARNING, not BLOCKER, and it breaks no success criterion. The PR head is still adef789f and the phase-close commits are unpushed, so the LIVE body's `plus one documentation-only merge` is accurate for the head a reviewer is actually reading; the committed file is the forward-looking version that becomes true once 87ce0885/54c59b30 are pushed. No reviewer is misled and nothing is stubbed or unwired -- only a committed record of a check is stale. STRUCTURAL ROOT CAUSE, worth fixing once rather than re-patching: D3 ref 2 asserts equality between a committed file and a live remote surface that the commit itself cannot update, so every future edit to 232-INTEGRATION-PR.md re-breaks it. This is the second drift of this exact ref. Fix by either (a) running `gh pr edit 45 --body-file 232-INTEGRATION-PR.md` after pushing the candidate, then leaving the ref alone, or (b) restating ref 2 as a head-relative claim ('live body matches the committed file as of the PR head it was opened from') so a forward-looking edit does not falsify it."
@@ -198,7 +198,7 @@ cannot update; every future edit to `232-INTEGRATION-PR.md` re-breaks it. Close 
 - restating ref 2 head-relatively — "live body matches the committed file as of the PR head it was
   opened from" — so a deliberately forward-looking edit no longer falsifies it.
 
-### Adjudication: the `getfluent` adopter-name exposure
+### Adjudication: the `adopter-app` adopter-name exposure
 
 **Escalate to the maintainer as a standalone decision. Do NOT treat it as a phase-232 gap, and do
 NOT scrub the two files.** Independently re-measured this pass, and the coordinator's own
@@ -206,8 +206,8 @@ re-measurement matches these figures exactly — two independent counts now agre
 
 | Surface | Public? | Count |
 |---|---|---|
-| `refs/heads/fix/getfluent-1.5.1` on `origin` | Yes — GitHub branches page, any `git ls-remote` | 1 live ref |
-| PR #41 (MERGED 2026-08-30), headRefName `fix/getfluent-1.5.1` | Yes — permanent in the public PR list | 1 merged PR |
+| `refs/heads/fix/adopter-app-1.5.1` on `origin` | Yes — GitHub branches page, any `git ls-remote` | 1 live ref |
+| PR #41 (MERGED 2026-08-30), headRefName `fix/adopter-app-1.5.1` | Yes — permanent in the public PR list | 1 merged PR |
 | Files on `origin/integration/v1.62-candidate-recut` | Yes | **34 occurrences across 16 files** |
 
 An earlier hand-off counted 5 occurrences in `232-11-SUMMARY.md` plus 1 in
@@ -225,9 +225,9 @@ phase's own structural invariant D-47 (no remote branch or tag deleted, moved, f
 rewritten) and is already classified `retained`, "maintainer-decided," in
 `232-HYGIENE-DISPOSITIONS.md`. Rewriting published history to scrub it was correctly not done.
 
-**Real exposure:** that an organization named getfluent is or was an Accrue adopter, and that a
+**Real exposure:** that an organization named adopter-app is or was an Accrue adopter, and that a
 1.5.1 fix was cut for them. That is a business-relationship disclosure. It is not a credential, not
-a token, not PII, and not a vulnerability. The `grep -c getfluent → 0` gate the phase enforced on
+a token, not PII, and not a vulnerability. The `grep -c adopter-app → 0` gate the phase enforced on
 the *PR body* was still the right call — the body is the single most-read surface — but it was never
 a repo-wide secret, and 232-11-SUMMARY.md's own key-decision describing that gate is itself one of
 the occurrences, which is the tell that this was always about one surface rather than the repo.
@@ -300,7 +300,7 @@ reproduced command and output) but judged non-blocking: none prevents a reviewer
 
 | # | Finding | Category | Why Advisory |
 |---|---------|----------|--------------|
-| 1 | `getfluent` adopter name public via branch ref, merged PR #41, and 34 occurrences in 16 published files | security | Pre-existing, already published, repo-wide; phase 232 neither created nor can close it; the only effective remediation is forbidden by D-47 and maintainer-owned |
+| 1 | `adopter-app` adopter name public via branch ref, merged PR #41, and 34 occurrences in 16 published files | security | Pre-existing, already published, repo-wide; phase 232 neither created nor can close it; the only effective remediation is forbidden by D-47 and maintainer-owned |
 | 2 | D3 ref 2's recorded `status: pass` (live body byte-identical to committed) no longer reproduces after the head-delta edit | other | Live body is accurate for the unpushed PR head; no reviewer misled, no success criterion affected. Second drift of this ref — fix structurally, not by re-patching |
 | 3 | WINDOWS.md rows 13/14 still `waived` after their causes were discharged | other | Over-reports rather than hides; waiver text is SHA-pinned; tooling forbids the transition |
 
@@ -309,7 +309,7 @@ reproduced command and output) but judged non-blocking: none prevents a reviewer
 Every command below was run fresh this pass at `HEAD` = `87ce0885`. Nothing was accepted from the
 hand-off message, from a SUMMARY, or from the prior VERIFICATION.md — including the two claims in
 the hand-off that did not survive contact (the live-PR-body sync state, and the size of the
-`getfluent` footprint).
+`adopter-app` footprint).
 
 | Behavior | Command | Result | Status |
 |---|---|---|---|
@@ -327,7 +327,7 @@ the hand-off that did not survive contact (the live-PR-body sync state, and the 
 | Cleanup ledger shape | `python3 -c "... len(rows), passes_taken"` | `8 2` | ✓ PASS |
 | `.tool-versions` tracked | `git ls-files -- .tool-versions` | `.tool-versions` | ✓ PASS |
 | phase-200 shadow dir gone | `ls .planning/phases/200-idempotent-verification-sign-off` | exit 1 | ✓ PASS |
-| Adopter-name public footprint | `git ls-remote --heads origin`; `gh pr view 41`; `git grep -c getfluent origin/integration/v1.62-candidate-recut` | live ref + MERGED PR + 34 occurrences / 16 files | ℹ️ INFO → Advisory #1 |
+| Adopter-name public footprint | `git ls-remote --heads origin`; `gh pr view 41`; `git grep -c adopter-app origin/integration/v1.62-candidate-recut` | live ref + MERGED PR + 34 occurrences / 16 files | ℹ️ INFO → Advisory #1 |
 
 Full `mix test` suites were not re-run; `87ce0885` is documentation-only (`.planning/` files
 exclusively), so the three green required release-gate cells in run 35256500599 remain the
@@ -351,7 +351,7 @@ clean:
    presently false. WARNING, not BLOCKER — the live body is accurate for the PR head a reviewer
    reads, and no success criterion depends on the equality. This is the ref's **second** drift;
    fix it structurally (Advisory #2) rather than patching the recorded outcome again.
-2. **The `getfluent` adopter name is public** via a live branch ref (`dba9a75d`), merged PR #41, and
+2. **The `adopter-app` adopter name is public** via a live branch ref (`dba9a75d`), merged PR #41, and
    34 occurrences across 16 published files — now confirmed by two independent measurements. Out of
    this phase's scope and beyond its reach; escalate separately to the maintainer.
 3. **WINDOWS.md rows 13/14 are factually superseded** while still reading `waived`.

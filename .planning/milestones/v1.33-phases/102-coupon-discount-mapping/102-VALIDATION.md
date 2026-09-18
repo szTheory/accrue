@@ -81,6 +81,6 @@ created: 2026-05-02
 
 ## Verification Snapshot
 
-- Core + telemetry lane: `TMPDIR=/Users/jon/projects/accrue/.tmp/phase102 mix test test/accrue/billing/discount_mapping_actions_test.exs test/accrue/billing/braintree_discount_mapping_subscribe_test.exs test/accrue/processor/braintree_test.exs test/accrue/telemetry/discount_mapping_invalid_test.exs test/accrue/telemetry/ops_event_contract_test.exs test/accrue/telemetry/metrics_ops_parity_test.exs` → `34 tests, 0 failures`
-- Portal lane: `TMPDIR=/Users/jon/projects/accrue/.tmp/phase102 mix test test/accrue_portal/live/checkout_live_discount_test.exs` → `3 tests, 0 failures`
+- Core + telemetry lane: `TMPDIR=/Users/dev/projects/accrue/.tmp/phase102 mix test test/accrue/billing/discount_mapping_actions_test.exs test/accrue/billing/braintree_discount_mapping_subscribe_test.exs test/accrue/processor/braintree_test.exs test/accrue/telemetry/discount_mapping_invalid_test.exs test/accrue/telemetry/ops_event_contract_test.exs test/accrue/telemetry/metrics_ops_parity_test.exs` → `34 tests, 0 failures`
+- Portal lane: `TMPDIR=/Users/dev/projects/accrue/.tmp/phase102 mix test test/accrue_portal/live/checkout_live_discount_test.exs` → `3 tests, 0 failures`
 - Browser lane: `npx playwright test e2e/phase102-portal-checkout.spec.js` → `4 passed`

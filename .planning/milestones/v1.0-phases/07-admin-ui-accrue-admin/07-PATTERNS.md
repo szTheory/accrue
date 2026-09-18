@@ -31,7 +31,7 @@
 
 **Analog:** `accrue/lib/accrue/billing.ex` and `accrue_admin/lib/accrue_admin.ex`
 
-**Namespace anchor pattern** ([accrue_admin/lib/accrue_admin.ex](/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin.ex:1)):
+**Namespace anchor pattern** ([accrue_admin/lib/accrue_admin.ex](/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin.ex:1)):
 ```elixir
 defmodule AccrueAdmin do
   @moduledoc """
@@ -41,7 +41,7 @@ defmodule AccrueAdmin do
 end
 ```
 
-**Facade + submodule split** ([accrue/lib/accrue/billing.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing.ex:1)):
+**Facade + submodule split** ([accrue/lib/accrue/billing.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing.ex:1)):
 ```elixir
 defmodule Accrue.Billing do
   alias Accrue.Billing.{
@@ -70,7 +70,7 @@ end
 
 **Analog:** `accrue/lib/accrue/config.ex`, `accrue/lib/accrue/repo.ex`, `accrue/lib/accrue/auth.ex`
 
-**Runtime config boundary** ([accrue/lib/accrue/config.ex](/Users/jon/projects/accrue/accrue/lib/accrue/config.ex:313)):
+**Runtime config boundary** ([accrue/lib/accrue/config.ex](/Users/dev/projects/accrue/accrue/lib/accrue/config.ex:313)):
 ```elixir
 @moduledoc """
 Runtime configuration schema for Accrue, backed by `NimbleOptions`.
@@ -80,7 +80,7 @@ Secrets ... and host-owned fields ... MUST be read at runtime.
 """
 ```
 
-**`get!/1` guard pattern** ([accrue/lib/accrue/config.ex](/Users/jon/projects/accrue/accrue/lib/accrue/config.ex:345)):
+**`get!/1` guard pattern** ([accrue/lib/accrue/config.ex](/Users/dev/projects/accrue/accrue/lib/accrue/config.ex:345)):
 ```elixir
 def get!(key) when is_atom(key) do
   unless Keyword.has_key?(@schema, key) do
@@ -94,7 +94,7 @@ def get!(key) when is_atom(key) do
 end
 ```
 
-**Behaviour facade boundary** ([accrue/lib/accrue/auth.ex](/Users/jon/projects/accrue/accrue/lib/accrue/auth.ex:37)):
+**Behaviour facade boundary** ([accrue/lib/accrue/auth.ex](/Users/dev/projects/accrue/accrue/lib/accrue/auth.ex:37)):
 ```elixir
 @callback current_user(conn()) :: user() | nil
 @callback require_admin_plug() :: (conn(), keyword() -> conn())
@@ -103,7 +103,7 @@ end
 @callback actor_id(user()) :: String.t() | nil
 ```
 
-**Runtime module resolution** ([accrue/lib/accrue/repo.ex](/Users/jon/projects/accrue/accrue/lib/accrue/repo.ex:157)):
+**Runtime module resolution** ([accrue/lib/accrue/repo.ex](/Users/dev/projects/accrue/accrue/lib/accrue/repo.ex:157)):
 ```elixir
 def repo do
   case Application.get_env(:accrue, :repo) do
@@ -125,7 +125,7 @@ end
 
 **Analog:** `accrue/lib/accrue/billing/query.ex`, `accrue/lib/accrue/billing/invoice_projection.ex`, `accrue/lib/accrue/connect.ex`
 
-**Composable query module** ([accrue/lib/accrue/billing/query.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/query.ex:1)):
+**Composable query module** ([accrue/lib/accrue/billing/query.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/query.ex:1)):
 ```elixir
 defmodule Accrue.Billing.Query do
   import Ecto.Query
@@ -137,7 +137,7 @@ defmodule Accrue.Billing.Query do
 end
 ```
 
-**Projection/decomposition helper** ([accrue/lib/accrue/billing/invoice_projection.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/invoice_projection.ex:25)):
+**Projection/decomposition helper** ([accrue/lib/accrue/billing/invoice_projection.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/invoice_projection.ex:25)):
 ```elixir
 @spec decompose(map()) :: {:ok, decomposed()}
 def decompose(stripe_inv) when is_map(stripe_inv) do
@@ -146,7 +146,7 @@ def decompose(stripe_inv) when is_map(stripe_inv) do
 end
 ```
 
-**Local query kept near domain facade** ([accrue/lib/accrue/connect.ex](/Users/jon/projects/accrue/accrue/lib/accrue/connect.ex:31)):
+**Local query kept near domain facade** ([accrue/lib/accrue/connect.ex](/Users/dev/projects/accrue/accrue/lib/accrue/connect.ex:31)):
 ```elixir
 import Ecto.Query, only: [from: 2]
 ...
@@ -163,7 +163,7 @@ def list_accounts(opts \\ []) when is_list(opts) do
 
 **Analog:** `accrue/lib/accrue/invoices/components.ex`, `accrue/lib/accrue/invoices/layouts.ex`, `accrue/lib/accrue/emails/html_bridge.ex`
 
-**Function-component module shape** ([accrue/lib/accrue/invoices/components.ex](/Users/jon/projects/accrue/accrue/lib/accrue/invoices/components.ex:32)):
+**Function-component module shape** ([accrue/lib/accrue/invoices/components.ex](/Users/dev/projects/accrue/accrue/lib/accrue/invoices/components.ex:32)):
 ```elixir
 use Phoenix.Component
 
@@ -178,7 +178,7 @@ def invoice_header(assigns) do
 end
 ```
 
-**Shared layout wrapper** ([accrue/lib/accrue/invoices/layouts.ex](/Users/jon/projects/accrue/accrue/lib/accrue/invoices/layouts.ex:20)):
+**Shared layout wrapper** ([accrue/lib/accrue/invoices/layouts.ex](/Users/dev/projects/accrue/accrue/lib/accrue/invoices/layouts.ex:20)):
 ```elixir
 use Phoenix.Component
 import Accrue.Invoices.Components
@@ -195,7 +195,7 @@ def print_shell(assigns) do
 end
 ```
 
-**Render-outside-LiveView seam** ([accrue/lib/accrue/emails/html_bridge.ex](/Users/jon/projects/accrue/accrue/lib/accrue/emails/html_bridge.ex:31)):
+**Render-outside-LiveView seam** ([accrue/lib/accrue/emails/html_bridge.ex](/Users/dev/projects/accrue/accrue/lib/accrue/emails/html_bridge.ex:31)):
 ```elixir
 @spec render((map() -> Phoenix.LiveView.Rendered.t()), map()) :: String.t()
 def render(component, assigns) when is_function(component, 1) and is_map(assigns) do
@@ -216,7 +216,7 @@ end
 
 **Analog:** `accrue/lib/accrue/telemetry.ex`, `accrue/lib/accrue/telemetry/ops.ex`, `accrue/lib/accrue/events.ex`, `accrue/lib/accrue/integrations/sigra.ex`
 
-**Span wrapper pattern** ([accrue/lib/accrue/telemetry.ex](/Users/jon/projects/accrue/accrue/lib/accrue/telemetry.ex:55)):
+**Span wrapper pattern** ([accrue/lib/accrue/telemetry.ex](/Users/dev/projects/accrue/accrue/lib/accrue/telemetry.ex:55)):
 ```elixir
 def span(event, metadata \\ %{}, fun)
     when is_list(event) and is_map(metadata) and is_function(fun, 0) do
@@ -229,7 +229,7 @@ def span(event, metadata \\ %{}, fun)
 end
 ```
 
-**Ops event helper** ([accrue/lib/accrue/telemetry/ops.ex](/Users/jon/projects/accrue/accrue/lib/accrue/telemetry/ops.ex:46)):
+**Ops event helper** ([accrue/lib/accrue/telemetry/ops.ex](/Users/dev/projects/accrue/accrue/lib/accrue/telemetry/ops.ex:46)):
 ```elixir
 def emit(suffix, measurements, metadata \\ %{})
 ...
@@ -237,7 +237,7 @@ event = [:accrue, :ops] ++ suffix
 :telemetry.execute(event, measurements, merged_metadata)
 ```
 
-**Audit/event write seam** ([accrue/lib/accrue/events.ex](/Users/jon/projects/accrue/accrue/lib/accrue/events.ex:92)):
+**Audit/event write seam** ([accrue/lib/accrue/events.ex](/Users/dev/projects/accrue/accrue/lib/accrue/events.ex:92)):
 ```elixir
 @spec record_multi(Ecto.Multi.t(), atom(), attrs()) :: Ecto.Multi.t()
 def record_multi(multi, name, attrs) when is_atom(name) and is_map(attrs) do
@@ -248,7 +248,7 @@ def record_multi(multi, name, attrs) when is_atom(name) and is_map(attrs) do
 end
 ```
 
-**Sigra audit delegation** ([accrue/lib/accrue/integrations/sigra.ex](/Users/jon/projects/accrue/accrue/lib/accrue/integrations/sigra.ex:54)):
+**Sigra audit delegation** ([accrue/lib/accrue/integrations/sigra.ex](/Users/dev/projects/accrue/accrue/lib/accrue/integrations/sigra.ex:54)):
 ```elixir
 @impl Accrue.Auth
 def current_user(conn), do: Sigra.Auth.current_user(conn)
@@ -267,7 +267,7 @@ def log_audit(user, event), do: Sigra.Audit.log(user, event)
 
 **Analog:** `accrue/test/support/repo_case.ex`, `accrue/test/support/billing_case.ex`, `accrue/test/accrue/invoices/components_test.exs`, `accrue/test/accrue/billing/query_test.exs`, `accrue/test/accrue/telemetry_test.exs`, `accrue/lib/accrue/test/mailer_assertions.ex`
 
-**CaseTemplate setup** ([accrue/test/support/repo_case.ex](/Users/jon/projects/accrue/accrue/test/support/repo_case.ex:16)):
+**CaseTemplate setup** ([accrue/test/support/repo_case.ex](/Users/dev/projects/accrue/accrue/test/support/repo_case.ex:16)):
 ```elixir
 use ExUnit.CaseTemplate
 
@@ -281,7 +281,7 @@ using do
 end
 ```
 
-**Heavier integration case** ([accrue/test/support/billing_case.ex](/Users/jon/projects/accrue/accrue/test/support/billing_case.ex:47)):
+**Heavier integration case** ([accrue/test/support/billing_case.ex](/Users/dev/projects/accrue/accrue/test/support/billing_case.ex:47)):
 ```elixir
 setup tags do
   pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Accrue.TestRepo, shared: not tags[:async])
@@ -292,7 +292,7 @@ setup tags do
 end
 ```
 
-**Component assertion style** ([accrue/test/accrue/invoices/components_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/invoices/components_test.exs:67)):
+**Component assertion style** ([accrue/test/accrue/invoices/components_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/invoices/components_test.exs:67)):
 ```elixir
 describe "invoice_header/1" do
   test "renders business_name + invoice number" do
@@ -305,7 +305,7 @@ describe "invoice_header/1" do
 end
 ```
 
-**Query test style** ([accrue/test/accrue/billing/query_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/query_test.exs:58)):
+**Query test style** ([accrue/test/accrue/billing/query_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/query_test.exs:58)):
 ```elixir
 test "active/1 returns trialing + active rows" do
   statuses = Query.active() |> Repo.all() |> Enum.map(& &1.status)
@@ -314,7 +314,7 @@ test "active/1 returns trialing + active rows" do
 end
 ```
 
-**Telemetry capture style** ([accrue/test/accrue/telemetry_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/telemetry_test.exs:12)):
+**Telemetry capture style** ([accrue/test/accrue/telemetry_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/telemetry_test.exs:12)):
 ```elixir
 :telemetry.attach_many(
   handler_id,
@@ -326,7 +326,7 @@ end
 )
 ```
 
-**Mailbox assertion helper style** ([accrue/lib/accrue/test/mailer_assertions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/test/mailer_assertions.ex:37)):
+**Mailbox assertion helper style** ([accrue/lib/accrue/test/mailer_assertions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/test/mailer_assertions.ex:37)):
 ```elixir
 defmacro assert_email_sent(type, opts \\ [], timeout \\ 100) do
   quote do
@@ -348,7 +348,7 @@ end
 ## Shared Patterns
 
 ### Runtime boundary pattern
-**Sources:** [accrue/lib/accrue/config.ex](/Users/jon/projects/accrue/accrue/lib/accrue/config.ex:321), [accrue/lib/accrue/repo.ex](/Users/jon/projects/accrue/accrue/lib/accrue/repo.ex:3)
+**Sources:** [accrue/lib/accrue/config.ex](/Users/dev/projects/accrue/accrue/lib/accrue/config.ex:321), [accrue/lib/accrue/repo.ex](/Users/dev/projects/accrue/accrue/lib/accrue/repo.ex:3)
 
 Apply to all `AccrueAdmin.*` modules that depend on host state.
 ```elixir
@@ -358,7 +358,7 @@ Application.get_env(:accrue, :auth_adapter, Accrue.Auth.Default)
 ```
 
 ### Behaviour seam pattern
-**Sources:** [accrue/lib/accrue/auth.ex](/Users/jon/projects/accrue/accrue/lib/accrue/auth.ex:37), [accrue/lib/accrue/integrations/sigra.ex](/Users/jon/projects/accrue/accrue/lib/accrue/integrations/sigra.ex:31)
+**Sources:** [accrue/lib/accrue/auth.ex](/Users/dev/projects/accrue/accrue/lib/accrue/auth.ex:37), [accrue/lib/accrue/integrations/sigra.ex](/Users/dev/projects/accrue/accrue/lib/accrue/integrations/sigra.ex:31)
 
 Apply to auth hook, step-up auth, and audit wiring.
 ```elixir
@@ -368,7 +368,7 @@ def log_audit(user, event), do: Sigra.Audit.log(user, event)
 ```
 
 ### Query-module ownership pattern
-**Sources:** [accrue/lib/accrue/billing/query.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/query.ex:21), [accrue/lib/accrue/billing/invoice_projection.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/invoice_projection.ex:25)
+**Sources:** [accrue/lib/accrue/billing/query.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/query.ex:21), [accrue/lib/accrue/billing/invoice_projection.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/invoice_projection.ex:25)
 
 Apply to every admin list/detail page.
 ```elixir
@@ -380,7 +380,7 @@ end
 ```
 
 ### Telemetry/audit pattern
-**Sources:** [accrue/lib/accrue/telemetry.ex](/Users/jon/projects/accrue/accrue/lib/accrue/telemetry.ex:23), [accrue/lib/accrue/events.ex](/Users/jon/projects/accrue/accrue/lib/accrue/events.ex:17)
+**Sources:** [accrue/lib/accrue/telemetry.ex](/Users/dev/projects/accrue/accrue/lib/accrue/telemetry.ex:23), [accrue/lib/accrue/events.ex](/Users/dev/projects/accrue/accrue/lib/accrue/events.ex:17)
 
 Apply to admin actions and long-running data loads.
 ```elixir
@@ -396,7 +396,7 @@ Accrue.Events.record(%{
 ```
 
 ### Component-module pattern
-**Sources:** [accrue/lib/accrue/invoices/components.ex](/Users/jon/projects/accrue/accrue/lib/accrue/invoices/components.ex:32), [accrue/lib/accrue/invoices/layouts.ex](/Users/jon/projects/accrue/accrue/lib/accrue/invoices/layouts.ex:20)
+**Sources:** [accrue/lib/accrue/invoices/components.ex](/Users/dev/projects/accrue/accrue/lib/accrue/invoices/components.ex:32), [accrue/lib/accrue/invoices/layouts.ex](/Users/dev/projects/accrue/accrue/lib/accrue/invoices/layouts.ex:20)
 
 Apply to `AccrueAdmin.Layouts` and `AccrueAdmin.Components.*`.
 ```elixir
@@ -413,8 +413,8 @@ end
 
 ### What exists
 - HEEx function-component patterns exist in `accrue`, not `accrue_admin`.
-- The only current real Phoenix UI-style modules are [accrue/lib/accrue/invoices/components.ex](/Users/jon/projects/accrue/accrue/lib/accrue/invoices/components.ex:1) and [accrue/lib/accrue/invoices/layouts.ex](/Users/jon/projects/accrue/accrue/lib/accrue/invoices/layouts.ex:1).
-- Rendering components outside a mounted LiveView already exists via [accrue/lib/accrue/emails/html_bridge.ex](/Users/jon/projects/accrue/accrue/lib/accrue/emails/html_bridge.ex:1).
+- The only current real Phoenix UI-style modules are [accrue/lib/accrue/invoices/components.ex](/Users/dev/projects/accrue/accrue/lib/accrue/invoices/components.ex:1) and [accrue/lib/accrue/invoices/layouts.ex](/Users/dev/projects/accrue/accrue/lib/accrue/invoices/layouts.ex:1).
+- Rendering components outside a mounted LiveView already exists via [accrue/lib/accrue/emails/html_bridge.ex](/Users/dev/projects/accrue/accrue/lib/accrue/emails/html_bridge.ex:1).
 
 ### What does not exist
 - No `use Phoenix.LiveView` modules exist in the repo today.

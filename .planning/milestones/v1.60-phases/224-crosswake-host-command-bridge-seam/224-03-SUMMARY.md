@@ -34,7 +34,7 @@ coverage:
     requirement: BRDG-01
     verification:
       - kind: integration
-        ref: CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh admission
+        ref: CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh admission
         status: pass
     human_judgment: false
   - id: D2
@@ -42,7 +42,7 @@ coverage:
     requirement: BRDG-02
     verification:
       - kind: integration
-        ref: CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full
+        ref: CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full
         status: pass
     human_judgment: false
 duration: 16min
@@ -76,7 +76,7 @@ status: complete
 
 ## Verification
 
-- PASS — `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh admission` (11 host-command tests).
+- PASS — `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh admission` (11 host-command tests).
 - PASS — `... verify_crosswake_host_commands.sh lifecycle` (11 host-command tests).
 - PASS — `... verify_crosswake_host_commands.sh full` (25 SwiftPM tests).
 - PASS — source gate validates the base ancestry, exact patch revision, audit digest, and binary diff identity before each mode.

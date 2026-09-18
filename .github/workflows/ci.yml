@@ -253,6 +253,11 @@ jobs:
       - name: Stable-core posture contract
         run: bash scripts/ci/verify_stable_core_posture.sh
 
+      - name: No absolute home paths (PII guard)
+        run: >-
+          bash scripts/ci/verify_no_home_paths.sh --self-test &&
+          bash scripts/ci/verify_no_home_paths.sh --repo
+
       - name: Roadmap hygiene contract
         run: bash scripts/ci/verify_roadmap_hygiene.sh
 

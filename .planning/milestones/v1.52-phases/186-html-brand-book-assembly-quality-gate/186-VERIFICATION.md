@@ -126,7 +126,7 @@ Zero `TODO`, `TBD`, `FIXME`, `XXX`, `HACK`, `PLACEHOLDER`, or empty-implementati
 
 #### 1. Visual confirmation of screenshot content
 
-**Test:** Open `.planning/phases/186-html-brand-book-assembly-quality-gate/qa-screenshots/` and inspect all 4 PNG files. Also run `open /Users/jon/projects/accrue/brandbook/index.html` and click the dark-mode toggle.
+**Test:** Open `.planning/phases/186-html-brand-book-assembly-quality-gate/qa-screenshots/` and inspect all 4 PNG files. Also run `open /Users/dev/projects/accrue/brandbook/index.html` and click the dark-mode toggle.
 
 **Expected:**
 - `light-desktop.png` — white/light background; Accrue logo visible at top; section navigation in sidebar or header; color palette, typography, spacing specimen SVGs visible.

@@ -64,8 +64,8 @@ status: complete
 
 - `swift test --package-path packages/crosswake-shell-core-ios --filter HostCommandAdmissionTests` — pass (14 tests).
 - `swift test --package-path packages/crosswake-shell-core-ios` — pass (28 tests).
-- `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh trusted-frame` — pass.
-- `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full` — pass.
+- `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh trusted-frame` — pass.
+- `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full` — pass.
 - Blocked-status `jq` assertion — pass; every capability remains `feasibility_blocked`.
 
 ## Decisions Made

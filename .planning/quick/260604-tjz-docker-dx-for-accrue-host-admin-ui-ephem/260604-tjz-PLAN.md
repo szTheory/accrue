@@ -54,7 +54,7 @@ must_haves:
 <objective>
 Close the four remaining Docker-DX gaps in `examples/accrue_host/` so the admin-UI
 demo is hands-off, collision-proof, and well-documented. The approved plan
-(`/Users/jon/.claude/plans/gsd-autonomous-cheerful-pike.md`) is LOCKED — this plan
+(`/Users/dev/.claude/plans/gsd-autonomous-cheerful-pike.md`) is LOCKED — this plan
 transcribes it into executable tasks. The key decision (ephemeral host ports, no
 Traefik) is final.
 
@@ -87,7 +87,7 @@ CONSTRAINTS:
 @./CLAUDE.md
 
 # Approved spec (authoritative — transcribe faithfully, do not redesign)
-@/Users/jon/.claude/plans/gsd-autonomous-cheerful-pike.md
+@/Users/dev/.claude/plans/gsd-autonomous-cheerful-pike.md
 
 # Files being modified
 @examples/accrue_host/docker-compose.yml
@@ -164,7 +164,7 @@ Show `ACCRUE_HOST_DOCKER_PORT` only as a COMMENTED-OUT opt-in example, not an ac
 Stage and commit these two files: `git commit -m "feat(host-docker): ephemeral host port by default (no manual port picking)"`.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/examples/accrue_host && grep -q 'ACCRUE_HOST_DOCKER_PORT:-}:4000' docker-compose.yml && ! grep -Eq '^ACCRUE_HOST_DOCKER_PORT=4000' .env.example && grep -q 'ACCRUE_HOST_COMPOSE_PROJECT' .env.example && echo OK</automated>
+    <automated>cd /Users/dev/projects/accrue/examples/accrue_host && grep -q 'ACCRUE_HOST_DOCKER_PORT:-}:4000' docker-compose.yml && ! grep -Eq '^ACCRUE_HOST_DOCKER_PORT=4000' .env.example && grep -q 'ACCRUE_HOST_COMPOSE_PROJECT' .env.example && echo OK</automated>
   </verify>
   <done>Compose `web` port maps `${...PORT:-}:4000` (empty default = ephemeral); `.env.example` no longer hard-sets port 4000 and explains the ephemeral default + opt-in pin; commit 1 made.</done>
 </task>
@@ -213,7 +213,7 @@ In `examples/accrue_host/Makefile`, rework `up` and add `open` (keep all other t
 Commit: `git commit -m "feat(host-docker): launch banner prints live URL, routes, and demo logins"`.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/examples/accrue_host && bash -n bin/dev-banner.sh && test -x bin/dev-banner.sh && grep -q 'accrue-demo-password' bin/dev-banner.sh && grep -q '/app/reports/advanced' bin/dev-banner.sh && grep -q -- '--url-only' bin/dev-banner.sh && grep -Eq '^open:' Makefile && grep -q 'dev-banner.sh' Makefile && echo OK</automated>
+    <automated>cd /Users/dev/projects/accrue/examples/accrue_host && bash -n bin/dev-banner.sh && test -x bin/dev-banner.sh && grep -q 'accrue-demo-password' bin/dev-banner.sh && grep -q '/app/reports/advanced' bin/dev-banner.sh && grep -q -- '--url-only' bin/dev-banner.sh && grep -Eq '^open:' Makefile && grep -q 'dev-banner.sh' Makefile && echo OK</automated>
   </verify>
   <done>`dev-banner.sh` is executable, passes `bash -n`, resolves the live port, supports `--url-only`, and prints the real routes + all five demo logins with the real password; Makefile `up` runs detached→banner→logs and `open` launches the browser; commit 2 made.</done>
 </task>
@@ -257,7 +257,7 @@ Do NOT convert the named volumes to bind mounts and do NOT add BuildKit `--mount
 Commit: `git commit -m "perf(host-docker): lean idempotent entrypoint + host-bind hex/mix/npm caches"`.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/examples/accrue_host && bash -n bin/dev-entrypoint.sh && test -x bin/dev-entrypoint.sh && grep -q 'exec mix phx.server' bin/dev-entrypoint.sh && grep -q 'priv/static/assets' bin/dev-entrypoint.sh && head -1 Dockerfile.dev | grep -q 'syntax=docker/dockerfile:1' && grep -q 'dev-entrypoint.sh' Dockerfile.dev && grep -q '/root/.hex' docker-compose.yml && grep -q 'mix_deps:/workspace' docker-compose.yml && echo OK</automated>
+    <automated>cd /Users/dev/projects/accrue/examples/accrue_host && bash -n bin/dev-entrypoint.sh && test -x bin/dev-entrypoint.sh && grep -q 'exec mix phx.server' bin/dev-entrypoint.sh && grep -q 'priv/static/assets' bin/dev-entrypoint.sh && head -1 Dockerfile.dev | grep -q 'syntax=docker/dockerfile:1' && grep -q 'dev-entrypoint.sh' Dockerfile.dev && grep -q '/root/.hex' docker-compose.yml && grep -q 'mix_deps:/workspace' docker-compose.yml && echo OK</automated>
   </verify>
   <done>`dev-entrypoint.sh` is executable, idempotent (guards npm + first-paint asset build), and execs phx.server; Dockerfile has the syntax header, COPYs bin/, and uses the entrypoint instead of `mix setup`; compose adds the three host-bind caches while keeping all named volumes; commit 3 made.</done>
 </task>
@@ -310,7 +310,7 @@ SEE the admin UI operators get, without wiring Stripe"). NOT a README duplicate 
 Commit: `git commit -m "docs(host-docker): rewrite Start Here + add local_demo evaluator guide"`.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue && test -f accrue_admin/guides/local_demo.md && grep -q 'guides/local_demo.md' accrue_admin/mix.exs && grep -c 'guides/local_demo.md' accrue_admin/mix.exs | grep -qE '^[23]$' && grep -q 'make open' examples/accrue_host/README.md && ! grep -q 'otherlib web 4010, thirdlib web 4020' examples/accrue_host/README.md && (cd accrue_admin && mix docs >/tmp/axdocs.log 2>&1); grep -qi 'local_demo' /tmp/axdocs.log || ls accrue_admin/doc/local_demo.html >/dev/null 2>&1 && echo OK</automated>
+    <automated>cd /Users/dev/projects/accrue && test -f accrue_admin/guides/local_demo.md && grep -q 'guides/local_demo.md' accrue_admin/mix.exs && grep -c 'guides/local_demo.md' accrue_admin/mix.exs | grep -qE '^[23]$' && grep -q 'make open' examples/accrue_host/README.md && ! grep -q 'otherlib web 4010, thirdlib web 4020' examples/accrue_host/README.md && (cd accrue_admin && mix docs >/tmp/axdocs.log 2>&1); grep -qi 'local_demo' /tmp/axdocs.log || ls accrue_admin/doc/local_demo.html >/dev/null 2>&1 && echo OK</automated>
   </verify>
   <done>README "Start Here" leads with the gameplan summary and the ephemeral/banner/caching story (no 4000/4010/4020 block, `make open` documented); `accrue_admin/guides/local_demo.md` exists as a persona-framed narrative and is registered in `extras:`, the `Guides:` group, and `skip_undefined_reference_warnings_on:`; `mix docs` builds clean with the guide; commit 4 made.</done>
 </task>
@@ -337,7 +337,7 @@ If included, commit: `git commit -m "feat(host-docker): native-dev banner (dev-o
 If deferred, make no commit and record the deferral in the SUMMARY.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/examples/accrue_host && { test -f lib/accrue_host_web/dev_banner.ex && grep -q 'PGHOST' lib/accrue_host_web/dev_banner.ex && grep -q 'dev_routes' lib/accrue_host/application.ex && MIX_ENV=test mix compile --warnings-as-errors >/tmp/axcompile.log 2>&1 && echo INCLUDED-OK; } || echo "DEFERRED-OK (note in SUMMARY)"</automated>
+    <automated>cd /Users/dev/projects/accrue/examples/accrue_host && { test -f lib/accrue_host_web/dev_banner.ex && grep -q 'PGHOST' lib/accrue_host_web/dev_banner.ex && grep -q 'dev_routes' lib/accrue_host/application.ex && MIX_ENV=test mix compile --warnings-as-errors >/tmp/axcompile.log 2>&1 && echo INCLUDED-OK; } || echo "DEFERRED-OK (note in SUMMARY)"</automated>
   </verify>
   <done>EITHER: a dev-only, Docker-suppressed native banner compiles clean under warnings-as-errors and does not touch prod/test boot — OR the task is deferred with a one-line note in the SUMMARY. Both outcomes are acceptable.</done>
 </task>

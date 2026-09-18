@@ -31,7 +31,7 @@
 
 **Analog:** `.github/workflows/ci.yml`
 
-**Trigger and matrix pattern** ([`.github/workflows/ci.yml:3`](/Users/jon/projects/accrue/.github/workflows/ci.yml#L3), lines 3-18 and 35-70):
+**Trigger and matrix pattern** ([`.github/workflows/ci.yml:3`](/Users/dev/projects/accrue/.github/workflows/ci.yml#L3), lines 3-18 and 35-70):
 
 ```yaml
 on:
@@ -56,7 +56,7 @@ jobs:
             continue-on-error: false
 ```
 
-**Cache and BEAM setup pattern** ([`.github/workflows/ci.yml:72`](/Users/jon/projects/accrue/.github/workflows/ci.yml#L72), lines 72-136):
+**Cache and BEAM setup pattern** ([`.github/workflows/ci.yml:72`](/Users/dev/projects/accrue/.github/workflows/ci.yml#L72), lines 72-136):
 
 ```yaml
 steps:
@@ -79,7 +79,7 @@ steps:
     uses: actions/cache/restore@v4
 ```
 
-**Required gate-step pattern** ([`.github/workflows/ci.yml:95`](/Users/jon/projects/accrue/.github/workflows/ci.yml#L95), lines 95-136):
+**Required gate-step pattern** ([`.github/workflows/ci.yml:95`](/Users/dev/projects/accrue/.github/workflows/ci.yml#L95), lines 95-136):
 
 ```yaml
 - name: Install deps
@@ -109,7 +109,7 @@ steps:
 
 **Analog:** `.github/workflows/ci.yml`
 
-**Workflow shell pattern** ([`.github/workflows/ci.yml:3`](/Users/jon/projects/accrue/.github/workflows/ci.yml#L3), lines 3-18):
+**Workflow shell pattern** ([`.github/workflows/ci.yml:3`](/Users/dev/projects/accrue/.github/workflows/ci.yml#L3), lines 3-18):
 
 ```yaml
 on:
@@ -120,7 +120,7 @@ on:
   workflow_dispatch: {}
 ```
 
-**Single-job setup pattern** ([`.github/workflows/accrue_admin_assets.yml:23`](/Users/jon/projects/accrue/.github/workflows/accrue_admin_assets.yml#L23), lines 23-49):
+**Single-job setup pattern** ([`.github/workflows/accrue_admin_assets.yml:23`](/Users/dev/projects/accrue/.github/workflows/accrue_admin_assets.yml#L23), lines 23-49):
 
 ```yaml
 jobs:
@@ -143,7 +143,7 @@ jobs:
 
 **Analog:** `.github/workflows/ci.yml`
 
-**Service + env pattern** ([`.github/workflows/accrue_admin_browser.yml:22`](/Users/jon/projects/accrue/.github/workflows/accrue_admin_browser.yml#L22), lines 22-43):
+**Service + env pattern** ([`.github/workflows/accrue_admin_browser.yml:22`](/Users/dev/projects/accrue/.github/workflows/accrue_admin_browser.yml#L22), lines 22-43):
 
 ```yaml
 services:
@@ -161,7 +161,7 @@ env:
   PGHOST: localhost
 ```
 
-**Artifact-on-failure pattern** ([`.github/workflows/accrue_admin_browser.yml:75`](/Users/jon/projects/accrue/.github/workflows/accrue_admin_browser.yml#L75), lines 75-89):
+**Artifact-on-failure pattern** ([`.github/workflows/accrue_admin_browser.yml:75`](/Users/dev/projects/accrue/.github/workflows/accrue_admin_browser.yml#L75), lines 75-89):
 
 ```yaml
 - name: Upload Playwright report
@@ -197,7 +197,7 @@ There is no existing version-manifest JSON file in this repository. Planner shou
 
 **Analog:** `accrue/mix.exs`
 
-**Project metadata pattern** ([`accrue/mix.exs:7`](/Users/jon/projects/accrue/accrue/mix.exs#L7), lines 7-20):
+**Project metadata pattern** ([`accrue/mix.exs:7`](/Users/dev/projects/accrue/accrue/mix.exs#L7), lines 7-20):
 
 ```elixir
 def project do
@@ -215,7 +215,7 @@ def project do
 end
 ```
 
-**Optional dependency pattern** ([`accrue/mix.exs:68`](/Users/jon/projects/accrue/accrue/mix.exs#L68), lines 68-95):
+**Optional dependency pattern** ([`accrue/mix.exs:68`](/Users/dev/projects/accrue/accrue/mix.exs#L68), lines 68-95):
 
 ```elixir
 # Optional deps — conditionally compiled
@@ -228,7 +228,7 @@ end
 {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
 ```
 
-**Package + docs config pattern** ([`accrue/mix.exs:115`](/Users/jon/projects/accrue/accrue/mix.exs#L115), lines 115-142):
+**Package + docs config pattern** ([`accrue/mix.exs:115`](/Users/dev/projects/accrue/accrue/mix.exs#L115), lines 115-142):
 
 ```elixir
 defp package do
@@ -261,7 +261,7 @@ end
 
 **Analog:** `accrue_admin/mix.exs`
 
-**Admin package metadata pattern** ([`accrue_admin/mix.exs:7`](/Users/jon/projects/accrue/accrue_admin/mix.exs#L7), lines 7-18):
+**Admin package metadata pattern** ([`accrue_admin/mix.exs:7`](/Users/dev/projects/accrue/accrue_admin/mix.exs#L7), lines 7-18):
 
 ```elixir
 def project do
@@ -277,7 +277,7 @@ def project do
 end
 ```
 
-**Sibling dependency pattern** ([`accrue_admin/mix.exs:35`](/Users/jon/projects/accrue/accrue_admin/mix.exs#L35), lines 35-47):
+**Sibling dependency pattern** ([`accrue_admin/mix.exs:35`](/Users/dev/projects/accrue/accrue_admin/mix.exs#L35), lines 35-47):
 
 ```elixir
 defp deps do
@@ -292,7 +292,7 @@ defp deps do
 end
 ```
 
-**Package file list pattern** ([`accrue_admin/mix.exs:50`](/Users/jon/projects/accrue/accrue_admin/mix.exs#L50), lines 50-55):
+**Package file list pattern** ([`accrue_admin/mix.exs:50`](/Users/dev/projects/accrue/accrue_admin/mix.exs#L50), lines 50-55):
 
 ```elixir
 defp package do
@@ -312,7 +312,7 @@ end
 
 **Analog:** `accrue/guides/testing.md`
 
-**Lead-with-working-example pattern** ([`accrue/guides/testing.md:1`](/Users/jon/projects/accrue/accrue/guides/testing.md#L1), lines 1-18):
+**Lead-with-working-example pattern** ([`accrue/guides/testing.md:1`](/Users/dev/projects/accrue/accrue/guides/testing.md#L1), lines 1-18):
 
 ```markdown
 # Testing Accrue Billing Flows
@@ -326,7 +326,7 @@ defmodule MyApp.BillingTest do
 ```
 ```
 
-**Checklist section pattern** ([`accrue/guides/testing.md:52`](/Users/jon/projects/accrue/accrue/guides/testing.md#L52), lines 52-95):
+**Checklist section pattern** ([`accrue/guides/testing.md:52`](/Users/dev/projects/accrue/accrue/guides/testing.md#L52), lines 52-95):
 
 ```markdown
 Scenario checklist: successful checkout, trial conversion, failed renewal, cancellation/grace period, invoice email/PDF, webhook replay, background jobs, and provider-parity tests.
@@ -336,7 +336,7 @@ Scenario checklist: successful checkout, trial conversion, failed renewal, cance
 ## Provider-parity tests
 ```
 
-**Docs test pattern if README content gets assertions** ([`accrue/test/accrue/docs/testing_guide_test.exs:21`](/Users/jon/projects/accrue/accrue/test/accrue/docs/testing_guide_test.exs#L21), lines 21-31):
+**Docs test pattern if README content gets assertions** ([`accrue/test/accrue/docs/testing_guide_test.exs:21`](/Users/dev/projects/accrue/accrue/test/accrue/docs/testing_guide_test.exs#L21), lines 21-31):
 
 ```elixir
 test "testing guide contains copy-paste public helper strings" do
@@ -355,7 +355,7 @@ end
 
 **Analog:** `accrue_admin/guides/admin_ui.md`
 
-**Host-setup-first pattern** ([`accrue_admin/guides/admin_ui.md:1`](/Users/jon/projects/accrue/accrue_admin/guides/admin_ui.md#L1), lines 1-23):
+**Host-setup-first pattern** ([`accrue_admin/guides/admin_ui.md:1`](/Users/dev/projects/accrue/accrue_admin/guides/admin_ui.md#L1), lines 1-23):
 
 ```markdown
 # AccrueAdmin Integration Guide
@@ -370,7 +370,7 @@ defmodule MyAppWeb.Router do
 ```
 ```
 
-**Operational command block pattern** ([`accrue_admin/guides/admin_ui.md:50`](/Users/jon/projects/accrue/accrue_admin/guides/admin_ui.md#L50), lines 50-79):
+**Operational command block pattern** ([`accrue_admin/guides/admin_ui.md:50`](/Users/dev/projects/accrue/accrue_admin/guides/admin_ui.md#L50), lines 50-79):
 
 ```markdown
 ## Private Asset Bundle
@@ -414,7 +414,7 @@ No changelog file exists yet. Use Release Please output conventions from `09-RES
 
 **Analog:** `accrue_admin/guides/admin_ui.md`
 
-**Sectioned install guide pattern** ([`accrue_admin/guides/admin_ui.md:5`](/Users/jon/projects/accrue/accrue_admin/guides/admin_ui.md#L5), lines 5-30):
+**Sectioned install guide pattern** ([`accrue_admin/guides/admin_ui.md:5`](/Users/dev/projects/accrue/accrue_admin/guides/admin_ui.md#L5), lines 5-30):
 
 ```markdown
 ## Host Setup
@@ -426,7 +426,7 @@ No changelog file exists yet. Use Release Please output conventions from `09-RES
 - compile-gated dev routes under `/billing/dev/*` only outside `MIX_ENV=prod`
 ```
 
-**Operational verification pattern** ([`accrue_admin/guides/admin_ui.md:66`](/Users/jon/projects/accrue/accrue_admin/guides/admin_ui.md#L66), lines 66-108):
+**Operational verification pattern** ([`accrue_admin/guides/admin_ui.md:66`](/Users/dev/projects/accrue/accrue_admin/guides/admin_ui.md#L66), lines 66-108):
 
 ```markdown
 ## Browser UAT
@@ -446,7 +446,7 @@ Use `MIX_ENV=prod mix compile` in `accrue_admin/` as the smoke check
 
 **Analog:** `guides/testing-live-stripe.md`
 
-**Runbook-style numbered steps** ([`guides/testing-live-stripe.md:49`](/Users/jon/projects/accrue/guides/testing-live-stripe.md#L49), lines 49-66):
+**Runbook-style numbered steps** ([`guides/testing-live-stripe.md:49`](/Users/dev/projects/accrue/guides/testing-live-stripe.md#L49), lines 49-66):
 
 ```markdown
 ## Running via `act` (local GitHub Actions replay)
@@ -457,7 +457,7 @@ Use `MIX_ENV=prod mix compile` in `accrue_admin/` as the smoke check
 4. Run:
 ```
 
-**Policy + command pairing pattern** ([`guides/testing-live-stripe.md:33`](/Users/jon/projects/accrue/guides/testing-live-stripe.md#L33), lines 33-47):
+**Policy + command pairing pattern** ([`guides/testing-live-stripe.md:33`](/Users/dev/projects/accrue/guides/testing-live-stripe.md#L33), lines 33-47):
 
 ```markdown
 ## Running locally
@@ -485,7 +485,7 @@ There is no conduct-policy file in the repo. The only reusable local pattern is 
 
 **Analog:** `guides/testing-live-stripe.md`
 
-**Disclosure-instructions style analog** ([`guides/testing-live-stripe.md:68`](/Users/jon/projects/accrue/guides/testing-live-stripe.md#L68), lines 68-81):
+**Disclosure-instructions style analog** ([`guides/testing-live-stripe.md:68`](/Users/dev/projects/accrue/guides/testing-live-stripe.md#L68), lines 68-81):
 
 ```markdown
 ## Running via GitHub Actions manual dispatch
@@ -503,7 +503,7 @@ There is no conduct-policy file in the repo. The only reusable local pattern is 
 
 **Analog:** `guides/testing-live-stripe.md`
 
-**Operator runbook pattern** ([`guides/testing-live-stripe.md:49`](/Users/jon/projects/accrue/guides/testing-live-stripe.md#L49), lines 49-80):
+**Operator runbook pattern** ([`guides/testing-live-stripe.md:49`](/Users/dev/projects/accrue/guides/testing-live-stripe.md#L49), lines 49-80):
 
 ```markdown
 ## Running via `act` (local GitHub Actions replay)
@@ -513,7 +513,7 @@ There is no conduct-policy file in the repo. The only reusable local pattern is 
 ## Scheduled run
 ```
 
-**Philosophy / why-this-exists pattern** ([`guides/testing-live-stripe.md:83`](/Users/jon/projects/accrue/guides/testing-live-stripe.md#L83), lines 83-97):
+**Philosophy / why-this-exists pattern** ([`guides/testing-live-stripe.md:83`](/Users/dev/projects/accrue/guides/testing-live-stripe.md#L83), lines 83-97):
 
 ```markdown
 ## Philosophy
@@ -528,7 +528,7 @@ The live-Stripe suite exists to catch one specific class of bug:
 
 ### GitHub Actions Skeleton
 
-**Sources:** [`.github/workflows/ci.yml:72`](/Users/jon/projects/accrue/.github/workflows/ci.yml#L72), [`.github/workflows/accrue_admin_assets.yml:28`](/Users/jon/projects/accrue/.github/workflows/accrue_admin_assets.yml#L28), [`.github/workflows/accrue_admin_browser.yml:44`](/Users/jon/projects/accrue/.github/workflows/accrue_admin_browser.yml#L44)
+**Sources:** [`.github/workflows/ci.yml:72`](/Users/dev/projects/accrue/.github/workflows/ci.yml#L72), [`.github/workflows/accrue_admin_assets.yml:28`](/Users/dev/projects/accrue/.github/workflows/accrue_admin_assets.yml#L28), [`.github/workflows/accrue_admin_browser.yml:44`](/Users/dev/projects/accrue/.github/workflows/accrue_admin_browser.yml#L44)
 
 **Apply to:** all new workflow files
 
@@ -544,7 +544,7 @@ Keep `ubuntu-24.04`, `actions/checkout@v4`, and `erlef/setup-beam@v1` consistent
 
 ### Service Container and Environment Shape
 
-**Sources:** [`.github/workflows/ci.yml:20`](/Users/jon/projects/accrue/.github/workflows/ci.yml#L20), [`.github/workflows/accrue_admin_browser.yml:22`](/Users/jon/projects/accrue/.github/workflows/accrue_admin_browser.yml#L22)
+**Sources:** [`.github/workflows/ci.yml:20`](/Users/dev/projects/accrue/.github/workflows/ci.yml#L20), [`.github/workflows/accrue_admin_browser.yml:22`](/Users/dev/projects/accrue/.github/workflows/accrue_admin_browser.yml#L22)
 
 **Apply to:** workflows that need DB-backed smoke checks before publish
 
@@ -566,7 +566,7 @@ env:
 
 ### ExDoc and Package Metadata
 
-**Sources:** [`accrue/mix.exs:115`](/Users/jon/projects/accrue/accrue/mix.exs#L115), [`accrue_admin/mix.exs:50`](/Users/jon/projects/accrue/accrue_admin/mix.exs#L50)
+**Sources:** [`accrue/mix.exs:115`](/Users/dev/projects/accrue/accrue/mix.exs#L115), [`accrue_admin/mix.exs:50`](/Users/dev/projects/accrue/accrue_admin/mix.exs#L50)
 
 **Apply to:** both `mix.exs` files
 
@@ -584,7 +584,7 @@ For `accrue_admin`, keep the same structure but preserve package-specific file r
 
 ### Markdown Guide Shape
 
-**Sources:** [`accrue/guides/testing.md:1`](/Users/jon/projects/accrue/accrue/guides/testing.md#L1), [`accrue_admin/guides/admin_ui.md:5`](/Users/jon/projects/accrue/accrue_admin/guides/admin_ui.md#L5), [`guides/testing-live-stripe.md:33`](/Users/jon/projects/accrue/guides/testing-live-stripe.md#L33)
+**Sources:** [`accrue/guides/testing.md:1`](/Users/dev/projects/accrue/accrue/guides/testing.md#L1), [`accrue_admin/guides/admin_ui.md:5`](/Users/dev/projects/accrue/accrue_admin/guides/admin_ui.md#L5), [`guides/testing-live-stripe.md:33`](/Users/dev/projects/accrue/guides/testing-live-stripe.md#L33)
 
 **Apply to:** `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `RELEASING.md`, admin guide updates
 
@@ -603,7 +603,7 @@ The repo's existing docs consistently lead with concrete commands and runnable s
 
 ### Docs Assertion Tests
 
-**Sources:** [`accrue/test/accrue/docs/testing_guide_test.exs:21`](/Users/jon/projects/accrue/accrue/test/accrue/docs/testing_guide_test.exs#L21), [`accrue/test/accrue/docs/community_auth_test.exs:17`](/Users/jon/projects/accrue/accrue/test/accrue/docs/community_auth_test.exs#L17)
+**Sources:** [`accrue/test/accrue/docs/testing_guide_test.exs:21`](/Users/dev/projects/accrue/accrue/test/accrue/docs/testing_guide_test.exs#L21), [`accrue/test/accrue/docs/community_auth_test.exs:17`](/Users/dev/projects/accrue/accrue/test/accrue/docs/community_auth_test.exs#L17)
 
 **Apply to:** any new docs tests the planner chooses to add
 

@@ -114,7 +114,7 @@ Applies ONLY to `charge/3`, `subscribe/2`, `swap_plan/3`, `pay_invoice/2`, `atta
 ### Core (already in deps from Phase 1/2)
 | Library | Version | Purpose | Source |
 |---------|---------|---------|--------|
-| `lattice_stripe` | `~> 1.0` | Stripe API — Subscription, Invoice, PaymentIntent, SetupIntent, PaymentMethod, Customer, Charge, Refund, BalanceTransaction | [VERIFIED: sibling project at `/Users/jon/projects/lattice_stripe/`] |
+| `lattice_stripe` | `~> 1.0` | Stripe API — Subscription, Invoice, PaymentIntent, SetupIntent, PaymentMethod, Customer, Charge, Refund, BalanceTransaction | [VERIFIED: sibling project at `/Users/dev/projects/lattice_stripe/`] |
 | `ecto` / `ecto_sql` | `~> 3.13` | Ecto.Enum for status, Repo.transact/2 for atomic mutations, optimistic_lock | [CITED: CLAUDE.md] |
 | `postgrex` | `~> 0.22` | Partial unique index for PM fingerprint dedup | [CITED: CLAUDE.md] |
 | `oban` | `~> 2.21` | Cron workers: ReconcileRefundFees, ReconcileChargeFees, DetectExpiringCards | [CITED: CLAUDE.md] |
@@ -129,7 +129,7 @@ All primitives come from Phase 1/2. Phase 3 is purely domain logic and state mac
 
 ## Key APIs & lattice_stripe Function Signatures
 
-All verified via Grep against `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/` [VERIFIED: source inspection 2026-04-14].
+All verified via Grep against `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/` [VERIFIED: source inspection 2026-04-14].
 
 ### Subscription
 ```elixir
@@ -792,7 +792,7 @@ Phase 3 is pure code/schema work on top of Phase 1/2 infrastructure. No new exte
 |------------|------------|-----------|---------|----------|
 | Elixir | All tasks | ✓ (assumed per Phase 1/2 completion) | ~> 1.17 | — |
 | PostgreSQL 14+ | Migrations | ✓ (assumed) | 14+ | — |
-| `lattice_stripe ~> 1.0` | PROC-02 adapter | ✓ (mix dep, sibling project at `/Users/jon/projects/lattice_stripe/`) | 1.0 | — |
+| `lattice_stripe ~> 1.0` | PROC-02 adapter | ✓ (mix dep, sibling project at `/Users/dev/projects/lattice_stripe/`) | 1.0 | — |
 | Stripe test API key | `@tag :stripe_live` integration tests only | unknown (host-provided via `STRIPE_TEST_KEY` env var) | N/A | Skip `:stripe_live` tag — unit suite via Fake covers everything else |
 
 No blocking dependencies.
@@ -842,11 +842,11 @@ No blocking dependencies.
 ## Sources
 
 ### Primary (HIGH confidence)
-- `/Users/jon/projects/accrue/.planning/phases/03-core-subscription-lifecycle/03-CONTEXT.md` — 86 locked decisions covering every architectural choice
-- `/Users/jon/projects/accrue/.planning/REQUIREMENTS.md` — v1 requirement IDs and descriptions
-- `/Users/jon/projects/accrue/.planning/ROADMAP.md` — Phase 3 goal + 6 success criteria
-- `/Users/jon/projects/accrue/CLAUDE.md` — stack versions, conditional compile pattern, config boundaries, Oban/ChromicPDF host-ownership rule
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/*.ex` — [VERIFIED via grep] function signatures for Subscription, Invoice, PaymentIntent, SetupIntent, PaymentMethod, Charge, Refund, Customer
+- `/Users/dev/projects/accrue/.planning/phases/03-core-subscription-lifecycle/03-CONTEXT.md` — 86 locked decisions covering every architectural choice
+- `/Users/dev/projects/accrue/.planning/REQUIREMENTS.md` — v1 requirement IDs and descriptions
+- `/Users/dev/projects/accrue/.planning/ROADMAP.md` — Phase 3 goal + 6 success criteria
+- `/Users/dev/projects/accrue/CLAUDE.md` — stack versions, conditional compile pattern, config boundaries, Oban/ChromicPDF host-ownership rule
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/*.ex` — [VERIFIED via grep] function signatures for Subscription, Invoice, PaymentIntent, SetupIntent, PaymentMethod, Charge, Refund, Customer
 - Stripe API docs — https://stripe.com/docs/api (Subscription, Invoice, PaymentIntent, SetupIntent, PaymentMethod, Charge, Refund, BalanceTransaction, events)
 
 ### Secondary (MEDIUM confidence)

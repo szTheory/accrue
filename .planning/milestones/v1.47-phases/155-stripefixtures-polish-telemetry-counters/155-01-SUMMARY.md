@@ -94,9 +94,9 @@ None - no external service configuration required.
 
 ## Verification
 
-- `cd /Users/jon/projects/accrue/accrue && mix test test/accrue/webhook/default_handler_entitlement_summary_test.exs --seed 0` - 15 tests, 0 failures.
-- `cd /Users/jon/projects/accrue/accrue && mix test test/accrue/telemetry/metrics_test.exs --seed 0` - 8 tests, 0 failures.
-- `cd /Users/jon/projects/accrue/accrue && mix test test/accrue/webhook/default_handler_entitlement_summary_test.exs test/accrue/telemetry/metrics_test.exs --seed 0` - 23 tests, 0 failures.
+- `cd /Users/dev/projects/accrue/accrue && mix test test/accrue/webhook/default_handler_entitlement_summary_test.exs --seed 0` - 15 tests, 0 failures.
+- `cd /Users/dev/projects/accrue/accrue && mix test test/accrue/telemetry/metrics_test.exs --seed 0` - 8 tests, 0 failures.
+- `cd /Users/dev/projects/accrue/accrue && mix test test/accrue/webhook/default_handler_entitlement_summary_test.exs test/accrue/telemetry/metrics_test.exs --seed 0` - 23 tests, 0 failures.
 - Source checks confirmed `omit_livemode`, non-Hex support wording, both metric counters, both event tuple assertions, and the malformed-summary `[:reason]` tag assertion.
 
 ## Self-Check: PASSED

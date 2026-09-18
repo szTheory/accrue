@@ -3,7 +3,7 @@ quick_id: 260621-nr8
 slug: admin-nav-live-nav-no-collapse
 date: 2026-06-21
 validate: true
-approved_plan: /Users/jon/.claude/plans/i-just-got-an-ethereal-harbor.md
+approved_plan: /Users/dev/.claude/plans/i-just-got-an-ethereal-harbor.md
 ---
 
 # Admin nav: live navigation + loading stripe · remove sidebar collapse

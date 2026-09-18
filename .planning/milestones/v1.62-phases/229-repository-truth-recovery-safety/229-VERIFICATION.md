@@ -6,7 +6,7 @@ behavior_unverified: 0
 score: 7/7 must-haves verified
 re_verification: "Yes — re-stamped 2026-09-17 after Phases 231/232 and quick-task 260916-gda modified 7 shared covered files (scripts/ci/README.md, collect_repository_inventory.mjs, phase229_gap_closure.test.mjs, preserve_repository_state.sh, render_repository_inventory.mjs, verify_phase229_handoff_invariants.mjs, verify_repository_inventory.mjs) via the isMainModule module-boundary migration, the meta-verifier wiring, and a stat-portability fix; all of Phase 229's executable evidence was re-run at this HEAD and still passes (61 node --test assertions across 5 suites, 3 --self-test harnesses, and the strict fixtures run). Supersedes the 2026-09-15T22:04:20Z report."
 evidence_mode: executable
-covered_digest: "v1:sha256:c50e73d77691833f79af632347fbc7406c61b9e49fd3134fcc7128e04cfa06ad"
+covered_digest: "v1:sha256:be519139344bdd8c47dce4e609c843da380b879a035e51b69a87e9e6c256d354"
 covered_files:
   - .planning/phases/229-repository-truth-recovery-safety/229-01-PLAN.md
   - .planning/phases/229-repository-truth-recovery-safety/229-01-SUMMARY.md

@@ -12,7 +12,7 @@
 ## Remote-ref cleanup scope (HYG-01)
 
 Presented after measuring: 4 origin branches fully merged into `origin/main`
-(`fix/chimeway-opaque-recipient-release`, `fix/getfluent-1.5.1`, `fix/release-otp-28-1`,
+(`fix/chimeway-opaque-recipient-release`, `fix/adopter-app-1.5.1`, `fix/release-otp-28-1`,
 `release-please--branches--main`) and 4 not merged (`fix/chimeway-opaque-recipient`,
 `fix/release-boot-env-resolver`, `gsd/phase-225-required-lane-signal-repair`,
 `phase-226-baseline-5da8e6b88735`). 0 open PRs.

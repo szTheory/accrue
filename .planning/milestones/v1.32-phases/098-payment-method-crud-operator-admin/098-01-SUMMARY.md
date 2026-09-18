@@ -76,7 +76,7 @@ completed: 2026-04-30
 **1. [Rule 3 - Blocking] Ran the support-matrix verifier from the repo root**
 - **Found during:** Task 2 verification
 - **Issue:** `scripts/ci/verify_processor_support_matrix.sh` is repo-root relative, so invoking it from `accrue/` failed with `No such file or directory`.
-- **Fix:** Re-ran the plan verification from `/Users/jon/projects/accrue` and kept `mix test` scoped under `cd accrue`.
+- **Fix:** Re-ran the plan verification from `/Users/dev/projects/accrue` and kept `mix test` scoped under `cd accrue`.
 - **Files modified:** None
 - **Verification:** `bash scripts/ci/verify_processor_support_matrix.sh && cd accrue && mix test ... --warnings-as-errors`
 - **Committed in:** `717e7d7` (verified as part of task commit)

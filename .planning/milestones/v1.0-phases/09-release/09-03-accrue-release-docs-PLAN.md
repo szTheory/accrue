@@ -47,8 +47,8 @@ Output: `accrue` README, changelog, quickstart/config guides, and updated ExDoc 
 </objective>
 
 <execution_context>
-@/Users/jon/.codex/get-shit-done/workflows/execute-plan.md
-@/Users/jon/.codex/get-shit-done/templates/summary.md
+@/Users/dev/.codex/get-shit-done/workflows/execute-plan.md
+@/Users/dev/.codex/get-shit-done/templates/summary.md
 </execution_context>
 
 <context>

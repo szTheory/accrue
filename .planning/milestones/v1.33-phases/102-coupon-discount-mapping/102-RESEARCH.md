@@ -138,7 +138,7 @@ cd accrue && mix deps.get
 cd ../accrue_portal && mix deps.get
 ```
 
-**Version verification:** `{:braintree, "~> 0.16"}` is already declared in [accrue/mix.exs](/Users/jon/projects/accrue/accrue/mix.exs:58), and Hex lists `0.16.0` as the current published version with a `2025-03-27` update date. [CITED: https://hex.pm/packages/braintree]
+**Version verification:** `{:braintree, "~> 0.16"}` is already declared in [accrue/mix.exs](/Users/dev/projects/accrue/accrue/mix.exs:58), and Hex lists `0.16.0` as the current published version with a `2025-03-27` update date. [CITED: https://hex.pm/packages/braintree]
 
 ## Architecture Patterns
 
@@ -372,7 +372,7 @@ All claims in this research were verified or cited in this session — no user c
 | Property | Value |
 |----------|-------|
 | Framework | ExUnit via Mix for `accrue` and `accrue_portal`. [VERIFIED: accrue/mix.exs][VERIFIED: accrue_portal/mix.exs] |
-| Config file | [accrue/mix.exs](/Users/jon/projects/accrue/accrue/mix.exs:1), [accrue_portal/mix.exs](/Users/jon/projects/accrue/accrue_portal/mix.exs:1), CI gate in [.github/workflows/ci.yml](/Users/jon/projects/accrue/.github/workflows/ci.yml:1). [VERIFIED: codebase grep] |
+| Config file | [accrue/mix.exs](/Users/dev/projects/accrue/accrue/mix.exs:1), [accrue_portal/mix.exs](/Users/dev/projects/accrue/accrue_portal/mix.exs:1), CI gate in [.github/workflows/ci.yml](/Users/dev/projects/accrue/.github/workflows/ci.yml:1). [VERIFIED: codebase grep] |
 | Quick run command | `cd accrue && mix test test/accrue/checkout/local_session_test.exs test/accrue/processor/braintree_local_portal_test.exs test/accrue/billing/coupon_actions_test.exs test/accrue/telemetry/portal_checkout_completed_test.exs` plus `cd ../accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs`. [VERIFIED: codebase grep] |
 | Full suite command | `cd accrue && mix test.all && cd ../accrue_admin && mix test --warnings-as-errors && cd ../accrue_portal && mix test --warnings-as-errors`. [VERIFIED: accrue/mix.exs][VERIFIED: .github/workflows/ci.yml] |
 
@@ -424,7 +424,7 @@ All claims in this research were verified or cited in this session — no user c
 
 ### Primary (HIGH confidence)
 
-- Local codebase inspection across [accrue/lib/accrue/billing/coupon_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:1), [subscription_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:1), [processor/braintree.ex](/Users/jon/projects/accrue/accrue/lib/accrue/processor/braintree.ex:1), [checkout/local_session.ex](/Users/jon/projects/accrue/accrue/lib/accrue/checkout/local_session.ex:1), and [accrue_portal/live/checkout_live.ex](/Users/jon/projects/accrue/accrue_portal/lib/accrue_portal/live/checkout_live.ex:1). [VERIFIED: codebase grep]
+- Local codebase inspection across [accrue/lib/accrue/billing/coupon_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:1), [subscription_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:1), [processor/braintree.ex](/Users/dev/projects/accrue/accrue/lib/accrue/processor/braintree.ex:1), [checkout/local_session.ex](/Users/dev/projects/accrue/accrue/lib/accrue/checkout/local_session.ex:1), and [accrue_portal/live/checkout_live.ex](/Users/dev/projects/accrue/accrue_portal/lib/accrue_portal/live/checkout_live.ex:1). [VERIFIED: codebase grep]
 - Braintree official subscription create docs: https://developer.paypal.com/braintree/docs/reference/request/subscription/create/ruby/ [CITED: https://developer.paypal.com/braintree/docs/reference/request/subscription/create/ruby/]
 - Braintree official add-ons/discounts guide: https://developer.paypal.com/braintree/articles/guides/recurring-billing/add-ons-discounts/ [CITED: https://developer.paypal.com/braintree/articles/guides/recurring-billing/add-ons-discounts/]
 - Braintree official discount response docs: https://developer.paypal.com/braintree/docs/reference/response/discount/node [CITED: https://developer.paypal.com/braintree/docs/reference/response/discount/node]
@@ -433,7 +433,7 @@ All claims in this research were verified or cited in this session — no user c
 
 ### Secondary (MEDIUM confidence)
 
-- Phase context and planning docs: [102-CONTEXT.md](/Users/jon/projects/accrue/.planning/phases/102-coupon-discount-mapping/102-CONTEXT.md:1), [101-CONTEXT.md](/Users/jon/projects/accrue/.planning/phases/101-accrue-portal-foundation-checkout/101-CONTEXT.md:1), [v1.33-REQUIREMENTS.md](/Users/jon/projects/accrue/.planning/milestones/v1.33-REQUIREMENTS.md:1). [VERIFIED: codebase grep]
+- Phase context and planning docs: [102-CONTEXT.md](/Users/dev/projects/accrue/.planning/phases/102-coupon-discount-mapping/102-CONTEXT.md:1), [101-CONTEXT.md](/Users/dev/projects/accrue/.planning/phases/101-accrue-portal-foundation-checkout/101-CONTEXT.md:1), [v1.33-REQUIREMENTS.md](/Users/dev/projects/accrue/.planning/milestones/v1.33-REQUIREMENTS.md:1). [VERIFIED: codebase grep]
 
 ### Tertiary (LOW confidence)
 

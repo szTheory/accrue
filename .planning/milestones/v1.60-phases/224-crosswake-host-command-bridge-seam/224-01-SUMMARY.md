@@ -117,8 +117,8 @@ The audited `WKScriptMessageHandler` seam does not expose content-world identity
 ## Verification
 
 - PASS — baseline: `swift test --package-path packages/crosswake-shell-core-ios` (19 tests).
-- PASS — `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh source-gate`.
-- PASS — `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh tracer` (5 tracer tests).
+- PASS — `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh source-gate`.
+- PASS — `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh tracer` (5 tracer tests).
 - PASS — checked-in capability report remains wholly `feasibility_blocked`.
 
 ## Next Phase Readiness

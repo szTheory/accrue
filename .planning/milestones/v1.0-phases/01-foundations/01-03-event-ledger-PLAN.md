@@ -237,7 +237,7 @@ Config keys this plan READS (never writes — Plan 02 owns the schema, Plan 01 w
 The `Accrue.TestRepo` MUST live in `test/support/` (not `lib/`) so production builds don't ship a Repo with the library (D-10 is strict: host owns Repo).
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && grep -q "Accrue.TestRepo" config/test.exs && MIX_ENV=test mix ecto.drop --quiet 2>/dev/null ; MIX_ENV=test mix ecto.create && MIX_ENV=test mix ecto.migrate 2>&1 | tail -20</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && grep -q "Accrue.TestRepo" config/test.exs && MIX_ENV=test mix ecto.drop --quiet 2>/dev/null ; MIX_ENV=test mix ecto.create && MIX_ENV=test mix ecto.migrate 2>&1 | tail -20</automated>
   </verify>
   <acceptance_criteria>
     - `grep -q "SQLSTATE '45A01'" accrue/priv/repo/migrations/20260411000001_create_accrue_events.exs`
@@ -331,7 +331,7 @@ The `Accrue.TestRepo` MUST live in `test/support/` (not `lib/`) so production bu
 **Smoke-test the exact Postgrex shape first**: run one quick IEx session or an early test that prints the `%Postgrex.Error{}` struct from the trigger — this determines whether the code is `"45A01"` string or a Postgrex-assigned atom, and fixes Pitfall #2 before other tests depend on the match shape.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && MIX_ENV=test mix test test/accrue/events/ --trace</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && MIX_ENV=test mix test test/accrue/events/ --trace</automated>
   </verify>
   <acceptance_criteria>
     - `mix test test/accrue/events/record_test.exs` reports all tests passing

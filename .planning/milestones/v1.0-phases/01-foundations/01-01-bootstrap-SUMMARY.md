@@ -92,7 +92,7 @@ completed_date: 2026-04-12
 - `accrue_admin/mix.exs` with `{:accrue, path: "../accrue"}` per D-43 dev path, plus `phoenix ~> 1.8`, `phoenix_live_view ~> 1.1`, `phoenix_html ~> 4.2`, dev-only `ex_doc`/`credo`.
 - `lib/accrue_admin.ex` namespace anchor (Phase 7 lands the real dashboard).
 - Config trio + `test_helper.exs` one-liner.
-- `/Users/jon/projects/accrue/LICENSE` — canonical MIT text with `Copyright (c) 2026 Accrue contributors`. Satisfies OSS-11.
+- `/Users/dev/projects/accrue/LICENSE` — canonical MIT text with `Copyright (c) 2026 Accrue contributors`. Satisfies OSS-11.
 - Confirmed no root `mix.exs` (non-umbrella per D-42).
 - `cd accrue_admin && mix deps.get` resolves `:accrue` via path plus the full Phoenix/LiveView tree.
 
@@ -110,7 +110,7 @@ completed_date: 2026-04-12
 
 **1. [Rule 3 - Blocker] :sigra not published to Hex**
 - **Found during:** Task 1 (`mix deps.get`)
-- **Issue:** The plan called for `{:sigra, "~> 0.1", optional: true}` per D-45 / CLAUDE.md §Conditional Compilation. Hex returned "No package with name sigra in registry." `:sigra` lives as a sibling project (`/Users/jon/projects/sigra`) but is not yet published.
+- **Issue:** The plan called for `{:sigra, "~> 0.1", optional: true}` per D-45 / CLAUDE.md §Conditional Compilation. Hex returned "No package with name sigra in registry." `:sigra` lives as a sibling project (`/Users/dev/projects/sigra`) but is not yet published.
 - **Fix:** Dropped the sigra line from `deps/0` and left an inline comment pointing at the follow-up work. The CLAUDE.md conditional-compile pattern still functions via `Code.ensure_loaded?/1` and `@compile {:no_warn_undefined, Sigra.X}` guards in whichever plan eventually ships `Accrue.Integrations.Sigra` — none of which require `:sigra` to be listed in `deps/0` to work. Once `:sigra` publishes to Hex, add back the `{:sigra, "~> 0.1", optional: true}` line; no other code change needed.
 - **Files modified:** `accrue/mix.exs`
 - **Commit:** `b22c012`
@@ -145,7 +145,7 @@ cd accrue && mix test                # 1 test, 0 failures
 cd accrue_admin && mix deps.get      # 0, :accrue resolved via path
 test -f LICENSE                      # present
 grep -q "MIT License" LICENSE        # match
-test ! -f /Users/jon/projects/accrue/mix.exs  # no umbrella root
+test ! -f /Users/dev/projects/accrue/mix.exs  # no umbrella root
 grep -q "config :accrue, :env" accrue/config/config.exs  # present
 grep -q "Accrue.TestRepo" accrue/config/test.exs          # present
 grep -q "Ecto.Adapters.SQL.Sandbox" accrue/config/test.exs  # present

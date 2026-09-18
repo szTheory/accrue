@@ -11,7 +11,7 @@ pain.
 
 Decisive finding from exploring the user's own fleet: a **shared Traefik reverse proxy is
 already running** on this machine — the `dev_proxy` stack from `scoria`
-(`/Users/jon/projects/scoria/docker/traefik/compose.yml`), on an external `proxy` network.
+(`/Users/dev/projects/scoria/docker/traefik/compose.yml`), on an external `proxy` network.
 Scoria's own docs position it as *the reference standard*. Several sibling repos converged
 on weaker variants (parapet's hash-seeded port ranges, threadline's CLI port-scanner,
 rulestead/scrypath's fixed-port `.env` lanes) — all inferior to the proxy at ~6 apps
@@ -54,7 +54,7 @@ apps coexist on the one Traefik.
 ### Files to change — `examples/accrue_host/`
 
 **1. `docker/traefik/compose.yml`  (NEW)** — copy scoria's verbatim
-(`/Users/jon/projects/scoria/docker/traefik/compose.yml`): `name: dev_proxy`, external
+(`/Users/dev/projects/scoria/docker/traefik/compose.yml`): `name: dev_proxy`, external
 `proxy` network, `traefik:v3.7.1`, binds `127.0.0.1:80:80` + `127.0.0.1:8080:8080`,
 `--providers.docker.exposedbydefault=false`, mounts the docker socket read-only. Shipping
 our own copy makes the demo self-contained for a fresh user (no scoria checkout required);

@@ -147,7 +147,7 @@ None — no external service configuration required.
 
 `231-REPOSITORY-INVENTORY.json`'s `refs.all` schema is a fixed `{name, object, role}` shape with no per-ref reason field (D-25's "do not widen a pinned schema" discipline applies equally here), so the reasons for its known "extra" refs relative to the frozen Phase 229/230 baselines are recorded here rather than inside the capsule itself:
 
-- `refs/heads/fix/getfluent-1.5.1` and `refs/remotes/origin/fix/getfluent-1.5.1` — maintainer-authorized fail-forward carryovers from Phase 230 (embed a downstream adopter's product name, predate this work, already public; renaming would invalidate the frozen 229 manifest). See `.planning/STATE.md`'s "Adopter-named refs: fail forward" section.
+- `refs/heads/fix/adopter-app-1.5.1` and `refs/remotes/origin/fix/adopter-app-1.5.1` — maintainer-authorized fail-forward carryovers from Phase 230 (embed a downstream adopter's product name, predate this work, already public; renaming would invalidate the frozen 229 manifest). See `.planning/STATE.md`'s "Adopter-named refs: fail forward" section.
 - `refs/heads/integration/v1.62-candidate` and `refs/remotes/origin/integration/v1.62-candidate` — the re-cut candidate branch, pushed to `origin` under this phase's own Plan 04 maintainer authorization (D-14) for the GATE-02 `workflow_dispatch` proof.
 
 ## Next Phase Readiness

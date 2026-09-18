@@ -113,7 +113,7 @@ No commit was created for Plan 192-06. Several touched files already had pre-exi
 - `cd accrue_admin && npm run phase192:signoff` - passed; wrote `192-SIGN-OFF.md` with `ACCEPT`
 - `node scripts/ci/verify_phase192_signoff.mjs` - passed
 - Human checkpoint - approved
-- `/Users/jon/.agents/gsd-core/bin/gsd_run query audit-uat --raw` - passed; zero outstanding UAT/verification items
+- `/Users/dev/.agents/gsd-core/bin/gsd_run query audit-uat --raw` - passed; zero outstanding UAT/verification items
 
 ## Decisions Made
 

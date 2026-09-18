@@ -55,7 +55,7 @@ Evidence command: `git status --porcelain -uall`
 | --- | --- | --- | --- | --- | --- |
 | origin/fix/chimeway-opaque-recipient | retained | Active fix branch with an open local tracking branch at the same commit; not superseded by any other ref. | — | — | false |
 | origin/fix/chimeway-opaque-recipient-release | retained | Active fix/release branch with an open local tracking branch at the same commit; not superseded by any other ref. | — | — | false |
-| origin/fix/getfluent-1.5.1 | retained | Adopter-named ref. Renaming this branch and its origin peer is maintainer-decided as fail-forward and deferred to a future capsule mint (232-CONTEXT.md deferred list); retained as-is for this phase, not superseded. | — | — | false |
+| origin/fix/adopter-app-1.5.1 | retained | Adopter-named ref. Renaming this branch and its origin peer is maintainer-decided as fail-forward and deferred to a future capsule mint (232-CONTEXT.md deferred list); retained as-is for this phase, not superseded. | — | — | false |
 | origin/fix/release-boot-env-resolver | retained | Active fix branch with an open local tracking branch at the same commit; not superseded by any other ref. | — | — | false |
 | origin/fix/release-otp-28-1 | retained | Active fix branch with an open local tracking branch at the same commit; not superseded by any other ref. | — | — | false |
 | origin/gsd/phase-225-required-lane-signal-repair | retained | Active GSD work branch; local tracking branch is ahead by 4 commits (unpushed local work), not superseded by any other ref. | — | — | false |

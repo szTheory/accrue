@@ -53,13 +53,13 @@ Every decision in `04-CONTEXT.md` has been cross-checked against the sibling `la
 |----|-------------|------------------|
 | **BILL-11** | Pause/resume with `pause_behavior` | `LatticeStripe.Subscription.update/4` accepts `pause_collection: %{behavior: "mark_uncollectible" \| "keep_as_draft" \| "void"}` (Stripe's three pause modes). Already plumbed through `lattice_stripe 1.0`. Wire via `Accrue.Billing.Subscription.pause/2` + `resume/2` in Phase 3 is `nil`-safe; Phase 4 adds `:pause_behavior` option + `:resumes_at` schedule. New subscription column: `paused_at :utc_datetime_usec`, `pause_behavior :string`. Webhook path: `customer.subscription.paused` / `.resumed`. |
 | **BILL-12** | Multi-item subscriptions | `LatticeStripe.SubscriptionItem.create/update/delete/list` — already in 1.0. Stripe `items[]` on sub create; individual item mutations via SubscriptionItem endpoints. Accrue already has `Accrue.Billing.SubscriptionItem` schema (Phase 2 D2-xx). Phase 4 promotes it to a first-class surface: `Accrue.Billing.add_item/3`, `remove_item/2`, `update_item_quantity/3`. Projection already denormalizes `price_id`, `quantity`, `plan_id`. Proration mandatory per D-05 (`:proration` option explicit, never silent). |
-| **BILL-13** | Metered billing | `LatticeStripe.Billing.Meter.create/3` (define once), `LatticeStripe.Billing.MeterEvent.create/3` (hot path, fire-and-forget). Confirmed in `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/billing/meter.ex` and `meter_event.ex`. Two-layer idempotency (body `identifier` + HTTP `idempotency_key:` opt) documented in `guides/metering.md`. `v1.billing.meter.error_report_triggered` webhook handles async failures. D4-03 locked: sync pass-through + outbox reconciler. |
+| **BILL-13** | Metered billing | `LatticeStripe.Billing.Meter.create/3` (define once), `LatticeStripe.Billing.MeterEvent.create/3` (hot path, fire-and-forget). Confirmed in `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/billing/meter.ex` and `meter_event.ex`. Two-layer idempotency (body `identifier` + HTTP `idempotency_key:` opt) documented in `guides/metering.md`. `v1.billing.meter.error_report_triggered` webhook handles async failures. D4-03 locked: sync pass-through + outbox reconciler. |
 | **BILL-14** | Free/comped subscriptions | Stripe idiom: `collection_method: "send_invoice"` + 100%-off coupon, OR `trial_end: "now" + 100 years` + `default_payment_method: nil`. Recommended path: **100%-off coupon** (re-uses discount infra from BILL-27/28, preserves invoice history, no fake trial). Accrue exposes `Accrue.Billing.comp_subscription/2` that applies a pre-created "comp_100_forever" coupon. Skips payment method requirement guard. |
 | **BILL-15** | Dunning / grace → `past_due → unpaid` | D4-02 locked. `LatticeStripe.Subscription.update/4` with `status: "unpaid"` or `cancel/3`. Oban cron SweeperJob. Columns: `past_due_since`, `dunning_sweep_attempted_at`. Telemetry `[:accrue, :ops, :dunning_exhaustion]`. |
 | **BILL-16** | Subscription Schedules | `LatticeStripe.SubscriptionSchedule.{create, retrieve, update, cancel, release}/3-4` + nested `SubscriptionSchedule.Phase`, `CurrentPhase`, `PhaseItem` structs. Two creation modes: `from_subscription` OR `customer + phases`. `end_behavior: "release" \| "cancel"`. Webhooks: `subscription_schedule.{created,updated,released,completed,canceled,expiring}`. **Schema:** new `accrue_subscription_schedules` table (thin projection per Discretion default) — columns: `id, stripe_id (unique), customer_id, subscription_id, status, current_phase_index, phases_count, next_phase_at, released_at, canceled_at, data :jsonb, timestamps`. Link to `accrue_subscriptions` via `subscription_id`. Phase transitions detected by diffing `current_phase.start_date` across webhook deliveries. |
 | **BILL-27** | `Accrue.Billing.Coupon` + `PromotionCode` | `LatticeStripe.Coupon.{create, retrieve, update, delete, list}/3` + `LatticeStripe.PromotionCode.{create, retrieve, update, list}/3` — both in 1.0. Phase 3 D3-16 shipped minimal `accrue_coupons` schema (passthrough, no expansion). Phase 4 adds: `accrue_promotion_codes` table (passthrough: `code, coupon_id, active, max_redemptions, times_redeemed, expires_at, data`), unique index on `code`. `Accrue.Billing.Coupon.create/2` + `PromotionCode.create/2` thin wrappers. Customer-facing apply: `Accrue.Billing.apply_promotion_code(subscription, code)` calls `Subscription.update(sub_id, coupon: coupon_id)`. |
 | **BILL-28** | Discount application at sub/invoice/checkout | Stripe composes discounts automatically — Accrue MIRRORS, never computes. Add columns to `accrue_invoices`: `discount_minor :integer`, `total_discount_amounts :jsonb` (Stripe's line-item breakdown). Add to `accrue_subscriptions`: `discount_id :string` (FK to coupon, nullable). Sources: `invoice.discounts[]`, `subscription.discount`, `checkout_session.discounts[]`. Denormalization happens in webhook handlers via `Accrue.Billing.Invoice.force_discount_changeset/2` (mirrors D3-17 force-path pattern). |
-| **CHKT-01** | `Accrue.Checkout.Session.create/retrieve` | `LatticeStripe.Checkout.Session.{create, retrieve, expire, list_line_items, stream!}/3-4`. Verified in `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/checkout/session.ex`. `mode` is required — pre-network `ArgumentError` if missing. Accrue wraps with defaults: `mode: :subscription`, `payment_method_types: ["card"]`, `customer_creation: "if_required"`, success/cancel URLs from config. |
+| **CHKT-01** | `Accrue.Checkout.Session.create/retrieve` | `LatticeStripe.Checkout.Session.{create, retrieve, expire, list_line_items, stream!}/3-4`. Verified in `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/checkout/session.ex`. `mode` is required — pre-network `ArgumentError` if missing. Accrue wraps with defaults: `mode: :subscription`, `payment_method_types: ["card"]`, `customer_creation: "if_required"`, success/cancel URLs from config. |
 | **CHKT-02** | Embedded + hosted Checkout modes | Stripe param `ui_mode: "hosted" \| "embedded"`. Hosted → returns `url` for redirect. Embedded → returns `client_secret` for `<stripe-checkout>` element client-side. Accrue's `mode: :hosted \| :embedded` option maps to `ui_mode`. Struct returned has both fields populated (one is `nil` depending on mode). |
 | **CHKT-03** | Line-item helpers | `LatticeStripe.Checkout.LineItem` struct exists. Accrue helper `Accrue.Checkout.LineItem.from_price(price_id, quantity)` → `%{"price" => price_id, "quantity" => quantity}`. Also `from_price_data/1` for ad-hoc one-time prices. |
 | **CHKT-04** | `Accrue.BillingPortal.Session.create` | `LatticeStripe.BillingPortal.Session.create/3` verified. Required param: `customer`. Optional: `return_url`, `flow_data`, `configuration` (`bpc_*`), `locale`, `on_behalf_of`. FlowData guards in lattice_stripe raise `ArgumentError` pre-network. Accrue wraps with `return_url` default from config. URL masked in Inspect (short-lived bearer credential). |
@@ -119,7 +119,7 @@ Every decision in `04-CONTEXT.md` has been cross-checked against the sibling `la
 
 | Library | Version | Purpose | Why Standard |
 |---------|---------|---------|--------------|
-| `:lattice_stripe` | `~> 1.1` (BUMP from `~> 1.0`) | All Stripe API calls | Sibling lib; 1.1 ships `Billing.Meter`, `MeterEvent`, `MeterEventAdjustment`, `BillingPortal.Session` required by Phase 4. `[VERIFIED: /Users/jon/projects/lattice_stripe/lib/lattice_stripe/billing/{meter,meter_event}.ex, billing_portal/session.ex]` |
+| `:lattice_stripe` | `~> 1.1` (BUMP from `~> 1.0`) | All Stripe API calls | Sibling lib; 1.1 ships `Billing.Meter`, `MeterEvent`, `MeterEventAdjustment`, `BillingPortal.Session` required by Phase 4. `[VERIFIED: /Users/dev/projects/lattice_stripe/lib/lattice_stripe/billing/{meter,meter_event}.ex, billing_portal/session.ex]` |
 | `:oban` | `~> 2.21` | Async/cron jobs | Already in deps. Phase 4 adds `:accrue_dunning` + `:accrue_meters` queues + cron entries (host wires). |
 | `:ecto_sql` | `~> 3.13` | Migrations + transactions | `Repo.transact/2` is load-bearing (D2-09). |
 | `:nimble_options` | `~> 1.1` | Config schema | Extends `Accrue.Config` for 5+ new keys. |
@@ -130,7 +130,7 @@ Every decision in `04-CONTEXT.md` has been cross-checked against the sibling `la
 
 | Package | Current Version | Source | Date |
 |---------|----------------|--------|------|
-| `lattice_stripe` | `1.1.0` (unreleased; code-complete on `main`, 66 commits post `v1.0.0` tag from 2026-04-13) | `[VERIFIED: /Users/jon/projects/lattice_stripe/ sibling repo]` | 2026-04-14 |
+| `lattice_stripe` | `1.1.0` (unreleased; code-complete on `main`, 66 commits post `v1.0.0` tag from 2026-04-13) | `[VERIFIED: /Users/dev/projects/lattice_stripe/ sibling repo]` | 2026-04-14 |
 | `oban` | `2.21.1` | `[CITED: CLAUDE.md]` | 2026-03-26 |
 | `ecto_sql` | `3.13.5` | `[CITED: CLAUDE.md]` | 2025-11-09 |
 | `nimble_options` | `1.1.1` | `[CITED: CLAUDE.md]` | 2024-05-25 |
@@ -470,8 +470,8 @@ accrue/lib/accrue/
 
 ```elixir
 # Sources:
-#   - /Users/jon/projects/lattice_stripe/lib/lattice_stripe/billing/meter_event.ex
-#   - /Users/jon/projects/lattice_stripe/guides/metering.md
+#   - /Users/dev/projects/lattice_stripe/lib/lattice_stripe/billing/meter_event.ex
+#   - /Users/dev/projects/lattice_stripe/guides/metering.md
 #   - D4-03 locked shape in 04-CONTEXT.md
 defmodule Accrue.Billing do
   @spec report_usage(Accrue.Billing.Customer.t() | String.t(), String.t(), keyword()) ::
@@ -919,16 +919,16 @@ end
 
 ### Primary (HIGH confidence)
 
-- `[VERIFIED: /Users/jon/projects/lattice_stripe/lib/lattice_stripe/billing/meter.ex]` — BILL-13 Meter API shape
-- `[VERIFIED: /Users/jon/projects/lattice_stripe/lib/lattice_stripe/billing/meter_event.ex]` — BILL-13 MeterEvent two-layer idempotency contract
-- `[VERIFIED: /Users/jon/projects/lattice_stripe/lib/lattice_stripe/billing_portal/session.ex]` — CHKT-04/05 FlowData guard + Configuration deferral
-- `[VERIFIED: /Users/jon/projects/lattice_stripe/lib/lattice_stripe/checkout/session.ex]` — CHKT-01/02/03 mode-required pre-network guard
-- `[VERIFIED: /Users/jon/projects/lattice_stripe/lib/lattice_stripe/subscription_schedule.ex]` — BILL-16 two creation modes, cancel vs release semantics
-- `[VERIFIED: /Users/jon/projects/lattice_stripe/guides/metering.md]` — complete `AccrueLike.UsageReporter` recipe, error code table, reconciliation patterns
-- `[VERIFIED: /Users/jon/projects/accrue/accrue/lib/accrue/events/upcaster.ex]` — Phase 1 behaviour scaffold, confirms Phase 4 only adds registry + read path wiring
-- `[VERIFIED: /Users/jon/projects/accrue/.planning/phases/04-advanced-billing-webhook-hardening/04-CONTEXT.md]` — all four D4 locked decisions
-- `[VERIFIED: /Users/jon/projects/accrue/.planning/REQUIREMENTS.md]` — 22 Phase 4 requirements, full traceability
-- `[VERIFIED: /Users/jon/projects/accrue/CLAUDE.md]` — tech stack pins (needs `~> 1.1` bump for lattice_stripe)
+- `[VERIFIED: /Users/dev/projects/lattice_stripe/lib/lattice_stripe/billing/meter.ex]` — BILL-13 Meter API shape
+- `[VERIFIED: /Users/dev/projects/lattice_stripe/lib/lattice_stripe/billing/meter_event.ex]` — BILL-13 MeterEvent two-layer idempotency contract
+- `[VERIFIED: /Users/dev/projects/lattice_stripe/lib/lattice_stripe/billing_portal/session.ex]` — CHKT-04/05 FlowData guard + Configuration deferral
+- `[VERIFIED: /Users/dev/projects/lattice_stripe/lib/lattice_stripe/checkout/session.ex]` — CHKT-01/02/03 mode-required pre-network guard
+- `[VERIFIED: /Users/dev/projects/lattice_stripe/lib/lattice_stripe/subscription_schedule.ex]` — BILL-16 two creation modes, cancel vs release semantics
+- `[VERIFIED: /Users/dev/projects/lattice_stripe/guides/metering.md]` — complete `AccrueLike.UsageReporter` recipe, error code table, reconciliation patterns
+- `[VERIFIED: /Users/dev/projects/accrue/accrue/lib/accrue/events/upcaster.ex]` — Phase 1 behaviour scaffold, confirms Phase 4 only adds registry + read path wiring
+- `[VERIFIED: /Users/dev/projects/accrue/.planning/phases/04-advanced-billing-webhook-hardening/04-CONTEXT.md]` — all four D4 locked decisions
+- `[VERIFIED: /Users/dev/projects/accrue/.planning/REQUIREMENTS.md]` — 22 Phase 4 requirements, full traceability
+- `[VERIFIED: /Users/dev/projects/accrue/CLAUDE.md]` — tech stack pins (needs `~> 1.1` bump for lattice_stripe)
 
 ### Secondary (MEDIUM confidence)
 

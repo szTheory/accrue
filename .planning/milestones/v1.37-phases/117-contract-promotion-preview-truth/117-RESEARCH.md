@@ -245,7 +245,7 @@ scripts/ci/
 
 **Example:**
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/lib/accrue/billing.ex
+# Source: /Users/dev/projects/accrue/accrue/lib/accrue/billing.ex
 def swap_plan(sub, new_price_id, opts) do
   span_billing(:subscription, :swap_plan, sub, opts, fn ->
     SubscriptionActions.swap_plan(sub, new_price_id, opts)
@@ -266,7 +266,7 @@ end
 
 **Example:**
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex
+# Source: /Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex
 with {:ok, current_plan} <- resolve_braintree_plan(existing_item.price_id),
      {:ok, target_plan} <- resolve_braintree_plan(new_price_id),
      :ok <- ensure_braintree_plan_processor(target_plan),
@@ -348,7 +348,7 @@ Verified patterns from official sources and the local codebase:
 
 ### Stripe/Fake preview path stays separate from commit
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex
+# Source: /Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex
 def preview_upcoming_invoice(%Subscription{} = sub, opts) do
   sub = Repo.preload(sub, [:subscription_items, :customer])
   new_price_id = Keyword.get(opts, :new_price_id)
@@ -375,7 +375,7 @@ end
 
 ### Braintree bounded proration translation
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/lib/accrue/processor/braintree.ex
+# Source: /Users/dev/projects/accrue/accrue/lib/accrue/processor/braintree.ex
 defp translate_proration_behavior(:create_prorations), do: {:ok, %{prorate_charges: true}}
 defp translate_proration_behavior(:none), do: {:ok, %{prorate_charges: false}}
 
@@ -392,7 +392,7 @@ end
 
 ### Live Stripe fidelity proof should stay advisory
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/test/live_stripe/proration_fidelity_live_test.exs
+# Source: /Users/dev/projects/accrue/accrue/test/live_stripe/proration_fidelity_live_test.exs
 assert {:ok, %UpcomingInvoice{} = preview} =
          Billing.preview_upcoming_invoice(sub,
            new_price_id: pro_price,

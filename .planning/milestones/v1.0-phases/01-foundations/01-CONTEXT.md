@@ -145,10 +145,10 @@ None — no backlog items matched Phase 1.
 **Downstream agents MUST read these before planning or implementing.**
 
 ### Project governance
-- `/Users/jon/projects/accrue/CLAUDE.md` — project instructions, constraints, full tech stack decisions, conditional-compile pattern, monorepo layout precedent, dialyzer/CI recipes
-- `/Users/jon/projects/accrue/.planning/PROJECT.md` — vision, core value, requirements shape
-- `/Users/jon/projects/accrue/.planning/REQUIREMENTS.md` — requirement IDs FND-01..07, PROC-01/03/07, EVT-01/02/03/07/08, AUTH-01/02, MAIL-01, PDF-01, OBS-01/06, TEST-01, OSS-11 (all within Phase 1 scope)
-- `/Users/jon/projects/accrue/.planning/ROADMAP.md` — Phase 1 goal, success criteria, depends-on
+- `/Users/dev/projects/accrue/CLAUDE.md` — project instructions, constraints, full tech stack decisions, conditional-compile pattern, monorepo layout precedent, dialyzer/CI recipes
+- `/Users/dev/projects/accrue/.planning/PROJECT.md` — vision, core value, requirements shape
+- `/Users/dev/projects/accrue/.planning/REQUIREMENTS.md` — requirement IDs FND-01..07, PROC-01/03/07, EVT-01/02/03/07/08, AUTH-01/02, MAIL-01, PDF-01, OBS-01/06, TEST-01, OSS-11 (all within Phase 1 scope)
+- `/Users/dev/projects/accrue/.planning/ROADMAP.md` — Phase 1 goal, success criteria, depends-on
 
 ### External library docs (fetch via Context7 or webfetch at plan time)
 - `:ex_money` on hex.pm — Kip Cole's Money lib; reference for `Accrue.Money` wrapper (D-01..04)
@@ -181,7 +181,7 @@ None — no backlog items matched Phase 1.
 <code_context>
 ## Existing Code Insights
 
-**Greenfield project** — `/Users/jon/projects/accrue/` currently contains only `CLAUDE.md` and `.planning/`. No source code exists. Phase 1 is the codebase's first commit of Elixir code.
+**Greenfield project** — `/Users/dev/projects/accrue/` currently contains only `CLAUDE.md` and `.planning/`. No source code exists. Phase 1 is the codebase's first commit of Elixir code.
 
 ### Reusable Assets
 - None in-repo. External reusable primitives (all declared as required deps in CLAUDE.md):

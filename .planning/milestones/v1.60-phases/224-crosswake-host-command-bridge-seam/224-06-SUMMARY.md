@@ -38,7 +38,7 @@ coverage:
     requirement: BRDG-01
     verification:
       - kind: integration
-        ref: CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh trusted-frame && full
+        ref: CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh trusted-frame && full
         status: pass
       - kind: other
         ref: jq blocked-status assertion on examples/crosswake_tracer/capability-report.json
@@ -67,8 +67,8 @@ status: complete
 
 - RED: `bash scripts/ci/test_verify_crosswake_host_commands.sh` failed before the runner change because the shell-bearing fixture target returned 0 rather than the required 80.
 - `bash scripts/ci/test_verify_crosswake_host_commands.sh` — pass; approved invocation recorded exactly once, and shell-bearing plus benign substitute targets both reject before a new Swift invocation.
-- `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh trusted-frame` — pass; 14 `HostCommandAdmissionTests` passed.
-- `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full` — pass; 28 Crosswake tests and tracer consumer passed.
+- `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh trusted-frame` — pass; 14 `HostCommandAdmissionTests` passed.
+- `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full` — pass; 28 Crosswake tests and tracer consumer passed.
 - `jq -e '.overall_status == "feasibility_blocked" and all(.capabilities[]; .status == "feasibility_blocked")' examples/crosswake_tracer/capability-report.json` — pass (`true`).
 
 ## Files Created/Modified

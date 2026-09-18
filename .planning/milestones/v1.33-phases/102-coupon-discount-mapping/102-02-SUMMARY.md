@@ -90,7 +90,7 @@ Each task was committed atomically:
 - **Issue:** The subscribe-path TDD slice could not verify end-to-end discount attachment while `Accrue.Processor.Braintree.build_request/1` still stripped discount data.
 - **Fix:** Extended the adapter early to translate resolved local discount mappings into Braintree’s `discounts.add[*].inherited_from_id` shape so the real subscribe seam stayed testable.
 - **Files modified:** `accrue/lib/accrue/processor/braintree.ex`
-- **Verification:** `TMPDIR=/Users/jon/projects/accrue/.tmp/phase102 mix test test/accrue/billing/braintree_discount_mapping_subscribe_test.exs`
+- **Verification:** `TMPDIR=/Users/dev/projects/accrue/.tmp/phase102 mix test test/accrue/billing/braintree_discount_mapping_subscribe_test.exs`
 - **Committed in:** `a74e931`
 
 **2. [Rule 3 - Blocking] Registered the new drift tuple in telemetry parity artifacts**
@@ -98,7 +98,7 @@ Each task was committed atomically:
 - **Issue:** Adding a new ops event without updating the inventory, metrics defaults, and public guide would fail the repo’s telemetry contract gates.
 - **Fix:** Updated `TelemetryOpsInventory`, default metrics, and `guides/telemetry.md` alongside the new emit site.
 - **Files modified:** `accrue/test/support/telemetry_ops_inventory.ex`, `accrue/lib/accrue/telemetry/metrics.ex`, `accrue/guides/telemetry.md`, `accrue/lib/accrue/telemetry/ops.ex`
-- **Verification:** `TMPDIR=/Users/jon/projects/accrue/.tmp/phase102 mix test test/accrue/telemetry/ops_event_contract_test.exs test/accrue/telemetry/metrics_ops_parity_test.exs`
+- **Verification:** `TMPDIR=/Users/dev/projects/accrue/.tmp/phase102 mix test test/accrue/telemetry/ops_event_contract_test.exs test/accrue/telemetry/metrics_ops_parity_test.exs`
 - **Committed in:** `125151a`
 
 ---

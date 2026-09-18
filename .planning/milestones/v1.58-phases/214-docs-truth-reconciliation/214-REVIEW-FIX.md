@@ -1,7 +1,7 @@
 ---
 phase: 214
 fixed_at: 2026-07-31T14:29:17Z
-review_path: /Users/jon/projects/accrue/.planning/phases/214-docs-truth-reconciliation/214-REVIEW.md
+review_path: /Users/dev/projects/accrue/.planning/phases/214-docs-truth-reconciliation/214-REVIEW.md
 iteration: 2
 findings_in_scope: 1
 fixed: 1
@@ -12,7 +12,7 @@ status: all_fixed
 # Phase 214: Code Review Fix Report
 
 **Fixed at:** 2026-07-31T14:29:17Z
-**Source review:** `/Users/jon/projects/accrue/.planning/phases/214-docs-truth-reconciliation/214-REVIEW.md`
+**Source review:** `/Users/dev/projects/accrue/.planning/phases/214-docs-truth-reconciliation/214-REVIEW.md`
 **Iteration:** 2
 
 **Summary:**

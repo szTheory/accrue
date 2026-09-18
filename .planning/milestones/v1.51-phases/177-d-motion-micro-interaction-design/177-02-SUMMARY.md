@@ -91,11 +91,11 @@ None. Plan is CSS/JS presentation only — no data access, auth, or network chan
 
 ### Created/modified files exist
 
-- [x] `/Users/jon/projects/accrue/accrue_admin/assets/css/app.css` — exists
-- [x] `/Users/jon/projects/accrue/accrue_admin/assets/js/hooks/sidebar_collapse.js` — exists
-- [x] `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/components/sidebar.ex` — exists
-- [x] `/Users/jon/projects/accrue/accrue_admin/priv/static/accrue_admin.css` — exists
-- [x] `/Users/jon/projects/accrue/accrue_admin/priv/static/accrue_admin.js` — exists
+- [x] `/Users/dev/projects/accrue/accrue_admin/assets/css/app.css` — exists
+- [x] `/Users/dev/projects/accrue/accrue_admin/assets/js/hooks/sidebar_collapse.js` — exists
+- [x] `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/components/sidebar.ex` — exists
+- [x] `/Users/dev/projects/accrue/accrue_admin/priv/static/accrue_admin.css` — exists
+- [x] `/Users/dev/projects/accrue/accrue_admin/priv/static/accrue_admin.js` — exists
 
 ### Commits exist
 

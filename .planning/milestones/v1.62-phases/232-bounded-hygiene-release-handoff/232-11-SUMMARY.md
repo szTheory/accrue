@@ -35,7 +35,7 @@ key-files:
 key-decisions:
   - "Task 2's body targets branch `integration/v1.62-candidate-recut` and head SHA `c1397fe9127a9b4b2b1d3a0758d57879b14f4604`, per the dispatch's corrected facts (232-09-SUMMARY.md's carry-forward): the originally-planned `integration/v1.62-candidate` branch still points at the OLD tip `f524f2a6` and is not the re-cut. Both values are deliberately confined to exactly one line each (the '**Head branch:**' line and the '**Head SHA:**' line under '## Provenance') so the maintainer's already-decided fresh re-cut, after phase 232's own closing plan lands, is a two-line edit rather than a body-wide search-and-replace. The same SHA also appears once more inside the rollback command (the `git revert` argument itself), which is unavoidable -- reverting a specific commit requires naming that commit -- and is called out explicitly here as the third line to re-point."
   - "During Task 2's own drafting, discovered (not fixed -- out of this plan's Task 1/2 scope) that `node scripts/ci/verify_hygiene_dispositions.mjs --require-completeness --require-soundness --require-determinism` now fails: `FAIL: 1 live item(s) have no corresponding row: remote_branch/origin/integration/v1.62-candidate-recut`. Plan 232-09 created this remote branch after 232-08's hygiene-dispositions record was captured (candidate_object 7e4fbce1), so the committed classification predates the branch that now exists live. This is reported plainly in the PR body's own risk section (as a real, currently-red, falsifiable claim, exactly matching the plan's 'anything still red' instruction) rather than silently worked around or omitted."
-  - "The adopter-named remote branch (`origin/fix/getfluent-1.5.1`) is referred to only generically in the PR body ('one adopter-named remote branch and its origin peer') -- the literal name was in an early draft, caught by this plan's own `grep -c getfluent` leak check, and removed before the final commit. It is never spelled out in the committed, eventually-public body."
+  - "The adopter-named remote branch (`origin/fix/adopter-app-1.5.1`) is referred to only generically in the PR body ('one adopter-named remote branch and its origin peer') -- the literal name was in an early draft, caught by this plan's own `grep -c adopter-app` leak check, and removed before the final commit. It is never spelled out in the committed, eventually-public body."
 
 requirements-completed: []
 
@@ -65,7 +65,7 @@ coverage:
         ref: "grep -nE '/Users/|/home/|\\$HOME' .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md; test $? -eq 1 -> no match (leak sweep clean)"
         status: pass
       - kind: other
-        ref: "grep -c 'getfluent' .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md -> 0"
+        ref: "grep -c 'adopter-app' .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md -> 0"
         status: pass
     human_judgment: false
   - id: D3
@@ -126,7 +126,7 @@ Wrote the pull-request body against the new contract, iterating until all three 
 - **Every claim is falsifiable**: each substantive bullet pairs a one-line assertion with a `Verify:`/`Reproduce:`/`Re-verify:` continuation line carrying a real, re-runnable command or a permalink -- the contract's falsifiability check passes with zero offending lines.
 - **Density**: 50 lines, inside the declared 50-80 band.
 - **Scope**: every referenced change maps to `REL-04`, `REL-05`, `HYG-01`, `HYG-02`, or `HYG-03`, or to a numbered row in `232-CLEANUP-FINDINGS.json`; nothing else is referenced.
-- **Leak and adopter-name sweeps both clean**: `grep -nE '/Users/|/home/|\$HOME'` matches nothing; `grep -c getfluent` returns `0`.
+- **Leak and adopter-name sweeps both clean**: `grep -nE '/Users/|/home/|\$HOME'` matches nothing; `grep -c adopter-app` returns `0`.
 
 ## Requirement-to-Change Mapping (D-59 Scope rule)
 
@@ -166,10 +166,10 @@ See `key-decisions` in frontmatter.
 
 **1. [Rule 3 - Blocking, caught before commit] Draft PR body named the adopter branch literally, tripping this plan's own leak check**
 - **Found during:** Task 2, first full run of the plan's own `<verify>` block.
-- **Issue:** An early draft of the "Deliberately not in this cleanup" bullet spelled out `origin/fix/getfluent-1.5.1` by name (copied from `232-HYGIENE-DISPOSITIONS.md`'s own committed row, which already names it in a non-public-facing evidence artifact). `grep -c getfluent .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md` returned `1`, tripping the exact adopter-name leak check the plan's own `<verify>` block runs.
+- **Issue:** An early draft of the "Deliberately not in this cleanup" bullet spelled out `origin/fix/adopter-app-1.5.1` by name (copied from `232-HYGIENE-DISPOSITIONS.md`'s own committed row, which already names it in a non-public-facing evidence artifact). `grep -c adopter-app .planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md` returned `1`, tripping the exact adopter-name leak check the plan's own `<verify>` block runs.
 - **Fix:** Rewrote the bullet to refer to it generically ("one adopter-named remote branch and its origin peer keep their current names"), preserving the factual claim (rename deferred to a future capsule mint, per `232-CONTEXT.md`'s deferred list) without publishing the name.
 - **Files modified:** `.planning/phases/232-bounded-hygiene-release-handoff/232-INTEGRATION-PR.md`.
-- **Verification:** Re-ran `grep -c getfluent` -> `0`. Full `<verify>` block re-run clean afterward.
+- **Verification:** Re-ran `grep -c adopter-app` -> `0`. Full `<verify>` block re-run clean afterward.
 - **Committed in:** `14a212c8` (caught and fixed before the commit; no separate "leaked" commit exists).
 
 **2. [Not fixed in this dispatch -- out of its Task 1/2 scope; reported honestly in the PR body, then closed by the orchestrator in `7c3a2d3a`] The committed hygiene-dispositions record did not cover the remote branch plan 232-09 created**

@@ -19,10 +19,10 @@ overrides_applied: 0
 
 | #   | Truth   | Status     | Evidence       |
 | --- | ------- | ---------- | -------------- |
-| 1 | A test in `examples/accrue_host` exercises full path: subscribe metered price -> trigger Simulate API Call -> assert flash + exactly one `MeterEvent` row. | ✓ VERIFIED | [subscription_live_test.exs](/Users/jon/projects/accrue/examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs#L35) subscribes with `Plans.ids().metered`, clicks button at line 46, asserts flash at line 49, asserts exactly one row at line 51. |
-| 2 | Inline code comment explains `value:` must be used and `quantity:` is not the meter-event option. | ✓ VERIFIED | [subscription_live.ex](/Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex#L193) comment explicitly states `value:` vs `quantity:` immediately above usage call. |
-| 3 | Proof remains on host adopter surface (`/app/billing`) and is not replaced by a core-only or parallel proof. | ✓ VERIFIED | [subscription_live_test.exs](/Users/jon/projects/accrue/examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs#L40) mounts `live(~p"/app/billing")`; no alternate test surface added in phase files. |
-| 4 | Durable row-shape assertion verifies `event_name == "api_calls"` and `value == 1`. | ✓ VERIFIED | [subscription_live_test.exs](/Users/jon/projects/accrue/examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs#L53) and [subscription_live_test.exs](/Users/jon/projects/accrue/examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs#L54). |
+| 1 | A test in `examples/accrue_host` exercises full path: subscribe metered price -> trigger Simulate API Call -> assert flash + exactly one `MeterEvent` row. | ✓ VERIFIED | [subscription_live_test.exs](/Users/dev/projects/accrue/examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs#L35) subscribes with `Plans.ids().metered`, clicks button at line 46, asserts flash at line 49, asserts exactly one row at line 51. |
+| 2 | Inline code comment explains `value:` must be used and `quantity:` is not the meter-event option. | ✓ VERIFIED | [subscription_live.ex](/Users/dev/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex#L193) comment explicitly states `value:` vs `quantity:` immediately above usage call. |
+| 3 | Proof remains on host adopter surface (`/app/billing`) and is not replaced by a core-only or parallel proof. | ✓ VERIFIED | [subscription_live_test.exs](/Users/dev/projects/accrue/examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs#L40) mounts `live(~p"/app/billing")`; no alternate test surface added in phase files. |
+| 4 | Durable row-shape assertion verifies `event_name == "api_calls"` and `value == 1`. | ✓ VERIFIED | [subscription_live_test.exs](/Users/dev/projects/accrue/examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs#L53) and [subscription_live_test.exs](/Users/dev/projects/accrue/examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs#L54). |
 
 **Score:** 4/4 truths verified
 
@@ -37,8 +37,8 @@ overrides_applied: 0
 
 | From | To  | Via | Status | Details |
 | ---- | --- | --- | ------ | ------- |
-| `subscription_live_test.exs` | `subscription_live.ex` | LiveView click on `Simulate API Call` invokes `handle_event("simulate_api_call", ...)` | ✓ WIRED | Test click at [subscription_live_test.exs](/Users/jon/projects/accrue/examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs#L46) maps to button event [subscription_live.ex](/Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex#L362) and handler [subscription_live.ex](/Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex#L192). |
-| `subscription_live.ex` | `billing.ex` | `Billing.report_usage_for_scope/3` host facade path | ✓ WIRED | Usage call at [subscription_live.ex](/Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex#L194) resolves to facade definition at [billing.ex](/Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host/billing.ex#L159). |
+| `subscription_live_test.exs` | `subscription_live.ex` | LiveView click on `Simulate API Call` invokes `handle_event("simulate_api_call", ...)` | ✓ WIRED | Test click at [subscription_live_test.exs](/Users/dev/projects/accrue/examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs#L46) maps to button event [subscription_live.ex](/Users/dev/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex#L362) and handler [subscription_live.ex](/Users/dev/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex#L192). |
+| `subscription_live.ex` | `billing.ex` | `Billing.report_usage_for_scope/3` host facade path | ✓ WIRED | Usage call at [subscription_live.ex](/Users/dev/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex#L194) resolves to facade definition at [billing.ex](/Users/dev/projects/accrue/examples/accrue_host/lib/accrue_host/billing.ex#L159). |
 
 ### Data-Flow Trace (Level 4)
 
@@ -65,7 +65,7 @@ overrides_applied: 0
 
 | Requirement | Source Plan | Description | Status | Evidence |
 | ----------- | ---------- | ----------- | ------ | -------- |
-| PRF-02 | 157-01-PLAN.md | Full-path metered usage adopter proof in `examples/accrue_host` with metered subscription, simulated usage event, flash + one `MeterEvent`, plus inline `value:` vs `quantity:` comment | ✓ SATISFIED | Test and source evidence above; requirement text found in [REQUIREMENTS.md](/Users/jon/projects/accrue/.planning/REQUIREMENTS.md#L29). |
+| PRF-02 | 157-01-PLAN.md | Full-path metered usage adopter proof in `examples/accrue_host` with metered subscription, simulated usage event, flash + one `MeterEvent`, plus inline `value:` vs `quantity:` comment | ✓ SATISFIED | Test and source evidence above; requirement text found in [REQUIREMENTS.md](/Users/dev/projects/accrue/.planning/REQUIREMENTS.md#L29). |
 
 ### Anti-Patterns Found
 

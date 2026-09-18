@@ -180,7 +180,7 @@ This phase does NOT: open the integration pull request, write the reviewer risk 
 - Pinning `commit-search-depth` in the release-please workflow (~492 commits against a default of 500, almost no headroom) — Phase 232.
 - Editorial polish of the 153-entry public CHANGELOG dominated by internal GSD/CI tooling commits — Phase 232, via `RELEASING.md`'s "human polish on the open release PR" clause.
 - `.planning/v1.61-v1.61-MILESTONE-AUDIT.md`, an apparent double-prefixed duplicate — recorded by Phase 230, acted on in Phase 232.
-- Renaming the two adopter-named refs (`fix/getfluent-1.5.1` and its origin peer) — maintainer-decided as fail-forward; free only at a capsule mint.
+- Renaming the two adopter-named refs (`fix/adopter-app-1.5.1` and its origin peer) — maintainer-decided as fail-forward; free only at a capsule mint.
 - Package publication — outside v1.62 entirely.
 
 </deferred>

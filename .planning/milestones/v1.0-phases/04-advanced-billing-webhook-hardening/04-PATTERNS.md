@@ -14,30 +14,30 @@ This document maps every new/modified file in Phase 4 to its closest existing an
 
 | New File | Role | Data Flow | Closest Analog | Match |
 |---|---|---|---|---|
-| `accrue/lib/accrue/billing/meter_event.ex` | schema | CRUD (outbox) | `/Users/jon/projects/accrue/accrue/lib/accrue/billing/coupon.ex` | role-match (thin projection w/ `data :map`) |
-| `accrue/lib/accrue/billing/subscription_schedule.ex` | schema | webhook projection | `/Users/jon/projects/accrue/accrue/lib/accrue/billing/invoice.ex` | role-match (dual changeset — user + `force_*`) |
-| `accrue/lib/accrue/billing/promotion_code.ex` | schema | CRUD (passthrough) | `/Users/jon/projects/accrue/accrue/lib/accrue/billing/coupon.ex` | exact (Phase 3 D3-16 thin projection shape) |
+| `accrue/lib/accrue/billing/meter_event.ex` | schema | CRUD (outbox) | `/Users/dev/projects/accrue/accrue/lib/accrue/billing/coupon.ex` | role-match (thin projection w/ `data :map`) |
+| `accrue/lib/accrue/billing/subscription_schedule.ex` | schema | webhook projection | `/Users/dev/projects/accrue/accrue/lib/accrue/billing/invoice.ex` | role-match (dual changeset — user + `force_*`) |
+| `accrue/lib/accrue/billing/promotion_code.ex` | schema | CRUD (passthrough) | `/Users/dev/projects/accrue/accrue/lib/accrue/billing/coupon.ex` | exact (Phase 3 D3-16 thin projection shape) |
 
 ### New / modified contexts (write surface)
 
 | File | Role | Data Flow | Closest Analog | Match |
 |---|---|---|---|---|
-| `accrue/lib/accrue/billing/meter_event_actions.ex` (NEW) — `report_usage/3` | context (Repo.transact + commit-then-Stripe) | request-response | `/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` (`subscribe/3` lines 68–102) | exact |
-| `accrue/lib/accrue/billing/dunning.ex` (NEW) — pure policy | service (no side effects) | transform | `/Users/jon/projects/accrue/accrue/lib/accrue/billing/query.ex` | role-match (pure, property-testable) |
+| `accrue/lib/accrue/billing/meter_event_actions.ex` (NEW) — `report_usage/3` | context (Repo.transact + commit-then-Stripe) | request-response | `/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` (`subscribe/3` lines 68–102) | exact |
+| `accrue/lib/accrue/billing/dunning.ex` (NEW) — pure policy | service (no side effects) | transform | `/Users/dev/projects/accrue/accrue/lib/accrue/billing/query.ex` | role-match (pure, property-testable) |
 | `accrue/lib/accrue/billing/subscription_actions.ex` — extend `pause/2`/`unpause/2`/`resume/2` with `pause_behavior` | context | request-response | **self** — `pause/2` lines 491–537 already implements the idiom | exact (in-file extension) |
 | `accrue/lib/accrue/billing/subscription_items.ex` (NEW) — `add_item/3`, `remove_item/2`, `update_item_quantity/3` (BILL-12) | context | CRUD | `subscription_actions.ex` (`update_quantity/3` lines 302–338) | exact |
 | `accrue/lib/accrue/billing/coupon_actions.ex` (NEW) — `Coupon.create/2`, `apply_promotion_code/2`, `comp_subscription/2` (BILL-14/27) | context | CRUD | `subscription_actions.ex` (`subscribe/3`) + `coupon.ex` schema | exact (pattern cocktail) |
 | `accrue/lib/accrue/billing/subscription_schedule_actions.ex` (NEW) (BILL-16) | context | CRUD | `subscription_actions.ex` (`subscribe/3`) | exact |
-| `accrue/lib/accrue/checkout.ex` (NEW) — `Accrue.Checkout` context | context | CRUD + reconcile | `/Users/jon/projects/accrue/accrue/lib/accrue/billing.ex` (facade) + `subscription_actions.ex` | role-match (no existing Checkout context) |
+| `accrue/lib/accrue/checkout.ex` (NEW) — `Accrue.Checkout` context | context | CRUD + reconcile | `/Users/dev/projects/accrue/accrue/lib/accrue/billing.ex` (facade) + `subscription_actions.ex` | role-match (no existing Checkout context) |
 | `accrue/lib/accrue/checkout/session.ex` (NEW) — schema + create/retrieve | schema + context | CRUD | `subscription.ex` + `subscription_actions.ex` | role-match |
-| `accrue/lib/accrue/checkout/line_item.ex` (NEW) — helper module | utility | transform | `/Users/jon/projects/accrue/accrue/lib/accrue/billing/metadata.ex` | role-match (tiny stateless helper) |
+| `accrue/lib/accrue/checkout/line_item.ex` (NEW) — helper module | utility | transform | `/Users/dev/projects/accrue/accrue/lib/accrue/billing/metadata.ex` | role-match (tiny stateless helper) |
 | `accrue/lib/accrue/billing_portal.ex` (NEW) + `billing_portal/session.ex` (NEW) | context + struct | request-response | `subscription_actions.ex` (tiny commit-then-Stripe path) | role-match |
 
 ### New Oban workers
 
 | File | Role | Data Flow | Closest Analog | Match |
 |---|---|---|---|---|
-| `accrue/lib/accrue/billing/meter_events/reconciler_job.ex` (NEW) | worker (cron) | batch reconcile | `/Users/jon/projects/accrue/accrue/lib/accrue/jobs/detect_expiring_cards.ex` | exact |
+| `accrue/lib/accrue/billing/meter_events/reconciler_job.ex` (NEW) | worker (cron) | batch reconcile | `/Users/dev/projects/accrue/accrue/lib/accrue/jobs/detect_expiring_cards.ex` | exact |
 | `accrue/lib/accrue/billing/dunning/sweeper_job.ex` (NEW) | worker (cron) | batch reconcile | `accrue/lib/accrue/jobs/detect_expiring_cards.ex` + `accrue/lib/accrue/webhook/pruner.ex` | exact |
 | `accrue/lib/accrue/webhooks/pruner.ex` — already exists at `accrue/lib/accrue/webhook/pruner.ex` | worker (cron) | delete-by-retention | **self** (finalize shape per D4-04) | exact (in-file extension) |
 
@@ -64,7 +64,7 @@ This document maps every new/modified file in Phase 4 to its closest existing an
 | File | Role | Data Flow | Closest Analog | Match |
 |---|---|---|---|---|
 | `accrue/lib/accrue/events.ex` — add `timeline_for/2`, `state_as_of/3`, `bucket_by/3` | context (read) | query | **self** — existing `record/1`/`record_multi/3` shape | exact (in-file extension) |
-| `accrue/lib/accrue/events/upcaster_registry.ex` (NEW) | registry module | transform | `/Users/jon/projects/accrue/accrue/lib/accrue/events/upcaster.ex` (behaviour, 28 lines) | role-match (extends the scaffold) |
+| `accrue/lib/accrue/events/upcaster_registry.ex` (NEW) | registry module | transform | `/Users/dev/projects/accrue/accrue/lib/accrue/events/upcaster.ex` (behaviour, 28 lines) | role-match (extends the scaffold) |
 | `accrue/lib/accrue/events/upcasters/v1_to_v2.ex` (example stub) | upcaster impl | transform | `accrue/lib/accrue/events/upcaster.ex` behaviour contract | exact |
 
 ### Webhook plug: multi-endpoint (WH-13)
@@ -78,7 +78,7 @@ This document maps every new/modified file in Phase 4 to its closest existing an
 
 | File | Role | Data Flow | Closest Analog | Match |
 |---|---|---|---|---|
-| `accrue/lib/accrue/telemetry/ops.ex` (NEW) | telemetry helper | event-driven | `/Users/jon/projects/accrue/accrue/lib/accrue/telemetry.ex` | role-match |
+| `accrue/lib/accrue/telemetry/ops.ex` (NEW) | telemetry helper | event-driven | `/Users/dev/projects/accrue/accrue/lib/accrue/telemetry.ex` | role-match |
 | `accrue/lib/accrue/telemetry/metrics.ex` (NEW, optional) | telemetry helper | N/A | same | role-match |
 | `accrue/guides/telemetry.md` (NEW) | docs | N/A | — | n/a |
 
@@ -108,7 +108,7 @@ This document maps every new/modified file in Phase 4 to its closest existing an
 
 ### 1. `Accrue.Billing.MeterEventActions.report_usage/3` — commit-then-Stripe outbox
 
-**Analog:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex`
+**Analog:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex`
 
 **Imports block** (lines 16–31):
 ```elixir
@@ -198,7 +198,7 @@ end
 
 ### 2. `Accrue.Billing.MeterEvent` schema — thin passthrough projection
 
-**Analog:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/coupon.ex` (full 61 lines)
+**Analog:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/coupon.ex` (full 61 lines)
 
 **Schema pattern** (analog lines 17–39):
 ```elixir
@@ -237,7 +237,7 @@ Apply verbatim to `MeterEvent`, `PromotionCode`, `SubscriptionSchedule` — with
 
 ### 3. `Accrue.Billing.SubscriptionSchedule` — dual changeset (user + webhook-force path)
 
-**Analog:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/invoice.ex` (full 150 lines)
+**Analog:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/invoice.ex` (full 150 lines)
 
 **Dual-changeset D3-17 pattern** (analog lines 99–128):
 ```elixir
@@ -270,7 +270,7 @@ Also reuse for the `past_due_since` / `dunning_sweep_attempted_at` columns on `S
 
 ### 4. `Accrue.Webhook.DefaultHandler` extension — `paused`, `resumed`, `subscription_schedule.*`, `checkout.session.completed`
 
-**Analog:** `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex`
+**Analog:** `/Users/dev/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex`
 
 **Dispatch clause shape** (lines 137–165):
 ```elixir
@@ -339,7 +339,7 @@ end
 
 ### 5. `Accrue.Billing.Dunning.SweeperJob` + `Accrue.Billing.MeterEvents.ReconcilerJob` — Oban cron workers
 
-**Analog:** `/Users/jon/projects/accrue/accrue/lib/accrue/jobs/detect_expiring_cards.ex` (full 110 lines)
+**Analog:** `/Users/dev/projects/accrue/accrue/lib/accrue/jobs/detect_expiring_cards.ex` (full 110 lines)
 
 **Worker shape** (analog lines 25–57):
 ```elixir
@@ -394,7 +394,7 @@ end
 
 ### 6. `Accrue.Webhook.Pruner` — retention sweeper (existing; finalize per D4-04)
 
-**Analog:** `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/pruner.ex` (full 58 lines)
+**Analog:** `/Users/dev/projects/accrue/accrue/lib/accrue/webhook/pruner.ex` (full 58 lines)
 
 ```elixir
 use Oban.Worker, queue: :accrue_maintenance
@@ -498,7 +498,7 @@ Apply verbatim to `requeue!/1`, `requeue_where!/2`.
 
 ### 9. `Accrue.Events` read API extension — `timeline_for/2`, `state_as_of/3`, `bucket_by/3`
 
-**Analog (same file):** `/Users/jon/projects/accrue/accrue/lib/accrue/events.ex`
+**Analog (same file):** `/Users/dev/projects/accrue/accrue/lib/accrue/events.ex`
 
 **`record/1` query helper shape** (lines 192–199):
 ```elixir
@@ -527,7 +527,7 @@ from e in Event,
 
 ### 10. `Accrue.Events.UpcasterRegistry` + upcaster impls
 
-**Analog:** `/Users/jon/projects/accrue/accrue/lib/accrue/events/upcaster.ex` (full 28 lines)
+**Analog:** `/Users/dev/projects/accrue/accrue/lib/accrue/events/upcaster.ex` (full 28 lines)
 
 **Behaviour contract** (lines 27–28):
 ```elixir
@@ -555,7 +555,7 @@ Read-path dispatch inside `Accrue.Events.Schemas.for/1` (already exists per rese
 
 ### 11. `Accrue.Processor.Fake` extensions
 
-**Analog (self):** `/Users/jon/projects/accrue/accrue/lib/accrue/processor/fake.ex` (1355 lines, deterministic id prefixes, GenServer + State module).
+**Analog (self):** `/Users/dev/projects/accrue/accrue/lib/accrue/processor/fake.ex` (1355 lines, deterministic id prefixes, GenServer + State module).
 
 **ID prefix pattern** (lines 70–79):
 ```elixir
@@ -575,7 +575,7 @@ Phase 4 additions: `@meter_event_prefix "mev_fake_"`, `@checkout_session_prefix 
 
 ### 12. `Accrue.Test.StripeFixtures` extensions
 
-**Analog (self):** `/Users/jon/projects/accrue/accrue/test/support/stripe_fixtures.ex` (`subscription_created/1` lines 16–57)
+**Analog (self):** `/Users/dev/projects/accrue/accrue/test/support/stripe_fixtures.ex` (`subscription_created/1` lines 16–57)
 
 **Fixture shape (string-keyed, Unix seconds, `"object"` discriminator, `deep_merge(base, overrides)`):**
 ```elixir
@@ -602,7 +602,7 @@ Phase 4 adds: `meter_event_created/1`, `meter_event_error_report_triggered/1`, `
 
 ### 13. `Accrue.Config` NimbleOptions extension
 
-**Analog (self):** `/Users/jon/projects/accrue/accrue/lib/accrue/config.ex` (lines 1–120)
+**Analog (self):** `/Users/dev/projects/accrue/accrue/lib/accrue/config.ex` (lines 1–120)
 
 **Schema entry shape** (lines 9–18):
 ```elixir
@@ -636,7 +636,7 @@ dlq_replay_max_rows: [type: :pos_integer, default: 10_000, ...]
 
 ### 14. `Accrue.Checkout` + `Accrue.BillingPortal` contexts
 
-**Analog:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` (mixed: commit-then-Stripe + dual bang/tuple + NimbleOptions)
+**Analog:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` (mixed: commit-then-Stripe + dual bang/tuple + NimbleOptions)
 
 These contexts do NOT mutate local state on create (Stripe hosts the flow); they only record the session row + call `Processor.checkout_session_create/2` / `portal_session_create/2`. The `reconcile/1` path is the mirror of `subscribe/3`'s `Repo.transact` — accepts a `checkout_session_id`, calls `Processor.fetch(:checkout_session, id)`, projects into local rows via `force_status_changeset/2`.
 
@@ -648,61 +648,61 @@ These contexts do NOT mutate local state on create (Stripe hosts the flow); they
 
 ### A. `Repo.transact` + commit-then-Stripe atomicity (D2-09, D3-18)
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` lines 86–102
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` lines 86–102
 
 **Apply to:** every new write-surface context function that touches both local DB state and Stripe — BUT: for `report_usage/3` (D4-03) the Stripe call lives OUTSIDE `Repo.transact` (outbox pattern, step 2 of 3). This is the key deviation: all prior Phase 3 actions call Stripe *inside* transact; Phase 4 `report_usage/3` flips this because the row MUST be durable before the Stripe call.
 
 ### B. `Events.record/1` + `Events.record_multi/2` (EVT-04)
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/events.ex` lines 80–127
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/events.ex` lines 80–127
 
 **Apply to:** every write path. Use `record/1` inside `Repo.transact/2` closures, `record_multi/3` inside `Ecto.Multi` pipelines. Pass `idempotency_key:` when replays must collapse (notably DLQ `requeue/1`).
 
 ### C. Dual bang/tuple API (D-05)
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` (every public function)
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` (every public function)
 
 **Apply to:** every new public function in `Accrue.Billing.*`, `Accrue.Checkout.*`, `Accrue.BillingPortal.*`, `Accrue.Webhooks.DLQ.*`.
 
 ### D. `force_status_changeset/2` on webhook path vs `changeset/2` on user path (D3-17)
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/invoice.ex` lines 99–128
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/invoice.ex` lines 99–128
 
 **Apply to:** any schema that has user-settable status transitions — in Phase 4 that's `SubscriptionSchedule`, and the new `past_due_since`/`dunning_sweep_attempted_at` columns on `Subscription` (use `force_status_changeset/2` from the webhook handler).
 
 ### E. NimbleOptions input validation
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` lines 136–244 (`@swap_schema` + `validate_swap_opts!`)
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` lines 136–244 (`@swap_schema` + `validate_swap_opts!`)
 
 **Apply to:** every context function that takes `opts :: keyword()` — including `report_usage/3`, `add_item/3`, `subscribe_via_schedule/3`, `Checkout.Session.create/2`, `BillingPortal.Session.create/2`, `DLQ.requeue_where/2`.
 
 ### F. Oban worker shape with `Accrue.Oban.Middleware.put(job)` for operation_id propagation
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/jobs/detect_expiring_cards.ex` lines 25, 32–38
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/jobs/detect_expiring_cards.ex` lines 25, 32–38
 
 **Apply to:** `MeterEvents.ReconcilerJob`, `Dunning.SweeperJob`, and the existing `Webhook.Pruner` (add the middleware call if missing).
 
 ### G. Telemetry namespace split — `[:accrue, :*]` firehose vs `[:accrue, :ops, :*]` ops-grade (OBS-03)
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/dispatch_worker.ex` line 85 (firehose), + research D4-02/D4-04 event names.
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/webhook/dispatch_worker.ex` line 85 (firehose), + research D4-02/D4-04 event names.
 
 **Apply to:** all new telemetry emits — anything SRE-actionable goes under `:ops`, everything else stays in the firehose namespace. Fire inside the same `Repo.transact/2` as the state write (D4-02 coherence).
 
 ### H. Orphan `:deferred` tolerance for webhook-first-for-unknown-customer (CR-03)
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex` lines 203–225, 308–327, 401–428
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex` lines 203–225, 308–327, 401–428
 
 **Apply to:** any new webhook reducer (subscription_schedule, checkout.session.completed) that may arrive before the parent customer row exists locally.
 
 ### I. String-keyed Stripe payload handling — `SubscriptionProjection.get/2` dual-key helper
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription.ex` lines 182–196 (`fetch_key/2`) + `default_handler.ex` lines 252–279 (price + price_id extraction)
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription.ex` lines 182–196 (`fetch_key/2`) + `default_handler.ex` lines 252–279 (price + price_id extraction)
 
 **Apply to:** every new projection module (`MeterEventProjection`, `SubscriptionScheduleProjection`, `CheckoutSessionProjection`). Fake returns atom-keyed; Stripe returns string-keyed. Normalize at read time, never in the caller.
 
 ### J. Stringify-for-jsonb (`data` column hygiene)
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` lines 719–727
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` lines 719–727
 
 ```elixir
 defp stringify(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
@@ -718,7 +718,7 @@ defp stringify(other), do: other
 
 ### K. `WR-09` — never use bang variants of `Repo.insert!/update!` inside a `Repo.transact` with-chain
 
-**Source:** `/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` lines 676–714 (`upsert_items/2` using `reduce_while` + non-bang)
+**Source:** `/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex` lines 676–714 (`upsert_items/2` using `reduce_while` + non-bang)
 
 **Apply to:** every list-of-children upsert in Phase 4 (promotion codes, schedule phases, checkout line items). Bang variants raise `Ecto.InvalidChangesetError` which *escapes* the enclosing with-chain and rolls back transparently — non-bang + `reduce_while` is the locked idiom.
 
@@ -738,13 +738,13 @@ For both Mix tasks the planner should reference the Hex `Mix.Task` docs: `use Mi
 ## Metadata
 
 **Analog search scope:**
-- `/Users/jon/projects/accrue/accrue/lib/accrue/billing/`
-- `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/`
-- `/Users/jon/projects/accrue/accrue/lib/accrue/events/` + `events.ex`
-- `/Users/jon/projects/accrue/accrue/lib/accrue/processor/` + `processor.ex`
-- `/Users/jon/projects/accrue/accrue/lib/accrue/jobs/`
-- `/Users/jon/projects/accrue/accrue/lib/accrue/config.ex`
-- `/Users/jon/projects/accrue/accrue/test/support/`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/billing/`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/webhook/`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/events/` + `events.ex`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/processor/` + `processor.ex`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/jobs/`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/config.ex`
+- `/Users/dev/projects/accrue/accrue/test/support/`
 
 **Files scanned in detail:**
 - `billing/subscription.ex` (197 lines — schema + predicates)

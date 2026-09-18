@@ -6,7 +6,7 @@
 
 ## User Constraints (from CONTEXT.md)
 
-No phase-specific `11-CONTEXT.md` exists yet. Planning is constrained by Phase 11 in [`ROADMAP.md`](/Users/jon/projects/accrue/.planning/ROADMAP.md), the milestone requirements in [`REQUIREMENTS.md`](/Users/jon/projects/accrue/.planning/REQUIREMENTS.md), and the completed Phase 10 host-app harness artifacts. [VERIFIED: repo grep]
+No phase-specific `11-CONTEXT.md` exists yet. Planning is constrained by Phase 11 in [`ROADMAP.md`](/Users/dev/projects/accrue/.planning/ROADMAP.md), the milestone requirements in [`REQUIREMENTS.md`](/Users/dev/projects/accrue/.planning/REQUIREMENTS.md), and the completed Phase 10 host-app harness artifacts. [VERIFIED: repo grep]
 
 <phase_requirements>
 ## Phase Requirements
@@ -23,7 +23,7 @@ No phase-specific `11-CONTEXT.md` exists yet. Planning is constrained by Phase 1
 
 ## Summary
 
-Phase 11 is not starting from zero. The repo already has three important building blocks: a strict package release gate in [`ci.yml`](/Users/jon/projects/accrue/.github/workflows/ci.yml), a host-app proof harness in [`scripts/ci/accrue_host_uat.sh`](/Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh), and a proven Playwright artifact pattern in [`accrue_admin_browser.yml`](/Users/jon/projects/accrue/.github/workflows/accrue_admin_browser.yml) plus [`playwright.config.js`](/Users/jon/projects/accrue/accrue_admin/playwright.config.js). [VERIFIED: repo grep]
+Phase 11 is not starting from zero. The repo already has three important building blocks: a strict package release gate in [`ci.yml`](/Users/dev/projects/accrue/.github/workflows/ci.yml), a host-app proof harness in [`scripts/ci/accrue_host_uat.sh`](/Users/dev/projects/accrue/scripts/ci/accrue_host_uat.sh), and a proven Playwright artifact pattern in [`accrue_admin_browser.yml`](/Users/dev/projects/accrue/.github/workflows/accrue_admin_browser.yml) plus [`playwright.config.js`](/Users/dev/projects/accrue/accrue_admin/playwright.config.js). [VERIFIED: repo grep]
 
 The main planning decision is orchestration. Right now the release-facing checks are split across multiple workflows, and the host browser path still uses a custom Node smoke script instead of Playwright Test. That is enough for local proof, but it does not give the ordered gate, failure-layer isolation, or first-class traces/screenshots the roadmap now requires. [VERIFIED: repo grep]
 
@@ -285,7 +285,7 @@ jobs:
 
 ### Current Host Drift Boundary
 ```bash
-# Source: /Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh
+# Source: /Users/dev/projects/accrue/scripts/ci/accrue_host_uat.sh
 mix accrue.install --yes \
   --billable AccrueHost.Accounts.User \
   --billing-context AccrueHost.Billing \
@@ -300,7 +300,7 @@ git -C "$repo_root" diff --quiet -- \
 
 ### Existing Playwright Artifact Pattern Worth Reusing
 ```javascript
-// Source: /Users/jon/projects/accrue/accrue_admin/playwright.config.js
+// Source: /Users/dev/projects/accrue/accrue_admin/playwright.config.js
 module.exports = defineConfig({
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : [["list"]],
   use: {
@@ -324,7 +324,7 @@ module.exports = defineConfig({
 | Manual post-release annotation review | Machine-readable workflow jobs/check run APIs | Current GitHub REST docs expose workflow jobs and check runs, including annotations. [CITED: https://docs.github.com/en/rest/actions/workflow-jobs][CITED: https://docs.github.com/en/rest/checks/runs?apiVersion=2022-11-28] | Phase 11 can automate the sweep if direct failures are not sufficient. |
 
 **Deprecated/outdated:**
-- Keeping the host browser check only as [`accrue_host_browser_smoke.cjs`](/Users/jon/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs) is outdated for a mandatory CI artifact gate because it lacks first-class retained traces/screenshots/reports. [VERIFIED: repo grep][CITED: https://playwright.dev/docs/ci-intro]
+- Keeping the host browser check only as [`accrue_host_browser_smoke.cjs`](/Users/dev/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs) is outdated for a mandatory CI artifact gate because it lacks first-class retained traces/screenshots/reports. [VERIFIED: repo grep][CITED: https://playwright.dev/docs/ci-intro]
 
 ## Assumptions Log
 
@@ -366,7 +366,7 @@ module.exports = defineConfig({
 | Property | Value |
 |----------|-------|
 | Framework | ExUnit for packages and host app; Playwright Test for existing admin browser UAT. [VERIFIED: repo grep] |
-| Config file | [`accrue_admin/playwright.config.js`](/Users/jon/projects/accrue/accrue_admin/playwright.config.js); no host Playwright config yet. [VERIFIED: repo grep] |
+| Config file | [`accrue_admin/playwright.config.js`](/Users/dev/projects/accrue/accrue_admin/playwright.config.js); no host Playwright config yet. [VERIFIED: repo grep] |
 | Quick run command | `bash scripts/ci/accrue_host_uat.sh` for current host equivalence. [VERIFIED: repo grep] |
 | Full suite command | `gh workflow run` is not the right local equivalent; Phase 11 should keep local reproduction in shell commands and CI reproduction in `ci.yml`. [ASSUMED] |
 
@@ -386,11 +386,11 @@ module.exports = defineConfig({
 - **Phase gate:** Updated `ci.yml` green on a pull request before `/gsd-verify-work`. [VERIFIED: .planning/ROADMAP.md]
 
 ### Wave 0 Gaps
-- [ ] [`examples/accrue_host/playwright.config.js`](/Users/jon/projects/accrue/examples/accrue_host/playwright.config.js) — host browser gate with retained artifacts. [VERIFIED: repo grep]
-- [ ] [`examples/accrue_host/e2e/host-billing.spec.js`](/Users/jon/projects/accrue/examples/accrue_host/e2e/host-billing.spec.js) — migrate current browser smoke assertions into Playwright Test. [VERIFIED: repo grep]
-- [ ] [`examples/accrue_host/package.json`](/Users/jon/projects/accrue/examples/accrue_host/package.json) — local Playwright dependency if Phase 11 localizes browser tooling. [VERIFIED: repo grep]
-- [ ] [`scripts/ci/annotation_sweep.sh`](/Users/jon/projects/accrue/scripts/ci/annotation_sweep.sh) — only if the planner decides a post-job API sweep is still necessary. [ASSUMED]
-- [ ] [`ci.yml`](/Users/jon/projects/accrue/.github/workflows/ci.yml) host/drift ordering changes — current main gate does not yet run the host app flow. [VERIFIED: repo grep]
+- [ ] [`examples/accrue_host/playwright.config.js`](/Users/dev/projects/accrue/examples/accrue_host/playwright.config.js) — host browser gate with retained artifacts. [VERIFIED: repo grep]
+- [ ] [`examples/accrue_host/e2e/host-billing.spec.js`](/Users/dev/projects/accrue/examples/accrue_host/e2e/host-billing.spec.js) — migrate current browser smoke assertions into Playwright Test. [VERIFIED: repo grep]
+- [ ] [`examples/accrue_host/package.json`](/Users/dev/projects/accrue/examples/accrue_host/package.json) — local Playwright dependency if Phase 11 localizes browser tooling. [VERIFIED: repo grep]
+- [ ] [`scripts/ci/annotation_sweep.sh`](/Users/dev/projects/accrue/scripts/ci/annotation_sweep.sh) — only if the planner decides a post-job API sweep is still necessary. [ASSUMED]
+- [ ] [`ci.yml`](/Users/dev/projects/accrue/.github/workflows/ci.yml) host/drift ordering changes — current main gate does not yet run the host app flow. [VERIFIED: repo grep]
 
 ## Security Domain
 
@@ -414,13 +414,13 @@ module.exports = defineConfig({
 ## Sources
 
 ### Primary (HIGH confidence)
-- [`ROADMAP.md`](/Users/jon/projects/accrue/.planning/ROADMAP.md) - Phase 11 goal, dependency, success criteria, and requirement IDs. [VERIFIED: repo grep]
-- [`REQUIREMENTS.md`](/Users/jon/projects/accrue/.planning/REQUIREMENTS.md) - CI-01 through CI-06 definitions and live-Stripe advisory boundary. [VERIFIED: repo grep]
-- [`ci.yml`](/Users/jon/projects/accrue/.github/workflows/ci.yml) - current package release gate, advisory live-Stripe job, and blocking commands. [VERIFIED: repo grep]
-- [`accrue_host_uat.yml`](/Users/jon/projects/accrue/.github/workflows/accrue_host_uat.yml) - current host UAT workflow shape. [VERIFIED: repo grep]
-- [`accrue_admin_browser.yml`](/Users/jon/projects/accrue/.github/workflows/accrue_admin_browser.yml) - existing Playwright CI artifact pattern. [VERIFIED: repo grep]
-- [`scripts/ci/accrue_host_uat.sh`](/Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh) - current host setup/test/browser/drift orchestration. [VERIFIED: repo grep]
-- [`scripts/ci/accrue_host_browser_smoke.cjs`](/Users/jon/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs) - current custom host browser runner. [VERIFIED: repo grep]
+- [`ROADMAP.md`](/Users/dev/projects/accrue/.planning/ROADMAP.md) - Phase 11 goal, dependency, success criteria, and requirement IDs. [VERIFIED: repo grep]
+- [`REQUIREMENTS.md`](/Users/dev/projects/accrue/.planning/REQUIREMENTS.md) - CI-01 through CI-06 definitions and live-Stripe advisory boundary. [VERIFIED: repo grep]
+- [`ci.yml`](/Users/dev/projects/accrue/.github/workflows/ci.yml) - current package release gate, advisory live-Stripe job, and blocking commands. [VERIFIED: repo grep]
+- [`accrue_host_uat.yml`](/Users/dev/projects/accrue/.github/workflows/accrue_host_uat.yml) - current host UAT workflow shape. [VERIFIED: repo grep]
+- [`accrue_admin_browser.yml`](/Users/dev/projects/accrue/.github/workflows/accrue_admin_browser.yml) - existing Playwright CI artifact pattern. [VERIFIED: repo grep]
+- [`scripts/ci/accrue_host_uat.sh`](/Users/dev/projects/accrue/scripts/ci/accrue_host_uat.sh) - current host setup/test/browser/drift orchestration. [VERIFIED: repo grep]
+- [`scripts/ci/accrue_host_browser_smoke.cjs`](/Users/dev/projects/accrue/scripts/ci/accrue_host_browser_smoke.cjs) - current custom host browser runner. [VERIFIED: repo grep]
 - https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax - native job ordering with `needs` and workflow control semantics. [CITED: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax]
 - https://docs.github.com/en/actions/tutorials/store-and-share-data - artifact upload and retention semantics. [CITED: https://docs.github.com/en/actions/tutorials/store-and-share-data]
 - https://docs.github.com/en/rest/actions/workflow-jobs - workflow jobs REST endpoints for optional sweep automation. [CITED: https://docs.github.com/en/rest/actions/workflow-jobs]

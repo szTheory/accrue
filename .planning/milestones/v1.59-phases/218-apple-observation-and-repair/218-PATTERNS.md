@@ -35,7 +35,7 @@
 
 Use a private typed seam with allowlisted values and explicit specs; raw JWS never becomes an Ecto field or generic metadata. Preserve only normalized, bounded facts before returning to intake.
 
-**Privacy and schema boundary** ([`observation.ex`](/Users/jon/projects/accrue/accrue/lib/accrue/entitlements/observation.ex:1), lines 1-31):
+**Privacy and schema boundary** ([`observation.ex`](/Users/dev/projects/accrue/accrue/lib/accrue/entitlements/observation.ex:1), lines 1-31):
 
 ```elixir
 @moduledoc """Privacy-bounded, rail-qualified entitlement evidence received from a provider."""
@@ -62,7 +62,7 @@ Implement `Apple.Verifier` and `Apple.Client` as behaviours with deterministic F
 
 **Analogs:** `observation.ex` and `projector.ex`
 
-**Idempotent identity ownership** ([`observation.ex`](/Users/jon/projects/accrue/accrue/lib/accrue/entitlements/observation.ex:128), lines 128-153):
+**Idempotent identity ownership** ([`observation.ex`](/Users/dev/projects/accrue/accrue/lib/accrue/entitlements/observation.ex:128), lines 128-153):
 
 ```elixir
 case repo.insert(changeset, on_conflict: :nothing, conflict_target: conflict_target(changeset)) do
@@ -77,7 +77,7 @@ else
 end
 ```
 
-**Lock and sole-writer handoff** ([`projector.ex`](/Users/jon/projects/accrue/accrue/lib/accrue/entitlements/projector.ex:43), lines 43-78):
+**Lock and sole-writer handoff** ([`projector.ex`](/Users/dev/projects/accrue/accrue/lib/accrue/entitlements/projector.ex:43), lines 43-78):
 
 ```elixir
 Accrue.Repo.transact(fn repo ->
@@ -98,7 +98,7 @@ end)
 
 **Analogs:** `entitlements/reconcile.ex`; `entitlements/stripe_sync/refresh_worker.ex`
 
-**Stale/idempotent result convention** ([`reconcile.ex`](/Users/jon/projects/accrue/accrue/lib/accrue/entitlements/reconcile.ex:36), lines 36-88):
+**Stale/idempotent result convention** ([`reconcile.ex`](/Users/dev/projects/accrue/accrue/lib/accrue/entitlements/reconcile.ex:36), lines 36-88):
 
 ```elixir
 Repo.transact(fn ->
@@ -114,7 +114,7 @@ Repo.transact(fn ->
 end)
 ```
 
-**Thin host-owned worker** ([`refresh_worker.ex`](/Users/jon/projects/accrue/accrue/lib/accrue/entitlements/stripe_sync/refresh_worker.ex:1), lines 1-35):
+**Thin host-owned worker** ([`refresh_worker.ex`](/Users/dev/projects/accrue/accrue/lib/accrue/entitlements/stripe_sync/refresh_worker.ex:1), lines 1-35):
 
 ```elixir
 use Oban.Worker, queue: :accrue_webhooks, max_attempts: 25
@@ -131,7 +131,7 @@ Keep job args scalar and privacy-safe (never JWS/token). The worker delegates to
 
 **Analog:** `entitlements.ex` public context and `source/registry.ex` Apple capability declaration.
 
-**Public context telemetry and typed result shape** ([`entitlements.ex`](/Users/jon/projects/accrue/accrue/lib/accrue/entitlements.ex:52), lines 52-70):
+**Public context telemetry and typed result shape** ([`entitlements.ex`](/Users/dev/projects/accrue/accrue/lib/accrue/entitlements.ex:52), lines 52-70):
 
 ```elixir
 def purchase_decision(account, rail, product_id, opts \\ []) do
@@ -146,7 +146,7 @@ def purchase_decision(account, rail, product_id, opts \\ []) do
 end
 ```
 
-**Apple external-management contract** ([`registry.ex`](/Users/jon/projects/accrue/accrue/lib/accrue/entitlements/source/registry.ex:69), lines 69-98):
+**Apple external-management contract** ([`registry.ex`](/Users/dev/projects/accrue/accrue/lib/accrue/entitlements/source/registry.ex:69), lines 69-98):
 
 ```elixir
 {:ok, :externally_managed,
@@ -160,7 +160,7 @@ Add the small public Apple facade (`purchase context/token`, observation, repair
 
 **Analog:** `20260802150000_create_accrue_entitlement_persistence.exs`
 
-**Qualified table + partial unique identity** ([migration](/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs:20), lines 20-68):
+**Qualified table + partial unique identity** ([migration](/Users/dev/projects/accrue/accrue/priv/repo/migrations/20260802150000_create_accrue_entitlement_persistence.exs:20), lines 20-68):
 
 ```elixir
 create Accrue.Migration.table(:accrue_entitlement_observations, primary_key: false) do
@@ -181,7 +181,7 @@ Create separate lineage, durable quarantine/intake, and reconciliation-checkpoin
 
 **Analogs:** `test/support/entitlements/fixtures.ex`; `projector_test.exs`; `stripe_sync_refresh_worker_test.exs`; `test/property/entitlements_fail_closed_property_test.exs`.
 
-**Deterministic privacy-safe fixture idiom** ([`fixtures.ex`](/Users/jon/projects/accrue/accrue/test/support/entitlements/fixtures.ex:1), lines 1-15 and 70-91):
+**Deterministic privacy-safe fixture idiom** ([`fixtures.ex`](/Users/dev/projects/accrue/accrue/test/support/entitlements/fixtures.ex:1), lines 1-15 and 70-91):
 
 ```elixir
 @timestamp ~U[2026-08-02 15:00:00.000000Z]
@@ -191,7 +191,7 @@ Create separate lineage, durable quarantine/intake, and reconciliation-checkpoin
   metadata: %{"source" => "fake_observer"}, evidence_digest: digest(rail, environment)}
 ```
 
-**Repo + Oban integration test setup** ([`projector_test.exs`](/Users/jon/projects/accrue/accrue/test/accrue/entitlements/projector_test.exs:1), lines 1-7 and 87-96):
+**Repo + Oban integration test setup** ([`projector_test.exs`](/Users/dev/projects/accrue/accrue/test/accrue/entitlements/projector_test.exs:1), lines 1-7 and 87-96):
 
 ```elixir
 use Accrue.RepoCase, async: false

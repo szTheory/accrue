@@ -234,7 +234,7 @@ end
 **When to use:** For every user-facing billing action in the example app. [VERIFIED: 10-CONTEXT.md]
 **Example:**
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/priv/accrue/templates/install/billing.ex.eex
+# Source: /Users/dev/projects/accrue/accrue/priv/accrue/templates/install/billing.ex.eex
 defmodule AccrueHost.Billing do
   alias Accrue.Billing
 
@@ -249,7 +249,7 @@ end
 **When to use:** For the one real webhook endpoint the host app exposes in Phase 10. [VERIFIED: 10-CONTEXT.md]
 **Example:**
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/lib/accrue/install/patches.ex
+# Source: /Users/dev/projects/accrue/accrue/lib/accrue/install/patches.ex
 import Accrue.Router
 
 pipeline :accrue_webhook_raw_body do
@@ -272,7 +272,7 @@ end
 **When to use:** For `/billing` and any realistic admin-only verification path. [VERIFIED: 10-CONTEXT.md]
 **Example:**
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/router.ex
+# Source: /Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/router.ex
 import AccrueAdmin.Router
 
 accrue_admin "/billing", session_keys: [:user_token]
@@ -335,7 +335,7 @@ Verified patterns from official sources and the current codebase:
 
 ### Host Billable Schema
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/lib/accrue/billable.ex
+# Source: /Users/dev/projects/accrue/accrue/lib/accrue/billable.ex
 schema "users" do
   field :email, :string
   use Accrue.Billable
@@ -346,8 +346,8 @@ end
 
 ### Mounted Admin + Webhook Router
 ```elixir
-# Source: /Users/jon/projects/accrue/accrue/lib/accrue/router.ex
-# Source: /Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/router.ex
+# Source: /Users/dev/projects/accrue/accrue/lib/accrue/router.ex
+# Source: /Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/router.ex
 import Accrue.Router
 import AccrueAdmin.Router
 
@@ -490,19 +490,19 @@ All claims in this research were verified or cited in this session — no user c
 - `https://hex.pm/api/packages/swoosh` - Swoosh 1.25.0 release version and publish timestamp.
 - `npm registry (@playwright/test)` - 1.59.1 version and publish timestamp.
 - Repo sources:
-  - `/Users/jon/projects/accrue/accrue/lib/mix/tasks/accrue.install.ex`
-  - `/Users/jon/projects/accrue/accrue/lib/accrue/router.ex`
-  - `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/plug.ex`
-  - `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/ingest.ex`
-  - `/Users/jon/projects/accrue/accrue/lib/accrue/billable.ex`
-  - `/Users/jon/projects/accrue/accrue/lib/accrue/test.ex`
-  - `/Users/jon/projects/accrue/accrue/lib/accrue/test/factory.ex`
-  - `/Users/jon/projects/accrue/accrue/lib/accrue/test/webhooks.ex`
-  - `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/router.ex`
-  - `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/auth_hook.ex`
-  - `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/step_up.ex`
-  - `/Users/jon/projects/accrue/accrue_admin/playwright.config.js`
-  - `/Users/jon/projects/accrue/accrue_admin/e2e/phase7-uat.spec.js`
+  - `/Users/dev/projects/accrue/accrue/lib/mix/tasks/accrue.install.ex`
+  - `/Users/dev/projects/accrue/accrue/lib/accrue/router.ex`
+  - `/Users/dev/projects/accrue/accrue/lib/accrue/webhook/plug.ex`
+  - `/Users/dev/projects/accrue/accrue/lib/accrue/webhook/ingest.ex`
+  - `/Users/dev/projects/accrue/accrue/lib/accrue/billable.ex`
+  - `/Users/dev/projects/accrue/accrue/lib/accrue/test.ex`
+  - `/Users/dev/projects/accrue/accrue/lib/accrue/test/factory.ex`
+  - `/Users/dev/projects/accrue/accrue/lib/accrue/test/webhooks.ex`
+  - `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/router.ex`
+  - `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/auth_hook.ex`
+  - `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/step_up.ex`
+  - `/Users/dev/projects/accrue/accrue_admin/playwright.config.js`
+  - `/Users/dev/projects/accrue/accrue_admin/e2e/phase7-uat.spec.js`
 
 ### Secondary (MEDIUM confidence)
 - None.

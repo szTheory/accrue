@@ -61,7 +61,7 @@ New module sibling to `DefaultHandler`. Dispatcher routes via `ctx.endpoint == :
 | CONN-02 | Account Link generation for onboarding/update flows | `LatticeStripe.AccountLink` exists. D5-06 ships struct with Inspect masking |
 | CONN-03 | Account status sync (capabilities, charges_enabled, details_submitted, payouts_enabled) | D5-02 hybrid projection + D5-05 ConnectHandler `account.updated` reducer with `force_status_changeset` |
 | CONN-04 | Destination charges | `Accrue.Connect.destination_charge/2` — `LatticeStripe.Charge` + `transfer_data: %{destination: acct}` |
-| CONN-05 | Separate charges + transfers flow | `Accrue.Connect.separate_charge_and_transfer/2` + `Accrue.Connect.transfer/2`; `LatticeStripe.Transfer` exists at `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/transfer.ex` (verified) |
+| CONN-05 | Separate charges + transfers flow | `Accrue.Connect.separate_charge_and_transfer/2` + `Accrue.Connect.transfer/2`; `LatticeStripe.Transfer` exists at `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/transfer.ex` (verified) |
 | CONN-06 | Platform fee computation helper | `Accrue.Connect.platform_fee/2` pure Money math; NimbleOptions config; StreamData property tests |
 | CONN-07 | Express dashboard login link | `LatticeStripe.LoginLink` exists. D5-06 LoginLink struct with Inspect masking |
 | CONN-08 | Payout schedule configuration | Passthrough via `Accrue.Connect.update_account/3` with `settings: %{payouts: %{schedule: ...}}` |
@@ -298,7 +298,7 @@ defp build_client!(opts) do
 end
 ```
 
-**Source:** lattice_stripe per-client/per-request semantics documented at `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/account.ex:11-30` [VERIFIED].
+**Source:** lattice_stripe per-client/per-request semantics documented at `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/account.ex:11-30` [VERIFIED].
 
 ### Pattern 2: Pdict Scoped Block (D5-01)
 
@@ -487,7 +487,7 @@ end
 | `Stripe-Account` HTTP header injection | Custom HTTP client wrapper | `LatticeStripe.Client.new!(stripe_account: …)` | Already implemented, per-request precedence handled |
 | AccountLink/LoginLink API serialization | Hand-rolled HTTP POST | `LatticeStripe.AccountLink.create/3`, `LatticeStripe.LoginLink.create/3` | Phase 17 ships these |
 | Connect Account create/update/retrieve | Hand-rolled wrappers | `LatticeStripe.Account.{create,retrieve,update,delete,reject,list}` | Full lifecycle exists |
-| Transfer API | Hand-rolled `transfers.create` | `LatticeStripe.Transfer.create/3` | [VERIFIED: file exists at `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/transfer.ex`] |
+| Transfer API | Hand-rolled `transfers.create` | `LatticeStripe.Transfer.create/3` | [VERIFIED: file exists at `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/transfer.ex`] |
 | Process dict propagation | New mechanism | Mirror `Accrue.Actor`/`Accrue.Stripe.with_api_version/2` pattern | Tested, established, three-level precedence already proven |
 | Oban context propagation | New middleware | Extend `Accrue.Oban.Middleware` (already threads `operation_id`) | ~10 LOC addition; same wire format |
 | Money math for platform fee | Bare integer arithmetic | `Accrue.Money` primitives + StreamData property tests | FND-01 compliance; zero/three-decimal currency safety |
@@ -697,14 +697,14 @@ redirect(conn, external: link.url)   # 5-min Express dashboard bearer
 | A3 | `LatticeStripe.Transfer.create/3` accepts `%{amount, currency, destination}` | Pattern: `transfer/2` helper | Verified file exists; planner should read it to confirm exact signature before writing the wrapper |
 | A4 | Stripe's documented platform fee rounding is "round percent to nearest minor unit, then add fixed, then clamp" | Pitfall 4 + D5-04 | If Stripe's documented order differs, property tests will diverge from Stripe's own computation. Verify against https://docs.stripe.com/connect/platform-pricing-tools/pricing-schemes before locking the algorithm |
 | A5 | Connect destination charges remain a `charges.create` endpoint (not `payment_intents.create`) under `2026-03-25.dahlia` | Example 2 + D5-03 | If dahlia removed Charge.create for destination charges, `destination_charge/2` must route through PaymentIntent with `transfer_data:`. Verify in lattice_stripe Charge module + Stripe API changelog |
-| A6 | `LatticeStripe.Charge.create/3` accepts `transfer_data: %{destination: …}` opt | D5-03 destination_charge | Verify directly from `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/charge.ex` |
+| A6 | `LatticeStripe.Charge.create/3` accepts `transfer_data: %{destination: …}` opt | D5-03 destination_charge | Verify directly from `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/charge.ex` |
 | A7 | Phase 4 endpoint plumbing is half-shipped (plug only) | Pitfall 1 + Critical Findings | HIGH CONFIDENCE — direct grep confirmed no `endpoint` field in `WebhookEvent` schema and no references in ingest/dispatch_worker. Risk is low; this finding is the strongest signal in the research |
 | A8 | `Accrue.Oban.Middleware` exists and currently threads operation_id | Pattern: extend middleware | `accrue/lib/accrue/oban/` directory exists per `ls`; planner should verify the middleware module name and shape before extending |
 
 ## Open Questions
 
 1. **Exact `LatticeStripe.AccountLink.create/3` return shape**
-   - What we know: Module exists at `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/account_link.ex`
+   - What we know: Module exists at `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/account_link.ex`
    - What's unclear: Whether it returns `{:ok, %LatticeStripe.AccountLink{}}` struct or `{:ok, raw_map}` from Stripe
    - Recommendation: Plan task should `Read` the module and adapt `Accrue.Connect.AccountLink.from_stripe/1` accordingly
 
@@ -826,19 +826,19 @@ The following CLAUDE.md directives constrain Phase 5 implementation. Planner MUS
 
 ### Primary (HIGH confidence)
 
-- **`/Users/jon/projects/accrue/.planning/phases/05-connect/05-CONTEXT.md`** [VERIFIED via Read] — locked decisions D5-01..D5-06 + canonical refs
-- **`/Users/jon/projects/accrue/.planning/REQUIREMENTS.md`** [VERIFIED via Read] — PROC-05, CONN-01..11 verbatim
-- **`/Users/jon/projects/accrue/.planning/ROADMAP.md`** [VERIFIED via Read] — Phase 5 goal + 5 success criteria
-- **`/Users/jon/projects/accrue/.planning/STATE.md`** [VERIFIED via Read] — Phase 4 complete, prior decision history
-- **`/Users/jon/projects/accrue/CLAUDE.md`** [VERIFIED via system reminder] — tech stack pins, constraints
-- **`/Users/jon/projects/accrue/accrue/lib/accrue/processor/stripe.ex:810-854`** [VERIFIED via Read] — `resolve_api_version/1` template at lines 820-825 + `build_client!/1` at 831-854
-- **`/Users/jon/projects/accrue/accrue/lib/accrue/webhook/webhook_event.ex:1-60`** [VERIFIED via Read] — confirms NO `endpoint` field exists; basis for Critical Finding / Pitfall 1
-- **`/Users/jon/projects/accrue/accrue/lib/accrue/webhook/plug.ex`** [VERIFIED via Grep] — endpoint atom only in plug telemetry, not propagated downstream
-- **`/Users/jon/projects/lattice_stripe/lib/lattice_stripe/account.ex:1-60`** [VERIFIED via Read] — Phase 17 ships full Account lifecycle; per-client AND per-request `stripe_account:` precedence documented
-- **`/Users/jon/projects/lattice_stripe/lib/lattice_stripe/transfer.ex`** [VERIFIED via find] — Transfer module exists; D5-03 separate_charge_and_transfer is unblocked
-- **`/Users/jon/projects/lattice_stripe/lib/lattice_stripe/account_link.ex`** [VERIFIED via ls] — exists
-- **`/Users/jon/projects/lattice_stripe/lib/lattice_stripe/login_link.ex`** [VERIFIED via ls] — exists
-- **`/Users/jon/projects/accrue/accrue/mix.exs`** [VERIFIED via Grep] — `lattice_stripe ~> 1.1`, `nimble_options ~> 1.1`, `mox ~> 1.2`, `stream_data ~> 1.3` confirmed pinned
+- **`/Users/dev/projects/accrue/.planning/phases/05-connect/05-CONTEXT.md`** [VERIFIED via Read] — locked decisions D5-01..D5-06 + canonical refs
+- **`/Users/dev/projects/accrue/.planning/REQUIREMENTS.md`** [VERIFIED via Read] — PROC-05, CONN-01..11 verbatim
+- **`/Users/dev/projects/accrue/.planning/ROADMAP.md`** [VERIFIED via Read] — Phase 5 goal + 5 success criteria
+- **`/Users/dev/projects/accrue/.planning/STATE.md`** [VERIFIED via Read] — Phase 4 complete, prior decision history
+- **`/Users/dev/projects/accrue/CLAUDE.md`** [VERIFIED via system reminder] — tech stack pins, constraints
+- **`/Users/dev/projects/accrue/accrue/lib/accrue/processor/stripe.ex:810-854`** [VERIFIED via Read] — `resolve_api_version/1` template at lines 820-825 + `build_client!/1` at 831-854
+- **`/Users/dev/projects/accrue/accrue/lib/accrue/webhook/webhook_event.ex:1-60`** [VERIFIED via Read] — confirms NO `endpoint` field exists; basis for Critical Finding / Pitfall 1
+- **`/Users/dev/projects/accrue/accrue/lib/accrue/webhook/plug.ex`** [VERIFIED via Grep] — endpoint atom only in plug telemetry, not propagated downstream
+- **`/Users/dev/projects/lattice_stripe/lib/lattice_stripe/account.ex:1-60`** [VERIFIED via Read] — Phase 17 ships full Account lifecycle; per-client AND per-request `stripe_account:` precedence documented
+- **`/Users/dev/projects/lattice_stripe/lib/lattice_stripe/transfer.ex`** [VERIFIED via find] — Transfer module exists; D5-03 separate_charge_and_transfer is unblocked
+- **`/Users/dev/projects/lattice_stripe/lib/lattice_stripe/account_link.ex`** [VERIFIED via ls] — exists
+- **`/Users/dev/projects/lattice_stripe/lib/lattice_stripe/login_link.ex`** [VERIFIED via ls] — exists
+- **`/Users/dev/projects/accrue/accrue/mix.exs`** [VERIFIED via Grep] — `lattice_stripe ~> 1.1`, `nimble_options ~> 1.1`, `mox ~> 1.2`, `stream_data ~> 1.3` confirmed pinned
 
 ### Secondary (MEDIUM confidence)
 

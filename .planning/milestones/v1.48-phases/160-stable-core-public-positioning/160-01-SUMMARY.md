@@ -33,8 +33,8 @@ metrics:
 
 ## Accomplishments
 
-- Repositioned [README.md](/Users/jon/projects/accrue/README.md) and [accrue/README.md](/Users/jon/projects/accrue/accrue/README.md) to state stable-core posture, documented-facade boundary, and evidence-based reopen triggers.
-- Tightened guide ownership across [first_hour.md](/Users/jon/projects/accrue/accrue/guides/first_hour.md), [jobs_to_be_done.md](/Users/jon/projects/accrue/accrue/guides/jobs_to_be_done.md), and [maturity-and-maintenance.md](/Users/jon/projects/accrue/accrue/guides/maturity-and-maintenance.md).
+- Repositioned [README.md](/Users/dev/projects/accrue/README.md) and [accrue/README.md](/Users/dev/projects/accrue/accrue/README.md) to state stable-core posture, documented-facade boundary, and evidence-based reopen triggers.
+- Tightened guide ownership across [first_hour.md](/Users/dev/projects/accrue/accrue/guides/first_hour.md), [jobs_to_be_done.md](/Users/dev/projects/accrue/accrue/guides/jobs_to_be_done.md), and [maturity-and-maintenance.md](/Users/dev/projects/accrue/accrue/guides/maturity-and-maintenance.md).
 - Preserved cross-link spine between root, core README, setup guide, scope narrative, and maturity doctrine.
 
 ## Verification Evidence

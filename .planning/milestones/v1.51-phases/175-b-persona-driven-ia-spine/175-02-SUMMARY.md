@@ -98,18 +98,18 @@ completed: 2026-06-04
 
 ## Files Created/Modified
 
-- `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/attention_counts.ex` — new shared context fn for badge counts
-- `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/nav_badge_hook.ex` — new on_mount hook assigning nav_attention_counts
-- `/Users/jon/projects/accrue/accrue_admin/assets/js/hooks/sidebar_collapse.js` — new JS hook for collapse persistence
-- `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/nav.ex` — items/3 with badge/collapsible + /payments href
-- `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/components/app_shell.ex` — nav_attention_counts attr + threading
-- `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/router.ex` — NavBadgeHook in @default_on_mount
-- `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/live/dashboard_live.ex` — delegates to AttentionCounts.compute/1
-- `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/copy.ex` — 4 verb relabels
-- `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/components/global_search.ex` — quick-link verb updates
-- `/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/components/topbar.ex` — search trigger text update
-- `/Users/jon/projects/accrue/accrue_admin/assets/js/app.js` — SidebarCollapse hook registration
-- `/Users/jon/projects/accrue/accrue_admin/priv/static/accrue_admin.js` — rebuilt bundle
+- `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/attention_counts.ex` — new shared context fn for badge counts
+- `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/nav_badge_hook.ex` — new on_mount hook assigning nav_attention_counts
+- `/Users/dev/projects/accrue/accrue_admin/assets/js/hooks/sidebar_collapse.js` — new JS hook for collapse persistence
+- `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/nav.ex` — items/3 with badge/collapsible + /payments href
+- `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/components/app_shell.ex` — nav_attention_counts attr + threading
+- `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/router.ex` — NavBadgeHook in @default_on_mount
+- `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/live/dashboard_live.ex` — delegates to AttentionCounts.compute/1
+- `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/copy.ex` — 4 verb relabels
+- `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/components/global_search.ex` — quick-link verb updates
+- `/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/components/topbar.ex` — search trigger text update
+- `/Users/dev/projects/accrue/accrue_admin/assets/js/app.js` — SidebarCollapse hook registration
+- `/Users/dev/projects/accrue/accrue_admin/priv/static/accrue_admin.js` — rebuilt bundle
 
 ## Decisions Made
 

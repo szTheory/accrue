@@ -151,10 +151,10 @@ The following issues were identified in this audit that are NOT already tracked 
 
 ## Files Audited
 
-- `/Users/jon/projects/accrue/.planning/phases/176-c-systematic-per-screen-rubric-uplift/176-SCORECARD.md`
-- `/Users/jon/projects/accrue/.planning/phases/176-c-systematic-per-screen-rubric-uplift/176-UI-SPEC.md`
-- `/Users/jon/projects/accrue/.planning/phases/176-c-systematic-per-screen-rubric-uplift/176-CONTEXT.md`
-- `/Users/jon/projects/accrue/.planning/phases/176-c-systematic-per-screen-rubric-uplift/176-01-SUMMARY.md` through `176-06-SUMMARY.md`
+- `/Users/dev/projects/accrue/.planning/phases/176-c-systematic-per-screen-rubric-uplift/176-SCORECARD.md`
+- `/Users/dev/projects/accrue/.planning/phases/176-c-systematic-per-screen-rubric-uplift/176-UI-SPEC.md`
+- `/Users/dev/projects/accrue/.planning/phases/176-c-systematic-per-screen-rubric-uplift/176-CONTEXT.md`
+- `/Users/dev/projects/accrue/.planning/phases/176-c-systematic-per-screen-rubric-uplift/176-01-SUMMARY.md` through `176-06-SUMMARY.md`
 - `accrue_admin/lib/accrue_admin/live/coupon_live.ex`
 - `accrue_admin/lib/accrue_admin/live/event_live.ex`
 - `accrue_admin/lib/accrue_admin/live/promotion_code_live.ex`

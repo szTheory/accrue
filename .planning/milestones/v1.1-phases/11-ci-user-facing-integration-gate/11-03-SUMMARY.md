@@ -92,7 +92,7 @@ Each task was committed atomically:
 
 ## Issues Encountered
 
-- The repo-local `ruby` shim had no version selected, so the YAML parse verification used the installed asdf Ruby binary directly at `/Users/jon/.asdf/installs/ruby/3.3.4/bin/ruby`.
+- The repo-local `ruby` shim had no version selected, so the YAML parse verification used the installed asdf Ruby binary directly at `/Users/dev/.asdf/installs/ruby/3.3.4/bin/ruby`.
 
 ## User Setup Required
 

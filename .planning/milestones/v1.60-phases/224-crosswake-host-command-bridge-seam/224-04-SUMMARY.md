@@ -34,7 +34,7 @@ coverage:
     requirement: BRDG-01
     verification:
       - kind: integration
-        ref: CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full
+        ref: CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full
         status: pass
     human_judgment: false
   - id: D2
@@ -78,7 +78,7 @@ status: complete
 
 ## Verification
 
-- PASS — `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full` (exact pinned native suite and tracer consumer).
+- PASS — `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full` (exact pinned native suite and tracer consumer).
 - PASS — `swift test --package-path examples/crosswake_tracer`.
 - PASS — blocked-status and bridge-evidence-location `jq` assertion.
 - PASS — final Crosswake checkout is clean on `chore/accrue-host-command-bridge` at `57e03b61082b1f865bc31c5e8b6dcee444f56dad`.

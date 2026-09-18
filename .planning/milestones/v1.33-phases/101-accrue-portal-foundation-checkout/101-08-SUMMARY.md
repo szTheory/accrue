@@ -59,8 +59,8 @@ Local Braintree checkout now hands off to a persisted synthetic completion event
 Commands run:
 
 ```bash
-cd /Users/jon/projects/accrue/accrue && mix test test/accrue/webhook/default_handler_portal_event_test.exs test/accrue/telemetry/portal_checkout_completed_test.exs
-cd /Users/jon/projects/accrue/accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs
+cd /Users/dev/projects/accrue/accrue && mix test test/accrue/webhook/default_handler_portal_event_test.exs test/accrue/telemetry/portal_checkout_completed_test.exs
+cd /Users/dev/projects/accrue/accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs
 ```
 
 Results:

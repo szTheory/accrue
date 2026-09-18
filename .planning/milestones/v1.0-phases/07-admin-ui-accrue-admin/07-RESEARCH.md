@@ -437,7 +437,7 @@ defmodule AccrueAdmin.Queries.Webhooks do
   end
 end
 ```
-Source: repo query posture in [Accrue.Events](/Users/jon/projects/accrue/accrue/lib/accrue/events.ex) and [Accrue.Webhooks.DLQ](/Users/jon/projects/accrue/accrue/lib/accrue/webhooks/dlq.ex)
+Source: repo query posture in [Accrue.Events](/Users/dev/projects/accrue/accrue/lib/accrue/events.ex) and [Accrue.Webhooks.DLQ](/Users/dev/projects/accrue/accrue/lib/accrue/webhooks/dlq.ex)
 
 ### Pattern 3: Action Wrapper Around Existing Core APIs
 **What:** LiveViews submit to thin admin action modules that add step-up checks, flash semantics, and audit writes around `Accrue.*` mutations.
@@ -456,7 +456,7 @@ with :ok <- AccrueAdmin.StepUp.require_fresh(socket, :refund, refund_ref),
   {:noreply, put_flash(socket, :info, "Refund queued")}
 end
 ```
-Source: repo action boundaries in [Accrue.Auth](/Users/jon/projects/accrue/accrue/lib/accrue/auth.ex), [Accrue.Events](/Users/jon/projects/accrue/accrue/lib/accrue/events.ex)
+Source: repo action boundaries in [Accrue.Auth](/Users/dev/projects/accrue/accrue/lib/accrue/auth.ex), [Accrue.Events](/Users/dev/projects/accrue/accrue/lib/accrue/events.ex)
 
 ### Anti-Patterns to Avoid
 
@@ -659,16 +659,16 @@ Source: https://hexdocs.pm/oban_web/installation.html
 ### Primary (HIGH confidence)
 
 - Local codebase:
-  - [accrue_admin/mix.exs](/Users/jon/projects/accrue/accrue_admin/mix.exs)
-  - [accrue_admin/lib/accrue_admin.ex](/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin.ex)
-  - [accrue/lib/accrue/auth.ex](/Users/jon/projects/accrue/accrue/lib/accrue/auth.ex)
-  - [accrue/lib/accrue/events.ex](/Users/jon/projects/accrue/accrue/lib/accrue/events.ex)
-  - [accrue/lib/accrue/billing/query.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/query.ex)
-  - [accrue/lib/accrue/webhook/webhook_event.ex](/Users/jon/projects/accrue/accrue/lib/accrue/webhook/webhook_event.ex)
-  - [accrue/lib/accrue/webhooks/dlq.ex](/Users/jon/projects/accrue/accrue/lib/accrue/webhooks/dlq.ex)
-  - [accrue/priv/repo/migrations/20260411000001_create_accrue_events.exs](/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260411000001_create_accrue_events.exs)
-  - [accrue/priv/repo/migrations/20260412100003_create_accrue_webhook_events.exs](/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260412100003_create_accrue_webhook_events.exs)
-  - [accrue/priv/repo/migrations/20260414120000_phase3_schema_upgrades.exs](/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260414120000_phase3_schema_upgrades.exs)
+  - [accrue_admin/mix.exs](/Users/dev/projects/accrue/accrue_admin/mix.exs)
+  - [accrue_admin/lib/accrue_admin.ex](/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin.ex)
+  - [accrue/lib/accrue/auth.ex](/Users/dev/projects/accrue/accrue/lib/accrue/auth.ex)
+  - [accrue/lib/accrue/events.ex](/Users/dev/projects/accrue/accrue/lib/accrue/events.ex)
+  - [accrue/lib/accrue/billing/query.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/query.ex)
+  - [accrue/lib/accrue/webhook/webhook_event.ex](/Users/dev/projects/accrue/accrue/lib/accrue/webhook/webhook_event.ex)
+  - [accrue/lib/accrue/webhooks/dlq.ex](/Users/dev/projects/accrue/accrue/lib/accrue/webhooks/dlq.ex)
+  - [accrue/priv/repo/migrations/20260411000001_create_accrue_events.exs](/Users/dev/projects/accrue/accrue/priv/repo/migrations/20260411000001_create_accrue_events.exs)
+  - [accrue/priv/repo/migrations/20260412100003_create_accrue_webhook_events.exs](/Users/dev/projects/accrue/accrue/priv/repo/migrations/20260412100003_create_accrue_webhook_events.exs)
+  - [accrue/priv/repo/migrations/20260414120000_phase3_schema_upgrades.exs](/Users/dev/projects/accrue/accrue/priv/repo/migrations/20260414120000_phase3_schema_upgrades.exs)
 - Official docs:
   - https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html#on_mount/1
   - https://hexdocs.pm/oban_web/Oban.Web.Router.html

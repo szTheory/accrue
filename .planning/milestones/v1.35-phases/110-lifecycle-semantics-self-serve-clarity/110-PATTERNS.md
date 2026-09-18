@@ -30,14 +30,14 @@
 
 **Analog:** same file
 
-**Lifecycle glossary anchor** ([accrue/lib/accrue/billing/subscription.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription.ex:10))
+**Lifecycle glossary anchor** ([accrue/lib/accrue/billing/subscription.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription.ex:10))
 ```elixir
 ## Use the predicates, not raw `.status`
 
 Do not gate business logic on direct comparisons to `.status`.
 ```
 
-**Canonical predicate pattern** ([accrue/lib/accrue/billing/subscription.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription.ex:169))
+**Canonical predicate pattern** ([accrue/lib/accrue/billing/subscription.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription.ex:169))
 ```elixir
 @doc """
 True if the subscription is `:active` with `cancel_at_period_end` set and
@@ -58,7 +58,7 @@ end
 
 **Analog:** same file
 
-**Query mirrors predicate semantics** ([accrue/lib/accrue/billing/query.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/query.ex:40))
+**Query mirrors predicate semantics** ([accrue/lib/accrue/billing/query.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/query.ex:40))
 ```elixir
 @doc """
 Subscriptions that are `:active` with `cancel_at_period_end` set and a
@@ -81,7 +81,7 @@ end
 
 **Analog:** same file
 
-**Cancel-at-period-end is the local semantic seam** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:528))
+**Cancel-at-period-end is the local semantic seam** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:528))
 ```elixir
 def cancel_at_period_end(%Subscription{} = sub, opts) do
   at_dt = Keyword.get(opts, :at)
@@ -93,7 +93,7 @@ def cancel_at_period_end(%Subscription{} = sub, opts) do
         {%{cancel_at_period_end: true}, %{cancel_at_period_end: true}, %{mode: "at_period_end"}}
 ```
 
-**Provider-honest unsupported copy pattern** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:586))
+**Provider-honest unsupported copy pattern** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:586))
 ```elixir
 {:error,
  %Accrue.APIError{
@@ -104,12 +104,12 @@ def cancel_at_period_end(%Subscription{} = sub, opts) do
  }}
 ```
 
-**Pause/unpause unsupported pattern** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:672))
+**Pause/unpause unsupported pattern** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:672))
 ```elixir
 message: "Braintree does not expose Accrue's pause/2 collection semantic."
 ```
 
-**State guard pattern** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:575))
+**State guard pattern** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:575))
 ```elixir
 unless Subscription.canceling?(sub) do
   raise Accrue.Error.InvalidState,
@@ -122,9 +122,9 @@ end
 
 ### `accrue/guides/<new lifecycle SSOT guide>.md` (docs, canonical contract)
 
-**Closest analogs:** [accrue/guides/portal_configuration_checklist.md](/Users/jon/projects/accrue/accrue/guides/portal_configuration_checklist.md:1), [accrue/guides/braintree-local-portal.md](/Users/jon/projects/accrue/accrue/guides/braintree-local-portal.md:1)
+**Closest analogs:** [accrue/guides/portal_configuration_checklist.md](/Users/dev/projects/accrue/accrue/guides/portal_configuration_checklist.md:1), [accrue/guides/braintree-local-portal.md](/Users/dev/projects/accrue/accrue/guides/braintree-local-portal.md:1)
 
-**Single-issue conceptual guide shape** ([accrue/guides/portal_configuration_checklist.md](/Users/jon/projects/accrue/accrue/guides/portal_configuration_checklist.md:28))
+**Single-issue conceptual guide shape** ([accrue/guides/portal_configuration_checklist.md](/Users/dev/projects/accrue/accrue/guides/portal_configuration_checklist.md:28))
 ```markdown
 ## The three required toggles
 ...
@@ -134,7 +134,7 @@ Why: with "Immediately" selected ... loses access on the spot. With `at_period_e
 customer keeps access through the period they already paid for
 ```
 
-**Provider-honest capability framing** ([accrue/guides/braintree-local-portal.md](/Users/jon/projects/accrue/accrue/guides/braintree-local-portal.md:16))
+**Provider-honest capability framing** ([accrue/guides/braintree-local-portal.md](/Users/dev/projects/accrue/accrue/guides/braintree-local-portal.md:16))
 ```markdown
 Braintree does not fall back to an upstream hosted billing portal.
 The failure is local and typed ...
@@ -146,7 +146,7 @@ The failure is local and typed ...
 
 **Analog:** same file
 
-**Current stale seam Phase 110 should correct** ([accrue/guides/braintree-local-portal.md](/Users/jon/projects/accrue/accrue/guides/braintree-local-portal.md:187))
+**Current stale seam Phase 110 should correct** ([accrue/guides/braintree-local-portal.md](/Users/dev/projects/accrue/accrue/guides/braintree-local-portal.md:187))
 ```markdown
 ### 3. Canceling Subscriptions
 
@@ -162,7 +162,7 @@ case Billing.cancel(subscription) do
 
 **Analog:** same file
 
-**Explicit access-through-date wording** ([accrue/guides/portal_configuration_checklist.md](/Users/jon/projects/accrue/accrue/guides/portal_configuration_checklist.md:58))
+**Explicit access-through-date wording** ([accrue/guides/portal_configuration_checklist.md](/Users/dev/projects/accrue/accrue/guides/portal_configuration_checklist.md:58))
 ```markdown
 ### 3. Cancellation timing — `at_period_end` (NOT immediate)
 ...
@@ -175,7 +175,7 @@ customer keeps access through the period they already paid for
 
 **Analogs:** same files
 
-**Convergence framing** ([accrue/guides/webhook_gotchas.md](/Users/jon/projects/accrue/accrue/guides/webhook_gotchas.md:52))
+**Convergence framing** ([accrue/guides/webhook_gotchas.md](/Users/dev/projects/accrue/accrue/guides/webhook_gotchas.md:52))
 ```markdown
 Treat webhook payloads as signals, not as your source of truth.
 ...
@@ -189,7 +189,7 @@ the local model backward.
 
 **Analog:** same file
 
-**Centralized customer copy seam** ([accrue_portal/lib/accrue_portal/copy.ex](/Users/jon/projects/accrue/accrue_portal/lib/accrue_portal/copy.ex:65))
+**Centralized customer copy seam** ([accrue_portal/lib/accrue_portal/copy.ex](/Users/dev/projects/accrue/accrue_portal/lib/accrue_portal/copy.ex:65))
 ```elixir
 def subscriptions_cancel_success,
   do: "Subscription will cancel at the end of the current billing period."
@@ -204,7 +204,7 @@ def subscription_cancel_body,
 
 **Analog:** same file
 
-**Thin mount + scoped mutation pattern** ([accrue_portal/lib/accrue_portal/live/subscription_live.ex](/Users/jon/projects/accrue/accrue_portal/lib/accrue_portal/live/subscription_live.ex:11))
+**Thin mount + scoped mutation pattern** ([accrue_portal/lib/accrue_portal/live/subscription_live.ex](/Users/dev/projects/accrue/accrue_portal/lib/accrue_portal/live/subscription_live.ex:11))
 ```elixir
 case Authorize.subscription(socket, id) do
   {:ok, %Subscription{} = subscription} ->
@@ -213,7 +213,7 @@ case Authorize.subscription(socket, id) do
     |> assign(:subscription, subscription)
 ```
 
-**Mutation pattern** ([accrue_portal/lib/accrue_portal/live/subscription_live.ex](/Users/jon/projects/accrue/accrue_portal/lib/accrue_portal/live/subscription_live.ex:43))
+**Mutation pattern** ([accrue_portal/lib/accrue_portal/live/subscription_live.ex](/Users/dev/projects/accrue/accrue_portal/lib/accrue_portal/live/subscription_live.ex:43))
 ```elixir
 case Authorize.subscription(socket, subscription.id) do
   {:ok, %Subscription{} = scoped_subscription} ->
@@ -224,7 +224,7 @@ case Authorize.subscription(socket, subscription.id) do
         |> put_flash(:info, Copy.subscription_cancel_success())
 ```
 
-**Current render seam** ([accrue_portal/lib/accrue_portal/live/subscription_live.ex](/Users/jon/projects/accrue/accrue_portal/lib/accrue_portal/live/subscription_live.ex:77))
+**Current render seam** ([accrue_portal/lib/accrue_portal/live/subscription_live.ex](/Users/dev/projects/accrue/accrue_portal/lib/accrue_portal/live/subscription_live.ex:77))
 ```elixir
 <strong>{Copy.subscription_status_label()}</strong>
 <span>{@subscription.status}</span>
@@ -239,7 +239,7 @@ case Authorize.subscription(socket, subscription.id) do
 
 **Analog:** same file
 
-**List surface currently renders raw status** ([accrue_portal/lib/accrue_portal/live/subscriptions_live.ex](/Users/jon/projects/accrue/accrue_portal/lib/accrue_portal/live/subscriptions_live.ex:54))
+**List surface currently renders raw status** ([accrue_portal/lib/accrue_portal/live/subscriptions_live.ex](/Users/dev/projects/accrue/accrue_portal/lib/accrue_portal/live/subscriptions_live.ex:54))
 ```elixir
 <p>{Copy.subscriptions_status_label()}: {subscription.status}</p>
 ...
@@ -252,7 +252,7 @@ case Authorize.subscription(socket, subscription.id) do
 
 **Analog:** same file
 
-**Admin strings are delegated, not embedded** ([accrue_admin/lib/accrue_admin/copy/subscription.ex](/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/copy/subscription.ex:16))
+**Admin strings are delegated, not embedded** ([accrue_admin/lib/accrue_admin/copy/subscription.ex](/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/copy/subscription.ex:16))
 ```elixir
 def subscription_kpi_status_label, do: "Status"
 def subscription_kpi_canonical_predicates_label, do: "Canonical predicates"
@@ -266,14 +266,14 @@ def subscription_action_cancel_at_period_end, do: "Cancel at period end"
 
 **Analog:** same file
 
-**Admin summary already uses predicate aggregation** ([accrue_admin/lib/accrue_admin/live/subscription_live.ex](/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/live/subscription_live.ex:150))
+**Admin summary already uses predicate aggregation** ([accrue_admin/lib/accrue_admin/live/subscription_live.ex](/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/live/subscription_live.ex:150))
 ```elixir
 <KpiCard.kpi_card label={Copy.subscription_kpi_canonical_predicates_label()} value={predicate_summary(@subscription)}>
   <:meta>Use `Accrue.Billing.Subscription` predicates, not raw status branching.</:meta>
 </KpiCard.kpi_card>
 ```
 
-**Predicate-summary helper** ([accrue_admin/lib/accrue_admin/live/subscription_live.ex](/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/live/subscription_live.ex:407))
+**Predicate-summary helper** ([accrue_admin/lib/accrue_admin/live/subscription_live.ex](/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/live/subscription_live.ex:407))
 ```elixir
 [
   Accrue.Billing.Subscription.active?(subscription) && "active",
@@ -284,7 +284,7 @@ def subscription_action_cancel_at_period_end, do: "Cancel at period end"
 ]
 ```
 
-**Action dispatch seam** ([accrue_admin/lib/accrue_admin/live/subscription_live.ex](/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/live/subscription_live.ex:501))
+**Action dispatch seam** ([accrue_admin/lib/accrue_admin/live/subscription_live.ex](/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/live/subscription_live.ex:501))
 ```elixir
 defp execute_action(subscription, _customer, %{type: "cancel_at_period_end"}, operation_id) do
   Billing.cancel_at_period_end(subscription, operation_id: operation_id)
@@ -297,13 +297,13 @@ end
 
 **Analog:** same file
 
-**Host example still carries local string constants** ([examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex](/Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex:18))
+**Host example still carries local string constants** ([examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex](/Users/dev/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex:18))
 ```elixir
 @error_copy "We couldn't complete that billing action..."
 @cancel_copy "Cancel organization subscription: Confirm cancellation before ending organization access."
 ```
 
-**Current immediate-cancel flow** ([examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex](/Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex:155))
+**Current immediate-cancel flow** ([examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex](/Users/dev/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex:155))
 ```elixir
 case Billing.cancel_active_organization(
        socket.assigns.current_scope,
@@ -318,7 +318,7 @@ case Billing.cancel_active_organization(
 
 ### Tests and verifier patterns
 
-**Core predicate truth** ([accrue/test/accrue/billing/subscription_predicates_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/subscription_predicates_test.exs:44))
+**Core predicate truth** ([accrue/test/accrue/billing/subscription_predicates_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/subscription_predicates_test.exs:44))
 ```elixir
 test "canceling? requires status=:active + cancel_at_period_end + future period end" do
   ...
@@ -326,7 +326,7 @@ test "canceling? requires status=:active + cancel_at_period_end + future period 
 end
 ```
 
-**Core action truth** ([accrue/test/accrue/billing/subscription_cancel_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/subscription_cancel_test.exs:58))
+**Core action truth** ([accrue/test/accrue/billing/subscription_cancel_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/subscription_cancel_test.exs:58))
 ```elixir
 test "sets cancel_at_period_end=true; status stays :active; canceling? returns true" do
   assert {:ok, updated} = Billing.cancel_at_period_end(sub)
@@ -336,14 +336,14 @@ test "sets cancel_at_period_end=true; status stays :active; canceling? returns t
 end
 ```
 
-**Query/list truth** ([accrue/test/accrue/billing/query_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/query_test.exs:66))
+**Query/list truth** ([accrue/test/accrue/billing/query_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/query_test.exs:66))
 ```elixir
 rows = Query.canceling() |> Repo.all()
 assert length(rows) == 1
 assert hd(rows).cancel_at_period_end == true
 ```
 
-**Portal rendered-copy verification** ([accrue_portal/test/accrue_portal/live/subscription_live_test.exs](/Users/jon/projects/accrue/accrue_portal/test/accrue_portal/live/subscription_live_test.exs:20), [accrue_portal/test/accrue_portal/live/subscriptions_live_test.exs](/Users/jon/projects/accrue/accrue_portal/test/accrue_portal/live/subscriptions_live_test.exs:20))
+**Portal rendered-copy verification** ([accrue_portal/test/accrue_portal/live/subscription_live_test.exs](/Users/dev/projects/accrue/accrue_portal/test/accrue_portal/live/subscription_live_test.exs:20), [accrue_portal/test/accrue_portal/live/subscriptions_live_test.exs](/Users/dev/projects/accrue/accrue_portal/test/accrue_portal/live/subscriptions_live_test.exs:20))
 ```elixir
 assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 ...
@@ -355,7 +355,7 @@ html =
 assert TestRepo.get!(Subscription, subscription.id).cancel_at_period_end
 ```
 
-**Admin rendered summary + action verification** ([accrue_admin/test/accrue_admin/live/subscription_live_test.exs](/Users/jon/projects/accrue/accrue_admin/test/accrue_admin/live/subscription_live_test.exs:80))
+**Admin rendered summary + action verification** ([accrue_admin/test/accrue_admin/live/subscription_live_test.exs](/Users/dev/projects/accrue/accrue_admin/test/accrue_admin/live/subscription_live_test.exs:80))
 ```elixir
 assert html =~ "Canonical predicates"
 assert html =~ "active"
@@ -363,7 +363,7 @@ assert html =~ "active"
 assert html =~ Copy.subscription_action_recorded_info()
 ```
 
-**Docs contract test analog** ([accrue/test/accrue/docs/organization_billing_guide_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/docs/organization_billing_guide_test.exs:10), [accrue/test/accrue/billing_portal_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing_portal_test.exs:88))
+**Docs contract test analog** ([accrue/test/accrue/docs/organization_billing_guide_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/docs/organization_billing_guide_test.exs:10), [accrue/test/accrue/billing_portal_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing_portal_test.exs:88))
 ```elixir
 guide = File.read!(@guide)
 
@@ -377,7 +377,7 @@ end
 ## Shared Patterns
 
 ### Lifecycle meaning comes from predicates, not raw status
-**Sources:** [accrue/lib/accrue/billing/subscription.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription.ex:10), [accrue_admin/lib/accrue_admin/live/subscription_live.ex](/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/live/subscription_live.ex:407)
+**Sources:** [accrue/lib/accrue/billing/subscription.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription.ex:10), [accrue_admin/lib/accrue_admin/live/subscription_live.ex](/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/live/subscription_live.ex:407)
 
 Apply to all doc/copy/UI work in Phase 110:
 - `active` can coexist with a pending end-of-period cancel.
@@ -385,7 +385,7 @@ Apply to all doc/copy/UI work in Phase 110:
 - `paused`, `past_due`, and `ended/canceled` must not be collapsed.
 
 ### Provider-honest unsupported messaging
-**Source:** [accrue/lib/accrue/billing/subscription_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:586)
+**Source:** [accrue/lib/accrue/billing/subscription_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:586)
 
 Apply to lifecycle helper text and docs:
 - say what Braintree cannot do
@@ -393,21 +393,21 @@ Apply to lifecycle helper text and docs:
 - give the next step
 
 ### Portal copy should stay centralized
-**Source:** [accrue_portal/lib/accrue_portal/copy.ex](/Users/jon/projects/accrue/accrue_portal/lib/accrue_portal/copy.ex:53)
+**Source:** [accrue_portal/lib/accrue_portal/copy.ex](/Users/dev/projects/accrue/accrue_portal/lib/accrue_portal/copy.ex:53)
 
 Apply to both portal LiveViews:
 - add shared lifecycle labels/body/helper text in `Copy`
 - keep LiveViews thin and copy-driven
 
 ### Admin summary should stay predicate-driven
-**Source:** [accrue_admin/lib/accrue_admin/live/subscription_live.ex](/Users/jon/projects/accrue/accrue_admin/lib/accrue_admin/live/subscription_live.ex:407)
+**Source:** [accrue_admin/lib/accrue_admin/live/subscription_live.ex](/Users/dev/projects/accrue/accrue_admin/lib/accrue_admin/live/subscription_live.ex:407)
 
 Apply to any shared lifecycle summary extraction:
 - the existing `predicate_summary/1` is the strongest UI analog for Phase 110
 - if extracted/shared, preserve ordering `active -> canceling -> paused -> past due -> canceled`
 
 ### Rendered HTML assertions over helper-unit tests
-**Sources:** [accrue_portal/test/accrue_portal/live/subscription_live_test.exs](/Users/jon/projects/accrue/accrue_portal/test/accrue_portal/live/subscription_live_test.exs:24), [accrue_admin/test/accrue_admin/live/subscription_live_test.exs](/Users/jon/projects/accrue/accrue_admin/test/accrue_admin/live/subscription_live_test.exs:86)
+**Sources:** [accrue_portal/test/accrue_portal/live/subscription_live_test.exs](/Users/dev/projects/accrue/accrue_portal/test/accrue_portal/live/subscription_live_test.exs:24), [accrue_admin/test/accrue_admin/live/subscription_live_test.exs](/Users/dev/projects/accrue/accrue_admin/test/accrue_admin/live/subscription_live_test.exs:86)
 
 Apply to UI verification:
 - assert user-visible copy in rendered HTML

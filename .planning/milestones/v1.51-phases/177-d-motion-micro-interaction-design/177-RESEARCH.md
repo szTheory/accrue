@@ -479,16 +479,16 @@ All new CSS transitions that use `--ax-transition-*` bundles honor this override
 |----------|-------|
 | Framework (ExUnit) | Mix test, `accrue_admin/test/` |
 | Framework (E2E) | Playwright, `accrue_admin/e2e/` |
-| Quick run command | `cd /Users/jon/projects/accrue/accrue_admin && mix test --seed 0` |
-| Full suite command | `cd /Users/jon/projects/accrue/accrue_admin && mix test --seed 0 && npm run e2e:visuals:png-only` |
-| E2E reduced-motion command | `cd /Users/jon/projects/accrue/accrue_admin && npx playwright test e2e/reduced-motion.spec.js` |
+| Quick run command | `cd /Users/dev/projects/accrue/accrue_admin && mix test --seed 0` |
+| Full suite command | `cd /Users/dev/projects/accrue/accrue_admin && mix test --seed 0 && npm run e2e:visuals:png-only` |
+| E2E reduced-motion command | `cd /Users/dev/projects/accrue/accrue_admin && npx playwright test e2e/reduced-motion.spec.js` |
 
 ### Phase Requirements → Test Map
 
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| MOT-01 | motion.md guide exists and is referenced in accrue_admin/mix.exs extras | unit | `cd /Users/jon/projects/accrue && bash scripts/ci/verify_package_docs.sh` | ❌ Wave 0 — add `"guides/motion.md"` needle to verify_package_docs.sh + seed fixture |
-| MOT-01 | motion guard rejects `transition: all` in app.css | unit (negative test) | `cd /Users/jon/projects/accrue/accrue && mix test test/accrue/docs/package_docs_verifier_test.exs --seed 0` | ❌ Wave 0 — add negative test |
+| MOT-01 | motion.md guide exists and is referenced in accrue_admin/mix.exs extras | unit | `cd /Users/dev/projects/accrue && bash scripts/ci/verify_package_docs.sh` | ❌ Wave 0 — add `"guides/motion.md"` needle to verify_package_docs.sh + seed fixture |
+| MOT-01 | motion guard rejects `transition: all` in app.css | unit (negative test) | `cd /Users/dev/projects/accrue/accrue && mix test test/accrue/docs/package_docs_verifier_test.exs --seed 0` | ❌ Wave 0 — add negative test |
 | MOT-01 | motion guard rejects raw `cubic-bezier(` in app.css | unit (negative test) | same | ❌ Wave 0 — add negative test |
 | MOT-01 | motion guard rejects raw ms/s literals in transition rules | unit (negative test) | same | ❌ Wave 0 — add negative test |
 | MOT-01 | motion guard rejects layout-thrash properties in transition lists | unit (negative test) | same | ❌ Wave 0 — add negative test |
@@ -497,10 +497,10 @@ All new CSS transitions that use `--ax-transition-*` bundles honor this override
 | MOT-03 | `.ax-dropdown-panel` transitions collapse to 0s under prefers-reduced-motion | E2E | `npx playwright test e2e/reduced-motion.spec.js` | ❌ Wave 0 — extend existing file |
 | MOT-03 | `.ax-command-palette` transitions collapse to 0s under prefers-reduced-motion | E2E | `npx playwright test e2e/reduced-motion.spec.js` | ❌ Wave 0 — extend existing file |
 | MOT-03 | Playwright structural check: open drawer/dropdown under reduced-motion, assert no transform travel | E2E | `npx playwright test e2e/reduced-motion.spec.js` | ❌ Wave 0 — extend existing file |
-| Regression | 252 tests remain green after all changes | unit | `cd /Users/jon/projects/accrue/accrue_admin && mix test --seed 0` | ✅ existing suite |
+| Regression | 252 tests remain green after all changes | unit | `cd /Users/dev/projects/accrue/accrue_admin && mix test --seed 0` | ✅ existing suite |
 
 ### Sampling Rate
-- **Per task commit:** `cd /Users/jon/projects/accrue/accrue_admin && mix test --seed 0 2>&1 | tail -5`
+- **Per task commit:** `cd /Users/dev/projects/accrue/accrue_admin && mix test --seed 0 2>&1 | tail -5`
 - **Per wave merge:** Full test suite + `npx playwright test e2e/reduced-motion.spec.js`
 - **Phase gate:** Full suite green + all new Playwright assertions pass before `/gsd:verify-work`
 

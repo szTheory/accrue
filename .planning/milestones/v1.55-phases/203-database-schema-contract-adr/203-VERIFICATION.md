@@ -58,7 +58,7 @@ Phase 203 achieved the ADR-only goal. The ADR is present, accepted for v1.55, re
 | Behavior | Command | Result | Status |
 |---|---|---|---|
 | ADR satisfies DB-01 through DB-04 markdown/content checklist and no source/docs/CI diff boundary is present | Phase validation `bash -lc` smoke checklist from `203-VALIDATION.md` | `phase-203-smoke-check: PASS` | PASS |
-| GSD key links resolve against cited source files | `node /Users/jon/.codex/gsd-core/bin/gsd-tools.cjs query verify.key-links .../203-01-PLAN.md` | 3/3 verified | PASS |
+| GSD key links resolve against cited source files | `node /Users/dev/.codex/gsd-core/bin/gsd-tools.cjs query verify.key-links .../203-01-PLAN.md` | 3/3 verified | PASS |
 | GSD artifact check plus manual status check | `verify.artifacts` and manual `rg` for ADR status | 1 literal false negative due markdown emphasis; manual line check passes | PASS |
 
 ### Probe Execution

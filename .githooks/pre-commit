@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Shift-left PII guard. Runs the same checks CI enforces, against the index.
+#
+# DESIGN CONSTRAINT: this file is committed and published, so it must never
+# contain a real username or adopter name -- a guard that spells out its own
+# secret leaks it. The machine's own home path is derived at RUNTIME from
+# $HOME and never written to disk; everything else is delegated to shared
+# verifiers that keep their patterns generic or sha256-pinned.
+#
+# Enable:  git config core.hooksPath .githooks
+# Bypass:  git commit --no-verify   (deliberate, reviewed exceptions only)
+set -uo pipefail
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+fail=0
+note() { printf '%s\n' "$*" >&2; }
+
+# 1. This machine's own home directory, resolved at runtime and never stored.
+REAL_USER="$(basename "${HOME:-}")"
+if [ -n "$REAL_USER" ]; then
+  hits="$(git grep -I -l --cached -F -e "/$REAL_USER/" -- . 2>/dev/null \
+          | grep -vE '^\.githooks/pre-commit$' || true)"
+  if [ -n "$hits" ]; then
+    note "PII guard: staged content embeds this machine's home directory (username redacted):"
+    printf '%s\n' "$hits" | sed 's/^/    /' >&2
+    fail=1
+  fi
+fi
+
+# 2. Any absolute home path with a non-placeholder user (shared with CI).
+bash scripts/ci/verify_no_home_paths.sh --staged || fail=1
+
+# 3. Retired-token ratchet. The pattern lives bracket-escaped and sha256-pinned
+#    in the census, never here.
+if [ -f .planning/hygiene/sensitive-token-census.json ] && command -v node >/dev/null 2>&1; then
+  node scripts/ci/verify_sensitive_token_census.mjs --repo . \
+    --census .planning/hygiene/sensitive-token-census.json \
+    --require-scope-lock --require-ratchet --require-no-cleartext >/dev/null || fail=1
+fi
+
+if [ "$fail" -ne 0 ]; then
+  note ""
+  note "Commit blocked by the PII guard. Replace absolute home paths with a"
+  note "placeholder (e.g. /Users/dev), or use --no-verify for a reviewed exception."
+  exit 1
+fi
+exit 0

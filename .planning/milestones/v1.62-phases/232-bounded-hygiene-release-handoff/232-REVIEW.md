@@ -85,7 +85,7 @@ pattern reuse the phase's own SUMMARYs flagged as a workaround (`sanitizeLeakChe
 `collect_hygiene_dispositions.mjs`) was in fact cleaned up later in the phase into a genuine
 single-source `export`/`import` (the stale comment describing the old workaround is the one
 remaining defect from that history — see IN-01). No `grep -P`, no hardcoded secrets, no
-`getfluent` literal leaked into any committed artifact, and the security bar (no local
+`adopter-app` literal leaked into any committed artifact, and the security bar (no local
 filesystem paths / adopter names in public artifacts) holds under live re-verification.
 
 Two real defects earn Critical status. First, the exact "guard swap only" files from

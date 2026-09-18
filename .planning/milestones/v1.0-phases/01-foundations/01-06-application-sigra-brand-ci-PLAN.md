@@ -229,7 +229,7 @@ end
    - Test 6: Pitfall #4 assertion — `refute File.read!("lib/accrue/application.ex") =~ "ChromicPDF"` and same for "Oban.start" and "Finch".
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix test test/accrue/application_test.exs && mix compile --warnings-as-errors && test -f priv/static/brand.css && grep -c "^  --accrue-" priv/static/brand.css</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix test test/accrue/application_test.exs && mix compile --warnings-as-errors && test -f priv/static/brand.css && grep -c "^  --accrue-" priv/static/brand.css</automated>
   </verify>
   <acceptance_criteria>
     - `mix test test/accrue/application_test.exs` reports all passing
@@ -406,7 +406,7 @@ end
 6. Run `bash scripts/ci/compile_matrix.sh` locally as the verify step. If `:sigra` is not available on the user's machine (no local path, not on Hex yet), the `with_sigra` branch will fail with `dependency not available` — that's acceptable; document in the task acceptance that either `sigra=off` succeeds alone OR the script runs both. The CI job is what actually enforces both.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix compile --warnings-as-errors && mix test test/accrue/integrations/sigra_test.exs && test -x /Users/jon/projects/accrue/scripts/ci/compile_matrix.sh && test -f /Users/jon/projects/accrue/.github/workflows/ci.yml</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix compile --warnings-as-errors && mix test test/accrue/integrations/sigra_test.exs && test -x /Users/dev/projects/accrue/scripts/ci/compile_matrix.sh && test -f /Users/dev/projects/accrue/.github/workflows/ci.yml</automated>
   </verify>
   <acceptance_criteria>
     - `mix compile --warnings-as-errors` passes in the current (default, sigra=off) build

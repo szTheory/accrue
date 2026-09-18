@@ -29,7 +29,7 @@ four-file production/test inventory for this reviewed diff.
 | Xcode | 26.6 (build 17F113) |
 | Platform | macOS 26.5, arm64 |
 | Exact native target | `swift test --package-path packages/crosswake-shell-core-ios` |
-| Pinned complete gate | `CROSSWAKE_SOURCE_ROOT=/Users/jon/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full` |
+| Pinned complete gate | `CROSSWAKE_SOURCE_ROOT=/Users/dev/projects/crosswake-accrue-bridge bash scripts/ci/verify_crosswake_host_commands.sh full` |
 | Accrue tracer consumer | `swift test --package-path examples/crosswake_tracer` |
 | Blocked-status assertion | `jq -e '.overall_status == "feasibility_blocked" and all(.capabilities[]; .status == "feasibility_blocked")' examples/crosswake_tracer/capability-report.json` |
 

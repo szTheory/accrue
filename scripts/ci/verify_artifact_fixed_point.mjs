@@ -245,6 +245,24 @@ function canonicalizeCoveredFiles(files) {
   return Array.from(new Set(files.map((f) => path.posix.normalize(String(f).split(path.sep).join("/"))))).sort();
 }
 
+// A covered_files entry is recorded relative to the repo at mint time. A later
+// milestone close moves .planning/phases/NNN-*/ under
+// .planning/milestones/<version>-phases/, so resolve the recorded path first
+// and fall back to the archive rather than failing on a correct move.
+function resolveCoveredPath(repo, rel) {
+  const direct = path.resolve(repo, rel);
+  if (fs.existsSync(direct)) return direct;
+  const prefix = ".planning/phases/";
+  if (!rel.startsWith(prefix)) return null;
+  const remainder = rel.slice(prefix.length);
+  const milestonesRoot = path.join(repo, ".planning", "milestones");
+  for (const archive of archivePhaseRoots(repo)) {
+    const candidate = path.join(milestonesRoot, archive, remainder);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
 export function computeDigest(repo, coveredFiles) {
   if (!Array.isArray(coveredFiles) || coveredFiles.length === 0) {
     fail("covered_files is empty -- refusing to compute a digest over zero files");
@@ -258,9 +276,12 @@ export function computeDigest(repo, coveredFiles) {
     if (rel === "" || rel === ".." || rel.startsWith("../") || path.isAbsolute(rel)) {
       fail(`covered file escapes the repository root: ${rel}`);
     }
-    const absolute = path.resolve(repo, rel);
-    if (!fs.existsSync(absolute)) fail(`covered file missing on disk: ${rel}`);
+    const absolute = resolveCoveredPath(repo, rel);
+    if (!absolute) fail(`covered file missing on disk: ${rel}`);
     const fileHash = crypto.createHash("sha256").update(fs.readFileSync(absolute)).digest("hex");
+    // The recorded `rel` string -- never the resolved location -- feeds the
+    // digest, so archiving a phase directory does not perturb a fingerprint
+    // minted before the move.
     parts.push(`${rel}\n${fileHash}\n`);
   }
   const aggregate = crypto
@@ -302,17 +323,56 @@ function readStateCurrentPhase(repo) {
   return phase;
 }
 
+function matchPhaseDir(root, phase) {
+  let entries;
+  try {
+    entries = fs.readdirSync(root, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+  } catch {
+    return null;
+  }
+  return entries.find((entry) => entry.name === phase || entry.name.startsWith(`${phase}-`)) || null;
+}
+
+function archivePhaseRoots(repo) {
+  try {
+    return fs.readdirSync(path.join(repo, ".planning", "milestones"), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && entry.name.endsWith("-phases"))
+      .map((entry) => entry.name)
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
+// A milestone close archives .planning/phases/NNN-*/ into
+// .planning/milestones/<version>-phases/NNN-*/ while STATE.md's current_phase
+// still names the last phase of the milestone that just shipped. Resolving the
+// active tree only would fail on that routine, correct operation, so fall back
+// to the archive -- the same archive-aware fallback the phase-230 evidence-path
+// sweep established for this class of regression.
 function resolveActivePhaseDir(repo, phase) {
   const activeRoot = path.join(repo, ".planning", "phases");
-  const entries = fs.readdirSync(activeRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory());
-  const match = entries.find((entry) => entry.name === phase || entry.name.startsWith(`${phase}-`));
-  if (!match) fail(`phase ${phase}: no active phase directory found under ${activeRoot}`);
-  return { name: match.name, absolute: path.join(activeRoot, match.name) };
+  const active = matchPhaseDir(activeRoot, phase);
+  if (active) {
+    return { name: active.name, prefix: `.planning/phases/${active.name}`, absolute: path.join(activeRoot, active.name) };
+  }
+  const milestonesRoot = path.join(repo, ".planning", "milestones");
+  for (const archive of archivePhaseRoots(repo)) {
+    const archived = matchPhaseDir(path.join(milestonesRoot, archive), phase);
+    if (archived) {
+      return {
+        name: archived.name,
+        prefix: `.planning/milestones/${archive}/${archived.name}`,
+        absolute: path.join(milestonesRoot, archive, archived.name)
+      };
+    }
+  }
+  fail(`phase ${phase}: no phase directory found under ${activeRoot} or any .planning/milestones/*-phases/`);
 }
 
 function liveArtifactFiles(repo, phase) {
-  const { name } = resolveActivePhaseDir(repo, phase);
-  const tracked = git(repo, ["ls-files", `.planning/phases/${name}/*`]).split("\n").filter(Boolean);
+  const { prefix } = resolveActivePhaseDir(repo, phase);
+  const tracked = git(repo, ["ls-files", `${prefix}/*`]).split("\n").filter(Boolean);
   return tracked.filter((file) => /-VERIFICATION\.md$|-UAT\.md$/.test(file)).sort();
 }
 

@@ -350,7 +350,7 @@ if (process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
     assert.throws(() => validateWindowRow({ ...validRow(), mystery_field: "x" }, "row"), /forbidden field: mystery_field/);
   });
   test("validateWindowRow rejects an absolute path or home-directory reference in a string value", () => {
-    assert.throws(() => validateWindowRow(validRow({ current_evidence: "/Users/jon/projects/accrue/proof" }), "row"), /absolute path or home-directory reference/);
+    assert.throws(() => validateWindowRow(validRow({ current_evidence: "/Users/dev/projects/accrue/proof" }), "row"), /absolute path or home-directory reference/);
     assert.throws(() => validateWindowRow(validRow({ current_evidence: "proof at $HOME/accrue" }), "row"), /absolute path or home-directory reference/);
     assert.throws(() => validateWindowRow(waivedRow({ owner: "/home/maintainer" }), "row"), /absolute path or home-directory reference/);
   });

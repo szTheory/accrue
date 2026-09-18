@@ -3,7 +3,7 @@ quick_id: 260621-olr
 slug: list-page-stat-strip-filter-toolbar
 date: 2026-06-21
 validate: true
-approved_plan: /Users/jon/.claude/plans/i-just-got-an-ethereal-harbor.md
+approved_plan: /Users/dev/.claude/plans/i-just-got-an-ethereal-harbor.md
 ---
 
 # Admin list pages: compact metrics (stat strip) + condensed filter toolbar

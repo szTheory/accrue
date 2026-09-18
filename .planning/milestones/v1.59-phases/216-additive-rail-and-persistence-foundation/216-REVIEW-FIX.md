@@ -1,7 +1,7 @@
 ---
 phase: 216
 fixed_at: 2026-08-02T00:00:00Z
-review_path: /Users/jon/projects/accrue/.planning/phases/216-additive-rail-and-persistence-foundation/216-REVIEW.md
+review_path: /Users/dev/projects/accrue/.planning/phases/216-additive-rail-and-persistence-foundation/216-REVIEW.md
 iteration: 1
 findings_in_scope: 3
 fixed: 3
@@ -12,7 +12,7 @@ status: all_fixed
 # Phase 216: Code Review Fix Report
 
 **Fixed at:** 2026-08-02T00:00:00Z
-**Source review:** `/Users/jon/projects/accrue/.planning/phases/216-additive-rail-and-persistence-foundation/216-REVIEW.md`
+**Source review:** `/Users/dev/projects/accrue/.planning/phases/216-additive-rail-and-persistence-foundation/216-REVIEW.md`
 **Iteration:** 1
 
 **Summary:**

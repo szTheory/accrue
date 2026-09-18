@@ -29,7 +29,7 @@
 
 **Analog:** `accrue/lib/accrue/billing/promotion_code.ex`
 
-**Schema + field layout** ([accrue/lib/accrue/billing/promotion_code.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/promotion_code.ex:15)):
+**Schema + field layout** ([accrue/lib/accrue/billing/promotion_code.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/promotion_code.ex:15)):
 ```elixir
 use Ecto.Schema
 
@@ -46,7 +46,7 @@ schema "accrue_promotion_codes" do
   field(:code, :string)
 ```
 
-**Changeset pattern** ([accrue/lib/accrue/billing/promotion_code.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/promotion_code.ex:46)):
+**Changeset pattern** ([accrue/lib/accrue/billing/promotion_code.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/promotion_code.ex:46)):
 ```elixir
 @cast_fields ~w[
   processor processor_id code coupon_id active
@@ -76,7 +76,7 @@ end
 
 **Analog:** `accrue/lib/accrue/billing/coupon_actions.ex`
 
-**Imports + module posture** ([accrue/lib/accrue/billing/coupon_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:30)):
+**Imports + module posture** ([accrue/lib/accrue/billing/coupon_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:30)):
 ```elixir
 require Logger
 
@@ -95,7 +95,7 @@ alias Accrue.Processor.Idempotency
 alias Accrue.Repo
 ```
 
-**Transactional write + event pattern** ([accrue/lib/accrue/billing/coupon_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:58)):
+**Transactional write + event pattern** ([accrue/lib/accrue/billing/coupon_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:58)):
 ```elixir
 @spec create_coupon(map(), keyword()) :: {:ok, Coupon.t()} | {:error, term()}
 def create_coupon(params, opts \\ []) when is_map(params) and is_list(opts) do
@@ -124,7 +124,7 @@ def create_coupon(params, opts \\ []) when is_map(params) and is_list(opts) do
 end
 ```
 
-**Local validation result shape** ([accrue/lib/accrue/billing/coupon_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:154)):
+**Local validation result shape** ([accrue/lib/accrue/billing/coupon_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:154)):
 ```elixir
 @type apply_error ::
         :not_found
@@ -135,7 +135,7 @@ end
         | term()
 ```
 
-**Eligibility checks** ([accrue/lib/accrue/billing/coupon_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:220)):
+**Eligibility checks** ([accrue/lib/accrue/billing/coupon_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:220)):
 ```elixir
 defp fetch_applicable(code) do
   now = Accrue.Clock.utc_now()
@@ -170,7 +170,7 @@ defp fetch_applicable(code) do
 
 **Analog:** `accrue/lib/accrue/billing.ex`
 
-**Alias aggregation** ([accrue/lib/accrue/billing.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing.ex:28)):
+**Alias aggregation** ([accrue/lib/accrue/billing.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing.ex:28)):
 ```elixir
 alias Accrue.Billing.{
   ChargeActions,
@@ -185,7 +185,7 @@ alias Accrue.Billing.{
 }
 ```
 
-**Facade wrapper pattern** ([accrue/lib/accrue/billing.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing.ex:651)):
+**Facade wrapper pattern** ([accrue/lib/accrue/billing.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing.ex:651)):
 ```elixir
 def create_coupon(params, opts \\ []),
   do:
@@ -214,7 +214,7 @@ end
 
 **Analog:** `accrue/lib/accrue/billing/subscription_actions.ex`
 
-**Subscribe transaction seam** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:114)):
+**Subscribe transaction seam** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:114)):
 ```elixir
 defp do_subscribe_supported(%Customer{} = customer, price_spec, opts) do
   {price_id, quantity} = normalize_price_spec(price_spec)
@@ -243,7 +243,7 @@ defp do_subscribe_supported(%Customer{} = customer, price_spec, opts) do
     end)
 ```
 
-**Braintree branch seam** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:156)):
+**Braintree branch seam** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:156)):
 ```elixir
 defp build_subscription_request(%Customer{} = customer, item_params, trial_end, opts) do
   if Processor.__impl__() == Accrue.Processor.Braintree do
@@ -256,7 +256,7 @@ defp build_subscription_request(%Customer{} = customer, item_params, trial_end, 
          }}
 ```
 
-**Current Stripe-only coupon seam to replace for Braintree** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:892)):
+**Current Stripe-only coupon seam to replace for Braintree** ([accrue/lib/accrue/billing/subscription_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:892)):
 ```elixir
 defp maybe_put_coupon(params, opts) do
   case Keyword.get(opts, :coupon) do
@@ -274,7 +274,7 @@ end
 
 **Analog:** `accrue/lib/accrue/processor/braintree.ex`
 
-**Adapter entrypoint pattern** ([accrue/lib/accrue/processor/braintree.ex](/Users/jon/projects/accrue/accrue/lib/accrue/processor/braintree.ex:46)):
+**Adapter entrypoint pattern** ([accrue/lib/accrue/processor/braintree.ex](/Users/dev/projects/accrue/accrue/lib/accrue/processor/braintree.ex:46)):
 ```elixir
 @impl Accrue.Processor
 def create_subscription(params, opts) when is_map(params) and is_list(opts) do
@@ -287,7 +287,7 @@ def create_subscription(params, opts) when is_map(params) and is_list(opts) do
 end
 ```
 
-**Request translation seam** ([accrue/lib/accrue/processor/braintree.ex](/Users/jon/projects/accrue/accrue/lib/accrue/processor/braintree.ex:73)):
+**Request translation seam** ([accrue/lib/accrue/processor/braintree.ex](/Users/dev/projects/accrue/accrue/lib/accrue/processor/braintree.ex:73)):
 ```elixir
 def build_request(params) do
   payment_method = params[:payment_method] || params["payment_method"] || %{}
@@ -305,7 +305,7 @@ def build_request(params) do
 end
 ```
 
-**Unsupported capability pattern** ([accrue/lib/accrue/processor/braintree.ex](/Users/jon/projects/accrue/accrue/lib/accrue/processor/braintree.ex:350)):
+**Unsupported capability pattern** ([accrue/lib/accrue/processor/braintree.ex](/Users/dev/projects/accrue/accrue/lib/accrue/processor/braintree.ex:350)):
 ```elixir
 def coupon_create(_params, _opts), do: {:error, unsupported()}
 def coupon_retrieve(_id, _opts), do: {:error, unsupported()}
@@ -321,7 +321,7 @@ def promotion_code_retrieve(_id, _opts), do: {:error, unsupported()}
 
 **Analog:** `accrue/lib/accrue/errors.ex`
 
-**Typed exception shape** ([accrue/lib/accrue/errors.ex](/Users/jon/projects/accrue/accrue/lib/accrue/errors.ex:112)):
+**Typed exception shape** ([accrue/lib/accrue/errors.ex](/Users/dev/projects/accrue/accrue/lib/accrue/errors.ex:112)):
 ```elixir
 defmodule Accrue.ConfigError do
   @type t :: %__MODULE__{}
@@ -337,7 +337,7 @@ defmodule Accrue.ConfigError do
 end
 ```
 
-**Domain-specific exception precedent** ([accrue/lib/accrue/errors.ex](/Users/jon/projects/accrue/accrue/lib/accrue/errors.ex:161)):
+**Domain-specific exception precedent** ([accrue/lib/accrue/errors.ex](/Users/dev/projects/accrue/accrue/lib/accrue/errors.ex:161)):
 ```elixir
 defmodule Accrue.Error.InvalidState do
   @type t :: %__MODULE__{}
@@ -360,7 +360,7 @@ end
 
 **Analog:** `accrue/lib/accrue/checkout/local_session.ex`
 
-**Schema pattern for persisted portal state** ([accrue/lib/accrue/checkout/local_session.ex](/Users/jon/projects/accrue/accrue/lib/accrue/checkout/local_session.ex:20)):
+**Schema pattern for persisted portal state** ([accrue/lib/accrue/checkout/local_session.ex](/Users/dev/projects/accrue/accrue/lib/accrue/checkout/local_session.ex:20)):
 ```elixir
 schema "accrue_checkout_sessions" do
   belongs_to(:customer, Customer)
@@ -381,7 +381,7 @@ schema "accrue_checkout_sessions" do
   field(:data, :map, default: %{})
 ```
 
-**Create-or-reuse pattern** ([accrue/lib/accrue/checkout/local_session.ex](/Users/jon/projects/accrue/accrue/lib/accrue/checkout/local_session.ex:65)):
+**Create-or-reuse pattern** ([accrue/lib/accrue/checkout/local_session.ex](/Users/dev/projects/accrue/accrue/lib/accrue/checkout/local_session.ex:65)):
 ```elixir
 def create_or_reuse(%Customer{} = customer, attrs) when is_map(attrs) do
   case Map.get(attrs, :operation_id) || Map.get(attrs, "operation_id") do
@@ -405,7 +405,7 @@ end
 
 **Analog:** `accrue_portal/lib/accrue_portal/live/checkout_live.ex`
 
-**Mount + assigns pattern** ([accrue_portal/lib/accrue_portal/live/checkout_live.ex](/Users/jon/projects/accrue/accrue_portal/lib/accrue_portal/live/checkout_live.ex:17)):
+**Mount + assigns pattern** ([accrue_portal/lib/accrue_portal/live/checkout_live.ex](/Users/dev/projects/accrue/accrue_portal/lib/accrue_portal/live/checkout_live.ex:17)):
 ```elixir
 def mount(%{"token" => token}, %{"accrue_portal" => portal}, socket) do
   session = LocalSession.by_token(token)
@@ -425,7 +425,7 @@ def mount(%{"token" => token}, %{"accrue_portal" => portal}, socket) do
        |> assign(:checkout_success, false)}
 ```
 
-**Submit path calling core facade** ([accrue_portal/lib/accrue_portal/live/checkout_live.ex](/Users/jon/projects/accrue/accrue_portal/lib/accrue_portal/live/checkout_live.ex:53)):
+**Submit path calling core facade** ([accrue_portal/lib/accrue_portal/live/checkout_live.ex](/Users/dev/projects/accrue/accrue_portal/lib/accrue_portal/live/checkout_live.ex:53)):
 ```elixir
 def handle_event("checkout_tokenized", %{"nonce" => nonce}, socket)
     when is_binary(nonce) and nonce != "" do
@@ -439,7 +439,7 @@ def handle_event("checkout_tokenized", %{"nonce" => nonce}, socket)
        ) do
 ```
 
-**Current CTA rendering seam** ([accrue_portal/lib/accrue_portal/live/checkout_live.ex](/Users/jon/projects/accrue/accrue_portal/lib/accrue_portal/live/checkout_live.ex:148)):
+**Current CTA rendering seam** ([accrue_portal/lib/accrue_portal/live/checkout_live.ex](/Users/dev/projects/accrue/accrue_portal/lib/accrue_portal/live/checkout_live.ex:148)):
 ```heex
 <form
   :if={@client_token && checkout_ready?(@checkout_session) && !@checkout_success}
@@ -460,7 +460,7 @@ def handle_event("checkout_tokenized", %{"nonce" => nonce}, socket)
 
 **Analog:** `accrue/priv/repo/migrations/20260501180000_create_accrue_checkout_sessions.exs`
 
-**Recent migration structure** ([accrue/priv/repo/migrations/20260501180000_create_accrue_checkout_sessions.exs](/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260501180000_create_accrue_checkout_sessions.exs:1)):
+**Recent migration structure** ([accrue/priv/repo/migrations/20260501180000_create_accrue_checkout_sessions.exs](/Users/dev/projects/accrue/accrue/priv/repo/migrations/20260501180000_create_accrue_checkout_sessions.exs:1)):
 ```elixir
 defmodule Accrue.Repo.Migrations.CreateAccrueCheckoutSessions do
   use Ecto.Migration
@@ -472,14 +472,14 @@ defmodule Accrue.Repo.Migrations.CreateAccrueCheckoutSessions do
         null: false
 ```
 
-**Index pattern** ([accrue/priv/repo/migrations/20260501180000_create_accrue_checkout_sessions.exs](/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260501180000_create_accrue_checkout_sessions.exs:28)):
+**Index pattern** ([accrue/priv/repo/migrations/20260501180000_create_accrue_checkout_sessions.exs](/Users/dev/projects/accrue/accrue/priv/repo/migrations/20260501180000_create_accrue_checkout_sessions.exs:28)):
 ```elixir
 create unique_index(:accrue_checkout_sessions, [:session_token])
 create unique_index(:accrue_checkout_sessions, [:operation_id])
 create index(:accrue_checkout_sessions, [:customer_id, :inserted_at])
 ```
 
-**Secondary analog for uniqueness-by-code** ([accrue/priv/repo/migrations/20260414130200_create_accrue_promotion_codes.exs](/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260414130200_create_accrue_promotion_codes.exs:19)):
+**Secondary analog for uniqueness-by-code** ([accrue/priv/repo/migrations/20260414130200_create_accrue_promotion_codes.exs](/Users/dev/projects/accrue/accrue/priv/repo/migrations/20260414130200_create_accrue_promotion_codes.exs:19)):
 ```elixir
 create table(:accrue_promotion_codes, primary_key: false) do
   add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
@@ -496,7 +496,7 @@ create table(:accrue_promotion_codes, primary_key: false) do
 
 **Analog:** `accrue/guides/braintree-local-portal.md`
 
-**Capability-boundary language** ([accrue/guides/braintree-local-portal.md](/Users/jon/projects/accrue/accrue/guides/braintree-local-portal.md:16)):
+**Capability-boundary language** ([accrue/guides/braintree-local-portal.md](/Users/dev/projects/accrue/accrue/guides/braintree-local-portal.md:16)):
 ```markdown
 Unlike Stripe, Braintree does not offer a pre-built, hosted customer billing
 portal for self-serve subscription management. Accrue now closes that gap with
@@ -504,7 +504,7 @@ first-party local portal semantics while still exposing the core primitives for
 hand-rolled flows.
 ```
 
-**Guide example pattern** ([accrue/guides/braintree-local-portal.md](/Users/jon/projects/accrue/accrue/guides/braintree-local-portal.md:77)):
+**Guide example pattern** ([accrue/guides/braintree-local-portal.md](/Users/dev/projects/accrue/accrue/guides/braintree-local-portal.md:77)):
 ```elixir
 def handle_event("add_payment_method", %{"nonce" => nonce}, socket) do
   customer = socket.assigns.customer
@@ -522,7 +522,7 @@ def handle_event("add_payment_method", %{"nonce" => nonce}, socket) do
 
 **Analog:** `accrue/test/accrue/billing/coupon_actions_test.exs`
 
-**Fixture + setup pattern** ([accrue/test/accrue/billing/coupon_actions_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/coupon_actions_test.exs:12)):
+**Fixture + setup pattern** ([accrue/test/accrue/billing/coupon_actions_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/coupon_actions_test.exs:12)):
 ```elixir
 setup do
   {:ok, customer} =
@@ -539,7 +539,7 @@ setup do
 end
 ```
 
-**Constraint assertion pattern** ([accrue/test/accrue/billing/coupon_actions_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/coupon_actions_test.exs:82)):
+**Constraint assertion pattern** ([accrue/test/accrue/billing/coupon_actions_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/coupon_actions_test.exs:82)):
 ```elixir
 cs =
   PromotionCode.changeset(%PromotionCode{}, %{
@@ -552,7 +552,7 @@ assert {:error, %Ecto.Changeset{errors: errors}} = Repo.insert(cs)
 assert Keyword.has_key?(errors, :code)
 ```
 
-**Validation-branch test pattern** ([accrue/test/accrue/billing/coupon_actions_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/coupon_actions_test.exs:153)):
+**Validation-branch test pattern** ([accrue/test/accrue/billing/coupon_actions_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/coupon_actions_test.exs:153)):
 ```elixir
 test "unknown code returns :not_found", %{sub: sub} do
   assert {:error, :not_found} = Billing.apply_promotion_code(sub, "NOPE")
@@ -567,7 +567,7 @@ end
 
 **Analog:** `accrue/test/accrue/billing/subscription_actions_test.exs`
 
-**Braintree gateway stub pattern** ([accrue/test/accrue/billing/subscription_actions_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/subscription_actions_test.exs:7)):
+**Braintree gateway stub pattern** ([accrue/test/accrue/billing/subscription_actions_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/subscription_actions_test.exs:7)):
 ```elixir
 defmodule BraintreeGatewayStub do
   def create(params, _opts) do
@@ -579,7 +579,7 @@ defmodule BraintreeGatewayStub do
        status: "Active",
 ```
 
-**Malformed handoff assertions** ([accrue/test/accrue/billing/subscription_actions_test.exs](/Users/jon/projects/accrue/accrue/test/accrue/billing/subscription_actions_test.exs:124)):
+**Malformed handoff assertions** ([accrue/test/accrue/billing/subscription_actions_test.exs](/Users/dev/projects/accrue/accrue/test/accrue/billing/subscription_actions_test.exs:124)):
 ```elixir
 assert {:error, %Accrue.APIError{code: "invalid_request_error"} = error} =
          Billing.subscribe(customer, "price_premium", payment_method: "pm_123")
@@ -595,7 +595,7 @@ assert error.message =~ "require a vaulted payment_method_token passed as"
 
 **Analog:** `accrue_portal/test/accrue_portal/live/checkout_live_test.exs`
 
-**LiveView session fixture pattern** ([accrue_portal/test/accrue_portal/live/checkout_live_test.exs](/Users/jon/projects/accrue/accrue_portal/test/accrue_portal/live/checkout_live_test.exs:198)):
+**LiveView session fixture pattern** ([accrue_portal/test/accrue_portal/live/checkout_live_test.exs](/Users/dev/projects/accrue/accrue_portal/test/accrue_portal/live/checkout_live_test.exs:198)):
 ```elixir
 defp checkout_fixture(%Customer{} = customer, attrs \\ %{}) do
   attrs =
@@ -610,7 +610,7 @@ defp checkout_fixture(%Customer{} = customer, attrs \\ %{}) do
         success_url: "https://app.example.test/billing/success",
 ```
 
-**Submit-path assertion pattern** ([accrue_portal/test/accrue_portal/live/checkout_live_test.exs](/Users/jon/projects/accrue/accrue_portal/test/accrue_portal/live/checkout_live_test.exs:132)):
+**Submit-path assertion pattern** ([accrue_portal/test/accrue_portal/live/checkout_live_test.exs](/Users/dev/projects/accrue/accrue_portal/test/accrue_portal/live/checkout_live_test.exs:132)):
 ```elixir
 assert {:error, {:redirect, %{to: "https://app.example.test/billing/success"}}} =
          render_hook(view, "checkout_tokenized", %{
@@ -622,7 +622,7 @@ assert {:error, {:redirect, %{to: "https://app.example.test/billing/success"}}} 
 assert LocalSession.by_id(session.id).status == "completed"
 ```
 
-**Expired/inline error assertions** ([accrue_portal/test/accrue_portal/live/checkout_live_test.exs](/Users/jon/projects/accrue/accrue_portal/test/accrue_portal/live/checkout_live_test.exs:152)):
+**Expired/inline error assertions** ([accrue_portal/test/accrue_portal/live/checkout_live_test.exs](/Users/dev/projects/accrue/accrue_portal/test/accrue_portal/live/checkout_live_test.exs:152)):
 ```elixir
 assert {:ok, expired_view, expired_html} = live(conn, "/billing/checkout/#{expired.session_token}")
 assert expired_html =~ "This checkout link has expired"
@@ -638,7 +638,7 @@ html =
 ## Shared Patterns
 
 ### Public facade spans
-**Source:** [accrue/lib/accrue/billing.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing.ex:49), [accrue/lib/accrue/billing.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing.ex:651)
+**Source:** [accrue/lib/accrue/billing.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing.ex:49), [accrue/lib/accrue/billing.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing.ex:651)
 **Apply to:** new `Accrue.Billing` write/read helpers
 ```elixir
 def subscribe(user, price_id_or_opts \\ [], opts \\ []) do
@@ -649,7 +649,7 @@ end
 ```
 
 ### Transaction + event recording
-**Source:** [accrue/lib/accrue/billing/coupon_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:64), [accrue/lib/accrue/billing/subscription_actions.ex](/Users/jon/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:122)
+**Source:** [accrue/lib/accrue/billing/coupon_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/coupon_actions.ex:64), [accrue/lib/accrue/billing/subscription_actions.ex](/Users/dev/projects/accrue/accrue/lib/accrue/billing/subscription_actions.ex:122)
 **Apply to:** local mapping writes and create-time redemption side effects
 ```elixir
 Repo.transact(fn ->
@@ -661,7 +661,7 @@ end)
 ```
 
 ### Typed operator-failure exceptions
-**Source:** [accrue/lib/accrue/errors.ex](/Users/jon/projects/accrue/accrue/lib/accrue/errors.ex:112), [accrue/lib/accrue/errors.ex](/Users/jon/projects/accrue/accrue/lib/accrue/errors.ex:161)
+**Source:** [accrue/lib/accrue/errors.ex](/Users/dev/projects/accrue/accrue/lib/accrue/errors.ex:112), [accrue/lib/accrue/errors.ex](/Users/dev/projects/accrue/accrue/lib/accrue/errors.ex:161)
 **Apply to:** mapping drift or unusable Braintree discount IDs
 ```elixir
 defexception [:message, :key, :diagnostic]
@@ -671,7 +671,7 @@ def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
 ```
 
 ### Ops telemetry
-**Source:** [accrue/lib/accrue/telemetry/ops.ex](/Users/jon/projects/accrue/accrue/lib/accrue/telemetry/ops.ex:40)
+**Source:** [accrue/lib/accrue/telemetry/ops.ex](/Users/dev/projects/accrue/accrue/lib/accrue/telemetry/ops.ex:40)
 **Apply to:** discount mapping drift, missing discount, incompatible discount
 ```elixir
 @spec emit(suffix(), map(), map()) :: :ok
@@ -686,7 +686,7 @@ end
 ```
 
 ### Local checkout state
-**Source:** [accrue/lib/accrue/checkout/local_session.ex](/Users/jon/projects/accrue/accrue/lib/accrue/checkout/local_session.ex:20), [accrue_portal/test/accrue_portal/live/checkout_live_test.exs](/Users/jon/projects/accrue/accrue_portal/test/accrue_portal/live/checkout_live_test.exs:198)
+**Source:** [accrue/lib/accrue/checkout/local_session.ex](/Users/dev/projects/accrue/accrue/lib/accrue/checkout/local_session.ex:20), [accrue_portal/test/accrue_portal/live/checkout_live_test.exs](/Users/dev/projects/accrue/accrue_portal/test/accrue_portal/live/checkout_live_test.exs:198)
 **Apply to:** preview totals, selected code, and submit-time revalidation correlation
 ```elixir
 field(:metadata, :map, default: %{})

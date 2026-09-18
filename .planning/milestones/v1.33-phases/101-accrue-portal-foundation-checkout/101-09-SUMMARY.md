@@ -63,7 +63,7 @@ The dashboard and subscription slice now has reusable portal-local proof for cus
 Commands run:
 
 ```bash
-cd /Users/jon/projects/accrue/accrue_portal && mix test test/accrue_portal/live/home_live_test.exs test/accrue_portal/live/subscriptions_live_test.exs test/accrue_portal/live/subscription_live_test.exs test/accrue_portal/live/wrong_tenant_property_test.exs
+cd /Users/dev/projects/accrue/accrue_portal && mix test test/accrue_portal/live/home_live_test.exs test/accrue_portal/live/subscriptions_live_test.exs test/accrue_portal/live/subscription_live_test.exs test/accrue_portal/live/wrong_tenant_property_test.exs
 ```
 
 Results:

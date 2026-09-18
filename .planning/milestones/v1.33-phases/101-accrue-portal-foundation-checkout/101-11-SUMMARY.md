@@ -57,8 +57,8 @@ Commands run:
 
 ```bash
 node -e 'const cfg=require("./release-please-config.json"); const group=cfg.plugins.find((p)=>p.type==="linked-versions"); const want=["accrue","accrue_admin","accrue_portal"]; if(!group) throw new Error("missing linked-versions plugin"); if(JSON.stringify(group.components)!==JSON.stringify(want)) throw new Error(`unexpected components: ${JSON.stringify(group.components)}`); for (const key of want) if (!cfg.packages[key]) throw new Error(`missing package ${key}`); console.log("linked-release config ok");'
-cd /Users/jon/projects/accrue/examples/accrue_host && mix compile
-rg -n '/checkout/start\?token=|session-resolved-customer-only|accrue_portal|braintree-local-portal|accrue_admin "/admin"|accrue_portal "/billing"' /Users/jon/projects/accrue/accrue_portal/README.md /Users/jon/projects/accrue/accrue/guides/braintree-local-portal.md /Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host_web/router.ex
+cd /Users/dev/projects/accrue/examples/accrue_host && mix compile
+rg -n '/checkout/start\?token=|session-resolved-customer-only|accrue_portal|braintree-local-portal|accrue_admin "/admin"|accrue_portal "/billing"' /Users/dev/projects/accrue/accrue_portal/README.md /Users/dev/projects/accrue/accrue/guides/braintree-local-portal.md /Users/dev/projects/accrue/examples/accrue_host/lib/accrue_host_web/router.ex
 ```
 
 Results:

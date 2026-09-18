@@ -69,7 +69,7 @@ overrides_applied: 0
 
 | Behavior | Command | Result | Status |
 | -------- | ------- | ------ | ------ |
-| Workflow YAML parses | `/Users/jon/.asdf/installs/ruby/3.3.4/bin/ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); YAML.load_file(".github/workflows/accrue_host_uat.yml"); YAML.load_file(".github/workflows/accrue_admin_assets.yml"); puts "workflow YAML OK"'` | `workflow YAML OK` | ✓ PASS |
+| Workflow YAML parses | `/Users/dev/.asdf/installs/ruby/3.3.4/bin/ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); YAML.load_file(".github/workflows/accrue_host_uat.yml"); YAML.load_file(".github/workflows/accrue_admin_assets.yml"); puts "workflow YAML OK"'` | `workflow YAML OK` | ✓ PASS |
 | Shell gate scripts are syntactically valid | `bash -n scripts/ci/accrue_host_uat.sh && bash -n scripts/ci/annotation_sweep.sh` | `shell syntax OK` | ✓ PASS |
 | Host Playwright contract is discoverable and scoped to one Chromium desktop test | `cd examples/accrue_host && npx playwright test --list` | Listed one `chromium-desktop` test: `phase11-host-gate.spec.js:69:1` | ✓ PASS |
 | Full host integration gate executes end to end | `CI=true bash scripts/ci/accrue_host_uat.sh` | Orchestrator-provided verification passed: focused host tests `16/16`, full host suite `127/127`, boot smoke passed, Playwright browser gate `1/1` passed | ✓ PASS |

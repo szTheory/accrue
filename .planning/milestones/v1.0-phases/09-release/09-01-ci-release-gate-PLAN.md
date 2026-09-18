@@ -35,8 +35,8 @@ Output: a package-aware GitHub Actions matrix that enforces the release gate for
 </objective>
 
 <execution_context>
-@/Users/jon/.codex/get-shit-done/workflows/execute-plan.md
-@/Users/jon/.codex/get-shit-done/templates/summary.md
+@/Users/dev/.codex/get-shit-done/workflows/execute-plan.md
+@/Users/dev/.codex/get-shit-done/templates/summary.md
 </execution_context>
 
 <context>

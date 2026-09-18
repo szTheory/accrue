@@ -188,7 +188,7 @@ This phase does NOT: delete any remote branch or tag; merge the integration PR; 
 - Commitlint with a billing-domain `scope-enum` banning numeric/phase-ID scopes (`feat(231-06)` → `feat(webhooks)`), wired into the GSD commit contract. The real long-term changelog fix, but it is a new capability affecting every future commit — its own phase.
 - A curated per-minor Highlights slot above the generated changelog ledger (the two-layer pattern every peer library uses). Per `RELEASING.md`, editorial polish lands on the open release PR, which is after this integration PR.
 - Standardizing `--fixtures` vs `--self-test` onto one name, adding `--help` everywhere, and migrating hand-rolled argv to `parseArgs` with `strict: true`. Real DX debt and a live vacuity vector (a typo'd flag is silently ignored today), but broader than this phase.
-- Renaming the two adopter-named refs (`fix/getfluent-1.5.1` and its origin peer) — maintainer-decided as fail-forward; free only at a capsule mint.
+- Renaming the two adopter-named refs (`fix/adopter-app-1.5.1` and its origin peer) — maintainer-decided as fail-forward; free only at a capsule mint.
 - Deleting local `main` and the remote branch deletions themselves — classification only this phase, per the maintainer decision.
 - The orphaned `CapabilityReportTests.swift`, out of the SPM build graph since Phase 223-04.
 - Remaining 231-REVIEW WARNING/INFO items not in scope: fail-open `--require-event-class`/`--require-exit-codes` on zero run-kind records; hand-maintained `OUT_OF_COHORT_LANES`; sanitization-regex inconsistency between two D-31 implementations.

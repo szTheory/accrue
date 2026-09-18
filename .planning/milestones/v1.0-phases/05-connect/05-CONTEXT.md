@@ -265,7 +265,7 @@ Downstream researcher and planner pick defaults for the following — not blocke
 - `.planning/ROADMAP.md` §"Phase 5: Connect" — goal, requirements (PROC-05, CONN-01..11), success criteria
 - `.planning/REQUIREMENTS.md` — PROC-05, CONN-01 through CONN-11
 - `.planning/PROJECT.md` — vision, constraints, core value, release model
-- `/Users/jon/projects/accrue/CLAUDE.md` — tech stack pins (`lattice_stripe ~> 1.1` post-Phase 4 D4-01)
+- `/Users/dev/projects/accrue/CLAUDE.md` — tech stack pins (`lattice_stripe ~> 1.1` post-Phase 4 D4-01)
 
 ### Prior phase decisions that constrain Phase 5
 - `.planning/phases/01-foundations/01-CONTEXT.md` — FND-01 Accrue.Money (D5-04 depends on this), Fake processor strategy, dual bang/tuple API (D-05), `Accrue.Error` shape
@@ -274,26 +274,26 @@ Downstream researcher and planner pick defaults for the following — not blocke
 - `.planning/phases/04-advanced-billing-webhook-hardening/04-CONTEXT.md` — D4-01 (lattice_stripe 1.1 consumption), D4-04 (multi-endpoint webhook plug, WH-13 — D5-05 wires the handler side), CHKT-04 (BillingPortal.Session struct with Inspect masking — D5-06 mirrors verbatim), Oban queues conventions
 
 ### Accrue codebase touchpoints for Phase 5 integration
-- `/Users/jon/projects/accrue/accrue/lib/accrue/processor/stripe.ex` — lines 60-80 (create_customer pattern to mirror for create_account), lines 820-854 (resolve_api_version + build_client! — D5-01 integration point; must add `resolve_stripe_account/1` sibling and pass `stripe_account:` into `LatticeStripe.Client.new!/1`)
-- `/Users/jon/projects/accrue/accrue/lib/accrue/processor.ex` — behaviour callback surface; Phase 5 adds Connect callbacks: `create_account/2`, `retrieve_account/2`, `update_account/3`, `delete_account/2`, `reject_account/3`, `list_accounts/2`, `create_account_link/2`, `create_login_link/2`, `create_transfer/2`, `retrieve_transfer/2`
-- `/Users/jon/projects/accrue/accrue/lib/accrue/actor.ex` lines 74-98 — `current_operation_id/0` + `put_operation_id/1` pattern to mirror for `Accrue.Connect.current_account_id/0` + `Accrue.Connect.with_account/2`
-- `/Users/jon/projects/accrue/accrue/lib/accrue/stripe.ex` — `Accrue.Stripe.with_api_version/2` template to mirror for `Accrue.Connect.with_account/2`
-- `/Users/jon/projects/accrue/accrue/lib/accrue/plug/` — `PutOperationId` template to mirror for `Accrue.Plug.PutConnectedAccount`
-- `/Users/jon/projects/accrue/accrue/lib/accrue/oban/` — middleware threading operation_id; extend to carry `stripe_account`
-- `/Users/jon/projects/accrue/accrue/lib/accrue/billing_portal/session.ex` lines 149-178 — `defimpl Inspect` masking pattern; D5-06 copies verbatim for AccountLink + LoginLink
-- `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex` lines 14-42 + 69-80 — dispatch shape and reducer pattern for D5-05 ConnectHandler to mirror
-- `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/plug.ex` lines 71-95 — endpoint atom routing (Phase 4 WH-13); D5-05 reads `ctx.endpoint` to select handler
-- `/Users/jon/projects/accrue/accrue/lib/accrue/config.ex` — NimbleOptions schema extension pattern for D5-04 `:connect, :platform_fee` config + `:connect, :default_stripe_account` fallback
+- `/Users/dev/projects/accrue/accrue/lib/accrue/processor/stripe.ex` — lines 60-80 (create_customer pattern to mirror for create_account), lines 820-854 (resolve_api_version + build_client! — D5-01 integration point; must add `resolve_stripe_account/1` sibling and pass `stripe_account:` into `LatticeStripe.Client.new!/1`)
+- `/Users/dev/projects/accrue/accrue/lib/accrue/processor.ex` — behaviour callback surface; Phase 5 adds Connect callbacks: `create_account/2`, `retrieve_account/2`, `update_account/3`, `delete_account/2`, `reject_account/3`, `list_accounts/2`, `create_account_link/2`, `create_login_link/2`, `create_transfer/2`, `retrieve_transfer/2`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/actor.ex` lines 74-98 — `current_operation_id/0` + `put_operation_id/1` pattern to mirror for `Accrue.Connect.current_account_id/0` + `Accrue.Connect.with_account/2`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/stripe.ex` — `Accrue.Stripe.with_api_version/2` template to mirror for `Accrue.Connect.with_account/2`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/plug/` — `PutOperationId` template to mirror for `Accrue.Plug.PutConnectedAccount`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/oban/` — middleware threading operation_id; extend to carry `stripe_account`
+- `/Users/dev/projects/accrue/accrue/lib/accrue/billing_portal/session.ex` lines 149-178 — `defimpl Inspect` masking pattern; D5-06 copies verbatim for AccountLink + LoginLink
+- `/Users/dev/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex` lines 14-42 + 69-80 — dispatch shape and reducer pattern for D5-05 ConnectHandler to mirror
+- `/Users/dev/projects/accrue/accrue/lib/accrue/webhook/plug.ex` lines 71-95 — endpoint atom routing (Phase 4 WH-13); D5-05 reads `ctx.endpoint` to select handler
+- `/Users/dev/projects/accrue/accrue/lib/accrue/config.ex` — NimbleOptions schema extension pattern for D5-04 `:connect, :platform_fee` config + `:connect, :default_stripe_account` fallback
 
 ### lattice_stripe (sibling repo — read before implementing any Connect surface)
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/account.ex` — `LatticeStripe.Account.{create,retrieve,update,delete,reject,list,stream!}` — full Phase 17 Connect lifecycle. Moduledoc lines 12-30 document per-client vs per-request `stripe_account:` precedence (D5-01 threading contract)
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/account/capability.ex` — capability shape
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/account/requirements.ex` — reused at both `account.requirements` and `account.future_requirements`
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/account_link.ex` — AccountLink API shape for D5-06
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/login_link.ex` — Express dashboard LoginLink API shape for D5-06
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/client.ex` — `Client.new!/1` with `stripe_account:` opt — D5-01 integration
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/transfer.ex` — Transfer API for D5-03 `separate_charge_and_transfer/2` (if it exists; if not, Phase 5 dev may need to add it to lattice_stripe first — verify in research phase)
-- `/Users/jon/projects/lattice_stripe/lib/lattice_stripe/charge.ex` — existing charge create; D5-03 destination_charge uses with `transfer_data:` opt
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/account.ex` — `LatticeStripe.Account.{create,retrieve,update,delete,reject,list,stream!}` — full Phase 17 Connect lifecycle. Moduledoc lines 12-30 document per-client vs per-request `stripe_account:` precedence (D5-01 threading contract)
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/account/capability.ex` — capability shape
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/account/requirements.ex` — reused at both `account.requirements` and `account.future_requirements`
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/account_link.ex` — AccountLink API shape for D5-06
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/login_link.ex` — Express dashboard LoginLink API shape for D5-06
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/client.ex` — `Client.new!/1` with `stripe_account:` opt — D5-01 integration
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/transfer.ex` — Transfer API for D5-03 `separate_charge_and_transfer/2` (if it exists; if not, Phase 5 dev may need to add it to lattice_stripe first — verify in research phase)
+- `/Users/dev/projects/lattice_stripe/lib/lattice_stripe/charge.ex` — existing charge create; D5-03 destination_charge uses with `transfer_data:` opt
 
 ### Stripe official documentation
 - https://docs.stripe.com/connect — Connect overview, account types comparison

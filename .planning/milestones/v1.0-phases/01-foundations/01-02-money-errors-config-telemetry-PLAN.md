@@ -348,7 +348,7 @@ end
 DO NOT import `Money.Ecto.Composite.Type` or reference `money_with_currency` PG type (Pitfall #1, A4).
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix test test/accrue/money_test.exs test/accrue/money_property_test.exs</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix test test/accrue/money_test.exs test/accrue/money_property_test.exs</automated>
   </verify>
   <acceptance_criteria>
     - `mix test test/accrue/money_test.exs` reports all tests passing
@@ -415,7 +415,7 @@ DO NOT import `Money.Ecto.Composite.Type` or reference `money_with_currency` PG 
    - `schema/0` returns a keyword list with at least 18 keys (all Phase 1 config keys)
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix test test/accrue/errors_test.exs test/accrue/config_test.exs</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix test test/accrue/errors_test.exs test/accrue/config_test.exs</automated>
   </verify>
   <acceptance_criteria>
     - `grep -c "defexception" accrue/lib/accrue/errors.ex` returns 7
@@ -489,7 +489,7 @@ DO NOT import `Money.Ecto.Composite.Type` or reference `money_with_currency` PG 
    - Actor tests in same file or a sibling `test/accrue/actor_test.exs` (planner's discretion; keep to Task 3 scope).
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue && mix test test/accrue/telemetry_test.exs && mix compile --warnings-as-errors</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue && mix test test/accrue/telemetry_test.exs && mix compile --warnings-as-errors</automated>
   </verify>
   <acceptance_criteria>
     - `mix test test/accrue/telemetry_test.exs` reports all passing

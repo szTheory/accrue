@@ -80,7 +80,7 @@ No accepted risks.
 
 Automated checks already run during Phase 11 completion:
 
-- `/Users/jon/.asdf/installs/ruby/3.3.4/bin/ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); YAML.load_file(".github/workflows/accrue_host_uat.yml"); puts "workflow YAML OK"'`
+- `/Users/dev/.asdf/installs/ruby/3.3.4/bin/ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); YAML.load_file(".github/workflows/accrue_host_uat.yml"); puts "workflow YAML OK"'`
 - `bash -n scripts/ci/accrue_host_uat.sh && bash -n scripts/ci/annotation_sweep.sh`
 - `cd examples/accrue_host && npx playwright test --list`
 - `CI=true bash scripts/ci/accrue_host_uat.sh`

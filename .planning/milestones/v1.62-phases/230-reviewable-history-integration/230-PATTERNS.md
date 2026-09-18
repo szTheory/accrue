@@ -25,7 +25,7 @@ CONTEXT.md's D-01..D-24 describe *what the candidate merge must prove*, not new 
 | `.planning/phases/230-reviewable-history-integration/230-REF-EXCEPTIONS.json` (new) | model/data | CRUD (small declared-additions ledger) | `recovery.refs` array schema inside `collect_repository_inventory.mjs` (`validateRecovery`, lines 60) + WINDOWS.md row-multiset precedent | role-match |
 | `.planning/phases/230-reviewable-history-integration/230-ROLLBACK-POINT.json` (new) | model/data | event-driven (point-in-time snapshot + restore procedure) | `recovery` manifest fields (`collect_repository_inventory.mjs` `validateRecovery`) + `restore_argv` construction in `preserve_repository_state.sh` line 281 | role-match |
 | `scripts/ci/README.md` (**modified** — add one evidence-table row) | config/docs | request-response (contributor lookup table) | itself, existing rows (lines 9-11, 33) | exact (self) |
-| `.tool-versions` (new, currently untracked — commit as-is/extended per D-23) | config | — | `/Users/jon/getfluent/.tool-versions` (sibling project, single `nodejs` line) — no in-repo analog exists yet | no analog (see below) |
+| `.tool-versions` (new, currently untracked — commit as-is/extended per D-23) | config | — | `/Users/dev/adopter-app/.tool-versions` (sibling project, single `nodejs` line) — no in-repo analog exists yet | no analog (see below) |
 
 ## Pattern Assignments
 
@@ -219,7 +219,7 @@ Add a Phase 230 row in the same three-column shape (artifact links / what-it-ans
 
 ### `.tool-versions` (new, config)
 
-**No in-repo analog** — this is the first `.tool-versions` file in this repository. Nearest external precedent is the sibling project `/Users/jon/getfluent/.tool-versions` (single `nodejs 22.14.0` line, asdf/mise format). The file currently sits untracked at repo root with exactly that one line; D-23 requires adding an `elixir 1.19.5-otp-28` line (matching `CLAUDE.md`'s `Elixir 1.19+, OTP 27+` floor and the CI matrix's `1.19.5 / OTP 28` primary target) before committing. No script reads this file today — it is a bare asdf/mise-format text file, one `tool version` pair per line.
+**No in-repo analog** — this is the first `.tool-versions` file in this repository. Nearest external precedent is the sibling project `/Users/dev/adopter-app/.tool-versions` (single `nodejs 22.14.0` line, asdf/mise format). The file currently sits untracked at repo root with exactly that one line; D-23 requires adding an `elixir 1.19.5-otp-28` line (matching `CLAUDE.md`'s `Elixir 1.19+, OTP 27+` floor and the CI matrix's `1.19.5 / OTP 28` primary target) before committing. No script reads this file today — it is a bare asdf/mise-format text file, one `tool version` pair per line.
 
 ---
 

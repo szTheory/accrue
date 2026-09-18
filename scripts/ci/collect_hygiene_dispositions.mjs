@@ -283,7 +283,7 @@ if (process.env.NODE_TEST_CONTEXT && invokedAsEntrypoint) {
   // Behavior: a field value containing a local filesystem path prefix is
   // rejected by the sanitization check.
   test("validateHygieneRow rejects an absolute path or home-directory reference in a string value", () => {
-    assert.throws(() => validateHygieneRow(untrackedRow({ reason: "found at /Users/jon/projects/accrue/foo" }), "row"), /absolute path or home-directory reference/);
+    assert.throws(() => validateHygieneRow(untrackedRow({ reason: "found at /Users/dev/projects/accrue/foo" }), "row"), /absolute path or home-directory reference/);
     assert.throws(() => validateHygieneRow(untrackedRow({ reason: "path at $HOME/accrue" }), "row"), /absolute path or home-directory reference/);
     assert.throws(() => validateHygieneRow(untrackedRow({ name: "/etc/passwd" }), "row"), /absolute path or home-directory reference/);
   });

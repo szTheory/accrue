@@ -63,7 +63,7 @@ The remaining BT-03 portal surfaces now have focused package-local proof: route 
 Commands run:
 
 ```bash
-cd /Users/jon/projects/accrue/accrue_portal && mix test test/accrue_portal/router_test.exs test/accrue_portal/live/payment_methods_live_test.exs test/accrue_portal/live/add_payment_method_live_test.exs test/accrue_portal/live/invoices_live_test.exs test/accrue_portal/live/payment_methods_wrong_tenant_test.exs test/accrue_portal/live/invoices_wrong_tenant_test.exs
+cd /Users/dev/projects/accrue/accrue_portal && mix test test/accrue_portal/router_test.exs test/accrue_portal/live/payment_methods_live_test.exs test/accrue_portal/live/add_payment_method_live_test.exs test/accrue_portal/live/invoices_live_test.exs test/accrue_portal/live/payment_methods_wrong_tenant_test.exs test/accrue_portal/live/invoices_wrong_tenant_test.exs
 ```
 
 Results:

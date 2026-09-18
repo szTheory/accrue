@@ -53,15 +53,15 @@ Output: modified `playwright.config.js`, `package.json` (+ lockfile), refactored
 <context>
 # AUTHORITATIVE SPEC — transcribe §1–§6 verbatim for exact config/mask/YAML snippets.
 # This plan is a faithful transcription of Part A; do not re-design.
-@/Users/jon/.claude/plans/can-u-do-it-humming-seahorse.md
+@/Users/dev/.claude/plans/can-u-do-it-humming-seahorse.md
 
 # Source of the helpers to extract + the exact seed sequence and theme-toggle mechanics to reuse.
-@/Users/jon/projects/accrue/accrue_admin/e2e/admin-visuals.spec.js
+@/Users/dev/projects/accrue/accrue_admin/e2e/admin-visuals.spec.js
 
 # Files to modify.
-@/Users/jon/projects/accrue/accrue_admin/playwright.config.js
-@/Users/jon/projects/accrue/accrue_admin/package.json
-@/Users/jon/projects/accrue/.github/workflows/accrue_admin_browser.yml
+@/Users/dev/projects/accrue/accrue_admin/playwright.config.js
+@/Users/dev/projects/accrue/accrue_admin/package.json
+@/Users/dev/projects/accrue/.github/workflows/accrue_admin_browser.yml
 
 # Grounded selector facts (confirmed at planning time):
 # - subscriptions list data_table is NOT selectable (default false, not overridden) → NO leading
@@ -89,8 +89,8 @@ Implement approved-plan §1 and §2 exactly.
 §2 — Refactor `accrue_admin/e2e/admin-visuals.spec.js`: delete the four moved local function definitions and instead `const { reset, seed, login, hideCaptureOnlyChrome } = require("./support/admin-visual-helpers");`. Keep `captureThemes`, `captureBBoxes`, the defensive `REGION_SELECTORS` require, and `VIEWPORT_ONLY_SURFACES` exactly where they are (captureThemes still calls the now-imported `hideCaptureOnlyChrome`). This is a pure move — the capture spec's runtime behavior must be identical.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue_admin && npm run e2e:visuals:png-only</automated>
-    <automated>cd /Users/jon/projects/accrue/accrue_admin && node -e "const p=require('./package.json'); if(/[\^~><=]/.test(p.devDependencies['@playwright/test'])) { console.error('caret/range still present'); process.exit(1); } console.log('pinned:', p.devDependencies['@playwright/test'])"</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue_admin && npm run e2e:visuals:png-only</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue_admin && node -e "const p=require('./package.json'); if(/[\^~><=]/.test(p.devDependencies['@playwright/test'])) { console.error('caret/range still present'); process.exit(1); } console.log('pinned:', p.devDependencies['@playwright/test'])"</automated>
   </verify>
   <done>The capture spec (`e2e:visuals:png-only`) is still green after the helper extraction (behavior-preserving move confirmed); `playwright.config.js` carries the `toHaveScreenshot` tolerance block and the committed `snapshotPathTemplate`; `@playwright/test` is pinned to an exact version with package-lock.json in sync; `admin-visual-helpers.js` exists exporting the four shared helpers and `admin-visuals.spec.js` imports them.</done>
 </task>
@@ -127,10 +127,10 @@ Structure (mirror the seed sequence and theme-toggle mechanics from `admin-visua
 CONSTRAINT — local verification only. Do NOT run `npm run e2e:visual-regression` (a missing-baseline run writes a macOS baseline). Do NOT pass `--update-snapshots`. Limit local checks to parse/list sanity (see verify). If a selector-only mask feels brittle, prefer a slightly broader selector-based mask over touching `accrue_admin/lib` templates — the `data-ax-visual-mask` template fallback mentioned in §4 is OUT OF SCOPE for this plan (confined file set); flag it rather than expanding scope. Mask correctness is ultimately proven when baselines mint on CI (orchestrator step, not here).
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue/accrue_admin && node --check e2e/admin-visual-regression-phase211.spec.js</automated>
-    <automated>cd /Users/jon/projects/accrue/accrue_admin && node --check e2e/support/admin-visual-helpers.js</automated>
-    <automated>cd /Users/jon/projects/accrue/accrue_admin && npx playwright test e2e/admin-visual-regression-phase211.spec.js --project=chromium-desktop --list</automated>
-    <automated>cd /Users/jon/projects/accrue/accrue_admin && node -e "const p=require('./package.json'); if(!p.scripts['e2e:visual-regression']) process.exit(1); console.log(p.scripts['e2e:visual-regression'])"</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue_admin && node --check e2e/admin-visual-regression-phase211.spec.js</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue_admin && node --check e2e/support/admin-visual-helpers.js</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue_admin && npx playwright test e2e/admin-visual-regression-phase211.spec.js --project=chromium-desktop --list</automated>
+    <automated>cd /Users/dev/projects/accrue/accrue_admin && node -e "const p=require('./package.json'); if(!p.scripts['e2e:visual-regression']) process.exit(1); console.log(p.scripts['e2e:visual-regression'])"</automated>
   </verify>
   <done>`admin-visual-regression-phase211.spec.js` parses (`node --check`) and its test tree enumerates via `playwright test --list` (require of the shared helper resolves; 4 surfaces × 2 themes present, all gated desktop-only); the `e2e:visual-regression` npm script matches §5 verbatim; NO baseline PNGs were written locally and `--update-snapshots` was never invoked.</done>
 </task>
@@ -154,8 +154,8 @@ The job triggers off the workflow's existing `on: pull_request` (and `workflow_d
 Scope guards: do NOT touch `ci.yml`'s `playwright-e2e` job (that is `accrue_host`), and do NOT rely on / modify the parked `admin-ui-ratchet-guardrails` job.
   </action>
   <verify>
-    <automated>cd /Users/jon/projects/accrue && ruby -ryaml -e "YAML.load_file('.github/workflows/accrue_admin_browser.yml'); puts 'yaml-ok'"</automated>
-    <automated>cd /Users/jon/projects/accrue && grep -q 'id: vrbaseline' .github/workflows/accrue_admin_browser.yml && grep -q "steps.vrbaseline.outputs.present == 'true'" .github/workflows/accrue_admin_browser.yml && grep -q 'Phase 211 visual regression gate' .github/workflows/accrue_admin_browser.yml && grep -q 'visual-baselines-mint' .github/workflows/accrue_admin_browser.yml && grep -q 'phase211-visual-baselines' .github/workflows/accrue_admin_browser.yml && grep -q 'update-snapshots' .github/workflows/accrue_admin_browser.yml && echo tokens-ok</automated>
+    <automated>cd /Users/dev/projects/accrue && ruby -ryaml -e "YAML.load_file('.github/workflows/accrue_admin_browser.yml'); puts 'yaml-ok'"</automated>
+    <automated>cd /Users/dev/projects/accrue && grep -q 'id: vrbaseline' .github/workflows/accrue_admin_browser.yml && grep -q "steps.vrbaseline.outputs.present == 'true'" .github/workflows/accrue_admin_browser.yml && grep -q 'Phase 211 visual regression gate' .github/workflows/accrue_admin_browser.yml && grep -q 'visual-baselines-mint' .github/workflows/accrue_admin_browser.yml && grep -q 'phase211-visual-baselines' .github/workflows/accrue_admin_browser.yml && grep -q 'update-snapshots' .github/workflows/accrue_admin_browser.yml && echo tokens-ok</automated>
   </verify>
   <done>The workflow file is valid YAML; the `browser-uat` job carries the `vrbaseline` presence check and the `if`-guarded `Phase 211 visual regression gate` step (no `continue-on-error`) right after `Run browser UAT`; a separate non-blocking `visual-baselines-mint` job exists that mints on Linux with `--update-snapshots` and uploads artifact `phase211-visual-baselines`; `ci.yml` and the parked ratchet job are untouched.</done>
 </task>
