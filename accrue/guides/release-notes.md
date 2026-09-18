@@ -39,9 +39,9 @@ tokens, credentials, provider payloads, or PII.
 
 ### 1.6.0
 
-**A canonical environment resolver and hardened live Stripe provider contracts.**
+**Release-safe environment resolution and hardened live Stripe provider contracts.**
 
-`1.6.0` adds the canonical `Accrue.Env` resolver so hosts read environment configuration through one documented path instead of scattered lookups. Live Stripe provider contracts, proration fidelity, and typed invoice-line normalization were re-proved against real provider responses, and the deterministic test suite no longer races on Agent teardown.
+`1.6.0` routes every build-tool environment lookup through a single internal seam, so an OTP release that does not ship the build tool no longer risks an undefined-function crash at boot while the `:prod` refuse-to-boot guard still trips correctly. Set `config :accrue, env: ...` explicitly in a release — the build-tool fallback is a convenience for `mix` workflows only. Live Stripe provider contracts, proration fidelity, and typed invoice-line normalization were re-proved against real provider responses, and the deterministic test suite no longer races on Agent teardown.
 
 `accrue_admin` and `accrue_portal` move in lockstep for dependency compatibility only; the core `accrue` package owns the changes.
 
@@ -131,7 +131,7 @@ The admin package is the **LiveView dashboard** that mounts into your Phoenix ro
 
 ### 1.6.0
 
-Matches **accrue 1.6.0** for linked dependency compatibility. The `Accrue.Env` resolver and live Stripe provider-contract fixes live in core; this package adds no operator workflow or authorization behavior.
+Matches **accrue 1.6.0** for linked dependency compatibility. The release-safe environment resolution and live Stripe provider-contract fixes live in core; this package adds no operator workflow or authorization behavior.
 
 ### 1.5.1
 

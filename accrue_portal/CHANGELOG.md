@@ -6,7 +6,7 @@
 
 ### Notes
 
-* Compatibility only: the linked 1.6.0 release accepts the core canonical `Accrue.Env` resolver and the live Stripe provider-contract fixes. The core `accrue` package owns those capabilities; this package owns only its existing UI surface.
+* Compatibility only: the linked 1.6.0 release accepts the core release-safe environment resolution and the live Stripe provider-contract fixes. The core `accrue` package owns those capabilities; this package owns only its existing UI surface.
 
 ### Features
 
