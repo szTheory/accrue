@@ -200,7 +200,6 @@ None yet.
 
 - **Resolved by v1.62:** the `main`/v1.61 divergence, the stale local `main` ref, the four unpublished audit-closure commits, and the unavailable live-CI monitor. All are reconciled into the integration candidate with committed evidence.
 - **Open:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
-- **Open (maintainer decision):** the adopter name `getfluent` appears in 34 places across 16 files on the published candidate branch, as public branch `refs/heads/fix/getfluent-1.5.1`, and as head of merged public PR #41. No credential, token, PII, or vulnerability — a business-relationship disclosure, classified *retained / maintainer-decided*.
 - **Open (coverage):** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
 
 ### Quick Tasks Completed
@@ -363,16 +362,13 @@ of any capsule/inventory minted against the current `dirty: true` state. This
 is an expected, known transition, not a defect -- Phase 232 must recapture
 after the tree goes clean, not before.
 
-### Adopter-named refs: fail forward (maintainer decision)
+### Adopter-named refs: closed (2026-09-18)
 
-`fix/getfluent-1.5.1` and its origin counterpart embed a downstream adopter's
-product name. They predate this work, are already on the public origin, are not
-merged to main, and the same names are already in the previously committed
-inventory, so nothing here added exposure. Maintainer decision: FAIL FORWARD --
-leave them. Renaming would invalidate the frozen manifest (the old names are
-baked into an immutable capsule pinned by the committed inventory's
-manifest_sha256), so it is only free when a NEW capsule is minted. Revisit then.
-Convention going forward: no adopter, customer or personal names in ref names.
+`fix/getfluent-1.5.1` named one of the maintainer's own downstream apps, not a
+third-party client. The branch is deleted from origin; the only residue is the
+head-ref name recorded on merged PR #41 (immutable GitHub metadata) and
+planning-doc text. Nothing reached `accrue/lib`, `accrue_admin`, the guides, or
+any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 

@@ -65,7 +65,6 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 - The candidate SHA is red on its own merge-blocking cohort. Path forward is already written down: push the phase-close commits, re-run CI at the new head, confirm the gates, merge PR #45, then run Release Please.
 - Two instances of the same structural mistake — snapshot records bound to mutable state (a branch *name* instead of a 40-hex object; a 1:1 join asserted against an *append-only* ledger). Worth promoting to a convention rather than rediscovering.
 - PR-body drift on PR #45 recurred twice from one root cause: a committed file asserting byte-equality with a remote surface the commit cannot update. Fix structurally (`gh pr edit --body-file` after push, or restate head-relative).
-- `getfluent` appears in 34 places across 16 files on the published candidate branch, as public branch `refs/heads/fix/getfluent-1.5.1`, and as head of merged public PR #41. No credential, token, PII, or vulnerability — a business-relationship disclosure, classified *retained / maintainer-decided* and still open as a standalone decision.
 - Nyquist coverage is partial: 229 genuine PARTIAL, 230 MISSING, 231/232 `draft` (never reconciled). Discovery only; nothing auto-run.
 
 ## Shipped Milestone: v1.61 CI Evidence & Critical-Path Hardening
