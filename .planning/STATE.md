@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-18)
 Phase: Milestone v1.62 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-09-18 — Milestone v1.62 completed and archived
+Last activity: 2026-09-18 — Completed quick task 260918-hnk: closed v1.62 audit tech-debt item #2
 
 ## Performance Metrics
 
@@ -212,6 +212,7 @@ None yet.
 | 260917-l7v | Shift left seven phase-232 session failure modes into merge-blocking CI guards (SL-A through SL-G) | 2026-09-17 | b42c64a5 | [260917-l7v-shift-left-phase-232-session-lessons-int](./quick/260917-l7v-shift-left-phase-232-session-lessons-int/) |
 | 260918-rpt | Fix release-PR title generation (grouped ${version} with no root package) that made release 1.6.0 tag nothing while reporting success; add a merge-blocking round-trip guard | 2026-09-18 | 11cf1e02 | [260918-rpt-fix-release-pr-title-generation](./quick/260918-rpt-fix-release-pr-title-generation/) |
 | 260918-e8m | Correct v1.62 ROADMAP doc-truth drift before archive: two Phase 231 success criteria claimed green gates the candidate SHA never earned, plus a stale 16/20 plan count | 2026-09-18 | 62c5c6a0 | [260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be](./quick/260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be/) |
+| 260918-hnk | Close v1.62 audit tech-debt item #2: the candidate SHA's merge-blocking gates are green at the shipped head, so record the resolution with its evidence | 2026-09-18 | 27a0e42c | [260918-hnk-close-v1-62-audit-tech-debt-item-2-candi](./quick/260918-hnk-close-v1-62-audit-tech-debt-item-2-candi/) |
 
 ## Deferred Items
 
