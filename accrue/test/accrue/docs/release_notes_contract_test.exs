@@ -367,6 +367,14 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
     # Keep the synthetic starting point stable when this suite runs from a
     # Release Please candidate or from main after that candidate is merged.
     # Candidate promotion below must own the only numbered section under test.
+    #
+    # Every numbered section newer than 1.5.0 is dropped, and the 1.5.0 heading
+    # itself is removed so its body flows back into `## Unreleased` -- that body
+    # carries the substantive assertions this suite exercises. The rule is
+    # version-agnostic on purpose: hardcoding the ladder (1.5.1, then 1.6.0,
+    # then ...) makes this seeder silently wrong on the release after next, and
+    # a seeder that produces an empty Unreleased section fails the contract for
+    # a reason that has nothing to do with the behavior under test.
     for package <- ["accrue", "accrue_admin", "accrue_portal"] do
       set_package_version!(tmp_dir, package, "1.4.0")
 
@@ -374,13 +382,27 @@ defmodule Accrue.Docs.ReleaseNotesContractTest do
 
       changelog
       |> File.read!()
-      |> String.replace(
-        ~r/^## \[1\.5\.1\][\s\S]*?(?=^## \[1\.5\.0\])/m,
-        "",
-        global: false
-      )
-      |> String.replace(~r/^## \[1\.5\.0\][^\n]*\n\n/m, "", global: false)
+      |> strip_sections_above_baseline!(changelog)
       |> then(&File.write!(changelog, &1))
+    end
+  end
+
+  @baseline_heading ~r/^## \[1\.5\.0\][^\n]*\n\n/m
+
+  defp strip_sections_above_baseline!(body, changelog) do
+    case String.split(body, @baseline_heading, parts: 2) do
+      [head, tail] ->
+        String.replace(head, ~r/^## \[[\s\S]*\z/m, "") <> tail
+
+      [_only] ->
+        raise """
+        release notes fixture seeder found no `## [1.5.0]` baseline section in #{changelog}.
+
+        The seeder normalizes a real changelog down to a synthetic 1.4.0 pre-release
+        starting point by deleting every numbered section above the 1.5.0 baseline.
+        Without that baseline it cannot produce a valid fixture, and silently seeding
+        an empty `## Unreleased` would fail the contract for the wrong reason.
+        """
     end
   end
 
