@@ -11,6 +11,8 @@ Phase execution remains in progress. These are wave observations, not final phas
 | 2 | Schema drift / codebase drift / UI safety. | Schema has no block; codebase drift skipped without STRUCTURE.md. UI safety initially blocked on missing UI-SPEC.md after CSS changes. |
 | 2 | UI contract repair through gsd-ui-researcher and independent gsd-ui-checker. | Approved 7/7 after clarifying that the legacy Admin spacing token is outside the shared scale. Contract explicitly records its execution-time provenance. |
 | 2 | Compiled UI-consideration probe and final UI safety rerun. | 30 applicable considerations, 30 explicit acceptance resolutions, 0 unresolved/unclassified; UI safety `block: false`. Criteria are not runtime pass claims. |
+| 3 | Independent orchestrator Portal compile and full test rerun, both with `--warnings-as-errors`. | Exit 0; 52 tests, 0 failures. Plan summary and branch-reachable task commits checked. |
+| 3 | Schema drift / UI safety / codebase drift. | Schema and UI gates have `block: false`; codebase drift skipped without STRUCTURE.md. |
 
 ## Execution environment
 
