@@ -5,18 +5,18 @@ titles: json
 findings:
   - id: CR-01
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "[BLOCKER] Checkout POST rejects supported personal legacy-processor sessions"
-open: 1
+open: 0
 total: 1
-recorded: 2026-10-07T22:45:07.840Z
+recorded: 2026-10-07T23:08:07.655Z
 ---
 
 # Phase 233: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | - |
+| CR-01 | critical | fixed | 233-REVIEW-FIX.md (not in the current review) |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.
