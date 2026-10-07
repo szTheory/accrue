@@ -147,7 +147,7 @@ defmodule AccruePortal.CheckoutContextTest do
     )
 
     case CustomEndpoint.start_link() do
-      {:ok, _pid} -> :ok
+      {:ok, pid} -> Process.unlink(pid)
       {:error, {:already_started, _pid}} -> :ok
     end
 

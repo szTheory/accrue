@@ -144,9 +144,22 @@ defmodule AccrueHostWeb.Router do
       session_keys: [:user_token],
       login_path: "/users/log-in"
     )
+
+    accrue_portal("/shared-billing",
+      on_mount: AccrueHostWeb.LiveAcceptance,
+      session_keys: [:user_token, :active_organization_id, :portal_billable_selection],
+      login_path: "/users/log-in",
+      context_adapter: AccrueHost.PortalContextAdapter
+    )
   else
     accrue_admin("/admin", session_keys: [:user_token], allow_live_reload: false)
     accrue_portal("/billing", session_keys: [:user_token], login_path: "/users/log-in")
+
+    accrue_portal("/shared-billing",
+      session_keys: [:user_token, :active_organization_id, :portal_billable_selection],
+      login_path: "/users/log-in",
+      context_adapter: AccrueHost.PortalContextAdapter
+    )
   end
 
   def __live_session__(conn, session_keys) when is_list(session_keys) do

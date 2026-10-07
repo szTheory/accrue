@@ -57,6 +57,13 @@ defmodule AccruePortal.Layouts do
               <span :if={@current_context.display_detail} class="portal-billable-detail">
                 {@current_context.display_detail}
               </span>
+              <a
+                :if={@current_context.switch_path}
+                class="portal-billable-switch"
+                href={@current_context.switch_path}
+              >
+                Switch account
+              </a>
             </div>
             <div
               :if={not @theme_locked}

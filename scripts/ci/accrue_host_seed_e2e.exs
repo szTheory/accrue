@@ -12,6 +12,7 @@ defmodule AccrueHostSeedE2E do
   alias Accrue.Webhook.WebhookEvent
   alias AccrueHost.Accounts
   alias AccrueHost.Accounts.Scope
+  alias AccrueHost.Accounts.OrganizationMembership
   alias AccrueHost.Accounts.User
   alias AccrueHost.Accounts.UserToken
   alias AccrueHost.Organizations
@@ -63,6 +64,8 @@ defmodule AccrueHostSeedE2E do
         name: "Host E2E Beta Org",
         slug: "host-e2e-beta"
       })
+
+    set_fixture_membership_role!(normal_user, host_org_alpha, :member)
 
     {:ok, admin_org_alpha} =
       Organizations.create_organization(Scope.for_user(admin_user), %{
@@ -498,6 +501,15 @@ defmodule AccrueHostSeedE2E do
       email: history_user.email
     })
     |> Repo.insert!()
+  end
+
+  defp set_fixture_membership_role!(user, organization, role) do
+    from(membership in OrganizationMembership,
+      where: membership.user_id == ^user.id and membership.organization_id == ^organization.id
+    )
+    |> Repo.one!()
+    |> Ecto.Changeset.change(role: role)
+    |> Repo.update!()
   end
 
   defp insert_portal_checkout_customer!(user) do

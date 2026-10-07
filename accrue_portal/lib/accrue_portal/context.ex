@@ -219,7 +219,7 @@ defmodule Accrue.Portal.Context do
   def valid_local_path?(_), do: false
 
   defp adapter_resolve(adapter, actor, selection) do
-    if function_exported?(adapter, :resolve, 2) do
+    if Code.ensure_loaded?(adapter) and function_exported?(adapter, :resolve, 2) do
       case adapter.resolve(actor, selection) do
         {:ok, resolved} when is_map(resolved) -> {:ok, resolved}
         {:error, reason} when reason in [:forbidden, :unavailable] -> {:error, reason}
@@ -235,7 +235,7 @@ defmodule Accrue.Portal.Context do
   end
 
   defp adapter_authorize(adapter, actor, context, action, target) do
-    if function_exported?(adapter, :authorize, 4) do
+    if Code.ensure_loaded?(adapter) and function_exported?(adapter, :authorize, 4) do
       case adapter.authorize(actor, context, action, target) do
         :ok -> :ok
         {:error, :forbidden} -> {:error, :forbidden}

@@ -150,7 +150,7 @@ defmodule AccruePortal.ContextPostTest do
         "context_pin" => pin
       })
 
-    assert redirected_to(default_response) == "/billing/payment-methods"
+    assert_context_redirect(default_response, "/billing/payment-methods", pin)
 
     assert Accrue.Processor.Fake.call_count(:set_default_payment_method) ==
              default_calls_before + 1
@@ -173,7 +173,7 @@ defmodule AccruePortal.ContextPostTest do
         "context_pin" => pin
       })
 
-    assert redirected_to(delete_response) == "/billing/payment-methods"
+    assert_context_redirect(delete_response, "/billing/payment-methods", pin)
     assert Accrue.Processor.Fake.call_count(:detach_payment_method) == delete_calls_before + 1
     assert %PaymentMethod{} = TestRepo.get(PaymentMethod, default_method.id)
     assert %PaymentMethod{} = TestRepo.get(PaymentMethod, other_method.id)
@@ -247,6 +247,14 @@ defmodule AccruePortal.ContextPostTest do
       {:error, {:live_redirect, %{to: path}}} -> live(conn, path)
     end
   end
+
+  defp assert_context_redirect(response, expected_path, expected_pin) do
+    redirect = redirected_to(response)
+    uri = URI.parse(redirect)
+
+    assert uri.path == expected_path
+    assert URI.decode_query(uri.query || "")["context_pin"] == expected_pin
+  end
 end
 
 defmodule AccruePortal.ContextPinPolicyTest do
@@ -277,7 +285,7 @@ defmodule AccruePortal.ContextPinPolicyTest do
     )
 
     case AccruePortal.ContextPostTest.CustomEndpoint.start_link() do
-      {:ok, _pid} -> :ok
+      {:ok, pid} -> Process.unlink(pid)
       {:error, {:already_started, _pid}} -> :ok
     end
 
@@ -384,11 +392,12 @@ defmodule AccruePortal.ContextPinPolicyTest do
 
     default_calls_before = Accrue.Processor.Fake.call_count(:set_default_payment_method)
 
-    assert redirected_to(
-             post(switched_conn, "/org-billing/payment-methods/#{new_default.id}/default", %{
-               "context_pin" => pin
-             })
-           ) == "/org-billing/payment-methods"
+    default_response =
+      post(switched_conn, "/org-billing/payment-methods/#{new_default.id}/default", %{
+        "context_pin" => pin
+      })
+
+    assert_context_redirect(default_response, "/org-billing/payment-methods", pin)
 
     assert Accrue.Processor.Fake.call_count(:set_default_payment_method) ==
              default_calls_before + 1
@@ -401,11 +410,12 @@ defmodule AccruePortal.ContextPinPolicyTest do
 
     delete_calls_before = Accrue.Processor.Fake.call_count(:detach_payment_method)
 
-    assert redirected_to(
-             post(switched_conn, "/org-billing/payment-methods/#{old_default.id}/delete", %{
-               "context_pin" => pin
-             })
-           ) == "/org-billing/payment-methods"
+    delete_response =
+      post(switched_conn, "/org-billing/payment-methods/#{old_default.id}/delete", %{
+        "context_pin" => pin
+      })
+
+    assert_context_redirect(delete_response, "/org-billing/payment-methods", pin)
 
     assert Accrue.Processor.Fake.call_count(:detach_payment_method) == delete_calls_before + 1
 
@@ -469,7 +479,7 @@ defmodule AccruePortal.ContextPinPolicyTest do
         "payment_method_nonce" => "fake-valid-nonce"
       })
 
-    assert redirected_to(response) == "/org-billing/payment-methods"
+    assert_context_redirect(response, "/org-billing/payment-methods", pin)
     assert Accrue.Processor.Fake.call_count(:create_payment_method) == calls_before + 1
 
     assert %Accrue.Billing.PaymentMethod{id: payment_method_id} =
@@ -487,6 +497,14 @@ defmodule AccruePortal.ContextPinPolicyTest do
     refute AccruePortal.TestRepo.get_by(Accrue.Billing.PaymentMethod,
              customer_id: other_customer.id
            )
+  end
+
+  defp assert_context_redirect(response, expected_path, expected_pin) do
+    redirect = redirected_to(response)
+    uri = URI.parse(redirect)
+
+    assert uri.path == expected_path
+    assert URI.decode_query(uri.query || "")["context_pin"] == expected_pin
   end
 
   test "revoked original billable pin does not fall through to the newly selected billable", %{

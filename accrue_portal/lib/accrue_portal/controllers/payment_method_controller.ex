@@ -19,12 +19,12 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
           {:ok, _payment_method} ->
             conn
             |> put_flash(:info, "Payment method saved.")
-            |> redirect(to: Path.payment_methods(base_path(conn)))
+            |> redirect(to: payment_methods_path(conn))
 
           {:error, _reason} ->
             conn
             |> put_flash(:error, "Unable to save payment method.")
-            |> redirect(to: Path.payment_methods(base_path(conn)))
+            |> redirect(to: payment_methods_path(conn))
         end
 
       :error ->
@@ -35,7 +35,7 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
   def create(conn, _params) do
     conn
     |> put_flash(:error, "Payment method tokenization failed.")
-    |> redirect(to: Path.payment_methods(base_path(conn)))
+    |> redirect(to: payment_methods_path(conn))
   end
 
   def set_default(conn, %{"id" => id}) do
@@ -51,12 +51,12 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
               {:ok, _customer} ->
                 conn
                 |> put_flash(:info, "Default payment method updated.")
-                |> redirect(to: Path.payment_methods(base_path(conn)))
+                |> redirect(to: payment_methods_path(conn))
 
               {:error, _reason} ->
                 conn
                 |> put_flash(:error, "Unable to update default payment method.")
-                |> redirect(to: Path.payment_methods(base_path(conn)))
+                |> redirect(to: payment_methods_path(conn))
             end
 
           :error ->
@@ -79,12 +79,12 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
               {:ok, _payment_method} ->
                 conn
                 |> put_flash(:info, "Payment method deleted.")
-                |> redirect(to: Path.payment_methods(base_path(conn)))
+                |> redirect(to: payment_methods_path(conn))
 
               {:error, _reason} ->
                 conn
                 |> put_flash(:error, "Unable to delete payment method.")
-                |> redirect(to: Path.payment_methods(base_path(conn)))
+                |> redirect(to: payment_methods_path(conn))
             end
 
           :error ->
@@ -98,6 +98,10 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
 
   defp base_path(conn) do
     conn.assigns[:accrue_portal_mount_path] || Accrue.Config.portal_mount_path()
+  end
+
+  defp payment_methods_path(conn) do
+    Path.context(Path.payment_methods(base_path(conn)), conn.params["context_pin"])
   end
 
   defp authorize(conn, action, target) do

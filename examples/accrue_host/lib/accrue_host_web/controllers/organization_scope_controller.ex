@@ -6,6 +6,20 @@ defmodule AccrueHostWeb.OrganizationScopeController do
   alias AccrueHost.Accounts.{Organization, OrganizationMembership, User}
   alias AccrueHost.Repo
 
+  def update(conn, %{"organization_slug" => "personal"}) do
+    case conn.assigns[:current_scope] do
+      %{user: %User{}} ->
+        conn
+        |> put_session(:portal_billable_selection, "personal")
+        |> redirect(to: ~p"/app/billing")
+
+      _ ->
+        conn
+        |> put_flash(:error, "You must log in first.")
+        |> redirect(to: ~p"/users/log-in")
+    end
+  end
+
   def update(conn, %{"organization_slug" => slug}) when is_binary(slug) do
     case conn.assigns[:current_scope] do
       %{user: %User{} = user} ->
@@ -14,6 +28,7 @@ defmodule AccrueHostWeb.OrganizationScopeController do
             org_ids = list_member_organization_ids(user.id)
 
             conn
+            |> delete_session(:portal_billable_selection)
             |> put_session(:active_organization_id, org.id)
             |> put_session(:active_organization_slug, org.slug)
             |> put_session(:active_organization_name, org.name)

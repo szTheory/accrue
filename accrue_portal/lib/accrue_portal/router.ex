@@ -29,17 +29,29 @@ defmodule Accrue.Portal.Router do
     login_path = validated[:login_path]
     on_mount = validated[:on_mount]
     context_adapter = validated[:context_adapter]
+    session_name = validated[:session_name]
+    blocked_session_name = validated[:blocked_session_name]
+    browser_pipeline = validated[:browser_pipeline]
+    authenticated_pipeline = validated[:authenticated_pipeline]
+    live_authenticated_pipeline = validated[:live_authenticated_pipeline]
+    scope_name = validated[:scope_name]
 
     quote bind_quoted: [
             mount_path: mount_path,
             session_keys: session_keys,
             login_path: login_path,
             context_adapter: context_adapter,
+            session_name: session_name,
+            blocked_session_name: blocked_session_name,
+            browser_pipeline: browser_pipeline,
+            authenticated_pipeline: authenticated_pipeline,
+            live_authenticated_pipeline: live_authenticated_pipeline,
+            scope_name: scope_name,
             on_mount: on_mount
           ] do
       import Phoenix.LiveView.Router, only: [fetch_live_flash: 2]
 
-      pipeline :accrue_portal_browser do
+      pipeline browser_pipeline do
         plug(:fetch_session)
         plug(:fetch_live_flash)
         plug(:protect_from_forgery)
@@ -47,7 +59,7 @@ defmodule Accrue.Portal.Router do
         plug(Accrue.Portal.BrandPlug)
       end
 
-      pipeline :accrue_portal_authenticated do
+      pipeline authenticated_pipeline do
         plug(Accrue.Portal.AuthPlug,
           mount_path: mount_path,
           login_path: login_path,
@@ -56,7 +68,7 @@ defmodule Accrue.Portal.Router do
         )
       end
 
-      pipeline :accrue_portal_live_authenticated do
+      pipeline live_authenticated_pipeline do
         plug(Accrue.Portal.AuthPlug,
           mount_path: mount_path,
           login_path: login_path,
@@ -66,7 +78,7 @@ defmodule Accrue.Portal.Router do
         )
       end
 
-      scope mount_path, as: :accrue_portal do
+      scope mount_path, as: scope_name do
         get("/assets/brand-#{AccruePortal.Assets.brand_hash()}", AccruePortal.Assets, :brand)
         get("/assets/css-#{AccruePortal.Assets.css_hash()}", AccruePortal.Assets, :css)
         get("/assets/js-#{AccruePortal.Assets.js_hash()}", AccruePortal.Assets, :js)
@@ -83,7 +95,7 @@ defmodule Accrue.Portal.Router do
           :live_view
         )
 
-        pipe_through([:accrue_portal_browser, :accrue_portal_authenticated])
+        pipe_through([browser_pipeline, authenticated_pipeline])
 
         post("/payment-methods", AccruePortal.Controllers.PaymentMethodController, :create)
 
@@ -102,10 +114,10 @@ defmodule Accrue.Portal.Router do
         post("/checkout/:token/complete", AccruePortal.Controllers.CheckoutController, :complete)
       end
 
-      scope mount_path, as: :accrue_portal do
-        pipe_through([:accrue_portal_browser, :accrue_portal_live_authenticated])
+      scope mount_path, as: scope_name do
+        pipe_through([browser_pipeline, live_authenticated_pipeline])
 
-        live_session :accrue_portal,
+        live_session session_name,
           root_layout: {AccruePortal.Layouts, :root},
           on_mount: on_mount,
           session:
@@ -120,7 +132,7 @@ defmodule Accrue.Portal.Router do
           live("/checkout/:token", AccruePortal.Live.CheckoutLive, :show)
         end
 
-        live_session :accrue_portal_blocked,
+        live_session blocked_session_name,
           root_layout: {AccruePortal.Layouts, :root},
           on_mount: [{Accrue.Portal.AuthHook, :ensure_user}],
           session:
@@ -208,6 +220,13 @@ defmodule Accrue.Portal.Router do
       session_keys: session_keys,
       login_path: login_path,
       context_adapter: context_adapter,
+      session_name: session_name(normalized_path),
+      blocked_session_name:
+        String.to_atom(Atom.to_string(session_name(normalized_path)) <> "_blocked"),
+      browser_pipeline: pipeline_name(normalized_path, "browser"),
+      authenticated_pipeline: pipeline_name(normalized_path, "authenticated"),
+      live_authenticated_pipeline: pipeline_name(normalized_path, "live_authenticated"),
+      scope_name: scope_name(normalized_path),
       on_mount: List.wrap(extra_hooks) ++ @default_on_mount
     ]
   end
@@ -223,6 +242,25 @@ defmodule Accrue.Portal.Router do
   defp valid_hook?(hook) when is_atom(hook), do: true
   defp valid_hook?({mod, arg}) when is_atom(mod), do: is_atom(arg) or is_binary(arg)
   defp valid_hook?(_), do: false
+
+  defp session_name("/billing"), do: :accrue_portal
+
+  defp session_name(path) do
+    String.to_atom("accrue_portal_" <> mount_suffix(path))
+  end
+
+  defp pipeline_name(path, suffix),
+    do: String.to_atom("accrue_portal_" <> mount_suffix(path) <> "_" <> suffix)
+
+  defp scope_name("/billing"), do: :accrue_portal
+  defp scope_name(path), do: String.to_atom("accrue_portal_" <> mount_suffix(path))
+
+  defp mount_suffix(path) do
+    path
+    |> String.trim("/")
+    |> then(&Regex.replace(~r/[^a-zA-Z0-9]+/, &1, "_"))
+    |> String.downcase()
+  end
 
   defp normalize_login_path!(path) when is_binary(path) do
     if Accrue.Portal.Context.valid_local_path?(path) do
