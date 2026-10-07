@@ -59,6 +59,10 @@ Contributors should treat operator-facing strings in three tiers:
 
 `accrue_admin` expects the host app to provide browser session state and an `Accrue.Auth` adapter that can resolve an admin-capable operator. The full router mount, branding config, and auth expectations live in the admin UI guide on HexDocs:
 
+Permission to manage a customer-facing Portal billable does not grant operator
+access here. The Portal host adapter and this package's admin authorization are
+separate boundaries; configure an explicit admin-capable `Accrue.Auth` policy.
+
 - <https://hexdocs.pm/accrue_admin/admin_ui.html>
 
 The first-time host setup path for the core package lives in the Accrue First Hour guide:

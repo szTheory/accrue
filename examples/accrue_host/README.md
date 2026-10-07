@@ -291,6 +291,37 @@ mix verify
 Package-facing docs mirror the same order in
 [`../../accrue/guides/first_hour.md`](../../accrue/guides/first_hour.md).
 
+## Optional customer Portal context
+
+`/billing` is the personal-only mount: it has no account picker and no custom
+context adapter. `/shared-billing` is a second example for hosts where one human
+may bill personally or through a workspace. It passes only the auth token and
+the host's active-scope keys to
+[`AccrueHost.PortalContextAdapter`](lib/accrue_host/portal_context_adapter.ex).
+The adapter reloads organization membership and current billing policy for each
+Portal read or action. The example uses `portal_billable_selection: "personal"`
+for an explicit personal selection; otherwise it resolves the active
+organization. These keys, organization schema, and membership roles belong to
+Cadence and are not required by `accrue_portal`.
+
+The resolver keeps the signed-in human (`actor`) separate from the billed user
+or organization (`billable`), its exact Accrue `Customer`, configured
+`processor`, and the action's server-loaded `target`. The visible billed name
+and the `/app/billing` switch link are presentation/navigation data only. A
+signed context pin keeps an open tab on the billable it displayed, then current
+membership and action policy are checked again before protected LiveView or
+POST operations. A member can review an organization but cannot add payment
+methods; denied forms render no Hosted Fields or submit button. Billing owner or
+admin membership roles only govern that billable; `/admin` still requires the
+separate operator authorization.
+
+Use the built-in Portal adapter contract in another host only when there is a
+real custom or mixed billable need. The personal `/billing` mount above remains
+the no-adapter path. Hosted Fields remain provider-specific: mounted Braintree
+forms use the official Braintree client, while provider-hosted sessions stay on
+their existing hosted path. The browser cases for these two example mounts are
+in `e2e/phase233-context.spec.js`.
+
 ## Seeded history
 
 `Seeded history` is the deterministic evaluation path for replay/history and
