@@ -5,14 +5,17 @@ defmodule Accrue.Portal.Context do
   The human actor performs policy checks. The billable identifies the billing
   owner. Display fields are presentation only and never grant access.
 
-  Context adapters expose a closed action vocabulary: `:read`,
-  `:manage_payment_methods`, `:manage_subscription`, and `:complete_checkout`.
+  Context adapters expose a closed action vocabulary for reads, payment-method
+  operations, subscription management, and checkout completion.
   Adapters must reload their own membership and billable records before
   authorizing an action; a session selection or pin is only a locator.
   """
 
   alias Accrue.Billing.Customer
   alias Accrue.Processor
+
+  @pin_salt "accrue-portal-payment-flow-v1"
+  @pin_max_age 20 * 60
 
   @enforce_keys [:actor, :billable, :owner_type, :owner_id, :processor]
   defstruct [
@@ -30,6 +33,9 @@ defmodule Accrue.Portal.Context do
   @type action ::
           :read
           | :manage_payment_methods
+          | :payment_method_create
+          | :payment_method_default
+          | :payment_method_delete
           | :manage_subscription
           | :complete_checkout
 
@@ -67,6 +73,95 @@ defmodule Accrue.Portal.Context do
   end
 
   def resolve(_, _, _, _), do: {:error, :unavailable}
+
+  @doc "Signs the canonical identity and Customer locator for one short-lived form flow."
+  @spec mint_pin(t(), module()) :: {:ok, String.t()} | {:error, :unavailable}
+  def mint_pin(%__MODULE__{} = context, endpoint) when is_atom(endpoint) do
+    with %Customer{
+           id: customer_id,
+           owner_type: customer_owner_type,
+           owner_id: customer_owner_id,
+           processor: customer_processor
+         } <- context.customer,
+         {:ok, owner_type, owner_id} <- owner_identity(context.billable),
+         true <- owner_type == context.owner_type and owner_id == context.owner_id,
+         true <-
+           customer_owner_type == owner_type and customer_owner_id == owner_id and
+             customer_processor == context.processor,
+         true <- is_binary(context.processor) and context.processor != "" do
+      pin = %{
+        "owner_type" => owner_type,
+        "owner_id" => owner_id,
+        "processor" => context.processor,
+        "customer_id" => to_string(customer_id)
+      }
+
+      {:ok, Phoenix.Token.sign(endpoint, @pin_salt, pin)}
+    else
+      _ -> {:error, :unavailable}
+    end
+  rescue
+    _ -> {:error, :unavailable}
+  end
+
+  def mint_pin(_, _), do: {:error, :unavailable}
+
+  @doc "Verifies and decodes a form-flow locator. It does not authorize the flow."
+  @spec verify_pin(term(), module()) :: {:ok, map()} | {:error, :invalid}
+  def verify_pin(pin, endpoint) when is_binary(pin) and is_atom(endpoint) do
+    case Phoenix.Token.verify(endpoint, @pin_salt, pin, max_age: @pin_max_age) do
+      {:ok,
+       %{
+         "owner_type" => owner_type,
+         "owner_id" => owner_id,
+         "processor" => processor,
+         "customer_id" => customer_id
+       } = payload}
+      when is_binary(owner_type) and owner_type != "" and is_binary(owner_id) and owner_id != "" and
+             is_binary(processor) and processor != "" and is_binary(customer_id) and
+             customer_id != "" ->
+        {:ok, payload}
+
+      _ ->
+        {:error, :invalid}
+    end
+  rescue
+    _ -> {:error, :invalid}
+  end
+
+  def verify_pin(_, _), do: {:error, :invalid}
+
+  @doc "Runs the host adapter's fresh named-action policy check for this context and target."
+  @spec authorize_action(t(), module() | nil, action(), term()) :: :ok | {:error, :forbidden}
+  def authorize_action(%__MODULE__{} = context, nil, action, target)
+      when action in [
+             :payment_method_create,
+             :payment_method_default,
+             :payment_method_delete
+           ] do
+    if target_in_context?(context, target), do: :ok, else: {:error, :forbidden}
+  end
+
+  def authorize_action(%__MODULE__{} = context, adapter, action, target)
+      when is_atom(adapter) do
+    case adapter_authorize(adapter, context.actor, context, action, target) do
+      :ok -> :ok
+      _ -> {:error, :forbidden}
+    end
+  end
+
+  def authorize_action(_, _, _, _), do: {:error, :forbidden}
+
+  defp target_in_context?(context, target) do
+    case context.customer do
+      %Customer{id: customer_id} ->
+        target == context.billable or target == context.customer or
+          match?(%Accrue.Billing.PaymentMethod{customer_id: ^customer_id}, target)
+
+      _ ->
+        false
+    end
+  end
 
   @spec personal(struct(), Customer.t()) :: {:ok, t()} | {:error, :unavailable}
   def personal(actor, %Customer{} = customer) do

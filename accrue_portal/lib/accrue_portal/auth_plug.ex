@@ -38,13 +38,31 @@ defmodule Accrue.Portal.AuthPlug do
       |> Keyword.take([:context_adapter, :session_keys, :mount_path])
       |> Keyword.put(:create?, false)
 
-    case CustomerSession.resolve(session, context_opts) do
+    resolution =
+      if payment_method_post?(conn, Keyword.fetch!(opts, :mount_path)) do
+        case conn.params do
+          %{"context_pin" => pin} when is_binary(pin) and pin != "" ->
+            CustomerSession.resolve_pin(
+              session,
+              pin,
+              Keyword.put(context_opts, :endpoint, conn.private[:phoenix_endpoint])
+            )
+
+          _ ->
+            {:error, :unavailable}
+        end
+      else
+        CustomerSession.resolve(session, context_opts)
+      end
+
+    case resolution do
       {:ok, %Context{} = context} ->
         conn
         |> assign_authenticated(session, context.actor, context.customer, opts)
         |> assign(:current_actor, context.actor)
         |> assign(:current_billable, context.billable)
         |> assign(:current_context, context)
+        |> assign(:current_context_adapter, Keyword.fetch!(opts, :context_adapter))
 
       {:error, :unauthenticated} ->
         redirect_to_login(conn, opts)
@@ -53,6 +71,12 @@ defmodule Accrue.Portal.AuthPlug do
         redirect_to_blocked(conn, opts)
     end
   end
+
+  defp payment_method_post?(%Plug.Conn{method: "POST", request_path: path}, mount_path) do
+    String.starts_with?(path, String.trim_trailing(mount_path, "/") <> "/payment-methods")
+  end
+
+  defp payment_method_post?(_, _), do: false
 
   defp require_user(conn, session, opts) do
     case Accrue.Auth.current_user(session) do

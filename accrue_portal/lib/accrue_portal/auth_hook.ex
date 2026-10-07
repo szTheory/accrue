@@ -2,19 +2,19 @@ defmodule Accrue.Portal.AuthHook do
   @moduledoc false
 
   import Phoenix.Component, only: [assign: 3]
-  import Phoenix.LiveView, only: [redirect: 2]
+  import Phoenix.LiveView, only: [push_navigate: 2, redirect: 2]
 
   alias Accrue.Portal.CustomerSession
   alias Accrue.Portal.Context
 
   @spec on_mount(atom(), map(), map(), Phoenix.LiveView.Socket.t()) ::
           {:cont, Phoenix.LiveView.Socket.t()} | {:halt, Phoenix.LiveView.Socket.t()}
-  def on_mount(:ensure_customer, _params, session, socket) do
-    mount_customer(session, socket, create?: true)
+  def on_mount(:ensure_customer, params, session, socket) do
+    mount_customer(session, socket, create?: true, pin: Map.get(params, "context_pin"))
   end
 
-  def on_mount(:ensure_customer_no_create, _params, session, socket) do
-    mount_customer(session, socket, create?: false)
+  def on_mount(:ensure_customer_no_create, params, session, socket) do
+    mount_customer(session, socket, create?: false, pin: Map.get(params, "context_pin"))
   end
 
   def on_mount(:ensure_user, _params, session, socket) do
@@ -25,7 +25,16 @@ defmodule Accrue.Portal.AuthHook do
   end
 
   defp mount_customer(session, socket, opts) do
-    case CustomerSession.resolve(session, opts) do
+    resolution =
+      case Keyword.get(opts, :pin) do
+        pin when is_binary(pin) and pin != "" ->
+          CustomerSession.resolve_pin(session, pin, endpoint: socket.endpoint)
+
+        _ ->
+          CustomerSession.resolve(session, opts)
+      end
+
+    case resolution do
       {:ok, %Context{} = context} ->
         {:cont,
          socket
@@ -33,6 +42,11 @@ defmodule Accrue.Portal.AuthHook do
          |> assign(:current_actor, context.actor)
          |> assign(:current_billable, context.billable)
          |> assign(:current_context, context)
+         |> assign(:current_context_pin, Keyword.get(opts, :pin))
+         |> assign(
+           :current_context_adapter,
+           get_in(session, ["accrue_portal", "context_adapter"])
+         )
          |> assign(:current_customer, context.customer)}
 
       {:error, :unauthenticated} ->

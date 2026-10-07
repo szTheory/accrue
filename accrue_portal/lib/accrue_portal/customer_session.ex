@@ -27,6 +27,23 @@ defmodule Accrue.Portal.CustomerSession do
     end
   end
 
+  @doc "Re-resolves a signed form locator against the current actor and host policy."
+  def resolve_pin(session, pin, opts \\ []) when is_map(session) and is_list(opts) do
+    endpoint = Keyword.get(opts, :endpoint)
+
+    with actor when is_map(actor) <- Accrue.Auth.current_user(session),
+         {:ok, identity} <- Accrue.Portal.Context.verify_pin(pin, endpoint),
+         {:ok, context} <- resolve_pinned_context(actor, identity, session, opts),
+         true <- context.customer.id |> to_string() == identity["customer_id"] do
+      {:ok, context}
+    else
+      {:error, reason} when reason in [:forbidden, :unauthenticated] -> {:error, reason}
+      _ -> {:error, :unavailable}
+    end
+  end
+
+  def resolve_pin(_, _, _), do: {:error, :unavailable}
+
   defp resolve_personal(actor, create?) do
     with {:ok, owner_type, owner_id} <- Accrue.Portal.Context.owner_identity(actor),
          customers <- find_personal_customers(owner_type, owner_id) do
@@ -53,6 +70,48 @@ defmodule Accrue.Portal.CustomerSession do
       end
     else
       {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp resolve_pinned_context(actor, identity, session, opts) do
+    case context_adapter(session, opts) do
+      nil ->
+        with {:ok, owner_type, owner_id} <- Accrue.Portal.Context.owner_identity(actor),
+             true <- owner_type == identity["owner_type"] and owner_id == identity["owner_id"],
+             %Customer{} = customer <- find_customer_by_id(identity["customer_id"]),
+             true <- exact_customer_identity?(customer, identity),
+             {:ok, context} <- Accrue.Portal.Context.personal(actor, customer) do
+          {:ok, context}
+        else
+          _ -> {:error, :unavailable}
+        end
+
+      adapter ->
+        portal = Map.get(session, "accrue_portal", %{})
+        mount_path = Keyword.get(opts, :mount_path, Map.get(portal, "mount_path"))
+
+        selection = %{
+          source: :pin,
+          values: %{
+            "owner_type" => identity["owner_type"],
+            "owner_id" => identity["owner_id"]
+          }
+        }
+
+        with {:ok, context} <-
+               Accrue.Portal.Context.resolve(actor, adapter, selection, mount_path),
+             true <-
+               context.owner_type == identity["owner_type"] and
+                 context.owner_id == identity["owner_id"] and
+                 context.processor == identity["processor"] and
+                 context.processor == Processor.name(),
+             %Customer{} = customer <- find_customer_by_id(identity["customer_id"]),
+             true <- exact_customer_identity?(customer, identity) do
+          {:ok, Accrue.Portal.Context.with_customer(context, customer)}
+        else
+          {:error, reason} -> {:error, reason}
+          _ -> {:error, :unavailable}
+        end
     end
   end
 
@@ -117,6 +176,17 @@ defmodule Accrue.Portal.CustomerSession do
     Repo.one(query)
   end
 
+  defp find_customer_by_id(id) do
+    Repo.get(Customer, id)
+  end
+
+  defp exact_customer_identity?(customer, identity) do
+    customer.owner_type == identity["owner_type"] and
+      to_string(customer.owner_id) == identity["owner_id"] and
+      customer.processor == identity["processor"] and
+      to_string(customer.id) == identity["customer_id"]
+  end
+
   defp exact_customer?(customer, context) do
     customer.owner_type == context.owner_type and customer.owner_id == context.owner_id and
       customer.processor == context.processor
@@ -135,4 +205,5 @@ defmodule AccruePortal.CustomerSession do
   @moduledoc false
 
   defdelegate resolve(session, opts \\ []), to: Accrue.Portal.CustomerSession
+  defdelegate resolve_pin(session, pin, opts \\ []), to: Accrue.Portal.CustomerSession
 end
