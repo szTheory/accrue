@@ -48,14 +48,21 @@ defmodule Accrue.Portal.Router do
       end
 
       pipeline :accrue_portal_authenticated do
-        plug(Accrue.Portal.AuthPlug, mount_path: mount_path, login_path: login_path)
+        plug(Accrue.Portal.AuthPlug,
+          mount_path: mount_path,
+          login_path: login_path,
+          context_adapter: context_adapter,
+          session_keys: session_keys
+        )
       end
 
       pipeline :accrue_portal_live_authenticated do
         plug(Accrue.Portal.AuthPlug,
           mount_path: mount_path,
           login_path: login_path,
-          customer_required: false
+          customer_required: false,
+          context_adapter: context_adapter,
+          session_keys: session_keys
         )
       end
 
@@ -112,6 +119,15 @@ defmodule Accrue.Portal.Router do
           live("/invoices", AccruePortal.Live.InvoicesLive, :index)
           live("/checkout/:token", AccruePortal.Live.CheckoutLive, :show)
         end
+
+        live_session :accrue_portal_blocked,
+          root_layout: {AccruePortal.Layouts, :root},
+          on_mount: [{Accrue.Portal.AuthHook, :ensure_user}],
+          session:
+            {Accrue.Portal.Router, :__session__,
+             [session_keys, mount_path, login_path, context_adapter]} do
+          live("/blocked", AccruePortal.Live.BlockedLive, :index)
+        end
       end
     end
   end
@@ -140,6 +156,9 @@ defmodule Accrue.Portal.Router do
       "accrue_portal" => %{
         "mount_path" => Accrue.Config.normalize_mount_path(mount_path),
         "login_path" => normalize_login_path!(login_path),
+        "blocked_path" =>
+          String.trim_trailing(Accrue.Config.normalize_mount_path(mount_path), "/") <>
+            "/blocked",
         "context_adapter" => context_adapter,
         "context_session_keys" => Enum.map(session_keys, &to_string/1),
         "brand_css_path" => AccruePortal.Assets.hashed_path(:brand, mount_path),
@@ -171,8 +190,8 @@ defmodule Accrue.Portal.Router do
       raise ArgumentError, ":session_keys must be a list of atoms or strings"
     end
 
-    if login_path == normalized_path do
-      raise ArgumentError, ":login_path must not point at the protected portal mount path"
+    if login_path == normalized_path or String.starts_with?(login_path, normalized_path <> "/") do
+      raise ArgumentError, ":login_path must not point inside the protected portal mount path"
     end
 
     unless valid_on_mount?(extra_hooks) do
@@ -206,7 +225,7 @@ defmodule Accrue.Portal.Router do
   defp valid_hook?(_), do: false
 
   defp normalize_login_path!(path) when is_binary(path) do
-    if String.starts_with?(path, "/") and not String.starts_with?(path, "//") do
+    if Accrue.Portal.Context.valid_local_path?(path) do
       path
     else
       raise ArgumentError, ":login_path must be a local path beginning with /"

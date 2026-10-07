@@ -77,7 +77,7 @@ defmodule Accrue.Portal.Context do
          billable: actor,
          owner_type: owner_type,
          owner_id: owner_id,
-         processor: Processor.name(),
+         processor: customer.processor,
          customer: customer
        }}
     else

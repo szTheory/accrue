@@ -47,6 +47,9 @@ defmodule AccruePortal.ContextContractTest do
     alias AccruePortal.ContextContractTest.Actor
     alias AccruePortal.ContextContractTest.Organization
 
+    def resolve(%Actor{}, %{source: :session, values: %{"active_billable_id" => "org-invalid"}}),
+      do: {:error, :unavailable}
+
     def resolve(%Actor{}, %{source: :session, values: %{"active_billable_id" => "org-" <> _ = id}}) do
       {:ok,
        %{
@@ -143,6 +146,8 @@ defmodule AccruePortal.ContextContractTest do
 
     assert {:ok, _view, html} = Phoenix.LiveViewTest.live(conn, "/custom-billing")
     assert html =~ subscription.processor_id
+    assert html =~ "Northwind Organization"
+    assert html =~ "Workspace billing"
     refute html =~ "Personal collision"
   end
 
@@ -194,9 +199,46 @@ defmodule AccruePortal.ContextContractTest do
         "active_billable_id" => "org-invalid"
       })
 
-    assert {:ok, _view, html} = Phoenix.LiveViewTest.live(conn, "/custom-billing")
+    assert {:error, {:redirect, %{to: "/custom-billing/blocked"}}} =
+             Phoenix.LiveViewTest.live(conn, "/custom-billing")
+
+    assert {:ok, _view, html} = Phoenix.LiveViewTest.live(conn, "/custom-billing/blocked")
     assert html =~ "Billing access unavailable"
     refute html =~ "org-invalid"
+    assert TestRepo.aggregate(Customer, :count, :id) == customer_count_before
+    assert Accrue.Processor.Fake.call_count(:create_customer) == provider_calls_before
+  end
+
+  test "authenticated unavailable HTTP action blocks before provisioning" do
+    customer_count_before = TestRepo.aggregate(Customer, :count, :id)
+    provider_calls_before = Accrue.Processor.Fake.call_count(:create_customer)
+
+    conn =
+      Phoenix.ConnTest.build_conn()
+      |> Plug.Test.init_test_session(%{
+        "user_token" => "actor:00000000-0000-0000-0000-000000000123",
+        "active_billable_id" => "org-invalid"
+      })
+      |> Phoenix.ConnTest.post("/custom-billing/payment-methods", %{})
+
+    assert Phoenix.ConnTest.redirected_to(conn) == "/custom-billing/blocked"
+    assert TestRepo.aggregate(Customer, :count, :id) == customer_count_before
+    assert Accrue.Processor.Fake.call_count(:create_customer) == provider_calls_before
+  end
+
+  test "custom mount with no explicit billable selection does not choose a first record" do
+    customer_count_before = TestRepo.aggregate(Customer, :count, :id)
+    provider_calls_before = Accrue.Processor.Fake.call_count(:create_customer)
+
+    conn =
+      Phoenix.ConnTest.build_conn()
+      |> Plug.Test.init_test_session(%{
+        "user_token" => "actor:00000000-0000-0000-0000-000000000123"
+      })
+
+    assert {:error, {:redirect, %{to: "/custom-billing/blocked"}}} =
+             Phoenix.LiveViewTest.live(conn, "/custom-billing")
+
     assert TestRepo.aggregate(Customer, :count, :id) == customer_count_before
     assert Accrue.Processor.Fake.call_count(:create_customer) == provider_calls_before
   end

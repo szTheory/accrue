@@ -9,7 +9,7 @@ defmodule AccruePortal.RouterTest do
     accrue_portal("/ops", session_keys: [:user_token])
   end
 
-  test "mount macro emits asset routes and one live_session sibling shell" do
+  test "mount macro emits asset routes and protected plus blocked live sessions" do
     routes = AccruePortal.TestRouter.__routes__()
     paths = Enum.map(routes, & &1.path)
 
@@ -22,6 +22,7 @@ defmodule AccruePortal.RouterTest do
     assert "/billing/payment-methods/new" in paths
     assert "/billing/invoices" in paths
     assert "/billing/checkout/:token" in paths
+    assert "/billing/blocked" in paths
 
     live_routes =
       Enum.filter(routes, fn route ->
@@ -35,8 +36,8 @@ defmodule AccruePortal.RouterTest do
       |> Enum.map(fn {_view, _action, _opts, live_session} -> live_session.name end)
       |> Enum.uniq()
 
-    assert length(live_routes) == 7
-    assert length(live_sessions) == 1
+    assert length(live_routes) == 8
+    assert length(live_sessions) == 2
   end
 
   test "session callback only forwards explicit host session keys" do
@@ -103,6 +104,29 @@ defmodule AccruePortal.RouterTest do
       |> Accrue.Portal.Router.__session__([:user_token], "/billing", "/users/log-in")
 
     assert session["accrue_portal"]["login_path"] == "/users/log-in"
+    assert session["accrue_portal"]["blocked_path"] == "/billing/blocked"
+  end
+
+  test "login paths must be safe and outside the protected mount" do
+    assert_raise ArgumentError, fn ->
+      Accrue.Portal.AuthPlug.init(login_path: "//outside.example")
+    end
+
+    assert_raise ArgumentError, fn ->
+      Accrue.Portal.AuthPlug.init(login_path: "/safe\npath")
+    end
+
+    module = "AccruePortal.RouterTest.InvalidLoginPath#{System.unique_integer([:positive])}"
+
+    assert_raise ArgumentError, fn ->
+      Code.compile_string("""
+      defmodule #{module} do
+        use Phoenix.Router
+        import Accrue.Portal.Router
+        accrue_portal("/billing", login_path: "/billing/sign-in")
+      end
+      """)
+    end
   end
 
   test "prod-like compilation keeps the portal shell mounted" do

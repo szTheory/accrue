@@ -15,6 +15,7 @@ defmodule AccruePortal.Layouts do
   attr(:phoenix_js_path, :string, default: nil)
   attr(:live_view_js_path, :string, default: nil)
   attr(:base_path, :string, default: nil)
+  attr(:current_context, :map, default: nil)
 
   def root(assigns) do
     assigns =
@@ -49,6 +50,12 @@ defmodule AccruePortal.Layouts do
                 {@brand_wordmark}
               </span>
             </a>
+            <div :if={@current_context && @current_context.display_name} class="portal-billable-identity">
+              <span class="portal-billable-name">{@current_context.display_name}</span>
+              <span :if={@current_context.display_detail} class="portal-billable-detail">
+                {@current_context.display_detail}
+              </span>
+            </div>
             <div
               :if={not @theme_locked}
               class="portal-theme-picker"

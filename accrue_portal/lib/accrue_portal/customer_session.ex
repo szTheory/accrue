@@ -17,9 +17,9 @@ defmodule Accrue.Portal.CustomerSession do
         {:error, :unauthenticated}
 
       %{__struct__: _mod, id: _id} = actor ->
-        case context_adapter(session) do
+        case context_adapter(session, opts) do
           nil -> resolve_personal(actor, create?)
-          adapter -> resolve_custom(actor, adapter, session, create?)
+          adapter -> resolve_custom(actor, adapter, session, create?, opts)
         end
 
       _actor ->
@@ -27,33 +27,47 @@ defmodule Accrue.Portal.CustomerSession do
     end
   end
 
-  defp resolve_personal(actor, true) do
+  defp resolve_personal(actor, create?) do
     with {:ok, owner_type, owner_id} <- Accrue.Portal.Context.owner_identity(actor),
-         {:ok, customer} <- get_or_create_exact(actor, owner_type, owner_id),
-         {:ok, context} <- Accrue.Portal.Context.personal(actor, customer) do
-      {:ok, context}
+         customers <- find_personal_customers(owner_type, owner_id) do
+      case customers do
+        [%Customer{} = customer] ->
+          Accrue.Portal.Context.personal(actor, customer)
+
+        [] when create? ->
+          with {:ok, %Customer{} = customer} <- Billing.create_customer(actor),
+               true <-
+                 customer.owner_type == owner_type and customer.owner_id == owner_id and
+                   is_binary(customer.processor) and customer.processor != "" do
+            Accrue.Portal.Context.personal(actor, customer)
+          else
+            {:error, reason} -> {:error, reason}
+            _ -> {:error, :unavailable}
+          end
+
+        [] ->
+          {:error, :customer_not_found}
+
+        _multiple ->
+          {:error, :unavailable}
+      end
     else
       {:error, reason} -> {:error, reason}
     end
   end
 
-  defp resolve_personal(actor, false) do
-    with {:ok, owner_type, owner_id} <- Accrue.Portal.Context.owner_identity(actor),
-         %Customer{} = customer <- find_customer(owner_type, owner_id),
-         {:ok, context} <- Accrue.Portal.Context.personal(actor, customer) do
-      {:ok, context}
-    else
-      nil -> {:error, :customer_not_found}
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  defp resolve_custom(actor, adapter, session, create?) do
+  defp resolve_custom(actor, adapter, session, create?, opts) do
     portal = Map.get(session, "accrue_portal", %{})
-    session_keys = Map.get(portal, "context_session_keys", [])
+    session_keys = Keyword.get(opts, :session_keys, Map.get(portal, "context_session_keys", []))
     values = Map.take(session, session_keys)
     selection = %{source: :session, values: values}
-    mount_path = Map.get(portal, "mount_path", Accrue.Config.portal_mount_path())
+
+    mount_path =
+      Keyword.get(
+        opts,
+        :mount_path,
+        Map.get(portal, "mount_path", Accrue.Config.portal_mount_path())
+      )
 
     with {:ok, context} <- Accrue.Portal.Context.resolve(actor, adapter, selection, mount_path),
          {:ok, customer} <- resolve_custom_customer(context, create?) do
@@ -82,11 +96,13 @@ defmodule Accrue.Portal.CustomerSession do
     end
   end
 
-  defp get_or_create_exact(actor, owner_type, owner_id) do
-    case find_customer(owner_type, owner_id) do
-      %Customer{} = customer -> {:ok, customer}
-      nil -> Billing.create_customer(actor)
-    end
+  defp find_personal_customers(owner_type, owner_id) do
+    query =
+      from(customer in Customer,
+        where: customer.owner_type == ^owner_type and customer.owner_id == ^owner_id
+      )
+
+    Repo.all(query)
   end
 
   defp find_customer(owner_type, owner_id) do
@@ -106,8 +122,9 @@ defmodule Accrue.Portal.CustomerSession do
       customer.processor == context.processor
   end
 
-  defp context_adapter(session) do
-    case get_in(session, ["accrue_portal", "context_adapter"]) do
+  defp context_adapter(session, opts) do
+    case Keyword.get(opts, :context_adapter) ||
+           get_in(session, ["accrue_portal", "context_adapter"]) do
       adapter when is_atom(adapter) -> adapter
       _ -> nil
     end

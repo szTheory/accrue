@@ -126,6 +126,6 @@ defmodule AccruePortal.AuthHookTest do
                %Phoenix.LiveView.Socket{}
              )
 
-    assert socket.redirected == {:redirect, %{to: "/billing/blocked"}}
+    assert socket.redirected == {:redirect, %{status: 302, to: "/billing/blocked"}}
   end
 end
