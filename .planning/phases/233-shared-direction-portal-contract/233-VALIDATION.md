@@ -43,8 +43,8 @@ created: "2026-10-07"
 | 233-04-T1 | BASE-01 | T-233-10 | `node -e "const f=require('fs').readFileSync('.planning/phases/233-shared-direction-portal-contract/233-INVENTORY.md','utf8');for(const x of ['/subscriptions/:id','/payment-methods/new','/checkout/:token','/checkout/:token/complete','Admin','source SHA','historical'])if(!f.includes(x))process.exit(1)"` | Missing file or route/provenance markers | pending |
 | 233-04-T2 | BASE-01 | T-233-09, T-233-10 | `cd accrue_admin && mix accrue_admin.assets.build` then `cd examples/accrue_host && npm run e2e -- e2e/phase233-baseline.spec.js --workers=1` | Build nonzero/missing asset; browser nonzero/zero tests or missing both served audiences and provenance | pending |
 | 233-04-T3 | SYS-01, SYS-02 | T-233-10 | `node -e "const f=require('fs').readFileSync('.planning/phases/233-shared-direction-portal-contract/DESIGN.md','utf8');for(const x of ['--ax-','--accrue-','focus','reflow','host','motion','status'])if(!f.includes(x))process.exit(1)"` | Missing DESIGN.md or role/ownership markers | pending |
-| 233-05-T1 | POR-08, SHIP-04 | T-233-11, T-233-12 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-context.spec.js --workers=1` | Nonzero, zero tests or absent personal/custom/mixed and actor cases | escalated: 4/5 pass; eligible personal checkout redirects to `/` with no Hosted Fields or Pay control |
-| 233-05-T2 | SHIP-04 | T-233-11 | `cd accrue_portal && mix test test/accrue_portal/readme_contract_test.exs` | Nonzero, zero tests or docs differ from public option/callback/action symbols | pending |
+| 233-05-T1 | POR-08, SHIP-04 | T-233-11, T-233-12 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-context.spec.js --workers=1` | Nonzero, zero tests or absent personal/custom/mixed, revoked/no-write, tab pin and actor cases | passed: 6 browser tests; eligible Hosted Fields SDK initialization, organization checkout denial, fresh membership revocation, stale-pin POST denial and persisted human actor verified |
+| 233-05-T2 | SHIP-04 | T-233-11 | `cd accrue_portal && mix test test/accrue_portal/readme_contract_test.exs --warnings-as-errors` | Nonzero, zero tests or docs differ from public option/callback/action symbols | passed: 2 tests |
 | 233-06-T1 | SYS-01, SYS-02 | T-233-13 | `cd accrue_admin && mix accrue_admin.assets.build` | Nonzero, missing generated asset or public-token rename | pending |
 | 233-06-T2 | SYS-01, SYS-02 | T-233-14 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-semantic.spec.js --workers=1` | Nonzero, zero tests or stale served Portal asset | pending |
 
@@ -74,13 +74,14 @@ created: "2026-10-07"
 - [ ] Focused feedback timing is measured.
 - [ ] Execution results support `nyquist_compliant: true` and `wave_0_complete: true` before those flags change.
 
-## Escalated Implementation Gap
+## Resolved Implementation Gaps
 
-- **233-05-T1 / POR-08, SAFE-02:** Canonical host's eligible personal checkout did not render. Three focused attempts (original browser case, fresh-login context, then existing phase102 promo-preview diagnostic) failed. In the new case, the valid seeded checkout URL redirected to `/` without `[data-portal-hosted-fields="checkout"]`; the existing phase102 test also reached the page without its expected Pay button. This is implementation/runtime behavior and remains a blocker for root to diagnose.
-- Other newly added host browser behaviors passed in the canonical run: denied member/read-only add-card and checkout, rejected unknown/unjoined/revoked/deleted selections preserving the personal identity, old-tab reload preserving its signed personal pin, and successful organization billing-manager mutation while `/admin` redirects to `/`.
-- Canonical browser command: 4 passed, 1 failed in 18.5s (escalated Chromium run). Focused checkout retry: 1 failed in 14s. Existing phase102 checkout diagnostic: 1 failed in 14s. Initial sandboxed browser launch failed before tests because Chromium lacked macOS Mach port access; escalated runs launched normally.
+- **233-05-T1 / POR-08, SAFE-02:** The existing personal checkout belongs to the sole existing Braintree Customer while the test host's configured processor is Fake. Checkout target validation now checks the stored Customer's exact owner and processor. The no-adapter personal context preserves that existing processor; adapter-backed custom contexts still require the configured processor and an exact selected Customer match. The focused checkout context regression and Phase 102 browser checkout tests pass.
+- **233-05-T1 / SAFE-02:** Membership-only revocation initially reached the blocked page over HTTP, then its LiveView socket redirected to login. The blocked live session omitted host-provided `on_mount` hooks, including the E2E SQL Sandbox allowance. It now forwards host hooks before the user-only guard, without invoking the default customer resolver. A Router test proves this hook contract; the browser now confirms generic blocked denial after membership deletion and rejects stale-pin POST without fallback.
+- Other browser proof includes personal-only Hosted Fields SDK initialization counters, read-only organization checkout with accessible denial and no Hosted Fields/submit, cross-tab pin retention, an authorized organization mutation persisted under the human `User`, and no Admin privilege bleed.
+- Canonical browser commands passed: Phase233 context 6/6, Phase233 baseline and semantic plus Phase102 checkout 4/4. Full Portal suite passed 70 tests; full host suite passed 219 tests.
 
-**Approval:** Partial; checkout gap remains escalated.
+**Approval:** Implementation gaps resolved; remaining validation rows belong to other plans and phase-level sign-off remains open.
 
 ## Validation Audit 2026-10-07
 
@@ -97,3 +98,11 @@ created: "2026-10-07"
 | Gaps found | 4 |
 | Resolved | 3 |
 | Escalated | 1 |
+
+## Validation Audit Resolution 2026-10-07
+
+| Metric | Count |
+|---|---|
+| Gaps found | 4 |
+| Resolved | 4 |
+| Escalated | 0 |

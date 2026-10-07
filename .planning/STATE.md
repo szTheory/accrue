@@ -6,10 +6,10 @@ current_phase: 233
 current_phase_name: Shared Direction & Portal Contract
 status: executing
 stopped_at: Completed 233-05-PLAN.md; Phase 233 final review remains pending
-last_updated: "2026-10-07T22:04:33.497Z"
+last_updated: "2026-10-07T22:36:18.348Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 233 plan 05 completed; all 7 plans are tracked complete and final review remains pending
-state_head: db1903858c35614e52d04a8ca710944db831f8d7
+state_head: 7e6d8933acab8031c4e449db98be3803ae4d30a7
 progress:
   total_phases: 7
   completed_phases: 0
@@ -103,6 +103,7 @@ Last activity: 2026-10-07 — Phase 233 plan 05 completed; all plans tracked 7/7
 | Phase 233 P03 | 13min | 2 tasks | 15 files |
 | Phase 233 P07 | 17min | 2 tasks | 13 files |
 | Phase 233 P05 | 26min | 2 tasks | 19 files |
+| Phase 233 P05 | 59min | 2 tasks | 26 files |
 
 ## Accumulated Context
 
@@ -201,6 +202,8 @@ Last activity: 2026-10-07 — Phase 233 plan 05 completed; all plans tracked 7/7
 - [Phase 233]: Portal context pins locate an exact billable and Customer; current host policy authorizes every action.
 - [Phase 233]: Personal-only hosts keep the no-adapter flow; mixed hosts explicitly select personal or organization billing.
 - [Phase 233]: Organization billing managers remain separate from Admin operators.
+- [Phase 233]: Blocked Portal LiveViews include host-supplied hooks before the user-only guard and omit the customer resolver.
+- [Phase 233]: Personal no-adapter checkout preserves its sole existing Customer processor; custom adapter checkout requires the configured processor.
 
 ### Pending Todos
 
@@ -269,7 +272,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-07T22:04:33.468Z
+Last session: 2026-10-07T22:36:18.326Z
 Stopped at: Completed 233-05-PLAN.md; Phase 233 final review remains pending
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

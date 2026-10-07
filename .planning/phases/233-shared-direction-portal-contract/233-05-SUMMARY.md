@@ -16,13 +16,13 @@ provides:
 affects: [portal-adoption, billing-authorization, phase-233-verification]
 
 actuals:
-  tokens: 9419
+  tokens: 17191
   tasks: 2
-  commits: 5
+  commits: 10
 
-commits: 5
+commits: 10
 plan_head_before: 5394f70ff09767767c9917bf95bbb867e096e601
-plan_head_after: db1903858c35614e52d04a8ca710944db831f8d7
+plan_head_after: 7e6d8933acab8031c4e449db98be3803ae4d30a7
 
 tech-stack:
   added: []
@@ -34,6 +34,7 @@ key-files:
   created:
     - examples/accrue_host/lib/accrue_host/portal_context_adapter.ex
     - accrue_portal/test/accrue_portal/readme_contract_test.exs
+    - .planning/phases/233-shared-direction-portal-contract/233-05-T1-GAP-RED.json
   modified:
     - examples/accrue_host/lib/accrue_host/billing.ex
     - accrue/priv/accrue/templates/install/billing.ex.eex
@@ -53,11 +54,14 @@ requirements-completed: [POR-08, SAFE-02, SAFE-03, SHIP-04]
 
 coverage:
   - id: D1
-    description: "The canonical host resolves personal and organization contexts, denies member card collection, and records an authorized organization's card mutation under a human actor."
+    description: "The canonical host resolves personal and organization contexts, denies member card and checkout collection, and records an authorized organization's card mutation under a human actor."
     requirement: SAFE-02
     verification:
       - kind: e2e
         ref: "examples/accrue_host/e2e/phase233-context.spec.js#host-selected member context shows its billable and blocks payment collection"
+        status: pass
+      - kind: e2e
+        ref: "examples/accrue_host/e2e/phase233-context.spec.js#host-selected member context shows its billable and blocks payment collection (organization-owned checkout denial)"
         status: pass
       - kind: e2e
         ref: "examples/accrue_host/e2e/phase233-context.spec.js#an authorized organization manager completes a real Portal payment method mutation"
@@ -67,7 +71,7 @@ coverage:
         status: pass
     human_judgment: false
   - id: D2
-    description: "The personal-only mount renders secure card entry without an organization picker, and a second tab retains its pinned personal identity after host selection changes."
+    description: "The personal-only mount initializes the Hosted Fields SDK without an organization picker, and a second tab retains its pinned personal identity after host selection changes."
     requirement: POR-08
     verification:
       - kind: e2e
@@ -85,8 +89,33 @@ coverage:
         ref: "accrue_portal/test/accrue_portal/readme_contract_test.exs"
         status: pass
     human_judgment: false
+  - id: D4
+    description: "A still-authenticated member whose selected organization membership is deleted sees generic blocked denial on stale-pin reload and POST, without personal or other billable fallback."
+    requirement: SAFE-02
+    verification:
+      - kind: unit
+        ref: "accrue_portal/test/accrue_portal/router_test.exs#blocked live session preserves host hooks without the customer resolver"
+        status: pass
+      - kind: e2e
+        ref: "examples/accrue_host/e2e/phase233-context.spec.js#revoked organization pin blocks reload and submit without falling back"
+        status: pass
+      - kind: http
+        ref: "examples/accrue_host/e2e/phase233-context.spec.js: stale pinned form POST redirects to /shared-billing/blocked"
+        status: pass
+    human_judgment: false
+  - id: D5
+    description: "Personal no-adapter checkout preserves its exact existing Braintree Customer when the configured new-customer processor is Fake; adapter-backed custom checkout remains processor strict."
+    requirement: SAFE-02
+    verification:
+      - kind: unit
+        ref: "accrue_portal/test/accrue_portal/checkout_context_test.exs#custom checkout stays disabled when the configured processor differs from its target"
+        status: pass
+      - kind: e2e
+        ref: "examples/accrue_host/e2e/phase102-portal-checkout.spec.js#promo preview and checkout completion controls"
+        status: pass
+    human_judgment: false
 
-duration: 26min
+duration: 59min
 completed: 2026-10-07
 status: complete
 ---
@@ -97,11 +126,11 @@ status: complete
 
 ## Performance
 
-- **Duration:** 26 min
+- **Duration:** 59 min
 - **Started:** 2026-10-07T21:36:52Z
-- **Completed:** 2026-10-07T22:03:19Z
+- **Completed:** 2026-10-07T22:36:00Z
 - **Tasks:** 2
-- **Files modified:** 19
+- **Files modified:** 26
 
 ## Accomplishments
 
@@ -109,6 +138,10 @@ status: complete
 - Added real browser coverage for personal-only Hosted Fields, member read-only denial with no payment form submission, cross-tab pin retention, an authorized organization card mutation, and the persisted human `User` actor shown in the Admin event ledger.
 - Kept the generated Billing facade and install template aligned through the existing fingerprint mechanism, and documented the optional contract across Portal, Admin, and the example host.
 - Added an executable README contract test that checks mount options, callback signatures, and all documented action names.
+- Preserved the sole existing personal Braintree Customer when the host's configured processor differs, while keeping adapter-backed custom processor matching strict.
+- Preserved host-supplied LiveView hooks on the generic blocked route so membership revocation retains authenticated user identity through the socket mount.
+- Added real revocation browser proof: deleting selected organization membership blocks the stale pin on reload and rejects its POST without falling back to the personal or another organization billable.
+- Measured eligible Hosted Fields SDK initialization through deterministic client and Hosted Fields creation counters; authorized organization mutation and persisted human actor remain proven.
 
 ## Task Commits
 
@@ -117,22 +150,25 @@ status: complete
 3. **Task 2:** `29985659` — docs(233-05): align adopter docs with shared portal contract
 4. **Task 1 browser actor proof:** `7e3380f2` — test(233-05): prove authorized organization mutation in browser
 5. **Task 2 fallback clarification:** `db190385` — docs(233-05): clarify personal customer fallback semantics
+6. **Revoked LiveView host-hook fix:** `e21cb7f9` — fix(233-05): preserve host hooks on blocked portal live view
+7. **Checkout compatibility and revoked pin browser proof:** `7e6d8933` — fix(233-05): prove checkout targets and revoked context denial
 
-The measured plan commit count is 5, from `5394f70ff09767767c9917bf95bbb867e096e601` through `db1903858c35614e52d04a8ca710944db831f8d7`.
+The measured plan-ledger range contains 10 commits from `5394f70ff09767767c9917bf95bbb867e096e601` through `7e6d8933acab8031c4e449db98be3803ae4d30a7`. It includes sequential phase and validation commits in the shared checkout.
 
 ## Verification
 
 - RED gate: `gsd_run check tdd-red-evidence .planning/phases/233-shared-direction-portal-contract/233-05-T1-RED.json` returned `RED_EVIDENCE_OK` (2 browser tests, personal control passed, named shared-mount route returned 404 before implementation).
-- Final browser contract: `npm_config_cache=/tmp/accrue-233-npm-cache npm run e2e -- e2e/phase233-context.spec.js --workers=1` — 3 passed, 0 failed.
-- Portal regression: `HEX_HOME=/tmp/accrue-233-hex mix test --warnings-as-errors` — 68 passed, 0 failed.
+- Final browser contract: `npm_config_cache=/tmp/accrue-233-npm-cache ACCRUE_HOST_E2E_FIXTURE=/private/tmp/phase233-context-fixture.json npm run e2e -- e2e/phase233-context.spec.js --workers=1` — 6 passed, 0 failed.
+- Browser regression: Phase233 baseline and semantic specs plus Phase102 checkout — 4 passed, 0 failed.
+- Portal regression: `HEX_HOME=/tmp/accrue-233-hex mix test --warnings-as-errors` — 70 passed, 0 failed.
 - Host Billing facade: `HEX_HOME=/tmp/accrue-233-hex mix test test/accrue_host/billing_facade_test.exs --warnings-as-errors` — 18 passed, 0 failed.
 - README contract: `HEX_HOME=/tmp/accrue-233-hex mix test test/accrue_portal/readme_contract_test.exs --warnings-as-errors` — 2 passed, 0 failed.
-- Full host regression: `HEX_HOME=/tmp/accrue-233-hex mix test --warnings-as-errors` — 219 tests, 1 failure in the unrelated `AccrueHostWeb.AdminMountTest` assertion that the dashboard HTML contains `Copy.dashboard_display_headline()`; the failure is retained for root review.
+- Full host regression: `HEX_HOME=/tmp/accrue-233-hex mix test` — 219 tests, 0 failures. The earlier AdminMount headline assertion was corrected in the subsequent validation audit.
 
 ## TDD Gate Compliance
 
 - **RED:** The host-selected route assertion failed because `/shared-billing` did not exist; the personal-only control passed. Machine validation and semantic inspection confirmed the failure was the missing planned mount.
-- **GREEN:** The final browser suite passes personal-only rendering, selected member denial, cross-tab pin retention, authorized organization mutation, and persisted human actor display. Portal and focused host suites also pass.
+- **GREEN:** The current browser suites pass personal-only Hosted Fields SDK initialization, selected member denial, cross-tab pin retention, membership-revoked pin denial, authorized organization mutation, and persisted human actor display. Portal and full host suites also pass.
 - **REFACTOR:** No separate refactor commit was needed; the router mount identity fix and redirect pin preservation were included in the implementation commit.
 
 ## Decisions Made
@@ -188,9 +224,16 @@ The measured plan commit count is 5, from `5394f70ff09767767c9917bf95bbb867e096e
 **Total deviations:** 5 auto-fixed (2 Rule 1, 1 Rule 2, 2 Rule 3).
 **Impact on plan:** Each fix was needed for correct multi-mount operation, context retention, deterministic regression coverage, or the plan's required positive authorization and actor proof. No new package or runtime dependency was added.
 
+## Follow-up RED/GREEN Evidence
+
+- **Checkout target regression RED:** `checkout_context_test.exs` now exercises a custom context whose stored checkout processor differs from the configured processor; it asserts generic denial, no Hosted Fields, no form, and zero client-token calls. The no-adapter personal Braintree positive control is exercised in the browser while the host processor is Fake.
+- **Blocked host hooks RED:** `233-05-T1-GAP-RED.json` records the failing Router contract test: only `AuthHook.ensure_user` existed in the blocked session, and the host hook assertion failed. The GREEN implementation forwards supplied host hooks before `ensure_user` and explicitly omits `ensure_customer`; the browser then confirmed the valid identity reaches the accessible blocked state after membership deletion.
+- **Browser proof:** Phase233 context 6/6 passed, including an authenticated membership deletion, stale-pin reload to `/shared-billing/blocked`, no Hosted Fields/submit control, and stale-pin POST redirected to the same generic blocked route.
+- **Mutation proof:** Browser payment-method POST returned success and the Admin event ledger showed the authenticated human `User` as actor for the organization-owned mutation. A separate manager case remained unable to access `/admin`.
+
 ## Issues Encountered
 
-- The full host suite ran 219 tests and failed one unrelated Admin dashboard headline assertion in `examples/accrue_host/test/accrue_host_web/admin_mount_test.exs:53`; no Admin dashboard code changed in this plan. Root should consider this during final phase review.
+- Historical validation first found one stale Admin dashboard headline assertion; the later audit updated it, and the full host suite now passes 219/219.
 - The roadmap progress helper returned `missing_phase_details` despite the existing Phase 233 checklist and progress row; those entries are updated directly during close-out, while Phase 233 remains in progress for root-owned review and UAT.
 - No authorization approval gate occurred. Existing pinned asset tooling and restored Hex cache were used; lockfiles were not changed.
 
@@ -208,8 +251,8 @@ The measured plan commit count is 5, from `5394f70ff09767767c9917bf95bbb867e096e
 ## Self-Check: PASSED
 
 - Summary file exists at the requested phase path.
-- All five measured plan commits are ancestors of `HEAD`.
-- The persisted plan ledger count is 5, matching `actuals.commits`, `commits`, and the recorded plan head range.
+- All seven plan task/follow-up commits are ancestors of `HEAD`.
+- The persisted shared-checkout plan ledger count is 10, matching `actuals.commits`, `commits`, and the recorded plan head range at this summary update.
 
 ---
 *Phase: 233-shared-direction-portal-contract*

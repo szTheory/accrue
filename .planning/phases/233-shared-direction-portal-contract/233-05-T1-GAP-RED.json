@@ -1,0 +1,13 @@
+{
+  "command": "HEX_HOME=/tmp/accrue-233-hex mix test test/accrue_portal/router_test.exs --only test (from accrue_portal)",
+  "exitCode": 2,
+  "output": "7 tests, 1 failure: blocked live session preserves host hooks without the customer resolver. Expected {HostSessionHook, :default} in blocked live session hooks; actual hooks were [{Accrue.Portal.AuthHook, :ensure_user}].",
+  "targetTest": "blocked live session preserves host hooks without the customer resolver",
+  "targetFile": "accrue_portal/test/accrue_portal/router_test.exs",
+  "expected": "The blocked live session carries host-provided mount hooks before its user-only guard and does not run the default customer resolver.",
+  "actual": "The blocked session hardcoded only AuthHook.ensure_user, omitting host hooks required for authenticated socket session access.",
+  "semanticAssessment": {
+    "status": "valid_red",
+    "assessment": "The named Router contract test executed and failed on the missing host hook. This was the intended regression signal, not a compile, collection, or fixture failure."
+  }
+}
