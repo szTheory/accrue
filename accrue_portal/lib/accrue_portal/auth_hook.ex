@@ -5,6 +5,7 @@ defmodule Accrue.Portal.AuthHook do
   import Phoenix.LiveView, only: [redirect: 2]
 
   alias Accrue.Portal.CustomerSession
+  alias Accrue.Portal.Context
 
   @spec on_mount(atom(), map(), map(), Phoenix.LiveView.Socket.t()) ::
           {:cont, Phoenix.LiveView.Socket.t()} | {:halt, Phoenix.LiveView.Socket.t()}
@@ -18,7 +19,7 @@ defmodule Accrue.Portal.AuthHook do
 
   defp mount_customer(session, socket, opts) do
     case CustomerSession.resolve(session, opts) do
-      {:ok, user, customer} ->
+      {:ok, %Context{} = context} ->
         portal = Map.get(session, "accrue_portal", %{})
 
         {:cont,
@@ -34,8 +35,11 @@ defmodule Accrue.Portal.AuthHook do
          |> assign(:phoenix_js_path, Map.get(portal, "phoenix_js_path"))
          |> assign(:live_view_js_path, Map.get(portal, "live_view_js_path"))
          |> assign(:base_path, Map.get(portal, "mount_path"))
-         |> assign(:current_user, user)
-         |> assign(:current_customer, customer)}
+         |> assign(:current_user, context.actor)
+         |> assign(:current_actor, context.actor)
+         |> assign(:current_billable, context.billable)
+         |> assign(:current_context, context)
+         |> assign(:current_customer, context.customer)}
 
       {:error, _reason} ->
         {:halt, redirect(socket, to: redirect_path(session))}

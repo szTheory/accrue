@@ -8,7 +8,7 @@ defmodule Accrue.Portal.CustomerSession do
   alias Accrue.Processor
   alias Accrue.Repo
 
-  @spec resolve(map(), keyword()) :: {:ok, Accrue.Auth.user(), Customer.t()} | {:error, term()}
+  @spec resolve(map(), keyword()) :: {:ok, Accrue.Portal.Context.t()} | {:error, term()}
   def resolve(session, opts \\ []) when is_map(session) and is_list(opts) do
     create? = Keyword.get(opts, :create?, true)
 
@@ -16,36 +16,100 @@ defmodule Accrue.Portal.CustomerSession do
       nil ->
         {:error, :unauthenticated}
 
-      %{__struct__: mod, id: id} = user ->
-        resolve_customer(user, mod, id, create?)
+      %{__struct__: _mod, id: _id} = actor ->
+        case context_adapter(session) do
+          nil -> resolve_personal(actor, create?)
+          adapter -> resolve_custom(actor, adapter, session, create?)
+        end
 
-      user ->
-        {:error, {:unsupported_user_shape, user}}
+      _actor ->
+        {:error, :unavailable}
     end
   end
 
-  defp resolve_customer(user, _mod, _id, true) do
-    case Billing.customer(user) do
-      {:ok, customer} -> {:ok, user, customer}
+  defp resolve_personal(actor, true) do
+    with {:ok, owner_type, owner_id} <- Accrue.Portal.Context.owner_identity(actor),
+         {:ok, customer} <- get_or_create_exact(actor, owner_type, owner_id),
+         {:ok, context} <- Accrue.Portal.Context.personal(actor, customer) do
+      {:ok, context}
+    else
       {:error, reason} -> {:error, reason}
     end
   end
 
-  defp resolve_customer(user, mod, id, false) do
-    billable_type = mod.__accrue__(:billable_type)
-    owner_id = to_string(id)
+  defp resolve_personal(actor, false) do
+    with {:ok, owner_type, owner_id} <- Accrue.Portal.Context.owner_identity(actor),
+         %Customer{} = customer <- find_customer(owner_type, owner_id),
+         {:ok, context} <- Accrue.Portal.Context.personal(actor, customer) do
+      {:ok, context}
+    else
+      nil -> {:error, :customer_not_found}
+      {:error, reason} -> {:error, reason}
+    end
+  end
 
+  defp resolve_custom(actor, adapter, session, create?) do
+    portal = Map.get(session, "accrue_portal", %{})
+    session_keys = Map.get(portal, "context_session_keys", [])
+    values = Map.take(session, session_keys)
+    selection = %{source: :session, values: values}
+    mount_path = Map.get(portal, "mount_path", Accrue.Config.portal_mount_path())
+
+    with {:ok, context} <- Accrue.Portal.Context.resolve(actor, adapter, selection, mount_path),
+         {:ok, customer} <- resolve_custom_customer(context, create?) do
+      {:ok, Accrue.Portal.Context.with_customer(context, customer)}
+    end
+  end
+
+  defp resolve_custom_customer(context, create?) do
+    case find_customer(context.owner_type, context.owner_id) do
+      %Customer{} = customer ->
+        {:ok, customer}
+
+      nil when not create? ->
+        {:error, :customer_not_found}
+
+      nil ->
+        case Billing.create_customer(context.billable) do
+          {:ok, %Customer{} = customer} ->
+            if exact_customer?(customer, context),
+              do: {:ok, customer},
+              else: {:error, :unavailable}
+
+          {:error, reason} ->
+            {:error, reason}
+        end
+    end
+  end
+
+  defp get_or_create_exact(actor, owner_type, owner_id) do
+    case find_customer(owner_type, owner_id) do
+      %Customer{} = customer -> {:ok, customer}
+      nil -> Billing.create_customer(actor)
+    end
+  end
+
+  defp find_customer(owner_type, owner_id) do
     query =
       from(customer in Customer,
         where:
-          customer.owner_type == ^billable_type and customer.owner_id == ^owner_id and
+          customer.owner_type == ^owner_type and customer.owner_id == ^owner_id and
             customer.processor == ^Processor.name(),
         limit: 1
       )
 
-    case Repo.one(query) do
-      %Customer{} = customer -> {:ok, user, customer}
-      nil -> {:error, :customer_not_found}
+    Repo.one(query)
+  end
+
+  defp exact_customer?(customer, context) do
+    customer.owner_type == context.owner_type and customer.owner_id == context.owner_id and
+      customer.processor == context.processor
+  end
+
+  defp context_adapter(session) do
+    case get_in(session, ["accrue_portal", "context_adapter"]) do
+      adapter when is_atom(adapter) -> adapter
+      _ -> nil
     end
   end
 end

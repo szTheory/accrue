@@ -28,11 +28,13 @@ defmodule Accrue.Portal.Router do
     session_keys = validated[:session_keys]
     login_path = validated[:login_path]
     on_mount = validated[:on_mount]
+    context_adapter = validated[:context_adapter]
 
     quote bind_quoted: [
             mount_path: mount_path,
             session_keys: session_keys,
             login_path: login_path,
+            context_adapter: context_adapter,
             on_mount: on_mount
           ] do
       import Phoenix.LiveView.Router, only: [fetch_live_flash: 2]
@@ -99,7 +101,9 @@ defmodule Accrue.Portal.Router do
         live_session :accrue_portal,
           root_layout: {AccruePortal.Layouts, :root},
           on_mount: on_mount,
-          session: {Accrue.Portal.Router, :__session__, [session_keys, mount_path, login_path]} do
+          session:
+            {Accrue.Portal.Router, :__session__,
+             [session_keys, mount_path, login_path, context_adapter]} do
           live("/", AccruePortal.Live.HomeLive, :index)
           live("/subscriptions", AccruePortal.Live.SubscriptionsLive, :index)
           live("/subscriptions/:id", AccruePortal.Live.SubscriptionLive, :show)
@@ -119,6 +123,13 @@ defmodule Accrue.Portal.Router do
   @spec __session__(Plug.Conn.t(), [atom() | String.t()], String.t(), String.t()) :: map()
   def __session__(conn, session_keys, mount_path, login_path)
       when is_list(session_keys) and is_binary(mount_path) do
+    __session__(conn, session_keys, mount_path, login_path, nil)
+  end
+
+  @spec __session__(Plug.Conn.t(), [atom() | String.t()], String.t(), String.t(), module() | nil) ::
+          map()
+  def __session__(conn, session_keys, mount_path, login_path, context_adapter)
+      when is_list(session_keys) and is_binary(mount_path) do
     host_session =
       Map.new(session_keys, fn key ->
         string_key = to_string(key)
@@ -129,6 +140,8 @@ defmodule Accrue.Portal.Router do
       "accrue_portal" => %{
         "mount_path" => Accrue.Config.normalize_mount_path(mount_path),
         "login_path" => normalize_login_path!(login_path),
+        "context_adapter" => context_adapter,
+        "context_session_keys" => Enum.map(session_keys, &to_string/1),
         "brand_css_path" => AccruePortal.Assets.hashed_path(:brand, mount_path),
         "assets_css_path" => AccruePortal.Assets.hashed_path(:css, mount_path),
         "assets_js_path" => AccruePortal.Assets.hashed_path(:js, mount_path),
@@ -152,6 +165,7 @@ defmodule Accrue.Portal.Router do
     session_keys = Keyword.get(opts, :session_keys, @default_session_keys)
     login_path = opts |> Keyword.get(:login_path, @default_login_path) |> normalize_login_path!()
     extra_hooks = Keyword.get(opts, :on_mount, [])
+    context_adapter = Keyword.get(opts, :context_adapter)
 
     unless is_list(session_keys) and Enum.all?(session_keys, &(is_atom(&1) or is_binary(&1))) do
       raise ArgumentError, ":session_keys must be a list of atoms or strings"
@@ -166,10 +180,15 @@ defmodule Accrue.Portal.Router do
             ":on_mount must be a hook or list of hooks accepted by Phoenix.LiveView"
     end
 
+    unless is_nil(context_adapter) or is_atom(context_adapter) do
+      raise ArgumentError, ":context_adapter must be a module or nil"
+    end
+
     [
       mount_path: normalized_path,
       session_keys: session_keys,
       login_path: login_path,
+      context_adapter: context_adapter,
       on_mount: List.wrap(extra_hooks) ++ @default_on_mount
     ]
   end
@@ -211,5 +230,9 @@ defmodule AccruePortal.Router do
 
   defdelegate __session__(conn, session_keys, mount_path), to: Accrue.Portal.Router
   defdelegate __session__(conn, session_keys, mount_path, login_path), to: Accrue.Portal.Router
+
+  defdelegate __session__(conn, session_keys, mount_path, login_path, context_adapter),
+    to: Accrue.Portal.Router
+
   defdelegate assets_path(kind, mount_path), to: Accrue.Portal.Router
 end

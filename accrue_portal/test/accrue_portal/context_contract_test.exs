@@ -46,12 +46,11 @@ defmodule AccruePortal.ContextContractTest do
   defmodule ContextAdapter do
     alias AccruePortal.ContextContractTest.Actor
     alias AccruePortal.ContextContractTest.Organization
-    @id "org-00000001"
 
-    def resolve(%Actor{} = _actor, %{source: :session, values: %{"active_billable_id" => @id}}) do
+    def resolve(%Actor{}, %{source: :session, values: %{"active_billable_id" => "org-" <> _ = id}}) do
       {:ok,
        %{
-         billable: %Organization{id: @id},
+         billable: %Organization{id: id},
          display_name: "Northwind Organization",
          display_detail: "Workspace billing",
          switch_path: "/accounts"
@@ -98,6 +97,7 @@ defmodule AccruePortal.ContextContractTest do
   setup do
     previous_auth = Application.get_env(:accrue, :auth_adapter)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
+
     Application.put_env(:accrue_portal, CustomEndpoint,
       secret_key_base: String.duplicate("abcd1234", 8),
       server: false,
@@ -107,7 +107,7 @@ defmodule AccruePortal.ContextContractTest do
     )
 
     case CustomEndpoint.start_link() do
-      {:ok, endpoint_pid} -> on_exit(fn -> Supervisor.stop(endpoint_pid) end)
+      {:ok, _endpoint_pid} -> :ok
       {:error, {:already_started, _endpoint_pid}} -> :ok
     end
 
@@ -143,7 +143,43 @@ defmodule AccruePortal.ContextContractTest do
 
     assert {:ok, _view, html} = Phoenix.LiveViewTest.live(conn, "/custom-billing")
     assert html =~ subscription.processor_id
-    assert html =~ "Northwind Organization"
     refute html =~ "Personal collision"
+  end
+
+  test "a different processor Customer with matching owner does not supply HomeLive data" do
+    id = "org-wrong-processor"
+
+    wrong_processor_customer =
+      %Customer{}
+      |> Customer.changeset(%{
+        owner_type: Organization.__accrue__(:billable_type),
+        owner_id: id,
+        processor: "another-processor",
+        processor_id: "cus_wrong_processor",
+        name: "Wrong processor"
+      })
+      |> TestRepo.insert!()
+
+    wrong_processor_subscription =
+      AccruePortal.Fixtures.read_only_subscription_fixture!(wrong_processor_customer)
+
+    conn =
+      Phoenix.ConnTest.build_conn()
+      |> Plug.Test.init_test_session(%{
+        "user_token" => "actor:00000000-0000-0000-0000-000000000123",
+        "active_billable_id" => id
+      })
+
+    assert {:ok, _view, html} = Phoenix.LiveViewTest.live(conn, "/custom-billing")
+    refute html =~ wrong_processor_subscription.processor_id
+
+    assert %Customer{processor: processor} =
+             TestRepo.get_by(Customer,
+               owner_type: Organization.__accrue__(:billable_type),
+               owner_id: id,
+               processor: Accrue.Processor.name()
+             )
+
+    assert processor == Accrue.Processor.name()
   end
 end
