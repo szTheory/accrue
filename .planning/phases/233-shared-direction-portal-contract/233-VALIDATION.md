@@ -1,9 +1,9 @@
 ---
 phase: "233"
 slug: "shared-direction-portal-contract"
-status: partial
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-10-07"
 ---
 
@@ -19,7 +19,7 @@ created: "2026-10-07"
 | Config file | `accrue_portal/mix.exs`; canonical host Playwright configuration |
 | Quick run command | `cd accrue_portal && mix test test/accrue_portal/auth_hook_test.exs test/accrue_portal/router_test.exs` |
 | Full suite command | `cd accrue_portal && mix test --warnings-as-errors` |
-| Estimated runtime | Unmeasured; record actual focused and full-suite runtime during execution |
+| Estimated runtime | Portal full suite: 2.0 seconds in independent wave-5 rerun (68 tests); later gap regression passed 70 tests. Context browser: final 6/6; prior 4/5 audit run measured 18.5 seconds. |
 
 ## Sampling Rate
 
@@ -32,21 +32,21 @@ created: "2026-10-07"
 
 | Task | Requirement | Threat ref | Automated command / evidence | Fails when | Status |
 |------|-------------|------------|------------------------------|------------|--------|
-| 233-01-T1 | POR-08, SAFE-02 | T-233-01 | `cd accrue_portal && mix test test/accrue_portal/context_contract_test.exs` | Nonzero, zero tests or missing rendered custom path and exact identity | pending |
-| 233-01-T2 | SAFE-02 | T-233-01, T-233-02 | `cd accrue_portal && mix test test/accrue_portal/auth_hook_test.exs test/accrue_portal/context_contract_test.exs` | Nonzero, zero tests or absent denied/no-provision assertions | pending |
-| 233-02-T1 | SAFE-02, SAFE-03 | T-233-03, T-233-04 | `cd accrue_portal && mix test test/accrue_portal/context_post_test.exs` | Nonzero, zero tests, or missing rendered default/delete producer-to-POST positive controls, switched-tab pin, denied zero-write or wrong-target assertions for either action | pending |
-| 233-02-T2 | SAFE-03 | T-233-04 | `cd accrue_portal && mix test test/accrue_portal/context_post_test.exs` | Nonzero, zero tests, read-allowed/write-denied add-card mount calls client_token_for, or missing rendered producer-to-POST positive and denied controls across default/delete/create | pending |
-| 233-03-T1 | POR-08, SAFE-02 | T-233-06, T-233-07 | `cd accrue_portal && mix test test/accrue_portal/context_live_test.exs` | Nonzero, zero tests or missing subscription event/reconnect cases | pending |
-| 233-03-T2 | SAFE-03 | T-233-07 | `cd accrue_portal && mix test test/accrue_portal/context_live_test.exs` | Nonzero, zero tests or missing invoice direct-navigation/reconnect denial | pending |
-| 233-07-T1 | SAFE-02, SAFE-03 | T-233-08, T-233-15 | `cd accrue_portal && mix test test/accrue_portal/checkout_context_test.exs` | Nonzero, zero tests, read-allowed/complete-denied mount calls client_token_for, or eligible event cannot mutate | pending |
-| 233-07-T2 | SAFE-03 | T-233-05, T-233-08 | `cd accrue_portal && mix test test/accrue_portal/checkout_context_test.exs` | Nonzero, zero tests, rendered checkout form lacks context_pin, or denied/replayed POST calls provider | pending |
-| 233-04-T1 | BASE-01 | T-233-10 | `node -e "const f=require('fs').readFileSync('.planning/phases/233-shared-direction-portal-contract/233-INVENTORY.md','utf8');for(const x of ['/subscriptions/:id','/payment-methods/new','/checkout/:token','/checkout/:token/complete','Admin','source SHA','historical'])if(!f.includes(x))process.exit(1)"` | Missing file or route/provenance markers | pending |
-| 233-04-T2 | BASE-01 | T-233-09, T-233-10 | `cd accrue_admin && mix accrue_admin.assets.build` then `cd examples/accrue_host && npm run e2e -- e2e/phase233-baseline.spec.js --workers=1` | Build nonzero/missing asset; browser nonzero/zero tests or missing both served audiences and provenance | pending |
-| 233-04-T3 | SYS-01, SYS-02 | T-233-10 | `node -e "const f=require('fs').readFileSync('.planning/phases/233-shared-direction-portal-contract/DESIGN.md','utf8');for(const x of ['--ax-','--accrue-','focus','reflow','host','motion','status'])if(!f.includes(x))process.exit(1)"` | Missing DESIGN.md or role/ownership markers | pending |
+| 233-01-T1 | POR-08, SAFE-02 | T-233-01 | `cd accrue_portal && mix test test/accrue_portal/context_contract_test.exs` | Nonzero, zero tests or missing rendered custom path and exact identity | passed |
+| 233-01-T2 | SAFE-02 | T-233-01, T-233-02 | `cd accrue_portal && mix test test/accrue_portal/auth_hook_test.exs test/accrue_portal/context_contract_test.exs` | Nonzero, zero tests or absent denied/no-provision assertions | passed |
+| 233-02-T1 | SAFE-02, SAFE-03 | T-233-03, T-233-04 | `cd accrue_portal && mix test test/accrue_portal/context_post_test.exs` | Nonzero, zero tests, or missing rendered default/delete producer-to-POST positive controls, switched-tab pin, denied zero-write or wrong-target assertions for either action | passed |
+| 233-02-T2 | SAFE-03 | T-233-04 | `cd accrue_portal && mix test test/accrue_portal/context_post_test.exs` | Nonzero, zero tests, read-allowed/write-denied add-card mount calls client_token_for, or missing rendered producer-to-POST positive and denied controls across default/delete/create | passed |
+| 233-03-T1 | POR-08, SAFE-02 | T-233-06, T-233-07 | `cd accrue_portal && mix test test/accrue_portal/context_live_test.exs` | Nonzero, zero tests or missing subscription event/reconnect cases | passed |
+| 233-03-T2 | SAFE-03 | T-233-07 | `cd accrue_portal && mix test test/accrue_portal/context_live_test.exs` | Nonzero, zero tests or missing invoice direct-navigation/reconnect denial | passed |
+| 233-07-T1 | SAFE-02, SAFE-03 | T-233-08, T-233-15 | `cd accrue_portal && mix test test/accrue_portal/checkout_context_test.exs` | Nonzero, zero tests, read-allowed/complete-denied mount calls client_token_for, or eligible event cannot mutate | passed |
+| 233-07-T2 | SAFE-03 | T-233-05, T-233-08 | `cd accrue_portal && mix test test/accrue_portal/checkout_context_test.exs` | Nonzero, zero tests, rendered checkout form lacks context_pin, or denied/replayed POST calls provider | passed |
+| 233-04-T1 | BASE-01 | T-233-10 | `node -e "const f=require('fs').readFileSync('.planning/phases/233-shared-direction-portal-contract/233-INVENTORY.md','utf8');for(const x of ['/subscriptions/:id','/payment-methods/new','/checkout/:token','/checkout/:token/complete','Admin','source SHA','historical'])if(!f.includes(x))process.exit(1)"` | Missing file or route/provenance markers | passed |
+| 233-04-T2 | BASE-01 | T-233-09, T-233-10 | `cd accrue_admin && mix accrue_admin.assets.build` then `cd examples/accrue_host && npm run e2e -- e2e/phase233-baseline.spec.js --workers=1` | Build nonzero/missing asset; browser nonzero/zero tests or missing both served audiences and provenance | passed |
+| 233-04-T3 | SYS-01, SYS-02 | T-233-10 | `node -e "const f=require('fs').readFileSync('.planning/phases/233-shared-direction-portal-contract/DESIGN.md','utf8');for(const x of ['--ax-','--accrue-','focus','reflow','host','motion','status'])if(!f.includes(x))process.exit(1)"` | Missing DESIGN.md or role/ownership markers | passed |
 | 233-05-T1 | POR-08, SHIP-04 | T-233-11, T-233-12 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-context.spec.js --workers=1` | Nonzero, zero tests or absent personal/custom/mixed, revoked/no-write, tab pin and actor cases | passed: 6 browser tests; eligible Hosted Fields SDK initialization, organization checkout denial, fresh membership revocation, stale-pin POST denial and persisted human actor verified |
 | 233-05-T2 | SHIP-04 | T-233-11 | `cd accrue_portal && mix test test/accrue_portal/readme_contract_test.exs --warnings-as-errors` | Nonzero, zero tests or docs differ from public option/callback/action symbols | passed: 2 tests |
-| 233-06-T1 | SYS-01, SYS-02 | T-233-13 | `cd accrue_admin && mix accrue_admin.assets.build` | Nonzero, missing generated asset or public-token rename | pending |
-| 233-06-T2 | SYS-01, SYS-02 | T-233-14 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-semantic.spec.js --workers=1` | Nonzero, zero tests or stale served Portal asset | pending |
+| 233-06-T1 | SYS-01, SYS-02 | T-233-13 | `cd accrue_admin && mix accrue_admin.assets.build` | Nonzero, missing generated asset or public-token rename | passed |
+| 233-06-T2 | SYS-01, SYS-02 | T-233-14 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-semantic.spec.js --workers=1` | Nonzero, zero tests or stale served Portal asset | passed |
 
 ## Wave 0 Requirements
 
@@ -58,7 +58,7 @@ created: "2026-10-07"
 - Create bounded canonical-host browser proof for current served assets in 233-04-T2, billed identity, read-only payment mount state and secure-field clearing in 233-05-T1, and CSS semantics in 233-06-T2.
 - A source-only assertion or historical screenshot cannot substitute for current served behavior.
 
-## Manual-Only Verifications
+## Visual observations (no recurring manual gate)
 
 | Behavior | Requirement | Why Direct Inspection | Instructions |
 |----------|-------------|-----------------------|--------------|
@@ -66,13 +66,13 @@ created: "2026-10-07"
 
 ## Validation Sign-Off
 
-- [ ] Concrete plan task IDs, threat references and commands are synchronized.
-- [ ] Every task has an automated check or explicit prerequisite that supplies it.
-- [ ] No three consecutive tasks lack automated verification.
-- [ ] Every new verification target is created before it is invoked.
-- [ ] No watch-mode command is used.
-- [ ] Focused feedback timing is measured.
-- [ ] Execution results support `nyquist_compliant: true` and `wave_0_complete: true` before those flags change.
+- [x] Concrete plan task IDs, threat references and commands are synchronized.
+- [x] Every task has an automated check or explicit prerequisite that supplies it.
+- [x] No three consecutive tasks lack automated verification.
+- [x] Every new verification target is created before it is invoked.
+- [x] No watch-mode command is used.
+- [x] Focused feedback timing is measured.
+- [x] Execution results support `nyquist_compliant: true` and `wave_0_complete: true` before those flags change.
 
 ## Resolved Implementation Gaps
 
@@ -100,6 +100,18 @@ created: "2026-10-07"
 | Escalated | 1 |
 
 ## Validation Audit Resolution 2026-10-07
+
+| Metric | Count |
+|---|---|
+| Gaps found | 4 |
+| Resolved | 4 |
+| Escalated | 0 |
+
+## Final validation reconciliation
+
+All 15 planned task checks have passing execution evidence in their committed summaries and 233-EXECUTION-CHECKS.md. The final gap rerun passed 70 Portal tests, 219 host tests, 18 Billing facade tests, 2 README tests, 6 context browser cases, and 4 baseline/semantic/existing checkout browser cases. The previously escalated checkout and connected blocked-page issues were fixed in `e21cb7f9` and `7e6d8933`; no behavior is delegated to manual UAT. All four audited coverage gaps are resolved.
+
+## Validation Audit 2026-10-07
 
 | Metric | Count |
 |---|---|
