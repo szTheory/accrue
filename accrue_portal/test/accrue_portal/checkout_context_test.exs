@@ -222,6 +222,50 @@ defmodule AccruePortal.CheckoutContextTest do
                      %{type: :user, id: _}}
   end
 
+  test "rendered checkout form posts its pin and nonce through the authorized completion route", %{
+    conn: conn
+  } do
+    session = checkout_fixture("org-checkout-post")
+    conn = sign_in_org(conn, "org-checkout-post")
+    ActionAdapter.grant("org-checkout-post", [:checkout_complete])
+
+    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
+    assert html =~ ~s(id="checkout-form")
+    assert html =~ ~s(method="post")
+    assert html =~ ~s(action="/org-billing/checkout/#{session.session_token}/complete")
+    assert html =~ ~s(name="_csrf_token")
+    assert html =~ ~s(name="payment_method_nonce")
+
+    [[pin]] = Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+    csrf = Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first) |> hd()
+
+    response =
+      post(conn, "/org-billing/checkout/#{session.session_token}/complete", %{
+        "context_pin" => pin,
+        "_csrf_token" => csrf,
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    assert redirected_to(response) == "https://app.example.test/billing/success"
+    assert LocalSession.by_id(session.id).status == "completed"
+    assert_received {:gateway_create, %{payment_method_token: "fake-valid-nonce"}, %{type: :user}}
+  end
+
+  test "checkout POST without rendered pin cannot call the provider", %{conn: conn} do
+    session = checkout_fixture("org-checkout-post-denied")
+    conn = sign_in_org(conn, "org-checkout-post-denied")
+    ActionAdapter.grant("org-checkout-post-denied", [:checkout_complete])
+
+    response =
+      post(conn, "/org-billing/checkout/#{session.session_token}/complete", %{
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    refute_received {:gateway_create, _, _}
+    refute LocalSession.by_id(session.id).status == "completed"
+    assert response.halted
+  end
+
   defp checkout_fixture(owner_id) do
     customer =
       %Customer{}
