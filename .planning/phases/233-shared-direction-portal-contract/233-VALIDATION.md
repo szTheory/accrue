@@ -1,7 +1,7 @@
 ---
 phase: "233"
 slug: "shared-direction-portal-contract"
-status: draft
+status: partial
 nyquist_compliant: false
 wave_0_complete: false
 created: "2026-10-07"
@@ -9,7 +9,7 @@ created: "2026-10-07"
 
 # Phase 233 — Validation Strategy
 
-> Execution validation contract. Planning has not run application tests, built assets, or inspected current served rendering. Commands and task/threat IDs below match the seven revised plans; all execution flags remain false. Wave 1 current served baseline (233-04) precedes router/auth edits (233-01, wave 2); 233-02 follows in wave 3; 233-03 and 233-07 run independently in wave 4; host proof 233-05 runs in wave 5. Semantic CSS 233-06 is wave 2 after baseline.
+> Execution validation contract. Phase execution and audit evidence are recorded below. Wave 1 current served baseline (233-04) precedes router/auth edits (233-01, wave 2); 233-02 follows in wave 3; 233-03 and 233-07 run independently in wave 4; host proof 233-05 runs in wave 5. Semantic CSS 233-06 is wave 2 after baseline.
 
 ## Test Infrastructure
 
@@ -43,7 +43,7 @@ created: "2026-10-07"
 | 233-04-T1 | BASE-01 | T-233-10 | `node -e "const f=require('fs').readFileSync('.planning/phases/233-shared-direction-portal-contract/233-INVENTORY.md','utf8');for(const x of ['/subscriptions/:id','/payment-methods/new','/checkout/:token','/checkout/:token/complete','Admin','source SHA','historical'])if(!f.includes(x))process.exit(1)"` | Missing file or route/provenance markers | pending |
 | 233-04-T2 | BASE-01 | T-233-09, T-233-10 | `cd accrue_admin && mix accrue_admin.assets.build` then `cd examples/accrue_host && npm run e2e -- e2e/phase233-baseline.spec.js --workers=1` | Build nonzero/missing asset; browser nonzero/zero tests or missing both served audiences and provenance | pending |
 | 233-04-T3 | SYS-01, SYS-02 | T-233-10 | `node -e "const f=require('fs').readFileSync('.planning/phases/233-shared-direction-portal-contract/DESIGN.md','utf8');for(const x of ['--ax-','--accrue-','focus','reflow','host','motion','status'])if(!f.includes(x))process.exit(1)"` | Missing DESIGN.md or role/ownership markers | pending |
-| 233-05-T1 | POR-08, SHIP-04 | T-233-11, T-233-12 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-context.spec.js --workers=1` | Nonzero, zero tests or absent personal/custom/mixed and actor cases | pending |
+| 233-05-T1 | POR-08, SHIP-04 | T-233-11, T-233-12 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-context.spec.js --workers=1` | Nonzero, zero tests or absent personal/custom/mixed and actor cases | escalated: 4/5 pass; eligible personal checkout redirects to `/` with no Hosted Fields or Pay control |
 | 233-05-T2 | SHIP-04 | T-233-11 | `cd accrue_portal && mix test test/accrue_portal/readme_contract_test.exs` | Nonzero, zero tests or docs differ from public option/callback/action symbols | pending |
 | 233-06-T1 | SYS-01, SYS-02 | T-233-13 | `cd accrue_admin && mix accrue_admin.assets.build` | Nonzero, missing generated asset or public-token rename | pending |
 | 233-06-T2 | SYS-01, SYS-02 | T-233-14 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-semantic.spec.js --workers=1` | Nonzero, zero tests or stale served Portal asset | pending |
@@ -74,4 +74,26 @@ created: "2026-10-07"
 - [ ] Focused feedback timing is measured.
 - [ ] Execution results support `nyquist_compliant: true` and `wave_0_complete: true` before those flags change.
 
-**Approval:** Pending execution evidence.
+## Escalated Implementation Gap
+
+- **233-05-T1 / POR-08, SAFE-02:** Canonical host's eligible personal checkout did not render. Three focused attempts (original browser case, fresh-login context, then existing phase102 promo-preview diagnostic) failed. In the new case, the valid seeded checkout URL redirected to `/` without `[data-portal-hosted-fields="checkout"]`; the existing phase102 test also reached the page without its expected Pay button. This is implementation/runtime behavior and remains a blocker for root to diagnose.
+- Other newly added host browser behaviors passed in the canonical run: denied member/read-only add-card and checkout, rejected unknown/unjoined/revoked/deleted selections preserving the personal identity, old-tab reload preserving its signed personal pin, and successful organization billing-manager mutation while `/admin` redirects to `/`.
+- Canonical browser command: 4 passed, 1 failed in 18.5s (escalated Chromium run). Focused checkout retry: 1 failed in 14s. Existing phase102 checkout diagnostic: 1 failed in 14s. Initial sandboxed browser launch failed before tests because Chromium lacked macOS Mach port access; escalated runs launched normally.
+
+**Approval:** Partial; checkout gap remains escalated.
+
+## Validation Audit 2026-10-07
+
+| Metric | Count |
+|---|---|
+| Gaps found | 3 |
+| Resolved | 2 |
+| Escalated | 1 |
+
+## Validation Audit 2026-10-07
+
+| Metric | Count |
+|---|---|
+| Gaps found | 4 |
+| Resolved | 3 |
+| Escalated | 1 |
