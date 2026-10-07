@@ -1,38 +1,34 @@
 ---
-gsd_state_version: 1.0
-milestone: v1.62
-milestone_name: Release Integration & Repository Hygiene
-status: Awaiting next milestone
-stopped_at: Phase 232 complete — all phases complete
-last_updated: "2026-09-18T15:14:54.513Z"
-last_activity: 2026-09-18
-last_activity_desc: Milestone v1.62 completed and archived
+gsd_state_version: "1.0"
+milestone: v1.63
+milestone_name: Admin and Portal UI refinement
+status: planning
+last_updated: "2026-10-07T14:17:22.695Z"
+last_activity: 2026-10-07
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 44
-  completed_plans: 44
-  percent: 100
-current_phase: 232
-state_head: 4e7715f772d763d7fe6c31f426ee6fafcc66becd
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-18)
+See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Planning next milestone. v1.62 shipped a *reviewable, per-lane-proved* release candidate, not a green one — the candidate SHA is red on `docs-contracts-shift-left`, `release-gate`, and `phase18-tax-gate`, with fixes already on the milestone line. Written path forward: push the phase-close commits, re-run CI at the new head, confirm the gates, merge PR #45, then run Release Please.
+**Current focus:** Defining requirements and the phase roadmap for v1.63, Admin and Portal UI refinement. v1.62 is complete and archived; its closeout and lane history remain in the milestone archive and are not active work.
 
 ## Current Position
 
-Phase: Milestone v1.62 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-18 — Completed quick task 260918-hnk: closed v1.62 audit tech-debt item #2
+Status: Defining requirements
+Last activity: 2026-10-07 — Milestone v1.63 started
 
 ## Performance Metrics
 

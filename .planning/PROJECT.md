@@ -33,17 +33,25 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest fully shipped milestone: v1.62 — Release Integration & Repository Hygiene, shipped 2026-09-18.** The repository now has reproducible branch/worktree/artifact/ship-window truth with immutable recovery capsules, a provenance-backed integration candidate built without rewriting published history, exact-SHA release-gate evidence recorded per lane with no aggregate green boolean, and evidence-backed cleanup handed off as PR #45. The candidate SHA is honestly recorded as **red** on `docs-contracts-shift-left`, `release-gate`, and `phase18-tax-gate`; fixes exist on the milestone line and land at the new head, so v1.62 delivers a *reviewable, provably-measured* release candidate, not a green one.
+**Latest fully shipped milestone: v1.62 — Release Integration & Repository Hygiene, shipped and archived 2026-09-18.** It completed the bounded repository-truth, integration-candidate, exact-SHA evidence, and hygiene work recorded in its milestone archive. Its release-handoff scope is closed; historical lane outcomes remain in the v1.62 evidence and are not active work for this milestone.
 
-**Prior fully shipped milestone: v1.61 — CI Evidence & Critical-Path Hardening, shipped 2026-09-12.** Required release and Admin failures now have trace-backed incident classification; CI has a privacy-safe, repository-bound baseline and explicit provider proof states; and the retained critical-path candidate reduced the measured median from 2,083 seconds to 1,125 seconds without removing required release, host, browser, artifact, or provider evidence. Crosswake runtime capability remains `feasibility_blocked` pending physical-device evidence.
+**Current focus:** formally planning v1.63, Admin and Portal UI refinement, following the accepted October 2026 maintainer request and the source-backed briefs in `.planning/notes/2026-10-07-accrue-ui-refinement-scope.md` and `.planning/notes/2026-10-07-portal-billable-context-contract.md`.
 
-**Phase 223 complete (2026-08-06):** the reusable iOS-compatible SwiftPM offline client now preserves canonical ES256 proof verification, authenticated atomic cache recovery, durable observed-time rollback protection, bounded compact-proof/JSON admission, host-owned reconnect and display seams, and deterministic package/iOS/reference evidence. IOS-01 through IOS-03 verified 28/28 must-haves; Phase 224 owns the Crosswake host-command bridge seam. Advisory code review recorded a follow-up cached-read versus concurrent signed-denial race in `223-REVIEW.md`; it must be resolved before relying on concurrent-cache behavior beyond the verified scenario coverage.
+## Current Milestone: v1.63 Admin and Portal UI refinement
 
-**Phase 226 complete (2026-08-12):** maintainers now have a durable, privacy-safe comparable-run baseline with repository-bound GitHub Actions evidence, explicit provider proof states, and owner-first host/browser setup diagnostics. BASE-01, BASE-02, and OWN-01 verified 5/5 must-haves; Phase 227 owns the measured critical-path improvement.
+**Goal:** Deliver a coherent, readable, responsive, and trustworthy baseline across existing Admin and Portal journeys and the example host's billing entry and return paths, with automated acceptance and bounded inspection of current rendered results.
 
-**Phase 228 complete (2026-09-11; re-verified 2026-09-12):** the Stripe webhook-signing CI boot contract now maps a securely supplied signing secret into the runtime rotation list and fails closed when it is absent. The phase's single boot-repair authorization sealed an honest `failed/selected_assertions_failed` result with no retry; later recurring provider work repaired the exposed live contracts, and run `34731755425` proved 2/2 selected Stripe tests with 0 skipped on code SHA `0e5378fa`.
+**Target features:**
+- Refine all 21 Admin routes and embedded operator actions, and all seven Portal pages, four POST paths, and named host billing/auth-return seams.
+- Serve engineers and support/billing operators equally in Admin; keep customers and their authorized company representatives in the customer Portal under a separate permission boundary.
+- Support personal, organization/custom, and mixed billables through one Portal with compatible personal defaults and an optional host resolver plus fresh per-action authorizer. The host owns account selection, membership, and policy; actor, billable, Customer, processor, and target remain distinct.
+- Correct existing UI-derived billing truth, scope, navigation, feedback, secure-field wiring, and exact provider identity; preserve provider-specific capabilities and do not add new billing-engine or provider features.
+- Establish shared visual roles while preserving Admin identity and customer host branding. Prove keyboard, mobile, theme, focus, motion, accessibility, asset delivery, and representative route/state behavior in the owning slices.
+- Keep local implementations understandable, retain official payment SDK boundaries, reuse deterministic browser/test tooling, and leave a working feedback preview after bounded automated acceptance.
 
-**Phase 227 complete (2026-09-12):** the exact candidate removed only the redundant `admin-drift-docs` dependency from host integration. Three successful, first-attempt workflow-dispatch runs at one candidate SHA measured 1,179s, 1,125s, and 1,079s (median 1,125s), clearing the frozen 1,666s median and 2,602s maximum thresholds while retaining required release, host, browser, provider, artifact, negative-control, and rollback evidence. PATH-01, PATH-02, SAFE-01, and SAFE-02 are verified 11/11; all v1.61 implementation phases and 10/10 requirements are complete, ready for milestone closeout.
+**Reopen decision:** explicit strategy change for the existing adopter-facing Admin and customer Portal surfaces, based on the accepted maintainer request and source findings recorded in the October 2026 scope brief. This is a bounded refinement of existing journeys, not a general design-system ratchet or approval for new billing capabilities.
+
+**Guardrails:** Provider-owned pages stay external boundaries; preserve personal-only installs, existing host ownership, server authorization, locked legal/replay wording, provider-specific cancellation and checkout behavior, public Portal tokens, CSP/SRI, alternate mounts, and package asset contracts. No forced organization model, universal account picker/roles, operator impersonation, dynamic processor routing, framework migration, custom card inputs, paid visual judge, or broad CI rearchitecture.
 
 ## Shipped Milestone: v1.62 Release Integration & Repository Hygiene (**shipped & archived 2026-09-18**)
 
@@ -678,10 +686,11 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] Reconcile `main` and the completed v1.61 lineage without rewriting published history or moving the v1.61 tag.
-- [ ] Produce a clean release candidate that passes local CI-equivalent and required GitHub Actions gates.
-- [ ] Resolve or explicitly waive ship windows, classify untracked/stale artifacts, and perform only objective release-risk cleanup.
-- [ ] Prepare the resulting integration and Release Please PRs for maintainer review without merging or publishing packages.
+- [ ] Establish a current-source inventory and shared visual direction across real Admin and Portal consumers, with evidence provenance and no forced common layout or new dependency.
+- [ ] Make existing Admin customer, subscription, invoice, payment, recovery, event, webhook, coupon, promotion-code, and Connect journeys readable, scoped, and truthful about observed state, amount, currency, dates, eligibility, and action results.
+- [ ] Make existing customer checkout and Portal self-service responsive and capability-aware, with visible outcomes, secure Hosted Fields lifecycle, safe host return, and no unsupported claims about access, payments, retention, or provider behavior.
+- [ ] Add the bounded optional Portal billable-resolution and per-action authorization contract while preserving the no-adapter personal default and pinning every form/action to the displayed owner, Customer, and processor.
+- [ ] Close route and interaction coverage with deterministic state/scope/browser evidence, inspected current renders, accurate assets/copy/docs, and a retained preview isolated from mutation/reset proof.
 
 ### Validated v1.62 (Phase 229 complete 2026-09-15)
 
@@ -897,8 +906,11 @@ Admin global search — 4/4 satisfied.
 | Bind CI evidence to repository, immutable run/job URLs, workflow topology, timestamps, and explicit provider proof state before comparing performance. | ✓ Good — Phase 226 produced a reproducible 20-path baseline and fail-closed evidence contracts. |
 | Keep the one-edge host-integration dependency change only if three independent attempt-1 observations satisfy the frozen median and maximum thresholds. | ✓ Good — Phase 227 retained the candidate at a 1,125-second median and closed its bounded authority. |
 | Never reinterpret a failed or skipped provider lane as proof, and never retry without new authorization. | ✓ Good — Phase 228 preserved the initial failed record; later separately authorized recurring proof closed the Stripe fidelity gaps honestly. |
-| Treat v1.62 as release integration and repository hygiene, not feature development or a general refactor. | — Pending — scope ends when the release candidate is green and further findings are subjective. |
-| Preserve published history and the v1.61 tag; reconcile through a reviewable integration candidate rather than force-push or tag movement. | — Pending — exact merge topology is determined from Phase 229 evidence. |
+| Treat v1.62 as release integration and repository hygiene, not feature development or a general refactor. | ✓ Good — Phases 229–232 completed and v1.62 was archived; its handoff is closed and is not carried as active v1.63 work. |
+| Preserve published history and the v1.61 tag; reconcile through a reviewable integration candidate rather than force-push or tag movement. | ✓ Good — the v1.62 archive records the completed reviewable integration; history mutation is outside v1.63 scope. |
+| Reopen bounded work on existing Admin and Portal journeys after v1.62. | — Pending — explicit strategy change for the adopter-facing surfaces, with source-backed UI truth, scope, wiring, and feedback findings; no new billing capability is authorized. |
+| Use one generic Portal for personal and host-selected organization/custom billables, with optional resolution and fresh action authorization. | — Pending — preserve personal defaults and keep host selection/policy, actor, billable, Customer, processor, and target separate. |
+| Share semantic visual roles while preserving Admin identity and customer host branding. | — Pending — use local understandable patterns and official payment SDK boundaries; no forced shared template or framework migration. |
 
 ## Evolution
 
@@ -918,4 +930,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-18 after v1.62 milestone.*
+*Last updated: 2026-10-07 when starting v1.63 Admin and Portal UI refinement.*
