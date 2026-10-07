@@ -1,9 +1,10 @@
 ---
 phase: 233-shared-direction-portal-contract
-reviewed: 2026-10-07T22:00:00Z
+reviewed: 2026-10-07T23:04:51Z
 depth: standard
-files_reviewed: 48
+files_reviewed: 58
 files_reviewed_list:
+  - .github/workflows/ci.yml
   - accrue/priv/accrue/templates/install/billing.ex.eex
   - accrue/priv/static/brand.css
   - accrue_admin/README.md
@@ -43,45 +44,49 @@ files_reviewed_list:
   - accrue_portal/test/accrue_portal/router_test.exs
   - accrue_portal/test/support/tap_formatter.ex
   - examples/accrue_host/README.md
+  - examples/accrue_host/config/runtime.exs
+  - examples/accrue_host/config/test.exs
+  - examples/accrue_host/e2e/onboarding_and_billing.spec.js
   - examples/accrue_host/e2e/phase233-baseline.spec.js
+  - examples/accrue_host/e2e/phase233-braintree-checkout.spec.js
   - examples/accrue_host/e2e/phase233-context.spec.js
   - examples/accrue_host/e2e/phase233-semantic.spec.js
   - examples/accrue_host/lib/accrue_host/billing.ex
   - examples/accrue_host/lib/accrue_host/portal_context_adapter.ex
   - examples/accrue_host/lib/accrue_host_web/controllers/organization_scope_controller.ex
   - examples/accrue_host/lib/accrue_host_web/router.ex
+  - examples/accrue_host/package.json
+  - examples/accrue_host/playwright.braintree.config.js
+  - examples/accrue_host/playwright.config.js
   - examples/accrue_host/test/accrue_host_web/admin_mount_test.exs
+  - examples/accrue_host/test/install_boundary_test.exs
   - scripts/ci/accrue_host_seed_e2e.exs
+  - scripts/ci/accrue_host_verify_browser.sh
 findings:
-  critical: 1
+  critical: 0
   warning: 0
   info: 0
-  total: 1
-status: issues_found
+  total: 0
+status: clean
 ---
 
 # Phase 233: Code Review Report
 
-**Reviewed:** 2026-10-07T22:00:00Z  
+**Reviewed:** 2026-10-07T23:04:51Z  
 **Depth:** standard  
-**Files Reviewed:** 48  
-**Status:** issues_found
+**Files Reviewed:** 58  
+**Status:** clean
 
 ## Summary
 
-Reviewed the Phase 233 portal context, authorization, checkout, host example, styles, documentation, and associated tests. One checkout transport mismatch blocks a supported personal checkout flow: LiveView permits the existing personal Customer's processor, but the rendered form's POST controller rejects that same session.
+Re-reviewed the expanded 58-file scope, including the Phase 233 checkout correction and its CI/browser lane changes. The earlier checkout finding is resolved: both LiveView token issuance and POST completion now require the LocalSession processor to match the configured processor, and matching-provider personal and custom completion paths are covered. The dedicated Braintree browser lane is invoked by the host verification script and CI; the runtime selector is gated to `config_env() == :test`.
 
-## Critical Issues
+## Narrative Findings (AI reviewer)
 
-### CR-01: [BLOCKER] Checkout POST rejects supported personal legacy-processor sessions
-
-**File:** `accrue_portal/lib/accrue_portal/controllers/checkout_controller.ex:99`  
-**Issue:** `checkout_target?/2` unconditionally requires `checkout.processor == Processor.name()`. The paired `CheckoutLive.checkout_action_target?/3` intentionally applies that configured-processor restriction only when a custom context adapter is present (`checkout_live.ex:501-506`), preserving personal billing compatibility with a sole existing Customer whose processor differs from the currently configured processor. The LiveView can therefore render a valid pinned checkout form and issue its client token, but submitting that form to this controller fails the target check and is denied before subscription creation. The current POST coverage exercises custom-adapter checkouts, while the configured-processor mismatch coverage only asserts the custom checkout is disabled.
-
-**Fix:** Make the POST target check use the same adapter-aware processor rule as `CheckoutLive.checkout_action_target?/3`: always require the pinned context processor to equal the LocalSession processor and the exact Customer to match; require `Processor.name()` only when `current_context_adapter` is configured. Add a personal legacy-processor rendered-form POST positive case while retaining the custom-adapter mismatch denial.
+No remaining bugs, security vulnerabilities, or quality defects found in the reviewed scope.
 
 ---
 
-_Reviewed: 2026-10-07T22:00:00Z_  
+_Reviewed: 2026-10-07T23:04:51Z_  
 _Reviewer: the agent (gsd-code-reviewer)_  
 _Depth: standard_
