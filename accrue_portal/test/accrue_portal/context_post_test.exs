@@ -271,4 +271,49 @@ defmodule AccruePortal.ContextPinPolicyTest do
     assert TokenCounter.count() == 0
     refute html =~ ~s(data-portal-hosted-fields="payment-method")
   end
+
+  test "rendered add-card form posts its original pin through create authorization", %{conn: conn} do
+    owner_id = "org-create-allowed"
+
+    %{customer: customer} =
+      Accrue.Test.Factory.active_subscription(%{
+        owner_type: Organization.__accrue__(:billable_type),
+        owner_id: owner_id,
+        email: "#{owner_id}@example.com",
+        name: "Test Organization"
+      })
+
+    ActionAdapter.grant(owner_id, [:payment_method_create])
+    TokenCounter.reset()
+
+    conn =
+      Plug.Test.init_test_session(conn, %{
+        "user_token" => "customer:00000000-0000-0000-0000-000000000123",
+        "active_billable_id" => owner_id
+      })
+
+    assert {:ok, _view, methods_html} = live(conn, "/org-billing/payment-methods")
+
+    [_, encoded_pin] =
+      Regex.run(~r/href="\/org-billing\/payment-methods\/new\?context_pin=([^"]+)"/, methods_html)
+
+    pin = URI.decode_www_form(encoded_pin)
+    add_path = "/org-billing/payment-methods/new?context_pin=" <> encoded_pin
+    assert {:ok, _view, add_html} = live(conn, add_path)
+
+    assert add_html =~ ~s(name="context_pin" value="#{pin}")
+    assert TokenCounter.count() > 0
+
+    calls_before = Accrue.Processor.Fake.call_count(:create_payment_method)
+
+    response =
+      post(conn, "/org-billing/payment-methods", %{
+        "context_pin" => pin,
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    assert redirected_to(response) == "/org-billing/payment-methods"
+    assert Accrue.Processor.Fake.call_count(:create_payment_method) == calls_before + 1
+    assert AccruePortal.TestRepo.get_by(Accrue.Billing.PaymentMethod, customer_id: customer.id)
+  end
 end
