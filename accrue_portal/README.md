@@ -91,8 +91,8 @@ revoked selection. Accrue resolves the exact owner type, owner ID, and
 configured processor Customer for custom billables, and authorizes the initial
 read before it may provision one. Without an adapter, one existing user-owned
 Customer row remains the personal fallback, including its configured
-processor; no row may be provisioned, and multiple rows are ambiguous and
-blocked.
+processor. If no row exists, the existing personal flow may provision one with
+the configured processor; multiple rows are ambiguous and blocked.
 
 Portal forms and routes carry a short-lived signed context pin containing the
 selected identity and exact Customer/processor locator. The pin keeps separate
