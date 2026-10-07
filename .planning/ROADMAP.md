@@ -18,6 +18,7 @@
 - ⏸️ **v1.60 First-Adopter iOS Bridge & Proof** — Phases 223-224 verified; remaining scope deferred by override closeout (2026-08-08) — [archive](milestones/v1.60-ROADMAP.md)
 - ✅ **v1.61 CI Evidence & Critical-Path Hardening** — Phases 225-228 (shipped 2026-09-12) — [archive](milestones/v1.61-ROADMAP.md)
 - ✅ **v1.62 Release Integration & Repository Hygiene** — Phases 229-232 (shipped 2026-09-18) — [archive](milestones/v1.62-ROADMAP.md)
+- 🚧 **v1.63 Admin and Portal UI refinement** — Phases 233-239 (planning)
 
 ## Planning Doctrine
 
@@ -27,11 +28,120 @@ Historical friction-backlog anchors remain canonical in the [v1.17 inventory](re
 
 Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be explicitly re-scoped by a future milestone before execution. Google Play remains backlogged in SEED-007 until Android is scheduled or a second adopter requires it.
 
-## Open Release Handoff (carried out of v1.62)
-
-v1.62 delivered a **reviewable, per-lane-proved** release candidate, not a green one. The candidate SHA is honestly recorded red on `docs-contracts-shift-left`, `release-gate`, and `phase18-tax-gate`; the fixes exist on the milestone line. The written path forward: push the phase-close commits, re-run CI at the new head, confirm the gates, merge PR #45, then run Release Please. See [v1.62 audit](milestones/v1.62-MILESTONE-AUDIT.md).
-
 ## Phases
+
+### v1.63 — Admin and Portal UI refinement
+
+- [ ] **Phase 233: Shared Direction & Portal Contract** - Establish current-source baseline, shared visual roles, and the bounded host-owned billing context contract.
+- [ ] **Phase 234: Admin Customers & Subscriptions** - Refine operator search, customer/subscription investigation, lifecycle truth, scope, and supported actions.
+- [ ] **Phase 235: Customer Plan Selection & Checkout** - Make existing checkout, payment hooks, provider handoffs, and safe returns understandable and reliable.
+- [ ] **Phase 236: Portal Billing Self-Service** - Refine existing customer billing pages and authorized payment/subscription tasks through one Portal.
+- [ ] **Phase 237: Admin Invoices, Payments & Recovery** - Make money and recovery work precise, scoped, and honest about outcomes.
+- [ ] **Phase 238: Admin Events, Webhooks & Remaining Billing Surfaces** - Improve event and delivery investigation plus existing coupon, promotion-code, and Connect surfaces.
+- [ ] **Phase 239: Integrated Quality & Handoff** - Close route coverage, cross-surface evidence, current-render inspection, and a usable feedback preview.
+
+## Phase Details
+
+### Phase 233: Shared Direction & Portal Contract
+**Goal**: Maintainers and adopters can see a current, coherent Admin and Portal baseline, while hosts can select a billed entity and authorize its actions through one bounded Portal contract.
+**Depends on**: Nothing (first phase)
+**Requirements**: BASE-01, SYS-01, SYS-02, POR-08, SAFE-02, SAFE-03, SHIP-04
+**Success Criteria** (what must be TRUE):
+  1. Maintainers can inspect the current served route, flow, component, and state inventory and distinguish it from historical captures.
+  2. Operators and customers see shared semantic visual roles while Admin identity, host customer branding, and audience-specific layouts remain recognizable in real consumers.
+  3. A personal-only host retains its existing Portal behavior without a company model or picker; a mixed host can resolve personal and custom billables while actor, billable, Customer, and processor remain distinct.
+  4. On initial request, LiveView events/reconnect, and protected actions, the host's fresh authorization governs the selected context; invalid or unauthorized selection cannot fall back, provision, or retarget a form.
+  5. The canonical example and adopter guidance show personal defaults plus organization/custom and mixed resolution without requiring a new auth or runtime dependency.
+**Plans**: TBD
+
+### Phase 234: Admin Customers & Subscriptions
+**Goal**: Operators can find and investigate the correct customer and subscription, understand observed lifecycle truth, and complete only supported subscription actions.
+**Depends on**: Phase 233
+**Requirements**: ADM-01, ADM-03, ADM-04, SAFE-01
+**Success Criteria** (what must be TRUE):
+  1. Operators can search, enter a nondefault owner scope, follow customer/subscription/related-record links, and return without losing object or filter context.
+  2. A known subscription lifecycle remains clear when ancillary observations are missing, and missing facts are identified as unknown.
+  3. Only eligible subscription actions are offered; confirmation, step-up expiry, duplicate protection, and resulting evidence communicate the actual outcome.
+  4. Mounted owner/customer denials and forged actions remain denied without exposing foreign records or payment-token data.
+  5. The affected Admin flows remain usable by keyboard and at narrow/coarse-pointer sizes, with the relevant light/dark and empty/error states checked in this slice.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 235: Customer Plan Selection & Checkout
+**Goal**: Customers can understand a selected offer, complete supported checkout through its actual browser integration, or leave safely with an honest outcome.
+**Depends on**: Phase 233
+**Requirements**: CKO-01, CKO-02, CKO-03, CKO-04
+**Success Criteria** (what must be TRUE):
+  1. The visible checkout form reaches the actual supported payment hook and represents valid, invalid, provider-failure, cancellation, and retry results accurately.
+  2. Hosted-provider and mounted checkout handoffs remain distinct and capability-aware; safe returns do not treat a query parameter as payment evidence or imply live parity from Fake proof.
+  3. Expired/completed sessions, stale promotions, and repeated submissions follow the existing contract without claiming an unproven charge or rendering missing price as zero.
+  4. Plan choice survives sign-in and return; only trusted available metadata supplies charge terms, and unknown terms or outcomes lead to recovery without blind resubmission.
+  5. Checkout keyboard, narrow-screen, theme, secure SDK, pending/error-state, and served-asset behavior is checked alongside each changed form and handoff.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 236: Portal Billing Self-Service
+**Goal**: Customers can understand their billing identity and manage supported existing payment, subscription, and invoice tasks in the branded Portal.
+**Depends on**: Phase 233; Phase 235 for shared checkout/return behavior
+**Requirements**: POR-01, POR-02, POR-03, POR-04, POR-05, POR-06, POR-07
+**Success Criteria** (what must be TRUE):
+  1. Customers can use all seven existing Portal pages with legible, responsive content clearly scoped to the selected billed entity and consistent with host branding.
+  2. Supported payment-method and subscription actions honor capability and ownership; list and detail entry points disclose matching consequences before confirmation.
+  3. Customers reach only their existing invoice records and hosted invoice access; missing or unauthorized records fail safely.
+  4. LiveView and POST/redirect actions announce visible success or failure, failed reads do not look empty, and checkout failure does not assert a charge.
+  5. Direct add-card navigation initializes supported secure fields; known subscription states and safe host returns are truthful, and Portal keyboard/mobile/theme/focus/motion states are checked in this slice.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 237: Admin Invoices, Payments & Recovery
+**Goal**: Operators can complete invoice, payment, refund, and recovery work with exact amounts, correct scope, and truthful result evidence.
+**Depends on**: Phase 234
+**Requirements**: ADM-02, ADM-05, ADM-06
+**Success Criteria** (what must be TRUE):
+  1. Operators distinguish draft, open, and overdue invoices, see missing due dates honestly, and read amounts at the correct currency minor-unit precision.
+  2. Invoice payment/finalization and refund views and confirmations show the exact amount, currency, and consequence.
+  3. Accepted, requires-action, failed, and completed results are distinguishable and tied to the resulting billing evidence.
+  4. Recovery views retain time window, owner, currency, and return context while keeping historical failures separate from current billing state.
+  5. Changed money/recovery flows retain keyboard, responsive, theme, and relevant pending/denied/error evidence within this slice.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 238: Admin Events, Webhooks & Remaining Billing Surfaces
+**Goal**: Operators can investigate local events and delivery history, retry or replay only eligible work, and inspect remaining existing billing surfaces without implied capabilities.
+**Depends on**: Phase 234; Phase 237 for related money evidence
+**Requirements**: ADM-07, ADM-08
+**Success Criteria** (what must be TRUE):
+  1. Operators can inspect local events and webhook deliveries with useful context, accessible identifiers, and linked evidence.
+  2. Retry/replay is limited to eligible deliveries with required confirmation and step-up; accepted versus processed results and partial selections are stated honestly.
+  3. Existing coupon, promotion-code, and Connect states and actions are understandable, provider-specific where needed, and never imply unsupported create/edit behavior.
+  4. Each changed filter, payload, action, and empty/error state has relevant keyboard, responsive, theme, and interaction evidence in this slice.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 239: Integrated Quality & Handoff
+**Goal**: Maintainers can rely on current cross-surface evidence for the complete refinement and inspect the delivered result in a stable preview.
+**Depends on**: Phases 233–238
+**Requirements**: INT-01, INT-02, INT-03, INT-04, SHIP-01, SHIP-02, SHIP-03
+**Success Criteria** (what must be TRUE):
+  1. Keyboard navigation, focus containment/restoration, narrow-screen reflow, zoom, theme handoff, forced themes, and reduced-motion behavior work across representative Admin, Portal, and host journeys; slice-level proof already exists for changed flows.
+  2. Empty, no-match, unavailable, unsupported, denied, pending, error, and long-content states have deliberate coverage at the least costly credible layer across the owned inventory.
+  3. Every owned route and unique interaction has a coverage disposition, and current required gates plus inspected representative renders support the completion claims.
+  4. Generated assets, fonts, mounts, CSP/SRI, copy exports, and host integration documentation match the source actually served; component examples/docs match production and task-owned debris is removed.
+  5. A useful feedback preview remains available separately from mutation/reset proof, with a concise change summary for optional owner feedback.
+**Plans**: TBD
+**UI hint**: yes
+
+## Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 233. Shared Direction & Portal Contract | 0/TBD | Not started | - |
+| 234. Admin Customers & Subscriptions | 0/TBD | Not started | - |
+| 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
+| 236. Portal Billing Self-Service | 0/TBD | Not started | - |
+| 237. Admin Invoices, Payments & Recovery | 0/TBD | Not started | - |
+| 238. Admin Events, Webhooks & Remaining Billing Surfaces | 0/TBD | Not started | - |
+| 239. Integrated Quality & Handoff | 0/TBD | Not started | - |
 
 <details>
 <summary>✅ v1.62 Release Integration & Repository Hygiene (Phases 229-232) — SHIPPED 2026-09-18</summary>

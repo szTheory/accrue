@@ -81,7 +81,44 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 
 ## Traceability
 
-The roadmap assigns every v1.63 requirement to exactly one phase. Coverage is pending roadmap creation.
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| BASE-01 | Phase 233 | Pending |
+| SYS-01 | Phase 233 | Pending |
+| SYS-02 | Phase 233 | Pending |
+| ADM-01 | Phase 234 | Pending |
+| ADM-02 | Phase 237 | Pending |
+| ADM-03 | Phase 234 | Pending |
+| ADM-04 | Phase 234 | Pending |
+| ADM-05 | Phase 237 | Pending |
+| ADM-06 | Phase 237 | Pending |
+| ADM-07 | Phase 238 | Pending |
+| ADM-08 | Phase 238 | Pending |
+| CKO-01 | Phase 235 | Pending |
+| CKO-02 | Phase 235 | Pending |
+| CKO-03 | Phase 235 | Pending |
+| CKO-04 | Phase 235 | Pending |
+| POR-01 | Phase 236 | Pending |
+| POR-02 | Phase 236 | Pending |
+| POR-03 | Phase 236 | Pending |
+| POR-04 | Phase 236 | Pending |
+| POR-05 | Phase 236 | Pending |
+| POR-06 | Phase 236 | Pending |
+| POR-07 | Phase 236 | Pending |
+| POR-08 | Phase 233 | Pending |
+| INT-01 | Phase 239 | Pending |
+| INT-02 | Phase 239 | Pending |
+| INT-03 | Phase 239 | Pending |
+| INT-04 | Phase 239 | Pending |
+| SAFE-01 | Phase 234 | Pending |
+| SAFE-02 | Phase 233 | Pending |
+| SAFE-03 | Phase 233 | Pending |
+| SHIP-01 | Phase 239 | Pending |
+| SHIP-02 | Phase 239 | Pending |
+| SHIP-03 | Phase 239 | Pending |
+| SHIP-04 | Phase 233 | Pending |
+
+**Coverage:** 34/34 v1.63 requirements mapped exactly once.
 
 ---
 *Requirements defined: 2026-10-07*
