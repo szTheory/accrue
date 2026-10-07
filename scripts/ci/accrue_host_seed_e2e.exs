@@ -26,9 +26,13 @@ defmodule AccrueHostSeedE2E do
     "host-user@example.test",
     "host-admin@example.test",
     "host-billing-manager@example.test",
+    "host-revocable-member@example.test",
     "billing-history@example.test"
   ]
-  @fixture_org_customer_emails ["admin-e2e-alpha-customer@example.test"]
+  @fixture_org_customer_emails [
+    "admin-e2e-alpha-customer@example.test",
+    "host-org-checkout@example.test"
+  ]
   @fixture_processor_event_ids ["evt_host_browser_replay", "evt_host_browser_first_run"]
   @fixture_customer_processor_ids [
     "cus_host_browser_replay",
@@ -43,7 +47,7 @@ defmodule AccrueHostSeedE2E do
   ]
   @fixture_subscription_item_processor_ids ["si_host_browser_replay"]
   @fixture_discount_codes ["SPRING25", "BROKEN"]
-  @fixture_checkout_operation_ids ["host-browser-portal-checkout"]
+  @fixture_checkout_operation_ids ["host-browser-portal-checkout", "host-browser-org-checkout"]
   @events_table Accrue.Migration.qualified_table(:accrue_events)
   @discount_mappings_table Accrue.Migration.qualified_table(:accrue_discount_mappings)
 
@@ -53,6 +57,7 @@ defmodule AccrueHostSeedE2E do
     normal_user = create_user!("host-user@example.test", false)
     admin_user = create_user!("host-admin@example.test", true)
     billing_manager = create_user!("host-billing-manager@example.test", false)
+    revocable_member = create_user!("host-revocable-member@example.test", false)
     history_user = create_user!("billing-history@example.test", false)
 
     {:ok, host_org_alpha} =
@@ -75,7 +80,8 @@ defmodule AccrueHostSeedE2E do
 
     Repo.delete_all(
       from(membership in OrganizationMembership,
-        where: membership.user_id == ^normal_user.id and membership.organization_id == ^revoked_org.id
+        where:
+          membership.user_id == ^normal_user.id and membership.organization_id == ^revoked_org.id
       )
     )
 
@@ -91,6 +97,8 @@ defmodule AccrueHostSeedE2E do
 
     set_fixture_membership_role!(normal_user, host_org_alpha, :member)
     insert_fixture_membership!(billing_manager, host_org_alpha, :admin)
+    insert_fixture_membership!(revocable_member, host_org_alpha, :admin)
+    insert_fixture_membership!(revocable_member, host_org_beta, :admin)
 
     {:ok, admin_org_alpha} =
       Organizations.create_organization(Scope.for_user(admin_user), %{
@@ -122,6 +130,11 @@ defmodule AccrueHostSeedE2E do
     portal_customer = insert_portal_checkout_customer!(normal_user)
     portal_payment_methods = insert_portal_payment_methods!(portal_customer)
     checkout_session = insert_portal_checkout_session!(portal_customer)
+    org_checkout_customer = insert_org_checkout_customer!(host_org_alpha)
+
+    org_checkout_session =
+      insert_portal_checkout_session!(org_checkout_customer, "host-browser-org-checkout")
+
     seed_portal_discount_mappings!()
 
     first_run_webhook = build_first_run_webhook(subscription)
@@ -154,6 +167,7 @@ defmodule AccrueHostSeedE2E do
       normal_email: normal_user.email,
       admin_email: admin_user.email,
       billing_manager_email: billing_manager.email,
+      revocable_member_email: revocable_member.email,
       webhook_id: webhook.id,
       subscription_id: subscription.id,
       first_run_webhook: first_run_webhook,
@@ -180,7 +194,9 @@ defmodule AccrueHostSeedE2E do
         backup: portal_payment_methods.backup.id
       },
       portal_checkout_token: checkout_session.session_token,
-      portal_checkout_url: "/billing/checkout/#{checkout_session.session_token}"
+      portal_checkout_url: "/billing/checkout/#{checkout_session.session_token}",
+      org_portal_checkout_url: "/shared-billing/checkout/#{org_checkout_session.session_token}",
+      revocable_member_org_slug: host_org_alpha.slug
     }
 
     write_fixture!(fixture_path, fixture)
@@ -562,6 +578,18 @@ defmodule AccrueHostSeedE2E do
     |> Repo.insert!()
   end
 
+  defp insert_org_checkout_customer!(organization) do
+    %Customer{}
+    |> Customer.changeset(%{
+      owner_type: "Organization",
+      owner_id: to_string(organization.id),
+      processor: "braintree",
+      processor_id: "cus_bt_host_org_checkout_#{organization.id}",
+      email: "host-org-checkout@example.test"
+    })
+    |> Repo.insert!()
+  end
+
   defp insert_portal_payment_methods!(customer) do
     default =
       insert_payment_method!(customer, %{
@@ -595,7 +623,7 @@ defmodule AccrueHostSeedE2E do
     %{default: default, backup: backup}
   end
 
-  defp insert_portal_checkout_session!(customer) do
+  defp insert_portal_checkout_session!(customer, operation_id \\ "host-browser-portal-checkout") do
     {:ok, session} =
       LocalSession.create_or_reuse(customer, %{
         processor: "braintree",
@@ -607,7 +635,7 @@ defmodule AccrueHostSeedE2E do
         success_url: "https://app.example.test/billing/success",
         cancel_url: "https://app.example.test/billing/cancel",
         return_url: "https://app.example.test/settings/billing",
-        operation_id: "host-browser-portal-checkout",
+        operation_id: operation_id,
         metadata: %{"source" => "fixture"},
         data: %{"local_portal" => true}
       })

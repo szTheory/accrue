@@ -55,6 +55,14 @@ defmodule AccrueHostWeb.Router do
 
     post("/app/organization-scope", OrganizationScopeController, :update)
 
+    if Application.compile_env(:accrue_host, :sql_sandbox) do
+      post(
+        "/api/e2e/revoke-membership",
+        OrganizationScopeController,
+        :revoke_membership_for_e2e
+      )
+    end
+
     # Ordering contract: AccrueHostWeb.UserAuth loads scope/auth first, then
     # Accrue.Live.Entitlements checks access; keep the deny target outside this
     # gated session, and see guides/entitlements.md for why missing or unloaded

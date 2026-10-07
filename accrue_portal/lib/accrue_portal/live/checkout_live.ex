@@ -4,11 +4,13 @@ defmodule AccruePortal.Live.CheckoutLive do
   require Logger
 
   alias Accrue.Billing
+  alias Accrue.Billing.Customer
   alias Accrue.Checkout.LocalSession
   alias Accrue.Error.DiscountMappingInvalid
   alias Accrue.Portal.{Context, CustomerSession}
   alias Accrue.Portal.Checkout.CompletionJob
   alias Accrue.Processor
+  alias Accrue.Repo
   alias AccruePortal.BraintreeClient
   alias AccruePortal.Copy
   alias AccruePortal.Path
@@ -25,21 +27,26 @@ defmodule AccruePortal.Live.CheckoutLive do
     with %LocalSession{} = checkout <- session,
          {:ok, pin, context} <- resolve_checkout_context(socket, params["context_pin"], true),
          true <- checkout_target?(context, checkout) do
+      action_target? =
+        checkout_action_target?(context, checkout, socket.assigns[:current_context_adapter])
+
       complete_allowed? =
-        Context.authorize_action(
-          context,
-          socket.assigns[:current_context_adapter],
-          :checkout_complete,
-          checkout
-        ) == :ok
+        action_target? and
+          Context.authorize_action(
+            context,
+            socket.assigns[:current_context_adapter],
+            :checkout_complete,
+            checkout
+          ) == :ok
 
       promo_allowed? =
-        Context.authorize_action(
-          context,
-          socket.assigns[:current_context_adapter],
-          :checkout_validate_promo,
-          checkout
-        ) == :ok
+        action_target? and
+          Context.authorize_action(
+            context,
+            socket.assigns[:current_context_adapter],
+            :checkout_validate_promo,
+            checkout
+          ) == :ok
 
       client_token =
         if checkout_ready?(checkout) and complete_allowed? do
@@ -444,7 +451,8 @@ defmodule AccruePortal.Live.CheckoutLive do
 
     with %LocalSession{} = checkout <- checkout,
          {:ok, _pin, context} <- resolve_checkout_context(socket, pin, false),
-         true <- checkout_target?(context, checkout),
+         true <-
+           checkout_action_target?(context, checkout, socket.assigns[:current_context_adapter]),
          true <- checkout_ready?(checkout),
          :ok <-
            Context.authorize_action(
@@ -460,9 +468,20 @@ defmodule AccruePortal.Live.CheckoutLive do
   end
 
   defp checkout_target?(context, %LocalSession{} = checkout) do
+    case Repo.get(Customer, checkout.customer_id) do
+      %Customer{owner_type: owner_type, owner_id: owner_id, processor: processor} ->
+        owner_type == context.owner_type and owner_id == context.owner_id and
+          processor == checkout.processor
+
+      _ ->
+        false
+    end
+  end
+
+  defp checkout_action_target?(context, %LocalSession{} = checkout, context_adapter) do
     customer_matches? =
       case context.customer do
-        %Accrue.Billing.Customer{id: customer_id, processor: processor} ->
+        %Customer{id: customer_id, processor: processor} ->
           customer_id == checkout.customer_id and processor == checkout.processor
 
         _ ->
@@ -479,9 +498,12 @@ defmodule AccruePortal.Live.CheckoutLive do
           false
       end
 
+    configured_processor_matches? =
+      is_nil(context_adapter) or checkout.processor == Processor.name()
+
     customer_matches? and selected_item_matches? and checkout.mode == "subscription" and
       checkout.ui_mode == "hosted" and context.processor == checkout.processor and
-      checkout.processor == Processor.name()
+      configured_processor_matches?
   end
 
   defp valid_amount?(amount) when is_integer(amount), do: amount > 0

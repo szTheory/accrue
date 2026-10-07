@@ -304,6 +304,23 @@ defmodule AccruePortal.CheckoutContextTest do
     refute_received {:gateway_create, _, _}
   end
 
+  test "custom checkout stays disabled when the configured processor differs from its target", %{
+    conn: conn
+  } do
+    session = checkout_fixture("org-checkout-processor-mismatch")
+    conn = sign_in_org(conn, "org-checkout-processor-mismatch")
+    ActionAdapter.grant("org-checkout-processor-mismatch", [:checkout_complete])
+    Application.put_env(:accrue, :processor, Accrue.Processor.Fake)
+    TokenCounter.reset()
+
+    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
+
+    assert html =~ "Checkout access is unavailable. No payment was submitted."
+    refute html =~ ~s(data-portal-hosted-fields="checkout")
+    refute html =~ ~s(id="checkout-form")
+    assert TokenCounter.count() == 0
+  end
+
   test "completed checkout replay and forged pin make no additional provider call", %{conn: conn} do
     session = checkout_fixture("org-checkout-post-replay")
     conn = sign_in_org(conn, "org-checkout-post-replay")

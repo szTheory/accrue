@@ -54,6 +54,59 @@ defmodule AccrueHostWeb.OrganizationScopeController do
     |> redirect(to: ~p"/app/billing")
   end
 
+  def revoke_membership_for_e2e(conn, %{"organization_slug" => slug}) when is_binary(slug) do
+    case conn.assigns[:current_scope] do
+      %{user: %User{id: user_id}} ->
+        deleted =
+          from(membership in OrganizationMembership,
+            join: organization in Organization,
+            on: organization.id == membership.organization_id,
+            where:
+              membership.user_id == ^user_id and organization.slug == ^slug and
+                is_nil(organization.deleted_at)
+          )
+          |> Repo.delete_all()
+
+        case deleted do
+          {1, _} ->
+            case other_member_organization(user_id) do
+              %Organization{} = organization ->
+                conn
+                |> put_session(:active_organization_id, organization.id)
+                |> put_session(:active_organization_slug, organization.slug)
+                |> put_session(:active_organization_name, organization.name)
+                |> send_resp(:no_content, "")
+
+              nil ->
+                conn
+                |> delete_session(:active_organization_id)
+                |> put_session(:portal_billable_selection, "personal")
+                |> send_resp(:no_content, "")
+            end
+
+          _ ->
+            send_resp(conn, :not_found, "")
+        end
+
+      _ ->
+        send_resp(conn, :unauthorized, "")
+    end
+  end
+
+  def revoke_membership_for_e2e(conn, _params), do: send_resp(conn, :bad_request, "")
+
+  defp other_member_organization(user_id) do
+    from(organization in Organization,
+      join: membership in OrganizationMembership,
+      on: membership.organization_id == organization.id,
+      where: membership.user_id == ^user_id and is_nil(organization.deleted_at),
+      order_by: organization.slug,
+      limit: 1,
+      select: organization
+    )
+    |> Repo.one()
+  end
+
   defp fetch_member_organization(user_id, slug) do
     from(o in Organization,
       join: m in OrganizationMembership,
