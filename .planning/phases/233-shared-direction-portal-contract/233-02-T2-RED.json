@@ -1,0 +1,11 @@
+{
+  "command": "HEX_HOME=/tmp/accrue-233-hex GSD_TAP_REPORT=../.planning/phases/233-shared-direction-portal-contract/233-02-T2-RED.tap mix test --formatter AccruePortal.TapFormatter test/accrue_portal/context_post_test.exs (from accrue_portal)",
+  "exitCode": 2,
+  "output": "TAP version 13\n1..3\nok 1 - test missing and forged pins block payment method writes\nok 2 - test rendered default and delete forms carry a context pin accepted by their POSTs\nnot ok 3 - test read-only organization cannot receive a Braintree client token or Hosted Fields\n",
+  "targetTest": "test read-only organization cannot receive a Braintree client token or Hosted Fields",
+  "targetFile": "accrue_portal/test/accrue_portal/context_post_test.exs",
+  "expected": "A read-authorized organization without :payment_method_create receives zero client-token calls and no Hosted Fields form.",
+  "actual": "The target test ran through the custom router and mount; the token generator was called twice before the form rendered.",
+  "reportPath": ".planning/phases/233-shared-direction-portal-contract/233-02-T2-RED.tap",
+  "semanticAssessment": "Valid RED: the named custom-organization LiveView integration test completed its route, session, Customer, and token-generator setup, then failed the planned zero-token assertion because AddPaymentMethodLive issued tokens without a create grant."
+}
