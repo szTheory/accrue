@@ -39,7 +39,7 @@ defmodule Accrue.Portal.AuthPlug do
       |> Keyword.put(:create?, false)
 
     resolution =
-      if payment_method_post?(conn, Keyword.fetch!(opts, :mount_path)) do
+      if pinned_form_post?(conn, Keyword.fetch!(opts, :mount_path)) do
         case conn.params do
           %{"context_pin" => pin} when is_binary(pin) and pin != "" ->
             CustomerSession.resolve_pin(
@@ -63,20 +63,37 @@ defmodule Accrue.Portal.AuthPlug do
         |> assign(:current_billable, context.billable)
         |> assign(:current_context, context)
         |> assign(:current_context_adapter, Keyword.fetch!(opts, :context_adapter))
+        |> assign(:current_context_session_keys, Keyword.fetch!(opts, :session_keys))
 
       {:error, :unauthenticated} ->
         redirect_to_login(conn, opts)
 
       {:error, _reason} ->
+        conn =
+          if checkout_completion_post?(conn, Keyword.fetch!(opts, :mount_path)) do
+            put_flash(conn, :error, "Checkout access is unavailable. No payment was submitted.")
+          else
+            conn
+          end
+
         redirect_to_blocked(conn, opts)
     end
   end
 
-  defp payment_method_post?(%Plug.Conn{method: "POST", request_path: path}, mount_path) do
-    String.starts_with?(path, String.trim_trailing(mount_path, "/") <> "/payment-methods")
+  defp pinned_form_post?(%Plug.Conn{method: "POST", request_path: path}, mount_path) do
+    base = String.trim_trailing(mount_path, "/")
+
+    String.starts_with?(path, base <> "/payment-methods") or
+      String.starts_with?(path, base <> "/checkout/")
   end
 
-  defp payment_method_post?(_, _), do: false
+  defp pinned_form_post?(_, _), do: false
+
+  defp checkout_completion_post?(%Plug.Conn{method: "POST", request_path: path}, mount_path) do
+    String.starts_with?(path, String.trim_trailing(mount_path, "/") <> "/checkout/")
+  end
+
+  defp checkout_completion_post?(_, _), do: false
 
   defp require_user(conn, session, opts) do
     case Accrue.Auth.current_user(session) do

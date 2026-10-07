@@ -52,6 +52,11 @@ defmodule AccruePortal.CheckoutContextTest do
       :persistent_term.put({__MODULE__, :grants}, Map.put(grants, owner_id, actions))
     end
 
+    def revoke(owner_id) do
+      revoked = :persistent_term.get({__MODULE__, :revoked}, MapSet.new())
+      :persistent_term.put({__MODULE__, :revoked}, MapSet.put(revoked, owner_id))
+    end
+
     def clear_grants do
       :persistent_term.erase({__MODULE__, :grants})
       :persistent_term.erase({__MODULE__, :revoked})
@@ -222,9 +227,10 @@ defmodule AccruePortal.CheckoutContextTest do
                      %{type: :user, id: _}}
   end
 
-  test "rendered checkout form posts its pin and nonce through the authorized completion route", %{
-    conn: conn
-  } do
+  test "rendered checkout form posts its pin and nonce through the authorized completion route",
+       %{
+         conn: conn
+       } do
     session = checkout_fixture("org-checkout-post")
     conn = sign_in_org(conn, "org-checkout-post")
     ActionAdapter.grant("org-checkout-post", [:checkout_complete])
@@ -237,7 +243,9 @@ defmodule AccruePortal.CheckoutContextTest do
     assert html =~ ~s(name="payment_method_nonce")
 
     [[pin]] = Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
-    csrf = Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first) |> hd()
+
+    csrf =
+      Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first) |> hd()
 
     response =
       post(conn, "/org-billing/checkout/#{session.session_token}/complete", %{
@@ -255,15 +263,169 @@ defmodule AccruePortal.CheckoutContextTest do
     session = checkout_fixture("org-checkout-post-denied")
     conn = sign_in_org(conn, "org-checkout-post-denied")
     ActionAdapter.grant("org-checkout-post-denied", [:checkout_complete])
+    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
+
+    csrf =
+      Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first) |> hd()
 
     response =
       post(conn, "/org-billing/checkout/#{session.session_token}/complete", %{
+        "_csrf_token" => csrf,
         "payment_method_nonce" => "fake-valid-nonce"
       })
 
     refute_received {:gateway_create, _, _}
     refute LocalSession.by_id(session.id).status == "completed"
     assert response.halted
+  end
+
+  test "read-only checkout pin cannot complete through POST", %{conn: conn} do
+    session = checkout_fixture("org-checkout-post-read-only")
+    conn = sign_in_org(conn, "org-checkout-post-read-only")
+    ActionAdapter.grant("org-checkout-post-read-only", [:checkout_validate_promo])
+    TokenCounter.reset()
+    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
+    assert TokenCounter.count() == 0
+    [[pin]] = Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    csrf =
+      Regex.run(~r/<meta name="csrf-token" content="([^"]+)"/, html, capture: :all_but_first)
+      |> hd()
+
+    response =
+      post(conn, "/org-billing/checkout/#{session.session_token}/complete", %{
+        "context_pin" => pin,
+        "_csrf_token" => csrf,
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    assert response.status == 302
+    refute LocalSession.by_id(session.id).status == "completed"
+    refute_received {:gateway_create, _, _}
+  end
+
+  test "completed checkout replay and forged pin make no additional provider call", %{conn: conn} do
+    session = checkout_fixture("org-checkout-post-replay")
+    conn = sign_in_org(conn, "org-checkout-post-replay")
+    ActionAdapter.grant("org-checkout-post-replay", [:checkout_complete])
+    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
+    [[pin]] = Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    csrf =
+      Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first) |> hd()
+
+    params = %{
+      "context_pin" => pin,
+      "_csrf_token" => csrf,
+      "payment_method_nonce" => "fake-valid-nonce"
+    }
+
+    assert redirected_to(
+             post(conn, "/org-billing/checkout/#{session.session_token}/complete", params)
+           ) ==
+             "https://app.example.test/billing/success"
+
+    assert_received {:gateway_create, _, _}
+
+    replay = post(conn, "/org-billing/checkout/#{session.session_token}/complete", params)
+    assert redirected_to(replay) == "/org-billing/checkout/#{session.session_token}"
+    refute_received {:gateway_create, _, _}
+
+    forged = Map.put(params, "context_pin", "forged-pin")
+    assert post(conn, "/org-billing/checkout/#{session.session_token}/complete", forged).halted
+    refute_received {:gateway_create, _, _}
+  end
+
+  test "old tab pin completes its original checkout after selection changes, foreign targets and revocation deny",
+       %{
+         conn: conn
+       } do
+    original = checkout_fixture("org-checkout-original-tab")
+    foreign = checkout_fixture("org-checkout-foreign-tab")
+    revoked = checkout_fixture("org-checkout-revoked-tab")
+    conn = sign_in_org(conn, "org-checkout-original-tab")
+    ActionAdapter.grant("org-checkout-original-tab", [:checkout_complete])
+    ActionAdapter.grant("org-checkout-foreign-tab", [:checkout_complete])
+    ActionAdapter.grant("org-checkout-revoked-tab", [:checkout_complete])
+    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{original.session_token}")
+    [[pin]] = Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    csrf =
+      Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first) |> hd()
+
+    params = %{
+      "context_pin" => pin,
+      "_csrf_token" => csrf,
+      "payment_method_nonce" => "fake-valid-nonce"
+    }
+
+    switched_conn = sign_in_org(conn, "org-checkout-foreign-tab")
+
+    old_tab_response =
+      post(switched_conn, "/org-billing/checkout/#{original.session_token}/complete", params)
+
+    assert redirected_to(old_tab_response) == "https://app.example.test/billing/success"
+    assert LocalSession.by_id(original.id).status == "completed"
+    assert_received {:gateway_create, _, _}
+
+    foreign_response =
+      post(conn, "/org-billing/checkout/#{foreign.session_token}/complete", params)
+
+    assert redirected_to(foreign_response) == "/org-billing/checkout/#{foreign.session_token}"
+    refute_received {:gateway_create, _, _}
+
+    revoked_conn = sign_in_org(conn, "org-checkout-revoked-tab")
+
+    assert {:ok, _view, revoked_html} =
+             live(revoked_conn, "/org-billing/checkout/#{revoked.session_token}")
+
+    [[revoked_pin]] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, revoked_html, capture: :all_but_first)
+
+    revoked_csrf =
+      Regex.run(~r/name="_csrf_token" value="([^"]+)"/, revoked_html, capture: :all_but_first)
+      |> hd()
+
+    ActionAdapter.revoke("org-checkout-revoked-tab")
+
+    denied =
+      post(revoked_conn, "/org-billing/checkout/#{revoked.session_token}/complete", %{
+        "context_pin" => revoked_pin,
+        "_csrf_token" => revoked_csrf,
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    assert denied.halted
+    refute_received {:gateway_create, _, _}
+  end
+
+  test "expired rendered context pin cannot make a provider call", %{conn: conn} do
+    session = checkout_fixture("org-checkout-expired-pin")
+    conn = sign_in_org(conn, "org-checkout-expired-pin")
+    ActionAdapter.grant("org-checkout-expired-pin", [:checkout_complete])
+    customer = TestRepo.get!(Customer, session.customer_id)
+
+    expired_pin =
+      Phoenix.Token.sign(
+        CustomEndpoint,
+        "accrue-portal-payment-flow-v1",
+        %{
+          "owner_type" => customer.owner_type,
+          "owner_id" => customer.owner_id,
+          "processor" => customer.processor,
+          "customer_id" => customer.id
+        },
+        signed_at: System.os_time(:second) - 1_260
+      )
+
+    response =
+      post(conn, "/org-billing/checkout/#{session.session_token}/complete", %{
+        "context_pin" => expired_pin,
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    assert response.halted
+    refute_received {:gateway_create, _, _}
   end
 
   defp checkout_fixture(owner_id) do

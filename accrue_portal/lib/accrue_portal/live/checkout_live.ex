@@ -321,13 +321,17 @@ defmodule AccruePortal.Live.CheckoutLive do
         <form
           :if={@client_token && checkout_ready?(@checkout_session) && !@checkout_success}
           id="checkout-form"
+          action={Path.checkout_complete(@base_path, @checkout_session.session_token)}
+          method="post"
           phx-hook="BraintreeHostedFields"
           phx-submit="checkout_submit"
           class="portal-hosted-fields-form"
           data-portal-hosted-fields="checkout"
           data-client-token={@client_token}
         >
+          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
           <input type="hidden" name="context_pin" value={@context_pin} />
+          <input type="hidden" name="payment_method_nonce" data-braintree-nonce-input value="" />
           <div class="portal-hosted-grid">
             <label class="portal-hosted-label">
               <span>Card number</span>
