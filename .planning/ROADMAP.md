@@ -65,7 +65,7 @@ Plans:
 - [x] 233-06-PLAN.md — Apply and verify semantic roles in bounded package-owned consumers.
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 233-02-PLAN.md — Connect rendered payment forms to pinned POST actions and gate add-card client tokens.
+- [x] 233-02-PLAN.md — Connect rendered payment forms to pinned POST actions and gate add-card client tokens.
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 233-03-PLAN.md — Apply the contract to Home, subscription, and invoice routes and events.
@@ -167,7 +167,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 233. Shared Direction & Portal Contract | 2/7 | In Progress | - |
+| 233. Shared Direction & Portal Contract | 4/7 | In Progress | - |
 | 234. Admin Customers & Subscriptions | 0/TBD | Not started | - |
 | 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
 | 236. Portal Billing Self-Service | 0/TBD | Not started | - |

@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 233
 current_phase_name: Shared Direction & Portal Contract
 status: executing
-stopped_at: Phase 233 Wave 2 complete; UI-SPEC approved; continuing with plan 233-02
-last_updated: "2026-10-07T20:15:00.248Z"
+stopped_at: Completed 233-02-PLAN.md
+last_updated: "2026-10-07T20:46:52.360Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 233 plan 06 completed; four plans remain
-state_head: 548f7598830682f36b14ff9ea76fbaf19fe67590
+state_head: 12f33a475ea9dde7f4bed47a2f34d17997867075
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 7
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -27,14 +27,14 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 233 — Shared Direction & Portal Contract
-**Progress:** [░░░░░░░░░░] 0% (3 of 7 plans complete)
+**Progress:** [░░░░░░░░░░] 0% (4 of 7 plans complete)
 
 ## Current Position
 
 Phase: 233 (Shared Direction & Portal Contract) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
-Last activity: 2026-10-07 — Phase 233 plan 06 completed
+Last activity: 2026-10-07 — Phase 233 plan 02 completed
 
 ## Performance Metrics
 
@@ -99,6 +99,7 @@ Last activity: 2026-10-07 — Phase 233 plan 06 completed
 | Phase 233 P04 | 25min | 3 tasks | 7 files |
 | Phase 233 P01 | 26min | 2 tasks | 11 files |
 | Phase 233 P06 | 19min | 2 tasks | 5 files |
+| Phase 233 P02 | 26min | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -186,6 +187,9 @@ Last activity: 2026-10-07 — Phase 233 plan 06 completed
 - [Phase 233]: Custom Customer identity uses owner type, lossless owner ID, and configured processor; personal resolution accepts one existing processor row and blocks ambiguity.
 - [Phase 233]: Authenticated context failures go to an auth-only blocked route; only missing authentication uses the local login path.
 - [Phase 233]: 233-06: Keep shared semantic meaning in package-owned Admin and Portal token systems; tint host accents for readable text/focus and use a deep primary control fill.
+- [Phase 233]: Payment-method flow pins are signed locators only; each operation re-resolves current host policy and the exact Customer.
+- [Phase 233]: Preserve personal single-Customer cross-processor compatibility while requiring configured processor identity for custom billables.
+- [Phase 233]: Run payment-method writes with the actual signed-in human actor attribution.
 
 ### Pending Todos
 
@@ -254,8 +258,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-07T20:15:00.226Z
-Stopped at: Phase 233 Wave 2 complete; UI-SPEC approved; continuing with plan 233-02
+Last session: 2026-10-07T20:46:52.337Z
+Stopped at: Completed 233-02-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -281,7 +285,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: .planning/phases/233-shared-direction-portal-contract/233-02-PLAN.md
+Resume file: None
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 

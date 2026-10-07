@@ -53,7 +53,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 
 - [ ] **SAFE-01**: Mounted owner/customer denials and forged-action protections remain enforced; foreign records and payment-token data are not exposed.
 - [x] **SAFE-02**: The optional host integration resolves the billed entity separately from the actor and freshly authorizes each action across HTTP, LiveView, and reconnect; invalid selections or unauthorized provisioning fail safely while the personal default remains compatible.
-- [ ] **SAFE-03**: Forms and checkout remain pinned to their displayed billable, Customer, and processor across tabs and account switches; lookups use full owner/provider identity and hosted-session grants do not exceed authorized actions.
+- [x] **SAFE-03**: Forms and checkout remain pinned to their displayed billable, Customer, and processor across tabs and account switches; lookups use full owner/provider identity and hosted-session grants do not exceed authorized actions.
 
 ### Delivery and Evidence
 
@@ -112,7 +112,7 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | INT-04 | Phase 239 | Pending |
 | SAFE-01 | Phase 234 | Pending |
 | SAFE-02 | Phase 233 | Complete |
-| SAFE-03 | Phase 233 | Pending |
+| SAFE-03 | Phase 233 | Complete |
 | SHIP-01 | Phase 239 | Pending |
 | SHIP-02 | Phase 239 | Pending |
 | SHIP-03 | Phase 239 | Pending |
