@@ -107,6 +107,11 @@ trap 'browser_failed=1; exit 130' INT TERM
 
 ensure_port_available "$browser_port"
 
+# The hosted checkout fixtures use Braintree LocalSessions. Keep the browser
+# process and seed subprocess on the same configured processor so the Portal
+# does not present Hosted Fields for a checkout it cannot mutate.
+export ACCRUE_HOST_BROWSER_USE_BRAINTREE=1
+
 MIX_ENV=test mix ecto.drop --quiet || true
 run_classified fixture_or_database env MIX_ENV=test mix ecto.create --quiet
 run_classified fixture_or_database env MIX_ENV=test mix ecto.migrate --quiet

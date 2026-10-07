@@ -28,7 +28,7 @@ defmodule AccruePortal.Live.CheckoutLive do
          {:ok, pin, context} <- resolve_checkout_context(socket, params["context_pin"], true),
          true <- checkout_target?(context, checkout) do
       action_target? =
-        checkout_action_target?(context, checkout, socket.assigns[:current_context_adapter])
+        checkout_action_target?(context, checkout)
 
       complete_allowed? =
         action_target? and
@@ -452,7 +452,7 @@ defmodule AccruePortal.Live.CheckoutLive do
     with %LocalSession{} = checkout <- checkout,
          {:ok, _pin, context} <- resolve_checkout_context(socket, pin, false),
          true <-
-           checkout_action_target?(context, checkout, socket.assigns[:current_context_adapter]),
+           checkout_action_target?(context, checkout),
          true <- checkout_ready?(checkout),
          :ok <-
            Context.authorize_action(
@@ -478,7 +478,7 @@ defmodule AccruePortal.Live.CheckoutLive do
     end
   end
 
-  defp checkout_action_target?(context, %LocalSession{} = checkout, context_adapter) do
+  defp checkout_action_target?(context, %LocalSession{} = checkout) do
     customer_matches? =
       case context.customer do
         %Customer{id: customer_id, processor: processor} ->
@@ -498,8 +498,7 @@ defmodule AccruePortal.Live.CheckoutLive do
           false
       end
 
-    configured_processor_matches? =
-      is_nil(context_adapter) or checkout.processor == Processor.name()
+    configured_processor_matches? = checkout.processor == Processor.name()
 
     customer_matches? and selected_item_matches? and checkout.mode == "subscription" and
       checkout.ui_mode == "hosted" and context.processor == checkout.processor and

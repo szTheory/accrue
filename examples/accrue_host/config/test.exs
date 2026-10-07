@@ -21,7 +21,11 @@ config :accrue_host, AccrueHost.Repo,
 config :accrue,
   env: :test,
   repo: AccrueHost.Repo,
-  processor: Accrue.Processor.Fake,
+  processor:
+    if(System.get_env("ACCRUE_HOST_BROWSER_USE_BRAINTREE") == "1",
+      do: Accrue.Processor.Braintree,
+      else: Accrue.Processor.Fake
+    ),
   plan_resolver: AccrueHost.Billing.PlanResolver,
   braintree_client_token_generator: AccrueHost.BraintreePortalStub.ClientTokenGenerator,
   webhook_handlers: [AccrueHost.BillingHandler],

@@ -3,6 +3,7 @@ defmodule AccruePortal.CheckoutContextTest do
 
   alias Accrue.Checkout.LocalSession
   alias Accrue.Billing.Customer
+  alias Accrue.Portal.Context
   alias AccruePortal.TestRepo
 
   defmodule Organization do
@@ -107,6 +108,8 @@ defmodule AccruePortal.CheckoutContextTest do
       session_keys: [:user_token, :active_billable_id],
       context_adapter: ActionAdapter
     )
+
+    accrue_portal("/personal-billing", session_keys: [:user_token])
   end
 
   defmodule CustomEndpoint do
@@ -257,6 +260,128 @@ defmodule AccruePortal.CheckoutContextTest do
     assert redirected_to(response) == "https://app.example.test/billing/success"
     assert LocalSession.by_id(session.id).status == "completed"
     assert_received {:gateway_create, %{payment_method_token: "fake-valid-nonce"}, %{type: :user}}
+  end
+
+  test "personal checkout POST completes for the matching configured processor", %{
+    conn: conn
+  } do
+    user_id = "00000000-0000-0000-0000-000000000123"
+    user = %AccruePortal.Fixtures.TestUser{id: user_id}
+
+    customer =
+      %Customer{}
+      |> Customer.changeset(%{
+        owner_type: user.__struct__.__accrue__(:billable_type),
+        owner_id: user_id,
+        email: "personal-checkout@example.com",
+        name: "Personal Customer",
+        processor: "braintree",
+        processor_id: "cus_personal_legacy"
+      })
+      |> TestRepo.insert!()
+
+    {:ok, session} =
+      LocalSession.create_or_reuse(customer, %{
+        processor: "braintree",
+        mode: "subscription",
+        ui_mode: "hosted",
+        status: "open",
+        price_id: "price_personal_legacy",
+        line_items: [%{"price" => "price_personal_legacy", "amount" => "49.00"}],
+        success_url: "https://app.example.test/billing/success",
+        cancel_url: "https://app.example.test/billing/cancel",
+        operation_id: "checkout-personal-legacy"
+      })
+
+    assert Accrue.Processor.name() == "braintree"
+    conn = Plug.Test.init_test_session(conn, %{"user_token" => "customer:" <> user_id})
+
+    assert {:ok, _view, html} =
+             live(conn, "/personal-billing/checkout/#{session.session_token}")
+
+    assert html =~ ~s(id="checkout-form")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    csrf =
+      Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first)
+      |> hd()
+
+    response =
+      post(conn, "/personal-billing/checkout/#{session.session_token}/complete", %{
+        "context_pin" => pin,
+        "_csrf_token" => csrf,
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    assert redirected_to(response) == "https://app.example.test/billing/success"
+    assert LocalSession.by_id(session.id).status == "completed"
+    assert_received {:gateway_create, params, actor}
+    assert params.payment_method_token == "fake-valid-nonce"
+    assert actor == %{type: :user, id: user_id}
+  end
+
+  test "personal checkout denies POST when its processor differs from configuration", %{
+    conn: conn
+  } do
+    user_id = "00000000-0000-0000-0000-000000000123"
+    user = %AccruePortal.Fixtures.TestUser{id: user_id}
+
+    customer =
+      %Customer{}
+      |> Customer.changeset(%{
+        owner_type: user.__struct__.__accrue__(:billable_type),
+        owner_id: user_id,
+        email: "personal-checkout-mismatch@example.com",
+        name: "Personal Customer",
+        processor: "braintree",
+        processor_id: "cus_personal_legacy_mismatch"
+      })
+      |> TestRepo.insert!()
+
+    {:ok, session} =
+      LocalSession.create_or_reuse(customer, %{
+        processor: "braintree",
+        mode: "subscription",
+        ui_mode: "hosted",
+        status: "open",
+        price_id: "price_personal_legacy_mismatch",
+        line_items: [%{"price" => "price_personal_legacy_mismatch", "amount" => "49.00"}],
+        success_url: "https://app.example.test/billing/success",
+        cancel_url: "https://app.example.test/billing/cancel",
+        operation_id: "checkout-personal-legacy-mismatch"
+      })
+
+    Application.put_env(:accrue, :processor, Accrue.Processor.Fake)
+    conn = Plug.Test.init_test_session(conn, %{"user_token" => "customer:" <> user_id})
+
+    assert {:ok, _view, html} =
+             live(conn, "/personal-billing/checkout/#{session.session_token}")
+
+    assert html =~ "Checkout access is unavailable. No payment was submitted."
+    refute html =~ ~s(id="checkout-form")
+    refute html =~ ~s(data-portal-hosted-fields="checkout")
+    assert TokenCounter.count() == 0
+
+    {:ok, context} = Context.personal(user, customer)
+    {:ok, pin} = Context.mint_pin(context, CustomEndpoint)
+
+    csrf =
+      Regex.run(~r/<meta name="csrf-token" content="([^"]+)"/, html, capture: :all_but_first)
+      |> hd()
+
+    response =
+      post(conn, "/personal-billing/checkout/#{session.session_token}/complete", %{
+        "context_pin" => pin,
+        "_csrf_token" => csrf,
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    assert redirected_to(response) == "/personal-billing/checkout/#{session.session_token}"
+    refute LocalSession.by_id(session.id).status == "completed"
+    assert Accrue.Processor.Fake.call_count(:create_subscription) == 0
+    refute_received {:gateway_create, _, _}
   end
 
   test "checkout POST without rendered pin cannot call the provider", %{conn: conn} do

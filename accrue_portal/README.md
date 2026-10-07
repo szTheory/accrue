@@ -94,6 +94,14 @@ Customer row remains the personal fallback, including its configured
 processor. If no row exists, the existing personal flow may provision one with
 the configured processor; multiple rows are ambiguous and blocked.
 
+Personal identity resolution can continue to display an existing Customer
+whose processor differs from the application's configured processor. Checkout
+mutation still requires the LocalSession processor to match the configured
+processor, because billing mutations dispatch through that configured adapter.
+When they differ, checkout is unavailable before client-token issuance and
+the POST completion route denies the submission; Accrue does not dynamically
+route a mutation to a Customer's historical processor.
+
 Portal forms and routes carry a short-lived signed context pin containing the
 selected identity and exact Customer/processor locator. The pin keeps separate
 tabs attached to the billable they display; it is not a permission grant.
