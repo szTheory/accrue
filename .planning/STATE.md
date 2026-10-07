@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 233
 current_phase_name: Shared Direction & Portal Contract
 status: executing
-stopped_at: Completed 233-02-PLAN.md
-last_updated: "2026-10-07T20:46:52.360Z"
+stopped_at: Completed 233-03-PLAN.md
+last_updated: "2026-10-07T21:08:13.378Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 233 plan 06 completed; four plans remain
-state_head: 12f33a475ea9dde7f4bed47a2f34d17997867075
+state_head: 18bbe9ce5c332f977733a11746f4f7fa43ac5557
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 7
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 233 (Shared Direction & Portal Contract) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-10-07 — Phase 233 plan 02 completed
 
@@ -100,6 +100,7 @@ Last activity: 2026-10-07 — Phase 233 plan 02 completed
 | Phase 233 P01 | 26min | 2 tasks | 11 files |
 | Phase 233 P06 | 19min | 2 tasks | 5 files |
 | Phase 233 P02 | 26min | 2 tasks | 17 files |
+| Phase 233 P03 | 13min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -190,6 +191,9 @@ Last activity: 2026-10-07 — Phase 233 plan 02 completed
 - [Phase 233]: Payment-method flow pins are signed locators only; each operation re-resolves current host policy and the exact Customer.
 - [Phase 233]: Preserve personal single-Customer cross-processor compatibility while requiring configured processor identity for custom billables.
 - [Phase 233]: Run payment-method writes with the actual signed-in human actor attribution.
+- [Phase 233]: Each protected subscription event re-resolves the signed pin, loads the target from the currently authorized Customer, then checks the named host action.
+- [Phase 233]: Custom adapter contexts receive an initial URL pin before continuing; personal-only behavior remains on its existing path.
+- [Phase 233]: Human actor attribution stays separate from the billed entity and is scoped around subscription mutations.
 
 ### Pending Todos
 
@@ -258,8 +262,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-07T20:46:52.337Z
-Stopped at: Completed 233-02-PLAN.md
+Last session: 2026-10-07T21:08:13.355Z
+Stopped at: Completed 233-03-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 

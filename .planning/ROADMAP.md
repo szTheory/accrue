@@ -68,7 +68,7 @@ Plans:
 - [x] 233-02-PLAN.md — Connect rendered payment forms to pinned POST actions and gate add-card client tokens.
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 233-03-PLAN.md — Apply the contract to Home, subscription, and invoice routes and events.
+- [x] 233-03-PLAN.md — Apply the contract to Home, subscription, and invoice routes and events.
 - [ ] 233-07-PLAN.md — Connect checkout form pins to both completion transports and gate client tokens.
 
 **Wave 5** *(blocked on Wave 4 completion)*
@@ -167,7 +167,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 233. Shared Direction & Portal Contract | 4/7 | In Progress | - |
+| 233. Shared Direction & Portal Contract | 5/7 | In Progress | - |
 | 234. Admin Customers & Subscriptions | 0/TBD | Not started | - |
 | 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
 | 236. Portal Billing Self-Service | 0/TBD | Not started | - |
