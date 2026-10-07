@@ -28,6 +28,7 @@ defmodule Accrue.Portal.Router do
     session_keys = validated[:session_keys]
     login_path = validated[:login_path]
     on_mount = validated[:on_mount]
+    blocked_on_mount = validated[:blocked_on_mount]
     context_adapter = validated[:context_adapter]
     session_name = validated[:session_name]
     blocked_session_name = validated[:blocked_session_name]
@@ -47,7 +48,8 @@ defmodule Accrue.Portal.Router do
             authenticated_pipeline: authenticated_pipeline,
             live_authenticated_pipeline: live_authenticated_pipeline,
             scope_name: scope_name,
-            on_mount: on_mount
+            on_mount: on_mount,
+            blocked_on_mount: blocked_on_mount
           ] do
       import Phoenix.LiveView.Router, only: [fetch_live_flash: 2]
 
@@ -134,7 +136,7 @@ defmodule Accrue.Portal.Router do
 
         live_session blocked_session_name,
           root_layout: {AccruePortal.Layouts, :root},
-          on_mount: [{Accrue.Portal.AuthHook, :ensure_user}],
+          on_mount: blocked_on_mount,
           session:
             {Accrue.Portal.Router, :__session__,
              [session_keys, mount_path, login_path, context_adapter]} do
@@ -227,7 +229,8 @@ defmodule Accrue.Portal.Router do
       authenticated_pipeline: pipeline_name(normalized_path, "authenticated"),
       live_authenticated_pipeline: pipeline_name(normalized_path, "live_authenticated"),
       scope_name: scope_name(normalized_path),
-      on_mount: List.wrap(extra_hooks) ++ @default_on_mount
+      on_mount: List.wrap(extra_hooks) ++ @default_on_mount,
+      blocked_on_mount: List.wrap(extra_hooks) ++ [{Accrue.Portal.AuthHook, :ensure_user}]
     ]
   end
 

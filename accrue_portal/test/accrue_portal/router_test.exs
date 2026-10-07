@@ -9,6 +9,18 @@ defmodule AccruePortal.RouterTest do
     accrue_portal("/ops", session_keys: [:user_token])
   end
 
+  defmodule HostSessionHook do
+    def on_mount(:default, _params, _session, socket), do: {:cont, socket}
+  end
+
+  defmodule HostHookRouter do
+    use Phoenix.Router
+
+    import Accrue.Portal.Router
+
+    accrue_portal("/host", session_keys: [:user_token], on_mount: HostSessionHook)
+  end
+
   test "mount macro emits asset routes and protected plus blocked live sessions" do
     routes = AccruePortal.TestRouter.__routes__()
     paths = Enum.map(routes, & &1.path)
@@ -38,6 +50,21 @@ defmodule AccruePortal.RouterTest do
 
     assert length(live_routes) == 8
     assert length(live_sessions) == 2
+  end
+
+  test "blocked live session preserves host hooks without the customer resolver" do
+    blocked =
+      HostHookRouter.__routes__()
+      |> Enum.find(&(&1.path == "/host/blocked"))
+      |> Map.fetch!(:metadata)
+      |> Map.fetch!(:phoenix_live_view)
+
+    on_mount = elem(blocked, 3).extra.on_mount
+    ids = Enum.map(on_mount, & &1.id)
+
+    assert {HostSessionHook, :default} in ids
+    assert {Accrue.Portal.AuthHook, :ensure_user} in ids
+    refute {Accrue.Portal.AuthHook, :ensure_customer} in ids
   end
 
   test "session callback only forwards explicit host session keys" do
