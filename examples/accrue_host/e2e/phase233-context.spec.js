@@ -33,6 +33,7 @@ test("host-selected member context shows its billable and blocks payment collect
   await expect(page.locator('[data-portal-hosted-fields="payment-method"]')).toBeVisible();
   const personalPin = new URL(page.url()).searchParams.get("context_pin");
   expect(personalPin).toBeTruthy();
+
   const oldTab = await page.context().newPage();
   await oldTab.goto(`/shared-billing/payment-methods/new?context_pin=${encodeURIComponent(personalPin)}`);
   await waitForLiveView(oldTab);
@@ -67,4 +68,48 @@ test("host-selected member context shows its billable and blocks payment collect
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/$/);
   await oldTab.close();
+});
+
+test("an authorized organization manager completes a real Portal payment method mutation", async ({ page, sandboxId }) => {
+  const fixture = readFixture();
+  await login(page, fixture, fixture.admin_email, sandboxId);
+
+  const csrfToken = await page.locator('meta[name="csrf-token"]').getAttribute("content");
+  const selected = await page.request.post("/app/organization-scope", {
+    headers: { "x-sandbox-id": sandboxId },
+    form: { _csrf_token: csrfToken, organization_slug: fixture.admin_org_alpha_slug }
+  });
+  expect(selected.ok()).toBeTruthy();
+
+  await page.goto("/shared-billing/payment-methods/new");
+  await waitForLiveView(page);
+  await expect(page.locator(".portal-billable-name")).toHaveText("Admin E2E Alpha Org");
+  await expect(page.locator('[data-portal-hosted-fields="payment-method"]')).toBeVisible();
+  const pin = new URL(page.url()).searchParams.get("context_pin");
+  expect(pin).toBeTruthy();
+
+  // The deterministic test nonce passes through the mounted Portal POST and
+  // Fake processor; no external processor or live-card result is involved.
+  const response = await page.request.post("/shared-billing/payment-methods", {
+    maxRedirects: 0,
+    headers: { "x-sandbox-id": sandboxId },
+    form: {
+      _csrf_token: await page.locator('meta[name="csrf-token"]').getAttribute("content"),
+      context_pin: pin,
+      payment_method_nonce: "fake-valid-nonce"
+    }
+  });
+  expect(response.status()).toBe(302);
+  const location = response.headers().location;
+  expect(location).toContain("/shared-billing/payment-methods?context_pin=");
+  await page.goto(location);
+  await waitForLiveView(page);
+  await expect(page.getByText("visa ending in 4242").first()).toBeVisible();
+
+  // Confirm the persisted event names a human actor in the mounted Admin ledger.
+  await page.goto("/admin/events?q=payment_method.added");
+  await waitForLiveView(page);
+  const mutationRow = page.getByRole("row").filter({ hasText: "payment_method.added" });
+  await expect(mutationRow).toHaveCount(1);
+  await expect(mutationRow).toContainText("User ");
 });
