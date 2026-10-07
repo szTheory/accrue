@@ -13,6 +13,8 @@ Phase execution remains in progress. These are wave observations, not final phas
 | 2 | Compiled UI-consideration probe and final UI safety rerun. | 30 applicable considerations, 30 explicit acceptance resolutions, 0 unresolved/unclassified; UI safety `block: false`. Criteria are not runtime pass claims. |
 | 3 | Independent orchestrator Portal compile and full test rerun, both with `--warnings-as-errors`. | Exit 0; 52 tests, 0 failures. Plan summary and branch-reachable task commits checked. |
 | 3 | Schema drift / UI safety / codebase drift. | Schema and UI gates have `block: false`; codebase drift skipped without STRUCTURE.md. |
+| 4 | Independent orchestrator Portal compile and full test rerun, both with `--warnings-as-errors`. | Exit 0; 66 tests, 0 failures. Plans 233-03 and 233-07 summaries and branch-reachable task commits checked. |
+| 4 | Schema drift / UI safety / codebase drift. | Schema and UI gates have `block: false`; codebase drift skipped without STRUCTURE.md. Plan index identifies only 233-05 as incomplete and ready. |
 
 ## Execution environment
 
