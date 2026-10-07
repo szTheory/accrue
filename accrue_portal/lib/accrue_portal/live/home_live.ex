@@ -28,9 +28,9 @@ defmodule AccruePortal.Live.HomeLive do
           <p>{Copy.home_body()}</p>
         </div>
         <nav class="portal-nav">
-          <a href={Path.subscriptions(@base_path)}>{Copy.home_manage_subscriptions_cta()}</a>
-          <a href={Path.payment_methods(@base_path)}>{Copy.home_manage_payment_methods_cta()}</a>
-          <a href={Path.invoices(@base_path)}>{Copy.home_manage_invoices_cta()}</a>
+          <a href={Path.context(Path.subscriptions(@base_path), @current_context_pin)}>{Copy.home_manage_subscriptions_cta()}</a>
+          <a href={Path.context(Path.payment_methods(@base_path), @current_context_pin)}>{Copy.home_manage_payment_methods_cta()}</a>
+          <a href={Path.context(Path.invoices(@base_path), @current_context_pin)}>{Copy.home_manage_invoices_cta()}</a>
         </nav>
       </section>
 

@@ -19,7 +19,8 @@ defmodule AccruePortal.Live.SubscriptionLive do
          |> assign(:subscription, subscription)
          |> assign(:show_cancel_confirmation, false)
          |> assign(:plan_change_price_id, nil)
-         |> assign(:plan_change_preview, nil)}
+         |> assign(:plan_change_preview, nil)
+         |> assign(:action_notice, nil)}
 
       {:error, :not_found} ->
         {:ok,
@@ -30,13 +31,17 @@ defmodule AccruePortal.Live.SubscriptionLive do
          |> assign(:subscription, nil)
          |> assign(:show_cancel_confirmation, false)
          |> assign(:plan_change_price_id, nil)
-         |> assign(:plan_change_preview, nil)}
+         |> assign(:plan_change_preview, nil)
+         |> assign(:action_notice, nil)}
     end
   end
 
   @impl true
   def handle_event("toggle_cancel_confirmation", _params, socket) do
-    {:noreply, update(socket, :show_cancel_confirmation, &(!&1))}
+    case authorize_current(socket, :subscription_cancel) do
+      {:ok, _subscription} -> {:noreply, update(socket, :show_cancel_confirmation, &(!&1))}
+      {:error, _reason} -> {:noreply, denied(socket)}
+    end
   end
 
   def handle_event(
@@ -44,6 +49,16 @@ defmodule AccruePortal.Live.SubscriptionLive do
         %{"plan_change" => %{"price_id" => price_id}},
         %{assigns: %{subscription: %Subscription{} = subscription}} = socket
       ) do
+    case authorize_current(socket, :subscription_preview) do
+      {:ok, %Subscription{} = authorized} ->
+        preview_plan_change_event(socket, authorized, price_id)
+
+      {:error, _reason} ->
+        {:noreply, denied(socket)}
+    end
+  end
+
+  defp preview_plan_change_event(socket, subscription, price_id) do
     case preview_plan_change(subscription, price_id) do
       {:ok, %UpcomingInvoice{} = preview, normalized_price_id} ->
         {:noreply,
@@ -81,19 +96,29 @@ defmodule AccruePortal.Live.SubscriptionLive do
         } = socket
       )
       when is_binary(price_id) do
-    case swap_plan(subscription, price_id) do
-      {:ok, _updated_subscription} ->
-        {:ok, refreshed} = Authorize.subscription(socket, subscription.id)
+    case authorize_current(socket, :subscription_change) do
+      {:ok, %Subscription{} = authorized} ->
+        case with_actor(socket, fn -> swap_plan(authorized, price_id) end) do
+          {:ok, _updated_subscription} ->
+            {:ok, refreshed} = Authorize.subscription(socket, subscription.id)
 
-        {:noreply,
-         socket
-         |> assign(:subscription, refreshed)
-         |> assign(:plan_change_price_id, nil)
-         |> assign(:plan_change_preview, nil)
-         |> put_flash(:info, Copy.subscription_plan_change_commit_success())}
+            {:noreply,
+             socket
+             |> assign(:subscription, refreshed)
+             |> assign(:plan_change_price_id, nil)
+             |> assign(:plan_change_preview, nil)
+             |> assign(:action_notice, Copy.subscription_plan_change_commit_success())
+             |> put_flash(:info, Copy.subscription_plan_change_commit_success())}
+
+          {:error, _reason} ->
+            {:noreply,
+             socket
+             |> clear_plan_change()
+             |> put_flash(:error, Copy.subscription_plan_change_commit_error())}
+        end
 
       {:error, _reason} ->
-        {:noreply, put_flash(socket, :error, Copy.subscription_plan_change_commit_error())}
+        {:noreply, denied(socket)}
     end
   end
 
@@ -110,17 +135,27 @@ defmodule AccruePortal.Live.SubscriptionLive do
 
   def handle_event(
         "cancel",
+        %{"id" => id},
+        %{assigns: %{subscription: %Subscription{id: expected_id}}} = socket
+      )
+      when id != expected_id do
+    {:noreply, denied(socket)}
+  end
+
+  def handle_event(
+        "cancel",
         _params,
         %{assigns: %{subscription: %Subscription{} = subscription}} = socket
       ) do
-    case Authorize.subscription(socket, subscription.id) do
+    case Authorize.subscription(socket, subscription.id, :subscription_cancel) do
       {:ok, %Subscription{} = scoped_subscription} ->
-        case cancel_subscription(scoped_subscription) do
+        case with_actor(socket, fn -> cancel_subscription(scoped_subscription) end) do
           {:ok, updated} ->
             {:noreply,
              socket
              |> assign(:subscription, updated)
              |> assign(:show_cancel_confirmation, false)
+             |> assign(:action_notice, Copy.subscription_cancel_success(scoped_subscription))
              |> put_flash(:info, Copy.subscription_cancel_success(scoped_subscription))}
 
           {:error, _reason} ->
@@ -130,6 +165,9 @@ defmodule AccruePortal.Live.SubscriptionLive do
 
       {:error, :not_found} ->
         {:noreply, put_flash(socket, :error, Copy.subscriptions_unknown_error())}
+
+      {:error, _reason} ->
+        {:noreply, denied(socket)}
     end
   end
 
@@ -143,7 +181,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
         <h1>{Copy.subscription_not_found_title()}</h1>
         <p>{Copy.subscription_not_found_body()}</p>
         <div class="portal-actions">
-          <a href={Path.home(@base_path)} class="portal-button-secondary">
+          <a href={Path.context(Path.home(@base_path), @current_context_pin)} class="portal-button-secondary">
             {Copy.subscription_back_home_cta()}
           </a>
         </div>
@@ -156,8 +194,8 @@ defmodule AccruePortal.Live.SubscriptionLive do
     ~H"""
     <main class="portal-shell">
       <AccruePortal.Layouts.breadcrumb trail={[
-        %{label: Copy.breadcrumb_home(), href: Path.home(@base_path)},
-        %{label: Copy.subscriptions_heading(), href: Path.subscriptions(@base_path)},
+        %{label: Copy.breadcrumb_home(), href: Path.context(Path.home(@base_path), @current_context_pin)},
+        %{label: Copy.subscriptions_heading(), href: Path.context(Path.subscriptions(@base_path), @current_context_pin)},
         %{label: Copy.subscription_heading(), href: nil}
       ]} />
       <section
@@ -169,13 +207,16 @@ defmodule AccruePortal.Live.SubscriptionLive do
         <h2>{Copy.subscription_recovery_heading()}</h2>
         <p>{Copy.subscription_recovery_body()}</p>
         <div class="portal-actions">
-          <a href={update_pm_path(@base_path, @subscription)} class="portal-button-primary">
+          <a href={Path.context(update_pm_path(@base_path, @subscription), @current_context_pin)} class="portal-button-primary">
             {Copy.subscription_recovery_cta()}
           </a>
         </div>
       </section>
 
       <section class="portal-card">
+        <p :if={@action_notice} class="portal-inline-status" role="status" aria-live="polite">
+          {@action_notice}
+        </p>
         <h1>{Copy.subscription_heading()}</h1>
         <ul class="portal-list">
           <li>
@@ -296,6 +337,37 @@ defmodule AccruePortal.Live.SubscriptionLive do
 
   defp cancel_subscription(%Subscription{} = subscription),
     do: Billing.cancel_at_period_end(subscription)
+
+  defp authorize_current(socket, action) do
+    case socket.assigns[:subscription] do
+      %Subscription{id: id} -> Authorize.subscription(socket, id, action)
+      _ -> {:error, :not_found}
+    end
+  end
+
+  defp denied(socket) do
+    socket
+    |> assign(:show_cancel_confirmation, false)
+    |> clear_plan_change()
+    |> assign(
+      :action_notice,
+      "Your change was not submitted because billing access is unavailable."
+    )
+    |> put_flash(:error, "Your change was not submitted because billing access is unavailable.")
+  end
+
+  defp clear_plan_change(socket) do
+    socket
+    |> assign(:plan_change_price_id, nil)
+    |> assign(:plan_change_preview, nil)
+  end
+
+  defp with_actor(socket, fun) do
+    actor = socket.assigns.current_context.actor
+    actor_id = Accrue.Auth.actor_id(actor) || Map.get(actor, :id) || Map.get(actor, "id")
+    audit_actor = %{type: :user, id: if(is_nil(actor_id), do: nil, else: to_string(actor_id))}
+    Accrue.Actor.with_actor(audit_actor, fun)
+  end
 
   defp preview_supported?(%Subscription{processor: "braintree"}), do: false
   defp preview_supported?(%Subscription{}), do: true

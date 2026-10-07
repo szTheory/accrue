@@ -16,6 +16,8 @@ defmodule AccruePortal.Layouts do
   attr(:live_view_js_path, :string, default: nil)
   attr(:base_path, :string, default: nil)
   attr(:current_context, :map, default: nil)
+  attr(:current_context_pin, :string, default: nil)
+  attr(:flash, :map, default: %{})
 
   def root(assigns) do
     assigns =
@@ -39,7 +41,7 @@ defmodule AccruePortal.Layouts do
       <body>
         <header class="portal-topbar">
           <div class="portal-topbar-inner">
-            <a href={@base_path} class="portal-brand-link" aria-label={@brand_wordmark || "Billing home"}>
+            <a href={AccruePortal.Path.context(@base_path, @current_context_pin)} class="portal-brand-link" aria-label={@brand_wordmark || "Billing home"}>
               <img
                 :if={@brand_logo_url}
                 class="portal-logo"
@@ -114,6 +116,12 @@ defmodule AccruePortal.Layouts do
             </div>
           </div>
         </header>
+        <div :if={@flash[:error]} id="portal-live-error" class="portal-inline-error" role="alert" aria-live="assertive">
+          {@flash[:error]}
+        </div>
+        <div :if={@flash[:info]} id="portal-live-status" class="portal-inline-status" role="status" aria-live="polite">
+          {@flash[:info]}
+        </div>
         <%= @inner_content %>
         <script :if={@phoenix_js_path} defer src={@phoenix_js_path}></script>
         <script :if={@live_view_js_path} defer src={@live_view_js_path}></script>

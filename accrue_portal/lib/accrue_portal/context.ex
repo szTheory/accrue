@@ -37,6 +37,9 @@ defmodule Accrue.Portal.Context do
           | :payment_method_default
           | :payment_method_delete
           | :manage_subscription
+          | :subscription_cancel
+          | :subscription_change
+          | :subscription_preview
           | :complete_checkout
 
   @type t :: %__MODULE__{
@@ -135,9 +138,13 @@ defmodule Accrue.Portal.Context do
   @spec authorize_action(t(), module() | nil, action(), term()) :: :ok | {:error, :forbidden}
   def authorize_action(%__MODULE__{} = context, nil, action, target)
       when action in [
+             :read,
              :payment_method_create,
              :payment_method_default,
-             :payment_method_delete
+             :payment_method_delete,
+             :subscription_cancel,
+             :subscription_change,
+             :subscription_preview
            ] do
     if target_in_context?(context, target), do: :ok, else: {:error, :forbidden}
   end
@@ -156,7 +163,7 @@ defmodule Accrue.Portal.Context do
     case context.customer do
       %Customer{id: customer_id} ->
         target == context.billable or target == context.customer or
-          match?(%Accrue.Billing.PaymentMethod{customer_id: ^customer_id}, target)
+          match?(%{customer_id: ^customer_id}, target)
 
       _ ->
         false

@@ -10,4 +10,10 @@ defmodule AccruePortal.Path do
   def payment_method_default(base, id), do: base <> "/payment-methods/" <> id <> "/default"
   def payment_method_delete(base, id), do: base <> "/payment-methods/" <> id <> "/delete"
   def checkout_complete(base, token), do: base <> "/checkout/" <> token <> "/complete"
+
+  def context(path, pin) when is_binary(pin) and pin != "" do
+    path <> "?context_pin=" <> URI.encode_www_form(pin)
+  end
+
+  def context(path, _pin), do: path
 end

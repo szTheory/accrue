@@ -36,13 +36,25 @@ defmodule Accrue.Portal.AuthHook do
 
     case resolution do
       {:ok, %Context{} = context} ->
+        pin =
+          case Keyword.get(opts, :pin) do
+            pin when is_binary(pin) and pin != "" ->
+              pin
+
+            _ ->
+              case Context.mint_pin(context, socket.endpoint) do
+                {:ok, pin} -> pin
+                _ -> nil
+              end
+          end
+
         {:cont,
          socket
          |> assign_portal_shell(session, context.actor)
          |> assign(:current_actor, context.actor)
          |> assign(:current_billable, context.billable)
          |> assign(:current_context, context)
-         |> assign(:current_context_pin, Keyword.get(opts, :pin))
+         |> assign(:current_context_pin, pin)
          |> assign(
            :current_context_adapter,
            get_in(session, ["accrue_portal", "context_adapter"])

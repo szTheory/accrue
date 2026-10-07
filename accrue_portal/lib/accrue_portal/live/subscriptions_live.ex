@@ -20,9 +20,9 @@ defmodule AccruePortal.Live.SubscriptionsLive do
 
   @impl true
   def handle_event("cancel", %{"id" => id}, socket) do
-    case Authorize.subscription(socket, id) do
+    case Authorize.subscription(socket, id, :subscription_cancel) do
       {:ok, %Subscription{} = sub} ->
-        case cancel_subscription(sub) do
+        case with_actor(socket, fn -> cancel_subscription(sub) end) do
           {:ok, _} ->
             {:noreply,
              socket
@@ -38,6 +38,14 @@ defmodule AccruePortal.Live.SubscriptionsLive do
 
       {:error, :not_found} ->
         {:noreply, put_flash(socket, :error, Copy.subscriptions_unknown_error())}
+
+      {:error, _reason} ->
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           "Your change was not submitted because billing access is unavailable."
+         )}
     end
   end
 
@@ -46,7 +54,7 @@ defmodule AccruePortal.Live.SubscriptionsLive do
     ~H"""
     <main class="portal-shell">
       <AccruePortal.Layouts.breadcrumb trail={[
-        %{label: Copy.breadcrumb_home(), href: Path.home(@base_path)},
+        %{label: Copy.breadcrumb_home(), href: Path.context(Path.home(@base_path), @current_context_pin)},
         %{label: Copy.subscriptions_heading(), href: nil}
       ]} />
       <section class="portal-card">
@@ -73,7 +81,7 @@ defmodule AccruePortal.Live.SubscriptionsLive do
             </div>
             <div class="portal-actions">
               <a
-                href={Path.subscriptions(@base_path) <> "/" <> subscription.id}
+        href={Path.context(Path.subscriptions(@base_path) <> "/" <> subscription.id, @current_context_pin)}
                 class="portal-button-secondary"
               >
                 {Copy.subscriptions_view_cta()}
@@ -96,6 +104,13 @@ defmodule AccruePortal.Live.SubscriptionsLive do
 
   defp cancel_subscription(%Subscription{} = subscription),
     do: Billing.cancel_at_period_end(subscription)
+
+  defp with_actor(socket, fun) do
+    actor = socket.assigns.current_context.actor
+    actor_id = Accrue.Auth.actor_id(actor) || Map.get(actor, :id) || Map.get(actor, "id")
+    audit_actor = %{type: :user, id: if(is_nil(actor_id), do: nil, else: to_string(actor_id))}
+    Accrue.Actor.with_actor(audit_actor, fun)
+  end
 
   defp plan_change_summary(%Subscription{processor: "braintree"} = subscription),
     do: Copy.subscriptions_plan_change_host_managed(subscription)
