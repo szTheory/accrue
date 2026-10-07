@@ -50,7 +50,10 @@ defmodule AccrueHost.InstallBoundaryTest do
   test "runtime config keeps fake-backed defaults instead of live-only setup" do
     runtime = File.read!(@runtime_path)
 
-    assert runtime =~ "config :accrue, :processor, Accrue.Processor.Fake"
+    assert runtime =~
+             "config_env() == :test and System.get_env(\"ACCRUE_HOST_BROWSER_USE_BRAINTREE\") == \"1\""
+
+    assert runtime =~ "else: Accrue.Processor.Fake"
     assert runtime =~ ~S|System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")|
     refute runtime =~ "config :accrue, :processor, Accrue.Processor.Stripe"
   end

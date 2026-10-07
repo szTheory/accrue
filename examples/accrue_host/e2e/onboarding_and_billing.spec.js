@@ -61,7 +61,10 @@ test.describe("Core User Journeys", () => {
     await expect(page.getByText("visa ending in 4242")).toBeVisible();
     await expect(page.getByText("mastercard ending in 4444")).toBeVisible();
     await expect(page.getByText("Default", { exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Add a card" })).toHaveAttribute("href", "/billing/payment-methods/new");
+    await expect(page.getByRole("link", { name: "Add a card" })).toHaveAttribute(
+      "href",
+      /^\/billing\/payment-methods\/new\?context_pin=/
+    );
     await expect(page.getByRole("button", { name: "Set default" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Delete card" })).toHaveCount(2);
 

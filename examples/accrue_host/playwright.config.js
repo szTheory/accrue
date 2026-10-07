@@ -18,6 +18,9 @@ const trustWalkthroughVideo =
 
 module.exports = defineConfig({
   testDir: "./e2e",
+  // Local checkout sessions are Braintree-specific. Run those specs against
+  // the matching adapter in the explicit Braintree checkout lane.
+  testIgnore: ["**/phase102-portal-checkout.spec.js", "**/phase233-braintree-checkout.spec.js"],
   globalSetup: path.join(__dirname, "e2e/global-setup.js"),
   timeout: 30_000,
   expect: { timeout: 5_000 },

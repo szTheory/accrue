@@ -23,7 +23,13 @@ end
 config :accrue_host, AccrueHostWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
-config :accrue, :processor, Accrue.Processor.Fake
+config :accrue,
+       :processor,
+       if(config_env() == :test and System.get_env("ACCRUE_HOST_BROWSER_USE_BRAINTREE") == "1",
+         do: Accrue.Processor.Braintree,
+         else: Accrue.Processor.Fake
+       )
+
 config :accrue, :auth_adapter, AccrueHost.Auth
 config :accrue, :plan_resolver, AccrueHost.Billing.PlanResolver
 

@@ -107,11 +107,6 @@ trap 'browser_failed=1; exit 130' INT TERM
 
 ensure_port_available "$browser_port"
 
-# The hosted checkout fixtures use Braintree LocalSessions. Keep the browser
-# process and seed subprocess on the same configured processor so the Portal
-# does not present Hosted Fields for a checkout it cannot mutate.
-export ACCRUE_HOST_BROWSER_USE_BRAINTREE=1
-
 MIX_ENV=test mix ecto.drop --quiet || true
 run_classified fixture_or_database env MIX_ENV=test mix ecto.create --quiet
 run_classified fixture_or_database env MIX_ENV=test mix ecto.migrate --quiet
@@ -160,7 +155,49 @@ for _ in $(seq 1 30); do
       setup_failure browser_launch "$e2e_status"
     fi
 
-    exit "$e2e_status"
+    # Local checkout sessions are Braintree-specific. Run their promo and
+    # Hosted Fields acceptance cases in a separate server process configured
+    # for Braintree; the default full browser suite remains on Fake.
+    stop_process_tree "$browser_server_pid"
+    browser_server_pid=""
+    run_classified fixture_or_database env \
+      ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 \
+      ACCRUE_HOST_E2E_FIXTURE="$fixture_file" \
+      MIX_ENV=test mix run "$repo_root/scripts/ci/accrue_host_seed_e2e.exs"
+
+    ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 PORT="$browser_port" PHX_SERVER=true MIX_ENV=test \
+      mix phx.server >>"$browser_log_file" 2>&1 &
+    browser_server_pid=$!
+
+    for _ in $(seq 1 30); do
+      if ! kill -0 "$browser_server_pid" >/dev/null 2>&1; then
+        browser_failed=1
+        setup_failure port_or_server_readiness
+      fi
+
+      if curl --fail --silent --show-error "http://127.0.0.1:${browser_port}/" >/dev/null; then
+        set +e
+        ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED=1 \
+          ACCRUE_HOST_REUSE_SERVER=1 \
+          ACCRUE_HOST_BROWSER_PORT="$browser_port" \
+          ACCRUE_HOST_E2E_FIXTURE="$fixture_file" \
+          npm run e2e:braintree-checkout
+        e2e_status=$?
+        set -e
+
+        if [ "$e2e_status" -ne 0 ]; then
+          browser_failed=1
+          setup_failure browser_launch "$e2e_status"
+        fi
+
+        exit 0
+      fi
+
+      sleep 1
+    done
+
+    browser_failed=1
+    setup_failure port_or_server_readiness
   fi
 
   sleep 1

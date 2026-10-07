@@ -32,7 +32,7 @@ async function installBraintreeInitializationProbe(page) {
   });
 }
 
-test("personal-only Portal mount needs no account picker and renders secure card entry", async ({ page, sandboxId }) => {
+test("personal-only Portal keeps secure card entry and blocks mismatched checkout", async ({ page, sandboxId }) => {
   const fixture = readFixture();
   await login(page, fixture, fixture.normal_email, sandboxId);
 
@@ -48,11 +48,14 @@ test("personal-only Portal mount needs no account picker and renders secure card
   await login(checkoutPage, fixture, fixture.normal_email, sandboxId);
   await checkoutPage.goto(fixture.portal_checkout_url);
   await waitForLiveView(checkoutPage);
-  await expect(checkoutPage.locator('[data-portal-hosted-fields="checkout"]')).toBeVisible();
-  await expect(checkoutPage.getByRole("button", { name: /^Pay / })).toBeVisible();
+  await expect(checkoutPage.getByRole("status")).toContainText(
+    "Checkout access is unavailable. No payment was submitted."
+  );
+  await expect(checkoutPage.locator('[data-portal-hosted-fields="checkout"]')).toHaveCount(0);
+  await expect(checkoutPage.locator("#checkout-form")).toHaveCount(0);
   await expect.poll(() => checkoutPage.evaluate(() => window.__braintreeInitializationCounts)).toEqual({
-    clientCreate: 1,
-    hostedFieldsCreate: 1
+    clientCreate: 0,
+    hostedFieldsCreate: 0
   });
   await checkoutPage.close();
 });
@@ -102,14 +105,6 @@ test("host-selected member context shows its billable and blocks payment collect
 
   // The host switch link is an existing local navigation path, not Portal policy.
   await expect(page.locator('.portal-billable-identity a[href="/app/billing"]')).toBeVisible();
-
-  // This checkout belongs to the organization. A read-only member can reach the
-  // shared mount but receives no payment collection controls.
-  await page.goto(fixture.org_portal_checkout_url);
-  await waitForLiveView(page);
-  await expect(page.locator('[data-portal-hosted-fields="checkout"]')).toHaveCount(0);
-  await expect(page.locator('#checkout-form button[type="submit"]')).toHaveCount(0);
-  await expect(page.getByRole("status")).toContainText("Checkout access is unavailable. No payment was submitted.");
 
   // A retained personal tab keeps its own identity and form locator after the
   // host's selected organization changes in another tab.

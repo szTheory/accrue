@@ -1596,6 +1596,33 @@ jobs:
           path: examples/accrue_host/test-results
           if-no-files-found: ignore
 
+      - name: Refresh Braintree checkout browser fixture
+        run: |
+          cd examples/accrue_host
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 mix run ../../scripts/ci/accrue_host_seed_e2e.exs
+
+      - name: Run configured Braintree checkout browser lane
+        env:
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE: "1"
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+        run: cd examples/accrue_host && npm run e2e:braintree-checkout
+
+      - name: Upload Braintree Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-braintree-checkout-report-shard-${{ matrix.shard }}
+          path: examples/accrue_host/playwright-report
+          if-no-files-found: ignore
+
+      - name: Upload Braintree Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-braintree-checkout-traces-shard-${{ matrix.shard }}
+          path: examples/accrue_host/test-results
+          if-no-files-found: ignore
+
   host-docker-smoke:
     name: Host Docker boot smoke
     if: github.event_name != 'schedule'
