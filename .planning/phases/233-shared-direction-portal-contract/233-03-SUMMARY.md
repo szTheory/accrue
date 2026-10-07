@@ -116,6 +116,8 @@ status: complete
 1. **Task 1: Bind dashboard and subscription reads, links and actions** - `aa32b0b4` (test), `08f53e27` (feat)
 2. **Task 2: Bind invoice navigation and reconnect to the same identity** - `1bc5fcf5` (test), `18bbe9ce` (feat)
 
+**Plan metadata:** `2c11d4b2` (docs: complete plan)
+
 ## Files Created/Modified
 
 - `accrue_portal/lib/accrue_portal/auth_hook.ex` - Adds the custom-host context pin to initial protected navigation while preserving old tab references.
