@@ -61,7 +61,7 @@ coverage:
         ref: "examples/accrue_host/e2e/phase233-context.spec.js#host-selected member context shows its billable and blocks payment collection"
         status: pass
       - kind: e2e
-        ref: "examples/accrue_host/e2e/phase233-context.spec.js#host-selected member context shows its billable and blocks payment collection (organization-owned checkout denial)"
+        ref: "examples/accrue_host/e2e/phase233-braintree-checkout.spec.js#matching Braintree organization checkout still enforces the host action grant"
         status: pass
       - kind: e2e
         ref: "examples/accrue_host/e2e/phase233-context.spec.js#an authorized organization manager completes a real Portal payment method mutation"
@@ -75,7 +75,10 @@ coverage:
     requirement: POR-08
     verification:
       - kind: e2e
-        ref: "examples/accrue_host/e2e/phase233-context.spec.js#personal-only Portal mount needs no account picker and renders secure card entry"
+        ref: "examples/accrue_host/e2e/phase233-context.spec.js#personal-only Portal keeps secure card entry and blocks mismatched checkout"
+        status: pass
+      - kind: e2e
+        ref: "examples/accrue_host/e2e/phase233-braintree-checkout.spec.js#configured Braintree personal checkout initializes Hosted Fields"
         status: pass
       - kind: e2e
         ref: "examples/accrue_host/e2e/phase233-context.spec.js#host-selected member context shows its billable and blocks payment collection"
@@ -104,14 +107,23 @@ coverage:
         status: pass
     human_judgment: false
   - id: D5
-    description: "Personal no-adapter checkout preserves its exact existing Braintree Customer when the configured new-customer processor is Fake; adapter-backed custom checkout remains processor strict."
+    description: "Personal resolution preserves its existing Customer for reads; both personal and custom checkout require the configured processor before token issuance or mutation, with matching-provider success controls."
     requirement: SAFE-02
     verification:
       - kind: unit
         ref: "accrue_portal/test/accrue_portal/checkout_context_test.exs#custom checkout stays disabled when the configured processor differs from its target"
         status: pass
+      - kind: unit
+        ref: "accrue_portal/test/accrue_portal/checkout_context_test.exs#personal checkout denies POST when its processor differs from configuration"
+        status: pass
+      - kind: unit
+        ref: "accrue_portal/test/accrue_portal/checkout_context_test.exs#personal checkout POST completes for the matching configured processor"
+        status: pass
+      - kind: unit
+        ref: "accrue_portal/test/accrue_portal/checkout_context_test.exs#rendered checkout form posts its pin and nonce through the authorized completion route"
+        status: pass
       - kind: e2e
-        ref: "examples/accrue_host/e2e/phase102-portal-checkout.spec.js#promo preview and checkout completion controls"
+        ref: "examples/accrue_host/e2e/phase233-braintree-checkout.spec.js#configured Braintree personal checkout initializes Hosted Fields"
         status: pass
     human_judgment: false
 
@@ -226,10 +238,16 @@ The measured plan-ledger range contains 10 commits from `5394f70ff09767767c9917b
 
 ## Follow-up RED/GREEN Evidence
 
-- **Checkout target regression RED:** `checkout_context_test.exs` now exercises a custom context whose stored checkout processor differs from the configured processor; it asserts generic denial, no Hosted Fields, no form, and zero client-token calls. The no-adapter personal Braintree positive control is exercised in the browser while the host processor is Fake.
+- **Checkout target regression RED:** `checkout_context_test.exs` exercises a custom context whose stored checkout processor differs from the configured processor; it asserts generic denial, no Hosted Fields, no form, and zero client-token calls. The initial personal checkout exception was superseded by the final review correction below.
 - **Blocked host hooks RED:** `233-05-T1-GAP-RED.json` records the failing Router contract test: only `AuthHook.ensure_user` existed in the blocked session, and the host hook assertion failed. The GREEN implementation forwards supplied host hooks before `ensure_user` and explicitly omits `ensure_customer`; the browser then confirmed the valid identity reaches the accessible blocked state after membership deletion.
 - **Browser proof:** Phase233 context 6/6 passed, including an authenticated membership deletion, stale-pin reload to `/shared-billing/blocked`, no Hosted Fields/submit control, and stale-pin POST redirected to the same generic blocked route.
 - **Mutation proof:** Browser payment-method POST returned success and the Admin event ledger showed the authenticated human `User` as actor for the organization-owned mutation. A separate manager case remained unable to access `/admin`.
+
+## Final Review Correction and Verification
+
+Commits `d828adc9` and `3dff46b2` supersede the earlier cross-configuration checkout interpretation. Personal Customer resolution retains the sole existing row for reads. Checkout LiveView and POST both require that Customer and LocalSession to match the configured processor: the phase excludes dynamic processor routing. A mismatched personal checkout produces no client token, Hosted Fields, or subscription write. Matching Braintree personal and custom rendered-form POST controls succeed with the human actor.
+
+The default Fake browser process proves mismatch denial and all six context scenarios. A separate test-only Braintree process proves eligible SDK initialization, promo behavior, and organization action denial; both lanes run from CI and `mix verify.full`. Final results: Portal **72/72**, host **219/219**, default browser **27 passed with 3 existing intentional skips**, Braintree browser **4/4**. Formatting, shell syntax, package JSON, CI YAML, and `git diff --check` passed. `233-REVIEW-FIX.md` records the RED/GREEN evidence, and the independent 58-file re-review reports zero findings. Earlier counts above describe their historical execution checkpoints.
 
 ## Issues Encountered
 

@@ -19,7 +19,7 @@ created: "2026-10-07"
 | Config file | `accrue_portal/mix.exs`; canonical host Playwright configuration |
 | Quick run command | `cd accrue_portal && mix test test/accrue_portal/auth_hook_test.exs test/accrue_portal/router_test.exs` |
 | Full suite command | `cd accrue_portal && mix test --warnings-as-errors` |
-| Estimated runtime | Portal full suite: 2.0 seconds in independent wave-5 rerun (68 tests); later gap regression passed 70 tests. Context browser: final 6/6; prior 4/5 audit run measured 18.5 seconds. |
+| Estimated runtime | Portal full suite: 2.0 seconds in independent wave-5 rerun (68 tests); final review regression passed 72 tests. Context browser: 6/6; prior 4/5 audit run measured 18.5 seconds. |
 
 ## Sampling Rate
 
@@ -43,7 +43,7 @@ created: "2026-10-07"
 | 233-04-T1 | BASE-01 | T-233-10 | `node -e "const f=require('fs').readFileSync('.planning/phases/233-shared-direction-portal-contract/233-INVENTORY.md','utf8');for(const x of ['/subscriptions/:id','/payment-methods/new','/checkout/:token','/checkout/:token/complete','Admin','source SHA','historical'])if(!f.includes(x))process.exit(1)"` | Missing file or route/provenance markers | passed |
 | 233-04-T2 | BASE-01 | T-233-09, T-233-10 | `cd accrue_admin && mix accrue_admin.assets.build` then `cd examples/accrue_host && npm run e2e -- e2e/phase233-baseline.spec.js --workers=1` | Build nonzero/missing asset; browser nonzero/zero tests or missing both served audiences and provenance | passed |
 | 233-04-T3 | SYS-01, SYS-02 | T-233-10 | `node -e "const f=require('fs').readFileSync('.planning/phases/233-shared-direction-portal-contract/DESIGN.md','utf8');for(const x of ['--ax-','--accrue-','focus','reflow','host','motion','status'])if(!f.includes(x))process.exit(1)"` | Missing DESIGN.md or role/ownership markers | passed |
-| 233-05-T1 | POR-08, SHIP-04 | T-233-11, T-233-12 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-context.spec.js --workers=1` | Nonzero, zero tests or absent personal/custom/mixed, revoked/no-write, tab pin and actor cases | passed: 6 browser tests; eligible Hosted Fields SDK initialization, organization checkout denial, fresh membership revocation, stale-pin POST denial and persisted human actor verified |
+| 233-05-T1 | POR-08, SHIP-04 | T-233-11, T-233-12 | Default context spec plus dedicated Braintree config via `scripts/ci/accrue_host_verify_browser.sh` | Nonzero, zero tests or absent personal/custom/mixed, revoked/no-write, tab pin and actor cases | passed: 6 context cases plus 4 dedicated Braintree cases; SDK initialization, organization checkout denial, membership revocation, stale-pin POST denial and persisted human actor verified |
 | 233-05-T2 | SHIP-04 | T-233-11 | `cd accrue_portal && mix test test/accrue_portal/readme_contract_test.exs --warnings-as-errors` | Nonzero, zero tests or docs differ from public option/callback/action symbols | passed: 2 tests |
 | 233-06-T1 | SYS-01, SYS-02 | T-233-13 | `cd accrue_admin && mix accrue_admin.assets.build` | Nonzero, missing generated asset or public-token rename | passed |
 | 233-06-T2 | SYS-01, SYS-02 | T-233-14 | `cd examples/accrue_host && npm run e2e -- e2e/phase233-semantic.spec.js --workers=1` | Nonzero, zero tests or stale served Portal asset | passed |
@@ -76,12 +76,12 @@ created: "2026-10-07"
 
 ## Resolved Implementation Gaps
 
-- **233-05-T1 / POR-08, SAFE-02:** The existing personal checkout belongs to the sole existing Braintree Customer while the test host's configured processor is Fake. Checkout target validation now checks the stored Customer's exact owner and processor. The no-adapter personal context preserves that existing processor; adapter-backed custom contexts still require the configured processor and an exact selected Customer match. The focused checkout context regression and Phase 102 browser checkout tests pass.
+- **233-05-T1 / POR-08, SAFE-02:** Personal Customer resolution preserves the sole existing Customer for reads. The final code review corrected the earlier checkout exception: both personal and custom checkout require the exact selected Customer and configured processor before tokens or mutation. Mismatched checkout is denied with zero writes; matching Braintree personal and custom POST controls pass. Separate Fake and Braintree browser processes reflect the LocalSession provider contract.
 - **233-05-T1 / SAFE-02:** Membership-only revocation initially reached the blocked page over HTTP, then its LiveView socket redirected to login. The blocked live session omitted host-provided `on_mount` hooks, including the E2E SQL Sandbox allowance. It now forwards host hooks before the user-only guard, without invoking the default customer resolver. A Router test proves this hook contract; the browser now confirms generic blocked denial after membership deletion and rejects stale-pin POST without fallback.
 - Other browser proof includes personal-only Hosted Fields SDK initialization counters, read-only organization checkout with accessible denial and no Hosted Fields/submit, cross-tab pin retention, an authorized organization mutation persisted under the human `User`, and no Admin privilege bleed.
 - Canonical browser commands passed: Phase233 context 6/6, Phase233 baseline and semantic plus Phase102 checkout 4/4. Full Portal suite passed 70 tests; full host suite passed 219 tests.
 
-**Approval:** Implementation gaps resolved; remaining validation rows belong to other plans and phase-level sign-off remains open.
+**Approval:** All planned validation rows and implementation gaps are resolved; the final goal verifier owns phase-level sign-off.
 
 ## Validation Audit 2026-10-07
 
@@ -109,7 +109,7 @@ created: "2026-10-07"
 
 ## Final validation reconciliation
 
-All 15 planned task checks have passing execution evidence in their committed summaries and 233-EXECUTION-CHECKS.md. The final gap rerun passed 70 Portal tests, 219 host tests, 18 Billing facade tests, 2 README tests, 6 context browser cases, and 4 baseline/semantic/existing checkout browser cases. The previously escalated checkout and connected blocked-page issues were fixed in `e21cb7f9` and `7e6d8933`; no behavior is delegated to manual UAT. All four audited coverage gaps are resolved.
+All 15 planned task checks have passing execution evidence in their committed summaries and 233-EXECUTION-CHECKS.md. The gap rerun passed 70 Portal tests and 219 host tests. Final review corrections `d828adc9` and `3dff46b2` supersede that checkpoint with **72 Portal tests**, **219 host tests**, **27 default browser passes / 3 existing intentional skips**, and **4 dedicated Braintree browser passes**. Billing facade 18/18 and README 2/2 are included in the respective full suites. Both browser lanes run in CI and the local full-verification command. The connected blocked-page issue was fixed in `e21cb7f9`; the processor boundary now matches the no-dynamic-routing contract. No behavior is delegated to manual UAT. All four audited coverage gaps and the checkout review finding are resolved.
 
 ## Validation Audit 2026-10-07
 
