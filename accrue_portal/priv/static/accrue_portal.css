@@ -117,7 +117,7 @@ body {
 }
 
 .portal-theme-option:focus-visible {
-  outline: 2px solid var(--accrue-brand-accent);
+  outline: 2px solid var(--accrue-brand-accent-text);
   outline-offset: 2px;
 }
 
@@ -169,7 +169,7 @@ body {
 }
 
 .portal-breadcrumb-link:focus-visible {
-  outline: 2px solid var(--accrue-brand-accent);
+  outline: 2px solid var(--accrue-brand-accent-text);
   outline-offset: 2px;
 }
 
@@ -299,8 +299,9 @@ body {
 }
 
 .portal-button-primary {
-  background: var(--accrue-brand-accent);
+  background: var(--accrue-brand-accent-strong);
   color: var(--accrue-brand-accent-contrast);
+  border-color: var(--accrue-brand-accent-text);
 }
 
 .portal-button-primary:hover {
@@ -334,7 +335,7 @@ body {
 .portal-shell button:focus-visible,
 .portal-shell input:focus-visible,
 .portal-link:focus-visible {
-  outline: 2px solid var(--accrue-brand-accent);
+  outline: 2px solid var(--accrue-brand-accent-text);
   outline-offset: 2px;
 }
 
@@ -392,22 +393,32 @@ body {
   line-height: 1.4;
   border: 1px solid transparent;
   background: color-mix(in srgb, var(--accrue-slate) 10%, transparent);
-  color: var(--accrue-slate);
+  color: var(--accrue-ink);
 }
 
 .portal-status-active {
   background: color-mix(in srgb, var(--accrue-moss) 16%, transparent);
-  color: var(--accrue-moss);
 }
 
 .portal-status-warning {
   background: color-mix(in srgb, var(--accrue-amber) 18%, transparent);
-  color: var(--accrue-amber);
 }
 
 .portal-status-info {
   background: color-mix(in srgb, var(--accrue-cobalt) 14%, transparent);
-  color: var(--accrue-cobalt);
+}
+
+.portal-status-active::before {
+  content: "✓";
+}
+
+.portal-status-warning::before {
+  content: "!";
+}
+
+.portal-status-info::before {
+  content: "i";
+  font-weight: 700;
 }
 
 /* --- Empty states ------------------------------------------------------- */
@@ -509,7 +520,7 @@ body {
 
 .portal-success-copy {
   margin: 0;
-  color: var(--accrue-moss);
+  color: var(--accrue-ink);
   font-weight: 600;
 }
 
