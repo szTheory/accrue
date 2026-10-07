@@ -13,7 +13,9 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
 
     case authorize(conn, :payment_method_create, customer) do
       :ok ->
-        case Billing.add_payment_method(customer, %{vault_acquisition: %{reference: nonce}}) do
+        case with_actor(conn, fn ->
+               Billing.add_payment_method(customer, %{vault_acquisition: %{reference: nonce}})
+             end) do
           {:ok, _payment_method} ->
             conn
             |> put_flash(:info, "Payment method saved.")
@@ -43,7 +45,9 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
       {:ok, payment_method} ->
         case authorize(conn, :payment_method_default, payment_method) do
           :ok ->
-            case Billing.set_default_payment_method(customer, payment_method) do
+            case with_actor(conn, fn ->
+                   Billing.set_default_payment_method(customer, payment_method)
+                 end) do
               {:ok, _customer} ->
                 conn
                 |> put_flash(:info, "Default payment method updated.")
@@ -71,7 +75,7 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
       {:ok, payment_method} ->
         case authorize(conn, :payment_method_delete, payment_method) do
           :ok ->
-            case Billing.delete_payment_method(payment_method) do
+            case with_actor(conn, fn -> Billing.delete_payment_method(payment_method) end) do
               {:ok, _payment_method} ->
                 conn
                 |> put_flash(:info, "Payment method deleted.")
@@ -112,6 +116,13 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
     conn
     |> put_flash(:error, "Billing access unavailable.")
     |> redirect(to: String.trim_trailing(base_path(conn), "/") <> "/blocked")
+  end
+
+  defp with_actor(conn, fun) do
+    actor = conn.assigns.current_actor
+    actor_id = Accrue.Auth.actor_id(actor) || Map.get(actor, :id) || Map.get(actor, "id")
+    actor = %{type: :user, id: if(is_nil(actor_id), do: nil, else: to_string(actor_id))}
+    Accrue.Actor.with_actor(actor, fun)
   end
 
   defp not_found(conn) do

@@ -2,7 +2,7 @@ defmodule Accrue.Portal.AuthHook do
   @moduledoc false
 
   import Phoenix.Component, only: [assign: 3]
-  import Phoenix.LiveView, only: [push_navigate: 2, redirect: 2]
+  import Phoenix.LiveView, only: [redirect: 2]
 
   alias Accrue.Portal.CustomerSession
   alias Accrue.Portal.Context

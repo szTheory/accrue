@@ -28,7 +28,9 @@ defmodule Accrue.Portal.CustomerSession do
   end
 
   @doc "Re-resolves a signed form locator against the current actor and host policy."
-  def resolve_pin(session, pin, opts \\ []) when is_map(session) and is_list(opts) do
+  def resolve_pin(session, pin, opts \\ [])
+
+  def resolve_pin(session, pin, opts) when is_map(session) and is_list(opts) do
     endpoint = Keyword.get(opts, :endpoint)
 
     with actor when is_map(actor) <- Accrue.Auth.current_user(session),

@@ -29,7 +29,10 @@ defmodule AccruePortal.ContextPostTest do
       end
     end
 
-    def authorize(_actor, context, :read, _target), do: if(context.billable, do: :ok)
+    def authorize(_actor, context, :read, _target) do
+      revoked = :persistent_term.get({__MODULE__, :revoked}, MapSet.new())
+      if MapSet.member?(revoked, context.owner_id), do: {:error, :forbidden}, else: :ok
+    end
 
     def authorize(_actor, context, action, _target) do
       if action in Map.get(:persistent_term.get({__MODULE__, :grants}, %{}), context.owner_id, []),
@@ -42,7 +45,15 @@ defmodule AccruePortal.ContextPostTest do
       :persistent_term.put({__MODULE__, :grants}, Map.put(grants, owner_id, actions))
     end
 
-    def clear_grants, do: :persistent_term.erase({__MODULE__, :grants})
+    def revoke(owner_id) do
+      revoked = :persistent_term.get({__MODULE__, :revoked}, MapSet.new())
+      :persistent_term.put({__MODULE__, :revoked}, MapSet.put(revoked, owner_id))
+    end
+
+    def clear_grants do
+      :persistent_term.erase({__MODULE__, :grants})
+      :persistent_term.erase({__MODULE__, :revoked})
+    end
   end
 
   defmodule TokenCounter do
@@ -189,6 +200,47 @@ defmodule AccruePortal.ContextPostTest do
     assert Accrue.Processor.Fake.call_count(:detach_payment_method) == detach_calls_before
   end
 
+  test "expired pins and a changed processor identity block payment method writes", %{conn: conn} do
+    %{user: user, customer: customer, payment_method: payment_method} = dashboard_fixture!()
+    conn = sign_in_conn(conn, user)
+    assert {:ok, _view, html} = live_payment_methods(conn)
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    expired_pin =
+      Phoenix.Token.sign(
+        AccruePortal.TestEndpoint,
+        "accrue-portal-payment-flow-v1",
+        %{
+          "owner_type" => customer.owner_type,
+          "owner_id" => customer.owner_id,
+          "processor" => customer.processor,
+          "customer_id" => customer.id
+        },
+        signed_at: System.system_time(:second) - 1_201
+      )
+
+    calls_before = Accrue.Processor.Fake.call_count(:detach_payment_method)
+
+    expired_response =
+      post(conn, "/billing/payment-methods/#{payment_method.id}/delete", %{
+        "context_pin" => expired_pin
+      })
+
+    assert redirected_to(expired_response) == "/billing/blocked"
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == calls_before
+
+    TestRepo.update!(Ecto.Changeset.change(customer, processor: "other-processor"))
+
+    mismatched_response =
+      post(conn, "/billing/payment-methods/#{payment_method.id}/delete", %{"context_pin" => pin})
+
+    assert redirected_to(mismatched_response) == "/billing/blocked"
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == calls_before
+    assert %PaymentMethod{} = TestRepo.get(PaymentMethod, payment_method.id)
+  end
+
   defp live_payment_methods(conn) do
     case live(conn, "/billing/payment-methods") do
       {:ok, _view, _html} = success -> success
@@ -204,6 +256,8 @@ defmodule AccruePortal.ContextPinPolicyTest do
   alias AccruePortal.ContextPostTest.CountingTokenGenerator
   alias AccruePortal.ContextPostTest.Organization
   alias AccruePortal.ContextPostTest.TokenCounter
+
+  import AccruePortal.Fixtures
 
   @endpoint AccruePortal.ContextPostTest.CustomEndpoint
 
@@ -272,6 +326,93 @@ defmodule AccruePortal.ContextPinPolicyTest do
     refute html =~ ~s(data-portal-hosted-fields="payment-method")
   end
 
+  test "default and delete pins remain bound to organization A after selecting B", %{conn: conn} do
+    owner_a = "org-payment-actions-a"
+    owner_b = "org-payment-actions-b"
+
+    %{customer: customer_a} =
+      Accrue.Test.Factory.active_subscription(%{
+        owner_type: Organization.__accrue__(:billable_type),
+        owner_id: owner_a,
+        email: "#{owner_a}@example.com",
+        name: "Organization A"
+      })
+
+    %{customer: customer_b} =
+      Accrue.Test.Factory.active_subscription(%{
+        owner_type: Organization.__accrue__(:billable_type),
+        owner_id: owner_b,
+        email: "#{owner_b}@example.com",
+        name: "Organization B"
+      })
+
+    old_default =
+      payment_method_fixture!(customer_a, %{processor_id: "pm_org_a_default", is_default: true})
+
+    new_default = payment_method_fixture!(customer_a, %{processor_id: "pm_org_a_new"})
+
+    other_default =
+      payment_method_fixture!(customer_b, %{processor_id: "pm_org_b_default", is_default: true})
+
+    AccruePortal.TestRepo.update!(
+      Accrue.Billing.Customer.changeset(customer_a, %{default_payment_method_id: old_default.id})
+    )
+
+    AccruePortal.TestRepo.update!(
+      Accrue.Billing.Customer.changeset(customer_b, %{default_payment_method_id: other_default.id})
+    )
+
+    ActionAdapter.grant(owner_a, [:payment_method_default, :payment_method_delete])
+    ActionAdapter.grant(owner_b, [:payment_method_default, :payment_method_delete])
+
+    conn =
+      Plug.Test.init_test_session(conn, %{
+        "user_token" => "customer:00000000-0000-0000-0000-000000000123",
+        "active_billable_id" => owner_a
+      })
+
+    assert {:ok, _view, html} = live(conn, "/org-billing/payment-methods")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    switched_conn =
+      Plug.Test.init_test_session(conn, %{
+        "user_token" => "customer:00000000-0000-0000-0000-000000000123",
+        "active_billable_id" => owner_b
+      })
+
+    default_calls_before = Accrue.Processor.Fake.call_count(:set_default_payment_method)
+
+    assert redirected_to(
+             post(switched_conn, "/org-billing/payment-methods/#{new_default.id}/default", %{
+               "context_pin" => pin
+             })
+           ) == "/org-billing/payment-methods"
+
+    assert Accrue.Processor.Fake.call_count(:set_default_payment_method) ==
+             default_calls_before + 1
+
+    assert AccruePortal.TestRepo.get!(Accrue.Billing.Customer, customer_a.id).default_payment_method_id ==
+             new_default.id
+
+    assert AccruePortal.TestRepo.get!(Accrue.Billing.Customer, customer_b.id).default_payment_method_id ==
+             other_default.id
+
+    delete_calls_before = Accrue.Processor.Fake.call_count(:detach_payment_method)
+
+    assert redirected_to(
+             post(switched_conn, "/org-billing/payment-methods/#{old_default.id}/delete", %{
+               "context_pin" => pin
+             })
+           ) == "/org-billing/payment-methods"
+
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == delete_calls_before + 1
+
+    assert %Accrue.Billing.PaymentMethod{} =
+             AccruePortal.TestRepo.get(Accrue.Billing.PaymentMethod, old_default.id)
+  end
+
   test "rendered add-card form posts its original pin through create authorization", %{conn: conn} do
     owner_id = "org-create-allowed"
 
@@ -281,6 +422,16 @@ defmodule AccruePortal.ContextPinPolicyTest do
         owner_id: owner_id,
         email: "#{owner_id}@example.com",
         name: "Test Organization"
+      })
+
+    other_owner_id = "org-create-switched"
+
+    %{customer: other_customer} =
+      Accrue.Test.Factory.active_subscription(%{
+        owner_type: Organization.__accrue__(:billable_type),
+        owner_id: other_owner_id,
+        email: "#{other_owner_id}@example.com",
+        name: "Other Organization"
       })
 
     ActionAdapter.grant(owner_id, [:payment_method_create])
@@ -306,14 +457,94 @@ defmodule AccruePortal.ContextPinPolicyTest do
 
     calls_before = Accrue.Processor.Fake.call_count(:create_payment_method)
 
+    switched_conn =
+      Plug.Test.init_test_session(conn, %{
+        "user_token" => "customer:00000000-0000-0000-0000-000000000123",
+        "active_billable_id" => other_owner_id
+      })
+
     response =
-      post(conn, "/org-billing/payment-methods", %{
+      post(switched_conn, "/org-billing/payment-methods", %{
         "context_pin" => pin,
         "payment_method_nonce" => "fake-valid-nonce"
       })
 
     assert redirected_to(response) == "/org-billing/payment-methods"
     assert Accrue.Processor.Fake.call_count(:create_payment_method) == calls_before + 1
-    assert AccruePortal.TestRepo.get_by(Accrue.Billing.PaymentMethod, customer_id: customer.id)
+
+    assert %Accrue.Billing.PaymentMethod{id: payment_method_id} =
+             AccruePortal.TestRepo.get_by(Accrue.Billing.PaymentMethod, customer_id: customer.id)
+
+    assert %Accrue.Events.Event{
+             actor_type: "user",
+             actor_id: "00000000-0000-0000-0000-000000000123"
+           } =
+             AccruePortal.TestRepo.get_by(Accrue.Events.Event,
+               type: "payment_method.added",
+               subject_id: payment_method_id
+             )
+
+    refute AccruePortal.TestRepo.get_by(Accrue.Billing.PaymentMethod,
+             customer_id: other_customer.id
+           )
+  end
+
+  test "revoked original billable pin does not fall through to the newly selected billable", %{
+    conn: conn
+  } do
+    original_owner = "org-revoked-original"
+    new_owner = "org-new-selection"
+
+    Accrue.Test.Factory.active_subscription(%{
+      owner_type: Organization.__accrue__(:billable_type),
+      owner_id: original_owner,
+      email: "#{original_owner}@example.com",
+      name: "Original Organization"
+    })
+
+    %{customer: new_customer} =
+      Accrue.Test.Factory.active_subscription(%{
+        owner_type: Organization.__accrue__(:billable_type),
+        owner_id: new_owner,
+        email: "#{new_owner}@example.com",
+        name: "New Organization"
+      })
+
+    ActionAdapter.grant(original_owner, [:payment_method_create])
+    ActionAdapter.grant(new_owner, [:payment_method_create])
+
+    conn =
+      Plug.Test.init_test_session(conn, %{
+        "user_token" => "customer:00000000-0000-0000-0000-000000000123",
+        "active_billable_id" => original_owner
+      })
+
+    assert {:ok, _view, html} = live(conn, "/org-billing/payment-methods")
+
+    [_, encoded_pin] =
+      Regex.run(~r/href="\/org-billing\/payment-methods\/new\?context_pin=([^"]+)"/, html)
+
+    pin = URI.decode_www_form(encoded_pin)
+    ActionAdapter.revoke(original_owner)
+    calls_before = Accrue.Processor.Fake.call_count(:create_payment_method)
+
+    switched_conn =
+      Plug.Test.init_test_session(conn, %{
+        "user_token" => "customer:00000000-0000-0000-0000-000000000123",
+        "active_billable_id" => new_owner
+      })
+
+    response =
+      post(switched_conn, "/org-billing/payment-methods", %{
+        "context_pin" => pin,
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    assert redirected_to(response) == "/org-billing/blocked"
+    assert Accrue.Processor.Fake.call_count(:create_payment_method) == calls_before
+
+    refute AccruePortal.TestRepo.get_by(Accrue.Billing.PaymentMethod,
+             customer_id: new_customer.id
+           )
   end
 end

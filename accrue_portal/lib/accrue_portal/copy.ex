@@ -225,6 +225,7 @@ defmodule AccruePortal.Copy do
   def add_payment_method_save_success, do: "Payment method saved."
   def add_payment_method_save_error, do: "Unable to save payment method."
   def add_payment_method_nonce_error, do: "Payment method tokenization failed."
+  def payment_method_create_denied, do: "You don't have permission to add payment methods."
 
   def invoices_page_title, do: "Invoices"
   def invoices_heading, do: "Invoices"

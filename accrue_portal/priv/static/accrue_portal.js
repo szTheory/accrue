@@ -15,6 +15,8 @@
       this.el.dataset.hostedFieldsBound = "1";
       this.hostedFields = null;
       this.readyToSubmit = false;
+      this.tokenizing = false;
+      this.submissionSent = false;
 
       window.braintree.client.create({ authorization: token }, function (clientErr, clientInstance) {
         if (clientErr) {
@@ -43,6 +45,24 @@
             this.el.addEventListener(
               "submit",
               function (event) {
+                if (this.el.dataset.portalHostedFields === "payment-method") {
+                  if (this.submissionSent) {
+                    event.preventDefault();
+                    return;
+                  }
+
+                  if (this.readyToSubmit) {
+                    this.readyToSubmit = false;
+                    this.submissionSent = true;
+                    return;
+                  }
+
+                  event.preventDefault();
+                  if (this.tokenizing) return;
+                  this.tokenizeAndSubmit(errorNode, submitButton);
+                  return;
+                }
+
                 if (this.readyToSubmit) {
                   this.readyToSubmit = false;
                   return;
@@ -58,21 +78,40 @@
     },
 
     destroyed: function () {
+      var nonceInput = this.el.querySelector("[data-braintree-nonce-input]");
+      if (nonceInput) nonceInput.value = "";
+      this.readyToSubmit = false;
+      this.tokenizing = false;
+      this.submissionSent = false;
+
       if (this.hostedFields && this.hostedFields.teardown) {
         this.hostedFields.teardown(function () {});
       }
+      this.hostedFields = null;
     },
 
     tokenizeAndSubmit: function (errorNode, submitButton) {
       if (!this.hostedFields) return;
+      if (this.el.dataset.portalHostedFields === "payment-method" && this.tokenizing) return;
 
       setInlineError(errorNode, "");
+      this.tokenizing = true;
       setSubmitting(submitButton, true);
+      var nonceInput = this.el.querySelector("[data-braintree-nonce-input]");
+      if (nonceInput) nonceInput.value = "";
 
       this.hostedFields.tokenize(
         function (tokenizeErr, payload) {
           if (tokenizeErr) {
+            this.tokenizing = false;
             setSubmitting(submitButton, false);
+
+            if (nonceInput) nonceInput.value = "";
+
+            if (this.el.dataset.portalHostedFields === "payment-method") {
+              setInlineError(errorNode, tokenizeErr.message || "Unable to tokenize card.");
+              return;
+            }
 
             this.pushEvent("checkout_failed", {
               message: tokenizeErr.message || "Unable to tokenize card."
@@ -81,9 +120,33 @@
             return;
           }
 
+          if (this.el.dataset.portalHostedFields === "payment-method") {
+            if (!nonceInput || !payload || !payload.nonce) {
+              this.tokenizing = false;
+              setSubmitting(submitButton, false);
+              setInlineError(errorNode, "Unable to tokenize card.");
+              return;
+            }
+
+            nonceInput.value = payload.nonce;
+            this.tokenizing = false;
+            this.readyToSubmit = true;
+
+            if (this.el.requestSubmit) {
+              this.el.requestSubmit();
+            } else {
+              this.readyToSubmit = false;
+              this.submissionSent = true;
+              this.el.submit();
+            }
+
+            return;
+          }
+
           this.pushEvent("checkout_tokenized", { nonce: payload.nonce }, function () {
+            this.tokenizing = false;
             setSubmitting(submitButton, false);
-          });
+          }.bind(this));
         }.bind(this)
       );
     }
