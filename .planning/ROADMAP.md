@@ -167,7 +167,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 233. Shared Direction & Portal Contract | 0/TBD | Not started | - |
+| 233. Shared Direction & Portal Contract | 2/7 | In Progress | - |
 | 234. Admin Customers & Subscriptions | 0/TBD | Not started | - |
 | 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
 | 236. Portal Billing Self-Service | 0/TBD | Not started | - |

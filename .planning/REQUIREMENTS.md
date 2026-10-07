@@ -40,7 +40,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 - [ ] **POR-05**: Direct add-card navigation initializes the supported secure Hosted Fields flow, and its supported states remain readable across shell themes and LiveView patches.
 - [ ] **POR-06**: Customers see known trial, incomplete, unpaid, and canceled states accurately, without claims about host access, complete invoice counts, or unsupported retention/document availability.
 - [ ] **POR-07**: Customers return only to validated host destinations; query parameters cannot prove payment, and leaving checkout is not described as subscription cancellation.
-- [ ] **POR-08**: One Portal supports personal, organization/custom, and mixed host billing; personal-only installs need no company model or account picker, and customer billing managers receive no operator/Admin access.
+- [x] **POR-08**: One Portal supports personal, organization/custom, and mixed host billing; personal-only installs need no company model or account picker, and customer billing managers receive no operator/Admin access.
 
 ### Interaction and Accessibility
 
@@ -52,7 +52,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 ### Safety and Scope
 
 - [ ] **SAFE-01**: Mounted owner/customer denials and forged-action protections remain enforced; foreign records and payment-token data are not exposed.
-- [ ] **SAFE-02**: The optional host integration resolves the billed entity separately from the actor and freshly authorizes each action across HTTP, LiveView, and reconnect; invalid selections or unauthorized provisioning fail safely while the personal default remains compatible.
+- [x] **SAFE-02**: The optional host integration resolves the billed entity separately from the actor and freshly authorizes each action across HTTP, LiveView, and reconnect; invalid selections or unauthorized provisioning fail safely while the personal default remains compatible.
 - [ ] **SAFE-03**: Forms and checkout remain pinned to their displayed billable, Customer, and processor across tabs and account switches; lookups use full owner/provider identity and hosted-session grants do not exceed authorized actions.
 
 ### Delivery and Evidence
@@ -105,13 +105,13 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | POR-05 | Phase 236 | Pending |
 | POR-06 | Phase 236 | Pending |
 | POR-07 | Phase 236 | Pending |
-| POR-08 | Phase 233 | Pending |
+| POR-08 | Phase 233 | Complete |
 | INT-01 | Phase 239 | Pending |
 | INT-02 | Phase 239 | Pending |
 | INT-03 | Phase 239 | Pending |
 | INT-04 | Phase 239 | Pending |
 | SAFE-01 | Phase 234 | Pending |
-| SAFE-02 | Phase 233 | Pending |
+| SAFE-02 | Phase 233 | Complete |
 | SAFE-03 | Phase 233 | Pending |
 | SHIP-01 | Phase 239 | Pending |
 | SHIP-02 | Phase 239 | Pending |

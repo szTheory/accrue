@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 233
 current_phase_name: Shared Direction & Portal Contract
 status: executing
-stopped_at: Completed 233-04-PLAN.md
-last_updated: "2026-10-07T18:58:55.325Z"
+stopped_at: Completed 233-01-PLAN.md
+last_updated: "2026-10-07T19:39:53.266Z"
 last_activity: 2026-10-07
-last_activity_desc: Phase 233 plan 04 completed; six plans remain
-state_head: 6459775ed8094b1cd5eac5bc9e4ff3be8b20618e
+last_activity_desc: Phase 233 plan 01 completed; five plans remain
+state_head: d84faaf727a146742417c7dae51109a3bf9573c2
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 7
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -27,13 +27,13 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 233 — Shared Direction & Portal Contract
-**Progress:** [░░░░░░░░░░] 0% (1 of 7 plans complete)
+**Progress:** [░░░░░░░░░░] 0% (2 of 7 plans complete)
 
 ## Current Position
 
 Phase: 233 (Shared Direction & Portal Contract) — EXECUTING
-Plan: 2 of 7
-Status: Executing
+Plan: 3 of 7
+Status: Ready to execute
 Last activity: 2026-10-07 — Phase 233 execution started
 
 ## Performance Metrics
@@ -97,6 +97,7 @@ Last activity: 2026-10-07 — Phase 233 execution started
 | Phase 232-bounded-hygiene-release-handoff P09 | ~25min | 3 tasks | 2 files |
 | Phase 232 P10 | 3h20min | 3 tasks | 7 files |
 | Phase 233 P04 | 25min | 3 tasks | 7 files |
+| Phase 233 P01 | 26min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -180,6 +181,9 @@ Last activity: 2026-10-07 — Phase 233 execution started
 - [Phase 232]: Both real regressions found (docs-contracts-shift-left human_judgment violations, release-gate stale test fixture) fixed and verified on the milestone line but NOT pushed to the frozen candidate-recut ref -- recorded waived at the frozen SHA with the fix commit cited as evidence
 - [Phase 233]: Share semantic meaning and observable checks while preserving Admin --ax-* and public/core Portal --accrue-* ownership, separate shells, and host customer branding.
 - [Phase 233]: Use deterministic canonical-host pages and verify served CSS/JS bytes against current package sources and URL digests.
+- [Phase 233]: Optional host adapter resolves an actor separately from the billable entity and authorizes read before custom Customer access or provisioning.
+- [Phase 233]: Custom Customer identity uses owner type, lossless owner ID, and configured processor; personal resolution accepts one existing processor row and blocks ambiguity.
+- [Phase 233]: Authenticated context failures go to an auth-only blocked route; only missing authentication uses the local login path.
 
 ### Pending Todos
 
@@ -248,8 +252,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-07T18:58:55.303Z
-Stopped at: Completed 233-04-PLAN.md
+Last session: 2026-10-07T19:39:53.247Z
+Stopped at: Completed 233-01-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -378,4 +382,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Run /gsd-execute-phase 233; Wave 1 begins with 233-04-PLAN.md.
+- Run /gsd-execute-phase 233; plan 233-02 is next in sequence.

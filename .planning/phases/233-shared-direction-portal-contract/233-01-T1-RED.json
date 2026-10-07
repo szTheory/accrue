@@ -1,0 +1,10 @@
+{
+  "command": "cd accrue_portal && GSD_TAP_REPORT=/tmp/accrue-233-t1-red.tap mix test --formatter AccruePortal.TapFormatter test/accrue_portal/context_contract_test.exs",
+  "exitCode": 2,
+  "output": "TAP version 13\n1..1\nnot ok 1 - test selected host billable renders HomeLive data for its exact Customer\n",
+  "targetTest": "test selected host billable renders HomeLive data for its exact Customer",
+  "targetFile": "test/accrue_portal/context_contract_test.exs",
+  "expected": "The selected organization subscription ID is rendered and the personal collision is absent.",
+  "actual": "The assertion on subscription.processor_id failed because the HomeLive page used the actor personal Customer.",
+  "semanticAssessment": "The intended test executed through the test router and real HomeLive and failed on the planned custom-billable behavior assertion. The assertion failed before implementation because the router ignored :context_adapter and CustomerSession resolved the actor as a personal user."
+}
