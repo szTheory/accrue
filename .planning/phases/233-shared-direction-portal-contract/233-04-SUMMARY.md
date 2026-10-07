@@ -71,7 +71,7 @@ coverage:
         ref: "node inline assertion on DESIGN.md --ax-* and --accrue-* ownership contract"
         status: pass
     human_judgment: false
-duration: 9min
+duration: 25min
 completed: 2026-10-07
 status: complete
 ---
@@ -82,9 +82,9 @@ status: complete
 
 ## Performance
 
-- **Duration:** 9 minutes
+- **Duration:** 25 minutes
 - **Started:** 2026-10-07T18:33:12Z (continuation handoff)
-- **Completed:** 2026-10-07T18:42:00Z (approximately)
+- **Completed:** 2026-10-07T18:58:03Z
 - **Tasks:** 3 / 3
 - **Files changed for the plan:** 4 source/document files and 3 PNG captures (7 files total)
 
@@ -100,7 +100,7 @@ status: complete
 2. **Task 2: Capture representative current served Admin and Portal states** — `c7b1026a` (`test`).
 3. **Task 3: Establish semantic direction from observed consumers** — `594f7a33` (`docs`).
 
-The plan-metadata commit is created after this self-check and includes the SUMMARY and planning-state updates.
+The close-out metadata commit is separate from the three task commits.
 
 ## Files Created
 
