@@ -1,0 +1,10 @@
+{
+  "command": "cd accrue_portal && GSD_TAP_REPORT=/tmp/accrue-233-03-t1-red.tap HEX_HOME=/tmp/accrue-233-hex mix test --formatter AccruePortal.TapFormatter test/accrue_portal/context_live_test.exs",
+  "exitCode": 2,
+  "output": "TAP version 13\n1..4\nok 1 - test invoices are loaded for the selected organization and a revoked pinned reconnect is blocked\nok 2 - test a forged foreign subscription event cannot mutate another customer's subscription\nnot ok 3 - test revoked subscription cancellation clears confirmation and performs no provider mutation\nnot ok 4 - test home and subscription routes keep the selected billed identity and signed navigation pin\n",
+  "targetTest": "test revoked subscription cancellation clears confirmation and performs no provider mutation",
+  "targetFile": "accrue_portal/test/accrue_portal/context_live_test.exs",
+  "expected": "A stale cancellation confirmation is cleared after host policy revocation, and no provider mutation is attempted.",
+  "actual": "The cancellation click left the confirmation visible because the event did not reauthorize the pinned context.",
+  "semanticAssessment": "The exact target LiveView test executed and failed on the planned stale-confirmation invalidation assertion. The record contains the complete TAP report from this test run; unrelated passing route tests are retained."
+}
