@@ -32,7 +32,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 ### v1.63 — Admin and Portal UI refinement
 
-- [ ] **Phase 233: Shared Direction & Portal Contract** - Establish current-source baseline, shared visual roles, and the bounded host-owned billing context contract.
+- [x] **Phase 233: Shared Direction & Portal Contract** - Establish current-source baseline, shared visual roles, and the bounded host-owned billing context contract. (completed 2026-10-07)
 - [ ] **Phase 234: Admin Customers & Subscriptions** - Refine operator search, customer/subscription investigation, lifecycle truth, scope, and supported actions.
 - [ ] **Phase 235: Customer Plan Selection & Checkout** - Make existing checkout, payment hooks, provider handoffs, and safe returns understandable and reliable.
 - [ ] **Phase 236: Portal Billing Self-Service** - Refine existing customer billing pages and authorized payment/subscription tasks through one Portal.
@@ -54,7 +54,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   4. On initial request, LiveView events/reconnect, and protected actions, the host's fresh authorization governs the selected context; invalid or unauthorized selection cannot fall back, provision, or retarget a form.
   5. The canonical example and adopter guidance show personal defaults plus organization/custom and mixed resolution without requiring a new auth or runtime dependency.
 
-**Plans**: 7 plans
+**Plans**: 7/7 plans complete
 
 Plans:
 **Wave 1**
@@ -167,7 +167,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 233. Shared Direction & Portal Contract | 7/7 | In Progress | - |
+| 233. Shared Direction & Portal Contract | 7/7 | Complete    | 2026-10-07 |
 | 234. Admin Customers & Subscriptions | 0/TBD | Not started | - |
 | 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
 | 236. Portal Billing Self-Service | 0/TBD | Not started | - |
