@@ -72,7 +72,7 @@ Plans:
 - [x] 233-07-PLAN.md — Connect checkout form pins to both completion transports and gate client tokens.
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 233-05-PLAN.md — Demonstrate personal, custom, and mixed host adoption with aligned docs.
+- [x] 233-05-PLAN.md — Demonstrate personal, custom, and mixed host adoption with aligned docs.
 
 ### Phase 234: Admin Customers & Subscriptions
 
@@ -167,7 +167,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 233. Shared Direction & Portal Contract | 6/7 | In Progress | - |
+| 233. Shared Direction & Portal Contract | 7/7 | In Progress | - |
 | 234. Admin Customers & Subscriptions | 0/TBD | Not started | - |
 | 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
 | 236. Portal Billing Self-Service | 0/TBD | Not started | - |

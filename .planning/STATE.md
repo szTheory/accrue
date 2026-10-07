@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 233
 current_phase_name: Shared Direction & Portal Contract
 status: executing
-stopped_at: Completed 233-07-PLAN.md
-last_updated: "2026-10-07T21:28:54.017Z"
+stopped_at: Completed 233-05-PLAN.md; Phase 233 final review remains pending
+last_updated: "2026-10-07T22:04:33.497Z"
 last_activity: 2026-10-07
-last_activity_desc: Phase 233 plan 07 completed; one plan remains
-state_head: e68b806c6c7f48830f942351ed6d2b1b653b5cda
+last_activity_desc: Phase 233 plan 05 completed; all 7 plans are tracked complete and final review remains pending
+state_head: db1903858c35614e52d04a8ca710944db831f8d7
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -27,14 +27,14 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 233 — Shared Direction & Portal Contract
-**Progress:** [░░░░░░░░░░] 0% (6 of 7 plans complete)
+**Progress:** [░░░░░░░░░░] 0% (7 of 7 plans complete)
 
 ## Current Position
 
 Phase: 233 (Shared Direction & Portal Contract) — EXECUTING
 Plan: 7 of 7
-Status: Ready to execute
-Last activity: 2026-10-07 — Phase 233 plan 07 completed
+Status: Final review pending; phase remains executing
+Last activity: 2026-10-07 — Phase 233 plan 05 completed; all plans tracked 7/7
 
 ## Performance Metrics
 
@@ -102,6 +102,7 @@ Last activity: 2026-10-07 — Phase 233 plan 07 completed
 | Phase 233 P02 | 26min | 2 tasks | 17 files |
 | Phase 233 P03 | 13min | 2 tasks | 15 files |
 | Phase 233 P07 | 17min | 2 tasks | 13 files |
+| Phase 233 P05 | 26min | 2 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -197,6 +198,9 @@ Last activity: 2026-10-07 — Phase 233 plan 07 completed
 - [Phase 233]: Human actor attribution stays separate from the billed entity and is scoped around subscription mutations.
 - [Phase 233]: Checkout token issuance and completion require fresh :checkout_complete authority for the same rendered-pin LocalSession; promo validation remains separate.
 - [Phase 233]: Use rendered checkout pins for both completion transports, with Hosted Fields POSTing a nonce-only form and LiveView events revalidating independently.
+- [Phase 233]: Portal context pins locate an exact billable and Customer; current host policy authorizes every action.
+- [Phase 233]: Personal-only hosts keep the no-adapter flow; mixed hosts explicitly select personal or organization billing.
+- [Phase 233]: Organization billing managers remain separate from Admin operators.
 
 ### Pending Todos
 
@@ -265,8 +269,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-07T21:28:53.995Z
-Stopped at: Completed 233-07-PLAN.md
+Last session: 2026-10-07T22:04:33.468Z
+Stopped at: Completed 233-05-PLAN.md; Phase 233 final review remains pending
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -395,4 +399,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Run /gsd-execute-phase 233; plan 233-02 is next in sequence.
+- Root: finish Phase 233 review, verification, and UAT before marking the phase complete.
