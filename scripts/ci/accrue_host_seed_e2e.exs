@@ -25,6 +25,7 @@ defmodule AccrueHostSeedE2E do
   @seeded_emails [
     "host-user@example.test",
     "host-admin@example.test",
+    "host-billing-manager@example.test",
     "billing-history@example.test"
   ]
   @fixture_org_customer_emails ["admin-e2e-alpha-customer@example.test"]
@@ -51,6 +52,7 @@ defmodule AccrueHostSeedE2E do
 
     normal_user = create_user!("host-user@example.test", false)
     admin_user = create_user!("host-admin@example.test", true)
+    billing_manager = create_user!("host-billing-manager@example.test", false)
     history_user = create_user!("billing-history@example.test", false)
 
     {:ok, host_org_alpha} =
@@ -65,7 +67,30 @@ defmodule AccrueHostSeedE2E do
         slug: "host-e2e-beta"
       })
 
+    {:ok, revoked_org} =
+      Organizations.create_organization(Scope.for_user(normal_user), %{
+        name: "Host E2E Revoked Org",
+        slug: "host-e2e-revoked"
+      })
+
+    Repo.delete_all(
+      from(membership in OrganizationMembership,
+        where: membership.user_id == ^normal_user.id and membership.organization_id == ^revoked_org.id
+      )
+    )
+
+    {:ok, deleted_org} =
+      Organizations.create_organization(Scope.for_user(admin_user), %{
+        name: "Host E2E Deleted Org",
+        slug: "host-e2e-deleted"
+      })
+
+    deleted_org
+    |> Ecto.Changeset.change(deleted_at: DateTime.utc_now() |> DateTime.truncate(:second))
+    |> Repo.update!()
+
     set_fixture_membership_role!(normal_user, host_org_alpha, :member)
+    insert_fixture_membership!(billing_manager, host_org_alpha, :admin)
 
     {:ok, admin_org_alpha} =
       Organizations.create_organization(Scope.for_user(admin_user), %{
@@ -128,11 +153,14 @@ defmodule AccrueHostSeedE2E do
       password: @password,
       normal_email: normal_user.email,
       admin_email: admin_user.email,
+      billing_manager_email: billing_manager.email,
       webhook_id: webhook.id,
       subscription_id: subscription.id,
       first_run_webhook: first_run_webhook,
       org_alpha_slug: host_org_alpha.slug,
       org_beta_slug: host_org_beta.slug,
+      revoked_org_slug: revoked_org.slug,
+      deleted_org_slug: deleted_org.slug,
       org_alpha_name: host_org_alpha.name,
       org_beta_name: host_org_beta.name,
       tax_invalid_customer_hint: "tax_invalid_e2e_hint",
@@ -510,6 +538,16 @@ defmodule AccrueHostSeedE2E do
     |> Repo.one!()
     |> Ecto.Changeset.change(role: role)
     |> Repo.update!()
+  end
+
+  defp insert_fixture_membership!(user, organization, role) do
+    %OrganizationMembership{}
+    |> OrganizationMembership.changeset(%{
+      user_id: user.id,
+      organization_id: organization.id,
+      role: role
+    })
+    |> Repo.insert!()
   end
 
   defp insert_portal_checkout_customer!(user) do

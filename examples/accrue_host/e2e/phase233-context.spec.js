@@ -12,6 +12,14 @@ test("personal-only Portal mount needs no account picker and renders secure card
   await expect(page.locator(".portal-billable-identity")).toHaveCount(0);
   await expect(page.locator('[data-portal-hosted-fields="payment-method"]')).toBeVisible();
   await expect(page.locator('input[name="payment_method_nonce"]')).toHaveCount(1);
+
+  const checkoutPage = await page.context().newPage();
+  await login(checkoutPage, fixture, fixture.normal_email, sandboxId);
+  await checkoutPage.goto(fixture.portal_checkout_url);
+  await waitForLiveView(checkoutPage);
+  await expect(checkoutPage.locator('[data-portal-hosted-fields="checkout"]')).toBeVisible();
+  await expect(checkoutPage.getByRole("button", { name: /^Pay / })).toBeVisible();
+  await checkoutPage.close();
 });
 
 test("host-selected member context shows its billable and blocks payment collection", async ({ page, sandboxId }) => {
@@ -60,14 +68,59 @@ test("host-selected member context shows its billable and blocks payment collect
   // The host switch link is an existing local navigation path, not Portal policy.
   await expect(page.locator('.portal-billable-identity a[href="/app/billing"]')).toBeVisible();
 
+  // This checkout belongs to the user's personal customer. Under the selected
+  // read-only organization context, the host must not issue Hosted Fields or a
+  // submit control for that target.
+  await page.goto(fixture.portal_checkout_url);
+  await waitForLiveView(page);
+  await expect(page.locator('[data-portal-hosted-fields="checkout"]')).toHaveCount(0);
+  await expect(page.locator('#checkout-form button[type="submit"]')).toHaveCount(0);
+
   // A retained personal tab keeps its own identity and form locator after the
   // host's selected organization changes in another tab.
   await expect(oldTab.locator(".portal-billable-name")).toHaveText(fixture.normal_email);
   await expect(oldTab.locator('input[name="context_pin"]')).toHaveValue(personalPin);
 
+  // A reconnect must revalidate the old signed identity against current host policy.
+  await oldTab.reload();
+  await waitForLiveView(oldTab);
+  await expect(oldTab.locator(".portal-billable-name")).toHaveText(fixture.normal_email);
+  await expect(oldTab.locator('input[name="context_pin"]')).toHaveValue(personalPin);
+  await expect(oldTab.locator('[data-portal-hosted-fields="payment-method"]')).toBeVisible();
+
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/$/);
   await oldTab.close();
+});
+
+test("invalid host selections do not fall back to a different billable", async ({ page, sandboxId }) => {
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+
+  const csrfToken = await page.locator('meta[name="csrf-token"]').getAttribute("content");
+  const personalSelection = await page.request.post("/app/organization-scope", {
+    headers: { "x-sandbox-id": sandboxId },
+    form: { _csrf_token: csrfToken, organization_slug: "personal" }
+  });
+  expect(personalSelection.ok()).toBeTruthy();
+
+  for (const unavailableSlug of [
+    "does-not-exist",
+    fixture.admin_org_alpha_slug,
+    fixture.revoked_org_slug,
+    fixture.deleted_org_slug
+  ]) {
+    const response = await page.request.post("/app/organization-scope", {
+      headers: { "x-sandbox-id": sandboxId },
+      form: { _csrf_token: csrfToken, organization_slug: unavailableSlug }
+    });
+    expect(response.ok()).toBeTruthy();
+
+    await page.goto("/shared-billing/payment-methods/new");
+    await waitForLiveView(page);
+    await expect(page.locator(".portal-billable-name")).toHaveText(fixture.normal_email);
+    await expect(page.locator('[data-portal-hosted-fields="payment-method"]')).toBeVisible();
+  }
 });
 
 test("an authorized organization manager completes a real Portal payment method mutation", async ({ page, sandboxId }) => {
@@ -112,4 +165,40 @@ test("an authorized organization manager completes a real Portal payment method 
   const mutationRow = page.getByRole("row").filter({ hasText: "payment_method.added" });
   await expect(mutationRow).toHaveCount(1);
   await expect(mutationRow).toContainText("User ");
+});
+
+test("a billing manager can mutate organization billing without Admin privileges", async ({ page, sandboxId }) => {
+  const fixture = readFixture();
+  await login(page, fixture, fixture.billing_manager_email, sandboxId);
+
+  await page.goto("/admin");
+  await expect(page).toHaveURL(/\/$/);
+
+  const csrfToken = await page.locator('meta[name="csrf-token"]').getAttribute("content");
+  const selected = await page.request.post("/app/organization-scope", {
+    headers: { "x-sandbox-id": sandboxId },
+    form: { _csrf_token: csrfToken, organization_slug: fixture.org_alpha_slug }
+  });
+  expect(selected.ok()).toBeTruthy();
+
+  await page.goto("/shared-billing/payment-methods/new");
+  await waitForLiveView(page);
+  await expect(page.locator(".portal-billable-name")).toHaveText(fixture.org_alpha_name);
+  await expect(page.locator('[data-portal-hosted-fields="payment-method"]')).toBeVisible();
+  const pin = new URL(page.url()).searchParams.get("context_pin");
+  expect(pin).toBeTruthy();
+
+  const response = await page.request.post("/shared-billing/payment-methods", {
+    maxRedirects: 0,
+    headers: { "x-sandbox-id": sandboxId },
+    form: {
+      _csrf_token: await page.locator('meta[name="csrf-token"]').getAttribute("content"),
+      context_pin: pin,
+      payment_method_nonce: "fake-valid-nonce"
+    }
+  });
+  expect(response.status()).toBe(302);
+  await page.goto(response.headers().location);
+  await waitForLiveView(page);
+  await expect(page.getByText("visa ending in 4242").first()).toBeVisible();
 });

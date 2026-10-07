@@ -50,7 +50,7 @@ defmodule AccrueHostWeb.AdminMountTest do
              AccrueHost.Auth.current_user(%{"user_token" => user_token})
 
     assert {:ok, view, html} = live(conn, "/admin")
-    assert html =~ Copy.dashboard_display_headline()
+    assert html =~ Copy.home_intro_headline()
 
     socket = live_socket(view)
     accrue_admin_session = socket.assigns.accrue_admin_session
