@@ -2,9 +2,14 @@
 gsd_state_version: "1.0"
 milestone: v1.63
 milestone_name: Admin and Portal UI refinement
+current_phase: 233
+current_phase_name: Shared Direction & Portal Contract
 status: planning
-last_updated: "2026-10-07T15:00:00.000Z"
+stopped_at: Phase 233 context gathered
+last_updated: "2026-10-07T17:11:24.784Z"
 last_activity: 2026-10-07
+last_activity_desc: v1.63 roadmap created; all 34 requirements mapped once
+state_head: 49d7026478423b64ac19ef0987193fe34080aa97
 progress:
   total_phases: 7
   completed_phases: 0
@@ -239,8 +244,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-09-17T14:59:41.861Z
-Stopped at: Phase 232 complete — all phases complete
+Last session: 2026-10-07T17:11:24.764Z
+Stopped at: Phase 233 context gathered
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -266,7 +271,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: None
+Resume file: .planning/phases/233-shared-direction-portal-contract/233-CONTEXT.md
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 
