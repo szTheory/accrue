@@ -2,6 +2,9 @@ defmodule AccruePortal.CheckoutContextTest do
   use AccruePortal.ConnCase, async: false
 
   alias Accrue.Checkout.LocalSession
+  alias Accrue.Billing.Customer
+  alias AccruePortal.TestRepo
+
   defmodule Organization do
     use Ecto.Schema
     use Accrue.Billable
@@ -30,9 +33,12 @@ defmodule AccruePortal.CheckoutContextTest do
     end
 
     def authorize(_actor, context, :read, _target) do
-      if MapSet.member?(:persistent_term.get({__MODULE__, :revoked}, MapSet.new()), context.owner_id),
-        do: {:error, :forbidden},
-        else: :ok
+      if MapSet.member?(
+           :persistent_term.get({__MODULE__, :revoked}, MapSet.new()),
+           context.owner_id
+         ),
+         do: {:error, :forbidden},
+         else: :ok
     end
 
     def authorize(_actor, context, action, _target) do
@@ -68,6 +74,25 @@ defmodule AccruePortal.CheckoutContextTest do
     end
   end
 
+  defmodule SubscriptionGatewayStub do
+    def create(params, _opts) do
+      if pid = Application.get_env(:accrue_portal, :checkout_context_test_pid) do
+        send(pid, {:gateway_create, params, Accrue.Actor.current()})
+      end
+
+      {:ok,
+       struct!(Braintree.Subscription,
+         id: "sub_bt_checkout_context",
+         plan_id: params[:plan_id],
+         payment_method_token: params[:payment_method_token],
+         status: "Active",
+         billing_period_start_date: "2024-01-01T00:00:00Z",
+         billing_period_end_date: "2024-02-01T00:00:00Z",
+         updated_at: "2024-01-01T00:00:00Z"
+       )}
+    end
+  end
+
   defmodule CustomRouter do
     use Phoenix.Router
     import Phoenix.ConnTest, except: [get: 3, post: 3]
@@ -98,8 +123,14 @@ defmodule AccruePortal.CheckoutContextTest do
   setup do
     previous_auth = Application.get_env(:accrue, :auth_adapter)
     previous_generator = Application.get_env(:accrue, :braintree_client_token_generator)
+    previous_processor = Application.get_env(:accrue, :processor)
+    previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
+    previous_test_pid = Application.get_env(:accrue_portal, :checkout_context_test_pid)
     Application.put_env(:accrue, :auth_adapter, AccruePortal.Fixtures.AuthAdapter)
     Application.put_env(:accrue, :braintree_client_token_generator, CountingTokenGenerator)
+    Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
+    Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
+    Application.put_env(:accrue_portal, :checkout_context_test_pid, self())
     ActionAdapter.clear_grants()
 
     Application.put_env(:accrue_portal, CustomEndpoint,
@@ -129,13 +160,27 @@ defmodule AccruePortal.CheckoutContextTest do
         do: Application.put_env(:accrue, :braintree_client_token_generator, previous_generator),
         else: Application.delete_env(:accrue, :braintree_client_token_generator)
 
+      if previous_processor,
+        do: Application.put_env(:accrue, :processor, previous_processor),
+        else: Application.delete_env(:accrue, :processor)
+
+      if previous_gateway,
+        do: Application.put_env(:accrue, :braintree_subscription_gateway, previous_gateway),
+        else: Application.delete_env(:accrue, :braintree_subscription_gateway)
+
+      if previous_test_pid,
+        do: Application.put_env(:accrue_portal, :checkout_context_test_pid, previous_test_pid),
+        else: Application.delete_env(:accrue_portal, :checkout_context_test_pid)
+
       ActionAdapter.clear_grants()
     end)
 
     :ok
   end
 
-  test "read-only checkout mount never issues a client token or renders Hosted Fields", %{conn: conn} do
+  test "read-only checkout mount never issues a client token or renders Hosted Fields", %{
+    conn: conn
+  } do
     session = checkout_fixture("org-checkout-read-only")
     conn = sign_in_org(conn, "org-checkout-read-only")
     ActionAdapter.grant("org-checkout-read-only", [])
@@ -148,28 +193,47 @@ defmodule AccruePortal.CheckoutContextTest do
     assert html =~ "Checkout access is unavailable"
   end
 
-  test "rendered checkout form pins its displayed context and tokenized event", %{conn: conn} do
+  test "rendered checkout form pins and completes the same context through the LiveView event", %{
+    conn: conn
+  } do
     session = checkout_fixture("org-checkout-allowed")
     conn = sign_in_org(conn, "org-checkout-allowed")
-    ActionAdapter.grant("org-checkout-allowed", [:complete_checkout])
+    ActionAdapter.grant("org-checkout-allowed", [:checkout_complete])
 
-    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
+    TokenCounter.reset()
+
+    assert {:ok, view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
 
     assert html =~ ~s(id="checkout-form")
-    assert html =~ ~s(method="post")
-    assert html =~ ~s(action="/org-billing/checkout/#{session.session_token}/complete")
     assert html =~ ~s(name="context_pin" value=)
-    assert html =~ ~s(name="_csrf_token" value=)
+    assert TokenCounter.count() > 0
+
+    [[pin]] = Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    assert {:error, {:redirect, %{to: "https://app.example.test/billing/success"}}} =
+             render_hook(view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
+
+    assert LocalSession.by_id(session.id).status == "completed"
+
+    assert_received {:gateway_create, %{payment_method_token: "fake-valid-nonce"},
+                     %{type: :user, id: _}}
   end
 
   defp checkout_fixture(owner_id) do
-    %{customer: customer} =
-      Accrue.Test.Factory.active_subscription(%{
+    customer =
+      %Customer{}
+      |> Customer.changeset(%{
         owner_type: Organization.__accrue__(:billable_type),
         owner_id: owner_id,
         email: "#{owner_id}@example.com",
-        name: "Checkout Organization"
+        name: "Checkout Organization",
+        processor: "braintree",
+        processor_id: "cus_checkout_context_#{System.unique_integer([:positive])}"
       })
+      |> TestRepo.insert!()
 
     {:ok, session} =
       LocalSession.create_or_reuse(customer, %{

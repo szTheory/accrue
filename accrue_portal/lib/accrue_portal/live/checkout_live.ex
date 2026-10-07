@@ -6,9 +6,12 @@ defmodule AccruePortal.Live.CheckoutLive do
   alias Accrue.Billing
   alias Accrue.Checkout.LocalSession
   alias Accrue.Error.DiscountMappingInvalid
+  alias Accrue.Portal.{Context, CustomerSession}
   alias Accrue.Portal.Checkout.CompletionJob
+  alias Accrue.Processor
   alias AccruePortal.BraintreeClient
   alias AccruePortal.Copy
+  alias AccruePortal.Path
 
   @client_script_src "https://js.braintreegateway.com/web/3.132.0/js/client.min.js"
   @client_script_sri "sha384-rNv6rxT4CpVv9Kb8luV4l/GpBwbhHTmZxWbI74/LX+ShrJzh/b9AL7nynSmHDpRC"
@@ -16,42 +19,69 @@ defmodule AccruePortal.Live.CheckoutLive do
   @hosted_fields_script_sri "sha384-QAzc9uX3XQPGzTESbnMNOUn9hY9jVL/L10Eq3Gxt4NKXIZZWzGlhnEscA3iGj8Jp"
 
   @impl true
-  def mount(%{"token" => token}, %{"accrue_portal" => portal}, socket) do
+  def mount(%{"token" => token} = params, %{"accrue_portal" => portal}, socket) do
     session = LocalSession.by_token(token)
 
-    case session do
-      %LocalSession{customer_id: customer_id} = checkout
-      when customer_id == socket.assigns.current_customer.id ->
-        client_token =
-          case checkout_ready?(checkout) &&
-                 BraintreeClient.client_token_for(socket.assigns.current_customer) do
+    with %LocalSession{} = checkout <- session,
+         {:ok, pin, context} <- resolve_checkout_context(socket, params["context_pin"], true),
+         true <- checkout_target?(context, checkout) do
+      complete_allowed? =
+        Context.authorize_action(
+          context,
+          socket.assigns[:current_context_adapter],
+          :checkout_complete,
+          checkout
+        ) == :ok
+
+      promo_allowed? =
+        Context.authorize_action(
+          context,
+          socket.assigns[:current_context_adapter],
+          :checkout_validate_promo,
+          checkout
+        ) == :ok
+
+      client_token =
+        if checkout_ready?(checkout) and complete_allowed? do
+          case BraintreeClient.client_token_for(context.customer) do
             {:ok, value} -> value
             _ -> nil
           end
+        end
 
-        {:ok,
-         socket
-         |> assign_checkout_pricing(checkout)
-         |> assign(:page_title, Copy.checkout_page_title())
-         |> assign(:portal, portal)
-         |> assign(:base_path, portal["mount_path"])
-         |> assign(:checkout_session, checkout)
-         |> assign(:client_token, client_token)
-         |> assign(:checkout_error, nil)
-         |> assign(:checkout_success, false)
-         |> assign(:promotion_code, nil)
-         |> assign(:promotion_code_input, "")
-         |> assign(:promo_status, nil)
-         |> assign(:promo_preview, nil)
-         |> assign(:client_script_src, @client_script_src)
-         |> assign(:client_script_sri, @client_script_sri)
-         |> assign(:hosted_fields_script_src, @hosted_fields_script_src)
-         |> assign(:hosted_fields_script_sri, @hosted_fields_script_sri)}
+      socket =
+        socket
+        |> assign_checkout_pricing(checkout)
+        |> assign(:page_title, Copy.checkout_page_title())
+        |> assign(:portal, portal)
+        |> assign(:base_path, portal["mount_path"])
+        |> assign(:checkout_session, checkout)
+        |> assign(:client_token, client_token)
+        |> assign(:context_pin, pin)
+        |> assign(:promo_allowed, promo_allowed?)
+        |> assign(:completion_denied, not complete_allowed?)
+        |> assign(:checkout_error, nil)
+        |> assign(:checkout_success, false)
+        |> assign(:promotion_code, nil)
+        |> assign(:promotion_code_input, "")
+        |> assign(:promo_status, nil)
+        |> assign(:promo_preview, nil)
+        |> assign(:client_script_src, @client_script_src)
+        |> assign(:client_script_sri, @client_script_sri)
+        |> assign(:hosted_fields_script_src, @hosted_fields_script_src)
+        |> assign(:hosted_fields_script_sri, @hosted_fields_script_sri)
+
+      if is_nil(params["context_pin"]) do
+        send(self(), {:patch_checkout_context_pin, pin})
+      end
+
+      {:ok, socket}
+    else
+      nil ->
+        {:ok, redirect(socket, to: portal["mount_path"])}
 
       _ ->
-        {:ok,
-         socket
-         |> redirect(to: portal["mount_path"])}
+        {:ok, redirect(socket, to: portal["blocked_path"] || portal["mount_path"])}
     end
   end
 
@@ -63,112 +93,148 @@ defmodule AccruePortal.Live.CheckoutLive do
   end
 
   @impl true
-  def handle_event("checkout_tokenized", %{"nonce" => nonce}, socket)
-      when is_binary(nonce) and nonce != "" do
-    checkout = socket.assigns.checkout_session
+  def handle_info({:patch_checkout_context_pin, pin}, socket) do
+    {:noreply,
+     push_patch(socket,
+       to:
+         Path.context(
+           Path.checkout(socket.assigns.base_path, socket.assigns.checkout_session.session_token),
+           pin
+         )
+     )}
+  end
 
-    if checkout_ready?(checkout) do
-      case subscribe_with_checkout(socket, checkout, nonce) do
-        {:ok, subscription} ->
-          {:ok, _session} = LocalSession.mark_completed(checkout)
-          maybe_enqueue_completion(checkout, subscription)
+  @impl true
+  def handle_params(_params, _uri, socket), do: {:noreply, socket}
 
-          case checkout.success_url do
-            url when is_binary(url) and url != "" ->
-              {:noreply, redirect(socket, external: url)}
+  @impl true
+  def handle_event(
+        "checkout_tokenized",
+        %{"nonce" => nonce, "context_pin" => pin},
+        socket
+      )
+      when is_binary(nonce) and nonce != "" and is_binary(pin) and pin != "" do
+    case authorized_checkout(socket, pin, :checkout_complete) do
+      {:ok, checkout, context} ->
+        if checkout_ready?(checkout) do
+          case subscribe_with_checkout(socket, checkout, context, nonce) do
+            {:ok, subscription} ->
+              {:ok, _session} = LocalSession.mark_completed(checkout)
+              maybe_enqueue_completion(checkout, subscription)
 
-            _ ->
+              case checkout.success_url do
+                url when is_binary(url) and url != "" ->
+                  {:noreply, redirect(socket, external: url)}
+
+                _ ->
+                  {:noreply,
+                   socket
+                   |> assign(:checkout_error, nil)
+                   |> assign(:checkout_success, true)}
+              end
+
+            {:error, %DiscountMappingInvalid{}} ->
               {:noreply,
                socket
                |> assign(:checkout_error, nil)
-               |> assign(:checkout_success, true)}
+               |> assign(:checkout_success, false)
+               |> assign(:promo_preview, nil)
+               |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
+               |> assign_base_checkout_amount()}
+
+            {:error, reason}
+            when reason in [:not_found, :inactive, :expired, :max_redemptions_reached] ->
+              {:noreply,
+               socket
+               |> assign(:checkout_error, nil)
+               |> assign(:checkout_success, false)
+               |> assign(:promotion_code, nil)
+               |> assign(:promo_preview, nil)
+               |> assign(:promo_status, Copy.checkout_promo_invalid())
+               |> assign_base_checkout_amount()}
+
+            {:error, _reason} ->
+              {:noreply,
+               socket
+               |> assign(:checkout_error, Copy.checkout_subscription_error())
+               |> assign(:checkout_success, false)}
           end
+        else
+          {:noreply, deny_checkout(socket, Copy.checkout_session_expired_body())}
+        end
 
-        {:error, %DiscountMappingInvalid{}} ->
-          {:noreply,
-           socket
-           |> assign(:checkout_error, nil)
-           |> assign(:checkout_success, false)
-           |> assign(:promo_preview, nil)
-           |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
-           |> assign_base_checkout_amount()}
-
-        {:error, reason}
-        when reason in [:not_found, :inactive, :expired, :max_redemptions_reached] ->
-          {:noreply,
-           socket
-           |> assign(:checkout_error, nil)
-           |> assign(:checkout_success, false)
-           |> assign(:promotion_code, nil)
-           |> assign(:promo_preview, nil)
-           |> assign(:promo_status, Copy.checkout_promo_invalid())
-           |> assign_base_checkout_amount()}
-
-        {:error, _reason} ->
-          {:noreply,
-           socket
-           |> assign(:checkout_error, Copy.checkout_subscription_error())
-           |> assign(:checkout_success, false)}
-      end
-    else
-      {:noreply, assign_expired_error(socket)}
+      _ ->
+        {:noreply, deny_checkout(socket, Copy.checkout_subscription_error())}
     end
   end
 
   def handle_event("checkout_tokenized", _params, socket) do
-    {:noreply, assign(socket, :checkout_error, Copy.checkout_missing_nonce_error())}
+    {:noreply, deny_checkout(socket, Copy.checkout_missing_nonce_error())}
   end
 
-  def handle_event("validate_promo", %{"promo" => %{"code" => code}}, socket) do
-    checkout = socket.assigns.checkout_session
+  def handle_event(
+        "validate_promo",
+        %{"promo" => %{"code" => code}, "context_pin" => pin},
+        socket
+      )
+      when is_binary(pin) and pin != "" do
     trimmed_code = String.trim(code)
 
-    cond do
-      not checkout_ready?(checkout) ->
-        {:noreply, assign_expired_error(socket)}
-
-      trimmed_code == "" ->
-        {:noreply,
-         socket
-         |> assign(:promotion_code, nil)
-         |> assign(:promotion_code_input, "")
-         |> assign(:promo_preview, nil)
-         |> assign(:promo_status, nil)
-         |> assign_base_checkout_amount()}
-
-      true ->
-        case Billing.resolve_discount_mapping(trimmed_code, socket.assigns.base_amount_minor) do
-          {:ok, %{amount_off_minor: amount_off_minor, estimated_total_minor: total_minor}} ->
-            {:noreply,
-             socket
-             |> assign(:promotion_code, trimmed_code)
-             |> assign(:promotion_code_input, trimmed_code)
-             |> assign(:promo_status, Copy.checkout_promo_ready())
-             |> assign(:promo_preview, %{
-               amount_off: format_minor_amount(amount_off_minor),
-               estimated_total: format_minor_amount(total_minor)
-             })
-             |> assign(:checkout_amount, format_minor_amount(total_minor))}
-
-          {:error, %DiscountMappingInvalid{}} ->
+    case authorized_checkout(socket, pin, :checkout_validate_promo) do
+      {:ok, checkout, _context} ->
+        if checkout_ready?(checkout) do
+          if trimmed_code == "" do
             {:noreply,
              socket
              |> assign(:promotion_code, nil)
-             |> assign(:promotion_code_input, trimmed_code)
+             |> assign(:promotion_code_input, "")
              |> assign(:promo_preview, nil)
-             |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
+             |> assign(:promo_status, nil)
              |> assign_base_checkout_amount()}
+          else
+            case Billing.resolve_discount_mapping(trimmed_code, socket.assigns.base_amount_minor) do
+              {:ok, %{amount_off_minor: amount_off_minor, estimated_total_minor: total_minor}} ->
+                {:noreply,
+                 socket
+                 |> assign(:promotion_code, trimmed_code)
+                 |> assign(:promotion_code_input, trimmed_code)
+                 |> assign(:promo_status, Copy.checkout_promo_ready())
+                 |> assign(:promo_preview, %{
+                   amount_off: format_minor_amount(amount_off_minor),
+                   estimated_total: format_minor_amount(total_minor)
+                 })
+                 |> assign(:checkout_amount, format_minor_amount(total_minor))}
 
-          {:error, _reason} ->
-            {:noreply,
-             socket
-             |> assign(:promotion_code, nil)
-             |> assign(:promotion_code_input, trimmed_code)
-             |> assign(:promo_preview, nil)
-             |> assign(:promo_status, Copy.checkout_promo_invalid())
-             |> assign_base_checkout_amount()}
+              {:error, %DiscountMappingInvalid{}} ->
+                {:noreply,
+                 socket
+                 |> assign(:promotion_code, nil)
+                 |> assign(:promotion_code_input, trimmed_code)
+                 |> assign(:promo_preview, nil)
+                 |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
+                 |> assign_base_checkout_amount()}
+
+              {:error, _reason} ->
+                {:noreply,
+                 socket
+                 |> assign(:promotion_code, nil)
+                 |> assign(:promotion_code_input, trimmed_code)
+                 |> assign(:promo_preview, nil)
+                 |> assign(:promo_status, Copy.checkout_promo_invalid())
+                 |> assign_base_checkout_amount()}
+            end
+          end
+        else
+          {:noreply, deny_checkout(socket, Copy.checkout_session_expired_body())}
         end
+
+      _ ->
+        {:noreply, deny_checkout(socket, Copy.checkout_promo_unavailable())}
     end
+  end
+
+  def handle_event("validate_promo", _params, socket) do
+    {:noreply, deny_checkout(socket, Copy.checkout_promo_unavailable())}
   end
 
   def handle_event("checkout_failed", %{"message" => message}, socket) do
@@ -217,17 +283,22 @@ defmodule AccruePortal.Live.CheckoutLive do
           </p>
         </div>
 
-        <div :if={not checkout_ready?(@checkout_session)} class="portal-inline-error" role="alert">
+        <div :if={@completion_denied} class="portal-inline-error" role="status" aria-live="polite">
+          <p>Checkout access is unavailable. No payment was submitted.</p>
+        </div>
+
+        <div :if={not checkout_ready?(@checkout_session)} class="portal-inline-error" role="status" aria-live="polite">
           <p>{Copy.checkout_session_expired_title()}</p>
           <p>{Copy.checkout_session_expired_body()}</p>
         </div>
 
         <form
-          :if={@client_token && checkout_ready?(@checkout_session) && !@checkout_success}
+          :if={@promo_allowed && checkout_ready?(@checkout_session) && !@checkout_success}
           id="promo-code-form"
           phx-change="validate_promo"
           class="portal-promo-form"
         >
+          <input type="hidden" name="context_pin" value={@context_pin} />
           <label class="portal-hosted-label" for="promo-code-input">
             <span>{Copy.checkout_promo_label()}</span>
           </label>
@@ -256,6 +327,7 @@ defmodule AccruePortal.Live.CheckoutLive do
           data-portal-hosted-fields="checkout"
           data-client-token={@client_token}
         >
+          <input type="hidden" name="context_pin" value={@context_pin} />
           <div class="portal-hosted-grid">
             <label class="portal-hosted-label">
               <span>Card number</span>
@@ -316,7 +388,7 @@ defmodule AccruePortal.Live.CheckoutLive do
     assign(socket, :checkout_amount, socket.assigns.base_checkout_amount)
   end
 
-  defp subscribe_with_checkout(socket, checkout, nonce) do
+  defp subscribe_with_checkout(socket, checkout, context, nonce) do
     subscribe_opts = [
       payment_method: %{vault_acquisition: %{reference: nonce}},
       operation_id: checkout.operation_id
@@ -331,7 +403,106 @@ defmodule AccruePortal.Live.CheckoutLive do
           subscribe_opts
       end
 
-    Billing.subscribe(socket.assigns.current_customer, checkout.price_id, subscribe_opts)
+    actor_id = Accrue.Auth.actor_id(context.actor) || Map.get(context.actor, :id)
+    actor = %{type: :user, id: if(is_nil(actor_id), do: nil, else: to_string(actor_id))}
+
+    Accrue.Actor.with_actor(actor, fn ->
+      Billing.subscribe(context.customer, checkout.price_id, subscribe_opts)
+    end)
+  end
+
+  defp resolve_checkout_context(socket, pin, _mint_if_missing?) do
+    pin =
+      if is_binary(pin) and pin != "" do
+        pin
+      else
+        case Context.mint_pin(socket.assigns.current_context, socket.endpoint) do
+          {:ok, value} -> value
+          _ -> nil
+        end
+      end
+
+    with true <- is_binary(pin) and pin != "",
+         {:ok, context} <-
+           CustomerSession.resolve_pin(socket.assigns.accrue_portal_session, pin,
+             endpoint: socket.endpoint,
+             mount_path: socket.assigns[:base_path] || Accrue.Config.portal_mount_path()
+           ) do
+      {:ok, pin, context}
+    else
+      _ -> {:error, :unavailable}
+    end
+  end
+
+  defp authorized_checkout(socket, pin, action) do
+    token = socket.assigns.checkout_session.session_token
+    checkout = LocalSession.by_token(token)
+
+    with %LocalSession{} = checkout <- checkout,
+         {:ok, _pin, context} <- resolve_checkout_context(socket, pin, false),
+         true <- checkout_target?(context, checkout),
+         true <- checkout_ready?(checkout),
+         :ok <-
+           Context.authorize_action(
+             context,
+             socket.assigns[:current_context_adapter],
+             action,
+             checkout
+           ) do
+      {:ok, checkout, context}
+    else
+      _ -> {:error, :unavailable}
+    end
+  end
+
+  defp checkout_target?(context, %LocalSession{} = checkout) do
+    customer_matches? =
+      case context.customer do
+        %Accrue.Billing.Customer{id: customer_id, processor: processor} ->
+          customer_id == checkout.customer_id and processor == checkout.processor
+
+        _ ->
+          false
+      end
+
+    selected_item_matches? =
+      case checkout.line_items do
+        [%{"price" => price_id, "amount" => amount} = item] ->
+          price_id == checkout.price_id and valid_amount?(amount) and
+            valid_currency?(item["currency"])
+
+        _ ->
+          false
+      end
+
+    customer_matches? and selected_item_matches? and checkout.mode == "subscription" and
+      checkout.ui_mode == "hosted" and context.processor == checkout.processor and
+      checkout.processor == Processor.name()
+  end
+
+  defp valid_amount?(amount) when is_integer(amount), do: amount > 0
+
+  defp valid_amount?(amount) when is_binary(amount) do
+    case Decimal.parse(String.trim_leading(String.trim(amount), "$")) do
+      {%Decimal{} = value, ""} -> Decimal.compare(value, Decimal.new(0)) == :gt
+      _ -> false
+    end
+  end
+
+  defp valid_amount?(_), do: false
+
+  defp valid_currency?(nil), do: true
+  defp valid_currency?(currency), do: is_binary(currency) and currency =~ ~r/^[A-Za-z]{3}$/
+
+  defp deny_checkout(socket, message) do
+    socket
+    |> assign(:client_token, nil)
+    |> assign(:completion_denied, true)
+    |> assign(:checkout_error, message)
+    |> assign(:checkout_success, false)
+    |> assign(:promotion_code, nil)
+    |> assign(:promo_preview, nil)
+    |> assign(:promo_status, nil)
   end
 
   defp checkout_amount_minor(%LocalSession{line_items: [first | _]}) when is_map(first) do
@@ -364,15 +535,11 @@ defmodule AccruePortal.Live.CheckoutLive do
     "#{sign}$#{dollars}.#{cents}"
   end
 
-  defp checkout_ready?(%LocalSession{expires_at: %DateTime{} = expires_at}) do
+  defp checkout_ready?(%LocalSession{status: "open", expires_at: %DateTime{} = expires_at}) do
     DateTime.compare(expires_at, DateTime.utc_now()) == :gt
   end
 
-  defp checkout_ready?(_session), do: true
-
-  defp assign_expired_error(socket) do
-    assign(socket, :checkout_error, Copy.checkout_session_expired_body())
-  end
+  defp checkout_ready?(_session), do: false
 
   defp maybe_enqueue_completion(checkout, subscription) do
     case CompletionJob.enqueue(checkout.id, subscription.id) do

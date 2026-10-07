@@ -23,6 +23,7 @@ defmodule AccruePortal.Copy do
 
   def checkout_promo_invalid, do: "This code is unavailable. Check the code and try again."
   def checkout_promo_temporarily_unavailable, do: "This promotion is temporarily unavailable."
+  def checkout_promo_unavailable, do: "This promotion is unavailable. No payment was submitted."
   def checkout_discount_amount_label(amount_text), do: "Estimated savings: " <> amount_text
   def checkout_estimated_total_label(amount_text), do: "Estimated total: " <> amount_text
 

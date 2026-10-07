@@ -119,11 +119,12 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert html =~ ~s(crossorigin="anonymous")
   end
 
-  test "checkout hook contract sends only the nonce back to LiveView" do
+  test "checkout hook returns the nonce and rendered context pin, never card fields" do
     js = File.read!(Path.expand("../../../priv/static/accrue_portal.js", __DIR__))
 
-    assert js =~ ~s|pushEvent("checkout_tokenized", { nonce: payload.nonce }, function ()|
-    refute js =~ ~s|pushEvent("checkout_tokenized", { nonce: payload.nonce,|
+    assert js =~ ~s|pushEvent("checkout_tokenized", {|
+    assert js =~ "context_pin: contextPin"
+    assert js =~ "nonce: payload.nonce"
     refute js =~ ~s|pushEvent("checkout_tokenized", { number:|
     refute js =~ ~s|pushEvent("checkout_tokenized", { cvv:|
     refute js =~ "payment_method_nonce"
@@ -137,11 +138,15 @@ defmodule AccruePortal.CheckoutLiveTest do
     session = checkout_fixture(customer, price_id: "price_basic")
     conn = sign_in_customer(conn, user)
 
-    assert {:ok, view, _html} = live(conn, "/billing/checkout/#{session.session_token}")
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
 
     assert {:error, {:redirect, %{to: "https://app.example.test/billing/success"}}} =
              render_hook(view, "checkout_tokenized", %{
                "nonce" => "fake-valid-nonce",
+               "context_pin" => pin,
                "number" => "4111111111111111",
                "cvv" => "123"
              })
@@ -164,11 +169,24 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert {:ok, expired_view, expired_html} =
              live(conn, "/billing/checkout/#{expired.session_token}")
 
+    [[pinned_path]] =
+      Regex.scan(~r/href="([^"]*context_pin=[^"]+)"/, expired_html, capture: :all_but_first)
+
+    pin =
+      pinned_path
+      |> URI.parse()
+      |> Map.get(:query)
+      |> URI.decode_query()
+      |> Map.fetch!("context_pin")
+
     assert expired_html =~ "This checkout link has expired"
     assert expired_html =~ "Leave checkout"
 
     assert expired_html_after =
-             render_hook(expired_view, "checkout_tokenized", %{"nonce" => "fake-valid-nonce"})
+             render_hook(expired_view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
 
     assert expired_html_after =~ "This checkout link has expired"
     assert expired_html_after =~ "Return to your account and start a new subscription."
@@ -199,7 +217,7 @@ defmodule AccruePortal.CheckoutLiveTest do
   end
 
   defp checkout_fixture(%Customer{} = customer, attrs \\ %{}) do
-    attrs = Enum.into(attrs, %{})
+    provided = Enum.into(attrs, %{})
 
     attrs =
       Map.merge(
@@ -218,8 +236,24 @@ defmodule AccruePortal.CheckoutLiveTest do
           metadata: %{"source" => "fixture"},
           data: %{"local_portal" => true}
         },
-        attrs
+        provided
       )
+
+    price_id =
+      Map.get(provided, :price_id) ||
+        case Map.get(provided, :line_items) do
+          [%{"price" => item_price} | _] -> item_price
+          _ -> attrs.price_id
+        end
+
+    line_items =
+      if Map.has_key?(provided, :line_items) do
+        provided.line_items
+      else
+        [%{"price" => price_id, "amount" => "49.00"}]
+      end
+
+    attrs = Map.merge(attrs, %{price_id: price_id, line_items: line_items})
 
     {:ok, session} = LocalSession.create_or_reuse(customer, attrs)
     session

@@ -40,7 +40,8 @@ defmodule Accrue.Portal.Context do
           | :subscription_cancel
           | :subscription_change
           | :subscription_preview
-          | :complete_checkout
+          | :checkout_validate_promo
+          | :checkout_complete
 
   @type t :: %__MODULE__{
           actor: struct(),
@@ -144,7 +145,9 @@ defmodule Accrue.Portal.Context do
              :payment_method_delete,
              :subscription_cancel,
              :subscription_change,
-             :subscription_preview
+             :subscription_preview,
+             :checkout_validate_promo,
+             :checkout_complete
            ] do
     if target_in_context?(context, target), do: :ok, else: {:error, :forbidden}
   end

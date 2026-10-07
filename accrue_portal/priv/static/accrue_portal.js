@@ -143,7 +143,20 @@
             return;
           }
 
-          this.pushEvent("checkout_tokenized", { nonce: payload.nonce }, function () {
+          var contextPinInput = this.el.querySelector('[name="context_pin"]');
+          var contextPin = contextPinInput ? contextPinInput.value : "";
+
+          if (!payload || !payload.nonce || !contextPin) {
+            this.tokenizing = false;
+            setSubmitting(submitButton, false);
+            setInlineError(errorNode, "Checkout context expired. No payment was submitted.");
+            return;
+          }
+
+          this.pushEvent("checkout_tokenized", {
+            nonce: payload.nonce,
+            context_pin: contextPin
+          }, function () {
             this.tokenizing = false;
             setSubmitting(submitButton, false);
           }.bind(this));
