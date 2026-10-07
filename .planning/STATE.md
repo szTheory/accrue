@@ -5,11 +5,11 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 234
 current_phase_name: Admin Customers & Subscriptions
 status: planning
-stopped_at: Phase 233 complete, ready to plan Phase 234
-last_updated: "2026-10-07T23:16:05Z"
+stopped_at: Phase 234 context gathered
+last_updated: "2026-10-07T23:45:48.985Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 233 complete, transitioned to Phase 234
-state_head: c7bd2dbfa004eaba7137183f73558ffa395e3c25
+state_head: 86d924a9d75c7541de68689277e2d1dfd0116d2e
 progress:
   total_phases: 7
   completed_phases: 1
@@ -262,8 +262,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-07T23:16:05Z
-Stopped at: Phase 233 complete, ready to plan Phase 234
+Last session: 2026-10-07T23:45:48.956Z
+Stopped at: Phase 234 context gathered
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -289,7 +289,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: None
+Resume file: .planning/phases/234-admin-customers-subscriptions/234-CONTEXT.md
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 
