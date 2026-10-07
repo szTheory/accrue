@@ -1,0 +1,4 @@
+TAP version 13
+1..2
+not ok 1 - test rendered checkout form pins its displayed context and tokenized event
+not ok 2 - test read-only checkout mount never issues a client token or renders Hosted Fields
