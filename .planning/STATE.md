@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 233
 current_phase_name: Shared Direction & Portal Contract
 status: executing
-stopped_at: Phase 233 planning verified; ready to execute
-last_updated: "2026-10-07T18:05:46.125Z"
+stopped_at: Completed 233-04-PLAN.md
+last_updated: "2026-10-07T18:42:17.177Z"
 last_activity: 2026-10-07
-last_activity_desc: Phase 233 planning verified; 7 plans in 5 waves ready to execute
-state_head: f308408695e6ea362fc26a7f179faed7e48999f9
+last_activity_desc: Phase 233 execution started
+state_head: 594f7a33d411d03c776d9a6b6562e3cac495a9d9
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 7
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -26,14 +26,15 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 233 of v1.63 is planned and verified, with 7 plans in 5 waves ready to execute. The seven milestone phases span 233–239; v1.62 is complete and archived, and its closeout and lane history remain historical.
+**Current focus:** Phase 233 — Shared Direction & Portal Contract
+**Progress:** [░░░░░░░░░░] 0% (1 of 7 plans complete)
 
 ## Current Position
 
-Phase: 233 (Shared Direction & Portal Contract) — READY TO EXECUTE
-Plan: 0 of 7 complete; begin with 233-04 (Wave 1)
-Status: Ready to execute
-Last activity: 2026-10-07 — Phase 233 planning verified; 7 plans in 5 waves ready to execute
+Phase: 233 (Shared Direction & Portal Contract) — EXECUTING
+Plan: 2 of 7
+Status: Executing
+Last activity: 2026-10-07 — Phase 233 execution started
 
 ## Performance Metrics
 
@@ -95,6 +96,7 @@ Last activity: 2026-10-07 — Phase 233 planning verified; 7 plans in 5 waves re
 | Phase 232 P08 | ~140min | 3 tasks | 8 files |
 | Phase 232-bounded-hygiene-release-handoff P09 | ~25min | 3 tasks | 2 files |
 | Phase 232 P10 | 3h20min | 3 tasks | 7 files |
+| Phase 233 P04 | 9min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -176,6 +178,8 @@ Last activity: 2026-10-07 — Phase 233 planning verified; 7 plans in 5 waves re
 - [Phase 232]: Maintainer decision at 232-08's checkpoint: rewrite .tool-versions to match integration/v1.62-candidate byte-for-byte (nodejs 22.14.0 / elixir 1.19.5-otp-28 / erlang 28.5), joined into the cleanup findings range as finding 8. — Local .tool-versions diverged from the candidate branch in two dimensions (erlang patch version AND a missing nodejs pin entirely); every scripts/ci/*.mjs gate is a Node script and ci.yml pins Node 22, while the local shell runs Node 24 -- local and CI gate runs were on different Node majors.
 - [Phase 232-bounded-hygiene-release-handoff]: Re-cut integration/v1.62-candidate at a new SHA (c1397fe9, merge 3f42158d), proved lossless by a newly generalized --require-union-hunks check (447 inspected, 7 co-touched, 0 drifted). Maintainer checkpoint decision: since updating the published branch required a non-fast-forward (force-push, prohibited), pushed the re-cut to a NEW branch integration/v1.62-candidate-recut instead, leaving integration/v1.62-candidate untouched. — Option A (move the published branch) required a force-push the plan itself prohibits -- an internal plan contradiction for a fresh-supersession re-cut where the old tip is not an ancestor of the new tip. Option B resolves it without relaxing any prohibition; 232-10/232-11 must target integration/v1.62-candidate-recut, not integration/v1.62-candidate.
 - [Phase 232]: Both real regressions found (docs-contracts-shift-left human_judgment violations, release-gate stale test fixture) fixed and verified on the milestone line but NOT pushed to the frozen candidate-recut ref -- recorded waived at the frozen SHA with the fix commit cited as evidence
+- [Phase 233]: Share semantic meaning and observable checks while preserving Admin --ax-* and public/core Portal --accrue-* ownership, separate shells, and host customer branding.
+- [Phase 233]: Use deterministic canonical-host pages and verify served CSS/JS bytes against current package sources and URL digests.
 
 ### Pending Todos
 
@@ -244,8 +248,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-07T17:11:24.764Z
-Stopped at: Phase 233 planning verified; ready to execute
+Last session: 2026-10-07T18:41:16.660Z
+Stopped at: Completed 233-04-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -271,7 +275,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: .planning/phases/233-shared-direction-portal-contract/233-PLAN-CHECK.md
+Resume file: None
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 

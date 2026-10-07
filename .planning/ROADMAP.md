@@ -58,7 +58,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 Plans:
 **Wave 1**
-- [ ] 233-04-PLAN.md — Inventory current Admin/Portal source and served renders; define semantic direction.
+- [x] 233-04-PLAN.md — Inventory current Admin/Portal source and served renders; define semantic direction.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 233-01-PLAN.md — Trace optional billable resolution through a real Portal page and blocked recovery.

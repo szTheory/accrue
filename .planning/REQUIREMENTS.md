@@ -9,9 +9,9 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 
 ### Baseline and Visual System
 
-- [ ] **BASE-01**: Maintainers can inspect a current route, flow, component, and state inventory with evidence provenance; historical screenshots cannot stand in for current rendering.
-- [ ] **SYS-01**: Operators and customers see consistent visual roles, typography, spacing, layers, and control states across real package consumers, with superseded local overrides removed.
-- [ ] **SYS-02**: Admin and Portal share semantic design roles while retaining audience-appropriate layouts and their existing Admin identity or host customer branding, without a new UI dependency.
+- [x] **BASE-01**: Maintainers can inspect a current route, flow, component, and state inventory with evidence provenance; historical screenshots cannot stand in for current rendering.
+- [x] **SYS-01**: Operators and customers see consistent visual roles, typography, spacing, layers, and control states across real package consumers, with superseded local overrides removed.
+- [x] **SYS-02**: Admin and Portal share semantic design roles while retaining audience-appropriate layouts and their existing Admin identity or host customer branding, without a new UI dependency.
 
 ### Admin
 
@@ -83,9 +83,9 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BASE-01 | Phase 233 | Pending |
-| SYS-01 | Phase 233 | Pending |
-| SYS-02 | Phase 233 | Pending |
+| BASE-01 | Phase 233 | Complete |
+| SYS-01 | Phase 233 | Complete |
+| SYS-02 | Phase 233 | Complete |
 | ADM-01 | Phase 234 | Pending |
 | ADM-02 | Phase 237 | Pending |
 | ADM-03 | Phase 234 | Pending |
