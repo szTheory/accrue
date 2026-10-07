@@ -231,6 +231,31 @@ defmodule AccruePortal.ContextLiveTest do
              live(conn, "/org-billing/invoices?context_pin=#{pin}")
   end
 
+  test "an invoice route pins its initial selection into the browser URL for reconnect", %{
+    conn: conn
+  } do
+    actor = user_fixture()
+    {_customer, _subscription, invoice} = organization_records!("org-a")
+    {_foreign_customer, _foreign_subscription, foreign_invoice} = organization_records!("org-b")
+    Adapter.grant("org-a", [])
+    Adapter.grant("org-b", [])
+    conn = signed_context(conn, actor, "org-a")
+    pin = context_pin!(actor, "org-a")
+
+    assert {:ok, view, html} = live(conn, "/org-billing/invoices")
+    assert_patch(view, "/org-billing/invoices?context_pin=" <> pin)
+    assert html =~ invoice.number
+    refute html =~ foreign_invoice.number
+
+    switched_conn = signed_context(build_conn(), actor, "org-b")
+
+    assert {:ok, _view, old_tab_html} =
+             live(switched_conn, "/org-billing/invoices?context_pin=" <> pin)
+
+    assert old_tab_html =~ invoice.number
+    refute old_tab_html =~ foreign_invoice.number
+  end
+
   defp context_pin!(actor, organization_id) do
     session = %{
       "user_token" => "customer:" <> actor.id,
