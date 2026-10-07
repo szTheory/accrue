@@ -182,4 +182,22 @@ defmodule AccruePortal.ContextContractTest do
 
     assert processor == Accrue.Processor.name()
   end
+
+  test "authenticated unavailable selection renders a generic blocked page without provisioning" do
+    customer_count_before = TestRepo.aggregate(Customer, :count, :id)
+    provider_calls_before = Accrue.Processor.Fake.call_count(:create_customer)
+
+    conn =
+      Phoenix.ConnTest.build_conn()
+      |> Plug.Test.init_test_session(%{
+        "user_token" => "actor:00000000-0000-0000-0000-000000000123",
+        "active_billable_id" => "org-invalid"
+      })
+
+    assert {:ok, _view, html} = Phoenix.LiveViewTest.live(conn, "/custom-billing")
+    assert html =~ "Billing access unavailable"
+    refute html =~ "org-invalid"
+    assert TestRepo.aggregate(Customer, :count, :id) == customer_count_before
+    assert Accrue.Processor.Fake.call_count(:create_customer) == provider_calls_before
+  end
 end

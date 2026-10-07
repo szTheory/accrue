@@ -37,6 +37,11 @@ defmodule AccruePortal.AuthHookTest do
     def actor_id(%{id: id}), do: id
   end
 
+  defmodule DeniedContextAdapter do
+    def resolve(_actor, _selection), do: {:error, :forbidden}
+    def authorize(_, _, _, _), do: {:error, :forbidden}
+  end
+
   setup do
     previous_auth = Application.get_env(:accrue, :auth_adapter)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
@@ -99,5 +104,28 @@ defmodule AccruePortal.AuthHookTest do
 
     assert redirected_to(conn) == "/users/log-in"
     assert get_session(conn, :user_return_to) == "/billing"
+  end
+
+  test "authenticated denied context goes to the non-login blocked destination" do
+    session = %{
+      "user_token" => "customer-token",
+      "accrue_portal" => %{
+        "mount_path" => "/billing",
+        "login_path" => "/users/log-in",
+        "context_adapter" => DeniedContextAdapter,
+        "context_session_keys" => ["active_billable_id"]
+      },
+      "active_billable_id" => "invalid-selection"
+    }
+
+    assert {:halt, socket} =
+             Accrue.Portal.AuthHook.on_mount(
+               :ensure_customer,
+               %{},
+               session,
+               %Phoenix.LiveView.Socket{}
+             )
+
+    assert socket.redirected == {:redirect, %{to: "/billing/blocked"}}
   end
 end

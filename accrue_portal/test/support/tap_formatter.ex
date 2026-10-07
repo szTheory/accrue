@@ -15,8 +15,16 @@ defmodule AccruePortal.TapFormatter do
     report =
       ["TAP version 13", "1..#{length(tests)}"] ++
         Enum.map(Enum.with_index(tests, 1), fn {test, index} ->
-      name = to_string(test.name)
-      result = if test.state, do: "not ok", else: "ok"
+          name = to_string(test.name)
+
+          result =
+            case test.state do
+              nil -> "ok"
+              :passed -> "ok"
+              {:excluded, _reason} -> "ok"
+              _ -> "not ok"
+            end
+
           "#{result} #{index} - #{name}"
         end)
 
