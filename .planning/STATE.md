@@ -4,16 +4,16 @@ milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 233
 current_phase_name: Shared Direction & Portal Contract
-status: planning
-stopped_at: Phase 233 context gathered
-last_updated: "2026-10-07T17:11:24.784Z"
+status: executing
+stopped_at: Phase 233 planning verified; ready to execute
+last_updated: "2026-10-07T18:05:46.125Z"
 last_activity: 2026-10-07
-last_activity_desc: v1.63 roadmap created; all 34 requirements mapped once
-state_head: 49d7026478423b64ac19ef0987193fe34080aa97
+last_activity_desc: Phase 233 planning verified; 7 plans in 5 waves ready to execute
+state_head: f308408695e6ea362fc26a7f179faed7e48999f9
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 0
+  total_plans: 7
   completed_plans: 0
   percent: 0
 ---
@@ -26,14 +26,14 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Planning Phase 233 of v1.63, Admin and Portal UI refinement. The seven phases span 233–239; v1.62 is complete and archived, and its closeout and lane history remain historical.
+**Current focus:** Phase 233 of v1.63 is planned and verified, with 7 plans in 5 waves ready to execute. The seven milestone phases span 233–239; v1.62 is complete and archived, and its closeout and lane history remain historical.
 
 ## Current Position
 
-Phase: 233 of 239 — Shared Direction & Portal Contract
-Plan: —
-Status: Planned; ready for phase planning
-Last activity: 2026-10-07 — v1.63 roadmap created; all 34 requirements mapped once
+Phase: 233 (Shared Direction & Portal Contract) — READY TO EXECUTE
+Plan: 0 of 7 complete; begin with 233-04 (Wave 1)
+Status: Ready to execute
+Last activity: 2026-10-07 — Phase 233 planning verified; 7 plans in 5 waves ready to execute
 
 ## Performance Metrics
 
@@ -245,7 +245,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-07T17:11:24.764Z
-Stopped at: Phase 233 context gathered
+Stopped at: Phase 233 planning verified; ready to execute
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -271,7 +271,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: .planning/phases/233-shared-direction-portal-contract/233-CONTEXT.md
+Resume file: .planning/phases/233-shared-direction-portal-contract/233-PLAN-CHECK.md
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 
@@ -374,4 +374,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Run /gsd-execute-phase 233; Wave 1 begins with 233-04-PLAN.md.

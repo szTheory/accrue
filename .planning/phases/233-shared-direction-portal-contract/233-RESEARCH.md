@@ -227,15 +227,15 @@ Portal README calls existing boundary “session-resolved-customer-only”; upda
 
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
-| A1 | Proposed resolver/authorizer arities/envelope are sufficient. | Pattern 1 | Public API may not express target/lifecycle needs. |
-| A2 | Session is suitable for minimal selection reference. | Pattern 1 | Some host may require route-bound persisted pin. |
-| A3 | Canonical host can provide representative captures. | Validation | Runtime availability unprobed. |
+| A1 | RESOLVED in plans 233-01/02/03/07: optional resolver/authorizer contract, named actions, server-loaded targets and pinned context transport cover the identified call sites. | Pattern 1 | Execution must prove the contract at HTTP, LiveView and POST boundaries. |
+| A2 | RESOLVED in plans 233-02/07: session selection starts a context; signed route/form/event pins preserve the displayed context across tabs and reconnect. | Pattern 1 | Execution must prove old-tab authorization and stale-pin denial. |
+| A3 | RESOLVED as an executable check in plans 233-04/06: the canonical host must serve representative Admin and Portal captures with provenance before visual claims. Runtime availability remains unprobed. | Validation | A failed browser/build command blocks the baseline; no render evidence is claimed here. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Pinned-context transport:** selection session changes across tabs. Recommend form-specific pin + mismatch rejection; keep tabs independently pinned only while fresh authorization passes.
-2. **Representative render set:** Admin home/detail, Portal overview/add-card or checkout and denial/recovery; sample theme/narrow viewport without screenshot Cartesian growth.
-3. **Audit evidence:** inspect actual emitted event after mutation; helper/assign alone doesn't prove durable attribution.
+1. **RESOLVED — Pinned-context transport:** Plans 233-02/07 use Phoenix.Token `context_pin` with a dedicated salt and 20-minute expiry. The signed locator contains exact billable owner type/ID, Customer ID and configured processor; every protected action re-resolves host policy, checks the server-loaded target and freshly authorizes the named action. The rendered form provides a hidden pin, its local URL preserves the pin for reconnect, and the Hosted Fields hook sends the same pin in its LiveView event or POST completion. A changed session selection cannot retarget an old form, and an invalid pin cannot fall back to current selection. These are plan decisions awaiting execution evidence.
+2. **RESOLVED — Representative render set:** Plans 233-04/06 require a bounded current served Admin/Portal baseline before semantic changes, with an operator overview, Portal home and representative long/empty or denied state, theme/accent and narrow viewport checks. Inventory and capture records include source SHA, rebuilt/served asset hashes, route, state, theme, viewport, date and assertion outcome. Historical captures remain historical; current rendering has not yet been inspected.
+3. **RESOLVED — Audit evidence:** Plans 233-02/03/07 scope mutations under `Accrue.Actor.with_actor/2` using the authenticated human. Plan 233-05 asserts that persisted event/operation attribution names that human rather than the billable organization. The test is planned; no persisted event has been observed in this research pass.
 
 ## Environment Availability
 

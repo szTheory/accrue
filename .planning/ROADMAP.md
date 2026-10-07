@@ -43,6 +43,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 ## Phase Details
 
 ### Phase 233: Shared Direction & Portal Contract
+
 **Goal**: Maintainers and adopters can see a current, coherent Admin and Portal baseline, while hosts can select a billed entity and authorize its actions through one bounded Portal contract.
 **Depends on**: Nothing (first phase)
 **Requirements**: BASE-01, SYS-01, SYS-02, POR-08, SAFE-02, SAFE-03, SHIP-04
@@ -52,9 +53,29 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   3. A personal-only host retains its existing Portal behavior without a company model or picker; a mixed host can resolve personal and custom billables while actor, billable, Customer, and processor remain distinct.
   4. On initial request, LiveView events/reconnect, and protected actions, the host's fresh authorization governs the selected context; invalid or unauthorized selection cannot fall back, provision, or retarget a form.
   5. The canonical example and adopter guidance show personal defaults plus organization/custom and mixed resolution without requiring a new auth or runtime dependency.
-**Plans**: TBD
+
+**Plans**: 7 plans
+
+Plans:
+**Wave 1**
+- [ ] 233-04-PLAN.md — Inventory current Admin/Portal source and served renders; define semantic direction.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 233-01-PLAN.md — Trace optional billable resolution through a real Portal page and blocked recovery.
+- [ ] 233-06-PLAN.md — Apply and verify semantic roles in bounded package-owned consumers.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 233-02-PLAN.md — Connect rendered payment forms to pinned POST actions and gate add-card client tokens.
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 233-03-PLAN.md — Apply the contract to Home, subscription, and invoice routes and events.
+- [ ] 233-07-PLAN.md — Connect checkout form pins to both completion transports and gate client tokens.
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 233-05-PLAN.md — Demonstrate personal, custom, and mixed host adoption with aligned docs.
 
 ### Phase 234: Admin Customers & Subscriptions
+
 **Goal**: Operators can find and investigate the correct customer and subscription, understand observed lifecycle truth, and complete only supported subscription actions.
 **Depends on**: Phase 233
 **Requirements**: ADM-01, ADM-03, ADM-04, SAFE-01
@@ -64,10 +85,12 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   3. Only eligible subscription actions are offered; confirmation, step-up expiry, duplicate protection, and resulting evidence communicate the actual outcome.
   4. Mounted owner/customer denials and forged actions remain denied without exposing foreign records or payment-token data.
   5. The affected Admin flows remain usable by keyboard and at narrow/coarse-pointer sizes, with the relevant light/dark and empty/error states checked in this slice.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 235: Customer Plan Selection & Checkout
+
 **Goal**: Customers can understand a selected offer, complete supported checkout through its actual browser integration, or leave safely with an honest outcome.
 **Depends on**: Phase 233
 **Requirements**: CKO-01, CKO-02, CKO-03, CKO-04
@@ -77,10 +100,12 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   3. Expired/completed sessions, stale promotions, and repeated submissions follow the existing contract without claiming an unproven charge or rendering missing price as zero.
   4. Plan choice survives sign-in and return; only trusted available metadata supplies charge terms, and unknown terms or outcomes lead to recovery without blind resubmission.
   5. Checkout keyboard, narrow-screen, theme, secure SDK, pending/error-state, and served-asset behavior is checked alongside each changed form and handoff.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 236: Portal Billing Self-Service
+
 **Goal**: Customers can understand their billing identity and manage supported existing payment, subscription, and invoice tasks in the branded Portal.
 **Depends on**: Phase 233; Phase 235 for shared checkout/return behavior
 **Requirements**: POR-01, POR-02, POR-03, POR-04, POR-05, POR-06, POR-07
@@ -90,10 +115,12 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   3. Customers reach only their existing invoice records and hosted invoice access; missing or unauthorized records fail safely.
   4. LiveView and POST/redirect actions announce visible success or failure, failed reads do not look empty, and checkout failure does not assert a charge.
   5. Direct add-card navigation initializes supported secure fields; known subscription states and safe host returns are truthful, and Portal keyboard/mobile/theme/focus/motion states are checked in this slice.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 237: Admin Invoices, Payments & Recovery
+
 **Goal**: Operators can complete invoice, payment, refund, and recovery work with exact amounts, correct scope, and truthful result evidence.
 **Depends on**: Phase 234
 **Requirements**: ADM-02, ADM-05, ADM-06
@@ -103,10 +130,12 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   3. Accepted, requires-action, failed, and completed results are distinguishable and tied to the resulting billing evidence.
   4. Recovery views retain time window, owner, currency, and return context while keeping historical failures separate from current billing state.
   5. Changed money/recovery flows retain keyboard, responsive, theme, and relevant pending/denied/error evidence within this slice.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 238: Admin Events, Webhooks & Remaining Billing Surfaces
+
 **Goal**: Operators can investigate local events and delivery history, retry or replay only eligible work, and inspect remaining existing billing surfaces without implied capabilities.
 **Depends on**: Phase 234; Phase 237 for related money evidence
 **Requirements**: ADM-07, ADM-08
@@ -115,10 +144,12 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   2. Retry/replay is limited to eligible deliveries with required confirmation and step-up; accepted versus processed results and partial selections are stated honestly.
   3. Existing coupon, promotion-code, and Connect states and actions are understandable, provider-specific where needed, and never imply unsupported create/edit behavior.
   4. Each changed filter, payload, action, and empty/error state has relevant keyboard, responsive, theme, and interaction evidence in this slice.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 239: Integrated Quality & Handoff
+
 **Goal**: Maintainers can rely on current cross-surface evidence for the complete refinement and inspect the delivered result in a stable preview.
 **Depends on**: Phases 233–238
 **Requirements**: INT-01, INT-02, INT-03, INT-04, SHIP-01, SHIP-02, SHIP-03
@@ -128,6 +159,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
   3. Every owned route and unique interaction has a coverage disposition, and current required gates plus inspected representative renders support the completion claims.
   4. Generated assets, fonts, mounts, CSP/SRI, copy exports, and host integration documentation match the source actually served; component examples/docs match production and task-owned debris is removed.
   5. A useful feedback preview remains available separately from mutation/reset proof, with a concise change summary for optional owner feedback.
+
 **Plans**: TBD
 **UI hint**: yes
 
