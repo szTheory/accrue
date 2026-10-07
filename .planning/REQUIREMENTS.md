@@ -1,88 +1,88 @@
-# Requirements: Accrue v1.62 Release Integration & Repository Hygiene
+# Requirements: Accrue v1.63 Admin and Portal UI refinement
 
-**Defined:** 2026-09-12
-**Core Value:** A Phoenix developer can install Accrue and its companion admin UI and launch a production-grade SaaS billing system without avoidable integration or release risk.
+**Defined:** 2026-10-07
+**Core Value:** A Phoenix developer can install Accrue and its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, with idiomatic Elixir DX, strong domain modeling, a tamper-evident audit ledger, great observability, and zero breaking-change pain for at least the first major version. Everything else is in service of that.
 
-## v1.62 Requirements
+## v1.63 Requirements
 
-### Repository Truth
+Requirements for the Admin and Portal UI refinement milestone. Each maps to exactly one roadmap phase.
 
-- [x] **REPO-01**: Maintainers can inspect one committed, reproducible inventory of local and remote `main`, the v1.61 lineage and tag, release branches, worktrees, open PRs, untracked paths, ship windows, and relevant planning state.
-- [x] **REPO-02**: Maintainers can recover every pre-existing divergent local ref and user-owned untracked artifact after synchronization work; no cleanup relies on force-push, tag movement, or unrecorded deletion.
-- [x] **REPO-03**: Maintainers have one supported, observable command path for listing, inspecting, and monitoring GitHub Actions runs, with failure output that remains attributable to an exact repository SHA.
+### Baseline and Visual System
 
-### History Integration
+- [ ] **BASE-01**: Maintainers can inspect a current route, flow, component, and state inventory with evidence provenance; historical screenshots cannot stand in for current rendering.
+- [ ] **SYS-01**: Operators and customers see consistent visual roles, typography, spacing, layers, and control states across real package consumers, with superseded local overrides removed.
+- [ ] **SYS-02**: Admin and Portal share semantic design roles while retaining audience-appropriate layouts and their existing Admin identity or host customer branding, without a new UI dependency.
 
-- [x] **INTG-01**: Maintainers can produce a reviewable integration candidate containing remote-`main` changes, all intended v1.61 work, and the four post-archive audit-closure commits without rewriting published history or moving the v1.61 tag.
-- [x] **INTG-02**: Every integration conflict or intentionally excluded commit has an evidence-backed disposition, and retained runtime, documentation, release, and CI behavior remains covered by focused regression checks.
-- [x] **INTG-03**: Maintainers can verify the candidate's ancestry, changed-file scope, milestone provenance, and rollback point before any pull request targets `main`.
+### Admin
 
-### Release Proof
+- [ ] **ADM-01**: Operators can distinguish a known subscription lifecycle from missing ancillary observations; missing data does not turn an active subscription into an inactive one.
+- [ ] **ADM-02**: Operators can distinguish draft, open, and overdue invoices and see missing due dates honestly; amounts preserve currency and minor-unit precision, including zero- and three-decimal currencies.
+- [ ] **ADM-03**: Operators can search, enter a nondefault owner scope, navigate customer/subscription/related records, and return without losing the correct owner, object, or filter context.
+- [ ] **ADM-04**: Operators can use only eligible subscription lifecycle actions, with existing confirmation, step-up, expiry, duplicate-protection, and truthful result-evidence behavior preserved.
+- [ ] **ADM-05**: Operators can review invoice payments/finalization and refunds with the exact amount, currency, and consequence, and distinguish accepted, requires-action, failed, and completed results.
+- [ ] **ADM-06**: Operators can review recovery with its time window, owner, and currency intact, while historical failures remain distinct from current billing state.
+- [ ] **ADM-07**: Operators can investigate events and webhook deliveries and replay only eligible deliveries with precise evidence, step-up, and honest partial-selection outcomes.
+- [ ] **ADM-08**: Operators can inspect existing coupon, promotion-code, and Connect states and actions without the UI implying unsupported capabilities.
 
-- [x] **GATE-01**: A fresh clean checkout of the exact integration candidate produces honest, re-verifiable, per-lane proof of the repository's complete local CI-equivalent gates — recorded argv and exit-code evidence at the exact candidate SHA under the closed `proved`/`failed`/`skipped`/`advisory`/`non_run` lexicon, with no aggregate green/passing boolean and no fabricated `proved` state — without depending on ignored caches, credentials, or another worktree.
-- [x] **GATE-02**: Required GitHub Actions checks for the exact candidate SHA produce honest per-lane status with recorded evidence, and provider lanes retain explicit `proved`, `failed`, `skipped`, `advisory`, or `non_run` semantics rather than being relabeled as success; a green Actions conclusion alone is not accepted as provider proof.
-- [x] **GATE-03**: Every open ship window has been fixed or explicitly waived with current evidence, owner, rationale, and release impact; no unexplained open window remains at the release handoff.
+### Checkout
 
-### Bounded Hygiene
+- [ ] **CKO-01**: Customers can complete or recover from the visible checkout form through the actual browser payment hook, with valid, invalid, provider-failure, cancellation, and retry outcomes represented truthfully.
+- [ ] **CKO-02**: Customers receive distinct, capability-aware hosted-provider and mounted-checkout handoffs and safe returns; Fake evidence is not presented as live-provider parity.
+- [ ] **CKO-03**: Both reachable checkout submission paths handle expired or completed sessions, stale promotions, and repeated submissions according to the existing contract, without claiming an unproven charge or rendering missing price as zero.
+- [ ] **CKO-04**: Customers retain their plan choice through sign-in and return; displayed charge terms come from trusted available metadata, and unknown terms or outcomes lead to a safe recovery path instead of a guessed authorization or blind resubmission.
 
-- [x] **HYG-01**: Every untracked file, stale worktree, debug session, and remote maintenance or release branch is classified as retained, committed, archived, superseded, or authorized for removal before cleanup occurs.
-- [x] **HYG-02**: GSD health, planning mirrors, generated artifacts, package metadata, changelogs, and release documentation agree with the integration candidate and contain no release-blocking drift.
-- [x] **HYG-03**: Cleanup changes are limited to objective test, lint, compiler, security, documentation-truth, dead-code, duplication, or comprehension findings in the release path, and stop when another pass yields only subjective nits.
+### Portal
 
-### Release Handoff
+- [ ] **POR-01**: Customers can use all seven existing Portal pages and supported actions with legible, responsive content scoped to the selected billed entity and compatible with host branding.
+- [ ] **POR-02**: Customers can add, default, or remove supported payment methods and change or cancel eligible subscriptions without crossing account or provider capabilities; list and detail entry points disclose the same consequences before confirmation.
+- [ ] **POR-03**: Customers can reach existing invoice records and hosted invoice access for the correct Customer; missing and unauthorized records fail safely.
+- [ ] **POR-04**: Customers receive visible and announced outcomes after LiveView actions and POST/redirects; failed reads are not represented as empty lists and checkout failure does not assert a charge.
+- [ ] **POR-05**: Direct add-card navigation initializes the supported secure Hosted Fields flow, and its supported states remain readable across shell themes and LiveView patches.
+- [ ] **POR-06**: Customers see known trial, incomplete, unpaid, and canceled states accurately, without claims about host access, complete invoice counts, or unsupported retention/document availability.
+- [ ] **POR-07**: Customers return only to validated host destinations; query parameters cannot prove payment, and leaving checkout is not described as subscription cancellation.
+- [ ] **POR-08**: One Portal supports personal, organization/custom, and mixed host billing; personal-only installs need no company model or account picker, and customer billing managers receive no operator/Admin access.
 
-- [x] **REL-04**: Maintainers can review an integration pull request with a concise risk summary, exact verification evidence, preserved rollback instructions, and no unrelated feature scope.
-- [x] **REL-05**: Release Please produces or is ready to produce a version-and-changelog-consistent release pull request after integration, without this milestone merging that PR or publishing packages.
+### Interaction and Accessibility
+
+- [ ] **INT-01**: Keyboard users can complete navigation and action flows with Tab, Shift+Tab, and Escape, including focus containment/restoration through patches, nested overlays, removed triggers, and reconnects.
+- [ ] **INT-02**: People using narrow viewports, zoom, or coarse pointers can access essential content and actions at 320 CSS pixels without page-wide overflow or unusable controls.
+- [ ] **INT-03**: Admin and Portal support light, dark, system, host-forced themes, representative accent and host-to-Portal theme handoff; repeated keyboard actions remain immediate and reduced motion removes nonessential motion.
+- [ ] **INT-04**: Empty, no-match, unavailable, unsupported, denied, pending, error, and long-content states are covered deliberately at the least costly credible verification layer.
+
+### Safety and Scope
+
+- [ ] **SAFE-01**: Mounted owner/customer denials and forged-action protections remain enforced; foreign records and payment-token data are not exposed.
+- [ ] **SAFE-02**: The optional host integration resolves the billed entity separately from the actor and freshly authorizes each action across HTTP, LiveView, and reconnect; invalid selections or unauthorized provisioning fail safely while the personal default remains compatible.
+- [ ] **SAFE-03**: Forms and checkout remain pinned to their displayed billable, Customer, and processor across tabs and account switches; lookups use full owner/provider identity and hosted-session grants do not exceed authorized actions.
+
+### Delivery and Evidence
+
+- [ ] **SHIP-01**: Generated Admin and Portal assets, fonts, mounts, CSP/SRI, copy exports, and host integration documentation match the source actually served by each package.
+- [ ] **SHIP-02**: Every owned route and unique interaction has a coverage disposition supported by current required gates and inspected representative renders.
+- [ ] **SHIP-03**: Component examples and adopter docs match production; task-owned debris is removed; a useful feedback preview remains separate from mutation/reset proof.
+- [ ] **SHIP-04**: Adopter documentation and the canonical example cover personal defaults plus organization/custom and mixed Portal resolution, while preserving actor attribution and requiring no new auth/runtime dependency.
 
 ## Future Requirements
 
-### Publication
-
-- **REL-06**: Maintainers publish the linked `accrue`, `accrue_admin`, and `accrue_portal` packages and verify their public artifacts after explicit release authorization.
-
-### Product Expansion
-
-- Backlogged ecosystem, Admin UI, StoreKit/Crosswake, and Google Play work remains governed by its planted-seed trigger and a separate milestone.
+This milestone adds no future feature commitment. Deferred capabilities require a separate trigger and milestone decision.
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| New billing, entitlement, admin, portal, or mobile capability | This is release integration and maintenance, not product expansion. |
-| Force-pushing shared branches or moving/recreating the published v1.61 tag | Published history and closeout evidence must remain immutable. |
-| Repository-wide formatting, renaming, stylistic rewriting, or speculative abstraction | These create review churn without demonstrated release or maintenance value. |
-| Deleting user-owned untracked files or remote branches without classification and explicit authorization | Cleanup must remain recoverable and auditable. |
-| Weakening required checks, reducing matrix coverage, hiding artifacts, or promoting skipped/advisory provider lanes | v1.61's evidence contract remains binding. |
-| Automatically resolving all 28 archived UAT items | Old debt is reconsidered only when it represents a current release risk. |
-| Merging into `main`, merging a Release Please PR, creating a GitHub release, or publishing Hex packages | These are external release actions requiring an explicit final authorization gate. |
+| New processors, billing actions, checkout capabilities, or provider features | This milestone refines existing journeys and does not expand Accrue's billing/provider support boundary. |
+| Core diagnosis/causality APIs, risk scores, Usage/meters, fee reconciliation, or new Admin rooms | These are deferred SEED-004 M2/M3 or separate product capabilities, not UI refinement requirements. |
+| Universal tenancy, role management, account discovery/picker, consolidated payer arrangements, operator impersonation, or dynamic multi-provider routing | The bounded Portal integration leaves account selection and policy with the host and preserves one fixed Customer/provider target per action. |
+| A Portal resume action, local invoice-detail/PDF route, or new payment/management behavior | These are not existing supported Portal journeys and were not accepted as new capabilities. |
+| Unrelated example-host pages or redesign of provider-hosted pages | Only the named billing entry, handoff, and return seams are in scope; provider markup and theme remain external. |
+| Rebrand, framework migration, forced common Admin/Portal shell, or a new density/settings mode | The work preserves the established Admin identity and customer host branding while refining existing patterns. |
+| Homemade secure card inputs or replacing the official payment SDK for visual consistency | Provider tokenization and secure fields remain within their supported SDK boundary. |
+| Paid visual evaluation, an endless aesthetic ratchet, or wholesale CI rearchitecture | Use existing deterministic tooling and finite named findings; add only evidence-backed checks needed for this milestone. |
 
 ## Traceability
 
-Roadmap phase ownership is populated during roadmap creation. Every v1.62 requirement must map to exactly one phase.
-
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| REPO-01 | Phase 229 | Complete |
-| REPO-02 | Phase 229 | Complete |
-| REPO-03 | Phase 229 | Complete |
-| INTG-01 | Phase 230 | Complete |
-| INTG-02 | Phase 230 | Complete |
-| INTG-03 | Phase 230 | Complete |
-| GATE-01 | Phase 231 | Complete |
-| GATE-02 | Phase 231 | Complete |
-| GATE-03 | Phase 231 | Complete |
-| HYG-01 | Phase 232 | Complete |
-| HYG-02 | Phase 232 | Complete |
-| HYG-03 | Phase 232 | Complete |
-| REL-04 | Phase 232 | Complete |
-| REL-05 | Phase 232 | Complete |
-
-**Coverage:**
-
-- v1.62 requirements: 14 total
-- Mapped to phases: 14
-- Unmapped: 0
+The roadmap assigns every v1.63 requirement to exactly one phase. Coverage is pending roadmap creation.
 
 ---
-*Requirements defined: 2026-09-12*
-*Last updated: 2026-09-12 when v1.62 roadmap was created*
+*Requirements defined: 2026-10-07*
+*Last updated: 2026-10-07 after v1.63 requirements approval*
