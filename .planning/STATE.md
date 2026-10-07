@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 233
 current_phase_name: Shared Direction & Portal Contract
 status: executing
-stopped_at: Completed 233-01-PLAN.md
-last_updated: "2026-10-07T19:39:53.266Z"
+stopped_at: Completed 233-06-PLAN.md
+last_updated: "2026-10-07T20:03:31.354Z"
 last_activity: 2026-10-07
-last_activity_desc: Phase 233 plan 01 completed; five plans remain
-state_head: d84faaf727a146742417c7dae51109a3bf9573c2
+last_activity_desc: Phase 233 plan 06 completed; four plans remain
+state_head: bbbecae62ba76431d1e720db8d6b24dca057a079
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 7
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -27,14 +27,14 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 233 — Shared Direction & Portal Contract
-**Progress:** [░░░░░░░░░░] 0% (2 of 7 plans complete)
+**Progress:** [░░░░░░░░░░] 0% (3 of 7 plans complete)
 
 ## Current Position
 
 Phase: 233 (Shared Direction & Portal Contract) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
-Last activity: 2026-10-07 — Phase 233 execution started
+Last activity: 2026-10-07 — Phase 233 plan 06 completed
 
 ## Performance Metrics
 
@@ -98,6 +98,7 @@ Last activity: 2026-10-07 — Phase 233 execution started
 | Phase 232 P10 | 3h20min | 3 tasks | 7 files |
 | Phase 233 P04 | 25min | 3 tasks | 7 files |
 | Phase 233 P01 | 26min | 2 tasks | 11 files |
+| Phase 233 P06 | 19min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -184,6 +185,7 @@ Last activity: 2026-10-07 — Phase 233 execution started
 - [Phase 233]: Optional host adapter resolves an actor separately from the billable entity and authorizes read before custom Customer access or provisioning.
 - [Phase 233]: Custom Customer identity uses owner type, lossless owner ID, and configured processor; personal resolution accepts one existing processor row and blocks ambiguity.
 - [Phase 233]: Authenticated context failures go to an auth-only blocked route; only missing authentication uses the local login path.
+- [Phase 233]: 233-06: Keep shared semantic meaning in package-owned Admin and Portal token systems; tint host accents for readable text/focus and use a deep primary control fill.
 
 ### Pending Todos
 
@@ -252,8 +254,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-07T19:39:53.247Z
-Stopped at: Completed 233-01-PLAN.md
+Last session: 2026-10-07T20:03:31.330Z
+Stopped at: Completed 233-06-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 

@@ -61,8 +61,8 @@ Plans:
 - [x] 233-04-PLAN.md — Inventory current Admin/Portal source and served renders; define semantic direction.
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 233-01-PLAN.md — Trace optional billable resolution through a real Portal page and blocked recovery.
-- [ ] 233-06-PLAN.md — Apply and verify semantic roles in bounded package-owned consumers.
+- [x] 233-01-PLAN.md — Trace optional billable resolution through a real Portal page and blocked recovery.
+- [x] 233-06-PLAN.md — Apply and verify semantic roles in bounded package-owned consumers.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 233-02-PLAN.md — Connect rendered payment forms to pinned POST actions and gate add-card client tokens.
