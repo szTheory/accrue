@@ -59,6 +59,14 @@ test("current served Admin and Portal controls retain semantic contrast, focus, 
   sandboxId
 }, testInfo) => {
   const fixture = readFixture();
+  const adminTheme = fs.readFileSync(path.join(repoRoot, "accrue_admin/assets/css/theme.css"), "utf8");
+  const publicBrand = fs.readFileSync(path.join(repoRoot, "accrue/priv/static/brand.css"), "utf8");
+  const portalCss = fs.readFileSync(path.join(repoRoot, "accrue_portal/priv/static/accrue_portal.css"), "utf8");
+  expect(adminTheme).toContain("--ax-status-success-text");
+  expect(adminTheme).toContain("--ax-focus-ring");
+  expect(publicBrand).toContain("--accrue-brand-accent");
+  expect(publicBrand).toContain("--accrue-brand-accent-text");
+  expect(portalCss).toContain("var(--accrue-brand-accent-text)");
 
   await login(page, fixture, fixture.admin_email, sandboxId);
   await workspaceBillingLink(page).click();
