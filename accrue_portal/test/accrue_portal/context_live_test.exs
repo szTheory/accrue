@@ -116,7 +116,7 @@ defmodule AccruePortal.ContextLiveTest do
         "active_billable_id" => "org-a"
       })
 
-    assert {:ok, _view, home} = live(conn, "/org-billing/")
+    assert {:ok, _view, home} = live_context(conn, "/org-billing/", actor, "org-a")
     assert home =~ "Org org-a"
     assert home =~ subscription.processor_id
     refute home =~ personal_subscription.processor_id
@@ -149,7 +149,9 @@ defmodule AccruePortal.ContextLiveTest do
     Adapter.grant("org-a", [:subscription_cancel])
     conn = signed_context(conn, actor, "org-a")
 
-    assert {:ok, view, html} = live(conn, "/org-billing/subscriptions/#{subscription.id}")
+    assert {:ok, view, html} =
+             live_context(conn, "/org-billing/subscriptions/#{subscription.id}", actor, "org-a")
+
     assert html =~ "Org org-a"
     view |> element("button[phx-click='toggle_cancel_confirmation']") |> render_click()
     assert has_element?(view, "button", "Keep subscription")
@@ -173,7 +175,10 @@ defmodule AccruePortal.ContextLiveTest do
     foreign = subscription_bundle_fixture!()
     Adapter.grant("org-a", [:subscription_cancel])
     conn = signed_context(conn, actor, "org-a")
-    assert {:ok, view, _html} = live(conn, "/org-billing/subscriptions/#{subscription.id}")
+
+    assert {:ok, view, _html} =
+             live_context(conn, "/org-billing/subscriptions/#{subscription.id}", actor, "org-a")
+
     before = Accrue.Processor.Fake.call_count(:update_subscription)
 
     render_click(view, "cancel", %{"id" => foreign.subscription.id})
@@ -196,7 +201,9 @@ defmodule AccruePortal.ContextLiveTest do
     Adapter.grant("org-a", [:subscription_cancel])
     conn = signed_context(conn, actor, "org-a")
 
-    assert {:ok, view, _html} = live(conn, "/org-billing/subscriptions/#{subscription.id}")
+    assert {:ok, view, _html} =
+             live_context(conn, "/org-billing/subscriptions/#{subscription.id}", actor, "org-a")
+
     view |> element("button[phx-click='toggle_cancel_confirmation']") |> render_click()
     render_click(view, "cancel", %{})
 
@@ -240,17 +247,17 @@ defmodule AccruePortal.ContextLiveTest do
     Adapter.grant("org-a", [])
     Adapter.grant("org-b", [])
     conn = signed_context(conn, actor, "org-a")
-    pin = context_pin!(actor, "org-a")
 
-    assert {:ok, view, html} = live(conn, "/org-billing/invoices")
-    assert_patch(view, "/org-billing/invoices?context_pin=" <> pin)
+    assert {:error, {:live_redirect, %{to: pinned_path}}} = live(conn, "/org-billing/invoices")
+    assert pinned_path =~ "/org-billing/invoices?context_pin="
+    assert {:ok, _view, html} = live(conn, pinned_path)
     assert html =~ invoice.number
     refute html =~ foreign_invoice.number
 
     switched_conn = signed_context(build_conn(), actor, "org-b")
 
     assert {:ok, _view, old_tab_html} =
-             live(switched_conn, "/org-billing/invoices?context_pin=" <> pin)
+             live(switched_conn, pinned_path)
 
     assert old_tab_html =~ invoice.number
     refute old_tab_html =~ foreign_invoice.number
@@ -277,6 +284,10 @@ defmodule AccruePortal.ContextLiveTest do
 
     assert {:ok, pin} = Context.mint_pin(context, Endpoint)
     pin
+  end
+
+  defp live_context(conn, path, actor, organization_id) do
+    live(conn, path <> "?context_pin=" <> context_pin!(actor, organization_id))
   end
 
   defp signed_context(conn, actor, organization_id) do

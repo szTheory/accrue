@@ -218,7 +218,7 @@ defmodule AccruePortal.SubscriptionLiveTest do
       assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
       href = recovery_cta_href(html)
-      assert String.ends_with?(href, "/payment-methods/new")
+      assert URI.parse(href).path == "/billing/payment-methods/new"
     end
 
     test "deep-links a past-due non-Braintree banner CTA to the in-portal payment-methods list",
@@ -232,8 +232,7 @@ defmodule AccruePortal.SubscriptionLiveTest do
       assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
       href = recovery_cta_href(html)
-      assert String.ends_with?(href, "/payment-methods")
-      refute String.ends_with?(href, "/payment-methods/new")
+      assert URI.parse(href).path == "/billing/payment-methods"
     end
   end
 

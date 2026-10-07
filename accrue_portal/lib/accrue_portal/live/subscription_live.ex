@@ -47,7 +47,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
   def handle_event(
         "preview_plan_change",
         %{"plan_change" => %{"price_id" => price_id}},
-        %{assigns: %{subscription: %Subscription{} = subscription}} = socket
+        %{assigns: %{subscription: %Subscription{}}} = socket
       ) do
     case authorize_current(socket, :subscription_preview) do
       {:ok, %Subscription{} = authorized} ->
@@ -55,36 +55,6 @@ defmodule AccruePortal.Live.SubscriptionLive do
 
       {:error, _reason} ->
         {:noreply, denied(socket)}
-    end
-  end
-
-  defp preview_plan_change_event(socket, subscription, price_id) do
-    case preview_plan_change(subscription, price_id) do
-      {:ok, %UpcomingInvoice{} = preview, normalized_price_id} ->
-        {:noreply,
-         socket
-         |> assign(:plan_change_price_id, normalized_price_id)
-         |> assign(:plan_change_preview, preview)}
-
-      {:error, :preview_unsupported} ->
-        {:noreply,
-         socket
-         |> assign(:plan_change_price_id, nil)
-         |> assign(:plan_change_preview, nil)
-         |> put_flash(
-           :error,
-           Copy.subscription_plan_change_preview_unavailable_body(subscription)
-         )}
-
-      {:error, :missing_reference} ->
-        {:noreply, put_flash(socket, :error, Copy.subscription_plan_change_missing_reference())}
-
-      {:error, _reason} ->
-        {:noreply,
-         socket
-         |> assign(:plan_change_price_id, nil)
-         |> assign(:plan_change_preview, nil)
-         |> put_flash(:error, Copy.subscription_plan_change_preview_error())}
     end
   end
 
@@ -172,6 +142,36 @@ defmodule AccruePortal.Live.SubscriptionLive do
   end
 
   def handle_event("cancel", _params, socket), do: {:noreply, socket}
+
+  defp preview_plan_change_event(socket, subscription, price_id) do
+    case preview_plan_change(subscription, price_id) do
+      {:ok, %UpcomingInvoice{} = preview, normalized_price_id} ->
+        {:noreply,
+         socket
+         |> assign(:plan_change_price_id, normalized_price_id)
+         |> assign(:plan_change_preview, preview)}
+
+      {:error, :preview_unsupported} ->
+        {:noreply,
+         socket
+         |> assign(:plan_change_price_id, nil)
+         |> assign(:plan_change_preview, nil)
+         |> put_flash(
+           :error,
+           Copy.subscription_plan_change_preview_unavailable_body(subscription)
+         )}
+
+      {:error, :missing_reference} ->
+        {:noreply, put_flash(socket, :error, Copy.subscription_plan_change_missing_reference())}
+
+      {:error, _reason} ->
+        {:noreply,
+         socket
+         |> assign(:plan_change_price_id, nil)
+         |> assign(:plan_change_preview, nil)
+         |> put_flash(:error, Copy.subscription_plan_change_preview_error())}
+    end
+  end
 
   @impl true
   def render(%{subscription: nil} = assigns) do

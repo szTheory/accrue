@@ -36,6 +36,19 @@ defmodule AccruePortal.Authorize do
     end
   end
 
+  def context(socket, action) do
+    with {:ok, context} <- fresh_context(socket),
+         :ok <-
+           Context.authorize_action(
+             context,
+             socket.assigns[:current_context_adapter],
+             action,
+             context.billable
+           ) do
+      {:ok, context}
+    end
+  end
+
   defp fresh_context(socket) do
     session = socket.assigns.accrue_portal_session
 

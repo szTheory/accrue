@@ -95,7 +95,7 @@ defmodule AccruePortal.SubscriptionsLiveTest do
     assert html =~ subscription.processor_id
     assert html =~ "Immediate cancellation can end access now."
     assert html =~ "Plan changes for this subscription are handled by your account team."
-    assert html =~ ~s(href="/billing/subscriptions/#{subscription.id}")
+    assert html =~ ~s(href="/billing/subscriptions/#{subscription.id}?context_pin=)
     refute html =~ ~s(phx-value-id="#{subscription.id}")
     refute html =~ "Cancel now"
   end

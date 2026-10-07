@@ -51,6 +51,23 @@ defmodule AccruePortal.ContextContractTest do
       do: {:error, :unavailable}
 
     def resolve(%Actor{}, %{source: :session, values: %{"active_billable_id" => "org-" <> _ = id}}) do
+      resolve_organization(id)
+    end
+
+    def resolve(%Actor{}, %{
+          source: :pin,
+          values: %{"owner_type" => "Organization", "owner_id" => "org-" <> _ = id}
+        }) do
+      resolve_organization(id)
+    end
+
+    def resolve(%Actor{}, %{source: :session, values: %{"active_billable_id" => other}})
+        when is_binary(other),
+        do: {:error, :unavailable}
+
+    def resolve(%Actor{}, _), do: {:error, :unavailable}
+
+    defp resolve_organization(id) do
       {:ok,
        %{
          billable: %Organization{id: id},
@@ -59,12 +76,6 @@ defmodule AccruePortal.ContextContractTest do
          switch_path: "/accounts"
        }}
     end
-
-    def resolve(%Actor{}, %{source: :session, values: %{"active_billable_id" => other}})
-        when is_binary(other),
-        do: {:error, :unavailable}
-
-    def resolve(%Actor{}, _), do: {:error, :unavailable}
 
     def authorize(%Actor{}, %{billable: %Organization{}}, :read, _target), do: :ok
     def authorize(_, _, _, _), do: {:error, :forbidden}
@@ -144,7 +155,7 @@ defmodule AccruePortal.ContextContractTest do
         "active_billable_id" => id
       })
 
-    assert {:ok, _view, html} = Phoenix.LiveViewTest.live(conn, "/custom-billing")
+    assert {:ok, _view, html} = live_pinned_context(conn, "/custom-billing")
     assert html =~ subscription.processor_id
     assert html =~ "Northwind Organization"
     assert html =~ "Workspace billing"
@@ -175,7 +186,7 @@ defmodule AccruePortal.ContextContractTest do
         "active_billable_id" => id
       })
 
-    assert {:ok, _view, html} = Phoenix.LiveViewTest.live(conn, "/custom-billing")
+    assert {:ok, _view, html} = live_pinned_context(conn, "/custom-billing")
     refute html =~ wrong_processor_subscription.processor_id
 
     assert %Customer{processor: processor} =
@@ -241,5 +252,15 @@ defmodule AccruePortal.ContextContractTest do
 
     assert TestRepo.aggregate(Customer, :count, :id) == customer_count_before
     assert Accrue.Processor.Fake.call_count(:create_customer) == provider_calls_before
+  end
+
+  defp live_pinned_context(conn, path) do
+    case Phoenix.LiveViewTest.live(conn, path) do
+      {:error, {:live_redirect, %{to: pinned_path}}} ->
+        Phoenix.LiveViewTest.live(conn, pinned_path)
+
+      result ->
+        result
+    end
   end
 end

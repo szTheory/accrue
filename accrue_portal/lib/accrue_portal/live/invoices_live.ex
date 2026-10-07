@@ -2,16 +2,27 @@ defmodule AccruePortal.Live.InvoicesLive do
   use Phoenix.LiveView
 
   alias AccruePortal.BillingReadModel
+  alias AccruePortal.Authorize
   alias AccruePortal.Copy
   alias AccruePortal.Path
 
   @impl true
   def mount(_params, %{"accrue_portal" => portal}, socket) do
-    {:ok,
-     socket
-     |> assign(:page_title, Copy.invoices_page_title())
-     |> assign(:portal, portal)
-     |> assign(:invoices, BillingReadModel.invoices(socket.assigns.current_customer))}
+    case Authorize.context(socket, :read) do
+      {:ok, context} ->
+        {:ok,
+         socket
+         |> assign(:page_title, Copy.invoices_page_title())
+         |> assign(:portal, portal)
+         |> assign(:invoices, BillingReadModel.invoices(context.customer))}
+
+      {:error, _reason} ->
+        {:ok,
+         Phoenix.LiveView.redirect(
+           socket,
+           to: String.trim_trailing(portal["mount_path"], "/") <> "/blocked"
+         )}
+    end
   end
 
   @impl true

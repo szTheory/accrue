@@ -6,6 +6,7 @@ defmodule Accrue.Portal.AuthHook do
 
   alias Accrue.Portal.CustomerSession
   alias Accrue.Portal.Context
+  alias AccruePortal.Live.{HomeLive, InvoicesLive, SubscriptionLive, SubscriptionsLive}
 
   @spec on_mount(atom(), map(), map(), Phoenix.LiveView.Socket.t()) ::
           {:cont, Phoenix.LiveView.Socket.t()} | {:halt, Phoenix.LiveView.Socket.t()}
@@ -48,18 +49,20 @@ defmodule Accrue.Portal.AuthHook do
               end
           end
 
-        {:cont,
-         socket
-         |> assign_portal_shell(session, context.actor)
-         |> assign(:current_actor, context.actor)
-         |> assign(:current_billable, context.billable)
-         |> assign(:current_context, context)
-         |> assign(:current_context_pin, pin)
-         |> assign(
-           :current_context_adapter,
-           get_in(session, ["accrue_portal", "context_adapter"])
-         )
-         |> assign(:current_customer, context.customer)}
+        socket =
+          socket
+          |> assign_portal_shell(session, context.actor)
+          |> assign(:current_actor, context.actor)
+          |> assign(:current_billable, context.billable)
+          |> assign(:current_context, context)
+          |> assign(:current_context_pin, pin)
+          |> assign(
+            :current_context_adapter,
+            get_in(session, ["accrue_portal", "context_adapter"])
+          )
+          |> assign(:current_customer, context.customer)
+
+        {:cont, pin_initial_url(socket, pin)}
 
       {:error, :unauthenticated} ->
         {:halt, redirect(socket, to: login_path(session))}
@@ -67,6 +70,53 @@ defmodule Accrue.Portal.AuthHook do
       {:error, _reason} ->
         {:halt, redirect(socket, to: blocked_path(session))}
     end
+  end
+
+  defp pin_initial_url(socket, pin) when is_binary(pin) and pin != "" do
+    if not is_nil(socket.assigns[:current_context_adapter]) and
+         is_atom(socket.assigns[:current_context_adapter]) and
+         socket.view in [HomeLive, SubscriptionsLive, SubscriptionLive, InvoicesLive] do
+      Phoenix.LiveView.attach_hook(
+        socket,
+        :accrue_context_pin_url,
+        :handle_params,
+        fn params, uri, socket ->
+          current_query = URI.parse(uri).query || ""
+
+          if is_binary(Map.get(params, "context_pin")) or
+               Map.has_key?(URI.decode_query(current_query), "context_pin") do
+            {:cont, socket}
+          else
+            case pinned_path(uri, pin) do
+              {:ok, path} ->
+                {:halt, Phoenix.LiveView.push_patch(socket, to: path, replace: true)}
+
+              :error ->
+                {:cont, socket}
+            end
+          end
+        end
+      )
+    else
+      socket
+    end
+  end
+
+  defp pin_initial_url(socket, _pin), do: socket
+
+  defp pinned_path(uri, pin) do
+    parsed = URI.parse(uri)
+    query = if is_binary(parsed.query), do: URI.decode_query(parsed.query), else: %{}
+    path = parsed.path
+
+    if Context.valid_local_path?(path) do
+      query = Map.put(query, "context_pin", pin)
+      {:ok, path <> "?" <> URI.encode_query(query)}
+    else
+      :error
+    end
+  rescue
+    _ -> :error
   end
 
   defp assign_portal_shell(socket, session, actor) do
