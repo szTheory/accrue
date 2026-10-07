@@ -36,9 +36,9 @@
    */
   --accrue-brand-accent:          var(--accrue-moss);   /* primary CTA, active accent */
   --accrue-brand-accent-strong:                         /* hover / active state */
-    color-mix(in srgb, var(--accrue-brand-accent) 82%, black);
+    color-mix(in srgb, var(--accrue-brand-accent) 18%, black);
   --accrue-brand-accent-text:                           /* accent used as text (legible per-theme) */
-    color-mix(in srgb, var(--accrue-brand-accent) 20%, var(--accrue-ink));
+    color-mix(in srgb, var(--accrue-brand-accent) 10%, var(--accrue-ink));
   --accrue-brand-accent-contrast: #FFFFFF;              /* text on the deep accent control */
   --accrue-brand-secondary:       var(--accrue-slate);  /* secondary emphasis, links */
   --accrue-brand-font:
@@ -78,9 +78,9 @@
   --accrue-border:         #2A333D;
   --accrue-shadow:         0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
   --accrue-brand-accent-text:
-    color-mix(in srgb, var(--accrue-brand-accent) 20%, var(--accrue-ink));
+    color-mix(in srgb, var(--accrue-brand-accent) 10%, var(--accrue-ink));
   --accrue-brand-accent-strong:
-    color-mix(in srgb, var(--accrue-brand-accent) 82%, black);
+    color-mix(in srgb, var(--accrue-brand-accent) 18%, black);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -93,8 +93,8 @@
     --accrue-border:         #2A333D;
     --accrue-shadow:         0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
     --accrue-brand-accent-text:
-      color-mix(in srgb, var(--accrue-brand-accent) 20%, var(--accrue-ink));
+      color-mix(in srgb, var(--accrue-brand-accent) 10%, var(--accrue-ink));
     --accrue-brand-accent-strong:
-      color-mix(in srgb, var(--accrue-brand-accent) 82%, black);
+      color-mix(in srgb, var(--accrue-brand-accent) 18%, black);
   }
 }
