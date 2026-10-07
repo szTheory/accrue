@@ -5,11 +5,11 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 233
 current_phase_name: Shared Direction & Portal Contract
 status: executing
-stopped_at: Completed 233-06-PLAN.md
-last_updated: "2026-10-07T20:03:31.354Z"
+stopped_at: Phase 233 Wave 2 complete; UI-SPEC approved; continuing with plan 233-02
+last_updated: "2026-10-07T20:15:00.248Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 233 plan 06 completed; four plans remain
-state_head: bbbecae62ba76431d1e720db8d6b24dca057a079
+state_head: 548f7598830682f36b14ff9ea76fbaf19fe67590
 progress:
   total_phases: 7
   completed_phases: 0
@@ -254,8 +254,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-07T20:03:31.330Z
-Stopped at: Completed 233-06-PLAN.md
+Last session: 2026-10-07T20:15:00.226Z
+Stopped at: Phase 233 Wave 2 complete; UI-SPEC approved; continuing with plan 233-02
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -281,7 +281,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: None
+Resume file: .planning/phases/233-shared-direction-portal-contract/233-02-PLAN.md
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 
