@@ -35,7 +35,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Latest fully shipped milestone: v1.62 — Release Integration & Repository Hygiene, shipped and archived 2026-09-18.** It completed the bounded repository-truth, integration-candidate, exact-SHA evidence, and hygiene work recorded in its milestone archive. Its release-handoff scope is closed; historical lane outcomes remain in the v1.62 evidence and are not active work for this milestone.
 
-**Current focus:** formally planning v1.63, Admin and Portal UI refinement, following the accepted October 2026 maintainer request and the source-backed briefs in `.planning/notes/2026-10-07-accrue-ui-refinement-scope.md` and `.planning/notes/2026-10-07-portal-billable-context-contract.md`.
+**Current focus:** Phase 234, Admin Customers & Subscriptions, within v1.63 Admin and Portal UI refinement. Phase 233 completed the current served baseline, shared semantic roles, and bounded host-owned Portal contract on 2026-10-07, with all seven requirements verified and 23 automated acceptance items.
 
 ## Current Milestone: v1.63 Admin and Portal UI refinement
 
@@ -686,11 +686,17 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] Establish a current-source inventory and shared visual direction across real Admin and Portal consumers, with evidence provenance and no forced common layout or new dependency.
 - [ ] Make existing Admin customer, subscription, invoice, payment, recovery, event, webhook, coupon, promotion-code, and Connect journeys readable, scoped, and truthful about observed state, amount, currency, dates, eligibility, and action results.
 - [ ] Make existing customer checkout and Portal self-service responsive and capability-aware, with visible outcomes, secure Hosted Fields lifecycle, safe host return, and no unsupported claims about access, payments, retention, or provider behavior.
-- [ ] Add the bounded optional Portal billable-resolution and per-action authorization contract while preserving the no-adapter personal default and pinning every form/action to the displayed owner, Customer, and processor.
 - [ ] Close route and interaction coverage with deterministic state/scope/browser evidence, inspected current renders, accurate assets/copy/docs, and a retained preview isolated from mutation/reset proof.
+
+### Validated v1.63 (Phase 233 complete 2026-10-07)
+
+- ✓ Establish a current-source inventory and shared visual direction across real Admin and Portal consumers, preserving package identity and host branding. — Phase 233 (BASE-01, SYS-01, SYS-02)
+- ✓ Add optional host billable resolution and fresh per-action authorization; preserve personal defaults, pin forms to exact Customer/provider identity, and keep human actors separate from billed entities. — Phase 233 (POR-08, SAFE-02, SAFE-03)
+- ✓ Demonstrate personal, custom, and mixed host adoption in the canonical example and executable adopter documentation. — Phase 233 (SHIP-04)
+
+Verification passed with zero unverified behavior. The Portal and host suites passed 72 and 219 tests; browser lanes passed 27 default cases and 4 Braintree cases, with 3 existing intentional default-suite skips. The inherited UI refinements remain in the owning route phases, as recorded in `233-UI-DISPOSITION.md`.
 
 ### Validated v1.62 (Phase 229 complete 2026-09-15)
 
@@ -909,8 +915,11 @@ Admin global search — 4/4 satisfied.
 | Treat v1.62 as release integration and repository hygiene, not feature development or a general refactor. | ✓ Good — Phases 229–232 completed and v1.62 was archived; its handoff is closed and is not carried as active v1.63 work. |
 | Preserve published history and the v1.61 tag; reconcile through a reviewable integration candidate rather than force-push or tag movement. | ✓ Good — the v1.62 archive records the completed reviewable integration; history mutation is outside v1.63 scope. |
 | Reopen bounded work on existing Admin and Portal journeys after v1.62. | — Pending — explicit strategy change for the adopter-facing surfaces, with source-backed UI truth, scope, wiring, and feedback findings; no new billing capability is authorized. |
-| Use one generic Portal for personal and host-selected organization/custom billables, with optional resolution and fresh action authorization. | — Pending — preserve personal defaults and keep host selection/policy, actor, billable, Customer, processor, and target separate. |
-| Share semantic visual roles while preserving Admin identity and customer host branding. | — Pending — use local understandable patterns and official payment SDK boundaries; no forced shared template or framework migration. |
+| Use one generic Portal for personal and host-selected organization/custom billables, with optional resolution and fresh action authorization. | ✓ Good — Phase 233 proves personal defaults, mixed selection, stale-pin/revocation denial, actual human attribution, and separate Admin authority. |
+| Share semantic visual roles while preserving Admin identity and customer host branding. | ✓ Good — Phase 233 defines shared roles and verifies bounded consumers, current served asset bytes, focus, contrast, status, and reflow. |
+| Treat signed context pins as identity locators, never durable authorization grants. | ✓ Good — Phase 233 reloads host policy and exact targets on HTTP, LiveView actions, and reconnect; invalid selection cannot provision or fall back. |
+| Preserve personal Customer identity for reads while requiring the configured processor for checkout tokens and mutations. | ✓ Good — Phase 233 verifies matching-provider success and mismatch zero-token/zero-write across both completion transports; no dynamic processor routing. |
+| Run Braintree checkout browser proof in a separate test-configured process from the normal Fake browser lane. | ✓ Good — Phase 233 aligns the LocalSession provider contract with deterministic SDK proof, with both lanes wired into CI and local full verification. |
 
 ## Evolution
 
@@ -930,4 +939,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-07 when starting v1.63 Admin and Portal UI refinement.*
+*Last updated: 2026-10-07 after Phase 233 completion; Phase 234 is next.*

@@ -6,7 +6,7 @@ current_phase: 234
 current_phase_name: Admin Customers & Subscriptions
 status: planning
 stopped_at: Phase 233 complete, ready to plan Phase 234
-last_updated: "2026-10-07T23:14:22.721Z"
+last_updated: "2026-10-07T23:16:05Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 233 complete, transitioned to Phase 234
 state_head: c7bd2dbfa004eaba7137183f73558ffa395e3c25
@@ -26,8 +26,9 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 233 — Shared Direction & Portal Contract
-**Progress:** [█░░░░░░░░░] 14% (7 of 7 plans complete)
+**Current focus:** Phase 234 — Admin Customers & Subscriptions
+**Progress:** [█░░░░░░░░░] 14% (1 of 7 milestone phases complete)
+**Planned work completed:** [████████████████████] 7/7 plans (100%); remaining phases await planning.
 
 ## Current Position
 
@@ -186,25 +187,11 @@ Last activity: 2026-10-07 — Phase 233 complete, transitioned to Phase 234
 - [Phase 232]: Maintainer decision at 232-08's checkpoint: rewrite .tool-versions to match integration/v1.62-candidate byte-for-byte (nodejs 22.14.0 / elixir 1.19.5-otp-28 / erlang 28.5), joined into the cleanup findings range as finding 8. — Local .tool-versions diverged from the candidate branch in two dimensions (erlang patch version AND a missing nodejs pin entirely); every scripts/ci/*.mjs gate is a Node script and ci.yml pins Node 22, while the local shell runs Node 24 -- local and CI gate runs were on different Node majors.
 - [Phase 232-bounded-hygiene-release-handoff]: Re-cut integration/v1.62-candidate at a new SHA (c1397fe9, merge 3f42158d), proved lossless by a newly generalized --require-union-hunks check (447 inspected, 7 co-touched, 0 drifted). Maintainer checkpoint decision: since updating the published branch required a non-fast-forward (force-push, prohibited), pushed the re-cut to a NEW branch integration/v1.62-candidate-recut instead, leaving integration/v1.62-candidate untouched. — Option A (move the published branch) required a force-push the plan itself prohibits -- an internal plan contradiction for a fresh-supersession re-cut where the old tip is not an ancestor of the new tip. Option B resolves it without relaxing any prohibition; 232-10/232-11 must target integration/v1.62-candidate-recut, not integration/v1.62-candidate.
 - [Phase 232]: Both real regressions found (docs-contracts-shift-left human_judgment violations, release-gate stale test fixture) fixed and verified on the milestone line but NOT pushed to the frozen candidate-recut ref -- recorded waived at the frozen SHA with the fix commit cited as evidence
-- [Phase 233]: Share semantic meaning and observable checks while preserving Admin --ax-* and public/core Portal --accrue-* ownership, separate shells, and host customer branding.
-- [Phase 233]: Use deterministic canonical-host pages and verify served CSS/JS bytes against current package sources and URL digests.
-- [Phase 233]: Optional host adapter resolves an actor separately from the billable entity and authorizes read before custom Customer access or provisioning.
-- [Phase 233]: Custom Customer identity uses owner type, lossless owner ID, and configured processor; personal resolution accepts one existing processor row and blocks ambiguity.
-- [Phase 233]: Authenticated context failures go to an auth-only blocked route; only missing authentication uses the local login path.
-- [Phase 233]: 233-06: Keep shared semantic meaning in package-owned Admin and Portal token systems; tint host accents for readable text/focus and use a deep primary control fill.
-- [Phase 233]: Payment-method flow pins are signed locators only; each operation re-resolves current host policy and the exact Customer.
-- [Phase 233]: Preserve personal single-Customer cross-processor compatibility while requiring configured processor identity for custom billables.
-- [Phase 233]: Run payment-method writes with the actual signed-in human actor attribution.
-- [Phase 233]: Each protected subscription event re-resolves the signed pin, loads the target from the currently authorized Customer, then checks the named host action.
-- [Phase 233]: Custom adapter contexts receive an initial URL pin before continuing; personal-only behavior remains on its existing path.
-- [Phase 233]: Human actor attribution stays separate from the billed entity and is scoped around subscription mutations.
-- [Phase 233]: Checkout token issuance and completion require fresh :checkout_complete authority for the same rendered-pin LocalSession; promo validation remains separate.
-- [Phase 233]: Use rendered checkout pins for both completion transports, with Hosted Fields POSTing a nonce-only form and LiveView events revalidating independently.
-- [Phase 233]: Portal context pins locate an exact billable and Customer; current host policy authorizes every action.
-- [Phase 233]: Personal-only hosts keep the no-adapter flow; mixed hosts explicitly select personal or organization billing.
-- [Phase 233]: Organization billing managers remain separate from Admin operators.
-- [Phase 233]: Blocked Portal LiveViews include host-supplied hooks before the user-only guard and omit the customer resolver.
-- [Phase 233]: Personal no-adapter checkout preserves its sole existing Customer processor; custom adapter checkout requires the configured processor.
+- [Phase 233]: Shared semantic roles preserve package token ownership, separate Admin/Portal shells, and host branding; current served assets and bounded visual behavior have executable proof.
+- [Phase 233]: Optional host adapters separate actor from billable and freshly authorize exact Customer/provider/target identity on HTTP, LiveView events, and reconnect; signed pins locate context and never grant authority.
+- [Phase 233]: Personal reads preserve the sole existing Customer; both checkout transports require the configured processor before token issuance or mutation. Dynamic processor routing remains out of scope.
+- [Phase 233]: Invalid selection and revoked membership deny without provisioning or fallback; blocked LiveViews preserve host hooks before user-only authentication, and mutations retain the human actor without Admin privilege bleed.
+- [Phase 233]: Fake and Braintree browser proof run in separate processes with test-only configuration; both lanes run in CI and local full verification. Inherited UI refinements are deferred to owning route phases.
 
 ### Pending Todos
 
@@ -251,6 +238,8 @@ None yet.
 | requirement | HOST-01..03 | Deferred at v1.60 override closeout |
 | requirement | READY-01..02 | Deferred at v1.60 override closeout |
 | seed | SEED-008-mailglass-downstream-major-cap | dormant — acknowledged and deferred at v1.62 override closeout (2026-09-18) |
+| UI refinement | Phase 233 inherited Portal spacing/type/theme targets and narrow Admin density | Follow up in Phases 235/236 and 234/237; see 233-UI-DISPOSITION.md |
+| archived metadata | Extra executable-UAT probe starting at Phase 218 lacks a deterministic completion date | Outside configured CI scope; current CI self-test, opted-in scan, and all-since-229 checks pass |
 
 ## Post-v1.48 Pause Rule
 
@@ -273,7 +262,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-07T22:36:18.326Z
+Last session: 2026-10-07T23:16:05Z
 Stopped at: Phase 233 complete, ready to plan Phase 234
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -403,4 +392,5 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Root: finish Phase 233 review, verification, and UAT before marking the phase complete.
+- Phase 233 is complete: 7/7 plans, 7/7 requirements, 23/23 automated acceptance items, zero unverified behavior, zero open code review findings, and 16/16 security threats closed.
+- Next: discuss Phase 234 — Admin Customers & Subscriptions (`$gsd-discuss-phase 234`). Automatic phase advance is disabled.
