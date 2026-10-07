@@ -69,7 +69,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [x] 233-03-PLAN.md — Apply the contract to Home, subscription, and invoice routes and events.
-- [ ] 233-07-PLAN.md — Connect checkout form pins to both completion transports and gate client tokens.
+- [x] 233-07-PLAN.md — Connect checkout form pins to both completion transports and gate client tokens.
 
 **Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 233-05-PLAN.md — Demonstrate personal, custom, and mixed host adoption with aligned docs.
@@ -167,7 +167,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 233. Shared Direction & Portal Contract | 5/7 | In Progress | - |
+| 233. Shared Direction & Portal Contract | 6/7 | In Progress | - |
 | 234. Admin Customers & Subscriptions | 0/TBD | Not started | - |
 | 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
 | 236. Portal Billing Self-Service | 0/TBD | Not started | - |
