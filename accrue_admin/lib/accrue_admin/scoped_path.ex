@@ -62,6 +62,47 @@ defmodule AccrueAdmin.ScopedPath do
   def return_path(mount_path, _raw_return_path, owner_scope),
     do: build(mount_path, "/subscriptions", owner_scope)
 
+  @doc false
+  def return_path(mount_path, raw_return_path, owner_scope, expected_customer_id)
+      when is_binary(mount_path) and is_binary(expected_customer_id) do
+    case validate_return_path(mount_path, raw_return_path) do
+      {:ok, "/customers/" <> customer_id = suffix, params}
+      when customer_id == expected_customer_id ->
+        build(mount_path, suffix, owner_scope, params)
+
+      {:ok, "/customers/" <> _customer_id, _params} ->
+        build(mount_path, "/subscriptions", owner_scope)
+
+      {:ok, suffix, params} ->
+        build(mount_path, suffix, owner_scope, params)
+
+      :error ->
+        build(mount_path, "/subscriptions", owner_scope)
+    end
+  end
+
+  def return_path(mount_path, raw_return_path, owner_scope, _expected_customer_id),
+    do: return_path(mount_path, raw_return_path, owner_scope)
+
+  @doc false
+  def return_path(mount_path, raw_return_path, owner_scope, expected_customer_id, fallback_suffix)
+      when is_binary(fallback_suffix) do
+    case validate_return_path(mount_path, raw_return_path) do
+      {:ok, "/customers/" <> customer_id = suffix, params}
+      when customer_id == expected_customer_id ->
+        build(mount_path, suffix, owner_scope, params)
+
+      {:ok, "/customers/" <> _customer_id, _params} ->
+        build(mount_path, fallback_suffix, owner_scope)
+
+      {:ok, suffix, params} ->
+        build(mount_path, suffix, owner_scope, params)
+
+      :error ->
+        build(mount_path, fallback_suffix, owner_scope)
+    end
+  end
+
   defp validate_return_path(_mount_path, raw) when not is_binary(raw), do: :error
 
   defp validate_return_path(mount_path, raw) when byte_size(raw) <= 4_096 do

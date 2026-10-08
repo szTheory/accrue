@@ -84,7 +84,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
         actor_type: "system"
       })
 
-    {:ok, charge: charge, source_event: source_event}
+    {:ok, charge: charge, customer: customer, source_event: source_event}
   end
 
   test "D-09 D-13 D-14 D-15 D-16 D-17 renders charge summary and refund drawer contract",
@@ -108,6 +108,58 @@ defmodule AccrueAdmin.ChargeLiveTest do
     refute has_element?(view, "[data-role='refund-form']")
     refute has_element?(view, "[data-role='confirm-panel']")
     refute html =~ ~s(class="ax-kpi-grid")
+  end
+
+  test "payment contextual return accepts only its loaded customer's local detail origin", %{
+    conn: conn,
+    charge: charge,
+    customer: customer
+  } do
+    customer =
+      customer
+      |> Customer.changeset(%{owner_type: "Organization", owner_id: "payment-return-org"})
+      |> TestRepo.update!()
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "payment-return-org",
+        active_organization_slug: "payment-return-org",
+        admin_organization_ids: ["payment-return-org"]
+      )
+
+    other_customer_id = Ecto.UUID.generate()
+
+    for {origin_id, expected_path} <- [
+          {customer.id, "/billing/customers/#{customer.id}"},
+          {other_customer_id, "/billing/payments"}
+        ] do
+      origin = "/billing/customers/#{origin_id}?tab=payments&org=foreign-org"
+
+      assert {:ok, view, html} =
+               live(
+                 conn,
+                 "/billing/payments/#{charge.id}?org=payment-return-org&return_to=#{URI.encode_www_form(origin)}"
+               )
+
+      refute html =~ other_customer_id
+
+      back_href =
+        view
+        |> element("a", "Back to results")
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.find("a")
+        |> Floki.attribute("href")
+        |> hd()
+
+      assert URI.parse(back_href).path == expected_path
+      assert URI.decode_query(URI.parse(back_href).query)["org"] == "payment-return-org"
+
+      if expected_path == "/billing/customers/#{customer.id}" do
+        assert URI.decode_query(URI.parse(back_href).query)["tab"] == "payments"
+      end
+    end
   end
 
   test "D-09 D-11 D-12 D-13 charge refund opens drawer after intent and requires step-up",

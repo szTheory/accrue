@@ -48,10 +48,47 @@ defmodule AccrueAdmin.Live.ChargeLive do
          socket
          |> assign_shell(admin)
          |> assign_charge(charge)
+         |> assign(
+           :return_path,
+           ScopedPath.build(
+             admin["mount_path"] || "/billing",
+             "/payments",
+             socket.assigns.current_owner_scope
+           )
+         )
          |> assign(:flashes, [])
          |> assign(:pending_refund, nil)
          |> assign(:refund_drawer_open?, false)}
     end
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    mount_path = socket.assigns.admin_mount_path
+    scope = socket.assigns.current_owner_scope
+
+    return_path =
+      ScopedPath.return_path(
+        mount_path,
+        Map.get(params, "return_to"),
+        scope,
+        socket.assigns.charge.customer_id,
+        "/payments"
+      )
+
+    {:noreply,
+     socket
+     |> assign(:return_path, return_path)
+     |> assign(
+       :related_items,
+       related_items(
+         socket.assigns.charge,
+         socket.assigns.customer,
+         mount_path,
+         scope,
+         return_path
+       )
+     )}
   end
 
   @impl true
@@ -159,6 +196,9 @@ defmodule AccrueAdmin.Live.ChargeLive do
             %{label: @charge.processor_id || @charge.id}
           ]}
         />
+        <p class="ax-detail-back-link">
+          <a class="ax-link" href={@return_path}>Back to results</a>
+        </p>
 
         <Detail.summary_card eyebrow="Charge detail" title={@charge.processor_id || @charge.id}>
           <:status><StatusBadge.status_badge status={status_badge(@charge.status)} /></:status>
@@ -463,7 +503,12 @@ defmodule AccrueAdmin.Live.ChargeLive do
         charge,
         charge.customer,
         socket.assigns.admin_mount_path,
-        socket.assigns.current_owner_scope
+        socket.assigns.current_owner_scope,
+        ScopedPath.build(
+          socket.assigns.admin_mount_path,
+          "/payments",
+          socket.assigns.current_owner_scope
+        )
       )
     )
   end
@@ -764,7 +809,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   defp platform_fee_summary(amount_minor, currency),
     do: money_text(amount_minor, currency) <> " platform fee"
 
-  defp related_items(charge, customer, mount_path, scope) do
+  defp related_items(charge, customer, mount_path, scope, return_path) do
     customer_items =
       if customer do
         [
@@ -772,13 +817,19 @@ defmodule AccrueAdmin.Live.ChargeLive do
             icon: :users,
             label: "Customer",
             value: customer.name || customer.email,
-            href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
+            href:
+              ScopedPath.build(mount_path, "/customers/#{customer.id}", scope, %{
+                "return_to" => return_path
+              })
           },
           %{
             icon: :payments,
             label: "Other payments for this customer",
             href:
-              ScopedPath.build(mount_path, "/payments", scope, %{"customer_id" => customer.id})
+              ScopedPath.build(mount_path, "/payments", scope, %{
+                "customer_id" => customer.id,
+                "return_to" => return_path
+              })
           }
         ]
       else

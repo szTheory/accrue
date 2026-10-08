@@ -74,7 +74,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          |> assign(:raw_json_loaded?, false)
          |> assign(:proration_options, proration_options())
          |> assign(:swap_plan_available, swap_plan_available?(subscription))
-         |> assign(:related_items, related_items(subscription, mount_path, scope))
+         |> assign(:related_items, related_items(subscription, mount_path, scope, nil))
          |> assign(:flashes, [])
          |> assign(:drawer_action_type, nil)
          |> assign(:pending_action, nil)}
@@ -87,10 +87,23 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       ScopedPath.return_path(
         socket.assigns.admin_mount_path,
         Map.get(params, "return_to"),
-        socket.assigns.current_owner_scope
+        socket.assigns.current_owner_scope,
+        socket.assigns.subscription.customer_id,
+        "/subscriptions"
       )
 
-    {:noreply, assign(socket, :return_path, return_path)}
+    {:noreply,
+     socket
+     |> assign(:return_path, return_path)
+     |> assign(
+       :related_items,
+       related_items(
+         socket.assigns.subscription,
+         socket.assigns.admin_mount_path,
+         socket.assigns.current_owner_scope,
+         return_path
+       )
+     )}
   end
 
   @impl true
@@ -242,7 +255,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <div class="ax-detail-health-actions" aria-label="Primary billing action from health summary">
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "return_to" => @return_path})}
             >
               Work global invoice queue
             </a>
@@ -286,14 +299,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <span class="ax-detail-queue-depth"><strong>Local context</strong><%= invoice_queue_summary(@open_invoice_summary) %></span>
           <a
             class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
-            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "return_to" => @return_path})}
           >
             Work all open invoice records
           </a>
           <div class="ax-detail-priority-links">
             <a
               class="ax-link-quiet"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
+              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id, "return_to" => @return_path})}
             >
               Filter this subscription's invoices
             </a>
@@ -334,7 +347,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <span :if={@global_open_invoice_queue == []} class="ax-detail-open-invoice-empty">
             No open invoice records in this owner scope.
           </span>
-          <a class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
+          <a class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "return_to" => @return_path})}>
             Work all invoices in queue
           </a>
         </section>
@@ -455,7 +468,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 </a>
                 <a
                   class="ax-button ax-button-secondary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
+                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "return_to" => @return_path})}
                 >
                   Work global invoice queue
                 </a>
@@ -2143,7 +2156,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     "#{money.amount_minor} #{money.currency}"
   end
 
-  defp related_items(subscription, mount_path, scope) do
+  defp related_items(subscription, mount_path, scope, return_path) do
     customer_items =
       if subscription.customer do
         customer = subscription.customer
@@ -2168,7 +2181,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           label: Copy.subscription_drill_link_charges_for_customer(),
           href:
             ScopedPath.build(mount_path, "/payments", scope, %{
-              "customer_id" => subscription.customer_id
+              "customer_id" => subscription.customer_id,
+              "return_to" => return_path
             })
         },
         %{

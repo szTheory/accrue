@@ -100,6 +100,36 @@ defmodule AccrueAdmin.ScopedPathTest do
            ) == "/billing/subscriptions?org=acme"
   end
 
+  test "customer detail returns are bound to the loaded record and current mount and owner" do
+    scope = organization_scope()
+    customer_id = Ecto.UUID.generate()
+    other_customer_id = Ecto.UUID.generate()
+
+    assert ScopedPath.return_path(
+             "/admin",
+             "/admin/customers/#{customer_id}?tab=payments&org=foreign",
+             scope,
+             customer_id,
+             "/invoices"
+           ) == "/admin/customers/#{customer_id}?org=acme&tab=payments"
+
+    assert ScopedPath.return_path(
+             "/admin",
+             "/admin/customers/#{other_customer_id}?tab=payments",
+             scope,
+             customer_id,
+             "/invoices"
+           ) == "/admin/invoices?org=acme"
+
+    assert ScopedPath.return_path(
+             "/admin",
+             "/billing/customers/#{customer_id}?tab=payments",
+             scope,
+             customer_id,
+             "/invoices"
+           ) == "/admin/invoices?org=acme"
+  end
+
   defp organization_scope do
     %OwnerScope{
       mode: :organization,

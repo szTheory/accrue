@@ -149,6 +149,70 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     refute html =~ ~s(class="ax-kpi-grid")
   end
 
+  test "invoice contextual return rebuilds active owner scope and rejects foreign customer origin",
+       %{
+         conn: conn,
+         invoice: invoice
+       } do
+    customer =
+      TestRepo.get!(Customer, invoice.customer_id)
+      |> Customer.changeset(%{owner_type: "Organization", owner_id: "invoice-return-org"})
+      |> TestRepo.update!()
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "invoice-return-org",
+        active_organization_slug: "invoice-return-org",
+        admin_organization_ids: ["invoice-return-org"]
+      )
+
+    foreign_customer_id = Ecto.UUID.generate()
+    raw_origin = "/billing/customers/#{foreign_customer_id}?org=foreign-org&tab=payments"
+
+    assert {:ok, view, html} =
+             live(
+               conn,
+               "/billing/invoices/#{invoice.id}?org=invoice-return-org&return_to=#{URI.encode_www_form(raw_origin)}"
+             )
+
+    refute html =~ foreign_customer_id
+
+    back_href =
+      view
+      |> element("a", "Back to results")
+      |> render()
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Floki.attribute("href")
+      |> hd()
+
+    assert URI.parse(back_href).path == "/billing/invoices"
+    assert URI.decode_query(URI.parse(back_href).query)["org"] == "invoice-return-org"
+
+    own_origin = "/billing/customers/#{customer.id}?org=foreign-org&tab=payments"
+
+    assert {:ok, view, _html} =
+             live(
+               conn,
+               "/billing/invoices/#{invoice.id}?org=invoice-return-org&return_to=#{URI.encode_www_form(own_origin)}"
+             )
+
+    back_href =
+      view
+      |> element("a", "Back to results")
+      |> render()
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Floki.attribute("href")
+      |> hd()
+
+    back_params = URI.parse(back_href).query |> URI.decode_query()
+    assert back_params["org"] == "invoice-return-org"
+    assert back_params["tab"] == "payments"
+    refute back_href =~ "foreign-org"
+  end
+
   test "D-10 D-11 D-12 D-13 invoice danger actions stay overflow-owned and step-up gated",
        %{
          conn: conn,

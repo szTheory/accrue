@@ -54,12 +54,49 @@ defmodule AccrueAdmin.Live.InvoiceLive do
          socket
          |> assign_shell(admin)
          |> assign_invoice(invoice)
+         |> assign(
+           :return_path,
+           ScopedPath.build(
+             admin["mount_path"] || "/billing",
+             "/invoices",
+             socket.assigns.current_owner_scope
+           )
+         )
          |> assign(:flashes, [])
          |> assign(:pending_action, nil)
          |> assign(:drawer_action_type, nil)
          |> assign(:generated_pdf_href, nil)
          |> assign(:generated_pdf_filename, nil)}
     end
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    mount_path = socket.assigns.admin_mount_path
+    scope = socket.assigns.current_owner_scope
+
+    return_path =
+      ScopedPath.return_path(
+        mount_path,
+        Map.get(params, "return_to"),
+        scope,
+        socket.assigns.invoice.customer_id,
+        "/invoices"
+      )
+
+    {:noreply,
+     socket
+     |> assign(:return_path, return_path)
+     |> assign(
+       :related_items,
+       related_items(
+         socket.assigns.invoice,
+         socket.assigns.customer,
+         mount_path,
+         scope,
+         return_path
+       )
+     )}
   end
 
   @impl true
@@ -265,6 +302,9 @@ defmodule AccrueAdmin.Live.InvoiceLive do
             %{label: invoice_label(@invoice)}
           ]}
         />
+        <p class="ax-detail-back-link">
+          <a class="ax-link" href={@return_path}>Back to results</a>
+        </p>
 
         <Detail.summary_card eyebrow={Copy.invoice_detail_eyebrow()} title={invoice_label(@invoice)}>
           <:status><StatusBadge.status_badge status={@invoice.status} /></:status>
@@ -733,7 +773,12 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         invoice,
         invoice.customer,
         socket.assigns.admin_mount_path,
-        socket.assigns.current_owner_scope
+        socket.assigns.current_owner_scope,
+        ScopedPath.build(
+          socket.assigns.admin_mount_path,
+          "/invoices",
+          socket.assigns.current_owner_scope
+        )
       )
     )
     |> assign(:pending_remove_item, nil)
@@ -1053,7 +1098,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     end
   end
 
-  defp related_items(invoice, customer, mount_path, scope) do
+  defp related_items(invoice, customer, mount_path, scope, return_path) do
     customer_items =
       if customer do
         [
@@ -1061,13 +1106,19 @@ defmodule AccrueAdmin.Live.InvoiceLive do
             icon: :users,
             label: "Customer",
             value: customer.name || customer.email,
-            href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
+            href:
+              ScopedPath.build(mount_path, "/customers/#{customer.id}", scope, %{
+                "return_to" => return_path
+              })
           },
           %{
             icon: :payments,
             label: "Payments for this customer",
             href:
-              ScopedPath.build(mount_path, "/payments", scope, %{"customer_id" => customer.id})
+              ScopedPath.build(mount_path, "/payments", scope, %{
+                "customer_id" => customer.id,
+                "return_to" => return_path
+              })
           }
         ]
       else
