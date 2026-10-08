@@ -550,6 +550,35 @@ defmodule AccruePortal.CheckoutContextTest do
     assert_received {:gateway_create, %{payment_method_token: "fake-valid-nonce"}, _actor}
   end
 
+  test "POST rejects a stale promotion before claiming or calling the provider", %{conn: conn} do
+    session = checkout_fixture("org-checkout-stale-promo")
+    conn = sign_in_org(conn, "org-checkout-stale-promo")
+    ActionAdapter.grant("org-checkout-stale-promo", [:checkout_complete])
+    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    csrf =
+      Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first) |> hd()
+
+    response =
+      post(conn, "/org-billing/checkout/#{session.session_token}/complete", %{
+        "_csrf_token" => csrf,
+        "context_pin" => pin,
+        "payment_method_nonce" => "fake-valid-nonce",
+        "promotion_code" => "STALE"
+      })
+
+    assert redirected_to(response) == "/org-billing/checkout/#{session.session_token}"
+
+    assert Phoenix.Flash.get(response.assigns.flash, :error) =~
+             "This promotion is unavailable"
+
+    assert LocalSession.by_id(session.id).status == "open"
+    refute_received {:gateway_create, _, _}
+  end
+
   test "old tab pin completes its original checkout after selection changes, foreign targets and revocation deny",
        %{
          conn: conn

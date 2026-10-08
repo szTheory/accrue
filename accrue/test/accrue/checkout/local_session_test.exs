@@ -76,6 +76,9 @@ defmodule Accrue.Checkout.LocalSessionTest do
     customer = CheckoutSessionFixture.build_customer()
     session = CheckoutSessionFixture.local_session_fixture(customer)
 
+    assert LocalSession.actionable?(session, DateTime.add(session.expires_at, -1, :microsecond))
+    refute LocalSession.actionable?(session, session.expires_at)
+    refute LocalSession.actionable?(session, DateTime.add(session.expires_at, 1, :microsecond))
     assert {:error, :unavailable} = LocalSession.claim(session, session.expires_at)
     assert LocalSession.by_id(session.id).status == "open"
   end

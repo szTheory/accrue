@@ -84,6 +84,16 @@ defmodule Accrue.Checkout.LocalSession do
     Repo.get_by(__MODULE__, session_token: token)
   end
 
+  @doc "Whether a persisted checkout may be acted on at the supplied instant."
+  @spec actionable?(t(), DateTime.t()) :: boolean()
+  def actionable?(
+        %__MODULE__{status: "open", expires_at: %DateTime{} = expires_at},
+        %DateTime{} = now
+      ),
+      do: DateTime.compare(expires_at, now) == :gt
+
+  def actionable?(%__MODULE__{}, %DateTime{}), do: false
+
   @spec mark_completed(t()) :: {:ok, t()} | {:error, Ecto.Changeset.t()}
   def mark_completed(%__MODULE__{} = session) do
     update_claimed_status(session, "completed")

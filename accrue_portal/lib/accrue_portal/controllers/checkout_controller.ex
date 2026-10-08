@@ -10,12 +10,16 @@ defmodule AccruePortal.Controllers.CheckoutController do
   alias Accrue.Processor
   alias AccruePortal.Path
 
-  def complete(conn, %{"token" => token, "context_pin" => pin, "payment_method_nonce" => nonce})
+  def complete(
+        conn,
+        %{"token" => token, "context_pin" => pin, "payment_method_nonce" => nonce} = params
+      )
       when is_binary(pin) and pin != "" and is_binary(nonce) and nonce != "" do
     with {:ok, context} <- resolve_pinned_context(conn, pin),
          %LocalSession{} = checkout <- LocalSession.by_token(token),
          true <- checkout_target?(context, checkout),
          true <- checkout_ready?(checkout),
+         :ok <- validate_promotion(checkout, Map.get(params, "promotion_code")),
          :ok <-
            Context.authorize_action(
              context,
@@ -24,10 +28,14 @@ defmodule AccruePortal.Controllers.CheckoutController do
              checkout
            ) do
       case LocalSession.claim(checkout, DateTime.utc_now()) do
-        {:ok, claimed} -> subscribe(conn, context, claimed, nonce)
-        {:error, _} -> unavailable(conn, token)
+        {:ok, claimed} ->
+          subscribe(conn, context, claimed, nonce, Map.get(params, "promotion_code"))
+
+        {:error, _} ->
+          unavailable(conn, token)
       end
     else
+      {:error, :stale_promotion} -> promotion_rejected(conn, token)
       _ -> deny(conn, token)
     end
   end
@@ -46,16 +54,20 @@ defmodule AccruePortal.Controllers.CheckoutController do
     )
   end
 
-  defp subscribe(conn, context, checkout, nonce) do
+  defp subscribe(conn, context, checkout, nonce, promotion_code) do
     actor_id = Accrue.Auth.actor_id(context.actor) || Map.get(context.actor, :id)
     actor = %{type: :user, id: if(is_nil(actor_id), do: nil, else: to_string(actor_id))}
 
+    opts =
+      [
+        payment_method: %{vault_acquisition: %{reference: nonce}},
+        operation_id: checkout.operation_id
+      ]
+      |> maybe_add_promotion(promotion_code)
+
     result =
       Accrue.Actor.with_actor(actor, fn ->
-        Billing.subscribe(context.customer, checkout.price_id,
-          payment_method: %{vault_acquisition: %{reference: nonce}},
-          operation_id: checkout.operation_id
-        )
+        Billing.subscribe(context.customer, checkout.price_id, opts)
       end)
 
     case result do
@@ -103,6 +115,23 @@ defmodule AccruePortal.Controllers.CheckoutController do
 
   defp checkout_target?(_, _), do: false
 
+  defp validate_promotion(_checkout, nil), do: :ok
+  defp validate_promotion(_checkout, ""), do: :ok
+
+  defp validate_promotion(%LocalSession{metadata: metadata}, code) when is_binary(code) do
+    case Billing.resolve_discount_mapping(code, metadata["amount_minor"]) do
+      {:ok, _mapping} -> :ok
+      {:error, _reason} -> {:error, :stale_promotion}
+    end
+  end
+
+  defp validate_promotion(_checkout, _code), do: {:error, :stale_promotion}
+
+  defp maybe_add_promotion(opts, code) when is_binary(code) and code != "",
+    do: Keyword.put(opts, :promotion_code, code)
+
+  defp maybe_add_promotion(opts, _code), do: opts
+
   defp checkout_terms_match?(
          context,
          %LocalSession{line_items: [item], metadata: metadata} = checkout
@@ -144,9 +173,8 @@ defmodule AccruePortal.Controllers.CheckoutController do
 
   defp valid_currency?(currency), do: is_binary(currency) and currency =~ ~r/^[A-Z]{3}$/
 
-  defp checkout_ready?(%LocalSession{status: "open", expires_at: %DateTime{} = expires_at}) do
-    DateTime.compare(expires_at, DateTime.utc_now()) == :gt
-  end
+  defp checkout_ready?(%LocalSession{} = session),
+    do: LocalSession.actionable?(session, DateTime.utc_now())
 
   defp checkout_ready?(_), do: false
 
@@ -205,6 +233,12 @@ defmodule AccruePortal.Controllers.CheckoutController do
       "Your card was declined. No subscription was created. Please try a fresh payment method."
     )
     |> redirect(to: Path.checkout(base_path(conn), checkout.session_token))
+  end
+
+  defp promotion_rejected(conn, token) do
+    conn
+    |> put_flash(:error, "This promotion is unavailable. No payment was submitted.")
+    |> redirect(to: Path.checkout(base_path(conn), token))
   end
 
   defp uncertain(conn, checkout) do
