@@ -5,11 +5,11 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 237
 current_phase_name: Admin Invoices, Payments & Recovery
 status: planning
-stopped_at: Phase 237 context gathered
-last_updated: "2026-10-08T23:29:04.066Z"
+stopped_at: Phase 237 UI-SPEC approved
+last_updated: "2026-10-08T23:41:34.689Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 236 complete, transitioned to Phase 237
-state_head: 4eee72ebd00291e32ce2f854f27579ccc51f641f
+state_head: 437af3a6e772f215703d99b186f4319e1aece890
 progress:
   total_phases: 7
   completed_phases: 4
@@ -336,9 +336,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T23:29:03.939Z
-Stopped at: Phase 237 context gathered
-Resume file: .planning/phases/237-admin-invoices-payments-recovery/237-CONTEXT.md
+Last session: 2026-10-08T23:41:34.577Z
+Stopped at: Phase 237 UI-SPEC approved
+Resume file: .planning/phases/237-admin-invoices-payments-recovery/237-UI-SPEC.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
