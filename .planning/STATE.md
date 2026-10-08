@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 236
 current_phase_name: Portal Billing Self-Service
 status: executing
-stopped_at: Completed 236-04-PLAN.md
-last_updated: "2026-10-08T17:09:13.648Z"
+stopped_at: Completed 236-03-PLAN.md
+last_updated: "2026-10-08T17:27:48.683Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 236 execution started
-state_head: 42b6407aa55d284b3fac4536a96ef3206be5f011
+state_head: 73d6ad0ac2f0f6883c7799e118259a53b62f2358
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 26
-  completed_plans: 24
+  completed_plans: 25
   percent: 43
 ---
 
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 236 (Portal Billing Self-Service) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-10-08 — Phase 236 execution started
 
@@ -126,6 +126,7 @@ Last activity: 2026-10-08 — Phase 236 execution started
 | Phase 236 P02 | 15min | 2 tasks | 11 files |
 | Phase 236 P04 | 9 min | 2 tasks | 6 files |
 | Phase 236 P04 | 12 min | 2 tasks | 8 files |
+| Phase 236 P03 | 18min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -256,6 +257,7 @@ Last activity: 2026-10-08 — Phase 236 execution started
 - [Phase 236]: Explicit Braintree declines become card errors; unrelated provider failures remain uncertain. — The processor response is authoritative that it declined this card, while generic errors do not prove whether the operation completed.
 - [Phase 236]: External checkout success URLs must match the configured HTTPS portal origin; validated local paths remain supported. — A stored return URL that escapes to an unapproved host creates an open redirect; matching host and effective port keeps navigation within the configured origin.
 - [Phase 236]: Recovery links use the same allowed destination policy as success redirects. — Both destinations come from persisted checkout return data and otherwise could navigate customers to an unapproved external host.
+- [Phase 236]: Phase 236: Gate subscription actions on observed lifecycle and provider capabilities, and freshly authorize the exact target at mutation time.
 
 ### Pending Todos
 
@@ -329,8 +331,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T17:06:53.779Z
-Stopped at: Completed 236-04-PLAN.md
+Last session: 2026-10-08T17:27:48.626Z
+Stopped at: Completed 236-03-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
