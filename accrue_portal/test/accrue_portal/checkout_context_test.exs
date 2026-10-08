@@ -94,7 +94,7 @@ defmodule AccruePortal.CheckoutContextTest do
 
       {:ok,
        struct!(Braintree.Subscription,
-         id: "sub_bt_checkout_context",
+         id: "sub_bt_checkout_context_#{System.unique_integer([:positive])}",
          plan_id: params[:plan_id],
          payment_method_token: params[:payment_method_token],
          status: "Active",
@@ -139,12 +139,14 @@ defmodule AccruePortal.CheckoutContextTest do
     previous_generator = Application.get_env(:accrue, :braintree_client_token_generator)
     previous_processor = Application.get_env(:accrue, :processor)
     previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
+    previous_portal_base_url = Application.get_env(:accrue, :portal_base_url)
     previous_test_pid = Application.get_env(:accrue_portal, :checkout_context_test_pid)
     previous_after_accept = Application.get_env(:accrue_portal, :checkout_context_after_accept)
     Application.put_env(:accrue, :auth_adapter, AccruePortal.Fixtures.AuthAdapter)
     Application.put_env(:accrue, :braintree_client_token_generator, CountingTokenGenerator)
     Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
     Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
+    Application.put_env(:accrue, :portal_base_url, "https://app.example.test")
     Application.put_env(:accrue_portal, :checkout_context_test_pid, self())
     ActionAdapter.clear_grants()
 
@@ -182,6 +184,10 @@ defmodule AccruePortal.CheckoutContextTest do
       if previous_gateway,
         do: Application.put_env(:accrue, :braintree_subscription_gateway, previous_gateway),
         else: Application.delete_env(:accrue, :braintree_subscription_gateway)
+
+      if previous_portal_base_url,
+        do: Application.put_env(:accrue, :portal_base_url, previous_portal_base_url),
+        else: Application.delete_env(:accrue, :portal_base_url)
 
       if previous_test_pid,
         do: Application.put_env(:accrue_portal, :checkout_context_test_pid, previous_test_pid),
@@ -277,6 +283,63 @@ defmodule AccruePortal.CheckoutContextTest do
     assert redirected_to(response) == "https://app.example.test/billing/success"
     assert LocalSession.by_id(session.id).status == "completed"
     assert_received {:gateway_create, %{payment_method_token: "fake-valid-nonce"}, %{type: :user}}
+  end
+
+  test "POST return destinations accept only local paths and the configured HTTPS origin", %{
+    conn: conn
+  } do
+    cases = [
+      {"local path", "/org-billing/thanks", "/org-billing/thanks"},
+      {
+        "configured HTTPS origin",
+        "https://app.example.test/billing/success",
+        "https://app.example.test/billing/success"
+      },
+      {
+        "configured HTTPS origin with default port",
+        "https://APP.EXAMPLE.TEST:443/billing/success",
+        "https://APP.EXAMPLE.TEST:443/billing/success"
+      },
+      {"unapproved HTTPS host", "https://attacker.example/billing/success", "/org-billing"},
+      {"unapproved HTTPS port", "https://app.example.test:444/success", "/org-billing"},
+      {"HTTP URL", "http://app.example.test/success", "/org-billing"},
+      {"URL with userinfo", "https://user@app.example.test/success", "/org-billing"},
+      {"protocol-relative path", "//attacker.example/success", "/org-billing"},
+      {"backslash path", "/\\attacker.example/success", "/org-billing"},
+      {"malformed URL", "https://app.example.test:bad/success", "/org-billing"},
+      {"blank URL", "", "/org-billing"}
+    ]
+
+    for {label, success_url, expected_destination} <- cases do
+      owner_id = "org-checkout-return-#{System.unique_integer([:positive])}"
+      session = checkout_fixture(owner_id, success_url: success_url)
+      case_conn = sign_in_org(conn, owner_id)
+      ActionAdapter.grant(owner_id, [:checkout_complete])
+
+      assert {:ok, _view, html} =
+               live(case_conn, "/org-billing/checkout/#{session.session_token}"),
+             "#{label}: checkout must render before the completion route is exercised"
+
+      [[pin]] =
+        Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+      csrf =
+        Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first)
+        |> hd()
+
+      response =
+        post(case_conn, "/org-billing/checkout/#{session.session_token}/complete", %{
+          "context_pin" => pin,
+          "_csrf_token" => csrf,
+          "payment_method_nonce" => "fake-valid-nonce"
+        })
+
+      assert redirected_to(response) == expected_destination,
+             "#{label}: unexpected checkout return destination"
+
+      assert Phoenix.Flash.get(response.assigns.flash, :info) =~ "Subscription created."
+      assert LocalSession.by_id(session.id).status == "completed"
+    end
   end
 
   test "personal checkout POST completes for the matching configured processor", %{

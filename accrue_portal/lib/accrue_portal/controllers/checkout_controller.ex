@@ -6,6 +6,7 @@ defmodule AccruePortal.Controllers.CheckoutController do
   alias Accrue.Billing
   alias Accrue.Checkout.LocalSession
   alias Accrue.CardError
+  alias Accrue.Config
   alias Accrue.Portal.{Context, CustomerSession}
   alias Accrue.Processor
   alias AccruePortal.Path
@@ -180,13 +181,11 @@ defmodule AccruePortal.Controllers.CheckoutController do
 
   defp success_destination(%LocalSession{success_url: url}, conn)
        when is_binary(url) and url != "" do
-    uri = URI.parse(url)
-
     cond do
       Context.valid_local_path?(url) ->
         {:local, url}
 
-      uri.scheme == "https" and is_binary(uri.host) and uri.host != "" and is_nil(uri.userinfo) ->
+      host_approved_https_url?(url) ->
         {:external, url}
 
       true ->
@@ -195,6 +194,30 @@ defmodule AccruePortal.Controllers.CheckoutController do
   end
 
   defp success_destination(_, conn), do: {:local, Path.home(base_path(conn))}
+
+  defp host_approved_https_url?(url) do
+    with {:ok, %URI{scheme: "https", host: host, userinfo: nil, port: port}} <- URI.new(url),
+         true <- is_binary(host) and host != "",
+         {:ok, %URI{host: approved_host, port: approved_port}} <- configured_https_origin() do
+      String.downcase(host) == String.downcase(approved_host) and port == approved_port
+    else
+      _ -> false
+    end
+  rescue
+    _ -> false
+  end
+
+  defp configured_https_origin do
+    with base when is_binary(base) <- Config.portal_base_url(),
+         {:ok, %URI{scheme: "https", host: host, userinfo: nil} = uri} <- URI.new(base),
+         true <- is_binary(host) and host != "" do
+      {:ok, uri}
+    else
+      _ -> :error
+    end
+  rescue
+    _ -> :error
+  end
 
   defp deny(conn, token) do
     conn

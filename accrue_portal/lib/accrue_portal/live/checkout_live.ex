@@ -7,6 +7,7 @@ defmodule AccruePortal.Live.CheckoutLive do
   alias Accrue.Billing.Customer
   alias Accrue.CardError
   alias Accrue.Checkout.LocalSession
+  alias Accrue.Config
   alias Accrue.Error.DiscountMappingInvalid
   alias Accrue.Portal.{Context, CustomerSession}
   alias Accrue.Portal.Checkout.CompletionJob
@@ -75,7 +76,6 @@ defmodule AccruePortal.Live.CheckoutLive do
         )
         |> assign(:checkout_error, nil)
         |> assign(:checkout_uncertain, checkout.status in ["processing", "uncertain"])
-        |> assign(:checkout_success, false)
         |> assign(:promotion_code, nil)
         |> assign(:promotion_code_input, "")
         |> assign(:promo_status, nil)
@@ -122,13 +122,11 @@ defmodule AccruePortal.Live.CheckoutLive do
   def handle_params(_params, _uri, socket), do: {:noreply, socket}
 
   defp success_destination(url, socket) when is_binary(url) and url != "" do
-    uri = URI.parse(url)
-
     cond do
       Context.valid_local_path?(url) ->
         {:local, url}
 
-      uri.scheme == "https" and is_binary(uri.host) and uri.host != "" and is_nil(uri.userinfo) ->
+      host_approved_https_url?(url) ->
         {:external, url}
 
       true ->
@@ -136,7 +134,31 @@ defmodule AccruePortal.Live.CheckoutLive do
     end
   end
 
-  defp success_destination(_, _socket), do: :show_success
+  defp success_destination(_, socket), do: {:local, Path.home(socket.assigns.base_path)}
+
+  defp host_approved_https_url?(url) do
+    with {:ok, %URI{scheme: "https", host: host, userinfo: nil, port: port}} <- URI.new(url),
+         true <- is_binary(host) and host != "",
+         {:ok, %URI{host: approved_host, port: approved_port}} <- configured_https_origin() do
+      String.downcase(host) == String.downcase(approved_host) and port == approved_port
+    else
+      _ -> false
+    end
+  rescue
+    _ -> false
+  end
+
+  defp configured_https_origin do
+    with base when is_binary(base) <- Config.portal_base_url(),
+         {:ok, %URI{scheme: "https", host: host, userinfo: nil} = uri} <- URI.new(base),
+         true <- is_binary(host) and host != "" do
+      {:ok, uri}
+    else
+      _ -> :error
+    end
+  rescue
+    _ -> :error
+  end
 
   @impl true
   def handle_event(
@@ -158,17 +180,16 @@ defmodule AccruePortal.Live.CheckoutLive do
 
                       case success_destination(claimed.success_url, socket) do
                         {:external, url} ->
-                          {:noreply, redirect(socket, external: url)}
-
-                        {:local, path} ->
-                          {:noreply, redirect(socket, to: path)}
-
-                        :show_success ->
                           {:noreply,
                            socket
-                           |> assign(:checkout_error, nil)
-                           |> assign(:checkout_uncertain, false)
-                           |> assign(:checkout_success, true)}
+                           |> put_flash(:info, "Subscription created.")
+                           |> redirect(external: url)}
+
+                        {:local, path} ->
+                          {:noreply,
+                           socket
+                           |> put_flash(:info, "Subscription created.")
+                           |> redirect(to: path)}
                       end
 
                     {:error, _reason} ->
@@ -183,7 +204,6 @@ defmodule AccruePortal.Live.CheckoutLive do
                    socket
                    |> assign(:checkout_error, nil)
                    |> assign(:checkout_uncertain, false)
-                   |> assign(:checkout_success, false)
                    |> assign(:promo_preview, nil)
                    |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
                    |> assign_base_checkout_amount()}
@@ -196,7 +216,6 @@ defmodule AccruePortal.Live.CheckoutLive do
                    socket
                    |> assign(:checkout_error, nil)
                    |> assign(:checkout_uncertain, false)
-                   |> assign(:checkout_success, false)
                    |> assign(:promotion_code, nil)
                    |> assign(:promo_preview, nil)
                    |> assign(:promo_status, Copy.checkout_promo_invalid())
@@ -211,8 +230,7 @@ defmodule AccruePortal.Live.CheckoutLive do
                      :checkout_error,
                      "Your card was declined. No subscription was created. Please try a fresh payment method."
                    )
-                   |> assign(:checkout_uncertain, false)
-                   |> assign(:checkout_success, false)}
+                   |> assign(:checkout_uncertain, false)}
 
                 {:error, _reason} ->
                   _ = LocalSession.mark_uncertain(claimed)
@@ -303,15 +321,13 @@ defmodule AccruePortal.Live.CheckoutLive do
   def handle_event("checkout_failed", %{"message" => message}, socket) do
     {:noreply,
      socket
-     |> assign(:checkout_error, Copy.checkout_card_error(message))
-     |> assign(:checkout_success, false)}
+     |> assign(:checkout_error, Copy.checkout_card_error(message))}
   end
 
   def handle_event("checkout_failed", _params, socket) do
     {:noreply,
      socket
-     |> assign(:checkout_error, Copy.checkout_card_error(nil))
-     |> assign(:checkout_success, false)}
+     |> assign(:checkout_error, Copy.checkout_card_error(nil))}
   end
 
   @impl true
@@ -350,8 +366,6 @@ defmodule AccruePortal.Live.CheckoutLive do
             <a :if={@checkout_recovery_url} href={@checkout_recovery_url} class="portal-button-secondary">Return to billing</a>
           </div>
         </section>
-        <p :if={@checkout_success} class="portal-success-copy">Subscription created.</p>
-
       <div
           :if={@checkout_error}
           class="portal-inline-error"
@@ -387,7 +401,7 @@ defmodule AccruePortal.Live.CheckoutLive do
         </div>
 
         <form
-          :if={@promo_allowed && @checkout_terms_valid && checkout_ready?(@checkout_session) && !@checkout_success}
+          :if={@promo_allowed && @checkout_terms_valid && checkout_ready?(@checkout_session)}
           id="promo-code-form"
           phx-change="validate_promo"
           class="portal-promo-form"
@@ -413,7 +427,7 @@ defmodule AccruePortal.Live.CheckoutLive do
         </form>
 
         <form
-          :if={@client_token && @checkout_terms_valid && checkout_ready?(@checkout_session) && !@checkout_success}
+          :if={@client_token && @checkout_terms_valid && checkout_ready?(@checkout_session)}
           id="checkout-form"
           action={Path.checkout_complete(@base_path, @checkout_session.session_token)}
           method="post"
@@ -612,7 +626,6 @@ defmodule AccruePortal.Live.CheckoutLive do
     |> assign(:client_token, nil)
     |> assign(:completion_denied, true)
     |> assign(:checkout_error, message)
-    |> assign(:checkout_success, false)
     |> assign(:checkout_uncertain, false)
     |> assign(:promotion_code, nil)
     |> assign(:promo_preview, nil)
@@ -624,7 +637,6 @@ defmodule AccruePortal.Live.CheckoutLive do
     |> assign(:client_token, nil)
     |> assign(:checkout_error, nil)
     |> assign(:checkout_uncertain, true)
-    |> assign(:checkout_success, false)
     |> assign(:promotion_code, nil)
     |> assign(:promo_preview, nil)
   end
@@ -662,8 +674,7 @@ defmodule AccruePortal.Live.CheckoutLive do
          |> assign(:checkout_session, latest)
          |> assign(:client_token, nil)
          |> assign(:checkout_uncertain, false)
-         |> assign(:checkout_error, nil)
-         |> assign(:checkout_success, false)}
+         |> assign(:checkout_error, nil)}
 
       _ ->
         {:noreply,
@@ -736,13 +747,11 @@ defmodule AccruePortal.Live.CheckoutLive do
   defp interval_label(interval, count), do: "every #{count} #{interval}s"
 
   defp safe_recovery_url(url, fallback) when is_binary(url) do
-    uri = URI.parse(url)
-
     cond do
       Context.valid_local_path?(url) ->
         url
 
-      uri.scheme == "https" and is_binary(uri.host) and uri.host != "" and is_nil(uri.userinfo) ->
+      host_approved_https_url?(url) ->
         url
 
       true ->

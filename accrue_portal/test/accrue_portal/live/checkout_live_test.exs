@@ -73,12 +73,14 @@ defmodule AccruePortal.CheckoutLiveTest do
   setup do
     previous_processor = Application.get_env(:accrue, :processor)
     previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
+    previous_portal_base_url = Application.get_env(:accrue, :portal_base_url)
     previous_auth = Application.get_env(:accrue, :auth_adapter)
     previous_after_accept = Application.get_env(:accrue_portal, :checkout_live_after_accept)
     previous_test_pid = Application.get_env(:accrue_portal, :checkout_live_test_pid)
 
     Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
     Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
+    Application.put_env(:accrue, :portal_base_url, "https://app.example.test")
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
     Application.put_env(:accrue_portal, :checkout_live_test_pid, self())
     BraintreeMox.stub_client_token("portal-client-token")
@@ -97,6 +99,12 @@ defmodule AccruePortal.CheckoutLiveTest do
         Application.put_env(:accrue, :braintree_subscription_gateway, previous_gateway)
       else
         Application.delete_env(:accrue, :braintree_subscription_gateway)
+      end
+
+      if previous_portal_base_url do
+        Application.put_env(:accrue, :portal_base_url, previous_portal_base_url)
+      else
+        Application.delete_env(:accrue, :portal_base_url)
       end
 
       if previous_auth do
@@ -269,6 +277,8 @@ defmodule AccruePortal.CheckoutLiveTest do
                "cvv" => "123"
              })
 
+    flash = assert_redirect(view, "https://app.example.test/billing/success")
+    assert flash["info"] =~ "Subscription created."
     assert LocalSession.by_id(session.id).status == "completed"
   end
 
@@ -340,6 +350,8 @@ defmodule AccruePortal.CheckoutLiveTest do
                "context_pin" => pin
              })
 
+    flash = assert_redirect(view, "/billing")
+    assert flash["info"] =~ "Subscription created."
     assert LocalSession.by_id(session.id).status == "completed"
   end
 
@@ -363,7 +375,31 @@ defmodule AccruePortal.CheckoutLiveTest do
              })
   end
 
-  test "missing success URL renders completed success in place", %{
+  test "unapproved HTTPS success host falls back to the portal home", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer, success_url: "https://attacker.example/success")
+    conn = sign_in_customer(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    assert {:error, {:redirect, %{to: "/billing"}}} =
+             render_hook(view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
+
+    flash = assert_redirect(view, "/billing")
+    assert flash["info"] =~ "Subscription created."
+    assert LocalSession.by_id(session.id).status == "completed"
+  end
+
+  test "missing success URL returns home with a success announcement", %{
     conn: conn,
     user: user,
     customer: customer
@@ -376,14 +412,34 @@ defmodule AccruePortal.CheckoutLiveTest do
     [[pin] | _] =
       Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
 
-    completed_html =
-      render_hook(view, "checkout_tokenized", %{
-        "nonce" => "fake-valid-nonce",
-        "context_pin" => pin
-      })
+    assert {:error, {:redirect, %{to: "/billing"}}} =
+             render_hook(view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
 
-    assert completed_html =~ "Subscription created."
+    flash = assert_redirect(view, "/billing")
+    assert flash["info"] =~ "Subscription created."
     assert LocalSession.by_id(session.id).status == "completed"
+  end
+
+  test "expired checkout with unapproved HTTPS recovery only links to the portal", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session =
+      checkout_fixture(customer,
+        expires_at: DateTime.add(DateTime.utc_now(), -300, :second),
+        cancel_url: "https://attacker.example/billing"
+      )
+
+    assert {:ok, _view, html} =
+             live(sign_in_customer(conn, user), "/billing/checkout/#{session.session_token}")
+
+    assert html =~ ~s(href="/billing")
+    refute html =~ "attacker.example"
+    assert LocalSession.by_id(session.id).status == "open"
   end
 
   test "accepted provider result with failed completion persistence shows uncertainty", %{
