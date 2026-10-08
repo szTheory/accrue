@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 236
 current_phase_name: Portal Billing Self-Service
 status: executing
-stopped_at: Completed 236-01-PLAN.md
-last_updated: "2026-10-08T16:40:13.371Z"
+stopped_at: Completed 236-02-PLAN.md
+last_updated: "2026-10-08T16:55:10.927Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 236 execution started
-state_head: ff6263d0c41c1bcf72955865857c2dba7a1e1c7b
+state_head: b628c711aa684c7bdfde232864eff34a55f239a2
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 26
-  completed_plans: 22
+  completed_plans: 23
   percent: 43
 ---
 
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 236 (Portal Billing Self-Service) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-10-08 — Phase 236 execution started
 
@@ -123,6 +123,7 @@ Last activity: 2026-10-08 — Phase 236 execution started
 | Phase 235 P05 | 13 minutes | 2 tasks | 6 files |
 | Phase 235 P06 | 60min | 2 tasks | 6 files |
 | Phase 236 P01 | 12 min | 2 tasks | 4 files |
+| Phase 236 P02 | 15min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -246,6 +247,10 @@ Last activity: 2026-10-08 — Phase 236 execution started
 - [Phase 235]: Keep Stripe cs_ validation and fetched paid-session reconciliation authoritative.
 - [Phase 235]: Use explicitly fixture-backed LocalSession evidence for the deterministic Braintree browser return; do not claim live-provider success.
 - [Phase 236]: Invoice reads return explicit success or unavailable outcomes; the existing 20-record cap is disclosed as a recent-list limit. — Customers need to distinguish an empty invoice history from a failed read, and the UI must avoid promising complete history or document retention.
+- [Phase 236]: Render payment-method actions only when the configured processor supports them and the selected owner grants the exact action. — The UI should not advertise a mutation that the current provider or fresh owner policy will reject; the POST repeats exact-target authorization.
+- [Phase 236]: A default card with another saved card cannot be removed until a replacement becomes default. — The existing billing deletion guard requires a replacement in this state, so the page should explain the next action before a doomed POST.
+- [Phase 236]: Braintree Hosted Fields are offered only to Braintree and deterministic Fake contexts. — The Portal's secure-field hook issues Braintree client tokens and nonce values; other providers need their own secure entry adapter before this route is available.
+- [Phase 236]: Card reads render explicit successful, unavailable, or unsupported outcomes. — A failed database read or unsupported provider must not be represented as a successfully empty saved-card list.
 
 ### Pending Todos
 
@@ -319,8 +324,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T16:38:56.021Z
-Stopped at: Completed 236-01-PLAN.md
+Last session: 2026-10-08T16:55:10.862Z
+Stopped at: Completed 236-02-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
