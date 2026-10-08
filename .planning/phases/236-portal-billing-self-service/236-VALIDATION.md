@@ -1,8 +1,8 @@
 ---
 phase: "236"
 slug: "portal-billing-self-service"
-status: pending
-nyquist_compliant: false
+status: validated
+nyquist_compliant: true
 wave_0_complete: true
 created: "2026-10-08"
 ---
@@ -30,6 +30,7 @@ created: "2026-10-08"
 
 - **After every task commit:** Run the focused ExUnit/LiveView/controller or Playwright command listed for that task.
 - **After every plan wave:** Run `cd accrue_portal && mix test.ci`; run the Phase 236 served-browser spec after wave 4 when it exists and covers the changed routes.
+- **Wave 5:** Run the focused Hosted Fields browser command in default, forced-light, and forced-dark host modes; each mode must pass before validation is marked complete.
 - **Before phase verification:** Run the full package command and Phase 236 served-browser spec; both must be green.
 - **Max feedback latency:** Target under 5 minutes for focused checks; measure and record actual suite times during execution.
 
@@ -46,6 +47,7 @@ The planner must replace “Assigned by plan” with actual plan/task/wave IDs a
 | 236-01-T1, 236-01-T2 | 236-01 | 1 | POR-03 | T-236-01, T-236-02 | Invoice access remains customer-scoped; failed reads are not empty results | LiveView/controller | `cd accrue_portal && mix test.ci`; `cd examples/accrue_host && ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js` | Existing invoice isolation, read-failure, and hosted-link assertions | ✓ green |
 | 236-01-T2, 236-02-T1, 236-03-T1, 236-04-T1 | 236-01, 236-02, 236-03, 236-04 | 1, 2, 3 | POR-04 | T-236-05, T-236-07, T-236-10 | Displayed outcomes reflect provider/result state and uncertainty | LiveView/controller | `cd accrue_portal && mix test.ci` | Existing empty/unavailable, POST result, checkout decline/uncertainty, and announcement assertions | ✓ green |
 | 236-02-T2, 236-05-T2 | 236-02, 236-05 | 2, 4 | POR-05 | T-236-04 | Payment fields stay provider-hosted; app only receives a nonce | LiveView + served browser | `cd accrue_portal && mix test.ci`; `cd examples/accrue_host && ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js` | Existing direct-route and served Hosted Fields lifecycle assertions | ✓ green |
+| 236-06-T1, 236-06-T2 | 236-06 | 5 | POR-05 | T-236-13, T-236-14 | Served add-card style handoff, contrast, host locks, context-pin patch, and teardown; deterministic SDK mock does not prove live Braintree iframe rendering | Served browser | `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` (3 passed); `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 ACCRUE_HOST_PORTAL_THEME=light npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` (2 passed); `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 ACCRUE_HOST_PORTAL_THEME=dark npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` (2 passed) | `examples/accrue_host/e2e/phase236-portal-self-service.spec.js` | ✓ green |
 | 236-03-T2, 236-05-T2 | 236-03, 236-05 | 3, 4 | POR-06 | T-236-07 | Known and unknown lifecycle states use truthful labels and claims | ExUnit + served browser | `cd accrue_portal && mix test.ci`; `cd examples/accrue_host && ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js` | Existing lifecycle matrix and served route assertions | ✓ green |
 | 236-04-T1, 236-04-T2 | 236-04 | 2 | POR-07 | T-236-08, T-236-09 | Return destinations are validated; query strings do not establish success | Controller + LiveView | `cd accrue_portal && mix test.ci` | Existing destination matrix, query-only status, decline, and uncertainty assertions | ✓ green |
 
@@ -73,9 +75,17 @@ All in-scope acceptance behaviors should have automated ExUnit/LiveView or serve
 - [x] Wave 0 covers all MISSING references
 - [x] No watch-mode flags
 - [x] Focused feedback latency measured and documented
-- [ ] `nyquist_compliant: true` set after passing validation evidence
+- [x] `nyquist_compliant: true` set after passing validation evidence
 
-**Approval:** pending — Wave 5 browser evidence must pass in default, forced-light, and forced-dark modes.
+**Approval:** validated 2026-10-08 after three focused Wave 5 browser runs passed in default, forced-light, and forced-dark modes. D-08 limits these results to served browser surfaces, application-supplied styles, and deterministic mock lifecycle; live-provider iframe fidelity remains outside this evidence.
+
+## Validation Audit 2026-10-08 — Wave 5
+
+| Metric | Count |
+|---|---|
+| Focused commands passed | 3 |
+| Browser results recorded | 3 positive `N passed` results |
+| Live-provider rendering claims | 0 |
 
 ## Validation Audit 2026-10-08
 

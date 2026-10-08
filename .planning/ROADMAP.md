@@ -150,9 +150,9 @@ Plans:
   2. Supported payment-method and subscription actions honor capability and ownership; list and detail entry points disclose matching consequences before confirmation.
   3. Customers reach only their existing invoice records and hosted invoice access; missing or unauthorized records fail safely.
   4. LiveView and POST/redirect actions announce visible success or failure, failed reads do not look empty, and checkout failure does not assert a charge.
-  5. Direct add-card navigation initializes supported secure fields; known subscription states and safe host returns are truthful, and Portal keyboard/mobile/theme/focus/motion states are checked in this slice.
+  5. Direct add-card navigation initializes readable supported secure fields across effective themes; known subscription states and safe host returns are truthful, and Portal keyboard/mobile/focus/motion states are checked in this slice.
 
-**Plans**: 5 plans
+**Plans**: 6 plans
 Plans:
 **Wave 1**
 - [ ] 236-01-PLAN.md — Scoped hosted invoices and distinct read outcomes
@@ -166,6 +166,9 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 236-05-PLAN.md — Host-branded seven-route browser contract in CI
+
+**Wave 5** *(blocked on Waves 2 and 4 completion)*
+- [ ] 236-06-PLAN.md — POR-05 themed direct add-card Hosted Fields closure
 
 **UI hint**: yes
 
