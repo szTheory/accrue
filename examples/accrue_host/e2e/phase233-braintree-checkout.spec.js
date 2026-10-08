@@ -187,6 +187,34 @@ test("Braintree client initialization failure fails closed", async ({ page, sand
   expect(await page.evaluate(() => window.__braintreeMockEvidence.counts.tokenize)).toBe(0);
 });
 
+test("leaving during tokenization tears down Hosted Fields without submitting later", async ({ page, sandboxId }) => {
+  const fixture = readFixture();
+  await openCheckout(page, fixture, sandboxId, {
+    delayMs: 700,
+    outcomes: [{ kind: "success", nonce: "mock-abandoned-nonce" }]
+  });
+
+  const action = await page.locator("#checkout-form").getAttribute("action");
+  let checkoutPosts = 0;
+  page.on("request", (request) => {
+    if (isCheckoutPost(request, action)) checkoutPosts += 1;
+  });
+  await page.locator("#checkout-form button[type=\"submit\"]").click();
+  await expect(page.locator("[data-braintree-error]")).toContainText("Securing your card details");
+
+  const navigationPromise = page.waitForNavigation({ waitUntil: "domcontentloaded" });
+  await page.getByRole("link", { name: "Leave checkout" }).evaluate((link) => {
+    link.href = "/";
+  });
+  await page.getByRole("link", { name: "Leave checkout" }).click();
+  await navigationPromise;
+  await page.waitForTimeout(800);
+
+  expect(checkoutPosts).toBe(0);
+  expect(await page.evaluate(() => window.__braintreeMockEvidence.counts.tokenize)).toBe(1);
+  expect(await page.evaluate(() => window.__braintreeMockEvidence.counts.teardown)).toBe(1);
+});
+
 test("double action and interrupted server transport do not replay a nonce", async ({ page, sandboxId }) => {
   const fixture = readFixture();
   await openCheckout(page, fixture, sandboxId, {

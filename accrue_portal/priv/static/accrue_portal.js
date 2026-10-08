@@ -131,6 +131,12 @@
 
       this.hostedFields.tokenize(
         function (tokenizeErr, payload) {
+          if (this.isDestroyed) {
+            this.tokenizing = false;
+            if (nonceInput) nonceInput.value = "";
+            return;
+          }
+
           if (tokenizeErr) {
             this.tokenizing = false;
             setSubmitting(submitButton, false);
