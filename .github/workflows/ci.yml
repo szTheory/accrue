@@ -1428,6 +1428,7 @@ jobs:
         run: |
           echo "## Host and CI setup evidence" >> "$GITHUB_STEP_SUMMARY"
           if [ -s "$ACCRUE_CI_SETUP_FACTS" ]; then
+            # shellcheck disable=SC2016 # Node template interpolation is intentional, not shell expansion.
             node -e 'const fs=require("fs"); for (const line of fs.readFileSync(process.argv[1], "utf8").trim().split("\n")) { const fact=JSON.parse(line); console.log(`- **Fact:** ${fact.code}; **State:** ${fact.result}; **Owner:** ${fact.owner}; **Next command:** see scripts/ci/ci_setup_diagnostic.sh describe ${fact.code}; **Evidence:** accrue-host-ci-setup-facts artifact`); }' "$ACCRUE_CI_SETUP_FACTS" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- **Fact:** setup record; **State:** no validated setup fact was emitted; **Owner:** CI; **Next command:** inspect the failing host-integration step; **Evidence:** accrue-host-ci-setup-facts artifact" >> "$GITHUB_STEP_SUMMARY"
