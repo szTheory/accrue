@@ -4,16 +4,16 @@ milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 237
 current_phase_name: Admin Invoices, Payments & Recovery
-status: planning
+status: executing
 stopped_at: Phase 237 UI-SPEC approved
-last_updated: "2026-10-08T23:41:34.689Z"
+last_updated: "2026-10-08T23:55:58.871Z"
 last_activity: 2026-10-08
-last_activity_desc: Phase 236 complete, transitioned to Phase 237
-state_head: 437af3a6e772f215703d99b186f4319e1aece890
+last_activity_desc: Phase 237 execution started
+state_head: afad17221d7638990a77861f3ecc3de274185468
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 27
+  total_plans: 35
   completed_plans: 27
   percent: 57
 ---
@@ -26,16 +26,16 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 236 — Portal Billing Self-Service
+**Current focus:** Phase 237 — Admin Invoices, Payments & Recovery
 **Progress:** [██████░░░░] 57% (2 of 7 milestone phases complete)
 **Planned work completed:** [████████████████████] 15/15 plans (100%); remaining phases await planning.
 
 ## Current Position
 
-Phase: 237 — Admin Invoices, Payments & Recovery
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-08 — Phase 236 complete, transitioned to Phase 237
+Phase: 237 (Admin Invoices, Payments & Recovery) — EXECUTING
+Plan: 1 of 8
+Status: Executing Phase 237
+Last activity: 2026-10-08 — Phase 237 execution started
 
 ## Performance Metrics
 
