@@ -338,7 +338,8 @@ defmodule AccruePortal.CheckoutLiveTest do
   } do
     expired =
       checkout_fixture(customer,
-        expires_at: DateTime.add(DateTime.utc_now(), -300, :second)
+        expires_at: DateTime.add(DateTime.utc_now(), -300, :second),
+        cancel_url: "javascript:alert(1)"
       )
 
     conn = sign_in_customer(conn, user)
@@ -357,7 +358,17 @@ defmodule AccruePortal.CheckoutLiveTest do
       |> Map.fetch!("context_pin")
 
     assert expired_html =~ "This checkout link has expired"
-    assert expired_html =~ "Leave checkout"
+
+    assert [[recovery_href]] =
+             Regex.scan(
+               ~r/<a[^>]+href="([^"]+)"[^>]*>Return to billing<\/a>/,
+               expired_html,
+               capture: :all_but_first
+             )
+
+    assert recovery_href == "/billing"
+    refute expired_html =~ ~s(id="checkout-form")
+    refute expired_html =~ ~s(id="promo-code-form")
 
     assert expired_html_after =
              render_hook(expired_view, "checkout_tokenized", %{
@@ -367,7 +378,10 @@ defmodule AccruePortal.CheckoutLiveTest do
 
     assert expired_html_after =~ "This checkout link has expired"
     assert expired_html_after =~ "Return to your account and start a new subscription."
+    assert expired_html_after =~ ~s(href="/billing")
+    refute expired_html_after =~ ~s(id="checkout-form")
     assert LocalSession.by_id(expired.id).status == "open"
+    refute_received {:gateway_create, _}
 
     assert {:error, {:redirect, %{to: "/billing"}}} =
              live(conn, "/billing/checkout/missing-token")

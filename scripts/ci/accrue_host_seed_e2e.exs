@@ -47,7 +47,11 @@ defmodule AccrueHostSeedE2E do
   ]
   @fixture_subscription_item_processor_ids ["si_host_browser_replay"]
   @fixture_discount_codes ["SPRING25", "BROKEN"]
-  @fixture_checkout_operation_ids ["host-browser-portal-checkout", "host-browser-org-checkout"]
+  @fixture_checkout_operation_ids [
+    "host-browser-portal-checkout",
+    "host-browser-portal-checkout-expired",
+    "host-browser-org-checkout"
+  ]
   @events_table Accrue.Migration.qualified_table(:accrue_events)
   @discount_mappings_table Accrue.Migration.qualified_table(:accrue_discount_mappings)
 
@@ -135,6 +139,14 @@ defmodule AccrueHostSeedE2E do
     org_checkout_session =
       insert_portal_checkout_session!(org_checkout_customer, "host-browser-org-checkout")
 
+    expired_portal_checkout_session =
+      insert_portal_checkout_session!(
+        portal_customer,
+        "host-browser-portal-checkout-expired",
+        expires_at: DateTime.add(DateTime.utc_now(), -300, :second),
+        cancel_url: "/app/billing"
+      )
+
     seed_portal_discount_mappings!()
 
     first_run_webhook = build_first_run_webhook(subscription)
@@ -195,6 +207,8 @@ defmodule AccrueHostSeedE2E do
       },
       portal_checkout_token: checkout_session.session_token,
       portal_checkout_url: "/billing/checkout/#{checkout_session.session_token}",
+      expired_portal_checkout_url:
+        "/billing/checkout/#{expired_portal_checkout_session.session_token}",
       org_portal_checkout_url: "/shared-billing/checkout/#{org_checkout_session.session_token}",
       revocable_member_org_slug: host_org_alpha.slug
     }
@@ -623,40 +637,46 @@ defmodule AccrueHostSeedE2E do
     %{default: default, backup: backup}
   end
 
-  defp insert_portal_checkout_session!(customer, operation_id \\ "host-browser-portal-checkout") do
+  defp insert_portal_checkout_session!(
+         customer,
+         operation_id \\ "host-browser-portal-checkout",
+         overrides \\ []
+       ) do
+    attrs = %{
+      processor: "braintree",
+      mode: "subscription",
+      ui_mode: "hosted",
+      status: "open",
+      price_id: "price_fixture",
+      line_items: [
+        %{
+          "price" => "price_fixture",
+          "quantity" => 1,
+          "amount" => "49.00",
+          "amount_minor" => 4_900
+        }
+      ],
+      success_url: "https://app.example.test/billing/success",
+      cancel_url: "https://app.example.test/billing/cancel",
+      return_url: "https://app.example.test/settings/billing",
+      operation_id: operation_id,
+      metadata: %{
+        "source" => "fixture",
+        "plan_name" => "Studio",
+        "amount_minor" => 4_900,
+        "currency" => "USD",
+        "interval" => "month",
+        "interval_count" => 1,
+        "billable_type" => customer.owner_type,
+        "billable_id" => customer.owner_id,
+        "billable_name" => customer.name || customer.email,
+        "processor" => customer.processor
+      },
+      data: %{"local_portal" => true}
+    }
+
     {:ok, session} =
-      LocalSession.create_or_reuse(customer, %{
-        processor: "braintree",
-        mode: "subscription",
-        ui_mode: "hosted",
-        status: "open",
-        price_id: "price_fixture",
-        line_items: [
-          %{
-            "price" => "price_fixture",
-            "quantity" => 1,
-            "amount" => "49.00",
-            "amount_minor" => 4_900
-          }
-        ],
-        success_url: "https://app.example.test/billing/success",
-        cancel_url: "https://app.example.test/billing/cancel",
-        return_url: "https://app.example.test/settings/billing",
-        operation_id: operation_id,
-        metadata: %{
-          "source" => "fixture",
-          "plan_name" => "Studio",
-          "amount_minor" => 4_900,
-          "currency" => "USD",
-          "interval" => "month",
-          "interval_count" => 1,
-          "billable_type" => customer.owner_type,
-          "billable_id" => customer.owner_id,
-          "billable_name" => customer.name || customer.email,
-          "processor" => customer.processor
-        },
-        data: %{"local_portal" => true}
-      })
+      LocalSession.create_or_reuse(customer, Map.merge(attrs, Enum.into(overrides, %{})))
 
     session
   end

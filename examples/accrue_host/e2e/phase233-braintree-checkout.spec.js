@@ -215,6 +215,31 @@ test("unknown pricing selection recovers without selecting a default", async ({ 
   await expect(page).not.toHaveURL(/\/users\/log-in/);
 });
 
+test("expired checkout returns to billing without a payment action", async ({ page, sandboxId }) => {
+  const fixture = readFixture();
+  await installBraintreeMock(page);
+  await login(page, fixture, fixture.normal_email, sandboxId);
+
+  const completeAction = `${fixture.expired_portal_checkout_url}/complete`;
+  let paymentPostCount = 0;
+  page.on("request", (request) => {
+    if (isCheckoutPost(request, completeAction)) paymentPostCount += 1;
+  });
+
+  await page.goto(fixture.expired_portal_checkout_url);
+  await waitForLiveView(page);
+  await expect(page.locator("body")).toContainText("This checkout link has expired");
+  await expect(page.locator("#checkout-form")).toHaveCount(0);
+  await expect(page.locator("#promo-code-form")).toHaveCount(0);
+
+  const recoveryLink = page.getByRole("link", { name: "Return to billing", exact: true });
+  await expect(recoveryLink).toHaveAttribute("href", "/app/billing");
+  await recoveryLink.click();
+  await expect(page).toHaveURL(/\/app\/billing$/);
+  expect(await page.evaluate(() => window.__braintreeMockEvidence.counts.tokenize)).toBe(0);
+  expect(paymentPostCount).toBe(0);
+});
+
 test("served checkout assets cover the 16 UI states at 320px (400% zoom equivalent), and long text", async ({ page, sandboxId }) => {
   const fixture = readFixture();
   await openCheckout(page, fixture, sandboxId, {
