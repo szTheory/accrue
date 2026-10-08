@@ -127,10 +127,10 @@ Plans:
 **Plans**: 4 plans
 Plans:
 **Wave 1**
-- [ ] 235-01-PLAN.md — Visible Braintree secure-form tracer and safe retry
+- [x] 235-01-PLAN.md — Visible Braintree secure-form tracer and safe retry
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 235-02-PLAN.md — Exact host-selected offer through sign-in and trusted terms
+- [x] 235-02-PLAN.md — Exact host-selected offer through sign-in and trusted terms
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 235-03-PLAN.md — Reentrant-safe POST and LiveView checkout outcomes
