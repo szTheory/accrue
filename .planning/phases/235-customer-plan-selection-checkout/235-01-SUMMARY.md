@@ -41,14 +41,13 @@ patterns-established:
 requirements-completed: [CKO-01, CKO-02]
 coverage:
   - id: D1
-    description: "Visible mounted checkout tokenizes once, posts the nonce and context pin, then renders an authoritative server denial."
+    description: "Visible mounted checkout uses the deterministic SDK fixture to tokenize once, posts the nonce and context pin, then renders an authoritative server denial; live provider acceptance is not claimed."
     requirement: CKO-02
     verification:
       - kind: e2e
         ref: "examples/accrue_host/e2e/phase233-braintree-checkout.spec.js#mock SDK visible submit sends one nonce and renders the server disposition"
         status: pass
-    human_judgment: true
-    rationale: "The injected SDK proves the browser path and safe server denial, but it does not prove live Braintree iframe behavior or provider acceptance."
+    human_judgment: false
   - id: D2
     description: "SDK errors, invalid card input, retries, duplicate actions, abandonment, teardown, and uncertain transport preserve at most one dispatch."
     requirement: CKO-01
