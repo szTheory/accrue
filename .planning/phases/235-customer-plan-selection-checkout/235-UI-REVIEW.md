@@ -1,6 +1,6 @@
 # Phase 235 — UI Review
 
-**Audited:** 2026-10-08  
+**Audited:** 2026-10-08 (refreshed after LiveView success redirect policy change)  
 **Baseline:** Approved `235-UI-SPEC.md`  
 **Screenshots:** Not captured — `http://localhost:8080` responded, but Playwright captures failed for desktop (1440×900), mobile (375×812), and tablet (768×1024); code-only audit  
 **Interaction captures:** off (workflow.ui_interaction_capture is false)
@@ -16,7 +16,7 @@
 | 3. Color | 2/4 | Portal surfaces/actions use semantic host tokens, while secure iframe text, error, and placeholder colors remain hard-coded. |
 | 4. Typography | 2/4 | Portal CSS uses at least nine sizes and four weights; the contract allows four sizes and two weights. |
 | 5. Spacing | 2/4 | Checkout CSS includes numerous non-scale values such as 6, 10, 12, 14, 18, 20, and 28px. |
-| 6. Experience Design | 3/4 | Expired checkout now has safe recovery and Braintree return states use scoped persisted evidence; unavailable-plan state lacks the contract's fallback action when no recovery URL exists. |
+| 6. Experience Design | 3/4 | LiveView completion now validates persisted success destinations and Braintree returns use scoped evidence; unavailable-plan state still lacks a fallback action when no recovery URL exists. |
 
 **Overall: 14/24**
 
@@ -64,6 +64,7 @@
 
 ### Pillar 6: Experience Design (3/4)
 
+- **FIXED SINCE PRIOR REVIEW:** After `LocalSession.mark_completed/1` succeeds, the LiveView completion path now accepts valid local paths and HTTPS external destinations, sends unsafe values to the Portal home, and renders success in place when the URL is missing. Focused tests cover all four branches and verify persisted completion for the HTTPS, unsafe, and missing-URL cases; this aligns the LiveView redirect policy with the existing POST destination policy. [checkout_live.ex:124](../../../accrue_portal/lib/accrue_portal/live/checkout_live.ex:124), [checkout_live.ex:155](../../../accrue_portal/lib/accrue_portal/live/checkout_live.ex:155), [checkout_controller.ex:181](../../../accrue_portal/lib/accrue_portal/controllers/checkout_controller.ex:181), [checkout_live_test.exs:246](../../../accrue_portal/test/accrue_portal/live/checkout_live_test.exs:246), [checkout_live_test.exs:316](../../../accrue_portal/test/accrue_portal/live/checkout_live_test.exs:316)
 - **FIXED SINCE PRIOR REVIEW:** Expired open sessions now render a validated `@checkout_recovery_url` link labeled “Return to billing”; Plan 05 reports that unsafe cancel URLs resolve to the safe `/billing` fallback and that the expired view makes no payment request. [checkout_live.ex:363](../../../accrue_portal/lib/accrue_portal/live/checkout_live.ex:363), [235-05-SUMMARY.md](235-05-SUMMARY.md)
 - **FIXED/EXPANDED SINCE PRIOR REVIEW:** Braintree successful returns now resolve the selected plan/selection locator to the current authorized organization, customer, and matching persisted `LocalSession`; only `completed` yields completion copy, while open/processing/uncertain stays pending and mismatches are unavailable. Plan 06's browser completion uses a fixture-backed session, not a live provider transaction. [subscription_live.ex:366](../../../examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex:366), [235-06-SUMMARY.md](235-06-SUMMARY.md)
 - The mounted checkout has distinct unavailable, denied, expired, completed, uncertain, promo, loading, card-error, and pending submission feedback. Status regions use ARIA live announcements; JS disables submission during tokenization and clears the nonce for uncertain transport failures. [checkout_live.ex:328](../../../accrue_portal/lib/accrue_portal/live/checkout_live.ex:328), [accrue_portal.js:121](../../../accrue_portal/priv/static/accrue_portal.js:121), [accrue_portal.js:255](../../../accrue_portal/priv/static/accrue_portal.js:255)
@@ -76,9 +77,12 @@
 - `.planning/phases/235-customer-plan-selection-checkout/235-CONTEXT.md`
 - `.planning/phases/235-customer-plan-selection-checkout/235-01-PLAN.md` through `235-06-PLAN.md` and corresponding summaries
 - `accrue_portal/lib/accrue_portal/live/checkout_live.ex`
+- `accrue_portal/lib/accrue_portal/controllers/checkout_controller.ex`
+- `accrue_portal/lib/accrue_portal/context.ex`
 - `accrue_portal/lib/accrue_portal/copy.ex`
 - `accrue_portal/priv/static/accrue_portal.css`
 - `accrue_portal/priv/static/accrue_portal.js`
 - `examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex`
 - `examples/accrue_host/e2e/phase233-braintree-checkout.spec.js`
+- `accrue_portal/test/accrue_portal/live/checkout_live_test.exs`
 - Prior `.planning/phases/235-customer-plan-selection-checkout/235-UI-REVIEW.md` (used only to identify stale claims; findings re-audited against current files)
