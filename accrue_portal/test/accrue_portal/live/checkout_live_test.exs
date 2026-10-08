@@ -53,16 +53,20 @@ defmodule AccruePortal.CheckoutLiveTest do
         after_accept.()
       end
 
-      {:ok,
-       struct!(Elixir.Braintree.Subscription,
-         id: "sub_bt_checkout_123",
-         plan_id: params[:plan_id],
-         payment_method_token: params[:payment_method_token],
-         status: "Active",
-         billing_period_start_date: "2024-01-01T00:00:00Z",
-         billing_period_end_date: "2024-02-01T00:00:00Z",
-         updated_at: "2024-01-01T00:00:00Z"
-       )}
+      if params[:payment_method_token] == "fake-declined-nonce" do
+        {:error, %Elixir.Braintree.ErrorResponse{message: "Processor Declined: Do Not Honor"}}
+      else
+        {:ok,
+         struct!(Elixir.Braintree.Subscription,
+           id: "sub_bt_checkout_123",
+           plan_id: params[:plan_id],
+           payment_method_token: params[:payment_method_token],
+           status: "Active",
+           billing_period_start_date: "2024-01-01T00:00:00Z",
+           billing_period_end_date: "2024-02-01T00:00:00Z",
+           updated_at: "2024-01-01T00:00:00Z"
+         )}
+      end
     end
   end
 
@@ -144,6 +148,7 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert html =~ ~s(name="promotion_code" value="")
     assert html =~ "Billed to"
     assert html =~ "Leave checkout"
+    refute html =~ "Cancel subscription"
     assert html =~ ~s(src="https://js.braintreegateway.com/web/3.132.0/js/client.min.js")
     assert html =~ ~s(integrity="#{@client_sri}")
     assert html =~ ~s(src="https://js.braintreegateway.com/web/3.132.0/js/hosted-fields.min.js")
@@ -265,6 +270,51 @@ defmodule AccruePortal.CheckoutLiveTest do
              })
 
     assert LocalSession.by_id(session.id).status == "completed"
+  end
+
+  test "query-only success markers do not complete or cancel the checkout", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer)
+
+    assert {:ok, _view, html} =
+             live(
+               sign_in_customer(conn, user),
+               "/billing/checkout/#{session.session_token}?checkout=success&success=true"
+             )
+
+    assert html =~ ~s(id="checkout-form")
+    refute html =~ "Subscription created."
+    refute html =~ "Cancel subscription"
+    assert LocalSession.by_id(session.id).status == "open"
+    refute_received {:gateway_create, _}
+  end
+
+  test "a declined card announces that no subscription was created", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer)
+    conn = sign_in_customer(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    declined_html =
+      render_hook(view, "checkout_tokenized", %{
+        "nonce" => "fake-declined-nonce",
+        "context_pin" => pin
+      })
+
+    assert declined_html =~ "Your card was declined. No subscription was created."
+    refute declined_html =~ "Subscription created."
+    assert_received {:gateway_create, "fake-declined-nonce"}
+    assert LocalSession.by_id(session.id).status == "open"
   end
 
   test "unsafe persisted success URL redirects to the portal home after completion", %{

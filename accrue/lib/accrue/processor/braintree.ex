@@ -50,8 +50,14 @@ defmodule Accrue.Processor.Braintree do
     braintree_params = build_request(params)
 
     case subscription_gateway().create(braintree_params, opts) do
-      {:ok, sub} -> {:ok, translate_subscription(sub)}
-      {:error, raw} -> {:error, to_accrue_error(raw)}
+      {:ok, sub} ->
+        {:ok, translate_subscription(sub)}
+
+      {:error, %Elixir.Braintree.ErrorResponse{} = error} ->
+        {:error, translate_charge_error(error)}
+
+      {:error, raw} ->
+        {:error, to_accrue_error(raw)}
     end
   end
 

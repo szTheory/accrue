@@ -108,16 +108,20 @@ defmodule Accrue.Processor.BraintreeTest do
 
   defmodule SubscriptionGatewayStub do
     def create(params, _opts) do
-      {:ok,
-       struct!(Elixir.Braintree.Subscription,
-         id: "sub_bt_123",
-         plan_id: params[:plan_id],
-         payment_method_token: params[:payment_method_token],
-         status: "Active",
-         billing_period_start_date: "2024-01-01T00:00:00Z",
-         billing_period_end_date: "2024-02-01T00:00:00Z",
-         updated_at: "2024-01-01T00:00:00Z"
-       )}
+      if params[:payment_method_token] == "declined-nonce" do
+        {:error, %Elixir.Braintree.ErrorResponse{message: "Processor Declined: Do Not Honor"}}
+      else
+        {:ok,
+         struct!(Elixir.Braintree.Subscription,
+           id: "sub_bt_123",
+           plan_id: params[:plan_id],
+           payment_method_token: params[:payment_method_token],
+           status: "Active",
+           billing_period_start_date: "2024-01-01T00:00:00Z",
+           billing_period_end_date: "2024-02-01T00:00:00Z",
+           updated_at: "2024-01-01T00:00:00Z"
+         )}
+      end
     end
 
     def find(id, _opts) do
@@ -396,6 +400,17 @@ defmodule Accrue.Processor.BraintreeTest do
     assert params.plan_id == "plan_pro"
     assert params.price == "30.00"
     assert params.options == %{prorate_charges: true}
+  end
+
+  test "create_subscription/2 translates a processor decline into a card error" do
+    assert {:error, %Accrue.CardError{code: "card_declined", decline_code: "do_not_honor"}} =
+             Braintree.create_subscription(
+               %{
+                 payment_method: %{vault_acquisition: %{reference: "declined-nonce"}},
+                 price: "price"
+               },
+               []
+             )
   end
 
   test "update_subscription/3 rejects quantity updates explicitly" do
