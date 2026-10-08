@@ -127,6 +127,7 @@ body {
   max-width: 720px;
   margin: 0 auto;
   padding: 32px 20px 64px;
+  min-width: 0;
 }
 
 /* --- Breadcrumb ----------------------------------------------------------- */
@@ -197,6 +198,7 @@ body {
   padding: 28px;
   box-shadow: var(--accrue-shadow);
   margin-bottom: 18px;
+  min-width: 0;
 }
 
 .portal-grid .portal-card {
@@ -206,6 +208,47 @@ body {
 .portal-card-checkout {
   display: grid;
   gap: 18px;
+}
+
+.portal-checkout-summary {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--accrue-border);
+  border-radius: var(--accrue-radius-sm);
+  background: var(--accrue-surface-muted);
+}
+
+.portal-checkout-summary h2 {
+  margin: 0;
+}
+
+.portal-checkout-summary dl {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+}
+
+.portal-checkout-summary dl > div {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.35fr) minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+
+.portal-checkout-summary dt {
+  color: var(--accrue-slate);
+  font-weight: 600;
+}
+
+.portal-checkout-summary dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--accrue-ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .portal-hero {
@@ -280,6 +323,7 @@ body {
 .portal-nav a,
 .portal-button-primary,
 .portal-button-secondary {
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -466,12 +510,16 @@ body {
 .portal-hosted-label {
   display: grid;
   gap: 6px;
+  min-width: 0;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--accrue-slate);
 }
 
 .portal-hosted-field {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
   min-height: 48px;
   padding: 12px 16px;
   border-radius: var(--accrue-radius-sm);
@@ -496,6 +544,7 @@ body {
 }
 
 .portal-inline-error {
+  min-width: 0;
   border: 1px solid color-mix(in srgb, var(--accrue-amber) 40%, transparent);
   background: color-mix(in srgb, var(--accrue-amber) 10%, transparent);
   color: var(--accrue-ink);
@@ -505,6 +554,7 @@ body {
 
 .portal-inline-error p {
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .portal-inline-error p + p {
@@ -522,11 +572,30 @@ body {
   margin: 0;
   color: var(--accrue-ink);
   font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.portal-card-checkout,
+.portal-checkout-actions,
+.portal-hosted-fields-form,
+.portal-promo-form,
+.portal-help,
+.portal-success-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /* --- Responsive --------------------------------------------------------- */
 
 @media (max-width: 700px) {
+  .portal-shell {
+    padding: 24px 12px 40px;
+  }
+
+  .portal-card-checkout {
+    padding: 18px;
+  }
+
   .portal-hero {
     flex-direction: column;
   }
@@ -548,5 +617,26 @@ body {
 
   .portal-hosted-grid .portal-hosted-label:first-child {
     grid-column: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .portal-checkout-summary {
+    padding: 12px;
+  }
+
+  .portal-checkout-summary dl > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .portal-checkout-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .portal-checkout-actions .portal-button-primary,
+  .portal-checkout-actions .portal-button-secondary {
+    width: 100%;
   }
 }

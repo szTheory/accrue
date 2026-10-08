@@ -94,6 +94,48 @@ function isCheckoutPost(request, action) {
     new URL(request.url()).pathname === new URL(action, request.url()).pathname;
 }
 
+async function assertNoHorizontalPageScroll(page, label) {
+  const widths = await page.evaluate(() => {
+    const viewport = document.documentElement.clientWidth;
+    const overflow = Array.from(document.body.querySelectorAll("*"))
+      .map((element) => ({
+        tag: element.tagName.toLowerCase(),
+        className: typeof element.className === "string" ? element.className : "",
+        right: Math.round(element.getBoundingClientRect().right),
+        width: Math.round(element.getBoundingClientRect().width)
+      }))
+      .filter((element) => element.right > viewport + 1)
+      .slice(0, 8);
+    return { viewport, document: document.documentElement.scrollWidth, overflow };
+  });
+  expect(widths.document, `${label}: document width; overflow=${JSON.stringify(widths.overflow)}`)
+    .toBeLessThanOrEqual(widths.viewport + 1);
+}
+
+async function assertVisibleWithinViewport(page, selector, viewportWidth, label) {
+  const box = await page.locator(selector).boundingBox();
+  expect(box, `${label}: ${selector} has a visible box`).toBeTruthy();
+  expect(box.x, `${label}: ${selector} left edge`).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width, `${label}: ${selector} right edge`).toBeLessThanOrEqual(viewportWidth + 1);
+}
+
+async function assertNoOverlap(page, selectors, label) {
+  const boxes = await Promise.all(selectors.map(async (selector) => ({
+    selector,
+    box: await page.locator(selector).boundingBox()
+  })));
+  for (let left = 0; left < boxes.length; left += 1) {
+    expect(boxes[left].box, `${label}: ${boxes[left].selector} is visible`).toBeTruthy();
+    for (let right = left + 1; right < boxes.length; right += 1) {
+      const a = boxes[left].box;
+      const b = boxes[right].box;
+      const overlap = Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) *
+        Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
+      expect(overlap, `${label}: ${boxes[left].selector} and ${boxes[right].selector} do not overlap`).toBe(0);
+    }
+  }
+}
+
 test("mock SDK visible submit sends one nonce and renders the server disposition", async ({ page, sandboxId }) => {
   const fixture = readFixture();
   await openCheckout(page, fixture, sandboxId);
@@ -171,6 +213,123 @@ test("unknown pricing selection recovers without selecting a default", async ({ 
   await expect(page.locator("body")).toContainText("That plan is unavailable");
   await expect(page.locator('[data-plan-id="price_basic"]')).toBeVisible();
   await expect(page).not.toHaveURL(/\/users\/log-in/);
+});
+
+test("served checkout assets cover the 16 UI states at 320px (400% zoom equivalent), and long text", async ({ page, sandboxId }) => {
+  const fixture = readFixture();
+  await openCheckout(page, fixture, sandboxId, {
+    delayMs: 700,
+    outcomes: [{ kind: "invalid" }]
+  });
+
+  const cssHref = await page.locator('link[rel="stylesheet"][href*="/assets/css-"]').getAttribute("href");
+  const jsHref = await page.locator('script[src*="/assets/js-"]').getAttribute("src");
+  expect(cssHref).toBeTruthy();
+  expect(jsHref).toBeTruthy();
+
+  const cssResponse = await page.request.get(new URL(cssHref, page.url()).toString());
+  const css = await cssResponse.text();
+  expect(cssResponse.status()).toBe(200);
+  expect(cssResponse.headers()["content-type"]).toContain("text/css");
+  expect(css).toContain(".portal-checkout-summary dl > div");
+  expect(css).toContain("overflow-wrap: anywhere");
+
+  const jsResponse = await page.request.get(new URL(jsHref, page.url()).toString());
+  expect(jsResponse.status()).toBe(200);
+  expect(jsResponse.headers()["content-type"]).toContain("javascript");
+
+  const summary = page.getByTestId("checkout-offer-summary");
+  const form = page.locator("#checkout-form");
+  await expect(summary).toHaveCount(1);
+  await expect(summary.locator("dl > div")).toHaveCount(3);
+  const trustedTerms = await summary.evaluate((element) => ({
+    name: element.dataset.planName,
+    amount: element.dataset.amountMinor,
+    currency: element.dataset.currency,
+    interval: element.dataset.interval
+  }));
+  expect(trustedTerms.name).toBeTruthy();
+  expect(trustedTerms.amount).toMatch(/^\d+$/);
+  expect(trustedTerms.currency).toBeTruthy();
+  expect(trustedTerms.interval).toBeTruthy();
+  await expect(summary).toContainText(trustedTerms.name);
+  await expect(form.locator("[data-braintree-field]")).toHaveCount(3);
+  await expect(form.locator("button[type=submit]")).toContainText("Pay");
+
+  await page.setViewportSize({ width: 320, height: 900 });
+  await assertNoHorizontalPageScroll(page, "320 CSS px mounted checkout");
+  for (const selector of [
+    '[data-testid="checkout-offer-summary"]',
+    '[data-braintree-field="number"]',
+    '[data-braintree-field="expirationDate"]',
+    '[data-braintree-field="cvv"]',
+    "#checkout-form button[type=submit]"
+  ]) {
+    await assertVisibleWithinViewport(page, selector, 320, "320 CSS px mounted checkout");
+  }
+  await assertNoOverlap(page, [
+    '[data-testid="checkout-offer-summary"]',
+    '[data-braintree-field="number"]',
+    '[data-braintree-field="expirationDate"]',
+    '[data-braintree-field="cvv"]',
+    "#checkout-form button[type=submit]"
+  ], "320 CSS px mounted checkout");
+
+  await summary.evaluate((element) => {
+    const values = element.querySelectorAll("dd");
+    values[0].textContent = "プラン名と説明を折り返すための長い Unicode 名称 🧾 ".repeat(8);
+    values[1].textContent = "顧客名と事業者名を折り返すための非常に長い文字列 🧭 ".repeat(8);
+  });
+  await form.locator("[data-braintree-error]").evaluate((element) => {
+    element.textContent = "安全な決済フィードバックを省略せず表示するための長い Unicode エラー 🧾 ".repeat(8);
+  });
+  await assertNoHorizontalPageScroll(page, "long mounted checkout content");
+  const textWidths = await page.locator(".portal-checkout-summary dd, [data-braintree-error]").evaluateAll((elements) =>
+    elements.map((element) => ({ client: element.clientWidth, scroll: element.scrollWidth }))
+  );
+  for (const width of textWidths) expect(width.scroll).toBeLessThanOrEqual(width.client + 1);
+
+  // At a 1280px display width, 400% browser zoom exposes a 320 CSS-pixel
+  // layout viewport. The 320px assertions above exercise that effective width.
+  await expect(summary).toBeVisible();
+  await expect(form.locator("button[type=submit]")).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.reload();
+  await waitForLiveView(page);
+  await page.locator("body").evaluate((body) => body.focus());
+  let reachedSubmit = false;
+  for (let index = 0; index < 32; index += 1) {
+    await page.keyboard.press("Tab");
+    reachedSubmit = await form.locator("button[type=submit]").evaluate((button) =>
+      document.activeElement === button && button.matches(":focus-visible")
+    );
+    if (reachedSubmit) break;
+  }
+  expect(reachedSubmit, "keyboard order reaches the mounted payment action").toBeTruthy();
+  expect(await form.locator("[data-braintree-error]").getAttribute("aria-live")).toBe("polite");
+
+  await page.setViewportSize({ width: 320, height: 900 });
+  await form.locator("button[type=submit]").click();
+  await expect(form.locator("[data-braintree-error]")).toContainText("Securing your card details");
+  await expect(summary).toContainText(trustedTerms.name);
+  await expect(form.locator("[data-braintree-error]")).toContainText("Check the card number");
+  await expect(form.locator("[data-braintree-error]")).toHaveAttribute("role", "status");
+  await assertNoHorizontalPageScroll(page, "checkout outcome at 320 CSS px");
+
+  await page.goto("/app/billing?checkout=cancel&plan=price_basic&selection=2e2cc9d8-62c8-40f4-8390-bd4cdd572410");
+  await waitForLiveView(page);
+  const hostedReturn = page.getByTestId("checkout-return-state");
+  await expect(hostedReturn).toContainText("Checkout was canceled");
+  await expect(hostedReturn).not.toContainText("Payment confirmed");
+  await page.setViewportSize({ width: 320, height: 900 });
+  await assertNoHorizontalPageScroll(page, "hosted return at 320 CSS px");
+  await hostedReturn.evaluate((element) => {
+    element.textContent = "Long host and provider recovery guidance wraps safely across Unicode text 日本語と英語 🧾 ".repeat(8);
+  });
+  await assertNoHorizontalPageScroll(page, "long hosted return guidance");
+  // 320 CSS pixels is the effective layout width at 400% zoom on a 1280px
+  // display; assert the served hosted return at the same constrained width.
+  await expect(hostedReturn).toBeVisible();
 });
 
 test("invalid card can be retried as a fresh customer action with one transport", async ({ page, sandboxId }) => {
