@@ -84,6 +84,23 @@ defmodule Accrue.Checkout.LocalSession do
     Repo.get_by(__MODULE__, session_token: token)
   end
 
+  @doc "Looks up one Braintree checkout operation within the supplied Customer boundary."
+  @spec for_customer_operation(Customer.t(), String.t()) :: t() | nil
+  def for_customer_operation(%Customer{id: customer_id}, operation_id)
+      when is_binary(operation_id) and byte_size(operation_id) > 0 and
+             byte_size(operation_id) <= 255 do
+    Repo.one(
+      from(session in __MODULE__,
+        where:
+          session.customer_id == ^customer_id and session.processor == "braintree" and
+            session.operation_id == ^operation_id,
+        limit: 1
+      )
+    )
+  end
+
+  def for_customer_operation(_, _), do: nil
+
   @doc "Whether a persisted checkout may be acted on at the supplied instant."
   @spec actionable?(t(), DateTime.t()) :: boolean()
   def actionable?(

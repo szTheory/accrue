@@ -33,6 +33,7 @@ defmodule AccrueHostWeb.SubscriptionLiveBraintreeTest do
     plan = Plans.get("price_basic")
     selection_id = Ecto.UUID.generate()
     session = insert_session!(customer, organization, plan, selection_id)
+    session_count = Repo.aggregate(LocalSession, :count)
     return_path = return_path(plan.id, selection_id)
 
     {:ok, view, _html} =
@@ -52,7 +53,7 @@ defmodule AccrueHostWeb.SubscriptionLiveBraintreeTest do
     end
 
     assert Repo.get!(LocalSession, session.id).status == "completed"
-    assert Repo.aggregate(LocalSession, :count) == 1
+    assert Repo.aggregate(LocalSession, :count) == session_count
   end
 
   test "Braintree handoff uses a local plan selection return without a Stripe placeholder", %{
@@ -115,11 +116,12 @@ defmodule AccrueHostWeb.SubscriptionLiveBraintreeTest do
 
     foreign_organization = AccountsFixtures.organization_fixture(%{owner: user})
     foreign_customer = insert_customer!(foreign_organization, user)
+    foreign_selection_id = Ecto.UUID.generate()
 
-    insert_session!(foreign_customer, foreign_organization, plan, selection_id)
+    insert_session!(foreign_customer, foreign_organization, plan, foreign_selection_id)
 
     for locator <- [
-          return_path(plan.id, selection_id),
+          return_path(plan.id, foreign_selection_id),
           return_path("price_pro", selection_id),
           return_path(plan.id, Ecto.UUID.generate()),
           "/app/billing?checkout=success&plan=price_basic&selection=not-a-uuid"
@@ -179,6 +181,7 @@ defmodule AccrueHostWeb.SubscriptionLiveBraintreeTest do
       line_items: [
         %{
           "price" => plan.id,
+          "quantity" => 1,
           "amount_minor" => plan.unit_amount_minor,
           "currency" => plan.currency,
           "interval" => Atom.to_string(plan.billing_cycle.unit),

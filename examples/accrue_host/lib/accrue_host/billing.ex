@@ -12,6 +12,7 @@ defmodule AccrueHost.Billing do
   alias Accrue.Billing
   alias Accrue.Billing.{Customer, PaymentMethod}
   alias Accrue.Billing.Subscription
+  alias Accrue.Checkout.LocalSession
   alias AccrueHost.Accounts.{Organization, OrganizationMembership, Scope, User}
   alias AccrueHost.Repo
 
@@ -217,6 +218,37 @@ defmodule AccrueHost.Billing do
     end
   end
 
+  @doc """
+  Resolves one Braintree checkout operation under the actor's current organization
+  membership, billing permission, and processor Customer.
+  """
+  def checkout_session_for_scope(
+        %Scope{
+          user: %User{} = actor,
+          active_organization: %Organization{id: organization_id}
+        },
+        operation_id
+      )
+      when is_binary(operation_id) and byte_size(operation_id) > 0 and
+             byte_size(operation_id) <= 255 do
+    with {:ok, organization} <- portal_organization_for(actor, to_string(organization_id)),
+         :ok <- authorize_portal_billable(actor, organization, :checkout_complete) do
+      case find_customer_for_processor(organization, "braintree") do
+        %Customer{} = customer ->
+          {:ok,
+           %{
+             customer: customer,
+             local_session: LocalSession.for_customer_operation(customer, operation_id)
+           }}
+
+        nil ->
+          {:ok, nil}
+      end
+    end
+  end
+
+  def checkout_session_for_scope(_, _), do: {:error, :forbidden}
+
   def cancel_active_organization(%Scope{} = scope, %Subscription{} = subscription, opts \\ []) do
     with {:ok, %{subscription: %Subscription{id: current_id}}} <- billing_state_for_scope(scope),
          :ok <- authorize_billing_mutation(scope),
@@ -297,6 +329,19 @@ defmodule AccrueHost.Billing do
 
     from(customer in Customer,
       where: customer.owner_type == ^billable_type and customer.owner_id == ^owner_id,
+      limit: 1
+    )
+    |> Repo.one()
+  end
+
+  defp find_customer_for_processor(%{__struct__: mod, id: id}, processor) do
+    billable_type = mod.__accrue__(:billable_type)
+    owner_id = to_string(id)
+
+    from(customer in Customer,
+      where:
+        customer.owner_type == ^billable_type and customer.owner_id == ^owner_id and
+          customer.processor == ^processor,
       limit: 1
     )
     |> Repo.one()
