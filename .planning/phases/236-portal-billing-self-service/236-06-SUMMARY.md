@@ -78,7 +78,7 @@ commits: 6
 2. **Task 2: Preserve contrast through theme changes, host locks, patches, and exit** — `5fe38525` (test), with test-registration follow-up `67dacd8e` and SDK selector alignment `cdad46b3` (test/fix)
 3. **Task 3: Reconcile the Phase 236 plan and Nyquist indexes** — `cf739ab8` (docs)
 
-**Plan metadata:** `9c735261` (GSD state, roadmap, requirement, and summary metadata commit; final metadata update follows).
+**Plan metadata:** `9c735261` records GSD state, roadmap, requirement, and summary metadata; the final metadata refresh is recorded in the last docs commit.
 
 ## Files Created/Modified
 
