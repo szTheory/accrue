@@ -26,10 +26,10 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 
 ### Checkout
 
-- [ ] **CKO-01**: Customers can complete or recover from the visible checkout form through the actual browser payment hook, with valid, invalid, provider-failure, cancellation, and retry outcomes represented truthfully.
-- [ ] **CKO-02**: Customers receive distinct, capability-aware hosted-provider and mounted-checkout handoffs and safe returns; Fake evidence is not presented as live-provider parity.
-- [ ] **CKO-03**: Both reachable checkout submission paths handle expired or completed sessions, stale promotions, and repeated submissions according to the existing contract, without claiming an unproven charge or rendering missing price as zero.
-- [ ] **CKO-04**: Customers retain their plan choice through sign-in and return; displayed charge terms come from trusted available metadata, and unknown terms or outcomes lead to a safe recovery path instead of a guessed authorization or blind resubmission.
+- [x] **CKO-01**: Customers can complete or recover from the visible checkout form through the actual browser payment hook, with valid, invalid, provider-failure, cancellation, and retry outcomes represented truthfully.
+- [x] **CKO-02**: Customers receive distinct, capability-aware hosted-provider and mounted-checkout handoffs and safe returns; Fake evidence is not presented as live-provider parity.
+- [x] **CKO-03**: Both reachable checkout submission paths handle expired or completed sessions, stale promotions, and repeated submissions according to the existing contract, without claiming an unproven charge or rendering missing price as zero.
+- [x] **CKO-04**: Customers retain their plan choice through sign-in and return; displayed charge terms come from trusted available metadata, and unknown terms or outcomes lead to a safe recovery path instead of a guessed authorization or blind resubmission.
 
 ### Portal
 
@@ -94,10 +94,10 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | ADM-06 | Phase 237 | Pending |
 | ADM-07 | Phase 238 | Pending |
 | ADM-08 | Phase 238 | Pending |
-| CKO-01 | Phase 235 | Pending |
-| CKO-02 | Phase 235 | Pending |
-| CKO-03 | Phase 235 | Pending |
-| CKO-04 | Phase 235 | Pending |
+| CKO-01 | Phase 235 | Complete |
+| CKO-02 | Phase 235 | Complete |
+| CKO-03 | Phase 235 | Complete |
+| CKO-04 | Phase 235 | Complete |
 | POR-01 | Phase 236 | Pending |
 | POR-02 | Phase 236 | Pending |
 | POR-03 | Phase 236 | Pending |

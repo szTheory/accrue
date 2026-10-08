@@ -4,17 +4,17 @@ milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 235
 current_phase_name: Customer Plan Selection & Checkout
-status: executing
-stopped_at: Completed 235-03-PLAN.md
-last_updated: "2026-10-08T12:15:19.109Z"
+status: verifying
+stopped_at: Completed 235-04-PLAN.md
+last_updated: "2026-10-08T12:34:10.620Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 235 execution started
-state_head: 62f44afe010a6247630da3188b6abeed071aa9dc
+state_head: 5c79eb0e981c862ad4484bf67791e96eaa0ad75b
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 19
-  completed_plans: 18
+  completed_plans: 19
   percent: 29
 ---
 
@@ -34,7 +34,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 Phase: 235 (Customer Plan Selection & Checkout) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-08 — Phase 235 execution started
 
 ## Performance Metrics
@@ -118,6 +118,7 @@ Last activity: 2026-10-08 — Phase 235 execution started
 | Phase 235 P01 | 20 min | 2 tasks | 3 files |
 | Phase 235 P02 | 12min | 3 tasks | 10 files |
 | Phase 235 P03 | 10min | 2 tasks | 7 files |
+| Phase 235 P04 | 17 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -231,6 +232,9 @@ Last activity: 2026-10-08 — Phase 235 execution started
 - [Phase 235]: POST and LiveView atomically claim an open, unexpired persisted session before provider work; only known rejection releases the claim.
 - [Phase 235]: Use one strict LocalSession.actionable?/2 expiry predicate and revalidate the selected promotion on the actual POST form.
 - [Phase 235]: Generic provider errors and local completion failures remain uncertain and cannot be replayed automatically.
+- [Phase 235]: Hosted return query parameters cannot establish payment completion; the host fetches and validates the Stripe session before mirroring it.
+- [Phase 235]: Same-session reconciliation takes a transaction advisory lock before projection to guarantee a single local subscription under concurrent returns.
+- [Phase 235]: Playwright uses a 320 CSS-pixel viewport to exercise the effective layout width of a 1280px display at 400% browser zoom; CSS document zoom did not model browser zoom or responsive media queries correctly.
 
 ### Pending Todos
 
@@ -301,8 +305,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T12:15:19.069Z
-Stopped at: Completed 235-03-PLAN.md
+Last session: 2026-10-08T12:34:10.579Z
+Stopped at: Completed 235-04-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
