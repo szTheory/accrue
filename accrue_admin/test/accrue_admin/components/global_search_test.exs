@@ -247,6 +247,8 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert source =~ "owner_scope == socket.assigns.current_owner_scope"
       assert source =~ "generation == socket.assigns.generation"
       assert source =~ "Task.start(fn ->"
+      assert source =~ "view_pid = self()"
+      assert source =~ "send_update(view_pid, __MODULE__,"
       assert source =~ "current_owner_scope: next_scope"
       assert source =~ "generation: socket.assigns.generation + 1"
     end

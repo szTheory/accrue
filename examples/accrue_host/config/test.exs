@@ -8,14 +8,20 @@ config :bcrypt_elixir, :log_rounds, 1
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
-config :accrue_host, :sql_sandbox, true
+if System.get_env("ACCRUE_HOST_E2E_DISABLE_SQL_SANDBOX") == "1" do
+  # The dedicated Phase 234 search browser lane exercises Task workers that
+  # need independent Repo connections. Normal test runs keep sandbox isolation.
+  config :accrue_host, :sql_sandbox, false
+else
+  config :accrue_host, :sql_sandbox, true
+  config :accrue_host, AccrueHost.Repo, pool: Ecto.Adapters.SQL.Sandbox
+end
 
 config :accrue_host, AccrueHost.Repo,
   username: System.get_env("PGUSER", "postgres"),
   password: System.get_env("PGPASSWORD", "postgres"),
   hostname: System.get_env("PGHOST", "localhost"),
   database: "accrue_host_test#{System.get_env("MIX_TEST_PARTITION")}",
-  pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: String.to_integer(System.get_env("ACCRUE_HOST_TEST_POOL_SIZE", "10"))
 
 config :accrue,

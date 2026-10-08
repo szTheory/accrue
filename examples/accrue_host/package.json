@@ -6,6 +6,7 @@
   },
   "scripts": {
     "e2e": "env -u NO_COLOR playwright test",
+    "e2e:search": "env -u NO_COLOR playwright test --config=playwright.search.config.js",
     "e2e:braintree-checkout": "ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 env -u NO_COLOR playwright test --config=playwright.braintree.config.js e2e/phase102-portal-checkout.spec.js e2e/phase233-braintree-checkout.spec.js",
     "e2e:a11y": "env -u NO_COLOR playwright test e2e/verify01-admin-a11y.spec.js",
     "e2e:mobile": "env -u NO_COLOR playwright test e2e/verify01-admin-mobile.spec.js",

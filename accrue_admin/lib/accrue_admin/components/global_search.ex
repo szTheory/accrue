@@ -116,6 +116,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
     generation = socket.assigns.generation + 1
     owner_scope = socket.assigns.current_owner_scope
     id = socket.assigns.id
+    view_pid = self()
 
     socket =
       assign(socket,
@@ -129,7 +130,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
     Task.start(fn ->
       {results, failures} = fetch_results(query, owner_scope)
 
-      send_update(__MODULE__,
+      send_update(view_pid, __MODULE__,
         id: id,
         action: "search_results",
         query: query,

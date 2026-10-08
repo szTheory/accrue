@@ -1580,6 +1580,21 @@ jobs:
           ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
         run: cd examples/accrue_host && npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
 
+      - name: Compile host for real async search lane
+        if: matrix.shard == 1
+        run: cd examples/accrue_host && ACCRUE_HOST_E2E_DISABLE_SQL_SANDBOX=1 mix compile --force
+
+      - name: Run real database-backed global search
+        if: matrix.shard == 1
+        env:
+          ACCRUE_HOST_E2E_DISABLE_SQL_SANDBOX: "1"
+          ACCRUE_HOST_BROWSER_PORT: 4102
+        run: cd examples/accrue_host && npm run e2e:search -- --workers=1
+
+      - name: Restore SQL Sandbox host compile for later browser lanes
+        if: matrix.shard == 1
+        run: cd examples/accrue_host && mix compile --force
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v7
