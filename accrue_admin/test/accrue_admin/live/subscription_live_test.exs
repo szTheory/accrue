@@ -525,6 +525,38 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Outcome not confirmed"
   end
 
+  test "definitive provider rejection is distinct from an ambiguous timeout", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    Accrue.Processor.Fake.scripted_response(
+      :cancel_subscription,
+      {:error,
+       %Accrue.APIError{message: "invalid request", code: "invalid_request", http_status: 422}}
+    )
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    render_click(element(view, "[data-role='confirm-action']"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "The provider rejected the action. No change was accepted."
+    assert html =~ "Open scoped subscription activity"
+    refute html =~ "Outcome not confirmed"
+    refute has_element?(view, "[data-role='confirm-action']")
+    refute html =~ "invalid request"
+  end
+
   test "compensation result links only to the scoped replacement and keeps the original", %{
     conn: conn
   } do
