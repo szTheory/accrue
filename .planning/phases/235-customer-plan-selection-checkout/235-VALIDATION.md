@@ -1,7 +1,7 @@
 ---
 phase: "235"
 slug: "customer-plan-selection-checkout"
-status: planned
+status: validated
 nyquist_compliant: true
 wave_0_complete: false
 created: "2026-10-08"
@@ -21,7 +21,7 @@ created: "2026-10-08"
 | **Config file** | `accrue_portal/mix.exs`; `examples/accrue_host/playwright.braintree.config.js` |
 | **Quick run command** | `cd accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs test/accrue_portal/live/checkout_live_discount_test.exs test/accrue_portal/checkout_context_test.exs` |
 | **Full suite command** | `cd accrue_portal && mix test`; `cd examples/accrue_host && npm run e2e:braintree-checkout` |
-| **Estimated runtime** | Not measured during research; record actual CI/runtime evidence when the phase runs |
+| **Estimated runtime** | Focused Portal suite: 2.84s in local run (26 tests); browser lane runs at wave level (12/12 passed) |
 
 ---
 
@@ -40,14 +40,14 @@ The mapping uses executable plan/task/wave IDs. The browser command is the exist
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 235-01 Task 1 | 235-01 | 1 | CKO-01, CKO-02 | T-235-01 | Visible official Hosted Fields path tokenizes and sends one nonce through actual transport; denied context has no form | Browser integration | `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ spec exists; submit assertions to extend | ⬜ pending |
-| 235-01 Task 2 | 235-01 | 1 | CKO-01 | T-235-02 | Duplicate click, SDK failure, cancellation and uncertain response never replay nonce; fresh retry resets fields | Browser integration | `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ spec exists; recovery assertions to extend | ⬜ pending |
-| 235-02 Task 1 | 235-02 | 2 | CKO-04 | T-235-03 | Exact host offer/customer/billable/processor survive sign-in and duplicate return, with fresh host authorization | Host LiveView + browser | `cd examples/accrue_host && mix test test/accrue_host_web/live/subscription_live_test.exs && npm run e2e:braintree-checkout` | ✅ files exist; assertions to extend | ⬜ pending |
-| 235-02 Task 2 | 235-02 | 2 | CKO-03, CKO-04 | T-235-04 | Trusted exact terms render; unknown/ambiguous terms fail closed without zero-price guess | Portal LiveView | `cd accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs` | ✅ file exists; assertions to extend | ⬜ pending |
-| 235-03 Task 1 | 235-03 | 3 | CKO-03 | T-235-05, T-235-06, T-235-07 | POST reauthorizes, claims one operation and reports accepted-but-unconfirmed action honestly | LocalSession + controller ExUnit | `cd accrue && mix test test/accrue/checkout/local_session_test.exs && cd ../accrue_portal && mix test test/accrue_portal/checkout_context_test.exs` | ✅ files exist; assertions to extend | ⬜ pending |
-| 235-03 Task 2 | 235-03 | 3 | CKO-01, CKO-03 | T-235-05, T-235-06, T-235-07 | LiveView shares expiry, promotion, concurrency and uncertain-outcome rules with POST | Portal LiveView + context ExUnit | `cd accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs test/accrue_portal/live/checkout_live_discount_test.exs test/accrue_portal/checkout_context_test.exs` | ✅ files exist; assertions to extend | ⬜ pending |
-| 235-04 Task 1 | 235-04 | 4 | CKO-02 | T-235-08, T-235-09 | Stripe hosted return refetches provider evidence; Braintree stays mounted; duplicate returns are idempotent | Facade + host ExUnit | `cd accrue && mix test test/accrue/checkout_test.exs test/accrue/billing/checkout_session_facade_test.exs && cd ../examples/accrue_host && mix test test/accrue_host_web/live/subscription_live_test.exs` | ✅ files exist; assertions to extend | ⬜ pending |
-| 235-04 Task 2 | 235-04 | 4 | CKO-01, CKO-02, CKO-03, CKO-04 | T-235-10 | Served assets, all 16 UI states, 320 CSS px, 400% zoom, keyboard/focus/live status and host theme stay usable | Browser integration + existing required CI job | `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ lane exists; assertions to extend | ⬜ pending |
+| 235-01 Task 1 | 235-01 | 1 | CKO-01, CKO-02 | T-235-01 | Visible official Hosted Fields path tokenizes and sends one nonce through actual transport; denied context has no form | Browser integration | `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ spec exists; assertions pass | ✅ green |
+| 235-01 Task 2 | 235-01 | 1 | CKO-01 | T-235-02 | Duplicate click, SDK failure, cancellation and uncertain response never replay nonce; fresh retry resets fields | Browser integration | `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ spec exists; assertions pass | ✅ green |
+| 235-02 Task 1 | 235-02 | 2 | CKO-04 | T-235-03 | Exact host offer/customer/billable/processor survive sign-in and duplicate return, with fresh host authorization | Host LiveView + browser | `cd examples/accrue_host && mix test test/accrue_host_web/live/subscription_live_test.exs && npm run e2e:braintree-checkout` | ✅ files exist; assertions pass | ✅ green |
+| 235-02 Task 2 | 235-02 | 2 | CKO-03, CKO-04 | T-235-04 | Trusted exact terms render; unknown/ambiguous terms fail closed without zero-price guess | Portal LiveView | `cd accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs` | ✅ file exists; assertions pass | ✅ green |
+| 235-03 Task 1 | 235-03 | 3 | CKO-03 | T-235-05, T-235-06, T-235-07 | POST reauthorizes, claims one operation and reports accepted-but-unconfirmed action honestly | LocalSession + controller ExUnit | `cd accrue && mix test test/accrue/checkout/local_session_test.exs && cd ../accrue_portal && mix test test/accrue_portal/checkout_context_test.exs` | ✅ files exist; assertions pass | ✅ green |
+| 235-03 Task 2 | 235-03 | 3 | CKO-01, CKO-03 | T-235-05, T-235-06, T-235-07 | LiveView shares expiry, promotion, concurrency and uncertain-outcome rules with POST | Portal LiveView + context ExUnit | `cd accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs test/accrue_portal/live/checkout_live_discount_test.exs test/accrue_portal/checkout_context_test.exs` | ✅ files exist; assertions pass | ✅ green |
+| 235-04 Task 1 | 235-04 | 4 | CKO-02 | T-235-08, T-235-09 | Stripe hosted return refetches provider evidence; Braintree stays mounted; duplicate returns are idempotent | Facade + host ExUnit | `cd accrue && mix test test/accrue/checkout_test.exs test/accrue/billing/checkout_session_facade_test.exs && cd ../examples/accrue_host && mix test test/accrue_host_web/live/subscription_live_test.exs` | ✅ files exist; assertions pass | ✅ green |
+| 235-04 Task 2 | 235-04 | 4 | CKO-01, CKO-02, CKO-03, CKO-04 | T-235-10 | Served assets, all 16 UI states, 320 CSS px, 400% zoom, keyboard/focus/live status and host theme stay usable | Browser integration + existing required CI job | `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ lane exists; assertions pass | ✅ green |
 
 ---
 
@@ -66,10 +66,18 @@ All acceptance behaviors have automated verification paths. Do not require confi
 ## Validation Sign-Off
 
 - [x] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
 - [x] Wave 0 covers all MISSING references
 - [x] No watch-mode flags
-- [ ] Feedback latency < 30s for focused checks; full browser lane is wave-level
-- [x] `nyquist_compliant: true` set in frontmatter after plan/task mapping; execution remains pending
+- [x] Feedback latency < 30s for focused checks (documented quick run measured 2.84s); full browser lane is wave-level
+- [x] `nyquist_compliant: true` set in frontmatter after plan/task mapping and execution
 
-**Approval:** pending
+**Approval:** approved 2026-10-08 (automated acceptance; no manual UAT)
+
+## Validation Audit 2026-10-08
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
