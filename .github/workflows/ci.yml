@@ -1611,6 +1611,11 @@ jobs:
           path: examples/accrue_host/test-results
           if-no-files-found: ignore
 
+      - name: Run configured Braintree return ExUnit suite
+        env:
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE: "1"
+        run: cd examples/accrue_host && mix test test/accrue_host_web/live/subscription_live_braintree_test.exs
+
       - name: Refresh Braintree checkout browser fixture
         run: |
           cd examples/accrue_host
