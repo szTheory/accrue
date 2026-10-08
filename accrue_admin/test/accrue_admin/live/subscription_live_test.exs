@@ -444,7 +444,10 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     render_submit(view, "step_up_submit", %{"code" => "123456"})
 
     assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 1
-    assert length(TestRepo.all(from(event in Event, where: event.type == "subscription.canceled"))) == 1
+
+    assert length(
+             TestRepo.all(from(event in Event, where: event.type == "subscription.canceled"))
+           ) == 1
   end
 
   test "changing the staged action while step-up is open discards the old continuation", %{
@@ -472,6 +475,96 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
     assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
     assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+  end
+
+  test "possibly submitted timeout stays uncertain and offers only scoped evidence", %{
+    conn: conn
+  } do
+    %{subscription: scoped_subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "uncertain-org",
+        email: "uncertain@example.com"
+      })
+
+    Accrue.Processor.Fake.scripted_response(:cancel_subscription, {:error, :timeout})
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "uncertain-org",
+        active_organization_slug: "uncertain-org",
+        admin_organization_ids: ["uncertain-org"]
+      )
+
+    {:ok, view, _html} =
+      live(conn, "/billing/subscriptions/#{scoped_subscription.id}?org=uncertain-org")
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    render_click(element(view, "[data-role='confirm-action']"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Outcome not confirmed"
+    assert html =~ "Open scoped subscription activity"
+    assert html =~ "org=uncertain-org"
+    refute has_element?(view, "[data-role='confirm-action']")
+    refute html =~ ":timeout"
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 1
+
+    html = render_click(view, "cancel_pending_action")
+    assert html =~ "Outcome not confirmed"
+  end
+
+  test "compensation result links only to the scoped replacement and keeps the original", %{
+    conn: conn
+  } do
+    %{subscription: subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "compensation-org",
+        email: "compensation@example.com"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "compensation-org",
+        active_organization_slug: "compensation-org",
+        admin_organization_ids: ["compensation-org"]
+      )
+
+    {:ok, view, _html} =
+      live(conn, "/billing/subscriptions/#{subscription.id}?org=compensation-org")
+
+    render_click(element(view, "button[role='menuitem']", "Comp this subscription"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "comp_subscription", "new_price_id" => "price_basic"}
+    )
+
+    render_click(element(view, "[data-role='confirm-action']"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Compensation created a replacement subscription"
+    assert html =~ "Open replacement subscription"
+    assert html =~ "org=compensation-org"
+    assert html =~ subscription.id
+    refute html =~ "foreign-org"
   end
 
   test "drawer-hosted item removal requires step-up before deleting the item", %{
