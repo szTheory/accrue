@@ -313,6 +313,29 @@ defmodule AccruePortal.CheckoutLiveTest do
              })
   end
 
+  test "missing success URL renders completed success in place", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer, success_url: nil)
+    conn = sign_in_customer(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    completed_html =
+      render_hook(view, "checkout_tokenized", %{
+        "nonce" => "fake-valid-nonce",
+        "context_pin" => pin
+      })
+
+    assert completed_html =~ "Subscription created."
+    assert LocalSession.by_id(session.id).status == "completed"
+  end
+
   test "accepted provider result with failed completion persistence shows uncertainty", %{
     conn: conn,
     user: user,
