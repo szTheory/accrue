@@ -245,12 +245,58 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute html =~ "Due now"
   end
 
+  test "lifecycle states stay distinct from scheduled cancellation and collection pause", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    scheduled_end = DateTime.add(DateTime.utc_now(), 86_400, :second)
+
+    cases = [
+      {:trialing, %{}, "Trialing"},
+      {:incomplete, %{}, "Incomplete"},
+      {:incomplete_expired, %{}, "Incomplete expired"},
+      {:past_due, %{}, "Past due"},
+      {:unpaid, %{}, "Unpaid"},
+      {:canceled, %{}, "Canceled"},
+      {:active, %{cancel_at_period_end: true, current_period_end: scheduled_end}, "Active"},
+      {:active, %{pause_collection: %{"behavior" => "void"}}, "Active"}
+    ]
+
+    for {status, fields, lifecycle} <- cases do
+      TestRepo.get!(Subscription, subscription.id)
+      |> Subscription.force_status_changeset(Map.merge(fields, %{status: status}))
+      |> TestRepo.update!()
+
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+      assert html =~ lifecycle
+
+      case fields do
+        %{cancel_at_period_end: true} ->
+          assert html =~ "Scheduled for"
+
+        %{pause_collection: _pause} ->
+          assert html =~ "Collection"
+          assert html =~ "Paused"
+
+        _ ->
+          :ok
+      end
+    end
+  end
+
   test "subscription identity and lifecycle precede actions and raw disclosure", %{
     conn: conn,
     subscription: subscription
   } do
+    subscription
+    |> Subscription.changeset(%{
+      data: Map.put(subscription.data || %{}, "payment_method_token", "secret_token_value")
+    })
+    |> TestRepo.update!()
+
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
     {identity, _} = :binary.match(html, "detail-header-metadata-actions")
     {lifecycle, _} = :binary.match(html, "Subscription lifecycle summary")
@@ -261,6 +307,10 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert lifecycle < action
     assert action < billing
     assert billing < raw
+
+    html = render_click(view, "load_raw_json", %{})
+    refute html =~ "payment_method_token"
+    refute html =~ "secret_token_value"
     assert html =~ "Cancellation"
   end
 

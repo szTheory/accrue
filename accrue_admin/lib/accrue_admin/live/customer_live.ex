@@ -262,7 +262,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
       current_owner_scope={assigns[:current_owner_scope]}
       active_organization_name={@active_organization_name}
     >
-      <section class="ax-page">
+      <section class="ax-page ax-customer-detail-page">
         <Breadcrumbs.breadcrumbs
           items={[
             %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope)},
@@ -279,11 +279,24 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
         <Detail.summary_card eyebrow="Customer detail" title={customer_label(@customer)}>
           <:facts>
-            <span><%= @customer.processor_id %></span>
+            <span><strong>Owner</strong> <%= owner_summary(@customer) %></span>
+            <span><strong>Processor customer ID</strong> <%= @customer.processor_id || "Not shown" %></span>
             <span>locale <%= @customer.preferred_locale || "--" %></span>
             <span>timezone <%= @customer.preferred_timezone || "--" %></span>
           </:facts>
         </Detail.summary_card>
+
+        <nav class="ax-tabs ax-customer-peer-tabs" aria-label="Customer peer record sets">
+          <a
+            :for={tab <- peer_record_set_links(@customer, @tab_counts, @admin_mount_path, @current_owner_scope, @return_path)}
+            href={tab.href}
+            class={["ax-tab", @tab == tab.id && "ax-tab-active"]}
+            aria-current={if(@tab == tab.id, do: "page", else: nil)}
+          >
+            <span><%= tab.label %></span>
+            <span :if={tab.count} class="ax-tab-count"><%= tab.count %></span>
+          </a>
+        </nav>
 
         <FlashGroup.flash_group flashes={@flashes} />
 
@@ -370,18 +383,6 @@ defmodule AccrueAdmin.Live.CustomerLive do
           </details>
 
           <section class="ax-detail-section" aria-label="Customer record sets">
-            <nav class="ax-tabs" aria-label="Customer peer record sets">
-              <a
-                :for={tab <- peer_record_set_links(@customer, @tab_counts, @admin_mount_path, @current_owner_scope, @return_path)}
-                href={tab.href}
-                class={["ax-tab", @tab == tab.id && "ax-tab-active"]}
-                aria-current={if(@tab == tab.id, do: "page", else: nil)}
-              >
-                <span><%= tab.label %></span>
-                <span :if={tab.count} class="ax-tab-count"><%= tab.count %></span>
-              </a>
-            </nav>
-
             <%= case @tab do %>
               <% "subscriptions" -> %>
                 <div :for={subscription <- @peer_records} class="ax-list-row">
@@ -403,7 +404,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                   >
                     <%= invoice.number || invoice.processor_id || invoice.id %>
                   </a>
-                  <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor || 0} currency={invoice.currency || "usd"} customer={@customer} />
+                  <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor} currency={invoice.currency} customer={@customer} />
                 </div>
                 <p :if={@peer_records == []} class="ax-body"><%= customer_peer_empty_body(:invoices) %></p>
 
@@ -415,7 +416,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                   >
                     <%= charge.processor_id || charge.id %>
                   </a>
-                  <MoneyFormatter.money_formatter amount_minor={charge.amount_cents || 0} currency={charge.currency || "usd"} customer={@customer} />
+                  <MoneyFormatter.money_formatter amount_minor={charge.amount_cents} currency={charge.currency} customer={@customer} />
                 </div>
                 <p :if={@peer_records == []} class="ax-body"><%= customer_peer_empty_body(:payments) %></p>
             <% end %>

@@ -403,7 +403,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
     # UX-02: single ax-page shell on customer detail
-    assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
+    assert Regex.scan(~r/class="ax-page(?: |")/, html) |> length() == 1
     assert html =~ "Detail Customer"
     assert html =~ "Tax and ownership"
     assert html =~ "Subscriptions"
@@ -412,6 +412,25 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert html =~ "Tax risk detected"
     assert html =~ "1 subscription needs attention"
     assert html =~ "1 invoice needs attention"
+  end
+
+  test "customer identity and peer tabs precede secondary detail sections", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
+
+    {identity, _} = :binary.match(html, "Customer detail")
+    {owner, _} = :binary.match(html, "Owner")
+    {tabs, _} = :binary.match(html, "Customer peer record sets")
+    {secondary, _} = :binary.match(html, "Payment methods")
+    assert identity < owner
+    assert owner < tabs
+    assert tabs < secondary
+    assert html =~ "Subscriptions"
+    assert html =~ "Invoices"
+    assert html =~ "Payments"
   end
 
   test "customer loader denies rows outside the active organization" do

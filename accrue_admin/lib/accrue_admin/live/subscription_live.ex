@@ -261,7 +261,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         </Detail.summary_card>
 
         <% health = detail_health_summary(@subscription) %>
-        <section class={["ax-detail-health-summary ax-detail-health-summary-top", "ax-detail-health-summary-" <> health.tone]} aria-label="Subscription lifecycle summary">
+        <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Subscription lifecycle summary">
           <div class="ax-detail-health-copy" role="status">
             <span class="ax-detail-health-label">Lifecycle</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
@@ -269,26 +269,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
           <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
-          <div class="ax-detail-health-actions" aria-label="Primary billing action from health summary">
-            <a
-              class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "return_to" => @return_path})}
-            >
-              Work global invoice queue
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
-            >
-              Fix customer setup
-            </a>
-            <a
-              class="ax-button ax-button-warning ax-button-sm ax-detail-recovery-shortcut"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Review dunning after invoices
-            </a>
-          </div>
         </section>
 
         <section class="ax-detail-priority-actions ax-detail-priority-actions-compact" aria-label="Global invoice queue workspace">
@@ -329,7 +309,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <section class="ax-inline-worklist ax-detail-open-invoice-queue" aria-label="Global open invoice queue preview">
           <div class="ax-inline-worklist-copy">
             <strong>Global open-invoice queue rows</strong>
-            <span>Each row opens one invoice record; use the full queue link to work every open invoice to $0.00.</span>
+            <span>Each row opens one invoice record; the full queue link lists every open invoice for review.</span>
           </div>
           <ol :if={@global_open_invoice_queue != []} class="ax-detail-open-invoice-list">
             <li :for={invoice <- @global_open_invoice_queue}>
@@ -489,7 +469,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 </a>
               </div>
               <span class="ax-detail-hint-chip">
-                Global queue works every open invoice to $0.00; local context is secondary.
+                Global queue lists every open invoice for review; local context is secondary.
               </span>
             </div>
           </details>
@@ -1036,7 +1016,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp summary_health_facts(subscription) do
     [
-      %{label: "Lifecycle", value: lifecycle_health_label(subscription)},
       %{
         label: "Plan / price",
         value: current_price_id(subscription) || not_projected_copy(:price)

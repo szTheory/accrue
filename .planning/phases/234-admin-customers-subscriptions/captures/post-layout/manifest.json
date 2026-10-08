@@ -1,0 +1,74 @@
+{
+  "phase": "234-admin-customers-subscriptions",
+  "captured_at": "2026-10-08T01:18:42.079Z",
+  "source_head_sha": "0d093a47221e220e6fa3e54bbf82916f05b88a6b",
+  "sources": {
+    "accrue_admin/lib/accrue_admin/live/customer_live.ex": {
+      "sha256": "cff274be2dcf3b9270df5195cf645134114ce0dc757e9c42d93a43f465bef526",
+      "bytes": 50935
+    },
+    "accrue_admin/lib/accrue_admin/live/subscription_live.ex": {
+      "sha256": "30f300fb340df1d861f95236e5ea140b4c0da8fb4fd350be1cdb0dde462253fb",
+      "bytes": 75413
+    },
+    "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": {
+      "sha256": "657d1999abcf8f6949ecdcea81d84d4f81b0f90bb6c97362859a5230d3378070",
+      "bytes": 23255
+    },
+    "accrue_admin/assets/css/app.css": {
+      "sha256": "1d0735b53763f102448ba612c143f5ed8f4189c06564186e5c61433365ef3920",
+      "bytes": 189128
+    }
+  },
+  "baseline_manifest_sha256": "6a7869aabca51ac12b6665d48f3a48ece5cc3f997d2d424999ed32ff9fc3560b",
+  "assets": {
+    "built": {
+      "sha256": "179159f4b5af9d6396156112ee9f7ba375f17daea5988f0e0903bc1745654fd8",
+      "bytes": 129329
+    },
+    "served": {
+      "sha256": "179159f4b5af9d6396156112ee9f7ba375f17daea5988f0e0903bc1745654fd8",
+      "bytes": 129329,
+      "url": "/admin/assets/css-c7918333f589aa99ee39f41ab1d48df2"
+    }
+  },
+  "fixture": {
+    "owner": "accrue-e2e-alpha",
+    "customer_id": "9b9d88bd-f585-401f-8acc-a21eaf116db4",
+    "subscription_id": "8b911f67-0b5c-4f3d-9a38-c152cf3e59d3"
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "theme": "default host theme",
+  "states": {
+    "customer-detail.png": {
+      "route": "/admin/customers/9b9d88bd-f585-401f-8acc-a21eaf116db4?org=accrue-e2e-alpha",
+      "state": "customer detail"
+    },
+    "subscription-detail.png": {
+      "route": "/admin/subscriptions/8b911f67-0b5c-4f3d-9a38-c152cf3e59d3?org=accrue-e2e-alpha",
+      "state": "subscription detail"
+    },
+    "subscription-drawer.png": {
+      "route": "/admin/subscriptions/8b911f67-0b5c-4f3d-9a38-c152cf3e59d3?org=accrue-e2e-alpha",
+      "state": "subscription detail action drawer if available"
+    }
+  },
+  "capture_command": "npm run e2e -- e2e/phase234-post-layout.spec.js --workers=1",
+  "images": {
+    "customer-detail.png": {
+      "sha256": "bd218acf51fca3adf8d02f6db7b6875f505df4600440e085ab660c452f11d348",
+      "bytes": 325833
+    },
+    "subscription-detail.png": {
+      "sha256": "00e56cd8789670676c1ce3929471e487ab94892bd911ca1804f0231db61a2fb7",
+      "bytes": 470578
+    },
+    "subscription-drawer.png": {
+      "sha256": "473a405be97cdb33f38fef695da2f0c090b043b222036da6264046836f6c161b",
+      "bytes": 301298
+    }
+  }
+}

@@ -6837,3 +6837,50 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   transition: var(--ax-transition-base);
 }
 .ax-toggle[aria-checked="true"] .ax-toggle-thumb { transform: translateX(1rem); }
+.ax-customer-peer-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-sm);
+  margin-block: var(--ax-space-md);
+}
+
+.ax-customer-peer-tabs .ax-tab {
+  min-height: 2.75rem;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+
+.ax-subscription-detail-page .ax-summary-fact {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ax-subscription-detail-page .ax-summary-facts {
+  gap: var(--ax-space-xs) var(--ax-space-md);
+  line-height: var(--ax-leading-normal);
+}
+
+.ax-subscription-detail-page .ax-detail-health-summary {
+  order: initial;
+  width: 100%;
+  margin-block: var(--ax-space-md);
+  padding: var(--ax-space-md);
+}
+
+.ax-subscription-detail-page .ax-detail-health-copy {
+  gap: var(--ax-space-xs) var(--ax-space-sm);
+  padding: var(--ax-space-xs);
+  font: var(--ax-type-body-font);
+  line-height: var(--ax-leading-normal);
+}
+
+.ax-customer-detail-page .ax-summary-facts {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 40rem) {
+  .ax-customer-peer-tabs .ax-tab {
+    flex: 1 1 8rem;
+  }
+}
