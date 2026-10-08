@@ -90,10 +90,10 @@ Plans:
 Plans:
 **Wave 1**
 - [x] 234-01-PLAN.md — Scoped subscription list, detail and return trace; immutable pre-layout capture
-- [ ] 234-02-PLAN.md — Factual Home and bounded global search
+- [x] 234-02-PLAN.md — Factual Home and bounded global search
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 234-07-PLAN.md — Scoped customer and related-record return journey
+- [x] 234-07-PLAN.md — Scoped customer and related-record return journey
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 234-03-PLAN.md — Lifecycle truth and readable record hierarchy
@@ -188,7 +188,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 233. Shared Direction & Portal Contract | 7/7 | Complete    | 2026-10-07 |
-| 234. Admin Customers & Subscriptions | 1/7 | In Progress | 2026-10-07 |
+| 234. Admin Customers & Subscriptions | 3/7 | In Progress | 2026-10-08 |
 | 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
 | 236. Portal Billing Self-Service | 0/TBD | Not started | - |
 | 237. Admin Invoices, Payments & Recovery | 0/TBD | Not started | - |
