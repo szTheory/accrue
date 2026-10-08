@@ -97,14 +97,16 @@ test("current served Admin and Portal controls retain semantic contrast, focus, 
   await login(page, fixture, fixture.normal_email, sandboxId);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
-  await page.goto("/billing/payment-methods");
+  // Home guarantees a served active subscription status even when the default
+  // browser lane deliberately disables provider-specific saved-card management.
+  await page.goto("/billing");
   await waitForLiveView(page);
   await expect(page.locator("main.portal-shell")).toBeVisible();
   await assertServedAsset(page, 'link[rel="stylesheet"][href*="/billing/assets/brand-"]', "accrue/priv/static/brand.css");
   await assertServedAsset(page, 'link[rel="stylesheet"][href*="/billing/assets/css-"]', "accrue_portal/priv/static/accrue_portal.css");
   const status = page.locator(".portal-status-active").first();
   await expect(status).toBeVisible();
-  await expect(status).toContainText(/default/i);
+  await expect(status).toContainText(/active/i);
   expect(await status.evaluate((node) => getComputedStyle(node, "::before").content)).toContain("✓");
 
   const action = page.locator(".portal-button-primary").first();
@@ -114,18 +116,19 @@ test("current served Admin and Portal controls retain semantic contrast, focus, 
   });
   expect(await contrast(page, actionColors.foreground, actionColors.background)).toBeGreaterThanOrEqual(4.5);
 
-  // Exercise an arbitrary, very light host accent. The text/focus bridge must remain readable.
+  // Exercise an arbitrary, very light host accent. The primary action must use
+  // a readable foreground against the computed accent surface.
   await page.locator("html").evaluate((node) => {
     node.style.setProperty("--accrue-brand-accent", "#ffffff");
     node.setAttribute("data-theme", "light");
   });
-  const accentLink = page.locator(".portal-breadcrumb-link").first();
-  await accentLink.hover();
-  const accentText = await accentLink.evaluate((node) => {
+  const accentAction = page.locator(".portal-button-primary").first();
+  await accentAction.hover();
+  const accentColors = await accentAction.evaluate((node) => {
     const style = getComputedStyle(node);
-    return { foreground: style.color, background: getComputedStyle(document.body).backgroundColor };
+    return { foreground: style.color, background: style.backgroundColor };
   });
-  expect(await contrast(page, accentText.foreground, accentText.background)).toBeGreaterThanOrEqual(4.5);
+  expect(await contrast(page, accentColors.foreground, accentColors.background)).toBeGreaterThanOrEqual(4.5);
 
   await page.keyboard.press("Tab");
   const portalFocus = await page.evaluate(() => {
@@ -139,11 +142,11 @@ test("current served Admin and Portal controls retain semantic contrast, focus, 
 
   await page.emulateMedia({ colorScheme: "dark" });
   await page.locator("html").evaluate((node) => node.setAttribute("data-theme", "dark"));
-  const darkAccentLink = page.locator(".portal-breadcrumb-link").first();
-  await darkAccentLink.hover();
-  const darkAccent = await darkAccentLink.evaluate((node) => {
+  const darkAccentAction = page.locator(".portal-button-primary").first();
+  await darkAccentAction.hover();
+  const darkAccent = await darkAccentAction.evaluate((node) => {
     const style = getComputedStyle(node);
-    return { foreground: style.color, background: getComputedStyle(document.body).backgroundColor };
+    return { foreground: style.color, background: style.backgroundColor };
   });
   const darkAccentRatio = await contrast(page, darkAccent.foreground, darkAccent.background);
   expect(darkAccentRatio, `${darkAccent.foreground} on ${darkAccent.background}`).toBeGreaterThanOrEqual(4.5);

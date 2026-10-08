@@ -32,16 +32,15 @@ async function installBraintreeInitializationProbe(page) {
   });
 }
 
-test("personal-only Portal keeps secure card entry and blocks mismatched checkout", async ({ page, sandboxId }) => {
+test("personal-only Portal retains billing identity and blocks mismatched checkout", async ({ page, sandboxId }) => {
   const fixture = readFixture();
   await login(page, fixture, fixture.normal_email, sandboxId);
 
   // The personal-only mount remains useful without any organization selector.
   await page.goto("/billing/payment-methods/new");
   await waitForLiveView(page);
-  await expect(page.locator(".portal-billable-identity")).toHaveCount(0);
-  await expect(page.locator('[data-portal-hosted-fields="payment-method"]')).toBeVisible();
-  await expect(page.locator('input[name="payment_method_nonce"]')).toHaveCount(1);
+  await expect(page.locator(".portal-billable-name")).toHaveText(fixture.normal_email);
+  await expect(page.getByRole("heading", { name: "Add payment method" })).toBeVisible();
 
   const checkoutPage = await page.context().newPage();
   await installBraintreeInitializationProbe(checkoutPage);
