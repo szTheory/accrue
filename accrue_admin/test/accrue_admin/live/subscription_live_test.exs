@@ -450,6 +450,33 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
            ) == 1
   end
 
+  test "reloading a pending confirmation does not replay the mutation", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    path = "/billing/subscriptions/#{subscription.id}"
+    {:ok, first_view, _html} = live(conn, path)
+    render_click(element(first_view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        first_view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    assert render_click(element(first_view, "[data-role='confirm-action']")) =~ "Step-up required"
+
+    {:ok, reconnected_view, html} = live(conn, path)
+
+    refute html =~ "Step-up required"
+    refute has_element?(reconnected_view, "[data-role='confirm-action']")
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+  end
+
   test "changing the staged action while step-up is open discards the old continuation", %{
     conn: conn,
     subscription: subscription
