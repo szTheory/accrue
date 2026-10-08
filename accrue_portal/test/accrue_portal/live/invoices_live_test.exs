@@ -36,8 +36,10 @@ defmodule AccruePortal.InvoicesLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/invoices")
 
+    assert html =~ customer.email
     assert html =~ current_invoice.number
     assert html =~ current_invoice.hosted_url
+    assert html =~ "Showing up to 20 recent invoices."
     refute html =~ foreign_invoice.number
     refute html =~ foreign_invoice.hosted_url
   end

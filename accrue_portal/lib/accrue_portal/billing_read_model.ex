@@ -65,6 +65,9 @@ defmodule AccruePortal.BillingReadModel do
     |> Repo.all()
   end
 
+  @doc "Returns a successful, customer-scoped invoice read outcome."
+  def invoice_result(%Customer{} = customer), do: {:ok, invoices(customer)}
+
   def charges(%Customer{id: customer_id}) do
     from(charge in Charge,
       where: charge.customer_id == ^customer_id,

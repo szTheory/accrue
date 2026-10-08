@@ -10,11 +10,15 @@ defmodule AccruePortal.Live.InvoicesLive do
   def mount(_params, %{"accrue_portal" => portal}, socket) do
     case Authorize.context(socket, :read) do
       {:ok, context} ->
+        {:ok, invoices} = BillingReadModel.invoice_result(context.customer)
+
         {:ok,
          socket
          |> assign(:page_title, Copy.invoices_page_title())
          |> assign(:portal, portal)
-         |> assign(:invoices, BillingReadModel.invoices(context.customer))}
+         |> assign(:current_context, context)
+         |> assign(:billing_identity, billing_identity(context))
+         |> assign(:invoices, invoices)}
 
       {:error, _reason} ->
         {:ok,
@@ -35,10 +39,16 @@ defmodule AccruePortal.Live.InvoicesLive do
       ]} />
       <section class="portal-card">
         <h1>{Copy.invoices_heading()}</h1>
+        <p :if={@billing_identity}>
+          Invoices for <strong>{@billing_identity}</strong>.
+        </p>
         <div :if={@invoices == []} class="portal-empty">
           <strong>{Copy.invoices_empty_title()}</strong>
           <p>{Copy.invoices_empty_body()}</p>
         </div>
+        <p :if={@invoices != []}>
+          {Copy.invoices_recent_note()}
+        </p>
         <ul :if={@invoices != []} class="portal-list">
           <li :for={invoice <- @invoices}>
             <div>
@@ -66,4 +76,13 @@ defmodule AccruePortal.Live.InvoicesLive do
   defp status_variant(:uncollectible), do: "portal-status-warning"
   defp status_variant(status) when status in [:open, :draft], do: "portal-status-info"
   defp status_variant(_status), do: nil
+
+  defp billing_identity(context) do
+    [
+      context.display_name,
+      context.customer && context.customer.name,
+      context.customer && context.customer.email
+    ]
+    |> Enum.find(fn value -> is_binary(value) and String.trim(value) != "" end)
+  end
 end

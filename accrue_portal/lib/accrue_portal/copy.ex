@@ -236,6 +236,8 @@ defmodule AccruePortal.Copy do
     "When your first invoice is issued, it will appear here. Paid and open invoices are kept for at least 7 years."
   end
 
+  def invoices_recent_note, do: "Showing up to 20 recent invoices."
+
   def invoices_status_label, do: "Status"
   def invoices_open_cta, do: "Open invoice"
 
