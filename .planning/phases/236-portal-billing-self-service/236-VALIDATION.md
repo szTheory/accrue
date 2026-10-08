@@ -48,6 +48,7 @@ The planner must replace “Assigned by plan” with actual plan/task/wave IDs a
 | 236-01-T2, 236-02-T1, 236-03-T1, 236-04-T1 | 236-01, 236-02, 236-03, 236-04 | 1, 2, 3 | POR-04 | T-236-05, T-236-07, T-236-10 | Displayed outcomes reflect provider/result state and uncertainty | LiveView/controller | `cd accrue_portal && mix test.ci` | Existing empty/unavailable, POST result, checkout decline/uncertainty, and announcement assertions | ✓ green |
 | 236-02-T2, 236-05-T2 | 236-02, 236-05 | 2, 4 | POR-05 | T-236-04 | Payment fields stay provider-hosted; app only receives a nonce | LiveView + served browser | `cd accrue_portal && mix test.ci`; `cd examples/accrue_host && ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js` | Existing direct-route and served Hosted Fields lifecycle assertions | ✓ green |
 | 236-06-T1, 236-06-T2 | 236-06 | 5 | POR-05 | T-236-13, T-236-14 | Served add-card style handoff, contrast, host locks, context-pin patch, and teardown; deterministic SDK mock does not prove live Braintree iframe rendering | Served browser | `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` (3 passed); `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 ACCRUE_HOST_PORTAL_THEME=light npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` (2 passed); `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 ACCRUE_HOST_PORTAL_THEME=dark npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` (2 passed) | `examples/accrue_host/e2e/phase236-portal-self-service.spec.js` | ✓ green |
+| 261008-lbv-T1/T2 | 261008-lbv | 1 | POR-05 | T-236-13, T-236-14 | Direct context-pin route remains disabled until setup is ready; post-mount ViewHook wrapper covers both pending SDK create stages, stale cleanup success/failure, theme refresh, pending theme styles, active teardown with concurrent LiveView update, and pagehide non-revival; malformed-token colors pass >=4.5:1 per actual field surface. Teardown errors fail closed with refresh guidance. Deterministic SDK mock and framework wrapper do not prove live provider iframe rendering. | Served browser | `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` (10 passed); `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 ACCRUE_HOST_PORTAL_THEME=light npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` (7 passed); `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 ACCRUE_HOST_PORTAL_THEME=dark npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` (7 passed); mock evidence only; live provider iframe rendering unverified | `examples/accrue_host/e2e/phase236-portal-self-service.spec.js` | ✓ green |
 | 236-03-T2, 236-05-T2 | 236-03, 236-05 | 3, 4 | POR-06 | T-236-07 | Known and unknown lifecycle states use truthful labels and claims | ExUnit + served browser | `cd accrue_portal && mix test.ci`; `cd examples/accrue_host && ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js` | Existing lifecycle matrix and served route assertions | ✓ green |
 | 236-04-T1, 236-04-T2 | 236-04 | 2 | POR-07 | T-236-08, T-236-09 | Return destinations are validated; query strings do not establish success | Controller + LiveView | `cd accrue_portal && mix test.ci` | Existing destination matrix, query-only status, decline, and uncertainty assertions | ✓ green |
 
@@ -64,7 +65,7 @@ The planner must replace “Assigned by plan” with actual plan/task/wave IDs a
 
 ## Manual-Only Verifications
 
-All in-scope acceptance behaviors should have automated ExUnit/LiveView or served-browser verification. No manual-only UAT is planned. A provider-only fidelity claim may be handed off only if deterministic fixtures cannot prove it and the exact external limitation is recorded under D-08.
+All stable, in-scope acceptance behaviors have automated ExUnit/LiveView or served-browser verification; no human UAT is required for phase acceptance. The only manual-only evidence boundary is live Braintree iframe rendering fidelity: the repeatable suite injects a deterministic SDK mock, so it proves application-supplied style values and lifecycle behavior but cannot establish the appearance or behavior inside Braintree's cross-origin iframe. Keep that claim explicitly unverified unless checked against the live provider. This is an external fidelity limitation, not a gap in the deterministic acceptance contract.
 
 ---
 
@@ -94,3 +95,39 @@ All in-scope acceptance behaviors should have automated ExUnit/LiveView or serve
 | Gaps found | 7 |
 | Resolved | 7 |
 | Escalated | 0 |
+
+## Validation Addendum — 261008-lbv
+
+| Metric | Count |
+|---|---|
+| Focused commands passed | 3 |
+| Browser results recorded | 3 positive results: 10, 7, and 7 passed |
+| Malformed-token themes checked | 2 (forced light and forced dark) |
+| Post-mount lifecycle stages checked | 2 (client creation and Hosted Fields creation) |
+| Teardown failure paths checked | 2 (async setup and theme refresh stay disabled; no replacement starts) |
+| Theme timing paths checked | 2 (style snapshot during create; concurrent LiveView update during active teardown) |
+| Manual-only verification added | 0 |
+
+The direct context-pin URL patch is observed separately. The lifecycle regression invokes the mounted hook through LiveView's `ViewHook.__updated` wrapper to simulate a post-mount DOM update; it does not claim that the URL-only patch itself invokes `updated()`. The deterministic SDK mock proves application-side style handoff and lifecycle behavior, not live provider iframe rendering. The final security re-audit returned `SECURED`: 15/15 threats closed, zero open.
+
+## Nyquist Recheck 2026-10-08
+
+Audited all six Phase 236 plan/summary pairs, POR-01 through POR-07, and the existing task verification map. Stable acceptance coverage is already present in ExUnit/LiveView and the blocking Phase 236 Playwright CI lane; no additional test file was needed. Re-ran the focused Hosted Fields browser matrix against the current suite:
+
+| Host theme | Automated command | Result |
+|---|---|---|
+| Default | `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` | 10 passed (17.1s) |
+| Forced light | `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 ACCRUE_HOST_PORTAL_THEME=light npm run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` | 7 passed (14.8s) |
+| Forced dark | `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 ACCRUE_HOST_PORTAL_THEME=dark npm run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'` | 7 passed (18.2s) |
+
+The first sandboxed browser launch was blocked by local Chromium process permissions; the same default run succeeded with browser process access, followed by successful forced-light and forced-dark runs. CI registers the default served contract and both forced-theme Hosted Fields runs as blocking checks. The mocked SDK remains the evidence boundary; no live-provider rendering assertion is inferred from these results.
+
+## Shared Hook Regression — Phase 235 Checkout
+
+The changed Hosted Fields hook is also used by the existing checkout flow. Re-ran its served Braintree contract after the Phase 236 lifecycle changes:
+
+| Command | Result |
+|---|---|
+| `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase233-braintree-checkout.spec.js --workers=1` | 12 passed (23.0s) |
+
+The run covers tokenization and nonce transport, retries, teardown, abandonment, and return handling through the shared hook. It uses the deterministic SDK fixture and does not claim live Braintree iframe fidelity.

@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.63
 milestone_name: Admin and Portal UI refinement
-current_phase: 236
-current_phase_name: Portal Billing Self-Service
-status: verifying
-stopped_at: Completed 236-06-PLAN.md
-last_updated: "2026-10-08T19:15:53.072Z"
+current_phase: 237
+current_phase_name: Admin Invoices, Payments & Recovery
+status: planning
+stopped_at: Phase 236 complete, ready to plan Phase 237
+last_updated: "2026-10-08T23:23:35.720Z"
 last_activity: 2026-10-08
-last_activity_desc: Phase 236 gap-closure plan completed
-state_head: cdad46b3722ba486f890ca84704d41b834f5fcee
+last_activity_desc: Phase 236 complete, transitioned to Phase 237
+state_head: adcdbbfa92be164b4847dfc8fa0bf788ccdafd1e
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 27
   completed_plans: 27
-  percent: 43
+  percent: 57
 ---
 
 # Project State
@@ -27,21 +27,21 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 236 — Portal Billing Self-Service
-**Progress:** [████░░░░░░] 43% (2 of 7 milestone phases complete)
+**Progress:** [██████░░░░] 57% (2 of 7 milestone phases complete)
 **Planned work completed:** [████████████████████] 15/15 plans (100%); remaining phases await planning.
 
 ## Current Position
 
-Phase: 236 (Portal Billing Self-Service) — READY TO EXECUTE
-Plan: 6 of 6
-Status: Phase complete — ready for verification
-Last activity: 2026-10-08 — Phase 236 execution started
+Phase: 237 — Admin Invoices, Payments & Recovery
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-08 — Phase 236 complete, transitioned to Phase 237
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 59
+- Total plans completed: 65
 - Average duration: —
 - Total execution time: —
 
@@ -59,6 +59,7 @@ Last activity: 2026-10-08 — Phase 236 execution started
 | 233 | 7 | - | - |
 | 234 | 8 | - | - |
 | 235 | 6 | - | - |
+| 236 | 6 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -302,6 +303,7 @@ None yet.
 | 261008-cb9 | Repair two warnings that make the required Admin CI test command fail with --warnings-as-errors: keep all handle_event/3 clauses contiguous by moving prepare_staged_action/2 below them, and rename the unused view test binding to _view. Run the Admin package CI test command and record the change as a quick task. Keep Phase 235 artifacts and checkout source untouched. | 2026-10-08 | 795114d9 | — | [261008-cb9-repair-two-warnings-that-make-the-requir](./quick/261008-cb9-repair-two-warnings-that-make-the-requir/) |
 | 261008-cjc | Repair Playwright CI: automate the existing test-only step-up code in the webhook replay journey and make Phase 234 saved post-layout evidence read-only by default | 2026-10-08 | 519ef895 | Verified | [261008-cjc-repair-playwright-ci-automate-the-existi](./quick/261008-cjc-repair-playwright-ci-automate-the-existi/) |
 | 261008-ffy | Repair Phase 235 regression gaps; isolate Braintree tests, restore processor-neutral facade docs, and add focused CI proof | 2026-10-08 | 42c28c17 | Verified | [261008-ffy-repair-phase-235-regression-gaps-by-isol](./quick/261008-ffy-repair-phase-235-regression-gaps-by-isol/) |
+| 261008-lbv | Repair Phase 236 Hosted Fields security gaps: retry stale asynchronous setup after LiveView updates and guarantee readable malformed-token styles with automated browser coverage | 2026-10-08 | adcdbbfa | complete | [261008-lbv-fix-phase-236-security-audit-gaps-retry-](./quick/261008-lbv-fix-phase-236-security-audit-gaps-retry-/) |
 
 ## Deferred Items
 
@@ -335,7 +337,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-08T19:15:52.764Z
-Stopped at: Completed 236-06-PLAN.md
+Stopped at: Phase 236 complete, ready to plan Phase 237
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

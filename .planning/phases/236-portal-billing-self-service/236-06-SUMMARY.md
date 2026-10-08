@@ -119,13 +119,34 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-Phase 236's POR-05 theme gap is closed with recurring, deterministic served-route browser checks. The only remaining evidence boundary is explicitly documented: real provider iframe rendering is not established by the SDK mock.
+Phase 236's POR-05 theme and Hosted Fields lifecycle gaps are covered by recurring, deterministic served-route browser checks. The remaining evidence boundary is explicitly documented: real provider iframe rendering is not established by the SDK mock.
 
 ## Self-Check: PASSED
 
 - Summary file exists.
 - Task commits `56f28efc`, `5fe38525`, `cf739ab8`, `67dacd8e`, and `cdad46b3`, plus metadata commit `9c735261`, are ancestors of the current plan head.
 - Roadmap and Nyquist index checker passed after the final selector implementation and three focused browser results were recorded.
+
+## Quick Follow-up 261008-lbv — Security Audit Findings
+
+The follow-up changes address the two Hosted Fields findings raised after the original summary was written:
+
+- **T-236-13:** malformed or low-contrast `--accrue-ink` and `--accrue-slate` values now fall back to a normalized foreground chosen against all served secure-field backgrounds. Input, placeholder, and invalid styles each meet the 4.5:1 browser assertion in forced light and forced dark modes.
+- **T-236-14:** a post-mount LiveView hook update during pending client or Hosted Fields creation now serializes cleanup and retries only after both SDK teardown callbacks succeed. Theme changes during pending field creation invalidate stale style snapshots and recreate with current styles. Active theme refresh blocks LiveView remounts until teardown settles. In all paths, teardown errors do not start replacement fields; the form remains disabled with refresh guidance, nonce state stays empty, and pagehide cannot revive pending fields.
+
+Observed focused browser results:
+
+- Default Hosted Fields matrix: **10 passed**.
+- Forced-light Hosted Fields matrix: **7 passed**.
+- Forced-dark Hosted Fields matrix: **7 passed**.
+
+The direct context-pin route was observed with delayed client creation and remains disabled until setup completes. Browser inspection showed that the URL-only context-pin patch does not itself call the already-mounted hook's update callback. Separate regressions invoke the mounted hook through LiveView's `ViewHook.__updated` framework wrapper during async creation and active theme teardown. The deterministic SDK mock proves application-side style handoff and lifecycle behavior; it does not prove live provider iframe rendering. The final security re-audit returned `SECURED` with 15/15 threats closed and zero open.
+
+The shared Hosted Fields hook also passed the Phase 235 checkout regression after the final lifecycle changes: the served Braintree fixture suite completed 12/12 tests. This protects the checkout consumer of the same hook; it remains deterministic SDK-mock evidence rather than live-provider proof.
+
+### Post-review hardening
+
+The incremental source reviews found three lifecycle gaps: teardown callback errors were ignored, a theme change during pending setup could retain stale styles, and a LiveView update during active theme teardown could mount overlapping fields. All three are fixed. A failed cleanup keeps the form disabled with refresh guidance, pending style snapshots are invalidated, and updates cannot remount until active teardown completes. Served-browser regressions cover each ordering and failure mode. The final incremental code review is clean, and the final security re-audit closed all 15 registered threats.
 
 ---
 *Phase: 236-portal-billing-self-service*

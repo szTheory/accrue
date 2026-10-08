@@ -2,7 +2,7 @@
 
 **Audited:** 2026-10-08
 **Baseline:** Approved [236-UI-SPEC.md](236-UI-SPEC.md) and decisions in [236-CONTEXT.md](236-CONTEXT.md)
-**Screenshots:** Not captured (server at `http://localhost:8080` answered, but Playwright failed for desktop 1440×900, mobile 375×812, and tablet 768×1024; code-only audit)
+**Screenshots:** Not captured for the Portal. `localhost:8080` answered but served the Traefik dashboard; project-target desktop, mobile, and tablet captures were unavailable.
 **Interaction captures:** off (workflow.ui_interaction_capture is false)
 
 ---
@@ -11,22 +11,34 @@
 
 | Pillar | Score | Key Finding |
 |--------|-------|-------------|
-| 1. Copywriting | 3/4 | Main empty-state copy matches; dashboard read failures offer no retry action. |
-| 2. Visuals | 3/4 | Home metric numerals are styled larger than the page heading, weakening the specified heading-first hierarchy. |
-| 3. Color | 2/4 | Hosted Fields use hard-coded light-theme colors instead of host semantic/theme colors. |
-| 4. Typography | 2/4 | CSS uses more than the four specified sizes and two weights, including 32px/700 metric numerals. |
-| 5. Spacing | 2/4 | Multiple layout values (14, 18, 20, 28px) fall outside the declared spacing scale. |
-| 6. Experience Design | 3/4 | State handling and confirmations are strong, but dashboard failures have no safe recovery action and visual interaction proof is unavailable. |
+| 1. Copywriting | 3/4 | Empty-state copy is contract-aligned, but dashboard recovery and payment-method failure copy remain vague. |
+| 2. Visuals | 3/4 | Page structure encodes the specified anchors, but the 32px/700 dashboard metrics compete with the 26px/600 page heading; Portal screenshots were unavailable. |
+| 3. Color | 3/4 | Semantic host colors remain in the shell and Hosted Fields now pass automated contrast assertions in default, forced-light, and forced-dark browser runs; live provider iframe appearance remains outside the mock. |
+| 4. Typography | 2/4 | The stylesheet uses at least nine rendered sizes and weights 400/500/600/700 against the four-size, two-weight contract. |
+| 5. Spacing | 2/4 | Repeated values such as 14px, 18px, 20px, and 28px diverge from the declared 4/8/16/24/32/48/64px scale. |
+| 6. Experience Design | 3/4 | Served-browser tests cover secure-field contrast and lifecycle, but dashboard failures lack an in-page recovery action. |
 
-**Overall: 15/24**
+**Overall: 16/24**
+
+---
+
+## Verification Evidence
+
+- Default/system Hosted Fields browser matrix: **10 passed**.
+- Host-forced light Hosted Fields matrix: **7 passed**.
+- Host-forced dark Hosted Fields matrix: **7 passed**.
+- These deterministic browser checks assert application-supplied Braintree styles against actual rendered field backgrounds, placeholder and invalid text, labels/help contrast, malformed-token fallbacks, theme refresh, context updates, nonce clearing, pending behavior, and teardown ordering.
+- The SDK mock does not prove Braintree's live cross-origin iframe rendering. That is an explicit provider boundary in the plan and summary, not an outstanding human UAT request. The implementation does not claim that mock evidence establishes live-provider fidelity.
+- Static screenshot probing against `localhost:8080` reached a Traefik 3.7.1 dashboard, so no screenshot from that service is used as Portal evidence. No valid Portal desktop/mobile/tablet captures were available.
+- Human visual polish is not a roadmap acceptance gate. No subjective visual judgment is outstanding for Phase 236 acceptance; any optional brand-presentation review would be separate from the executable acceptance criteria.
 
 ---
 
 ## Top 3 Priority Fixes
 
-1. **Theme Hosted Fields from host tokens and active color scheme** — card entry text and placeholder contrast can fail in host dark/custom themes — derive the Hosted Fields foreground, placeholder, and invalid colors from the same semantic theme roles used by the Portal.
-2. **Bring typography back to the approved four sizes and two weights** — metric values and labels create hierarchy that diverges from the contract — map page heading/body/label/metadata and weights to 26/16/14/12px and 600/400; remove or explicitly contract any additional display role.
-3. **Make dashboard read failures actionable** — customers cannot recover from a failed subscription read from the dashboard — add a safe retry or relevant navigation link while retaining the unavailable state and never rendering it as empty.
+1. **Make dashboard read failure actionable** — customers cannot recover from an unavailable dashboard read without reloading or navigating away — provide a safe retry or relevant route while keeping the unavailable state distinct from empty data.
+2. **Align typography to the approved roles** — several type sizes and weights make metric values compete with the page anchor — map ordinary roles to 12/14/16/26px and 400/600, or amend the contract for a specifically justified display role.
+3. **Normalize recurring spacing values** — off-scale values weaken the promised rhythm across shell, cards, and forms — replace recurring 14/18/20/28px gaps/padding with the approved scale or document bounded component exceptions in the contract.
 
 ---
 
@@ -34,44 +46,49 @@
 
 ### Pillar 1: Copywriting (3/4)
 
-- **PASS evidence** — The core home and collection empty-state strings match the contract: home “Welcome” / “You don't have a subscription yet.” (`accrue_portal/lib/accrue_portal/copy.ex:59-60`), subscription empty text (`:65-69`), payment method empty text (`:223-227`), and invoice empty text/next step (`:288-294`). The invoice empty state also avoids a retention promise.
-- **WARNING** — Dashboard unavailable copy only says “Billing data is unavailable. Try again later.” (`accrue_portal/lib/accrue_portal/copy.ex:57`), while the subscription unavailable block renders no retry or recovery link (`accrue_portal/lib/accrue_portal/live/home_live.ex:99-103`). Replace “later” with a concrete safe next step and expose a retry/navigation action.
-- **WARNING** — Payment method operation failures are generic (“Unable to delete payment method.” / “Unable to update default payment method.”; `accrue_portal/lib/accrue_portal/copy.ex:248-251`). They do not say that the change was not submitted as the contract asks for denied changes (`236-UI-SPEC.md`, Copywriting Contract). Use outcome-specific copy that distinguishes denial from uncertainty.
-- **NEEDS HUMAN JUDGMENT** — “Switch account” is rendered when `switch_path` exists (`accrue_portal/lib/accrue_portal/layouts.ex:61-67`). Whether the host-provided destination makes the selected billing context clear is content/context dependent and could not be judged without the rendered host flow. Confirm its accessible name and destination context with a configured host.
+- **PASS evidence** — Home and collection empty-state strings match the contract: home “Welcome” / “You don't have a subscription yet.” (`accrue_portal/lib/accrue_portal/copy.ex:59-60`), subscription (`:65-69`), payment method (`:223-227`), and invoice (`:288-294`). Invoice copy avoids a retention guarantee.
+- **WARNING** — Dashboard unavailable copy says “Billing data is unavailable. Try again later.” (`accrue_portal/lib/accrue_portal/copy.ex:57`); its unavailable subscription block has no retry or recovery link (`accrue_portal/lib/accrue_portal/live/home_live.ex:99-119`). Give the customer a concrete next step and an in-page retry or navigation action.
+- **WARNING** — Payment-method failures use “Unable to delete payment method.” and “Unable to update default payment method.” (`accrue_portal/lib/accrue_portal/copy.ex:248-251`). The contract calls for denied changes to state that they were not submitted and provide a safe retry/navigation path. Use outcome-specific copy to distinguish denial from an uncertain provider result.
+- **PASS evidence** — Secure-field tokenization errors name what to check and state that no payment was submitted on generic tokenization failure (`accrue_portal/priv/static/accrue_portal.js:270-279`).
 
 ### Pillar 2: Visuals (3/4)
 
-- **WARNING** — The home contract says “Account overview” and billed-entity context lead, with counts supporting them. The metric number style is 32px and weight 700 (`accrue_portal/priv/static/accrue_portal.css:475-481`), larger/heavier than the 26px h1 (`:299-305`), so the three count cards can compete with the page anchor. Reduce metric emphasis. **NEEDS HUMAN JUDGMENT:** confirm the resulting page hierarchy in rendered captures.
-- **WARNING** — Static captures did not succeed, so actual focus appearance, host-branded layout, and desktop/mobile/tablet hierarchy could not be inspected. The responsive CSS reflows navigation and hero at 700px (`accrue_portal/priv/static/accrue_portal.css:677-723`), but code alone does not establish the 320px contract for actual content and host themes.
-- **PASS evidence** — Topbar retains the billed identity and wraps long values (`accrue_portal/lib/accrue_portal/layouts.ex:56-67`, `accrue_portal/priv/static/accrue_portal.css:41-60`); keyboard focus selectors are present (`accrue_portal/priv/static/accrue_portal.css:416-425`). Theme-picker controls have accessible names (`accrue_portal/lib/accrue_portal/layouts.ex:75-121`).
+- **WARNING** — The contract makes “Account overview” and billed-entity context the home anchor, with counts supporting it. Metric numerals render at 32px/700 (`accrue_portal/priv/static/accrue_portal.css:475-479`), above the 26px/600 h1 (`:299-305`), so count cards can compete with the page heading. Reduce metric emphasis or explicitly establish the intended display role in the contract.
+- **WARNING** — The implementation has responsive reflow and long-value wrapping (`accrue_portal/priv/static/accrue_portal.css:652-752`), but no valid Phase 236 Portal screenshot was captured to inspect desktop/tablet/mobile hierarchy or the 320px layout visually. Existing automated browser assertions provide executable responsive/overflow coverage; the missing screenshot is an audit-evidence limitation, not a request for subjective UAT.
+- **PASS evidence** — The billed identity wraps long values (`accrue_portal/lib/accrue_portal/layouts.ex:56-67`; `accrue_portal/priv/static/accrue_portal.css:41-60`), keyboard focus styles exist (`:416-425`), and the three theme controls have accessible names (`accrue_portal/lib/accrue_portal/layouts.ex:75-123`).
 
-### Pillar 3: Color (2/4)
+### Pillar 3: Color (3/4)
 
-- **PASS evidence** — The main stylesheet uses host semantic surface, ink, border, accent, and status tokens (`accrue_portal/priv/static/accrue_portal.css:14-18, 230-235, 381-408, 512-522`), and links/primary actions use accent roles rather than spreading accent across all controls. Statuses also have text labels in the Portal markup and shape cues in CSS.
-- **WARNING** — Hosted Fields override that system with fixed `#111418`, `#B42318`, and `#5D6A73` (`accrue_portal/priv/static/accrue_portal.js:267-281`). This ignores configured host palette and active light/dark/system theme; the contract explicitly requires secure-field labels/help/errors to remain legible across these themes. Use validated semantic theme values and verify contrast against bright host accents.
-- **WARNING** — Color contrast against arbitrary configured host accents is not established by source inspection or captured rendering. Theme role mapping exists in the layout (`accrue_portal/lib/accrue_portal/layouts.ex:182-198`), but there is no evidence here that the effective accent text/contrast bridge meets 4.5:1 for normal text and 3:1 for focus boundaries across host themes.
+- **PASS evidence** — Portal surfaces, text, borders, and host actions use semantic tokens (`accrue_portal/priv/static/accrue_portal.css:14-18, 230-235, 381-408, 512-522`); the host theme bridge sanitizes configured accent/font values before emitting CSS (`accrue_portal/lib/accrue_portal/layouts.ex:182-219`). Statuses also have text labels and shape cues.
+- **PASS evidence** — The prior fixed light-theme Hosted Fields palette has been replaced with computed field-background and semantic-token-derived values in `hostedFieldStyles` (`accrue_portal/priv/static/accrue_portal.js:364-412`). Current Playwright runs passed the 4.5:1 assertions for input, placeholder, invalid text, rendered labels, and help text for all three fields under default/system, forced-light, forced-dark, and malformed-token fallback cases (`examples/accrue_host/e2e/phase236-portal-self-service.spec.js:166-221`; focused matrix results above).
+- **WARNING** — The deterministic SDK mock captures the style object supplied by the application; it cannot establish how the live cross-origin Braintree iframe paints those styles. This is the documented provider evidence boundary, not a failing phase acceptance claim or human UAT requirement (`236-06-SUMMARY.md`, key decision and verification notes).
+- **WARNING** — Browser proof checks the secure-field and associated text contrast, but there is no reported ratio assertion for every host accent/focus boundary in every overall Portal theme. Keep semantic-role coverage and extend executable assertions only if a concrete token pairing remains unverified; do not reopen the passing Hosted Fields matrix without new evidence.
 
 ### Pillar 4: Typography (2/4)
 
-- **WARNING** — The contract permits four sizes (12, 14, 16, 26px) and weights 400/600. The stylesheet uses at least 12, 13, 14, 15, 16, 17, 19, 26, and 32px equivalents; examples include 13px billable identity (`accrue_portal/priv/static/accrue_portal.css:47-49`), 15px subtitle (`:326-329`), 19px h2 (`:307-312`), and 32px metric (`:475-479`). Consolidate to the declared roles or amend the contract with approved exceptions.
-- **WARNING** — Weights 400, 500, 600, and 700 are present: inline Hosted Fields use 400 (`accrue_portal/priv/static/accrue_portal.js:270-274`), links use 500 (`accrue_portal/priv/static/accrue_portal.css:343-348`), and the wordmark/metrics use 700 (`:83-86`, `:475-479`). Restrict styles to 400/600 per the contract.
-- **PASS evidence** — Body line height is 1.5 and ordinary Portal controls inherit body sizing; the embedded field input explicitly requests 16px (`accrue_portal/priv/static/accrue_portal.css:14-20`, `accrue_portal/priv/static/accrue_portal.js:267-275`).
+- **WARNING** — The contract permits 12, 14, 16, and 26px with weights 400/600. The stylesheet uses 12, 13, 14, 15, 16, 17, 19, 26, and 32px equivalents: 13px billable identity (`accrue_portal/priv/static/accrue_portal.css:47-49`), 15px subtitle (`:326-329`), 19px h2 (`:307-312`), and 32px metric (`:475-479`) are examples. Consolidate to the declared roles or add approved exceptions to the contract.
+- **WARNING** — Weights 400, 500, 600, and 700 are used: 500 appears on breadcrumbs and ordinary links (`accrue_portal/priv/static/accrue_portal.css:200, 215, 343-348`); 700 appears on the wordmark and metric (`:83-86, 475-479`). Restrict weights to 400/600 or define a supported exception.
+- **PASS evidence** — Body line-height is 1.5 and embedded secure-field input text requests 16px (`accrue_portal/priv/static/accrue_portal.css:14-20`; `accrue_portal/priv/static/accrue_portal.js:364-392`).
 
 ### Pillar 5: Spacing (2/4)
 
-- **WARNING** — The scale is xs 4, sm 8, md 16, lg 24, xl 32, 2xl 48, 3xl 64px. The stylesheet adds recurring off-scale values: 14px topbar padding (`accrue_portal/priv/static/accrue_portal.css:31-38`), 18px section margins and card gaps (`:220-236`, `:244-247`), 20px hero gap (`:290-295`), and 28px card padding (`:230-236`). Normalize these to scale values (or document bounded exceptions) to maintain consistent rhythm.
-- **WARNING** — Responsive card padding adds another 18px exception (`accrue_portal/priv/static/accrue_portal.css:702-708`); checkout and inline errors use 12/14px values (`:249-256`, `:620-627`). These are not shown to be mapped to package-local authoritative tokens. Audit the complete spacing set and use the local mapping consistently.
-- **PASS evidence** — The layout includes narrow-screen rules and long-content wrapping (`accrue_portal/priv/static/accrue_portal.css:652-752`), but no screenshot was captured to verify the 320 CSS px acceptance condition.
+- **WARNING** — The approved scale is 4/8/16/24/32/48/64px. Recurrent exceptions include 14px topbar padding (`accrue_portal/priv/static/accrue_portal.css:31-38`), 18px section margins and card/form gaps (`:218-247`), a 20px hero gap (`:290-295`), and 28px card padding (`:230-236`). Normalize these recurring values or document justified bounded exceptions.
+- **WARNING** — Additional values include 10/12/14px control and error padding (`accrue_portal/priv/static/accrue_portal.css:598-627`) and responsive 18px checkout padding (`:702-708`). Audit package CSS as a set and map spacing to the approved scale consistently.
+- **PASS evidence** — Narrow-layout and wrapping rules are present (`accrue_portal/priv/static/accrue_portal.css:652-752`). Served browser coverage recorded by Phase 05 asserts 320px overflow and long-text behavior; this review did not rerun those unchanged tests.
 
 ### Pillar 6: Experience Design (3/4)
 
-- **WARNING** — Home dashboard read failures produce “Subscriptions unavailable” and unavailable metric labels (`accrue_portal/lib/accrue_portal/live/home_live.ex:99-119`) with no retry action. A customer cannot recover without leaving/reloading the page; provide an explicit, safe retry or navigation path.
-- **WARNING** — Payment-method unavailable reads use `role="status"` / polite live announcements (`accrue_portal/lib/accrue_portal/live/payment_methods_live.ex:115-117`), while invoice read failures use `role="alert"` (`accrue_portal/lib/accrue_portal/live/invoices_live.ex:50-52`). Confirm routine unavailable reads are consistently announced at the intended urgency; reserve alert for urgent errors.
-- **WARNING** — Screenshot/interaction proof is absent: static Playwright attempts failed at all three required viewports, and interaction capture is configured off. Thus keyboard confirmation behavior, actual focus movement, 320px overflow, reduced motion, theme patches, and announcements remain code-derived rather than observed in this audit.
-- **PASS evidence** — The implementation distinguishes successful-empty and unavailable reads, provides explicit cancellation confirmations with Escape handling and focus restoration (`accrue_portal/lib/accrue_portal/live/subscriptions_live.ex:28-64, 114-123`; `subscription_live.ex:65-104`), disables secure submit until fields are available (`add_payment_method_live.ex:116-130`), and has reduced-motion CSS (`accrue_portal/priv/static/accrue_portal.css:755-762`). These patterns support a 3 rather than a lower score.
+- **WARNING** — Dashboard read failures render unavailable labels but provide no retry action (`accrue_portal/lib/accrue_portal/live/home_live.ex:99-119`). A customer cannot recover in place; add a safe retry or relevant navigation.
+- **WARNING** — The phase-wide contract asks for polite status on routine outcomes and alert semantics for urgent errors. Payment-method unavailable reads use `role="status"` (`accrue_portal/lib/accrue_portal/live/payment_methods_live.ex:115-117`), while invoice read failures use `role="alert"` (`accrue_portal/lib/accrue_portal/live/invoices_live.ex:50-52`). Review urgency consistency and reserve assertive alerts for urgent failures.
+- **PASS evidence** — Secure Hosted Fields interaction has fresh browser evidence: all three matrices passed; direct-route styles, contrast, malformed token fallbacks, pending/validation states, nonce clearing, retry ordering, stale-resource teardown failure, theme refresh, and page-exit teardown are asserted in `examples/accrue_host/e2e/phase236-portal-self-service.spec.js:166-432, 659-720`. The mock is deterministic and provider-independent.
+- **PASS evidence** — Existing phase browser assertions cover theme, bright accents, keyboard focus, reduced motion, long text, seven served routes, and cancellation confirmation/focus behavior (`examples/accrue_host/e2e/phase236-portal-self-service.spec.js`; `236-05-SUMMARY.md`). Those unchanged checks were not rerun in this focused refresh, avoiding churn on verified coverage.
 
 ## Files Audited
 
+- `.planning/phases/236-portal-billing-self-service/236-01-PLAN.md` through `236-06-PLAN.md`
+- `.planning/phases/236-portal-billing-self-service/236-01-SUMMARY.md` through `236-06-SUMMARY.md`
+- `.planning/phases/236-portal-billing-self-service/236-UI-SPEC.md`
+- `.planning/phases/236-portal-billing-self-service/236-CONTEXT.md`
 - `accrue_portal/lib/accrue_portal/copy.ex`
 - `accrue_portal/lib/accrue_portal/layouts.ex`
 - `accrue_portal/lib/accrue_portal/live/home_live.ex`
@@ -83,3 +100,6 @@
 - `accrue_portal/lib/accrue_portal/live/checkout_live.ex`
 - `accrue_portal/priv/static/accrue_portal.css`
 - `accrue_portal/priv/static/accrue_portal.js`
+- `examples/accrue_host/e2e/phase236-portal-self-service.spec.js`
+- `examples/accrue_host/playwright.config.js`
+- `.github/workflows/ci.yml` (Phase 236 browser matrix registration)

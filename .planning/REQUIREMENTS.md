@@ -33,13 +33,13 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 
 ### Portal
 
-- [ ] **POR-01**: Customers can use all seven existing Portal pages and supported actions with legible, responsive content scoped to the selected billed entity and compatible with host branding.
-- [ ] **POR-02**: Customers can add, default, or remove supported payment methods and change or cancel eligible subscriptions without crossing account or provider capabilities; list and detail entry points disclose the same consequences before confirmation.
+- [x] **POR-01**: Customers can use all seven existing Portal pages and supported actions with legible, responsive content scoped to the selected billed entity and compatible with host branding.
+- [x] **POR-02**: Customers can add, default, or remove supported payment methods and change or cancel eligible subscriptions without crossing account or provider capabilities; list and detail entry points disclose the same consequences before confirmation.
 - [x] **POR-03**: Customers can reach existing invoice records and hosted invoice access for the correct Customer; missing and unauthorized records fail safely.
-- [ ] **POR-04**: Customers receive visible and announced outcomes after LiveView actions and POST/redirects; failed reads are not represented as empty lists and checkout failure does not assert a charge.
+- [x] **POR-04**: Customers receive visible and announced outcomes after LiveView actions and POST/redirects; failed reads are not represented as empty lists and checkout failure does not assert a charge.
 - [x] **POR-05**: Direct add-card navigation initializes the supported secure Hosted Fields flow, and its supported states remain readable across shell themes and LiveView patches.
-- [ ] **POR-06**: Customers see known trial, incomplete, unpaid, and canceled states accurately, without claims about host access, complete invoice counts, or unsupported retention/document availability.
-- [ ] **POR-07**: Customers return only to validated host destinations; query parameters cannot prove payment, and leaving checkout is not described as subscription cancellation.
+- [x] **POR-06**: Customers see known trial, incomplete, unpaid, and canceled states accurately, without claims about host access, complete invoice counts, or unsupported retention/document availability.
+- [x] **POR-07**: Customers return only to validated host destinations; query parameters cannot prove payment, and leaving checkout is not described as subscription cancellation.
 - [x] **POR-08**: One Portal supports personal, organization/custom, and mixed host billing; personal-only installs need no company model or account picker, and customer billing managers receive no operator/Admin access.
 
 ### Interaction and Accessibility
@@ -98,13 +98,13 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | CKO-02 | Phase 235 | Complete |
 | CKO-03 | Phase 235 | Complete |
 | CKO-04 | Phase 235 | Complete |
-| POR-01 | Phase 236 | Pending |
-| POR-02 | Phase 236 | Pending |
+| POR-01 | Phase 236 | Complete |
+| POR-02 | Phase 236 | Complete |
 | POR-03 | Phase 236 | Complete |
-| POR-04 | Phase 236 | Pending |
+| POR-04 | Phase 236 | Complete |
 | POR-05 | Phase 236 | Complete |
-| POR-06 | Phase 236 | Pending |
-| POR-07 | Phase 236 | Pending |
+| POR-06 | Phase 236 | Complete |
+| POR-07 | Phase 236 | Complete |
 | POR-08 | Phase 233 | Complete |
 | INT-01 | Phase 239 | Pending |
 | INT-02 | Phase 239 | Pending |

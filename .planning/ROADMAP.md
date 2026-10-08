@@ -35,7 +35,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 - [x] **Phase 233: Shared Direction & Portal Contract** - Establish current-source baseline, shared visual roles, and the bounded host-owned billing context contract. (completed 2026-10-07)
 - [x] **Phase 234: Admin Customers & Subscriptions** - Refine operator search, customer/subscription investigation, lifecycle truth, scope, and supported actions. (completed 2026-10-07)
 - [x] **Phase 235: Customer Plan Selection & Checkout** - Make existing checkout, payment hooks, provider handoffs, and safe returns understandable and reliable. (completed 2026-10-08)
-- [ ] **Phase 236: Portal Billing Self-Service** - Refine existing customer billing pages and authorized payment/subscription tasks through one Portal.
+- [x] **Phase 236: Portal Billing Self-Service** - Refine existing customer billing pages and authorized payment/subscription tasks through one Portal. (completed 2026-10-08)
 - [ ] **Phase 237: Admin Invoices, Payments & Recovery** - Make money and recovery work precise, scoped, and honest about outcomes.
 - [ ] **Phase 238: Admin Events, Webhooks & Remaining Billing Surfaces** - Improve event and delivery investigation plus existing coupon, promotion-code, and Connect surfaces.
 - [ ] **Phase 239: Integrated Quality & Handoff** - Close route coverage, cross-surface evidence, current-render inspection, and a usable feedback preview.
@@ -152,23 +152,23 @@ Plans:
   4. LiveView and POST/redirect actions announce visible success or failure, failed reads do not look empty, and checkout failure does not assert a charge.
   5. Direct add-card navigation initializes readable supported secure fields across effective themes; known subscription states and safe host returns are truthful, and Portal keyboard/mobile/focus/motion states are checked in this slice.
 
-**Plans**: 6 plans
+**Plans**: 6/6 plans complete
 Plans:
 **Wave 1**
-- [ ] 236-01-PLAN.md — Scoped hosted invoices and distinct read outcomes
+- [x] 236-01-PLAN.md — Scoped hosted invoices and distinct read outcomes
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 236-02-PLAN.md — Supported payment-method actions and direct secure card entry
-- [ ] 236-04-PLAN.md — Checkout evidence and safe returns
+- [x] 236-02-PLAN.md — Supported payment-method actions and direct secure card entry
+- [x] 236-04-PLAN.md — Checkout evidence and safe returns
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 236-03-PLAN.md — Subscription action parity and truthful lifecycle
+- [x] 236-03-PLAN.md — Subscription action parity and truthful lifecycle
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 236-05-PLAN.md — Host-branded seven-route browser contract in CI
+- [x] 236-05-PLAN.md — Host-branded seven-route browser contract in CI
 
 **Wave 5** *(blocked on Waves 2 and 4 completion)*
-- [ ] 236-06-PLAN.md — POR-05 themed direct add-card Hosted Fields closure
+- [x] 236-06-PLAN.md — POR-05 themed direct add-card Hosted Fields closure
 
 **UI hint**: yes
 
@@ -223,7 +223,7 @@ Plans:
 | 233. Shared Direction & Portal Contract | 7/7 | Complete    | 2026-10-07 |
 | 234. Admin Customers & Subscriptions | 8/8 | Complete    | 2026-10-07 |
 | 235. Customer Plan Selection & Checkout | 6/6 | Complete    | 2026-10-08 |
-| 236. Portal Billing Self-Service | 6/6 | In Progress  | - |
+| 236. Portal Billing Self-Service | 6/6 | Complete    | 2026-10-08 |
 | 237. Admin Invoices, Payments & Recovery | 0/TBD | Not started | - |
 | 238. Admin Events, Webhooks & Remaining Billing Surfaces | 0/TBD | Not started | - |
 | 239. Integrated Quality & Handoff | 0/TBD | Not started | - |
