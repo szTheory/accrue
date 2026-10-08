@@ -225,6 +225,82 @@ defmodule AccrueAdmin.CustomerLiveTest do
     refute html =~ ~s(href="/billing/charges)
   end
 
+  test "subscription link returns to the active customer tab under current owner scope", %{
+    conn: conn,
+    customer: customer
+  } do
+    subscription = TestRepo.one!(from(s in Subscription, where: s.customer_id == ^customer.id))
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        active_organization_name: "Allowed Org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    allowed_customer =
+      customer
+      |> Customer.changeset(%{owner_type: "Organization", owner_id: "org_allowed"})
+      |> TestRepo.update!()
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/customers/#{allowed_customer.id}?org=allowed-org&tab=subscriptions"
+             )
+
+    href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find_value(fn node ->
+        if Floki.text(node) =~ subscription.processor_id,
+          do: Floki.attribute(node, "href") |> List.first()
+      end)
+
+    params = href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    return_path = URI.decode_www_form(params["return_to"])
+    return_query = return_path |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(return_path).path == "/billing/customers/#{allowed_customer.id}"
+    assert return_query["org"] == "allowed-org"
+    assert return_query["tab"] == "subscriptions"
+  end
+
+  test "direct customer links have scoped customer-list fallback and hostile origins are ignored",
+       %{
+         conn: conn,
+         customer: customer
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    foreign_id = Ecto.UUID.generate()
+
+    for suffix <- [
+          "",
+          "?return_to=https%3A%2F%2Fevil.example%2Fbilling%2Fcustomers",
+          "?return_to=#{URI.encode_www_form("/billing/customers/#{foreign_id}?tab=payments")}"
+        ] do
+      assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}" <> suffix)
+
+      href =
+        view
+        |> element("a", "Back to results")
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.find("a")
+        |> Floki.attribute("href")
+        |> hd()
+
+      assert URI.parse(href).path == "/billing/customers"
+      refute href =~ "evil.example"
+      refute href =~ foreign_id
+    end
+  end
+
   test "D-08 D-09 customer payment-method actions do not render visible initial forms", %{
     conn: conn,
     customer: customer
@@ -402,7 +478,21 @@ defmodule AccrueAdmin.CustomerLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}?tab=invoices")
 
-    assert html =~ ~s(href="/billing/invoices/#{invoice.id}")
+    invoice_href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find_value(fn node ->
+        href = Floki.attribute(node, "href") |> List.first()
+        if URI.parse(href || "").path == "/billing/invoices/#{invoice.id}", do: href
+      end)
+
+    assert invoice_href
+    invoice_params = invoice_href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(URI.decode_www_form(invoice_params["return_to"])).path ==
+             "/billing/customers/#{customer.id}"
+
     assert html =~ "INV-001"
   end
 

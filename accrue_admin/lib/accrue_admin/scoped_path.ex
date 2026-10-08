@@ -5,7 +5,7 @@ defmodule AccrueAdmin.ScopedPath do
 
   @return_routes %{
     "/subscriptions" => ~w(view status q sort direction cursor customer_id),
-    "/customers" => ~w(q sort direction cursor tab),
+    "/customers" => ~w(q owner_type has_default_payment_method sort direction cursor tab),
     "/invoices" => ~w(q status sort direction cursor),
     "/payments" => ~w(q status sort direction cursor)
   }
@@ -17,7 +17,9 @@ defmodule AccrueAdmin.ScopedPath do
     "direction" => 8,
     "cursor" => 2_048,
     "customer_id" => 128,
-    "tab" => 32
+    "tab" => 32,
+    "owner_type" => 64,
+    "has_default_payment_method" => 8
   }
 
   @doc false
@@ -65,8 +67,10 @@ defmodule AccrueAdmin.ScopedPath do
   defp validate_return_path(mount_path, raw) when byte_size(raw) <= 4_096 do
     uri = URI.parse(raw)
 
-    with true <- is_nil(uri.scheme) and is_nil(uri.host) and is_nil(uri.userinfo) and is_nil(uri.fragment),
-         {suffix, allowed_keys} <- Enum.find(@return_routes, fn {route, _keys} -> uri.path == mount_path <> route end) || :error,
+    with true <-
+           is_nil(uri.scheme) and is_nil(uri.host) and is_nil(uri.userinfo) and
+             is_nil(uri.fragment),
+         {suffix, allowed_keys} <- return_route(mount_path, uri.path),
          true <- is_binary(uri.query) do
       params =
         uri.query
@@ -86,12 +90,30 @@ defmodule AccrueAdmin.ScopedPath do
 
   defp validate_return_path(_mount_path, _raw), do: :error
 
+  defp return_route(mount_path, path) do
+    Enum.find(@return_routes, fn {route, _keys} -> path == mount_path <> route end) ||
+      customer_detail_return_route(mount_path, path)
+  end
+
+  defp customer_detail_return_route(mount_path, path) do
+    prefix = mount_path <> "/customers/"
+
+    with true <- String.starts_with?(path, prefix),
+         id <- String.replace_prefix(path, prefix, ""),
+         true <- Ecto.UUID.cast(id) != :error do
+      {String.replace_prefix(path, mount_path, ""), ["tab"]}
+    else
+      _ -> :error
+    end
+  end
+
   defp safe_return_value?(key, value) do
     max_bytes = Map.fetch!(@return_value_limits, key)
 
     is_binary(value) and byte_size(value) <= max_bytes and
       not String.match?(value, ~r/[\x00-\x1F\x7F]/) and
       (key != "view" or value in ["all", "at_risk"]) and
-      (key != "direction" or value in ["asc", "desc"])
+      (key != "direction" or value in ["asc", "desc"]) and
+      (key != "tab" or value in ~w(subscriptions invoices payments))
   end
 end

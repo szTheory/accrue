@@ -54,6 +54,14 @@ defmodule AccrueAdmin.Live.CustomerLive do
            scoped_admin_path(admin, socket.assigns.current_owner_scope, "/customers")
          )
          |> assign(:customer, customer)
+         |> assign(
+           :return_path,
+           ScopedPath.build(
+             admin["mount_path"] || "/billing",
+             "/customers",
+             socket.assigns.current_owner_scope
+           )
+         )
          |> assign(:flashes, [])
          |> assign(:params, %{})
          |> assign(:drawer_action_type, nil)
@@ -84,10 +92,51 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
+    return_path = customer_return_path(params, socket.assigns)
+
+    journey_path =
+      ScopedPath.build(
+        socket.assigns.admin_mount_path,
+        "/customers/#{socket.assigns.customer.id}",
+        socket.assigns.current_owner_scope,
+        Map.take(params, ["tab"])
+      )
+
     {:noreply,
      socket
      |> assign(:params, params)
+     |> assign(:return_path, return_path)
+     |> assign(:journey_path, journey_path)
      |> assign_peer_record_set(params)}
+  end
+
+  defp customer_return_path(params, assigns) do
+    mount_path = assigns.admin_mount_path
+
+    case Map.get(params, "return_to") do
+      nil ->
+        ScopedPath.build(mount_path, "/customers", assigns.current_owner_scope)
+
+      raw_return_path ->
+        candidate =
+          ScopedPath.return_path(mount_path, raw_return_path, assigns.current_owner_scope)
+
+        fallback = ScopedPath.build(mount_path, "/subscriptions", assigns.current_owner_scope)
+        customer_prefix = mount_path <> "/customers/"
+        current_customer_prefix = customer_prefix <> assigns.customer.id
+
+        cond do
+          candidate == fallback ->
+            ScopedPath.build(mount_path, "/customers", assigns.current_owner_scope)
+
+          String.starts_with?(candidate, customer_prefix) and
+              not String.starts_with?(candidate, current_customer_prefix) ->
+            ScopedPath.build(mount_path, "/customers", assigns.current_owner_scope)
+
+          true ->
+            candidate
+        end
+    end
   end
 
   @impl true
@@ -224,6 +273,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
             %{label: customer_label(@customer)}
           ]}
         />
+        <p class="ax-detail-back-link">
+          <a class="ax-link" href={@return_path}>Back to results</a>
+        </p>
 
         <Detail.summary_card eyebrow="Customer detail" title={customer_label(@customer)}>
           <:facts>
@@ -320,7 +372,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
           <section class="ax-detail-section" aria-label="Customer record sets">
             <nav class="ax-tabs" aria-label="Customer peer record sets">
               <a
-                :for={tab <- peer_record_set_links(@customer, @tab_counts, @admin_mount_path, @current_owner_scope)}
+                :for={tab <- peer_record_set_links(@customer, @tab_counts, @admin_mount_path, @current_owner_scope, @return_path)}
                 href={tab.href}
                 class={["ax-tab", @tab == tab.id && "ax-tab-active"]}
                 aria-current={if(@tab == tab.id, do: "page", else: nil)}
@@ -334,7 +386,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
               <% "subscriptions" -> %>
                 <div :for={subscription <- @peer_records} class="ax-list-row">
                   <a
-                    href={ScopedPath.build(@admin_mount_path, "/subscriptions/#{subscription.id}", @current_owner_scope)}
+                    href={ScopedPath.build(@admin_mount_path, "/subscriptions/#{subscription.id}", @current_owner_scope, %{"return_to" => @journey_path})}
                     class="ax-link"
                   >
                     <%= subscription.processor_id %>
@@ -346,7 +398,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
               <% "invoices" -> %>
                 <div :for={invoice <- @peer_records} class="ax-list-row">
                   <a
-                    href={ScopedPath.build(@admin_mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}
+                    href={ScopedPath.build(@admin_mount_path, "/invoices/#{invoice.id}", @current_owner_scope, %{"return_to" => @journey_path})}
                     class="ax-link"
                   >
                     <%= invoice.number || invoice.processor_id || invoice.id %>
@@ -358,7 +410,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
               <% "charges" -> %>
                 <div :for={charge <- @peer_records} class="ax-list-row">
                   <a
-                    href={ScopedPath.build(@admin_mount_path, "/payments/#{charge.id}", @current_owner_scope)}
+                    href={ScopedPath.build(@admin_mount_path, "/payments/#{charge.id}", @current_owner_scope, %{"return_to" => @journey_path})}
                     class="ax-link"
                   >
                     <%= charge.processor_id || charge.id %>
@@ -831,14 +883,15 @@ defmodule AccrueAdmin.Live.CustomerLive do
     }
   end
 
-  defp peer_record_set_links(customer, counts, mount_path, owner_scope) do
+  defp peer_record_set_links(customer, counts, mount_path, owner_scope, return_path) do
     Enum.map(@peer_record_sets, fn tab ->
       %{
         id: tab,
         label: peer_record_set_label(tab),
         href:
           scoped_mount_path(mount_path, "/customers/#{customer.id}", owner_scope, %{
-            "tab" => peer_record_set_param(tab)
+            "tab" => peer_record_set_param(tab),
+            "return_to" => return_path
           }),
         count: Map.get(counts, String.to_existing_atom(tab))
       }

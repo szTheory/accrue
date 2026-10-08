@@ -230,6 +230,33 @@ defmodule AccrueAdmin.CustomersLiveTest do
     assert_before(html, "Captain Customer", "cus_fake_00001")
   end
 
+  test "customer result carries bounded list filters into the detail return", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live_list(
+               conn,
+               "/billing/customers?q=Captain&owner_type=Team&has_default_payment_method=true"
+             )
+
+    [href] =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a.ax-link")
+      |> Enum.map(&Floki.attribute(&1, "href"))
+      |> List.flatten()
+      |> Enum.filter(&String.contains?(&1, "/billing/customers/"))
+
+    params = href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    return_path = URI.decode_www_form(params["return_to"])
+    return_query = return_path |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(return_path).path == "/billing/customers"
+    assert return_query["q"] == "Captain"
+    assert return_query["owner_type"] == "Team"
+    assert return_query["has_default_payment_method"] == "true"
+  end
+
   defp live_list(conn, path), do: live(conn, path, on_error: :warn)
 
   defp assert_page_header_contract(html, contract) do

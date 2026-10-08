@@ -20,6 +20,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Customers
+  alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(_params, session, socket) do
@@ -146,7 +147,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
-            %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope)},
+            %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope, customer_return_path(@admin_mount_path, @current_owner_scope, @params))},
             %{label: "Payment method", render: &default_payment_method_label/1},
             %{label: "ID", render: &id_badge_cell(&1, "table")}
           ]}
@@ -215,9 +216,14 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   # Customer cell: primary name/identifier as a link, with email stacked beneath it
   # so the column reads as a find-and-open target (name + contact at a glance).
-  defp customer_link(row, mount_path, owner_scope) do
+  defp customer_link(row, mount_path, owner_scope, return_path) do
     label = row.name || row.email || row.processor_id || row.id
-    href = scoped_path(mount_path, "/customers/#{row.id}", owner_scope)
+
+    href =
+      ScopedPath.build(mount_path, "/customers/#{row.id}", owner_scope, %{
+        "return_to" => return_path
+      })
+
     escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
     email_line =
@@ -231,6 +237,13 @@ defmodule AccrueAdmin.Live.CustomersLive do
     Phoenix.HTML.raw(
       ~s(<span class="ax-stack-xs"><a href="#{href}" class="ax-link">#{escaped}</a>#{email_line}</span>)
     )
+  end
+
+  defp customer_return_path(mount_path, owner_scope, params) do
+    return_params =
+      Map.take(params, ~w(q owner_type has_default_payment_method sort direction cursor tab))
+
+    ScopedPath.build(mount_path, "/customers", owner_scope, return_params)
   end
 
   # Click-to-copy processor (or local) id chip, rendered via the shared IdBadge
