@@ -874,10 +874,12 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       %{"action_type" => "cancel_now"}
     )
 
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ "Step-up required"
+
     current = TestRepo.get!(Subscription, subscription.id)
     current |> Subscription.changeset(%{status: :canceled}) |> TestRepo.update!()
 
-    html = render_click(element(view, "[data-role='confirm-action']"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
 
     assert html =~ "Review the action again"
     refute html =~ "Step-up required"
@@ -910,6 +912,38 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     html = render_submit(view, "step_up_submit", %{"code" => "123456"})
     assert html =~ "Subscription action recorded"
     assert TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+  end
+
+  test "confirmation rejects a removed or changed item after review", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    item = List.first(subscription.subscription_items)
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Remove item"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{
+        "action_type" => "remove_item",
+        "item_id" => item.id,
+        "proration" => "create_prorations"
+      }
+    )
+
+    current_item = TestRepo.get!(SubscriptionItem, item.id)
+    current_item |> SubscriptionItem.changeset(%{quantity: 2}) |> TestRepo.update!()
+
+    html = render_click(element(view, "[data-role='confirm-action']"))
+
+    assert html =~ "Review the action again"
+    refute html =~ "Step-up required"
+    assert TestRepo.get!(SubscriptionItem, item.id).quantity == 2
   end
 
   describe "dunning state inside summary and drill sections" do
