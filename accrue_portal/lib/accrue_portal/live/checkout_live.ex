@@ -121,6 +121,23 @@ defmodule AccruePortal.Live.CheckoutLive do
   @impl true
   def handle_params(_params, _uri, socket), do: {:noreply, socket}
 
+  defp success_destination(url, socket) when is_binary(url) and url != "" do
+    uri = URI.parse(url)
+
+    cond do
+      Context.valid_local_path?(url) ->
+        {:local, url}
+
+      uri.scheme == "https" and is_binary(uri.host) and uri.host != "" and is_nil(uri.userinfo) ->
+        {:external, url}
+
+      true ->
+        {:local, Path.home(socket.assigns.base_path)}
+    end
+  end
+
+  defp success_destination(_, _socket), do: :show_success
+
   @impl true
   def handle_event(
         "checkout_tokenized",
@@ -139,11 +156,14 @@ defmodule AccruePortal.Live.CheckoutLive do
                     {:ok, _session} ->
                       maybe_enqueue_completion(claimed, subscription)
 
-                      case claimed.success_url do
-                        url when is_binary(url) and url != "" ->
+                      case success_destination(claimed.success_url, socket) do
+                        {:external, url} ->
                           {:noreply, redirect(socket, external: url)}
 
-                        _ ->
+                        {:local, path} ->
+                          {:noreply, redirect(socket, to: path)}
+
+                        :show_success ->
                           {:noreply,
                            socket
                            |> assign(:checkout_error, nil)

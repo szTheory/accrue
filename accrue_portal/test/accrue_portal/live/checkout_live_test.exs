@@ -267,6 +267,52 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert LocalSession.by_id(session.id).status == "completed"
   end
 
+  test "unsafe persisted success URL redirects to the portal home after completion", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session =
+      checkout_fixture(customer,
+        success_url: "javascript:window.location='https://attacker.example/'"
+      )
+
+    conn = sign_in_customer(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    assert {:error, {:redirect, %{to: "/billing"}}} =
+             render_hook(view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
+
+    assert LocalSession.by_id(session.id).status == "completed"
+  end
+
+  test "local success URL remains an accepted destination", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer, success_url: "/billing/thanks")
+    conn = sign_in_customer(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    assert {:error, {:redirect, %{to: "/billing/thanks"}}} =
+             render_hook(view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
+  end
+
   test "accepted provider result with failed completion persistence shows uncertainty", %{
     conn: conn,
     user: user,
