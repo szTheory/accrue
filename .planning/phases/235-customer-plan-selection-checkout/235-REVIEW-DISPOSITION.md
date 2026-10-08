@@ -5,22 +5,22 @@ titles: json
 findings:
   - id: CR-01
     severity: critical
-    disposition: open
-    title: "Zero-priced plan submissions are rejected"
+    disposition: fixed
+    title: "LiveView completion accepts an unchecked external redirect"
   - id: WR-01
     severity: warning
     disposition: open
     title: "Braintree completion returns an unverifiable Stripe placeholder"
-open: 2
+open: 1
 total: 2
-recorded: 2026-10-08T15:02:52.803Z
+recorded: 2026-10-08T15:35:31.979Z
 ---
 
 # Phase 235: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | - (not in the current review) |
+| CR-01 | critical | fixed | 235-REVIEW-FIX.md (not in the current review) |
 | WR-01 | warning | open | - (not in the current review) |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
