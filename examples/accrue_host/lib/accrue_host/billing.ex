@@ -219,8 +219,8 @@ defmodule AccrueHost.Billing do
   end
 
   @doc """
-  Resolves one Braintree checkout operation under the actor's current organization
-  membership, billing permission, and processor Customer.
+  Resolves one scoped checkout operation under the actor's current organization
+  membership and billing permission, using the processor Customer.
   """
   def checkout_session_for_scope(
         %Scope{
