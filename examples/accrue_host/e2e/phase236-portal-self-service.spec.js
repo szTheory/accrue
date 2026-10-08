@@ -107,9 +107,9 @@ test("Hosted Fields hand off readable semantic styles on direct add-card navigat
   expect(evidence.label).toContain("not live provider proof");
   expect(evidence.fields).toHaveLength(3);
   for (const field of evidence.fields) {
-    expect(contrastRatio(evidence.styles.input.color, field.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(evidence.styles[`.${field.name}`].color, field.background)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(evidence.styles["::placeholder"].color, field.background)).toBeGreaterThanOrEqual(4.5);
-    expect(contrastRatio(evidence.styles["input.invalid"].color, field.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(evidence.styles[".invalid"].color, field.background)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(field.label, field.background)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(field.help, field.background)).toBeGreaterThanOrEqual(4.5);
   }

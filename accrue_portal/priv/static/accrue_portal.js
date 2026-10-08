@@ -299,10 +299,11 @@
         "font-weight": "400",
         "line-height": "1.5"
       },
-      "input.invalid": { color: fields.number.invalid.color },
+      ".number": { color: fields.number.input.color },
+      ".expirationDate": { color: fields.expirationDate.input.color },
+      ".cvv": { color: fields.cvv.input.color },
+      ".invalid": { color: fields.number.invalid.color },
       "::placeholder": { color: fields.number.placeholder.color },
-      "input[name=expirationDate]": { color: fields.expirationDate.input.color },
-      "input[name=cvv]": { color: fields.cvv.input.color }
     };
   }
 
