@@ -548,6 +548,10 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute html =~ ":timeout"
     assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 1
 
+    blocked = render_click(view, "open_action_drawer", %{"action_type" => "cancel_now"})
+    assert blocked =~ "Check scoped subscription activity before starting another action"
+    refute has_element?(view, "[data-role='confirm-action']")
+
     html = render_click(view, "cancel_pending_action")
     assert html =~ "Outcome not confirmed"
   end
