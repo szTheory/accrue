@@ -210,6 +210,11 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
     timeout: 15_000
   });
   await replayConfirm.locator("[data-role='confirm-replay']").click();
+  const stepUpDialog = page.getByRole("dialog", { name: "Step-up required" });
+  await expect(stepUpDialog).toBeVisible({ timeout: 15_000 });
+  await stepUpDialog.getByRole("textbox", { name: "Verification code" }).fill("123456");
+  await stepUpDialog.getByRole("button", { name: "Verify identity" }).click();
+  await expect(stepUpDialog).toBeHidden({ timeout: 15_000 });
   await waitForLiveView(page);
   await expect(
     page
