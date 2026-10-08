@@ -126,10 +126,18 @@ Plans:
 
 **Plans**: 4 plans
 Plans:
+**Wave 1**
 - [ ] 235-01-PLAN.md — Visible Braintree secure-form tracer and safe retry
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 235-02-PLAN.md — Exact host-selected offer through sign-in and trusted terms
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 235-03-PLAN.md — Reentrant-safe POST and LiveView checkout outcomes
+
+**Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 235-04-PLAN.md — Distinct hosted return and served-browser accessibility proof
+
 **UI hint**: yes
 
 ### Phase 236: Portal Billing Self-Service
