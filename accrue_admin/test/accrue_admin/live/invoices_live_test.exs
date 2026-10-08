@@ -55,16 +55,56 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     {:ok, invoice: invoice}
   end
 
-  test "filters invoice rows and renders detail links", %{conn: conn} do
+  test "filters invoice rows and renders stored identity, status, amount, and detail links",
+       %{conn: conn, invoice: invoice} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/invoices?status=open")
 
     assert html =~ Copy.invoices_index_headline()
     assert html =~ "INV-0002"
-    assert html =~ "/billing/invoices/"
+    assert html =~ "/billing/invoices/#{invoice.id}"
+    assert html =~ "Open"
+    assert html =~ "$75.00"
     assert html =~ "ax-chip ax-label"
     refute html =~ "ax-text-12"
+  end
+
+  test "organization invoice list excludes invoices owned by another organization", %{conn: conn} do
+    organization_id = Ecto.UUID.generate()
+    foreign_organization_id = Ecto.UUID.generate()
+    owner_customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
+    owner_subscription = insert_subscription(owner_customer)
+
+    owner_invoice =
+      insert_invoice(owner_customer, owner_subscription, %{
+        number: "INV-SCOPED-OWNER",
+        processor_id: "in_scoped_owner",
+        status: :open
+      })
+
+    foreign_customer = insert_customer(%{owner_type: "Organization", owner_id: foreign_organization_id})
+    foreign_subscription = insert_subscription(foreign_customer)
+
+    insert_invoice(foreign_customer, foreign_subscription, %{
+      number: "INV-SCOPED-FOREIGN",
+      processor_id: "in_scoped_foreign",
+      status: :open
+    })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: organization_id,
+        active_organization_slug: "invoice-owner",
+        admin_organization_ids: [organization_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?org=invoice-owner&view=all")
+
+    assert html =~ "INV-SCOPED-OWNER"
+    assert html =~ "/billing/invoices/#{owner_invoice.id}"
+    refute html =~ "INV-SCOPED-FOREIGN"
   end
 
   test "renders Copy-backed filtered empty list when search excludes all invoices", %{conn: conn} do
