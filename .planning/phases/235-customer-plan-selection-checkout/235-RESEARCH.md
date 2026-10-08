@@ -161,6 +161,8 @@ end
 
 This mirrors the current POST boundary; use it as a refactor target, not a copy-and-paste replacement until the parallel LiveView behavior is reconciled. [VERIFIED: accrue_portal/lib/accrue_portal/controllers/checkout_controller.ex:14-24]
 
+The existing action atom is `:checkout_complete`. [VERIFIED: accrue_portal/lib/accrue_portal/controllers/checkout_controller.ex:18-22] Quote: `:checkout_complete`.
+
 ### Pattern 3: Hosted Fields tokenizes in the browser; the server owns the result
 
 **What:** The SDK iframes collect sensitive fields and produce a nonce, then the browser sends that nonce through the actual form POST or the LiveView event. Disable duplicate submits during tokenization; clear single-use nonce and fields after failure, abandonment, or context invalidation; do not automatically resend on a timeout/uncertain response. [CITED: https://developer.paypal.com/braintree/docs/guides/hosted-fields/setup-and-integration/javascript/v3] [VERIFIED: accrue_portal/priv/static/accrue_portal.js:94-172]
