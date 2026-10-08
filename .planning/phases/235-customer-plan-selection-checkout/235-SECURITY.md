@@ -34,10 +34,17 @@ created: "2026-10-08"
 | T-235-08 | Spoofing | Hosted return | high | mitigate | Return handling fetches and matches the processor session and requires complete paid evidence; URL parameters alone cannot mark paid (`accrue/test/accrue/checkout_test.exs`, `examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs`). | closed |
 | T-235-09 | Repudiation | Concurrent hosted return | medium | mitigate | Same-session reconciliation is serialized and tested for idempotent singular local projection (`accrue/test/accrue/checkout_test.exs`). | closed |
 | T-235-10 | Information disclosure | Provider error/status copy | medium | mitigate | LiveView tests assert card fields never leave Hosted Fields; the browser test asserts the tokenized nonce is not rendered in the page (`accrue_portal/test/accrue_portal/live/checkout_live_test.exs`, `examples/accrue_host/e2e/phase233-braintree-checkout.spec.js`). | closed |
+| T-235-11 | Tampering | Trusted zero-priced POST eligibility | high | mitigate | Actual controller POST completes a persisted explicitly zero-priced session once; missing, negative, mismatched, forged, and replayed terms do not cause another provider operation (`accrue_portal/test/accrue_portal/checkout_context_test.exs`). | closed |
+| T-235-12 | Spoofing | Expired recovery destination | medium | mitigate | Expired checkout renders only the validated recovery URL; hostile cancel URL falls back to `/billing`, with LiveView and served-browser no-payment assertions (`accrue_portal/test/accrue_portal/live/checkout_live_test.exs`, `examples/accrue_host/e2e/phase233-braintree-checkout.spec.js`). | closed |
+| T-235-13 | Spoofing | Braintree host return | high | mitigate | Host return reloads the currently authorized organization and exact processor Customer before scoped LocalSession lookup; completed, foreign, and permission-loss cases are covered (`examples/accrue_host/test/accrue_host_web/live/subscription_live_braintree_test.exs`). | closed |
+| T-235-14 | Tampering | Braintree return locator and state | high | mitigate | Plan/selection URL values are locators only; forged and pending values cannot show completion, while Stripe still requires fetched paid-session evidence (`examples/accrue_host/test/accrue_host_web/live/subscription_live_braintree_test.exs`, `subscription_live_test.exs`). | closed |
+| T-235-15 | Repudiation | Repeated Braintree return | medium | mitigate | Completed return can be revisited without changing the LocalSession count or initiating another payment operation (`examples/accrue_host/test/accrue_host_web/live/subscription_live_braintree_test.exs`, `examples/accrue_host/e2e/phase233-braintree-checkout.spec.js`). | closed |
 | T-235-SC | Tampering | Package changes (235-01) | high | mitigate | No package install occurred; no dependency manifest or lockfile is present in the Phase 235 commit file set. | closed |
 | T-235-SC | Tampering | Package changes (235-02) | high | mitigate | No package install occurred; no dependency manifest or lockfile is present in the Phase 235 commit file set. | closed |
 | T-235-SC | Tampering | Package changes (235-03) | high | mitigate | No package install occurred; no dependency manifest or lockfile is present in the Phase 235 commit file set. | closed |
 | T-235-SC | Tampering | Package changes (235-04) | high | mitigate | No package install occurred; no dependency manifest or lockfile is present in the Phase 235 commit file set. | closed |
+| T-235-SC | Tampering | Package changes (235-05) | high | mitigate | No package install occurred; no dependency manifest or lockfile changed for this plan. | closed |
+| T-235-SC | Tampering | Package changes (235-06) | high | mitigate | No package install occurred; no dependency manifest or lockfile changed for this plan. | closed |
 
 *Status: open · closed · open — below high threshold (non-blocking)*
 *Severity: critical > high > medium > low — only open threats at or above workflow.security_block_on count toward threats_open*
@@ -51,7 +58,7 @@ No accepted risks.
 
 | Audit Date | Threats Total | Closed | Open | Run By |
 |------------|---------------|--------|------|--------|
-| 2026-10-08 | 14 | 14 | 0 | GSD execute-phase orchestrator, ASVS L1 source/test check |
+| 2026-10-08 | 21 | 21 | 0 | GSD execute-phase orchestrator, ASVS L1 source/test check |
 
 ## Sign-Off
 
@@ -61,3 +68,11 @@ No accepted risks.
 - [x] `status: verified` set in frontmatter
 
 **Approval:** verified 2026-10-08
+
+## Security Audit 2026-10-08
+
+| Metric | Count |
+|---|---|
+| Threats found | 21 |
+| Closed | 21 |
+| Open | 0 |
