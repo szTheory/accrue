@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 235
 current_phase_name: Customer Plan Selection & Checkout
 status: executing
-stopped_at: Completed 235-05-PLAN.md
-last_updated: "2026-10-08T13:51:17.975Z"
+stopped_at: Completed 235-06-PLAN.md
+last_updated: "2026-10-08T14:54:03.487Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 235 execution started
-state_head: 89396b21f5c4af2424d2b368377fe8ca19e18363
+state_head: 11787fe95270c2a899ed1b5adf0b86604a0e1370
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 21
-  completed_plans: 20
+  completed_plans: 21
   percent: 29
 ---
 
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 235 (Customer Plan Selection & Checkout) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-10-08 — Phase 235 execution started
 
@@ -120,6 +120,7 @@ Last activity: 2026-10-08 — Phase 235 execution started
 | Phase 235 P03 | 10min | 2 tasks | 7 files |
 | Phase 235 P04 | 17 | 2 tasks | 7 files |
 | Phase 235 P05 | 13 minutes | 2 tasks | 6 files |
+| Phase 235 P06 | 60min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -239,6 +240,9 @@ Last activity: 2026-10-08 — Phase 235 execution started
 - [Phase 235]: Explicit trusted zero-price POST eligibility requires all existing trusted context, offer, terms, and authorization checks; missing, negative, mismatched, and replayed terms remain rejected. — Plan 235-05 aligned the actual POST with visible checkout eligibility without treating an absent amount as zero or weakening existing validation.
 - [Phase 235]: Expired checkout recovery uses the already validated safe recovery URL and leaves payment submission unavailable; hostile cancellation URLs fall back to billing. — Plan 235-05 closes the UI recovery gap while preserving the expired session's non-payment state and safe navigation boundary.
 - [Phase 235]: Default to shift-left verification: automate stable acceptance with focused tests, integration/E2E/smoke/seam checks, and CI when recurring value exists; target zero human UAT and hand off only irreducible human judgment or external/live-provider evidence, with the reason recorded. Do not reopen a verified closure absent new evidence. — The user explicitly asked GSD to automate verification wherever feasible, minimize human UAT, make recurring checks part of CI, and record closure so the workflow does not churn on already-automated coverage.
+- [Phase 235]: Braintree returns locate, but do not prove, payment; display completion only after a current authorized Customer and exact completed LocalSession match.
+- [Phase 235]: Keep Stripe cs_ validation and fetched paid-session reconciliation authoritative.
+- [Phase 235]: Use explicitly fixture-backed LocalSession evidence for the deterministic Braintree browser return; do not claim live-provider success.
 
 ### Pending Todos
 
@@ -311,8 +315,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T13:49:59.017Z
-Stopped at: Completed 235-05-PLAN.md
+Last session: 2026-10-08T14:54:03.424Z
+Stopped at: Completed 235-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
