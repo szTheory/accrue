@@ -5,11 +5,11 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 236
 current_phase_name: Portal Billing Self-Service
 status: planning
-stopped_at: Phase 235 complete, ready to plan Phase 236
-last_updated: "2026-10-08T15:48:10.406Z"
+stopped_at: Phase 236 context gathered
+last_updated: "2026-10-08T15:53:37.544Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 235 complete, transitioned to Phase 236
-state_head: 25e3a00d0f98208b483abb2f52d18716060311a0
+state_head: 1caa5e67f9187952614304b8bd445148741ec694
 progress:
   total_phases: 7
   completed_phases: 3
@@ -317,9 +317,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T14:54:03.424Z
-Stopped at: Phase 235 complete, ready to plan Phase 236
-Resume file: None
+Last session: 2026-10-08T15:53:37.476Z
+Stopped at: Phase 236 context gathered
+Resume file: .planning/phases/236-portal-billing-self-service/236-CONTEXT.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
