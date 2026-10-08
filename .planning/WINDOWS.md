@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 5
+open_count: 6
 waived_count: 6
 fixed_count: 8
-total_count: 19
-last_updated: 2026-10-08T04:49:19.603Z
+total_count: 20
+last_updated: 2026-10-08T12:01:21.609Z
 ---
 
 # Broken Windows Ledger
@@ -34,6 +34,7 @@ last_updated: 2026-10-08T04:49:19.603Z
 | 17 | 234 | deviation | accrue_admin/test/accrue_admin/live/subscription_live_test.exs |  | Task 2 delayed review assertions were committed after the overlapping fresh-dispatch implementation, so Task 2 has no separate RED commit. | open |  | 2026-10-08T01:31:43.711Z |  |
 | 18 | 234 | deviation | .planning/ROADMAP.md |  | roadmap.update-plan-progress 234 returned missing_phase_details, so the aggregate Phase 234 roadmap entry could not be updated. | open |  | 2026-10-08T01:32:40.174Z |  |
 | 19 | 235 | deviation | examples/accrue_host/e2e/phase233-braintree-checkout.spec.js |  | Mock SDK proves the nonce-bearing server denial; live Braintree provider acceptance was not verified because the configured gateway returned HTTP 500. | open |  | 2026-10-08T04:49:19.603Z |  |
+| 20 | 235 | deviation |  |  | Added test-only Portal origin and organization shared-billing route after deterministic browser verification exposed the missing runtime context. | open |  | 2026-10-08T12:01:21.609Z |  |
 
 ````json
 [
@@ -271,6 +272,19 @@ last_updated: 2026-10-08T04:49:19.603Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-08T04:49:19.603Z",
+    "resolved_at": null,
+    "milestone": "v1.63"
+  },
+  {
+    "id": 20,
+    "kind": "deviation",
+    "phase": "235",
+    "file": "",
+    "line": null,
+    "description": "Added test-only Portal origin and organization shared-billing route after deterministic browser verification exposed the missing runtime context.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-08T12:01:21.609Z",
     "resolved_at": null,
     "milestone": "v1.63"
   }
