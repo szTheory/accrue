@@ -357,6 +357,111 @@ defmodule AccruePortal.CheckoutContextTest do
     assert actor == %{type: :user, id: user_id}
   end
 
+  test "explicit trusted zero-priced checkout POST completes exactly once", %{conn: conn} do
+    owner_id = "org-checkout-zero-priced"
+
+    session =
+      checkout_fixture(owner_id,
+        line_items: [
+          %{
+            "price" => "price_checkout_context",
+            "amount" => "0.00",
+            "amount_minor" => 0,
+            "quantity" => 1,
+            "currency" => "USD"
+          }
+        ],
+        metadata: %{
+          "amount_minor" => 0,
+          "currency" => "USD",
+          "interval" => "month",
+          "interval_count" => 1,
+          "plan_name" => "Free plan",
+          "billable_name" => "Checkout Organization",
+          "billable_id" => owner_id,
+          "processor" => "braintree"
+        }
+      )
+
+    conn = sign_in_org(conn, owner_id)
+    ActionAdapter.grant(owner_id, [:checkout_complete])
+
+    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
+    assert html =~ ~s(id="checkout-form")
+
+    [[pin]] = Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    csrf =
+      Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first)
+      |> hd()
+
+    params = %{
+      "context_pin" => pin,
+      "_csrf_token" => csrf,
+      "payment_method_nonce" => "fake-valid-zero-priced-nonce"
+    }
+
+    response = post(conn, "/org-billing/checkout/#{session.session_token}/complete", params)
+
+    assert redirected_to(response) == "https://app.example.test/billing/success"
+    assert Phoenix.Flash.get(response.assigns.flash, :info) =~ "Subscription created"
+    assert LocalSession.by_id(session.id).status == "completed"
+    assert_received {:gateway_create, %{payment_method_token: "fake-valid-zero-priced-nonce"}, _}
+
+    replay = post(conn, "/org-billing/checkout/#{session.session_token}/complete", params)
+    assert redirected_to(replay) == "/org-billing/checkout/#{session.session_token}"
+    refute_received {:gateway_create, _, _}
+  end
+
+  test "checkout POST rejects missing, negative, and mismatched amounts before billing", %{
+    conn: conn
+  } do
+    owner_id = "org-checkout-invalid-price-terms"
+    session = checkout_fixture(owner_id)
+    conn = sign_in_org(conn, owner_id)
+    ActionAdapter.grant(owner_id, [:checkout_complete])
+
+    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
+
+    [[pin]] = Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    csrf =
+      Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first)
+      |> hd()
+
+    params = %{
+      "context_pin" => pin,
+      "_csrf_token" => csrf,
+      "payment_method_nonce" => "fake-invalid-price-nonce"
+    }
+
+    invalid_terms = [
+      %{
+        metadata: Map.delete(session.metadata, "amount_minor"),
+        line_items: [Map.delete(hd(session.line_items), "amount_minor")]
+      },
+      %{
+        metadata: Map.put(session.metadata, "amount_minor", -1),
+        line_items: [%{hd(session.line_items) | "amount_minor" => -1, "amount" => "-0.01"}]
+      },
+      %{
+        metadata: Map.put(session.metadata, "amount_minor", 0),
+        line_items: [%{hd(session.line_items) | "amount_minor" => 1, "amount" => "0.00"}]
+      }
+    ]
+
+    for terms <- invalid_terms do
+      TestRepo.update!(Ecto.Changeset.change(LocalSession.by_id(session.id), terms))
+
+      response = post(conn, "/org-billing/checkout/#{session.session_token}/complete", params)
+
+      assert redirected_to(response) == "/org-billing/checkout/#{session.session_token}"
+      assert Phoenix.Flash.get(response.assigns.flash, :error) =~ "Checkout access is unavailable"
+      assert LocalSession.by_id(session.id).status == "open"
+      refute_received {:gateway_create, _, _}
+    end
+  end
+
   test "personal checkout denies POST when its processor differs from configuration", %{
     conn: conn
   } do
@@ -671,7 +776,7 @@ defmodule AccruePortal.CheckoutContextTest do
     refute_received {:gateway_create, _, _}
   end
 
-  defp checkout_fixture(owner_id) do
+  defp checkout_fixture(owner_id, overrides \\ %{}) do
     customer =
       %Customer{}
       |> Customer.changeset(%{
@@ -684,36 +789,38 @@ defmodule AccruePortal.CheckoutContextTest do
       })
       |> TestRepo.insert!()
 
-    {:ok, session} =
-      LocalSession.create_or_reuse(customer, %{
-        processor: "braintree",
-        mode: "subscription",
-        ui_mode: "hosted",
-        status: "open",
-        price_id: "price_checkout_context",
-        line_items: [
-          %{
-            "price" => "price_checkout_context",
-            "amount" => "49.00",
-            "amount_minor" => 4_900,
-            "quantity" => 1,
-            "currency" => "USD"
-          }
-        ],
-        metadata: %{
+    attrs = %{
+      processor: "braintree",
+      mode: "subscription",
+      ui_mode: "hosted",
+      status: "open",
+      price_id: "price_checkout_context",
+      line_items: [
+        %{
+          "price" => "price_checkout_context",
+          "amount" => "49.00",
           "amount_minor" => 4_900,
-          "currency" => "USD",
-          "interval" => "month",
-          "interval_count" => 1,
-          "plan_name" => "Checkout plan",
-          "billable_name" => "Checkout Organization",
-          "billable_id" => owner_id,
-          "processor" => "braintree"
-        },
-        success_url: "https://app.example.test/billing/success",
-        cancel_url: "https://app.example.test/billing/cancel",
-        operation_id: "checkout-context-#{System.unique_integer([:positive])}"
-      })
+          "quantity" => 1,
+          "currency" => "USD"
+        }
+      ],
+      metadata: %{
+        "amount_minor" => 4_900,
+        "currency" => "USD",
+        "interval" => "month",
+        "interval_count" => 1,
+        "plan_name" => "Checkout plan",
+        "billable_name" => "Checkout Organization",
+        "billable_id" => owner_id,
+        "processor" => "braintree"
+      },
+      success_url: "https://app.example.test/billing/success",
+      cancel_url: "https://app.example.test/billing/cancel",
+      operation_id: "checkout-context-#{System.unique_integer([:positive])}"
+    }
+
+    {:ok, session} =
+      LocalSession.create_or_reuse(customer, Map.merge(attrs, Enum.into(overrides, %{})))
 
     session
   end
