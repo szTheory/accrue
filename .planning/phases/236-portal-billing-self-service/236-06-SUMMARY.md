@@ -14,9 +14,9 @@ provides:
   - Recurring default and host-forced theme browser verification for direct add-card
 affects: [portal-billing, hosted-fields, phase-236-validation]
 actuals:
-  tokens: 5390
+  tokens: 8885
   tasks: 3
-  commits: 4
+  commits: 6
 tech-stack:
   added: []
   patterns: [computed semantic color handoff to Hosted Fields, host theme policy selected by test environment]
@@ -26,6 +26,7 @@ key-files:
 key-decisions:
   - "The deterministic Hosted Fields mock verifies application-supplied styles, served surfaces, and lifecycle only; it does not establish live Braintree iframe rendering fidelity."
   - "Theme changes recreate Hosted Fields because the SDK creation API accepts styles and offers no general setStyle operation."
+  - "Use Braintree's documented `.number`/`.expirationDate`/`.cvv` field selectors and `.invalid` state selector for style overrides."
 patterns-established:
   - "Use actual computed field backgrounds and semantic Portal color roles when passing styles to secure provider fields."
   - "Register only the browser assertions applicable to the selected host theme policy so CI reports executed checks without mode-specific skips."
@@ -45,12 +46,12 @@ coverage:
         ref: "ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 ACCRUE_HOST_PORTAL_THEME=dark npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields' — 2 passed"
         status: pass
     human_judgment: false
-duration: 7min
+duration: 42min
 completed: 2026-10-08
 status: complete
 plan_head_before: 2f13c9f2c141b5b3064112c40115286ff9caf992
-plan_head_after: 67dacd8e8f103312df8aa66fe8d2054d57061e95
-commits: 4
+plan_head_after: cdad46b3722ba486f890ca84704d41b834f5fcee
+commits: 6
 ---
 
 # Phase 236 Plan 06: Portal Billing Self-Service Summary
@@ -59,9 +60,9 @@ commits: 4
 
 ## Performance
 
-- **Duration:** 7 minutes
-- **Started:** 2026-10-08T18:33:32Z
-- **Completed:** 2026-10-08T18:40:32Z
+- **Duration:** 42 minutes
+- **Started:** 2026-10-08T18:34:26Z
+- **Completed:** 2026-10-08T19:15:58Z
 - **Tasks:** 3
 - **Files modified:** 6
 
@@ -74,10 +75,10 @@ commits: 4
 ## Task Commits
 
 1. **Task 1: Make direct add-card fields readable in light and dark themes** — `56f28efc` (fix)
-2. **Task 2: Preserve contrast through theme changes, host locks, patches, and exit** — `5fe38525` (test), with test-registration follow-up `67dacd8e` (test)
+2. **Task 2: Preserve contrast through theme changes, host locks, patches, and exit** — `5fe38525` (test), with test-registration follow-up `67dacd8e` and SDK selector alignment `cdad46b3` (test/fix)
 3. **Task 3: Reconcile the Phase 236 plan and Nyquist indexes** — `cf739ab8` (docs)
 
-**Plan metadata:** GSD state, roadmap, requirement, and summary metadata commit.
+**Plan metadata:** `9c735261` (GSD state, roadmap, requirement, and summary metadata commit; final metadata update follows).
 
 ## Files Created/Modified
 
@@ -123,8 +124,8 @@ Phase 236's POR-05 theme gap is closed with recurring, deterministic served-rout
 ## Self-Check: PASSED
 
 - Summary file exists.
-- Task commits `56f28efc`, `5fe38525`, `cf739ab8`, and `67dacd8e` are ancestors of the current plan head.
-- Roadmap and Nyquist index checker passed after the three focused browser results were recorded.
+- Task commits `56f28efc`, `5fe38525`, `cf739ab8`, `67dacd8e`, and `cdad46b3`, plus metadata commit `9c735261`, are ancestors of the current plan head.
+- Roadmap and Nyquist index checker passed after the final selector implementation and three focused browser results were recorded.
 
 ---
 *Phase: 236-portal-billing-self-service*
