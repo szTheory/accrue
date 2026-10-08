@@ -1,7 +1,6 @@
 defmodule AccrueAdmin.Components.GlobalSearch do
-  @moduledoc """
-  Stateful LiveComponent for global search in the admin interface.
-  """
+  @moduledoc "Stateful, bounded LiveComponent search preview for Admin records."
+
   use Phoenix.LiveComponent
 
   alias AccrueAdmin.Components.Icon
@@ -9,55 +8,79 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   alias AccrueAdmin.Queries.{Customers, Invoices, Subscriptions}
   alias AccrueAdmin.ScopedPath
 
+  @max_query_length 100
+
   @impl true
   def mount(socket) do
     {:ok,
      assign(socket,
-       # mount_path is provided by update/2 from app_shell; nil here avoids
-       # silently building broken navigation links if update/2 is not called
-       # (e.g. during a hot-reload partial update or future refactors).
        mount_path: nil,
        current_owner_scope: nil,
        query: "",
-       results: %{customers: [], invoices: [], subscriptions: []},
+       results: empty_results(),
+       failures: [],
        is_open: false,
-       loading: false
+       loading: false,
+       generation: 0
      )}
   end
 
   @impl true
   def update(%{action: "toggle"}, socket) do
     if socket.assigns.is_open do
-      {:ok,
-       assign(socket,
-         is_open: false,
-         query: "",
-         results: %{customers: [], invoices: [], subscriptions: []}
-       )}
+      {:ok, close(socket)}
     else
       {:ok, assign(socket, is_open: true)}
     end
   end
 
-  def update(%{action: "close"}, socket) do
-    {:ok,
-     assign(socket,
-       is_open: false,
-       query: "",
-       results: %{customers: [], invoices: [], subscriptions: []}
-     )}
-  end
+  def update(%{action: "close"}, socket), do: {:ok, close(socket)}
+  def update(%{action: "open"}, socket), do: {:ok, assign(socket, is_open: true)}
 
-  def update(%{action: "open"}, socket) do
-    {:ok, assign(socket, is_open: true)}
+  def update(
+        %{
+          action: "search_results",
+          query: query,
+          owner_scope: owner_scope,
+          generation: generation
+        } = assigns,
+        socket
+      ) do
+    if generation == socket.assigns.generation and query == socket.assigns.query and
+         owner_scope == socket.assigns.current_owner_scope do
+      {:ok,
+       assign(socket,
+         results: assigns.results,
+         failures: assigns.failures,
+         loading: false
+       )}
+    else
+      {:ok, socket}
+    end
   end
 
   def update(assigns, socket) do
-    {:ok, assign(socket, assigns)}
+    current_scope = socket.assigns.current_owner_scope
+    next_scope = Map.get(assigns, :current_owner_scope, socket.assigns.current_owner_scope)
+    socket = assign(socket, assigns)
+
+    if next_scope != current_scope do
+      {:ok,
+       assign(socket,
+         current_owner_scope: next_scope,
+         query: "",
+         results: empty_results(),
+         failures: [],
+         loading: false,
+         generation: socket.assigns.generation + 1
+       )}
+    else
+      {:ok, socket}
+    end
   end
 
   @impl true
-  def handle_event("toggle", _, socket) do
+  def handle_event("toggle", _params, socket) do
     if socket.assigns.is_open do
       {:noreply, close(socket)}
     else
@@ -65,78 +88,117 @@ defmodule AccrueAdmin.Components.GlobalSearch do
     end
   end
 
-  def handle_event("open", _, socket) do
-    {:noreply, assign(socket, is_open: true)}
-  end
-
-  def handle_event("close", _, socket) do
-    {:noreply, close(socket)}
-  end
-
-  # Maximum query length accepted before hitting the DB — prevents expensive
-  # ilike patterns on arbitrarily large input pasted into the search box.
-  @max_query_length 100
+  def handle_event("open", _params, socket), do: {:noreply, assign(socket, is_open: true)}
+  def handle_event("close", _params, socket), do: {:noreply, close(socket)}
 
   def handle_event("search", %{"q" => query}, socket) do
-    trimmed = String.trim(query)
+    query = String.trim(query)
 
     cond do
-      trimmed == "" ->
-        {:noreply,
-         assign(socket,
-           query: "",
-           results: empty_results(),
-           loading: false
-         )}
+      query == "" ->
+        {:noreply, clear_query(socket)}
 
-      String.length(trimmed) > @max_query_length ->
-        # Reject absurdly long queries before hitting the DB.
-        {:noreply, assign(socket, query: trimmed, results: empty_results(), loading: false)}
+      String.length(query) > @max_query_length ->
+        {:noreply, assign(clear_query(socket), query: query)}
 
       true ->
-        results = fetch_results(trimmed, socket.assigns[:current_owner_scope])
-        {:noreply, assign(socket, query: trimmed, results: results, loading: false)}
+        {:noreply, begin_search(socket, query)}
     end
+  end
+
+  def handle_event("retry", _params, %{assigns: %{query: query}} = socket) when query != "" do
+    {:noreply, begin_search(socket, query)}
+  end
+
+  def handle_event("retry", _params, socket), do: {:noreply, socket}
+
+  defp begin_search(socket, query) do
+    generation = socket.assigns.generation + 1
+    owner_scope = socket.assigns.current_owner_scope
+    id = socket.assigns.id
+
+    socket =
+      assign(socket,
+        query: query,
+        generation: generation,
+        results: empty_results(),
+        failures: [],
+        loading: true
+      )
+
+    Task.start(fn ->
+      {results, failures} = fetch_results(query, owner_scope)
+
+      send_update(__MODULE__,
+        id: id,
+        action: "search_results",
+        query: query,
+        owner_scope: owner_scope,
+        generation: generation,
+        results: results,
+        failures: failures
+      )
+    end)
+
+    socket
+  end
+
+  defp clear_query(socket) do
+    assign(socket,
+      query: "",
+      results: empty_results(),
+      failures: [],
+      loading: false,
+      generation: socket.assigns.generation + 1
+    )
   end
 
   defp empty_results, do: %{customers: [], invoices: [], subscriptions: []}
 
-  defp close(socket) do
-    assign(socket,
-      is_open: false,
-      query: "",
-      results: empty_results()
-    )
-  end
+  defp close(socket), do: socket |> clear_query() |> assign(is_open: false)
 
   defp fetch_results(query, owner_scope) do
     tasks = [
-      customers: fn ->
-        Customers.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) |> page_rows()
-      end,
-      invoices: fn ->
-        Invoices.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) |> page_rows()
-      end,
+      customers: fn -> Customers.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) end,
+      invoices: fn -> Invoices.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) end,
       subscriptions: fn ->
-        Subscriptions.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) |> page_rows()
+        Subscriptions.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)
       end
     ]
 
     tasks
-    |> Task.async_stream(fn {key, func} -> {key, func.()} end,
+    |> Task.async_stream(fn {key, func} -> {key, safe_lookup(func)} end,
       on_timeout: :kill_task,
       timeout: 3_000
     )
-    |> Enum.reduce(empty_results(), fn
-      {:ok, {key, data}}, acc -> Map.put(acc, key, data)
-      {:exit, _}, acc -> acc
+    |> Enum.reduce({empty_results(), []}, fn
+      {:ok, {key, {:ok, {rows, _cursor}}}}, {results, failures} ->
+        {Map.put(results, key, rows), failures}
+
+      {:ok, {key, {:error, _reason}}}, {results, failures} ->
+        {results, [key | failures]}
+
+      {:exit, _reason}, {results, failures} ->
+        {results, [:lookup | failures]}
     end)
+    |> then(fn {results, failures} -> {results, Enum.uniq(failures)} end)
   end
 
-  defp page_rows({rows, _cursor}), do: rows
+  defp safe_lookup(func) do
+    {:ok, func.()}
+  rescue
+    _error -> {:error, :unavailable}
+  catch
+    _kind, _reason -> {:error, :unavailable}
+  end
 
   @impl true
   def render(assigns) do
+    assigns =
+      assigns
+      |> Phoenix.Component.assign_new(:failures, fn -> [] end)
+      |> Phoenix.Component.assign_new(:loading, fn -> false end)
+
     ~H"""
     <div
       id={@id}
@@ -160,8 +222,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
             aria-hidden="true"
             phx-click="close"
             phx-target={@myself}
-          >
-          </div>
+          ></div>
 
           <div
             class="ax-command-palette"
@@ -180,93 +241,104 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   type="text"
                   name="q"
                   value={@query}
-                  placeholder="Type customer name, email, or ID"
+                  placeholder="Search customers, invoices, or subscriptions"
                   autocomplete="off"
                   spellcheck="false"
                   autofocus
-                  phx-debounce="150"
                   class="ax-command-palette-input"
                   id="global-search-input"
                   data-focus-trap-initial
+                  aria-describedby="global-search-help"
                 />
                 <span id="search-spinner" class="ax-spinner" hidden={not @loading} aria-hidden="true"></span>
               </div>
+              <p id="global-search-help" class="ax-body ax-command-palette-help">
+                Customers: name, email, owner ID, processor ID. Invoices: number, processor ID, customer name or email.
+                Subscriptions: processor ID, customer name or email. Up to five results per group.
+              </p>
             </form>
 
-            <div class="ax-command-palette-body">
+            <div class="ax-command-palette-body" aria-live="polite" aria-atomic="false">
               <%= if @query == "" do %>
                 <div class="ax-command-palette-empty">
-                  <p class="ax-eyebrow">Jump to</p>
+                  <p class="ax-eyebrow">Open a scoped list</p>
                   <ul class="ax-command-palette-list">
                     <li class="ax-command-palette-list-item">
                       <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers", @current_owner_scope)}>
-                        <Icon.icon name={:users} size="sm" /> <span>Search customer records</span>
+                        <Icon.icon name={:users} size="sm" /> <span>Customers</span>
                       </a>
                     </li>
                     <li class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})} data-path={scoped_path(@mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
-                        <Icon.icon name={:invoices} size="sm" /> <span>Open invoice queue to $0.00</span>
+                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices", @current_owner_scope)} data-path={scoped_path(@mount_path, "/invoices", @current_owner_scope)}>
+                        <Icon.icon name={:invoices} size="sm" /> <span>Invoices</span>
                       </a>
                     </li>
                     <li class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/analytics/recovery", @current_owner_scope)} data-path={scoped_path(@mount_path, "/analytics/recovery", @current_owner_scope)}>
-                        <Icon.icon name={:recovery} size="sm" /> <span>Recover at-risk revenue</span>
-                      </a>
-                    </li>
-                    <li class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/webhooks", @current_owner_scope, %{"status" => "dead"})} data-path={scoped_path(@mount_path, "/webhooks", @current_owner_scope, %{"status" => "dead"})}>
-                        <Icon.icon name={:webhooks} size="sm" /> <span>Investigate an incident</span>
+                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/subscriptions", @current_owner_scope)} data-path={scoped_path(@mount_path, "/subscriptions", @current_owner_scope)}>
+                        <Icon.icon name={:recovery} size="sm" /> <span>Subscriptions</span>
                       </a>
                     </li>
                   </ul>
                 </div>
               <% else %>
-                <div class="ax-command-palette-results">
-                  <%= if Enum.empty?(@results.customers) and Enum.empty?(@results.invoices) and Enum.empty?(@results.subscriptions) do %>
-                    <div class="ax-command-palette-no-results">
-                      <p><%= Copy.global_search_no_results_html(@query) %></p>
-                    </div>
-                  <% else %>
-                    <%= if not Enum.empty?(@results.customers) do %>
-                      <p class="ax-eyebrow">Customers</p>
-                      <ul class="ax-command-palette-list">
-                        <%= for customer <- @results.customers do %>
-                          <li class="ax-command-palette-list-item">
-                            <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)}>
-                              <%= customer.name || customer.email %>
-                            </a>
-                          </li>
-                        <% end %>
-                      </ul>
-                    <% end %>
+                <%= if @loading do %>
+                  <p role="status">Searching billing records…</p>
+                <% end %>
+                <%= if @failures != [] do %>
+                  <div class="ax-command-palette-error" role="status">
+                    <p>Some lookups are unavailable. Results from completed groups remain available.</p>
+                    <button type="button" class="ax-button ax-button-secondary ax-button-sm" phx-click="retry" phx-target={@myself}>
+                      Retry unavailable lookups
+                    </button>
+                  </div>
+                <% end %>
+                <%= if not @loading and @failures == [] and no_results?(@results) do %>
+                  <div class="ax-command-palette-no-results">
+                    <p><%= Copy.global_search_no_results_html(@query) %></p>
+                  </div>
+                <% end %>
 
-                    <%= if not Enum.empty?(@results.invoices) do %>
-                      <p class="ax-eyebrow">Invoices</p>
-                      <ul class="ax-command-palette-list">
-                        <%= for invoice <- @results.invoices do %>
-                          <li class="ax-command-palette-list-item">
-                            <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}>
-                              <%= invoice.number || invoice.id %>
-                            </a>
-                          </li>
-                        <% end %>
-                      </ul>
-                    <% end %>
+                <%= if @results.customers != [] do %>
+                  <p class="ax-eyebrow">Customers</p>
+                  <ul class="ax-command-palette-list" data-search-group="customers">
+                    <li :for={customer <- @results.customers} class="ax-command-palette-list-item">
+                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)}>
+                        <span><strong><%= customer.name || customer.email || customer.id %></strong>
+                          <small><%= customer.email %><%= if customer.owner_id, do: " · #{customer.owner_type} #{customer.owner_id}" %><%= if customer.processor_id, do: " · #{customer.processor} #{customer.processor_id}" %></small>
+                          <code>Customer ID: <%= customer.id %></code>
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                <% end %>
 
-                    <%= if not Enum.empty?(@results.subscriptions) do %>
-                      <p class="ax-eyebrow">Subscriptions</p>
-                      <ul class="ax-command-palette-list">
-                        <%= for sub <- @results.subscriptions do %>
-                          <li class="ax-command-palette-list-item">
-                            <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)}>
-                              <%= sub.id %> - <%= sub.status %>
-                            </a>
-                          </li>
-                        <% end %>
-                      </ul>
-                    <% end %>
-                  <% end %>
-                </div>
+                <%= if @results.invoices != [] do %>
+                  <p class="ax-eyebrow">Invoices</p>
+                  <ul class="ax-command-palette-list" data-search-group="invoices">
+                    <li :for={invoice <- @results.invoices} class="ax-command-palette-list-item">
+                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}>
+                        <span><strong><%= invoice.number || invoice.id %></strong>
+                          <small><%= invoice.customer_name %><%= if invoice.customer_email, do: " · #{invoice.customer_email}" %><%= if invoice.processor_id, do: " · #{invoice.processor_id}" %></small>
+                          <code>Invoice ID: <%= invoice.id %></code>
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                <% end %>
+
+                <%= if @results.subscriptions != [] do %>
+                  <p class="ax-eyebrow">Subscriptions</p>
+                  <ul class="ax-command-palette-list" data-search-group="subscriptions">
+                    <li :for={sub <- @results.subscriptions} class="ax-command-palette-list-item">
+                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)}>
+                        <span><strong><%= sub.customer_name || sub.customer_email || sub.id %> · <%= sub.status %></strong>
+                          <small><%= sub.customer_email %><%= if sub.processor_id, do: " · #{sub.processor_id}" %></small>
+                          <code>Subscription ID: <%= sub.id %></code>
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                <% end %>
               <% end %>
             </div>
 
@@ -277,14 +349,16 @@ defmodule AccrueAdmin.Components.GlobalSearch do
             </div>
           </div>
         <% end %>
-        </div>
+      </div>
     </div>
     """
   end
 
-  defp scoped_path(mount_path, suffix, owner_scope, params \\ %{})
-  defp scoped_path(nil, _suffix, _owner_scope, _params), do: "#"
+  defp no_results?(results),
+    do: Enum.all?([:customers, :invoices, :subscriptions], &(Map.fetch!(results, &1) == []))
 
-  defp scoped_path(mount_path, suffix, owner_scope, params),
-    do: ScopedPath.build(mount_path, suffix, owner_scope, params)
+  defp scoped_path(nil, _suffix, _owner_scope), do: "#"
+
+  defp scoped_path(mount_path, suffix, owner_scope),
+    do: ScopedPath.build(mount_path, suffix, owner_scope)
 end

@@ -24,7 +24,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
         })
 
       # Component must render without raising
-      assert html =~ "Jump to"
+      assert html =~ "Open a scoped list"
 
       # All four shortcut links should fall back to "#"
       assert html =~ ~s(data-path="#")
@@ -44,9 +44,9 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
 
       assert html =~ ~s(data-path="/billing/customers")
       assert html =~ ~s(href="/billing/customers")
-      assert html =~ ~s(data-path="/billing/invoices?status=open")
-      assert html =~ ~s(data-path="/billing/analytics/recovery")
-      assert html =~ ~s(data-path="/billing/webhooks?status=dead")
+      assert html =~ ~s(data-path="/billing/invoices")
+      assert html =~ ~s(data-path="/billing/subscriptions")
+      refute html =~ "Open invoice queue to $0.00"
     end
 
     test "preserves organization owner scope in shortcut and result paths" do
@@ -67,19 +67,19 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
           id: "global-search",
           mount_path: "/billing",
           current_owner_scope: owner_scope,
-          query: "acme",
+          query: "",
           results: %{
-            customers: [%{id: "cus_1", name: "Acme", email: "ops@example.com"}],
-            invoices: [%{id: "inv_1", number: "INV-1"}],
-            subscriptions: [%{id: "sub_1", status: :active}]
+            customers: [],
+            invoices: [],
+            subscriptions: []
           },
           is_open: true,
           loading: false
         })
 
-      assert html =~ ~s(data-path="/billing/customers/cus_1?org=acme")
-      assert html =~ ~s(data-path="/billing/invoices/inv_1?org=acme")
-      assert html =~ ~s(data-path="/billing/subscriptions/sub_1?org=acme")
+      assert html =~ ~s(data-path="/billing/customers?org=acme")
+      assert html =~ ~s(data-path="/billing/invoices?org=acme")
+      assert html =~ ~s(data-path="/billing/subscriptions?org=acme")
     end
   end
 
@@ -139,7 +139,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
                ~s(<a class="ax-command-palette-item" href="/billing/customers" data-path="/billing/customers")
 
       assert html =~
-               ~s(<a class="ax-command-palette-item" href="/billing/invoices?status=open" data-path="/billing/invoices?status=open")
+               ~s(<a class="ax-command-palette-item" href="/billing/invoices" data-path="/billing/invoices")
     end
 
     test "Phase 199 command palette declares Overlay-backed or overlay-equivalent source markers" do
@@ -169,7 +169,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
              "command palette must either use Overlay or declare equivalent focus/portal markers"
     end
 
-    test "Phase 199 no-results copy names the billing search domain" do
+    test "no matches are distinct from failed lookups" do
       html =
         render_component(GlobalSearch, %{
           id: "global-search",
@@ -180,8 +180,138 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
           loading: false
         })
 
-      refute html =~ "No results found"
       assert html =~ ~s(No billing records match "missing-acme")
+      refute html =~ "Some lookups are unavailable"
+    end
+
+    test "partial failure retains successful groups and offers a read retry" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "ada@example.com",
+          results: %{
+            customers: [
+              %{
+                id: "cus_exact_123",
+                name: "Ada Lovelace",
+                email: "ada@example.com",
+                owner_type: "Organization",
+                owner_id: "org-1",
+                processor: "stripe",
+                processor_id: "cus_stripe_9"
+              }
+            ],
+            invoices: [],
+            subscriptions: []
+          },
+          failures: [:invoices],
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ "Some lookups are unavailable"
+      assert html =~ "Retry unavailable lookups"
+      assert html =~ "Ada Lovelace"
+      assert html =~ "ada@example.com"
+      assert html =~ "Organization org-1"
+      assert html =~ "stripe cus_stripe_9"
+      assert html =~ "Customer ID: cus_exact_123"
+      assert html =~ ~s(href="/billing/customers/cus_exact_123")
+    end
+
+    test "help copy lists only fields the three queries actually match" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "ada",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          failures: [],
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ "Customers: name, email, owner ID, processor ID"
+      assert html =~ "Invoices: number, processor ID, customer name or email"
+      assert html =~ "Subscriptions: processor ID, customer name or email"
+      assert html =~ "Up to five results per group"
+      refute html =~ "Type customer name, email, or ID"
+      refute html =~ "Open invoice queue to $0.00"
+    end
+
+    test "async replies are accepted only for the current query, scope and generation" do
+      source = File.read!("lib/accrue_admin/components/global_search.ex")
+
+      assert source =~ "query == socket.assigns.query"
+      assert source =~ "owner_scope == socket.assigns.current_owner_scope"
+      assert source =~ "generation == socket.assigns.generation"
+      assert source =~ "Task.start(fn ->"
+      assert source =~ "current_owner_scope: next_scope"
+      assert source =~ "generation: socket.assigns.generation + 1"
+    end
+
+    test "late results cannot replace the current query results" do
+      socket = %Phoenix.LiveView.Socket{
+        assigns: %{
+          query: "current query",
+          current_owner_scope: nil,
+          generation: 4,
+          results: %{customers: [%{id: "current"}], invoices: [], subscriptions: []},
+          failures: [],
+          loading: false
+        }
+      }
+
+      assert {:ok, updated} =
+               GlobalSearch.update(
+                 %{
+                   action: "search_results",
+                   query: "old query",
+                   owner_scope: nil,
+                   generation: 3,
+                   results: %{customers: [%{id: "stale"}], invoices: [], subscriptions: []},
+                   failures: []
+                 },
+                 socket
+               )
+
+      assert updated.assigns.results.customers == [%{id: "current"}]
+    end
+
+    test "changing owner scope clears query and prior results" do
+      owner_scope = %OwnerScope{
+        mode: :organization,
+        current_admin: %{id: "admin_1", role: :admin},
+        organization_id: "org_1",
+        organization_slug: "acme",
+        organization_display_name: "Acme",
+        platform_admin?: false,
+        admin_org_ids: ["org_1"],
+        active_organization_id: "org_1",
+        active_organization_slug: "acme"
+      }
+
+      socket = %Phoenix.LiveView.Socket{
+        assigns: %{
+          __changed__: %{},
+          query: "stale query",
+          current_owner_scope: nil,
+          generation: 1,
+          results: %{customers: [%{id: "foreign"}], invoices: [], subscriptions: []},
+          failures: [],
+          loading: true
+        }
+      }
+
+      assert {:ok, updated} =
+               GlobalSearch.update(%{current_owner_scope: owner_scope}, socket)
+
+      assert updated.assigns.current_owner_scope == owner_scope
+      assert updated.assigns.query == ""
+      assert updated.assigns.results == %{customers: [], invoices: [], subscriptions: []}
+      refute updated.assigns.loading
+      assert updated.assigns.generation == 2
     end
 
     test "Phase 199 search source uses owner-scoped query modules" do
@@ -196,7 +326,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert source =~
                "Subscriptions.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)"
 
-      assert source =~ "ScopedPath.build(mount_path, suffix, owner_scope, params)"
+      assert source =~ "ScopedPath.build(mount_path, suffix, owner_scope)"
     end
   end
 end
