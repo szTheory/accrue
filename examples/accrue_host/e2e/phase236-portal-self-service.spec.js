@@ -30,6 +30,7 @@ async function installHostedFieldsMock(page, options = {}) {
     const saveCounts = () => sessionStorage.setItem(storageKey, JSON.stringify(counts));
     const pendingClientCallbacks = [];
     const pendingHostedFieldsCallbacks = [];
+    const pendingHostedFieldsTeardownCallbacks = [];
     const outcomes = mockOptions.outcomes || [{ kind: "invalid" }];
     const sdk = {
       client: {
@@ -77,9 +78,15 @@ async function installHostedFieldsMock(page, options = {}) {
             teardown(done) {
               counts.teardown += 1;
               saveCounts();
-              if (done) done(mockOptions.failFirstHostedFieldsTeardown && counts.teardown === 1
+              if (!done) return;
+              const finish = () => done(mockOptions.failFirstHostedFieldsTeardown && counts.teardown === 1
                 ? new Error("mock Hosted Fields teardown failed")
                 : null);
+              if (mockOptions.holdFirstHostedFieldsTeardown && counts.teardown === 1) {
+                pendingHostedFieldsTeardownCallbacks.push(finish);
+              } else {
+                finish();
+              }
             }
           };
           const complete = () => callback(null, instance);
@@ -113,6 +120,12 @@ async function installHostedFieldsMock(page, options = {}) {
         },
         releaseHostedFieldsCreate() {
           const callback = pendingHostedFieldsCallbacks.shift();
+          if (!callback) return false;
+          callback();
+          return true;
+        },
+        releaseHostedFieldsTeardown() {
+          const callback = pendingHostedFieldsTeardownCallbacks.shift();
           if (!callback) return false;
           callback();
           return true;
@@ -324,8 +337,11 @@ test("Hosted Fields stay disabled when stale-resource teardown fails", async ({ 
   expect(counts.clientTeardown).toBe(1);
 });
 
-if (!process.env.ACCRUE_HOST_PORTAL_THEME) test("Hosted Fields do not recreate after theme-refresh teardown fails", async ({ page, sandboxId }) => {
-  await installHostedFieldsMock(page, { failFirstHostedFieldsTeardown: true });
+if (!process.env.ACCRUE_HOST_PORTAL_THEME) test("Hosted Fields do not recreate after theme-refresh teardown fails during update", async ({ page, sandboxId }) => {
+  await installHostedFieldsMock(page, {
+    failFirstHostedFieldsTeardown: true,
+    holdFirstHostedFieldsTeardown: true
+  });
   const fixture = readFixture();
   await login(page, fixture, fixture.normal_email, sandboxId);
   await page.goto("/billing/payment-methods/new");
@@ -339,13 +355,21 @@ if (!process.env.ACCRUE_HOST_PORTAL_THEME) test("Hosted Fields do not recreate a
   const nextTheme = currentTheme === "dark" ? "light" : "dark";
   await page.getByRole("button", { name: nextTheme === "dark" ? "Dark theme" : "Light theme" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", nextTheme);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.teardown)).toBe(1);
+  await expect(submit).toBeDisabled();
+  expect(await page.evaluate(() => window.__phase236HostedFieldsControl.triggerPostMountUpdate())).toBe(true);
+  let counts = await page.evaluate(() => window.__phase236HostedFieldsEvidence.counts);
+  expect(counts.clientCreate).toBe(1);
+  expect(counts.hostedFieldsCreate).toBe(1);
+  expect(await page.evaluate(() => window.__phase236HostedFieldsControl.releaseHostedFieldsTeardown())).toBe(true);
 
   await expect(form.locator("[data-braintree-error]")).toHaveText(
     "Secure card fields could not be safely reset. Refresh this page to try again."
   );
   await expect(submit).toBeDisabled();
   await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
-  const counts = await page.evaluate(() => window.__phase236HostedFieldsEvidence.counts);
+  counts = await page.evaluate(() => window.__phase236HostedFieldsEvidence.counts);
+  expect(counts.clientCreate).toBe(1);
   expect(counts.hostedFieldsCreate).toBe(1);
   expect(counts.teardown).toBe(1);
 });
@@ -369,7 +393,7 @@ test("Hosted Fields do not revive after pagehide during client creation", async 
 });
 
 if (!process.env.ACCRUE_HOST_PORTAL_THEME) test("Hosted Fields refresh after the direct-route context pin and theme changes", async ({ page, sandboxId }) => {
-  await installHostedFieldsMock(page);
+  await installHostedFieldsMock(page, { holdFirstHostedFieldsTeardown: true });
   const fixture = readFixture();
   await login(page, fixture, fixture.normal_email, sandboxId);
   await page.goto("/billing/payment-methods/new");
@@ -378,11 +402,24 @@ if (!process.env.ACCRUE_HOST_PORTAL_THEME) test("Hosted Fields refresh after the
   const form = page.locator('[data-portal-hosted-fields="payment-method"]');
   await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
   await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(1);
-  await page.getByRole("button", { name: "Dark theme" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(2);
+  const currentTheme = await page.locator("html").getAttribute("data-theme");
+  const nextTheme = currentTheme === "dark" ? "light" : "dark";
+  await page.getByRole("button", { name: nextTheme === "dark" ? "Dark theme" : "Light theme" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", nextTheme);
   await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.teardown)).toBe(1);
+  await expect(form.locator("[data-checkout-submit]")).toBeDisabled();
+  expect(await page.evaluate(() => window.__phase236HostedFieldsControl.triggerPostMountUpdate())).toBe(true);
+  let counts = await page.evaluate(() => window.__phase236HostedFieldsEvidence.counts);
+  expect(counts.clientCreate).toBe(1);
+  expect(counts.hostedFieldsCreate).toBe(1);
+  expect(await page.evaluate(() => window.__phase236HostedFieldsControl.releaseHostedFieldsTeardown())).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(2);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.clientCreate)).toBe(2);
+  await expect(form.locator("[data-checkout-submit]")).toBeEnabled();
   await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+  counts = await page.evaluate(() => window.__phase236HostedFieldsEvidence.counts);
+  expect(counts.teardown).toBe(1);
+  expect(counts.clientTeardown).toBe(0);
 });
 
 if (process.env.ACCRUE_HOST_PORTAL_THEME) test("host-forced theme locks the picker on the served add-card route", async ({ page, sandboxId }) => {

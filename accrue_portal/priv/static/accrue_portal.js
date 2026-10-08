@@ -123,6 +123,7 @@
       this.submissionSent = false;
       this.hostedFieldStylesSnapshot = null;
       this.hostedFieldsSetupInFlight = true;
+      this.hostedFieldsTeardownInFlight = false;
       this.hostedFieldsRetryAfterPending = false;
       this.lifecycleGeneration = (this.lifecycleGeneration || 0) + 1;
       var createGeneration = this.lifecycleGeneration;
@@ -227,7 +228,7 @@
       if (this.hostedFields) {
         setSubmitting(this.el.querySelector("[data-checkout-submit]"), false);
         refreshHostedFields(this);
-      } else if (this.hostedFieldsSetupInFlight) {
+      } else if (this.hostedFieldsSetupInFlight || this.hostedFieldsTeardownInFlight) {
         this.hostedFieldsRetryAfterPending = true;
         setSubmitDisabled(this.el.querySelector("[data-checkout-submit]"), true);
       } else if (window.braintree) {
@@ -578,9 +579,12 @@
     setSubmitDisabled(hook.el.querySelector("[data-checkout-submit]"), true);
     var old = hook.hostedFields;
     hook.hostedFields = null;
+    hook.hostedFieldsTeardownInFlight = true;
     teardownAsyncResource(old, function (teardownError) {
+      hook.hostedFieldsTeardownInFlight = false;
       if (hook.isDestroyed) return;
       if (teardownError) {
+        hook.hostedFieldsRetryAfterPending = false;
         hook.hostedFieldsSetupFailed = true;
         setSubmitDisabled(hook.el.querySelector("[data-checkout-submit]"), true);
         setInlineError(
