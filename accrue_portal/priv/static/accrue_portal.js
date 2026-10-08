@@ -3,14 +3,31 @@
 
   Hooks.BraintreeHostedFields = {
     mounted: function () {
-      if (!window.braintree) return;
-      if (this.el.dataset.hostedFieldsBound === "1") return;
-
-      var token = this.el.dataset.clientToken;
       var errorNode = this.el.querySelector("[data-braintree-error]");
       var submitButton = this.el.querySelector("[data-checkout-submit]");
 
-      if (!token) return;
+      if (!window.braintree) {
+        setSubmitDisabled(submitButton, true);
+        this.sdkLoadAttempts = (this.sdkLoadAttempts || 0) + 1;
+        if (this.sdkLoadAttempts > 100) {
+          setInlineError(errorNode, "Secure card entry could not load. Refresh this page to try again.");
+          return;
+        }
+        setInlineError(errorNode, "Loading secure card fields...");
+        this.sdkLoadTimer = window.setTimeout(function () {
+          if (!this.isDestroyed) this.mounted();
+        }.bind(this), 50);
+        return;
+      }
+      if (this.el.dataset.hostedFieldsBound === "1") return;
+
+      var token = this.el.dataset.clientToken;
+
+      if (!token) {
+        setSubmitDisabled(submitButton, true);
+        setInlineError(errorNode, "Secure card entry is unavailable. Return to your account and try again.");
+        return;
+      }
 
       this.el.dataset.hostedFieldsBound = "1";
       this.hostedFields = null;
@@ -20,7 +37,8 @@
 
       window.braintree.client.create({ authorization: token }, function (clientErr, clientInstance) {
         if (clientErr) {
-          setInlineError(errorNode, "Unable to start card entry.");
+          setSubmitDisabled(submitButton, true);
+          setInlineError(errorNode, "Secure card entry could not start. Refresh this page to try again.");
           return;
         }
 
@@ -36,11 +54,14 @@
           },
           function (hostedFieldsErr, hostedFieldsInstance) {
             if (hostedFieldsErr) {
-              setInlineError(errorNode, "Unable to load secure card fields.");
+              setSubmitDisabled(submitButton, true);
+              setInlineError(errorNode, "Secure card fields could not load. Refresh this page to try again.");
               return;
             }
 
             this.hostedFields = hostedFieldsInstance;
+            setSubmitting(submitButton, false);
+            setInlineError(errorNode, "Secure card fields are ready.");
 
             this.el.addEventListener(
               "submit",
@@ -63,6 +84,11 @@
                   return;
                 }
 
+                if (this.tokenizing || this.submissionSent) {
+                  event.preventDefault();
+                  return;
+                }
+
                 if (this.readyToSubmit) {
                   this.readyToSubmit = false;
                   return;
@@ -78,6 +104,8 @@
     },
 
     destroyed: function () {
+      this.isDestroyed = true;
+      if (this.sdkLoadTimer) window.clearTimeout(this.sdkLoadTimer);
       var nonceInput = this.el.querySelector("[data-braintree-nonce-input]");
       if (nonceInput) nonceInput.value = "";
       this.readyToSubmit = false;
@@ -97,6 +125,7 @@
       setInlineError(errorNode, "");
       this.tokenizing = true;
       setSubmitting(submitButton, true);
+      setInlineError(errorNode, "Securing your card details...");
       var nonceInput = this.el.querySelector("[data-braintree-nonce-input]");
       if (nonceInput) nonceInput.value = "";
 
@@ -109,13 +138,15 @@
             if (nonceInput) nonceInput.value = "";
 
             if (this.el.dataset.portalHostedFields === "payment-method") {
-              setInlineError(errorNode, tokenizeErr.message || "Unable to tokenize card.");
+              setInlineError(errorNode, invalidCardError(tokenizeErr)
+                ? "Check the card number, expiration, and security code, then try again."
+                : "Secure card tokenization failed. No payment was submitted. Try again.");
               return;
             }
 
-            this.pushEvent("checkout_failed", {
-              message: tokenizeErr.message || "Unable to tokenize card."
-            });
+            setInlineError(errorNode, invalidCardError(tokenizeErr)
+              ? "Check the card number, expiration, and security code, then try again."
+              : "Secure card tokenization failed. No payment was submitted. Try again.");
 
             return;
           }
@@ -153,6 +184,8 @@
             return;
           }
 
+          setInlineError(errorNode, "Submitting your payment securely. Keep this page open.");
+
           if (!this.el.action || this.el.method !== "post") {
             this.pushEvent("checkout_tokenized", {
               nonce: payload.nonce,
@@ -167,7 +200,7 @@
           nonceInput.value = payload.nonce;
           this.tokenizing = false;
           this.submissionSent = true;
-          this.el.submit();
+          submitCheckout(this.el, nonceInput, errorNode);
         }.bind(this)
       );
     }
@@ -202,7 +235,34 @@
   }
 
   function setInlineError(node, message) {
-    if (node) node.textContent = message || "";
+    if (!node) return;
+    node.setAttribute("role", "status");
+    node.setAttribute("aria-live", "polite");
+    node.textContent = message || "";
+  }
+
+  function invalidCardError(error) {
+    return error.code === "HOSTED_FIELDS_FIELDS_INVALID" ||
+      (error.details && Array.isArray(error.details.invalidFieldKeys) && error.details.invalidFieldKeys.length > 0);
+  }
+
+  function submitCheckout(form, nonceInput, errorNode) {
+    var body = new URLSearchParams(new FormData(form));
+
+    window.fetch(form.action, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { Accept: "text/html" },
+      body: body
+    }).then(function (response) {
+      window.location.assign(response.url || form.action);
+    }).catch(function () {
+      nonceInput.value = "";
+      setInlineError(
+        errorNode,
+        "We couldn't confirm whether your payment went through. Check your billing status or contact support before trying again."
+      );
+    });
   }
 
   function setSubmitting(button, submitting) {
@@ -216,6 +276,10 @@
     button.textContent = submitting
       ? button.dataset.labelProcessing || button.dataset.labelDefault
       : button.dataset.labelDefault;
+  }
+
+  function setSubmitDisabled(button, disabled) {
+    if (button) button.disabled = !!disabled;
   }
 
   // --- Theme picker ------------------------------------------------------
