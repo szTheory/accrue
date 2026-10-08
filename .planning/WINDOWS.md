@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 1
+open_count: 2
 waived_count: 6
 fixed_count: 8
-total_count: 15
-last_updated: 2026-10-08T00:50:59.696Z
+total_count: 16
+last_updated: 2026-10-08T01:20:22.343Z
 ---
 
 # Broken Windows Ledger
@@ -30,6 +30,7 @@ last_updated: 2026-10-08T00:50:59.696Z
 | 13 | 232 | unmet-truth | accrue/test/accrue/docs/package_docs_verifier_test.exs |  | release-gate (all required matrix cells: Floor, Primary, Primary+OpenTelemetry) is failing on the merits at the frozen re-cut candidate SHA: package_docs_verifier_test.exs's seed_tmp_dir! fixture never copied the new scripts/ci/main_module.mjs dependency that scripts/ci/verify_foundation_contrast.mjs (introduced by this phase's D-29 shared module-boundary guard) now imports, so every spawned foundation-contrast subprocess crashed with ERR_MODULE_NOT_FOUND. Fixed and verified on the milestone line (commit 11d42183, mix test test/accrue/docs/package_docs_verifier_test.exs --seed 0 now 46/46). | waived | Owner: Accrue maintainer (szTheory). Rationale: root cause is a stale test fixture (missing scripts/ci/main_module.mjs in seed_tmp_dir!) introduced by this phase's own D-29 shared module-boundary guard; fixed and verified on the milestone line (11d42183, mix test test/accrue/docs/package_docs_verifier_test.exs --seed 0 now 46/46 across the whole file). The frozen candidate SHA is immutable under this plan's hard limits, so the fix is not yet incorporated into it. Release impact: none to shipped behavior -- the failure is confined to a CI test-fixture gap in the verifier's own scratch-copy machinery, not a regression in any package's runtime code; the fix will land in the next re-cut. | 2026-09-17T14:50:27.063Z | 2026-09-17T14:50:38.182Z |
 | 14 | 232 | unmet-truth | .github/workflows/ci.yml |  | annotation-sweep is failing at the frozen re-cut candidate SHA (run 35232417814) purely as a downstream consequence of the docs-contracts-shift-left and release-gate regressions above -- it sweeps release-facing annotations from those same jobs and has no independent local-equivalent form (its only proof is a real GitHub Actions dispatch, per 231-GATE-01-EVIDENCE.md's established precedent for this exact lane). | waived | Owner: Accrue maintainer (szTheory). Rationale: purely a downstream consequence of ship-window rows 12 and 13 (annotation-sweep sweeps the same jobs that failed for those reasons); no independent defect. Release impact: none beyond rows 12/13 -- resolves automatically once those land in a future re-cut and this lane is re-dispatched. | 2026-09-17T14:50:27.147Z | 2026-09-17T14:50:38.272Z |
 | 15 | 234 | deviation | accrue_admin/test/accrue_admin/live/dashboard_live_test.exs |  | Dashboard scope-control tests were added after the initial implementation instead of preceding it in a RED-first cycle. | open |  | 2026-10-08T00:50:59.696Z |  |
+| 16 | 234 | deviation | .planning/phases/234-admin-customers-subscriptions/234-03-SUMMARY.md |  | TDD-marked task tests were added after implementation; workflow TDD mode was disabled and no RED commit was produced. | open |  | 2026-10-08T01:20:22.343Z |  |
 
 ````json
 [
@@ -215,6 +216,19 @@ last_updated: 2026-10-08T00:50:59.696Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-08T00:50:59.696Z",
+    "resolved_at": null,
+    "milestone": "v1.63"
+  },
+  {
+    "id": 16,
+    "kind": "deviation",
+    "phase": "234",
+    "file": ".planning/phases/234-admin-customers-subscriptions/234-03-SUMMARY.md",
+    "line": null,
+    "description": "TDD-marked task tests were added after implementation; workflow TDD mode was disabled and no RED commit was produced.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-08T01:20:22.343Z",
     "resolved_at": null,
     "milestone": "v1.63"
   }
