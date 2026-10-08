@@ -71,6 +71,28 @@ test("Phase 234 post-layout served Admin details evidence", async ({ page, sandb
   if (await drawerTrigger.count()) await drawerTrigger.click();
   const drawerImage = await page.screenshot({ fullPage: true });
 
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto(customerPath, { waitUntil: "domcontentloaded" });
+  await waitForLiveView(page);
+  const customerOverflow = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, document: document.documentElement.scrollWidth, elements: [...document.querySelectorAll("body *")].map((el) => ({ tag: el.tagName, className: typeof el.className === "string" ? el.className : "", id: el.id, left: el.getBoundingClientRect().left, right: el.getBoundingClientRect().right, width: el.getBoundingClientRect().width })).filter((box) => box.right > document.documentElement.clientWidth + 1 || box.left < -1).sort((a, b) => b.right - a.right).slice(0, 12) }));
+  expect(customerOverflow.document <= customerOverflow.viewport).toBeTruthy();
+  await expect(page.locator(".ax-customer-detail-page .ax-summary-card")).toBeVisible();
+  const peerTabs = page.locator(".ax-customer-peer-tabs .ax-tab");
+  await expect(peerTabs).toHaveCount(3);
+  for (const tab of await peerTabs.all()) {
+    expect((await tab.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+  }
+
+  await page.goto(subscriptionPath, { waitUntil: "domcontentloaded" });
+  await waitForLiveView(page);
+  const subscriptionOverflow = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, document: document.documentElement.scrollWidth }));
+  expect(subscriptionOverflow.document <= subscriptionOverflow.viewport).toBeTruthy();
+  await expect(page.locator(".ax-subscription-detail-page .ax-summary-card")).toBeVisible();
+  await expect(page.getByText("Subscription is active", { exact: true })).toBeVisible();
+  await expect(page.getByText("Price is not confirmed in admin", { exact: true }).first()).toBeVisible();
+  await expect(page.locator(".ax-subscription-detail-page [data-ax-action-band] .ax-button:visible").first()).toBeVisible();
+  expect(await page.locator(".ax-subscription-detail-page [data-ax-action-band] .ax-button:visible").first().evaluate((button) => button.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+
   const assetUrl = await page.locator('link[rel="stylesheet"][href*="/admin/assets/css-"]').getAttribute("href");
   if (!assetUrl) throw new Error("served Admin stylesheet link was not found");
   const assetResponse = await page.request.get(assetUrl);

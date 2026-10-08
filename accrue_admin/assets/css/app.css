@@ -6879,8 +6879,23 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   overflow-wrap: anywhere;
 }
 
+.ax-customer-detail-page .ax-detail-section,
+.ax-customer-detail-page .ax-field-list,
+.ax-customer-detail-page .ax-field,
+.ax-customer-detail-page .ax-list-row,
+.ax-customer-detail-page .ax-list-row > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 40rem) {
   .ax-customer-peer-tabs .ax-tab {
     flex: 1 1 8rem;
+  }
+
+  .ax-customer-detail-page .ax-button,
+  .ax-subscription-detail-page [data-ax-action-band] .ax-button {
+    min-height: 2.75rem;
   }
 }
