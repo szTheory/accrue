@@ -188,22 +188,18 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning &amp; recovery"
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "Billing status"
-    assert html =~ "No - billing is not active"
-    assert html =~ "Setup required now"
-    assert html =~ "ax-detail-health-summary-danger"
+    assert html =~ "Lifecycle"
+    assert html =~ "Active"
+    refute html =~ "Setup required now"
+    assert html =~ "ax-detail-health-summary-moss"
     assert html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount not shown"
-
-    assert html =~
-             "Billing is not active until setup fields are fixed; finish setup before trusting revenue, renewal, or recovery numbers."
 
     refute html =~ "Billing health right now"
     assert html =~ "MRR"
     assert html =~ "Charge amount not shown"
     assert html =~ "Billing setup gaps"
-    assert html =~ "Setup incomplete - active billing unverified"
-    assert html =~ "Fix customer setup"
+    assert html =~ "Lifecycle state"
     assert html =~ "Open local invoice context"
     assert html =~ "Global dunning funnel"
     assert html =~ "recovery analytics still shows at-risk accounts and funnel trends."
@@ -223,6 +219,49 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     refute html =~
              "Update the customer tax location in the host app, then retry recurring tax on this subscription."
+  end
+
+  test "active lifecycle remains active when price and period observations are unavailable", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    subscription
+    |> Subscription.changeset(%{current_period_start: nil, current_period_end: nil})
+    |> TestRepo.update!()
+
+    TestRepo.delete_all(
+      from(item in SubscriptionItem, where: item.subscription_id == ^subscription.id)
+    )
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    assert html =~ "Lifecycle"
+    assert html =~ "Subscription is active"
+    assert html =~ "Price is not confirmed in admin"
+    assert html =~ "Current period is not shown in admin"
+    refute html =~ "Setup incomplete - active billing unverified"
+    refute html =~ "Billing is not active"
+    refute html =~ "Due now"
+  end
+
+  test "subscription identity and lifecycle precede actions and raw disclosure", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    {identity, _} = :binary.match(html, "detail-header-metadata-actions")
+    {lifecycle, _} = :binary.match(html, "Subscription lifecycle summary")
+    {action, _} = :binary.match(html, "data-ax-action-band")
+    {billing, _} = :binary.match(html, "data-ax-drill-section=\"billing-items\"")
+    {raw, _} = :binary.match(html, "data-ax-lazy-json")
+    assert identity < lifecycle
+    assert lifecycle < action
+    assert action < billing
+    assert billing < raw
+    assert html =~ "Cancellation"
   end
 
   test "renders default action hierarchy with two primary actions and grouped overflow",

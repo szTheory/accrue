@@ -50,10 +50,11 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Action required" or
              html =~ "Healthy"
 
-    assert html =~ "Exposure"
+    refute html =~ "Exposure"
     assert html =~ "target"
 
-    assert html =~ "Canceling at period end"
+    assert html =~ "Active"
+    assert html =~ "Ends"
     assert html =~ "/billing/subscriptions/"
     assert html =~ "ax-chip ax-label"
   end
@@ -94,7 +95,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Action required" or
              html =~ "Healthy"
 
-    assert html =~ "Exposure"
+    refute html =~ "Exposure"
     assert html =~ "target"
 
     assert html =~ "Customer billing lookup"
@@ -107,7 +108,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Webhooks: debug failed deliveries"
     assert html =~ "Events audit log"
     assert html =~ "ax-status-badge"
-    assert html =~ "Failed webhooks"
+    refute html =~ "Failed webhooks"
     refute html =~ "Bulk invoice actions"
     refute html =~ "Process next invoice"
     refute html =~ "Send invoice reminders"
@@ -263,7 +264,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
-    assert html =~ "Exposure"
+    refute html =~ "Exposure"
     assert html =~ "target"
     refute html =~ "ax-health-verdict"
 

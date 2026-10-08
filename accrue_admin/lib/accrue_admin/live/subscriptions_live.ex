@@ -7,7 +7,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   alias Accrue.Billing.{Customer, Invoice, Query, Subscription}
   alias Accrue.Repo
-  alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.BillingPresentation
 
   alias AccrueAdmin.Components.{
@@ -172,26 +171,10 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
               <:stat
-                label="Exposure"
-                value={format_minor(@summary.open_invoice_exposure_minor, "usd")}
-                tone={exposure_tone(@summary)}
-                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-              />
-              <:stat
                 label="At-risk subscriptions"
                 value={count(@summary.past_due_count, "subscription")}
                 tone="amber"
                 href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-              />
-              <:stat
-                label="Failed webhooks"
-                value={count(@summary.failed_webhook_count, "failed webhook")}
-                tone={webhook_tone(@summary)}
-                href={
-                  @admin_mount_path
-                  |> scoped_path("/webhooks", @current_owner_scope)
-                  |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "failed,dead"})
-                }
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -299,16 +282,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       open_invoice_count:
         invoices
         |> where([invoice], invoice.status in ^open_invoice_statuses)
-        |> Repo.aggregate(:count, :id),
-      open_invoice_exposure_minor:
-        invoices
-        |> where([invoice], invoice.status in ^open_invoice_statuses)
-        |> select([invoice], coalesce(sum(invoice.amount_remaining_minor), 0))
-        |> Repo.one()
-        |> Kernel.||(0),
-      failed_webhook_count:
-        WebhookEvent
-        |> where([event], event.status in [:failed, :dead])
         |> Repo.aggregate(:count, :id)
     }
   end
@@ -387,12 +360,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp verdict_tone(:action_required), do: "amber"
   defp verdict_tone(:healthy), do: "moss"
 
-  defp exposure_tone(%{open_invoice_exposure_minor: minor}) when minor > 0, do: "amber"
-  defp exposure_tone(_summary), do: "moss"
-
-  defp webhook_tone(%{failed_webhook_count: count}) when count > 0, do: "amber"
-  defp webhook_tone(_summary), do: "moss"
-
   defp state_cell(row) do
     {status, label} = lifecycle_status(row)
 
@@ -408,18 +375,20 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     |> Phoenix.HTML.raw()
   end
 
-  defp lifecycle_status(%{cancel_at_period_end: true}), do: {:warning, "Canceling at period end"}
-  defp lifecycle_status(%{status: :past_due}), do: {:warning, "At risk"}
-  defp lifecycle_status(%{status: :unpaid}), do: {:warning, "At risk"}
-  defp lifecycle_status(%{status: :trialing}), do: {:trialing, "Trialing"}
-  defp lifecycle_status(%{status: :active}), do: {:active, "Active"}
-  defp lifecycle_status(%{status: :paused}), do: {:neutral, "Paused"}
-
-  defp lifecycle_status(%{ended_at: ended_at}) when not is_nil(ended_at),
-    do: {:neutral, "Canceled"}
-
-  defp lifecycle_status(%{status: :canceled}), do: {:neutral, "Canceled"}
-  defp lifecycle_status(%{status: status}), do: {status, humanize(status)}
+  defp lifecycle_status(row) do
+    cond do
+      row.status == :incomplete_expired -> {:neutral, "Incomplete expired"}
+      Subscription.canceled?(row) -> {:neutral, "Canceled"}
+      row.status == :unpaid -> {:warning, "Unpaid"}
+      Subscription.past_due?(row) -> {:warning, "Past due"}
+      row.status == :incomplete -> {:warning, "Incomplete"}
+      Subscription.trialing?(row) -> {:trialing, "Trialing"}
+      Subscription.canceling?(row) -> {:warning, "Active · cancellation scheduled"}
+      row.status == :paused -> {:neutral, "Paused"}
+      Subscription.active?(row) -> {:active, "Active"}
+      true -> {row.status, humanize(row.status)}
+    end
+  end
 
   defp status_tone(status) when status in [:active, :success, :ok], do: "moss"
   defp status_tone(status) when status in [:trialing, :info], do: "cobalt"
@@ -459,19 +428,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     """)
   end
 
-  defp format_minor(amount_minor, _currency) when is_integer(amount_minor) do
-    dollars = amount_minor / 100
-    "$" <> :erlang.float_to_binary(dollars, decimals: 2)
-  end
-
-  defp format_minor(%Decimal{} = amount_minor, currency) do
-    amount_minor
-    |> Decimal.to_integer()
-    |> format_minor(currency)
-  end
-
-  defp format_minor(_amount_minor, _currency), do: "$0.00"
-
   defp time_cell(%{ended_at: %DateTime{} = ended_at}), do: "Ended #{format_date(ended_at)}"
 
   defp time_cell(%{ended_at: ended_at}) when not is_nil(ended_at),
@@ -480,13 +436,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp time_cell(%{cancel_at_period_end: true, current_period_end: %DateTime{} = ends_at}),
     do: "Ends #{format_date(ends_at)}"
 
+  defp time_cell(%{cancel_at_period_end: true}),
+    do: "Cancellation scheduled · end date not shown"
+
   defp time_cell(%{current_period_end: %DateTime{} = renews_at}),
     do: "Renews #{format_date(renews_at)}"
 
   defp time_cell(%{trial_end: %DateTime{} = trial_end}),
     do: "Trial ends #{format_date(trial_end)}"
 
-  defp time_cell(_row), do: "No renewal date"
+  defp time_cell(_row), do: "Renewal date not shown"
 
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"

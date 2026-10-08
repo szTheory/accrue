@@ -8,7 +8,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   alias Accrue.{Actor, Auth, Billing, Clock, Config, Events, PlanResolver}
   alias Accrue.Billing.{Invoice, Subscription, UpcomingInvoice}
   alias Accrue.Dunning.Campaign
-  alias Accrue.Invoices.Render, as: InvoiceRender
   alias Accrue.Repo
 
   alias AccrueAdmin.Components.{
@@ -18,6 +17,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     DetailDrawer,
     DropdownMenu,
     FlashGroup,
+    MoneyFormatter,
     JsonViewer,
     RelatedResources,
     StepUpAuthModal,
@@ -240,18 +240,35 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <a class="ax-link" href={@return_path}>Back to results</a>
         </p>
 
+        <Detail.summary_card
+          eyebrow={Copy.subscription_detail_eyebrow()}
+          title={subscription_title(@subscription, @customer)}
+        >
+          <:facts>
+            <span class="ax-summary-fact">
+              <strong>Subscription</strong>
+              <%= @subscription.processor_id || @subscription.id %>
+            </span>
+            <span class="ax-summary-fact">
+              <strong>Customer</strong>
+              <%= customer_label(@customer) %>
+            </span>
+            <span :for={fact <- summary_health_facts(@subscription)} class="ax-summary-fact">
+              <strong><%= fact.label %></strong>
+              <%= fact.value %>
+            </span>
+          </:facts>
+        </Detail.summary_card>
+
         <% health = detail_health_summary(@subscription) %>
-        <section class={["ax-detail-health-summary ax-detail-health-summary-top", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
+        <section class={["ax-detail-health-summary ax-detail-health-summary-top", "ax-detail-health-summary-" <> health.tone]} aria-label="Subscription lifecycle summary">
           <div class="ax-detail-health-copy" role="status">
-            <span class="ax-detail-health-label">Billing status</span>
+            <span class="ax-detail-health-label">Lifecycle</span>
             <strong class="ax-detail-health-answer"><%= health.answer %></strong>
-            <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
-            <strong :if={health.caveats == []} class="ax-detail-health-verdict"><%= health.headline %></strong>
-            <span :if={health.caveats == []} class="ax-detail-health-body"><%= health.body %></span>
+            <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
+            <span class="ax-detail-health-body"><%= health.body %></span>
           </div>
-          <span :if={health.caveats != []} class="ax-detail-health-body ax-detail-health-setup-note">
-            Billing is not active until setup fields are fixed; finish setup before trusting revenue, renewal, or recovery numbers.
-          </span>
+          <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
           <div class="ax-detail-health-actions" aria-label="Primary billing action from health summary">
             <a
               class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
@@ -273,26 +290,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </a>
           </div>
         </section>
-
-        <Detail.summary_card
-          eyebrow={Copy.subscription_detail_eyebrow()}
-          title={subscription_title(@subscription, @customer)}
-        >
-          <:facts>
-            <span class="ax-summary-fact">
-              <strong>Subscription</strong>
-              <%= @subscription.processor_id || @subscription.id %>
-            </span>
-            <span class="ax-summary-fact">
-              <strong>Customer</strong>
-              <%= @customer.name || @customer.email || @customer.id %>
-            </span>
-            <span :for={fact <- summary_health_facts(@subscription)} class="ax-summary-fact">
-              <strong><%= fact.label %></strong>
-              <%= fact.value %>
-            </span>
-          </:facts>
-        </Detail.summary_card>
 
         <section class="ax-detail-priority-actions ax-detail-priority-actions-compact" aria-label="Global invoice queue workspace">
           <span class="ax-label ax-detail-priority-label">Global invoice queue workspace</span>
@@ -338,7 +335,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <li :for={invoice <- @global_open_invoice_queue}>
               <a href={global_invoice_row_href(@admin_mount_path, @current_owner_scope, invoice)} class="ax-detail-open-invoice-row">
                 <strong><%= global_invoice_row_customer(invoice) %></strong>
-                <span><%= format_invoice_exposure(invoice.amount_remaining_minor || 0) %> remaining</span>
+                <span>
+                  <%= if is_integer(invoice.amount_remaining_minor) and is_binary(invoice.currency) do %>
+                    <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor} currency={invoice.currency} />
+                  <% else %>
+                    Amount not shown
+                  <% end %>
+                  remaining
+                </span>
                 <em><%= global_invoice_row_due(invoice) %></em>
                 <span class="ax-detail-open-invoice-action">Open invoice record</span>
               </a>
@@ -1032,10 +1036,37 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp summary_health_facts(subscription) do
     [
+      %{label: "Lifecycle", value: lifecycle_health_label(subscription)},
+      %{
+        label: "Plan / price",
+        value: current_price_id(subscription) || not_projected_copy(:price)
+      },
+      %{label: "Current period", value: current_period_summary(subscription)},
+      %{label: "Cancellation", value: cancellation_summary(subscription)},
       %{label: "Renewal", value: renews_or_ends_summary(subscription)},
       %{label: "MRR", value: mrr_summary(subscription)}
     ]
   end
+
+  defp cancellation_summary(%{
+         cancel_at_period_end: true,
+         current_period_end: %DateTime{} = ending
+       }),
+       do: "Scheduled for #{format_datetime(ending)}"
+
+  defp cancellation_summary(%{cancel_at_period_end: true}),
+    do: "Scheduled; effective date not shown"
+
+  defp cancellation_summary(%{status: status}) when status in [:canceled, :incomplete_expired],
+    do: "Canceled"
+
+  defp cancellation_summary(_subscription), do: "No cancellation scheduled"
+
+  defp collection_summary(%{pause_collection: pause}) when not is_nil(pause),
+    do: "Paused"
+
+  defp collection_summary(%{status: :paused}), do: "Paused"
+  defp collection_summary(_subscription), do: "Not paused"
 
   defp open_invoice_summary(subscription) do
     open_statuses = [:draft, :open]
@@ -1045,30 +1076,21 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       [invoice],
       invoice.subscription_id == ^subscription.id and invoice.status in ^open_statuses
     )
-    |> select([invoice], %{
-      count: count(invoice.id),
-      exposure_minor: fragment("coalesce(sum(?), 0)", invoice.amount_remaining_minor)
-    })
+    |> select([invoice], %{count: count(invoice.id)})
     |> Repo.one()
     |> case do
-      %{count: count, exposure_minor: exposure_minor} ->
-        %{count: count || 0, exposure_minor: exposure_minor || 0}
+      %{count: count} ->
+        %{count: count || 0}
 
       _summary ->
-        %{count: 0, exposure_minor: 0}
+        %{count: 0}
     end
   end
 
-  defp invoice_queue_summary(%{count: count, exposure_minor: exposure_minor}) do
-    "#{pluralize(count, "open invoice")}; #{format_invoice_exposure(exposure_minor)} exposure"
-  end
+  defp invoice_queue_summary(%{count: count}),
+    do: "#{pluralize(count, "open invoice")}; amounts shown per invoice"
 
-  defp invoice_queue_summary(_summary), do: "0 open invoices; $0.00 exposure"
-
-  defp format_invoice_exposure(amount_minor) when is_integer(amount_minor),
-    do: InvoiceRender.format_money(amount_minor, :usd, "en")
-
-  defp format_invoice_exposure(_amount_minor), do: "$0.00"
+  defp invoice_queue_summary(_summary), do: "0 open invoices"
 
   defp global_open_invoice_queue(owner_scope) do
     open_statuses = [:draft, :open]
@@ -1131,94 +1153,60 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp global_invoice_row_due(%{due_date: %DateTime{} = due_date}),
     do: "Due #{format_datetime(due_date)}"
 
-  defp global_invoice_row_due(_invoice), do: "Due now - prioritize before dunning"
+  defp global_invoice_row_due(_invoice), do: "Due date not shown"
 
   defp detail_health_summary(subscription) do
-    caveats = projection_caveats(subscription)
-
     cond do
+      subscription.status == :incomplete_expired ->
+        %{tone: "slate", answer: "Incomplete expired", headline: "Setup window expired", body: ""}
+
+      Subscription.canceled?(subscription) ->
+        %{
+          tone: "slate",
+          answer: "Canceled",
+          headline: "Subscription has ended",
+          body: "Host access policy is not represented by this billing status."
+        }
+
+      subscription.status == :unpaid ->
+        %{tone: "danger", answer: "Unpaid", headline: "Subscription is unpaid", body: ""}
+
       Accrue.Billing.Subscription.past_due?(subscription) ->
         %{
           tone: "amber",
-          label: "At risk",
-          answer: "Unhealthy - payment recovery needed",
-          headline: "Payment recovery is needed",
-          body:
-            "Open invoices or dunning activity need operator attention before this account is healthy.",
-          caveats: caveats
+          answer: "Past due",
+          headline: "Payment is past due",
+          body: "The subscription lifecycle is past due or unpaid."
         }
 
-      caveats != [] ->
-        %{
-          tone: "danger",
-          label: "Setup incomplete",
-          answer: "No - billing is not active",
-          headline: "Billing is not active",
-          body:
-            "Setup fields must be fixed before billing, revenue, renewal, or recovery reporting can be trusted.",
-          caveats: caveats
-        }
+      subscription.status == :incomplete ->
+        %{tone: "amber", answer: "Incomplete", headline: "Setup is incomplete", body: ""}
 
-      Accrue.Billing.Subscription.canceling?(subscription) ->
-        %{
-          tone: "amber",
-          label: "Ending",
-          answer: "Renewal is ending",
-          headline: "Renewal is scheduled to end",
-          body: "The account remains active through the paid-through date.",
-          caveats: []
-        }
+      Subscription.trialing?(subscription) ->
+        %{tone: "moss", answer: "Trialing", headline: "Subscription is trialing", body: ""}
 
-      Accrue.Billing.Subscription.paused?(subscription) ->
-        %{
-          tone: "amber",
-          label: "Paused",
-          answer: "Collection is paused",
-          headline: "Collection is paused",
-          body: "Review collection settings before relying on recurring revenue.",
-          caveats: []
-        }
-
-      Accrue.Billing.Subscription.canceled?(subscription) ->
-        %{
-          tone: "slate",
-          label: "Ended",
-          answer: "No active billing",
-          headline: "No active billing",
-          body: "This subscription is no longer collecting recurring revenue.",
-          caveats: []
-        }
+      subscription.status == :paused ->
+        %{tone: "slate", answer: "Paused", headline: "Subscription is paused", body: ""}
 
       Accrue.Billing.Subscription.active?(subscription) ->
         %{
           tone: "moss",
-          label: "Healthy",
-          answer: "Yes - active billing is healthy right now",
-          headline: "Active billing is healthy right now",
-          body: "No dunning, cancellation, or payment-risk flags are active.",
-          caveats: []
+          answer: "Active",
+          headline: "Subscription is active",
+          body: "Price and period dates are shown separately when available."
         }
 
       true ->
         %{
           tone: "slate",
-          label: humanize(subscription.status),
-          answer: "Review subscription state",
-          headline: "Review subscription state",
-          body: "Confirm the processor state before taking billing action.",
-          caveats: caveats
+          answer: humanize(subscription.status),
+          headline: "Subscription lifecycle",
+          body: ""
         }
     end
   end
 
-  defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
-    do: "Setup required now"
-
-  defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
-
-  defp detail_health_metric(%{tone: "amber"}), do: "Operator action required"
-
-  defp detail_health_metric(_health), do: "Review required"
+  defp detail_health_metric(_health), do: "Observed from persisted subscription state"
 
   defp projection_caveats(subscription) do
     [
@@ -1235,23 +1223,29 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp lifecycle_health_label(subscription) do
     cond do
+      subscription.status == :incomplete_expired ->
+        "Incomplete expired"
+
+      Subscription.canceled?(subscription) ->
+        "Canceled"
+
+      subscription.status == :unpaid ->
+        "Unpaid"
+
       Accrue.Billing.Subscription.past_due?(subscription) ->
-        "At risk - payment recovery needed"
+        "Past due"
 
-      Accrue.Billing.Subscription.canceling?(subscription) ->
-        "Canceling - renewal ends this period"
+      subscription.status == :incomplete ->
+        "Incomplete"
 
-      Accrue.Billing.Subscription.paused?(subscription) ->
-        "Paused - collection paused"
+      Subscription.trialing?(subscription) ->
+        "Trialing"
 
-      Accrue.Billing.Subscription.canceled?(subscription) ->
-        "Ended - no active billing"
-
-      projection_caveats(subscription) != [] ->
-        "Setup incomplete - active billing unverified"
+      subscription.status == :paused ->
+        "Paused"
 
       Accrue.Billing.Subscription.active?(subscription) ->
-        "Healthy - active billing"
+        if Subscription.trialing?(subscription), do: "Trialing", else: "Active"
 
       true ->
         humanize(subscription.status)
@@ -1292,6 +1286,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       },
       %{label: "Current period", value: current_period_summary(subscription)},
       %{label: "Renewal", value: renews_or_ends_summary(subscription)},
+      %{label: "Collection", value: collection_summary(subscription)},
       %{label: "Quantity", value: quantity_summary(subscription)}
     ]
   end
