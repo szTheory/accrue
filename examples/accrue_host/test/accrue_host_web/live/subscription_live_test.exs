@@ -34,7 +34,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     {:ok, view, html} =
       conn
       |> log_in_user(user, active_organization_id: organization.id)
-      |> live("/app/billing?plan=price_basic")
+      |> live("/app/billing?plan=price_basic&selection=#{Ecto.UUID.generate()}")
 
     assert html =~ "Checkout handoff"
     assert html =~ "Continue with Launch"
@@ -48,7 +48,10 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     conn = get(conn, "/pricing?plan=price_basic")
 
     assert redirected_to(conn) == "/users/log-in"
-    assert Plug.Conn.get_session(conn, :user_return_to) == "/app/billing?plan=price_basic"
+    assert "/app/billing?" <> selection_query = Plug.Conn.get_session(conn, :user_return_to)
+    selection = URI.decode_query(selection_query)
+    assert selection["plan"] == "price_basic"
+    assert {:ok, _uuid} = Ecto.UUID.cast(selection["selection"])
 
     conn = get(build_conn(), "/pricing?plan=price_unknown")
 

@@ -68,7 +68,7 @@ defmodule Accrue.Checkout.LocalSession do
       op_id when is_binary(op_id) and op_id != "" ->
         case by_operation_id(customer, op_id) do
           %__MODULE__{} = existing -> {:ok, existing}
-          nil -> insert_session(customer, attrs)
+          nil -> insert_or_reuse_after_conflict(customer, attrs, op_id)
         end
 
       _ ->
@@ -98,6 +98,23 @@ defmodule Accrue.Checkout.LocalSession do
         limit: 1
       )
     )
+  end
+
+  defp insert_or_reuse_after_conflict(%Customer{} = customer, attrs, operation_id) do
+    case insert_session(customer, attrs) do
+      {:ok, _session} = inserted ->
+        inserted
+
+      {:error, %Ecto.Changeset{errors: errors}} = error ->
+        if Keyword.has_key?(errors, :operation_id) do
+          case by_operation_id(customer, operation_id) do
+            %__MODULE__{} = existing -> {:ok, existing}
+            nil -> error
+          end
+        else
+          error
+        end
+    end
   end
 
   defp insert_session(%Customer{} = customer, attrs) do

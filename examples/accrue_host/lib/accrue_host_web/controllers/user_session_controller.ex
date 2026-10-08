@@ -85,9 +85,13 @@ defmodule AccrueHostWeb.UserSessionController do
   defp local_path?("/" <> rest), do: not String.starts_with?(rest, ["/", "\\"])
   defp local_path?(_path), do: false
 
-  defp valid_selected_return?("/app/billing?plan=" <> plan_id) do
-    case URI.decode_query("plan=" <> plan_id) do
-      %{"plan" => decoded} when decoded != "" -> not is_nil(AccrueHost.Billing.Plans.get(decoded))
+  defp valid_selected_return?("/app/billing?" <> query) do
+    with %{"plan" => plan_id, "selection" => selection_id} = params <- URI.decode_query(query),
+         2 <- map_size(params),
+         %{id: ^plan_id} <- AccrueHost.Billing.Plans.get(plan_id),
+         {:ok, _uuid} <- Ecto.UUID.cast(selection_id) do
+      true
+    else
       _ -> false
     end
   rescue

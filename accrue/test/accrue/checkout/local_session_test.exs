@@ -56,6 +56,41 @@ defmodule Accrue.Checkout.LocalSessionTest do
     assert LocalSession.by_id(session.id).status == "completed"
   end
 
+  test "concurrent create_or_reuse calls resolve one operation to one persisted session" do
+    customer = CheckoutSessionFixture.build_customer()
+    parent = self()
+    operation_id = "concurrent-checkout-#{Ecto.UUID.generate()}"
+
+    attrs = %{
+      processor: "braintree",
+      mode: "subscription",
+      ui_mode: "hosted",
+      price_id: "price_pro",
+      line_items: [%{"price" => "price_pro", "quantity" => 1}],
+      operation_id: operation_id
+    }
+
+    tasks =
+      for _ <- 1..12 do
+        Task.async(fn ->
+          send(parent, {:ready, self()})
+          receive do: (:start -> LocalSession.create_or_reuse(customer, attrs))
+        end)
+      end
+
+    for _ <- tasks do
+      assert_receive {:ready, _pid}, 1_000
+    end
+
+    Enum.each(tasks, &send(&1.pid, :start))
+    results = Enum.map(tasks, &Task.await(&1, 5_000))
+
+    assert Enum.all?(results, &match?({:ok, %LocalSession{}}, &1))
+
+    assert results |> Enum.map(fn {:ok, session} -> session.id end) |> Enum.uniq() |> length() ==
+             1
+  end
+
   test "create_or_reuse/2 rejects non-braintree processors" do
     customer = CheckoutSessionFixture.build_customer()
 

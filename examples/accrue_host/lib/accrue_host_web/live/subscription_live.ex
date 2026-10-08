@@ -5,6 +5,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   import Phoenix.Controller, only: [get_csrf_token: 0]
 
   alias Accrue.Billing.Subscription
+  alias Accrue.Checkout.LocalSession
   alias AccrueHost.Accounts.{Organization, OrganizationMembership}
   alias AccrueHost.Billing
   alias AccrueHost.Billing.Plans
@@ -35,7 +36,8 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   @impl true
-  def handle_params(%{"plan" => plan_id}, _uri, socket) when is_binary(plan_id) do
+  def handle_params(%{"plan" => plan_id, "selection" => selection_id}, _uri, socket)
+      when is_binary(plan_id) and is_binary(selection_id) do
     case Plans.get(plan_id) do
       nil ->
         {:noreply,
@@ -44,7 +46,20 @@ defmodule AccrueHostWeb.SubscriptionLive do
          |> put_flash(:error, "That plan is unavailable. Choose a plan from pricing to continue.")}
 
       plan ->
-        create_selected_checkout(socket, plan)
+        case Ecto.UUID.cast(selection_id) do
+          {:ok, _uuid} ->
+            socket = assign(socket, :checkout_selection_id, selection_id)
+            create_selected_checkout(socket, plan, selection_id)
+
+          :error ->
+            {:noreply,
+             socket
+             |> assign(:selected_checkout_plan, nil)
+             |> put_flash(
+               :error,
+               "That plan selection has expired. Choose a plan from pricing to continue."
+             )}
+        end
     end
   end
 
@@ -165,8 +180,18 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
   def handle_event("create_checkout_session", %{"plan" => plan_id}, socket) do
     case Plans.get(plan_id) do
-      nil -> {:noreply, put_flash(socket, :error, "That plan is unavailable.")}
-      plan -> create_selected_checkout(socket, plan)
+      nil ->
+        {:noreply, put_flash(socket, :error, "That plan is unavailable.")}
+
+      plan ->
+        case socket.assigns[:checkout_selection_id] do
+          selection_id when is_binary(selection_id) ->
+            create_selected_checkout(socket, plan, selection_id)
+
+          _ ->
+            {:noreply,
+             put_flash(socket, :error, "Choose a plan from pricing before starting checkout.")}
+        end
     end
   end
 
@@ -174,7 +199,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
     {:noreply, put_flash(socket, :error, "Choose a plan from pricing before starting checkout.")}
   end
 
-  defp create_selected_checkout(socket, plan) do
+  defp create_selected_checkout(socket, plan, selection_id) do
     scope = socket.assigns.current_scope
     billable = scope.active_organization
 
@@ -186,7 +211,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
         ui_mode: :hosted,
         success_url: url(~p"/app/billing?checkout=success"),
         cancel_url: url(~p"/app/billing?checkout=cancel"),
-        operation_id: "pricing:#{billable.id}:#{plan.id}",
+        operation_id: "pricing:#{billable.id}:#{plan.id}:#{selection_id}",
         line_items: [
           %{
             "price" => plan.id,
@@ -207,6 +232,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
           "interval_count" => plan.billing_cycle.count,
           "billable_type" => "Organization",
           "billable_id" => to_string(billable.id),
+          "billable_name" => billable.name,
           "processor" => to_string(Processor.name())
         }
       }
@@ -215,12 +241,28 @@ defmodule AccrueHostWeb.SubscriptionLive do
         {:ok, session} ->
           {:noreply,
            socket
-           |> assign(:checkout_url, session.url)
+           |> assign(:checkout_url, selected_checkout_url(session))
            |> assign(:selected_checkout_plan, plan)}
 
         {:error, reason} ->
           {:noreply, put_flash(socket, :error, @error_copy <> " (#{inspect(reason)})")}
       end
+    end
+  end
+
+  defp selected_checkout_url(%{id: id, url: url}) do
+    case Ecto.UUID.cast(id) do
+      {:ok, _uuid} ->
+        case LocalSession.by_id(id) do
+          %LocalSession{session_token: token} ->
+            AccruePortal.Path.checkout("/shared-billing", token)
+
+          _ ->
+            url
+        end
+
+      :error ->
+        url
     end
   end
 
@@ -548,6 +590,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
     |> assign_new(:braintree_client_token, fn -> nil end)
     |> assign_new(:checkout_url, fn -> nil end)
     |> assign_new(:selected_checkout_plan, fn -> nil end)
+    |> assign_new(:checkout_selection_id, fn -> nil end)
     |> assign(:customer, customer)
     |> assign(:subscription, subscription)
     |> assign(:subscription_plan_label, plan_label(subscription))

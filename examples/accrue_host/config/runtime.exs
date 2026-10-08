@@ -30,6 +30,10 @@ config :accrue,
          else: Accrue.Processor.Fake
        )
 
+if config_env() == :test do
+  config :accrue, :portal_base_url, "http://127.0.0.1:#{System.get_env("PORT", "4002")}"
+end
+
 config :accrue, :auth_adapter, AccrueHost.Auth
 config :accrue, :plan_resolver, AccrueHost.Billing.PlanResolver
 

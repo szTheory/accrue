@@ -11,8 +11,13 @@ defmodule AccrueHostWeb.PageController do
   def pricing(conn, %{"plan" => plan_id}) when is_binary(plan_id) do
     case Plans.get(plan_id) do
       %{id: id} ->
+        selection_id = Ecto.UUID.generate()
+
         conn
-        |> put_session(:user_return_to, "/app/billing?plan=#{URI.encode_www_form(id)}")
+        |> put_session(
+          :user_return_to,
+          "/app/billing?#{URI.encode_query(plan: id, selection: selection_id)}"
+        )
         |> redirect(to: ~p"/users/log-in")
 
       nil ->
