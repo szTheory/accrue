@@ -6,10 +6,10 @@ current_phase: 235
 current_phase_name: Customer Plan Selection & Checkout
 status: executing
 stopped_at: Completed 235-06-PLAN.md
-last_updated: "2026-10-08T14:54:03.487Z"
+last_updated: "2026-10-08T15:18:19.160Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 235 execution started
-state_head: 11787fe95270c2a899ed1b5adf0b86604a0e1370
+state_head: 42c28c17ff2e56fa2b24d6b6ce87d7b85ebc3223
 progress:
   total_phases: 7
   completed_phases: 2
@@ -35,7 +35,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 Phase: 235 (Customer Plan Selection & Checkout) — EXECUTING
 Plan: 3 of 6
 Status: Ready to execute
-Last activity: 2026-10-08 — Phase 235 execution started
+Last activity: 2026-10-08 - Completed quick task 261008-ffy: Repair Phase 235 regression gaps; isolate Braintree tests, restore processor-neutral facade docs, and add focused CI proof
 
 ## Performance Metrics
 
@@ -283,6 +283,7 @@ None yet.
 | 260918-hnk | Close v1.62 audit tech-debt item #2: the candidate SHA's merge-blocking gates are green at the shipped head, so record the resolution with its evidence | 2026-09-18 | 27a0e42c | — | [260918-hnk-close-v1-62-audit-tech-debt-item-2-candi](./quick/260918-hnk-close-v1-62-audit-tech-debt-item-2-candi/) |
 | 261008-cb9 | Repair two warnings that make the required Admin CI test command fail with --warnings-as-errors: keep all handle_event/3 clauses contiguous by moving prepare_staged_action/2 below them, and rename the unused view test binding to _view. Run the Admin package CI test command and record the change as a quick task. Keep Phase 235 artifacts and checkout source untouched. | 2026-10-08 | 795114d9 | — | [261008-cb9-repair-two-warnings-that-make-the-requir](./quick/261008-cb9-repair-two-warnings-that-make-the-requir/) |
 | 261008-cjc | Repair Playwright CI: automate the existing test-only step-up code in the webhook replay journey and make Phase 234 saved post-layout evidence read-only by default | 2026-10-08 | 519ef895 | Verified | [261008-cjc-repair-playwright-ci-automate-the-existi](./quick/261008-cjc-repair-playwright-ci-automate-the-existi/) |
+| 261008-ffy | Repair Phase 235 regression gaps; isolate Braintree tests, restore processor-neutral facade docs, and add focused CI proof | 2026-10-08 | 42c28c17 | Verified | [261008-ffy-repair-phase-235-regression-gaps-by-isol](./quick/261008-ffy-repair-phase-235-regression-gaps-by-isol/) |
 
 ## Deferred Items
 
