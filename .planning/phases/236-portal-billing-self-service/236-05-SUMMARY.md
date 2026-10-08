@@ -184,7 +184,7 @@ Each task was committed atomically:
 
 - Plan metadata and required requirement IDs match `236-05-PLAN.md`.
 - The evaluation-scope check resolved both plan task commits (`b8c04a52`, `94288d64`).
-- The package gate passed with 110 tests and no failures; the served browser contract passed 5/5; `actionlint` and `git diff --check` passed.
+- The package gate passed (110 tests); the served browser contract passed 5/5; `actionlint` and `git diff --check` passed.
 - All plan task acceptance criteria have passing automated coverage; no human UAT remains for this plan.
 
 ## User Setup Required
