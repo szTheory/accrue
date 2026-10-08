@@ -6,10 +6,10 @@ current_phase: 235
 current_phase_name: Customer Plan Selection & Checkout
 status: verifying
 stopped_at: Completed 235-04-PLAN.md
-last_updated: "2026-10-08T12:56:11.965Z"
+last_updated: "2026-10-08T13:12:25.625Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 235 execution started
-state_head: 795114d9ac59276b978929df624b225ec69a3cb8
+state_head: 519ef895deba3ee93313fa9bd8c8d092498f96b0
 progress:
   total_phases: 7
   completed_phases: 2
@@ -35,7 +35,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 Phase: 235 (Customer Plan Selection & Checkout) — EXECUTING
 Plan: 4 of 4
 Status: Phase complete — ready for verification
-Last activity: 2026-10-08 - Completed quick task 261008-cb9: Repair Admin CI warnings
+Last activity: 2026-10-08 - Completed quick task 261008-cjc: Repair Playwright CI replay step-up and Phase 234 evidence behavior
 
 ## Performance Metrics
 
@@ -264,16 +264,17 @@ None yet.
 
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260915-dpd | Fix eager Mix.env/0 evaluation in Accrue auth modules that crashes OTP releases at boot | 2026-09-15 | 5653216c | [260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue](./quick/260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue/) |
-| 260916-gda | Close phase-231 loose ends: STATE.md standing sections, gap-closure TAP harness, 229-UAT regen, CR-01 window-disposition invariant, WR-01 expected-repository validation, REQUIREMENTS.md gate wording | 2026-09-16 | f5b6d390 | [260916-gda-close-phase-231-loose-ends-state-md-stan](./quick/260916-gda-close-phase-231-loose-ends-state-md-stan/) |
-| 260916-hl9 | Resolve the sibling dependency-operator contradiction between CLAUDE.md and the code, and make it machine-enforced | 2026-09-16 | 9f309871 | [260916-hl9-resolve-the-sibling-dependency-operator-](./quick/260916-hl9-resolve-the-sibling-dependency-operator-/) |
-| 260917-l7v | Shift left seven phase-232 session failure modes into merge-blocking CI guards (SL-A through SL-G) | 2026-09-17 | b42c64a5 | [260917-l7v-shift-left-phase-232-session-lessons-int](./quick/260917-l7v-shift-left-phase-232-session-lessons-int/) |
-| 260918-rpt | Fix release-PR title generation (grouped ${version} with no root package) that made release 1.6.0 tag nothing while reporting success; add a merge-blocking round-trip guard | 2026-09-18 | 11cf1e02 | [260918-rpt-fix-release-pr-title-generation](./quick/260918-rpt-fix-release-pr-title-generation/) |
-| 260918-e8m | Correct v1.62 ROADMAP doc-truth drift before archive: two Phase 231 success criteria claimed green gates the candidate SHA never earned, plus a stale 16/20 plan count | 2026-09-18 | 62c5c6a0 | [260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be](./quick/260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be/) |
-| 260918-hnk | Close v1.62 audit tech-debt item #2: the candidate SHA's merge-blocking gates are green at the shipped head, so record the resolution with its evidence | 2026-09-18 | 27a0e42c | [260918-hnk-close-v1-62-audit-tech-debt-item-2-candi](./quick/260918-hnk-close-v1-62-audit-tech-debt-item-2-candi/) |
-| 261008-cb9 | Repair two warnings that make the required Admin CI test command fail with --warnings-as-errors: keep all handle_event/3 clauses contiguous by moving prepare_staged_action/2 below them, and rename the unused view test binding to _view. Run the Admin package CI test command and record the change as a quick task. Keep Phase 235 artifacts and checkout source untouched. | 2026-10-08 | 795114d9 | [261008-cb9-repair-two-warnings-that-make-the-requir](./quick/261008-cb9-repair-two-warnings-that-make-the-requir/) |
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 260915-dpd | Fix eager Mix.env/0 evaluation in Accrue auth modules that crashes OTP releases at boot | 2026-09-15 | 5653216c | — | [260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue](./quick/260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue/) |
+| 260916-gda | Close phase-231 loose ends: STATE.md standing sections, gap-closure TAP harness, 229-UAT regen, CR-01 window-disposition invariant, WR-01 expected-repository validation, REQUIREMENTS.md gate wording | 2026-09-16 | f5b6d390 | — | [260916-gda-close-phase-231-loose-ends-state-md-stan](./quick/260916-gda-close-phase-231-loose-ends-state-md-stan/) |
+| 260916-hl9 | Resolve the sibling dependency-operator contradiction between CLAUDE.md and the code, and make it machine-enforced | 2026-09-16 | 9f309871 | — | [260916-hl9-resolve-the-sibling-dependency-operator-](./quick/260916-hl9-resolve-the-sibling-dependency-operator-/) |
+| 260917-l7v | Shift left seven phase-232 session failure modes into merge-blocking CI guards (SL-A through SL-G) | 2026-09-17 | b42c64a5 | — | [260917-l7v-shift-left-phase-232-session-lessons-int](./quick/260917-l7v-shift-left-phase-232-session-lessons-int/) |
+| 260918-rpt | Fix release-PR title generation (grouped ${version} with no root package) that made release 1.6.0 tag nothing while reporting success; add a merge-blocking round-trip guard | 2026-09-18 | 11cf1e02 | — | [260918-rpt-fix-release-pr-title-generation](./quick/260918-rpt-fix-release-pr-title-generation/) |
+| 260918-e8m | Correct v1.62 ROADMAP doc-truth drift before archive: two Phase 231 success criteria claimed green gates the candidate SHA never earned, plus a stale 16/20 plan count | 2026-09-18 | 62c5c6a0 | — | [260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be](./quick/260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be/) |
+| 260918-hnk | Close v1.62 audit tech-debt item #2: the candidate SHA's merge-blocking gates are green at the shipped head, so record the resolution with its evidence | 2026-09-18 | 27a0e42c | — | [260918-hnk-close-v1-62-audit-tech-debt-item-2-candi](./quick/260918-hnk-close-v1-62-audit-tech-debt-item-2-candi/) |
+| 261008-cb9 | Repair two warnings that make the required Admin CI test command fail with --warnings-as-errors: keep all handle_event/3 clauses contiguous by moving prepare_staged_action/2 below them, and rename the unused view test binding to _view. Run the Admin package CI test command and record the change as a quick task. Keep Phase 235 artifacts and checkout source untouched. | 2026-10-08 | 795114d9 | — | [261008-cb9-repair-two-warnings-that-make-the-requir](./quick/261008-cb9-repair-two-warnings-that-make-the-requir/) |
+| 261008-cjc | Repair Playwright CI: automate the existing test-only step-up code in the webhook replay journey and make Phase 234 saved post-layout evidence read-only by default | 2026-10-08 | 519ef895 | Verified | [261008-cjc-repair-playwright-ci-automate-the-existi](./quick/261008-cjc-repair-playwright-ci-automate-the-existi/) |
 
 ## Deferred Items
 
