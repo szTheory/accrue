@@ -65,11 +65,13 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
     previous_processor = Application.get_env(:accrue, :processor)
     previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
     previous_auth = Application.get_env(:accrue, :auth_adapter)
+    previous_portal_base_url = Application.get_env(:accrue, :portal_base_url)
     previous_test_pid = Application.get_env(:accrue_portal, :checkout_discount_test_pid)
 
     Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
     Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
+    Application.put_env(:accrue, :portal_base_url, "https://app.example.test")
     Application.put_env(:accrue_portal, :checkout_discount_test_pid, self())
     BraintreeMox.stub_client_token("portal-client-token")
 
@@ -93,6 +95,12 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
         Application.put_env(:accrue, :auth_adapter, previous_auth)
       else
         Application.delete_env(:accrue, :auth_adapter)
+      end
+
+      if previous_portal_base_url do
+        Application.put_env(:accrue, :portal_base_url, previous_portal_base_url)
+      else
+        Application.delete_env(:accrue, :portal_base_url)
       end
 
       if previous_test_pid do
