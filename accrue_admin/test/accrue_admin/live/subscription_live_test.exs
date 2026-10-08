@@ -418,6 +418,62 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert Accrue.Billing.Subscription.canceled?(canceled)
   end
 
+  test "repeated confirmation and delayed step-up submission dispatch one cancellation", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ "Step-up required"
+    assert render_click(view, "confirm_action") =~ "Step-up required"
+
+    assert render_submit(view, "step_up_submit", %{"code" => "123456"}) =~
+             "Subscription action recorded"
+
+    render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 1
+    assert length(TestRepo.all(from(event in Event, where: event.type == "subscription.canceled"))) == 1
+  end
+
+  test "changing the staged action while step-up is open discards the old continuation", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ "Step-up required"
+
+    render_click(view, "prepare_action", %{"action_type" => "cancel_at_period_end"})
+    render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+  end
+
   test "drawer-hosted item removal requires step-up before deleting the item", %{
     conn: conn,
     subscription: subscription
