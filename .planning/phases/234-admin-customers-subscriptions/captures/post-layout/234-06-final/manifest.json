@@ -1,0 +1,105 @@
+{
+  "phase": "234-admin-customers-subscriptions",
+  "captured_at": "2026-10-08T02:10:09.170Z",
+  "source_sha": "f00c1a584807a53a45cbffb931c771875d5db43f",
+  "baseline_manifest_sha256": "6a7869aabca51ac12b6665d48f3a48ece5cc3f997d2d424999ed32ff9fc3560b",
+  "sources": {
+    "accrue_admin/assets/js/hooks/command_palette.js": {
+      "sha256": "8037315b4b3ff89de37c64a1294ad5d96631e2784259b4d2417bdb30daa4fb57",
+      "bytes": 5464
+    },
+    "accrue_admin/assets/js/hooks/overlay.js": {
+      "sha256": "6050800340dcfe2b9e8e05fbe9ce6b01e3fcd7df9110154e133ebef9d915b199",
+      "bytes": 2192
+    },
+    "accrue_admin/assets/js/hooks/focus_trap.js": {
+      "sha256": "55876cca8bb8f50a719945f482a6287d656c5a57e34bc927fec8b07e6b9dfcb7",
+      "bytes": 7114
+    },
+    "accrue_admin/assets/css/app.css": {
+      "sha256": "94163abffa7550511ede59a667e6ddec1bf624b9913379e418aafecfd1a84eee",
+      "bytes": 189533
+    }
+  },
+  "assets": {
+    "built": {
+      "sha256": "27eb8ded0fc2a0601223d14af93ea00e0dab463b746091bec677caa87bd90615",
+      "bytes": 129693
+    },
+    "served": {
+      "sha256": "27eb8ded0fc2a0601223d14af93ea00e0dab463b746091bec677caa87bd90615",
+      "bytes": 129693,
+      "url": "/admin/assets/css-946fccd42f7091141e2cf2ebc450f01c"
+    }
+  },
+  "fixture": {
+    "owner": "accrue-e2e-alpha",
+    "customer_id": "83104526-1b68-44af-b99a-0aaae5682552",
+    "subscription_id": "bb859307-8291-497f-a7a2-86be4ca95cec"
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "theme": "light captures; dark theme and reduced motion verified after capture",
+  "states": {
+    "home.png": {
+      "route": "http://127.0.0.1:4101/admin?org=accrue-e2e-alpha",
+      "state": "home"
+    },
+    "search.png": {
+      "route": "http://127.0.0.1:4101/admin?org=accrue-e2e-alpha",
+      "state": "search"
+    },
+    "customer-list.png": {
+      "route": "http://127.0.0.1:4101/admin/customers?org=accrue-e2e-alpha",
+      "state": "customer-list"
+    },
+    "customer-detail.png": {
+      "route": "http://127.0.0.1:4101/admin/customers/83104526-1b68-44af-b99a-0aaae5682552?org=accrue-e2e-alpha&return_to=%2Fadmin%2Fcustomers%3Forg%3Daccrue-e2e-alpha",
+      "state": "customer-detail"
+    },
+    "subscription-list.png": {
+      "route": "http://127.0.0.1:4101/admin/subscriptions?view=all&org=accrue-e2e-alpha",
+      "state": "subscription-list"
+    },
+    "subscription-detail.png": {
+      "route": "http://127.0.0.1:4101/admin/subscriptions/bb859307-8291-497f-a7a2-86be4ca95cec?org=accrue-e2e-alpha&return_to=%2Fadmin%2Fsubscriptions%3Forg%3Daccrue-e2e-alpha%26view%3Dall",
+      "state": "subscription-detail"
+    },
+    "subscription-drawer.png": {
+      "route": "http://127.0.0.1:4101/admin/subscriptions/bb859307-8291-497f-a7a2-86be4ca95cec?org=accrue-e2e-alpha&return_to=%2Fadmin%2Fsubscriptions%3Forg%3Daccrue-e2e-alpha%26view%3Dall",
+      "state": "subscription-drawer"
+    }
+  },
+  "images": {
+    "home.png": {
+      "sha256": "8dbc903e07ff668eefcf39a586e72f0a01b68430f6e0b40893fe87cbc9b2a511",
+      "bytes": 122126
+    },
+    "search.png": {
+      "sha256": "40bd6dc1da1cad38431e0f9c58749c606b8af855e8385b3291b4cbe82c571a40",
+      "bytes": 120665
+    },
+    "customer-list.png": {
+      "sha256": "25bbe55872d7b3d5bdbc14e3ba48afc754dba5f08d622abaed3480ca7550ebd5",
+      "bytes": 147019
+    },
+    "customer-detail.png": {
+      "sha256": "bc3d94ad422470b031ae02544ff8c993339c38c51607ae4d4777554aacd0250e",
+      "bytes": 325505
+    },
+    "subscription-list.png": {
+      "sha256": "0ced185ba2572d00f9a9e3b2ace4b663df5df9205357051a987c5cc40879b467",
+      "bytes": 185336
+    },
+    "subscription-detail.png": {
+      "sha256": "7dfd9d133d96c32c83b11ced6948715c4df64e711fd4e0c261feb3199deacf25",
+      "bytes": 470197
+    },
+    "subscription-drawer.png": {
+      "sha256": "7beff4e16ef554e23206411d2627bcc978979c131b9b0991843493a0f0458938",
+      "bytes": 327356
+    }
+  }
+}
