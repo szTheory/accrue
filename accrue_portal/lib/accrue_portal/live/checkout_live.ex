@@ -49,7 +49,7 @@ defmodule AccruePortal.Live.CheckoutLive do
           ) == :ok
 
       client_token =
-        if checkout_ready?(checkout) and complete_allowed? do
+        if checkout_ready?(checkout) and valid_checkout_terms?(checkout) and complete_allowed? do
           case BraintreeClient.client_token_for(context.customer) do
             {:ok, value} -> value
             _ -> nil
@@ -67,6 +67,11 @@ defmodule AccruePortal.Live.CheckoutLive do
         |> assign(:context_pin, pin)
         |> assign(:promo_allowed, promo_allowed?)
         |> assign(:completion_denied, not complete_allowed?)
+        |> assign(:checkout_terms_valid, valid_checkout_terms?(checkout))
+        |> assign(
+          :checkout_recovery_url,
+          safe_recovery_url(checkout.cancel_url, portal["mount_path"])
+        )
         |> assign(:checkout_error, nil)
         |> assign(:checkout_success, false)
         |> assign(:promotion_code, nil)
@@ -273,9 +278,27 @@ defmodule AccruePortal.Live.CheckoutLive do
       <section class="portal-card portal-card-checkout">
         <p class="portal-eyebrow">Secure checkout</p>
         <h1>{Copy.checkout_heading()}</h1>
-        <p :if={not @checkout_success}>
-          Confirm subscription for <strong>{@checkout_session.price_id}</strong>.
-        </p>
+        <section
+          class="portal-checkout-summary"
+          data-testid="checkout-offer-summary"
+          aria-label="Selected plan"
+          data-plan-name={@checkout_terms_valid && @checkout_plan_name}
+          data-amount-minor={@checkout_terms_valid && @base_amount_minor}
+          data-currency={@checkout_terms_valid && @checkout_currency}
+          data-interval={@checkout_terms_valid && @checkout_interval}
+          data-billable={@checkout_terms_valid && @checkout_billable_name}
+        >
+          <h2>Selected plan</h2>
+          <dl :if={@checkout_terms_valid}>
+            <div><dt>Plan</dt><dd>{@checkout_plan_name}</dd></div>
+            <div><dt>Billed to</dt><dd>{@checkout_billable_name}</dd></div>
+            <div><dt>Charge</dt><dd>{@checkout_currency} {@base_checkout_amount} / {@checkout_interval}</dd></div>
+          </dl>
+          <div :if={!@checkout_terms_valid} class="portal-inline-error" role="status" aria-live="polite">
+            <p>Plan details are unavailable, so payment cannot continue.</p>
+            <a :if={@checkout_recovery_url} href={@checkout_recovery_url} class="portal-button-secondary">Return to billing</a>
+          </div>
+        </section>
         <p :if={@checkout_success} class="portal-success-copy">Subscription created.</p>
 
         <div
@@ -300,7 +323,7 @@ defmodule AccruePortal.Live.CheckoutLive do
         </div>
 
         <form
-          :if={@promo_allowed && checkout_ready?(@checkout_session) && !@checkout_success}
+          :if={@promo_allowed && @checkout_terms_valid && checkout_ready?(@checkout_session) && !@checkout_success}
           id="promo-code-form"
           phx-change="validate_promo"
           class="portal-promo-form"
@@ -326,7 +349,7 @@ defmodule AccruePortal.Live.CheckoutLive do
         </form>
 
         <form
-          :if={@client_token && checkout_ready?(@checkout_session) && !@checkout_success}
+          :if={@client_token && @checkout_terms_valid && checkout_ready?(@checkout_session) && !@checkout_success}
           id="checkout-form"
           action={Path.checkout_complete(@base_path, @checkout_session.session_token)}
           method="post"
@@ -364,8 +387,8 @@ defmodule AccruePortal.Live.CheckoutLive do
               {Copy.checkout_pay_cta(@checkout_amount)}
             </button>
             <a
-              :if={@checkout_session.cancel_url}
-              href={@checkout_session.cancel_url}
+              :if={@checkout_recovery_url}
+              href={@checkout_recovery_url}
               class="portal-button-secondary"
             >
               {Copy.checkout_leave_cta()}
@@ -374,8 +397,8 @@ defmodule AccruePortal.Live.CheckoutLive do
         </form>
 
         <a
-          :if={(!@client_token || !checkout_ready?(@checkout_session)) && @checkout_session.cancel_url}
-          href={@checkout_session.cancel_url}
+          :if={(!@client_token || !checkout_ready?(@checkout_session) || !@checkout_terms_valid) && @checkout_recovery_url}
+          href={@checkout_recovery_url}
           class="portal-button-secondary"
         >
           {Copy.checkout_leave_cta()}
@@ -386,13 +409,29 @@ defmodule AccruePortal.Live.CheckoutLive do
   end
 
   defp assign_checkout_pricing(socket, %LocalSession{} = checkout) do
-    amount_minor = checkout_amount_minor(checkout)
-    amount_text = format_minor_amount(amount_minor)
+    case checkout_terms(checkout) do
+      {:ok, terms} ->
+        amount_text = format_minor_amount(terms.amount_minor)
 
-    socket
-    |> assign(:base_amount_minor, amount_minor)
-    |> assign(:base_checkout_amount, amount_text)
-    |> assign(:checkout_amount, amount_text)
+        socket
+        |> assign(:base_amount_minor, terms.amount_minor)
+        |> assign(:base_checkout_amount, amount_text)
+        |> assign(:checkout_amount, amount_text)
+        |> assign(:checkout_plan_name, terms.plan_name)
+        |> assign(:checkout_billable_name, terms.billable_name)
+        |> assign(:checkout_currency, terms.currency)
+        |> assign(:checkout_interval, interval_label(terms.interval, terms.interval_count))
+
+      :error ->
+        socket
+        |> assign(:base_amount_minor, nil)
+        |> assign(:base_checkout_amount, "Unavailable")
+        |> assign(:checkout_amount, "Unavailable")
+        |> assign(:checkout_plan_name, "Unavailable")
+        |> assign(:checkout_billable_name, "Unavailable")
+        |> assign(:checkout_currency, "Unavailable")
+        |> assign(:checkout_interval, "Unavailable")
+    end
   end
 
   defp assign_base_checkout_amount(socket) do
@@ -489,14 +528,7 @@ defmodule AccruePortal.Live.CheckoutLive do
       end
 
     selected_item_matches? =
-      case checkout.line_items do
-        [%{"price" => price_id, "amount" => amount} = item] ->
-          price_id == checkout.price_id and valid_amount?(amount) and
-            valid_currency?(item["currency"])
-
-        _ ->
-          false
-      end
+      valid_checkout_terms?(checkout)
 
     configured_processor_matches? = checkout.processor == Processor.name()
 
@@ -505,19 +537,10 @@ defmodule AccruePortal.Live.CheckoutLive do
       configured_processor_matches?
   end
 
-  defp valid_amount?(amount) when is_integer(amount), do: amount > 0
+  defp valid_checkout_terms?(%LocalSession{} = checkout),
+    do: match?({:ok, _}, checkout_terms(checkout))
 
-  defp valid_amount?(amount) when is_binary(amount) do
-    case Decimal.parse(String.trim_leading(String.trim(amount), "$")) do
-      {%Decimal{} = value, ""} -> Decimal.compare(value, Decimal.new(0)) == :gt
-      _ -> false
-    end
-  end
-
-  defp valid_amount?(_), do: false
-
-  defp valid_currency?(nil), do: true
-  defp valid_currency?(currency), do: is_binary(currency) and currency =~ ~r/^[A-Za-z]{3}$/
+  defp valid_checkout_terms?(_), do: false
 
   defp deny_checkout(socket, message) do
     socket
@@ -530,27 +553,86 @@ defmodule AccruePortal.Live.CheckoutLive do
     |> assign(:promo_status, nil)
   end
 
-  defp checkout_amount_minor(%LocalSession{line_items: [first | _]}) when is_map(first) do
-    first
-    |> Map.get("amount", "0.00")
-    |> parse_amount_minor()
+  defp checkout_terms(%LocalSession{line_items: [item], metadata: metadata} = checkout)
+       when is_map(item) and is_map(metadata) do
+    amount_minor = Map.get(metadata, "amount_minor")
+    line_amount_minor = Map.get(item, "amount_minor")
+    amount = Map.get(item, "amount")
+    currency = Map.get(metadata, "currency")
+    interval = Map.get(metadata, "interval")
+    interval_count = Map.get(metadata, "interval_count")
+    plan_name = Map.get(metadata, "plan_name")
+    billable_name = Map.get(metadata, "billable_name")
+    billable_id = Map.get(metadata, "billable_id")
+    processor = Map.get(metadata, "processor")
+
+    with true <- Map.get(item, "price") == checkout.price_id,
+         true <- Map.get(item, "quantity") == 1,
+         true <- is_integer(amount_minor) and amount_minor >= 0,
+         true <- line_amount_minor == amount_minor,
+         true <- valid_decimal_amount?(amount, amount_minor),
+         true <- is_binary(currency) and currency =~ ~r/^[A-Z]{3}$/,
+         true <- interval in ["day", "week", "month", "year"],
+         true <- is_integer(interval_count) and interval_count > 0,
+         true <- is_binary(plan_name) and String.trim(plan_name) != "",
+         true <- is_binary(billable_name) and String.trim(billable_name) != "",
+         true <- is_binary(billable_id) and billable_id != "",
+         true <- processor == checkout.processor do
+      {:ok,
+       %{
+         amount_minor: amount_minor,
+         currency: currency,
+         interval: interval,
+         interval_count: interval_count,
+         plan_name: plan_name,
+         billable_name: billable_name
+       }}
+    else
+      _ -> :error
+    end
   end
 
-  defp checkout_amount_minor(_session), do: 0
+  defp checkout_terms(_), do: :error
 
-  defp parse_amount_minor(amount) when is_binary(amount) do
-    amount
-    |> String.trim()
-    |> String.trim_leading("$")
-    |> Decimal.new()
-    |> Decimal.mult(Decimal.new(100))
-    |> Decimal.round(0, :half_even)
-    |> Decimal.to_integer()
+  defp valid_decimal_amount?(amount, expected_minor) when is_integer(amount),
+    do: amount == expected_minor
+
+  defp valid_decimal_amount?(amount, expected_minor) when is_binary(amount) do
+    case Decimal.parse(String.trim_leading(String.trim(amount), "$")) do
+      {%Decimal{} = value, ""} ->
+        minor = Decimal.mult(value, Decimal.new(100))
+
+        Decimal.compare(minor, Decimal.new(0)) != :lt and
+          Decimal.compare(minor, Decimal.new(expected_minor)) == :eq
+
+      _ ->
+        false
+    end
+  rescue
+    ArgumentError -> false
   end
 
-  defp parse_amount_minor(amount) when is_integer(amount), do: amount
+  defp valid_decimal_amount?(_, _), do: false
 
-  defp parse_amount_minor(_), do: 0
+  defp interval_label(interval, 1), do: "per " <> interval
+  defp interval_label(interval, count), do: "every #{count} #{interval}s"
+
+  defp safe_recovery_url(url, fallback) when is_binary(url) do
+    uri = URI.parse(url)
+
+    cond do
+      Context.valid_local_path?(url) ->
+        url
+
+      uri.scheme == "https" and is_binary(uri.host) and uri.host != "" and is_nil(uri.userinfo) ->
+        url
+
+      true ->
+        fallback
+    end
+  end
+
+  defp safe_recovery_url(_, fallback), do: fallback
 
   defp format_minor_amount(amount_minor) when is_integer(amount_minor) do
     sign = if amount_minor < 0, do: "-", else: ""

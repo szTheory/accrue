@@ -100,7 +100,9 @@ defmodule AccruePortal.CheckoutLiveTest do
     session =
       checkout_fixture(customer,
         price_id: "price_pro",
-        line_items: [%{"price" => "price_pro", "amount" => "49.00"}]
+        line_items: [
+          %{"price" => "price_pro", "quantity" => 1, "amount" => "49.00", "amount_minor" => 4900}
+        ]
       )
 
     conn = sign_in_customer(conn, user)
@@ -111,12 +113,94 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert html =~ ~s(data-braintree-field="expirationDate")
     assert html =~ ~s(data-braintree-field="cvv")
     assert html =~ "Pay $49.00"
+    assert html =~ "Studio"
+    assert html =~ "USD $49.00 / per month"
+    assert html =~ "Billed to"
     assert html =~ "Leave checkout"
     assert html =~ ~s(src="https://js.braintreegateway.com/web/3.132.0/js/client.min.js")
     assert html =~ ~s(integrity="#{@client_sri}")
     assert html =~ ~s(src="https://js.braintreegateway.com/web/3.132.0/js/hosted-fields.min.js")
     assert html =~ ~s(integrity="#{@hosted_fields_sri}")
     assert html =~ ~s(crossorigin="anonymous")
+  end
+
+  test "an explicit trusted zero remains visible as zero", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session =
+      checkout_fixture(customer,
+        line_items: [
+          %{"price" => "price_fixture", "quantity" => 1, "amount" => "0.00", "amount_minor" => 0}
+        ],
+        metadata: checkout_metadata(%{"amount_minor" => 0})
+      )
+
+    assert {:ok, _view, html} =
+             live(sign_in_customer(conn, user), "/billing/checkout/#{session.session_token}")
+
+    assert html =~ "USD $0.00 / per month"
+    assert html =~ "Pay $0.00"
+    assert html =~ ~s(id="checkout-form")
+  end
+
+  test "incomplete or inconsistent terms disable payment and offer safe recovery", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    invalid_sessions = [
+      checkout_fixture(customer, metadata: %{"source" => "missing terms"}),
+      checkout_fixture(customer, line_items: [], metadata: checkout_metadata()),
+      checkout_fixture(customer,
+        line_items: [%{"price" => "price_fixture", "amount" => "49.001", "amount_minor" => 4900}],
+        metadata: checkout_metadata()
+      ),
+      checkout_fixture(customer,
+        line_items: [%{"price" => "price_fixture", "amount" => "-1.00", "amount_minor" => 4900}],
+        metadata: checkout_metadata()
+      ),
+      checkout_fixture(customer, metadata: checkout_metadata(%{"currency" => "US"})),
+      checkout_fixture(customer, metadata: checkout_metadata(%{"interval" => ""})),
+      checkout_fixture(customer,
+        line_items: [
+          %{
+            "price" => "price_fixture",
+            "quantity" => 1,
+            "amount" => "49.00",
+            "amount_minor" => 4900
+          },
+          %{"price" => "second", "quantity" => 1, "amount" => "1.00", "amount_minor" => 100}
+        ],
+        metadata: checkout_metadata()
+      )
+    ]
+
+    for session <- invalid_sessions do
+      assert {:ok, _view, html} =
+               live(sign_in_customer(conn, user), "/billing/checkout/#{session.session_token}")
+
+      assert html =~ "Plan details are unavailable"
+      assert html =~ "Return to billing"
+      refute html =~ ~s(id="checkout-form")
+      refute html =~ ~s(id="promo-code-form")
+    end
+  end
+
+  test "long Unicode plan labels render as escaped trusted data", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    long_name = String.duplicate("航🚀", 80)
+    session = checkout_fixture(customer, metadata: checkout_metadata(%{"plan_name" => long_name}))
+
+    assert {:ok, _view, html} =
+             live(sign_in_customer(conn, user), "/billing/checkout/#{session.session_token}")
+
+    assert html =~ long_name
+    refute html =~ "price_fixture</strong>"
   end
 
   test "checkout hook returns the nonce and rendered context pin, never card fields" do
@@ -227,13 +311,20 @@ defmodule AccruePortal.CheckoutLiveTest do
           ui_mode: "hosted",
           status: "open",
           price_id: "price_fixture",
-          line_items: [%{"price" => "price_fixture", "amount" => "49.00"}],
+          line_items: [
+            %{
+              "price" => "price_fixture",
+              "quantity" => 1,
+              "amount" => "49.00",
+              "amount_minor" => 4900
+            }
+          ],
           success_url: "https://app.example.test/billing/success",
           cancel_url: "https://app.example.test/billing/cancel",
           return_url: "https://app.example.test/settings/billing",
           operation_id:
             "checkout-fixture-" <> Integer.to_string(System.unique_integer([:positive])),
-          metadata: %{"source" => "fixture"},
+          metadata: checkout_metadata(),
           data: %{"local_portal" => true}
         },
         provided
@@ -250,13 +341,30 @@ defmodule AccruePortal.CheckoutLiveTest do
       if Map.has_key?(provided, :line_items) do
         provided.line_items
       else
-        [%{"price" => price_id, "amount" => "49.00"}]
+        [%{"price" => price_id, "quantity" => 1, "amount" => "49.00", "amount_minor" => 4900}]
       end
 
     attrs = Map.merge(attrs, %{price_id: price_id, line_items: line_items})
 
     {:ok, session} = LocalSession.create_or_reuse(customer, attrs)
     session
+  end
+
+  defp checkout_metadata(overrides \\ %{}) do
+    Map.merge(
+      %{
+        "plan_name" => "Studio",
+        "amount_minor" => 4900,
+        "currency" => "USD",
+        "interval" => "month",
+        "interval_count" => 1,
+        "billable_type" => "User",
+        "billable_id" => "fixture-billable",
+        "billable_name" => "Fixture account",
+        "processor" => "braintree"
+      },
+      overrides
+    )
   end
 
   defp build_customer(attrs) do
