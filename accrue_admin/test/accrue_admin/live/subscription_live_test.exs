@@ -124,6 +124,58 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Work all invoices in queue"
   end
 
+  test "subscription detail returns to the validated originating list in the current organization scope",
+       %{
+         conn: conn
+       } do
+    %{subscription: subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "journey-org",
+        email: "phase234-return@example.com"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "journey-org",
+        active_organization_slug: "journey-org",
+        admin_organization_ids: ["journey-org"]
+      )
+
+    return_to =
+      URI.encode(
+        "/billing/subscriptions?org=foreign-org&view=all&status=active&q=phase234",
+        &URI.char_unreserved?/1
+      )
+
+    assert {:ok, view, html} =
+             live(
+               conn,
+               "/billing/subscriptions/#{subscription.id}?org=journey-org&return_to=#{return_to}"
+             )
+
+    assert html =~ "Back to results"
+
+    back_path =
+      view
+      |> element("a", "Back to results")
+      |> render()
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Floki.attribute("href")
+      |> hd()
+
+    back_query = back_path |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    assert URI.parse(back_path).path == "/billing/subscriptions"
+    assert back_query["org"] == "journey-org"
+    assert back_query["view"] == "all"
+    assert back_query["status"] == "active"
+    assert back_query["q"] == "phase234"
+    refute html =~ "foreign-org"
+  end
+
   test "summary and drill bands replace page-level KPI and predicate noise", %{
     conn: conn,
     subscription: subscription
@@ -389,12 +441,17 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert {:error,
             {:redirect, %{to: "/billing/subscriptions?org=allowed-org", flash: flash_token}}} =
              redirect =
-             live(conn, "/billing/subscriptions/#{denied_subscription.id}?org=allowed-org")
+             live(
+               conn,
+               "/billing/subscriptions/#{denied_subscription.id}?org=allowed-org&return_to=https%3A%2F%2Fforeign.example%2Fadmin%2Fsubscriptions%3Forg%3Dorg_denied%26view%3Dall"
+             )
 
     assert %{"error" => denied} =
              Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
 
     assert denied == Copy.Locked.owner_access_denied()
+    refute denied =~ denied_subscription.processor_id
+    refute denied =~ "org_denied"
 
     assert redirect
   end

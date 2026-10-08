@@ -21,7 +21,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   alias AccrueAdmin.Components.StatusBadge
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.DataTableNav
   alias AccrueAdmin.Queries.Subscriptions
+  alias AccrueAdmin.ScopedPath
 
   @default_queue_status "past_due,canceling"
 
@@ -60,6 +62,25 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
        socket.assigns.table_path,
        Map.drop(params, ["_target", "_csrf_token"])
      )}
+  end
+
+  @impl true
+  def handle_params(%{"cursor" => cursor} = params, _uri, socket) do
+    if Subscriptions.cursor_valid?(cursor, params, socket.assigns.current_owner_scope) do
+      {:noreply, assign(socket, :params, params)}
+    else
+      to =
+        socket.assigns.table_path
+        |> DataTableNav.merge_query(Map.drop(params, ["cursor", "org"]))
+
+      {:noreply,
+       socket
+       |> put_flash(
+         :info,
+         "That saved page position expired. Showing the first page with the same filters."
+       )
+       |> push_patch(to: to)}
+    end
   end
 
   @impl true
@@ -205,7 +226,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           columns={[
             %{
               label: "Customer details",
-              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope)
+              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope, @params)
             },
             %{label: "State", render: &state_cell/1},
             %{label: "Plan / amount", render: &plan_amount_cell/1},
@@ -219,7 +240,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           card_fields={[
             %{
               label: "Customer details",
-              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope)
+              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope, @params)
             },
             %{label: "State", render: &state_cell/1},
             %{label: "Plan / amount", render: &plan_amount_cell/1},
@@ -330,13 +351,28 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   # Primary link resolves to the subscription's own detail page (D-01's literal href
   # mandate) with customer-first TEXT for scannability; secondary link cross-navigates to
   # the customer (mirrors invoices_live.ex's bidirectional identity-cell pattern).
-  defp identity_cell(row, mount_path, owner_scope) do
-    subscription_href = scoped_path(mount_path, "/subscriptions/#{row.id}", owner_scope)
-    customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
+  defp identity_cell(row, mount_path, owner_scope, params) do
+    list_path =
+      mount_path
+      |> scoped_path("/subscriptions", owner_scope)
+      |> DataTableNav.merge_query(params)
+
+    return_to = ScopedPath.return_path(mount_path, list_path, owner_scope)
+
+    subscription_href =
+      ScopedPath.build(mount_path, "/subscriptions/#{row.id}", owner_scope, %{
+        "return_to" => return_to
+      })
+
+    customer_href =
+      ScopedPath.build(mount_path, "/customers/#{row.customer_id}", owner_scope, %{
+        "return_to" => return_to
+      })
+
     subscription_id = row.processor_id || row.id
 
     Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{subscription_href}" class="ax-link">#{escape(customer_label(row))}</a><a href="#{customer_href}" class="ax-label ax-muted">#{escape(subscription_id)}</a></span>)
+      ~s(<span class="ax-stack-xs"><a href="#{customer_href}" class="ax-link">#{escape(customer_label(row))}</a><a href="#{subscription_href}" class="ax-label ax-muted">#{escape(subscription_id)}</a></span>)
     )
   end
 

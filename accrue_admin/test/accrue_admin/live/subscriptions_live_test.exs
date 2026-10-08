@@ -287,38 +287,100 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "ax-data-table-grid"
   end
 
-  test "renders the identity cell as a customer-label link to the subscription and a muted subscription-id link to the customer",
+  test "renders customer and subscription labels to their own destination with list context",
        %{conn: conn} do
     %{subscription: subscription} =
-      Factory.active_subscription(%{email: "phase196-primary@example.com"})
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "journey-org",
+        email: "phase234-journey@example.com"
+      })
 
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "journey-org",
+        active_organization_slug: "journey-org",
+        admin_organization_ids: ["journey-org"]
+      )
 
-    assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/subscriptions?org=journey-org&view=all&status=active&q=phase234"
+             )
 
-    assert html =~ "phase196-primary@example.com"
+    assert html =~ "phase234-journey@example.com"
 
     parsed = Floki.parse_document!(html)
 
-    assert parsed
-           |> Floki.find("a.ax-link")
-           |> Enum.any?(fn link ->
-             Floki.text(link) == "phase196-primary@example.com" and
-               link
-               |> Floki.attribute("href")
-               |> Enum.any?(&String.contains?(&1, "/subscriptions/#{subscription.id}"))
-           end)
+    customer_link =
+      parsed
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "phase234-journey@example.com"))
 
-    assert parsed
-           |> Floki.find("a.ax-label.ax-muted")
-           |> Enum.any?(fn link ->
-             Floki.text(link) == subscription.processor_id and
-               link
-               |> Floki.attribute("href")
-               |> Enum.any?(&String.contains?(&1, "/customers/#{subscription.customer_id}"))
-           end)
+    subscription_link =
+      parsed
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == subscription.processor_id))
 
-    assert_before(html, "phase196-primary@example.com", subscription.processor_id)
+    assert customer_link
+    assert subscription_link
+
+    assert Floki.attribute(customer_link, "href") |> hd() =~
+             "/customers/#{subscription.customer_id}"
+
+    assert Floki.attribute(subscription_link, "href") |> hd() =~
+             "/subscriptions/#{subscription.id}"
+
+    detail_path = Floki.attribute(subscription_link, "href") |> hd()
+    detail_query = detail_path |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    assert detail_query["org"] == "journey-org"
+    assert detail_query["return_to"] =~ "/billing/subscriptions?"
+    assert detail_query["return_to"] =~ "status=active"
+    assert detail_query["return_to"] =~ "view=all"
+
+    assert_before(html, "phase234-journey@example.com", subscription.processor_id)
+  end
+
+  test "invalid cursor recovers to the first page without dropping organization or filters", %{
+    conn: conn
+  } do
+    %{subscription: subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "cursor-org",
+        email: "phase234-cursor@example.com"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "cursor-org",
+        active_organization_slug: "cursor-org",
+        admin_organization_ids: ["cursor-org"]
+      )
+
+    stale_cursor =
+      AccrueAdmin.Queries.Cursor.encode(
+        ~U[2026-01-01 00:00:00Z],
+        Ecto.UUID.generate()
+      )
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/subscriptions?org=cursor-org&view=all&status=active&q=phase234&cursor=#{stale_cursor}"
+             )
+
+    assert html =~
+             "That saved page position expired. Showing the first page with the same filters."
+
+    assert html =~ "phase234-cursor@example.com"
+    assert html =~ subscription.processor_id
+    refute html =~ "cursor=#{stale_cursor}"
   end
 
   # Shared SPA-filter contract smoke (260621-io6): proves the parent-targeted

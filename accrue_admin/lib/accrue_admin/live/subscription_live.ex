@@ -82,6 +82,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   @impl true
+  def handle_params(params, _uri, socket) do
+    return_path =
+      ScopedPath.return_path(
+        socket.assigns.admin_mount_path,
+        Map.get(params, "return_to"),
+        socket.assigns.current_owner_scope
+      )
+
+    {:noreply, assign(socket, :return_path, return_path)}
+  end
+
+  @impl true
   def handle_event("open_action_drawer", %{"action_type" => action_type}, socket)
       when is_binary(action_type) do
     socket = ensure_timeline_events(socket)
@@ -194,7 +206,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         phx-window-keydown="step_up_escape"
         phx-key="escape"
       >
-        <Breadcrumbs.breadcrumbs
+          <Breadcrumbs.breadcrumbs
           items={[
             %{
               label: Copy.dashboard_breadcrumb_home(),
@@ -211,6 +223,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             %{label: subscription_title(@subscription, @customer)}
           ]}
         />
+        <p class="ax-detail-back-link">
+          <a class="ax-link" href={@return_path}>Back to results</a>
+        </p>
 
         <% health = detail_health_summary(@subscription) %>
         <section class={["ax-detail-health-summary ax-detail-health-summary-top", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">

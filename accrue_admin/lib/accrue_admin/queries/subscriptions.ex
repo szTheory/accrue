@@ -103,6 +103,30 @@ defmodule AccrueAdmin.Queries.Subscriptions do
     end
   end
 
+  @doc false
+  def cursor_valid?(cursor, params, owner_scope) when is_binary(cursor) and is_map(params) do
+    with {:ok, {timestamp, id}} <- AccrueAdmin.Queries.Cursor.decode(cursor) do
+      filter = decode_filter(params)
+
+      Subscription
+      |> join(:inner, [subscription], customer in Customer,
+        on: customer.id == subscription.customer_id
+      )
+      |> scope_query(owner_scope)
+      |> filter_query(filter)
+      |> where(
+        [subscription, _customer],
+        subscription.id == ^id and subscription.inserted_at == ^timestamp
+      )
+      |> Repo.aggregate(:count, :id)
+      |> Kernel.>(0)
+    else
+      :error -> false
+    end
+  end
+
+  def cursor_valid?(_cursor, _params, _owner_scope), do: false
+
   @impl true
   def decode_filter(params) when is_map(params) do
     %{
