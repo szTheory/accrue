@@ -180,6 +180,13 @@ Each task was committed atomically:
 - Chromium required the approved local browser execution permission; with it, the served suite completed 5/5.
 - `git diff --check`, `actionlint .github/workflows/ci.yml`, `cd accrue_portal && mix test.ci` (110 tests, 0 failures), and the served Playwright suite passed.
 
+## Self-Check: PASSED
+
+- Plan metadata and required requirement IDs match `236-05-PLAN.md`.
+- The evaluation-scope check resolved both plan task commits (`b8c04a52`, `94288d64`).
+- The package gate passed with 110 tests and no failures; the served browser contract passed 5/5; `actionlint` and `git diff --check` passed.
+- All plan task acceptance criteria have passing automated coverage; no human UAT remains for this plan.
+
 ## User Setup Required
 
 None - no external service configuration required.
