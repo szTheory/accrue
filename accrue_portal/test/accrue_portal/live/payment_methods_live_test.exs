@@ -133,6 +133,5 @@ defmodule AccruePortal.PaymentMethodsLiveTest do
 
     assert %Accrue.Billing.PaymentMethod{} =
              TestRepo.get(Accrue.Billing.PaymentMethod, payment_method.id)
-
   end
 end
