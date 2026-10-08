@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 2
+open_count: 4
 waived_count: 6
 fixed_count: 8
-total_count: 16
-last_updated: 2026-10-08T01:20:22.343Z
+total_count: 18
+last_updated: 2026-10-08T01:32:40.174Z
 ---
 
 # Broken Windows Ledger
@@ -31,6 +31,8 @@ last_updated: 2026-10-08T01:20:22.343Z
 | 14 | 232 | unmet-truth | .github/workflows/ci.yml |  | annotation-sweep is failing at the frozen re-cut candidate SHA (run 35232417814) purely as a downstream consequence of the docs-contracts-shift-left and release-gate regressions above -- it sweeps release-facing annotations from those same jobs and has no independent local-equivalent form (its only proof is a real GitHub Actions dispatch, per 231-GATE-01-EVIDENCE.md's established precedent for this exact lane). | waived | Owner: Accrue maintainer (szTheory). Rationale: purely a downstream consequence of ship-window rows 12 and 13 (annotation-sweep sweeps the same jobs that failed for those reasons); no independent defect. Release impact: none beyond rows 12/13 -- resolves automatically once those land in a future re-cut and this lane is re-dispatched. | 2026-09-17T14:50:27.147Z | 2026-09-17T14:50:38.272Z |
 | 15 | 234 | deviation | accrue_admin/test/accrue_admin/live/dashboard_live_test.exs |  | Dashboard scope-control tests were added after the initial implementation instead of preceding it in a RED-first cycle. | open |  | 2026-10-08T00:50:59.696Z |  |
 | 16 | 234 | deviation | .planning/phases/234-admin-customers-subscriptions/234-03-SUMMARY.md |  | TDD-marked task tests were added after implementation; workflow TDD mode was disabled and no RED commit was produced. | open |  | 2026-10-08T01:20:22.343Z |  |
+| 17 | 234 | deviation | accrue_admin/test/accrue_admin/live/subscription_live_test.exs |  | Task 2 delayed review assertions were committed after the overlapping fresh-dispatch implementation, so Task 2 has no separate RED commit. | open |  | 2026-10-08T01:31:43.711Z |  |
+| 18 | 234 | deviation | .planning/ROADMAP.md |  | roadmap.update-plan-progress 234 returned missing_phase_details, so the aggregate Phase 234 roadmap entry could not be updated. | open |  | 2026-10-08T01:32:40.174Z |  |
 
 ````json
 [
@@ -229,6 +231,32 @@ last_updated: 2026-10-08T01:20:22.343Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-08T01:20:22.343Z",
+    "resolved_at": null,
+    "milestone": "v1.63"
+  },
+  {
+    "id": 17,
+    "kind": "deviation",
+    "phase": "234",
+    "file": "accrue_admin/test/accrue_admin/live/subscription_live_test.exs",
+    "line": null,
+    "description": "Task 2 delayed review assertions were committed after the overlapping fresh-dispatch implementation, so Task 2 has no separate RED commit.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-08T01:31:43.711Z",
+    "resolved_at": null,
+    "milestone": "v1.63"
+  },
+  {
+    "id": 18,
+    "kind": "deviation",
+    "phase": "234",
+    "file": ".planning/ROADMAP.md",
+    "line": null,
+    "description": "roadmap.update-plan-progress 234 returned missing_phase_details, so the aggregate Phase 234 roadmap entry could not be updated.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-08T01:32:40.174Z",
     "resolved_at": null,
     "milestone": "v1.63"
   }
