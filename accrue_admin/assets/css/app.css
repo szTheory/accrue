@@ -6856,6 +6856,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 }
 
 .ax-subscription-detail-page .ax-summary-facts {
+  /* ax-type-exception: summary facts use the existing body leading until their typography is composed from role utilities. */
   gap: var(--ax-space-xs) var(--ax-space-md);
   line-height: var(--ax-leading-normal);
 }
@@ -6871,7 +6872,6 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   gap: var(--ax-space-xs) var(--ax-space-sm);
   padding: var(--ax-space-xs);
   font: var(--ax-type-body-font);
-  line-height: var(--ax-leading-normal);
 }
 
 .ax-customer-detail-page .ax-summary-facts {
