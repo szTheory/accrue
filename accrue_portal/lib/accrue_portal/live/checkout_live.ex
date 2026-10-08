@@ -294,7 +294,7 @@ defmodule AccruePortal.Live.CheckoutLive do
             <div><dt>Billed to</dt><dd>{@checkout_billable_name}</dd></div>
             <div><dt>Charge</dt><dd>{@checkout_currency} {@base_checkout_amount} / {@checkout_interval}</dd></div>
           </dl>
-          <div :if={!@checkout_terms_valid} class="portal-inline-error" role="status" aria-live="polite">
+          <div :if={!@checkout_terms_valid} class="portal-inline-error" role="alert">
             <p>Plan details are unavailable, so payment cannot continue.</p>
             <a :if={@checkout_recovery_url} href={@checkout_recovery_url} class="portal-button-secondary">Return to billing</a>
           </div>

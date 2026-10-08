@@ -121,6 +121,58 @@ test("mock SDK visible submit sends one nonce and renders the server disposition
   expect(await page.evaluate(() => window.__braintreeMockEvidence.counts.tokenize)).toBe(1);
 });
 
+test("pricing selection survives login and renders persisted trusted terms", async ({ page, sandboxId }) => {
+  const fixture = readFixture();
+  await page.goto("/pricing");
+  await page.locator('[data-plan-id="price_basic"] a').click();
+  await expect(page).toHaveURL(/\/users\/log-in$/);
+
+  const csrfToken = await page.locator('meta[name="csrf-token"]').getAttribute("content");
+  expect(csrfToken).toBeTruthy();
+  const loginResponse = await page.request.post("/users/log-in", {
+    headers: { "x-sandbox-id": sandboxId },
+    maxRedirects: 0,
+    form: {
+      _csrf_token: csrfToken,
+      "user[email]": fixture.billing_manager_email,
+      "user[password]": fixture.password,
+      // The persona's own return path must not replace the validated pricing choice.
+      "user[return_to]": "/app/billing?plan=price_pro"
+    }
+  });
+
+  expect(loginResponse.status()).toBe(302);
+  const returnPath = new URL(loginResponse.headers().location, page.url());
+  expect(returnPath.pathname).toBe("/app/billing");
+  expect(returnPath.searchParams.get("plan")).toBe("price_basic");
+  expect(returnPath.searchParams.get("selection")).toMatch(/^[0-9a-f-]{36}$/i);
+  await page.goto(loginResponse.headers().location);
+  await waitForLiveView(page);
+  await expect(page.locator('[data-plan-id="price_basic"]')).toBeVisible();
+  await expect(page.getByTestId("checkout-url")).toBeVisible();
+
+  const checkoutUrl = await page.getByTestId("checkout-url").getAttribute("href");
+  expect(checkoutUrl).toBeTruthy();
+  await page.goto(checkoutUrl);
+  await waitForLiveView(page);
+
+  const persistedSummary = page.getByTestId("checkout-offer-summary");
+  await expect(persistedSummary).toHaveAttribute("data-plan-name", "Launch");
+  await expect(persistedSummary).toHaveAttribute("data-amount-minor", "1500");
+  await expect(persistedSummary).toHaveAttribute("data-currency", "USD");
+  await expect(persistedSummary).toHaveAttribute("data-interval", "per month");
+  await expect(persistedSummary).toContainText("Launch");
+  await expect(persistedSummary).toContainText("USD $15.00 / per month");
+  await expect(persistedSummary).not.toContainText("Studio");
+});
+
+test("unknown pricing selection recovers without selecting a default", async ({ page }) => {
+  await page.goto("/pricing?plan=price_unknown");
+  await expect(page.locator("body")).toContainText("That plan is unavailable");
+  await expect(page.locator('[data-plan-id="price_basic"]')).toBeVisible();
+  await expect(page).not.toHaveURL(/\/users\/log-in/);
+});
+
 test("invalid card can be retried as a fresh customer action with one transport", async ({ page, sandboxId }) => {
   const fixture = readFixture();
   await openCheckout(page, fixture, sandboxId, {

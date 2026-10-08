@@ -631,12 +631,30 @@ defmodule AccrueHostSeedE2E do
         ui_mode: "hosted",
         status: "open",
         price_id: "price_fixture",
-        line_items: [%{"price" => "price_fixture", "amount" => "49.00"}],
+        line_items: [
+          %{
+            "price" => "price_fixture",
+            "quantity" => 1,
+            "amount" => "49.00",
+            "amount_minor" => 4_900
+          }
+        ],
         success_url: "https://app.example.test/billing/success",
         cancel_url: "https://app.example.test/billing/cancel",
         return_url: "https://app.example.test/settings/billing",
         operation_id: operation_id,
-        metadata: %{"source" => "fixture"},
+        metadata: %{
+          "source" => "fixture",
+          "plan_name" => "Studio",
+          "amount_minor" => 4_900,
+          "currency" => "USD",
+          "interval" => "month",
+          "interval_count" => 1,
+          "billable_type" => customer.owner_type,
+          "billable_id" => customer.owner_id,
+          "billable_name" => customer.name || customer.email,
+          "processor" => customer.processor
+        },
         data: %{"local_portal" => true}
       })
 
