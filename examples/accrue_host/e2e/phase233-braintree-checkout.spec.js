@@ -195,6 +195,7 @@ test("pricing selection survives login and renders persisted trusted terms", asy
 
   const checkoutUrl = await page.getByTestId("checkout-url").getAttribute("href");
   expect(checkoutUrl).toBeTruthy();
+  await installBraintreeMock(page);
   await page.goto(checkoutUrl);
   await waitForLiveView(page);
 
@@ -206,6 +207,65 @@ test("pricing selection survives login and renders persisted trusted terms", asy
   await expect(persistedSummary).toContainText("Launch");
   await expect(persistedSummary).toContainText("USD $15.00 / per month");
   await expect(persistedSummary).not.toContainText("Studio");
+
+  const form = page.locator("#checkout-form");
+  const action = await form.getAttribute("action");
+  await form.locator('[name="context_pin"]').evaluate((input) => {
+    input.value = "deliberately-stale-context-pin";
+  });
+  const requestPromise = page.waitForRequest((request) => isCheckoutPost(request, action));
+  const responsePromise = page.waitForResponse((response) => isCheckoutPost(response.request(), action));
+  const navigationPromise = page.waitForNavigation({ waitUntil: "domcontentloaded" });
+  await form.locator('button[type="submit"]').click();
+
+  const request = await requestPromise;
+  const response = await responsePromise;
+  await navigationPromise;
+  const submitted = new URLSearchParams(request.postData() || "");
+  expect(submitted.get("payment_method_nonce")).toBe("mock-one-time-nonce");
+  expect(submitted.get("context_pin")).toBe("deliberately-stale-context-pin");
+  expect(response.status()).toBe(302);
+  await expect(page.locator("body")).toContainText("Billing access unavailable");
+  await expect(page.locator("body")).not.toContainText("Checkout completed");
+  expect(await page.evaluate(() => window.__braintreeMockEvidence.counts.tokenize)).toBe(1);
+});
+
+test("fixture-backed Braintree return shows only the scoped persisted LocalSession outcome", async ({ page, sandboxId }) => {
+  const fixture = readFixture();
+  await login(page, fixture, fixture.billing_manager_email, sandboxId);
+
+  expect(fixture.braintree_return_evidence).toContain("fixture-backed");
+  expect(fixture.braintree_return_evidence).toContain("not live Braintree proof");
+  expect(fixture.braintree_completed_return_url).not.toContain("{CHECKOUT_SESSION_ID}");
+
+  await page.goto(fixture.braintree_completed_return_url);
+  await waitForLiveView(page);
+  const completedReturn = page.getByTestId("checkout-return-state");
+  await expect(completedReturn).toContainText("Checkout completed");
+  await expect(completedReturn).not.toContainText("Payment confirmed by the provider");
+
+  const completedUrl = new URL(page.url());
+  expect(completedUrl.searchParams.get("plan")).toBe("price_basic");
+  expect(completedUrl.searchParams.get("selection")).toMatch(/^[0-9a-f-]{36}$/i);
+  expect(completedUrl.searchParams.has("checkout_session_id")).toBe(false);
+
+  await page.reload();
+  await waitForLiveView(page);
+  await expect(page.getByTestId("checkout-return-state")).toContainText("Checkout completed");
+
+  await page.goto(fixture.braintree_pending_return_url);
+  await waitForLiveView(page);
+  const pendingReturn = page.getByTestId("checkout-return-state");
+  await expect(pendingReturn).toContainText("Checkout is still being verified");
+  await expect(pendingReturn).not.toContainText("Checkout completed");
+
+  const forgedReturn = new URL(fixture.braintree_completed_return_url, page.url());
+  forgedReturn.searchParams.set("selection", "00000000-0000-0000-0000-000000000000");
+  await page.goto(forgedReturn.toString());
+  await waitForLiveView(page);
+  const forgedState = page.getByTestId("checkout-return-state");
+  await expect(forgedState).not.toContainText("Checkout completed");
+  await expect(forgedState).toContainText("couldn't verify this checkout return");
 });
 
 test("unknown pricing selection recovers without selecting a default", async ({ page }) => {

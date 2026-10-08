@@ -15,6 +15,7 @@ defmodule AccrueHostSeedE2E do
   alias AccrueHost.Accounts.OrganizationMembership
   alias AccrueHost.Accounts.User
   alias AccrueHost.Accounts.UserToken
+  alias AccrueHost.Billing.Plans
   alias AccrueHost.Organizations
   alias AccrueHost.Repo
 
@@ -139,6 +140,12 @@ defmodule AccrueHostSeedE2E do
     org_checkout_session =
       insert_portal_checkout_session!(org_checkout_customer, "host-browser-org-checkout")
 
+    braintree_completed_return =
+      insert_braintree_host_return_session!(org_checkout_customer, host_org_alpha, "completed")
+
+    braintree_pending_return =
+      insert_braintree_host_return_session!(org_checkout_customer, host_org_alpha, "open")
+
     expired_portal_checkout_session =
       insert_portal_checkout_session!(
         portal_customer,
@@ -210,6 +217,9 @@ defmodule AccrueHostSeedE2E do
       expired_portal_checkout_url:
         "/billing/checkout/#{expired_portal_checkout_session.session_token}",
       org_portal_checkout_url: "/shared-billing/checkout/#{org_checkout_session.session_token}",
+      braintree_completed_return_url: braintree_completed_return.success_url,
+      braintree_pending_return_url: braintree_pending_return.success_url,
+      braintree_return_evidence: "fixture-backed LocalSession; not live Braintree proof",
       revocable_member_org_slug: host_org_alpha.slug
     }
 
@@ -279,6 +289,17 @@ defmodule AccrueHostSeedE2E do
           select: customer.id
         )
       )
+
+    fixture_checkout_customer_ids =
+      Repo.all(
+        from(customer in Customer,
+          where: customer.email in ^@fixture_org_customer_emails,
+          select: customer.id
+        )
+      )
+
+    cleanup_session_customer_ids =
+      Enum.uniq(cleanup_customer_ids ++ fixture_checkout_customer_ids)
 
     fixture_subscription_ids =
       Repo.all(
@@ -351,7 +372,7 @@ defmodule AccrueHostSeedE2E do
     Repo.delete_all(
       from(session in LocalSession,
         where:
-          session.customer_id in ^cleanup_customer_ids or
+          session.customer_id in ^cleanup_session_customer_ids or
             session.operation_id in ^@fixture_checkout_operation_ids
       )
     )
@@ -678,6 +699,58 @@ defmodule AccrueHostSeedE2E do
     {:ok, session} =
       LocalSession.create_or_reuse(customer, Map.merge(attrs, Enum.into(overrides, %{})))
 
+    session
+  end
+
+  defp insert_braintree_host_return_session!(customer, organization, status) do
+    plan = Plans.get("price_basic")
+    selection_id = Ecto.UUID.generate()
+
+    success_url =
+      "/app/billing?" <>
+        URI.encode_query(%{
+          checkout: "success",
+          plan: plan.id,
+          selection: selection_id
+        })
+
+    attrs = %{
+      processor: "braintree",
+      mode: "subscription",
+      ui_mode: "hosted",
+      status: status,
+      price_id: plan.id,
+      line_items: [
+        %{
+          "price" => plan.id,
+          "quantity" => 1,
+          "name" => plan.label,
+          "amount" => "15.00",
+          "amount_minor" => plan.unit_amount_minor,
+          "currency" => plan.currency,
+          "interval" => Atom.to_string(plan.billing_cycle.unit),
+          "interval_count" => plan.billing_cycle.count
+        }
+      ],
+      success_url: success_url,
+      cancel_url: "/app/billing?checkout=cancel&plan=#{plan.id}&selection=#{selection_id}",
+      operation_id: "pricing:#{organization.id}:#{plan.id}:#{selection_id}",
+      metadata: %{
+        "plan_name" => plan.label,
+        "amount_minor" => plan.unit_amount_minor,
+        "currency" => plan.currency,
+        "interval" => Atom.to_string(plan.billing_cycle.unit),
+        "interval_count" => plan.billing_cycle.count,
+        "billable_type" => "Organization",
+        "billable_id" => to_string(organization.id),
+        "billable_name" => organization.name,
+        "processor" => "braintree",
+        "plan_id" => plan.id,
+        "selection_id" => selection_id
+      }
+    }
+
+    {:ok, session} = LocalSession.create_or_reuse(customer, attrs)
     session
   end
 
