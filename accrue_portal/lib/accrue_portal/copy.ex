@@ -83,10 +83,10 @@ defmodule AccruePortal.Copy do
   end
 
   def subscriptions_cancel_success(%Subscription{processor: "braintree"}),
-    do: "Subscription canceled now. Review access changes in your account."
+    do: "Subscription canceled now. Ask your app host about application access."
 
   def subscriptions_cancel_success(_subscription),
-    do: "Cancel renewal scheduled. Access stays on until the current billing period ends."
+    do: "Cancel renewal scheduled to stop at the current billing period end."
 
   def subscriptions_cancel_error(%Subscription{processor: "braintree"}),
     do: "Unable to cancel subscription now."
@@ -159,22 +159,21 @@ defmodule AccruePortal.Copy do
   def subscription_cancel_heading(_subscription), do: "Need to stop renewing?"
 
   def subscription_cancel_body(%Subscription{processor: "braintree"}) do
-    "Cancel now can end access immediately. If you need end-of-term non-renewal instead, contact support."
+    "Braintree cancels this subscription immediately. Ask your app host about application access."
   end
 
   def subscription_cancel_body(_subscription),
-    do:
-      "End at period end to turn off renewal now and keep access through the current billing period."
+    do: "End at period end to turn off renewal now and keep billing through the current period."
 
   def subscription_cancel_cta(%Subscription{processor: "braintree"}), do: "Cancel now"
   def subscription_cancel_cta(_subscription), do: "Cancel renewal"
   def subscription_keep_cta, do: "Keep subscription"
 
   def subscription_cancel_success(%Subscription{processor: "braintree"}),
-    do: "Subscription canceled now. Review access changes in your account."
+    do: "Subscription canceled now. Ask your app host about application access."
 
   def subscription_cancel_success(_subscription),
-    do: "Cancel renewal scheduled. Access stays on until the current billing period ends."
+    do: "Cancel renewal scheduled to stop at the current billing period end."
 
   def subscription_cancel_error(%Subscription{processor: "braintree"}),
     do: "Unable to cancel subscription now."
@@ -190,7 +189,31 @@ defmodule AccruePortal.Copy do
 
   def subscription_not_found_title, do: "Page not found"
   def subscription_not_found_body, do: "We couldn't find that subscription."
+  def subscription_unavailable_title, do: "Subscription unavailable"
+
+  def subscription_unavailable_body,
+    do: "Subscription details could not be loaded. Try again in a moment."
+
+  def subscriptions_unavailable_title, do: "Subscriptions unavailable"
+
+  def subscription_cancel_requires_confirmation,
+    do: "Confirm the displayed cancellation before submitting it."
+
+  def subscription_cancel_unavailable,
+    do: "Cancellation is no longer available for this subscription. Refresh and try again."
+
+  def subscription_cancel_not_available,
+    do: "Cancellation isn't available for this provider or observed subscription state."
+
+  def subscriptions_unavailable_body do
+    "Subscriptions could not be loaded for this account. Try again in a moment."
+  end
+
   def subscription_back_home_cta, do: "Go to your account home"
+
+  def subscription_cancel_confirmation(billed_identity, subscription_reference) do
+    "Billing for #{billed_identity}: confirm cancellation of subscription #{subscription_reference}."
+  end
 
   def payment_methods_page_title, do: "Payment Methods"
   def payment_methods_heading, do: "Payment methods"
@@ -279,31 +302,66 @@ defmodule AccruePortal.Copy do
 
   def subscription_lifecycle_label(%Subscription{} = subscription) do
     cond do
-      Subscription.canceling?(subscription) -> "Canceling"
-      Subscription.paused?(subscription) -> "Paused"
-      Subscription.past_due?(subscription) -> "Past due"
-      Subscription.canceled?(subscription) -> "Ended"
-      Subscription.active?(subscription) -> "Active"
-      true -> "Unknown"
+      Subscription.canceling?(subscription) ->
+        "Canceling"
+
+      Subscription.canceled?(subscription) ->
+        "Ended"
+
+      Subscription.paused?(subscription) ->
+        "Paused"
+
+      subscription.status == :trialing ->
+        "Trialing"
+
+      subscription.status == :incomplete ->
+        "Incomplete"
+
+      subscription.status == :unpaid ->
+        "Unpaid"
+
+      subscription.status == :past_due ->
+        "Past due"
+
+      subscription.cancel_at_period_end == true or not is_nil(subscription.cancel_at) ->
+        "Cancellation scheduled"
+
+      subscription.status == :active ->
+        "Active"
+
+      true ->
+        "Unknown"
     end
   end
 
   def subscription_lifecycle_summary(%Subscription{} = subscription) do
     cond do
       Subscription.canceling?(subscription) ->
-        "Cancel renewal scheduled. Access ends at the current period end."
-
-      Subscription.paused?(subscription) ->
-        "Paused. Billing collection is stopped until the subscription is unpaused."
-
-      Subscription.past_due?(subscription) ->
-        "Past due. Access may change if payment recovery does not complete."
+        "Renewal is scheduled to stop at the current period end."
 
       Subscription.canceled?(subscription) ->
-        "Ended. This subscription is no longer renewing."
+        "Billing reports that this subscription has ended."
 
-      Subscription.active?(subscription) ->
-        "Active and renewing."
+      Subscription.paused?(subscription) ->
+        "Billing reports this subscription as paused."
+
+      subscription.status == :trialing ->
+        "A trial is in progress."
+
+      subscription.status == :incomplete ->
+        "Subscription setup is incomplete."
+
+      subscription.status == :unpaid ->
+        "Billing reports this subscription as unpaid."
+
+      Subscription.past_due?(subscription) ->
+        "Payment is past due. Review billing details or update the payment method."
+
+      subscription.cancel_at_period_end == true or not is_nil(subscription.cancel_at) ->
+        "A cancellation is scheduled, but its effective date is unavailable."
+
+      subscription.status == :active ->
+        "Billing reports this subscription as active."
 
       true ->
         "Lifecycle status unavailable."
@@ -312,17 +370,26 @@ defmodule AccruePortal.Copy do
 
   def subscription_access_timing(%Subscription{} = subscription) do
     cond do
-      subscription.processor == "braintree" and not Subscription.canceled?(subscription) ->
-        "Immediate cancellation can end access now. Contact support if you need end-of-term handling instead."
+      Subscription.canceled?(subscription) ->
+        "Billing reports this subscription has ended."
 
       Subscription.canceling?(subscription) ->
-        "Access ends on the current period end date shown below."
+        "The current billing period ends at the displayed date."
 
-      Subscription.canceled?(subscription) ->
-        "Access has already ended."
+      Subscription.paused?(subscription) ->
+        "Billing reports this subscription as paused."
+
+      subscription.processor == "braintree" and
+        (Subscription.active?(subscription) or Subscription.past_due?(subscription)) and
+        not Subscription.paused?(subscription) and subscription.cancel_at_period_end == false and
+          is_nil(subscription.cancel_at) ->
+        "Application access is controlled by your app host."
+
+      subscription.cancel_at_period_end == true and is_nil(subscription.current_period_end) ->
+        "A cancellation is scheduled, but the period end date is unavailable."
 
       true ->
-        "Changes can take a moment to converge across local projection and provider updates."
+        "Billing period details reflect the processor record. Application access is controlled by your app host."
     end
   end
 

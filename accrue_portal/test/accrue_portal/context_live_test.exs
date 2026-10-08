@@ -179,6 +179,10 @@ defmodule AccruePortal.ContextLiveTest do
     assert {:ok, view, _html} =
              live_context(conn, "/org-billing/subscriptions/#{subscription.id}", actor, "org-a")
 
+    view
+    |> element("button[phx-click='toggle_cancel_confirmation']")
+    |> render_click()
+
     before = Accrue.Processor.Fake.call_count(:update_subscription)
 
     render_click(view, "cancel", %{"id" => foreign.subscription.id})
@@ -205,7 +209,10 @@ defmodule AccruePortal.ContextLiveTest do
              live_context(conn, "/org-billing/subscriptions/#{subscription.id}", actor, "org-a")
 
     view |> element("button[phx-click='toggle_cancel_confirmation']") |> render_click()
-    render_click(view, "cancel", %{})
+
+    view
+    |> element("button[phx-click='cancel'][phx-value-id='#{subscription.id}']")
+    |> render_click()
 
     event =
       Accrue.Events.Event

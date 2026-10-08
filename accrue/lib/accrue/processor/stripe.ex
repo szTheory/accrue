@@ -95,13 +95,14 @@ defmodule Accrue.Processor.Stripe do
         cancel: true,
         lifecycle_webhook_projection: true,
         update: true,
+        swap_plan: true,
         cancel_at_period_end: true,
         cancel_immediately: true,
         pause: true,
         resume: true
       },
       billing_portal: %{create: true},
-      invoice: %{lifecycle_webhook_projection: true},
+      invoice: %{lifecycle_webhook_projection: true, preview_upcoming_invoice: true},
       webhook: %{verify: true, parse: true},
       entitlements: %{local_mapping: true},
       dunning: %{campaign: true, smart_retry_alignment: true}

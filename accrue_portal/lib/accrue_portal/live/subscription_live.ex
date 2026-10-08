@@ -4,6 +4,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
   alias Accrue.Billing
   alias Accrue.Billing.{Subscription, UpcomingInvoice}
   alias AccruePortal.Authorize
+  alias AccruePortal.BillingReadModel
   alias AccruePortal.Copy
   alias AccruePortal.Path
 
@@ -17,6 +18,12 @@ defmodule AccruePortal.Live.SubscriptionLive do
          |> assign(:portal, portal)
          |> assign(:base_path, portal["mount_path"])
          |> assign(:subscription, subscription)
+         |> assign(:subscription_unavailable?, false)
+         |> assign(:can_cancel?, BillingReadModel.subscription_cancel_available?(subscription))
+         |> assign(
+           :can_change_plan?,
+           BillingReadModel.subscription_plan_change_available?(subscription)
+         )
          |> assign(:show_cancel_confirmation, false)
          |> assign(:plan_change_price_id, nil)
          |> assign(:plan_change_preview, nil)
@@ -29,6 +36,24 @@ defmodule AccruePortal.Live.SubscriptionLive do
          |> assign(:portal, portal)
          |> assign(:base_path, portal["mount_path"])
          |> assign(:subscription, nil)
+         |> assign(:subscription_unavailable?, false)
+         |> assign(:can_cancel?, false)
+         |> assign(:can_change_plan?, false)
+         |> assign(:show_cancel_confirmation, false)
+         |> assign(:plan_change_price_id, nil)
+         |> assign(:plan_change_preview, nil)
+         |> assign(:action_notice, nil)}
+
+      {:error, _reason} ->
+        {:ok,
+         socket
+         |> assign(:page_title, Copy.subscription_unavailable_title())
+         |> assign(:portal, portal)
+         |> assign(:base_path, portal["mount_path"])
+         |> assign(:subscription, nil)
+         |> assign(:subscription_unavailable?, true)
+         |> assign(:can_cancel?, false)
+         |> assign(:can_change_plan?, false)
          |> assign(:show_cancel_confirmation, false)
          |> assign(:plan_change_price_id, nil)
          |> assign(:plan_change_preview, nil)
@@ -39,8 +64,19 @@ defmodule AccruePortal.Live.SubscriptionLive do
   @impl true
   def handle_event("toggle_cancel_confirmation", _params, socket) do
     case authorize_current(socket, :subscription_cancel) do
-      {:ok, _subscription} -> {:noreply, update(socket, :show_cancel_confirmation, &(!&1))}
-      {:error, _reason} -> {:noreply, denied(socket)}
+      {:ok, %Subscription{} = subscription} ->
+        if BillingReadModel.subscription_cancel_available?(subscription) do
+          {:noreply,
+           socket
+           |> assign(:subscription, subscription)
+           |> assign(:can_cancel?, true)
+           |> update(:show_cancel_confirmation, &(!&1))}
+        else
+          {:noreply, cancel_unavailable(socket)}
+        end
+
+      {:error, _reason} ->
+        {:noreply, denied(socket)}
     end
   end
 
@@ -51,7 +87,11 @@ defmodule AccruePortal.Live.SubscriptionLive do
       ) do
     case authorize_current(socket, :subscription_preview) do
       {:ok, %Subscription{} = authorized} ->
-        preview_plan_change_event(socket, authorized, price_id)
+        if BillingReadModel.subscription_plan_change_available?(authorized) do
+          preview_plan_change_event(socket, authorized, price_id)
+        else
+          {:noreply, plan_change_unavailable(socket, authorized)}
+        end
 
       {:error, _reason} ->
         {:noreply, denied(socket)}
@@ -62,29 +102,38 @@ defmodule AccruePortal.Live.SubscriptionLive do
         "confirm_plan_change",
         _params,
         %{
-          assigns: %{subscription: %Subscription{} = subscription, plan_change_price_id: price_id}
+          assigns: %{subscription: %Subscription{}, plan_change_price_id: price_id}
         } = socket
       )
       when is_binary(price_id) do
     case authorize_current(socket, :subscription_change) do
       {:ok, %Subscription{} = authorized} ->
-        case with_actor(socket, fn -> swap_plan(authorized, price_id) end) do
-          {:ok, _updated_subscription} ->
-            {:ok, refreshed} = Authorize.subscription(socket, subscription.id)
+        if BillingReadModel.subscription_plan_change_available?(authorized) do
+          case with_actor(socket, fn -> swap_plan(authorized, price_id) end) do
+            {:ok, %Subscription{} = updated_subscription} ->
+              {:noreply,
+               socket
+               |> assign(:subscription, updated_subscription)
+               |> assign(
+                 :can_cancel?,
+                 BillingReadModel.subscription_cancel_available?(updated_subscription)
+               )
+               |> assign(
+                 :can_change_plan?,
+                 BillingReadModel.subscription_plan_change_available?(updated_subscription)
+               )
+               |> clear_plan_change()
+               |> assign(:action_notice, Copy.subscription_plan_change_commit_success())
+               |> put_flash(:info, Copy.subscription_plan_change_commit_success())}
 
-            {:noreply,
-             socket
-             |> assign(:subscription, refreshed)
-             |> assign(:plan_change_price_id, nil)
-             |> assign(:plan_change_preview, nil)
-             |> assign(:action_notice, Copy.subscription_plan_change_commit_success())
-             |> put_flash(:info, Copy.subscription_plan_change_commit_success())}
-
-          {:error, _reason} ->
-            {:noreply,
-             socket
-             |> clear_plan_change()
-             |> put_flash(:error, Copy.subscription_plan_change_commit_error())}
+            {:error, _reason} ->
+              {:noreply,
+               socket
+               |> clear_plan_change()
+               |> put_flash(:error, Copy.subscription_plan_change_commit_error())}
+          end
+        else
+          {:noreply, plan_change_unavailable(socket, authorized)}
         end
 
       {:error, _reason} ->
@@ -114,23 +163,40 @@ defmodule AccruePortal.Live.SubscriptionLive do
 
   def handle_event(
         "cancel",
-        _params,
-        %{assigns: %{subscription: %Subscription{} = subscription}} = socket
+        %{"id" => id},
+        %{
+          assigns: %{
+            subscription: %Subscription{id: id} = subscription,
+            show_cancel_confirmation: true
+          }
+        } = socket
       ) do
     case Authorize.subscription(socket, subscription.id, :subscription_cancel) do
       {:ok, %Subscription{} = scoped_subscription} ->
-        case with_actor(socket, fn -> cancel_subscription(scoped_subscription) end) do
-          {:ok, updated} ->
-            {:noreply,
-             socket
-             |> assign(:subscription, updated)
-             |> assign(:show_cancel_confirmation, false)
-             |> assign(:action_notice, Copy.subscription_cancel_success(scoped_subscription))
-             |> put_flash(:info, Copy.subscription_cancel_success(scoped_subscription))}
+        if BillingReadModel.subscription_cancel_available?(scoped_subscription) do
+          case with_actor(socket, fn -> cancel_subscription(scoped_subscription) end) do
+            {:ok, updated} ->
+              {:noreply,
+               socket
+               |> assign(:subscription, updated)
+               |> assign(:can_cancel?, BillingReadModel.subscription_cancel_available?(updated))
+               |> assign(
+                 :can_change_plan?,
+                 BillingReadModel.subscription_plan_change_available?(updated)
+               )
+               |> assign(:show_cancel_confirmation, false)
+               |> assign(:action_notice, Copy.subscription_cancel_success(scoped_subscription))
+               |> put_flash(:info, Copy.subscription_cancel_success(scoped_subscription))}
 
-          {:error, _reason} ->
-            {:noreply,
-             put_flash(socket, :error, Copy.subscription_cancel_error(scoped_subscription))}
+            {:error, _reason} ->
+              {:noreply,
+               socket
+               |> assign(:show_cancel_confirmation, false)
+               |> assign(:action_notice, Copy.subscription_cancel_error(scoped_subscription))
+               |> put_flash(:error, Copy.subscription_cancel_error(scoped_subscription))}
+          end
+        else
+          {:noreply, cancel_unavailable(socket)}
         end
 
       {:error, :not_found} ->
@@ -141,13 +207,20 @@ defmodule AccruePortal.Live.SubscriptionLive do
     end
   end
 
-  def handle_event("cancel", _params, socket), do: {:noreply, socket}
+  def handle_event("cancel", _params, socket),
+    do: {:noreply, put_flash(socket, :error, Copy.subscription_cancel_requires_confirmation())}
 
   defp preview_plan_change_event(socket, subscription, price_id) do
     case preview_plan_change(subscription, price_id) do
       {:ok, %UpcomingInvoice{} = preview, normalized_price_id} ->
         {:noreply,
          socket
+         |> assign(:subscription, subscription)
+         |> assign(:can_cancel?, BillingReadModel.subscription_cancel_available?(subscription))
+         |> assign(
+           :can_change_plan?,
+           BillingReadModel.subscription_plan_change_available?(subscription)
+         )
          |> assign(:plan_change_price_id, normalized_price_id)
          |> assign(:plan_change_preview, preview)}
 
@@ -174,6 +247,22 @@ defmodule AccruePortal.Live.SubscriptionLive do
   end
 
   @impl true
+  def render(%{subscription: nil, subscription_unavailable?: true} = assigns) do
+    ~H"""
+    <main class="portal-shell">
+      <section class="portal-card" role="alert">
+        <h1>{Copy.subscription_unavailable_title()}</h1>
+        <p>{Copy.subscription_unavailable_body()}</p>
+        <div class="portal-actions">
+          <a href={Path.context(Path.home(@base_path), @current_context_pin)} class="portal-button-secondary">
+            {Copy.subscription_back_home_cta()}
+          </a>
+        </div>
+      </section>
+    </main>
+    """
+  end
+
   def render(%{subscription: nil} = assigns) do
     ~H"""
     <main class="portal-shell">
@@ -242,27 +331,49 @@ defmodule AccruePortal.Live.SubscriptionLive do
 
       <section class="portal-card">
         <h2>{Copy.subscription_cancel_heading(@subscription)}</h2>
-        <p>{Copy.subscription_cancel_body(@subscription)}</p>
         <p>{Copy.subscription_access_timing(@subscription)}</p>
-        <div :if={!@show_cancel_confirmation}>
-          <button phx-click="toggle_cancel_confirmation" class="portal-button-secondary">
+        <div :if={@can_cancel? && !@show_cancel_confirmation}>
+          <p>{Copy.subscription_cancel_body(@subscription)}</p>
+          <button
+            phx-click="toggle_cancel_confirmation"
+            phx-value-id={@subscription.id}
+            class="portal-button-secondary"
+          >
             {Copy.subscription_cancel_cta(@subscription)}
           </button>
         </div>
-        <div :if={@show_cancel_confirmation}>
-          <button phx-click="cancel" class="portal-button-secondary">
+        <div :if={@can_cancel? && @show_cancel_confirmation} role="group">
+          <p>{Copy.subscription_cancel_body(@subscription)}</p>
+          <p>
+            {Copy.subscription_cancel_confirmation(
+              @current_context.display_name || @current_customer.name || @current_customer.email || "this account",
+              @subscription.processor_id || @subscription.id
+            )}
+          </p>
+          <button
+            phx-click="cancel"
+            phx-value-id={@subscription.id}
+            class="portal-button-secondary"
+          >
             {Copy.subscription_cancel_cta(@subscription)}
           </button>
-          <button phx-click="toggle_cancel_confirmation" class="portal-button-secondary">
+          <button
+            phx-click="toggle_cancel_confirmation"
+            phx-value-id={@subscription.id}
+            class="portal-button-secondary"
+          >
             {Copy.subscription_keep_cta()}
           </button>
         </div>
+        <p :if={!@can_cancel?} class="portal-inline-status">
+          {Copy.subscription_cancel_not_available()}
+        </p>
       </section>
 
       <section class="portal-card">
         <h2>{Copy.subscription_plan_change_heading()}</h2>
-        <p>{Copy.subscription_plan_change_body(@subscription)}</p>
-        <%= if preview_supported?(@subscription) do %>
+        <%= if @can_change_plan? do %>
+          <p>{Copy.subscription_plan_change_body(@subscription)}</p>
           <div>
             <p>
               <strong>{Copy.subscription_plan_change_current_label()}</strong>
@@ -323,7 +434,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
 
   defp status_variant(_status), do: "portal-status-info"
 
-  defp format_datetime(nil), do: "-"
+  defp format_datetime(nil), do: "Not available"
   defp format_datetime(%DateTime{} = dt), do: Calendar.strftime(dt, "%Y-%m-%d")
 
   defp format_money(nil), do: "--"
@@ -348,12 +459,30 @@ defmodule AccruePortal.Live.SubscriptionLive do
   defp denied(socket) do
     socket
     |> assign(:show_cancel_confirmation, false)
+    |> assign(:can_cancel?, false)
+    |> assign(:can_change_plan?, false)
     |> clear_plan_change()
     |> assign(
       :action_notice,
       "Your change was not submitted because billing access is unavailable."
     )
     |> put_flash(:error, "Your change was not submitted because billing access is unavailable.")
+  end
+
+  defp cancel_unavailable(socket) do
+    socket
+    |> assign(:show_cancel_confirmation, false)
+    |> assign(:can_cancel?, false)
+    |> assign(:action_notice, Copy.subscription_cancel_unavailable())
+    |> put_flash(:error, Copy.subscription_cancel_unavailable())
+  end
+
+  defp plan_change_unavailable(socket, subscription) do
+    socket
+    |> assign(:subscription, subscription)
+    |> assign(:can_change_plan?, false)
+    |> clear_plan_change()
+    |> put_flash(:error, Copy.subscription_plan_change_preview_unavailable_body(subscription))
   end
 
   defp clear_plan_change(socket) do
@@ -369,9 +498,6 @@ defmodule AccruePortal.Live.SubscriptionLive do
     Accrue.Actor.with_actor(audit_actor, fun)
   end
 
-  defp preview_supported?(%Subscription{processor: "braintree"}), do: false
-  defp preview_supported?(%Subscription{}), do: true
-
   defp recovery_prompt?(%Subscription{} = subscription) do
     Subscription.past_due?(subscription) or Subscription.dunning_campaign_active?(subscription)
   end
@@ -385,7 +511,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
     normalized_price_id = normalize_price_id(price_id)
 
     cond do
-      not preview_supported?(subscription) ->
+      not BillingReadModel.subscription_plan_change_available?(subscription) ->
         {:error, :preview_unsupported}
 
       is_nil(normalized_price_id) ->
