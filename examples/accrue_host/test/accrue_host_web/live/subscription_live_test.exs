@@ -26,7 +26,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     %{user: user, organization: organization}
   end
 
-  test "creates a checkout handoff link from workspace billing", %{
+  test "selected pricing plan creates its own checkout handoff", %{
     conn: conn,
     organization: organization,
     user: user
@@ -34,18 +34,26 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     {:ok, view, html} =
       conn
       |> log_in_user(user, active_organization_id: organization.id)
-      |> live(~p"/app/billing")
+      |> live("/app/billing?plan=price_basic")
 
     assert html =~ "Checkout handoff"
-    assert html =~ "Create checkout link"
-
-    view
-    |> element("button", "Create checkout link")
-    |> render_click()
-
+    assert html =~ "Continue with Launch"
+    assert html =~ "https://checkout.stripe.test/c/pay/cs_fake_"
     html = render(view)
     assert html =~ "Checkout link"
     assert html =~ "https://checkout.stripe.test/c/pay/cs_fake_"
+  end
+
+  test "pricing selection stores only a validated exact-plan login return", %{conn: conn} do
+    conn = get(conn, "/pricing?plan=price_basic")
+
+    assert redirected_to(conn) == "/users/log-in"
+    assert Plug.Conn.get_session(conn, :user_return_to) == "/app/billing?plan=price_basic"
+
+    conn = get(build_conn(), "/pricing?plan=price_unknown")
+
+    assert html_response(conn, 200) =~ "That plan is unavailable"
+    refute Plug.Conn.get_session(conn, :user_return_to)
   end
 
   test "choosing a different plan while subscribed swaps instead of creating a second subscription",

@@ -9,6 +9,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   alias AccrueHost.Billing
   alias AccrueHost.Billing.Plans
   alias AccrueHost.Repo
+  alias Accrue.Processor
 
   @active_organization_label "Active workspace"
   @active_organization_helper "Plan changes and payment actions apply to this workspace only."
@@ -32,6 +33,23 @@ defmodule AccrueHostWeb.SubscriptionLive do
      |> assign(:confirm_cancel, false)
      |> load_state()}
   end
+
+  @impl true
+  def handle_params(%{"plan" => plan_id}, _uri, socket) when is_binary(plan_id) do
+    case Plans.get(plan_id) do
+      nil ->
+        {:noreply,
+         socket
+         |> assign(:selected_checkout_plan, nil)
+         |> put_flash(:error, "That plan is unavailable. Choose a plan from pricing to continue.")}
+
+      plan ->
+        create_selected_checkout(socket, plan)
+    end
+  end
+
+  def handle_params(_params, _uri, socket),
+    do: {:noreply, assign(socket, :selected_checkout_plan, nil)}
 
   @impl true
   def handle_event("start_subscription", %{"plan" => plan_id} = params, socket) do
@@ -145,26 +163,69 @@ defmodule AccrueHostWeb.SubscriptionLive do
     end
   end
 
-  def handle_event("create_checkout_session", _params, socket) do
-    attrs = %{
-      success_url: url(~p"/app/billing?checkout=success"),
-      cancel_url: url(~p"/app/billing?checkout=cancel"),
-      line_items: [%{price: Plans.ids().pro, quantity: 1}]
-    }
-
-    case Billing.create_checkout_session_for_scope(socket.assigns.current_scope, attrs) do
-      {:ok, session} ->
-        {:noreply, assign(socket, :checkout_url, session.url)}
-
-      {:error, :no_active_organization} ->
-        {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
-
-      {:error, :forbidden} ->
-        {:noreply, put_flash(socket, :error, @member_denial_copy)}
-
-      {:error, _reason} ->
-        {:noreply, put_flash(socket, :error, @error_copy)}
+  def handle_event("create_checkout_session", %{"plan" => plan_id}, socket) do
+    case Plans.get(plan_id) do
+      nil -> {:noreply, put_flash(socket, :error, "That plan is unavailable.")}
+      plan -> create_selected_checkout(socket, plan)
     end
+  end
+
+  def handle_event("create_checkout_session", _params, socket) do
+    {:noreply, put_flash(socket, :error, "Choose a plan from pricing before starting checkout.")}
+  end
+
+  defp create_selected_checkout(socket, plan) do
+    scope = socket.assigns.current_scope
+    billable = scope.active_organization
+
+    if billing_locked?(socket.assigns.access_state) or is_nil(billable) do
+      {:noreply, put_flash(socket, :error, @member_denial_copy)}
+    else
+      attrs = %{
+        mode: :subscription,
+        ui_mode: :hosted,
+        success_url: url(~p"/app/billing?checkout=success"),
+        cancel_url: url(~p"/app/billing?checkout=cancel"),
+        operation_id: "pricing:#{billable.id}:#{plan.id}",
+        line_items: [
+          %{
+            "price" => plan.id,
+            "quantity" => 1,
+            "name" => plan.label,
+            "amount" => amount_decimal(plan.unit_amount_minor),
+            "amount_minor" => plan.unit_amount_minor,
+            "currency" => plan.currency,
+            "interval" => plan.billing_cycle.unit,
+            "interval_count" => plan.billing_cycle.count
+          }
+        ],
+        metadata: %{
+          "plan_name" => plan.label,
+          "amount_minor" => plan.unit_amount_minor,
+          "currency" => plan.currency,
+          "interval" => Atom.to_string(plan.billing_cycle.unit),
+          "interval_count" => plan.billing_cycle.count,
+          "billable_type" => "Organization",
+          "billable_id" => to_string(billable.id),
+          "processor" => to_string(Processor.name())
+        }
+      }
+
+      case Billing.create_checkout_session_for_scope(scope, attrs) do
+        {:ok, session} ->
+          {:noreply,
+           socket
+           |> assign(:checkout_url, session.url)
+           |> assign(:selected_checkout_plan, plan)}
+
+        {:error, reason} ->
+          {:noreply, put_flash(socket, :error, @error_copy <> " (#{inspect(reason)})")}
+      end
+    end
+  end
+
+  defp amount_decimal(amount_minor) when is_integer(amount_minor) do
+    "#{div(amount_minor, 100)}.#{String.pad_leading(Integer.to_string(rem(amount_minor, 100)), 2, "0")}"
   end
 
   @impl true
@@ -300,18 +361,23 @@ defmodule AccrueHostWeb.SubscriptionLive do
           <div>
             <h2 class="text-2xl font-semibold">Checkout handoff</h2>
             <p class="mt-1 text-base leading-7 text-base-content/65">
-              Create a hosted checkout link for the Studio plan when a buyer needs to complete payment outside this screen.
+              Continue with the exact plan selected on pricing when a buyer needs to complete payment outside this screen.
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
             <button
+              :if={@selected_checkout_plan}
               type="button"
               phx-click="create_checkout_session"
+              phx-value-plan={@selected_checkout_plan.id}
               class="btn btn-outline rounded-lg"
               disabled={@billing_locked?}
             >
-              Create checkout link
+              Continue with {@selected_checkout_plan.label}
             </button>
+            <p :if={!@selected_checkout_plan} class="text-sm text-base-content/60">
+              Choose a plan from pricing to start checkout.
+            </p>
           </div>
           <div :if={@checkout_url} class="space-y-1">
             <p class="text-sm font-semibold text-base-content/60">Checkout link</p>
@@ -481,6 +547,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
     |> assign(:billing_locked?, billing_locked?(access_state))
     |> assign_new(:braintree_client_token, fn -> nil end)
     |> assign_new(:checkout_url, fn -> nil end)
+    |> assign_new(:selected_checkout_plan, fn -> nil end)
     |> assign(:customer, customer)
     |> assign(:subscription, subscription)
     |> assign(:subscription_plan_label, plan_label(subscription))

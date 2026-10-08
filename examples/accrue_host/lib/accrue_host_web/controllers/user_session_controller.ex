@@ -71,11 +71,28 @@ defmodule AccrueHostWeb.UserSessionController do
   # scheme-relative "//host" or a "/\host" target — and it flows through the same
   # `:user_return_to` session key that `UserAuth.log_in_user/3` already reads.
   defp maybe_store_login_return_to(conn, %{"return_to" => path}) when is_binary(path) do
-    if local_path?(path), do: put_session(conn, :user_return_to, path), else: conn
+    selected_return = get_session(conn, :user_return_to)
+
+    cond do
+      valid_selected_return?(selected_return) -> conn
+      local_path?(path) -> put_session(conn, :user_return_to, path)
+      true -> conn
+    end
   end
 
   defp maybe_store_login_return_to(conn, _params), do: conn
 
   defp local_path?("/" <> rest), do: not String.starts_with?(rest, ["/", "\\"])
   defp local_path?(_path), do: false
+
+  defp valid_selected_return?("/app/billing?plan=" <> plan_id) do
+    case URI.decode_query("plan=" <> plan_id) do
+      %{"plan" => decoded} when decoded != "" -> not is_nil(AccrueHost.Billing.Plans.get(decoded))
+      _ -> false
+    end
+  rescue
+    ArgumentError -> false
+  end
+
+  defp valid_selected_return?(_), do: false
 end
