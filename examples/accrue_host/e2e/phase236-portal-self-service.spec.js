@@ -115,8 +115,7 @@ test("Hosted Fields hand off readable semantic styles on direct add-card navigat
   }
 });
 
-test("Hosted Fields refresh after the direct-route context pin and theme changes", async ({ page, sandboxId }) => {
-  test.skip(process.env.ACCRUE_HOST_PORTAL_THEME, "Theme picker is locked by test host policy");
+if (!process.env.ACCRUE_HOST_PORTAL_THEME) test("Hosted Fields refresh after the direct-route context pin and theme changes", async ({ page, sandboxId }) => {
   await installHostedFieldsMock(page);
   const fixture = readFixture();
   await login(page, fixture, fixture.normal_email, sandboxId);
@@ -133,8 +132,7 @@ test("Hosted Fields refresh after the direct-route context pin and theme changes
   await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
 });
 
-test("host-forced theme locks the picker on the served add-card route", async ({ page, sandboxId }) => {
-  test.skip(!process.env.ACCRUE_HOST_PORTAL_THEME, "This check is exercised by forced-theme CI commands");
+if (process.env.ACCRUE_HOST_PORTAL_THEME) test("host-forced theme locks the picker on the served add-card route", async ({ page, sandboxId }) => {
   await installHostedFieldsMock(page);
   const fixture = readFixture();
   await login(page, fixture, fixture.normal_email, sandboxId);
