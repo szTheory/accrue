@@ -564,11 +564,20 @@
     setSubmitDisabled(hook.el.querySelector("[data-checkout-submit]"), true);
     var old = hook.hostedFields;
     hook.hostedFields = null;
-    old.teardown(function () {
-      if (!hook.isDestroyed) {
-        hook.el.dataset.hostedFieldsBound = "0";
-        hook.mounted();
+    teardownAsyncResource(old, function (teardownError) {
+      if (hook.isDestroyed) return;
+      if (teardownError) {
+        hook.hostedFieldsSetupFailed = true;
+        setSubmitDisabled(hook.el.querySelector("[data-checkout-submit]"), true);
+        setInlineError(
+          hook.el.querySelector("[data-braintree-error]"),
+          "Secure card fields could not be safely reset. Refresh this page to try again."
+        );
+        return;
       }
+
+      hook.el.dataset.hostedFieldsBound = "0";
+      hook.mounted();
     });
   }
 

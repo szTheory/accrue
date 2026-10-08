@@ -290,6 +290,32 @@ test("Hosted Fields stay disabled when stale-resource teardown fails", async ({ 
   expect(counts.clientTeardown).toBe(1);
 });
 
+if (!process.env.ACCRUE_HOST_PORTAL_THEME) test("Hosted Fields do not recreate after theme-refresh teardown fails", async ({ page, sandboxId }) => {
+  await installHostedFieldsMock(page, { failFirstHostedFieldsTeardown: true });
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  await page.goto("/billing/payment-methods/new");
+  await waitForLiveView(page);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(1);
+
+  const form = page.locator('[data-portal-hosted-fields="payment-method"]');
+  const submit = form.locator("[data-checkout-submit]");
+  await expect(submit).toBeEnabled();
+  const currentTheme = await page.locator("html").getAttribute("data-theme");
+  const nextTheme = currentTheme === "dark" ? "light" : "dark";
+  await page.getByRole("button", { name: nextTheme === "dark" ? "Dark theme" : "Light theme" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", nextTheme);
+
+  await expect(form.locator("[data-braintree-error]")).toHaveText(
+    "Secure card fields could not be safely reset. Refresh this page to try again."
+  );
+  await expect(submit).toBeDisabled();
+  await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+  const counts = await page.evaluate(() => window.__phase236HostedFieldsEvidence.counts);
+  expect(counts.hostedFieldsCreate).toBe(1);
+  expect(counts.teardown).toBe(1);
+});
+
 test("Hosted Fields do not revive after pagehide during client creation", async ({ page, sandboxId }) => {
   await installHostedFieldsMock(page, { holdFirstClientCreate: true });
   const fixture = readFixture();
