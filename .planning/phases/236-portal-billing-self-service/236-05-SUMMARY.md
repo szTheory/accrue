@@ -33,7 +33,7 @@ tech-stack:
 
 key-files:
   created: [examples/accrue_host/e2e/phase236-portal-self-service.spec.js]
-  modified: [.github/workflows/ci.yml, accrue_portal/lib/accrue_portal/billing_read_model.ex, accrue_portal/lib/accrue_portal/copy.ex, accrue_portal/lib/accrue_portal/layouts.ex, accrue_portal/lib/accrue_portal/live/home_live.ex, accrue_portal/lib/accrue_portal/live/subscription_live.ex, accrue_portal/lib/accrue_portal/live/subscriptions_live.ex, accrue_portal/priv/static/accrue_portal.css, accrue_portal/priv/static/accrue_portal.js, accrue_portal/test/accrue_portal/live/home_live_test.exs, examples/accrue_host/lib/accrue_host/billing.ex, scripts/ci/accrue_host_seed_e2e.exs]
+  modified: [.github/workflows/ci.yml, accrue_portal/lib/accrue_portal/billing_read_model.ex, accrue_portal/lib/accrue_portal/copy.ex, accrue_portal/lib/accrue_portal/layouts.ex, accrue_portal/lib/accrue_portal/live/home_live.ex, accrue_portal/lib/accrue_portal/live/subscription_live.ex, accrue_portal/lib/accrue_portal/live/subscriptions_live.ex, accrue_portal/priv/static/accrue_portal.css, accrue_portal/priv/static/accrue_portal.js, accrue_portal/test/accrue_portal/live/home_live_test.exs, examples/accrue_host/lib/accrue_host/billing.ex, scripts/ci/accrue_host_seed_e2e.exs, examples/accrue_host/e2e/phase233-context.spec.js, examples/accrue_host/e2e/phase233-semantic.spec.js]
 
 key-decisions:
   - "Run the served Portal browser contract in the existing blocking Playwright CI lane with deterministic provider behavior."
@@ -135,6 +135,12 @@ Each task was committed atomically:
 
 1. **Task 1: Apply host-branded hierarchy across the Portal shell** - `b8c04a52` (feat)
 2. **Task 2: Prove all seven served routes in blocking Playwright CI** - `94288d64` (test)
+
+## Regression Gate Follow-Up
+
+- Refreshed two earlier Phase 233 browser assertions to match Phase 236's visible billed identity and the default lane's provider-independent theme/status checks.
+- **Test-only commit:** `582c10fb` (`test(phase-236): align Portal regression browser assertions`).
+- **Verification:** prior-phase default browser batch 13/13 passed; Braintree checkout lane 14/14 passed.
 
 ## Files Created/Modified
 
