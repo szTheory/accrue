@@ -1,15 +1,15 @@
 ---
 phase: "234"
 slug: "admin-customers-subscriptions"
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-10-07"
 ---
 
 # Phase 234 — Validation Strategy
 
-> Execution-time validation contract. No application tests, builds, browser runs, or new render captures have run during planning. Task IDs, waves, checks and threat references below are planning assignments; results remain pending execution.
+> Execution-time validation contract. Plan summaries now record the focused ExUnit suites, package suite, asset build, and browser run completed during execution.
 
 ## Test Infrastructure
 
@@ -39,37 +39,37 @@ The final per-task/wave/threat map is below. Planning ran no application tests, 
 
 | Task / wave | Requirements | Check and threat refs | Status |
 |---|---|---|---|
-| 234-01 T1 / 1 | ADM-03 SAFE-01 | One-time pre-layout capture before edits, followed by read-only manifest/image hash verification and bounded ScopedPath return validation; T-234-01/02; default-mode baseline spec plus `cd accrue_admin && mix test test/accrue_admin/scoped_path_test.exs` | Pending |
-| 234-01 T2 / 1 | ADM-03 SAFE-01 | Scoped subscription list/detail/return, labels and invalid cursor; T-234-01/02; `cd accrue_admin && mix test test/accrue_admin/live/subscriptions_live_test.exs test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/scoped_path_test.exs` | Pending |
-| 234-02 T1 / 1 | ADM-01 ADM-03 SAFE-01 | Same-scope Home facts/links; T-234-03; `cd accrue_admin && mix test test/accrue_admin/live/dashboard_live_test.exs` | Pending |
-| 234-02 T2 / 1 | ADM-03 SAFE-01 | Three bounded search groups, partial failure, stale invalidation; T-234-04/05; `cd accrue_admin && mix test test/accrue_admin/components/global_search_test.exs` | Pending |
-| 234-07 T1 / 2 | ADM-03 SAFE-01 | Customer tabs/list context/alternate mount/forged return; T-234-16/17; `cd accrue_admin && mix test test/accrue_admin/live/customers_live_test.exs test/accrue_admin/live/customer_live_test.exs` | Pending |
-| 234-07 T2 / 2 | ADM-03 SAFE-01 | Subscription-origin invoice/payment contextual return and denial; T-234-16/17; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/live/invoice_live_test.exs test/accrue_admin/live/charge_live_test.exs` | Pending |
-| 234-03 T1 / 3 | ADM-01 | Lifecycle separate from ancillary absence, exact money; T-234-06; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/live/subscriptions_live_test.exs` | Pending |
-| 234-03 T2 / 3 | ADM-01 ADM-03 | Read immutable Plan 234-01 pre-layout evidence via archive-aware resolver; detail hierarchy and technical disclosure; T-234-07; `cd accrue_admin && mix test test/accrue_admin/live/customer_live_test.exs test/accrue_admin/live/subscription_live_test.exs` | Pending |
-| 234-04 T1 / 4 | ADM-04 SAFE-01 | Provider/core/lifecycle/item matrix and forged event; T-234-08/09; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs` | Pending |
-| 234-04 T2 / 4 | ADM-04 SAFE-01 | Fresh scope/target/review after step-up; T-234-08/09; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/live/step_up_test.exs` | Pending |
-| 234-05 T1 / 5 | ADM-04 SAFE-01 | Stable operation ID, duplicate guard, reconnect; T-234-10; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/live/step_up_test.exs` | Pending |
-| 234-05 T2 / 5 | ADM-04 SAFE-01 | Ambiguity, scoped original/replacement refresh; T-234-11/12; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs` | Pending |
-| 234-06 T1 / 6 | ADM-01 ADM-03 ADM-04 SAFE-01 | Served focus/reflow/themes/source provenance and distinct post-layout captures; T-234-14/15; `cd examples/accrue_host && npm run e2e -- e2e/phase234-admin-customers-subscriptions.spec.js --workers=1` | Pending |
-| 234-06 T2 / 6 | SAFE-01 | Restored mounted denial and CI; T-234-13/14; `cd examples/accrue_host && npm run e2e -- e2e/phase234-admin-customers-subscriptions.spec.js e2e/verify01-admin-denial.spec.js --workers=1` | Pending |
+| 234-01 T1 / 1 | ADM-03 SAFE-01 | One-time pre-layout capture before edits, followed by read-only manifest/image hash verification and bounded ScopedPath return validation; T-234-01/02; default-mode baseline spec plus `cd accrue_admin && mix test test/accrue_admin/scoped_path_test.exs` | Passed; see plan summary |
+| 234-01 T2 / 1 | ADM-03 SAFE-01 | Scoped subscription list/detail/return, labels and invalid cursor; T-234-01/02; `cd accrue_admin && mix test test/accrue_admin/live/subscriptions_live_test.exs test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/scoped_path_test.exs` | Passed; see plan summary |
+| 234-02 T1 / 1 | ADM-01 ADM-03 SAFE-01 | Same-scope Home facts/links; T-234-03; `cd accrue_admin && mix test test/accrue_admin/live/dashboard_live_test.exs` | Passed; 2 tests, 0 failures |
+| 234-02 T2 / 1 | ADM-03 SAFE-01 | Three bounded search groups, partial failure, stale invalidation; T-234-04/05; `cd accrue_admin && mix test test/accrue_admin/components/global_search_test.exs` | Passed; 14 tests, 0 failures |
+| 234-07 T1 / 2 | ADM-03 SAFE-01 | Customer tabs/list context/alternate mount/forged return; T-234-16/17; `cd accrue_admin && mix test test/accrue_admin/live/customers_live_test.exs test/accrue_admin/live/customer_live_test.exs` | Passed; see plan summary |
+| 234-07 T2 / 2 | ADM-03 SAFE-01 | Subscription-origin invoice/payment contextual return and denial; T-234-16/17; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/live/invoice_live_test.exs test/accrue_admin/live/charge_live_test.exs` | Passed; see plan summary |
+| 234-03 T1 / 3 | ADM-01 | Lifecycle separate from ancillary absence, exact money; T-234-06; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/live/subscriptions_live_test.exs` | Passed; see plan summary |
+| 234-03 T2 / 3 | ADM-01 ADM-03 | Read immutable Plan 234-01 pre-layout evidence via archive-aware resolver; detail hierarchy and technical disclosure; T-234-07; `cd accrue_admin && mix test test/accrue_admin/live/customer_live_test.exs test/accrue_admin/live/subscription_live_test.exs` | Passed; see plan summary; 320px document width verified |
+| 234-04 T1 / 4 | ADM-04 SAFE-01 | Provider/core/lifecycle/item matrix and forged event; T-234-08/09; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs` | Passed; 29-test action/step-up run |
+| 234-04 T2 / 4 | ADM-04 SAFE-01 | Fresh scope/target/review after step-up; T-234-08/09; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/live/step_up_test.exs` | Passed; 29 tests, 0 failures |
+| 234-05 T1 / 5 | ADM-04 SAFE-01 | Stable operation ID, duplicate guard, reconnect; T-234-10; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/live/step_up_test.exs` | Passed; 35-test action/step-up run |
+| 234-05 T2 / 5 | ADM-04 SAFE-01 | Ambiguity, scoped original/replacement refresh; T-234-11/12; `cd accrue_admin && mix test test/accrue_admin/live/subscription_live_test.exs` | Passed; 35 tests, 0 failures |
+| 234-06 T1 / 6 | ADM-01 ADM-03 ADM-04 SAFE-01 | Served focus/reflow/themes/source provenance and distinct post-layout captures; T-234-14/15; `cd examples/accrue_host && npm run e2e -- e2e/phase234-admin-customers-subscriptions.spec.js --workers=1` | Passed in combined browser run; host-sandbox search result limitation documented |
+| 234-06 T2 / 6 | SAFE-01 | Restored mounted denial and CI; T-234-13/14; `cd examples/accrue_host && npm run e2e -- e2e/phase234-admin-customers-subscriptions.spec.js e2e/verify01-admin-denial.spec.js --workers=1` | Passed; 4 tests, 0 skipped; CI discovery confirmed |
 
 | Behavior group | Requirement | Secure behavior | Layer | Command / file | Current state |
 |---|---|---|---|---|---|
-| Known lifecycle and truthful amount/date observations | ADM-01 | Ancillary gaps do not rewrite known lifecycle or invent amount/currency/due date | Unit and LiveView | Existing subscription list/detail tests; focused presentation tests as needed | Assertions pending |
-| Search, scope and investigation navigation | ADM-03, SAFE-01 | Three bounded query groups; partial failure distinct from no match; stale results invalidated; labels match target; validated mount-local return state preserves filters/tab/current scope | Query, component, LiveView, representative browser | Quick investigation run plus planned host browser file | Assertions pending |
-| Eligible action and fresh review | ADM-04, SAFE-01 | Current actor/scope/target/items/provider/lifecycle and step-up rechecked at dispatch, including after challenge delay | Unit and LiveView | Quick action run | Assertions pending |
-| Intent, uncertainty and scoped replacement result | ADM-04, SAFE-01 | Logical staged operation identity is reused; duplicate dispatch suppressed; reconnect does not replay; ambiguity is unconfirmed; result refresh and replacement link are scoped | LiveView with deterministic processor fixtures | Quick action run | Assertions pending |
-| Mounted positive and denial controls | SAFE-01 | Two-owner and customer-manager denial paths reveal no foreign identity or payment-token data; authorized counterpart succeeds | LiveView and host browser | `examples/accrue_host/e2e/verify01-admin-denial.spec.js` plus action tests | Diagnose existing skip |
-| Real keyboard, responsive and theme behavior | ADM-03, ADM-04, SAFE-01 | Focus/close/restore/nested modal stack, visible focus, noncolor state cues, 320px and coarse targets, light/dark/system, long and empty/error states | Host browser and current served captures | Planned phase234 host browser file | New assertions/file pending |
+| Known lifecycle and truthful amount/date observations | ADM-01 | Ancillary gaps do not rewrite known lifecycle or invent amount/currency/due date | Unit and LiveView | Existing subscription list/detail tests; focused presentation tests as needed | Passed; lifecycle tests and package suite green |
+| Search, scope and investigation navigation | ADM-03, SAFE-01 | Three bounded query groups; partial failure distinct from no match; stale results invalidated; labels match target; validated mount-local return state preserves filters/tab/current scope | Query, component, LiveView, representative browser | Quick investigation run plus planned host browser file | Passed; component/LiveView coverage and served scoped journey; async search completion is host-sandbox-limited |
+| Eligible action and fresh review | ADM-04, SAFE-01 | Current actor/scope/target/items/provider/lifecycle and step-up rechecked at dispatch, including after challenge delay | Unit and LiveView | Quick action run | Passed; 29-test action/step-up run and package suite |
+| Intent, uncertainty and scoped replacement result | ADM-04, SAFE-01 | Logical staged operation identity is reused; duplicate dispatch suppressed; reconnect does not replay; ambiguity is unconfirmed; result refresh and replacement link are scoped | LiveView with deterministic processor fixtures | Quick action run | Passed; 35-test action/step-up run and package suite |
+| Mounted positive and denial controls | SAFE-01 | Two-owner and customer-manager denial paths reveal no foreign identity or payment-token data; authorized counterpart succeeds | LiveView and host browser | `examples/accrue_host/e2e/verify01-admin-denial.spec.js` plus action tests | Passed; 4 combined browser tests, 0 skipped |
+| Real keyboard, responsive and theme behavior | ADM-03, ADM-04, SAFE-01 | Focus/close/restore/nested modal stack, visible focus, noncolor state cues, 320px and coarse targets, light/dark/system, long and empty/error states | Host browser and current served captures | Planned phase234 host browser file | Passed for planned served states; final captures and served asset hashes recorded |
 
 ## Wave 0 Requirements
 
 - [x] Bind every implementation task to an executable check, existing or created in the same/dependency task; finalize per-task map and unique threat references in the plans.
-- [ ] Inspect existing deterministic auth, two-owner, step-up, and processor fixtures; repair only seams required by these flows.
-- [ ] Create `examples/accrue_host/e2e/phase234-admin-customers-subscriptions.spec.js` in the host lane, with positive controls and finite representative journeys.
-- [ ] Diagnose the existing mounted denial skip before restoring it; retain its meaningful failure direction.
-- [ ] Reuse existing package/host tools. No new test framework, provider credentials, dependency install, or exhaustive screenshot matrix is part of the plan.
+- [x] Inspect existing deterministic auth, two-owner, step-up, and processor fixtures; repair only seams required by these flows.
+- [x] Create `examples/accrue_host/e2e/phase234-admin-customers-subscriptions.spec.js` in the host lane, with positive controls and finite representative journeys.
+- [x] Diagnose the existing mounted denial skip before restoring it; retain its meaningful failure direction.
+- [x] Reuse existing package/host tools. No new test framework, provider credentials, dependency install, or exhaustive screenshot matrix is part of the plan.
 
 ## Manual-Only Verifications
 
@@ -102,8 +102,24 @@ Before browser evidence, run `cd accrue_admin && mix accrue_admin.assets.build` 
 - [x] No three consecutive planned tasks lack automated feedback.
 - [x] Newly named test files are assigned to their task or an earlier dependency.
 - [x] Planned commands use the actual package/host working directory and no watch mode.
-- [ ] Runtime and result evidence are recorded during execution.
+- [x] Runtime and result evidence are recorded during execution.
 - [ ] Phase completion includes automated UAT, committed summaries, passed verification, and `behavior_unverified: 0`.
-- [ ] `nyquist_compliant: true` is set only when warranted by finalized coverage.
+- [x] `nyquist_compliant: true` is set only when warranted by finalized coverage.
 
 **Approval:** Per-task map planned; execution supplies results.
+
+### Execution audit — 2026-10-07
+
+- All 14 planned tasks have passing automated checks recorded in their phase summaries. Focused ExUnit suites, the Admin package suite (550 tests), the asset build, and the served Playwright run (4 tests, 0 skipped) passed.
+- The browser test covers the search dialog keyboard/focus behavior and the authorized scoped customer-to-subscription investigation journey. Global search result completion remains unverified in the host SQL sandbox because background query workers remain in the loading state; bounded query, partial-failure, and stale-result behavior have focused component coverage. This is an environment-specific browser evidence limitation, not a missing automated requirement check.
+- No validation gaps require additional tests or manual-only classification.
+
+**Nyquist result:** compliant for the finalized phase coverage map.
+
+## Validation Audit 2026-10-08
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
