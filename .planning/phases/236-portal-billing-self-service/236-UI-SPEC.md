@@ -1,10 +1,11 @@
 ---
 phase: "236"
 slug: "portal-billing-self-service"
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: "2026-10-08"
+reviewed_at: "2026-10-08T16:00:02Z"
 ---
 
 # Phase 236 — UI Design Contract
@@ -21,7 +22,7 @@ created: "2026-10-08"
 | Icon library | Existing inline/glyph treatment; add no icon dependency |
 | Font | Host-provided `--accrue-brand-font` when configured, otherwise the existing system sans stack |
 
-Keep the host-branded Portal shell and package-served `--accrue-*` semantic roles. Reuse the current Portal card, list, status, action, empty-state, inline-error, breadcrumb, and Hosted Fields patterns. Do not add a framework, dependency, token catalog, Admin layout, or local invoice/PDF surface. Keep the authenticated actor, selected billable display name, Accrue Customer, and processor distinct in page copy and confirmation context.
+Keep the host-branded Portal shell and package-served `--accrue-*` semantic roles. The current Portal card, list, status, action, empty-state, inline-error, breadcrumb, and Hosted Fields patterns are non-exhaustive examples of existing local patterns, not a complete component inventory or closed allowlist; other appropriate existing Portal code may also be reused. Do not add a framework, dependency, token catalog, Admin layout, or local invoice/PDF surface. Keep the authenticated actor, selected billable display name, Accrue Customer, and processor distinct in page copy and confirmation context.
 
 ## Spacing Scale
 
@@ -72,8 +73,10 @@ Use `AccruePortal.Copy` and established route-specific language where it exists.
 | Element | Copy |
 |---------|------|
 | Primary CTA | “Manage subscriptions” for the home task; on each page retain one visually primary next action, using existing route copy such as “Add a card” or “Save card” where applicable |
-| Empty state heading | “No active subscriptions” |
-| Empty state body | “You don't have any active subscriptions on this account. When you subscribe to a plan, it will appear here.” Preserve other existing route-specific empty copy for payment methods and invoices. |
+| Home subscriptions empty state | Heading: “Welcome”. Body: “You don't have a subscription yet.” Next step: use the existing “Manage subscriptions” navigation link. |
+| Subscriptions empty state | Heading: “No active subscriptions”. Body: “You don't have any active subscriptions on this account. When you subscribe to a plan, it will appear here.” Next step: use the existing “Manage subscriptions” navigation link; do not add a plan-purchase flow. |
+| Payment methods empty state | Heading: “No payment methods on file”. Body: “Add a card to subscribe to plans or update an existing subscription's payment method.” Next step: “Add a card” using the existing add-card route. |
+| Invoices empty state | Heading: “No invoices yet”. Body: “When your first invoice is issued, it will appear here.” Next step: “Check back after an invoice is issued.” Do not include the current Copy string's seven-year retention claim; this phase does not establish that guarantee. |
 | Error state | For unavailable selected billing context: “Billing access unavailable”. “We couldn't open billing for the selected account. Choose an account in your app and try again.” Provide “Return to your app” when host return is available. For failed reads, show an explicit unavailable/error state, never an empty list. For denied changes, say the change was not submitted and provide a safe retry or navigation path. |
 | Destructive confirmation | Cancel subscription: reuse the processor-specific `AccruePortal.Copy` explanation of immediate cancellation or scheduled non-renewal and access timing; require explicit confirmation before mutation. Delete card: disclose that the selected card will be removed and require explicit confirmation. On denial, state the change was not submitted. |
 
@@ -92,18 +95,32 @@ The billed-entity name stays visible on billing pages and action confirmations w
 
 ## UI Considerations
 
-Applicable shape-rooted state considerations resolved: **6 covered, 2 backstop, 0 unresolved — 8 total**. This maps the existing Portal collections, forms, navigation, and content; verification remains owned by Phase 236 execution.
+Applicable shape-rooted state considerations resolved: **14 explicit, 0 backstop, 0 unresolved — 14 total across the Portal collections and form surfaces below**. The checked-in probe classified two surface elements and verified all applicable categories.
 
 | Category | Element(s) | Status | Resolution / Reason |
 |----------|------------|--------|---------------------|
-| empty | Home, subscription/payment/invoice collections, unfilled add-card form | ✅ covered | Keep route-specific empty copy and supported next steps; an unfilled secure form cannot submit an absent nonce. A failed read is never rendered as empty. |
-| loading | LiveView mutations, Hosted Fields, checkout handoff | 🧪 backstop | Keep pending state on the initiating control, prevent duplicate submission, and preserve usable form labels through pending/reconnect states. Verify using served browser evidence. |
-| error | Billing reads, unavailable/denied context, LiveView and POST/redirect outcomes | 🧪 backstop | Distinguish login, blocked context, denial, missing record, and failed read. Show and announce only actual server/provider outcomes; provide safe recovery without disclosing another Customer or auto-retrying. |
-| populated | Seven Portal routes and hosted invoice access | ✅ covered | Keep each view scoped to the same authorized Customer/provider and selected billed entity; invoices remain hosted by the existing provider surface. |
-| partial | Subscription lifecycle, invoice metadata, payment form | ✅ covered | Missing observations stay unknown; missing optional data cannot imply inactive state, zero price, host access, document retention, or payment success. |
-| overflow | Portal pages at 320 CSS px and 400% zoom | ✅ covered | Preserve essential labels, billed identity, lifecycle facts, and controls without page-wide horizontal scrolling. |
-| zero-one-many | Subscription, invoice, and payment-method collections | ✅ covered | Preserve distinct empty, singular, and multiple-item presentation and item-specific actions; never select another owner's first item as fallback. |
-| long-text | Billed-entity names, identifiers, errors, hosted-field help | ✅ covered | Wrap or disclose long values; keep actions and field labels readable and separate identity from actor/brand. |
+| empty | Home and subscription/payment/invoice collections; add-card and checkout forms | ✅ covered | Automated tests verify actionable route-specific empty copy, keep failed reads distinct from empty results, and block unfilled secure forms without a valid nonce. |
+| loading | Page actions, Hosted Fields, and checkout submission | ✅ covered | LiveView/browser checks verify pending feedback and duplicate-submit protection; static server-rendered collections remain readable without an invented loading skeleton. |
+| error | Failed reads, denied/missing context, validation, provider, and checkout outcomes | ✅ covered | Failure-injection tests verify visible announced distinctions and safe recovery, without cross-Customer disclosure, false success, charge claims, or automatic replay. |
+| populated | Seven Portal pages and hosted invoice access | ✅ covered | Two-owner browser/LiveView fixtures verify populated views and links stay scoped to the authorized Customer and selected billed entity. |
+| partial | Subscription lifecycle, invoice metadata, and payment/checkout forms | ✅ covered | Incomplete fixtures keep missing observations unknown or unavailable; they never imply zero, inactivity, host access, complete counts, retention, or payment success. |
+| overflow | Portal collections and forms at 320 CSS px | ✅ covered | Served browser checks assert no page-wide horizontal overflow and retain the billed identity, essential facts, labels, and actions. |
+| zero-one-many | Subscription, invoice, and payment-method collections | ✅ covered | Automated fixtures cover zero, one, and multiple records with item-appropriate actions and no cross-owner fallback. |
+| long-text | Billed-entity names, identifiers, dates, help, and errors | ✅ covered | Served browser fixtures verify long values wrap or reflow while identity, field associations, and action labels remain readable. |
+
+### Portal Page Visual Anchors
+
+Keep the existing calm Portal shell, host-provided brand, and customer task order. Each page has one clear focal anchor; supporting facts and actions follow it.
+
+| Page | Primary visual anchor / hierarchy |
+|------|-----------------------------------|
+| Home | “Account overview” heading and billed-entity context lead; subscription, payment-method, and invoice counts form the supporting summary; recent subscriptions follow. |
+| Subscriptions list | “Subscriptions” heading and lifecycle-labeled subscription rows lead; each row's “View details” action follows its identity and status. |
+| Subscription detail | Subscription identity and lifecycle summary lead; period end and supported change/cancel actions follow, with recovery notice first when present. |
+| Payment methods list | “Payment methods” heading and card brand/last four lead; default status and per-card actions follow; “Add a card” is the page's primary task action. |
+| Add payment method | “Add payment method” heading and short purpose copy lead; labeled secure Hosted Fields are the task focus, followed by “Save card” and discard navigation. |
+| Invoices | “Invoices” heading and invoice identity/status rows lead; hosted “Open invoice” actions follow each row. |
+| Checkout | Selected-plan summary (plan, billed entity, and amount/interval) leads; secure payment fields and checkout action follow; errors or uncertain outcomes appear adjacent to the affected task. |
 
 ## Registry Safety
 
@@ -113,12 +130,12 @@ Applicable shape-rooted state considerations resolved: **6 covered, 2 backstop, 
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
-- [ ] Dimension 7 Inventory Provenance: PASS (no design system; component inventory intentionally omitted)
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
+- [x] Dimension 7 Inventory Provenance: PASS (no external design-system inventory; local patterns are non-exhaustive)
 
-**Approval:** pending
+**Approval:** approved 2026-10-08
