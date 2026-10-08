@@ -836,6 +836,28 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert TestRepo.get!(SubscriptionItem, item.id)
   end
 
+  test "terminated subscriptions do not offer lifecycle or billing mutation actions", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    subscription =
+      subscription
+      |> Subscription.changeset(%{status: :canceled, ended_at: DateTime.utc_now()})
+      |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    refute has_element?(view, "[data-ax-primary-action]", "Change plan")
+    refute has_element?(view, "[data-ax-primary-action]", "Cancel renewal")
+
+    for action_type <- ["pause", "resume", "update_quantity", "add_item", "remove_item"] do
+      html = render_click(view, "open_action_drawer", %{"action_type" => action_type})
+      refute html =~ ~s(data-action-type="#{action_type}")
+      refute html =~ ~s(data-role="confirm-action")
+    end
+  end
+
   describe "dunning state inside summary and drill sections" do
     test "subscription with no campaign renders the dunning drill without a standalone card", %{
       conn: conn,
