@@ -1,9 +1,33 @@
 (function () {
   var Hooks = {};
+  var hostedFieldsHooks = [];
+
+  function destroyHostedFieldsHook(hook) {
+    if (!hook || hook.isDestroyed) return;
+
+    hook.isDestroyed = true;
+    hook.lifecycleGeneration = (hook.lifecycleGeneration || 0) + 1;
+    if (hook.sdkLoadTimer) window.clearTimeout(hook.sdkLoadTimer);
+
+    var nonceInput = hook.el && hook.el.querySelector("[data-braintree-nonce-input]");
+    if (nonceInput) nonceInput.value = "";
+    hook.readyToSubmit = false;
+    hook.tokenizing = false;
+    hook.submissionSent = false;
+
+    if (hook.hostedFields && hook.hostedFields.teardown) {
+      hook.hostedFields.teardown(function () {});
+    }
+    hook.hostedFields = null;
+
+    var index = hostedFieldsHooks.indexOf(hook);
+    if (index !== -1) hostedFieldsHooks.splice(index, 1);
+  }
 
   Hooks.BraintreeHostedFields = {
     mounted: function () {
       this.isDestroyed = false;
+      if (hostedFieldsHooks.indexOf(this) === -1) hostedFieldsHooks.push(this);
       var errorNode = this.el.querySelector("[data-braintree-error]");
       var submitButton = this.el.querySelector("[data-checkout-submit]");
 
@@ -117,19 +141,7 @@
     },
 
     destroyed: function () {
-      this.isDestroyed = true;
-      this.lifecycleGeneration = (this.lifecycleGeneration || 0) + 1;
-      if (this.sdkLoadTimer) window.clearTimeout(this.sdkLoadTimer);
-      var nonceInput = this.el.querySelector("[data-braintree-nonce-input]");
-      if (nonceInput) nonceInput.value = "";
-      this.readyToSubmit = false;
-      this.tokenizing = false;
-      this.submissionSent = false;
-
-      if (this.hostedFields && this.hostedFields.teardown) {
-        this.hostedFields.teardown(function () {});
-      }
-      this.hostedFields = null;
+      destroyHostedFieldsHook(this);
     },
 
     tokenizeAndSubmit: function (errorNode, submitButton) {
@@ -226,6 +238,10 @@
       );
     }
   };
+
+  window.addEventListener("pagehide", function () {
+    hostedFieldsHooks.slice().forEach(destroyHostedFieldsHook);
+  });
 
   document.addEventListener("submit", function (event) {
     var form = event.target;
@@ -362,6 +378,18 @@
   }
 
   document.addEventListener("click", handleThemeClick);
+
+  window.addEventListener("phx:portal:restore-focus", function (event) {
+    var id = event.detail && event.detail.id;
+    if (!id) return;
+
+    window.requestAnimationFrame(function () {
+      var target = document.getElementById(id);
+      if (target && typeof target.focus === "function") {
+        target.focus({ preventScroll: true });
+      }
+    });
+  });
 
   function bootLiveSocket() {
     var liveView = window.LiveView || (window.Phoenix && window.Phoenix.LiveView);

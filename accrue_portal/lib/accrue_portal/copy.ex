@@ -41,7 +41,7 @@ defmodule AccruePortal.Copy do
 
   def home_page_title, do: "#{brand_name()} billing"
   def home_eyebrow, do: "Customer billing"
-  def home_heading, do: "#{brand_name()} billing"
+  def home_heading, do: home_summary_heading()
 
   def home_body,
     do: "Review your #{brand_name()} account and manage subscriptions from one place."
@@ -52,7 +52,9 @@ defmodule AccruePortal.Copy do
   def home_summary_heading, do: "Account overview"
   def home_subscription_count_label, do: "Subscriptions"
   def home_payment_method_count_label, do: "Payment methods"
-  def home_invoice_count_label, do: "Invoices"
+  def home_invoice_count_label, do: "Recent invoices (up to 20)"
+  def home_invoice_count_note, do: "Up to 20 recent invoices are shown."
+  def home_dashboard_unavailable, do: "Billing data is unavailable. Try again later."
   def home_recent_subscriptions_heading, do: "Recent subscriptions"
   def home_empty_title, do: "Welcome"
   def home_empty_body, do: "You don't have a subscription yet."

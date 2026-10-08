@@ -8,10 +8,9 @@ defmodule AccruePortal.BillingReadModel do
 
   def dashboard(%Customer{} = customer) do
     %{
-      subscriptions: subscriptions(customer),
-      payment_methods: payment_methods(customer),
-      invoices: invoices(customer),
-      charges: charges(customer)
+      subscriptions: subscription_result(customer),
+      payment_methods: payment_method_result(customer),
+      invoices: invoice_result(customer)
     }
   end
 

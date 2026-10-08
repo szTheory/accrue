@@ -25,6 +25,7 @@ defmodule AccruePortal.Layouts do
       |> assign(:brand_style_tag, brand_style_tag(assigns.brand, assigns.csp_nonce))
       |> assign(:brand_logo_url, sanitize_url(assigns.brand[:logo_url]))
       |> assign(:brand_wordmark, brand_wordmark(assigns.brand))
+      |> assign(:billable_identity, billable_identity(assigns.current_context))
 
     ~H"""
     <!DOCTYPE html>
@@ -52,8 +53,8 @@ defmodule AccruePortal.Layouts do
                 {@brand_wordmark}
               </span>
             </a>
-            <div :if={@current_context && @current_context.display_name} class="portal-billable-identity">
-              <span class="portal-billable-name">{@current_context.display_name}</span>
+            <div :if={@billable_identity} class="portal-billable-identity">
+              <span class="portal-billable-name">{@billable_identity}</span>
               <span :if={@current_context.display_detail} class="portal-billable-detail">
                 {@current_context.display_detail}
               </span>
@@ -74,7 +75,7 @@ defmodule AccruePortal.Layouts do
               <button
                 type="button"
                 data-portal-theme="system"
-                aria-pressed={@theme == "system"}
+                aria-pressed={to_string(@theme == "system")}
                 class={["portal-theme-option", @theme == "system" && "is-active"]}
                 aria-label="Match system theme"
                 title="System"
@@ -89,7 +90,7 @@ defmodule AccruePortal.Layouts do
               <button
                 type="button"
                 data-portal-theme="light"
-                aria-pressed={@theme == "light"}
+                aria-pressed={to_string(@theme == "light")}
                 class={["portal-theme-option", @theme == "light" && "is-active"]}
                 aria-label="Light theme"
                 title="Light"
@@ -110,7 +111,7 @@ defmodule AccruePortal.Layouts do
               <button
                 type="button"
                 data-portal-theme="dark"
-                aria-pressed={@theme == "dark"}
+                aria-pressed={to_string(@theme == "dark")}
                 class={["portal-theme-option", @theme == "dark" && "is-active"]}
                 aria-label="Dark theme"
                 title="Dark"
@@ -243,4 +244,39 @@ defmodule AccruePortal.Layouts do
   end
 
   defp brand_wordmark(_brand), do: nil
+
+  defp billable_identity(nil), do: nil
+
+  defp billable_identity(context) when is_map(context) do
+    context
+    |> context_value(:display_name)
+    |> nonempty_text()
+    |> case do
+      nil ->
+        customer = context_value(context, :customer)
+
+        nonempty_text(context_value(customer, :name)) ||
+          nonempty_text(context_value(customer, :email))
+
+      display_name ->
+        display_name
+    end
+  end
+
+  defp billable_identity(_context), do: nil
+
+  defp context_value(context, key) when is_map(context) do
+    Map.get(context, key, Map.get(context, Atom.to_string(key)))
+  end
+
+  defp context_value(_context, _key), do: nil
+
+  defp nonempty_text(value) when is_binary(value) do
+    case String.trim(value) do
+      "" -> nil
+      trimmed -> trimmed
+    end
+  end
+
+  defp nonempty_text(_value), do: nil
 end

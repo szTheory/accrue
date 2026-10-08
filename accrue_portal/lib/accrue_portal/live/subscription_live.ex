@@ -66,11 +66,20 @@ defmodule AccruePortal.Live.SubscriptionLive do
     case authorize_current(socket, :subscription_cancel) do
       {:ok, %Subscription{} = subscription} ->
         if BillingReadModel.subscription_cancel_available?(subscription) do
-          {:noreply,
-           socket
-           |> assign(:subscription, subscription)
-           |> assign(:can_cancel?, true)
-           |> update(:show_cancel_confirmation, &(!&1))}
+          show_confirmation? = not socket.assigns.show_cancel_confirmation
+
+          socket =
+            socket
+            |> assign(:subscription, subscription)
+            |> assign(:can_cancel?, true)
+            |> assign(:show_cancel_confirmation, show_confirmation?)
+
+          focus_id =
+            if show_confirmation?,
+              do: "cancel-confirm-#{subscription.id}",
+              else: "cancel-trigger-#{subscription.id}"
+
+          {:noreply, push_portal_focus(socket, focus_id)}
         else
           {:noreply, cancel_unavailable(socket)}
         end
@@ -79,6 +88,20 @@ defmodule AccruePortal.Live.SubscriptionLive do
         {:noreply, denied(socket)}
     end
   end
+
+  def handle_event(
+        "cancel_confirmation_escape",
+        %{"key" => "Escape"},
+        %{assigns: %{show_cancel_confirmation: true, subscription: %Subscription{id: id}}} =
+          socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:show_cancel_confirmation, false)
+     |> push_portal_focus("cancel-trigger-#{id}")}
+  end
+
+  def handle_event("cancel_confirmation_escape", _params, socket), do: {:noreply, socket}
 
   def handle_event(
         "preview_plan_change",
@@ -124,6 +147,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
                )
                |> clear_plan_change()
                |> assign(:action_notice, Copy.subscription_plan_change_commit_success())
+               |> push_portal_focus("subscription-action-notice")
                |> put_flash(:info, Copy.subscription_plan_change_commit_success())}
 
             {:error, _reason} ->
@@ -186,6 +210,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
                )
                |> assign(:show_cancel_confirmation, false)
                |> assign(:action_notice, Copy.subscription_cancel_success(scoped_subscription))
+               |> push_portal_focus("subscription-action-notice")
                |> put_flash(:info, Copy.subscription_cancel_success(scoped_subscription))}
 
             {:error, _reason} ->
@@ -281,7 +306,11 @@ defmodule AccruePortal.Live.SubscriptionLive do
 
   def render(assigns) do
     ~H"""
-    <main class="portal-shell">
+    <main
+      class="portal-shell"
+      phx-window-keydown={@show_cancel_confirmation && "cancel_confirmation_escape"}
+      phx-key={@show_cancel_confirmation && "Escape"}
+    >
       <AccruePortal.Layouts.breadcrumb trail={[
         %{label: Copy.breadcrumb_home(), href: Path.context(Path.home(@base_path), @current_context_pin)},
         %{label: Copy.subscriptions_heading(), href: Path.context(Path.subscriptions(@base_path), @current_context_pin)},
@@ -303,7 +332,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
       </section>
 
       <section class="portal-card">
-        <p :if={@action_notice} class="portal-inline-status" role="status" aria-live="polite">
+        <p :if={@action_notice} id="subscription-action-notice" class="portal-inline-status" role="status" aria-live="polite" tabindex="-1">
           {@action_notice}
         </p>
         <h1>{Copy.subscription_heading()}</h1>
@@ -335,6 +364,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
         <div :if={@can_cancel? && !@show_cancel_confirmation}>
           <p>{Copy.subscription_cancel_body(@subscription)}</p>
           <button
+            id={"cancel-trigger-#{@subscription.id}"}
             phx-click="toggle_cancel_confirmation"
             phx-value-id={@subscription.id}
             class="portal-button-secondary"
@@ -342,7 +372,11 @@ defmodule AccruePortal.Live.SubscriptionLive do
             {Copy.subscription_cancel_cta(@subscription)}
           </button>
         </div>
-        <div :if={@can_cancel? && @show_cancel_confirmation} role="group">
+        <div
+          :if={@can_cancel? && @show_cancel_confirmation}
+          role="group"
+          aria-label="Cancel subscription confirmation"
+        >
           <p>{Copy.subscription_cancel_body(@subscription)}</p>
           <p>
             {Copy.subscription_cancel_confirmation(
@@ -351,6 +385,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
             )}
           </p>
           <button
+            id={"cancel-confirm-#{@subscription.id}"}
             phx-click="cancel"
             phx-value-id={@subscription.id}
             class="portal-button-secondary"
@@ -358,6 +393,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
             {Copy.subscription_cancel_cta(@subscription)}
           </button>
           <button
+            id={"cancel-keep-#{@subscription.id}"}
             phx-click="toggle_cancel_confirmation"
             phx-value-id={@subscription.id}
             class="portal-button-secondary"
@@ -550,4 +586,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
   end
 
   defp normalize_price_id(_price_id), do: nil
+
+  defp push_portal_focus(socket, id),
+    do: Phoenix.LiveView.push_event(socket, "portal:restore-focus", %{id: id})
 end
