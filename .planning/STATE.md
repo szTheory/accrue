@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 235
 current_phase_name: Customer Plan Selection & Checkout
 status: executing
-stopped_at: Completed 235-02-PLAN.md
-last_updated: "2026-10-08T12:01:21.422Z"
+stopped_at: Completed 235-03-PLAN.md
+last_updated: "2026-10-08T12:15:19.109Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 235 execution started
-state_head: 32a7b9f4311ff8326a4e52fc85c0080bca4dfd4a
+state_head: 62f44afe010a6247630da3188b6abeed071aa9dc
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 19
-  completed_plans: 17
+  completed_plans: 18
   percent: 29
 ---
 
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 235 (Customer Plan Selection & Checkout) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-10-08 — Phase 235 execution started
 
@@ -117,6 +117,7 @@ Last activity: 2026-10-08 — Phase 235 execution started
 | Phase 234 P08 | 21min | 3 tasks | 21 files |
 | Phase 235 P01 | 20 min | 2 tasks | 3 files |
 | Phase 235 P02 | 12min | 3 tasks | 10 files |
+| Phase 235 P03 | 10min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -227,6 +228,9 @@ Last activity: 2026-10-08 — Phase 235 execution started
 - [Phase 235]: Per-pricing-return UUID creates a fresh idempotency namespace while concurrent resumes converge on one persisted session.
 - [Phase 235]: Organization checkout resumes through the freshly authorized shared-billing route.
 - [Phase 235]: Incomplete or mismatched trusted terms block payment; no unsupported numeric charge cap was introduced.
+- [Phase 235]: POST and LiveView atomically claim an open, unexpired persisted session before provider work; only known rejection releases the claim.
+- [Phase 235]: Use one strict LocalSession.actionable?/2 expiry predicate and revalidate the selected promotion on the actual POST form.
+- [Phase 235]: Generic provider errors and local completion failures remain uncertain and cannot be replayed automatically.
 
 ### Pending Todos
 
@@ -297,8 +301,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T12:01:21.383Z
-Stopped at: Completed 235-02-PLAN.md
+Last session: 2026-10-08T12:15:19.069Z
+Stopped at: Completed 235-03-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
