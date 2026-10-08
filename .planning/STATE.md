@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 234
 current_phase_name: Admin Customers & Subscriptions
 status: executing
-stopped_at: Phase 234 planned and checked; ready to execute
-last_updated: "2026-10-08T00:24:26.653Z"
+stopped_at: Completed 234-01-PLAN.md
+last_updated: "2026-10-08T00:42:14.226Z"
 last_activity: 2026-10-07
-last_activity_desc: Phase 233 complete, transitioned to Phase 234
-state_head: 4198f7d3e4b36779d04307c9747721d7bf2a4e90
+last_activity_desc: Phase 234 execution started
+state_head: cf03cc80215ddb7ea4b6377ddfcf523bfe610094
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 14
-  completed_plans: 7
+  completed_plans: 8
   percent: 14
 ---
 
@@ -32,10 +32,10 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 ## Current Position
 
-Phase: 234 (Admin Customers & Subscriptions) — READY TO EXECUTE
-Plan: Not started
+Phase: 234 (Admin Customers & Subscriptions) — EXECUTING
+Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-10-07 — Phase 233 complete, transitioned to Phase 234
+Last activity: 2026-10-07 — Phase 234 execution started
 
 ## Performance Metrics
 
@@ -106,6 +106,7 @@ Last activity: 2026-10-07 — Phase 233 complete, transitioned to Phase 234
 | Phase 233 P07 | 17min | 2 tasks | 13 files |
 | Phase 233 P05 | 26min | 2 tasks | 19 files |
 | Phase 233 P05 | 59min | 2 tasks | 26 files |
+| Phase 234 P01 | 12m | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -192,6 +193,8 @@ Last activity: 2026-10-07 — Phase 233 complete, transitioned to Phase 234
 - [Phase 233]: Personal reads preserve the sole existing Customer; both checkout transports require the configured processor before token issuance or mutation. Dynamic processor routing remains out of scope.
 - [Phase 233]: Invalid selection and revoked membership deny without provisioning or fallback; blocked LiveViews preserve host hooks before user-only authentication, and mutations retain the human actor without Admin privilege bleed.
 - [Phase 233]: Fake and Braintree browser proof run in separate processes with test-only configuration; both lanes run in CI and local full verification. Inherited UI refinements are deferred to owning route phases.
+- [Phase 234]: Return URLs preserve only allowlisted mounted list state; the current server scope owns authorization and organization context.
+- [Phase 234]: Signed subscription cursors must still reference a row within the active owner scope and filter.
 
 ### Pending Todos
 
@@ -262,8 +265,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T00:24:26.599Z
-Stopped at: Phase 234 planned and checked; ready to execute
+Last session: 2026-10-08T00:42:14.186Z
+Stopped at: Completed 234-01-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -289,7 +292,7 @@ covered-input fingerprint over all 52 inputs. 229-UAT.md was generated from SUMM
 T-229-14, T-229-G14-03) were one stale register entry — the audit doc commit is an ancestor of
 the renderer fix — and were re-verified closed adversarially (61/61, threats_open: 0).
 
-Resume file: .planning/phases/234-admin-customers-subscriptions/234-01-PLAN.md
+Resume file: None
 
 ### Phase 229 evidence: two ordering constraints learned the hard way
 

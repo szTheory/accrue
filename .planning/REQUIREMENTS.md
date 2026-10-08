@@ -17,7 +17,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 
 - [ ] **ADM-01**: Operators can distinguish a known subscription lifecycle from missing ancillary observations; missing data does not turn an active subscription into an inactive one.
 - [ ] **ADM-02**: Operators can distinguish draft, open, and overdue invoices and see missing due dates honestly; amounts preserve currency and minor-unit precision, including zero- and three-decimal currencies.
-- [ ] **ADM-03**: Operators can search, enter a nondefault owner scope, navigate customer/subscription/related records, and return without losing the correct owner, object, or filter context.
+- [x] **ADM-03**: Operators can search, enter a nondefault owner scope, navigate customer/subscription/related records, and return without losing the correct owner, object, or filter context.
 - [ ] **ADM-04**: Operators can use only eligible subscription lifecycle actions, with existing confirmation, step-up, expiry, duplicate-protection, and truthful result-evidence behavior preserved.
 - [ ] **ADM-05**: Operators can review invoice payments/finalization and refunds with the exact amount, currency, and consequence, and distinguish accepted, requires-action, failed, and completed results.
 - [ ] **ADM-06**: Operators can review recovery with its time window, owner, and currency intact, while historical failures remain distinct from current billing state.
@@ -51,7 +51,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 
 ### Safety and Scope
 
-- [ ] **SAFE-01**: Mounted owner/customer denials and forged-action protections remain enforced; foreign records and payment-token data are not exposed.
+- [x] **SAFE-01**: Mounted owner/customer denials and forged-action protections remain enforced; foreign records and payment-token data are not exposed.
 - [x] **SAFE-02**: The optional host integration resolves the billed entity separately from the actor and freshly authorizes each action across HTTP, LiveView, and reconnect; invalid selections or unauthorized provisioning fail safely while the personal default remains compatible.
 - [x] **SAFE-03**: Forms and checkout remain pinned to their displayed billable, Customer, and processor across tabs and account switches; lookups use full owner/provider identity and hosted-session grants do not exceed authorized actions.
 
@@ -88,7 +88,7 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | SYS-02 | Phase 233 | Complete |
 | ADM-01 | Phase 234 | Pending |
 | ADM-02 | Phase 237 | Pending |
-| ADM-03 | Phase 234 | Pending |
+| ADM-03 | Phase 234 | Complete |
 | ADM-04 | Phase 234 | Pending |
 | ADM-05 | Phase 237 | Pending |
 | ADM-06 | Phase 237 | Pending |
@@ -110,7 +110,7 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | INT-02 | Phase 239 | Pending |
 | INT-03 | Phase 239 | Pending |
 | INT-04 | Phase 239 | Pending |
-| SAFE-01 | Phase 234 | Pending |
+| SAFE-01 | Phase 234 | Complete |
 | SAFE-02 | Phase 233 | Complete |
 | SAFE-03 | Phase 233 | Complete |
 | SHIP-01 | Phase 239 | Pending |
