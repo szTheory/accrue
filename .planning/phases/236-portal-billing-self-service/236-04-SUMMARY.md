@@ -13,11 +13,11 @@ affects: [portal-billing-self-service, checkout, return-navigation]
 
 # Actuals (#2632)
 actuals:
-  tokens: 6716
+  tokens: 7282
   tasks: 2
-  commits: 2
-plan_head_before: f9ef76518be5dab2cdcc13c906157c653fb5e9d9
-plan_head_after: e6679acebe927b912d71313c9a71b2084f46b886
+  commits: 4
+plan_head_before: c480b6f37340fde3a113e2b06f351119d65b8971
+plan_head_after: 42b6407aa55d284b3fac4536a96ef3206be5f011
 
 # Tech tracking
 tech-stack:
@@ -36,6 +36,8 @@ key-files:
     - accrue_portal/lib/accrue_portal/live/checkout_live.ex
     - accrue_portal/test/accrue_portal/checkout_context_test.exs
     - accrue_portal/test/accrue_portal/live/checkout_live_test.exs
+    - accrue_portal/test/accrue_portal/live/payment_methods_live_test.exs
+    - accrue_portal/test/accrue_portal/live/checkout_live_discount_test.exs
 
 key-decisions:
   - "Classify only explicit Braintree decline responses as card declines; preserve uncertain handling for other failures."
@@ -61,6 +63,9 @@ coverage:
       - kind: unit
         ref: "test/accrue/processor/braintree_test.exs#create_subscription/2 translates a processor decline into a card error"
         status: pass
+      - kind: integration
+        ref: "cd accrue_portal && mix test.ci"
+        status: pass
     human_judgment: false
   - id: D2
     description: "POST and LiveView accept validated local or configured HTTPS destinations, reject malformed or unapproved destinations, and retain the success announcement across redirects."
@@ -81,10 +86,13 @@ coverage:
       - kind: integration
         ref: "test/accrue_portal/live/checkout_live_test.exs#expired checkout with unapproved HTTPS recovery only links to the portal"
         status: pass
+      - kind: integration
+        ref: "cd accrue_portal && mix test.ci"
+        status: pass
     human_judgment: false
 
 # Metrics
-duration: 9 min
+duration: 12 min
 completed: 2026-10-08
 status: complete
 ---
@@ -95,11 +103,11 @@ status: complete
 
 ## Performance
 
-- **Duration:** 9 min
+- **Duration:** 12 min
 - **Started:** 2026-10-08T16:56:43Z
-- **Completed:** 2026-10-08T17:05:51Z
+- **Completed:** 2026-10-08T17:08:38Z
 - **Tasks:** 2
-- **Files modified:** 6
+- **Files modified:** 8
 
 ## Accomplishments
 
@@ -107,6 +115,7 @@ status: complete
 - POST and LiveView destinations accept safe local paths or the exact HTTPS origin configured by `portal_base_url`; malformed, blank, and unapproved destinations use the Portal home.
 - LiveView success flashes survive redirects, and checkout recovery links use the same external-origin policy.
 - Added deterministic tests for query-only status markers, decline and uncertainty copy, and the full return destination matrix.
+- Wave 2 Portal package gate passes: 100 tests, 0 failures, formatting check clean.
 
 ## Task Commits
 
@@ -114,6 +123,8 @@ Each task was committed atomically:
 
 1. **Task 1: Keep checkout outcome tied to server evidence** - `44f4346f` (fix)
 2. **Task 2: Return only to validated destinations** - `e6679ace` (fix)
+
+**Wave gate repairs:** `05651fa0` (format the payment-method test file) and `42b6407a` (configure the approved return origin in the discount test fixture).
 
 ## Files Created/Modified
 
@@ -123,6 +134,8 @@ Each task was committed atomically:
 - `accrue_portal/lib/accrue_portal/live/checkout_live.ex` - Applies the same policy to LiveView redirects and recovery links and preserves success flashes.
 - `accrue_portal/test/accrue_portal/checkout_context_test.exs` - Covers the POST return destination matrix.
 - `accrue_portal/test/accrue_portal/live/checkout_live_test.exs` - Covers query-only status, decline, uncertainty, LiveView redirects, and recovery.
+- `accrue_portal/test/accrue_portal/live/payment_methods_live_test.exs` - Removes a formatting-only blank line found by the package gate.
+- `accrue_portal/test/accrue_portal/live/checkout_live_discount_test.exs` - Configures its expected HTTPS return origin for the tightened redirect policy.
 
 ## Decisions Made
 
@@ -149,6 +162,7 @@ Each task was committed atomically:
 
 - The existing LiveView accepted an absent success URL in place, while the plan requires the safe local fallback. Updated this branch to redirect to Portal home with the persisted success announcement.
 - Applied the configured-origin rule to the existing recovery link as well, preventing it from exposing an unapproved external destination.
+- The first Wave 2 package gate found one formatting-only drift in a prior payment-method test and one checkout discount fixture that lacked the now-required configured HTTPS origin. Both were corrected and committed; the repeated gate passes with 100 tests and no failures.
 
 ## User Setup Required
 
@@ -156,7 +170,7 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- Wave 2 is ready for the `accrue_portal` package CI gate.
+- Wave 2 `accrue_portal` package CI gate passes; Plan 236-03 is next.
 - Deterministic checkout outcome and redirect behavior is covered without human UAT; the phase's served-host proof remains in Plan 236-05.
 
 ---
