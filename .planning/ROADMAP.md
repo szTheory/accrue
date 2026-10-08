@@ -33,7 +33,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 ### v1.63 — Admin and Portal UI refinement
 
 - [x] **Phase 233: Shared Direction & Portal Contract** - Establish current-source baseline, shared visual roles, and the bounded host-owned billing context contract. (completed 2026-10-07)
-- [ ] **Phase 234: Admin Customers & Subscriptions** - Refine operator search, customer/subscription investigation, lifecycle truth, scope, and supported actions.
+- [x] **Phase 234: Admin Customers & Subscriptions** - Refine operator search, customer/subscription investigation, lifecycle truth, scope, and supported actions. (completed 2026-10-07)
 - [ ] **Phase 235: Customer Plan Selection & Checkout** - Make existing checkout, payment hooks, provider handoffs, and safe returns understandable and reliable.
 - [ ] **Phase 236: Portal Billing Self-Service** - Refine existing customer billing pages and authorized payment/subscription tasks through one Portal.
 - [ ] **Phase 237: Admin Invoices, Payments & Recovery** - Make money and recovery work precise, scoped, and honest about outcomes.
@@ -86,7 +86,7 @@ Plans:
   4. Mounted owner/customer denials and forged actions remain denied without exposing foreign records or payment-token data.
   5. The affected Admin flows remain usable by keyboard and at narrow/coarse-pointer sizes, with the relevant light/dark and empty/error states checked in this slice.
 
-**Plans**: 8/8 plans executed
+**Plans**: 8/8 plans complete
 Plans:
 **Wave 1**
 - [x] 234-01-PLAN.md — Scoped subscription list, detail and return trace; immutable pre-layout capture
@@ -191,7 +191,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 233. Shared Direction & Portal Contract | 7/7 | Complete    | 2026-10-07 |
-| 234. Admin Customers & Subscriptions | 7/7 | In Progress | - |
+| 234. Admin Customers & Subscriptions | 8/8 | Complete    | 2026-10-07 |
 | 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
 | 236. Portal Billing Self-Service | 0/TBD | Not started | - |
 | 237. Admin Invoices, Payments & Recovery | 0/TBD | Not started | - |

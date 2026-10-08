@@ -35,7 +35,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Latest fully shipped milestone: v1.62 — Release Integration & Repository Hygiene, shipped and archived 2026-09-18.** It completed the bounded repository-truth, integration-candidate, exact-SHA evidence, and hygiene work recorded in its milestone archive. Its release-handoff scope is closed; historical lane outcomes remain in the v1.62 evidence and are not active work for this milestone.
 
-**Current focus:** Phase 234, Admin Customers & Subscriptions, within v1.63 Admin and Portal UI refinement. Phase 233 completed the current served baseline, shared semantic roles, and bounded host-owned Portal contract on 2026-10-07, with all seven requirements verified and 23 automated acceptance items.
+**Current focus:** Phase 235, Customer Plan Selection & Checkout, within v1.63 Admin and Portal UI refinement. Phase 233 established the current served baseline, shared semantic roles, and bounded host-owned Portal contract. Phase 234 completed the scoped Admin customer/subscription journeys, lifecycle truth, and supported actions, with all four mapped requirements verified and 23 automated acceptance checks.
 
 ## Current Milestone: v1.63 Admin and Portal UI refinement
 
@@ -698,6 +698,15 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 Verification passed with zero unverified behavior. The Portal and host suites passed 72 and 219 tests; browser lanes passed 27 default cases and 4 Braintree cases, with 3 existing intentional default-suite skips. The inherited UI refinements remain in the owning route phases, as recorded in `233-UI-DISPOSITION.md`.
 
+### Validated v1.63 (Phase 234 complete 2026-10-07)
+
+- ✓ Distinguish subscription lifecycle from missing ancillary observations without inventing inactive state. — Phase 234 (ADM-01)
+- ✓ Search and navigate customers, subscriptions, and related records under the current owner scope while preserving valid return context. — Phase 234 (ADM-03)
+- ✓ Offer only eligible subscription actions and preserve fresh review, step-up expiry, duplicate protection, and truthful outcome evidence. — Phase 234 (ADM-04)
+- ✓ Preserve owner/customer denials and forged-action protections without exposing foreign records or payment-token data. — Phase 234 (SAFE-01)
+
+Verification passed with 18/18 truths verified and zero behavior unverified. All 23 acceptance checks are automated; the real database-backed search, step-up, accessibility, computed readability, and narrow-layout checks run in merge-blocking CI.
+
 ### Validated v1.62 (Phase 229 complete 2026-09-15)
 
 Evidence-backed repository truth and recovery safety — 3/3 requirements satisfied in Phase 229.
@@ -914,12 +923,15 @@ Admin global search — 4/4 satisfied.
 | Never reinterpret a failed or skipped provider lane as proof, and never retry without new authorization. | ✓ Good — Phase 228 preserved the initial failed record; later separately authorized recurring proof closed the Stripe fidelity gaps honestly. |
 | Treat v1.62 as release integration and repository hygiene, not feature development or a general refactor. | ✓ Good — Phases 229–232 completed and v1.62 was archived; its handoff is closed and is not carried as active v1.63 work. |
 | Preserve published history and the v1.61 tag; reconcile through a reviewable integration candidate rather than force-push or tag movement. | ✓ Good — the v1.62 archive records the completed reviewable integration; history mutation is outside v1.63 scope. |
-| Reopen bounded work on existing Admin and Portal journeys after v1.62. | — Pending — explicit strategy change for the adopter-facing surfaces, with source-backed UI truth, scope, wiring, and feedback findings; no new billing capability is authorized. |
+| Reopen bounded work on existing Admin and Portal journeys after v1.62. | ✓ Good — Phases 233–234 established the current baseline and delivered scoped Admin customer/subscription workflows; no new billing capability was added. |
 | Use one generic Portal for personal and host-selected organization/custom billables, with optional resolution and fresh action authorization. | ✓ Good — Phase 233 proves personal defaults, mixed selection, stale-pin/revocation denial, actual human attribution, and separate Admin authority. |
 | Share semantic visual roles while preserving Admin identity and customer host branding. | ✓ Good — Phase 233 defines shared roles and verifies bounded consumers, current served asset bytes, focus, contrast, status, and reflow. |
 | Treat signed context pins as identity locators, never durable authorization grants. | ✓ Good — Phase 233 reloads host policy and exact targets on HTTP, LiveView actions, and reconnect; invalid selection cannot provision or fall back. |
 | Preserve personal Customer identity for reads while requiring the configured processor for checkout tokens and mutations. | ✓ Good — Phase 233 verifies matching-provider success and mismatch zero-token/zero-write across both completion transports; no dynamic processor routing. |
 | Run Braintree checkout browser proof in a separate test-configured process from the normal Fake browser lane. | ✓ Good — Phase 233 aligns the LocalSession provider contract with deterministic SDK proof, with both lanes wired into CI and local full verification. |
+| Keep global search bounded and owner-scoped, and prove real asynchronous Repo completion in the existing merge-blocking browser lane. | ✓ Good — Phase 234 verifies query completion, scoped navigation, and stale-result removal against the real Repo pool. |
+| Recheck actor, scope, target, eligibility, and material action facts immediately before dispatch; block blind retries when provider outcomes are uncertain. | ✓ Good — Phase 234 covers the reviewed dispatch boundary and evidence-specific outcomes. |
+| Shift testable acceptance into deterministic executable evidence and skip confirmation-only UAT when that evidence passes. | ✓ Good — Phase 234 records 23 automated acceptance checks and zero behavior unverified, with recurring checks wired into CI. |
 
 ## Evolution
 
@@ -939,4 +951,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-07 after Phase 233 completion; Phase 234 is next.*
+*Last updated: 2026-10-07 after Phase 234 completion; Phase 235 is next.*
