@@ -4,6 +4,8 @@ defmodule AccrueAdmin.InvoicesLiveTest do
   alias Accrue.Billing.{Customer, Invoice, Subscription}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.ListContracts
+  alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Invoices, as: InvoicesQuery
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -83,7 +85,9 @@ defmodule AccrueAdmin.InvoicesLiveTest do
         status: :open
       })
 
-    foreign_customer = insert_customer(%{owner_type: "Organization", owner_id: foreign_organization_id})
+    foreign_customer =
+      insert_customer(%{owner_type: "Organization", owner_id: foreign_organization_id})
+
     foreign_subscription = insert_subscription(foreign_customer)
 
     insert_invoice(foreign_customer, foreign_subscription, %{
@@ -105,6 +109,76 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert html =~ "INV-SCOPED-OWNER"
     assert html =~ "/billing/invoices/#{owner_invoice.id}"
     refute html =~ "INV-SCOPED-FOREIGN"
+  end
+
+  test "invoice fixtures preserve raw date, amount, currency, identity, and owner observations" do
+    reference = ~U[2026-10-08 12:00:00.000000Z]
+    organization_id = Ecto.UUID.generate()
+    foreign_organization_id = Ecto.UUID.generate()
+    empty_organization_id = Ecto.UUID.generate()
+
+    empty_owner_scope = organization_scope(empty_organization_id)
+    assert {[], nil} = InvoicesQuery.list(owner_scope: empty_owner_scope)
+
+    single_organization_id = Ecto.UUID.generate()
+
+    single_customer =
+      insert_customer(%{owner_type: "Organization", owner_id: single_organization_id})
+
+    single_subscription = insert_subscription(single_customer)
+
+    single_invoice =
+      insert_invoice(single_customer, single_subscription, %{
+        number: "INV-FIXTURE-SINGLE",
+        status: :paid
+      })
+
+    {single_rows, nil} =
+      InvoicesQuery.list(owner_scope: organization_scope(single_organization_id))
+
+    assert [%{id: single_id, status: :paid}] = single_rows
+    assert single_id == single_invoice.id
+
+    customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
+    subscription = insert_subscription(customer)
+    fixtures = invoice_fixture_set(customer, subscription, reference)
+
+    foreign_customer =
+      insert_customer(%{owner_type: "Organization", owner_id: foreign_organization_id})
+
+    foreign_invoice =
+      foreign_customer
+      |> then(&insert_subscription/1)
+      |> then(
+        &insert_invoice(foreign_customer, &1, %{number: "INV-FIXTURE-FOREIGN", status: :paid})
+      )
+
+    assert fixtures.dates.before.due_date == DateTime.add(reference, -1, :second)
+    assert fixtures.dates.equal.due_date == reference
+    assert fixtures.dates.after.due_date == DateTime.add(reference, 1, :second)
+    assert is_nil(fixtures.dates.missing.due_date)
+
+    assert fixtures.money.zero.amount_due_minor == 0
+    assert fixtures.money.zero.currency == "usd"
+    assert fixtures.money.zero_decimal.amount_due_minor == 1_234
+    assert fixtures.money.zero_decimal.currency == "jpy"
+    assert fixtures.money.three_decimal.amount_due_minor == 1_234
+    assert fixtures.money.three_decimal.currency == "kwd"
+    assert fixtures.money.unsupported_currency.currency == "zzz"
+    assert fixtures.money.missing_currency.currency == nil
+
+    all_owner_fixtures = Map.merge(fixtures.dates, fixtures.money) |> Map.values()
+    assert length(all_owner_fixtures) == 10
+    assert Enum.all?(all_owner_fixtures, &(&1.status == :open))
+    assert Enum.all?(all_owner_fixtures, &(&1.inserted_at == reference))
+    assert Enum.all?(all_owner_fixtures, &(&1.customer_id == customer.id))
+    assert length(Enum.uniq_by(all_owner_fixtures, & &1.id)) == 10
+
+    {scoped_rows, nil} = InvoicesQuery.list(owner_scope: organization_scope(organization_id))
+    scoped_ids = MapSet.new(Enum.map(scoped_rows, & &1.id))
+    assert MapSet.equal?(scoped_ids, MapSet.new(Enum.map(all_owner_fixtures, & &1.id)))
+    refute MapSet.member?(scoped_ids, foreign_invoice.id)
+    assert Enum.all?(scoped_rows, &(&1.owner_id == organization_id))
   end
 
   test "renders Copy-backed filtered empty list when search excludes all invoices", %{conn: conn} do
@@ -329,6 +403,69 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     %Invoice{}
     |> Invoice.force_status_changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
+  end
+
+  defp invoice_fixture_set(customer, subscription, reference) do
+    dates =
+      [
+        before: DateTime.add(reference, -1, :second),
+        equal: reference,
+        after: DateTime.add(reference, 1, :second),
+        missing: nil
+      ]
+      |> Map.new(fn {label, due_date} ->
+        invoice =
+          insert_invoice(customer, subscription, %{
+            number: "INV-FIXTURE-DATE-#{label}",
+            status: :open,
+            due_date: due_date
+          })
+          |> pin_invoice_inserted_at(reference)
+
+        {label, invoice}
+      end)
+
+    money =
+      [
+        zero: {0, "usd"},
+        zero_decimal: {1_234, "jpy"},
+        two_decimal: {1_234, "usd"},
+        three_decimal: {1_234, "kwd"},
+        unsupported_currency: {1_234, "zzz"},
+        missing_currency: {50, nil}
+      ]
+      |> Map.new(fn {label, {amount_minor, currency}} ->
+        invoice =
+          insert_invoice(customer, subscription, %{
+            number: "INV-FIXTURE-MONEY-#{label}",
+            status: :open,
+            amount_due_minor: amount_minor,
+            amount_remaining_minor: amount_minor,
+            total_minor: amount_minor,
+            currency: currency
+          })
+          |> pin_invoice_inserted_at(reference)
+
+        {label, invoice}
+      end)
+
+    %{dates: dates, money: money}
+  end
+
+  defp pin_invoice_inserted_at(invoice, timestamp) do
+    invoice
+    |> Ecto.Changeset.change(inserted_at: timestamp)
+    |> TestRepo.update!()
+  end
+
+  defp organization_scope(organization_id) do
+    %OwnerScope{
+      mode: :organization,
+      current_admin: %{id: "admin_1"},
+      organization_id: organization_id,
+      platform_admin?: true,
+      admin_org_ids: []
+    }
   end
 
   defp assert_page_header_contract(html, contract) do
