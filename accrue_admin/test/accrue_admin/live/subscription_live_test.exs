@@ -346,7 +346,6 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       AccrueAdmin.Copy.Subscription.subscription_action_remove_item(),
       "Collection",
       AccrueAdmin.Copy.Subscription.subscription_action_pause_collection(),
-      AccrueAdmin.Copy.Subscription.subscription_action_resume(),
       "Danger zone",
       "Cancel immediately",
       "Comp this subscription"
@@ -856,6 +855,61 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       refute html =~ ~s(data-action-type="#{action_type}")
       refute html =~ ~s(data-role="confirm-action")
     end
+  end
+
+  test "confirmation rejects a subscription whose lifecycle changed after review", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    current = TestRepo.get!(Subscription, subscription.id)
+    current |> Subscription.changeset(%{status: :canceled}) |> TestRepo.update!()
+
+    html = render_click(element(view, "[data-role='confirm-action']"))
+
+    assert html =~ "Review the action again"
+    refute html =~ "Step-up required"
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+  end
+
+  test "unrelated metadata changes preserve a reviewed action through fresh step-up", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    current = TestRepo.get!(Subscription, subscription.id)
+    current |> Subscription.changeset(%{metadata: %{"note" => "unrelated"}}) |> TestRepo.update!()
+
+    html = render_click(element(view, "[data-role='confirm-action']"))
+    assert html =~ "Step-up required"
+
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+    assert html =~ "Subscription action recorded"
+    assert TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
   end
 
   describe "dunning state inside summary and drill sections" do

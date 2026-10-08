@@ -130,8 +130,21 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
     case pending_action(params, socket) do
       {:ok, action} ->
-        if action_available?(socket.assigns.subscription, action.type) do
-          {:noreply, assign(socket, :pending_action, maybe_attach_preview(socket, action))}
+        if action_available?(socket.assigns.subscription, action.type) and
+             action_input_valid?(socket.assigns.subscription, action) do
+          action = maybe_attach_preview(socket, action)
+
+          action =
+            action
+            |> Map.put(:subscription_id, socket.assigns.subscription.id)
+            |> Map.put(:review_actor_id, Auth.actor_id(socket.assigns.current_admin))
+            |> Map.put(:review_scope, scope_identity(socket.assigns.current_owner_scope))
+            |> Map.put(
+              :review_fingerprint,
+              review_fingerprint(action, socket.assigns.subscription)
+            )
+
+          {:noreply, assign(socket, :pending_action, action)}
         else
           {:noreply, reject_unavailable_action(socket)}
         end
@@ -167,19 +180,26 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         {:noreply, push_flash(socket, :warning, Copy.subscription_select_action_warning())}
 
       %{type: type} = action when type in @destructive_actions ->
-        case StepUp.require_fresh(
-               socket,
-               step_up_action(action, socket.assigns.subscription),
-               &execute_pending_action(&1, action)
-             ) do
-          {:ok, socket} ->
-            {:noreply, socket}
+        case validate_review(socket, action) do
+          {:ok, fresh_socket, fresh_subscription} ->
+            case StepUp.require_fresh(
+                   fresh_socket,
+                   step_up_action(action, fresh_subscription),
+                   &execute_pending_action(&1, action)
+                 ) do
+              {:ok, socket} ->
+                {:noreply, socket}
 
-          {:challenge, socket} ->
-            {:noreply, socket}
+              {:challenge, socket} ->
+                {:noreply, socket}
 
-          {:error, _reason, socket} ->
-            {:noreply, push_flash(socket, :error, subscription_action_error_copy(socket, action))}
+              {:error, _reason, socket} ->
+                {:noreply,
+                 push_flash(socket, :error, subscription_action_error_copy(socket, action))}
+            end
+
+          {:error, socket} ->
+            {:noreply, reject_stale_review(socket)}
         end
 
       action ->
@@ -355,7 +375,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </div>
             <div class="ax-page-actions">
               <button
-                :if={@swap_plan_available}
+                :if={action_available?(@subscription, "swap_plan")}
                 type="button"
                 class="ax-button ax-button-primary"
                 phx-click="open_action_drawer"
@@ -366,7 +386,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <%= action_label("swap_plan") %>
               </button>
               <button
-                :if={!braintree_processor?(@subscription)}
+                :if={action_available?(@subscription, "cancel_at_period_end")}
                 type="button"
                 class="ax-button ax-button-secondary"
                 phx-click="open_action_drawer"
@@ -1336,13 +1356,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         label: "Edit billing",
         items:
           [
-            quantity_change_available?(subscription) &&
+            action_available?(subscription, "update_quantity") &&
               action_item("update_quantity", subscription_label),
-            quantity_item_changes_available?(subscription) &&
+            action_available?(subscription, "add_item") &&
               action_item("add_item", subscription_label),
-            quantity_item_changes_available?(subscription) &&
+            action_available?(subscription, "update_item_quantity") &&
               action_item("update_item_quantity", subscription_label),
-            quantity_item_changes_available?(subscription) &&
+            action_available?(subscription, "remove_item") &&
               action_item("remove_item", subscription_label)
           ]
           |> Enum.reject(&(&1 in [false, nil]))
@@ -1350,18 +1370,22 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       %{
         label: "Collection",
         items:
-          if braintree_processor?(subscription) do
-            []
-          else
-            [action_item("pause", subscription_label), action_item("resume", subscription_label)]
-          end
+          [
+            action_available?(subscription, "pause") && action_item("pause", subscription_label),
+            action_available?(subscription, "resume") && action_item("resume", subscription_label)
+          ]
+          |> Enum.reject(&(&1 in [false, nil]))
       },
       %{
         label: "Danger zone",
-        items: [
-          action_item("cancel_now", subscription_label, danger?: true),
-          action_item("comp_subscription", subscription_label, danger?: true)
-        ]
+        items:
+          [
+            action_available?(subscription, "cancel_now") &&
+              action_item("cancel_now", subscription_label, danger?: true),
+            action_available?(subscription, "comp_subscription") &&
+              action_item("comp_subscription", subscription_label, danger?: true)
+          ]
+          |> Enum.reject(&(&1 in [false, nil]))
       }
     ]
     |> Enum.reject(&(Map.get(&1, :items) == []))
@@ -1552,10 +1576,19 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp action_available?(subscription, "swap_plan"), do: swap_plan_available?(subscription)
 
   defp action_available?(subscription, "cancel_at_period_end"),
-    do: not braintree_processor?(subscription)
+    do:
+      not braintree_processor?(subscription) and Subscription.active?(subscription) and
+        not Subscription.canceled?(subscription) and not Subscription.canceling?(subscription)
 
-  defp action_available?(subscription, "pause"), do: not braintree_processor?(subscription)
-  defp action_available?(subscription, "resume"), do: not braintree_processor?(subscription)
+  defp action_available?(subscription, "pause"),
+    do:
+      not braintree_processor?(subscription) and Subscription.active?(subscription) and
+        not Subscription.paused?(subscription) and not Subscription.canceled?(subscription)
+
+  defp action_available?(subscription, "resume"),
+    do:
+      not braintree_processor?(subscription) and
+        (Subscription.paused?(subscription) or Subscription.canceling?(subscription))
 
   defp action_available?(subscription, "update_quantity"),
     do: quantity_change_available?(subscription)
@@ -1564,9 +1597,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
        when action in ["add_item", "update_item_quantity", "remove_item"],
        do: quantity_item_changes_available?(subscription)
 
-  defp action_available?(_subscription, action)
+  defp action_available?(subscription, action)
        when action in ["cancel_now", "comp_subscription"],
-       do: true
+       do:
+         (action == "cancel_now" and not Subscription.canceled?(subscription)) or
+           (action == "comp_subscription" and not is_nil(subscription.customer_id))
 
   defp action_available?(_subscription, _action), do: false
 
@@ -1603,6 +1638,25 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp execute_pending_action(socket, action) do
+    case validate_review(socket, action) do
+      {:ok, fresh_socket, fresh_subscription} ->
+        if action.type not in @destructive_actions or StepUp.fresh?(fresh_socket) do
+          fresh_socket =
+            fresh_socket
+            |> assign(:subscription, fresh_subscription)
+            |> assign(:customer, fresh_subscription.customer)
+
+          execute_pending_action_fresh(fresh_socket, action)
+        else
+          reject_stale_review(fresh_socket)
+        end
+
+      {:error, socket} ->
+        reject_stale_review(socket)
+    end
+  end
+
+  defp execute_pending_action_fresh(socket, action) do
     subscription = socket.assigns.subscription
 
     result =
@@ -1635,6 +1689,127 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     |> assign(:pending_action, nil)
     |> assign(:drawer_action_type, nil)
   end
+
+  defp validate_review(socket, action) do
+    session = socket.assigns[:accrue_admin_session] || %{}
+    current_scope = socket.assigns.current_owner_scope
+
+    params =
+      if current_scope.mode == :organization,
+        do: %{"org" => current_scope.organization_slug},
+        else: %{}
+
+    with {:ok, scope} <- AccrueAdmin.OwnerScope.resolve(session, params),
+         true <- Auth.actor_id(scope.current_admin) == action.review_actor_id,
+         true <- scope_identity(scope) == action.review_scope,
+         {:ok, subscription} <- Subscriptions.detail(action.subscription_id, scope),
+         true <- action_available?(subscription, action.type),
+         true <- action_input_valid?(subscription, action),
+         true <- review_fingerprint(action, subscription) == action.review_fingerprint do
+      {:ok,
+       socket
+       |> assign(:current_admin, scope.current_admin)
+       |> assign(:current_owner_scope, scope), subscription}
+    else
+      _ -> {:error, socket}
+    end
+  end
+
+  defp reject_stale_review(socket) do
+    socket
+    |> assign(:pending_action, nil)
+    |> assign(:drawer_action_type, nil)
+    |> push_flash(
+      :warning,
+      "The subscription or action details changed. Review the action again before confirming."
+    )
+  end
+
+  defp scope_identity(scope) do
+    {scope.mode, scope.organization_id, scope.organization_slug, scope.platform_admin?,
+     scope.admin_org_ids}
+  end
+
+  defp review_fingerprint(action, subscription) do
+    material_subscription = %{
+      id: subscription.id,
+      customer_id: subscription.customer_id,
+      customer_owner_type: subscription.customer && subscription.customer.owner_type,
+      customer_owner_id: subscription.customer && subscription.customer.owner_id,
+      processor: subscription.processor,
+      processor_id: subscription.processor_id,
+      status: subscription.status,
+      ended_at: subscription.ended_at,
+      cancel_at_period_end: subscription.cancel_at_period_end,
+      cancel_at: subscription.cancel_at,
+      current_period_end: subscription.current_period_end,
+      pause_collection: subscription.pause_collection,
+      items:
+        Enum.map(subscription.subscription_items || [], fn item ->
+          Map.take(item, [:id, :processor_id, :price_id, :quantity])
+        end)
+    }
+
+    material_action =
+      Map.take(action, [
+        :type,
+        :new_price_id,
+        :new_quantity,
+        :item_id,
+        :pause_behavior,
+        :proration,
+        :source_event_id,
+        :source_webhook_event_id,
+        :preview
+      ])
+
+    :crypto.hash(:sha256, :erlang.term_to_binary({material_subscription, material_action}))
+  end
+
+  defp action_input_valid?(_subscription, %{
+         type: "swap_plan",
+         new_price_id: price,
+         proration: proration
+       }),
+       do: present?(price) and Map.has_key?(@proration_atoms, proration)
+
+  defp action_input_valid?(_subscription, %{
+         type: "update_quantity",
+         new_quantity: quantity,
+         proration: proration
+       }),
+       do: is_integer(quantity) and quantity > 0 and Map.has_key?(@proration_atoms, proration)
+
+  defp action_input_valid?(_subscription, %{
+         type: "add_item",
+         new_price_id: price,
+         new_quantity: quantity,
+         proration: proration
+       }),
+       do:
+         present?(price) and is_integer(quantity) and quantity > 0 and
+           Map.has_key?(@proration_atoms, proration)
+
+  defp action_input_valid?(subscription, %{
+         type: "update_item_quantity",
+         item_id: id,
+         new_quantity: quantity,
+         proration: proration
+       }),
+       do:
+         present?(id) and is_integer(quantity) and quantity > 0 and
+           Map.has_key?(@proration_atoms, proration) and
+           match?({:ok, _}, subscription_item(subscription, id))
+
+  defp action_input_valid?(subscription, %{type: "remove_item", item_id: id, proration: proration}),
+       do:
+         present?(id) and Map.has_key?(@proration_atoms, proration) and
+           match?({:ok, _}, subscription_item(subscription, id))
+
+  defp action_input_valid?(_subscription, %{type: "pause", pause_behavior: behavior}),
+    do: behavior in @pause_behaviors
+
+  defp action_input_valid?(_subscription, _action), do: true
 
   defp execute_action(subscription, _customer, %{type: "cancel_now"}, operation_id) do
     Billing.cancel(subscription, operation_id: operation_id)
@@ -1897,12 +2072,66 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp present?(_value), do: true
 
   defp confirm_copy(action, subscription, customer) do
-    Copy.subscription_confirm_workflow_message(action.type,
-      subscription_id: subscription.id,
-      customer_id: customer_label(customer),
-      source_event_id: action.source_event_id
-    )
+    base =
+      Copy.subscription_confirm_workflow_message(action.type,
+        subscription_id: subscription.processor_id || subscription.id,
+        customer_id: customer_label(customer),
+        source_event_id: action.source_event_id
+      )
+
+    base <> " " <> review_consequence(action, subscription)
   end
+
+  defp review_consequence(%{type: "cancel_now"}, _subscription),
+    do: "This cancels the subscription immediately."
+
+  defp review_consequence(%{type: "cancel_at_period_end"}, subscription),
+    do:
+      "This schedules cancellation at period end (#{format_datetime(subscription.current_period_end)})."
+
+  defp review_consequence(%{type: "pause", pause_behavior: behavior}, _subscription),
+    do: "This pauses collection using #{humanize(behavior)} behavior."
+
+  defp review_consequence(%{type: "resume"}, subscription) do
+    if Subscription.paused?(subscription),
+      do: "This resumes collection for the paused subscription.",
+      else: "This cancels the scheduled end and keeps the subscription active."
+  end
+
+  defp review_consequence(%{type: "swap_plan"} = action, _subscription) do
+    preview =
+      if action[:preview],
+        do: "Review the displayed invoice preview.",
+        else: "Invoice amount and currency preview are unavailable."
+
+    "This changes the plan to #{action.new_price_id || "an unselected plan"} with #{humanize(action.proration || "create_prorations")} proration. #{preview}"
+  end
+
+  defp review_consequence(%{type: "update_quantity"} = action, _subscription),
+    do:
+      "This changes the single subscription item quantity to #{action.new_quantity || "not selected"} with #{humanize(action.proration || "create_prorations")} proration."
+
+  defp review_consequence(%{type: "add_item"} = action, _subscription),
+    do:
+      "This adds #{action.new_price_id || "an unselected price"} at quantity #{action.new_quantity || "not selected"} with #{humanize(action.proration || "create_prorations")} proration."
+
+  defp review_consequence(%{type: type, item_id: item_id} = action, subscription)
+       when type in ["update_item_quantity", "remove_item"] do
+    item = Enum.find(subscription.subscription_items || [], &(to_string(&1.id) == item_id))
+    item_label = if item, do: subscription_item_label(item), else: "an unavailable item"
+
+    if type == "remove_item" do
+      "This removes #{item_label} with #{humanize(action.proration || "create_prorations")} proration."
+    else
+      "This changes #{item_label} to quantity #{action.new_quantity || "not selected"} with #{humanize(action.proration || "create_prorations")} proration."
+    end
+  end
+
+  defp review_consequence(%{type: "comp_subscription"}, _subscription),
+    do: "This creates a replacement subscription; it does not change the existing subscription."
+
+  defp review_consequence(_action, _subscription),
+    do: "Review the selected billing change before confirming."
 
   defp subscription_action_error_copy(socket, action) do
     [
@@ -2035,11 +2264,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp maybe_attach_preview(_socket, action), do: action
 
   defp swap_plan_available?(subscription) do
-    if braintree_processor?(subscription) do
-      PlanResolver.configured?()
-    else
-      true
-    end
+    Subscription.active?(subscription) and not Subscription.paused?(subscription) and
+      not Subscription.canceled?(subscription) and
+      (not braintree_processor?(subscription) or PlanResolver.configured?())
   end
 
   defp preview_supported?(subscription), do: not braintree_processor?(subscription)
@@ -2048,7 +2275,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     quantity_item_changes_available?(subscription) and single_item_subscription?(subscription)
   end
 
-  defp quantity_item_changes_available?(subscription), do: not braintree_processor?(subscription)
+  defp quantity_item_changes_available?(subscription),
+    do:
+      not braintree_processor?(subscription) and Subscription.active?(subscription) and
+        not Subscription.paused?(subscription) and not Subscription.canceled?(subscription)
 
   defp single_item_subscription?(subscription) do
     length(subscription.subscription_items || []) == 1
