@@ -71,7 +71,7 @@
         window.braintree.hostedFields.create(
           {
             client: clientInstance,
-            styles: hostedFieldStyles(),
+            styles: hostedFieldStyles(this.el),
             fields: {
               number: { selector: fieldSelector(this.el, "number"), placeholder: "4111 1111 1111 1111" },
               expirationDate: { selector: fieldSelector(this.el, "expirationDate"), placeholder: "MM / YY" },
@@ -264,22 +264,52 @@
     }
   });
 
-  function hostedFieldStyles() {
+  function hostedFieldStyles(form) {
+    var fields = {};
+    ["number", "expirationDate", "cvv"].forEach(function (name) {
+      var field = form.querySelector('[data-braintree-field="' + name + '"]');
+      var background = field ? normalizedColor(getComputedStyle(field).backgroundColor, "#FFFFFF") : "#FFFFFF";
+      var backgroundLuminance = colorLuminance(background);
+      var primary = normalizedColor(getComputedStyle(document.documentElement).getPropertyValue("--accrue-ink"), "#111418");
+      var muted = normalizedColor(getComputedStyle(document.documentElement).getPropertyValue("--accrue-slate"), "#5D6A73");
+      var invalid = normalizedColor(backgroundLuminance > 0.45 ? "#9B1C1C" : "#FFB4AB", "#9B1C1C");
+      fields[name] = { input: { color: primary }, invalid: { color: invalid }, placeholder: { color: muted } };
+    });
     return {
       input: {
-        color: "#111418",
+        color: fields.number.input.color,
         "font-size": "16px",
         "font-family": "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         "font-weight": "400",
         "line-height": "1.5"
       },
-      "input.invalid": {
-        color: "#B42318"
-      },
-      "::placeholder": {
-        color: "#5D6A73"
-      }
+      "input.invalid": { color: fields.number.invalid.color },
+      "::placeholder": { color: fields.number.placeholder.color },
+      "input[name=expirationDate]": { color: fields.expirationDate.input.color },
+      "input[name=cvv]": { color: fields.cvv.input.color }
     };
+  }
+
+  function normalizedColor(value, fallback) {
+    var probe = document.createElement("span");
+    probe.style.color = "";
+    probe.style.color = String(value || "").trim();
+    if (!probe.style.color) return fallback;
+    document.body.appendChild(probe);
+    var normalized = getComputedStyle(probe).color;
+    probe.remove();
+    if (!/^rgba?\(/i.test(normalized) && !/^color\(srgb\s/i.test(normalized)) return fallback;
+    return normalized;
+  }
+
+  function colorLuminance(color) {
+    var channels = color.match(/\d+/g);
+    if (!channels || channels.length < 3) return 1;
+    var rgb = channels.slice(0, 3).map(function (channel) {
+      var value = Number(channel) / 255;
+      return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
   }
 
   function fieldSelector(form, fieldName) {
@@ -348,6 +378,7 @@
     if (choice !== "system" && choice !== "light" && choice !== "dark") return;
 
     document.documentElement.dataset.theme = choice;
+    hostedFieldsHooks.slice().forEach(refreshHostedFields);
     document.cookie =
       "accrue_theme=" + choice + "; path=/; max-age=31536000; samesite=lax";
 
@@ -365,6 +396,26 @@
         button.classList.remove("is-active");
       }
     }
+  }
+
+  function refreshHostedFields(hook) {
+    if (!hook || hook.isDestroyed || !hook.hostedFields) return;
+    var nextStyles = JSON.stringify(hostedFieldStyles(hook.el));
+    if (nextStyles === hook.hostedFieldStylesSnapshot) return;
+    hook.lifecycleGeneration = (hook.lifecycleGeneration || 0) + 1;
+    hook.readyToSubmit = false;
+    hook.tokenizing = false;
+    var nonce = hook.el.querySelector("[data-braintree-nonce-input]");
+    if (nonce) nonce.value = "";
+    setSubmitDisabled(hook.el.querySelector("[data-checkout-submit]"), true);
+    var old = hook.hostedFields;
+    hook.hostedFields = null;
+    old.teardown(function () {
+      if (!hook.isDestroyed) {
+        hook.el.dataset.hostedFieldsBound = "0";
+        hook.mounted();
+      }
+    });
   }
 
   function handleThemeClick(event) {

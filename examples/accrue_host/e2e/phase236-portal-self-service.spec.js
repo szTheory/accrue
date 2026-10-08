@@ -39,6 +39,7 @@ async function installHostedFieldsMock(page, options = {}) {
       hostedFields: {
         create(_options, callback) {
           counts.hostedFieldsCreate += 1;
+          window.__phase236HostedFieldsEvidence.styles = _options.styles;
           saveCounts();
           window.setTimeout(() => {
             callback(null, {
@@ -73,6 +74,7 @@ async function installHostedFieldsMock(page, options = {}) {
       value: {
         counts,
         kind: "deterministic injected Hosted Fields SDK; not live provider proof"
+        ,styles: null
       }
     });
     Object.defineProperty(window, "braintree", {
@@ -82,6 +84,36 @@ async function installHostedFieldsMock(page, options = {}) {
     });
   }, options);
 }
+
+test("Hosted Fields hand off readable semantic styles on direct add-card navigation", async ({ page, sandboxId }) => {
+  await installHostedFieldsMock(page);
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  await page.emulateMedia({ colorScheme: "dark" });
+  const response = await page.goto("/billing/payment-methods/new");
+  expect(response && response.status()).toBe(200);
+  await waitForLiveView(page);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.styles)).not.toBeNull();
+  const evidence = await page.evaluate(() => {
+    const form = document.querySelector('[data-portal-hosted-fields="payment-method"]');
+    const fields = Array.from(form.querySelectorAll("[data-braintree-field]")).map((field) => ({
+      name: field.dataset.braintreeField,
+      background: getComputedStyle(field).backgroundColor,
+      label: getComputedStyle(field.closest("label")).color,
+      help: getComputedStyle(document.querySelector(".portal-help")).color
+    }));
+    return { fields, styles: window.__phase236HostedFieldsEvidence.styles, label: window.__phase236HostedFieldsEvidence.kind };
+  });
+  expect(evidence.label).toContain("not live provider proof");
+  expect(evidence.fields).toHaveLength(3);
+  for (const field of evidence.fields) {
+    expect(contrastRatio(evidence.styles.input.color, field.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(evidence.styles["::placeholder"].color, field.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(evidence.styles["input.invalid"].color, field.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(field.label, field.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(field.help, field.background)).toBeGreaterThanOrEqual(4.5);
+  }
+});
 
 /** @param {import('@playwright/test').Page} page */
 async function assertNoHorizontalPageScroll(page, label) {
