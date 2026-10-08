@@ -142,7 +142,7 @@ defmodule AccruePortal.Controllers.CheckoutController do
     amount = item["amount"]
 
     item["price"] == checkout.price_id and item["quantity"] == 1 and
-      is_integer(amount_minor) and amount_minor > 0 and item["amount_minor"] == amount_minor and
+      is_integer(amount_minor) and amount_minor >= 0 and item["amount_minor"] == amount_minor and
       valid_decimal_amount?(amount, amount_minor) and valid_currency?(currency) and
       item["currency"] == currency and metadata["processor"] == checkout.processor and
       metadata["billable_id"] == to_string(context.owner_id) and
