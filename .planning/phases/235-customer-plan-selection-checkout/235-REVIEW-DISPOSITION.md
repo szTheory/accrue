@@ -9,9 +9,9 @@ findings:
     title: "LiveView completion accepts an unchecked external redirect"
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Braintree completion returns an unverifiable Stripe placeholder"
-open: 1
+open: 0
 total: 2
 recorded: 2026-10-08T15:35:31.979Z
 ---
@@ -21,7 +21,7 @@ recorded: 2026-10-08T15:35:31.979Z
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
 | CR-01 | critical | fixed | 235-REVIEW-FIX.md (not in the current review) |
-| WR-01 | warning | open | - (not in the current review) |
+| WR-01 | warning | fixed | 235-06-SUMMARY.md (not in the current review) |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.
