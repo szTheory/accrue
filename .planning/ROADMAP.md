@@ -86,7 +86,27 @@ Plans:
   4. Mounted owner/customer denials and forged actions remain denied without exposing foreign records or payment-token data.
   5. The affected Admin flows remain usable by keyboard and at narrow/coarse-pointer sizes, with the relevant light/dark and empty/error states checked in this slice.
 
-**Plans**: TBD
+**Plans**: 7 plans
+Plans:
+**Wave 1**
+- [ ] 234-01-PLAN.md — Scoped subscription list, detail and return trace; immutable pre-layout capture
+- [ ] 234-02-PLAN.md — Factual Home and bounded global search
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 234-07-PLAN.md — Scoped customer and related-record return journey
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 234-03-PLAN.md — Lifecycle truth and readable record hierarchy
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 234-04-PLAN.md — Eligible action review and fresh dispatch gate
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 234-05-PLAN.md — Stable action intent and truthful scoped results
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 234-06-PLAN.md — Served keyboard, responsive, denial and CI evidence
+
 **UI hint**: yes
 
 ### Phase 235: Customer Plan Selection & Checkout
