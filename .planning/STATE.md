@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 234
 current_phase_name: Admin Customers & Subscriptions
 status: executing
-stopped_at: Completed 234-04-PLAN.md
-last_updated: "2026-10-08T01:32:29.613Z"
+stopped_at: Completed 234-05-PLAN.md
+last_updated: "2026-10-08T01:46:28.387Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 234 execution started
-state_head: 26edbe7aad9fac9bea217a135556bcab5bcf0893
+state_head: d9b2fba9e309a9e72384179f602f2df46dca4d43
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 13
   percent: 14
 ---
 
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 234 (Admin Customers & Subscriptions) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-10-07 — Phase 234 execution started
 
@@ -111,6 +111,7 @@ Last activity: 2026-10-07 — Phase 234 execution started
 | Phase 234 P07 | 7min | 2 tasks | 13 files |
 | Phase 234 P03 | 15min | 2 tasks | 13 files |
 | Phase 234 P04 | 6min | 2 tasks | 2 files |
+| Phase 234 P05 | 15min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -207,6 +208,8 @@ Last activity: 2026-10-07 — Phase 234 execution started
 - [Phase 234]: Preserved the record-aware ScopedPath return behavior approved in Plan 234-07.
 - [Phase 234]: Lifecycle-aware eligibility distinguishes paused collection from scheduled-cancellation resume.
 - [Phase 234]: Reviewed actions re-read the host actor, owner scope, local target, items, and material consequence facts before dispatch.
+- [Phase 234]: Keep operation identity stable per staged intent and ephemeral across reconnects; reconnect requires a fresh scoped read and review.
+- [Phase 234]: Classify provider outcomes only by available evidence; uncertain outcomes block blind retry and use owner-scoped reads.
 
 ### Pending Todos
 
@@ -277,8 +280,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T01:32:29.581Z
-Stopped at: Completed 234-04-PLAN.md
+Last session: 2026-10-08T01:46:28.351Z
+Stopped at: Completed 234-05-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
