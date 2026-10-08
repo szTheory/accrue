@@ -268,7 +268,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       |> TestRepo.update!()
 
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+      assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
       assert html =~ lifecycle
 
       case fields do

@@ -142,33 +142,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
-  defp prepare_staged_action(params, socket) do
-    case pending_action(params, socket) do
-      {:ok, action} ->
-        if action_available?(socket.assigns.subscription, action.type) and
-             action_input_valid?(socket.assigns.subscription, action) do
-          action = maybe_attach_preview(socket, action)
-
-          action =
-            action
-            |> Map.put(:subscription_id, socket.assigns.subscription.id)
-            |> Map.put(:review_actor_id, Auth.actor_id(socket.assigns.current_admin))
-            |> Map.put(:review_scope, scope_identity(socket.assigns.current_owner_scope))
-            |> Map.put(
-              :review_fingerprint,
-              review_fingerprint(action, socket.assigns.subscription)
-            )
-
-          {:noreply, stage_action(socket, action)}
-        else
-          {:noreply, reject_unavailable_action(socket)}
-        end
-
-      :error ->
-        {:noreply, reject_unavailable_action(socket)}
-    end
-  end
-
   def handle_event("prepare_action", _params, socket),
     do: {:noreply, reject_unavailable_action(socket)}
 
@@ -210,6 +183,33 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   def handle_event("step_up_dismiss", _params, socket) do
     {:noreply, dismiss_step_up_if_pending(socket)}
+  end
+
+  defp prepare_staged_action(params, socket) do
+    case pending_action(params, socket) do
+      {:ok, action} ->
+        if action_available?(socket.assigns.subscription, action.type) and
+             action_input_valid?(socket.assigns.subscription, action) do
+          action = maybe_attach_preview(socket, action)
+
+          action =
+            action
+            |> Map.put(:subscription_id, socket.assigns.subscription.id)
+            |> Map.put(:review_actor_id, Auth.actor_id(socket.assigns.current_admin))
+            |> Map.put(:review_scope, scope_identity(socket.assigns.current_owner_scope))
+            |> Map.put(
+              :review_fingerprint,
+              review_fingerprint(action, socket.assigns.subscription)
+            )
+
+          {:noreply, stage_action(socket, action)}
+        else
+          {:noreply, reject_unavailable_action(socket)}
+        end
+
+      :error ->
+        {:noreply, reject_unavailable_action(socket)}
+    end
   end
 
   defp confirm_staged_action(socket) do
