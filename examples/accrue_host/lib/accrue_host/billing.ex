@@ -298,6 +298,7 @@ defmodule AccrueHost.Billing do
   end
 
   defp portal_target_allowed(nil, billable, billable), do: :ok
+  defp portal_target_allowed(%Customer{}, billable, billable), do: :ok
   defp portal_target_allowed(%Customer{id: id}, _billable, %Customer{id: id}), do: :ok
 
   defp portal_target_allowed(%Customer{id: id}, _billable, %{customer_id: target_id})

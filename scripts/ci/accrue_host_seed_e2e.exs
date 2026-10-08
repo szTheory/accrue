@@ -42,11 +42,20 @@ defmodule AccrueHostSeedE2E do
   ]
   @fixture_subscription_processor_ids [
     "sub_host_browser_replay",
+    "sub_bt_host_portal_fixture",
+    "sub_bt_host_portal_partial",
     # Plan 04 host edge_states.exs: at-risk and canceling subscriptions
     "sub_e2e_edge_at_risk",
     "sub_e2e_edge_canceling"
   ]
-  @fixture_subscription_item_processor_ids ["si_host_browser_replay"]
+  @fixture_subscription_item_processor_ids [
+    "si_host_browser_replay",
+    "si_bt_host_portal_fixture"
+  ]
+  @fixture_invoice_processor_ids [
+    "inv_bt_host_portal_personal",
+    "inv_bt_host_portal_workspace"
+  ]
   @fixture_discount_codes ["SPRING25", "BROKEN"]
   @fixture_checkout_operation_ids [
     "host-browser-portal-checkout",
@@ -134,8 +143,27 @@ defmodule AccrueHostSeedE2E do
     webhook = insert_fixture_webhook!(customer, subscription)
     portal_customer = insert_portal_checkout_customer!(normal_user)
     portal_payment_methods = insert_portal_payment_methods!(portal_customer)
+    portal_subscription = insert_portal_subscription!(portal_customer)
+    portal_partial_subscription = insert_portal_partial_subscription!(portal_customer)
+    portal_invoice =
+      insert_portal_invoice!(
+        portal_customer,
+        portal_subscription,
+        "inv_bt_host_portal_personal",
+        "INV-PORTAL-PERSONAL-001",
+        "https://example.test/portal-personal-invoice"
+      )
+
     checkout_session = insert_portal_checkout_session!(portal_customer)
     org_checkout_customer = insert_org_checkout_customer!(host_org_alpha)
+    org_portal_invoice =
+      insert_portal_invoice!(
+        org_checkout_customer,
+        nil,
+        "inv_bt_host_portal_workspace",
+        "INV-PORTAL-WORKSPACE-001",
+        "https://example.test/portal-workspace-invoice"
+      )
 
     org_checkout_session =
       insert_portal_checkout_session!(org_checkout_customer, "host-browser-org-checkout")
@@ -212,6 +240,11 @@ defmodule AccrueHostSeedE2E do
         default: portal_payment_methods.default.id,
         backup: portal_payment_methods.backup.id
       },
+      portal_subscription_id: to_string(portal_subscription.id),
+      portal_partial_subscription_id: to_string(portal_partial_subscription.id),
+      portal_invoice_id: to_string(portal_invoice.id),
+      portal_invoice_url: portal_invoice.hosted_url,
+      org_portal_invoice_url: org_portal_invoice.hosted_url,
       portal_checkout_token: checkout_session.session_token,
       portal_checkout_url: "/billing/checkout/#{checkout_session.session_token}",
       expired_portal_checkout_url:
@@ -300,6 +333,14 @@ defmodule AccrueHostSeedE2E do
 
     cleanup_session_customer_ids =
       Enum.uniq(cleanup_customer_ids ++ fixture_checkout_customer_ids)
+
+    Repo.delete_all(
+      from(invoice in Invoice,
+        where:
+          invoice.processor_id in ^@fixture_invoice_processor_ids or
+            invoice.customer_id in ^cleanup_session_customer_ids
+      )
+    )
 
     fixture_subscription_ids =
       Repo.all(
@@ -656,6 +697,101 @@ defmodule AccrueHostSeedE2E do
     |> Repo.update!()
 
     %{default: default, backup: backup}
+  end
+
+  defp insert_portal_subscription!(customer) do
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    period_start = DateTime.add(now, -30 * 24 * 60 * 60, :second)
+    period_end = DateTime.add(now, 30 * 24 * 60 * 60, :second)
+
+    subscription =
+      %Subscription{}
+      |> Subscription.changeset(%{
+        customer_id: customer.id,
+        processor: "braintree",
+        processor_id: "sub_bt_host_portal_fixture",
+        status: :active,
+        current_period_start: period_start,
+        current_period_end: period_end,
+        cancel_at_period_end: false,
+        data: %{
+          "cancel_at_period_end" => false,
+          "current_period_start" => DateTime.to_unix(period_start),
+          "current_period_end" => DateTime.to_unix(period_end),
+          "items" => %{
+            "data" => [
+              %{
+                "id" => "si_bt_host_portal_fixture",
+                "price" => %{"id" => "price_basic", "product" => "prod_host_portal"}
+              }
+            ]
+          }
+        }
+      })
+      |> Repo.insert!()
+
+    %SubscriptionItem{}
+    |> SubscriptionItem.changeset(%{
+      subscription_id: subscription.id,
+      processor: "braintree",
+      processor_id: "si_bt_host_portal_fixture",
+      price_id: "price_basic",
+      processor_plan_id: "price_basic",
+      processor_product_id: "prod_host_portal",
+      quantity: 1,
+      current_period_start: period_start,
+      current_period_end: period_end,
+      data: %{
+        "id" => "si_bt_host_portal_fixture",
+        "price" => %{"id" => "price_basic", "product" => "prod_host_portal"}
+      }
+    })
+    |> Repo.insert!()
+
+    Repo.preload(subscription, :subscription_items)
+  end
+
+  defp insert_portal_partial_subscription!(customer) do
+    %Subscription{}
+    |> Subscription.changeset(%{
+      customer_id: customer.id,
+      processor: "braintree",
+      processor_id: "sub_bt_host_portal_partial",
+      status: :past_due,
+      data: %{
+        "items" => %{
+          "data" => [
+            %{"id" => "si_bt_host_portal_partial", "price" => %{"id" => "price_basic"}}
+          ]
+        }
+      }
+    })
+    |> Repo.insert!()
+  end
+
+  defp insert_portal_invoice!(customer, subscription, processor_id, number, hosted_url) do
+    %Invoice{}
+    |> Invoice.changeset(%{
+      customer_id: customer.id,
+      subscription_id: subscription && subscription.id,
+      processor: "braintree",
+      processor_id: processor_id,
+      status: :open,
+      number: number,
+      currency: "usd",
+      total_minor: 4_900,
+      amount_due_minor: 4_900,
+      amount_paid_minor: 0,
+      amount_remaining_minor: 4_900,
+      collection_method: "charge_automatically",
+      total_discount_amounts: %{},
+      automatic_tax: false,
+      pdf_url: hosted_url <> ".pdf",
+      hosted_url: hosted_url,
+      metadata: %{},
+      data: %{}
+    })
+    |> Repo.insert!()
   end
 
   defp insert_portal_checkout_session!(

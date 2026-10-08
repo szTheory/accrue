@@ -1628,6 +1628,16 @@ jobs:
           ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
         run: cd examples/accrue_host && npm run e2e:braintree-checkout
 
+      - name: Run Phase 236 Portal self-service browser contract
+        if: matrix.shard == 1
+        env:
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE: "1"
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+        run: >-
+          cd examples/accrue_host && npm run e2e --
+          --config=playwright.braintree.config.js
+          e2e/phase236-portal-self-service.spec.js
+
       - name: Upload Braintree Playwright report
         if: failure()
         uses: actions/upload-artifact@v7
