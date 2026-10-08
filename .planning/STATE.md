@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 235
 current_phase_name: Customer Plan Selection & Checkout
 status: executing
-stopped_at: Phase 235 UI-SPEC approved
-last_updated: "2026-10-08T04:27:00.745Z"
-last_activity: 2026-10-07
-last_activity_desc: Phase 234 complete, transitioned to Phase 235
-state_head: d625ab1680c515ceb98fb8c3fc806058a38a107a
+stopped_at: Completed 235-01-PLAN.md
+last_updated: "2026-10-08T04:49:16.600Z"
+last_activity: 2026-10-08
+last_activity_desc: Phase 235 execution started
+state_head: 19d63bf642902d2ceb8d98436070a2119d855541
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 19
-  completed_plans: 15
+  completed_plans: 16
   percent: 29
 ---
 
@@ -32,10 +32,10 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 ## Current Position
 
-Phase: 235 (Customer Plan Selection & Checkout) — READY TO EXECUTE
-Plan: Not started
+Phase: 235 (Customer Plan Selection & Checkout) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-10-07 — Phase 234 complete, transitioned to Phase 235
+Last activity: 2026-10-08 — Phase 235 execution started
 
 ## Performance Metrics
 
@@ -115,6 +115,7 @@ Last activity: 2026-10-07 — Phase 234 complete, transitioned to Phase 235
 | Phase 234 P05 | 15min | 2 tasks | 3 files |
 | Phase 234 P06 | 24min | 2 tasks | 10 files |
 | Phase 234 P08 | 21min | 3 tasks | 21 files |
+| Phase 235 P01 | 20 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -220,6 +221,8 @@ Last activity: 2026-10-07 — Phase 234 complete, transitioned to Phase 235
 - [Phase 234]: Use the existing merge-blocking Playwright job and its isolated Postgres service because search correctness has recurring value.
 - [Phase 234]: Keep the Phase 234-06 screenshot artifact immutable; verify current served asset equality, accessibility, computed style, and layout directly.
 - [Phase 234]: Skip confirmation-only UAT when all testable acceptance claims have passing automated evidence.
+- [Phase 235]: Preserve the existing checkout POST contract and use fetch so uncertain responses remain visible without replay.
+- [Phase 235]: Treat a nonce and browser navigation as non-authoritative; the deterministic server case asserts context denial.
 
 ### Pending Todos
 
@@ -290,9 +293,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T04:07:24.116Z
-Stopped at: Phase 235 UI-SPEC approved
-Resume file: .planning/phases/235-customer-plan-selection-checkout/235-UI-SPEC.md
+Last session: 2026-10-08T04:49:16.561Z
+Stopped at: Completed 235-01-PLAN.md
+Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 

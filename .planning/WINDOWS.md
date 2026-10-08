@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 4
+open_count: 5
 waived_count: 6
 fixed_count: 8
-total_count: 18
-last_updated: 2026-10-08T01:32:40.174Z
+total_count: 19
+last_updated: 2026-10-08T04:49:19.603Z
 ---
 
 # Broken Windows Ledger
@@ -33,6 +33,7 @@ last_updated: 2026-10-08T01:32:40.174Z
 | 16 | 234 | deviation | .planning/phases/234-admin-customers-subscriptions/234-03-SUMMARY.md |  | TDD-marked task tests were added after implementation; workflow TDD mode was disabled and no RED commit was produced. | open |  | 2026-10-08T01:20:22.343Z |  |
 | 17 | 234 | deviation | accrue_admin/test/accrue_admin/live/subscription_live_test.exs |  | Task 2 delayed review assertions were committed after the overlapping fresh-dispatch implementation, so Task 2 has no separate RED commit. | open |  | 2026-10-08T01:31:43.711Z |  |
 | 18 | 234 | deviation | .planning/ROADMAP.md |  | roadmap.update-plan-progress 234 returned missing_phase_details, so the aggregate Phase 234 roadmap entry could not be updated. | open |  | 2026-10-08T01:32:40.174Z |  |
+| 19 | 235 | deviation | examples/accrue_host/e2e/phase233-braintree-checkout.spec.js |  | Mock SDK proves the nonce-bearing server denial; live Braintree provider acceptance was not verified because the configured gateway returned HTTP 500. | open |  | 2026-10-08T04:49:19.603Z |  |
 
 ````json
 [
@@ -257,6 +258,19 @@ last_updated: 2026-10-08T01:32:40.174Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-08T01:32:40.174Z",
+    "resolved_at": null,
+    "milestone": "v1.63"
+  },
+  {
+    "id": 19,
+    "kind": "deviation",
+    "phase": "235",
+    "file": "examples/accrue_host/e2e/phase233-braintree-checkout.spec.js",
+    "line": null,
+    "description": "Mock SDK proves the nonce-bearing server denial; live Braintree provider acceptance was not verified because the configured gateway returned HTTP 500.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-08T04:49:19.603Z",
     "resolved_at": null,
     "milestone": "v1.63"
   }
