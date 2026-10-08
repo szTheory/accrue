@@ -15,7 +15,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 
 ### Admin
 
-- [ ] **ADM-01**: Operators can distinguish a known subscription lifecycle from missing ancillary observations; missing data does not turn an active subscription into an inactive one.
+- [x] **ADM-01**: Operators can distinguish a known subscription lifecycle from missing ancillary observations; missing data does not turn an active subscription into an inactive one.
 - [ ] **ADM-02**: Operators can distinguish draft, open, and overdue invoices and see missing due dates honestly; amounts preserve currency and minor-unit precision, including zero- and three-decimal currencies.
 - [x] **ADM-03**: Operators can search, enter a nondefault owner scope, navigate customer/subscription/related records, and return without losing the correct owner, object, or filter context.
 - [ ] **ADM-04**: Operators can use only eligible subscription lifecycle actions, with existing confirmation, step-up, expiry, duplicate-protection, and truthful result-evidence behavior preserved.
@@ -86,7 +86,7 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | BASE-01 | Phase 233 | Complete |
 | SYS-01 | Phase 233 | Complete |
 | SYS-02 | Phase 233 | Complete |
-| ADM-01 | Phase 234 | Pending |
+| ADM-01 | Phase 234 | Complete |
 | ADM-02 | Phase 237 | Pending |
 | ADM-03 | Phase 234 | Complete |
 | ADM-04 | Phase 234 | Pending |

@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 234
 current_phase_name: Admin Customers & Subscriptions
 status: executing
-stopped_at: Completed 234-01-PLAN.md
-last_updated: "2026-10-08T00:42:14.226Z"
+stopped_at: Completed 234-02-PLAN.md
+last_updated: "2026-10-08T00:52:09.728Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 234 execution started
-state_head: cf03cc80215ddb7ea4b6377ddfcf523bfe610094
+state_head: 39ca340191667a8b61fd167f0ca04f9cb35a45be
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 14
-  completed_plans: 8
+  completed_plans: 9
   percent: 14
 ---
 
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 234 (Admin Customers & Subscriptions) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-10-07 — Phase 234 execution started
 
@@ -107,6 +107,7 @@ Last activity: 2026-10-07 — Phase 234 execution started
 | Phase 233 P05 | 26min | 2 tasks | 19 files |
 | Phase 233 P05 | 59min | 2 tasks | 26 files |
 | Phase 234 P01 | 12m | 2 tasks | 12 files |
+| Phase 234 P02 | 7min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -195,6 +196,8 @@ Last activity: 2026-10-07 — Phase 234 execution started
 - [Phase 233]: Fake and Braintree browser proof run in separate processes with test-only configuration; both lanes run in CI and local full verification. Inherited UI refinements are deferred to owning route phases.
 - [Phase 234]: Return URLs preserve only allowlisted mounted list state; the current server scope owns authorization and organization context.
 - [Phase 234]: Signed subscription cursors must still reference a row within the active owner scope and filter.
+- [Phase 234]: Home shows bounded scoped audit activity instead of unsupported global aggregates.
+- [Phase 234]: Global search is a bounded async preview with explicit partial failure and stale-result invalidation.
 
 ### Pending Todos
 
@@ -265,8 +268,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T00:42:14.186Z
-Stopped at: Completed 234-01-PLAN.md
+Last session: 2026-10-08T00:52:09.686Z
+Stopped at: Completed 234-02-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
