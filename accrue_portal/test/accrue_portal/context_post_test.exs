@@ -98,6 +98,7 @@ defmodule AccruePortal.ContextPostTest do
   end
 
   alias Accrue.Billing.PaymentMethod
+  alias AccruePortal.Copy
   alias AccruePortal.TestRepo
 
   import AccruePortal.Fixtures
@@ -152,6 +153,9 @@ defmodule AccruePortal.ContextPostTest do
 
     assert_context_redirect(default_response, "/billing/payment-methods", pin)
 
+    assert Phoenix.Flash.get(default_response.assigns.flash, :info) ==
+             Copy.payment_methods_default_success()
+
     assert Accrue.Processor.Fake.call_count(:set_default_payment_method) ==
              default_calls_before + 1
 
@@ -174,9 +178,49 @@ defmodule AccruePortal.ContextPostTest do
       })
 
     assert_context_redirect(delete_response, "/billing/payment-methods", pin)
+
+    assert Phoenix.Flash.get(delete_response.assigns.flash, :error) ==
+             Copy.payment_methods_delete_error()
+
     assert Accrue.Processor.Fake.call_count(:detach_payment_method) == delete_calls_before + 1
     assert %PaymentMethod{} = TestRepo.get(PaymentMethod, default_method.id)
     assert %PaymentMethod{} = TestRepo.get(PaymentMethod, other_method.id)
+  end
+
+  test "failed default changes announce failure without changing the customer default", %{
+    conn: conn
+  } do
+    %{user: user, customer: customer, payment_method: payment_method} = dashboard_fixture!()
+
+    TestRepo.update!(
+      Accrue.Billing.Customer.changeset(customer, %{default_payment_method_id: payment_method.id})
+    )
+
+    target = payment_method_fixture!(customer, %{processor_id: "pm_failed_default_target"})
+    conn = sign_in_conn(conn, user)
+    assert {:ok, _view, html} = live_payment_methods(conn)
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    Accrue.Processor.Fake.stub(:set_default_payment_method, fn _customer_id, _params, _opts ->
+      {:error, :offline}
+    end)
+
+    on_exit(fn -> Accrue.Processor.Fake.unstub(:set_default_payment_method) end)
+
+    response =
+      post(conn, "/billing/payment-methods/#{target.id}/default", %{
+        "context_pin" => pin
+      })
+
+    assert_context_redirect(response, "/billing/payment-methods", pin)
+
+    assert Phoenix.Flash.get(response.assigns.flash, :error) ==
+             Copy.payment_methods_default_error()
+
+    assert TestRepo.get!(Accrue.Billing.Customer, customer.id).default_payment_method_id ==
+             payment_method.id
   end
 
   test "missing and forged pins block payment method writes", %{conn: conn} do
@@ -264,6 +308,7 @@ defmodule AccruePortal.ContextPinPolicyTest do
   alias AccruePortal.ContextPostTest.CountingTokenGenerator
   alias AccruePortal.ContextPostTest.Organization
   alias AccruePortal.ContextPostTest.TokenCounter
+  alias AccruePortal.Copy
 
   import AccruePortal.Fixtures
 
@@ -332,6 +377,68 @@ defmodule AccruePortal.ContextPinPolicyTest do
 
     assert TokenCounter.count() == 0
     refute html =~ ~s(data-portal-hosted-fields="payment-method")
+  end
+
+  test "payment method actions appear only when the selected owner grants them", %{conn: conn} do
+    owner_id = "org-payment-method-capabilities"
+
+    %{customer: customer} =
+      Accrue.Test.Factory.active_subscription(%{
+        owner_type: Organization.__accrue__(:billable_type),
+        owner_id: owner_id,
+        email: "#{owner_id}@example.com",
+        name: "Capability Organization"
+      })
+
+    default_method =
+      payment_method_fixture!(customer, %{
+        processor_id: "pm_capability_default",
+        card_brand: "visa",
+        card_last4: "4242",
+        is_default: true
+      })
+
+    additional_method =
+      payment_method_fixture!(customer, %{
+        processor_id: "pm_capability_additional",
+        card_brand: "mastercard",
+        card_last4: "5555"
+      })
+
+    AccruePortal.TestRepo.update!(
+      Accrue.Billing.Customer.changeset(customer, %{default_payment_method_id: default_method.id})
+    )
+
+    conn =
+      Plug.Test.init_test_session(conn, %{
+        "user_token" => "customer:00000000-0000-0000-0000-000000000123",
+        "active_billable_id" => owner_id
+      })
+
+    ActionAdapter.grant(owner_id, [])
+    assert {:ok, _view, read_only_html} = live(conn, "/org-billing/payment-methods")
+    refute read_only_html =~ "/org-billing/payment-methods/new?"
+    refute read_only_html =~ "/org-billing/payment-methods/#{additional_method.id}/default"
+    refute read_only_html =~ "/org-billing/payment-methods/#{additional_method.id}/delete"
+
+    ActionAdapter.grant(owner_id, [:payment_method_default])
+    assert {:ok, _view, default_only_html} = live(conn, "/org-billing/payment-methods")
+    assert default_only_html =~ "/org-billing/payment-methods/#{additional_method.id}/default"
+
+    assert default_only_html =~
+             "Set mastercard ending in 5555 as the default payment method for Test Organization?"
+
+    refute default_only_html =~ "/org-billing/payment-methods/#{additional_method.id}/delete"
+    refute default_only_html =~ "/org-billing/payment-methods/new?"
+
+    ActionAdapter.grant(owner_id, [:payment_method_delete])
+    assert {:ok, _view, delete_only_html} = live(conn, "/org-billing/payment-methods")
+    assert delete_only_html =~ "/org-billing/payment-methods/#{additional_method.id}/delete"
+    refute delete_only_html =~ "/org-billing/payment-methods/#{default_method.id}/delete"
+    assert delete_only_html =~ Copy.payment_methods_default_removal_blocked()
+
+    assert delete_only_html =~
+             "Remove mastercard ending in 5555 from the saved payment methods for Test Organization?"
   end
 
   test "default and delete pins remain bound to organization A after selecting B", %{conn: conn} do

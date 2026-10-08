@@ -45,6 +45,41 @@ defmodule AccruePortal.BillingReadModel do
     methods
   end
 
+  @doc "Returns a distinct successful or unavailable outcome for customer-facing card reads."
+  def payment_method_result(%Customer{} = customer) do
+    cond do
+      not current_processor?(customer) ->
+        {:error, :unsupported}
+
+      not Accrue.Processor.supports?([:payment_method, :list]) ->
+        {:error, :unsupported}
+
+      true ->
+        reader =
+          Application.get_env(
+            :accrue_portal,
+            :payment_method_reader,
+            &Accrue.Billing.list_payment_methods/1
+          )
+
+        case reader.(customer) do
+          {:ok, methods} when is_list(methods) -> {:ok, methods}
+          methods when is_list(methods) -> {:ok, methods}
+          {:error, _reason} -> {:error, :unavailable}
+          _ -> {:error, :unavailable}
+        end
+    end
+  rescue
+    _exception in [DBConnection.ConnectionError, Postgrex.Error] -> {:error, :unavailable}
+  end
+
+  defp current_processor?(%Customer{processor: customer_processor}) do
+    processor = Accrue.Processor.__impl__()
+    customer_processor == processor.processor_name()
+  rescue
+    _ -> false
+  end
+
   def payment_method(%Customer{id: customer_id}, id) when is_binary(id) do
     case Repo.get_by(PaymentMethod, id: id, customer_id: customer_id) do
       %PaymentMethod{} = payment_method -> {:ok, payment_method}

@@ -6,24 +6,25 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
   alias Accrue.Billing
   alias Accrue.Portal.Context
   alias AccruePortal.BillingReadModel
+  alias AccruePortal.Copy
   alias AccruePortal.Path
 
   def create(conn, %{"payment_method_nonce" => nonce}) when is_binary(nonce) and nonce != "" do
     customer = conn.assigns.current_customer
 
-    case authorize(conn, :payment_method_create, customer) do
+    case authorize_supported(conn, :payment_method_create, customer, [:vault_acquisition, :create]) do
       :ok ->
         case with_actor(conn, fn ->
                Billing.add_payment_method(customer, %{vault_acquisition: %{reference: nonce}})
              end) do
           {:ok, _payment_method} ->
             conn
-            |> put_flash(:info, "Payment method saved.")
+            |> put_flash(:info, Copy.add_payment_method_save_success())
             |> redirect(to: payment_methods_path(conn))
 
           {:error, _reason} ->
             conn
-            |> put_flash(:error, "Unable to save payment method.")
+            |> put_flash(:error, Copy.add_payment_method_save_error())
             |> redirect(to: payment_methods_path(conn))
         end
 
@@ -34,7 +35,7 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
 
   def create(conn, _params) do
     conn
-    |> put_flash(:error, "Payment method tokenization failed.")
+    |> put_flash(:error, Copy.add_payment_method_nonce_error())
     |> redirect(to: payment_methods_path(conn))
   end
 
@@ -43,19 +44,19 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
 
     case BillingReadModel.payment_method(customer, id) do
       {:ok, payment_method} ->
-        case authorize(conn, :payment_method_default, payment_method) do
+        case authorize_supported(conn, :payment_method_default, payment_method, [:set_default]) do
           :ok ->
             case with_actor(conn, fn ->
                    Billing.set_default_payment_method(customer, payment_method)
                  end) do
               {:ok, _customer} ->
                 conn
-                |> put_flash(:info, "Default payment method updated.")
+                |> put_flash(:info, Copy.payment_methods_default_success())
                 |> redirect(to: payment_methods_path(conn))
 
               {:error, _reason} ->
                 conn
-                |> put_flash(:error, "Unable to update default payment method.")
+                |> put_flash(:error, Copy.payment_methods_default_error())
                 |> redirect(to: payment_methods_path(conn))
             end
 
@@ -73,17 +74,17 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
 
     case BillingReadModel.payment_method(customer, id) do
       {:ok, payment_method} ->
-        case authorize(conn, :payment_method_delete, payment_method) do
+        case authorize_supported(conn, :payment_method_delete, payment_method, [:delete]) do
           :ok ->
             case with_actor(conn, fn -> Billing.delete_payment_method(payment_method) end) do
               {:ok, _payment_method} ->
                 conn
-                |> put_flash(:info, "Payment method deleted.")
+                |> put_flash(:info, Copy.payment_methods_delete_success())
                 |> redirect(to: payment_methods_path(conn))
 
               {:error, _reason} ->
                 conn
-                |> put_flash(:error, "Unable to delete payment method.")
+                |> put_flash(:error, Copy.payment_methods_delete_error())
                 |> redirect(to: payment_methods_path(conn))
             end
 
@@ -114,6 +115,24 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
       :ok -> :ok
       _ -> :error
     end
+  end
+
+  defp authorize_supported(conn, action, target, capabilities) do
+    customer = conn.assigns.current_customer
+    processor = Accrue.Processor.__impl__()
+
+    supported? =
+      customer.processor == processor.processor_name() and
+        (action != :payment_method_create or customer.processor in ["braintree", "fake"]) and
+        Enum.all?(capabilities, &Accrue.Processor.supports?([:payment_method, &1]))
+
+    if supported? do
+      authorize(conn, action, target)
+    else
+      :error
+    end
+  rescue
+    _ -> :error
   end
 
   defp blocked(conn) do

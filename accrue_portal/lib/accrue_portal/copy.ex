@@ -201,6 +201,20 @@ defmodule AccruePortal.Copy do
     "Add a card to subscribe to plans or update an existing subscription's payment method."
   end
 
+  def payment_methods_empty_read_only_body, do: "No payment methods are on file for this account."
+
+  def payment_methods_unavailable_title, do: "Payment methods unavailable"
+
+  def payment_methods_unavailable_body do
+    "Payment methods are temporarily unavailable. Try again in a moment."
+  end
+
+  def payment_methods_unsupported_title, do: "Payment methods unavailable"
+
+  def payment_methods_unsupported_body do
+    "Saved payment method management isn't available for this billing provider."
+  end
+
   def payment_methods_default_badge, do: "Default"
   def payment_methods_card_fallback, do: "Card"
   def payment_methods_set_default_cta, do: "Set default"
@@ -210,6 +224,19 @@ defmodule AccruePortal.Copy do
   def payment_methods_delete_error, do: "Unable to delete payment method."
   def payment_methods_default_success, do: "Default payment method updated."
   def payment_methods_default_error, do: "Unable to update default payment method."
+
+  def payment_methods_set_default_confirmation(billed_identity, card_label) do
+    "Set #{card_label} as the default payment method for #{billed_identity}? " <>
+      "Future billing that uses the account default will use this card."
+  end
+
+  def payment_methods_default_removal_blocked,
+    do: "Set another card as default before removing this one."
+
+  def payment_methods_delete_confirmation(billed_identity, card_label) do
+    "Remove #{card_label} from the saved payment methods for #{billed_identity}? " <>
+      "Future payments that need this saved card may require another card."
+  end
 
   def add_payment_method_page_title, do: "Add Payment Method"
   def add_payment_method_heading, do: "Add payment method"
@@ -227,6 +254,9 @@ defmodule AccruePortal.Copy do
   def add_payment_method_save_error, do: "Unable to save payment method."
   def add_payment_method_nonce_error, do: "Payment method tokenization failed."
   def payment_method_create_denied, do: "You don't have permission to add payment methods."
+
+  def payment_method_create_unavailable,
+    do: "Card entry isn't available for this billing provider."
 
   def invoices_page_title, do: "Invoices"
   def invoices_heading, do: "Invoices"

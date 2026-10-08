@@ -80,7 +80,14 @@ defmodule Accrue.Processor.Stripe do
   def capabilities do
     %{
       customer: %{create: true, retrieve: true, update: true},
-      payment_method: %{vault_acquisition: true, list: true},
+      payment_method: %{
+        vault_acquisition: true,
+        create: true,
+        list: true,
+        update: true,
+        delete: true,
+        set_default: true
+      },
       checkout: %{create: true, fetch: true, hosted: true, embedded: true},
       subscription: %{
         direct_create: true,
