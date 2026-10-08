@@ -124,7 +124,12 @@ Plans:
   4. Plan choice survives sign-in and return; only trusted available metadata supplies charge terms, and unknown terms or outcomes lead to recovery without blind resubmission.
   5. Checkout keyboard, narrow-screen, theme, secure SDK, pending/error-state, and served-asset behavior is checked alongside each changed form and handoff.
 
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 235-01-PLAN.md — Visible Braintree secure-form tracer and safe retry
+- [ ] 235-02-PLAN.md — Exact host-selected offer through sign-in and trusted terms
+- [ ] 235-03-PLAN.md — Reentrant-safe POST and LiveView checkout outcomes
+- [ ] 235-04-PLAN.md — Distinct hosted return and served-browser accessibility proof
 **UI hint**: yes
 
 ### Phase 236: Portal Billing Self-Service

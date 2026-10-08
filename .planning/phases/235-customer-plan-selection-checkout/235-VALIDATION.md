@@ -1,8 +1,8 @@
 ---
 phase: "235"
 slug: "customer-plan-selection-checkout"
-status: draft
-nyquist_compliant: false
+status: planned
+nyquist_compliant: true
 wave_0_complete: false
 created: "2026-10-08"
 ---
@@ -36,14 +36,18 @@ created: "2026-10-08"
 
 ## Per-Task Verification Map
 
-This draft maps each requirement to executable evidence. The planner must replace the planning-assignment labels with the actual plan/task/wave IDs when it decomposes the work.
+The mapping uses executable plan/task/wave IDs. The browser command is the existing Braintree-configured lane in merge-blocking `playwright-e2e`; its injected SDK proves the form integration path, not live-provider parity.
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| Assign from plan | Assign from plan | Assign from plan | CKO-01 | Assign from plan | Visible Hosted Fields form tokenizes and submits; valid, invalid, provider-failure, cancellation, and fresh-retry outcomes are truthful | LiveView + browser integration | `cd accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs test/accrue_portal/live/checkout_live_discount_test.exs`; `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ infrastructure exists; assertions to extend | ⬜ pending |
-| Assign from plan | Assign from plan | Assign from plan | CKO-02 | Assign from plan | Hosted-provider redirect and mounted checkout stay capability-specific; return navigation alone never proves payment | ExUnit + browser integration | `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ infrastructure exists; assertions to extend | ⬜ pending |
-| Assign from plan | Assign from plan | Assign from plan | CKO-03 | Assign from plan | Both submission transports revalidate session, expiry, promotion, and replay state; uncertain outcomes never auto-replay or claim success | ExUnit + browser integration | `cd accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs test/accrue_portal/live/checkout_live_discount_test.exs test/accrue_portal/checkout_context_test.exs` | ✅ infrastructure exists; assertions to extend | ⬜ pending |
-| Assign from plan | Assign from plan | Assign from plan | CKO-04 | Assign from plan | Selected plan survives sign-in/return; trusted terms render; missing terms and ambiguous outcomes recover safely | Host integration + browser | `cd accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs test/accrue_portal/checkout_context_test.exs`; `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ infrastructure exists; assertions to extend | ⬜ pending |
+| 235-01 Task 1 | 235-01 | 1 | CKO-01, CKO-02 | T-235-01 | Visible official Hosted Fields path tokenizes and sends one nonce through actual transport; denied context has no form | Browser integration | `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ spec exists; submit assertions to extend | ⬜ pending |
+| 235-01 Task 2 | 235-01 | 1 | CKO-01 | T-235-02 | Duplicate click, SDK failure, cancellation and uncertain response never replay nonce; fresh retry resets fields | Browser integration | `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ spec exists; recovery assertions to extend | ⬜ pending |
+| 235-02 Task 1 | 235-02 | 2 | CKO-04 | T-235-03 | Exact host offer/customer/billable/processor survive sign-in and duplicate return, with fresh host authorization | Host LiveView + browser | `cd examples/accrue_host && mix test test/accrue_host_web/live/subscription_live_test.exs && npm run e2e:braintree-checkout` | ✅ files exist; assertions to extend | ⬜ pending |
+| 235-02 Task 2 | 235-02 | 2 | CKO-03, CKO-04 | T-235-04 | Trusted exact terms render; unknown/ambiguous terms fail closed without zero-price guess | Portal LiveView | `cd accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs` | ✅ file exists; assertions to extend | ⬜ pending |
+| 235-03 Task 1 | 235-03 | 3 | CKO-03 | T-235-05, T-235-06, T-235-07 | POST reauthorizes, claims one operation and reports accepted-but-unconfirmed action honestly | LocalSession + controller ExUnit | `cd accrue && mix test test/accrue/checkout/local_session_test.exs && cd ../accrue_portal && mix test test/accrue_portal/checkout_context_test.exs` | ✅ files exist; assertions to extend | ⬜ pending |
+| 235-03 Task 2 | 235-03 | 3 | CKO-01, CKO-03 | T-235-05, T-235-06, T-235-07 | LiveView shares expiry, promotion, concurrency and uncertain-outcome rules with POST | Portal LiveView + context ExUnit | `cd accrue_portal && mix test test/accrue_portal/live/checkout_live_test.exs test/accrue_portal/live/checkout_live_discount_test.exs test/accrue_portal/checkout_context_test.exs` | ✅ files exist; assertions to extend | ⬜ pending |
+| 235-04 Task 1 | 235-04 | 4 | CKO-02 | T-235-08, T-235-09 | Stripe hosted return refetches provider evidence; Braintree stays mounted; duplicate returns are idempotent | Facade + host ExUnit | `cd accrue && mix test test/accrue/checkout_test.exs test/accrue/billing/checkout_session_facade_test.exs && cd ../examples/accrue_host && mix test test/accrue_host_web/live/subscription_live_test.exs` | ✅ files exist; assertions to extend | ⬜ pending |
+| 235-04 Task 2 | 235-04 | 4 | CKO-01, CKO-02, CKO-03, CKO-04 | T-235-10 | Served assets, all 16 UI states, 320 CSS px, 400% zoom, keyboard/focus/live status and host theme stay usable | Browser integration + existing required CI job | `cd examples/accrue_host && npm run e2e:braintree-checkout` | ✅ lane exists; assertions to extend | ⬜ pending |
 
 ---
 
@@ -61,11 +65,11 @@ All acceptance behaviors have automated verification paths. Do not require confi
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
 - [ ] Sampling continuity: no 3 consecutive tasks without automated verify
 - [x] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
+- [x] No watch-mode flags
 - [ ] Feedback latency < 30s for focused checks; full browser lane is wave-level
-- [ ] `nyquist_compliant: true` set in frontmatter after plan/task mapping and execution evidence
+- [x] `nyquist_compliant: true` set in frontmatter after plan/task mapping; execution remains pending
 
 **Approval:** pending
