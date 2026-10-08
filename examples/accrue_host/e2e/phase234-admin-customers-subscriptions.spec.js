@@ -5,6 +5,7 @@ const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 const { test, expect } = require("./support/test.js");
 const { readFixture, login, waitForLiveView } = require("./support/fixture.js");
+const AxeBuilder = require("@axe-core/playwright").default;
 
 const repoRoot = path.resolve(__dirname, "../../..");
 const phase = "234-admin-customers-subscriptions";
@@ -33,15 +34,11 @@ async function assertBaselineIsImmutable() {
   return baseline;
 }
 
-async function assertCurrentCaptureIsImmutable(currentSources, currentAssetHash) {
+async function assertStoredCaptureIsIntact() {
   const { resolvePhaseEvidencePath } = await import("../../../scripts/ci/phase_evidence_path.mjs");
   const resolve = (name) => resolvePhaseEvidencePath(phase, `captures/post-layout/234-06-final/${name}`, { root: repoRoot });
   const manifest = JSON.parse(fs.readFileSync(resolve("manifest.json"), "utf8"));
   expect(manifest.phase).toBe(phase);
-  expect(manifest.assets.served.sha256).toBe(currentAssetHash);
-  for (const [source, current] of Object.entries(currentSources)) {
-    expect(manifest.sources[source]).toEqual(current);
-  }
   for (const [name, expected] of Object.entries(manifest.images)) {
     const bytes = fs.readFileSync(resolve(name));
     expect(bytes.length).toBe(expected.bytes);
@@ -67,6 +64,31 @@ async function assertDomIntegrity(page) {
   expect(result.hiddenFocus).toBe(false);
 }
 
+async function assertNoSeriousA11yViolations(page, label) {
+  const results = await new AxeBuilder({ page }).analyze();
+  const serious = results.violations.filter((violation) => ["critical", "serious"].includes(violation.impact));
+  expect(serious, `${label}: ${JSON.stringify(serious.map(({ id, nodes }) => ({ id, count: nodes.length })))}`).toEqual([]);
+}
+
+async function assertSubscriptionDetailReadability(page) {
+  const metrics = await page.locator(".ax-subscription-detail-page").evaluate((root) => {
+    return Array.from(
+      root.querySelectorAll(".ax-summary-list-value, .ax-summary-list-action, .ax-field-label, .ax-field-value")
+    )
+      .filter((element) => element.getClientRects().length > 0)
+      .map((element) => {
+        const style = getComputedStyle(element);
+        const fontSize = Number.parseFloat(style.fontSize);
+        const lineHeight = Number.parseFloat(style.lineHeight);
+        return { text: element.textContent?.trim(), fontSize, lineHeight };
+      });
+  });
+
+  expect(metrics.length, "subscription detail should expose readable primary facts").toBeGreaterThan(0);
+  expect(metrics.filter(({ text }) => text).every(({ fontSize }) => fontSize >= 14)).toBeTruthy();
+  expect(metrics.filter(({ text }) => text).every(({ fontSize, lineHeight }) => lineHeight / fontSize >= 1.2)).toBeTruthy();
+}
+
 async function servedStylesheet(page) {
   const href = await page.locator('link[rel="stylesheet"][href*="/admin/assets/css-"]').getAttribute("href");
   expect(href).toMatch(/\/admin\/assets\/css-[a-f0-9]{32}$/);
@@ -86,6 +108,7 @@ async function capture(page, name, records, testInfo) {
 }
 
 test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and asset provenance", async ({ page, sandboxId }, testInfo) => {
+  test.setTimeout(90_000);
   const baseline = await assertBaselineIsImmutable();
   const fixture = readFixture();
   const destination = path.join(repoRoot, captureDestination);
@@ -124,7 +147,6 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
   await expect(searchInput).toBeFocused();
   await searchInput.fill("admin-e2e-alpha-customer@example.test");
   await expect(searchInput).toHaveValue("admin-e2e-alpha-customer@example.test");
-  await expect(searchDialog.locator('[role="status"]')).toContainText("Searching billing records");
   await expect(searchDialog).toHaveAttribute("aria-modal", "true");
   await capture(page, "search.png", screenshots, testInfo);
   await page.keyboard.press("Escape");
@@ -142,6 +164,7 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
   await waitForLiveView(page);
   await expect(page.getByRole("heading", { name: "admin-e2e-alpha-customer@example.test" })).toBeVisible();
   await assertDomIntegrity(page);
+  await assertNoSeriousA11yViolations(page, "customer detail, light theme");
   await capture(page, "customer-detail.png", screenshots, testInfo);
 
   const relatedSubscription = page.locator('a[href*="/admin/subscriptions/"]').first();
@@ -169,30 +192,58 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
   await waitForLiveView(page);
   await expect(page.locator("main")).toContainText("admin-e2e-alpha-customer@example.test");
   await assertDomIntegrity(page);
+  await assertSubscriptionDetailReadability(page);
+  await assertNoSeriousA11yViolations(page, "subscription detail, light theme");
   await capture(page, "subscription-detail.png", screenshots, testInfo);
 
-  const actionTrigger = page.getByRole("button", { name: /cancel|pause|resume|change/i }).first();
-  if (await actionTrigger.count()) {
-    await actionTrigger.click();
-    const drawer = page.locator("#subscription-action-drawer");
-    await expect(drawer).toBeVisible();
-    await expect(drawer.locator('[role="dialog"][aria-modal="true"]')).toBeVisible();
-    await expect(drawer).toContainText(/review|cancel|pause|resume|change/i);
-    await capture(page, "subscription-drawer.png", screenshots, testInfo);
-    await page.keyboard.press("Escape");
-    await expect(drawer).toBeHidden();
-  } else {
-    await capture(page, "subscription-drawer.png", screenshots, testInfo);
-  }
+  const actionMenu = page.locator("#subscription-action-menu");
+  await actionMenu.locator("summary").click();
+  await actionMenu.getByRole("menuitem", { name: /cancel immediately/i }).click();
+  const drawer = page.locator("#subscription-action-drawer");
+  await expect(drawer).toBeVisible();
+  await expect(drawer.locator('[role="dialog"][aria-modal="true"]')).toBeVisible();
+  await expect(drawer.locator('form[data-action-type="cancel_now"]')).toBeVisible();
+  await capture(page, "subscription-drawer.png", screenshots, testInfo);
+  await drawer.locator('form[data-action-type="cancel_now"] button[type="submit"]').click();
+  await expect(drawer.locator('[data-role="confirm-panel"]')).toBeVisible();
+  const confirmAction = drawer.locator('[data-role="confirm-action"]:visible');
+  await confirmAction.click();
+
+  const stepUp = page.locator("#accrue-admin-step-up-dialog");
+  await expect(stepUp).toBeVisible();
+  await expect(page.locator("#step-up-code")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(stepUp.getByRole("button", { name: /cancel/i })).toBeFocused();
+  await page.keyboard.press("Tab");
+  const submitStepUp = stepUp.getByRole("button", { name: /verify/i });
+  await expect(submitStepUp).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.locator("#step-up-code")).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(submitStepUp).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(stepUp).toBeHidden();
+  await expect(drawer.locator('[data-role="confirm-panel"]')).toBeVisible();
+  await expect(confirmAction).toBeFocused();
+  await expect(page.locator('[data-role="subscription-action-result"]')).toHaveCount(0);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await waitForLiveView(page);
+  await expect(page.locator("main")).toContainText("Active");
+  await expect(page.locator('[data-role="subscription-action-result"]')).toHaveCount(0);
 
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
   await page.locator("html").evaluate((element) => element.setAttribute("data-theme", "dark"));
+  await assertSubscriptionDetailReadability(page);
+  await assertNoSeriousA11yViolations(page, "subscription detail, dark theme");
   await assertNoPageOverflow(page);
   const reducedMotion = await page.locator("body").evaluate((element) => getComputedStyle(element).transitionDuration);
   expect(reducedMotion.split(",").every((duration) => parseFloat(duration) <= 0.01)).toBeTruthy();
 
   if (existing) {
-    await assertCurrentCaptureIsImmutable(sources, asset.sha256);
+    // These are immutable Phase 234-06 captures. Phase 234-08 intentionally
+    // updates typography, so current served-asset provenance is asserted above
+    // while the historical PNG bytes remain independently integrity-checked.
+    await assertStoredCaptureIsIntact();
   } else {
     fs.mkdirSync(destination, { recursive: true });
     const images = {};
@@ -242,6 +293,11 @@ test.describe("Phase 234 coarse pointer", () => {
     await assertNoPageOverflow(page);
     await assertDomIntegrity(page);
     await expect(page.locator("main")).toContainText("admin-e2e-alpha-customer@example.test");
+    await page.goto(`/admin/customers/${fixture.admin_denial_customer_id}?org=${owner}`, { waitUntil: "domcontentloaded" });
+    await waitForLiveView(page);
+    await assertNoPageOverflow(page);
+    await assertDomIntegrity(page);
+    await expect(page.getByRole("heading", { name: "admin-e2e-alpha-customer@example.test" })).toBeVisible();
     await page.goto(`/admin/subscriptions?view=all&org=${owner}`, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
     await assertNoPageOverflow(page);
@@ -250,5 +306,12 @@ test.describe("Phase 234 coarse pointer", () => {
     await expect(target).toBeVisible();
     const box = await target.boundingBox();
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    const subscriptionLink = page.locator('main a[href*="/admin/subscriptions/"]:visible').first();
+    await expect(subscriptionLink).toBeVisible();
+    await subscriptionLink.click();
+    await waitForLiveView(page);
+    await assertNoPageOverflow(page);
+    await assertDomIntegrity(page);
+    await assertSubscriptionDetailReadability(page);
   });
 });

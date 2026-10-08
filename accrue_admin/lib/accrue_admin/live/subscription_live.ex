@@ -1699,9 +1699,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     if socket.assigns[:step_up_pending] do
       socket
       |> StepUp.dismiss_challenge()
-      |> assign(:pending_action, nil)
-      |> assign(:drawer_action_type, nil)
-      |> assign(:dispatch_state, :idle)
+      |> assign(:dispatch_state, :staged)
     else
       socket
     end
