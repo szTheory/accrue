@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 236
 current_phase_name: Portal Billing Self-Service
 status: executing
-stopped_at: Completed 236-02-PLAN.md
-last_updated: "2026-10-08T16:55:10.927Z"
+stopped_at: Completed 236-04-PLAN.md
+last_updated: "2026-10-08T17:07:01.755Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 236 execution started
-state_head: b628c711aa684c7bdfde232864eff34a55f239a2
+state_head: f2c83b18d9b4404ed27f38badc11953cb70caeb4
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 26
-  completed_plans: 23
+  completed_plans: 24
   percent: 43
 ---
 
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 236 (Portal Billing Self-Service) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-10-08 — Phase 236 execution started
 
@@ -124,6 +124,7 @@ Last activity: 2026-10-08 — Phase 236 execution started
 | Phase 235 P06 | 60min | 2 tasks | 6 files |
 | Phase 236 P01 | 12 min | 2 tasks | 4 files |
 | Phase 236 P02 | 15min | 2 tasks | 11 files |
+| Phase 236 P04 | 9 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -251,6 +252,9 @@ Last activity: 2026-10-08 — Phase 236 execution started
 - [Phase 236]: A default card with another saved card cannot be removed until a replacement becomes default. — The existing billing deletion guard requires a replacement in this state, so the page should explain the next action before a doomed POST.
 - [Phase 236]: Braintree Hosted Fields are offered only to Braintree and deterministic Fake contexts. — The Portal's secure-field hook issues Braintree client tokens and nonce values; other providers need their own secure entry adapter before this route is available.
 - [Phase 236]: Card reads render explicit successful, unavailable, or unsupported outcomes. — A failed database read or unsupported provider must not be represented as a successfully empty saved-card list.
+- [Phase 236]: Explicit Braintree declines become card errors; unrelated provider failures remain uncertain. — The processor response is authoritative that it declined this card, while generic errors do not prove whether the operation completed.
+- [Phase 236]: External checkout success URLs must match the configured HTTPS portal origin; validated local paths remain supported. — A stored return URL that escapes to an unapproved host creates an open redirect; matching host and effective port keeps navigation within the configured origin.
+- [Phase 236]: Recovery links use the same allowed destination policy as success redirects. — Both destinations come from persisted checkout return data and otherwise could navigate customers to an unapproved external host.
 
 ### Pending Todos
 
@@ -324,8 +328,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T16:55:10.862Z
-Stopped at: Completed 236-02-PLAN.md
+Last session: 2026-10-08T17:06:53.779Z
+Stopped at: Completed 236-04-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
