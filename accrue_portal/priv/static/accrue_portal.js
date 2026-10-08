@@ -27,26 +27,47 @@
 
   function teardownAsyncResource(resource, callback) {
     if (!resource || typeof resource.teardown !== "function") {
-      callback();
+      callback(null);
       return;
     }
 
+    var callbackCalled = false;
+    function finish(error) {
+      if (callbackCalled) return;
+      callbackCalled = true;
+      callback(error || null);
+    }
+
     try {
-      resource.teardown(callback);
-    } catch (_error) {
-      callback();
+      resource.teardown(finish);
+    } catch (error) {
+      finish(error);
     }
   }
 
   function finishStaleHostedFieldsSetup(hook, createGeneration, clientInstance, hostedFieldsInstance) {
-    teardownAsyncResource(hostedFieldsInstance, function () {
-      teardownAsyncResource(clientInstance, function () {
+    var teardownError = null;
+    teardownAsyncResource(hostedFieldsInstance, function (hostedFieldsError) {
+      if (hostedFieldsError) teardownError = hostedFieldsError;
+      teardownAsyncResource(clientInstance, function (clientError) {
+        if (clientError && !teardownError) teardownError = clientError;
         if (hook.hostedFieldsSetupGeneration === createGeneration) {
           hook.hostedFieldsSetupInFlight = false;
           hook.hostedFieldsSetupGeneration = null;
         }
 
         if (hook.isDestroyed || !hook.hostedFieldsRetryAfterPending) return;
+
+        if (teardownError) {
+          hook.hostedFieldsRetryAfterPending = false;
+          hook.hostedFieldsSetupFailed = true;
+          setSubmitDisabled(hook.el.querySelector("[data-checkout-submit]"), true);
+          setInlineError(
+            hook.el.querySelector("[data-braintree-error]"),
+            "Secure card fields could not be safely reset. Refresh this page to try again."
+          );
+          return;
+        }
 
         hook.hostedFieldsRetryAfterPending = false;
         hook.el.dataset.hostedFieldsBound = "0";
@@ -198,6 +219,10 @@
       this.lifecycleGeneration = (this.lifecycleGeneration || 0) + 1;
       this.readyToSubmit = false;
       this.tokenizing = false;
+      if (this.hostedFieldsSetupFailed) {
+        setSubmitDisabled(this.el.querySelector("[data-checkout-submit]"), true);
+        return;
+      }
       if (this.hostedFields) {
         setSubmitting(this.el.querySelector("[data-checkout-submit]"), false);
         refreshHostedFields(this);

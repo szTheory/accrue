@@ -40,7 +40,9 @@ async function installHostedFieldsMock(page, options = {}) {
             teardown(done) {
               counts.clientTeardown += 1;
               saveCounts();
-              if (done) done();
+              if (done) done(mockOptions.failFirstClientTeardown && counts.clientTeardown === 1
+                ? new Error("mock client teardown failed")
+                : null);
             }
           });
           if (mockOptions.holdFirstClientCreate && counts.clientCreate === 1) {
@@ -74,7 +76,9 @@ async function installHostedFieldsMock(page, options = {}) {
             teardown(done) {
               counts.teardown += 1;
               saveCounts();
-              if (done) done();
+              if (done) done(mockOptions.failFirstHostedFieldsTeardown && counts.teardown === 1
+                ? new Error("mock Hosted Fields teardown failed")
+                : null);
             }
           };
           const complete = () => callback(null, instance);
@@ -256,6 +260,34 @@ test("Hosted Fields tear down stale fields and retry after a post-mount LiveView
   expect(counts.clientTeardown).toBe(1);
   expect(counts.hostedFieldsCreate).toBe(2);
   expect(counts.teardown).toBe(1);
+});
+
+test("Hosted Fields stay disabled when stale-resource teardown fails", async ({ page, sandboxId }) => {
+  await installHostedFieldsMock(page, {
+    holdFirstHostedFieldsCreate: true,
+    failFirstHostedFieldsTeardown: true
+  });
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  await page.goto("/billing/payment-methods/new");
+  await waitForLiveView(page);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(1);
+
+  const form = page.locator('[data-portal-hosted-fields="payment-method"]');
+  const submit = form.locator("[data-checkout-submit]");
+  expect(await page.evaluate(() => window.__phase236HostedFieldsControl.triggerPostMountUpdate())).toBe(true);
+  await page.evaluate(() => window.__phase236HostedFieldsControl.releaseHostedFieldsCreate());
+
+  await expect(form.locator("[data-braintree-error]")).toHaveText(
+    "Secure card fields could not be safely reset. Refresh this page to try again."
+  );
+  await expect(submit).toBeDisabled();
+  await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+  const counts = await page.evaluate(() => window.__phase236HostedFieldsEvidence.counts);
+  expect(counts.clientCreate).toBe(1);
+  expect(counts.hostedFieldsCreate).toBe(1);
+  expect(counts.teardown).toBe(1);
+  expect(counts.clientTeardown).toBe(1);
 });
 
 test("Hosted Fields do not revive after pagehide during client creation", async ({ page, sandboxId }) => {
