@@ -5,6 +5,7 @@ defmodule AccruePortal.Live.CheckoutLive do
 
   alias Accrue.Billing
   alias Accrue.Billing.Customer
+  alias Accrue.CardError
   alias Accrue.Checkout.LocalSession
   alias Accrue.Error.DiscountMappingInvalid
   alias Accrue.Portal.{Context, CustomerSession}
@@ -73,6 +74,7 @@ defmodule AccruePortal.Live.CheckoutLive do
           safe_recovery_url(checkout.cancel_url, portal["mount_path"])
         )
         |> assign(:checkout_error, nil)
+        |> assign(:checkout_uncertain, checkout.status in ["processing", "uncertain"])
         |> assign(:checkout_success, false)
         |> assign(:promotion_code, nil)
         |> assign(:promotion_code_input, "")
@@ -129,54 +131,83 @@ defmodule AccruePortal.Live.CheckoutLive do
     case authorized_checkout(socket, pin, :checkout_complete) do
       {:ok, checkout, context} ->
         if checkout_ready?(checkout) do
-          case subscribe_with_checkout(socket, checkout, context, nonce) do
-            {:ok, subscription} ->
-              {:ok, _session} = LocalSession.mark_completed(checkout)
-              maybe_enqueue_completion(checkout, subscription)
+          case LocalSession.claim(checkout, DateTime.utc_now()) do
+            {:ok, claimed} ->
+              case subscribe_with_checkout(socket, claimed, context, nonce) do
+                {:ok, subscription} ->
+                  case LocalSession.mark_completed(claimed) do
+                    {:ok, _session} ->
+                      maybe_enqueue_completion(claimed, subscription)
 
-              case checkout.success_url do
-                url when is_binary(url) and url != "" ->
-                  {:noreply, redirect(socket, external: url)}
+                      case claimed.success_url do
+                        url when is_binary(url) and url != "" ->
+                          {:noreply, redirect(socket, external: url)}
 
-                _ ->
+                        _ ->
+                          {:noreply,
+                           socket
+                           |> assign(:checkout_error, nil)
+                           |> assign(:checkout_uncertain, false)
+                           |> assign(:checkout_success, true)}
+                      end
+
+                    {:error, _reason} ->
+                      _ = LocalSession.mark_uncertain(claimed)
+                      {:noreply, uncertain_checkout(socket, claimed)}
+                  end
+
+                {:error, %DiscountMappingInvalid{}} ->
+                  _ = LocalSession.release_claim(claimed)
+
                   {:noreply,
                    socket
                    |> assign(:checkout_error, nil)
-                   |> assign(:checkout_success, true)}
+                   |> assign(:checkout_uncertain, false)
+                   |> assign(:checkout_success, false)
+                   |> assign(:promo_preview, nil)
+                   |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
+                   |> assign_base_checkout_amount()}
+
+                {:error, reason}
+                when reason in [:not_found, :inactive, :expired, :max_redemptions_reached] ->
+                  _ = LocalSession.release_claim(claimed)
+
+                  {:noreply,
+                   socket
+                   |> assign(:checkout_error, nil)
+                   |> assign(:checkout_uncertain, false)
+                   |> assign(:checkout_success, false)
+                   |> assign(:promotion_code, nil)
+                   |> assign(:promo_preview, nil)
+                   |> assign(:promo_status, Copy.checkout_promo_invalid())
+                   |> assign_base_checkout_amount()}
+
+                {:error, %CardError{}} ->
+                  _ = LocalSession.release_claim(claimed)
+
+                  {:noreply,
+                   socket
+                   |> assign(
+                     :checkout_error,
+                     "Your card was declined. No subscription was created. Please try a fresh payment method."
+                   )
+                   |> assign(:checkout_uncertain, false)
+                   |> assign(:checkout_success, false)}
+
+                {:error, _reason} ->
+                  _ = LocalSession.mark_uncertain(claimed)
+                  {:noreply, uncertain_checkout(socket, claimed)}
               end
 
-            {:error, %DiscountMappingInvalid{}} ->
-              {:noreply,
-               socket
-               |> assign(:checkout_error, nil)
-               |> assign(:checkout_success, false)
-               |> assign(:promo_preview, nil)
-               |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
-               |> assign_base_checkout_amount()}
-
-            {:error, reason}
-            when reason in [:not_found, :inactive, :expired, :max_redemptions_reached] ->
-              {:noreply,
-               socket
-               |> assign(:checkout_error, nil)
-               |> assign(:checkout_success, false)
-               |> assign(:promotion_code, nil)
-               |> assign(:promo_preview, nil)
-               |> assign(:promo_status, Copy.checkout_promo_invalid())
-               |> assign_base_checkout_amount()}
-
-            {:error, _reason} ->
-              {:noreply,
-               socket
-               |> assign(:checkout_error, Copy.checkout_subscription_error())
-               |> assign(:checkout_success, false)}
+            {:error, _claim_reason} ->
+              claim_unavailable(socket, checkout)
           end
         else
           {:noreply, deny_checkout(socket, Copy.checkout_session_expired_body())}
         end
 
       _ ->
-        {:noreply, deny_checkout(socket, Copy.checkout_subscription_error())}
+        unavailable_checkout(socket)
     end
   end
 
@@ -301,7 +332,7 @@ defmodule AccruePortal.Live.CheckoutLive do
         </section>
         <p :if={@checkout_success} class="portal-success-copy">Subscription created.</p>
 
-        <div
+      <div
           :if={@checkout_error}
           class="portal-inline-error"
           role="alert"
@@ -313,11 +344,23 @@ defmodule AccruePortal.Live.CheckoutLive do
           </p>
         </div>
 
+        <div :if={@checkout_uncertain} class="portal-inline-error" role="status" aria-live="polite" data-checkout-uncertain>
+          <p>We could not confirm the payment result. Do not submit again.</p>
+          <p>Check your subscription status or contact support before taking another payment action.</p>
+          <a :if={@checkout_recovery_url} href={@checkout_recovery_url} class="portal-button-secondary">Return to billing</a>
+        </div>
+
         <div :if={@completion_denied} class="portal-inline-error" role="status" aria-live="polite">
           <p>Checkout access is unavailable. No payment was submitted.</p>
         </div>
 
-        <div :if={not checkout_ready?(@checkout_session)} class="portal-inline-error" role="status" aria-live="polite">
+        <div :if={@checkout_session.status == "completed"} class="portal-inline-error" role="status" aria-live="polite">
+          <p>This checkout has already been completed.</p>
+          <p>Return to your account to review your subscription.</p>
+          <a :if={@checkout_recovery_url} href={@checkout_recovery_url} class="portal-button-secondary">Return to billing</a>
+        </div>
+
+        <div :if={not checkout_ready?(@checkout_session) and @checkout_session.status == "open"} class="portal-inline-error" role="status" aria-live="polite">
           <p>{Copy.checkout_session_expired_title()}</p>
           <p>{Copy.checkout_session_expired_body()}</p>
         </div>
@@ -361,6 +404,7 @@ defmodule AccruePortal.Live.CheckoutLive do
         >
           <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
           <input type="hidden" name="context_pin" value={@context_pin} />
+          <input type="hidden" name="promotion_code" value={@promotion_code || ""} />
           <input type="hidden" name="payment_method_nonce" data-braintree-nonce-input value="" />
           <div class="portal-hosted-grid">
             <label class="portal-hosted-label">
@@ -548,9 +592,62 @@ defmodule AccruePortal.Live.CheckoutLive do
     |> assign(:completion_denied, true)
     |> assign(:checkout_error, message)
     |> assign(:checkout_success, false)
+    |> assign(:checkout_uncertain, false)
     |> assign(:promotion_code, nil)
     |> assign(:promo_preview, nil)
     |> assign(:promo_status, nil)
+  end
+
+  defp uncertain_checkout(socket, checkout) do
+    %{socket | assigns: Map.put(socket.assigns, :checkout_session, checkout)}
+    |> assign(:client_token, nil)
+    |> assign(:checkout_error, nil)
+    |> assign(:checkout_uncertain, true)
+    |> assign(:checkout_success, false)
+    |> assign(:promotion_code, nil)
+    |> assign(:promo_preview, nil)
+  end
+
+  defp claim_unavailable(socket, checkout) do
+    latest = LocalSession.by_id(checkout.id) || checkout
+
+    case latest.status do
+      "completed" ->
+        {:noreply,
+         socket
+         |> assign(:checkout_session, latest)
+         |> assign(:client_token, nil)
+         |> assign(:checkout_uncertain, false)
+         |> assign(:checkout_error, nil)}
+
+      "processing" ->
+        {:noreply, uncertain_checkout(socket, latest)}
+
+      _ ->
+        {:noreply, deny_checkout(socket, Copy.checkout_session_expired_body())}
+    end
+  end
+
+  defp unavailable_checkout(socket) do
+    checkout = LocalSession.by_token(socket.assigns.checkout_session.session_token)
+
+    case checkout do
+      %LocalSession{status: status} = latest when status in ["processing", "uncertain"] ->
+        {:noreply, uncertain_checkout(socket, latest)}
+
+      %LocalSession{status: "completed"} = latest ->
+        {:noreply,
+         socket
+         |> assign(:checkout_session, latest)
+         |> assign(:client_token, nil)
+         |> assign(:checkout_uncertain, false)
+         |> assign(:checkout_error, nil)
+         |> assign(:checkout_success, false)}
+
+      _ ->
+        {:noreply,
+         deny_checkout(socket, "Checkout access is unavailable. No payment was submitted.")}
+    end
   end
 
   defp checkout_terms(%LocalSession{line_items: [item], metadata: metadata} = checkout)
@@ -642,9 +739,8 @@ defmodule AccruePortal.Live.CheckoutLive do
     "#{sign}$#{dollars}.#{cents}"
   end
 
-  defp checkout_ready?(%LocalSession{status: "open", expires_at: %DateTime{} = expires_at}) do
-    DateTime.compare(expires_at, DateTime.utc_now()) == :gt
-  end
+  defp checkout_ready?(%LocalSession{} = session),
+    do: LocalSession.actionable?(session, DateTime.utc_now())
 
   defp checkout_ready?(_session), do: false
 

@@ -1,6 +1,8 @@
 defmodule AccruePortal.CheckoutLiveTest do
   use AccruePortal.ConnCase, async: false
 
+  import Ecto.Query
+
   alias Accrue.Billing.Customer
   alias Accrue.Checkout.LocalSession
   alias AccruePortal.BraintreeMox
@@ -43,6 +45,14 @@ defmodule AccruePortal.CheckoutLiveTest do
 
   defmodule SubscriptionGatewayStub do
     def create(params, _opts) do
+      if pid = Application.get_env(:accrue_portal, :checkout_live_test_pid) do
+        send(pid, {:gateway_create, params[:payment_method_token]})
+      end
+
+      if after_accept = Application.get_env(:accrue_portal, :checkout_live_after_accept) do
+        after_accept.()
+      end
+
       {:ok,
        struct!(Elixir.Braintree.Subscription,
          id: "sub_bt_checkout_123",
@@ -60,10 +70,13 @@ defmodule AccruePortal.CheckoutLiveTest do
     previous_processor = Application.get_env(:accrue, :processor)
     previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
     previous_auth = Application.get_env(:accrue, :auth_adapter)
+    previous_after_accept = Application.get_env(:accrue_portal, :checkout_live_after_accept)
+    previous_test_pid = Application.get_env(:accrue_portal, :checkout_live_test_pid)
 
     Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
     Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
+    Application.put_env(:accrue_portal, :checkout_live_test_pid, self())
     BraintreeMox.stub_client_token("portal-client-token")
 
     user = %TestUser{id: Ecto.UUID.generate()}
@@ -86,6 +99,18 @@ defmodule AccruePortal.CheckoutLiveTest do
         Application.put_env(:accrue, :auth_adapter, previous_auth)
       else
         Application.delete_env(:accrue, :auth_adapter)
+      end
+
+      if previous_after_accept do
+        Application.put_env(:accrue_portal, :checkout_live_after_accept, previous_after_accept)
+      else
+        Application.delete_env(:accrue_portal, :checkout_live_after_accept)
+      end
+
+      if previous_test_pid do
+        Application.put_env(:accrue_portal, :checkout_live_test_pid, previous_test_pid)
+      else
+        Application.delete_env(:accrue_portal, :checkout_live_test_pid)
       end
     end)
 
@@ -115,6 +140,8 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert html =~ "Pay $49.00"
     assert html =~ "Studio"
     assert html =~ "USD $49.00 / per month"
+    assert html =~ ~s(data-testid="checkout-offer-summary")
+    assert html =~ ~s(name="promotion_code" value="")
     assert html =~ "Billed to"
     assert html =~ "Leave checkout"
     assert html =~ ~s(src="https://js.braintreegateway.com/web/3.132.0/js/client.min.js")
@@ -209,6 +236,8 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert js =~ ~s|pushEvent("checkout_tokenized", {|
     assert js =~ "context_pin: contextPin"
     assert js =~ "nonce: payload.nonce"
+    assert js =~ "Submitting your payment securely. Keep this page open."
+    assert js =~ "aria-live"
     refute js =~ ~s|pushEvent("checkout_tokenized", { number:|
     refute js =~ ~s|pushEvent("checkout_tokenized", { cvv:|
     refute js =~ "payment_method_nonce"
@@ -235,6 +264,70 @@ defmodule AccruePortal.CheckoutLiveTest do
                "cvv" => "123"
              })
 
+    assert LocalSession.by_id(session.id).status == "completed"
+  end
+
+  test "accepted provider result with failed completion persistence shows uncertainty", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer)
+    conn = sign_in_customer(conn, user)
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    Application.put_env(:accrue_portal, :checkout_live_after_accept, fn ->
+      TestRepo.update_all(
+        from(checkout in LocalSession, where: checkout.id == ^session.id),
+        set: [status: "uncertain"]
+      )
+    end)
+
+    uncertain_html =
+      render_hook(view, "checkout_tokenized", %{
+        "nonce" => "fake-valid-nonce",
+        "context_pin" => pin
+      })
+
+    assert uncertain_html =~ "We could not confirm the payment result. Do not submit again."
+    refute uncertain_html =~ ~s(id="checkout-form")
+    assert LocalSession.by_id(session.id).status == "uncertain"
+  end
+
+  test "two LiveViews cannot submit the same persisted operation twice", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer)
+    conn = sign_in_customer(conn, user)
+    assert {:ok, first, first_html} = live(conn, "/billing/checkout/#{session.session_token}")
+    assert {:ok, second, second_html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[first_pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, first_html, capture: :all_but_first)
+
+    [[second_pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, second_html, capture: :all_but_first)
+
+    assert {:error, {:redirect, %{to: "https://app.example.test/billing/success"}}} =
+             render_hook(first, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => first_pin
+             })
+
+    replay_html =
+      render_hook(second, "checkout_tokenized", %{
+        "nonce" => "fake-second-nonce",
+        "context_pin" => second_pin
+      })
+
+    assert replay_html =~ "This checkout has already been completed."
+    assert_received {:gateway_create, "fake-valid-nonce"}
+    refute_received {:gateway_create, "fake-second-nonce"}
     assert LocalSession.by_id(session.id).status == "completed"
   end
 
