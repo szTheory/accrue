@@ -363,6 +363,7 @@ defmodule AccruePortal.Live.CheckoutLive do
         <div :if={not checkout_ready?(@checkout_session) and @checkout_session.status == "open"} class="portal-inline-error" role="status" aria-live="polite">
           <p>{Copy.checkout_session_expired_title()}</p>
           <p>{Copy.checkout_session_expired_body()}</p>
+          <a :if={@checkout_recovery_url} href={@checkout_recovery_url} class="portal-button-secondary">Return to billing</a>
         </div>
 
         <form
@@ -441,7 +442,7 @@ defmodule AccruePortal.Live.CheckoutLive do
         </form>
 
         <a
-          :if={(!@client_token || !checkout_ready?(@checkout_session) || !@checkout_terms_valid) && @checkout_recovery_url}
+          :if={@client_token == nil && checkout_ready?(@checkout_session) && @checkout_terms_valid && @checkout_recovery_url}
           href={@checkout_recovery_url}
           class="portal-button-secondary"
         >
