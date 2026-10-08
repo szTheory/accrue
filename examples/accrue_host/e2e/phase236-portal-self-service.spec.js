@@ -115,6 +115,37 @@ test("Hosted Fields hand off readable semantic styles on direct add-card navigat
   }
 });
 
+test("Hosted Fields refresh after the direct-route context pin and theme changes", async ({ page, sandboxId }) => {
+  test.skip(process.env.ACCRUE_HOST_PORTAL_THEME, "Theme picker is locked by test host policy");
+  await installHostedFieldsMock(page);
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  await page.goto("/billing/payment-methods/new");
+  await waitForLiveView(page);
+  await expect.poll(() => new URL(page.url()).searchParams.get("context_pin")).toBeTruthy();
+  const form = page.locator('[data-portal-hosted-fields="payment-method"]');
+  await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(1);
+  await page.getByRole("button", { name: "Dark theme" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(2);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.teardown)).toBe(1);
+  await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+});
+
+test("host-forced theme locks the picker on the served add-card route", async ({ page, sandboxId }) => {
+  test.skip(!process.env.ACCRUE_HOST_PORTAL_THEME, "This check is exercised by forced-theme CI commands");
+  await installHostedFieldsMock(page);
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  const response = await page.goto("/billing/payment-methods/new");
+  expect(response && response.status()).toBe(200);
+  await waitForLiveView(page);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", process.env.ACCRUE_HOST_PORTAL_THEME);
+  await expect(page.locator("[data-portal-theme]")).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.styles)).not.toBeNull();
+});
+
 /** @param {import('@playwright/test').Page} page */
 async function assertNoHorizontalPageScroll(page, label) {
   const widths = await page.evaluate(() => {

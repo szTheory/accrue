@@ -1,5 +1,11 @@
 import Config
 
+portal_theme =
+  case System.get_env("ACCRUE_HOST_PORTAL_THEME") do
+    theme when theme in ["light", "dark"] -> String.to_atom(theme)
+    _ -> :system
+  end
+
 # Only in tests, remove the complexity from the password hashing algorithm
 config :bcrypt_elixir, :log_rounds, 1
 
@@ -44,7 +50,8 @@ config :accrue,
     from_email: "billing@cadence.test",
     support_email: "support@cadence.test",
     accent_color: "#26785F",
-    secondary_color: "#3E6E91"
+    secondary_color: "#3E6E91",
+    theme: portal_theme
   ],
   admin_branding: [
     app_name: "Accrue Admin",

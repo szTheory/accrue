@@ -1,8 +1,8 @@
 ---
 phase: "236"
 slug: "portal-billing-self-service"
-status: validated
-nyquist_compliant: true
+status: pending
+nyquist_compliant: false
 wave_0_complete: true
 created: "2026-10-08"
 ---
@@ -73,9 +73,9 @@ All in-scope acceptance behaviors should have automated ExUnit/LiveView or serve
 - [x] Wave 0 covers all MISSING references
 - [x] No watch-mode flags
 - [x] Focused feedback latency measured and documented
-- [x] `nyquist_compliant: true` set after passing validation evidence
+- [ ] `nyquist_compliant: true` set after passing validation evidence
 
-**Approval:** validated 2026-10-08; all seven POR rows have passing automated evidence. No manual-only behavior remains.
+**Approval:** pending — Wave 5 browser evidence must pass in default, forced-light, and forced-dark modes.
 
 ## Validation Audit 2026-10-08
 

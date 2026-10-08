@@ -1638,6 +1638,28 @@ jobs:
           --config=playwright.braintree.config.js
           e2e/phase236-portal-self-service.spec.js
 
+      - name: Run Phase 236 Portal Hosted Fields with forced light theme
+        if: matrix.shard == 1
+        env:
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE: "1"
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+          ACCRUE_HOST_PORTAL_THEME: light
+        run: >-
+          cd examples/accrue_host && npm run e2e --
+          --config=playwright.braintree.config.js
+          e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'
+
+      - name: Run Phase 236 Portal Hosted Fields with forced dark theme
+        if: matrix.shard == 1
+        env:
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE: "1"
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+          ACCRUE_HOST_PORTAL_THEME: dark
+        run: >-
+          cd examples/accrue_host && npm run e2e --
+          --config=playwright.braintree.config.js
+          e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'
+
       - name: Upload Braintree Playwright report
         if: failure()
         uses: actions/upload-artifact@v7

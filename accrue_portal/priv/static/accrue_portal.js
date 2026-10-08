@@ -8,6 +8,7 @@
     hook.isDestroyed = true;
     hook.lifecycleGeneration = (hook.lifecycleGeneration || 0) + 1;
     if (hook.sdkLoadTimer) window.clearTimeout(hook.sdkLoadTimer);
+    if (hook.themeMedia && hook.themeMediaListener) hook.themeMedia.removeEventListener("change", hook.themeMediaListener);
 
     var nonceInput = hook.el && hook.el.querySelector("[data-braintree-nonce-input]");
     if (nonceInput) nonceInput.value = "";
@@ -28,6 +29,11 @@
     mounted: function () {
       this.isDestroyed = false;
       if (hostedFieldsHooks.indexOf(this) === -1) hostedFieldsHooks.push(this);
+      if (!this.themeMedia) {
+        this.themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+        this.themeMediaListener = function () { refreshHostedFields(this); }.bind(this);
+        this.themeMedia.addEventListener("change", this.themeMediaListener);
+      }
       var errorNode = this.el.querySelector("[data-braintree-error]");
       var submitButton = this.el.querySelector("[data-checkout-submit]");
 
@@ -60,18 +66,22 @@
       this.tokenizing = false;
       this.submissionSent = false;
       this.lifecycleGeneration = (this.lifecycleGeneration || 0) + 1;
+      var createGeneration = this.lifecycleGeneration;
 
       window.braintree.client.create({ authorization: token }, function (clientErr, clientInstance) {
+        if (this.isDestroyed || createGeneration !== this.lifecycleGeneration) return;
         if (clientErr) {
           setSubmitDisabled(submitButton, true);
           setInlineError(errorNode, "Secure card entry could not start. Refresh this page to try again.");
           return;
         }
 
+        var styles = hostedFieldStyles(this.el);
+        this.hostedFieldStylesSnapshot = JSON.stringify(styles);
         window.braintree.hostedFields.create(
           {
             client: clientInstance,
-            styles: hostedFieldStyles(this.el),
+            styles: styles,
             fields: {
               number: { selector: fieldSelector(this.el, "number"), placeholder: "4111 1111 1111 1111" },
               expirationDate: { selector: fieldSelector(this.el, "expirationDate"), placeholder: "MM / YY" },
@@ -79,6 +89,10 @@
             }
           },
           function (hostedFieldsErr, hostedFieldsInstance) {
+            if (this.isDestroyed || createGeneration !== this.lifecycleGeneration) {
+              if (hostedFieldsInstance && hostedFieldsInstance.teardown) hostedFieldsInstance.teardown(function () {});
+              return;
+            }
             if (hostedFieldsErr) {
               setSubmitDisabled(submitButton, true);
               setInlineError(errorNode, "Secure card fields could not load. Refresh this page to try again.");
@@ -89,7 +103,7 @@
             setSubmitting(submitButton, false);
             setInlineError(errorNode, "Secure card fields are ready.");
 
-            this.el.addEventListener(
+            if (this.el.dataset.hostedFieldsSubmitBound !== "1") this.el.addEventListener(
               "submit",
               function (event) {
                 if (this.el.dataset.portalHostedFields === "payment-method") {
@@ -124,6 +138,7 @@
                 this.tokenizeAndSubmit(errorNode, submitButton);
               }.bind(this)
             );
+            this.el.dataset.hostedFieldsSubmitBound = "1";
           }.bind(this)
         );
       }.bind(this));
@@ -137,6 +152,7 @@
       this.tokenizing = false;
       if (this.hostedFields) {
         setSubmitting(this.el.querySelector("[data-checkout-submit]"), false);
+        refreshHostedFields(this);
       }
     },
 
