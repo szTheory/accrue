@@ -13,15 +13,15 @@ findings:
     title: "Braintree completion returns an unverifiable Stripe placeholder"
 open: 2
 total: 2
-recorded: 2026-10-08T12:47:13.034Z
+recorded: 2026-10-08T15:02:52.803Z
 ---
 
 # Phase 235: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | - |
-| WR-01 | warning | open | - |
+| CR-01 | critical | open | - (not in the current review) |
+| WR-01 | warning | open | - (not in the current review) |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.
