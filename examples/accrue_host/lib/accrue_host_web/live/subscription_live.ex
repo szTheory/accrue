@@ -5,6 +5,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   import Phoenix.Controller, only: [get_csrf_token: 0]
 
   alias Accrue.Billing.Subscription
+  alias Accrue.Checkout
   alias Accrue.Checkout.LocalSession
   alias AccrueHost.Accounts.{Organization, OrganizationMembership}
   alias AccrueHost.Billing
@@ -36,8 +37,9 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   @impl true
-  def handle_params(%{"plan" => plan_id, "selection" => selection_id}, _uri, socket)
-      when is_binary(plan_id) and is_binary(selection_id) do
+  def handle_params(params = %{"plan" => plan_id, "selection" => selection_id}, _uri, socket)
+      when is_binary(plan_id) and is_binary(selection_id) and
+             not is_map_key(params, "checkout") do
     case Plans.get(plan_id) do
       nil ->
         {:noreply,
@@ -61,6 +63,85 @@ defmodule AccrueHostWeb.SubscriptionLive do
              )}
         end
     end
+  end
+
+  def handle_params(%{"checkout" => "cancel"} = params, _uri, socket) do
+    {:noreply,
+     socket
+     |> assign_return_offer(params)
+     |> assign(
+       :checkout_return_state,
+       {:canceled, "Checkout was canceled. Return to billing to review the current status."}
+     )}
+  end
+
+  def handle_params(
+        %{"checkout" => "success", "checkout_session_id" => session_id} = params,
+        _uri,
+        socket
+      )
+      when is_binary(session_id) and byte_size(session_id) <= 255 do
+    socket = assign_return_offer(socket, params)
+    scope = socket.assigns.current_scope
+    organization = scope.active_organization
+
+    if billing_locked?(socket.assigns.access_state) do
+      {:noreply,
+       assign(
+         socket,
+         :checkout_return_state,
+         {:blocked,
+          "Billing access is unavailable for this workspace. Ask a workspace admin to review the checkout status."}
+       )}
+    else
+      if valid_checkout_session_id?(session_id) and not is_nil(organization) do
+        expected_metadata = %{
+          "billable_type" => "Organization",
+          "billable_id" => to_string(organization.id),
+          "processor" => to_string(Processor.name()),
+          "plan_id" => params["plan"],
+          "selection_id" => params["selection"]
+        }
+
+        state =
+          case Checkout.reconcile(session_id, expected_metadata: expected_metadata) do
+            {:ok, session} ->
+              if value(session, :status) == "complete" and
+                   value(session, :payment_status) == "paid" do
+                {:complete,
+                 "Payment confirmed by the provider. Your subscription is being updated."}
+              else
+                {:pending,
+                 "The provider has not confirmed payment yet. Check billing status before trying again."}
+              end
+
+            {:error, _reason} ->
+              {:unavailable,
+               "We couldn't verify this checkout return. Check billing status or contact support before trying again."}
+          end
+
+        {:noreply, assign(socket, :checkout_return_state, state)}
+      else
+        {:noreply,
+         assign(
+           socket,
+           :checkout_return_state,
+           {:unavailable,
+            "We couldn't verify this checkout return. Check billing status or contact support before trying again."}
+         )}
+      end
+    end
+  end
+
+  def handle_params(%{"checkout" => "success"} = params, _uri, socket) do
+    {:noreply,
+     socket
+     |> assign_return_offer(params)
+     |> assign(
+       :checkout_return_state,
+       {:unavailable,
+        "We couldn't verify this checkout return. Check billing status or contact support before trying again."}
+     )}
   end
 
   def handle_params(_params, _uri, socket),
@@ -209,8 +290,8 @@ defmodule AccrueHostWeb.SubscriptionLive do
       attrs = %{
         mode: :subscription,
         ui_mode: :hosted,
-        success_url: url(~p"/app/billing?checkout=success"),
-        cancel_url: url(~p"/app/billing?checkout=cancel"),
+        success_url: hosted_success_url(plan, selection_id),
+        cancel_url: hosted_cancel_url(plan, selection_id),
         operation_id: "pricing:#{billable.id}:#{plan.id}:#{selection_id}",
         line_items: [
           %{
@@ -233,7 +314,9 @@ defmodule AccrueHostWeb.SubscriptionLive do
           "billable_type" => "Organization",
           "billable_id" => to_string(billable.id),
           "billable_name" => billable.name,
-          "processor" => to_string(Processor.name())
+          "processor" => to_string(Processor.name()),
+          "plan_id" => plan.id,
+          "selection_id" => selection_id
         }
       }
 
@@ -249,6 +332,30 @@ defmodule AccrueHostWeb.SubscriptionLive do
       end
     end
   end
+
+  defp hosted_success_url(plan, selection_id) do
+    url(~p"/app/billing") <>
+      "?checkout=success&plan=#{URI.encode(plan.id)}&selection=#{URI.encode(selection_id)}&checkout_session_id={CHECKOUT_SESSION_ID}"
+  end
+
+  defp hosted_cancel_url(plan, selection_id) do
+    url(~p"/app/billing") <>
+      "?" <> URI.encode_query(%{checkout: "cancel", plan: plan.id, selection: selection_id})
+  end
+
+  defp assign_return_offer(socket, %{"plan" => plan_id, "selection" => selection_id}) do
+    case {Plans.get(plan_id), Ecto.UUID.cast(selection_id)} do
+      {%{} = plan, {:ok, _uuid}} -> assign(socket, :selected_checkout_plan, plan)
+      _ -> assign(socket, :selected_checkout_plan, nil)
+    end
+  end
+
+  defp assign_return_offer(socket, _params), do: assign(socket, :selected_checkout_plan, nil)
+
+  defp valid_checkout_session_id?(id), do: Regex.match?(~r/\Acs_[A-Za-z0-9_]+\z/, id)
+
+  defp value(%{} = map, key), do: Map.get(map, key) || Map.get(map, Atom.to_string(key))
+  defp value(_, _key), do: nil
 
   defp selected_checkout_url(%{id: id, url: url}) do
     case Ecto.UUID.cast(id) do
@@ -406,6 +513,15 @@ defmodule AccrueHostWeb.SubscriptionLive do
               Continue with the exact plan selected on pricing when a buyer needs to complete payment outside this screen.
             </p>
           </div>
+          <p
+            :if={@checkout_return_state}
+            role="status"
+            aria-live="polite"
+            data-testid="checkout-return-state"
+            class="rounded-lg border border-base-300 p-4 text-base leading-7"
+          >
+            {elem(@checkout_return_state, 1)}
+          </p>
           <div class="flex flex-wrap gap-2">
             <button
               :if={@selected_checkout_plan}
@@ -591,6 +707,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
     |> assign_new(:checkout_url, fn -> nil end)
     |> assign_new(:selected_checkout_plan, fn -> nil end)
     |> assign_new(:checkout_selection_id, fn -> nil end)
+    |> assign_new(:checkout_return_state, fn -> nil end)
     |> assign(:customer, customer)
     |> assign(:subscription, subscription)
     |> assign(:subscription_plan_label, plan_label(subscription))

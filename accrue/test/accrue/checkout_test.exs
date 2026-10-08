@@ -9,6 +9,8 @@ defmodule Accrue.CheckoutTest do
 
   alias Accrue.Checkout
   alias Accrue.Checkout.{LineItem, Session}
+  alias Accrue.Billing
+  alias Accrue.Billing.Subscription
 
   setup do
     {:ok, customer} =
@@ -156,7 +158,7 @@ defmodule Accrue.CheckoutTest do
   end
 
   describe "Accrue.Checkout.reconcile/1" do
-    test "fetches the session and projects customer + subscription locally",
+    test "unpaid Fake sessions are not treated as completion evidence",
          %{customer: customer} do
       {:ok, session} =
         Session.create(%{
@@ -165,14 +167,18 @@ defmodule Accrue.CheckoutTest do
           success_url: "https://example.com/s"
         })
 
-      # Fake's create returns a session with our customer's processor_id wired in
       assert {:ok, mirrored} = Checkout.reconcile(session.id)
-      assert is_map(mirrored)
-      # The reconciled customer row must still exist for the same processor_id
-      assert %Customer{} = Repo.get_by(Customer, processor_id: customer.processor_id)
+      assert mirrored.payment_status == "unpaid"
+      assert Repo.get_by(Customer, processor_id: customer.processor_id)
+      assert Repo.all(Accrue.Billing.Subscription) == []
     end
 
-    test "is idempotent across two reconcile calls", %{customer: customer} do
+    test "paid Fake session reconciliation is idempotent under parallel returns", %{
+      customer: customer
+    } do
+      {:ok, subscription} = Billing.subscribe(customer, "price_basic")
+      Repo.delete!(subscription)
+
       {:ok, session} =
         Session.create(%{
           customer: customer,
@@ -180,8 +186,52 @@ defmodule Accrue.CheckoutTest do
           success_url: "https://example.com/s"
         })
 
-      assert {:ok, _} = Checkout.reconcile(session.id)
-      assert {:ok, _} = Checkout.reconcile(session.id)
+      :ok =
+        Accrue.Processor.Fake.stub(:checkout_session_fetch, fn id, _opts ->
+          {:ok,
+           %{
+             id: id,
+             status: "complete",
+             payment_status: "paid",
+             customer: customer.processor_id,
+             subscription: subscription.processor_id,
+             metadata: %{"plan_id" => "price_basic_monthly"}
+           }}
+        end)
+
+      results =
+        1..8
+        |> Task.async_stream(fn _ -> Checkout.reconcile(session.id) end,
+          max_concurrency: 8,
+          timeout: 10_000
+        )
+        |> Enum.to_list()
+
+      assert Enum.all?(results, &match?({:ok, {:ok, %{payment_status: "paid"}}}, &1))
+      assert [%Subscription{processor_id: processor_id}] = Repo.all(Subscription)
+      assert processor_id == subscription.processor_id
+      assert Accrue.Processor.Fake.call_count(:checkout_session_fetch) == 8
+
+      :ok = Accrue.Processor.Fake.unstub(:checkout_session_fetch)
+    end
+
+    test "rejects a fetched session whose trusted metadata belongs to another context" do
+      :ok =
+        Accrue.Processor.Fake.scripted_response(
+          :checkout_session_fetch,
+          {:ok,
+           %{
+             id: "cs_fake_context",
+             status: "complete",
+             payment_status: "paid",
+             metadata: %{"billable_id" => "different-workspace"}
+           }}
+        )
+
+      assert {:error, :checkout_context_mismatch} =
+               Checkout.reconcile("cs_fake_context",
+                 expected_metadata: %{"billable_id" => "workspace-1"}
+               )
     end
 
     test "returns error tuple for unknown session id" do

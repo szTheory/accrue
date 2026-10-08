@@ -39,9 +39,88 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     assert html =~ "Checkout handoff"
     assert html =~ "Continue with Launch"
     assert html =~ "https://checkout.stripe.test/c/pay/cs_fake_"
+
+    checkout_calls =
+      Accrue.Processor.Fake.calls()
+      |> Enum.filter(&(elem(&1, 0) == :checkout_session_create))
+
+    assert length(checkout_calls) >= 1
+    {_operation, [checkout_params, _opts]} = List.last(checkout_calls)
+
+    assert checkout_params["success_url"] =~ "checkout=success"
+    assert checkout_params["success_url"] =~ "checkout_session_id={CHECKOUT_SESSION_ID}"
+    assert checkout_params["cancel_url"] =~ "checkout=cancel"
+    assert checkout_params["metadata"]["plan_id"] == "price_basic"
+    assert checkout_params["metadata"]["billable_id"] == to_string(organization.id)
+    assert checkout_params["metadata"]["selection_id"]
     html = render(view)
     assert html =~ "Checkout link"
     assert html =~ "https://checkout.stripe.test/c/pay/cs_fake_"
+  end
+
+  test "success and cancel navigation never create payment evidence by themselves", %{
+    conn: conn,
+    organization: organization,
+    user: user
+  } do
+    selection_id = Ecto.UUID.generate()
+
+    {:ok, view, _html} =
+      conn
+      |> log_in_user(user, active_organization_id: organization.id)
+      |> live("/app/billing?checkout=success&plan=price_basic&selection=#{selection_id}")
+
+    html = render(view)
+    assert html =~ "verify this checkout return"
+    refute html =~ "Payment confirmed by the provider"
+    assert Accrue.Processor.Fake.call_count(:checkout_session_fetch) == 0
+
+    {:ok, view, _html} =
+      conn
+      |> log_in_user(user, active_organization_id: organization.id)
+      |> live("/app/billing?checkout=cancel&plan=price_basic&selection=#{selection_id}")
+
+    html = render(view)
+    assert html =~ "Checkout was canceled"
+    refute html =~ "Payment confirmed by the provider"
+    assert Accrue.Processor.Fake.call_count(:checkout_session_fetch) == 0
+  end
+
+  test "success return shows completion only after matching fetched Fake session evidence", %{
+    conn: conn,
+    organization: organization,
+    user: user
+  } do
+    selection_id = Ecto.UUID.generate()
+
+    :ok =
+      Accrue.Processor.Fake.stub(:checkout_session_fetch, fn id, _opts ->
+        {:ok,
+         %{
+           id: id,
+           status: "complete",
+           payment_status: "paid",
+           metadata: %{
+             "billable_type" => "Organization",
+             "billable_id" => to_string(organization.id),
+             "processor" => "fake",
+             "plan_id" => "price_basic",
+             "selection_id" => selection_id
+           }
+         }}
+      end)
+
+    {:ok, view, _html} =
+      conn
+      |> log_in_user(user, active_organization_id: organization.id)
+      |> live(
+        "/app/billing?checkout=success&checkout_session_id=cs_fake_host_return&plan=price_basic&selection=#{selection_id}"
+      )
+
+    html = render(view)
+    assert html =~ "Payment confirmed by the provider"
+    assert html =~ ~s(data-testid="checkout-return-state")
+    :ok = Accrue.Processor.Fake.unstub(:checkout_session_fetch)
   end
 
   test "pricing selection stores only a validated exact-plan login return", %{conn: conn} do

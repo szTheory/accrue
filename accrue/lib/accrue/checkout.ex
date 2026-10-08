@@ -32,17 +32,41 @@ defmodule Accrue.Checkout do
 
   Idempotent — calling twice produces the same local state.
   """
-  @spec reconcile(String.t()) :: {:ok, map()} | {:error, term()}
-  def reconcile(session_id) when is_binary(session_id) do
+  @spec reconcile(String.t(), keyword()) :: {:ok, map()} | {:error, term()}
+  def reconcile(session_id, opts \\ []) when is_binary(session_id) and is_list(opts) do
     with {:ok, stripe_session} <-
-           Processor.__impl__().checkout_session_fetch(session_id, []) do
-      Repo.transact(fn ->
-        with :ok <- mirror_customer(stripe_session),
-             :ok <- mirror_subscription(stripe_session) do
-          {:ok, stripe_session}
-        end
-      end)
+           Processor.__impl__().checkout_session_fetch(session_id, []),
+         :ok <- validate_expected_metadata(stripe_session, Keyword.get(opts, :expected_metadata)) do
+      if paid_checkout?(stripe_session) do
+        Repo.transact(fn ->
+          # Serialize projection for the same processor session. The provider
+          # fetch stays outside the transaction; local webhook reconciliation
+          # is idempotent and cannot create parallel duplicate projections.
+          Repo.repo().query!("SELECT pg_advisory_xact_lock(hashtext($1)::bigint)", [session_id])
+
+          with :ok <- mirror_customer(stripe_session),
+               :ok <- mirror_subscription(stripe_session) do
+            {:ok, stripe_session}
+          end
+        end)
+      else
+        {:ok, stripe_session}
+      end
     end
+  end
+
+  defp paid_checkout?(session) do
+    get(session, :status) == "complete" and get(session, :payment_status) == "paid"
+  end
+
+  defp validate_expected_metadata(_session, nil), do: :ok
+
+  defp validate_expected_metadata(session, expected) when is_map(expected) do
+    actual = get(session, :metadata) || %{}
+
+    if Enum.all?(expected, fn {key, value} -> Map.get(actual, key) == value end),
+      do: :ok,
+      else: {:error, :checkout_context_mismatch}
   end
 
   @doc """
