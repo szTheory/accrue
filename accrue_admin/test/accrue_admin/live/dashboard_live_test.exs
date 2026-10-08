@@ -88,99 +88,75 @@ defmodule AccrueAdmin.DashboardLiveTest do
     :ok
   end
 
-  test "renders attention rail, task launchers, demoted KPIs, and activity", %{conn: conn} do
+  test "renders factual recent activity without unsupported health or aggregate claims", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing")
 
-    # Page chrome — PageHeader emits the single top-level h1 (ax-display) + one verdict
+    # Home presents observable activity and scope-matched destinations only.
     assert html =~ "ax-display"
-    assert html =~ "data-ax-health-verdict"
-    # Seed has one open invoice → verdict is :action_required (single StatusBadge verdict)
-    assert html =~ Copy.dashboard_health_verdict_action_required()
-
-    # Zone 1 — attention rail: heading + seeded exceptions (open invoice P1, dead webhook P2,
-    # failed meter P4), rebuilt from StatusBadge / .ax-chip / .ax-link-quiet primitives
-    assert html =~ Copy.home_attention_priority_heading()
-    assert html =~ "Work invoice queue"
-    assert html =~ Copy.home_attention_webhooks_label()
-    assert html =~ "Debug failed webhook queue"
-    assert html =~ Copy.home_attention_meter_label()
-    assert html =~ Copy.home_attention_action_investigate()
-    assert html =~ ~s(href="/billing/events?q=meter_event")
-    assert html =~ ~s(href="/billing/invoices?status=open")
-
-    # Header actions — single customer-lookup control + audit-ledger link
+    assert html =~ "Recent audit activity"
+    assert html =~ "customer.updated"
     assert html =~ "data-ax-command-palette-trigger"
     assert html =~ Copy.home_customer_search_cta()
-    assert html =~ "Audit ledger"
-
-    # Header StatStrip — 4-stat exposure-first strip
-    assert html =~ "Open invoices"
-    assert html =~ "Exposure"
-    assert html =~ "At-risk subscriptions"
-    assert html =~ "Failed webhooks"
-
-    # Zone 2 — task launchers (three JTBD doors; customer tile folded into the header)
-    assert html =~ "data-ax-launcher-primary"
-    assert html =~ Copy.home_launcher_invoices_title()
-    assert html =~ Copy.home_launcher_recovery_title()
-    assert html =~ "Open dunning analytics"
-    assert html =~ Copy.home_launcher_developer_title()
-    assert html =~ "Debug webhook failures"
-
-    # Zone 3 — demoted KPI strip
-    assert html =~ Copy.dashboard_kpi_customers_label()
-    assert html =~ Copy.dashboard_kpi_active_subscriptions_label()
-    assert html =~ Copy.dashboard_kpi_open_invoice_balance_label()
-    assert html =~ Copy.dashboard_kpi_webhook_backlog_label()
-    assert html =~ Copy.dashboard_kpi_customers_aria_label()
-    assert html =~ Copy.dashboard_kpi_subscriptions_aria_label()
-    assert html =~ Copy.dashboard_kpi_invoices_aria_label()
-    assert html =~ Copy.dashboard_kpi_webhooks_aria_label()
-
-    # Zone 4 — recent activity timelines
-    assert html =~ Copy.dashboard_activity_event_ledger_eyebrow()
-    assert html =~ Copy.dashboard_activity_webhook_health_eyebrow()
-    assert html =~ "invoice.payment_failed"
-    assert html =~ "customer.updated"
     assert html =~ "Open event"
-    assert html =~ "Debug delivery trace"
-    assert html =~ "Debug failed webhook queue"
-    assert html =~ "Open full event ledger"
-    assert html =~ "Load more audit events"
-    assert html =~ "Filter admin actors"
-    assert html =~ "Filter system actors"
-    assert html =~ "Admin user Admin 1"
-    assert html =~ "Latest event ledger summary"
-    assert html =~ "Action"
-    assert html =~ "Audit event"
+    assert html =~ "Open event ledger"
 
-    # Regrouped sidebar nav still threads to every section (exact, query-free hrefs)
+    refute html =~ "data-ax-health-verdict"
+    refute html =~ "Healthy"
+    refute html =~ "above $0.00 target"
+    refute html =~ "Failed webhooks"
+    refute html =~ "At-risk subscriptions"
     assert html =~ ~s(href="/billing/customers")
-    assert html =~ ~s(href="/billing/subscriptions")
-    assert html =~ ~s(href="/billing/invoices")
-    assert html =~ ~s(href="/billing/webhooks")
     assert html =~ ~s(href="/billing/events")
   end
 
-  test "header verdict is 'Action required' when open invoices are zero but another signal fires (WR-01)",
-       %{conn: conn} do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+  test "organization Home shows its event and same-scope destinations only", %{conn: conn} do
+    org_id = Ecto.UUID.generate()
+    allowed = customer_for_org(org_id)
+    foreign = customer_for_org(Ecto.UUID.generate())
 
-    # Drive open_invoice_count to 0 while the setup's dead webhook (blocked_webhook_count > 0)
-    # and failed meter event remain. The header verdict must key off ALL attention signals,
-    # so it must render "Action required" — never a green "Healthy" while the attention rail
-    # lists priority exceptions on the same page (the IA-01 answer-first contract).
-    TestRepo.delete_all(Invoice)
+    {:ok, _} =
+      Events.record(%{
+        type: "home.allowed_scope_event",
+        subject_type: "Customer",
+        subject_id: allowed.id,
+        actor_type: "admin",
+        actor_id: "admin_1"
+      })
 
-    assert {:ok, _view, html} = live(conn, "/billing")
+    {:ok, _} =
+      Events.record(%{
+        type: "home.foreign_scope_event",
+        subject_type: "Customer",
+        subject_id: foreign.id,
+        actor_type: "admin",
+        actor_id: "admin_1"
+      })
 
-    assert html =~ "data-ax-health-verdict"
-    assert html =~ Copy.dashboard_health_verdict_action_required()
-    refute html =~ Copy.dashboard_health_verdict_healthy()
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: org_id,
+        active_organization_slug: "home-org",
+        admin_organization_ids: [org_id]
+      )
 
-    # The exception the verdict must not contradict is still surfaced in the rail.
-    assert html =~ Copy.home_attention_webhooks_label()
+    assert {:ok, _view, html} = live(conn, "/billing?org=home-org")
+    assert html =~ "home.allowed_scope_event"
+    refute html =~ "home.foreign_scope_event"
+    assert html =~ ~s(href="/billing/customers?org=home-org")
+    assert html =~ ~s(href="/billing/events?org=home-org")
+  end
+
+  defp customer_for_org(org_id) do
+    %{customer: customer} =
+      Factory.customer(%{
+        owner_type: "Organization",
+        owner_id: org_id,
+        email: "#{org_id}@example.com"
+      })
+
+    customer
   end
 end
