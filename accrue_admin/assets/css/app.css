@@ -6038,10 +6038,10 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 }
 
 .ax-subscription-detail-page .ax-summary-list-compact .ax-summary-list-row {
-  padding: 0.3125rem 0;
+  padding: var(--ax-space-sm) 0;
   border-bottom-color: var(--ax-border-strong);
   grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) max-content;
-  gap: 0.0625rem var(--ax-space-xs);
+  gap: var(--ax-space-2xs) var(--ax-space-xs);
 }
 
 .ax-subscription-detail-page .ax-summary-list-key,
@@ -6053,13 +6053,13 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 
 .ax-subscription-detail-page .ax-summary-list-key {
   /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-size: 0.6875rem;
+  font-size: var(--ax-type-sm);
 }
 
 .ax-subscription-detail-page .ax-summary-list-value,
 .ax-subscription-detail-page .ax-summary-list-action {
   /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-size: 0.8125rem;
+  font-size: var(--ax-type-sm);
 }
 
 .ax-summary-list-key,
@@ -6356,13 +6356,13 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 .ax-subscription-detail-page .ax-field-label,
 .ax-subscription-detail-page .ax-field-value {
   /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  line-height: 1.1;
+  line-height: var(--ax-leading-normal);
 }
 
 .ax-field-label {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
-  font-size: var(--ax-type-xs);
+  font-size: var(--ax-type-sm);
   font-weight: 600;
   color: var(--ax-muted);
   text-transform: uppercase;
