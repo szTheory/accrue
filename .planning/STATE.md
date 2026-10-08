@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.63
 milestone_name: Admin and Portal UI refinement
-current_phase: 235
-current_phase_name: Customer Plan Selection & Checkout
-status: executing
-stopped_at: Completed 235-06-PLAN.md
-last_updated: "2026-10-08T15:18:19.160Z"
+current_phase: 236
+current_phase_name: Portal Billing Self-Service
+status: planning
+stopped_at: Phase 235 complete, ready to plan Phase 236
+last_updated: "2026-10-08T15:48:10.406Z"
 last_activity: 2026-10-08
-last_activity_desc: Phase 235 execution started
-state_head: 42c28c17ff2e56fa2b24d6b6ce87d7b85ebc3223
+last_activity_desc: Phase 235 complete, transitioned to Phase 236
+state_head: 25e3a00d0f98208b483abb2f52d18716060311a0
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 21
   completed_plans: 21
-  percent: 29
+  percent: 43
 ---
 
 # Project State
@@ -27,21 +27,21 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 235 — Customer Plan Selection & Checkout
-**Progress:** [███░░░░░░░] 29% (2 of 7 milestone phases complete)
+**Progress:** [████░░░░░░] 43% (2 of 7 milestone phases complete)
 **Planned work completed:** [████████████████████] 15/15 plans (100%); remaining phases await planning.
 
 ## Current Position
 
-Phase: 235 (Customer Plan Selection & Checkout) — EXECUTING
-Plan: 3 of 6
-Status: Ready to execute
-Last activity: 2026-10-08 - Completed quick task 261008-ffy: Repair Phase 235 regression gaps; isolate Braintree tests, restore processor-neutral facade docs, and add focused CI proof
+Phase: 236 — Portal Billing Self-Service
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-08 — Phase 235 complete, transitioned to Phase 236
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 53
+- Total plans completed: 59
 - Average duration: —
 - Total execution time: —
 
@@ -58,6 +58,7 @@ Last activity: 2026-10-08 - Completed quick task 261008-ffy: Repair Phase 235 re
 | 232 | 11 | - | - |
 | 233 | 7 | - | - |
 | 234 | 8 | - | - |
+| 235 | 6 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -317,7 +318,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-08T14:54:03.424Z
-Stopped at: Completed 235-06-PLAN.md
+Stopped at: Phase 235 complete, ready to plan Phase 236
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

@@ -34,7 +34,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 - [x] **Phase 233: Shared Direction & Portal Contract** - Establish current-source baseline, shared visual roles, and the bounded host-owned billing context contract. (completed 2026-10-07)
 - [x] **Phase 234: Admin Customers & Subscriptions** - Refine operator search, customer/subscription investigation, lifecycle truth, scope, and supported actions. (completed 2026-10-07)
-- [ ] **Phase 235: Customer Plan Selection & Checkout** - Make existing checkout, payment hooks, provider handoffs, and safe returns understandable and reliable.
+- [x] **Phase 235: Customer Plan Selection & Checkout** - Make existing checkout, payment hooks, provider handoffs, and safe returns understandable and reliable. (completed 2026-10-08)
 - [ ] **Phase 236: Portal Billing Self-Service** - Refine existing customer billing pages and authorized payment/subscription tasks through one Portal.
 - [ ] **Phase 237: Admin Invoices, Payments & Recovery** - Make money and recovery work precise, scoped, and honest about outcomes.
 - [ ] **Phase 238: Admin Events, Webhooks & Remaining Billing Surfaces** - Improve event and delivery investigation plus existing coupon, promotion-code, and Connect surfaces.
@@ -124,7 +124,7 @@ Plans:
   4. Plan choice survives sign-in and return; only trusted available metadata supplies charge terms, and unknown terms or outcomes lead to recovery without blind resubmission.
   5. Checkout keyboard, narrow-screen, theme, secure SDK, pending/error-state, and served-asset behavior is checked alongside each changed form and handoff.
 
-**Plans**: 4 plans
+**Plans**: 6/6 plans complete
 Plans:
 **Wave 1**
 - [x] 235-01-PLAN.md — Visible Braintree secure-form tracer and safe retry
@@ -133,10 +133,10 @@ Plans:
 - [x] 235-02-PLAN.md — Exact host-selected offer through sign-in and trusted terms
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 235-03-PLAN.md — Reentrant-safe POST and LiveView checkout outcomes
+- [x] 235-03-PLAN.md — Reentrant-safe POST and LiveView checkout outcomes
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 235-04-PLAN.md — Distinct hosted return and served-browser accessibility proof
+- [x] 235-04-PLAN.md — Distinct hosted return and served-browser accessibility proof
 
 **UI hint**: yes
 
@@ -205,7 +205,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 233. Shared Direction & Portal Contract | 7/7 | Complete    | 2026-10-07 |
 | 234. Admin Customers & Subscriptions | 8/8 | Complete    | 2026-10-07 |
-| 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
+| 235. Customer Plan Selection & Checkout | 6/6 | Complete    | 2026-10-08 |
 | 236. Portal Billing Self-Service | 0/TBD | Not started | - |
 | 237. Admin Invoices, Payments & Recovery | 0/TBD | Not started | - |
 | 238. Admin Events, Webhooks & Remaining Billing Surfaces | 0/TBD | Not started | - |
