@@ -151,7 +151,7 @@ Each task was committed atomically:
 **3. Recorded roadmap plan progress manually after the SDK declined the existing Phase 234 rows.**
 - **Found during:** State updates
 - **Issue:** `roadmap.update-plan-progress 234` reported `missing_phase_details` and left ROADMAP.md untouched even though Phase 234's plan checklist and progress row exist.
-- **Adjustment:** Updated only the existing 234-06 checklist entry, Phase 234 plan count, and progress row to `7/7`, `In Progress`, and no completion date. Phase-level completion remains unchecked pending shared verification.
+- **Adjustment:** Checked the existing roadmap entries for all seven summarized plans, and updated the Phase 234 plan count and progress row to `7/7`, `In Progress`, and no completion date. Phase-level completion remains unchecked pending shared verification.
 - **Files modified:** `.planning/ROADMAP.md`
 - **Verification:** Compared against the SDK result (`plan_count: 7`, `summary_count: 7`, `status: In Progress`, `complete: false`).
 

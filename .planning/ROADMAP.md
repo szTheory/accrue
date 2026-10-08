@@ -96,13 +96,13 @@ Plans:
 - [x] 234-07-PLAN.md — Scoped customer and related-record return journey
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 234-03-PLAN.md — Lifecycle truth and readable record hierarchy
+- [x] 234-03-PLAN.md — Lifecycle truth and readable record hierarchy
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 234-04-PLAN.md — Eligible action review and fresh dispatch gate
+- [x] 234-04-PLAN.md — Eligible action review and fresh dispatch gate
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 234-05-PLAN.md — Stable action intent and truthful scoped results
+- [x] 234-05-PLAN.md — Stable action intent and truthful scoped results
 
 **Wave 6** *(blocked on Wave 5 completion)*
 - [x] 234-06-PLAN.md — Served keyboard, responsive, denial and CI evidence
