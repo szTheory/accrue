@@ -4,17 +4,17 @@ milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 236
 current_phase_name: Portal Billing Self-Service
-status: executing
-stopped_at: Completed 236-03-PLAN.md
-last_updated: "2026-10-08T18:34:26.386Z"
+status: verifying
+stopped_at: Completed 236-06-PLAN.md
+last_updated: "2026-10-08T18:41:11.576Z"
 last_activity: 2026-10-08
-last_activity_desc: Phase 236 execution started
-state_head: 3b4f9a1d858d550d9fcb9fdb6d200cc4949d88a8
+last_activity_desc: Phase 236 gap-closure plan completed
+state_head: 67dacd8e8f103312df8aa66fe8d2054d57061e95
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 27
-  completed_plans: 25
+  completed_plans: 27
   percent: 43
 ---
 
@@ -33,8 +33,8 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 236 (Portal Billing Self-Service) — READY TO EXECUTE
-Plan: 5 of 5
-Status: Ready to execute
+Plan: 6 of 6
+Status: Phase complete — ready for verification
 Last activity: 2026-10-08 — Phase 236 execution started
 
 ## Performance Metrics
@@ -127,6 +127,7 @@ Last activity: 2026-10-08 — Phase 236 execution started
 | Phase 236 P04 | 9 min | 2 tasks | 6 files |
 | Phase 236 P04 | 12 min | 2 tasks | 8 files |
 | Phase 236 P03 | 18min | 2 tasks | 10 files |
+| Phase 236 P06 | 7min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -258,6 +259,8 @@ Last activity: 2026-10-08 — Phase 236 execution started
 - [Phase 236]: External checkout success URLs must match the configured HTTPS portal origin; validated local paths remain supported. — A stored return URL that escapes to an unapproved host creates an open redirect; matching host and effective port keeps navigation within the configured origin.
 - [Phase 236]: Recovery links use the same allowed destination policy as success redirects. — Both destinations come from persisted checkout return data and otherwise could navigate customers to an unapproved external host.
 - [Phase 236]: Phase 236: Gate subscription actions on observed lifecycle and provider capabilities, and freshly authorize the exact target at mutation time.
+- [Phase 236]: Braintree mock evidence covers application style handoff and deterministic lifecycle, not live-provider iframe rendering.
+- [Phase 236]: Refresh Hosted Fields through teardown/create when effective Portal theme colors change.
 
 ### Pending Todos
 
@@ -331,8 +334,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T17:27:48.626Z
-Stopped at: Completed 236-03-PLAN.md
+Last session: 2026-10-08T18:41:11.397Z
+Stopped at: Completed 236-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

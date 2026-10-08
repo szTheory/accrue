@@ -37,7 +37,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 - [ ] **POR-02**: Customers can add, default, or remove supported payment methods and change or cancel eligible subscriptions without crossing account or provider capabilities; list and detail entry points disclose the same consequences before confirmation.
 - [x] **POR-03**: Customers can reach existing invoice records and hosted invoice access for the correct Customer; missing and unauthorized records fail safely.
 - [ ] **POR-04**: Customers receive visible and announced outcomes after LiveView actions and POST/redirects; failed reads are not represented as empty lists and checkout failure does not assert a charge.
-- [ ] **POR-05**: Direct add-card navigation initializes the supported secure Hosted Fields flow, and its supported states remain readable across shell themes and LiveView patches.
+- [x] **POR-05**: Direct add-card navigation initializes the supported secure Hosted Fields flow, and its supported states remain readable across shell themes and LiveView patches.
 - [ ] **POR-06**: Customers see known trial, incomplete, unpaid, and canceled states accurately, without claims about host access, complete invoice counts, or unsupported retention/document availability.
 - [ ] **POR-07**: Customers return only to validated host destinations; query parameters cannot prove payment, and leaving checkout is not described as subscription cancellation.
 - [x] **POR-08**: One Portal supports personal, organization/custom, and mixed host billing; personal-only installs need no company model or account picker, and customer billing managers receive no operator/Admin access.
@@ -102,7 +102,7 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | POR-02 | Phase 236 | Pending |
 | POR-03 | Phase 236 | Complete |
 | POR-04 | Phase 236 | Pending |
-| POR-05 | Phase 236 | Pending |
+| POR-05 | Phase 236 | Complete |
 | POR-06 | Phase 236 | Pending |
 | POR-07 | Phase 236 | Pending |
 | POR-08 | Phase 233 | Complete |

@@ -223,7 +223,7 @@ Plans:
 | 233. Shared Direction & Portal Contract | 7/7 | Complete    | 2026-10-07 |
 | 234. Admin Customers & Subscriptions | 8/8 | Complete    | 2026-10-07 |
 | 235. Customer Plan Selection & Checkout | 6/6 | Complete    | 2026-10-08 |
-| 236. Portal Billing Self-Service | 0/TBD | Not started | - |
+| 236. Portal Billing Self-Service | 6/6 | In Progress  | - |
 | 237. Admin Invoices, Payments & Recovery | 0/TBD | Not started | - |
 | 238. Admin Events, Webhooks & Remaining Billing Surfaces | 0/TBD | Not started | - |
 | 239. Integrated Quality & Handoff | 0/TBD | Not started | - |
