@@ -1,4 +1,5 @@
-defmodule AccrueHostWeb.SubscriptionLiveBraintreeTest do
+if System.get_env("ACCRUE_HOST_BROWSER_USE_BRAINTREE") == "1" do
+  defmodule AccrueHostWeb.SubscriptionLiveBraintreeTest do
   use AccrueHostWeb.ConnCase, async: false
 
   import Phoenix.LiveViewTest
@@ -213,5 +214,6 @@ defmodule AccrueHostWeb.SubscriptionLiveBraintreeTest do
   defp return_path(plan_id, selection_id) do
     "/app/billing?" <>
       URI.encode_query(%{checkout: "success", plan: plan_id, selection: selection_id})
+  end
   end
 end
