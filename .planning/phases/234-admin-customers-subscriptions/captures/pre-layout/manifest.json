@@ -1,0 +1,73 @@
+{
+  "phase": "234-admin-customers-subscriptions",
+  "captured_at": "2026-10-08T00:33:14.193Z",
+  "pre_edit_source_sha": "3da32d163e9418caef313323045f9ddd11227f2a",
+  "sources": {
+    "accrue_admin/lib/accrue_admin/live/customer_live.ex": {
+      "sha256": "a93c55e1e966681dc758eda5d78a345c31ace96c85b46ced36bc26bc11a856e7",
+      "bytes": 48932
+    },
+    "accrue_admin/lib/accrue_admin/live/subscription_live.ex": {
+      "sha256": "3e8e09e96d1541498d94d673d36e3eb6a9910526da17bef240adcaa921d97364",
+      "bytes": 76019
+    },
+    "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": {
+      "sha256": "02e9b0dee28dd79b2917f10da01dc3b4725c38663507aa8817d3b7769a4b7a6a",
+      "bytes": 24000
+    },
+    "accrue_admin/assets/css/app.css": {
+      "sha256": "5275503c594e8e363eb66c51664340812a0e6f2e791ab3fde712596e109b4017",
+      "bytes": 188110
+    }
+  },
+  "assets": {
+    "built": {
+      "sha256": "6c3d6d1484788e38d99232e93d1db1e312edb6ea6b5609c7153c90c190edea3b",
+      "bytes": 128454
+    },
+    "served": {
+      "sha256": "6c3d6d1484788e38d99232e93d1db1e312edb6ea6b5609c7153c90c190edea3b",
+      "bytes": 128454,
+      "url": "/admin/assets/css-78ef060144d92bc6a3b5c54d80c2e7f8"
+    }
+  },
+  "fixture": {
+    "owner": "accrue-e2e-alpha",
+    "customer_id": "45428213-1603-4704-a3b1-1eb48335c395",
+    "subscription_id": "ada6bd0c-9da1-4ab2-97cf-e020168cde63"
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "theme": "default host theme",
+  "states": {
+    "customer-detail.png": {
+      "route": "/admin/customers/45428213-1603-4704-a3b1-1eb48335c395?org=accrue-e2e-alpha",
+      "state": "customer detail"
+    },
+    "subscription-detail.png": {
+      "route": "/admin/subscriptions/ada6bd0c-9da1-4ab2-97cf-e020168cde63?org=accrue-e2e-alpha",
+      "state": "subscription detail"
+    },
+    "subscription-drawer.png": {
+      "route": "/admin/subscriptions/ada6bd0c-9da1-4ab2-97cf-e020168cde63?org=accrue-e2e-alpha",
+      "state": "subscription detail action drawer if available"
+    }
+  },
+  "capture_command": "PHASE234_CAPTURE_BASELINE=1 npm run e2e -- e2e/phase234-pre-layout.spec.js --workers=1",
+  "images": {
+    "customer-detail.png": {
+      "sha256": "d2f720159d668b25c8ad453539b2ec559e03e15661e11593b35d667729d5ce6c",
+      "bytes": 290860
+    },
+    "subscription-detail.png": {
+      "sha256": "6d1651074d30c9007e8960b67ae28088b7a9716d7d53889dfbc135789ae4f307",
+      "bytes": 451498
+    },
+    "subscription-drawer.png": {
+      "sha256": "9dfbd7e6bbb59807fc1167bf6beed950da8f3a6d6ba271136742663d54bb999c",
+      "bytes": 312783
+    }
+  }
+}
