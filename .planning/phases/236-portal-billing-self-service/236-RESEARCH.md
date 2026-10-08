@@ -339,8 +339,8 @@ These excerpts are exact to make in-repository discrete values and implementatio
 
 ## Open Questions
 
-1. **How should existing invoice list truncation be communicated?** The local query caps at 20, while D-04 disallows a complete-count implication. Keep copy neutral and avoid adding total counts unless the product contract explicitly defines them; this is not a blocker.
-2. **Are return URLs restricted by a host allowlist beyond current validation?** Existing controller accepts validated local paths and HTTPS URL shape; Phase 235 host-approved return behavior is the authority. Planner should reuse the accepted checkout contract and test its exact rules rather than invent a new allowlist.
+1. **(RESOLVED) How should existing invoice list truncation be communicated?** Keep the existing 20-record cap in `BillingReadModel.invoices/1`. Use recent/bounded-list copy without a total or complete-history claim; plan `236-01` implements and verifies this. No total-count policy is introduced.
+2. **(RESOLVED) Are return URLs restricted by a host allowlist beyond current validation?** Preserve the existing validated local and Phase-235-approved HTTPS host-return rules and safe fallback as authoritative. Plan `236-04` exercises accepted and rejected destinations with a deterministic matrix; it adds no new allowlist or return policy.
 
 ## Sources
 
@@ -355,6 +355,7 @@ These excerpts are exact to make in-repository discrete values and implementatio
 ### Secondary (MEDIUM confidence)
 
 - [Braintree Hosted Fields overview](https://developer.paypal.com/braintree/docs/guides/hosted-fields/overview/javascript/v3) and [setup/integration](https://developer.paypal.com/braintree/docs/guides/hosted-fields/setup-and-integration/javascript/v3) — hosted iframe/tokenize/nonce lifecycle and field styling.
+- [Braintree HostedFields API](https://braintree.github.io/braintree-web/current/HostedFields.html) and [hosted-fields module](https://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html) — full existing JavaScript v3 component-method surface used by `COVERAGE.md`.
 - [Phoenix LiveViewTest](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveViewTest.html) — event, submit, and rendered-output testing interface.
 - [OWASP ASVS](https://owasp.org/projects/asvs) — current standard/version reference.
 
