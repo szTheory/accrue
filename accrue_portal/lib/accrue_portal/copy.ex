@@ -233,10 +233,16 @@ defmodule AccruePortal.Copy do
   def invoices_empty_title, do: "No invoices yet"
 
   def invoices_empty_body do
-    "When your first invoice is issued, it will appear here. Paid and open invoices are kept for at least 7 years."
+    "When your first invoice is issued, it will appear here."
   end
 
+  def invoices_empty_next_step, do: "Check back after an invoice is issued."
   def invoices_recent_note, do: "Showing up to 20 recent invoices."
+
+  def invoices_unavailable_body,
+    do: "Invoices are temporarily unavailable. Try again in a moment."
+
+  def invoices_retry_cta, do: "Try again"
 
   def invoices_status_label, do: "Status"
   def invoices_open_cta, do: "Open invoice"

@@ -10,15 +10,20 @@ defmodule AccruePortal.Live.InvoicesLive do
   def mount(_params, %{"accrue_portal" => portal}, socket) do
     case Authorize.context(socket, :read) do
       {:ok, context} ->
-        {:ok, invoices} = BillingReadModel.invoice_result(context.customer)
+        socket =
+          socket
+          |> assign(:page_title, Copy.invoices_page_title())
+          |> assign(:portal, portal)
+          |> assign(:current_context, context)
+          |> assign(:billing_identity, billing_identity(context))
 
-        {:ok,
-         socket
-         |> assign(:page_title, Copy.invoices_page_title())
-         |> assign(:portal, portal)
-         |> assign(:current_context, context)
-         |> assign(:billing_identity, billing_identity(context))
-         |> assign(:invoices, invoices)}
+        case BillingReadModel.invoice_result(context.customer) do
+          {:ok, invoices} ->
+            {:ok, socket |> assign(:invoice_state, :ok) |> assign(:invoices, invoices)}
+
+          {:error, _reason} ->
+            {:ok, socket |> assign(:invoice_state, :unavailable) |> assign(:invoices, [])}
+        end
 
       {:error, _reason} ->
         {:ok,
@@ -42,14 +47,24 @@ defmodule AccruePortal.Live.InvoicesLive do
         <p :if={@billing_identity}>
           Invoices for <strong>{@billing_identity}</strong>.
         </p>
-        <div :if={@invoices == []} class="portal-empty">
+        <div :if={@invoice_state == :unavailable} class="portal-inline-error" role="alert">
+          <p>{Copy.invoices_unavailable_body()}</p>
+          <a
+            href={Path.context(Path.invoices(@base_path), @current_context_pin)}
+            class="portal-button-secondary"
+          >
+            {Copy.invoices_retry_cta()}
+          </a>
+        </div>
+        <div :if={@invoice_state == :ok && @invoices == []} class="portal-empty">
           <strong>{Copy.invoices_empty_title()}</strong>
           <p>{Copy.invoices_empty_body()}</p>
+          <p>{Copy.invoices_empty_next_step()}</p>
         </div>
-        <p :if={@invoices != []}>
+        <p :if={@invoice_state == :ok && @invoices != []}>
           {Copy.invoices_recent_note()}
         </p>
-        <ul :if={@invoices != []} class="portal-list">
+        <ul :if={@invoice_state == :ok && @invoices != []} class="portal-list">
           <li :for={invoice <- @invoices}>
             <div>
               <strong>{invoice.number || invoice.processor_id || invoice.id}</strong>

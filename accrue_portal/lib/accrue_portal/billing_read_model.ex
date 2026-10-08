@@ -57,6 +57,25 @@ defmodule AccruePortal.BillingReadModel do
   end
 
   def invoices(%Customer{id: customer_id}) do
+    list_invoices(customer_id)
+  end
+
+  @doc "Returns an explicit invoice read outcome for customer-facing surfaces."
+  def invoice_result(%Customer{id: customer_id}) do
+    reader = Application.get_env(:accrue_portal, :invoice_reader, &list_invoices/1)
+
+    case reader.(customer_id) do
+      {:ok, invoices} when is_list(invoices) -> {:ok, invoices}
+      invoices when is_list(invoices) -> {:ok, invoices}
+      {:error, _reason} -> {:error, :unavailable}
+      _ -> {:error, :unavailable}
+    end
+  rescue
+    _exception in [DBConnection.ConnectionError, Postgrex.Error] ->
+      {:error, :unavailable}
+  end
+
+  defp list_invoices(customer_id) do
     from(invoice in Invoice,
       where: invoice.customer_id == ^customer_id,
       order_by: [desc: invoice.inserted_at],
@@ -64,9 +83,6 @@ defmodule AccruePortal.BillingReadModel do
     )
     |> Repo.all()
   end
-
-  @doc "Returns a successful, customer-scoped invoice read outcome."
-  def invoice_result(%Customer{} = customer), do: {:ok, invoices(customer)}
 
   def charges(%Customer{id: customer_id}) do
     from(charge in Charge,
