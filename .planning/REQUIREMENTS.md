@@ -35,7 +35,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 
 - [ ] **POR-01**: Customers can use all seven existing Portal pages and supported actions with legible, responsive content scoped to the selected billed entity and compatible with host branding.
 - [ ] **POR-02**: Customers can add, default, or remove supported payment methods and change or cancel eligible subscriptions without crossing account or provider capabilities; list and detail entry points disclose the same consequences before confirmation.
-- [ ] **POR-03**: Customers can reach existing invoice records and hosted invoice access for the correct Customer; missing and unauthorized records fail safely.
+- [x] **POR-03**: Customers can reach existing invoice records and hosted invoice access for the correct Customer; missing and unauthorized records fail safely.
 - [ ] **POR-04**: Customers receive visible and announced outcomes after LiveView actions and POST/redirects; failed reads are not represented as empty lists and checkout failure does not assert a charge.
 - [ ] **POR-05**: Direct add-card navigation initializes the supported secure Hosted Fields flow, and its supported states remain readable across shell themes and LiveView patches.
 - [ ] **POR-06**: Customers see known trial, incomplete, unpaid, and canceled states accurately, without claims about host access, complete invoice counts, or unsupported retention/document availability.
@@ -100,7 +100,7 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | CKO-04 | Phase 235 | Complete |
 | POR-01 | Phase 236 | Pending |
 | POR-02 | Phase 236 | Pending |
-| POR-03 | Phase 236 | Pending |
+| POR-03 | Phase 236 | Complete |
 | POR-04 | Phase 236 | Pending |
 | POR-05 | Phase 236 | Pending |
 | POR-06 | Phase 236 | Pending |

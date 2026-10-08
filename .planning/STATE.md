@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 236
-current_phase_name: portal-billing-self-service
+current_phase_name: Portal Billing Self-Service
 status: executing
-stopped_at: Phase 236 planning in progress
-last_updated: "2026-10-08T16:25:55.387Z"
+stopped_at: Completed 236-01-PLAN.md
+last_updated: "2026-10-08T16:40:13.371Z"
 last_activity: 2026-10-08
-last_activity_desc: Phase 235 complete, transitioned to Phase 236
-state_head: 2efcbb27a35211485eed42c85af4ce95143d59be
+last_activity_desc: Phase 236 execution started
+state_head: ff6263d0c41c1bcf72955865857c2dba7a1e1c7b
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 26
-  completed_plans: 21
+  completed_plans: 22
   percent: 43
 ---
 
@@ -26,16 +26,16 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 235 — Customer Plan Selection & Checkout
+**Current focus:** Phase 236 — Portal Billing Self-Service
 **Progress:** [████░░░░░░] 43% (2 of 7 milestone phases complete)
 **Planned work completed:** [████████████████████] 15/15 plans (100%); remaining phases await planning.
 
 ## Current Position
 
-Phase: 236 (portal-billing-self-service) — READY TO EXECUTE
-Plan: Not started
+Phase: 236 (Portal Billing Self-Service) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-10-08 — Phase 235 complete, transitioned to Phase 236
+Last activity: 2026-10-08 — Phase 236 execution started
 
 ## Performance Metrics
 
@@ -122,6 +122,7 @@ Last activity: 2026-10-08 — Phase 235 complete, transitioned to Phase 236
 | Phase 235 P04 | 17 | 2 tasks | 7 files |
 | Phase 235 P05 | 13 minutes | 2 tasks | 6 files |
 | Phase 235 P06 | 60min | 2 tasks | 6 files |
+| Phase 236 P01 | 12 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -244,6 +245,7 @@ Last activity: 2026-10-08 — Phase 235 complete, transitioned to Phase 236
 - [Phase 235]: Braintree returns locate, but do not prove, payment; display completion only after a current authorized Customer and exact completed LocalSession match.
 - [Phase 235]: Keep Stripe cs_ validation and fetched paid-session reconciliation authoritative.
 - [Phase 235]: Use explicitly fixture-backed LocalSession evidence for the deterministic Braintree browser return; do not claim live-provider success.
+- [Phase 236]: Invoice reads return explicit success or unavailable outcomes; the existing 20-record cap is disclosed as a recent-list limit. — Customers need to distinguish an empty invoice history from a failed read, and the UI must avoid promising complete history or document retention.
 
 ### Pending Todos
 
@@ -317,9 +319,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T16:01:33.396Z
-Stopped at: Phase 236 planning in progress
-Resume file: .planning/phases/236-portal-billing-self-service/236-RESEARCH.md
+Last session: 2026-10-08T16:38:56.021Z
+Stopped at: Completed 236-01-PLAN.md
+Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
