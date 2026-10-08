@@ -3,17 +3,17 @@ gsd_state_version: "1.0"
 milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 236
-current_phase_name: Portal Billing Self-Service
-status: planning
-stopped_at: Phase 236 UI-SPEC approved
-last_updated: "2026-10-08T16:01:19.550Z"
+current_phase_name: portal-billing-self-service
+status: executing
+stopped_at: Phase 236 planning in progress
+last_updated: "2026-10-08T16:25:55.387Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 235 complete, transitioned to Phase 236
-state_head: 520f38d146db8770c7da04c3dec40fc5f75badcc
+state_head: 2efcbb27a35211485eed42c85af4ce95143d59be
 progress:
   total_phases: 7
   completed_phases: 3
-  total_plans: 21
+  total_plans: 26
   completed_plans: 21
   percent: 43
 ---
@@ -32,9 +32,9 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 ## Current Position
 
-Phase: 236 — Portal Billing Self-Service
+Phase: 236 (portal-billing-self-service) — READY TO EXECUTE
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-10-08 — Phase 235 complete, transitioned to Phase 236
 
 ## Performance Metrics
@@ -317,9 +317,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T16:01:19.478Z
-Stopped at: Phase 236 UI-SPEC approved
-Resume file: .planning/phases/236-portal-billing-self-service/236-UI-SPEC.md
+Last session: 2026-10-08T16:01:33.396Z
+Stopped at: Phase 236 planning in progress
+Resume file: .planning/phases/236-portal-billing-self-service/236-RESEARCH.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 

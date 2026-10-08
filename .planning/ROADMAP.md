@@ -152,7 +152,21 @@ Plans:
   4. LiveView and POST/redirect actions announce visible success or failure, failed reads do not look empty, and checkout failure does not assert a charge.
   5. Direct add-card navigation initializes supported secure fields; known subscription states and safe host returns are truthful, and Portal keyboard/mobile/theme/focus/motion states are checked in this slice.
 
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+**Wave 1**
+- [ ] 236-01-PLAN.md — Scoped hosted invoices and distinct read outcomes
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 236-02-PLAN.md — Supported payment-method actions and direct secure card entry
+- [ ] 236-04-PLAN.md — Checkout evidence and safe returns
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 236-03-PLAN.md — Subscription action parity and truthful lifecycle
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 236-05-PLAN.md — Host-branded seven-route browser contract in CI
+
 **UI hint**: yes
 
 ### Phase 237: Admin Invoices, Payments & Recovery
