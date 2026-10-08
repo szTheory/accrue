@@ -1,6 +1,8 @@
 defmodule AccruePortal.CheckoutContextTest do
   use AccruePortal.ConnCase, async: false
 
+  import Ecto.Query
+
   alias Accrue.Checkout.LocalSession
   alias Accrue.Billing.Customer
   alias Accrue.Portal.Context
@@ -86,6 +88,10 @@ defmodule AccruePortal.CheckoutContextTest do
         send(pid, {:gateway_create, params, Accrue.Actor.current()})
       end
 
+      if after_accept = Application.get_env(:accrue_portal, :checkout_context_after_accept) do
+        after_accept.()
+      end
+
       {:ok,
        struct!(Braintree.Subscription,
          id: "sub_bt_checkout_context",
@@ -134,6 +140,7 @@ defmodule AccruePortal.CheckoutContextTest do
     previous_processor = Application.get_env(:accrue, :processor)
     previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
     previous_test_pid = Application.get_env(:accrue_portal, :checkout_context_test_pid)
+    previous_after_accept = Application.get_env(:accrue_portal, :checkout_context_after_accept)
     Application.put_env(:accrue, :auth_adapter, AccruePortal.Fixtures.AuthAdapter)
     Application.put_env(:accrue, :braintree_client_token_generator, CountingTokenGenerator)
     Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
@@ -180,6 +187,15 @@ defmodule AccruePortal.CheckoutContextTest do
         do: Application.put_env(:accrue_portal, :checkout_context_test_pid, previous_test_pid),
         else: Application.delete_env(:accrue_portal, :checkout_context_test_pid)
 
+      if previous_after_accept,
+        do:
+          Application.put_env(
+            :accrue_portal,
+            :checkout_context_after_accept,
+            previous_after_accept
+          ),
+        else: Application.delete_env(:accrue_portal, :checkout_context_after_accept)
+
       ActionAdapter.clear_grants()
     end)
 
@@ -216,7 +232,8 @@ defmodule AccruePortal.CheckoutContextTest do
     assert html =~ ~s(name="context_pin" value=)
     assert TokenCounter.count() > 0
 
-    [[pin]] = Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
 
     assert {:error, {:redirect, %{to: "https://app.example.test/billing/success"}}} =
              render_hook(view, "checkout_tokenized", %{
@@ -287,7 +304,25 @@ defmodule AccruePortal.CheckoutContextTest do
         ui_mode: "hosted",
         status: "open",
         price_id: "price_personal_legacy",
-        line_items: [%{"price" => "price_personal_legacy", "amount" => "49.00"}],
+        line_items: [
+          %{
+            "price" => "price_personal_legacy",
+            "amount" => "49.00",
+            "amount_minor" => 4_900,
+            "quantity" => 1,
+            "currency" => "USD"
+          }
+        ],
+        metadata: %{
+          "amount_minor" => 4_900,
+          "currency" => "USD",
+          "interval" => "month",
+          "interval_count" => 1,
+          "plan_name" => "Personal plan",
+          "billable_name" => "Personal Customer",
+          "billable_id" => user_id,
+          "processor" => "braintree"
+        },
         success_url: "https://app.example.test/billing/success",
         cancel_url: "https://app.example.test/billing/cancel",
         operation_id: "checkout-personal-legacy"
@@ -478,6 +513,43 @@ defmodule AccruePortal.CheckoutContextTest do
     refute_received {:gateway_create, _, _}
   end
 
+  test "POST reports accepted work with a failed local completion update as uncertain", %{
+    conn: conn
+  } do
+    session = checkout_fixture("org-checkout-persistence-failure")
+    conn = sign_in_org(conn, "org-checkout-persistence-failure")
+    ActionAdapter.grant("org-checkout-persistence-failure", [:checkout_complete])
+    assert {:ok, _view, html} = live(conn, "/org-billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    csrf =
+      Regex.run(~r/name="_csrf_token" value="([^"]+)"/, html, capture: :all_but_first) |> hd()
+
+    Application.put_env(:accrue_portal, :checkout_context_after_accept, fn ->
+      TestRepo.update_all(
+        from(checkout in LocalSession, where: checkout.id == ^session.id),
+        set: [status: "uncertain"]
+      )
+    end)
+
+    response =
+      post(conn, "/org-billing/checkout/#{session.session_token}/complete", %{
+        "_csrf_token" => csrf,
+        "context_pin" => pin,
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    assert redirected_to(response) == "/org-billing/checkout/#{session.session_token}"
+
+    assert Phoenix.Flash.get(response.assigns.flash, :error) =~
+             "could not confirm the payment result"
+
+    assert LocalSession.by_id(session.id).status == "uncertain"
+    assert_received {:gateway_create, %{payment_method_token: "fake-valid-nonce"}, _actor}
+  end
+
   test "old tab pin completes its original checkout after selection changes, foreign targets and revocation deny",
        %{
          conn: conn
@@ -590,7 +662,25 @@ defmodule AccruePortal.CheckoutContextTest do
         ui_mode: "hosted",
         status: "open",
         price_id: "price_checkout_context",
-        line_items: [%{"price" => "price_checkout_context", "amount" => "49.00"}],
+        line_items: [
+          %{
+            "price" => "price_checkout_context",
+            "amount" => "49.00",
+            "amount_minor" => 4_900,
+            "quantity" => 1,
+            "currency" => "USD"
+          }
+        ],
+        metadata: %{
+          "amount_minor" => 4_900,
+          "currency" => "USD",
+          "interval" => "month",
+          "interval_count" => 1,
+          "plan_name" => "Checkout plan",
+          "billable_name" => "Checkout Organization",
+          "billable_id" => owner_id,
+          "processor" => "braintree"
+        },
         success_url: "https://app.example.test/billing/success",
         cancel_url: "https://app.example.test/billing/cancel",
         operation_id: "checkout-context-#{System.unique_integer([:positive])}"

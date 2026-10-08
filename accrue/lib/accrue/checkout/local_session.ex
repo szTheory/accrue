@@ -86,9 +86,43 @@ defmodule Accrue.Checkout.LocalSession do
 
   @spec mark_completed(t()) :: {:ok, t()} | {:error, Ecto.Changeset.t()}
   def mark_completed(%__MODULE__{} = session) do
-    session
-    |> changeset(%{status: "completed"})
-    |> Repo.update()
+    update_claimed_status(session, "completed")
+  end
+
+  @doc "Atomically claims an open, unexpired session for one provider operation."
+  @spec claim(t(), DateTime.t()) :: {:ok, t()} | {:error, :unavailable}
+  def claim(%__MODULE__{} = session, %DateTime{} = now) do
+    query =
+      from(checkout in __MODULE__,
+        where:
+          checkout.id == ^session.id and checkout.status == "open" and
+            checkout.expires_at > ^now
+      )
+
+    case Repo.update_all(query, set: [status: "processing", updated_at: now]) do
+      {1, _} -> {:ok, by_id(session.id)}
+      _ -> {:error, :unavailable}
+    end
+  end
+
+  @doc "Records a provider operation whose result is not yet authoritative."
+  @spec mark_uncertain(t()) :: {:ok, t()} | {:error, term()}
+  def mark_uncertain(%__MODULE__{} = session), do: update_claimed_status(session, "uncertain")
+
+  @doc "Releases a claim only after a definite provider rejection."
+  @spec release_claim(t()) :: {:ok, t()} | {:error, term()}
+  def release_claim(%__MODULE__{} = session), do: update_claimed_status(session, "open")
+
+  defp update_claimed_status(%__MODULE__{} = session, status) do
+    query =
+      from(checkout in __MODULE__,
+        where: checkout.id == ^session.id and checkout.status == "processing"
+      )
+
+    case Repo.update_all(query, set: [status: status, updated_at: DateTime.utc_now()]) do
+      {1, _} -> {:ok, by_id(session.id)}
+      _ -> {:error, :not_claimed}
+    end
   end
 
   defp by_operation_id(%Customer{id: customer_id}, operation_id) do

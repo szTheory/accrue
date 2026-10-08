@@ -5,6 +5,7 @@ defmodule AccruePortal.Controllers.CheckoutController do
 
   alias Accrue.Billing
   alias Accrue.Checkout.LocalSession
+  alias Accrue.CardError
   alias Accrue.Portal.{Context, CustomerSession}
   alias Accrue.Processor
   alias AccruePortal.Path
@@ -22,7 +23,10 @@ defmodule AccruePortal.Controllers.CheckoutController do
              :checkout_complete,
              checkout
            ) do
-      subscribe(conn, context, checkout, nonce)
+      case LocalSession.claim(checkout, DateTime.utc_now()) do
+        {:ok, claimed} -> subscribe(conn, context, claimed, nonce)
+        {:error, _} -> unavailable(conn, token)
+      end
     else
       _ -> deny(conn, token)
     end
@@ -66,11 +70,17 @@ defmodule AccruePortal.Controllers.CheckoutController do
             end
 
           {:error, _changeset} ->
-            deny(conn, checkout.session_token)
+            _ = LocalSession.mark_uncertain(checkout)
+            uncertain(conn, checkout)
         end
 
+      {:error, %CardError{}} ->
+        _ = LocalSession.release_claim(checkout)
+        rejected(conn, checkout)
+
       {:error, _reason} ->
-        deny(conn, checkout.session_token)
+        _ = LocalSession.mark_uncertain(checkout)
+        uncertain(conn, checkout)
     end
   end
 
@@ -84,15 +94,7 @@ defmodule AccruePortal.Controllers.CheckoutController do
           false
       end
 
-    selected_item_matches? =
-      case checkout.line_items do
-        [%{"price" => price_id, "amount" => amount} = item] ->
-          price_id == checkout.price_id and valid_amount?(amount) and
-            valid_currency?(item["currency"])
-
-        _ ->
-          false
-      end
+    selected_item_matches? = checkout_terms_match?(context, checkout)
 
     customer_matches? and selected_item_matches? and checkout.mode == "subscription" and
       checkout.ui_mode == "hosted" and context.processor == checkout.processor and
@@ -101,18 +103,46 @@ defmodule AccruePortal.Controllers.CheckoutController do
 
   defp checkout_target?(_, _), do: false
 
-  defp valid_amount?(amount) when is_integer(amount), do: amount > 0
+  defp checkout_terms_match?(
+         context,
+         %LocalSession{line_items: [item], metadata: metadata} = checkout
+       )
+       when is_map(item) and is_map(metadata) do
+    amount_minor = metadata["amount_minor"]
+    currency = metadata["currency"]
+    amount = item["amount"]
 
-  defp valid_amount?(amount) when is_binary(amount) do
-    case Decimal.parse(String.trim_leading(String.trim(amount), "$")) do
-      {%Decimal{} = value, ""} -> Decimal.compare(value, Decimal.new(0)) == :gt
-      _ -> false
-    end
+    item["price"] == checkout.price_id and item["quantity"] == 1 and
+      is_integer(amount_minor) and amount_minor > 0 and item["amount_minor"] == amount_minor and
+      valid_decimal_amount?(amount, amount_minor) and valid_currency?(currency) and
+      item["currency"] == currency and metadata["processor"] == checkout.processor and
+      metadata["billable_id"] == to_string(context.owner_id) and
+      is_binary(metadata["plan_name"]) and String.trim(metadata["plan_name"]) != "" and
+      is_binary(metadata["billable_name"]) and String.trim(metadata["billable_name"]) != "" and
+      metadata["interval"] in ["day", "week", "month", "year"] and
+      is_integer(metadata["interval_count"]) and metadata["interval_count"] > 0
   end
 
-  defp valid_amount?(_), do: false
-  defp valid_currency?(nil), do: true
-  defp valid_currency?(currency), do: is_binary(currency) and currency =~ ~r/^[A-Za-z]{3}$/
+  defp checkout_terms_match?(_, _), do: false
+
+  defp valid_decimal_amount?(amount, expected_minor) when is_integer(amount),
+    do: amount == expected_minor
+
+  defp valid_decimal_amount?(amount, expected_minor) when is_binary(amount) do
+    case Decimal.parse(String.trim_leading(String.trim(amount), "$")) do
+      {%Decimal{} = value, ""} ->
+        Decimal.compare(Decimal.mult(value, Decimal.new(100)), Decimal.new(expected_minor)) == :eq
+
+      _ ->
+        false
+    end
+  rescue
+    ArgumentError -> false
+  end
+
+  defp valid_decimal_amount?(_, _), do: false
+
+  defp valid_currency?(currency), do: is_binary(currency) and currency =~ ~r/^[A-Z]{3}$/
 
   defp checkout_ready?(%LocalSession{status: "open", expires_at: %DateTime{} = expires_at}) do
     DateTime.compare(expires_at, DateTime.utc_now()) == :gt
@@ -148,6 +178,42 @@ defmodule AccruePortal.Controllers.CheckoutController do
           else: Path.home(base_path(conn))
         )
     )
+  end
+
+  defp unavailable(conn, token) do
+    case LocalSession.by_token(token) do
+      %LocalSession{status: status} = checkout when status in ["processing", "uncertain"] ->
+        uncertain(conn, checkout)
+
+      %LocalSession{status: "completed"} = checkout ->
+        conn
+        |> put_flash(
+          :info,
+          "This checkout has already been completed. Review your subscription status before taking another action."
+        )
+        |> redirect(to: Path.checkout(base_path(conn), checkout.session_token))
+
+      _ ->
+        deny(conn, token)
+    end
+  end
+
+  defp rejected(conn, checkout) do
+    conn
+    |> put_flash(
+      :error,
+      "Your card was declined. No subscription was created. Please try a fresh payment method."
+    )
+    |> redirect(to: Path.checkout(base_path(conn), checkout.session_token))
+  end
+
+  defp uncertain(conn, checkout) do
+    conn
+    |> put_flash(
+      :error,
+      "We could not confirm the payment result. Do not submit again. Check your subscription status or contact support."
+    )
+    |> redirect(to: Path.checkout(base_path(conn), checkout.session_token))
   end
 
   defp base_path(conn) do
