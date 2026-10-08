@@ -86,7 +86,7 @@ Plans:
   4. Mounted owner/customer denials and forged actions remain denied without exposing foreign records or payment-token data.
   5. The affected Admin flows remain usable by keyboard and at narrow/coarse-pointer sizes, with the relevant light/dark and empty/error states checked in this slice.
 
-**Plans**: 7/7 plans executed
+**Plans**: 8/8 plans executed
 Plans:
 **Wave 1**
 - [x] 234-01-PLAN.md — Scoped subscription list, detail and return trace; immutable pre-layout capture
@@ -106,6 +106,9 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5 completion)*
 - [x] 234-06-PLAN.md — Served keyboard, responsive, denial and CI evidence
+
+**Wave 8** *(verification gap closure)*
+- [x] 234-08-PLAN.md — Shift-left real-search, step-up, and measurable UI verification
 
 **UI hint**: yes
 

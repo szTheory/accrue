@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 234
 current_phase_name: Admin Customers & Subscriptions
 status: verifying
-stopped_at: Completed 234-06-PLAN.md
-last_updated: "2026-10-08T02:13:21.448Z"
+stopped_at: Completed 234-08-PLAN.md
+last_updated: "2026-10-08T03:34:01.583Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 234 execution started
-state_head: 4703330c5da87459631f168a6f7d5842bd18eaa1
+state_head: 09b6a484d0350034ad658a75fb6052fd4437d562
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 15
+  completed_plans: 15
   percent: 14
 ---
 
@@ -113,6 +113,7 @@ Last activity: 2026-10-07 — Phase 234 execution started
 | Phase 234 P04 | 6min | 2 tasks | 2 files |
 | Phase 234 P05 | 15min | 2 tasks | 3 files |
 | Phase 234 P06 | 24min | 2 tasks | 10 files |
+| Phase 234 P08 | 21min | 3 tasks | 21 files |
 
 ## Accumulated Context
 
@@ -214,6 +215,10 @@ Last activity: 2026-10-07 — Phase 234 execution started
 - [Phase 234]: Plan 234-06 kept the existing Playwright CI lane because unrestricted discovery already executes both host specs.
 - [Phase 234]: Plan 234-06 preserved prior served evidence by writing final captures to a plan-specific directory.
 - [Phase 234]: Plan 234-06 kept global-search production code unchanged; host SQL sandbox ownership does not reach async search workers.
+- [Phase 234]: Keep SQL Sandbox as the default test mode and turn it off only in the dedicated real-query browser lane.
+- [Phase 234]: Use the existing merge-blocking Playwright job and its isolated Postgres service because search correctness has recurring value.
+- [Phase 234]: Keep the Phase 234-06 screenshot artifact immutable; verify current served asset equality, accessibility, computed style, and layout directly.
+- [Phase 234]: Skip confirmation-only UAT when all testable acceptance claims have passing automated evidence.
 
 ### Pending Todos
 
@@ -284,8 +289,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T02:13:21.416Z
-Stopped at: Completed 234-06-PLAN.md
+Last session: 2026-10-08T03:34:01.531Z
+Stopped at: Completed 234-08-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
