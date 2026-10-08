@@ -223,6 +223,40 @@ defmodule AccruePortal.ContextPostTest do
              payment_method.id
   end
 
+  test "failed card saves announce the processor result and create no card", %{conn: conn} do
+    %{user: user, customer: customer} = dashboard_fixture!()
+    conn = sign_in_conn(conn, user)
+    assert {:ok, _view, html} = live_payment_methods(conn)
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    payment_method_ids_before =
+      TestRepo.all(PaymentMethod) |> Enum.map(& &1.id) |> MapSet.new()
+
+    Accrue.Processor.Fake.stub(:create_payment_method, fn _params, _opts ->
+      {:error, :offline}
+    end)
+
+    on_exit(fn -> Accrue.Processor.Fake.unstub(:create_payment_method) end)
+
+    response =
+      post(conn, "/billing/payment-methods", %{
+        "context_pin" => pin,
+        "payment_method_nonce" => "fake-valid-nonce"
+      })
+
+    assert_context_redirect(response, "/billing/payment-methods", pin)
+
+    assert Phoenix.Flash.get(response.assigns.flash, :error) ==
+             Copy.add_payment_method_save_error()
+
+    assert TestRepo.all(PaymentMethod) |> Enum.map(& &1.id) |> MapSet.new() ==
+             payment_method_ids_before
+
+    assert TestRepo.get(Accrue.Billing.Customer, customer.id)
+  end
+
   test "missing and forged pins block payment method writes", %{conn: conn} do
     %{user: user, customer: customer, payment_method: payment_method} = dashboard_fixture!()
     conn = sign_in_conn(conn, user)
@@ -587,6 +621,10 @@ defmodule AccruePortal.ContextPinPolicyTest do
       })
 
     assert_context_redirect(response, "/org-billing/payment-methods", pin)
+
+    assert Phoenix.Flash.get(response.assigns.flash, :info) ==
+             Copy.add_payment_method_save_success()
+
     assert Accrue.Processor.Fake.call_count(:create_payment_method) == calls_before + 1
 
     assert %Accrue.Billing.PaymentMethod{id: payment_method_id} =

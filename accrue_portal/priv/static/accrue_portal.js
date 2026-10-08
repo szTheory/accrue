@@ -3,6 +3,7 @@
 
   Hooks.BraintreeHostedFields = {
     mounted: function () {
+      this.isDestroyed = false;
       var errorNode = this.el.querySelector("[data-braintree-error]");
       var submitButton = this.el.querySelector("[data-checkout-submit]");
 
@@ -34,6 +35,7 @@
       this.readyToSubmit = false;
       this.tokenizing = false;
       this.submissionSent = false;
+      this.lifecycleGeneration = (this.lifecycleGeneration || 0) + 1;
 
       window.braintree.client.create({ authorization: token }, function (clientErr, clientInstance) {
         if (clientErr) {
@@ -103,8 +105,20 @@
       }.bind(this));
     },
 
+    updated: function () {
+      var nonceInput = this.el.querySelector("[data-braintree-nonce-input]");
+      if (nonceInput) nonceInput.value = "";
+      this.lifecycleGeneration = (this.lifecycleGeneration || 0) + 1;
+      this.readyToSubmit = false;
+      this.tokenizing = false;
+      if (this.hostedFields) {
+        setSubmitting(this.el.querySelector("[data-checkout-submit]"), false);
+      }
+    },
+
     destroyed: function () {
       this.isDestroyed = true;
+      this.lifecycleGeneration = (this.lifecycleGeneration || 0) + 1;
       if (this.sdkLoadTimer) window.clearTimeout(this.sdkLoadTimer);
       var nonceInput = this.el.querySelector("[data-braintree-nonce-input]");
       if (nonceInput) nonceInput.value = "";
@@ -128,10 +142,11 @@
       setInlineError(errorNode, "Securing your card details...");
       var nonceInput = this.el.querySelector("[data-braintree-nonce-input]");
       if (nonceInput) nonceInput.value = "";
+      var lifecycleGeneration = this.lifecycleGeneration;
 
       this.hostedFields.tokenize(
         function (tokenizeErr, payload) {
-          if (this.isDestroyed) {
+          if (this.isDestroyed || lifecycleGeneration !== this.lifecycleGeneration) {
             this.tokenizing = false;
             if (nonceInput) nonceInput.value = "";
             return;
@@ -211,6 +226,27 @@
       );
     }
   };
+
+  document.addEventListener("submit", function (event) {
+    var form = event.target;
+    if (!form || form.nodeName !== "FORM" || !form.hasAttribute("data-confirm")) return;
+
+    if (form.dataset.confirmAccepted === "1") {
+      delete form.dataset.confirmAccepted;
+      return;
+    }
+
+    event.preventDefault();
+    if (!window.confirm(form.getAttribute("data-confirm"))) return;
+
+    form.dataset.confirmAccepted = "1";
+    if (typeof form.requestSubmit === "function") {
+      if (event.submitter) form.requestSubmit(event.submitter);
+      else form.requestSubmit();
+    } else {
+      form.submit();
+    }
+  });
 
   function hostedFieldStyles() {
     return {

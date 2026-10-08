@@ -11,7 +11,7 @@ defmodule AccruePortal.Live.AddPaymentMethodLive do
     customer = socket.assigns.current_customer
     adapter = socket.assigns[:current_context_adapter]
 
-    {client_token, create_denied?} =
+    {client_token, create_denied?, create_unavailable?} =
       case Accrue.Portal.Context.authorize_action(
              context,
              adapter,
@@ -19,13 +19,17 @@ defmodule AccruePortal.Live.AddPaymentMethodLive do
              customer
            ) do
         :ok ->
-          case BraintreeClient.client_token_for(customer) do
-            {:ok, token} -> {token, false}
-            {:error, _reason} -> {nil, false}
+          if hosted_fields_supported?(customer) do
+            case BraintreeClient.client_token_for(customer) do
+              {:ok, token} -> {token, false, false}
+              {:error, _reason} -> {nil, false, false}
+            end
+          else
+            {nil, false, true}
           end
 
         {:error, :forbidden} ->
-          {nil, true}
+          {nil, true, false}
       end
 
     pin =
@@ -40,9 +44,11 @@ defmodule AccruePortal.Live.AddPaymentMethodLive do
       |> assign(:page_title, Copy.add_payment_method_page_title())
       |> assign(:portal, portal)
       |> assign(:base_path, portal["mount_path"])
+      |> assign(:billed_identity, billed_identity(context, customer))
       |> assign(:client_token, client_token)
       |> assign(:context_pin, pin)
       |> assign(:create_denied, create_denied?)
+      |> assign(:create_unavailable, create_unavailable?)
 
     if is_binary(pin) and not is_binary(Map.get(params, "context_pin")) do
       send(self(), {:patch_context_pin, pin})
@@ -76,6 +82,7 @@ defmodule AccruePortal.Live.AddPaymentMethodLive do
       <section class="portal-card">
         <div class="portal-stack">
           <h1>{Copy.add_payment_method_heading()}</h1>
+          <p>Billing for <strong>{@billed_identity}</strong></p>
           <p>{Copy.add_payment_method_body()}</p>
         </div>
 
@@ -108,7 +115,7 @@ defmodule AccruePortal.Live.AddPaymentMethodLive do
           </div>
           <p class="portal-help" data-braintree-error></p>
           <div class="portal-actions">
-            <button type="submit" class="portal-button-primary" data-checkout-submit>
+            <button type="submit" class="portal-button-primary" data-checkout-submit disabled>
               {Copy.add_payment_method_save_cta()}
             </button>
             <a href={Path.payment_methods(@base_path)} class="portal-button-secondary">
@@ -119,7 +126,8 @@ defmodule AccruePortal.Live.AddPaymentMethodLive do
 
         <div :if={!@client_token} class="portal-stack" role="status" aria-live="polite">
           <p :if={@create_denied}>{Copy.payment_method_create_denied()}</p>
-          <p :if={!@create_denied}>{Copy.checkout_missing_nonce_error()}</p>
+          <p :if={@create_unavailable}>{Copy.payment_method_create_unavailable()}</p>
+          <p :if={!@create_denied and !@create_unavailable}>{Copy.checkout_missing_nonce_error()}</p>
           <a href={Path.payment_methods(@base_path)} class="portal-button-secondary">
             {Copy.add_payment_method_discard_cta()}
           </a>
@@ -127,5 +135,20 @@ defmodule AccruePortal.Live.AddPaymentMethodLive do
       </section>
     </main>
     """
+  end
+
+  defp hosted_fields_supported?(%{processor: customer_processor}) do
+    processor = Accrue.Processor.__impl__()
+
+    customer_processor == processor.processor_name() and
+      customer_processor in ["braintree", "fake"] and
+      Accrue.Processor.supports?([:payment_method, :vault_acquisition]) and
+      Accrue.Processor.supports?([:payment_method, :create])
+  rescue
+    _ -> false
+  end
+
+  defp billed_identity(context, customer) do
+    context.display_name || customer.name || customer.email || "this account"
   end
 end
