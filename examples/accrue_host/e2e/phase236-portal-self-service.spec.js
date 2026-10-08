@@ -25,15 +25,29 @@ async function installHostedFieldsMock(page, options = {}) {
     } catch (_error) {
       counts = null;
     }
-    counts = counts || { clientCreate: 0, hostedFieldsCreate: 0, tokenize: 0, teardown: 0 };
+    counts = counts || { clientCreate: 0, clientTeardown: 0, hostedFieldsCreate: 0, tokenize: 0, teardown: 0 };
+    counts.clientTeardown = counts.clientTeardown || 0;
     const saveCounts = () => sessionStorage.setItem(storageKey, JSON.stringify(counts));
+    const pendingClientCallbacks = [];
+    const pendingHostedFieldsCallbacks = [];
     const outcomes = mockOptions.outcomes || [{ kind: "invalid" }];
     const sdk = {
       client: {
         create(_options, callback) {
           counts.clientCreate += 1;
           saveCounts();
-          window.setTimeout(() => callback(null, {}), mockOptions.setupDelayMs || 0);
+          const complete = () => callback(null, {
+            teardown(done) {
+              counts.clientTeardown += 1;
+              saveCounts();
+              if (done) done();
+            }
+          });
+          if (mockOptions.holdFirstClientCreate && counts.clientCreate === 1) {
+            pendingClientCallbacks.push(complete);
+          } else {
+            window.setTimeout(complete, mockOptions.setupDelayMs || 0);
+          }
         }
       },
       hostedFields: {
@@ -41,30 +55,34 @@ async function installHostedFieldsMock(page, options = {}) {
           counts.hostedFieldsCreate += 1;
           window.__phase236HostedFieldsEvidence.styles = _options.styles;
           saveCounts();
-          window.setTimeout(() => {
-            callback(null, {
-              tokenize(done) {
-                counts.tokenize += 1;
-                saveCounts();
-                const outcome = outcomes.shift() || { kind: "invalid" };
-                window.setTimeout(() => {
-                  if (outcome.kind === "invalid") {
-                    done({
-                      code: "HOSTED_FIELDS_FIELDS_INVALID",
-                      details: { invalidFieldKeys: ["number"] }
-                    });
-                    return;
-                  }
-                  done(null, { nonce: outcome.nonce || "phase236-one-time-nonce" });
-                }, mockOptions.tokenizeDelayMs || 0);
-              },
-              teardown(done) {
-                counts.teardown += 1;
-                saveCounts();
-                if (done) done();
-              }
-            });
-          }, mockOptions.setupDelayMs || 0);
+          const instance = {
+            tokenize(done) {
+              counts.tokenize += 1;
+              saveCounts();
+              const outcome = outcomes.shift() || { kind: "invalid" };
+              window.setTimeout(() => {
+                if (outcome.kind === "invalid") {
+                  done({
+                    code: "HOSTED_FIELDS_FIELDS_INVALID",
+                    details: { invalidFieldKeys: ["number"] }
+                  });
+                  return;
+                }
+                done(null, { nonce: outcome.nonce || "phase236-one-time-nonce" });
+              }, mockOptions.tokenizeDelayMs || 0);
+            },
+            teardown(done) {
+              counts.teardown += 1;
+              saveCounts();
+              if (done) done();
+            }
+          };
+          const complete = () => callback(null, instance);
+          if (mockOptions.holdFirstHostedFieldsCreate && counts.hostedFieldsCreate === 1) {
+            pendingHostedFieldsCallbacks.push(complete);
+          } else {
+            window.setTimeout(complete, mockOptions.setupDelayMs || 0);
+          }
         }
       }
     };
@@ -77,11 +95,52 @@ async function installHostedFieldsMock(page, options = {}) {
         ,styles: null
       }
     });
+    Object.defineProperty(window, "__phase236HostedFieldsControl", {
+      configurable: false,
+      value: {
+        pendingClientCallbacks: () => pendingClientCallbacks.length,
+        releaseClientCreate() {
+          const callback = pendingClientCallbacks.shift();
+          if (!callback) return false;
+          callback();
+          return true;
+        },
+        releaseHostedFieldsCreate() {
+          const callback = pendingHostedFieldsCallbacks.shift();
+          if (!callback) return false;
+          callback();
+          return true;
+        },
+        triggerPostMountUpdate() {
+          const form = document.querySelector('[data-portal-hosted-fields="payment-method"]');
+          const sockets = [window.liveSocket, window.accruePortalLiveSocket];
+          for (const socket of sockets) {
+            const views = Object.values((socket && socket.roots) || {});
+            for (const view of views) {
+              const hook = view.getHook && view.getHook(form);
+              if (hook && hook.el === form && typeof hook.__updated === "function") {
+                hook.__updated();
+                return true;
+              }
+            }
+          }
+          return false;
+        }
+      }
+    });
     Object.defineProperty(window, "braintree", {
       configurable: false,
       get() { return sdk; },
       set() {}
     });
+    if (mockOptions.malformedTokens) {
+      const setMalformedTokens = () => {
+        document.documentElement.style.setProperty("--accrue-ink", "not-a-color");
+        document.documentElement.style.setProperty("--accrue-slate", "still-not-a-color");
+      };
+      if (document.documentElement) setMalformedTokens();
+      else document.addEventListener("DOMContentLoaded", setMalformedTokens, { once: true });
+    }
   }, options);
 }
 
@@ -113,6 +172,108 @@ test("Hosted Fields hand off readable semantic styles on direct add-card navigat
     expect(contrastRatio(field.label, field.background)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(field.help, field.background)).toBeGreaterThanOrEqual(4.5);
   }
+});
+
+test("Hosted Fields keep malformed-token fallback styles readable on every field", async ({ page, sandboxId }) => {
+  await installHostedFieldsMock(page, { malformedTokens: true });
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  const response = await page.goto("/billing/payment-methods/new");
+  expect(response && response.status()).toBe(200);
+  await waitForLiveView(page);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.styles)).not.toBeNull();
+
+  const evidence = await page.evaluate(() => {
+    const form = document.querySelector('[data-portal-hosted-fields="payment-method"]');
+    return {
+      styles: window.__phase236HostedFieldsEvidence.styles,
+      fields: Array.from(form.querySelectorAll("[data-braintree-field]")).map((field) => ({
+        name: field.dataset.braintreeField,
+        background: getComputedStyle(field).backgroundColor
+      }))
+    };
+  });
+
+  expect(evidence.fields).toHaveLength(3);
+  for (const field of evidence.fields) {
+    expect(contrastRatio(evidence.styles[`.${field.name}`].color, field.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(evidence.styles["::placeholder"].color, field.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(evidence.styles[".invalid"].color, field.background)).toBeGreaterThanOrEqual(4.5);
+  }
+});
+
+test("Hosted Fields retry after a post-mount LiveView update invalidates client creation", async ({ page, sandboxId }) => {
+  await installHostedFieldsMock(page, { holdFirstClientCreate: true });
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  const response = await page.goto("/billing/payment-methods/new");
+  expect(response && response.status()).toBe(200);
+  await waitForLiveView(page);
+
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.clientCreate)).toBe(1);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsControl.pendingClientCallbacks())).toBe(1);
+  await expect.poll(() => new URL(page.url()).searchParams.get("context_pin")).toBeTruthy();
+
+  const form = page.locator('[data-portal-hosted-fields="payment-method"]');
+  const submit = form.locator("[data-checkout-submit]");
+  await expect(submit).toBeDisabled();
+  await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+  expect(await page.evaluate(() => window.__phase236HostedFieldsControl.triggerPostMountUpdate())).toBe(true);
+  await page.evaluate(() => window.__phase236HostedFieldsControl.releaseClientCreate());
+
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.clientCreate)).toBe(2);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(1);
+  await expect(submit).toBeEnabled();
+  await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+  const counts = await page.evaluate(() => window.__phase236HostedFieldsEvidence.counts);
+  expect(counts.clientCreate).toBe(2);
+  expect(counts.hostedFieldsCreate).toBe(1);
+  expect(counts.clientTeardown).toBe(1);
+  expect(counts.teardown).toBe(0);
+});
+
+test("Hosted Fields tear down stale fields and retry after a post-mount LiveView update", async ({ page, sandboxId }) => {
+  await installHostedFieldsMock(page, { holdFirstHostedFieldsCreate: true });
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  await page.goto("/billing/payment-methods/new");
+  await waitForLiveView(page);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(1);
+
+  const form = page.locator('[data-portal-hosted-fields="payment-method"]');
+  const submit = form.locator("[data-checkout-submit]");
+  await expect(submit).toBeDisabled();
+  await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+  expect(await page.evaluate(() => window.__phase236HostedFieldsControl.triggerPostMountUpdate())).toBe(true);
+  await page.evaluate(() => window.__phase236HostedFieldsControl.releaseHostedFieldsCreate());
+
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.clientCreate)).toBe(2);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(2);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.teardown)).toBe(1);
+  await expect(submit).toBeEnabled();
+  await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+  const counts = await page.evaluate(() => window.__phase236HostedFieldsEvidence.counts);
+  expect(counts.clientTeardown).toBe(1);
+  expect(counts.hostedFieldsCreate).toBe(2);
+  expect(counts.teardown).toBe(1);
+});
+
+test("Hosted Fields do not revive after pagehide during client creation", async ({ page, sandboxId }) => {
+  await installHostedFieldsMock(page, { holdFirstClientCreate: true });
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  await page.goto("/billing/payment-methods/new");
+  await waitForLiveView(page);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsControl.pendingClientCallbacks())).toBe(1);
+
+  const form = page.locator('[data-portal-hosted-fields="payment-method"]');
+  await expect(form.locator("[data-checkout-submit]")).toBeDisabled();
+  await page.evaluate(() => window.dispatchEvent(new Event("pagehide")));
+  await page.evaluate(() => window.__phase236HostedFieldsControl.releaseClientCreate());
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.clientTeardown)).toBe(1);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(0);
+  await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+  await expect(form.locator("[data-checkout-submit]")).toBeDisabled();
 });
 
 if (!process.env.ACCRUE_HOST_PORTAL_THEME) test("Hosted Fields refresh after the direct-route context pin and theme changes", async ({ page, sandboxId }) => {
@@ -170,10 +331,15 @@ function contrastRatio(foreground, background) {
   const rgb = (value) => {
     const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
     const srgbMatch = value.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/i);
-    if (!match && !srgbMatch) throw new Error(`Unsupported computed color: ${value}`);
+    const hexMatch = value.match(/^#([\da-f]{3}|[\da-f]{6})$/i);
+    if (!match && !srgbMatch && !hexMatch) throw new Error(`Unsupported computed color: ${value}`);
     const channels = match
       ? [Number(match[1]) / 255, Number(match[2]) / 255, Number(match[3]) / 255]
-      : [Number(srgbMatch[1]), Number(srgbMatch[2]), Number(srgbMatch[3])];
+      : srgbMatch
+        ? [Number(srgbMatch[1]), Number(srgbMatch[2]), Number(srgbMatch[3])]
+        : hexMatch[1].length === 3
+          ? hexMatch[1].split("").map((channel) => parseInt(channel + channel, 16) / 255)
+          : [0, 2, 4].map((index) => parseInt(hexMatch[1].slice(index, index + 2), 16) / 255);
     return channels.map((normalized) => {
       return normalized <= 0.04045
         ? normalized / 12.92

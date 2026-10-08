@@ -25,8 +25,39 @@
     if (index !== -1) hostedFieldsHooks.splice(index, 1);
   }
 
+  function teardownAsyncResource(resource, callback) {
+    if (!resource || typeof resource.teardown !== "function") {
+      callback();
+      return;
+    }
+
+    try {
+      resource.teardown(callback);
+    } catch (_error) {
+      callback();
+    }
+  }
+
+  function finishStaleHostedFieldsSetup(hook, createGeneration, clientInstance, hostedFieldsInstance) {
+    teardownAsyncResource(hostedFieldsInstance, function () {
+      teardownAsyncResource(clientInstance, function () {
+        if (hook.hostedFieldsSetupGeneration === createGeneration) {
+          hook.hostedFieldsSetupInFlight = false;
+          hook.hostedFieldsSetupGeneration = null;
+        }
+
+        if (hook.isDestroyed || !hook.hostedFieldsRetryAfterPending) return;
+
+        hook.hostedFieldsRetryAfterPending = false;
+        hook.el.dataset.hostedFieldsBound = "0";
+        hook.mounted();
+      });
+    });
+  }
+
   Hooks.BraintreeHostedFields = {
     mounted: function () {
+      if (this.isDestroyed) return;
       this.isDestroyed = false;
       if (hostedFieldsHooks.indexOf(this) === -1) hostedFieldsHooks.push(this);
       if (!this.themeMedia) {
@@ -50,6 +81,10 @@
         }.bind(this), 50);
         return;
       }
+      if (this.sdkLoadTimer) {
+        window.clearTimeout(this.sdkLoadTimer);
+        this.sdkLoadTimer = null;
+      }
       if (this.el.dataset.hostedFieldsBound === "1") return;
 
       var token = this.el.dataset.clientToken;
@@ -65,12 +100,20 @@
       this.readyToSubmit = false;
       this.tokenizing = false;
       this.submissionSent = false;
+      this.hostedFieldsSetupInFlight = true;
+      this.hostedFieldsRetryAfterPending = false;
       this.lifecycleGeneration = (this.lifecycleGeneration || 0) + 1;
       var createGeneration = this.lifecycleGeneration;
+      this.hostedFieldsSetupGeneration = createGeneration;
 
       window.braintree.client.create({ authorization: token }, function (clientErr, clientInstance) {
-        if (this.isDestroyed || createGeneration !== this.lifecycleGeneration) return;
+        if (this.isDestroyed || createGeneration !== this.lifecycleGeneration) {
+          finishStaleHostedFieldsSetup(this, createGeneration, clientInstance, null);
+          return;
+        }
         if (clientErr) {
+          this.hostedFieldsSetupInFlight = false;
+          this.hostedFieldsSetupGeneration = null;
           setSubmitDisabled(submitButton, true);
           setInlineError(errorNode, "Secure card entry could not start. Refresh this page to try again.");
           return;
@@ -90,16 +133,21 @@
           },
           function (hostedFieldsErr, hostedFieldsInstance) {
             if (this.isDestroyed || createGeneration !== this.lifecycleGeneration) {
-              if (hostedFieldsInstance && hostedFieldsInstance.teardown) hostedFieldsInstance.teardown(function () {});
+              finishStaleHostedFieldsSetup(this, createGeneration, clientInstance, hostedFieldsInstance);
               return;
             }
             if (hostedFieldsErr) {
+              this.hostedFieldsSetupInFlight = false;
+              this.hostedFieldsSetupGeneration = null;
               setSubmitDisabled(submitButton, true);
               setInlineError(errorNode, "Secure card fields could not load. Refresh this page to try again.");
               return;
             }
 
             this.hostedFields = hostedFieldsInstance;
+            this.hostedFieldsSetupInFlight = false;
+            this.hostedFieldsSetupGeneration = null;
+            this.hostedFieldsRetryAfterPending = false;
             setSubmitting(submitButton, false);
             setInlineError(errorNode, "Secure card fields are ready.");
 
@@ -153,6 +201,12 @@
       if (this.hostedFields) {
         setSubmitting(this.el.querySelector("[data-checkout-submit]"), false);
         refreshHostedFields(this);
+      } else if (this.hostedFieldsSetupInFlight) {
+        this.hostedFieldsRetryAfterPending = true;
+        setSubmitDisabled(this.el.querySelector("[data-checkout-submit]"), true);
+      } else if (window.braintree) {
+        this.el.dataset.hostedFieldsBound = "0";
+        this.mounted();
       }
     },
 
@@ -282,15 +336,26 @@
 
   function hostedFieldStyles(form) {
     var fields = {};
+    var backgrounds = [];
+    var primaryCandidate = getComputedStyle(document.documentElement).getPropertyValue("--accrue-ink");
+    var mutedCandidate = getComputedStyle(document.documentElement).getPropertyValue("--accrue-slate");
+
     ["number", "expirationDate", "cvv"].forEach(function (name) {
       var field = form.querySelector('[data-braintree-field="' + name + '"]');
       var background = field ? normalizedColor(getComputedStyle(field).backgroundColor, "#FFFFFF") : "#FFFFFF";
-      var backgroundLuminance = colorLuminance(background);
-      var primary = normalizedColor(getComputedStyle(document.documentElement).getPropertyValue("--accrue-ink"), "#111418");
-      var muted = normalizedColor(getComputedStyle(document.documentElement).getPropertyValue("--accrue-slate"), "#5D6A73");
-      var invalid = normalizedColor(backgroundLuminance > 0.45 ? "#9B1C1C" : "#FFB4AB", "#9B1C1C");
-      fields[name] = { input: { color: primary }, invalid: { color: invalid }, placeholder: { color: muted } };
+      backgrounds.push(background);
+      fields[name] = {
+        input: { color: readableHostedFieldColor(primaryCandidate, [background]) }
+      };
     });
+
+    var averageLuminance = backgrounds.reduce(function (sum, background) {
+      return sum + colorLuminance(background);
+    }, 0) / backgrounds.length;
+    var invalidCandidate = averageLuminance > 0.45 ? "#9B1C1C" : "#FFB4AB";
+    var invalid = readableHostedFieldColor(invalidCandidate, backgrounds);
+    var muted = readableHostedFieldColor(mutedCandidate, backgrounds);
+
     return {
       input: {
         color: fields.number.input.color,
@@ -302,9 +367,32 @@
       ".number": { color: fields.number.input.color },
       ".expirationDate": { color: fields.expirationDate.input.color },
       ".cvv": { color: fields.cvv.input.color },
-      ".invalid": { color: fields.number.invalid.color },
-      "::placeholder": { color: fields.number.placeholder.color },
+      ".invalid": { color: invalid },
+      "::placeholder": { color: muted },
     };
+  }
+
+  function readableHostedFieldColor(candidate, backgrounds) {
+    var normalized = normalizedColor(candidate, "");
+    if (normalized && isReadableAgainstAllBackgrounds(normalized, backgrounds)) return normalized;
+
+    var dark = normalizedColor("#111418", "#111418");
+    var light = normalizedColor("#FFFFFF", "#FFFFFF");
+    var darkMinimum = minimumContrastRatio(dark, backgrounds);
+    var lightMinimum = minimumContrastRatio(light, backgrounds);
+    return darkMinimum >= lightMinimum ? dark : light;
+  }
+
+  function isReadableAgainstAllBackgrounds(foreground, backgrounds) {
+    return backgrounds.length > 0 && backgrounds.every(function (background) {
+      return colorContrastRatio(foreground, background) >= 4.5;
+    });
+  }
+
+  function minimumContrastRatio(foreground, backgrounds) {
+    return backgrounds.reduce(function (minimum, background) {
+      return Math.min(minimum, colorContrastRatio(foreground, background));
+    }, Infinity);
   }
 
   function normalizedColor(value, fallback) {
@@ -320,13 +408,37 @@
   }
 
   function colorLuminance(color) {
-    var channels = color.match(/\d+/g);
-    if (!channels || channels.length < 3) return 1;
-    var rgb = channels.slice(0, 3).map(function (channel) {
-      var value = Number(channel) / 255;
+    var rgb = colorChannels(color);
+    if (!rgb) return 1;
+    var linear = rgb.map(function (channel) {
+      var value = channel;
       return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
     });
-    return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+    return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+  }
+
+  function colorChannels(color) {
+    var normalized = String(color || "").trim();
+    var values = normalized.match(/(?:\d*\.)?\d+/g);
+    if (!values || values.length < 3) return null;
+
+    var isSrgb = /^color\(srgb\s/i.test(normalized);
+    var alpha = values.length > 3 ? Number(values[3]) : 1;
+    if (alpha < 1) return null;
+
+    return values.slice(0, 3).map(function (channel) {
+      var value = Number(channel);
+      return isSrgb ? value : value / 255;
+    });
+  }
+
+  function colorContrastRatio(foreground, background) {
+    if (!colorChannels(foreground) || !colorChannels(background)) return 0;
+    var foregroundLuminance = colorLuminance(foreground);
+    var backgroundLuminance = colorLuminance(background);
+    var lighter = Math.max(foregroundLuminance, backgroundLuminance);
+    var darker = Math.min(foregroundLuminance, backgroundLuminance);
+    return (lighter + 0.05) / (darker + 0.05);
   }
 
   function fieldSelector(form, fieldName) {
