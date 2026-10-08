@@ -4,17 +4,17 @@ milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 234
 current_phase_name: Admin Customers & Subscriptions
-status: executing
-stopped_at: Completed 234-05-PLAN.md
-last_updated: "2026-10-08T01:46:28.387Z"
+status: verifying
+stopped_at: Completed 234-06-PLAN.md
+last_updated: "2026-10-08T02:13:21.448Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 234 execution started
-state_head: d9b2fba9e309a9e72384179f602f2df46dca4d43
+state_head: 4703330c5da87459631f168a6f7d5842bd18eaa1
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 14
-  completed_plans: 13
+  completed_plans: 14
   percent: 14
 ---
 
@@ -34,7 +34,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 Phase: 234 (Admin Customers & Subscriptions) — EXECUTING
 Plan: 7 of 7
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-07 — Phase 234 execution started
 
 ## Performance Metrics
@@ -112,6 +112,7 @@ Last activity: 2026-10-07 — Phase 234 execution started
 | Phase 234 P03 | 15min | 2 tasks | 13 files |
 | Phase 234 P04 | 6min | 2 tasks | 2 files |
 | Phase 234 P05 | 15min | 2 tasks | 3 files |
+| Phase 234 P06 | 24min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -210,6 +211,9 @@ Last activity: 2026-10-07 — Phase 234 execution started
 - [Phase 234]: Reviewed actions re-read the host actor, owner scope, local target, items, and material consequence facts before dispatch.
 - [Phase 234]: Keep operation identity stable per staged intent and ephemeral across reconnects; reconnect requires a fresh scoped read and review.
 - [Phase 234]: Classify provider outcomes only by available evidence; uncertain outcomes block blind retry and use owner-scoped reads.
+- [Phase 234]: Plan 234-06 kept the existing Playwright CI lane because unrestricted discovery already executes both host specs.
+- [Phase 234]: Plan 234-06 preserved prior served evidence by writing final captures to a plan-specific directory.
+- [Phase 234]: Plan 234-06 kept global-search production code unchanged; host SQL sandbox ownership does not reach async search workers.
 
 ### Pending Todos
 
@@ -280,8 +284,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T01:46:28.351Z
-Stopped at: Completed 234-05-PLAN.md
+Last session: 2026-10-08T02:13:21.416Z
+Stopped at: Completed 234-06-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 

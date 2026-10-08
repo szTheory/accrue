@@ -86,7 +86,7 @@ Plans:
   4. Mounted owner/customer denials and forged actions remain denied without exposing foreign records or payment-token data.
   5. The affected Admin flows remain usable by keyboard and at narrow/coarse-pointer sizes, with the relevant light/dark and empty/error states checked in this slice.
 
-**Plans**: 7 plans
+**Plans**: 7/7 plans executed
 Plans:
 **Wave 1**
 - [x] 234-01-PLAN.md — Scoped subscription list, detail and return trace; immutable pre-layout capture
@@ -105,7 +105,7 @@ Plans:
 - [ ] 234-05-PLAN.md — Stable action intent and truthful scoped results
 
 **Wave 6** *(blocked on Wave 5 completion)*
-- [ ] 234-06-PLAN.md — Served keyboard, responsive, denial and CI evidence
+- [x] 234-06-PLAN.md — Served keyboard, responsive, denial and CI evidence
 
 **UI hint**: yes
 
@@ -188,7 +188,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 233. Shared Direction & Portal Contract | 7/7 | Complete    | 2026-10-07 |
-| 234. Admin Customers & Subscriptions | 3/7 | In Progress | 2026-10-08 |
+| 234. Admin Customers & Subscriptions | 7/7 | In Progress | - |
 | 235. Customer Plan Selection & Checkout | 0/TBD | Not started | - |
 | 236. Portal Billing Self-Service | 0/TBD | Not started | - |
 | 237. Admin Invoices, Payments & Recovery | 0/TBD | Not started | - |
