@@ -121,6 +121,7 @@
       this.readyToSubmit = false;
       this.tokenizing = false;
       this.submissionSent = false;
+      this.hostedFieldStylesSnapshot = null;
       this.hostedFieldsSetupInFlight = true;
       this.hostedFieldsRetryAfterPending = false;
       this.lifecycleGeneration = (this.lifecycleGeneration || 0) + 1;
@@ -553,8 +554,21 @@
   }
 
   function refreshHostedFields(hook) {
-    if (!hook || hook.isDestroyed || !hook.hostedFields) return;
+    if (!hook || hook.isDestroyed) return;
     var nextStyles = JSON.stringify(hostedFieldStyles(hook.el));
+    if (!hook.hostedFields && hook.hostedFieldsSetupInFlight) {
+      if (hook.hostedFieldStylesSnapshot && nextStyles !== hook.hostedFieldStylesSnapshot) {
+        hook.lifecycleGeneration = (hook.lifecycleGeneration || 0) + 1;
+        hook.readyToSubmit = false;
+        hook.tokenizing = false;
+        hook.hostedFieldsRetryAfterPending = true;
+        var pendingNonce = hook.el.querySelector("[data-braintree-nonce-input]");
+        if (pendingNonce) pendingNonce.value = "";
+        setSubmitDisabled(hook.el.querySelector("[data-checkout-submit]"), true);
+      }
+      return;
+    }
+    if (!hook.hostedFields) return;
     if (nextStyles === hook.hostedFieldStylesSnapshot) return;
     hook.lifecycleGeneration = (hook.lifecycleGeneration || 0) + 1;
     hook.readyToSubmit = false;

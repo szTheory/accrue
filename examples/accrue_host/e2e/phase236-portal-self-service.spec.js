@@ -56,6 +56,7 @@ async function installHostedFieldsMock(page, options = {}) {
         create(_options, callback) {
           counts.hostedFieldsCreate += 1;
           window.__phase236HostedFieldsEvidence.styles = _options.styles;
+          window.__phase236HostedFieldsEvidence.styleHistory.push(_options.styles);
           saveCounts();
           const instance = {
             tokenize(done) {
@@ -95,8 +96,9 @@ async function installHostedFieldsMock(page, options = {}) {
       configurable: false,
       value: {
         counts,
-        kind: "deterministic injected Hosted Fields SDK; not live provider proof"
-        ,styles: null
+        kind: "deterministic injected Hosted Fields SDK; not live provider proof",
+        styles: null,
+        styleHistory: []
       }
     });
     Object.defineProperty(window, "__phase236HostedFieldsControl", {
@@ -260,6 +262,38 @@ test("Hosted Fields tear down stale fields and retry after a post-mount LiveView
   expect(counts.clientTeardown).toBe(1);
   expect(counts.hostedFieldsCreate).toBe(2);
   expect(counts.teardown).toBe(1);
+});
+
+if (!process.env.ACCRUE_HOST_PORTAL_THEME) test("Hosted Fields recreate with current styles when theme changes during creation", async ({ page, sandboxId }) => {
+  await installHostedFieldsMock(page, { holdFirstHostedFieldsCreate: true });
+  const fixture = readFixture();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  await page.goto("/billing/payment-methods/new");
+  await waitForLiveView(page);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(1);
+
+  const form = page.locator('[data-portal-hosted-fields="payment-method"]');
+  const submit = form.locator("[data-checkout-submit]");
+  await expect(submit).toBeDisabled();
+  const currentTheme = await page.locator("html").getAttribute("data-theme");
+  const nextTheme = currentTheme === "dark" ? "light" : "dark";
+  const originalStyles = await page.evaluate(() => JSON.stringify(window.__phase236HostedFieldsEvidence.styleHistory[0]));
+  await page.getByRole("button", { name: nextTheme === "dark" ? "Dark theme" : "Light theme" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", nextTheme);
+  await page.evaluate(() => window.__phase236HostedFieldsControl.releaseHostedFieldsCreate());
+
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.hostedFieldsCreate)).toBe(2);
+  await expect.poll(() => page.evaluate(() => window.__phase236HostedFieldsEvidence.counts.teardown)).toBe(1);
+  await expect(submit).toBeEnabled();
+  await expect(form.locator("[data-braintree-nonce-input]")).toHaveValue("");
+  const evidence = await page.evaluate(() => ({
+    counts: window.__phase236HostedFieldsEvidence.counts,
+    styleHistory: window.__phase236HostedFieldsEvidence.styleHistory
+  }));
+  expect(evidence.counts.clientCreate).toBe(2);
+  expect(evidence.counts.clientTeardown).toBe(1);
+  expect(evidence.styleHistory).toHaveLength(2);
+  expect(JSON.stringify(evidence.styleHistory[1])).not.toBe(originalStyles);
 });
 
 test("Hosted Fields stay disabled when stale-resource teardown fails", async ({ page, sandboxId }) => {
