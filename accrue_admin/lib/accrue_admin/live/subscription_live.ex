@@ -72,10 +72,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          |> assign(:timeline_events, events)
          |> assign(:timeline_events_loaded?, true)
          |> assign(:raw_json_loaded?, false)
+         |> assign(:action_result, nil)
          |> assign(:proration_options, proration_options())
          |> assign(:swap_plan_available, swap_plan_available?(subscription))
          |> assign(:related_items, related_items(subscription, mount_path, scope, nil))
          |> assign(:flashes, [])
+         |> assign(:dispatch_state, :idle)
          |> assign(:drawer_action_type, nil)
          |> assign(:pending_action, nil)}
     end
@@ -111,13 +113,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       when is_binary(action_type) do
     socket = ensure_timeline_events(socket)
 
-    if action_available?(socket.assigns.subscription, action_type) do
-      {:noreply,
-       socket
-       |> assign(:drawer_action_type, action_type)
-       |> assign(:pending_action, nil)}
-    else
-      {:noreply, reject_unavailable_action(socket)}
+    cond do
+      outcome_requires_reconciliation?(socket) ->
+        {:noreply, require_outcome_review(socket)}
+
+      action_available?(socket.assigns.subscription, action_type) ->
+        {:noreply,
+         socket
+         |> assign(:drawer_action_type, action_type)
+         |> assign(:pending_action, nil)}
+
+      true ->
+        {:noreply, reject_unavailable_action(socket)}
     end
   end
 
@@ -128,6 +135,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       when is_binary(action_type) do
     socket = ensure_timeline_events(socket)
 
+    if outcome_requires_reconciliation?(socket) do
+      {:noreply, require_outcome_review(socket)}
+    else
+      prepare_staged_action(params, socket)
+    end
+  end
+
+  defp prepare_staged_action(params, socket) do
     case pending_action(params, socket) do
       {:ok, action} ->
         if action_available?(socket.assigns.subscription, action.type) and
@@ -144,7 +159,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               review_fingerprint(action, socket.assigns.subscription)
             )
 
-          {:noreply, assign(socket, :pending_action, action)}
+          {:noreply, stage_action(socket, action)}
         else
           {:noreply, reject_unavailable_action(socket)}
         end
@@ -160,8 +175,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   def handle_event("cancel_pending_action", _params, socket) do
     {:noreply,
      socket
+     |> dismiss_step_up_if_pending()
      |> assign(:pending_action, nil)
-     |> assign(:drawer_action_type, nil)}
+     |> assign(:drawer_action_type, nil)
+     |> assign(:dispatch_state, :idle)}
   end
 
   def handle_event("load_activity", _params, socket) do
@@ -173,37 +190,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   def handle_event("confirm_action", _params, socket) do
-    pending_action = socket.assigns.pending_action
-
-    case pending_action do
-      nil ->
-        {:noreply, push_flash(socket, :warning, Copy.subscription_select_action_warning())}
-
-      %{type: type} = action when type in @destructive_actions ->
-        case validate_review(socket, action) do
-          {:ok, fresh_socket, fresh_subscription} ->
-            case StepUp.require_fresh(
-                   fresh_socket,
-                   step_up_action(action, fresh_subscription),
-                   &execute_pending_action(&1, action)
-                 ) do
-              {:ok, socket} ->
-                {:noreply, socket}
-
-              {:challenge, socket} ->
-                {:noreply, socket}
-
-              {:error, _reason, socket} ->
-                {:noreply,
-                 push_flash(socket, :error, subscription_action_error_copy(socket, action))}
-            end
-
-          {:error, socket} ->
-            {:noreply, reject_stale_review(socket)}
-        end
-
-      action ->
-        {:noreply, execute_pending_action(socket, action)}
+    if socket.assigns[:dispatch_state] in [:awaiting_step_up, :dispatching, :submitted] do
+      {:noreply, socket}
+    else
+      confirm_staged_action(socket)
     end
   end
 
@@ -220,6 +210,45 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   def handle_event("step_up_dismiss", _params, socket) do
     {:noreply, dismiss_step_up_if_pending(socket)}
+  end
+
+  defp confirm_staged_action(socket) do
+    pending_action = socket.assigns.pending_action
+
+    case pending_action do
+      nil ->
+        {:noreply, push_flash(socket, :warning, Copy.subscription_select_action_warning())}
+
+      %{type: type} = action when type in @destructive_actions ->
+        case validate_review(socket, action) do
+          {:ok, fresh_socket, fresh_subscription} ->
+            fresh_socket = assign(fresh_socket, :dispatch_state, :awaiting_step_up)
+
+            case StepUp.require_fresh(
+                   fresh_socket,
+                   step_up_action(action, fresh_subscription),
+                   &execute_pending_action(&1, action)
+                 ) do
+              {:ok, socket} ->
+                {:noreply, socket}
+
+              {:challenge, socket} ->
+                {:noreply, socket}
+
+              {:error, _reason, socket} ->
+                {:noreply,
+                 socket
+                 |> assign(:dispatch_state, :staged)
+                 |> push_flash(:error, subscription_action_error_copy(socket, action))}
+            end
+
+          {:error, socket} ->
+            {:noreply, reject_stale_review(socket)}
+        end
+
+      action ->
+        {:noreply, execute_pending_action(socket, action)}
+    end
   end
 
   @impl true
@@ -366,6 +395,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         />
 
         <FlashGroup.flash_group flashes={@flashes} />
+        <section
+          :if={@action_result}
+          class="ax-card"
+          data-role="subscription-action-result"
+          role="status"
+          aria-live="polite"
+        >
+          <p class="ax-body"><%= @action_result.message %></p>
+          <a :if={@action_result.href} class="ax-link" href={@action_result.href}>
+            <%= @action_result.link_label %>
+          </a>
+        </section>
 
         <section class="ax-card ax-detail-action-band" data-ax-action-band>
           <header class="ax-page-header">
@@ -836,15 +877,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
     |> assign(:current_path, admin_path(admin, "/subscriptions"))
-  end
-
-  defp load_subscription(subscription_id) do
-    Subscription
-    |> Repo.get(subscription_id)
-    |> case do
-      nil -> nil
-      subscription -> Repo.preload(subscription, [:customer, :subscription_items])
-    end
   end
 
   defp timeline_events(subscription_id),
@@ -1559,6 +1591,50 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
+  defp stage_action(socket, action) do
+    previous = socket.assigns[:pending_action]
+    same_intent? = intent_identity(previous) == intent_identity(action)
+
+    action =
+      Map.put(
+        action,
+        :operation_id,
+        if(same_intent? && previous[:operation_id],
+          do: previous[:operation_id],
+          else: "admin-ui-" <> Ecto.UUID.generate()
+        )
+      )
+
+    socket =
+      if not same_intent? and socket.assigns[:step_up_pending],
+        do: StepUp.dismiss_challenge(socket),
+        else: socket
+
+    socket
+    |> assign(:pending_action, action)
+    |> assign(:dispatch_state, :staged)
+    |> maybe_clear_previous_result(not same_intent?)
+  end
+
+  defp intent_identity(nil), do: nil
+
+  defp intent_identity(action) do
+    Map.take(action, [
+      :type,
+      :subscription_id,
+      :new_price_id,
+      :new_quantity,
+      :item_id,
+      :pause_behavior,
+      :proration,
+      :source_event_id,
+      :source_webhook_event_id
+    ])
+  end
+
+  defp maybe_clear_previous_result(socket, true), do: assign(socket, :action_result, nil)
+  defp maybe_clear_previous_result(socket, false), do: socket
+
   defp optional_string(value) when value in [nil, ""], do: {:ok, nil}
   defp optional_string(value) when is_binary(value), do: {:ok, value}
   defp optional_string(_value), do: :error
@@ -1621,7 +1697,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp dismiss_step_up_if_pending(socket) do
     if socket.assigns[:step_up_pending] do
-      StepUp.dismiss_challenge(socket)
+      socket
+      |> StepUp.dismiss_challenge()
+      |> assign(:pending_action, nil)
+      |> assign(:drawer_action_type, nil)
+      |> assign(:dispatch_state, :idle)
     else
       socket
     end
@@ -1638,21 +1718,30 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp execute_pending_action(socket, action) do
-    case validate_review(socket, action) do
-      {:ok, fresh_socket, fresh_subscription} ->
-        if action.type not in @destructive_actions or StepUp.fresh?(fresh_socket) do
-          fresh_socket =
-            fresh_socket
-            |> assign(:subscription, fresh_subscription)
-            |> assign(:customer, fresh_subscription.customer)
+    current_action = socket.assigns[:pending_action]
 
-          execute_pending_action_fresh(fresh_socket, action)
-        else
-          reject_stale_review(fresh_socket)
-        end
+    if socket.assigns[:dispatch_state] in [:dispatching, :submitted] or
+         is_nil(current_action) or current_action[:operation_id] != action[:operation_id] do
+      reject_stale_review(socket)
+    else
+      socket = assign(socket, :dispatch_state, :dispatching)
 
-      {:error, socket} ->
-        reject_stale_review(socket)
+      case validate_review(socket, action) do
+        {:ok, fresh_socket, fresh_subscription} ->
+          if action.type not in @destructive_actions or StepUp.fresh?(fresh_socket) do
+            fresh_socket =
+              fresh_socket
+              |> assign(:subscription, fresh_subscription)
+              |> assign(:customer, fresh_subscription.customer)
+
+            execute_pending_action_fresh(fresh_socket, action)
+          else
+            reject_stale_review(fresh_socket)
+          end
+
+        {:error, socket} ->
+          reject_stale_review(socket)
+      end
     end
   end
 
@@ -1660,34 +1749,44 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     subscription = socket.assigns.subscription
 
     result =
-      with_admin_context(socket.assigns.current_admin, fn operation_id ->
+      with_admin_context(socket.assigns.current_admin, action.operation_id, fn operation_id ->
         execute_action(subscription, socket.assigns.customer, action, operation_id)
       end)
 
     case result do
       {:ok, {:comped, new_subscription}} ->
-        socket
-        |> record_admin_audit(action, subscription.id, new_subscription.id)
-        |> refresh_subscription(subscription.id)
-        |> push_flash(
-          :info,
-          "Comp replacement created: #{new_subscription.processor_id || new_subscription.id}"
-        )
+        present_compensation_result(socket, action, subscription.id, new_subscription)
 
       {:ok, %Subscription{} = updated_subscription} ->
-        socket
-        |> record_admin_audit(action, updated_subscription.id, updated_subscription.id)
-        |> refresh_subscription(updated_subscription.id)
-        |> push_flash(:info, Copy.subscription_action_recorded_info())
+        case refresh_subscription(socket, updated_subscription.id) do
+          {:ok, refreshed} ->
+            refreshed
+            |> record_admin_audit(action, updated_subscription.id, updated_subscription.id)
+            |> put_action_result(:confirmed, Copy.subscription_action_recorded_info())
+            |> finish_action_submission(:submitted, true)
+
+          :not_found ->
+            socket
+            |> put_action_result(
+              :unconfirmed,
+              "The provider returned a change, but the subscription is no longer available in this owner scope. Check scoped activity before taking another action."
+            )
+            |> finish_action_submission(:submitted, true)
+        end
 
       {:ok, :requires_action, payment_intent} ->
-        push_flash(socket, :warning, Copy.payment_processor_action_warning(payment_intent))
+        _ = payment_intent
 
-      {:error, _reason} ->
-        push_flash(socket, :error, subscription_action_error_copy(socket, action))
+        socket
+        |> put_action_result(
+          :pending,
+          "The provider requires another action. A completed subscription change is not confirmed; check scoped activity before deciding what to do next."
+        )
+        |> finish_action_submission(:submitted, true)
+
+      {:error, reason} ->
+        handle_action_error(socket, action, reason)
     end
-    |> assign(:pending_action, nil)
-    |> assign(:drawer_action_type, nil)
   end
 
   defp validate_review(socket, action) do
@@ -1719,6 +1818,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     socket
     |> assign(:pending_action, nil)
     |> assign(:drawer_action_type, nil)
+    |> assign(:dispatch_state, :idle)
     |> push_flash(
       :warning,
       "The subscription or action details changed. Review the action again before confirming."
@@ -2019,8 +2119,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp execute_action(_subscription, _customer, %{type: other}, _operation_id),
     do: {:error, {:unsupported_action, other}}
 
-  defp with_admin_context(user, fun) do
-    operation_id = "admin-ui-" <> Ecto.UUID.generate()
+  defp with_admin_context(user, operation_id, fun) do
     prior_operation_id = Actor.current_operation_id()
 
     try do
@@ -2053,16 +2152,140 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp refresh_subscription(socket, subscription_id) do
-    subscription = load_subscription(subscription_id)
-    events = timeline_events(subscription.id)
+    case Subscriptions.detail(subscription_id, socket.assigns.current_owner_scope) do
+      {:ok, subscription} ->
+        events = timeline_events(subscription.id)
 
-    socket
-    |> assign(:subscription, subscription)
-    |> assign(:customer, subscription.customer)
-    |> assign(:timeline_events, events)
-    |> assign(:timeline_events_loaded?, true)
-    |> assign(:swap_plan_available, swap_plan_available?(subscription))
+        {:ok,
+         socket
+         |> assign(:subscription, subscription)
+         |> assign(:customer, subscription.customer)
+         |> assign(:timeline_events, events)
+         |> assign(:timeline_events_loaded?, true)
+         |> assign(:swap_plan_available, swap_plan_available?(subscription))}
+
+      :not_found ->
+        :not_found
+    end
   end
+
+  defp present_compensation_result(socket, action, original_id, replacement) do
+    scope = socket.assigns.current_owner_scope
+
+    with {:ok, original} <- Subscriptions.detail(original_id, scope),
+         {:ok, scoped_replacement} <- Subscriptions.detail(replacement.id, scope),
+         {:ok, refreshed} <- refresh_subscription(socket, original.id) do
+      replacement_path =
+        ScopedPath.build(
+          socket.assigns.admin_mount_path,
+          "/subscriptions/#{scoped_replacement.id}",
+          scope,
+          %{"return_to" => socket.assigns.return_path}
+        )
+
+      refreshed
+      |> record_admin_audit(action, original.id, scoped_replacement.id)
+      |> put_action_result(
+        :confirmed,
+        "Compensation created a replacement subscription.",
+        replacement_path,
+        "Open replacement subscription"
+      )
+      |> finish_action_submission(:submitted, true)
+    else
+      _ ->
+        socket
+        |> put_action_result(
+          :unconfirmed,
+          "The compensation request returned, but its replacement is not available in this owner scope. Check scoped subscription activity before taking another action."
+        )
+        |> finish_action_submission(:submitted, true)
+    end
+  end
+
+  defp put_action_result(socket, kind, message, href \\ nil, link_label \\ nil) do
+    assign(socket, :action_result, %{
+      kind: kind,
+      message: message,
+      href: href || action_activity_path(socket),
+      link_label: link_label || "Open scoped subscription activity"
+    })
+  end
+
+  defp finish_action_submission(socket, state, clear_review?) do
+    socket = assign(socket, :dispatch_state, state)
+
+    if clear_review? do
+      socket
+      |> assign(:pending_action, nil)
+      |> assign(:drawer_action_type, nil)
+    else
+      socket
+    end
+  end
+
+  defp action_activity_path(socket) do
+    ScopedPath.build(
+      socket.assigns.admin_mount_path,
+      "/events",
+      socket.assigns.current_owner_scope,
+      %{"subject_type" => "Subscription", "subject_id" => socket.assigns.subscription.id}
+    )
+  end
+
+  defp outcome_requires_reconciliation?(socket) do
+    match?(%{kind: :unconfirmed}, socket.assigns[:action_result])
+  end
+
+  defp require_outcome_review(socket) do
+    push_flash(
+      socket,
+      :warning,
+      "Check scoped subscription activity before starting another action for this subscription."
+    )
+  end
+
+  defp unconfirmed_action_copy(_socket, _action) do
+    "Outcome not confirmed. The request may have reached the provider. Check scoped subscription activity before deciding whether another action is needed; Accrue will not retry automatically."
+  end
+
+  defp handle_action_error(socket, action, reason) do
+    cond do
+      local_action_rejection?(reason) ->
+        socket
+        |> assign(:pending_action, action)
+        |> assign(:drawer_action_type, action.type)
+        |> put_action_result(
+          :rejected,
+          "The action was rejected before provider submission. Review the form values and confirm again when they are ready."
+        )
+        |> finish_action_submission(:staged, false)
+
+      definitive_provider_rejection?(reason) ->
+        socket
+        |> put_action_result(:failed, "The provider rejected the action. No change was accepted.")
+        |> finish_action_submission(:submitted, true)
+
+      true ->
+        socket
+        |> put_action_result(:unconfirmed, unconfirmed_action_copy(socket, action))
+        |> finish_action_submission(:submitted, true)
+    end
+  end
+
+  defp definitive_provider_rejection?(%Accrue.APIError{http_status: status})
+       when is_integer(status) and status >= 400 and status < 500 and
+              status not in [408, 409, 429],
+       do: true
+
+  defp definitive_provider_rejection?(_reason), do: false
+
+  defp local_action_rejection?(reason)
+       when reason in [:missing_new_price_id, :invalid_proration, :invalid_quantity],
+       do: true
+
+  defp local_action_rejection?({:unsupported_action, _}), do: true
+  defp local_action_rejection?(_reason), do: false
 
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
