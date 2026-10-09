@@ -806,7 +806,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     invoice_label = invoice_label(invoice)
 
     [
-      %{label: "Status", value: humanize(invoice.status)},
+      %{label: "Status", value: invoice_status_summary(invoice)},
       %{
         label: "Customer",
         value: customer_label(customer),
@@ -831,6 +831,19 @@ defmodule AccrueAdmin.Live.InvoiceLive do
       %{label: "Line items", value: Integer.to_string(length(invoice.items || []))}
     ]
   end
+
+  defp invoice_status_summary(invoice) do
+    status = humanize(invoice.status)
+
+    if overdue_invoice?(invoice), do: status <> " · Overdue", else: status
+  end
+
+  defp overdue_invoice?(%{status: status, due_date: %DateTime{} = due_date}) do
+    invoice_status(%{status: status}) == "open" and
+      DateTime.compare(due_date, Accrue.Clock.utc_now()) == :lt
+  end
+
+  defp overdue_invoice?(_invoice), do: false
 
   defp collection_fields(invoice) do
     [
@@ -1297,28 +1310,10 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp invoice_status(_invoice), do: nil
 
   defp money_text(amount_minor, currency) when is_integer(amount_minor) do
-    Accrue.Invoices.Render.format_money(
-      amount_minor,
-      normalize_currency(currency),
-      customer_locale(nil)
-    )
+    MoneyFormatter.format_money(amount_minor, currency, customer_locale(nil))
   end
 
   defp money_text(_amount_minor, _currency), do: "--"
-
-  defp normalize_currency(currency) when is_atom(currency), do: currency
-
-  defp normalize_currency(currency) when is_binary(currency) do
-    code = String.downcase(currency)
-
-    try do
-      String.to_existing_atom(code)
-    rescue
-      ArgumentError -> :usd
-    end
-  end
-
-  defp normalize_currency(_currency), do: :usd
 
   defp customer_locale(%{preferred_locale: locale}) when is_binary(locale) and locale != "",
     do: locale

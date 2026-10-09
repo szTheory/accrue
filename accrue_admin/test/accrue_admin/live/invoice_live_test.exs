@@ -169,6 +169,98 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert invoice.customer_id == customer.id
   end
 
+  test "invoice detail preserves supported money precision, unavailable evidence, and overdue separation",
+       %{
+         conn: conn,
+         invoice: invoice
+       } do
+    now = Accrue.Clock.utc_now()
+    customer = TestRepo.get!(Customer, invoice.customer_id)
+
+    _customer =
+      customer
+      |> Customer.changeset(%{name: "顧客 🧾 Long Name"})
+      |> TestRepo.update!()
+
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        number: "INV-精密-🧾-0001",
+        status: :open,
+        currency: "jpy",
+        amount_due_minor: 1_234,
+        amount_remaining_minor: 1_234,
+        amount_paid_minor: 0,
+        due_date: DateTime.add(now, -1, :second)
+      })
+      |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    assert html =~ "顧客 🧾 Long Name"
+    assert html =~ "INV-精密-🧾-0001"
+    assert html =~ "Open"
+    assert html =~ "Overdue"
+    assert html =~ "1,234"
+    refute html =~ "1,234.00"
+    assert html =~ "Due"
+
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        currency: "kwd",
+        amount_due_minor: 1_234,
+        amount_remaining_minor: 1_234,
+        amount_paid_minor: 0
+      })
+      |> TestRepo.update!()
+
+    assert {:ok, _view, kwd_html} = live(conn, "/billing/invoices/#{invoice.id}")
+    assert kwd_html =~ "1.234"
+
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        currency: "usd",
+        amount_due_minor: 0,
+        amount_remaining_minor: 0,
+        amount_paid_minor: 0
+      })
+      |> TestRepo.update!()
+
+    assert {:ok, _view, zero_html} = live(conn, "/billing/invoices/#{invoice.id}")
+    assert zero_html =~ "$0.00"
+
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        currency: "zzz",
+        amount_due_minor: 1_234,
+        amount_remaining_minor: nil,
+        amount_paid_minor: 0
+      })
+      |> TestRepo.update!()
+
+    assert {:ok, _view, unavailable_html} = live(conn, "/billing/invoices/#{invoice.id}")
+    assert unavailable_html =~ "--"
+    refute unavailable_html =~ "$12.34"
+
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        currency: nil,
+        amount_due_minor: 1_234,
+        amount_remaining_minor: 1_234,
+        amount_paid_minor: 0
+      })
+      |> TestRepo.update!()
+
+    assert {:ok, _view, missing_currency_html} = live(conn, "/billing/invoices/#{invoice.id}")
+    assert missing_currency_html =~ "--"
+    refute missing_currency_html =~ "$12.34"
+  end
+
   test "invoice contextual return rebuilds active owner scope and rejects foreign customer origin",
        %{
          conn: conn,
