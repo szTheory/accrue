@@ -5,6 +5,7 @@ defmodule AccrueAdmin.WebhookReplayTest do
 
   alias Accrue.Billing.{Customer, Invoice}
   alias Accrue.Events.Event
+  alias Accrue.Webhooks.DLQ
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
 
@@ -102,6 +103,22 @@ defmodule AccrueAdmin.WebhookReplayTest do
 
     assert audit_event.actor_type == "admin"
     assert audit_event.caused_by_webhook_event_id == webhook.id
+  end
+
+  test "replay claims a delivery once and keeps one active dispatch job", %{webhook: webhook} do
+    assert {:ok, %{status: :received}} = DLQ.requeue(webhook.id)
+    assert {:error, :not_dead_lettered} = DLQ.requeue(webhook.id)
+
+    jobs =
+      TestRepo.all(
+        from(job in Oban.Job,
+          where:
+            job.worker == "Accrue.Webhook.DispatchWorker" and
+              fragment("?->>'webhook_event_id' = ?", job.args, ^webhook.id)
+        )
+      )
+
+    assert length(jobs) == 1
   end
 
   test "selection-driven retry confirms once and records one admin audit event", %{

@@ -82,14 +82,22 @@ defmodule Accrue.Webhooks.DLQ do
   def requeue!(id), do: unwrap!(requeue(id))
 
   defp do_requeue(id) do
-    case fetch_replayable(id) do
-      {:ok, row} -> commit_requeue(row)
-      {:error, _} = err -> err
-    end
+    Repo.transact(fn ->
+      case fetch_replayable(id) do
+        {:ok, row} -> commit_requeue(row)
+        {:error, _} = err -> err
+      end
+    end)
   end
 
   defp fetch_replayable(id) do
-    case Repo.get(WebhookEvent, id) do
+    query =
+      from(event in WebhookEvent,
+        where: event.id == ^id,
+        lock: "FOR UPDATE"
+      )
+
+    case Repo.one(query) do
       nil -> {:error, :not_found}
       %WebhookEvent{status: :replayed} -> {:error, :already_replayed}
       %WebhookEvent{status: status} = row when status in [:dead, :failed] -> {:ok, row}
@@ -98,13 +106,35 @@ defmodule Accrue.Webhooks.DLQ do
   end
 
   defp commit_requeue(%WebhookEvent{} = row) do
-    Repo.transact(fn ->
-      with {:ok, updated} <-
-             row
-             |> WebhookEvent.status_changeset(:received)
-             |> Repo.update(),
-           {:ok, _job} <-
-             Oban.insert(Accrue.Webhook.DispatchWorker.new(%{"webhook_event_id" => updated.id})),
+    {claimed, _updated_rows} =
+      Repo.update_all(
+        from(event in WebhookEvent,
+          where: event.id == ^row.id and event.status in [:dead, :failed]
+        ),
+        [
+          set: [
+            status: :received,
+            updated_at: DateTime.utc_now() |> DateTime.truncate(:microsecond)
+          ]
+        ],
+        returning: true
+      )
+
+    if claimed == 1 do
+      updated = Repo.get!(WebhookEvent, row.id)
+
+      with {:ok, _job} <-
+             Oban.insert(
+               Accrue.Webhook.DispatchWorker.new(
+                 %{"webhook_event_id" => updated.id},
+                 unique: [
+                   fields: [:worker, :args],
+                   keys: [:webhook_event_id],
+                   period: :infinity,
+                   states: [:available, :scheduled, :executing, :retryable]
+                 ]
+               )
+             ),
            {:ok, _ev} <-
              Events.record(%{
                type: "webhook.replay_requested",
@@ -119,7 +149,9 @@ defmodule Accrue.Webhooks.DLQ do
              }) do
         {:ok, updated}
       end
-    end)
+    else
+      {:error, :not_dead_lettered}
+    end
   end
 
   # --- requeue_where/2 --------------------------------------------------
