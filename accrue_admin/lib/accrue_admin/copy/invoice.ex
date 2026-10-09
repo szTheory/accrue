@@ -15,6 +15,10 @@ defmodule AccrueAdmin.Copy.Invoice do
 
   def invoice_action_recorded_info, do: "Invoice action recorded."
 
+  def invoice_action_unavailable do
+    "This invoice action is unavailable for the current state or owner scope. Return to the invoice and choose one of its listed actions."
+  end
+
   def invoices_page_title_index, do: "Invoices"
 
   def invoices_index_breadcrumb_invoices, do: "Invoices"

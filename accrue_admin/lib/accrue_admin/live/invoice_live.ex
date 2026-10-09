@@ -1497,10 +1497,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     ).body
   end
 
-  defp invoice_action_unavailable_copy(socket) do
-    Copy.resource_state_copy(:invoices, :error,
-      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope)
-    ).body
+  defp invoice_action_unavailable_copy(_socket) do
+    Copy.Invoice.invoice_action_unavailable()
   end
 
   defp invoice_pdf_error_copy(_reason) do
