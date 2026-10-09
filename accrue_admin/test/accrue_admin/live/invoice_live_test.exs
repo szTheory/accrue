@@ -276,6 +276,27 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert Enum.count(Fake.calls(), fn {operation, _args} -> operation == :pay_invoice end) == 1
   end
 
+  test "finalization result names the refreshed invoice state", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+    render_click(element(view, "button", Copy.Invoice.invoice_action_finalize()))
+
+    render_submit(
+      element(view, "form[data-action-type='finalize']"),
+      %{"action_type" => "finalize"}
+    )
+
+    html = render_click(element(view, "button[data-role='confirm-action']"))
+
+    assert html =~ "processor returned success for Finalize invoice"
+    assert html =~ "current scoped invoice reports Open"
+    refute html =~ "processor settlement"
+    assert TestRepo.get!(Invoice, invoice.id).status == :open
+  end
+
   test "requires-action payment result stays distinct from a completed invoice", %{
     conn: conn,
     invoice: invoice
