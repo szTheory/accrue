@@ -168,6 +168,16 @@ async function assertInitialDetailInvariants(page, target) {
     `${label}: DETAIL pages may expose at most two visible primary actions`
   ).toBeLessThanOrEqual(2);
 
+  if (target.name === "Invoice") {
+    const primaryActionRects = await primaryActions.evaluateAll((elements) =>
+      elements.map((element) => element.getBoundingClientRect().height)
+    );
+    expect(
+      primaryActionRects.every((height) => height >= 44),
+      "Invoice task actions retain the shared 44px minimum hit area"
+    ).toBe(true);
+  }
+
   const overflowMenus = await page.locator("[data-ax-action-overflow-menu]:visible").count();
   expect(overflowMenus, `${label}: at most one visible action overflow menu`).toBeLessThanOrEqual(1);
 
