@@ -77,17 +77,13 @@ jobs:
       - name: Run browser UAT
         run: cd accrue_admin && npm run e2e
 
-      - name: Check for committed visual baselines
-        id: vrbaseline
-        run: |
-          if ls accrue_admin/e2e/__screenshots__/visual-desktop/*.png >/dev/null 2>&1; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Test visual baseline set guard
+        run: cd accrue_admin && node --test test/js/visual_baseline_set_test.mjs
+
+      - name: Require complete committed visual baseline set
+        run: node accrue_admin/e2e/visual-baseline-set.cjs accrue_admin/e2e/__screenshots__/visual-desktop
 
       - name: Phase 211 visual regression gate
-        if: steps.vrbaseline.outputs.present == 'true'
         run: cd accrue_admin && npm run e2e:visual-regression
 
       - name: Upload Playwright report
