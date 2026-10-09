@@ -6,16 +6,16 @@ current_phase: 240
 current_phase_name: Shared System and Real Billing Exemplar
 current_plan: 6
 status: executing
-stopped_at: Completed 240-05-PLAN.md
-last_updated: "2026-10-09T22:40:57.302Z"
+stopped_at: Completed 240-06-PLAN.md
+last_updated: "2026-10-09T22:57:49.857Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 240 planned and independently checked; six plans across four waves ready to execute
-state_head: d224b7685e6c5723aab062fa827c1cde2f3b5e82
+state_head: 465c954640f1fab0cab53c03f38faefc548c4fc6
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -156,6 +156,7 @@ Last activity: 2026-10-09 — Wave 1 complete; recovered interrupted 240-02 meta
 | Phase 240 P03 | 9min | 3 tasks | 7 files |
 | Phase 240 P04 | 12 | 2 tasks | 11 files |
 | Phase 240 P05 | 61 | 2 tasks | 23 files |
+| Phase 240 P06 | 15 min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -332,6 +333,9 @@ Last activity: 2026-10-09 — Wave 1 complete; recovered interrupted 240-02 meta
 - [Phase 240]: Keep FocusTrap production behavior unchanged; supply browser focus APIs in its Node harness.
 - [Phase 240]: Browser online is only transport recovery; billing controls remain locked until LiveView reports reconnected.
 - [Phase 240]: Observe billing controls at document scope across overlay replacement and preserve each control's original disabled state.
+- [Phase 240]: Use Phase 239 route authority and live ComponentRegistry APIs rather than adding a second route or component registry.
+- [Phase 240]: Keep first-fresh performance values diagnostic only and keep future behavior guarded by existing owner tests.
+- [Phase 240]: Preserve the existing host TrustSmoke timing budget and record its independent failure for owner follow-up.
 
 ### Pending Todos
 
@@ -412,8 +416,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T22:40:57.280Z
-Stopped at: Completed 240-05-PLAN.md
+Last session: 2026-10-09T22:57:46.209Z
+Stopped at: Completed 240-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

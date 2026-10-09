@@ -10,9 +10,9 @@
 
 - [x] **DSN-01**: Operators can scan identity, current facts and next actions through consistent shared typography, spacing and hierarchy in existing list, detail and action-review compositions.
 - [x] **DSN-02**: Operators can read essential facts and activate controls with long or missing data at narrow, desktop and tablet/coarse-pointer layouts, including text enlargement and zoom without lost task access.
-- [ ] **DSN-03**: Operators can select and retain Light, Dark or System, with one selected preference, correct effective styles and existing host-forced theme behavior.
+- [x] **DSN-03**: Operators can select and retain Light, Dark or System, with one selected preference, correct effective styles and existing host-forced theme behavior.
 - [x] **DSN-04**: Operators retain correct labels, icons, disabled state and task context through actual busy completion, repeated LiveView updates and reconnect, without premature enabling or replay of a staged action.
-- [ ] **DSN-05**: Keyboard users can complete touched navigation and review flows with visible focus, associated validation/status semantics, overlay containment and logical focus return after dismissal, correction or replacement.
+- [x] **DSN-05**: Keyboard users can complete touched navigation and review flows with visible focus, associated validation/status semantics, overlay containment and logical focus return after dismissal, correction or replacement.
 
 ### Operator journeys
 
@@ -31,7 +31,7 @@
 
 ### Delivery and evidence
 
-- [ ] **EVR-01**: Maintainers can inspect current route, interaction, component and state coverage with source, fixture and served-asset provenance, keeping historical, rendered and exercised evidence distinct.
+- [x] **EVR-01**: Maintainers can inspect current route, interaction, component and state coverage with source, fixture and served-asset provenance, keeping historical, rendered and exercised evidence distinct.
 - [x] **EVR-02**: Maintainers receive faithful recurring regression proof with each delivery slice in existing acceptance owners, including focused failure controls for new guards and no confirmation-only human UAT dependency.
 - [ ] **EVR-03**: Maintainers receive blocking visual regression results for the complete expected Linux snapshot set, with reviewed intended updates and masks that preserve task-critical information.
 - [ ] **EVR-04**: Maintainers can start and use the documented Fake-backed Admin feedback preview without mutation/reset proof disturbing it, with honest transport, local/remote and provider evidence limits.
@@ -78,9 +78,9 @@ Each approved requirement has one primary phase owner in the approved roadmap. S
 |---|---|---|
 | DSN-01 | Phase 240 | Complete |
 | DSN-02 | Phase 240 | Complete |
-| DSN-03 | Phase 240 | Pending |
+| DSN-03 | Phase 240 | Complete |
 | DSN-04 | Phase 240 | Complete |
-| DSN-05 | Phase 240 | Pending |
+| DSN-05 | Phase 240 | Complete |
 | JRN-01 | Phase 241 | Pending |
 | JRN-02 | Phase 241 | Pending |
 | JRN-03 | Phase 241 | Pending |
@@ -90,7 +90,7 @@ Each approved requirement has one primary phase owner in the approved roadmap. S
 | JRN-07 | Phase 242 | Pending |
 | UXC-01 | Phase 242 | Pending |
 | UXC-02 | Phase 240 | Complete |
-| EVR-01 | Phase 240 | Pending |
+| EVR-01 | Phase 240 | Complete |
 | EVR-02 | Phase 240 | Complete |
 | EVR-03 | Phase 243 | Pending |
 | EVR-04 | Phase 243 | Pending |

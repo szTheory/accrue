@@ -20,3 +20,8 @@
   status: open
   **Found during:** Plan 240-05 Task 1 (`mix test`)
   **Scope:** Existing test/application exchange-rate startup configuration; unrelated to the disposable cancellation fixture.
+
+- Full host `mix verify.full` stopped in the existing `AccrueHostWeb.TrustSmokeTest`: webhook ingest measured 222ms against its 100ms release smoke budget.
+  status: open
+  **Found during:** Plan 240-06 Task 2 (`HEX_HOME=/private/tmp/accrue240-hex MIX_ENV=test mix verify.full`)
+  **Scope:** The timing test and its threshold are outside this asset-evidence change; the test threshold was not weakened and the suite was not retried.

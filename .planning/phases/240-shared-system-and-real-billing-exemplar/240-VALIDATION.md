@@ -83,3 +83,20 @@ Proof/reset/mutation work uses isolated package/host test fixtures. The canonica
 - [ ] Execution evidence complete; `nyquist_compliant: true` set only by the appropriate validation audit
 
 **Approval:** Planning contract passed independent plan-checking on 2026-10-09. Execution validation remains pending; Nyquist execution compliance is not claimed by plan approval.
+
+## Execution evidence through 240-06
+
+Recorded on 2026-10-09 from local commands and the prior plan summaries. These rows report observed acceptance only; they do not set `nyquist_compliant` or claim remote CI success.
+
+| Requirement | Observed evidence | Remaining boundary |
+|---|---|---|
+| DSN-01 | Invoice list/detail/review and subscription owner suites; Admin full ExUnit at 617 passed, 0 failed; Phase 237 mounted list/detail/action-review test passed | Other route-family pages remain mapped to their existing recurring owners |
+| DSN-02 | Phase 196 and 198 browser evidence; narrow/intermediate/coarse-pointer cases recorded by 240-03 | Actual 400% browser zoom unavailable locally; CSS/pinch scaling is not zoom proof; Linux window 27 remains remote CI owner |
+| DSN-03 | Theme preference owners and Phase 199/238 mounted evidence; Phase 237 stores System preference separately from effective light/dark CSS evidence | OS theme is browser-emulated, not a physical OS change |
+| DSN-04 | Phase 191 lifecycle owner: 26 tests passed; held-action fixture/owning Admin tests: 71 passed; no replay/duplicate dispatch covered by authoritative fixture assertions | No new host invoice mutation was dispatched in the Phase 237 read-only exemplar |
+| DSN-05 | FocusTrap Node owner: 41 passed; Phase 199 keyboard/overlay owner passed after its recorded selector/fixture repairs | Axe/tree evidence does not claim screen-reader speech |
+| UXC-02 | Invoice state/action owners and full Admin suite cover distinct supported/unsupported and outcome states | N/A review/result states remain justified on read-only endpoints in `240-COVERAGE.md` |
+| EVR-01 | 240-06 ledger validates 21 production routes, all 8 requirements, live incumbent registry 30/42/8 and 43 component modules; mounted CSS/JS/Geist bytes match package build, host compile and served response | The ledger is a durable inventory, not a recurring point-in-time CI gate |
+| EVR-02 | New verifier self-test reports `self-test: valid=1 missing-route-rejected=1`; Phase 237 browser owner passes and detects/restores a deliberately stale JS response | `MIX_ENV=test mix verify.full` stopped at the existing TrustSmoke timing assertion (222ms vs 100ms); final reviewed Linux baselines belong to Phase 243 |
+
+Local execution limits retained: remote CI is unobserved; Phase 243 owns final reviewed goldens; actual browser zoom was unavailable; the original 240-03 execution did not preserve pre-GREEN RED timing, and its retrospective reports are explicitly not original timing evidence. The phase remains open for the parent executor's independent gates.
