@@ -138,7 +138,7 @@ Plans:
 
 ## Progress
 
-**Execution order:** 240 → 241 → 242 → 243. Roadmap approval is complete; next command is `$gsd-plan-phase 240`.
+**Execution order:** 240 → 241 → 242 → 243. Phase 240 is verified complete; next command is `$gsd-discuss-phase 241`.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|

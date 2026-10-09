@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 241 — Billing Operator Journeys. Phase 240 is complete (six plans, eight requirements, 47/47 independent must-haves). Next command: `$gsd-discuss-phase 241`. Reuse [approved decisions](research/v1.64/SUMMARY.md), the [Phase 240 verification](phases/240-shared-system-and-real-billing-exemplar/240-VERIFICATION.md), shared UI contract and current evidence; do not repeat kickoff, research, Impeccable init or Phase 240 execution.
-**Progress:** [███░░░░░░░] 25% (1 of 4 approved milestone phases complete; all 6 currently planned tasks sets executed).
+**Progress:** [███░░░░░░░] 25% (1 of 4 approved milestone phases complete; all 6 currently planned plans executed).
 **Planned work completed:** Phase 240: 6/6 plans, current Admin 618/0, Node 41/0, package browser 89 passed / 19 incumbent skips, full host gate passed. Phases 241–243 remain. v1.63 is archived and closed.
 
 ## Current Position
