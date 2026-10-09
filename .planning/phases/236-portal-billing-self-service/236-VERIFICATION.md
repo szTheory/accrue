@@ -1,8 +1,8 @@
 ---
 phase: 236-portal-billing-self-service
-verified: 2026-10-08T23:21:39Z
-status: passed
-score: 21/21 must-haves verified
+verified: 2026-10-09T02:50:35Z
+status: human_needed
+score: 20/21 must-haves verified
 covered_files:
   - .github/workflows/ci.yml
   - .planning/phases/236-portal-billing-self-service/236-01-PLAN.md
@@ -44,25 +44,29 @@ covered_files:
   - examples/accrue_host/e2e/phase236-portal-self-service.spec.js
   - examples/accrue_host/lib/accrue_host/billing.ex
   - scripts/ci/accrue_host_seed_e2e.exs
-covered_digest: "v3:sha256:ef25655e2a25cbdd37503767c6e35e103e7fa41bc58ce2c6917460730a550145"
+covered_digest: "v3:sha256:af49b83fe925d841ef5946e712194b827e064a01ef2826593f925b221ee53c1e"
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:
-  previous_status: gaps_found
-  previous_score: 19/21
+  previous_status: passed
+  previous_score: 21/21
   gaps_closed:
     - "Hosted Fields receive readable theme-derived field, placeholder, and invalid colors, with contrast assertions in default, forced-light, and forced-dark served-browser runs."
     - "Theme and LiveView lifecycle updates clear stale nonce state and serialize teardown/recreation; cleanup failures keep submission disabled."
   gaps_remaining: []
   regressions: []
 advisory: []
+human_verification:
+  - test: "Confirm the live Braintree Hosted Fields iframe remains readable in default, forced-light, and forced-dark host themes."
+    expected: "The rendered card fields, placeholder, and invalid text are readable and match the application-supplied contrast styles in each theme."
+    why_human: "CI uses a deterministic SDK mock that inspects the style object but cannot observe rendering inside the cross-origin provider iframe."
 ---
 
 # Phase 236: Portal Billing Self-Service Verification Report
 
 **Phase Goal:** Customers can understand their billing identity and manage supported existing payment, subscription, and invoice tasks in the branded Portal.
-**Verified:** 2026-10-08T23:21:39Z
-**Status:** passed
+**Verified:** 2026-10-09T02:50:35Z
+**Status:** human_needed
 **Re-verification:** Yes — after Hosted Fields gap closure
 
 ## Goal Achievement
@@ -90,10 +94,10 @@ advisory: []
 | 17 | Checkout reauthorizes the pinned displayed billable and exact operation; query parameters grant no authority or success. | ✓ VERIFIED | Controller and LiveView validate the pin, session target, provider, and operation before mutation. Tests cover stale pins and query-only status markers. |
 | 18 | The branded shell shows the selected billed identity on all seven existing Portal pages. | ✓ VERIFIED | Served route browser test asserts the selected identity and host wordmark on Home, subscription list/detail, payment list/add, invoice, and checkout. |
 | 19 | Served browser fixtures cover empty/loading/error/populated/partial/overflow/zero-one-many/long-text, keyboard/focus, themes/contrast, and reduced motion. | ✓ VERIFIED | Current Phase 236 Playwright assertions cover these states and are registered in the blocking Braintree lane; focused theme matrices are additionally registered as blocking steps. |
-| 20 | Patched and themed add-card labels/help/errors remain readable and clear one-time state on failure or abandonment. | ✓ VERIFIED | Deterministic tests assert 4.5:1 for each SDK-supplied field/placeholder/invalid color and associated visible label/help surfaces; lifecycle tests cover patch, failure, and abandonment. Live iframe pixels remain outside the test's claim. |
+| 20 | Patched and themed add-card labels/help/errors remain readable and clear one-time state on failure or abandonment. | ⚠️ UNCERTAIN | App-side contrast assertions and lifecycle tests pass, but the deterministic SDK mock cannot establish readability of the cross-origin iframe that renders the secure fields. |
 | 21 | Visible and announced feedback survives redirects and LiveView patches without unsupported payment/access claims. | ✓ VERIFIED | POST result copy and checkout return tests assert flashes; LiveView action tests assert status/alert semantics and focus restoration. |
 
-**Score:** 21/21 truths verified (0 present, behavior-unverified)
+**Score:** 20/21 truths verified (1 uncertain; 0 present, behavior-unverified)
 
 ### Deferred Items
 
@@ -171,11 +175,24 @@ Not applicable. No Phase 236 plan/summary declares a probe script, and this is n
 | POR-02 | 02, 03 | Supported card and subscription actions respect capability/ownership and disclose matching consequences. | ✓ SATISFIED | Exact-target authorization, capability gates, consequence parity, and result tests are active. |
 | POR-03 | 01 | Existing invoices and hosted access are Customer-scoped; missing/foreign records fail safely. | ✓ SATISFIED | Scoped query, wrong-tenant tests, and served two-owner isolation evidence. |
 | POR-04 | 01, 02, 03, 04, 05 | Actions announce outcomes, failed reads remain distinct, and checkout failures do not claim charges. | ✓ SATISFIED | LiveView/controller tests and served result assertions. |
-| POR-05 | 02, 05, 06 | Direct add-card uses supported Hosted Fields and remains readable across themes and LiveView patches. | ✓ SATISFIED | Application styles and lifecycle pass current default/light/dark mock runs; no live-provider fidelity claim is made or required for this deterministic acceptance contract. |
+| POR-05 | 02, 05, 06 | Direct add-card uses supported Hosted Fields and remains readable across themes and LiveView patches. | ? NEEDS HUMAN | App-supplied styles, labels, contrast calculations, and patch lifecycle are covered by browser tests, but live iframe readability across themes remains unobserved. |
 | POR-06 | 01, 03, 05 | Known subscription states are factual; no unsupported access/history/document guarantees. | ✓ SATISFIED | Lifecycle, missing-observation, invoice bounded-copy, and unavailable tests. |
 | POR-07 | 04, 05 | Returns are validated; query parameters do not prove payment; leaving checkout is not cancellation. | ✓ SATISFIED | Safe-destination table tests and checkout outcome/exit tests. |
 
 All seven requirement IDs in the six PLAN files are accounted for; all seven requirements mapped to Phase 236 in REQUIREMENTS.md are claimed by at least one plan. No orphaned Phase 236 requirement was found.
+
+### Test Quality Audit
+
+| Test File | Linked Req | Active | Skipped | Circular | Assertion Level | Verdict |
+|---|---|---:|---:|---:|---|---|
+| Portal ExUnit/LiveView tests mapped in plans 01–04 | POR-01–POR-07 | Yes | 0 detected | 0 file-generation patterns detected | Behavioral/value | Pass based on current validation record |
+| `examples/accrue_host/e2e/phase236-portal-self-service.spec.js` | POR-01, POR-04–POR-07 | Yes in CI Braintree lane | Conditional skip only when fixture mode is off; CI enables it | 0 file-generation patterns detected | Behavioral | Pass; provider iframe fidelity is outside mock scope |
+
+The validation artifact records the current package and browser run results. The tests exercise scoped reads, authorization, action results, return safety, and application-side Hosted Fields state. The conditional browser skip is bypassed by the blocking CI configuration. No requirement is supported only by a disabled test.
+
+### Decision Coverage
+
+All trackable CONTEXT.md decisions are honored by shipped artifacts (8/8; non-blocking gate).
 
 ### Anti-Patterns Found
 
@@ -186,11 +203,19 @@ All seven requirement IDs in the six PLAN files are accounted for; all seven req
 
 No unreferenced `TBD`, `FIXME`, or `XXX` debt markers or user-visible empty stubs were found in the audited implementation. `return null` matches in the browser color parser represent invalid-color handling, not UI output.
 
+### Human Verification Required
+
+1. **Live Braintree secure-field readability by theme**
+
+   **Test:** Open the direct add-card page with a live Braintree account under default, forced-light, and forced-dark host themes.
+   **Expected:** Card input, placeholder, and invalid text are readable within the provider iframe in each theme.
+   **Why human:** The iframe is cross-origin; current CI observes the application-supplied style configuration through a deterministic SDK mock, not the provider-rendered pixels.
+
 ### Gaps Summary
 
-The two prior code-level Hosted Fields gaps are closed: computed theme-derived styles now pass the 4.5:1 assertions in default, forced-light, and forced-dark browser runs, and setup/teardown/patch lifecycle races fail closed with nonce clearing. All seven requirement IDs are represented and automated evidence is wired to blocking CI. No human UAT item remains under the Phase 236 acceptance contract. The evidence boundary is explicit: the deterministic SDK mock validates application-supplied styles and lifecycle, not rendering inside Braintree's live cross-origin iframe. UI-REVIEW also records no subjective visual-polish gate for this phase.
+The two prior code-level Hosted Fields gaps are closed: computed theme-derived styles pass the 4.5:1 app-side assertions in default, forced-light, and forced-dark browser runs, and setup/teardown/patch lifecycle races fail closed with nonce clearing. All seven requirements are represented and automated evidence is wired to blocking CI. One narrow human check remains because the live cross-origin Braintree iframe cannot be observed by the deterministic CI mock, so POR-05's rendered readability claim is not fully verified. This is distinct from the UI-REVIEW's subjective visual-polish findings, which are not phase acceptance gates.
 
 ---
 
-_Verified: 2026-10-08T23:21:39Z_  
+_Verified: 2026-10-09T02:50:35Z_
 _Verifier: the agent (gsd-verifier)_

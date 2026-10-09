@@ -131,3 +131,30 @@ The changed Hosted Fields hook is also used by the existing checkout flow. Re-ra
 | `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase233-braintree-checkout.spec.js --workers=1` | 12 passed (23.0s) |
 
 The run covers tokenization and nonce transport, retries, teardown, abandonment, and return handling through the shared hook. It uses the deterministic SDK fixture and does not claim live Braintree iframe fidelity.
+
+## Nyquist Recheck — Current Integration Evidence (2026-10-08)
+
+Audited all six Phase 236 plan/summary pairs and the POR-01 through POR-07 verification map against the current test commands and the available post-source-commit evidence (`b24092fa`). Every stable acceptance behavior already has an automated behavioral assertion in the package or served-browser suites; this audit found no genuine coverage gap and required no new test file.
+
+| Automated lane | Result | Evidence scope |
+|---|---:|---|
+| Core package | 2,077 passed, 0 failed (11 excluded) | Current core package regression suite |
+| Admin package | 581 passed, 0 failed | Current Admin package regression suite |
+| Portal package | 110 passed, 0 failed | Current Portal package regression suite |
+| Host package | 222 passed, 0 failed | Current host package regression suite |
+| Package documentation verifier | 46 passed, 0 failed | Current package documentation checks |
+| Phase 234 browser contract | 1 passed, 0 failed | Shared subscription browser journey regression |
+| Phase 237 browser contract | 1 passed, 0 failed | Current Admin regression journey |
+| Phase 233 Braintree browser lane | 12 passed, 0 failed | Shared Hosted Fields checkout consumer, deterministic SDK fixture |
+| Phase 236 Braintree browser lane | 14 passed, 0 failed | Portal billing and Hosted Fields journey, deterministic SDK fixture |
+| Standard Fake browser lane | 14 passed, 0 failed | Standard provider fixture regression |
+| Real-query search browser check | 1 passed, 0 failed | Search path using real query behavior |
+
+The existing focused Phase 236 Hosted Fields theme and lifecycle evidence remains recorded above (10 default, 7 forced-light, and 7 forced-dark tests); the current 14-test lane adds regression evidence for the complete Phase 236 served journey. Browser SDK fixtures prove application-side behavior and do not establish rendering inside Braintree's cross-origin iframe. No deterministic acceptance criterion requires human UAT.
+
+| Audit result | Count |
+|---|---:|
+| Phase requirements audited | 7 (POR-01 through POR-07) |
+| Deterministic coverage gaps found | 0 |
+| New tests required | 0 |
+| Unresolved human verification for stable acceptance | 0 |

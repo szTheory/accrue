@@ -24,6 +24,8 @@
 
 ## Verification Evidence
 
+- Fresh served-browser refresh on 2026-10-08: `ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 npm --prefix examples/accrue_host run e2e -- --config=playwright.braintree.config.js e2e/phase236-portal-self-service.spec.js --workers=1` — **14 passed**. This covers all seven Portal routes, owner-scoped collections, theme/focus/reduced-motion/long-text behavior, Hosted Fields lifecycle, and cancellation confirmation/focus behavior. Chromium required browser process access; the successful run completed in 12.8s.
+- The screenshot probe found `localhost:8080`, but its response identifies the Traefik dashboard, not the Portal. No screenshot from that endpoint was used as Portal evidence; the earlier missing-Portal-screenshot limitation remains.
 - Default/system Hosted Fields browser matrix: **10 passed**.
 - Host-forced light Hosted Fields matrix: **7 passed**.
 - Host-forced dark Hosted Fields matrix: **7 passed**.
