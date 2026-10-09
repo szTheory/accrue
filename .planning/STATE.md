@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 237
 current_phase_name: Admin Invoices, Payments & Recovery
 status: executing
-stopped_at: Completed 237-04-PLAN.md
-last_updated: "2026-10-09T00:13:05.942Z"
+stopped_at: Completed 237-06-PLAN.md
+last_updated: "2026-10-09T00:26:54.038Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 237 execution started
-state_head: 61d8fab5666230183ab86d42b2ca36aef51d56c3
+state_head: 5023a5dfe3bb5139fd96186ac6ba507cc6107412
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 35
-  completed_plans: 31
+  completed_plans: 32
   percent: 57
 ---
 
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 237 (Admin Invoices, Payments & Recovery) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
 Last activity: 2026-10-08 — Phase 237 execution started
 
@@ -133,6 +133,7 @@ Last activity: 2026-10-08 — Phase 237 execution started
 | Phase 237 P02 | 4min | 2 tasks | 2 files |
 | Phase 237 P03 | 5min | 2 tasks | 1 files |
 | Phase 237 P04 | 6 min | 2 tasks | 5 files |
+| Phase 237 P06 | 12min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -270,6 +271,8 @@ Last activity: 2026-10-08 — Phase 237 execution started
 - [Phase 237]: Wave 0 characterizes existing fixture and action contracts; plans 05 and 06 own new behavior assertions.
 - [Phase 237]: Overdue requires stored open status and a known due date strictly before Accrue.Clock.utc_now().
 - [Phase 237]: Invoice money uses the shared MoneyFormatter; missing or unsupported evidence never defaults to USD.
+- [Phase 237]: Refund review binds to provider charge identity, exact integer amount/currency/status, and refundable balance; dispatch reauthorizes scope and reloads current charge facts after step-up.
+- [Phase 237]: Deterministic charge/refund outcomes are verified in automated LiveView and package tests; ADM-05 remains pending until its other plans complete.
 
 ### Pending Todos
 
@@ -344,8 +347,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T00:13:05.878Z
-Stopped at: Completed 237-04-PLAN.md
+Last session: 2026-10-09T00:26:53.943Z
+Stopped at: Completed 237-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

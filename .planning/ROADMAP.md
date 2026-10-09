@@ -191,7 +191,7 @@ Plans:
 - [x] 237-03-PLAN.md — Wave 0 recovery currency/window/navigation fixtures
 - [x] 237-04-PLAN.md — Invoice collection and detail truth
 - [ ] 237-05-PLAN.md — Invoice action revalidation and evidenced outcomes
-- [ ] 237-06-PLAN.md — Charge/refund precision, revalidation, and outcomes
+- [x] 237-06-PLAN.md — Charge/refund precision, revalidation, and outcomes
 - [ ] 237-07-PLAN.md — Recovery currency, history, scope, and return context
 - [ ] 237-08-PLAN.md — Representative served browser and CI proof
 **UI hint**: yes
@@ -233,7 +233,7 @@ Plans:
 | 234. Admin Customers & Subscriptions | 8/8 | Complete    | 2026-10-07 |
 | 235. Customer Plan Selection & Checkout | 6/6 | Complete    | 2026-10-08 |
 | 236. Portal Billing Self-Service | 6/6 | Complete    | 2026-10-08 |
-| 237. Admin Invoices, Payments & Recovery | 4/8 | In Progress | - |
+| 237. Admin Invoices, Payments & Recovery | 5/8 | In Progress | - |
 | 238. Admin Events, Webhooks & Remaining Billing Surfaces | 0/TBD | Not started | - |
 | 239. Integrated Quality & Handoff | 0/TBD | Not started | - |
 
