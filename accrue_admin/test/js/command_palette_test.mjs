@@ -54,6 +54,10 @@ function fakeDocument() {
 function fakeWindow() {
   return {
     listeners: { keydown: new Set() },
+    requestAnimationFrame(callback) {
+      callback();
+      return 1;
+    },
     addEventListener(type, handler) {
       if (!this.listeners[type]) this.listeners[type] = new Set();
       this.listeners[type].add(handler);

@@ -833,6 +833,74 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     await assertNoStaleOverlayState(page, "StepUp Escape");
   });
 
+  test("@phase199 @keyboard invoice review contains focus, exposes associated validation, and restores after rapid dismissal", async ({
+    page,
+    request,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-desktop", "invoice review keyboard sequence runs once");
+
+    const fixtures = await seedPhase199(request);
+    await login(page, `/billing/invoices/${fixtures.edgeStates.jpy_invoice_id}`);
+    await setPhase191Theme(page, "light");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+
+    const openInvoiceReview = async () => {
+      const menu = page.locator("[data-ax-action-overflow-menu]").first();
+      await expect(menu, "invoice action menu trigger").toBeVisible();
+      await menu.locator("summary").focus();
+      await page.keyboard.press("Enter");
+      const item = page.getByRole("menuitem", { name: /Void invoice/i }).first();
+      await expect(item, "Void invoice review option").toBeVisible();
+      await item.focus();
+      await page.keyboard.press("Enter");
+      const drawer = page.locator("#ax-overlay-root [data-presentation='drawer']").first();
+      await expect(drawer, "invoice review drawer").toBeVisible();
+      return drawer;
+    };
+
+    const drawer = await openInvoiceReview();
+    const focusable = drawer.locator("button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]");
+    const first = focusable.first();
+    const last = focusable.last();
+    await first.focus();
+    await page.keyboard.press("Shift+Tab");
+    await expect(last, "Shift+Tab wraps to the last review control").toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(first, "Tab wraps to the first review control").toBeFocused();
+
+    await page.keyboard.press("Escape");
+    await assertNoStaleOverlayState(page, "rapid reduced-motion invoice review dismissal");
+    await expect(page.locator("#main-content"), "removed review opener uses logical page focus").toBeFocused();
+    await assertTopPointerTarget(page.locator("[data-theme-target='system']"), "theme control after drawer teardown");
+
+    const reopened = await openInvoiceReview();
+    const prepareAction = reopened.getByRole("button", { name: /Void invoice/i }).first();
+    await prepareAction.focus();
+    await page.keyboard.press("Enter");
+    const stagedConfirm = reopened.getByRole("button", { name: /Confirm Void invoice/i });
+    await expect(stagedConfirm, "review action stages confirmation").toBeVisible();
+    await stagedConfirm.focus();
+    await page.keyboard.press("Enter");
+
+    const modal = page.locator("#accrue-admin-step-up-dialog");
+    const code = modal.locator("input[name='code']");
+    await expect(modal, "step-up modal opens from keyboard review").toBeVisible();
+    await expect(code, "step-up input receives initial focus").toBeFocused();
+    await expect(code).toHaveAttribute("aria-invalid", "false");
+    await code.fill("000000");
+    await page.keyboard.press("Enter");
+    const error = modal.locator("[data-role='step-up-error']");
+    await expect(error, "invalid code exposes an associated error").toBeVisible();
+    await expect(code).toHaveAttribute("aria-invalid", "true");
+    await expect(code).toHaveAttribute("aria-describedby", /step-up-error/);
+    await expect(code, "correction stays inside the active modal").toBeFocused();
+
+    await code.fill("123456");
+    await page.keyboard.press("Enter");
+    await expect(modal, "corrected submission closes step-up").toBeHidden();
+    await assertNoStaleOverlayState(page, "invoice review submission");
+  });
+
   test("@phase199 @motion drawer geometry matches desktop right-dock and mobile bottom-sheet contracts", async ({
     page,
     request,

@@ -28,6 +28,21 @@ function fakeDocument() {
   };
 }
 
+function fakeWindow({ reducedMotion = false } = {}) {
+  return {
+    getComputedStyle() {
+      return { display: "block", visibility: "visible" };
+    },
+    matchMedia(query) {
+      return { matches: reducedMotion && query.includes("prefers-reduced-motion") };
+    },
+    requestAnimationFrame(callback) {
+      callback();
+      return 1;
+    }
+  };
+}
+
 function focusable(name, documentLike) {
   return {
     name,
@@ -89,9 +104,11 @@ function keyEvent(key, options = {}) {
   };
 }
 
-function withDocument(documentLike, callback) {
+function withDocument(documentLike, callback, windowLike = fakeWindow()) {
   const priorDocument = globalThis.document;
+  const priorWindow = globalThis.window;
   globalThis.document = documentLike;
+  globalThis.window = windowLike;
 
   try {
     callback();
@@ -101,12 +118,19 @@ function withDocument(documentLike, callback) {
     } else {
       globalThis.document = priorDocument;
     }
+    if (priorWindow === undefined) {
+      delete globalThis.window;
+    } else {
+      globalThis.window = priorWindow;
+    }
   }
 }
 
-async function withDocumentAsync(documentLike, callback) {
+async function withDocumentAsync(documentLike, callback, windowLike = fakeWindow()) {
   const priorDocument = globalThis.document;
+  const priorWindow = globalThis.window;
   globalThis.document = documentLike;
+  globalThis.window = windowLike;
 
   try {
     await callback();
@@ -115,6 +139,11 @@ async function withDocumentAsync(documentLike, callback) {
       delete globalThis.document;
     } else {
       globalThis.document = priorDocument;
+    }
+    if (priorWindow === undefined) {
+      delete globalThis.window;
+    } else {
+      globalThis.window = priorWindow;
     }
   }
 }
@@ -405,4 +434,57 @@ test("Destroy cleanup removes listeners and restores fallback focus when trigger
     assert.equal(documentLike.listeners.focusin.size, 0);
     assert.equal(documentLike.activeElement, fallback);
   });
+});
+
+test("focus restoration prefers the surviving replacement trigger over the removed opener", () => {
+  const documentLike = fakeDocument();
+  const trigger = focusable("old-trigger", documentLike);
+  const replacement = focusable("replacement-trigger", documentLike);
+  const close = focusable("close", documentLike);
+  documentLike.registry["#invoice-action-trigger"] = replacement;
+  const root = rootElement([close], {
+    focusTrapCloseEvent: "close_drawer",
+    focusTrapReturnTo: "#invoice-action-trigger"
+  });
+
+  withDocument(documentLike, () => {
+    trigger.focus();
+    const hook = { ...FocusTrap, el: root, pushEvent() {} };
+    hook.mounted();
+    close.focus();
+    trigger.isConnected = false;
+
+    hook.destroyed();
+
+    assert.equal(documentLike.activeElement, replacement);
+    assert.equal(replacement.focusCount, 1);
+    assert.equal(documentLike.listeners.keydown.size, 0);
+    assert.equal(documentLike.listeners.focusin.size, 0);
+  });
+});
+
+test("rapid teardown with reduced motion cancels pending focus and cannot intercept later Tab", async () => {
+  const documentLike = fakeDocument();
+  const trigger = focusable("trigger", documentLike);
+  const initial = focusable("initial", documentLike);
+  const root = rootElement([initial], { focusTrapInitial: "#initial" });
+  initial.selector = "#initial";
+  const windowLike = fakeWindow({ reducedMotion: true });
+
+  await withDocumentAsync(documentLike, async () => {
+    trigger.focus();
+    const hook = { ...FocusTrap, el: root, pushEvent() {} };
+    hook.mounted();
+    hook.destroyed();
+    await waitForTimers();
+
+    const tab = keyEvent("Tab");
+    documentLike.dispatch("keydown", tab);
+
+    assert.equal(windowLike.matchMedia("(prefers-reduced-motion: reduce)").matches, true);
+    assert.equal(initial.focusCount, 0);
+    assert.equal(tab.defaultPrevented, false);
+    assert.equal(documentLike.listeners.keydown.size, 0);
+    assert.equal(documentLike.listeners.focusin.size, 0);
+  }, windowLike);
 });
