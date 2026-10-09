@@ -8,7 +8,7 @@ const { test, expect } = require("./support/test.js");
 const { readFixture, login, waitForLiveView } = require("./support/fixture.js");
 
 const repoRoot = path.resolve(__dirname, "../../..");
-const captureDir = path.join(repoRoot, ".planning/phases/237-admin-invoices-payments-recovery/captures/237-08");
+const captureDir = path.join(repoRoot, ".planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar");
 const sourcePaths = [
   "accrue_admin/assets/css/app.css",
   "accrue_admin/assets/css/theme.css",
@@ -106,11 +106,17 @@ async function assertCurrentAssets(page) {
   expect(cssHref).toMatch(/\/admin\/assets\/css-[a-f0-9]{32}$/);
   const jsHref = await page.locator('script[src*="/admin/assets/js-"]').getAttribute("src");
   expect(jsHref).toMatch(/\/admin\/assets\/js-[a-f0-9]{32}$/);
-  await page.evaluate(async () => {
+  const loadedFonts = await page.evaluate(async () => {
     await document.fonts.load('14px "Geist"');
     await document.fonts.load('14px "Geist Mono"');
     await document.fonts.ready;
+    return {
+      geist: document.fonts.check('14px "Geist"'),
+      geistMono: document.fonts.check('14px "Geist Mono"')
+    };
   });
+  expect(loadedFonts.geist, "Geist font face should be loaded").toBe(true);
+  expect(loadedFonts.geistMono, "Geist Mono font face should be loaded").toBe(true);
   const sansPath = "/admin/assets/geist-sans-vf.woff2";
   const monoPath = "/admin/assets/geist-mono-vf.woff2";
   const assets = [
@@ -159,6 +165,18 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
     return [source, { sha256: sha256(bytes), bytes: bytes.length }];
   }));
   const sourceSha = sha256(Buffer.from(JSON.stringify(sources)));
+  const packageLock = fs.readFileSync(path.join(repoRoot, "examples/accrue_host/package-lock.json"));
+  const browserEnvironment = {
+    browser: browser.browserType().name(),
+    browserVersion: browser.version(),
+    os: `${process.platform} ${require("node:os").release()}`,
+    node: process.version,
+    runner: process.env.CI === "1" ? "CI=1" : "local",
+    packageLockSha256: sha256(packageLock),
+    packageAssetBuildCommand: "cd accrue_admin && mix accrue_admin.assets.build",
+    hostCompileCommand: "cd examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors",
+    browserCommand: "CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop"
+  };
   const screenshots = {};
 
   await login(page, fixture, fixture.admin_email, sandboxId);
@@ -184,6 +202,12 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(invoiceCard).not.toContainText("charge_automatically");
   await expect(invoiceCard).not.toContainText("False");
   const firstInvoiceRouteTaskReadyMs = Number(process.hrtime.bigint() - invoiceRouteStarted) / 1_000_000;
+  const storedTheme = await page.evaluate(() => ({
+    localStorage: localStorage.getItem("accrue_theme"),
+    cookie: document.cookie.split("; ").find((entry) => entry.startsWith("accrue_theme="))?.split("=").slice(1).join("=") || null,
+    rendered: document.documentElement.dataset.theme,
+    prefersColorScheme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+  }));
   const initialResourceDiagnostics = await page.evaluate(() => {
     const entries = performance.getEntriesByType("resource");
     const resources = entries.map((entry) => ({
@@ -201,9 +225,25 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
       encodedBodyBytes: resources.reduce((total, item) => total + item.encodedBodyBytes, 0),
       decodedBodyBytes: resources.reduce((total, item) => total + item.decodedBodyBytes, 0),
       transferBytes: resources.reduce((total, item) => total + item.transferBytes, 0),
+      layoutShift: {
+        supported: PerformanceObserver.supportedEntryTypes.includes("layout-shift"),
+        entries: performance.getEntriesByType("layout-shift").length,
+        value: performance.getEntriesByType("layout-shift").reduce((total, item) => total + (item.value || 0), 0)
+      },
+      longTasks: {
+        supported: PerformanceObserver.supportedEntryTypes.includes("longtask"),
+        entries: performance.getEntriesByType("longtask").length,
+        totalDurationMs: performance.getEntriesByType("longtask").reduce((total, item) => total + item.duration, 0)
+      },
       resources
     };
   });
+  const warmRouteStarted = process.hrtime.bigint();
+  await page.goto(page.url(), { waitUntil: "domcontentloaded" });
+  await waitForLiveView(page);
+  const warmInvoiceRouteLiveViewReadyMs = Number(process.hrtime.bigint() - warmRouteStarted) / 1_000_000;
+  await expect(page.getByRole("heading", { name: /open receivables/i }).first()).toBeVisible();
+  const warmInvoiceRouteTaskReadyMs = Number(process.hrtime.bigint() - warmRouteStarted) / 1_000_000;
   const assets = await assertCurrentAssets(page);
   const jsHref = await page.locator('script[src*="/admin/assets/js-"]').getAttribute("src");
   await page.route("**/admin/assets/js-*", async (route) => {
@@ -212,7 +252,28 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
     staleBytes[0] ^= 1;
     await route.fulfill({ response, body: staleBytes });
   });
-  await assertAssetBytes(page, jsHref, "accrue_admin/priv/static/accrue_admin.js");
+  let staleAssetRejected = false;
+  let staleAssetFailure = "";
+  try {
+    await assertAssetBytes(page, jsHref, "accrue_admin/priv/static/accrue_admin.js");
+  } catch (error) {
+    if (!error.message.includes("served response differs from package build")) throw error;
+    staleAssetRejected = true;
+    staleAssetFailure = error.message.split("\n")[0];
+  } finally {
+    await page.unroute("**/admin/assets/js-*");
+  }
+  expect(staleAssetRejected, "stale JavaScript response must be rejected by its byte digest").toBe(true);
+  const restoredJs = await assertAssetBytes(page, jsHref, "accrue_admin/priv/static/accrue_admin.js");
+  expect(restoredJs.servedSha256).toBe(assets[restoredJs.path].packageSha256);
+  const staleAssetEvidence = {
+    path: restoredJs.path,
+    injectedFirstByteMutation: true,
+    expectedFailure: staleAssetFailure,
+    restoredServedSha256: restoredJs.servedSha256,
+    restoredToPackageSha256: restoredJs.servedSha256 === restoredJs.packageSha256
+  };
+  expect(staleAssetEvidence.restoredToPackageSha256).toBe(true);
   await page.setViewportSize({ width: 320, height: 800 });
   await assertNoOverflow(page);
   const mobileSearch = await page.locator("#search-trigger").boundingBox();
@@ -253,12 +314,16 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(payAction).toBeFocused();
   const focusOutline = await payAction.evaluate((element) => getComputedStyle(element).outlineWidth);
   expect(focusOutline).not.toBe("0px");
+  const drawerInteractionStarted = process.hrtime.bigint();
   await page.keyboard.press("Enter");
   const reviewForm = page.locator('#invoice-action-drawer form[data-action-type="pay"]');
   await expect(reviewForm).toBeVisible();
+  const drawerReadyMs = Number(process.hrtime.bigint() - drawerInteractionStarted) / 1_000_000;
+  const reviewInteractionStarted = process.hrtime.bigint();
   await reviewForm.getByRole("button", { name: /pay invoice/i }).click();
   const review = page.locator('#invoice-action-drawer [data-role="confirm-panel"]');
   await expect(review).toBeVisible();
+  const reviewReadyMs = Number(process.hrtime.bigint() - reviewInteractionStarted) / 1_000_000;
   await expect(review).toContainText(fixture.invoice_id);
   await expect(review).toContainText("admin-e2e-alpha-customer@example.test");
   await expect(review).toContainText(fixture.admin_org_alpha_slug);
@@ -456,12 +521,29 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
     source_sha: sourceSha,
     sources,
     assets,
+    stale_asset_negative: staleAssetEvidence,
+    browser_environment: browserEnvironment,
+    theme_provenance: {
+      stored_theme_before_visual_override: storedTheme,
+      effective_theme_checks: [lightTokens, darkTokens].map((tokens) => ({ background: tokens.background, color: tokens.color, reducedMotionDuration: tokens.duration })),
+      visual_override_method: "Playwright prefers-color-scheme emulation plus data-theme DOM setter; not a stored preference mutation"
+    },
     first_fresh_invoice_diagnostics: {
       fixture: "disposable host Ecto sandbox; seeded Admin Alpha invoice",
       route: `/admin/invoices?org=${owner}`,
-      liveview_ready_ms: Number(firstInvoiceRouteLiveViewReadyMs.toFixed(2)),
-      task_ready_ms: Number(firstInvoiceRouteTaskReadyMs.toFixed(2)),
-      resources: initialResourceDiagnostics
+      query: `org=${fixture.admin_org_alpha_slug}`,
+      cold: {
+        liveview_ready_ms: Number(firstInvoiceRouteLiveViewReadyMs.toFixed(2)),
+        task_ready_ms: Number(firstInvoiceRouteTaskReadyMs.toFixed(2))
+      },
+      warm: {
+        liveview_ready_ms: Number(warmInvoiceRouteLiveViewReadyMs.toFixed(2)),
+        task_ready_ms: Number(warmInvoiceRouteTaskReadyMs.toFixed(2))
+      },
+      drawer_ready_ms: Number(drawerReadyMs.toFixed(2)),
+      action_review_ready_ms: Number(reviewReadyMs.toFixed(2)),
+      raw_and_encoded_resource_diagnostics: initialResourceDiagnostics,
+      first_fresh_timing_is_diagnostic_only: true
     },
     subscription_crosscheck: {
       fixture: "disposable host Ecto sandbox; seeded Admin Alpha past-due subscription",
@@ -472,6 +554,13 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
       long_identity: longIdentityMetrics
     },
     viewport_and_theme: Object.fromEntries(Object.entries(screenshots).map(([name, shot]) => [name, { route: shot.route, viewport: shot.viewport, theme: shot.theme, sha256: sha256(shot.bytes), bytes: shot.bytes.length }])),
+    route_and_interaction: {
+      route: `/admin/invoices/${fixture.invoice_id}?org=${owner}`,
+      action_review_target: fixture.invoice_id,
+      action_review_opened: true,
+      action_confirmed_or_dispatched: false,
+      no_mutation_claim_from_http_method_observation: true
+    },
     read_only: true,
     confirmed_or_dispatched: false
   };
