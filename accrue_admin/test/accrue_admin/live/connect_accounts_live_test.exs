@@ -259,6 +259,30 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     refute html =~ "acct_other"
   end
 
+  test "connect list separates Stripe-observed readiness from the local fee override", %{
+    conn: conn
+  } do
+    unknown =
+      insert_account(%{
+        id: "00000000-0000-0000-0000-000000000001",
+        stripe_account_id: "acct_unknown_observation",
+        charges_enabled: false,
+        payouts_enabled: false,
+        details_submitted: false,
+        data: %{"platform_fee_override" => %{"percent" => "1.5"}}
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/connect?view=all")
+
+    assert html =~ "Stripe-observed"
+    assert html =~ "Unknown"
+    assert html =~ "Local platform fee override"
+    assert html =~ "Override saved"
+    assert html =~ "/billing/connect/#{unknown.id}"
+    refute html =~ "Ready"
+  end
+
   defp assert_page_header_contract(html, contract) do
     assert html =~ ~s(data-ax-page-header)
     assert html =~ ~s(data-ax-page-title)
