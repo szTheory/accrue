@@ -14,11 +14,11 @@ provides:
   - FocusTrap and command-palette Node harnesses provide browser focus APIs; prior nine-test harness failures are resolved.
 affects: [phase-240, admin-theme, admin-overlays, keyboard-accessibility]
 actuals:
-  tokens: 84061
+  tokens: 96684
   tasks: 2
-  commits: 3
+  commits: 5
   plan_head_before: ea1ff2e83fa0f783f35392140a369568cacd8665
-  plan_head_after: d185347cfd61cd1e01a87ec2b0ee5bb3d8c75a4c
+  plan_head_after: aec79f5231154faccc78066f757d8c7c5605d502
 tech-stack:
   added: []
   patterns:
@@ -75,7 +75,7 @@ coverage:
         ref: "node --test --test-reporter=tap test/js/*.mjs (41 passed)"
         status: pass
     human_judgment: false
-duration: 12min
+duration: 23min
 completed: 2026-10-09
 status: complete
 ---
@@ -86,11 +86,11 @@ status: complete
 
 ## Performance
 
-- **Duration:** 12 minutes
+- **Duration:** 23 minutes including the acceptance follow-up
 - **Started:** 2026-10-09T21:10:49Z
-- **Completed:** 2026-10-09T21:23:00Z
+- **Completed:** 2026-10-09T21:34:18Z
 - **Tasks:** 2
-- **Files modified:** 11
+- **Files modified:** 23 including durable acceptance evidence and plan metadata
 
 ## Accomplishments
 
@@ -105,7 +105,7 @@ status: complete
 1. **Task 1: Prove stored preference and effective theme through OS and host changes** - `65c1b80f` (test), `2a79b390` (feat)
 2. **Task 2: Complete keyboard review, correction and focus restoration** - `d185347c` (test)
 
-Task commit count measured from the persisted plan ledger: 3. Plan head before: `ea1ff2e83fa0f783f35392140a369568cacd8665`. Plan head after task commits: `d185347cfd61cd1e01a87ec2b0ee5bb3d8c75a4c`.
+Original task commit count: 3. Acceptance follow-up commit: `aec79f52`. Total commits measured from the persisted plan ledger at follow-up summary write: 5, including the original plan metadata commit. Plan head before: `ea1ff2e83fa0f783f35392140a369568cacd8665`. Plan head after acceptance fix: `aec79f5231154faccc78066f757d8c7c5605d502`.
 
 ## Files Created/Modified
 
@@ -153,7 +153,7 @@ Task commit count measured from the persisted plan ledger: 3. Plan head before: 
 
 - The first hook launch was blocked by macOS process permissions; rerunning the installed Chromium test with approved escalated access succeeded.
 - The repository's PII pre-commit hook rejected the raw machine-local path in Task 1's unchanged JUnit RED record. The actual report and classifier JSON remain in the ignored local evidence directory; committed current-GREEN evidence is path-free.
-- `CI=1 npm run e2e:phase199` ran 36 tests and reported 18 passed, 15 skipped, and 3 unrelated failures: the recovery route fixture lacked its expected link on desktop, and the focus-ring ratchet guard lacked its expected attention rail on desktop and mobile. The task-owned theme and keyboard cases passed in their focused mounted runs. These wider failures are open in `deferred-items.md` for separate investigation.
+- The first full `CI=1 npm run e2e:phase199` run exposed three acceptance fixture/selector failures; the follow-up below corrected them. The final full suite passes 21 tests with 15 existing skips and no failures.
 
 ## User Setup Required
 
@@ -162,7 +162,7 @@ None - no external service configuration required.
 ## Next Phase Readiness
 
 - Theme state and keyboard review contracts are available for later Phase 240 plans to reuse.
-- The earlier Node harness failures are cleared. The unrelated recovery-fixture and focus-ring ratchet failures remain recorded and should be investigated separately.
+- The earlier Node harness failures are cleared and the full Phase 199 acceptance gate passes. No deferred Phase 199 acceptance failures remain.
 
 ## Self-Check: PASSED
 
@@ -174,3 +174,15 @@ None - no external service configuration required.
 ---
 *Phase: 240-shared-system-and-real-billing-exemplar*
 *Completed: 2026-10-09*
+
+## Acceptance Gate Follow-up (2026-10-09)
+
+The plan was reopened to complete its required full Phase 199 acceptance gate. The original focused theme and keyboard cases were already passing; this follow-up fixed the three broader suite failures without removing assertions or adding retries.
+
+- **Recovery fixture clock:** `seed_phase199_interactions!/0` used wall-clock timestamps while Recovery queries use `Accrue.Clock.utc_now/0`. Its five-day-old campaign therefore appeared outside the deterministic 30-day window and the route had no row. The fixture now uses the same application clock. The route test identifies the specific seeded subscription by its real `href` prefix (which also carries `return_to`) and continues to assert the long email accessible name and destination route.
+- **Current Home DOM:** `DashboardLive` renders the Recent audit activity home section and the keyboard customer-search control; it does not render the historical `data-ax-zone="attention-rail"` selector. The two existing ratchet rows now target `.ax-home [data-command-palette-trigger]`, a real keyboard control on `/billing`. Both rows retain the same visible focus-outline assertion, with desktop and mobile coverage.
+- **Evidence:** Both exact pre-fix target tests have native JUnit reports and records in this phase directory. `gsd_run check tdd-red-evidence` returned `RED_EVIDENCE_OK` for each. Current GREEN records and reports are preserved alongside them as `240-04-acceptance-route-{red,green}.*` and `240-04-acceptance-ratchet-{red,green}.*`.
+- **Verification:** `CI=1 npm run e2e:phase199` passes 21 and skips 15 existing tests, with zero failures. `node --test --test-reporter=tap test/js/*.mjs` passes 41/41. The full suite and focused route/ratchet GREEN JUnit records are durable in the committed run evidence.
+- **Fix commit:** `aec79f52` (`test(240-04): repair Phase 199 acceptance fixtures`).
+
+This follow-up supersedes the initial closeout note that listed the three Phase 199 failures as open. `deferred-items.md` now records them as resolved.
