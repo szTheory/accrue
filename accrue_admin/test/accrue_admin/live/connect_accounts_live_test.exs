@@ -146,7 +146,12 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
         charges_enabled: true,
         payouts_enabled: true,
         details_submitted: true,
-        data: %{"platform_fee_override" => %{"percent" => "1.0"}}
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => true,
+          "platform_fee_override" => %{"percent" => "1.0"}
+        }
       })
 
     insert_account(%{
@@ -229,7 +234,12 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
       stripe_account_id: "acct_ready",
       charges_enabled: true,
       payouts_enabled: true,
-      details_submitted: true
+      details_submitted: true,
+      data: %{
+        "charges_enabled" => true,
+        "payouts_enabled" => true,
+        "details_submitted" => true
+      }
     })
 
     queue_conn =
@@ -264,6 +274,50 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     assert html =~ "Override saved"
     assert html =~ "/billing/connect/"
     refute html =~ "acct_other"
+  end
+
+  test "provider boolean filters and KPI counts use observations stored in account data", %{
+    conn: conn
+  } do
+    insert_account(%{
+      stripe_account_id: "acct_snapshot_disabled",
+      charges_enabled: true,
+      payouts_enabled: true,
+      details_submitted: true,
+      data: %{
+        "charges_enabled" => false,
+        "payouts_enabled" => false,
+        "details_submitted" => false
+      }
+    })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, filtered_html} =
+             live(conn, "/billing/connect?view=all&charges_enabled=false")
+
+    assert filtered_html =~ "acct_snapshot_disabled"
+    refute filtered_html =~ "acct_other"
+    refute filtered_html =~ "acct_match"
+
+    all_conn =
+      Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
+
+    assert {:ok, _view, all_html} = live(all_conn, "/billing/connect?view=all")
+
+    stats =
+      all_html
+      |> Floki.parse_document!()
+      |> Floki.find(".ax-stat")
+      |> Enum.map(fn stat ->
+        {
+          stat |> Floki.find(".ax-stat-label") |> Floki.text() |> String.trim(),
+          stat |> Floki.find(".ax-stat-value") |> Floki.text() |> String.trim()
+        }
+      end)
+      |> Map.new()
+
+    assert stats[Copy.connect_accounts_kpi_label_charges_enabled()] == "1"
   end
 
   test "connect list separates Stripe-observed readiness from the local fee override", %{

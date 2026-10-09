@@ -444,11 +444,11 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       total_count: Repo.aggregate(accounts, :count, :id),
       charges_enabled_count:
         accounts
-        |> where([account], account.charges_enabled == true)
+        |> where([account], fragment("?->>'charges_enabled' = 'true'", account.data))
         |> Repo.aggregate(:count, :id),
       details_submitted_count:
         accounts
-        |> where([account], account.details_submitted == true)
+        |> where([account], fragment("?->>'details_submitted' = 'true'", account.data))
         |> Repo.aggregate(:count, :id),
       deauthorized_count:
         accounts
