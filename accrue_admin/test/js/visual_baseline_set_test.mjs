@@ -38,7 +38,7 @@ test("complete set passes the pure check and CLI", () => {
     assert.deepEqual(checkBaselineSet(directory).missing, []);
     const result = spawnSync(process.execPath, [validator, directory], { encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /8 visual baselines/);
+    assert.match(result.stdout, /all 8 required visual baselines/);
   });
 });
 
