@@ -62,7 +62,9 @@ defmodule AccrueAdmin.Components.AtRiskTable do
     >
       <header class="ax-at-risk-header">
         <p class="ax-label">At-Risk Subscriptions</p>
-        <p class="ax-body ax-muted">{length(@rows)} active dunning campaigns in this window</p>
+        <p :if={@state not in ["loading", "error"]} class="ax-body ax-muted">
+          {length(@rows)} active dunning campaigns in this window
+        </p>
       </header>
 
       <div :if={@state == "loading"} class="ax-at-risk-state" data-state="loading" role="status">
