@@ -243,6 +243,36 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "Replay requested for the active organization."
   end
 
+  test "single replay rechecks current status after fresh step-up", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, webhook.id)
+
+    assert {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    render_click(element(view, "[data-role='replay-single']"))
+    render_click(element(view, "[data-role='confirm-replay']"))
+    assert render(view) =~ Copy.step_up_title()
+
+    webhook
+    |> Ecto.Changeset.change(status: :received)
+    |> TestRepo.update!()
+
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Replay is blocked because this webhook isn&#39;t linked to a billable row"
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
+
+    refute TestRepo.exists?(
+             from(event in Event,
+               where:
+                 event.type == "admin.webhook.replay.completed" and
+                   event.subject_id == ^webhook.id
+             )
+           )
+  end
+
   test "forensic payload section uses Detail.detail_section not hand-rolled ax-card", %{
     conn: conn,
     webhook: webhook

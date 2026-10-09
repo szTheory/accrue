@@ -473,7 +473,14 @@ defmodule AccrueAdmin.Live.WebhookLive do
         replay_blocked(socket)
 
       {:error, reason} ->
-        push_flash(socket, :error, inspect(reason))
+        _ = reason
+
+        socket
+        |> clear_replay_drawer()
+        |> push_flash(
+          :error,
+          "Replay could not be queued. Confirm the delivery is still eligible and try again."
+        )
     end
   end
 
