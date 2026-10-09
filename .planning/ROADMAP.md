@@ -184,10 +184,10 @@ Plans:
   4. Recovery views retain time window, owner, currency, and return context while keeping historical failures separate from current billing state.
   5. Changed money/recovery flows retain keyboard, responsive, theme, and relevant pending/denied/error evidence within this slice.
 
-**Plans**: 8 plans
+**Plans**: 2/8 plans complete
 Plans:
-- [ ] 237-01-PLAN.md — Owner-scoped invoice tracer and Wave 0 boundary fixtures
-- [ ] 237-02-PLAN.md — Wave 0 invoice and refund action/result fixtures
+- [x] 237-01-PLAN.md — Owner-scoped invoice tracer and Wave 0 boundary fixtures
+- [x] 237-02-PLAN.md — Wave 0 invoice and refund action/result fixtures
 - [ ] 237-03-PLAN.md — Wave 0 recovery currency/window/navigation fixtures
 - [ ] 237-04-PLAN.md — Invoice collection and detail truth
 - [ ] 237-05-PLAN.md — Invoice action revalidation and evidenced outcomes
@@ -233,7 +233,7 @@ Plans:
 | 234. Admin Customers & Subscriptions | 8/8 | Complete    | 2026-10-07 |
 | 235. Customer Plan Selection & Checkout | 6/6 | Complete    | 2026-10-08 |
 | 236. Portal Billing Self-Service | 6/6 | Complete    | 2026-10-08 |
-| 237. Admin Invoices, Payments & Recovery | 0/TBD | Not started | - |
+| 237. Admin Invoices, Payments & Recovery | 2/8 | In Progress | - |
 | 238. Admin Events, Webhooks & Remaining Billing Surfaces | 0/TBD | Not started | - |
 | 239. Integrated Quality & Handoff | 0/TBD | Not started | - |
 
