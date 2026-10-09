@@ -169,6 +169,21 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert invoice.customer_id == customer.id
   end
 
+  test "unsupported invoice action is rejected with a scoped safe next step", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    html = render_click(view, "open_action_drawer", %{"action_type" => "refund"})
+
+    assert html =~ "This invoice action is unavailable for the current state or owner scope."
+    assert html =~ "Return to the invoice and choose one of its listed actions."
+    refute html =~ "data-ax-action-drawer-form"
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :refund_invoice end)
+  end
+
   test "payment review shows exact amount and cancels when amount or currency changes", %{
     conn: conn,
     invoice: invoice
