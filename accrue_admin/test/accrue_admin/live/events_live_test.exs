@@ -294,6 +294,36 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert html =~ webhook_id
   end
 
+  test "event type links open the exact scoped event record", %{conn: conn} do
+    organization_id = Ecto.UUID.generate()
+    organization_slug = "event-link-#{System.unique_integer([:positive])}"
+
+    customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
+    invoice = insert_invoice(customer, %{processor_id: "in_exact_event_link"})
+
+    {:ok, event} =
+      Events.record(%{
+        type: "invoice.payment_failed.exact_link",
+        subject_type: "Invoice",
+        subject_id: invoice.id,
+        actor_type: "webhook",
+        actor_id: "evt_exact_link"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: organization_id,
+        active_organization_slug: organization_slug,
+        admin_organization_ids: [organization_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing/events?org=#{organization_slug}")
+
+    assert html =~ ~s(href="/billing/events/#{event.id}?org=#{organization_slug}")
+    assert html =~ "invoice.payment_failed.exact_link"
+  end
+
   test "active-organization event feed summary counts in-scope charge subjects", %{conn: conn} do
     allowed_org = "org_charge_allowed"
     denied_org = "org_charge_denied"

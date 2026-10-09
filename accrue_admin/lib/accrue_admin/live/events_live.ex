@@ -136,7 +136,11 @@ defmodule AccrueAdmin.Live.EventsLive do
           row_label={Copy.events_list_result_label_pair()}
           filter_submit_label={Copy.billing_events_apply_filters()}
           columns={[
-            %{id: :type, label: Copy.billing_events_table_column_event()},
+            %{
+              id: :type,
+              label: Copy.billing_events_table_column_event(),
+              render: fn row -> event_cell(row, @admin_mount_path, @current_owner_scope) end
+            },
             %{
               label: Copy.billing_events_table_column_subject(),
               render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope) end
@@ -377,6 +381,13 @@ defmodule AccrueAdmin.Live.EventsLive do
         escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
         Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
     end
+  end
+
+  defp event_cell(row, mount_path, owner_scope) do
+    label = row.type || Copy.billing_events_when_unknown()
+    href = ScopedPath.build(mount_path, "/events/#{row.id}", owner_scope)
+    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
   end
 
   defp subject_href(%{subject_type: "Customer", subject_id: id}, mount_path, scope),
