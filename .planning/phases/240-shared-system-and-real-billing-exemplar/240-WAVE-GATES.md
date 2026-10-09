@@ -24,3 +24,10 @@ status: in_progress
 ## Outstanding platform-specific work
 
 Linux pixel comparison remains unrun locally on macOS (WINDOWS item 27). Existing Linux CI owns recurring comparison; Phase 243 owns final reviewed goldens. This is separate from the passing eight-file guard and semantic browser evidence. Actual 400% browser zoom was not exposed by the headless environment; pinch/visual scaling is explicitly distinguished in 240-03.
+
+## Wave 3 — passed
+
+- Admin build with warnings as errors exited 0; fresh full ExUnit run: 617 tests, 0 failures.
+- Plan 240-05 owning unit suite: 71 tests, 0 failures; Phase 191 desktop/mobile lifecycle owner: 26 tests, 0 failures.
+- Schema and UI gates returned `block: false`; codebase drift explicitly skipped (`no-structure-md`).
+- Controlled fixture, real LiveView readiness, overlay replacement/focus and original disabled-state assertions are committed. No staged mutation replay was observed in authoritative fixture counts.
