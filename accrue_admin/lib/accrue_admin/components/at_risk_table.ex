@@ -34,6 +34,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
   attr(:rows, :list, required: true)
   attr(:base_path, :string, default: "/billing")
   attr(:owner_scope, :any, default: nil)
+  attr(:current_window, :string, default: "30d")
   attr(:class, :string, default: nil)
   attr(:loading, :boolean, default: false)
   attr(:error, :any, default: nil)
@@ -78,6 +79,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
         <thead>
           <tr>
             <th scope="col" class="ax-label">Customer</th>
+            <th scope="col" class="ax-label">Current subscription status</th>
             <th scope="col" class="ax-label">Amount</th>
             <th scope="col" class="ax-label">Campaign Age</th>
             <th scope="col" class="ax-label">Current Step</th>
@@ -89,12 +91,13 @@ defmodule AccrueAdmin.Components.AtRiskTable do
           <tr :for={row <- @rows}>
             <td>
               <a
-                href={subscription_href(@base_path, row, @owner_scope)}
+                href={subscription_href(@base_path, row, @owner_scope, @current_window)}
                 class="ax-link"
               >
                 {row.customer_label || "—"}
               </a>
             </td>
+            <td class="ax-body">{current_status(row)}</td>
             <td class="ax-body">{format_amount(row)}</td>
             <td class="ax-body">{campaign_age(row)}</td>
             <td class="ax-body">{step_label(row)}</td>
@@ -116,6 +119,10 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
           <dl class="ax-at-risk-card-facts">
             <div>
+              <dt class="ax-label">Current subscription status</dt>
+              <dd class="ax-body">{current_status(row)}</dd>
+            </div>
+            <div>
               <dt class="ax-label">Amount</dt>
               <dd class="ax-body">{format_amount(row)}</dd>
             </div>
@@ -128,13 +135,13 @@ defmodule AccrueAdmin.Components.AtRiskTable do
               <dd class="ax-body">{format_eta(row.next_step_eta)}</dd>
             </div>
             <div>
-              <dt class="ax-label">Last failure</dt>
+              <dt class="ax-label">Historical failure reason</dt>
               <dd class="ax-body ax-muted">{format_failure(row.failure_reason)}</dd>
             </div>
           </dl>
 
           <a
-            href={subscription_href(@base_path, row, @owner_scope)}
+            href={subscription_href(@base_path, row, @owner_scope, @current_window)}
             class="ax-button ax-button-secondary"
             aria-label={"Open recovery campaign for #{row.customer_label || row.subscription_id}"}
           >
@@ -181,13 +188,23 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
   defp normalize_state_copy(_copy, fallback), do: fallback
 
-  defp subscription_href(base_path, row, owner_scope) do
+  defp subscription_href(base_path, row, owner_scope, current_window) do
+    return_to =
+      ScopedPath.build(base_path, "/analytics/recovery", owner_scope, %{
+        "window" => current_window
+      })
+
     ScopedPath.build(
       base_path,
       "/analytics/recovery/subscriptions/" <> row.subscription_id,
-      owner_scope
+      owner_scope,
+      %{"return_to" => return_to}
     )
   end
+
+  defp current_status(%{current_status: status}) when is_atom(status), do: Atom.to_string(status)
+  defp current_status(%{current_status: status}) when is_binary(status), do: status
+  defp current_status(_row), do: "Unavailable"
 
   defp load_more_href(_base_path, _next_cursor, href, _owner_scope)
        when is_binary(href) and href != "",
@@ -209,7 +226,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
   defp format_amount(%{amount_due_minor: amount_minor, currency: currency})
        when is_integer(amount_minor) do
-    case normalize_currency(currency || "usd") do
+    case normalize_currency(currency) do
       nil ->
         "Amount unavailable"
 

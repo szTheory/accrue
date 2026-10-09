@@ -168,6 +168,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
             rows={@at_risk}
             base_path={@admin_mount_path}
             owner_scope={@current_owner_scope}
+          current_window={@window}
             empty_copy={Copy.resource_state_copy(:dunning, :queue_empty)}
           />
         </section>

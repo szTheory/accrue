@@ -137,6 +137,7 @@ defmodule AccrueAdmin.Queries.Dunning do
         group_by: [
           subscription.id,
           subscription.customer_id,
+          subscription.status,
           customer.email,
           customer.name,
           subscription.dunning_campaign_started_at

@@ -7,7 +7,8 @@ defmodule AccrueAdmin.ScopedPath do
     "/subscriptions" => ~w(view status q sort direction cursor customer_id),
     "/customers" => ~w(q owner_type has_default_payment_method sort direction cursor tab),
     "/invoices" => ~w(q status sort direction cursor),
-    "/payments" => ~w(q status sort direction cursor)
+    "/payments" => ~w(q status sort direction cursor),
+    "/analytics/recovery" => ~w(window)
   }
   @return_value_limits %{
     "view" => 32,
@@ -19,7 +20,8 @@ defmodule AccrueAdmin.ScopedPath do
     "customer_id" => 128,
     "tab" => 32,
     "owner_type" => 64,
-    "has_default_payment_method" => 8
+    "has_default_payment_method" => 8,
+    "window" => 8
   }
 
   @doc false
@@ -155,6 +157,7 @@ defmodule AccrueAdmin.ScopedPath do
       not String.match?(value, ~r/[\x00-\x1F\x7F]/) and
       (key != "view" or value in ["all", "at_risk"]) and
       (key != "direction" or value in ["asc", "desc"]) and
+      (key != "window" or value in ["7d", "30d", "90d"]) and
       (key != "tab" or value in ~w(subscriptions invoices payments))
   end
 end

@@ -259,6 +259,7 @@ defmodule Accrue.Analytics.Dunning do
         group_by: [
           s.id,
           s.customer_id,
+          s.status,
           c.email,
           c.name,
           s.dunning_campaign_started_at

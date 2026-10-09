@@ -16,12 +16,17 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
       assert html =~ ~s(class="ax-at-risk-cards")
 
       assert html =~ "Northwind Finance"
+      assert html =~ "Current subscription status"
+      assert html =~ "past_due"
       assert html =~ "$320.00"
       assert html =~ "Past due 9 days"
       assert html =~ "Step 2"
       assert html =~ "2026-04-20 15:30 UTC"
       assert html =~ "card_declined"
-      assert html =~ ~s(href="/billing/analytics/recovery/subscriptions/sub_123")
+
+      assert html =~
+               ~s(href="/billing/analytics/recovery/subscriptions/sub_123?return_to=%2Fbilling%2Fanalytics%2Frecovery%3Fwindow%3D30d")
+
       assert html =~ ~s(aria-label="Open recovery campaign for Northwind Finance")
     end
 
@@ -33,13 +38,27 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
           rows: rows(),
           base_path: "/billing",
           owner_scope: owner_scope,
+          current_window: "7d",
           next_cursor: "cursor-2"
         )
 
-      assert html =~ ~s(href="/billing/analytics/recovery/subscriptions/sub_123?org=allowed-org")
+      assert html =~
+               ~s(href="/billing/analytics/recovery/subscriptions/sub_123?org=allowed-org&amp;return_to=)
+
+      assert html =~ "%26window%3D7d"
+      assert html =~ "org=allowed-org"
 
       assert html =~
                ~r/href="\/billing\/analytics\/recovery\?(?:cursor=cursor-2&amp;org=allowed-org|org=allowed-org&amp;cursor=cursor-2)"/
+    end
+
+    test "missing currency does not imply USD for at-risk amounts" do
+      row = %{hd(rows()) | currency: nil}
+
+      html = render_component(&AtRiskTable.at_risk_table/1, rows: [row])
+
+      assert html =~ "Amount unavailable"
+      refute html =~ "$320.00"
     end
 
     test "renders distinct empty, loading, error, no-pagination, and has-pagination states" do
@@ -103,6 +122,7 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
         subscription_id: "sub_123",
         customer_id: "cus_123",
         customer_label: "Northwind Finance",
+        current_status: :past_due,
         amount_due_minor: 32_000,
         currency: "usd",
         days_in_campaign: 9,

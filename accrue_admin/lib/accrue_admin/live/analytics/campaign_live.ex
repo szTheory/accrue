@@ -42,6 +42,18 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
   end
 
   @impl true
+  def handle_params(params, _uri, socket) do
+    return_path =
+      ScopedPath.return_path(
+        socket.assigns.admin_mount_path,
+        Map.get(params, "return_to"),
+        socket.assigns.current_owner_scope
+      )
+
+    {:noreply, assign(socket, :return_path, return_path)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <AppShell.app_shell
@@ -56,7 +68,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
       <section class="ax-page" aria-label="Dunning timeline for subscription">
         <Breadcrumbs.breadcrumbs items={[
           %{label: "Analytics"},
-          %{label: "Recovery", href: @current_path},
+          %{label: "Recovery", href: @return_path},
           %{label: "Subscription"}
         ]} />
 
@@ -65,6 +77,8 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
             <span>{@subscription_id}</span>
           </:facts>
         </Detail.summary_card>
+
+        <a class="ax-link" href={@return_path}>Back to results</a>
 
         <Detail.summary_list rows={summary_rows(@subscription_id, @arcs, @invoice_map, @admin_mount_path, @current_owner_scope)} />
 

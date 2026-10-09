@@ -421,6 +421,118 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       assert html =~ "/analytics/recovery/subscriptions/" or html =~ "No active dunning campaigns"
     end
 
+    test "current subscription state is separate from the historical failure label", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      assert {:ok, _view, html} = live(conn, fixture.return_path)
+
+      assert html =~ "Current subscription status"
+      assert html =~ "past_due"
+      assert html =~ "Last Failure Reason"
+    end
+
+    test "detail links preserve current owner and selected UTC window", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      assert {:ok, _view, html} =
+               live(conn, "/billing/analytics/recovery?org=allowed-org&window=7d")
+
+      assert html =~
+               ~r|href="/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}\?[^\"]*return_to=%2Fbilling%2Fanalytics%2Frecovery%3Forg%3Dallowed-org%26window%3D7d[^\"]*"|
+    end
+
+    test "related link reflects the latest rapidly selected window", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      {:ok, view, _html} =
+        live(conn, "/billing/analytics/recovery?org=allowed-org&window=7d")
+
+      _html = render_patch(view, "/billing/analytics/recovery?org=allowed-org&window=90d")
+      html = render(view)
+
+      assert html =~ "%26window%3D90d"
+      refute html =~ "%26window%3D7d"
+    end
+
+    test "returning from campaign detail restores validated owner and window", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      return_to =
+        URI.encode_query(%{
+          "return_to" => "/billing/analytics/recovery?org=forged-org&window=7d"
+        })
+        |> String.replace_prefix("return_to=", "")
+
+      assert {:ok, _view, html} =
+               live(
+                 conn,
+                 "/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}?return_to=#{return_to}&org=allowed-org"
+               )
+
+      assert html =~ "Back to results"
+
+      assert html =~ ~r|href="/billing/analytics/recovery\?[^\"]*window=7d[^\"]*org=allowed-org| or
+               html =~ ~r|href="/billing/analytics/recovery\?[^\"]*org=allowed-org[^\"]*window=7d|
+
+      refute html =~ "forged-org"
+    end
+
+    test "unsafe campaign return target falls back inside the current owner scope", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      assert {:ok, _view, html} =
+               live(
+                 conn,
+                 "/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}?return_to=https%3A%2F%2Fevil.example&org=allowed-org"
+               )
+
+      [_, href] =
+        Regex.run(~r|<a class="ax-link" href="([^"]+)">Back to results</a>|, html)
+
+      assert href == "/billing/subscriptions?org=allowed-org"
+      refute html =~ "evil.example"
+    end
+
     test "an empty authorized owner scope does not invent a default-currency total", %{conn: conn} do
       owner_id = "org_empty_recovery"
 
@@ -494,7 +606,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
                ~r/href="\/billing\/analytics\/recovery\?[^\"]*org=allowed-org[^\"]*window=90d/
 
       assert html =~
-               ~s(href="/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}?org=allowed-org")
+               ~r|href="/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}\?[^\"]*org=allowed-org|
     end
 
     test "cross-package boundary: RecoveryLive does not import Ecto.Query, Accrue.Repo, or Accrue.Billing.Subscription" do
