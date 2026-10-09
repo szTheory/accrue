@@ -19,7 +19,7 @@
 - ✅ **v1.61 CI Evidence & Critical-Path Hardening** — Phases 225–228 (2026-09-12) — [archive](milestones/v1.61-ROADMAP.md)
 - ✅ **v1.62 Release Integration & Repository Hygiene** — Phases 229–232 (2026-09-18) — [archive](milestones/v1.62-ROADMAP.md)
 - ✅ **v1.63 Admin and Portal UI refinement** — Phases 233–239 (shipped 2026-10-09) — [archive](milestones/v1.63-ROADMAP.md)
-- 🚧 **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (approved 2026-10-09; ready to plan)
+- 🚧 **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (1/4 complete; next: Phase 241 discussion)
 
 ## Planning Doctrine
 
@@ -50,7 +50,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 ## v1.64 — Admin Operator UI Cleanup
 
-**Status:** Approved by maintainer on 2026-10-09. Scope/version, all 18 [requirements](REQUIREMENTS.md), and this four-phase structure are confirmed. [Bounded upstream decisions](research/v1.64/SUMMARY.md) are complete. Next: `$gsd-plan-phase 240`; no repeat kickoff, research or approval interview is needed.
+**Status:** Approved by maintainer on 2026-10-09. Scope/version, all 18 [requirements](REQUIREMENTS.md), and this four-phase structure are confirmed. [Bounded upstream decisions](research/v1.64/SUMMARY.md) are complete. Phase 240 completed on 2026-10-09 (6/6 plans; 47/47 must-haves). Next: `$gsd-discuss-phase 241`; no repeat kickoff, research or approval interview is needed.
 
 **Milestone goal:** Existing Admin journeys become clearer, consistent, responsive and easier to operate while preserving billing truth, authorization and scope, with recurring automated acceptance and a usable Fake-backed feedback preview.
 
@@ -74,7 +74,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 **Propagation obligation**: Shared rules, interaction patterns, state distinctions and evidence owners established here must be exercised on every affected Phase 241–242 consumer. Do not declare broad route coverage from this exemplar. Preserve deliberate 2px dense and 1px structural exceptions; confirm suspected compression and action geometry in current mounted output before editing.
 **Early regression guard**: Strengthen the existing expected-Linux-snapshot set guard before propagation and prove its missing-set failure at the existing owner. EVR-03's final reviewed baseline closure remains Phase 243 ownership; the guard is not postponed until then.
-**Plans**: 6/6 plans executed
+**Plans**: 6/6 plans complete
 Plans:
 **Wave 1**
 - [x] 240-01-PLAN.md — Real invoice tracer, shared hierarchy and dense subscription cross-check
@@ -142,7 +142,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | In Progress | - |
+| 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | Complete    | 2026-10-09 |
 | 241. Billing Operator Journeys | v1.64 | 0/TBD | Not started | - |
 | 242. Investigations and Remaining Admin Surfaces | v1.64 | 0/TBD | Not started | - |
 | 243. Integrated Evidence and Feedback Preview | v1.64 | 0/TBD | Not started | - |

@@ -2,21 +2,21 @@
 gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
-current_phase: 240
-current_phase_name: Shared System and Real Billing Exemplar
-current_plan: 6
-status: executing
-stopped_at: Completed 240-06-PLAN.md
-last_updated: "2026-10-09T22:57:49.857Z"
+current_phase: 241
+current_phase_name: Billing Operator Journeys
+current_plan: Not started
+status: planning
+stopped_at: Phase 240 verified and complete; next command $gsd-discuss-phase 241
+last_updated: "2026-10-09T23:46:33.444Z"
 last_activity: 2026-10-09
-last_activity_desc: Phase 240 planned and independently checked; six plans across four waves ready to execute
-state_head: 465c954640f1fab0cab53c03f38faefc548c4fc6
+last_activity_desc: Phase 240 verified 47/47; six plans complete; ready for Phase 241 discussion
+state_head: 2d6fed6bcaeb65144943792650b6ba888b6c02b4
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 6
   completed_plans: 6
-  percent: 0
+  percent: 25
 ---
 
 # Project State
@@ -27,23 +27,23 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 240 — Shared System and Real Billing Exemplar. Six plans across four waves passed independent plan-checking; [planning verification](phases/240-shared-system-and-real-billing-exemplar/240-PLAN-CHECK.md) records all eight requirement, 14 decision and probe mappings. Next command: `$gsd-execute-phase 240`. Reuse the [decision summary](research/v1.64/SUMMARY.md), phase context, UI contract, validation map and plans; no repeat stocktake, research, accepted planning, approval interviews or Impeccable init.
-**Progress:** [░░░░░░░░░░] 0% (0 of 4 approved milestone phases complete)
-**Planned work completed:** Phase 240 has six verified execution plans; 2/6 executed. Wave 1 passed the Admin build and 614 ExUnit tests. Continue with 240-03, then 240-04; no repeated execution of 240-01 or 240-02. v1.63 closed at 45/45 plans across Phases 233–239.
+**Current focus:** Phase 241 — Billing Operator Journeys. Phase 240 is complete (six plans, eight requirements, 47/47 independent must-haves). Next command: `$gsd-discuss-phase 241`. Reuse [approved decisions](research/v1.64/SUMMARY.md), the [Phase 240 verification](phases/240-shared-system-and-real-billing-exemplar/240-VERIFICATION.md), shared UI contract and current evidence; do not repeat kickoff, research, Impeccable init or Phase 240 execution.
+**Progress:** [███░░░░░░░] 25% (1 of 4 approved milestone phases complete; all 6 currently planned tasks sets executed).
+**Planned work completed:** Phase 240: 6/6 plans, current Admin 618/0, Node 41/0, package browser 89 passed / 19 incumbent skips, full host gate passed. Phases 241–243 remain. v1.63 is archived and closed.
 
 ## Current Position
 
-Phase: 240 (Shared System and Real Billing Exemplar) — IN PROGRESS
-Current Plan: 6
-Total Plans in Phase: 6
-Status: Executing Wave 2
-Last activity: 2026-10-09 — Wave 1 complete; recovered interrupted 240-02 metadata closeout; 614 Admin tests passed
+Phase: 241 — Billing Operator Journeys
+Current Plan: Not started
+Total Plans in Phase: TBD
+Status: Ready for Phase 241 discussion
+Last activity: 2026-10-09 — Phase 240 complete, transitioned to Phase 241
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 83
+- Total plans completed: 89
 - Average duration: —
 - Total execution time: —
 
@@ -65,6 +65,7 @@ Last activity: 2026-10-09 — Wave 1 complete; recovered interrupted 240-02 meta
 | 237 | 8 | - | - |
 | 238 | 5 | - | - |
 | 239 | 5 | - | - |
+| 240 | 6 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -326,7 +327,7 @@ Last activity: 2026-10-09 — Wave 1 complete; recovered interrupted 240-02 meta
 - [Phase 239]: Report remote CI and live-provider outcomes as unobserved.
 - [Phase 240]: Invoice review exposes invoice, customer, and owner identity with exact currency while preserving existing authorization, step-up, eligibility, and duplicate protections.
 - [Phase 240]: Set the owning shared detail action selector to 44px and use the existing 2px dense spacing token; retain the 1px structural rule.
-- [Phase 240]: Keep subscription presentation unchanged because mounted desktop, narrow, intermediate, and coarse-pointer evidence showed no composition defect.
+- [Phase 240]: Initial subscription geometry cross-check preserved dense layout; later named lifecycle spacing/type defects were corrected. Global invoice-queue composition/destinations remain a concrete Phase 241 consumer finding.
 - [Phase 240]: Scoped shared 44px action target sizing to coarse pointers; fine-pointer dense geometry is preserved.
 - [Phase 240]: Actual browser zoom remains unverified because the headless host provides only pinch/visual scaling; CSS enlargement and spacing checks remain separately recorded.
 - [Phase 240]: Keep stored theme preference and computed OS appearance as separate assertions; host-forced appearance wins.
@@ -335,11 +336,11 @@ Last activity: 2026-10-09 — Wave 1 complete; recovered interrupted 240-02 meta
 - [Phase 240]: Observe billing controls at document scope across overlay replacement and preserve each control's original disabled state.
 - [Phase 240]: Use Phase 239 route authority and live ComponentRegistry APIs rather than adding a second route or component registry.
 - [Phase 240]: Keep first-fresh performance values diagnostic only and keep future behavior guarded by existing owner tests.
-- [Phase 240]: Preserve the existing host TrustSmoke timing budget and record its independent failure for owner follow-up.
+- [Phase 240]: Preserve the 100ms TrustSmoke budget and original 222ms observation; final full host gate passed after repairing archive/test contracts. No open Phase 240 host failure remains.
 
 ### Pending Todos
 
-- Run `$gsd-plan-phase 240`. The v1.64 kickoff is complete: scope/version, all 18 requirements and Phases 240–243 approved; bounded diligence complete. Load [ROADMAP.md](ROADMAP.md), [REQUIREMENTS.md](REQUIREMENTS.md) and [SUMMARY.md](research/v1.64/SUMMARY.md). Do not recreate the roadmap or repeat kickoff, research, approval interviews or Impeccable init.
+- Run `$gsd-discuss-phase 241` — Billing Operator Journeys. Confirm only phase-specific unresolved decisions; carry forward the approved roadmap, Phase 240 shared contract and named subscription queue finding. No repeat milestone interview, research or accepted execution.
 
 ### Deferred / Dormant
 
@@ -416,8 +417,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T22:57:46.209Z
-Stopped at: Completed 240-06-PLAN.md
+Last session: 2026-10-09T23:47:38Z
+Stopped at: Phase 240 verified and complete; next command $gsd-discuss-phase 241
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -547,5 +548,9 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Next command: `$gsd-execute-phase 240` — execute six checked plans for Shared System and Real Billing Exemplar.
-- Phase 239/v1.63 are closed; Phase 240 is planned, with execution and implementation verification pending. Context can be cleared: scope, requirements, decisions, UI contract, validation map, recurring automation owners and stopping rules are recorded. Reuse Impeccable init/code-first and the closed safety contracts; no new interview or accepted-plan rewrite is needed.
+- **Next command:** `$gsd-discuss-phase 241` — Billing Operator Journeys. Phase 241 has no context/plans yet. Phase 240 is complete, not the milestone (1/4 phases; 8/18 requirements).
+- Context can be cleared: approved decisions, six execution summaries, independent 47/47 verification, validation/security/review dispositions, fresh captures and test results are committed. Do not rerun Phase 240 or restart upstream diligence.
+- Default to automated acceptance at existing unit/integration/E2E/smoke/seam owners and CI when recurring value exists. Required human UAT: 0; subjective feedback remains optional. Keep mutations in disposable fixtures, separate from the feedback preview.
+- Carry concrete scope owners forward: Phase 241 subscription global-invoice queue composition/destinations and other billing journeys; Phase 242 remaining route consumers; Phase 243 reviewed Linux goldens and preview handoff. Actual browser zoom and locally unrun Linux pixels remain explicit evidence limits, not claims or new mandatory owner UAT.
+- Two completion reference-parser warnings were inspected and classified as bookkeeping false positives: shell command strings were read as file paths; package-relative `priv/static/accrue_admin.css` and phase-relative `240-03-red-evidence/task1-invoice-state-copy.json` both exist at their documented owners. Commands passed and native report copies are present. No acceptance evidence is missing; preserve historical summaries and their fingerprint rather than rewriting completed work for parser churn.
+- No push, merge, publication or remote main-CI verification occurred in this execution; local green checks do not establish remote CI status.
