@@ -81,13 +81,13 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     assert data_attr_count(html, "data-ax-lazy-json") == 1
 
     for label <- [
-          "Account readiness",
+          "Stripe-observed readiness",
           "Owner",
           "Country",
           "Charges enabled",
           "Payouts enabled",
           "Onboarding / details submitted",
-          "Platform fee override"
+          "Local platform fee override"
         ] do
       assert html =~ label
     end
@@ -182,6 +182,82 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
       )
 
     assert audit_event.actor_type == "admin"
+  end
+
+  test "same-value override save preserves independent Stripe observations", %{
+    conn: conn,
+    account: account
+  } do
+    account =
+      account
+      |> Account.changeset(%{
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => true,
+          "platform_fee_override" => %{"percent" => "1.5"}
+        }
+      })
+      |> TestRepo.update!()
+
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, account.id)
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, html} = live(conn, "/billing/connect/#{account.id}")
+
+    assert html =~ "Stripe-observed readiness"
+    assert html =~ "Local platform fee override"
+    assert html =~ "Ready"
+
+    render_click(element(view, "[data-ax-primary-action]", "Edit platform fee override"))
+
+    render_submit(
+      element(view, "form[data-ax-action-drawer-form][phx-submit=\"save_override\"]"),
+      %{
+        "override" => %{
+          "percent" => "1.5",
+          "fixed_cents" => "",
+          "min_cents" => "",
+          "max_cents" => "",
+          "preview_amount_minor" => "10000",
+          "preview_currency" => "usd"
+        }
+      }
+    )
+
+    assert render_submit(view, "step_up_submit", %{"code" => "123456"}) =~
+             "Platform fee override saved."
+
+    saved = TestRepo.get!(Account, account.id)
+    assert saved.data["platform_fee_override"] == %{"percent" => "1.5"}
+    assert saved.data["charges_enabled"]
+    assert saved.data["payouts_enabled"]
+    assert saved.data["details_submitted"]
+    assert saved.charges_enabled and saved.payouts_enabled and saved.details_submitted
+  end
+
+  test "rejected step-up leaves the local override unchanged", %{conn: conn, account: account} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/connect/#{account.id}")
+
+    render_click(element(view, "[data-ax-primary-action]", "Edit platform fee override"))
+
+    render_submit(
+      element(view, "form[data-ax-action-drawer-form][phx-submit=\"save_override\"]"),
+      %{
+        "override" => %{
+          "percent" => "1.9",
+          "fixed_cents" => "",
+          "min_cents" => "",
+          "max_cents" => "",
+          "preview_amount_minor" => "10000",
+          "preview_currency" => "usd"
+        }
+      }
+    )
+
+    render_submit(view, "step_up_submit", %{"code" => "incorrect"})
+
+    assert TestRepo.get!(Account, account.id).data["platform_fee_override"] == nil
   end
 
   test "applies ax-measure to platform-fee description prose", %{
