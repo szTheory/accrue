@@ -4,17 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 240
 current_phase_name: Shared System and Real Billing Exemplar
+current_plan: 2
 status: executing
-stopped_at: Phase 240 planned and independently checked — next $gsd-execute-phase 240
-last_updated: "2026-10-09T19:10:32.269Z"
+stopped_at: Completed 240-01-PLAN.md
+last_updated: "2026-10-09T19:44:20.469Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 240 planned and independently checked; six plans across four waves ready to execute
-state_head: 49f058dec220c49af3b2e047ce1900fa651b3076
+state_head: de0c4e19c76edbb926757c0d3c29006d12e049c9
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 6
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -33,7 +34,8 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 ## Current Position
 
 Phase: 240 (Shared System and Real Billing Exemplar) — READY TO EXECUTE
-Plan: —
+Current Plan: 2
+Total Plans in Phase: 6
 Status: Ready to execute
 Last activity: 2026-10-09 — Phase 240 planning complete; six plans, four waves, no remaining planning issues
 
@@ -150,6 +152,7 @@ Last activity: 2026-10-09 — Phase 240 planning complete; six plans, four waves
 | Phase 239 P03 | 2 min | 2 tasks | 2 files |
 | Phase 239 P04 | 1 min | 2 tasks | 3 files |
 | Phase 239 P05 | 6 min | 2 tasks | 9 files |
+| Phase 240 P01 | 18m | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -317,6 +320,9 @@ Last activity: 2026-10-09 — Phase 240 planning complete; six plans, four waves
 - [Phase 239]: Keep Plan 04 and its original transparency prohibition unchanged; record the maintainer's accepted replacement scope additively and enforce its durable wording contract.
 - [Phase 239]: Keep optional feedback off-app and outside routine UAT; automate only host overflow and read-only reload claims that recur.
 - [Phase 239]: Report remote CI and live-provider outcomes as unobserved.
+- [Phase 240]: Invoice review exposes invoice, customer, and owner identity with exact currency while preserving existing authorization, step-up, eligibility, and duplicate protections.
+- [Phase 240]: Set the owning shared detail action selector to 44px and use the existing 2px dense spacing token; retain the 1px structural rule.
+- [Phase 240]: Keep subscription presentation unchanged because mounted desktop, narrow, intermediate, and coarse-pointer evidence showed no composition defect.
 
 ### Pending Todos
 
@@ -397,9 +403,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T19:10:32.210Z
-Stopped at: Phase 240 planned and independently checked — next $gsd-execute-phase 240
-Resume file: .planning/phases/240-shared-system-and-real-billing-exemplar/240-PLAN-CHECK.md
+Last session: 2026-10-09T19:44:20.447Z
+Stopped at: Completed 240-01-PLAN.md
+Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
