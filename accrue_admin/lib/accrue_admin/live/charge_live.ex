@@ -341,6 +341,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
           <:footer>
             <button
               :if={@pending_refund}
+              id="charge-refund-confirm"
               phx-click="confirm_refund"
               class="ax-button ax-button-primary"
               data-role="confirm-refund"
@@ -385,6 +386,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
           pending={@step_up_pending}
           challenge={@step_up_challenge}
           error={@step_up_error}
+          return_focus="#charge-refund-confirm"
         />
 
         <div :if={@step_up_pending} hidden aria-hidden="true" data-role="step-up-test-mirror">

@@ -61,7 +61,12 @@ defmodule AccrueAdmin.Components.StepUpAuthModal do
             <%= Copy.step_up_cancel_label() %>
           </button>
 
-          <button type="submit" class="ax-button ax-button-primary" data-role="step-up-submit"><%= Copy.step_up_submit_label() %></button>
+          <button
+            type="submit"
+            class="ax-button ax-button-primary"
+            data-role="step-up-submit"
+            phx-disable-with="Processing action…"
+          ><%= Copy.step_up_submit_label() %></button>
         </div>
       </form>
     </Overlay.overlay>

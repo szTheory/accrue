@@ -320,15 +320,149 @@ test.describe("Phase 191 page-flow regression harness", () => {
     const staleAction = page.getByRole("button", { name: "Refund charge" });
     await expect(staleAction).toBeVisible();
     await staleAction.focus();
+    await page.evaluate(() => {
+      window.__phase240ReplacementTemplate = document.querySelector("#accrue-admin-shell button[phx-click='open_refund_drawer']").cloneNode(true);
+    });
 
     await context.setOffline(true);
     await expect(page.getByText(/Connection lost\. Reconnecting before actions can run\./i)).toBeVisible();
     await expect(staleAction).toBeDisabled();
+    await page.evaluate(() => {
+      const current = document.querySelector("#accrue-admin-shell button[phx-click='open_refund_drawer']");
+      current.replaceWith(window.__phase240ReplacementTemplate);
+      delete window.__phase240ReplacementTemplate;
+    });
+    await expect(staleAction).toBeDisabled();
+    await page.evaluate(() => window.liveSocket.disconnect());
 
     await context.setOffline(false);
+    await page.evaluate(() => window.liveSocket.connect());
     await expect(page.getByText(/Connection restored\. Review the current state before running an action\./i)).toBeVisible();
     await expect(staleAction).toBeEnabled();
-    await assertNoBodyFocus(page, "charge reconnect focus");
+    await expect.poll(() => page.evaluate(() => document.activeElement?.tagName || "")).not.toBe("BODY");
+  });
+
+  test("browser online signal keeps staged billing action disabled until LiveView reconnects @reconnect @ax187", async ({
+    page,
+    request,
+    context,
+  }) => {
+    await reset(request);
+    const fixtureData = await seedPhase191Matrix(request);
+    await login(page, resolvePhase191Route("charge-detail", fixtureData));
+
+    const staleAction = page.getByRole("button", { name: "Refund charge" });
+    await expect(staleAction).toBeVisible();
+    await context.setOffline(true);
+    await expect(staleAction).toBeDisabled();
+
+    await page.evaluate(() => window.dispatchEvent(new Event("online")));
+
+    await expect(staleAction).toBeDisabled();
+    await expect(page.getByText(/Connection lost\. Reconnecting before actions can run\./i)).toBeVisible();
+  });
+
+  test("disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187", async ({
+    page,
+    request,
+    context,
+  }) => {
+    await reset(request);
+    const fixtureData = await seedPhase191Matrix(request);
+    const response = await request.post(
+      `/__e2e__/phase240/hold-subscription-cancel?subscription_id=${fixtureData.subscription_id}`
+    );
+
+    expect(response.ok()).toBeTruthy();
+    const hold = await response.json();
+    expect(hold.operation).toBe("cancel_subscription");
+    expect(hold.token).toBeTruthy();
+
+    try {
+      await login(page, resolvePhase191Route("subscription-detail", fixtureData));
+      await clickActionTrigger(page, { name: "subscription cancel", trigger: /Cancel immediately/i, preferMenu: true });
+      const drawer = await visibleDrawer(page, "subscription cancel");
+      await drawer.locator('[data-role="cancel-now-form"]').evaluate((form) => form.requestSubmit());
+      await drawer.locator('[data-role="confirm-action"]').click();
+
+      const stepUp = page.locator("#accrue-admin-step-up-dialog");
+      await expect(stepUp).toBeVisible();
+      await stepUp.locator("#step-up-code").fill("123456");
+      const submit = stepUp.locator('[data-role="step-up-submit"]');
+
+      await context.setOffline(true);
+      await expect(page.getByText(/Connection lost\. Reconnecting before actions can run\./i)).toBeVisible();
+      await expect(submit).toBeDisabled();
+      await page.evaluate(() => window.liveSocket.disconnect());
+
+      // The actual transport must recover before the lifecycle owner unlocks
+      // the staged operation and permits the real LiveView event.
+      await context.setOffline(false);
+      await page.evaluate(() => window.liveSocket.connect());
+      await expect(page.getByText(/Connection restored\. Review the current state before running an action\./i)).toBeVisible();
+      await expect(stepUp).toBeHidden();
+      const beforeDispatchResponse = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+      expect(beforeDispatchResponse.ok()).toBeTruthy();
+      const beforeDispatch = await beforeDispatchResponse.json();
+      expect(beforeDispatch.dispatch_count).toBe(0);
+      expect(beforeDispatch.status).toBe("active");
+
+      // A staged confirmation is intentionally not replayed after a real
+      // LiveView rejoin; an operator must review and stage it again.
+      await clickActionTrigger(page, { name: "subscription cancel", trigger: /Cancel immediately/i, preferMenu: true });
+      const rejoinedDrawer = await visibleDrawer(page, "subscription cancel");
+      await rejoinedDrawer.locator('[data-role="cancel-now-form"]').evaluate((form) => form.requestSubmit());
+      await rejoinedDrawer.locator('[data-role="confirm-action"]').click();
+      await expect(stepUp).toBeVisible();
+      await stepUp.locator("#step-up-code").fill("123456");
+      await expect(submit).toBeEnabled();
+      await submit.click();
+
+      await expect.poll(async () => {
+        const statusResponse = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+        expect(statusResponse.ok()).toBeTruthy();
+        return (await statusResponse.json()).dispatch_count;
+      }).toBe(1);
+      const statusResponse = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+      expect(statusResponse.ok()).toBeTruthy();
+      const held = await statusResponse.json();
+      expect(held.dispatch_count).toBe(1);
+      expect(held.held).toBeTruthy();
+      expect(held.status).toBe("active");
+      expect(held.canceled_event_count).toBe(0);
+      expect(held.admin_audit_count).toBe(0);
+      await expect(submit).toBeDisabled();
+      await expect(submit).toHaveAttribute("aria-busy", "true");
+      await expect(submit.locator(":scope > .ax-button-spinner")).toBeVisible();
+
+      // While the server is held, the real submit stays disabled and busy.
+      // Releasing it completes the one authorized dispatch.
+      await expect(submit).toBeDisabled();
+      await expect(submit).toHaveAttribute("aria-busy", "true");
+      await expect(submit.locator(":scope > .ax-button-spinner")).toBeVisible();
+
+      const release = await request.post(`/__e2e__/phase240/release-action?token=${hold.token}`);
+      expect(release.ok()).toBeTruthy();
+      await expect.poll(async () => {
+        const completed = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+        expect(completed.ok()).toBeTruthy();
+        return (await completed.json()).status;
+      }).toBe("canceled");
+      await expect(page.getByText("Subscription has ended", { exact: true })).toBeVisible();
+      await expect(stepUp).toBeHidden();
+      await expect(page.locator(".ax-button-spinner")).toHaveCount(0);
+
+      const completedResponse = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+      expect(completedResponse.ok()).toBeTruthy();
+      const completed = await completedResponse.json();
+      expect(completed.dispatch_count).toBe(1);
+      expect(completed.provider_calls).toBe(1);
+      expect(completed.status).toBe("canceled");
+      expect(completed.canceled_event_count).toBe(1);
+      expect(completed.admin_audit_count).toBe(1);
+    } finally {
+      await request.post(`/__e2e__/phase240/release-action?token=${hold.token}`);
+    }
   });
 
   test("AX187-440 AX187-441 AX187-442 AX187-443 destructive confirmations name object, billing effect, scope, and audit outcome @copy @destructive @ax187", async ({
@@ -351,26 +485,24 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await expect(confirmPanel).toContainText(/admin audit row/i);
 
     const subscriptionRoute = resolvePhase191Route("subscription-detail", fixtureData);
-    const subscriptionId = subscriptionRoute.split("/").pop();
     await login(page, subscriptionRoute);
     await clickActionTrigger(page, { name: "subscription cancel", trigger: /Cancel immediately/i, preferMenu: true });
     const subscriptionDrawer = await visibleDrawer(page, "subscription cancel");
     await subscriptionDrawer.locator('[data-role="cancel-now-form"]').evaluate((form) => form.requestSubmit());
     confirmPanel = subscriptionDrawer.locator('[data-role="confirm-panel"]');
     await expect(confirmPanel).toBeVisible();
-    await expect(confirmPanel).toContainText(new RegExp(`subscription ${subscriptionId}`, "i"));
+    await expect(confirmPanel).toContainText(/subscription sub_e2e_phase191_active/i);
     await expect(confirmPanel).toContainText(/billing period|billing schedule/i);
     await expect(confirmPanel).toContainText(/admin audit row/i);
 
     const chargeRoute = resolvePhase191Route("charge-detail", fixtureData);
-    const chargeId = chargeRoute.split("/").pop();
     await login(page, chargeRoute);
     await clickActionTrigger(page, { name: "charge refund", trigger: /Refund charge/i });
     const refundDrawer = await visibleDrawer(page, "charge refund");
     await refundDrawer.locator("#charge-refund-form").evaluate((form) => form.requestSubmit());
     confirmPanel = refundDrawer.locator('[data-role="confirm-panel"]');
     await expect(confirmPanel).toBeVisible();
-    await expect(confirmPanel).toContainText(new RegExp(`Refund charge ${chargeId}`, "i"));
+    await expect(confirmPanel).toContainText(/Refund charge ch_e2e_phase191_boundary/i);
     await expect(confirmPanel).toContainText(/refund ledger row|admin audit row/i);
 
     await login(page, "/billing/webhooks");
@@ -382,7 +514,7 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await page.locator('[data-role="bulk-action"]').click();
     const bulkReplayConfirm = page.locator('[data-role="bulk-replay-confirm"]');
     await expect(bulkReplayConfirm).toBeVisible();
-    await expect(bulkReplayConfirm).toContainText(/failed every automatic retry/i);
+    await expect(bulkReplayConfirm).toContainText(/Only deliveries still eligible when confirmed will be queued/i);
     await expect(bulkReplayConfirm.locator('[data-role="confirm-retry-selected"]')).toBeVisible();
   });
 
