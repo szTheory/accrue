@@ -465,7 +465,7 @@ defmodule AccrueAdmin.CopyTest do
       ],
       "lib/accrue_admin/live/invoice_live.ex" => [
         "Copy.action_hidden_context(",
-        "Copy.resource_state_copy(:invoices"
+        "Copy.Invoice.invoice_action_unavailable("
       ],
       "lib/accrue_admin/live/charge_live.ex" => [
         "Copy.action_hidden_context(",
