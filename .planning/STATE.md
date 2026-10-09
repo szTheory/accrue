@@ -5,17 +5,17 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 238
 current_phase_name: Admin Events, Webhooks & Remaining Billing Surfaces
 current_plan: 5
-status: executing
-stopped_at: Completed 238-04-PLAN.md
-last_updated: "2026-10-09T03:57:29.441Z"
+status: verifying
+stopped_at: Completed 238-05-PLAN.md
+last_updated: "2026-10-09T04:19:01.787Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 235 complete, transitioned to Phase 238
-state_head: f554ff12e02ad30c5c0903a7b4bdb429fa13ffe5
+state_head: 093f850a620cfc06c0d42d728cc5b1d7082eede8
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 40
-  completed_plans: 39
+  completed_plans: 40
   percent: 71
 ---
 
@@ -36,7 +36,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 Phase: 238 (Admin Events, Webhooks & Remaining Billing Surfaces) — IN PROGRESS
 Current Plan: 5
 Total Plans in Phase: 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-09 — Completed Phase 238 Plan 01
 
 ## Performance Metrics
@@ -144,6 +144,7 @@ Last activity: 2026-10-09 — Completed Phase 238 Plan 01
 | Phase 238 P02 | 12min | 3 tasks | 8 files |
 | Phase 238 P03 | 5min | 2 tasks | 5 files |
 | Phase 238 P04 | 8min | 2 tasks | 4 files |
+| Phase 238 P5 | 11min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -298,6 +299,7 @@ Last activity: 2026-10-09 — Completed Phase 238 Plan 01
 - [Phase 238]: Expected coupon and promotion-code detail read failures render generic unavailable states and retry only local reads.
 - [Phase 238]: Treat raw provider snapshot fields in Account.data as Stripe evidence; missing fields are unavailable rather than inferred from false database defaults.
 - [Phase 238]: Keep platform fee override in its separate local Account.data key and preserve it alongside provider facts.
+- [Phase 238]: Phase 238-05 keeps host browser fixtures deterministic and reserves read failures and mixed replay outcomes for the Admin ExUnit seam; the existing unrestricted Playwright shard needs no CI selection change.
 
 ### Pending Todos
 
@@ -372,8 +374,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T03:57:29.385Z
-Stopped at: Completed 238-04-PLAN.md
+Last session: 2026-10-09T04:19:01.717Z
+Stopped at: Completed 238-05-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

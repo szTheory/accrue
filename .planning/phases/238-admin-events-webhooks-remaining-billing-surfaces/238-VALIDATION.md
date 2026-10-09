@@ -51,15 +51,16 @@ Phase 238 plan/task IDs below bind each behavior to its focused seam before exec
 | 238-03-T2 | 238-03 | 1 | ADM-08 | T-238-07 | Exact scoped promotion code, restrictions, and parent coupon; inspection only. | ExUnit / LiveView | `cd accrue_admin && mix test test/accrue_admin/live/promotion_codes_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs` | Existing suites | ⬜ pending |
 | 238-04-T1 | 238-04 | 1 | ADM-08 | T-238-09, T-238-10 | Connect list preserves separate provider and local facts and scoped identities. | ExUnit / LiveView | `cd accrue_admin && mix test test/accrue_admin/live/connect_accounts_live_test.exs` | Existing suite | ⬜ pending |
 | 238-04-T2 | 238-04 | 1 | ADM-08 | T-238-08 | Local override save revalidates target and step-up without remote mutation. | ExUnit / LiveView | `cd accrue_admin && mix test test/accrue_admin/live/connect_account_live_test.exs` | Existing suite | ⬜ pending |
-| 238-05-T1 | 238-05 | 2 | ADM-07, ADM-08 | T-238-11, T-238-12 | Mounted journeys assert scoped links, partial outcomes, inspection boundaries, and error/pending routes. | Mounted Playwright | `cd examples/accrue_host && npx playwright test e2e/phase238-admin-events-webhooks.spec.js --project=chromium-desktop` | New phase-owned spec created in Wave 0 | ⬜ pending |
-| 238-05-T2 | 238-05 | 2 | ADM-07, ADM-08 | T-238-13 | Keyboard, responsive, theme, long-text, axe, and required-shard discovery. | Mounted Playwright | `cd examples/accrue_host && npx playwright test --list e2e/phase238-admin-events-webhooks.spec.js` | New spec; existing required Playwright shard | ⬜ pending |
+| 238-05-T1 | 238-05 | 2 | ADM-07, ADM-08 | T-238-11, T-238-12 | Seeded mounted journeys assert exact links, route/result states, inspection boundaries, and rejected-step-up correction. | Mounted Playwright | `cd examples/accrue_host && npx playwright test e2e/phase238-admin-events-webhooks.spec.js --project=chromium-desktop` | Phase-owned spec + deterministic seed fixtures; ExUnit retains read-failure and mixed-outcome seams | ✅ pass (2 tests) |
+| 238-05-T2 | 238-05 | 2 | ADM-07, ADM-08 | T-238-13 | Keyboard, responsive, theme, long-text, axe, and required-shard discovery. | Mounted Playwright | `cd examples/accrue_host && npx playwright test --list e2e/phase238-admin-events-webhooks.spec.js` | New spec; unrestricted required Playwright shard | ✅ pass (2 tests listed; browser 2/2) |
+| 238-05-T3 | 238-05 | 2 | ADM-07 | T-238-11 | Legacy copy regression assertion matches the explicit Phase 238 replay wording. | ExUnit | `cd accrue_admin && mix test test/accrue_admin/copy_test.exs` | Existing copy contract | ✅ pass (13 tests) |
 
 ---
 
 ## Wave 0 Requirements
 
 - [ ] Keep the existing targeted Admin ExUnit suites green and add counterexamples for stale/ineligible bulk replay selection, mixed eligibility, and a mid-batch requeue failure with accurate audit/result counts.
-- [ ] Add or extend `examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js` for the mounted required host lane: selection, confirmation and step-up, queued-versus-processed and partial copy, scope/evidence links, billing inspection boundaries, keyboard, theme, and narrow layout.
+- [ ] Add or extend the Phase 238 host E2E fixture and spec for seeded selection, confirmation and step-up, queued-versus-processed copy, scope/evidence links, billing inspection boundaries, keyboard, theme, and narrow layout. Keep detailed DB failures and mixed outcome permutations at the lower-cost ExUnit seam.
 - [ ] Confirm the Phase 238 browser spec is discovered by the recurring required `host-integration` Playwright shard in `ci.yml`.
 - [ ] No new test framework, package, live-provider credential, or manual provider action is required.
 
@@ -79,5 +80,13 @@ All stable in-scope behavior has deterministic ExUnit/LiveView or mounted Playwr
 - [ ] No watch-mode flags.
 - [ ] Feedback latency and suite results are recorded during execution.
 - [ ] `nyquist_compliant: true` is set only after finalized coverage and passing evidence.
+
+### Phase 238-05 Execution Evidence (2026-10-09)
+
+- Focused mounted browser command: 2 tests passed, Chromium desktop; local fixtures prove application behavior only.
+- Required browser discovery: `playwright --list` listed both phase tests. `.github/workflows/ci.yml` runs the unrestricted Playwright shard, so no workflow edit was needed. No remote CI or branch-protection claim was made.
+- Focused copy suite: 13 tests passed.
+- Full Admin suite: `mix test --warnings-as-errors` passed, 601 tests, exit code 0 after removing two warnings that otherwise caused this required command to abort.
+- Read failures and mixed replay outcomes remain verified at the ExUnit seam. No production fault-injection hook was added.
 
 **Approval:** pending

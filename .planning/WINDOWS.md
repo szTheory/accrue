@@ -2,9 +2,9 @@
 schema_version: 1
 open_count: 6
 waived_count: 6
-fixed_count: 9
-total_count: 21
-last_updated: 2026-10-08T19:16:48.715Z
+fixed_count: 12
+total_count: 24
+last_updated: 2026-10-09T04:19:40.710Z
 ---
 
 # Broken Windows Ledger
@@ -36,6 +36,9 @@ last_updated: 2026-10-08T19:16:48.715Z
 | 19 | 235 | deviation | examples/accrue_host/e2e/phase233-braintree-checkout.spec.js |  | Mock SDK proves the nonce-bearing server denial; live Braintree provider acceptance was not verified because the configured gateway returned HTTP 500. | open |  | 2026-10-08T04:49:19.603Z |  |
 | 20 | 235 | deviation |  |  | Added test-only Portal origin and organization shared-billing route after deterministic browser verification exposed the missing runtime context. | open |  | 2026-10-08T12:01:21.609Z |  |
 | 21 | 236 | deviation | .planning/ROADMAP.md |  | The roadmap.update-plan-progress SDK writer could not target the active milestone table, so the Phase 236 6/6 In Progress row was reconciled directly. | fixed |  | 2026-10-08T19:16:35.467Z | 2026-10-08T19:16:48.715Z |
+| 22 | 238 | deviation | accrue_admin/lib/accrue_admin/live/webhook_live.ex |  | Axe heading-order violation in the webhook replay detail was fixed by correcting the section heading level. | fixed |  | 2026-10-09T04:19:27.287Z | 2026-10-09T04:19:38.013Z |
+| 23 | 238 | deviation | accrue_admin/lib/accrue_admin/components/overlay.ex |  | Axe found an invalid article element with dialog role on the step-up modal; the modal panel now uses a div. | fixed |  | 2026-10-09T04:19:34.737Z | 2026-10-09T04:19:39.526Z |
+| 24 | 238 | deviation | accrue_admin/test/accrue_admin/components/data_table_test.exs |  | The required warnings-as-errors Admin command was blocked by an unused test binding and unused private helper; both warnings were removed and the suite passed. | fixed |  | 2026-10-09T04:19:36.443Z | 2026-10-09T04:19:40.710Z |
 
 ````json
 [
@@ -300,6 +303,45 @@ last_updated: 2026-10-08T19:16:48.715Z
     "reason": "",
     "recorded_at": "2026-10-08T19:16:35.467Z",
     "resolved_at": "2026-10-08T19:16:48.715Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 22,
+    "kind": "deviation",
+    "phase": "238",
+    "file": "accrue_admin/lib/accrue_admin/live/webhook_live.ex",
+    "line": null,
+    "description": "Axe heading-order violation in the webhook replay detail was fixed by correcting the section heading level.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T04:19:27.287Z",
+    "resolved_at": "2026-10-09T04:19:38.013Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 23,
+    "kind": "deviation",
+    "phase": "238",
+    "file": "accrue_admin/lib/accrue_admin/components/overlay.ex",
+    "line": null,
+    "description": "Axe found an invalid article element with dialog role on the step-up modal; the modal panel now uses a div.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T04:19:34.737Z",
+    "resolved_at": "2026-10-09T04:19:39.526Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 24,
+    "kind": "deviation",
+    "phase": "238",
+    "file": "accrue_admin/test/accrue_admin/components/data_table_test.exs",
+    "line": null,
+    "description": "The required warnings-as-errors Admin command was blocked by an unused test binding and unused private helper; both warnings were removed and the suite passed.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T04:19:36.443Z",
+    "resolved_at": "2026-10-09T04:19:40.710Z",
     "milestone": "v1.63"
   }
 ]
