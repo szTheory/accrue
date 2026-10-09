@@ -2,9 +2,9 @@
 schema_version: 1
 open_count: 6
 waived_count: 6
-fixed_count: 12
-total_count: 24
-last_updated: 2026-10-09T04:19:40.710Z
+fixed_count: 14
+total_count: 26
+last_updated: 2026-10-09T06:56:00.293Z
 ---
 
 # Broken Windows Ledger
@@ -39,6 +39,8 @@ last_updated: 2026-10-09T04:19:40.710Z
 | 22 | 238 | deviation | accrue_admin/lib/accrue_admin/live/webhook_live.ex |  | Axe heading-order violation in the webhook replay detail was fixed by correcting the section heading level. | fixed |  | 2026-10-09T04:19:27.287Z | 2026-10-09T04:19:38.013Z |
 | 23 | 238 | deviation | accrue_admin/lib/accrue_admin/components/overlay.ex |  | Axe found an invalid article element with dialog role on the step-up modal; the modal panel now uses a div. | fixed |  | 2026-10-09T04:19:34.737Z | 2026-10-09T04:19:39.526Z |
 | 24 | 238 | deviation | accrue_admin/test/accrue_admin/components/data_table_test.exs |  | The required warnings-as-errors Admin command was blocked by an unused test binding and unused private helper; both warnings were removed and the suite passed. | fixed |  | 2026-10-09T04:19:36.443Z | 2026-10-09T04:19:40.710Z |
+| 25 | 239 | deviation | .planning/phases/239-integrated-quality-handoff/239-COVERAGE.md |  | Phase 239 route ledger duplicate stylesheet row was corrected and deterministic ordering is now enforced by ExUnit. | fixed |  | 2026-10-09T06:55:22.555Z | 2026-10-09T06:55:27.423Z |
+| 26 | 239 | deviation | .planning/ROADMAP.md |  | The roadmap progress SDK missed its existing Phase 239 checklist and row; the current plan checkbox and 1/4 In Progress row were reconciled directly. | fixed |  | 2026-10-09T06:56:00.230Z | 2026-10-09T06:56:00.293Z |
 
 ````json
 [
@@ -342,6 +344,32 @@ last_updated: 2026-10-09T04:19:40.710Z
     "reason": "",
     "recorded_at": "2026-10-09T04:19:36.443Z",
     "resolved_at": "2026-10-09T04:19:40.710Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 25,
+    "kind": "deviation",
+    "phase": "239",
+    "file": ".planning/phases/239-integrated-quality-handoff/239-COVERAGE.md",
+    "line": null,
+    "description": "Phase 239 route ledger duplicate stylesheet row was corrected and deterministic ordering is now enforced by ExUnit.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T06:55:22.555Z",
+    "resolved_at": "2026-10-09T06:55:27.423Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 26,
+    "kind": "deviation",
+    "phase": "239",
+    "file": ".planning/ROADMAP.md",
+    "line": null,
+    "description": "The roadmap progress SDK missed its existing Phase 239 checklist and row; the current plan checkbox and 1/4 In Progress row were reconciled directly.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T06:56:00.230Z",
+    "resolved_at": "2026-10-09T06:56:00.293Z",
     "milestone": "v1.63"
   }
 ]

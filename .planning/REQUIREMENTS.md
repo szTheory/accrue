@@ -44,10 +44,10 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 
 ### Interaction and Accessibility
 
-- [ ] **INT-01**: Keyboard users can complete navigation and action flows with Tab, Shift+Tab, and Escape, including focus containment/restoration through patches, nested overlays, removed triggers, and reconnects.
-- [ ] **INT-02**: People using narrow viewports, zoom, or coarse pointers can access essential content and actions at 320 CSS pixels without page-wide overflow or unusable controls.
-- [ ] **INT-03**: Admin and Portal support light, dark, system, host-forced themes, representative accent and host-to-Portal theme handoff; repeated keyboard actions remain immediate and reduced motion removes nonessential motion.
-- [ ] **INT-04**: Empty, no-match, unavailable, unsupported, denied, pending, error, and long-content states are covered deliberately at the least costly credible verification layer.
+- [x] **INT-01**: Keyboard users can complete navigation and action flows with Tab, Shift+Tab, and Escape, including focus containment/restoration through patches, nested overlays, removed triggers, and reconnects.
+- [x] **INT-02**: People using narrow viewports, zoom, or coarse pointers can access essential content and actions at 320 CSS pixels without page-wide overflow or unusable controls.
+- [x] **INT-03**: Admin and Portal support light, dark, system, host-forced themes, representative accent and host-to-Portal theme handoff; repeated keyboard actions remain immediate and reduced motion removes nonessential motion.
+- [x] **INT-04**: Empty, no-match, unavailable, unsupported, denied, pending, error, and long-content states are covered deliberately at the least costly credible verification layer.
 
 ### Safety and Scope
 
@@ -58,7 +58,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 ### Delivery and Evidence
 
 - [ ] **SHIP-01**: Generated Admin and Portal assets, fonts, mounts, CSP/SRI, copy exports, and host integration documentation match the source actually served by each package.
-- [ ] **SHIP-02**: Every owned route and unique interaction has a coverage disposition supported by current required gates and inspected representative renders.
+- [x] **SHIP-02**: Every owned route and unique interaction has a coverage disposition supported by current required gates and inspected representative renders.
 - [ ] **SHIP-03**: Component examples and adopter docs match production; task-owned debris is removed; a useful feedback preview remains separate from mutation/reset proof.
 - [x] **SHIP-04**: Adopter documentation and the canonical example cover personal defaults plus organization/custom and mixed Portal resolution, while preserving actor attribution and requiring no new auth/runtime dependency.
 
@@ -106,15 +106,15 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | POR-06 | Phase 236 | Complete |
 | POR-07 | Phase 236 | Complete |
 | POR-08 | Phase 233 | Complete |
-| INT-01 | Phase 239 | Pending |
-| INT-02 | Phase 239 | Pending |
-| INT-03 | Phase 239 | Pending |
-| INT-04 | Phase 239 | Pending |
+| INT-01 | Phase 239 | Complete |
+| INT-02 | Phase 239 | Complete |
+| INT-03 | Phase 239 | Complete |
+| INT-04 | Phase 239 | Complete |
 | SAFE-01 | Phase 234 | Complete |
 | SAFE-02 | Phase 233 | Complete |
 | SAFE-03 | Phase 233 | Complete |
 | SHIP-01 | Phase 239 | Pending |
-| SHIP-02 | Phase 239 | Pending |
+| SHIP-02 | Phase 239 | Complete |
 | SHIP-03 | Phase 239 | Pending |
 | SHIP-04 | Phase 233 | Complete |
 

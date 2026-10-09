@@ -4,18 +4,18 @@ milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 239
 current_phase_name: Integrated Quality & Handoff
-current_plan: Not started
-status: planning
-stopped_at: Phase 238 complete, ready to plan Phase 239
-last_updated: "2026-10-09T06:03:27.878Z"
+current_plan: 2
+status: executing
+stopped_at: Completed 239-01-PLAN.md
+last_updated: "2026-10-09T06:55:38.999Z"
 last_activity: 2026-10-09
-last_activity_desc: Phase 238 complete, transitioned to Phase 239
-state_head: 28bd110f8e863ad0fd7c77bdd65520041023dc67
+last_activity_desc: Phase 239 execution started
+state_head: 1c8c12e46bfcc1fe4f53f9c9e874454d86f45acb
 progress:
   total_phases: 7
   completed_phases: 6
-  total_plans: 40
-  completed_plans: 40
+  total_plans: 44
+  completed_plans: 41
   percent: 86
 ---
 
@@ -33,11 +33,11 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 ## Current Position
 
-Phase: 239 — Integrated Quality & Handoff
-Current Plan: Not started
-Total Plans in Phase: TBD
-Status: Ready to plan
-Last activity: 2026-10-09 — Phase 238 complete, transitioned to Phase 239
+Phase: 239 (Integrated Quality & Handoff) — EXECUTING
+Current Plan: 2
+Total Plans in Phase: 4
+Status: Ready to execute
+Last activity: 2026-10-09 — Phase 239 execution started
 
 ## Performance Metrics
 
@@ -146,6 +146,7 @@ Last activity: 2026-10-09 — Phase 238 complete, transitioned to Phase 239
 | Phase 238 P03 | 5min | 2 tasks | 5 files |
 | Phase 238 P04 | 8min | 2 tasks | 4 files |
 | Phase 238 P5 | 11min | 3 tasks | 6 files |
+| Phase 239 P1 | 6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -301,6 +302,10 @@ Last activity: 2026-10-09 — Phase 238 complete, transitioned to Phase 239
 - [Phase 238]: Treat raw provider snapshot fields in Account.data as Stripe evidence; missing fields are unavailable rather than inferred from false database defaults.
 - [Phase 238]: Keep platform fee override in its separate local Account.data key and preserve it alongside provider facts.
 - [Phase 238]: Phase 238-05 keeps host browser fixtures deterministic and reserves read failures and mixed replay outcomes for the Admin ExUnit seam; the existing unrestricted Playwright shard needs no CI selection change.
+- [Phase 239]: Package mount routes are derived from Admin/Portal route helpers and exact-compared against ordered evidence-ledger rows.
+- [Phase 239]: Current-render screenshots are inspectable evidence; deterministic route, identity, viewport and no-write assertions gate the Playwright smoke.
+- [Phase 239]: Shared-billing selected-customer coverage remains in the existing Phase 233 context journey because selecting context requires the state-changing flow.
+- [Phase 239]: Checked-in CI definitions are recorded separately from remote CI results, which were unobserved.
 
 ### Pending Todos
 
@@ -375,8 +380,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T04:19:01.717Z
-Stopped at: Phase 238 complete, ready to plan Phase 239
+Last session: 2026-10-09T06:55:38.941Z
+Stopped at: Completed 239-01-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
