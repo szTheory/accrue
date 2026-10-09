@@ -123,6 +123,7 @@ Plan commit counts are measured from `d701fc9bdce9b13b6743d60ef3c68c1d69d93f6e` 
 
 - The first targeted ExUnit selector matched no tests; the full planned test file was run and produced a behavior-specific failure before implementation.
 - Initial full-suite iteration exposed an incorrect currency module qualification and a stale test struct from optimistic locking. Both were corrected and all planned gates passed afterward.
+- `roadmap.update-plan-progress 237` declined with `missing_phase_details` even though the Phase 237 detail and progress row exist; its active-region scoping excludes this roadmap layout. The Phase 237 plan count, completed checkbox, and progress row were updated directly, without changing other phases.
 
 ## User Setup Required
 
@@ -132,6 +133,13 @@ None - no external service configuration required.
 
 - Plan 237-04 is complete. ADM-02 remains pending because Plan 237-08 also declares the shared requirement; the readiness gate returned 0/1 requirements ready to mark.
 - Proceed to the next runnable plan. No manual verification checkpoint is needed for this plan's tested behavior.
+
+## Self-Check: PASSED
+
+- All five modified source/test files and this summary exist.
+- Task commits `0f753861`, `dd4a3045`, and summary commit `61d8fab5` are ancestors of HEAD.
+- Coverage classification reports both deliverables auto-covered with no errors.
+- ROADMAP.md shows Phase 237 at 4/8 plans complete and Plan 237-04 checked off; ADM-02 remains pending because its sibling plan is unfinished.
 
 ---
 *Phase: 237-admin-invoices-payments-recovery*
