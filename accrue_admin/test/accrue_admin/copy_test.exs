@@ -540,16 +540,20 @@ defmodule AccrueAdmin.CopyTest do
   end
 
   test "generated copy export exactly matches the checked-in browser fixture" do
-    output =
+    temp_dir =
       Path.join(
         System.tmp_dir!(),
-        "accrue-copy-strings-#{System.unique_integer([:positive])}.json"
+        "accrue-copy-strings-#{Base.encode16(:crypto.strong_rand_bytes(16))}"
       )
+
+    assert :ok = File.mkdir(temp_dir)
+
+    output = Path.join(temp_dir, "copy_strings.json")
 
     fixture =
       Path.expand("../../../examples/accrue_host/e2e/generated/copy_strings.json", __DIR__)
 
-    on_exit(fn -> File.rm(output) end)
+    on_exit(fn -> File.rm_rf(temp_dir) end)
 
     assert {_, 0} =
              System.cmd("mix", ["accrue_admin.export_copy_strings", "--out", output],
