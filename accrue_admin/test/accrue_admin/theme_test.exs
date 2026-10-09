@@ -165,6 +165,9 @@ defmodule AccrueAdmin.ThemeTest do
     assert script =~ ~s(const forcedTheme = "dark";)
     assert script =~ "allowed.has(forcedTheme) ? forcedTheme"
     assert script =~ "if (!allowed.has(forcedTheme)) window.localStorage.setItem(key, theme)"
+
+    assert %{"stored" => "light", "theme" => "dark"} =
+             run_anti_fouc_script("accrue_theme=dark", "light", "dark")
   end
 
   test "Phase 199 anti-fouc script resolves cookie before localStorage using production key" do
@@ -280,11 +283,11 @@ defmodule AccrueAdmin.ThemeTest do
     end
   end
 
-  defp run_anti_fouc_script(cookie, stored_value) do
+  defp run_anti_fouc_script(cookie, stored_value, forced_theme \\ nil) do
     payload =
       Jason.encode!(%{
         cookie: cookie,
-        script: AccrueAdmin.Layouts.anti_fouc_script(),
+        script: AccrueAdmin.Layouts.anti_fouc_script(forced_theme),
         stored: stored_value
       })
       |> Base.encode64()

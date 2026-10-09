@@ -192,6 +192,15 @@ const THEME_CASES = Object.freeze([
     localStorage: "system",
     expected: "system",
   },
+  {
+    name: "invalid localStorage uses the system fallback",
+    localStorage: "neon",
+    expected: "system",
+  },
+  {
+    name: "absent preference uses the system fallback",
+    expected: "system",
+  },
 ]);
 
 const COPY_TARGETS = Object.freeze([
@@ -432,6 +441,10 @@ async function assertThemePersistence(page, themeCase) {
     "data-theme",
     themeCase.expected
   );
+  if (themeCase.expected !== "forced") {
+    await expect(page.locator(`[data-theme-target='${themeCase.expected}']`), `${themeCase.name}: one selected preference`)
+      .toHaveAttribute("aria-checked", "true");
+  }
   await expect
     .poll(() => page.evaluate(() => window.localStorage.getItem("accrue_theme")), {
       message: `${themeCase.name}: production theme key persisted`,
@@ -481,6 +494,51 @@ async function assertThemePickerReloadPersistence(page) {
     "data-theme",
     "dark"
   );
+}
+
+async function assertSystemThemeTracksAppearance(page) {
+  const systemOption = page.locator("[data-theme-target='system']");
+  const effectiveCanvas = () =>
+    page.locator("html").evaluate((element) => getComputedStyle(element).backgroundColor);
+
+  await page.emulateMedia({ colorScheme: "light" });
+  await systemOption.click();
+  await expect(systemOption).toHaveAttribute("aria-checked", "true");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
+  const lightCanvas = await effectiveCanvas();
+
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect.poll(effectiveCanvas, { message: "System preference applies the dark canvas" }).not.toBe(lightCanvas);
+  await expect(systemOption).toHaveAttribute("aria-checked", "true");
+  await expect.poll(() => page.evaluate(() => window.localStorage.getItem("accrue_theme"))).toBe("system");
+
+  const darkCanvas = await effectiveCanvas();
+  const staleCanvas = await page.locator("html").evaluate((element) => {
+    element.dataset.theme = "light";
+    return getComputedStyle(element).backgroundColor;
+  });
+  expect(staleCanvas, "negative control: a stale light selection keeps the light canvas").toBe(lightCanvas);
+  expect(staleCanvas, "negative control: a stale light selection differs from System dark").not.toBe(darkCanvas);
+  await page.locator("html").evaluate((element) => { element.dataset.theme = "system"; });
+  await expect.poll(effectiveCanvas, { message: "System dark canvas is restored after negative control" }).toBe(darkCanvas);
+
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect.poll(effectiveCanvas, { message: "System preference returns to the light canvas" }).not.toBe(darkCanvas);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
+  await expect(systemOption).toHaveAttribute("aria-checked", "true");
+
+  // This link uses LiveView navigation, so the preference must survive a patch as well as reload.
+  await page.locator("a[href='/billing/invoices']").first().click();
+  await expect(page).toHaveURL(/\/billing\/invoices/);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
+  await expect(page.locator("[data-theme-target='system']")).toHaveAttribute("aria-checked", "true");
+  await expect.poll(effectiveCanvas, { message: "light OS palette remains active after LiveView patch" }).toBe(lightCanvas);
+
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
+  await expect(page.locator("[data-theme-target='system']")).toHaveAttribute("aria-checked", "true");
+  await expect.poll(() => page.evaluate(() => window.localStorage.getItem("accrue_theme"))).toBe("system");
+  await expect.poll(effectiveCanvas, { message: "light OS palette remains active after reload" }).toBe(lightCanvas);
 }
 
 async function assertActionContextLabels(page, label = "action labels") {
@@ -808,6 +866,17 @@ test.describe("Phase 199 interaction and overlay contract", () => {
 
     await seedPhase199(request);
     await assertThemePickerReloadPersistence(page);
+  });
+
+  test("@phase199 @theme System keeps one stored choice while effective colors follow OS through patch and reload", async ({
+    page,
+    request,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-desktop", "System appearance lifecycle runs once");
+
+    await seedPhase199(request);
+    await login(page, "/billing/customers");
+    await assertSystemThemeTracksAppearance(page);
   });
 
   test("@phase199 @affordance floating panels stay viewport-bound and non-modal controls stay non-interactive", async ({

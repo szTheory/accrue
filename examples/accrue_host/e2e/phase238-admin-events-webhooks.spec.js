@@ -245,9 +245,13 @@ if (process.env.ACCRUE_HOST_ADMIN_THEME) {
     const fixture = readFixture();
     const origin = `http://127.0.0.1:${process.env.ACCRUE_HOST_BROWSER_PORT || "4101"}`;
     await page.context().addCookies([{ name: "accrue_theme", value: "light", url: origin }]);
+    await page.addInitScript(() => window.localStorage.setItem("accrue_theme", "light"));
     await openAdmin(page, fixture, sandboxId, `/admin/webhooks?status=dead&${orgQuery(fixture)}`);
 
     await expect(page.locator("html")).toHaveAttribute("data-theme", process.env.ACCRUE_HOST_ADMIN_THEME);
+    await expect.poll(() => page.evaluate(() => window.localStorage.getItem("accrue_theme"))).toBe("light");
+    await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).colorScheme))
+      .toBe(process.env.ACCRUE_HOST_ADMIN_THEME);
     await expect(page.locator("[data-role='admin-theme-forced']")).toHaveText(
       `${process.env.ACCRUE_HOST_ADMIN_THEME[0].toUpperCase()}${process.env.ACCRUE_HOST_ADMIN_THEME.slice(1)} theme set by host`
     );
