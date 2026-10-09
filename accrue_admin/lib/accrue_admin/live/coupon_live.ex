@@ -360,26 +360,47 @@ defmodule AccrueAdmin.Live.CouponLive do
     do: "#{used || 0} of #{max}"
 
   defp format_minor(amount_minor, currency) when is_integer(amount_minor) do
-    Accrue.Invoices.Render.format_money(
-      amount_minor,
-      normalize_currency(currency),
-      Accrue.Config.default_locale()
-    )
+    case normalize_currency(currency) do
+      {:ok, currency_atom} ->
+        Accrue.Invoices.Render.format_money(
+          amount_minor,
+          currency_atom,
+          Accrue.Config.default_locale()
+        )
+
+      {:error, :missing} ->
+        "Amount unavailable (currency missing)"
+
+      {:error, {:unsupported, code}} ->
+        "Amount unavailable (unsupported currency: #{code})"
+
+      {:error, :unknown} ->
+        "Amount unavailable (currency unknown)"
+    end
   end
 
-  defp normalize_currency(currency) when is_atom(currency), do: currency
+  defp normalize_currency(nil), do: {:error, :missing}
+
+  defp normalize_currency(currency) when is_atom(currency) do
+    case Money.Currency.currency_for_code(Atom.to_string(currency)) do
+      {:ok, _currency} -> {:ok, currency}
+      _unknown -> {:error, {:unsupported, Atom.to_string(currency)}}
+    end
+  end
 
   defp normalize_currency(currency) when is_binary(currency) do
     code = String.downcase(currency)
 
     try do
-      String.to_existing_atom(code)
+      code
+      |> String.to_existing_atom()
+      |> normalize_currency()
     rescue
-      ArgumentError -> :usd
+      ArgumentError -> {:error, {:unsupported, currency}}
     end
   end
 
-  defp normalize_currency(_currency), do: :usd
+  defp normalize_currency(_currency), do: {:error, :unknown}
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
 

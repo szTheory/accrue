@@ -95,6 +95,36 @@ defmodule AccrueAdmin.CouponLiveTest do
            ]
   end
 
+  test "fixed discount with unsupported currency is never shown as USD", %{conn: conn} do
+    coupon =
+      insert_coupon(%{
+        name: "Unsupported currency coupon",
+        amount_off_minor: 1_500,
+        currency: "xyz"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+
+    assert html =~ "Amount unavailable (unsupported currency: xyz)"
+    refute html =~ "$15.00"
+  end
+
+  test "fixed discount with missing currency is shown as unavailable", %{conn: conn} do
+    coupon =
+      insert_coupon(%{
+        name: "Missing currency coupon",
+        amount_off_minor: 1_500,
+        currency: nil
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+
+    assert html =~ "Amount unavailable (currency missing)"
+    refute html =~ "$15.00"
+  end
+
   test "renders RelatedResources card with promotion codes and events links", %{
     conn: conn,
     coupon: coupon
