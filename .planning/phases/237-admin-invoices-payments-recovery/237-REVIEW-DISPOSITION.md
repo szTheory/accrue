@@ -9,14 +9,14 @@ findings:
     title: "Recovery table reports zero rows before the query succeeds"
 open: 0
 total: 1
-recorded: 2026-10-09T01:43:38Z
+recorded: 2026-10-09T01:46:39Z
 ---
 
 # Phase 237: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| WR-01 | warning | fixed | commit 6de9ff36 |
+| WR-01 | warning | fixed | commit 6de9ff36 (not in the current review) |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 
