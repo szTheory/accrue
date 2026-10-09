@@ -210,6 +210,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
       )
 
     assert html =~ "Confirm refund"
+    assert has_element?(view, "[data-role='confirm-refund']")
 
     html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm refund"))
     assert html =~ Copy.step_up_title()
@@ -447,6 +448,109 @@ defmodule AccrueAdmin.ChargeLiveTest do
     # Confirm panel must show and its prose must have ax-measure
     assert html =~ "Confirm refund"
     assert html =~ ~s(class="ax-body ax-measure")
+  end
+
+  test "refund review identifies the exact charge and refuses an amount above its remaining balance",
+       %{
+         conn: conn,
+         charge: charge
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{"amount_minor" => "3000", "reason" => "requested_by_customer"}
+      )
+
+    assert html =~ "Refund charge ch_detail"
+    assert html =~ "$30.00"
+
+    open_refund_drawer(view)
+
+    html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{"amount_minor" => "8000", "reason" => "requested_by_customer"}
+      )
+
+    assert html =~ "Refund amount cannot exceed the remaining refundable balance."
+    refute has_element?(view, "[data-role='confirm-panel']")
+  end
+
+  test "charge detail preserves zero and three-decimal charge, refund, and fee evidence", %{
+    conn: conn,
+    charge: charge
+  } do
+    original_refund = TestRepo.one!(from(refund in Refund, where: refund.charge_id == ^charge.id))
+
+    charge
+    |> Charge.changeset(%{
+      amount_cents: 0,
+      currency: "jpy",
+      stripe_fee_amount_minor: 0,
+      data: %{"application_fee_amount" => 0}
+    })
+    |> TestRepo.update!()
+
+    original_refund
+    |> Refund.changeset(%{
+      amount_minor: 0,
+      currency: "jpy",
+      stripe_fee_refunded_amount_minor: 0,
+      merchant_loss_amount_minor: 0
+    })
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, zero_html} = live(conn, "/billing/payments/#{charge.id}")
+    assert zero_html =~ AccrueAdmin.Components.MoneyFormatter.format_money(0, "jpy")
+
+    three_decimal_customer =
+      insert_customer(%{name: "BHD Detail", email: "bhd-detail@example.com"})
+
+    three_decimal_subscription = insert_subscription(three_decimal_customer)
+
+    three_decimal_charge =
+      insert_charge(three_decimal_customer, three_decimal_subscription, %{
+        processor: "fake",
+        processor_id: "ch_bhd_detail",
+        status: "succeeded",
+        amount_cents: 1234,
+        currency: "bhd",
+        stripe_fee_amount_minor: 12,
+        data: %{"application_fee_amount" => 34}
+      })
+
+    insert_refund(three_decimal_charge, %{
+      stripe_id: "re_bhd_detail",
+      amount_minor: 234,
+      currency: "bhd",
+      status: :pending,
+      stripe_fee_refunded_amount_minor: 1,
+      merchant_loss_amount_minor: 2
+    })
+
+    assert {:ok, _view, three_decimal_html} =
+             live(conn, "/billing/payments/#{three_decimal_charge.id}")
+
+    assert three_decimal_html =~ AccrueAdmin.Components.MoneyFormatter.format_money(1234, "bhd")
+    assert three_decimal_html =~ AccrueAdmin.Components.MoneyFormatter.format_money(234, "bhd")
+    assert three_decimal_html =~ AccrueAdmin.Components.MoneyFormatter.format_money(12, "bhd")
+    assert three_decimal_html =~ AccrueAdmin.Components.MoneyFormatter.format_money(1, "bhd")
+  end
+
+  test "an ineligible charge exposes no refund action", %{conn: conn, charge: charge} do
+    charge
+    |> Charge.changeset(%{status: "failed"})
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    refute has_element?(view, "[data-ax-primary-action]")
+    refute has_element?(view, "[data-role='confirm-refund']")
   end
 
   test "out-of-scope charge route redirects with denial flash before rendering detail", %{

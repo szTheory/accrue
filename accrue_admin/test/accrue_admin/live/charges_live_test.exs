@@ -233,6 +233,54 @@ defmodule AccrueAdmin.ChargesLiveTest do
     refute html =~ "/billing/charges"
   end
 
+  test "formats exact payment amounts and leaves unsupported currencies unavailable", %{
+    conn: conn,
+    charge: charge
+  } do
+    charge
+    |> Charge.changeset(%{amount_cents: 0, currency: "jpy", stripe_fee_amount_minor: 0})
+    |> TestRepo.update!()
+
+    three_decimal_customer = insert_customer(%{name: "Three Decimal", email: "bhd@example.com"})
+    three_decimal_subscription = insert_subscription(three_decimal_customer)
+
+    insert_charge(three_decimal_customer, three_decimal_subscription, %{
+      processor_id: "ch_three_decimal",
+      status: "succeeded",
+      amount_cents: 1234,
+      currency: "bhd"
+    })
+
+    unsupported_customer =
+      insert_customer(%{name: "Unsupported", email: "bad-currency@example.com"})
+
+    unsupported_subscription = insert_subscription(unsupported_customer)
+
+    insert_charge(unsupported_customer, unsupported_subscription, %{
+      processor_id: "ch_unknown_currency",
+      status: "succeeded",
+      amount_cents: 1234,
+      currency: "not-a-currency"
+    })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/payments?view=all")
+
+    rows = Floki.parse_document!(html) |> Floki.find("tr[data-row-id]")
+
+    amount_text = fn processor_id ->
+      row = Enum.find(rows, &(Floki.text(&1) =~ processor_id))
+      row |> Floki.find("td") |> Enum.at(2) |> Floki.text()
+    end
+
+    assert amount_text.("ch_open") == AccrueAdmin.Components.MoneyFormatter.format_money(0, "jpy")
+
+    assert amount_text.("ch_three_decimal") ==
+             AccrueAdmin.Components.MoneyFormatter.format_money(1234, "bhd")
+
+    assert amount_text.("ch_unknown_currency") == "--"
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",
