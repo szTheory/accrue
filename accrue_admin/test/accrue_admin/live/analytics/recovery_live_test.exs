@@ -5,6 +5,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   alias Accrue.Events
   alias Accrue.Events.Event
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.Live.Analytics.RecoveryLive
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -61,7 +62,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   test "renders recovery dashboard with MRR totals", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+    assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
     assert html =~ Copy.recovery_index_heading()
     assert html =~ Copy.recovery_index_subtitle()
@@ -75,7 +76,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   test "D-18 D-19 renders Recovery-specific overview grammar in order", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=30d")
+    assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery?window=30d")
 
     assert heading_count(html, "h1") == 1
     assert html =~ Copy.recovery_index_heading()
@@ -132,7 +133,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
       assert html =~ "Recovery Funnel"
       assert html =~ "currently in dunning"
@@ -142,7 +143,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
          %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
       # Worked-example copy lives in either the Exhausted KpiCard delta string
       # (recovery_live.ex) or the FunnelChart Exhausted-bar tooltip (DAN-09
@@ -187,7 +188,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     test "renders JPY symbol for the JPY Recovered KPI value", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
       # Since we now render cards per currency, both USD and JPY cards will appear.
       # The JPY card should render ¥/￥/JPY, and the USD card should render $
@@ -202,34 +203,73 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   describe "window parameter (DAN-10)" do
     test "no ?window= param defaults to 30d window selector active", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
       # The 30d button — and only the 30d button — must carry aria-current="page".
       assert active_window_label(html) =~ "30 days"
     end
 
     test "?window=7d renders 7d button as active", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=7d")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery?window=7d")
       assert active_window_label(html) =~ "7 days"
     end
 
     test "?window=90d renders 90d button as active", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=90d")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery?window=90d")
       assert active_window_label(html) =~ "90 days"
     end
 
     test "invalid ?window= falls back to 30d default", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=bad")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery?window=bad")
       assert active_window_label(html) =~ "30 days"
     end
 
     test "window change via render_patch fires handle_params", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      {:ok, view, _html} = live(conn, "/billing/analytics/recovery")
+      {:ok, view, _html} = live_recovery(conn, "/billing/analytics/recovery")
       html = render_patch(view, "/billing/analytics/recovery?window=7d")
       assert active_window_label(html) =~ "7 days"
+    end
+
+    test "loading state keeps the selected owner and UTC window until scoped reads finish", %{
+      conn: conn
+    } do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      {:ok, view, loading_html} =
+        live(conn, "/billing/analytics/recovery?org=allowed-org&window=7d")
+
+      assert loading_html =~ ~s(data-state="loading")
+      assert active_window_label(loading_html) =~ "7 days"
+      assert loading_html =~ "org=allowed-org"
+      assert loading_html =~ "Loading recovery observations for this owner and UTC window."
+      refute loading_html =~ "Recovery Funnel"
+      assert render_async(view) =~ "$12.34"
+      refute render(view) =~ ~s(data-state="loading")
+    end
+
+    test "failed recovery read remains a recoverable error rather than an empty result" do
+      assert {:noreply, socket} =
+               RecoveryLive.handle_async(
+                 :recovery_query,
+                 {:exit, :query_timeout},
+                 %Phoenix.LiveView.Socket{}
+               )
+
+      assert socket.assigns.recovery_loading? == false
+      assert socket.assigns.recovery_error =~ "temporarily unavailable"
+      assert socket.assigns.stats == %{recovered: [], lost: []}
+      assert socket.assigns.at_risk == []
     end
 
     test "window change re-queries KPI values rather than only changing the active button", %{
@@ -248,12 +288,13 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       })
 
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      {:ok, view, html_30d} = live(conn, "/billing/analytics/recovery?window=30d")
+      {:ok, view, html_30d} = live_recovery(conn, "/billing/analytics/recovery?window=30d")
 
       assert active_window_label(html_30d) =~ "30 days"
       assert html_30d =~ "$150.00"
 
-      html_7d = render_patch(view, "/billing/analytics/recovery?window=7d")
+      _html_7d = render_patch(view, "/billing/analytics/recovery?window=7d")
+      html_7d = render_async(view)
 
       assert active_window_label(html_7d) =~ "7 days"
       assert html_7d =~ "$50.00"
@@ -264,7 +305,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
       assert {:ok, _view, html} =
-               live(conn, "/billing/analytics/recovery?owner=platform&window=30d")
+               live_recovery(conn, "/billing/analytics/recovery?owner=platform&window=30d")
 
       assert html =~ ~r/href="\/billing\/analytics\/recovery\?[^"]*owner=platform[^"]*window=7d/
       assert html =~ ~r/href="\/billing\/analytics\/recovery\?[^"]*owner=platform[^"]*window=30d/
@@ -397,7 +438,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     test "renders At-Risk Subscriptions section on recovery dashboard", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
       assert html =~ "At-Risk Subscriptions"
 
@@ -408,7 +449,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     test "window change via render_patch re-assigns at-risk list without crash", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-      {:ok, view, _html} = live(conn, "/billing/analytics/recovery")
+      {:ok, view, _html} = live_recovery(conn, "/billing/analytics/recovery")
       html = render_patch(view, "/billing/analytics/recovery?window=7d")
 
       assert html =~ "At-Risk Subscriptions"
@@ -416,7 +457,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
     test "at-risk table row links to per-subscription drill-down route", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
       assert html =~ "/analytics/recovery/subscriptions/" or html =~ "No active dunning campaigns"
     end
@@ -432,7 +473,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
           admin_organization_ids: [fixture.owner_id]
         )
 
-      assert {:ok, _view, html} = live(conn, fixture.return_path)
+      assert {:ok, _view, html} = live_recovery(conn, fixture.return_path)
 
       assert html =~ "Current subscription status"
       assert html =~ "past_due"
@@ -451,7 +492,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
         )
 
       assert {:ok, _view, html} =
-               live(conn, "/billing/analytics/recovery?org=allowed-org&window=7d")
+               live_recovery(conn, "/billing/analytics/recovery?org=allowed-org&window=7d")
 
       assert html =~
                ~r|href="/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}\?[^\"]*return_to=%2Fbilling%2Fanalytics%2Frecovery%3Forg%3Dallowed-org%26window%3D7d[^\"]*"|
@@ -469,10 +510,10 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
         )
 
       {:ok, view, _html} =
-        live(conn, "/billing/analytics/recovery?org=allowed-org&window=7d")
+        live_recovery(conn, "/billing/analytics/recovery?org=allowed-org&window=7d")
 
       _html = render_patch(view, "/billing/analytics/recovery?org=allowed-org&window=90d")
-      html = render(view)
+      html = render_async(view)
 
       assert html =~ "%26window%3D90d"
       refute html =~ "%26window%3D7d"
@@ -545,7 +586,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
         )
 
       assert {:ok, _view, html} =
-               live(conn, "/billing/analytics/recovery?org=empty-org&window=7d")
+               live_recovery(conn, "/billing/analytics/recovery?org=empty-org&window=7d")
 
       assert active_window_label(html) =~ "7 days"
       assert html =~ "No active dunning campaigns"
@@ -567,7 +608,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
           admin_organization_ids: [fixture.owner_id]
         )
 
-      assert {:ok, _view, html} = live(conn, fixture.return_path)
+      assert {:ok, _view, html} = live_recovery(conn, fixture.return_path)
 
       assert html =~ "Recovered MRR (USD)"
       assert html =~ "$12.34"
@@ -589,7 +630,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
           admin_organization_ids: [fixture.owner_id]
         )
 
-      assert {:ok, _view, html} = live(conn, fixture.return_path)
+      assert {:ok, _view, html} = live_recovery(conn, fixture.return_path)
 
       assert html =~ "$12.34"
       refute html =~ "$98.76"
@@ -615,6 +656,13 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       refute source =~ "import Ecto.Query"
       refute source =~ "Accrue.Repo"
       refute source =~ "Accrue.Billing.Subscription"
+    end
+  end
+
+  defp live_recovery(conn, path) do
+    case live(conn, path) do
+      {:ok, view, _html} -> {:ok, view, render_async(view)}
+      result -> result
     end
   end
 

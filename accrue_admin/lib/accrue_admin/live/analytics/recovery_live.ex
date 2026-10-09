@@ -29,59 +29,88 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     {since, until} = window_bounds(window)
     owner_scope = socket.assigns.current_owner_scope
 
-    stats = Dunning.recovered_vs_lost_mrr(owner_scope, since: since, until: until)
-    funnel = Dunning.funnel(owner_scope, since: since, until: until)
-    at_risk = Dunning.at_risk_subscriptions(owner_scope, since: since, until: until)
-
-    locale = Accrue.Config.default_locale()
-
-    recovered_currencies = Enum.map(stats.recovered, & &1.currency)
-    lost_currencies = Enum.map(stats.lost, & &1.currency)
-    currencies = Enum.uniq(recovered_currencies ++ lost_currencies)
-    supported_currencies = Enum.filter(currencies, &(not is_nil(known_currency_atom(&1))))
-    has_unavailable_currency = length(supported_currencies) != length(currencies)
-    currencies = supported_currencies ++ if(has_unavailable_currency, do: [nil], else: [])
-
-    kpi_pairs =
-      Enum.map(currencies, fn currency ->
-        if is_nil(currency) do
-          %{
-            currency: "Unavailable",
-            recovered_str: "Amount unavailable",
-            exhausted_str: "Amount unavailable"
-          }
-        else
-          recovered = Enum.find(stats.recovered, &(&1.currency == currency))
-          lost = Enum.find(stats.lost, &(&1.currency == currency))
-
-          %{
-            currency: to_string(currency),
-            recovered_str:
-              format_recovery_money(
-                recovered && recovered.cents,
-                known_currency_atom(currency),
-                currency,
-                locale
-              ),
-            exhausted_str:
-              format_recovery_money(
-                lost && lost.cents,
-                known_currency_atom(currency),
-                currency,
-                locale
-              )
-          }
-        end
-      end)
-
     {:noreply,
      socket
      |> assign(:window, window)
      |> assign(:window_selector_base_path, window_selector_base_path(uri))
-     |> assign(:stats, stats)
-     |> assign(:funnel, funnel)
-     |> assign(:kpi_pairs, kpi_pairs)
-     |> assign(:at_risk, at_risk)}
+     |> assign(:stats, %{recovered: [], lost: []})
+     |> assign(:funnel, %{entered: 0, recovered: 0, exhausted: 0, active: 0})
+     |> assign(:kpi_pairs, [])
+     |> assign(:at_risk, [])
+     |> assign(:recovery_loading?, true)
+     |> assign(:recovery_error, nil)
+     |> start_async(:recovery_query, fn ->
+       %{
+         stats: Dunning.recovered_vs_lost_mrr(owner_scope, since: since, until: until),
+         funnel: Dunning.funnel(owner_scope, since: since, until: until),
+         at_risk: Dunning.at_risk_subscriptions(owner_scope, since: since, until: until)
+       }
+     end)}
+  end
+
+  @impl true
+  def handle_async(:recovery_query, {:ok, result}, socket) do
+    {:noreply,
+     socket
+     |> assign(:stats, result.stats)
+     |> assign(:funnel, result.funnel)
+     |> assign(:at_risk, result.at_risk)
+     |> assign(:kpi_pairs, recovery_kpi_pairs(result.stats))
+     |> assign(:recovery_loading?, false)
+     |> assign(:recovery_error, nil)}
+  end
+
+  def handle_async(:recovery_query, {:exit, _reason}, socket) do
+    {:noreply,
+     socket
+     |> assign(:stats, %{recovered: [], lost: []})
+     |> assign(:funnel, %{entered: 0, recovered: 0, exhausted: 0, active: 0})
+     |> assign(:kpi_pairs, [])
+     |> assign(:at_risk, [])
+     |> assign(:recovery_loading?, false)
+     |> assign(:recovery_error, "Recovery data is temporarily unavailable. Retry this window.")}
+  end
+
+  defp recovery_kpi_pairs(stats) do
+    currencies =
+      Enum.map(stats.recovered, & &1.currency) ++ Enum.map(stats.lost, & &1.currency)
+
+    currencies = Enum.uniq(currencies)
+    supported_currencies = Enum.filter(currencies, &(not is_nil(known_currency_atom(&1))))
+    has_unavailable_currency = length(supported_currencies) != length(currencies)
+    currencies = supported_currencies ++ if(has_unavailable_currency, do: [nil], else: [])
+    locale = Accrue.Config.default_locale()
+
+    Enum.map(currencies, fn currency ->
+      if is_nil(currency) do
+        %{
+          currency: "Unavailable",
+          recovered_str: "Amount unavailable",
+          exhausted_str: "Amount unavailable"
+        }
+      else
+        recovered = Enum.find(stats.recovered, &(&1.currency == currency))
+        lost = Enum.find(stats.lost, &(&1.currency == currency))
+
+        %{
+          currency: to_string(currency),
+          recovered_str:
+            format_recovery_money(
+              recovered && recovered.cents,
+              known_currency_atom(currency),
+              currency,
+              locale
+            ),
+          exhausted_str:
+            format_recovery_money(
+              lost && lost.cents,
+              known_currency_atom(currency),
+              currency,
+              locale
+            )
+        }
+      end
+    end)
   end
 
   defp known_currency_atom(currency) when is_atom(currency) do
@@ -169,12 +198,21 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
             base_path={@admin_mount_path}
             owner_scope={@current_owner_scope}
           current_window={@window}
+          loading={@recovery_loading?}
+          error={@recovery_error}
             empty_copy={Copy.resource_state_copy(:dunning, :queue_empty)}
           />
         </section>
 
-        <section data-ax-recovery-supporting-funnel>
+        <section
+          data-ax-recovery-supporting-funnel
+          data-state={recovery_state(@recovery_loading?, @recovery_error)}
+        >
+          <p :if={@recovery_loading?} class="ax-body" role="status">
+            Loading recovery observations for this owner and UTC window.
+          </p>
           <FunnelChart.funnel_chart
+            :if={!@recovery_loading? && is_nil(@recovery_error)}
             entered={@funnel.entered}
             recovered={@funnel.recovered}
             exhausted={@funnel.exhausted}
@@ -224,6 +262,10 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
 
   defp decode_query(nil), do: %{}
   defp decode_query(query), do: URI.decode_query(query)
+
+  defp recovery_state(true, _error), do: "loading"
+  defp recovery_state(false, error) when not is_nil(error), do: "error"
+  defp recovery_state(false, _error), do: "ready"
 
   defp assign_shell(socket, admin) do
     current_path = (admin["mount_path"] || "/billing") <> "/analytics/recovery"
