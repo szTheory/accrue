@@ -40,7 +40,12 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
         charges_enabled: true,
         payouts_enabled: true,
         details_submitted: true,
-        data: %{"platform_fee_override" => %{"percent" => "1.5"}}
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => true,
+          "platform_fee_override" => %{"percent" => "1.5"}
+        }
       })
 
     _other =
@@ -133,15 +138,16 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
   test "connect organization scope limits rows and KPI counts", %{conn: conn} do
     org_id = Ecto.UUID.generate()
 
-    insert_account(%{
-      stripe_account_id: "acct_org_allowed",
-      owner_type: "Organization",
-      owner_id: org_id,
-      charges_enabled: true,
-      payouts_enabled: true,
-      details_submitted: true,
-      data: %{"platform_fee_override" => %{"percent" => "1.0"}}
-    })
+    allowed =
+      insert_account(%{
+        stripe_account_id: "acct_org_allowed",
+        owner_type: "Organization",
+        owner_id: org_id,
+        charges_enabled: true,
+        payouts_enabled: true,
+        details_submitted: true,
+        data: %{"platform_fee_override" => %{"percent" => "1.0"}}
+      })
 
     insert_account(%{
       stripe_account_id: "acct_org_denied",
@@ -166,6 +172,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
 
     assert html =~ "acct_org_allowed"
     refute html =~ "acct_org_denied"
+    assert html =~ "/billing/connect/#{allowed.id}?org=allowed-org"
 
     stats =
       html
@@ -276,11 +283,33 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/connect?view=all")
 
     assert html =~ "Stripe-observed"
-    assert html =~ "Unknown"
+    assert html =~ "Stripe-observed: unavailable"
     assert html =~ "Local platform fee override"
     assert html =~ "Override saved"
     assert html =~ "/billing/connect/#{unknown.id}"
     refute html =~ "Ready"
+  end
+
+  test "equal observation timestamps order account rows by stable ID", %{conn: conn} do
+    timestamp = ~U[2026-01-01 00:00:00Z]
+
+    insert_account(%{
+      id: "00000000-0000-0000-0000-000000000001",
+      stripe_account_id: "acct_tie_a",
+      inserted_at: timestamp
+    })
+
+    insert_account(%{
+      id: "00000000-0000-0000-0000-000000000002",
+      stripe_account_id: "acct_tie_b",
+      inserted_at: timestamp
+    })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/connect?view=all")
+
+    assert :binary.match(html, "acct_tie_b") |> elem(0) <
+             :binary.match(html, "acct_tie_a") |> elem(0)
   end
 
   defp assert_page_header_contract(html, contract) do

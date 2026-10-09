@@ -156,15 +156,15 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
               render: &account_link(&1, @admin_mount_path, @current_owner_scope)
             },
             %{label: Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
-            %{label: Copy.connect_accounts_table_column_readiness(), render: &readiness_summary/1},
-            %{label: Copy.connect_accounts_table_column_override(), render: &override_summary/1},
+            %{label: "Stripe-observed readiness", render: &readiness_summary(&1, @current_owner_scope)},
+            %{label: "Local platform fee override", render: &override_summary(&1, @current_owner_scope)},
             %{label: Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
           card_title={&card_title/1}
           card_fields={[
             %{label: Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
-            %{label: Copy.connect_accounts_table_column_readiness(), render: &readiness_summary/1},
-            %{label: Copy.connect_accounts_table_column_override(), render: &override_summary/1},
+            %{label: "Stripe-observed readiness", render: &readiness_summary(&1, @current_owner_scope)},
+            %{label: "Local platform fee override", render: &override_summary(&1, @current_owner_scope)},
             %{label: Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
           filter_fields={connect_filter_fields()}
@@ -484,23 +484,41 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
   defp owner_summary(row),
     do: "#{row.owner_type || Copy.connect_accounts_row_owner_fallback()} #{row.owner_id || "--"}"
 
-  defp readiness_summary(row) do
-    [
-      row.type && String.capitalize(row.type),
-      row.charges_enabled && "charges",
-      row.payouts_enabled && "payouts",
-      row.details_submitted && "submitted"
-    ]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.reject(&(&1 == false))
-    |> case do
-      [] -> Copy.connect_accounts_readiness_needs_onboarding()
-      values -> Enum.join(values, Copy.connect_accounts_readiness_joiner())
+  defp readiness_summary(row, owner_scope) do
+    case load_scoped_account(row.id, owner_scope) do
+      nil ->
+        "Stripe-observed: unavailable"
+
+      account ->
+        facts = [
+          provider_fact(account, "charges_enabled", "charges enabled", "charges disabled"),
+          provider_fact(account, "payouts_enabled", "payouts enabled", "payouts disabled"),
+          provider_fact(
+            account,
+            "details_submitted",
+            "details submitted",
+            "onboarding incomplete"
+          )
+        ]
+
+        if Enum.all?(facts, &(&1 == "Unknown")) do
+          "Stripe-observed: unavailable"
+        else
+          "Stripe-observed: " <> Enum.join(facts, Copy.connect_accounts_readiness_joiner())
+        end
     end
   end
 
-  defp override_summary(%{id: id}) do
-    case Repo.get(Account, id) do
+  defp provider_fact(account, key, true_label, false_label) do
+    case Map.fetch(account.data || %{}, key) do
+      {:ok, true} -> true_label
+      {:ok, false} -> false_label
+      _ -> "Unknown"
+    end
+  end
+
+  defp override_summary(row, owner_scope) do
+    case load_scoped_account(row.id, owner_scope) do
       nil ->
         Copy.connect_accounts_override_default_only()
 
@@ -510,6 +528,18 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
           else: Copy.connect_accounts_override_default_only()
     end
   end
+
+  defp load_scoped_account(id, %{mode: :organization, organization_id: organization_id}) do
+    Repo.one(
+      from(account in Account,
+        where:
+          account.id == ^id and account.owner_type == "Organization" and
+            account.owner_id == ^organization_id
+      )
+    )
+  end
+
+  defp load_scoped_account(id, _owner_scope), do: Repo.get(Account, id)
 
   defp status_summary(%{deauthorized_at: %DateTime{} = value}),
     do: Copy.connect_accounts_status_deauthorized_prefix() <> format_datetime(value)
