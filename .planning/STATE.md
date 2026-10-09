@@ -4,17 +4,18 @@ milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 238
 current_phase_name: Admin Events, Webhooks & Remaining Billing Surfaces
+current_plan: 3
 status: executing
-stopped_at: Phase 238 UI-SPEC approved
-last_updated: "2026-10-09T03:19:37.692Z"
-last_activity: 2026-10-08
+stopped_at: Completed 238-01-PLAN.md
+last_updated: "2026-10-09T03:30:46.455Z"
+last_activity: 2026-10-09
 last_activity_desc: Phase 235 complete, transitioned to Phase 238
-state_head: eb3cea91d5b7e5e2445fd52d18e52231f46245d9
+state_head: a87afbcde82c84271fcd3b00666f06d94645c1fb
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 40
-  completed_plans: 35
+  completed_plans: 36
   percent: 71
 ---
 
@@ -32,10 +33,11 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 ## Current Position
 
-Phase: 238 (Admin Events, Webhooks & Remaining Billing Surfaces) — READY TO EXECUTE
-Plan: Not started
+Phase: 238 (Admin Events, Webhooks & Remaining Billing Surfaces) — IN PROGRESS
+Current Plan: 2
+Total Plans in Phase: 5
 Status: Ready to execute
-Last activity: 2026-10-08 — Phase 235 complete, transitioned to Phase 238
+Last activity: 2026-10-09 — Completed Phase 238 Plan 01
 
 ## Performance Metrics
 
@@ -138,6 +140,7 @@ Last activity: 2026-10-08 — Phase 235 complete, transitioned to Phase 238
 | Phase 237 P07 | 11min | 2 tasks | 9 files |
 | Phase 237 P05 | 9m | 2 tasks | 2 files |
 | Phase 237 P08 | 16min | 2 tasks | 10 files |
+| Phase 238 P01 | 7min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -283,6 +286,8 @@ Last activity: 2026-10-08 — Phase 235 complete, transitioned to Phase 238
 - [Phase 237]: Use the existing blocking host Playwright job for recurring served browser verification.
 - [Phase 237]: Keep payment review browser coverage read-only; cancel before confirmation or dispatch.
 - [Phase 237]: Use Accrue.Clock for recovery window bounds and deterministic campaign timestamps.
+- [Phase 238]: Queue acceptance is reported separately from downstream processing.
+- [Phase 238]: Replay intent is consumed before step-up and every queue call rechecks scoped eligibility.
 
 ### Pending Todos
 
@@ -357,9 +362,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T03:04:49.498Z
-Stopped at: Phase 238 UI-SPEC approved
-Resume file: .planning/phases/238-admin-events-webhooks-remaining-billing-surfaces/238-UI-SPEC.md
+Last session: 2026-10-09T03:30:28.603Z
+Stopped at: Completed 238-01-PLAN.md
+Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
