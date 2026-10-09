@@ -1,58 +1,24 @@
 ---
 phase: 233-shared-direction-portal-contract
-verified: 2026-10-07T23:15:02Z
+verified: 2026-10-09T02:22:10Z
 status: passed
-score: 5/5 roadmap truths verified
+score: 29/29 must-haves verified
 covered_files:
   - ".github/workflows/ci.yml"
   - ".planning/phases/233-shared-direction-portal-contract/233-01-PLAN.md"
   - ".planning/phases/233-shared-direction-portal-contract/233-01-SUMMARY.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-01-T1-RED.json"
-  - ".planning/phases/233-shared-direction-portal-contract/233-01-T2-RED.json"
   - ".planning/phases/233-shared-direction-portal-contract/233-02-PLAN.md"
   - ".planning/phases/233-shared-direction-portal-contract/233-02-SUMMARY.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-02-T1-RED.json"
-  - ".planning/phases/233-shared-direction-portal-contract/233-02-T1-RED.tap"
-  - ".planning/phases/233-shared-direction-portal-contract/233-02-T2-RED.json"
-  - ".planning/phases/233-shared-direction-portal-contract/233-02-T2-RED.tap"
-  - ".planning/phases/233-shared-direction-portal-contract/233-02-T2-create-RED.json"
-  - ".planning/phases/233-shared-direction-portal-contract/233-02-T2-create-RED.tap"
   - ".planning/phases/233-shared-direction-portal-contract/233-03-PLAN.md"
   - ".planning/phases/233-shared-direction-portal-contract/233-03-SUMMARY.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-03-T1-RED.json"
-  - ".planning/phases/233-shared-direction-portal-contract/233-03-T2-RED.json"
   - ".planning/phases/233-shared-direction-portal-contract/233-04-PLAN.md"
   - ".planning/phases/233-shared-direction-portal-contract/233-04-SUMMARY.md"
   - ".planning/phases/233-shared-direction-portal-contract/233-05-PLAN.md"
   - ".planning/phases/233-shared-direction-portal-contract/233-05-SUMMARY.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-05-T1-GAP-RED.json"
-  - ".planning/phases/233-shared-direction-portal-contract/233-05-T1-RED.json"
   - ".planning/phases/233-shared-direction-portal-contract/233-06-PLAN.md"
   - ".planning/phases/233-shared-direction-portal-contract/233-06-SUMMARY.md"
   - ".planning/phases/233-shared-direction-portal-contract/233-07-PLAN.md"
   - ".planning/phases/233-shared-direction-portal-contract/233-07-SUMMARY.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-07-T1-RED.json"
-  - ".planning/phases/233-shared-direction-portal-contract/233-07-T1-RED.tap"
-  - ".planning/phases/233-shared-direction-portal-contract/233-07-T2-RED.json"
-  - ".planning/phases/233-shared-direction-portal-contract/233-07-T2-RED.tap"
-  - ".planning/phases/233-shared-direction-portal-contract/233-BASELINE.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-EXECUTION-CHECKS.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-INVENTORY.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-REVIEW-DISPOSITION.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-REVIEW-FIX.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-REVIEW.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-SECURITY.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-UAT.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-UI-DISPOSITION.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-UI-REVIEW.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-UI-SPEC.md"
-  - ".planning/phases/233-shared-direction-portal-contract/233-VALIDATION.md"
-  - ".planning/phases/233-shared-direction-portal-contract/DESIGN.md"
-  - ".planning/phases/233-shared-direction-portal-contract/captures/admin-overview.png"
-  - ".planning/phases/233-shared-direction-portal-contract/captures/portal-home.png"
-  - ".planning/phases/233-shared-direction-portal-contract/captures/portal-state.png"
-  - ".planning/phases/233-shared-direction-portal-contract/captures/semantic-admin-320.png"
-  - ".planning/phases/233-shared-direction-portal-contract/captures/semantic-portal-320-dark.png"
   - "accrue/priv/accrue/templates/install/billing.ex.eex"
   - "accrue/priv/static/brand.css"
   - "accrue_admin/README.md"
@@ -111,21 +77,23 @@ covered_files:
   - "examples/accrue_host/test/install_boundary_test.exs"
   - "scripts/ci/accrue_host_seed_e2e.exs"
   - "scripts/ci/accrue_host_verify_browser.sh"
-covered_digest: "v3:sha256:36f521fe60d357d25c83a519fa61ea1f25671344d54963bc229b488101b25281"
+covered_digest: "v3:sha256:4257749be37567e5dcf734ef95f64b17922620ec76082127e64d891781959319"
 behavior_unverified: 0
 overrides_applied: 0
-decision_coverage:
-  honored: 17
-  total: 17
-  not_honored: []
+re_verification:
+  previous_status: passed
+  previous_score: 5/5 roadmap truths verified
+  gaps_closed: []
+  gaps_remaining: []
+  regressions: []
 ---
 
 # Phase 233: Shared Direction & Portal Contract Verification Report
 
 **Phase Goal:** Maintainers and adopters can see a current, coherent Admin and Portal baseline, while hosts can select a billed entity and authorize its actions through one bounded Portal contract.
-**Verified:** 2026-10-07T23:15:02Z
+**Verified:** 2026-10-09T02:22:10Z
 **Status:** passed
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — refreshed after the prior passed report became stale.
 
 ## Goal Achievement
 
@@ -133,115 +101,103 @@ decision_coverage:
 
 | # | Truth | Status | Evidence |
 |---|---|---|---|
-| 1 | Maintainers can inspect current route, flow, component, and state ownership and distinguish current renders from historical captures. | ✓ VERIFIED | [233-INVENTORY.md](233-INVENTORY.md) records the current Admin/Portal and host routes, owners, states, package assets, and later-phase scope. [233-BASELINE.md](233-BASELINE.md) records current served routes, fixtures, viewport/theme, date, source/asset hashes, and identifies earlier evidence as historical. Three current captures exist and were inspected. The baseline browser test and final semantic browser run are recorded as passing in the phase evidence. |
-| 2 | Admin and Portal consumers share semantic roles while preserving package tokens, Admin identity, host branding, and audience-specific shells. | ✓ VERIFIED | [DESIGN.md](DESIGN.md) defines roles and preserves `--ax-*` versus `--accrue-*` ownership. Package CSS and the semantic browser spec are substantive and wired through Admin build and host recompilation; test assertions cover status cues, focus, host-accent contrast, 320px reflow, and served asset/source hashes. Captures retain distinct Admin and Cadence Portal shells. |
-| 3 | Personal-only hosts need no picker/company model; mixed hosts resolve personal and custom billables while actor, billable, Customer, and processor remain distinct. | ✓ VERIFIED | `Accrue.Portal.Context` and `CustomerSession` separate actor and server-resolved billable and use exact owner type, lossless owner ID, processor, and Customer identity. Personal resolution retains a sole existing Customer for reads and blocks ambiguity. The host adapter, compiled README contract, Portal integration tests, and context browser coverage exercise personal/custom/mixed use, membership-only revocation, persisted human actor attribution, and Admin denial for a non-Admin billing manager. |
-| 4 | Initial requests, LiveView events/reconnects, and protected actions freshly authorize selected context; invalid selection cannot provision, fall back, retarget, or mutate. | ✓ VERIFIED | Portal 72/0 and host 219/0 pass below. Named integration cases cover HTTP and LiveView denial without provisioning, reconnect/event reauthorization, stale pins, revocation, foreign targets, zero writes, and allowed mutations. `Context` pins are signed locators; controllers and LiveViews reload targets and authorize before operations. Checkout source and tests prove configured-processor equality in both mount/token issuance and POST; matching personal/custom provider success and mismatched zero-token/zero-write controls are present. |
-| 5 | Canonical example and adopter guidance cover personal, custom/organization, and mixed resolution without new auth/runtime dependency. | ✓ VERIFIED | The canonical `portal_context_adapter.ex`, host router, billing facade, Portal/Admin/host READMEs, and README contract test are present and wired. The contract test checks documented option/callback/action names. Summaries identify no added dependencies; package manifests/lockfiles are unchanged by the phase implementation. |
+| 1 | Maintainers can inspect the current served route, flow, component, and state inventory and distinguish it from historical captures. | ✓ VERIFIED | `233-INVENTORY.md` and `233-BASELINE.md` separate current source and served route/asset provenance from historical evidence. Current desktop baseline browser checks passed; baseline asserts served hashed assets against source bytes. |
+| 2 | Operators and customers see shared semantic visual roles while Admin identity, host customer branding, and audience-specific layouts remain recognizable in real consumers. | ✓ VERIFIED | `DESIGN.md`, package token ownership, Admin and Portal CSS, and served semantic browser checks establish distinct `--ax-*` and `--accrue-*` APIs, text/glyph status cues, focus, accent contrast, and 320px reflow. Current baseline/semantic browser checks passed 8/8 in this refresh. |
+| 3 | A personal-only host retains existing Portal behavior without a company model or picker; mixed hosts resolve personal and custom billables while actor, billable, Customer, and processor remain distinct. | ✓ VERIFIED | `CustomerSession`, `Context`, and the host adapter resolve exact owner type/ID/processor Customer separately from authenticated actor. Contract tests cover personal fallback, explicit custom selection, identity collisions, and no first-record choice. Current context and host browser checks passed; Phase 233 dedicated Braintree browser lane passed 12 checks and Phase 236 lane passed 14. |
+| 4 | Initial requests, LiveView events/reconnects, and protected actions freshly authorize selected context; invalid selection cannot provision, fall back, retarget, or mutate. | ✓ VERIFIED | AuthPlug/AuthHook and payment, checkout, subscription, and invoice paths verify signed locators, re-resolve host policy and server-load exact targets before protected operations. Tests cover denial, revocation, changed tabs, reconnect, replay, foreign targets, zero provisioning/token/write, and allowed mutations. Current Portal suite: 110 tests, 0 failures; Host suite: 222, 0 failures. |
+| 5 | Canonical example and adopter guidance cover personal, custom/organization, and mixed resolution without new auth/runtime dependency. | ✓ VERIFIED | Canonical host adapter/router, generated install template, package READMEs, and executable README contract tests agree on the optional adapter and named-action API. Core tests: 2,077, 0 failures; docs verifier: 46, 0 failures. No phase dependency was added. |
 
-**Score:** 5/5 roadmap truths verified (0 present, behavior-unverified).
+**Score:** 29/29 must-haves verified (0 present, behavior-unverified).
 
 ### Plan Must-Haves
 
-All plan-specific truths are additionally verified (24 total across seven plans). The Portal full suite exercises their identity, authorization, pinning, zero-write, reconnect, and actor-attribution transitions; the host suite exercises adapter adoption and persisted actor evidence. The final checkout processor boundary was re-read in implementation and tests after review correction. No plan truth remains uncertain or failed.
+All 24 plan-specific truths are verified in source and their focused tests: optional adapter and personal compatibility; generic blocked recovery and no provisioning; no implicit first billable; exact Customer identity; signed payment and checkout pins; fresh action authorization for POSTs, LiveView events, reconnects, and server-loaded targets; state clearing/no replay on denial; provider token gating; actor attribution; current baseline provenance; separate semantic token/brand/shell ownership; and canonical host/docs alignment. Corresponding artifact and wiring evidence appears in the tables below. No plan truth failed or remains uncertain.
 
 ### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 |---|---|---|---|
-| `233-INVENTORY.md`, `233-BASELINE.md`, `DESIGN.md` | Current source map, served evidence, semantic contract | ✓ VERIFIED | Substantive route/state matrices and provenance; captured assets and browser spec link the contract to served package output. |
-| `captures/{admin-overview,portal-home,portal-state}.png` and two semantic captures | Representative current Admin/Portal states | ✓ VERIFIED | All five files exist; deterministic fixtures and provenance are documented. Visual inspection confirmed the retained current states and separate audience shells. |
-| `accrue_portal/lib/accrue_portal/{context,customer_session}.ex` | Public boundary, signed pin, exact identity resolution | ✓ VERIFIED | Implemented callbacks, actor/billable separation, pin validation and exact identity query; used by auth, LiveViews, and controllers. |
-| Payment/checkout controllers and LiveViews | Protected form and checkout transports | ✓ VERIFIED | Rendered pins flow to event and POST paths; fresh policy and exact target checks precede provider calls. |
-| `examples/accrue_host/lib/accrue_host/portal_context_adapter.ex` | Host-owned resolve and action policy | ✓ VERIFIED | Real membership and target policy used by the host mount and browser path. |
-| `examples/accrue_host/e2e/phase233-*.spec.js` | Served semantic, baseline, context, provider checks | ✓ VERIFIED | Browser specs are invoked through the host verification script/CI; final evidence records 27 default browser passes with 3 intentional skips and 4/4 Braintree lane passes. |
-| Package README files and install template | Adopter guidance and canonical example | ✓ VERIFIED | Executable docs contract plus host suite verify public callback/options/action names and template consistency. |
+| `233-INVENTORY.md`, `233-BASELINE.md`, `DESIGN.md` | Current source/served baseline and bounded semantic contract | ✓ VERIFIED | Substantive route/state ownership and provenance docs; baseline and semantic browser specs assert real served asset bytes and hashes. |
+| `captures/*` (five representative images) | Current Admin/Portal renders documented by baseline | ✓ VERIFIED | Evidence files were present and provenance is documented. Their pre-existing worktree edits were backed up and restored byte-for-byte around the browser run; no capture file was modified by this verification. |
+| `accrue_portal/lib/accrue_portal/{context,customer_session,auth_hook,auth_plug}.ex` | Optional host resolution, actor/billable distinction, pinning, fresh authorization | ✓ VERIFIED | Implementations connect router session data through policy resolution and exact Customer identity into HTTP/LiveView mounts. |
+| Portal payment, checkout, subscription, and invoice controllers/LiveViews | Protected rendered forms and pinned actions | ✓ VERIFIED | Rendered pin producers feed real POST/event paths; consumers re-resolve and authorize before provider/billing operations. Focused contract tests cover positive and denial transitions. |
+| `examples/accrue_host/lib/accrue_host/portal_context_adapter.ex` and host billing/router | Host-owned personal/custom selection and action policy | ✓ VERIFIED | Membership and target checks remain host-owned; personal, mixed, manager, revocation, and actor paths are exercised in integration/browser coverage. |
+| `examples/accrue_host/e2e/phase233-*.spec.js` | Current baseline, semantic, context, and processor browser proof | ✓ VERIFIED | Current refresh passed 8/8 baseline/context/semantic checks; supplied current evidence records Phase 233 Braintree lane 12 passes and Phase 236 lane 14 passes. |
+| Portal/Admin/host README and install template | Adopter guidance aligned with public API | ✓ VERIFIED | Executable docs contract validates router option, callbacks, and action names. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 |---|---|---|---|---|
-| Host router/session | `CustomerSession` and `Context` | Optional adapter and declared session keys | ✓ WIRED | Router passes mount-specific adapter/session data; resolution checks host policy before Customer provisioning. |
-| `Context` pin | Payment/checkout actions | Signed pin verification and fresh adapter authorization | ✓ WIRED | Three payment POSTs, checkout event, checkout POST, navigation and reconnect re-resolve pinned identity and server-loaded targets. |
-| Auth hook | Home/subscription/invoice LiveViews | Context assigns and target-scoped reads/actions | ✓ WIRED | Verified in Portal context and LiveView tests, including revoked reconnect and actor-scoped mutation. |
-| Package semantic role | CSS consumer | Admin build and embedded Portal recompilation | ✓ WIRED | Browser specs compare served hashed response bytes to current source and assert focus/status/contrast/reflow. |
-| Canonical host | Docs | Shared adapter snippets and named action list | ✓ WIRED | README contract test plus host regression suite. |
+| Host router/session | `CustomerSession` / `Context` | Declared session subset and optional adapter | ✓ WIRED | Router passes host options into mounts; resolver uses host policy before custom Customer provisioning. |
+| Signed context pin | Payment/checkout actions | Phoenix.Token mint/verify plus current adapter authorization | ✓ WIRED | Rendered default/delete/create and checkout forms carry pins through HTTP or LiveView; targets are reloaded under exact Customer before action. |
+| AuthHook | Home/subscription/invoice LiveViews | Resolved context assign and target-scoped reads/actions | ✓ WIRED | Pinned navigation/reconnect and subscription/invoice controls call fresh authorization paths. |
+| Host adapter | Host membership and billing facade | Resolve and authorize callbacks | ✓ WIRED | Adapter delegates live membership/action/target checks to host billing policy and keeps Admin operator authorization separate. |
+| Semantic roles | Package CSS and served assets | Admin build and Portal recompilation | ✓ WIRED | Served checks verify source/body and URL digests plus status, focus, contrast, and narrow reflow. |
+| Public API | Adopter documentation | Executable README contract test | ✓ WIRED | Docs examples and named action list are checked against current code symbols. |
 
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data variable | Source | Produces real data | Status |
 |---|---|---|---|---|
-| Portal Home/subscriptions/invoices | Customer and billing read models | Exact Customer from database; scoped billing queries | Yes | ✓ FLOWING |
-| Payment method forms | Context pin and payment methods | Rendered form plus signed context and server-loaded Customer target | Yes | ✓ FLOWING |
-| Checkout | LocalSession, Customer, provider result | Database LocalSession reload and configured processor provider operation | Yes | ✓ FLOWING |
-| Host adapter | actor, selected billable, membership | Authenticated host session and fresh host membership query | Yes | ✓ FLOWING |
-| Admin/Portal semantic output | CSS/JS | Package source compiled/embedded and served at hashed URL | Yes | ✓ FLOWING |
+| Portal Home, subscription, invoice views | Customer and billing read models | Exact DB Customer and Customer-scoped billing queries | Yes | ✓ FLOWING |
+| Payment-method forms | Context pin and payment methods | Displayed resolved context; server-side pin verification and Customer-scoped target reload | Yes | ✓ FLOWING |
+| Checkout | LocalSession, Customer, processor result | Persisted LocalSession and configured provider operation | Yes | ✓ FLOWING |
+| Host adapter | Actor, selected billable, membership | Authenticated host session and current membership query | Yes | ✓ FLOWING |
+| Admin/Portal baseline | CSS/JS | Package source compiled/embedded and served at hashed URL | Yes | ✓ FLOWING |
 
 ### Behavioral Spot-Checks
 
-| Behavior | Command/evidence | Result | Status |
+| Behavior | Evidence | Result | Status |
 |---|---|---|---|
-| Portal contract transitions, denial paths, exact Customer identity, pin actions, checkout and processor mismatch | `cd accrue_portal && HEX_HOME=/tmp/accrue-233-hex mix test --warnings-as-errors` | 72 tests, 0 failures | ✓ PASS |
-| Canonical host integration and persisted actor attribution | `cd examples/accrue_host && HEX_HOME=/tmp/accrue-233-hex mix test --warnings-as-errors` | 219 tests, 0 failures | ✓ PASS |
-| Billing facade and README examples | Included in host/Portal suites; phase validation records facade 18/18 and README 2/2 | Passing | ✓ PASS |
-| Admin/Portal served semantics and asset provenance | Final phase evidence: baseline and semantic browser runs; 27 default browser passes, 3 intentional existing skips | Passing; no capture regeneration performed during this verification | ✓ PASS |
-| Dedicated Braintree browser path | Final phase evidence and CI wiring: 4/4 | Matching-provider personal/custom success and authorization denial controls | ✓ PASS |
+| Portal identity, authorization, pin, denial, and action transitions | Current Portal suite; 110 tests, 0 failures | Passed | ✓ PASS |
+| Host adoption and actor attribution | Current host suite; 222 tests, 0 failures | Passed | ✓ PASS |
+| Core and generated docs contracts | Core 2,077 tests, 0 failures; docs verifier 46, 0 failures | Passed | ✓ PASS |
+| Current Admin/Portal baseline, context, semantic contracts | Browser refresh, 8/8 | Passed | ✓ PASS |
+| Braintree browser contracts | Phase 233 lane 12 passed; Phase 236 lane 14 passed | Passed | ✓ PASS |
+| Later-phase adjacent detail/recovery coverage | Phase 234 subscription detail 1/1; Phase 237 billing/recovery 1/1 | Passed | ✓ PASS |
 
-### Executable UAT / CI Contract
-
-The configured CI contract at `.github/workflows/ci.yml:269-271` passed all three commands: `--self-test`, `--all-opted-in` (2 opted phases, 1 complete, 3 summaries, 6 UAT checks), and `--all-since 229` (5 phases, 51 summaries, 161 automated UAT checks). The extra exploratory `--all-since 218` probe reports missing `completed` metadata in archived `218-01-SUMMARY.md`; Phase 218 is outside configured CI scope, so that archival metadata issue does not block this phase.
+Tests were not rerun in this verification; the behavioral results above are the current execution evidence supplied for this refresh. Source wiring and named test cases were inspected independently.
 
 ### Probe Execution
 
-No phase-declared or conventional phase probes were found; this phase is not a migration/tooling phase.
+No phase-declared or conventional phase probes apply; Phase 233 is not a migration or tooling phase.
 
 ### Requirements Coverage
 
 | Requirement | Source plan | Description | Status | Evidence |
 |---|---|---|---|---|
-| BASE-01 | 233-04 | Current route/flow/component/state inventory and provenance-separated current render baseline | ✓ SATISFIED | Inventory, baseline, captures, served asset hashes, baseline browser spec. |
-| SYS-01 | 233-04, 233-06 | Shared semantic roles, consistent state/focus/contrast/reflow, remove superseded local overrides | ✓ SATISFIED | Package-owned CSS changes and semantic browser checks; Admin build and served-source assertions. |
-| SYS-02 | 233-04, 233-06 | Shared roles without erasing Admin identity or host branding, no new UI dependency | ✓ SATISFIED | Distinct token namespaces, shells, brand and browser captures; no dependency added. |
-| POR-08 | 233-01, 233-02, 233-03, 233-05, 233-07 | Personal, custom, and mixed Portal billing with no operator-role bleed | ✓ SATISFIED | Personal/custom/mixed integration and browser cases; billing manager denied Admin access. |
-| SAFE-02 | 233-01, 233-02, 233-03, 233-05, 233-07 | Fresh authorization across HTTP/LiveView/reconnect and safe invalid selection behavior | ✓ SATISFIED | Negative zero-provision/zero-write tests, revocation browser path, server-loaded target checks. |
-| SAFE-03 | 233-02, 233-03, 233-05, 233-07 | Forms pinned to displayed context and exact provider/customer identity | ✓ SATISFIED | Signed pin, stale/foreign/replay denial tests, configured processor checks for checkout mount and POST. |
-| SHIP-04 | 233-05 | Canonical example/adopter docs cover optional host resolution without extra auth/runtime dependency | ✓ SATISFIED | Executable README contract, host adapter, docs, full host suite. |
+| BASE-01 | 233-04 | Current route/flow/component/state inventory and provenance-separated served baseline | ✓ SATISFIED | Current inventory, baseline, captures, asset provenance assertions; browser refresh passed. |
+| SYS-01 | 233-04, 233-06 | Shared semantic roles and observable state/focus/contrast/reflow | ✓ SATISFIED | Package CSS and served browser assertions cover text/glyph status, visible focus, contrast, and 320px reflow. |
+| SYS-02 | 233-04, 233-06 | Shared roles preserve Admin identity, host brand, distinct shells/tokens, and no new UI dependency | ✓ SATISFIED | Separate token namespaces and consumer shells verified in source/browser; manifests show no added dependency. |
+| POR-08 | 233-01, 233-02, 233-03, 233-05, 233-07 | Personal, custom, and mixed Portal context without operator-role bleed | ✓ SATISFIED | Exact identity, personal/mixed selection, manager/Admin boundary and host browser controls. |
+| SAFE-02 | 233-01, 233-02, 233-03, 233-05, 233-07 | Fresh authorization, safe invalid selection, no unauthorized provisioning or writes | ✓ SATISFIED | Denial/revocation/reconnect/no-provision/no-token/no-write cases in focused suites and browser controls. |
+| SAFE-03 | 233-02, 233-03, 233-05, 233-07 | Forms and checkout pinned to displayed billable, Customer, and processor | ✓ SATISFIED | Rendered form pins, exact target checks, mismatched processor and replay controls. |
+| SHIP-04 | 233-05 | Adopter docs and canonical example cover personal/custom/mixed use without new auth/runtime dependency | ✓ SATISFIED | Canonical adapter, host example, install template, and executable docs contract; no dependency additions. |
 
-No additional Phase 233 requirements were found orphaned from the plans.
+No Phase 233 requirement is orphaned from the plans.
 
 ### Decision Coverage
 
-All 17 trackable CONTEXT.md decisions are honored by shipped artifacts. The decision-coverage gate is non-blocking and reports no unhonored decisions.
+The current validation record reports 17/17 trackable context decisions honored. This is non-blocking; no decision drift is identified.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 |---|---:|---|---|---|
-| — | — | No unresolved debt markers, empty implementations, data stubs, or unwired artifacts found in reviewed phase implementation files. | — | — |
+| — | — | No unresolved TODO/FIXME/XXX markers, empty implementations, or disconnected data paths found in reviewed phase implementation files. | — | — |
 
-The UI review's 20/24 score records four inherited spacing/type/theme/dense-Admin observations with explicit later-phase dispositions in `233-UI-DISPOSITION.md`; they are outside this phase's bounded shared-role/current-baseline scope and do not contradict its verified criteria. The Admin capture itself shows tightly wrapped metric-card labels, matching the documented Phase 234/237 follow-up.
-
-### Prohibition Checks
-
-| Prohibition | Evidence | Status |
-|---|---|---|
-| Do not grant customer billing managers Admin operator access or imply that power in Portal | Host browser and access tests deny the non-Admin manager at Admin while allowing authorized billing; separate package shells/copy | ✓ VERIFIED |
-| Do not relabel unavailable custom selection as personal | Generic blocked page and no-fallback tests | ✓ VERIFIED |
-| Do not retarget forms when host selection changes | Rendered context-pin and cross-tab tests | ✓ VERIFIED |
-| Do not trust cached action/preview after revocation | Fresh event/reconnect authorization and zero-mutation tests | ✓ VERIFIED |
-| Do not use historical screenshots or old pass counts as current evidence | Baseline marks historical evidence and records fresh source/asset provenance | ✓ VERIFIED |
-| Do not let semantic alignment imply operator powers or erase host branding | Current captures, semantic browser assertions, and design contract | ✓ VERIFIED |
-| Do not require organizations, host roles, a picker, or a new auth/runtime dependency | Optional adapter contract, personal default, compiled docs, package manifest review | ✓ VERIFIED |
+The few `placeholder` matches are expected secure-field input hints and CSS `::placeholder` styling, not implementation stubs. The UI review’s inherited spacing/type/theme-size and dense Admin observations have explicit dispositions in `233-UI-DISPOSITION.md`; they are outside this bounded semantic-contract goal and are not unresolved Phase 233 gaps.
 
 ### Human Verification Required
 
-None. All roadmap and plan behaviors have deterministic test or browser evidence; `behavior_unverified: 0`. No deferred `<human-check>` blocks were present in the seven plans. The five retained captures were inspected; visual refinements outside the bounded phase are documented for owning later phases.
+None. The phase’s stable behavior and current served baseline contracts have deterministic integration and browser evidence. No recurring manual UAT is required by the validation strategy.
 
 ### Gaps Summary
 
-No goal-blocking gaps found. The no-adapter path deliberately preserves a sole existing Customer for reads, while both checkout LiveView capability issuance and POST mutation require that Customer/LocalSession processor to match the configured processor. Dynamic processor routing is outside the phase contract. Both matching-provider success controls and mismatch zero-token/zero-write controls are present and passing. The separate Braintree browser lane is test-only, wired into host verification and CI, and does not claim live-provider fidelity.
+No unresolved gaps. The prior report’s scope and fingerprint were stale; current source, plans, requirements, and fresh execution evidence support all five roadmap truths, all 24 plan-specific truths, and all seven Phase 233 requirements. Security review records 16/16 threats closed, code review reports no findings, and the UI audit’s observations are explicitly dispositioned.
 
 ---
 
-_Verified: 2026-10-07T23:15:02Z_
-_Verifier: gsd-verifier_
+_Verified: 2026-10-09T02:22:10Z_
+_Verifier: the agent (gsd-verifier)_
