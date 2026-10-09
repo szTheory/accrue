@@ -9,7 +9,7 @@
 ### Shared design and interaction system
 
 - [x] **DSN-01**: Operators can scan identity, current facts and next actions through consistent shared typography, spacing and hierarchy in existing list, detail and action-review compositions.
-- [ ] **DSN-02**: Operators can read essential facts and activate controls with long or missing data at narrow, desktop and tablet/coarse-pointer layouts, including text enlargement and zoom without lost task access.
+- [x] **DSN-02**: Operators can read essential facts and activate controls with long or missing data at narrow, desktop and tablet/coarse-pointer layouts, including text enlargement and zoom without lost task access.
 - [ ] **DSN-03**: Operators can select and retain Light, Dark or System, with one selected preference, correct effective styles and existing host-forced theme behavior.
 - [ ] **DSN-04**: Operators retain correct labels, icons, disabled state and task context through actual busy completion, repeated LiveView updates and reconnect, without premature enabling or replay of a staged action.
 - [ ] **DSN-05**: Keyboard users can complete touched navigation and review flows with visible focus, associated validation/status semantics, overlay containment and logical focus return after dismissal, correction or replacement.
@@ -77,7 +77,7 @@ Each approved requirement has one primary phase owner in the approved roadmap. S
 | Requirement | Phase | Status |
 |---|---|---|
 | DSN-01 | Phase 240 | Complete |
-| DSN-02 | Phase 240 | Pending |
+| DSN-02 | Phase 240 | Complete |
 | DSN-03 | Phase 240 | Pending |
 | DSN-04 | Phase 240 | Pending |
 | DSN-05 | Phase 240 | Pending |
