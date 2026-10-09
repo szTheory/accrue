@@ -443,7 +443,7 @@ defmodule AccrueAdmin.DataTableTest do
        %{
          conn: conn
        } do
-    {:ok, view, html} =
+    {:ok, view, _html} =
       live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
 
     html = render_click(element(view, "[data-role='toggle-all']"))

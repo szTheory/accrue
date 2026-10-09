@@ -377,34 +377,6 @@ defmodule AccrueAdmin.Live.WebhookLive do
     |> assign(:detail_unavailable?, false)
   end
 
-  defp assign_webhook(socket, webhook) do
-    events = derived_events(webhook.id)
-
-    socket
-    |> assign(:webhook, webhook)
-    |> assign(
-      :current_path,
-      scoped_mount_path(
-        socket.assigns.admin_mount_path,
-        "/webhooks",
-        socket.assigns.current_owner_scope,
-        %{}
-      )
-    )
-    |> assign(:attempt_history, attempt_history(webhook.id))
-    |> assign(:derived_events, events)
-    |> assign(
-      :related_items,
-      related_items(
-        webhook,
-        events,
-        socket.assigns.admin_mount_path,
-        socket.assigns.current_owner_scope
-      )
-    )
-    |> assign(:replay_state, replay_state_for(webhook))
-  end
-
   defp assign_webhook(socket, webhook, attempts, events) do
     socket
     |> assign(:webhook, webhook)
