@@ -149,6 +149,26 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     refute html =~ ~s(class="ax-kpi-grid")
   end
 
+  test "invoice action fixture retains the scoped target and raw money contract", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    customer = TestRepo.get!(Customer, invoice.customer_id)
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert invoice.status == :draft
+    assert invoice.amount_due_minor == 9_900
+    assert invoice.currency == "usd"
+    assert customer.owner_type == "User"
+    assert is_binary(customer.owner_id)
+
+    assert {:ok, view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    assert has_element?(view, "[data-ax-primary-action]", Copy.Invoice.invoice_action_finalize())
+    assert html =~ "INV-2000"
+    assert invoice.customer_id == customer.id
+  end
+
   test "invoice contextual return rebuilds active owner scope and rejects foreign customer origin",
        %{
          conn: conn,
