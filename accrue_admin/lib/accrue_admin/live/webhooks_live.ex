@@ -166,12 +166,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   defp replay_scoped_rows(ids, owner_scope) do
     selected_rows =
       ids
-      |> Enum.map(fn id ->
-        case Webhooks.detail(id, owner_scope) do
-          {:ok, row} -> %{id: row.id, row: row}
-          _inaccessible -> %{id: nil, row: nil}
-        end
-      end)
+      |> Enum.map(&selected_replay_row(&1, owner_scope))
       |> Enum.sort_by(
         fn %{id: id, row: row} ->
           received_at =
@@ -188,30 +183,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
       Enum.count(selected_rows, fn %{row: row} -> row && row.status in [:failed, :dead] end)
 
     outcomes =
-      Enum.map(selected_rows, fn %{id: id, row: row} ->
-        case row do
-          %{status: status} when status not in [:failed, :dead] ->
-            %{id: id, outcome: :skipped, attempted: false}
-
-          nil ->
-            %{id: nil, outcome: :skipped, attempted: false}
-
-          %{id: id} ->
-            case Webhooks.detail(id, owner_scope) do
-              {:ok, %{status: status}} when status in [:failed, :dead] ->
-                case requeue_delivery(id) do
-                  {:ok, _queued} -> %{id: id, outcome: :queued, attempted: true}
-                  {:error, _reason} -> %{id: id, outcome: :failed, attempted: true}
-                end
-
-              {:ok, _still_scoped_but_ineligible} ->
-                %{id: id, outcome: :skipped, attempted: false}
-
-              _stale_or_inaccessible ->
-                %{id: nil, outcome: :skipped, attempted: false}
-            end
-        end
-      end)
+      Enum.map(selected_rows, &replay_outcome/1)
 
     queued = Enum.count(outcomes, &(&1.outcome == :queued))
 
@@ -224,6 +196,39 @@ defmodule AccrueAdmin.Live.WebhooksLive do
       failed: Enum.count(outcomes, &(&1.outcome == :failed)),
       outcomes: outcomes
     }
+  end
+
+  defp selected_replay_row(id, owner_scope) do
+    case Webhooks.detail(id, owner_scope) do
+      {:ok, row} -> %{id: row.id, row: row}
+      _inaccessible -> %{id: nil, row: nil}
+    end
+  rescue
+    _read_error -> %{id: nil, row: nil, read_failed?: true}
+  end
+
+  defp replay_outcome(%{read_failed?: true}),
+    do: %{id: nil, outcome: :failed, attempted: true}
+
+  defp replay_outcome(%{id: nil}),
+    do: %{id: nil, outcome: :skipped, attempted: false}
+
+  defp replay_outcome(%{id: id, row: %{status: status}}) when status not in [:failed, :dead],
+    do: %{id: id, outcome: :skipped, attempted: false}
+
+  defp replay_outcome(%{id: id}) do
+    try do
+      case requeue_delivery(id) do
+        {:ok, _queued} -> %{id: id, outcome: :queued, attempted: true}
+        {:error, reason} when reason in [:already_replayed, :not_dead_lettered, :not_found] ->
+          %{id: id, outcome: :skipped, attempted: false}
+
+        {:error, _reason} -> %{id: id, outcome: :failed, attempted: true}
+        _unexpected -> %{id: id, outcome: :failed, attempted: true}
+      end
+    rescue
+      _queue_error -> %{id: id, outcome: :failed, attempted: true}
+    end
   end
 
   defp canonical_ids(ids) do

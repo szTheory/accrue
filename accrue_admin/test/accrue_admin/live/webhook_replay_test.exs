@@ -327,7 +327,11 @@ defmodule AccrueAdmin.WebhookReplayTest do
     last = set_received_at(last, ~U[2026-01-01 10:00:00.000000Z])
 
     Application.put_env(:accrue_admin, :webhook_requeue_fun, fn id ->
-      if id == failed.id, do: {:error, :injected_failure}, else: Accrue.Webhooks.DLQ.requeue(id)
+      if id == failed.id do
+        raise "injected queue exception"
+      else
+        Accrue.Webhooks.DLQ.requeue(id)
+      end
     end)
 
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
