@@ -272,6 +272,84 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     end
   end
 
+  describe "Wave 0 raw recovery event fixtures" do
+    test "keeps UTC bounds, event identity, currency, and minor units as stored facts" do
+      reference = DateTime.utc_now()
+
+      fixtures =
+        [7, 30, 90]
+        |> Enum.with_index()
+        |> Enum.flat_map(fn {days, index} ->
+          boundary = DateTime.add(reference, -days, :day)
+
+          [
+            insert_raw_recovery_event(
+              "sub_wave0_#{days}d_at",
+              boundary,
+              Enum.at(["usd", "jpy", "kwd"], index),
+              Enum.at([12_345, 1_234, 567], index)
+            ),
+            insert_raw_recovery_event(
+              "sub_wave0_#{days}d_outside",
+              DateTime.add(boundary, -1, :second),
+              Enum.at([nil, "unsupported", "usd"], index),
+              Enum.at([0, 9_876, 100], index)
+            )
+          ]
+        end)
+
+      # Two distinct ledger rows at the same UTC instant remain distinguishable.
+      duplicate_timestamp = DateTime.add(reference, -7, :day)
+
+      same_instant =
+        insert_raw_recovery_event(
+          "sub_wave0_same_instant",
+          duplicate_timestamp,
+          "usd",
+          0
+        )
+
+      zero_fixtures = []
+      one_fixture = Enum.take(fixtures, 1)
+      multiple_fixtures = fixtures
+
+      assert zero_fixtures == []
+      assert length(one_fixture) == 1
+      assert length(multiple_fixtures) > 1
+      assert Enum.map(fixtures, & &1.id) |> Enum.uniq() |> length() == length(fixtures)
+
+      assert same_instant.id != Enum.at(fixtures, 0).id
+      assert same_instant.inserted_at == duplicate_timestamp
+      assert Enum.at(fixtures, 0).inserted_at == duplicate_timestamp
+
+      Enum.each(fixtures ++ [same_instant], fn fixture ->
+        persisted = TestRepo.get!(Event, fixture.id)
+        assert persisted.id == fixture.id
+        assert persisted.subject_id == fixture.subject_id
+        assert persisted.inserted_at == fixture.inserted_at
+        assert persisted.data == fixture.data
+      end)
+
+      assert Enum.map(fixtures, & &1.data["currency"]) == [
+               "usd",
+               nil,
+               "jpy",
+               "unsupported",
+               "kwd",
+               "usd"
+             ]
+
+      assert Enum.map(fixtures, & &1.data["mrr_value_cents"]) == [
+               12_345,
+               0,
+               1_234,
+               9_876,
+               567,
+               100
+             ]
+    end
+  end
+
   # Returns the trimmed text content of the link element carrying aria-current="page".
   # Returns nil if no active button is found, surfacing the bug immediately via
   # a clean assertion failure rather than a FunctionClauseError from List.first(nil).
@@ -464,5 +542,21 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
         actor_type: "system",
         data: data
       })
+  end
+
+  defp insert_raw_recovery_event(subject_id, inserted_at, currency, cents) do
+    data = %{"mrr_value_cents" => cents}
+    data = if is_nil(currency), do: data, else: Map.put(data, "currency", currency)
+
+    %Event{
+      type: "dunning.recovered",
+      subject_type: "Subscription",
+      subject_id: subject_id,
+      actor_type: "system",
+      schema_version: 1,
+      data: data,
+      inserted_at: inserted_at
+    }
+    |> TestRepo.insert!()
   end
 end
