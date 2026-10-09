@@ -4338,6 +4338,17 @@ details[open].ax-dropdown .ax-dropdown-panel {
   color: var(--ax-accent-readable);
 }
 
+/* At intermediate touch widths the desktop table remains the active layout.
+   Preserve compact rows for fine pointers, but give table links the shared
+   44px frequent-action target when the input is coarse. */
+@media (pointer: coarse) {
+  .ax-data-table-shell .ax-link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+  }
+}
+
 html.accrue-admin[data-theme="dark"] .ax-card.ax-data-table-shell {
   background-color: #171d24 !important;
 }
