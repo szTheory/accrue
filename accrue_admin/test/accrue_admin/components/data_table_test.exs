@@ -9,7 +9,9 @@ defmodule AccrueAdmin.DataTableTest do
 
     def start_link(_opts) do
       Agent.start_link(
-        fn -> %{rows: [], list_calls: [], count_calls: [], fail_lists?: false} end,
+        fn ->
+          %{rows: [], list_calls: [], count_calls: [], fail_lists?: false, fail_counts?: false}
+        end,
         name: __MODULE__
       )
     end
@@ -17,6 +19,8 @@ defmodule AccrueAdmin.DataTableTest do
     def put_rows(rows), do: Agent.update(__MODULE__, &Map.put(&1, :rows, rows))
     def fail_lists, do: Agent.update(__MODULE__, &Map.put(&1, :fail_lists?, true))
     def recover_lists, do: Agent.update(__MODULE__, &Map.put(&1, :fail_lists?, false))
+    def fail_counts, do: Agent.update(__MODULE__, &Map.put(&1, :fail_counts?, true))
+    def recover_counts, do: Agent.update(__MODULE__, &Map.put(&1, :fail_counts?, false))
 
     def consume_list_failure do
       Agent.get_and_update(__MODULE__, fn state ->
@@ -39,6 +43,7 @@ defmodule AccrueAdmin.DataTableTest do
     def list_calls, do: Agent.get(__MODULE__, &Enum.reverse(&1.list_calls))
     def count_calls, do: Agent.get(__MODULE__, &Enum.reverse(&1.count_calls))
     def rows, do: Agent.get(__MODULE__, & &1.rows)
+    def count_failure?, do: Agent.get(__MODULE__, & &1.fail_counts?)
   end
 
   defmodule FixtureQuery do
@@ -69,6 +74,10 @@ defmodule AccrueAdmin.DataTableTest do
     @impl true
     def count_newer_than(opts \\ []) do
       FixtureStore.record_count_call(opts)
+
+      if FixtureStore.count_failure?() do
+        raise DBConnection.ConnectionError, message: "fixture database unavailable"
+      end
 
       filter = Keyword.get(opts, :filter, %{})
       cursor = AccrueAdmin.Queries.Behaviour.decode_cursor(opts)
@@ -417,6 +426,41 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ ~s(data-ax-state="populated")
     assert html =~ "Newest open"
     refute html =~ ~s(data-role="unavailable-state")
+  end
+
+  test "poll count failure keeps rows visible and an explicit retry recovers", %{conn: conn} do
+    {:ok, view, html} =
+      live_isolated(conn, TableLive,
+        session: %{"params" => %{}, "poll_interval_ms" => 0}
+      )
+
+    assert html =~ "Newest open"
+
+    FixtureStore.put_rows([
+      %{
+        id: "row-6",
+        label: "Newest added",
+        status: "open",
+        category: "zeta",
+        inserted_at: ~U[2026-04-15 17:00:06Z]
+      }
+      | FixtureStore.rows()
+    ])
+
+    FixtureStore.fail_counts()
+    Phoenix.LiveView.send_update(view.pid, DataTable, id: "fixtures", action: :poll)
+    html = render(view)
+
+    assert html =~ ~s(data-role="poll-read-error")
+    assert html =~ "Newest open"
+    refute html =~ ~s(data-role="unavailable-state")
+
+    FixtureStore.recover_counts()
+    html = render_click(element(view, "[data-role='retry-poll']"))
+
+    refute html =~ ~s(data-role="poll-read-error")
+    assert html =~ "1 new rows - click to load"
+    assert html =~ "Newest open"
   end
 
   test "load-more failure keeps loaded rows and retry loads the failed page", %{conn: conn} do

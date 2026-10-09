@@ -58,6 +58,7 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:enable_polling, fn -> true end)
       |> assign_new(:poll_interval_ms, fn -> 5_000 end)
       |> assign_new(:newer_count, fn -> 0 end)
+      |> assign_new(:poll_error?, fn -> false end)
       |> assign_new(:read_error, fn -> nil end)
       |> assign_new(:failed_cursor, fn -> nil end)
       |> assign_new(:unavailable_copy, fn -> "This history could not be loaded. Try again." end)
@@ -308,6 +309,10 @@ defmodule AccrueAdmin.Components.DataTable do
      |> refresh_state()}
   end
 
+  def handle_event("retry-poll", _params, socket) do
+    {:noreply, socket |> poll_newer() |> refresh_state()}
+  end
+
   slot(:list_status)
 
   @impl true
@@ -352,6 +357,13 @@ defmodule AccrueAdmin.Components.DataTable do
           data-phase191-focus="load-newer"
         >
           Load newer rows
+        </button>
+      </div>
+
+      <div :if={@poll_error?} class="ax-data-table-partial-alert" data-role="poll-read-error" role="alert">
+        <p class="ax-body">Could not check for newer rows. The rows shown remain available, and polling will retry automatically.</p>
+        <button type="button" phx-click="retry-poll" phx-target={@myself} class="ax-button ax-button-secondary" data-role="retry-poll">
+          Retry check
         </button>
       </div>
 
@@ -843,24 +855,34 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   defp poll_newer(socket) do
-    count =
-      case top_cursor(socket) do
-        nil ->
-          0
+    case top_cursor(socket) do
+      nil ->
+        socket
+        |> assign(:newer_count, 0)
+        |> assign(:poll_error?, false)
 
-        cursor ->
-          socket.assigns.query_module.count_newer_than(
-            query_opts(
-              socket.assigns.filter,
-              cursor,
-              nil,
-              Map.get(socket.assigns, :current_owner_scope)
-            )
-            |> Keyword.delete(:limit)
+      cursor ->
+        opts =
+          query_opts(
+            socket.assigns.filter,
+            cursor,
+            nil,
+            Map.get(socket.assigns, :current_owner_scope)
           )
-      end
+          |> Keyword.delete(:limit)
 
-    assign(socket, :newer_count, count)
+        try do
+          case socket.assigns.query_module.count_newer_than(opts) do
+            {:error, %DBConnection.ConnectionError{}} -> assign(socket, :poll_error?, true)
+            count ->
+              socket
+              |> assign(:newer_count, count)
+              |> assign(:poll_error?, false)
+          end
+        rescue
+          _error in DBConnection.ConnectionError -> assign(socket, :poll_error?, true)
+        end
+    end
   end
 
   defp top_cursor(socket) do
