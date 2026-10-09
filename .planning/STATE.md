@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 237
 current_phase_name: Admin Invoices, Payments & Recovery
 status: executing
-stopped_at: Phase 237 UI-SPEC approved
-last_updated: "2026-10-08T23:55:58.871Z"
+stopped_at: Completed 237-01-PLAN.md
+last_updated: "2026-10-08T23:59:52.985Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 237 execution started
-state_head: afad17221d7638990a77861f3ecc3de274185468
+state_head: 70b11687d2e628942a2bcff14fe1af529e08b275
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 35
-  completed_plans: 27
+  completed_plans: 28
   percent: 57
 ---
 
@@ -33,8 +33,8 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 237 (Admin Invoices, Payments & Recovery) — EXECUTING
-Plan: 1 of 8
-Status: Executing Phase 237
+Plan: 2 of 8
+Status: Ready to execute
 Last activity: 2026-10-08 — Phase 237 execution started
 
 ## Performance Metrics
@@ -129,6 +129,7 @@ Last activity: 2026-10-08 — Phase 237 execution started
 | Phase 236 P04 | 12 min | 2 tasks | 8 files |
 | Phase 236 P03 | 18min | 2 tasks | 10 files |
 | Phase 236 P06 | 42min | 3 tasks | 6 files |
+| Phase 237 P01 | 3min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -262,6 +263,7 @@ Last activity: 2026-10-08 — Phase 237 execution started
 - [Phase 236]: Phase 236: Gate subscription actions on observed lifecycle and provider capabilities, and freshly authorize the exact target at mutation time.
 - [Phase 236]: Braintree mock evidence covers application style handoff and deterministic lifecycle, not live-provider iframe rendering.
 - [Phase 236]: Refresh Hosted Fields through teardown/create when effective Portal theme colors change.
+- [Phase 237]: Use fixed UTC invoice fixtures and characterize current scoped list behavior before adding presentation expectations in plan 04.
 
 ### Pending Todos
 
@@ -336,9 +338,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-08T23:41:34.577Z
-Stopped at: Phase 237 UI-SPEC approved
-Resume file: .planning/phases/237-admin-invoices-payments-recovery/237-UI-SPEC.md
+Last session: 2026-10-08T23:59:52.919Z
+Stopped at: Completed 237-01-PLAN.md
+Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
