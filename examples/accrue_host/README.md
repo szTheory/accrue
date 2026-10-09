@@ -7,6 +7,8 @@ operator surface remains **Accrue Admin**.
 
 ## Start Here
 
+Phase 239's [read-only preview handoff](../../.planning/phases/239-integrated-quality-handoff/239-HANDOFF.md) summarizes current local evidence, optional feedback boundaries, and the separate proof path.
+
 The whole happy path is three steps:
 
 ```bash
