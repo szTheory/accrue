@@ -76,7 +76,7 @@ plan_head_after: 371d1b23b745d2237eec2f9ff29f356913c5c0a2
 1. **Task 1: Document preview and proof isolation from current host contracts** — `371d1b23` (docs)
 2. **Task 2: Check handoff reachability and local/remote evidence wording** — verification only; no additional source changes.
 
-**Plan metadata:** pending.
+**Plan metadata:** `b8caa8c2` (GSD summary/state/roadmap commit).
 
 ## Files Created/Modified
 
