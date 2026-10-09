@@ -3,9 +3,10 @@ gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 status: planning
-stopped_at: v1.64 approved — focused diligence and requirements definition
-last_updated: "2026-10-09T17:08:53.504Z"
+stopped_at: v1.64 diligence complete — awaiting requirements confirmation
+last_updated: "2026-10-09T17:19:59Z"
 last_activity: 2026-10-09
+last_activity_desc: v1.64 bounded upstream diligence complete; 18 requirements drafted
 progress:
   total_phases: 0
   completed_phases: 0
@@ -22,16 +23,16 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.64 Admin Operator UI Cleanup approved; complete one focused multi-lens diligence pass, then confirm scoped requirements and roadmap. Read the [kickoff note](notes/2026-10-09-admin-operator-impeccable-kickoff.md) and [focused diligence](research/v1.64/).
+**Current focus:** v1.64 scope/version approved and bounded three-lens upstream diligence complete. Await confirmation of the [18 proposed requirements](REQUIREMENTS.md), then create/approve the roadmap. Read the [decision summary](research/v1.64/SUMMARY.md); no repeat stocktake, research or Impeccable init.
 **Progress:** [░░░░░░░░░░] 0% (new milestone; phase structure pending approval)
 **Planned work completed:** No v1.64 execution plans yet. v1.63 closed at 45/45 plans across Phases 233–239.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (requirements confirmation)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-10-09 — Milestone v1.64 started
+Status: Awaiting requirements confirmation
+Last activity: 2026-10-09 — v1.64 diligence complete; 18 requirements drafted
 
 ## Performance Metrics
 
@@ -316,7 +317,7 @@ Last activity: 2026-10-09 — Milestone v1.64 started
 
 ### Pending Todos
 
-- Finish the already-started `$gsd-new-milestone Admin Operator UI Cleanup`: scope/version approved, additional bounded diligence requested, requirements/roadmap confirmation pending. Reuse Impeccable initialization and closed v1.63 contracts. First new phase is expected at 240; do not restart the kickoff or repeat the stocktake.
+- Finish the already-started `$gsd-new-milestone Admin Operator UI Cleanup`: scope/version approved, focused diligence complete, 18 requirements drafted; requirements confirmation and roadmap approval remain. Load [SUMMARY.md](research/v1.64/SUMMARY.md) and [REQUIREMENTS.md](REQUIREMENTS.md). Reuse Impeccable initialization and closed v1.63 contracts. First new phase is expected at 240; do not restart kickoff, research or the stocktake.
 
 ### Deferred / Dormant
 
@@ -393,9 +394,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T15:29:55Z
-Stopped at: v1.64 approved — focused diligence and requirements definition
-Resume file: .planning/notes/2026-10-09-admin-operator-impeccable-kickoff.md
+Last session: 2026-10-09T17:19:59Z
+Stopped at: v1.64 diligence complete — awaiting requirements confirmation
+Resume file: .planning/research/v1.64/SUMMARY.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -524,5 +525,5 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Continue the active new-milestone workflow through focused diligence, requirements confirmation, and roadmap approval; no fresh command is needed at this checkpoint.
+- Reply to the 18-requirement confirmation to continue the active new-milestone workflow, then approve the concrete roadmap. Focused diligence is complete; no fresh command or repeated review is needed at this checkpoint.
 - Phase 239/v1.63 are closed. After roadmap approval, the expected next command is `$gsd-plan-phase 240`. Reuse the [kickoff stocktake](notes/2026-10-09-admin-operator-impeccable-kickoff.md); Impeccable init and code-first are settled.
