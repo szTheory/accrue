@@ -123,3 +123,11 @@ Before browser evidence, run `cd accrue_admin && mix accrue_admin.assets.build` 
 | Gaps found | 0 |
 | Resolved | 0 |
 | Escalated | 0 |
+
+### Regression refresh — Phase 237 gate
+
+- Reused the completed Phase 237 regression gate as current cross-phase evidence: Core 2,077 passed / 0 failed (11 excluded), Admin 581 / 0, Portal 110 / 0, and Host 222 / 0.
+- The Phase 234 subscription browser journey passed 1/1 in that gate. The broader browser lanes also passed: standard Fake 14, real-query search 1, Phase 233 Braintree 12, and Phase 236 Braintree 14.
+- This refresh adds no Phase 234-specific acceptance behavior: the phase's existing task map, focused package checks, dedicated browser journeys, security controls, and real-pool search completion test already cover its requirements. No test file or implementation change is needed; no human UAT is required for this deterministic contract.
+
+**Nyquist refresh result:** no uncovered recurring behavior found; existing automated coverage remains compliant. Phase verification should still be rerun because the GSD status query reports its previous verification digest as stale after covered source changes.

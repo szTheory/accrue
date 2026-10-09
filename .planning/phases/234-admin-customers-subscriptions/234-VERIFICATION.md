@@ -1,6 +1,6 @@
 ---
 phase: 234-admin-customers-subscriptions
-verified: 2026-10-08T03:33:44Z
+verified: 2026-10-09T02:34:37Z
 status: passed
 score: 18/18 must-haves verified
 covered_files:
@@ -57,7 +57,7 @@ covered_files:
   - examples/accrue_host/package.json
   - examples/accrue_host/playwright.config.js
   - examples/accrue_host/playwright.search.config.js
-covered_digest: "v3:sha256:997521492d55e953bc9945c419357cf941ebfefefd3f822b70e521434ae6bd4f"
+covered_digest: "v3:sha256:3b0699ca52b06c3ab19ea5eafc4c2368b35fc112a1a8636d9719e6a7f6e47fde"
 behavior_unverified: 0
 overrides_applied: 0
 decision_coverage:
@@ -79,7 +79,7 @@ re_verification:
 # Phase 234: Admin Customers & Subscriptions Verification Report
 
 **Phase Goal:** Operators can find and investigate the correct customer and subscription, understand observed lifecycle truth, and complete only supported subscription actions.
-**Verified:** 2026-10-08T03:33:44Z
+**Verified:** 2026-10-09T02:34:37Z
 **Status:** passed
 **Re-verification:** Yes — after 234-08 evidence closure
 
@@ -154,14 +154,16 @@ The artifact and key-link queries returned zero declarations for plans 01–08 d
 
 | Behavior | Command/evidence | Result | Status |
 |---|---|---|---|
-| Expired step-up requires a fresh challenge before continuation | mix test test/accrue_admin/live/step_up_test.exs:204 | Current verifier run: 1 test, 0 failures; continuation count 0 before verification and 1 after valid code | ✓ PASS |
-| Async search result updates the originating LiveView | mix test test/accrue_admin/components/global_search_test.exs:246 | Current verifier run: 1 test, 0 failures | ✓ PASS |
+| Expired step-up requires a fresh challenge before continuation | `step_up_test.exs` named expiry test; included in the latest Admin suite | Continuation count is asserted as 0 before verification and 1 after valid code; latest Admin suite passed 581/0 | ✓ PASS |
+| Async search result updates the originating LiveView | `global_search_test.exs` named update-target test; included in the latest Admin suite | The test asserts the originating LiveView update target; latest Admin suite passed 581/0 | ✓ PASS |
 | Real scoped database search completes, navigates, and removes stale match | ACCRUE_HOST_E2E_DISABLE_SQL_SANDBOX=1 ACCRUE_HOST_BROWSER_PORT=4102 npm run e2e:search -- --workers=1 | UAT records two consecutive runs, 1/1 each | ✓ PASS |
 | Nested step-up keyboard/no-mutation journey | env -u ACCRUE_HOST_E2E_DISABLE_SQL_SANDBOX npm run e2e -- e2e/phase234-admin-customers-subscriptions.spec.js --workers=1 | UAT records 2/2 passed; desktop and 320px coarse-pointer cases | ✓ PASS |
-| Phase 234-08 focused ExUnit and browser validation | global_search_test.exs plus step_up_test.exs; updated Phase 234 Playwright spec | 19/19 ExUnit; 2/2 browser tests, 0 skipped | ✓ PASS |
+| Current cross-package regression gate | Core, Admin, Portal, Host | Core 2,077/0 (11 excluded); Admin 581/0; Portal 110/0; Host 222/0 | ✓ PASS |
+| Current package docs verifier | Package documentation | 46/0 | ✓ PASS |
+| Phase 234 browser journey | `phase234-admin-customers-subscriptions.spec.js` | 1/1 passed in the latest regression gate | ✓ PASS |
+| Current cross-phase served browser lanes | Standard Fake, real-query search, Phase 233 Braintree, Phase 236 Braintree | 14/14, 1/1, 12/12, 14/14 respectively | ✓ PASS |
 | Full Phase 234 UAT | .planning/phases/234-admin-customers-subscriptions/234-UAT.md | 23/23 automated checks passed; 0 issues, pending, skipped, or blocked; four former gaps resolved | ✓ PASS |
 | Phase 234 package and asset validation before 234-08 | Admin package suite and asset build recorded in UAT/validation artifacts | 550 tests, 0 failures; asset build passed. 234-08 separately rebuilt assets and reran focused tests/browser checks. | ✓ PASS |
-| Phase 233 regression baseline | Core 2,071 tests/0 failures (11 excluded); Portal 72/0; host 219/0; browser set 8/8 | Passed after ae64e0cd corrected the stale dashboard badge expectation and an unallowlisted line-height declaration | ✓ PASS |
 
 ### Probe Execution
 
@@ -188,16 +190,16 @@ GSD decision coverage reports 28/28 CONTEXT decisions honored, with no non-honor
 |---|---|---|
 | 234-VALIDATION.md | validated, Nyquist-compliant; Phase 234-01..07 task/wave evidence recorded as passed | The later real-pool search, step-up, and measurable UI checks are recorded in 234-08-SUMMARY.md and 234-UAT.md; the former sandbox search limitation has a dedicated lane. |
 | 234-SECURITY.md | verified; 18/18 threats closed, 0 open, no accepted risks | Supports mounted denial and forged-action findings; implementation and controls were checked independently. |
-| 234-UI-REVIEW.md | 15/24, completed before 234-08; fresh Playwright capture had failed then | Its small-type finding is addressed by 14px/1.2 computed-style assertions and CSS update. The remaining dense-row/subpixel-spacing suggestions are non-blocking polish; current keyboard, action reachability, axe, theme, and narrow checks cover the roadmap contract. |
-| 234-REVIEW.md | standard source review; 24 files, 0 critical, 0 warning, 0 info; clean | No additional code-review blocker. |
-| 234-08-SUMMARY.md and 234-UAT.md | Plan 08 complete; 23/23 checks passed; four gaps resolved | UAT claims were corroborated against current test definitions, source changes, and CI wiring; new named expiry and update-target tests also passed in this verifier run. |
+| 234-UI-REVIEW.md | 16/24, refreshed 2026-10-08 | Its small-type finding is addressed by 14px/1.2 computed-style assertions and CSS update. The remaining density, copy, and spacing suggestions are non-blocking polish; current keyboard, action reachability, axe, theme, and narrow checks cover the roadmap contract. |
+| 234-REVIEW.md | standard source review; 34 files, 0 findings; clean | No additional code-review blocker. |
+| 234-08-SUMMARY.md and 234-UAT.md | Plan 08 complete; 23/23 checks passed; four gaps resolved | Current test definitions and CI wiring were checked against the recorded evidence; no tests were rerun for this digest refresh. |
 
 ### Test Quality Audit
 
 | Test File | Linked Requirement | Result | Assessment |
 |---|---|---|---|
-| accrue_admin/test/accrue_admin/components/global_search_test.exs | ADM-03, SAFE-01 | 19/19 focused tests reported; named update-target test rerun 1/1 | Covers empty/partial failure and stale scope/query; real-pool E2E proves the DB-backed completion path. |
-| accrue_admin/test/accrue_admin/live/step_up_test.exs | ADM-04, SAFE-01 | 5/5 focused tests reported; named expiry test rerun 1/1 | Expired timestamp blocks continuation until valid challenge. |
+| accrue_admin/test/accrue_admin/components/global_search_test.exs | ADM-03, SAFE-01 | Phase 234 recorded 19/19 focused tests; latest Admin suite passed 581/0 | Covers empty/partial failure and stale scope/query; real-pool E2E proves the DB-backed completion path. |
+| accrue_admin/test/accrue_admin/live/step_up_test.exs | ADM-04, SAFE-01 | Phase 234 recorded 5/5 focused tests; latest Admin suite passed 581/0 | Expired timestamp blocks continuation until valid challenge. |
 | Mounted customer/subscription/invoice/charge/scoped-path tests | ADM-01, ADM-03, SAFE-01 | Focused suites passed during phase execution | Values, destinations, scope, owner denials, and return-state assertions. |
 | examples/accrue_host/e2e/phase234-admin-customers-subscriptions.spec.js | ADM-03, ADM-04, SAFE-01 | 2/2 passed, 0 skipped | Served journey covers nested step-up and no mutation, light/dark accessibility, computed readability, and coarse-pointer reflow. |
 | examples/accrue_host/e2e/phase234-search-completion.spec.js | ADM-03, SAFE-01 | 1/1 on two consecutive runs | Real-pool E2E covers result identity, owner scope, route, and stale-result removal. |
