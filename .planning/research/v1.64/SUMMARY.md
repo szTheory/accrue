@@ -2,10 +2,10 @@
 milestone: v1.64
 name: Admin Operator UI Cleanup
 date: 2026-10-09
-status: diligence-complete-requirements-confirmation-pending
+status: diligence-complete-requirements-approved-roadmap-pending
 review_type: bounded-three-lens-upstream-review
 scope_version_approved: true
-requirements_approved: false
+requirements_approved: true
 roadmap_approved: false
 ---
 
@@ -73,9 +73,9 @@ These are recommendations, not approved phases. Every phase owns acceptance with
 - **Settled:** scope/version approval, Admin-only refinement, equal operator audiences, incumbent identity, code-first Impeccable setup, four-slice recommendation, zero required human UAT target and optional subjective feedback, existing acceptance owners, no paid evaluator.
 - **Deferred:** Portal, core diagnosis/causality/new rooms (SEED-004 M2/M3), provider expansion/fidelity runs, global CI redesign, exhaustive snapshot matrix, unrelated release windows and historical verification debt. SEED-003 is a bounded hygiene constraint; its old release campaign is not new scope. Seeds remain unmodified.
 - **Delivery evidence outstanding:** fresh mounted candidates, actual input/zoom methods and limitations, controlled busy/reconnect cases, current served asset digests, selected golden/mask changes and execution outcomes.
-- **Owner decisions outstanding:** scoped requirements confirmation, then roadmap approval, as required by `gsd-new-milestone`. No new product interview or aesthetic choice is needed.
+- **Owner decisions outstanding:** roadmap approval, as required by `gsd-new-milestone`. All 18 requirements were approved on 2026-10-09. No new product interview or aesthetic choice is needed.
 - **Reopen only for:** a named new defect, safety/behavior failure, changed task requirement, or explicit owner feedback. Preserve the original review budget; do not reset it by renaming the polish task. Necessary repair of a failed behavioral gate is not another aesthetic round.
 
 ## Continuation checkpoint
 
-The full proposed list is in [REQUIREMENTS.md](../../REQUIREMENTS.md), marked draft until maintainer confirmation. Confirm it without repeating this research, then promote/commit requirements and generate the roadmap from them. Continue numbering at 240 and preserve v1.63's archive. Once roadmap approval completes, report the actual next command (`$gsd-plan-phase 240` expected). No fresh new-milestone invocation is necessary mid-checkpoint.
+The full approved list is in [REQUIREMENTS.md](../../REQUIREMENTS.md); the maintainer confirmed all 18 items on 2026-10-09. Generate the roadmap from them without repeating this research or requirements confirmation. Continue numbering at 240 and preserve v1.63's archive. Once roadmap approval completes, report the actual next command (`$gsd-plan-phase 240` expected). No fresh new-milestone invocation is necessary mid-checkpoint.

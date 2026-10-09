@@ -44,4 +44,4 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 ## Next milestone
 
-**v1.64 Admin Operator UI Cleanup is awaiting requirements confirmation.** The maintainer approved scope/version on 2026-10-09; the requested bounded three-lens review is complete. [The decision summary](research/v1.64/SUMMARY.md) recommends the original four slices with concrete navigation/copy/interaction and proof corrections. [Eighteen draft requirements](REQUIREMENTS.md) are ready for confirmation. New phase numbering starts at 240; no phase structure is approved yet. Reuse completed Impeccable setup and closed v1.63 contracts; do not repeat this review.
+**v1.64 Admin Operator UI Cleanup is creating its roadmap.** Scope/version and [all 18 requirements](REQUIREMENTS.md) were approved on 2026-10-09; the bounded three-lens review is complete. [The decision summary](research/v1.64/SUMMARY.md) recommends four slices with concrete navigation/copy/interaction and proof corrections. New phase numbering starts at 240; roadmap approval remains. Reuse completed Impeccable setup and closed v1.63 contracts; do not repeat research or requirements confirmation.

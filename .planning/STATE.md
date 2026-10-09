@@ -3,10 +3,10 @@ gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 status: planning
-stopped_at: v1.64 diligence complete — awaiting requirements confirmation
+stopped_at: v1.64 requirements approved — creating roadmap
 last_updated: "2026-10-09T17:19:59Z"
 last_activity: 2026-10-09
-last_activity_desc: v1.64 bounded upstream diligence complete; 18 requirements drafted
+last_activity_desc: v1.64 all 18 requirements approved; creating roadmap
 progress:
   total_phases: 0
   completed_phases: 0
@@ -23,16 +23,16 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.64 scope/version approved and bounded three-lens upstream diligence complete. Await confirmation of the [18 proposed requirements](REQUIREMENTS.md), then create/approve the roadmap. Read the [decision summary](research/v1.64/SUMMARY.md); no repeat stocktake, research or Impeccable init.
+**Current focus:** v1.64 scope/version and [all 18 requirements](REQUIREMENTS.md) approved; bounded diligence complete. Create and confirm the concrete roadmap from the [decision summary](research/v1.64/SUMMARY.md). No repeat stocktake, research, requirements confirmation or Impeccable init.
 **Progress:** [░░░░░░░░░░] 0% (new milestone; phase structure pending approval)
 **Planned work completed:** No v1.64 execution plans yet. v1.63 closed at 45/45 plans across Phases 233–239.
 
 ## Current Position
 
-Phase: Not started (requirements confirmation)
+Phase: Not started (roadmap creation)
 Plan: —
-Status: Awaiting requirements confirmation
-Last activity: 2026-10-09 — v1.64 diligence complete; 18 requirements drafted
+Status: Creating roadmap
+Last activity: 2026-10-09 — v1.64 all 18 requirements approved
 
 ## Performance Metrics
 
@@ -317,7 +317,7 @@ Last activity: 2026-10-09 — v1.64 diligence complete; 18 requirements drafted
 
 ### Pending Todos
 
-- Finish the already-started `$gsd-new-milestone Admin Operator UI Cleanup`: scope/version approved, focused diligence complete, 18 requirements drafted; requirements confirmation and roadmap approval remain. Load [SUMMARY.md](research/v1.64/SUMMARY.md) and [REQUIREMENTS.md](REQUIREMENTS.md). Reuse Impeccable initialization and closed v1.63 contracts. First new phase is expected at 240; do not restart kickoff, research or the stocktake.
+- Finish the already-started `$gsd-new-milestone Admin Operator UI Cleanup`: scope/version and all 18 requirements approved; focused diligence complete. Create the roadmap and collect its approval. Load [SUMMARY.md](research/v1.64/SUMMARY.md) and [REQUIREMENTS.md](REQUIREMENTS.md). First new phase is expected at 240; do not restart kickoff, research, requirements confirmation or Impeccable init.
 
 ### Deferred / Dormant
 
@@ -395,7 +395,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-09T17:19:59Z
-Stopped at: v1.64 diligence complete — awaiting requirements confirmation
+Stopped at: v1.64 requirements approved — creating roadmap
 Resume file: .planning/research/v1.64/SUMMARY.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -525,5 +525,5 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Reply to the 18-requirement confirmation to continue the active new-milestone workflow, then approve the concrete roadmap. Focused diligence is complete; no fresh command or repeated review is needed at this checkpoint.
+- Review/approve the concrete roadmap when presented. Requirements confirmation and focused diligence are complete; no fresh command or repeated review is needed at this checkpoint.
 - Phase 239/v1.63 are closed. After roadmap approval, the expected next command is `$gsd-plan-phase 240`. Reuse the [kickoff stocktake](notes/2026-10-09-admin-operator-impeccable-kickoff.md); Impeccable init and code-first are settled.
