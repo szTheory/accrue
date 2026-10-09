@@ -142,6 +142,9 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   const asset = await assertCurrentStylesheet(page);
   await page.setViewportSize({ width: 320, height: 800 });
   await assertNoOverflow(page);
+  const mobileSearch = await page.locator("#search-trigger").boundingBox();
+  expect(mobileSearch).not.toBeNull();
+  expect(mobileSearch.x).toBeGreaterThanOrEqual(0);
   await expect(invoiceCard.getByRole("link", { name: /view invoice/i })).toBeVisible();
   const lightTokens = await assertThemeAndMotion(page, "light");
   const collectionShot = await page.screenshot({ fullPage: true });
@@ -175,6 +178,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await testInfo.attach("phase237-invoice-review.png", { body: reviewShot, contentType: "image/png" });
   await page.keyboard.press("Escape");
   await expect(review).toBeHidden();
+  await expect(payAction).toBeFocused();
   await expect(page.locator('[data-role="invoice-action-result"]')).toHaveCount(0);
 
   await page.setViewportSize({ width: 320, height: 800 });
