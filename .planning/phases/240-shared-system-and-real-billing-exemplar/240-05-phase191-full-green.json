@@ -6,7 +6,7 @@
   "expected": "The complete Phase191 desktop and mobile browser owner passes with reconnect, replacement, busy, confirmation and focus assertions active.",
   "actual": "26 passed, 0 failed, 0 skipped, 0 errors across chromium-desktop and chromium-mobile.",
   "semanticAssessment": "The plan-required complete mounted Phase191 owner completed successfully; the new busy/reconnect cases passed alongside the existing responsive, overlay, focus, and confirmation coverage.",
-  "reportPath": ".planning/phases/240-shared-system-and-real-billing-exemplar/240-05-phase191-full-final.junit.xml",
-  "runStartedAt": "2026-10-09T22:24:25Z",
-  "reportModifiedAt": "2026-10-09T22:24:29.597Z"
+  "reportPath": ".planning/phases/240-shared-system-and-real-billing-exemplar/240-05-phase191-complete.junit.xml",
+  "runStartedAt": "2026-10-09T22:37:35Z",
+  "reportModifiedAt": "2026-10-09T22:37:38.767Z"
 }

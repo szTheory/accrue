@@ -94,7 +94,7 @@ async function clickActionTrigger(page, { name, trigger, preferMenu = false }) {
 
   const menu = page.locator("[data-ax-action-overflow-menu]").first();
   await expect(menu, `${name}: overflow action menu`).toBeVisible();
-  await menu.click();
+  await menu.locator("summary").click();
 
   const item = page.getByRole("menuitem", { name: trigger }).first();
   await expect(item, `${name}: menu item`).toBeVisible();
@@ -322,6 +322,14 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await staleAction.focus();
     await page.evaluate(() => {
       window.__phase240ReplacementTemplate = document.querySelector("#accrue-admin-shell button[phx-click='open_refund_drawer']").cloneNode(true);
+      const originallyDisabled = window.__phase240ReplacementTemplate.cloneNode(true);
+      originallyDisabled.id = "phase240-original-disabled-control";
+      originallyDisabled.disabled = true;
+      originallyDisabled.setAttribute("aria-disabled", "true");
+      const hiddenFixture = document.createElement("div");
+      hiddenFixture.hidden = true;
+      hiddenFixture.append(originallyDisabled);
+      document.querySelector("#ax-overlay-root").append(hiddenFixture);
     });
 
     await context.setOffline(true);
@@ -339,6 +347,15 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await page.evaluate(() => window.liveSocket.connect());
     await expect(page.getByText(/Connection restored\. Review the current state before running an action\./i)).toBeVisible();
     await expect(staleAction).toBeEnabled();
+    await expect.poll(() => page.evaluate(() => {
+      const control = document.querySelector("#phase240-original-disabled-control");
+      return {
+        disabled: control?.disabled,
+        ariaDisabled: control?.getAttribute("aria-disabled"),
+        staleDisabled: control?.getAttribute("data-stale-disabled")
+      };
+    })).toEqual({ disabled: true, ariaDisabled: "true", staleDisabled: null });
+    await page.evaluate(() => document.querySelector("#phase240-original-disabled-control")?.parentElement.remove());
     await expect.poll(() => page.evaluate(() => document.activeElement?.tagName || "")).not.toBe("BODY");
   });
 
