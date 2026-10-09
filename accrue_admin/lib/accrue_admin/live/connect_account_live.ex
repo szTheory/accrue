@@ -445,7 +445,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
 
     [
       %{
-        label: AccrueAdmin.Copy.connect_account_summary_label_readiness(),
+        label: "Stripe-observed readiness",
         value: readiness_summary(account)
       },
       %{
@@ -458,18 +458,18 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
       },
       %{
         label: AccrueAdmin.Copy.connect_account_summary_label_charges_enabled(),
-        value: enabled_label(account.charges_enabled)
+        value: observed_enabled_label(account, "charges_enabled")
       },
       %{
         label: AccrueAdmin.Copy.connect_account_summary_label_payouts_enabled(),
-        value: enabled_label(account.payouts_enabled)
+        value: observed_enabled_label(account, "payouts_enabled")
       },
       %{
         label: AccrueAdmin.Copy.connect_account_summary_label_onboarding(),
-        value: enabled_label(account.details_submitted)
+        value: observed_enabled_label(account, "details_submitted")
       },
       %{
-        label: AccrueAdmin.Copy.connect_account_summary_label_override(),
+        label: "Local platform fee override",
         value: override_state_label(account),
         action_label: "Change",
         action_context:
@@ -896,10 +896,20 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     do: account_status(%{deauthorized_at: value})
 
   defp readiness_summary(account) do
-    if account.charges_enabled and account.payouts_enabled and account.details_submitted do
-      AccrueAdmin.Copy.connect_account_readiness_ready()
-    else
-      AccrueAdmin.Copy.connect_account_readiness_needs_attention()
+    observations =
+      Enum.map(["charges_enabled", "payouts_enabled", "details_submitted"], fn key ->
+        Map.get(account.data || %{}, key)
+      end)
+
+    cond do
+      Enum.all?(observations, &(&1 == true)) ->
+        AccrueAdmin.Copy.connect_account_readiness_ready()
+
+      Enum.any?(observations, &(&1 == false)) ->
+        AccrueAdmin.Copy.connect_account_readiness_needs_attention()
+
+      true ->
+        "Unknown"
     end
   end
 
@@ -909,9 +919,13 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   defp account_status(_account),
     do: AccrueAdmin.Copy.connect_account_status_active_authorization()
 
-  defp enabled_label(true), do: AccrueAdmin.Copy.connect_account_enabled_label_true()
-  defp enabled_label(false), do: AccrueAdmin.Copy.connect_account_enabled_label_false()
-  defp enabled_label(nil), do: AccrueAdmin.Copy.connect_account_enabled_label_unknown()
+  defp observed_enabled_label(account, key) do
+    case Map.fetch(account.data || %{}, key) do
+      {:ok, true} -> AccrueAdmin.Copy.connect_account_enabled_label_true()
+      {:ok, false} -> AccrueAdmin.Copy.connect_account_enabled_label_false()
+      _ -> AccrueAdmin.Copy.connect_account_enabled_label_unknown()
+    end
+  end
 
   defp capabilities_summary(capabilities)
        when is_map(capabilities) and map_size(capabilities) > 0 do

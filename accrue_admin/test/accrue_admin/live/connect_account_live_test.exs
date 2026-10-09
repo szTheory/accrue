@@ -94,6 +94,7 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
 
     assert html =~ "Capabilities / requirements"
     assert html =~ "Platform fee policy"
+    assert html =~ "Unknown"
 
     assert has_element?(view, "[data-ax-primary-action]", "Edit platform fee override")
     refute has_element?(view, "form[phx-submit='save_override']")
