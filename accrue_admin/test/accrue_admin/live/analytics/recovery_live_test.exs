@@ -424,72 +424,34 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     test "organization scope excludes out-of-scope recovery metrics and at-risk rows", %{
       conn: conn
     } do
-      allowed_customer =
-        insert_customer(%{
-          owner_type: "Organization",
-          owner_id: "org_allowed",
-          email: "allowed-recovery@example.com"
-        })
-
-      denied_customer =
-        insert_customer(%{
-          owner_type: "Organization",
-          owner_id: "org_denied",
-          email: "denied-recovery@example.com"
-        })
-
-      allowed_recovered = insert_subscription(allowed_customer)
-      denied_recovered = insert_subscription(denied_customer)
-
-      allowed_at_risk =
-        insert_subscription(allowed_customer, %{
-          status: :past_due,
-          dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -2 * 86_400, :second)
-        })
-
-      denied_at_risk =
-        insert_subscription(denied_customer, %{
-          status: :past_due,
-          dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -3 * 86_400, :second)
-        })
-
-      record_dunning_event("dunning.recovered", allowed_recovered, %{
-        mrr_value_cents: 1_234,
-        currency: "usd"
-      })
-
-      record_dunning_event("dunning.recovered", denied_recovered, %{
-        mrr_value_cents: 9_876,
-        currency: "usd"
-      })
-
-      record_dunning_event("dunning.campaign_started", allowed_at_risk, %{
-        campaign_anchor: DateTime.to_iso8601(allowed_at_risk.dunning_campaign_started_at)
-      })
-
-      record_dunning_event("dunning.campaign_started", denied_at_risk, %{
-        campaign_anchor: DateTime.to_iso8601(denied_at_risk.dunning_campaign_started_at)
-      })
+      fixture = recovery_navigation_fixture()
 
       conn =
         Phoenix.ConnTest.init_test_session(conn,
           admin_token: "admin",
-          active_organization_id: "org_allowed",
+          active_organization_id: fixture.owner_id,
           active_organization_slug: "allowed-org",
-          admin_organization_ids: ["org_allowed"]
+          admin_organization_ids: [fixture.owner_id]
         )
 
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?org=allowed-org")
+      assert {:ok, _view, html} = live(conn, fixture.return_path)
 
       assert html =~ "$12.34"
       refute html =~ "$98.76"
       assert html =~ "allowed-recovery@example.com"
       refute html =~ "denied-recovery@example.com"
-      assert html =~ allowed_at_risk.id
-      refute html =~ denied_at_risk.id
+      assert html =~ fixture.allowed_at_risk.id
+      refute html =~ fixture.denied_at_risk.id
+      assert active_window_label(html) =~ "30 days"
 
       assert html =~
-               ~s(href="/billing/analytics/recovery/subscriptions/#{allowed_at_risk.id}?org=allowed-org")
+               ~r/href="\/billing\/analytics\/recovery\?[^\"]*org=allowed-org[^\"]*window=7d/
+
+      assert html =~
+               ~r/href="\/billing\/analytics\/recovery\?[^\"]*org=allowed-org[^\"]*window=90d/
+
+      assert html =~
+               ~s(href="/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}?org=allowed-org")
     end
 
     test "cross-package boundary: RecoveryLive does not import Ecto.Query, Accrue.Repo, or Accrue.Billing.Subscription" do
@@ -558,5 +520,61 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       inserted_at: inserted_at
     }
     |> TestRepo.insert!()
+  end
+
+  defp recovery_navigation_fixture do
+    allowed_customer =
+      insert_customer(%{
+        owner_type: "Organization",
+        owner_id: "org_allowed",
+        email: "allowed-recovery@example.com"
+      })
+
+    denied_customer =
+      insert_customer(%{
+        owner_type: "Organization",
+        owner_id: "org_denied",
+        email: "denied-recovery@example.com"
+      })
+
+    allowed_recovered = insert_subscription(allowed_customer)
+    denied_recovered = insert_subscription(denied_customer)
+
+    allowed_at_risk =
+      insert_subscription(allowed_customer, %{
+        status: :past_due,
+        dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -2 * 86_400, :second)
+      })
+
+    denied_at_risk =
+      insert_subscription(denied_customer, %{
+        status: :past_due,
+        dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -3 * 86_400, :second)
+      })
+
+    record_dunning_event("dunning.recovered", allowed_recovered, %{
+      mrr_value_cents: 1_234,
+      currency: "usd"
+    })
+
+    record_dunning_event("dunning.recovered", denied_recovered, %{
+      mrr_value_cents: 9_876,
+      currency: "usd"
+    })
+
+    record_dunning_event("dunning.campaign_started", allowed_at_risk, %{
+      campaign_anchor: DateTime.to_iso8601(allowed_at_risk.dunning_campaign_started_at)
+    })
+
+    record_dunning_event("dunning.campaign_started", denied_at_risk, %{
+      campaign_anchor: DateTime.to_iso8601(denied_at_risk.dunning_campaign_started_at)
+    })
+
+    %{
+      owner_id: "org_allowed",
+      allowed_at_risk: allowed_at_risk,
+      denied_at_risk: denied_at_risk,
+      return_path: "/billing/analytics/recovery?org=allowed-org&window=30d"
+    }
   end
 end
