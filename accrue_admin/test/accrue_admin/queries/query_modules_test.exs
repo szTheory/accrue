@@ -113,6 +113,7 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
       stripe_account_id: "acct_old",
       email: "old-account@example.com",
       charges_enabled: false,
+      data: %{"charges_enabled" => false},
       inserted_at: ~U[2026-04-10 16:00:00Z]
     })
 
@@ -122,6 +123,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
       charges_enabled: true,
       payouts_enabled: true,
       details_submitted: true,
+      data: %{
+        "charges_enabled" => true,
+        "payouts_enabled" => true,
+        "details_submitted" => true
+      },
       inserted_at: ~U[2026-04-11 16:00:00Z]
     })
 
@@ -246,6 +252,32 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     refute Enum.any?(rows, &(&1.stripe_account_id == "acct_old"))
   end
 
+  test "connect account boolean filters leave missing provider observations unknown" do
+    unknown =
+      insert_connect_account(%{
+        stripe_account_id: "acct_unknown_observations",
+        charges_enabled: true,
+        payouts_enabled: false,
+        details_submitted: true,
+        data: %{}
+      })
+
+    for value <- ["true", "false"] do
+      {rows, _cursor} =
+        ConnectAccounts.list(filter: ConnectAccounts.decode_filter(%{"charges_enabled" => value}))
+
+      refute Enum.any?(rows, &(&1.id == unknown.id))
+    end
+
+    {attention_rows, _cursor} =
+      ConnectAccounts.list(
+        filter: ConnectAccounts.decode_filter(%{"needs_attention" => "true"}),
+        limit: 20
+      )
+
+    assert Enum.any?(attention_rows, &(&1.id == unknown.id))
+  end
+
   describe "multi-status filter handling" do
     test "Invoices.decode_filter/1 passes comma-separated status through unchanged" do
       filter = Invoices.decode_filter(%{"status" => "open,uncollectible"})
@@ -364,6 +396,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         charges_enabled: true,
         payouts_enabled: true,
         details_submitted: true,
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => true
+        },
         deauthorized_at: ~U[2026-04-11 17:10:00Z],
         inserted_at: ~U[2026-04-11 17:10:00Z]
       })
@@ -374,6 +411,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         charges_enabled: false,
         payouts_enabled: true,
         details_submitted: true,
+        data: %{
+          "charges_enabled" => false,
+          "payouts_enabled" => true,
+          "details_submitted" => true
+        },
         inserted_at: ~U[2026-04-11 17:11:00Z]
       })
 
@@ -383,6 +425,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         charges_enabled: true,
         payouts_enabled: false,
         details_submitted: true,
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => false,
+          "details_submitted" => true
+        },
         inserted_at: ~U[2026-04-11 17:12:00Z]
       })
 
@@ -392,6 +439,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         charges_enabled: true,
         payouts_enabled: true,
         details_submitted: false,
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => false
+        },
         inserted_at: ~U[2026-04-11 17:13:00Z]
       })
 
@@ -401,6 +453,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         charges_enabled: true,
         payouts_enabled: true,
         details_submitted: true,
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => true
+        },
         inserted_at: ~U[2026-04-11 17:14:00Z]
       })
 
@@ -426,6 +483,7 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
           owner_type: "Organization",
           owner_id: "org_allowed",
           charges_enabled: false,
+          data: %{"charges_enabled" => false},
           inserted_at: ~U[2026-04-11 18:10:00Z]
         })
 
@@ -434,6 +492,7 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         owner_type: "Organization",
         owner_id: "org_allowed",
         charges_enabled: false,
+        data: %{"charges_enabled" => false},
         inserted_at: ~U[2026-04-11 18:11:00Z]
       })
 
@@ -442,6 +501,7 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         owner_type: "Organization",
         owner_id: "org_denied",
         charges_enabled: false,
+        data: %{"charges_enabled" => false},
         inserted_at: ~U[2026-04-11 18:12:00Z]
       })
 
