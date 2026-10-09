@@ -1,9 +1,9 @@
 ---
 phase: "237"
 slug: "admin-invoices-payments-recovery"
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-10-08"
 ---
 
@@ -20,7 +20,7 @@ created: "2026-10-08"
 | Quick run command | cd accrue_admin && mix test test/accrue_admin/live/invoices_live_test.exs test/accrue_admin/live/invoice_live_test.exs test/accrue_admin/live/charges_live_test.exs test/accrue_admin/live/charge_live_test.exs test/accrue_admin/live/analytics/recovery_live_test.exs |
 | Full suite command | cd accrue_admin && mix test --warnings-as-errors |
 | Served browser seam | Existing host integration Playwright lane via scripts/ci/accrue_host_uat.sh and .github/workflows/ci.yml |
-| Estimated runtime | Not measured in planning; measure focused and full runs during execution |
+| Estimated runtime | Focused ExUnit suites: about 4 seconds; served Playwright journey: 8.6 seconds |
 
 ## Sampling Rate
 
@@ -35,10 +35,10 @@ The plan/task/wave IDs and threat references below identify ownership; execution
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 237-01-T1/T2; 237-04-T1/T2 | 237-01, 237-04 | 0, 1 | ADM-02 | T-237-01, T-237-08, T-237-09 | Wave 0 characterizes existing scoped invoice path and raw fixtures to green; plan 04 adds and greens overdue, money, and collection assertions | ExUnit + LiveView | `cd accrue_admin && mix test test/accrue_admin/live/invoices_live_test.exs`; `cd accrue_admin && mix test test/accrue_admin/live/invoice_live_test.exs` | Existing invoice suites; passing baseline/fixtures by 237-01, new behavior checks by 237-04 | pending |
-| 237-02-T1/T2; 237-05-T1/T2; 237-06-T1/T2 | 237-02, 237-05, 237-06 | 0, 1, 2 | ADM-05 | T-237-03, T-237-04, T-237-05, T-237-10..15 | Wave 0 prepares green action/result fixtures; plans 05/06 add and green stale-dispatch and outcome assertions | LiveView + action contract | `cd accrue_admin && mix test test/accrue_admin/live/invoice_live_test.exs`; `cd accrue_admin && mix test test/accrue_admin/live/charge_live_test.exs` | Existing action suites; passing fixtures by 237-02, new behavior checks by 237-05/06 | pending |
-| 237-03-T1/T2; 237-07-T1/T2 | 237-03, 237-07 | 0, 1 | ADM-06 | T-237-06, T-237-07, T-237-16..18 | Wave 0 prepares green raw event/window/owner fixtures; plan 07 adds and greens currency/history/return assertions | Query/LiveView | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs` | Existing recovery suite; passing fixtures by 237-03, new behavior checks by 237-07 | pending |
-| 237-08-T1/T2 | 237-08 | 3 | ADM-02, ADM-05, ADM-06 | T-237-19, T-237-20 | Read-only served navigation and staged-review inspection, focus/cancel, 320px reflow, theme, assets, foreign-owner denial/read-error; no confirm or dispatch | Playwright | `cd examples/accrue_host && npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop`; `cd examples/accrue_host && npx playwright test --list e2e/phase237-admin-billing.spec.js` | Phase-owned browser spec created by 237-08; existing blocking playwright-e2e discovery. Fake-backed LiveView plans 05/06 own pending, duplicate-submit, and result assertions. | pending |
+| 237-01-T1/T2; 237-04-T1/T2 | 237-01, 237-04 | 0, 1 | ADM-02 | T-237-01, T-237-08, T-237-09 | Wave 0 characterizes existing scoped invoice path and raw fixtures to green; plan 04 adds and greens overdue, money, and collection assertions | ExUnit + LiveView | `cd accrue_admin && mix test test/accrue_admin/live/invoices_live_test.exs`; `cd accrue_admin && mix test test/accrue_admin/live/invoice_live_test.exs` | Existing invoice suites; baseline/fixtures by 237-01 and behavior checks by 237-04 | green |
+| 237-02-T1/T2; 237-05-T1/T2; 237-06-T1/T2 | 237-02, 237-05, 237-06 | 0, 1, 2 | ADM-05 | T-237-03, T-237-04, T-237-05, T-237-10..15 | Wave 0 prepares green action/result fixtures; plans 05/06 add and green stale-dispatch and outcome assertions | LiveView + action contract | `cd accrue_admin && mix test test/accrue_admin/live/invoice_live_test.exs`; `cd accrue_admin && mix test test/accrue_admin/live/charge_live_test.exs` | Existing action suites; fixtures by 237-02 and stale-dispatch/result checks by 237-05/06 | green |
+| 237-03-T1/T2; 237-07-T1/T2 | 237-03, 237-07 | 0, 1 | ADM-06 | T-237-06, T-237-07, T-237-16..18 | Wave 0 prepares green raw event/window/owner fixtures; plan 07 adds and greens currency/history/return assertions | Query/LiveView | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs` | Existing recovery suite; fixtures by 237-03 and currency/history/navigation checks by 237-07 | green |
+| 237-08-T1/T2 | 237-08 | 3 | ADM-02, ADM-05, ADM-06 | T-237-19, T-237-20 | Read-only served navigation and staged-review inspection, focus/cancel, 320px reflow, theme, assets, foreign-owner denial/read-error; no confirm or dispatch | Playwright | `cd examples/accrue_host && npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop`; `cd examples/accrue_host && npx playwright test --list e2e/phase237-admin-billing.spec.js` | Phase-owned browser spec; existing blocking playwright-e2e discovery. Fake-backed LiveView plans 05/06 own pending, duplicate-submit, and result assertions. | green |
 
 ## Criterion Evidence Index
 
@@ -110,11 +110,11 @@ Recall considered status shaming, invented currency/amounts, unsupported provide
 
 ## Wave 0 Requirements
 
-- [ ] 237-01-T1/T2: Keep the current scoped invoice route green and provide passing raw date, lifecycle, zero/0-/3-decimal money, row-count, and owner fixtures. Plan 04 owns the new presentation assertions.
-- [ ] 237-02-T1/T2: Keep current invoice/refund action suites green and provide passing target, step-up, eligibility, amount/currency, and result-contract fixtures. Plans 05/06 own new stale-dispatch and outcome assertions.
-- [ ] 237-03-T1/T2: Keep current recovery suite green and provide passing raw currency/event, UTC boundary, owner, window, target, and return-context fixtures. Plan 07 owns new currency, history/current, and navigation assertions.
-- [ ] 237-08-T1/T2: Add one representative read-only served Admin browser journey for navigation, staged-review inspection/cancel, focus, 320px reflow, theme, assets, and denied/read-error UI in the existing blocking host CI lane. Do not confirm or dispatch; plans 05/06 prove pending, duplicate-submit, and results.
-- [ ] No new test framework or provider credential setup is required.
+- [x] 237-01-T1/T2: Keep the current scoped invoice route green and provide passing raw date, lifecycle, zero/0-/3-decimal money, row-count, and owner fixtures. Plan 04 owns the new presentation assertions.
+- [x] 237-02-T1/T2: Keep current invoice/refund action suites green and provide passing target, step-up, eligibility, amount/currency, and result-contract fixtures. Plans 05/06 own new stale-dispatch and outcome assertions.
+- [x] 237-03-T1/T2: Keep current recovery suite green and provide passing raw currency/event, UTC boundary, owner, window, target, and return-context fixtures. Plan 07 owns new currency, history/current, and navigation assertions.
+- [x] 237-08-T1/T2: Add one representative read-only served Admin browser journey for navigation, staged-review inspection/cancel, focus, 320px reflow, theme, assets, and denied/read-error UI in the existing blocking host CI lane. Do not confirm or dispatch; plans 05/06 prove pending, duplicate-submit, and results.
+- [x] No new test framework or provider credential setup is required.
 
 ## Manual-Only Verifications
 
@@ -122,12 +122,19 @@ All stable in-scope acceptance behavior should have automated ExUnit/LiveView or
 
 ## Validation Sign-Off
 
-- [ ] Every plan task has an automated verify command or an explicit Wave 0 dependency.
-- [ ] No three consecutive tasks lack automated feedback.
-- [ ] Wave 0 provides green fixtures for each research-identified coverage gap; plans 04–07 close the behavioral gaps with passing assertions.
-- [ ] No watch-mode flags.
-- [ ] Focused feedback latency and test results are recorded during execution.
-- [ ] nyquist_compliant is set true only after finalized coverage and passing evidence.
+- [x] Every plan task has an automated verify command or an explicit Wave 0 dependency.
+- [x] No three consecutive tasks lack automated feedback.
+- [x] Wave 0 provides green fixtures for each research-identified coverage gap; plans 04–07 close the behavioral gaps with passing assertions.
+- [x] No watch-mode flags.
+- [x] Focused feedback latency and test results are recorded during execution.
+- [x] nyquist_compliant is set true only after finalized coverage and passing evidence.
 
-Approval: pending planning and execution evidence.
+Approval: automated validation passed 2026-10-08. Focused ExUnit suites: 87 tests, 0 failures; served Playwright journey: 1 passed and 1 discovered; full package suite: 581 tests, 0 failures (Phase 237 execution evidence). No human UAT remains for deterministic acceptance.
 
+## Validation Audit 2026-10-09
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
