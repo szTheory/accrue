@@ -35,7 +35,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Latest fully shipped milestone: v1.63 — Admin and Portal UI refinement, shipped and archived 2026-10-09.** All seven phases and 34 requirements completed. The milestone delivered scoped, capability-explicit Admin/Portal and checkout journeys, current served evidence, and recurring automated acceptance. Its audit found zero blockers; four pre-close items were explicitly acknowledged and recorded in `STATE.md` Deferred Items.
 
-**Next milestone:** None selected. The maintainer will choose future scope after the workspace closeout; v1.63 does not authorize additional UI cleanup or new billing capability work.
+**Next milestone:** No milestone is formally active. On 2026-10-09 the maintainer explicitly requested an **Admin Operator UI Cleanup** using Impeccable and the installed Kowalski skills, then asked for a stocktake before activation. This is an explicit strategy decision to continue flagship Admin refinement; the [new kickoff stocktake](notes/2026-10-09-admin-operator-impeccable-kickoff.md) preserves the proposed Admin-only scope, current evidence, sibling-project lessons, and automation/stopping rules. Reuse the completed Impeccable setup and v1.63 safety contracts. Proposed version v1.64 and phases starting at 240 await formal summary/roadmap confirmation; no new billing capabilities or additional Portal refinement are authorized by this stocktake.
 
 ## Shipped Milestone: v1.63 Admin and Portal UI refinement (**shipped & archived 2026-10-09**)
 

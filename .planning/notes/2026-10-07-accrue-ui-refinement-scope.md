@@ -1,11 +1,13 @@
 ---
 date: "2026-10-07 08:57"
-promoted: false
+promoted: true
+promoted_milestone: v1.63
+delivered: 2026-10-09
 ---
 
 # Accrue UI refinement: proposed milestone brief
 
-Status: upstream scope and recommendations, 2026-10-07. Proposed next milestone: **v1.63 — Admin and Portal UI refinement**, with candidate phases 233–239. This document does not activate a milestone or claim implementation, current visual verification, or passing tests.
+Status: historical kickoff brief, promoted into **v1.63 — Admin and Portal UI refinement**, completed and archived on 2026-10-09 across Phases 233–239. Original recommendations below remain historical; use the [v1.63 archive](../milestones/v1.63-ROADMAP.md) for delivered scope and evidence. The separate [October 9 Admin-only stocktake](2026-10-09-admin-operator-impeccable-kickoff.md) records the new request. Do not treat this brief as an unfinished milestone or repeat its setup interview.
 
 Accepted scope clarification: one reusable Portal supporting personal, organization/custom and mixed billing through host-defined context and action permissions. The owner accepted this direction before requesting the final pre-milestone handoff. The earlier personal-versus-workspace question is withdrawn. The researched integration contract and tradeoffs are in [Portal billable context](2026-10-07-portal-billable-context-contract.md).
 

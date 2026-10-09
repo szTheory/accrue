@@ -2,7 +2,7 @@
 
 ## Preview and optional feedback
 
-Start the Fake-backed Cadence preview using the [host README](../../../examples/accrue_host/README.md): `cd examples/accrue_host`, `make proxy` once, then `make up`. Open `http://accrue.localhost/` (or the loopback fallback printed by the banner). Use the existing operator and healthy-customer instructions there; credentials are intentionally not duplicated here.
+Start the Fake-backed Cadence preview using the [host README](../../../../examples/accrue_host/README.md): `cd examples/accrue_host`, `make proxy` once, then `make up`. Open `http://accrue.localhost/` (or the loopback fallback printed by the banner). Use the existing operator and healthy-customer instructions there; credentials are intentionally not duplicated here.
 
 Optional owner feedback is subjective polish input collected outside the app. There is no in-app feedback widget, feedback loading control, or long-feedback-text behavior in scope. The local processor is `Accrue.Processor.Fake`; this preview does not establish live-provider parity, real customer billing outcomes, or release approval. Stable acceptance is covered by automated local contracts and the recurring CI jobs listed in [the coverage ledger](239-COVERAGE.md); this run observed local evidence only, and remote CI is unobserved.
 

@@ -44,4 +44,4 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 ## Next milestone
 
-No next milestone has been selected. Start one only after a separate maintainer decision.
+No new milestone is formally active. The maintainer requested a preliminary **Admin Operator UI Cleanup** stocktake on 2026-10-09; the [kickoff note](notes/2026-10-09-admin-operator-impeccable-kickoff.md) records that intent and the explicit instruction to defer activation. Proposed v1.64 and phase numbering from 240 require the new-milestone summary and roadmap confirmation. Reuse completed Impeccable setup and closed v1.63 contracts.
