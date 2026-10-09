@@ -1,15 +1,15 @@
 ---
 phase: "240"
 slug: "shared-system-and-real-billing-exemplar"
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-10-09"
 ---
 
 # Phase 240 — Validation Strategy
 
-> Existing acceptance owners provide recurring proof with each change. This is a planning contract; no implementation test or current mounted proof has run. The planner reconciles the map below to its concrete tasks and new-file dependencies before plan-checking.
+> Existing acceptance owners provide recurring proof with each change. All six plans are executed; the State A audit cross-references their task maps and current GREEN owners below. Local platform limits remain explicit and are not represented as universal proof.
 
 ## Test Infrastructure
 
@@ -33,14 +33,14 @@ created: "2026-10-09"
 
 | Requirement | Existing owner / automated starting command | Required focused extension | Status |
 |---|---|---|---|
-| DSN-01 | `cd accrue_admin && mix test test/accrue_admin/live/invoices_live_test.exs test/accrue_admin/live/invoice_live_test.exs test/accrue_admin/live/subscription_live_test.exs` | Real invoice list/detail/review tracer plus dense subscription; shared hierarchy and current mounted geometry | Pending |
-| DSN-02 | `cd accrue_admin && npm run e2e:phase196` and `npm run e2e:phase198` | Long/missing content, 320/intermediate/coarse-pointer, enlarged/text-spaced content, truthful browser-zoom method and limits | Pending |
-| DSN-03 | `cd accrue_admin && mix test test/accrue_admin/components/theme_picker_test.exs test/accrue_admin/theme_test.exs` | Mounted stored System/effective OS light-dark-light, patch/reload and host-forced precedence | Pending |
-| DSN-04 | Existing invoice/subscription ExUnit owners and mounted interaction owner | Controlled actual server busy completion, repeated patches, reconnect/replaced controls, online-alone negative and authoritative no-replay proof | Pending |
-| DSN-05 | `cd accrue_admin && node --test test/js/focus_trap_test.mjs`; existing phase199 overlay browser owner | Tab/Shift-Tab wrap, validation/correction, dismiss/submit and replaced/removed-trigger focus restoration; actual reduced-motion teardown | Pending |
-| UXC-02 | Existing invoice list/detail ExUnit owners | State matrix of real branches, exact target/money/outcome, supported next step and explicit N/A rationale where no capability exists | Pending |
-| EVR-01 | Existing asset/build/drift and mounted provenance owners | Current 21-route/registry-owner pointers, source/fixture/built/compiled/served CSS/JS/fonts, exercised transitions and comparable resource diagnostics | Pending |
-| EVR-02 | Existing recurring ExUnit/Node/package/mounted/axe/Linux owners | Early expected snapshot set guard: complete passes, missing-all/missing-partial fail; new guards have focused negatives without demoting pixels | Pending |
+| DSN-01 | `cd accrue_admin && mix test test/accrue_admin/live/invoices_live_test.exs test/accrue_admin/live/invoice_live_test.exs test/accrue_admin/live/subscription_live_test.exs` | Real invoice list/detail/review tracer plus dense subscription; shared hierarchy and current mounted geometry | COVERED |
+| DSN-02 | `cd accrue_admin && npm run e2e:phase196` and `npm run e2e:phase198` | Long/missing content, 320/intermediate/coarse-pointer, enlarged/text-spaced content, truthful browser-zoom method and limits | COVERED |
+| DSN-03 | `cd accrue_admin && mix test test/accrue_admin/components/theme_picker_test.exs test/accrue_admin/theme_test.exs` | Mounted stored System/effective OS light-dark-light, patch/reload and host-forced precedence | COVERED |
+| DSN-04 | Existing invoice/subscription ExUnit owners and mounted interaction owner | Controlled actual server busy completion, repeated patches, reconnect/replaced controls, online-alone negative and authoritative no-replay proof | COVERED |
+| DSN-05 | `cd accrue_admin && node --test test/js/focus_trap_test.mjs`; existing phase199 overlay browser owner | Tab/Shift-Tab wrap, validation/correction, dismiss/submit and replaced/removed-trigger focus restoration; actual reduced-motion teardown | COVERED |
+| UXC-02 | Existing invoice list/detail ExUnit owners | State matrix of real branches, exact target/money/outcome, supported next step and explicit N/A rationale where no capability exists | COVERED |
+| EVR-01 | Existing asset/build/drift and mounted provenance owners | Current 21-route/registry-owner pointers, source/fixture/built/compiled/served CSS/JS/fonts, exercised transitions and comparable resource diagnostics | COVERED |
+| EVR-02 | Existing recurring ExUnit/Node/package/mounted/axe/Linux owners | Early expected snapshot set guard: complete passes, missing-all/missing-partial fail; new guards have focused negatives without demoting pixels | COVERED |
 
 ## Wave 0 Requirements
 
@@ -79,10 +79,10 @@ Proof/reset/mutation work uses isolated package/host test fixtures. The canonica
 - [x] Wave 0 and missing-file dependencies reconciled to final plans
 - [x] All eight requirements mapped to plan tasks and threat references
 - [x] No watch-mode commands or invented timing promises
-- [ ] Existing recurring CI owners retained and new checks wired once
-- [ ] Execution evidence complete; `nyquist_compliant: true` set only by the appropriate validation audit
+- [x] Existing recurring CI owners retained and new checks wired once
+- [x] Execution evidence complete; State A validation audit found all eight requirements COVERED
 
-**Approval:** Planning contract passed independent plan-checking on 2026-10-09. Execution validation remains pending; Nyquist execution compliance is not claimed by plan approval.
+**Approval:** Planning contract passed independent plan-checking on 2026-10-09. Execution validation is now audited from current GREEN owners; plan approval alone did not establish execution compliance.
 
 ## Execution evidence through 240-06
 
@@ -90,13 +90,29 @@ Recorded on 2026-10-09 from local commands and the prior plan summaries. These r
 
 | Requirement | Observed evidence | Remaining boundary |
 |---|---|---|
-| DSN-01 | Invoice list/detail/review and subscription owner suites; Admin full ExUnit at 617 passed, 0 failed; Phase 237 mounted list/detail/action-review test passed | Other route-family pages remain mapped to their existing recurring owners |
+| DSN-01 | Invoice list/detail/review and subscription owner suites; Admin full ExUnit at 618 passed, 0 failed; Phase 237 mounted list/detail/action-review test passed | Other route-family pages remain mapped to their existing recurring owners |
 | DSN-02 | Phase 196 and 198 browser evidence; narrow/intermediate/coarse-pointer cases recorded by 240-03 | Actual 400% browser zoom unavailable locally; CSS/pinch scaling is not zoom proof; Linux window 27 remains remote CI owner |
 | DSN-03 | Theme preference owners and Phase 199/238 mounted evidence; Phase 237 stores System preference separately from effective light/dark CSS evidence | OS theme is browser-emulated, not a physical OS change |
 | DSN-04 | Phase 191 lifecycle owner: 26 tests passed; held-action fixture/owning Admin tests: 71 passed; no replay/duplicate dispatch covered by authoritative fixture assertions | No new host invoice mutation was dispatched in the Phase 237 read-only exemplar |
 | DSN-05 | FocusTrap Node owner: 41 passed; Phase 199 keyboard/overlay owner passed after its recorded selector/fixture repairs | Axe/tree evidence does not claim screen-reader speech |
 | UXC-02 | Invoice state/action owners and full Admin suite cover distinct supported/unsupported and outcome states | N/A review/result states remain justified on read-only endpoints in `240-COVERAGE.md` |
 | EVR-01 | 240-06 ledger validates 21 production routes, all 8 requirements, live incumbent registry 30/42/8 and 43 component modules; mounted CSS/JS/Geist bytes match package build, host compile and served response | The ledger is a durable inventory, not a recurring point-in-time CI gate |
-| EVR-02 | New verifier self-test reports `self-test: valid=1 missing-route-rejected=1`; Phase 237 browser owner passes and detects/restores a deliberately stale JS response | Host `verify.full`: initial TrustSmoke result 222ms vs 100ms; one unchanged diagnostic rerun reported 223 tests/1 failure in the bounded ExUnit stage, with no detailed failure block preserved. Final reviewed Linux baselines belong to Phase 243. |
+| EVR-02 | New verifier self-test reports `self-test: valid=1 missing-route-rejected=1`; Phase 237 browser owner passes and detects/restores a deliberately stale JS response | Final host `verify.full` exited 0: 64 bounded/223 full ExUnit, dev boot, 37 default browser checks (16 incumbent skips), 14 checkout checks. Initial timing/truncated diagnostics remain historical in deferred-items. Final reviewed Linux baselines belong to Phase 243. |
 
-Local execution limits retained: remote CI is unobserved; Phase 243 owns final reviewed goldens; actual browser zoom was unavailable; the original 240-03 execution did not preserve pre-GREEN RED timing, and its retrospective reports are explicitly not original timing evidence. The phase remains open for the parent executor's independent gates.
+Local execution limits retained: remote CI is unobserved; Phase 243 owns final reviewed goldens; actual browser zoom was unavailable; the original 240-03 execution did not preserve pre-GREEN RED timing, and its retrospective reports are explicitly not original timing evidence. The phase remains open only for independent goal verification and completion bookkeeping.
+
+## Per-task execution coverage audit
+
+All tasks in 240-01 (1–3), 240-02 (1–2), 240-03 (1–3), 240-04 (1–2), 240-05 (1–2), and 240-06 (1–2) are **COVERED** by the concrete task gates above and their committed summaries. The audit cross-referenced existing test files, their behavior assertions and current GREEN runs; no missing automated owner or test-generation gap was found. No test files were generated by this audit.
+
+Final execution: Admin 618/0; Node 41/0, including 12 baseline-set positive/omission controls; Phase 191/196/198/199 desktop/mobile bundle 89 passed/19 incumbent skips/0 failures; host full gate 64 bounded/223 full/37 default browser/14 checkout checks passed; ledger positive/omission-negative and docs/contrast guard passed. Current mounted Phase 237 additionally checks served byte identity and the restored stale-JS negative. See `captures/final-gates/results.json` and privacy-labeled native report copies.
+
+**Automation policy:** required maintainer UAT = 0. Keep recurring verification at the existing semantic owners and CI lanes; phase ledgers are point-in-time reconciliation, not extra recurring jobs. Preserve original RED timing/report deviations and platform limits; optional subjective feedback is not a completion gate.
+
+## Validation Audit 2026-10-09
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |

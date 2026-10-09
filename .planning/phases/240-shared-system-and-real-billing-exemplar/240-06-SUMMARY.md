@@ -171,3 +171,11 @@ None. The change adds no endpoint, authorization path, schema, or non-test file-
 - Summary and current evidence ledger exist.
 - Evidence verifier and mounted capture manifest exist.
 - Task commits `e805cbef`, `e24e1082` and `b10ff3c0` are ancestors of HEAD.
+
+## Parent final acceptance and review follow-up
+
+- **Follow-up task commit:** `9eaa9cc1` — existing Phase 234 browser evidence roots/price-versus-amount assertions, archived Phase 239 route and docs owners, and restored inherited-size type exception annotations. Source paths: `examples/accrue_host/e2e/phase234-admin-customers-subscriptions.spec.js`, `examples/accrue_host/e2e/phase234-post-layout.spec.js`, `examples/accrue_host/test/accrue_host_web/phase239_route_coverage_contract_test.exs`, `scripts/ci/verify_package_docs.sh`, `accrue_admin/assets/css/app.css`.
+- Final host gate exited 0 (64 bounded, 223 full, dev boot, 37 default browser / 16 incumbent skips, 14 checkout browser checks). This resolves the historical deferred full-gate item above without changing its original observation or the 100ms smoke budget.
+- Admin full suite 618/0; Node 41/0; package browser bundle 89 passed / 19 incumbent skips / 0 failures; ledger valid and missing-route negative passed; eight-baseline and docs/contrast guards passed.
+- Review fixes `5623c421`, `b0336989`, `25af07fa` and their evidence/disposition are recorded in `240-REVIEW-FIX.md` and `240-REVIEW-DISPOSITION.md`.
+- Current refreshed screenshots and manifest replace the earlier point-in-time exemplar. Native report privacy copies and final results are explicitly labeled under `captures/final-gates/`; raw native reports remain in task temporary storage. Original timing/report limitations remain disclosed.

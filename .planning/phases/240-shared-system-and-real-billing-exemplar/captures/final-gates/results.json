@@ -1,0 +1,64 @@
+{
+  "phase": 240,
+  "evidence_kind": "observed local command results; report copies redact local filesystem prefixes; raw native reports retained in task temporary storage",
+  "admin": {
+    "tests": 618,
+    "failures": 0,
+    "compile_warnings_as_errors": true
+  },
+  "node": {
+    "tests": 41,
+    "failures": 0
+  },
+  "host_verify_full": {
+    "exit_code": 0,
+    "bounded_tests": 64,
+    "full_tests": 223,
+    "failures": 0,
+    "dev_boot_smoke": "passed",
+    "browser_passed": 37,
+    "browser_incumbent_skips": 16,
+    "braintree_checkout_passed": 14
+  },
+  "package_browser": {
+    "id": "",
+    "name": "",
+    "tests": "108",
+    "failures": "0",
+    "skipped": "19",
+    "errors": "0",
+    "time": "133.713823"
+  },
+  "baseline_set": {
+    "expected": 8,
+    "present": 8,
+    "node_controls": 12
+  },
+  "ledger": {
+    "routes": 21,
+    "requirements": 8,
+    "registry": [
+      30,
+      42,
+      8
+    ],
+    "component_modules": 43,
+    "valid_ledger_passed": true,
+    "missing_route_rejected": true
+  },
+  "package_docs": "passed",
+  "remote_ci": "unobserved",
+  "human_uat_required": 0,
+  "platform_limits": [
+    "Linux pixel comparison unrun locally; WINDOW 27 / Phase 243 owner retained",
+    "actual 400 percent browser zoom unavailable; emulation distinguished"
+  ],
+  "commands": {
+    "admin": "cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test",
+    "node": "cd accrue_admin && node --test test/js/*.mjs",
+    "host": "cd examples/accrue_host && MIX_ENV=test mix verify.full",
+    "package_browser": "cd accrue_admin && CI=1 npx playwright test e2e/admin-spec-list-phase196.spec.js e2e/admin-spec-detail-phase198.spec.js e2e/admin-interaction-overlay-phase199.spec.js e2e/admin-page-flow-phase191.spec.js --project=chromium-desktop --project=chromium-mobile --reporter=junit",
+    "docs": "bash scripts/ci/verify_package_docs.sh",
+    "baseline": "node accrue_admin/e2e/visual-baseline-set.cjs accrue_admin/e2e/__screenshots__/visual-desktop"
+  }
+}

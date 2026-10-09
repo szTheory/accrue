@@ -86,3 +86,13 @@ No observed issue blocks the core invoice review or subscription task. All findi
 - `accrue_admin/lib/accrue_admin/components/detail.ex`
 - `accrue_admin/assets/css/app.css`
 - `accrue_admin/assets/css/theme.css`
+
+## Post-audit disposition (original scores retained)
+
+- Invoice review dismissal: fixed by `5623c421`; mounted owner checks **Back to invoice**.
+- Repeated invoice filter/lens/count/clear hierarchy: fixed by `25af07fa`; focused invoice owners and full package desktop/mobile bundle pass.
+- Shared lifecycle health weights/spacing: fixed by `b0336989`; mounted owner checks computed approved weights and positive token spacing. `9eaa9cc1` restores existing inherited-size emphasis annotations; it does not change computed presentation.
+- Subscription global invoice queue composition, accent competition and route-specific legacy presentation: assigned to **Phase 241 Billing Operator Journeys**, consistent with `240-CONTEXT.md` deferred destinations and ROADMAP propagation obligations. Preserve this finding as a concrete consumer change; do not restart broad visual research.
+- Experience dismissal shares the first fixed finding. Interaction capture was configured off; current automated keyboard/reconnect/mutation-count controls provide its owning evidence. Subjective owner feedback remains optional.
+
+The original 13/24 score is the pre-fix audit, not a re-scored current verdict. Current captures and final automated results are linked from `240-COVERAGE.md`. Other-route propagation and reviewed Linux goldens remain with Phases 241–243.
