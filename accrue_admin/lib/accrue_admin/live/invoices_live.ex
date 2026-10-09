@@ -150,7 +150,11 @@ defmodule AccrueAdmin.Live.InvoicesLive do
             %{label: Copy.invoices_column_status(), render: &status_summary/1},
             %{label: Copy.invoices_column_due_date(), render: &due_date_summary/1},
             %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
-            %{id: :collection_method, label: Copy.invoices_column_collection()},
+            %{
+              id: :collection_method,
+              label: Copy.invoices_column_collection(),
+              render: &collection_method_summary/1
+            },
             %{label: Copy.invoices_column_billing_signals(), render: &billing_signals_cell/1}
           ]}
           card_title={&card_title/1}
@@ -159,7 +163,11 @@ defmodule AccrueAdmin.Live.InvoicesLive do
             %{label: Copy.invoices_column_status(), render: &status_summary/1},
             %{label: Copy.invoices_column_due_date(), render: &due_date_summary/1},
             %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
-            %{id: :collection_method, label: Copy.invoices_column_collection()},
+            %{
+              id: :collection_method,
+              label: Copy.invoices_column_collection(),
+              render: &collection_method_summary/1
+            },
             %{label: Copy.invoices_column_billing_signals(), render: &billing_signals_cell/1},
             %{
               id: :action,
@@ -287,6 +295,19 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     remaining = format_money(row.amount_remaining_minor, row.currency)
     Copy.invoices_balance_summary(due, paid, remaining)
   end
+
+  defp collection_method_summary(row), do: collection_method_label(row.collection_method)
+
+  defp collection_method_label(value)
+       when value in [:charge_automatically, "charge_automatically"],
+       do: Copy.invoices_filter_collection_automatic()
+
+  defp collection_method_label(value) when value in [:send_invoice, "send_invoice"],
+    do: Copy.invoices_filter_collection_send_invoice()
+
+  defp collection_method_label(value) when value in [nil, ""], do: "Unknown"
+
+  defp collection_method_label(value), do: humanize(value)
 
   defp card_title(row), do: row.number || row.processor_id || row.id
 

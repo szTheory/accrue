@@ -126,8 +126,10 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await waitForLiveView(page);
   await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
   await waitForLiveView(page);
+  const invoiceRouteStarted = process.hrtime.bigint();
   await page.goto(`/admin/invoices?org=${owner}`, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
+  const firstInvoiceRouteLiveViewReadyMs = Number(process.hrtime.bigint() - invoiceRouteStarted) / 1_000_000;
   await expect(page.locator("html.accrue-admin")).toHaveCount(1);
   await expect(page.getByRole("heading", { name: /open receivables/i }).first()).toBeVisible();
   const invoiceLink = page.locator(`a[href^="/admin/invoices/${fixture.invoice_id}"]`).first();
@@ -141,6 +143,27 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(invoiceCard).toContainText("Automatic");
   await expect(invoiceCard).not.toContainText("charge_automatically");
   await expect(invoiceCard).not.toContainText("False");
+  const firstInvoiceRouteTaskReadyMs = Number(process.hrtime.bigint() - invoiceRouteStarted) / 1_000_000;
+  const initialResourceDiagnostics = await page.evaluate(() => {
+    const entries = performance.getEntriesByType("resource");
+    const resources = entries.map((entry) => ({
+      path: new URL(entry.name, location.href).origin === location.origin
+        ? new URL(entry.name, location.href).pathname
+        : new URL(entry.name, location.href).origin,
+      initiatorType: entry.initiatorType,
+      encodedBodyBytes: entry.encodedBodySize,
+      decodedBodyBytes: entry.decodedBodySize,
+      transferBytes: entry.transferSize,
+      durationMs: Number(entry.duration.toFixed(2))
+    }));
+    return {
+      resourceCount: resources.length,
+      encodedBodyBytes: resources.reduce((total, item) => total + item.encodedBodyBytes, 0),
+      decodedBodyBytes: resources.reduce((total, item) => total + item.decodedBodyBytes, 0),
+      transferBytes: resources.reduce((total, item) => total + item.transferBytes, 0),
+      resources
+    };
+  });
   const asset = await assertCurrentStylesheet(page);
   await page.setViewportSize({ width: 320, height: 800 });
   await assertNoOverflow(page);
@@ -273,6 +296,13 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
     source_sha: sourceSha,
     sources,
     stylesheet: asset,
+    first_fresh_invoice_diagnostics: {
+      fixture: "disposable host Ecto sandbox; seeded Admin Alpha invoice",
+      route: `/admin/invoices?org=${owner}`,
+      liveview_ready_ms: Number(firstInvoiceRouteLiveViewReadyMs.toFixed(2)),
+      task_ready_ms: Number(firstInvoiceRouteTaskReadyMs.toFixed(2)),
+      resources: initialResourceDiagnostics
+    },
     viewport_and_theme: Object.fromEntries(Object.entries(screenshots).map(([name, shot]) => [name, { route: shot.route, viewport: shot.viewport, theme: shot.theme, sha256: sha256(shot.bytes), bytes: shot.bytes.length }])),
     read_only: true,
     confirmed_or_dispatched: false

@@ -179,6 +179,16 @@ defmodule AccrueAdmin.Copy.Invoice do
 
   def invoice_confirm_cancel, do: "Cancel"
 
+  def invoice_review_invoice_label, do: "Invoice ID"
+
+  def invoice_review_customer_label, do: "Customer"
+
+  def invoice_review_customer_id_label, do: "Customer ID"
+
+  def invoice_review_owner_label, do: "Owner target"
+
+  def invoice_review_owner_scope_label, do: "Owner scope"
+
   def invoice_confirm_workflow_message(action_label, source_suffix),
     do:
       invoice_confirm_workflow_message(

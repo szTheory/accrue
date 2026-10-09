@@ -507,7 +507,12 @@ defmodule AccrueAdmin.Live.InvoiceLive do
           close_event="cancel_pending_action"
         >
           <%= if @pending_action do %>
-            <.pending_action_content pending_action={@pending_action} invoice={@invoice} />
+            <.pending_action_content
+              pending_action={@pending_action}
+              invoice={@invoice}
+              customer={@customer}
+              owner_scope={@current_owner_scope}
+            />
           <% else %>
             <.invoice_action_form
               action_type={@drawer_action_type}
@@ -542,7 +547,12 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         >
           <section data-ax-overlay-panel data-presentation="drawer">
             <%= if @pending_action do %>
-              <.pending_action_content pending_action={@pending_action} invoice={@invoice} />
+              <.pending_action_content
+                pending_action={@pending_action}
+                invoice={@invoice}
+                customer={@customer}
+                owner_scope={@current_owner_scope}
+              />
               <button
                 phx-click="confirm_action"
                 class="ax-button ax-button-primary"
@@ -661,18 +671,37 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
   attr(:pending_action, :map, required: true)
   attr(:invoice, :map, required: true)
+  attr(:customer, :map, required: true)
+  attr(:owner_scope, :map, required: true)
 
   defp pending_action_content(assigns) do
     assigns =
       assigns
       |> assign(:requires_step_up?, assigns.pending_action.type in @destructive_actions)
       |> assign(:reviewed_money, reviewed_money_copy(assigns.pending_action))
+      |> assign(:owner_scope_label, owner_scope_copy(assigns.owner_scope))
 
     ~H"""
     <section class="ax-stack-md" data-role="confirm-panel">
       <p class="ax-label"><%= Copy.invoice_confirm_panel_label() %></p>
       <p :if={@requires_step_up?} class="ax-caption"><%= Copy.step_up_title() %></p>
       <p class="ax-body"><%= confirm_copy(@pending_action, @invoice) %></p>
+      <Detail.detail_field_list
+        class="ax-review-target"
+        fields={[
+          %{label: Copy.Invoice.invoice_review_invoice_label(), value: @invoice.id},
+          %{label: Copy.Invoice.invoice_review_customer_label(), value: customer_label(@customer)},
+          %{label: Copy.Invoice.invoice_review_customer_id_label(), value: @invoice.customer_id},
+          %{
+            label: Copy.Invoice.invoice_review_owner_label(),
+            value: "#{@customer.owner_type} · #{@customer.owner_id}"
+          },
+          %{
+            label: Copy.Invoice.invoice_review_owner_scope_label(),
+            value: @owner_scope_label
+          }
+        ]}
+      />
       <p :if={@reviewed_money} class="ax-caption" data-role="reviewed-invoice-money"><%= @reviewed_money %></p>
     </section>
     """

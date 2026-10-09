@@ -187,18 +187,29 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     render_click(element(view, "button", Copy.Invoice.invoice_action_manual_pay()))
 
-    html =
-      render_submit(
-        element(view, "form[data-action-type='pay']"),
-        %{"action_type" => "pay"}
-      )
+    render_submit(
+      element(view, "form[data-action-type='pay']"),
+      %{"action_type" => "pay"}
+    )
 
-    review = Floki.find(html, "[data-role='confirm-panel']") |> Floki.text(sep: " ")
+    html = render(view)
+
+    review =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("[data-role='confirm-panel']")
+      |> Floki.text(sep: " ")
+
+    customer = TestRepo.get!(Customer, invoice.customer_id)
 
     assert review =~ "Customer"
-    assert review =~ "invoice-detail@example.com"
+    assert review =~ "Invoice Detail"
+    assert review =~ "Customer ID"
+    assert review =~ invoice.customer_id
+    assert review =~ "Owner target"
+    assert review =~ "#{customer.owner_type} · #{customer.owner_id}"
     assert review =~ "Owner scope"
-    assert review =~ "active organization scope"
+    assert review =~ "global owner scope"
     assert review =~ invoice.id
 
     assert html =~ "99.00"
