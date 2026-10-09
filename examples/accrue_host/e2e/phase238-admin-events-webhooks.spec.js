@@ -147,6 +147,7 @@ test("Phase 238 admin evidence remains keyboard reachable, themed, and contained
   await filter.focus();
   await expect(filter).toBeFocused();
   await expect(page.locator("[data-role='bulk-action']")).toHaveCount(0);
+  await expect(page.locator("article").filter({ hasText: "evt_host_browser_replay" }).first()).toContainText("Dead");
 
   for (const theme of ["light", "dark", "system"]) {
     await page.getByRole("radio", { name: theme, exact: false }).check();
@@ -159,6 +160,11 @@ test("Phase 238 admin evidence remains keyboard reachable, themed, and contained
   await waitForLiveView(page);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
 
+  await page.setViewportSize({ width: 640, height: 800 });
+  await page.locator("html").evaluate((element) => { element.style.zoom = "2"; });
+  await expectNoDocumentOverflow(page);
+  await expect(filter).toBeVisible();
+  await page.locator("html").evaluate((element) => { element.style.zoom = ""; });
   await page.setViewportSize({ width: 320, height: 800 });
   await expectNoDocumentOverflow(page);
   await expect(filter).toBeVisible();
