@@ -58,6 +58,13 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:enable_polling, fn -> true end)
       |> assign_new(:poll_interval_ms, fn -> 5_000 end)
       |> assign_new(:newer_count, fn -> 0 end)
+      |> assign_new(:read_error, fn -> nil end)
+      |> assign_new(:failed_cursor, fn -> nil end)
+      |> assign_new(:unavailable_copy, fn -> "This history could not be loaded. Try again." end)
+      |> assign_new(
+        :partial_load_copy,
+        fn -> "Some results could not be loaded. The rows shown may be incomplete. Try again." end
+      )
       |> assign(
         :limit,
         normalize_positive(
@@ -95,7 +102,16 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   defp resolve_list_state(socket) do
-    list_state = normalize_marker(socket.assigns[:list_state]) || derive_list_state(socket)
+    list_state =
+      if socket.assigns[:read_error] == :initial do
+        "unavailable"
+      else
+        case normalize_marker(socket.assigns[:list_state]) do
+          "unavailable" -> derive_list_state(socket)
+          nil -> derive_list_state(socket)
+          state -> state
+        end
+      end
 
     empty_reason =
       normalize_marker(socket.assigns[:empty_reason]) ||
@@ -131,7 +147,7 @@ defmodule AccrueAdmin.Components.DataTable do
   defp assign_render_flags(socket) do
     rows = socket.assigns[:rows] || []
     loading? = loading_fixture_enabled?(socket.assigns)
-    empty? = Enum.empty?(rows) and !loading?
+    empty? = Enum.empty?(rows) and !loading? and socket.assigns[:read_error] != :initial
     populated? = !Enum.empty?(rows) and !loading?
 
     assign(socket,
@@ -139,6 +155,13 @@ defmodule AccrueAdmin.Components.DataTable do
       render_empty_state: empty?,
       render_rows: populated?
     )
+  end
+
+  defp refresh_state(socket) do
+    socket
+    |> resolve_list_state()
+    |> resolve_empty_state()
+    |> assign_render_flags()
   end
 
   # Derive the empty-state title/copy: when filters are active AND the page opted
@@ -178,19 +201,71 @@ defmodule AccrueAdmin.Components.DataTable do
           Map.get(socket.assigns, :current_owner_scope)
         )
 
-      {rows, next_cursor} = socket.assigns.query_module.list(query_opts)
+      case read_page(socket.assigns.query_module, query_opts) do
+        {:ok, {rows, next_cursor}} ->
+          merged_rows =
+            socket.assigns.rows
+            |> Kernel.++(rows)
+            |> Enum.take(socket.assigns.dom_limit)
 
-      merged_rows =
-        socket.assigns.rows
-        |> Kernel.++(rows)
-        |> Enum.take(socket.assigns.dom_limit)
+          {:noreply,
+           socket
+           |> assign(:rows, merged_rows)
+           |> assign(:next_cursor, next_cursor)
+           |> assign(:read_error, nil)
+           |> assign(:failed_cursor, nil)
+           |> prune_selected_ids()
+           |> refresh_state()}
 
-      {:noreply,
-       socket
-       |> assign(:rows, merged_rows)
-       |> assign(:next_cursor, next_cursor)
-       |> prune_selected_ids()}
+        :unavailable ->
+          {:noreply,
+           socket
+           |> assign(:read_error, :partial)
+           |> assign(:failed_cursor, socket.assigns.next_cursor)}
+      end
     end
+  end
+
+  def handle_event("retry-read", _params, %{assigns: %{read_error: :partial}} = socket) do
+    cursor = socket.assigns.failed_cursor
+
+    opts =
+      query_opts(
+        socket.assigns.filter,
+        cursor,
+        socket.assigns.limit,
+        Map.get(socket.assigns, :current_owner_scope)
+      )
+
+    case read_page(socket.assigns.query_module, opts) do
+      {:ok, {rows, next_cursor}} ->
+        merged_rows =
+          socket.assigns.rows
+          |> Kernel.++(rows)
+          |> Enum.take(socket.assigns.dom_limit)
+
+        {:noreply,
+         socket
+         |> assign(:rows, merged_rows)
+         |> assign(:next_cursor, next_cursor)
+         |> assign(:read_error, nil)
+         |> assign(:failed_cursor, nil)
+         |> prune_selected_ids()
+         |> refresh_state()}
+
+      :unavailable ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("retry-read", _params, socket) do
+    {:noreply,
+     socket
+     |> reload(socket.assigns.params,
+       reset_selection?: true,
+       params_signature: socket.assigns.params_signature
+     )
+     |> refresh_state()}
   end
 
   def handle_event("toggle-row", %{"id" => row_id}, socket) do
@@ -229,7 +304,8 @@ defmodule AccrueAdmin.Components.DataTable do
        reset_selection?: false,
        params_signature: socket.assigns.params_signature
      )
-     |> assign(:newer_count, 0)}
+     |> assign(:newer_count, 0)
+     |> refresh_state()}
   end
 
   slot(:list_status)
@@ -279,8 +355,23 @@ defmodule AccrueAdmin.Components.DataTable do
         </button>
       </div>
 
-      <div :if={@list_status != []} class="ax-data-table-list-status" data-role="list-status">
+      <div :if={@list_status != [] and @read_error != :initial} class="ax-data-table-list-status" data-role="list-status">
         <%= render_slot(@list_status, %{visible_count: length(@rows), list_state: @list_state}) %>
+      </div>
+
+      <div :if={@read_error == :initial} class="ax-card ax-data-table-unavailable" data-role="unavailable-state" role="alert">
+        <p class="ax-empty-title">History unavailable</p>
+        <p class="ax-body"><%= @unavailable_copy %></p>
+        <button type="button" phx-click="retry-read" phx-target={@myself} class="ax-button ax-button-secondary" data-role="retry-read">
+          Retry
+        </button>
+      </div>
+
+      <div :if={@read_error == :partial} class="ax-data-table-partial-alert" data-role="partial-read-error" role="alert">
+        <p class="ax-body"><%= @partial_load_copy %></p>
+        <button type="button" phx-click="retry-read" phx-target={@myself} class="ax-button ax-button-secondary" data-role="retry-read">
+          Retry loading remaining rows
+        </button>
       </div>
 
       <div :if={@render_loading_fixture} class="ax-data-table-loading" data-role="loading-skeleton">
@@ -646,26 +737,50 @@ defmodule AccrueAdmin.Components.DataTable do
     filter_params = socket.assigns.query_module.encode_filter(filter) |> stringify_map()
     cursor = Map.get(params, "cursor") || Map.get(params, :cursor)
 
-    {rows, next_cursor} =
-      socket.assigns.query_module.list(
-        query_opts(
-          filter,
-          cursor,
-          socket.assigns.limit,
-          Map.get(socket.assigns, :current_owner_scope)
-        )
+    query_opts =
+      query_opts(
+        filter,
+        cursor,
+        socket.assigns.limit,
+        Map.get(socket.assigns, :current_owner_scope)
       )
 
-    socket
-    |> assign(:params_signature, Keyword.fetch!(opts, :params_signature))
-    |> assign(:params, params)
-    |> assign(:filter, filter)
-    |> assign(:filter_params, filter_params)
-    |> assign(:rows, rows)
-    |> assign(:next_cursor, next_cursor)
-    |> assign(:newer_count, 0)
-    |> maybe_reset_selection(opts)
-    |> prune_selected_ids()
+    socket =
+      socket
+      |> assign(:params_signature, Keyword.fetch!(opts, :params_signature))
+      |> assign(:params, params)
+      |> assign(:filter, filter)
+      |> assign(:filter_params, filter_params)
+      |> assign(:newer_count, 0)
+      |> assign(:read_error, nil)
+      |> assign(:failed_cursor, nil)
+      |> maybe_reset_selection(opts)
+
+    case read_page(socket.assigns.query_module, query_opts) do
+      {:ok, {rows, next_cursor}} ->
+        socket
+        |> assign(:rows, rows)
+        |> assign(:next_cursor, next_cursor)
+        |> prune_selected_ids()
+
+      :unavailable ->
+        socket
+        |> assign(:rows, [])
+        |> assign(:next_cursor, nil)
+        |> assign(:read_error, :initial)
+        |> assign(:selected_ids, MapSet.new())
+    end
+  end
+
+  defp read_page(query_module, opts) do
+    try do
+      case query_module.list(opts) do
+        {:error, %DBConnection.ConnectionError{}} -> :unavailable
+        page -> {:ok, page}
+      end
+    rescue
+      _error in DBConnection.ConnectionError -> :unavailable
+    end
   end
 
   defp maybe_reset_selection(socket, opts) do

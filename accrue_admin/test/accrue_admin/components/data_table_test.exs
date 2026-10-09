@@ -8,10 +8,21 @@ defmodule AccrueAdmin.DataTableTest do
     use Agent
 
     def start_link(_opts) do
-      Agent.start_link(fn -> %{rows: [], list_calls: [], count_calls: []} end, name: __MODULE__)
+      Agent.start_link(
+        fn -> %{rows: [], list_calls: [], count_calls: [], fail_lists?: false} end,
+        name: __MODULE__
+      )
     end
 
     def put_rows(rows), do: Agent.update(__MODULE__, &Map.put(&1, :rows, rows))
+    def fail_lists, do: Agent.update(__MODULE__, &Map.put(&1, :fail_lists?, true))
+    def recover_lists, do: Agent.update(__MODULE__, &Map.put(&1, :fail_lists?, false))
+
+    def consume_list_failure do
+      Agent.get_and_update(__MODULE__, fn state ->
+        {state.fail_lists?, state}
+      end)
+    end
 
     def record_list_call(opts) do
       Agent.update(__MODULE__, fn state ->
@@ -39,6 +50,10 @@ defmodule AccrueAdmin.DataTableTest do
     @impl true
     def list(opts \\ []) do
       FixtureStore.record_list_call(opts)
+
+      if FixtureStore.consume_list_failure() do
+        raise DBConnection.ConnectionError, message: "fixture database unavailable"
+      end
 
       filter = Keyword.get(opts, :filter, %{})
       limit = AccrueAdmin.Queries.Behaviour.normalize_limit(opts)
@@ -198,6 +213,10 @@ defmodule AccrueAdmin.DataTableTest do
       end
 
       {:noreply, socket}
+    end
+
+    def handle_event("change_query", _params, socket) do
+      {:noreply, Phoenix.Component.assign(socket, :table_params, %{"status" => "closed"})}
     end
 
     @impl true
@@ -378,6 +397,75 @@ defmodule AccrueAdmin.DataTableTest do
     assert pagination_call[:filter] == %{status: "open"}
     assert is_binary(pagination_call[:cursor])
     assert {:ok, {~U[2026-04-15 17:00:04Z], "row-4"}} = Cursor.decode(pagination_call[:cursor])
+  end
+
+  test "initial list failure is unavailable and retry restores results", %{conn: conn} do
+    FixtureStore.fail_lists()
+
+    {:ok, view, html} = live_isolated(conn, TableLive, session: %{"params" => %{}})
+
+    assert html =~ ~s(data-ax-state="unavailable")
+    assert html =~ ~s(data-role="unavailable-state")
+    assert html =~ ~s(role="alert")
+    assert html =~ "History unavailable"
+    refute html =~ ~s(data-role="empty-state")
+    refute html =~ "fixture database unavailable"
+
+    FixtureStore.recover_lists()
+    html = render_click(element(view, "[data-role='retry-read']"))
+
+    assert html =~ ~s(data-ax-state="populated")
+    assert html =~ "Newest open"
+    refute html =~ ~s(data-role="unavailable-state")
+  end
+
+  test "load-more failure keeps loaded rows and retry loads the failed page", %{conn: conn} do
+    {:ok, view, html} = live_isolated(conn, TableLive, session: %{"params" => %{}})
+    assert html =~ "Newest open"
+    assert html =~ "Load more"
+
+    FixtureStore.fail_lists()
+    html = render_click(element(view, "[data-role='load-more']"))
+
+    assert html =~ ~s(data-role="partial-read-error")
+    assert html =~ "Some results could not be loaded"
+    assert html =~ "Newest open"
+    refute html =~ "Oldest open"
+
+    FixtureStore.recover_lists()
+    html = render_click(element(view, "[data-role='retry-read']"))
+
+    assert html =~ "Newest closed"
+    refute html =~ ~s(data-role="partial-read-error")
+  end
+
+  test "first-page failure clears stale rows, pagination, and selection while preserving filters",
+       %{
+         conn: conn
+       } do
+    {:ok, view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
+
+    html = render_click(element(view, "[data-role='toggle-all']"))
+    assert html =~ "2 selected"
+    assert html =~ ~s(data-role="load-more")
+
+    FixtureStore.fail_lists()
+    html = render_click(view, "change_query", %{})
+
+    assert html =~ ~s(data-ax-state="unavailable")
+    assert html =~ ~s(data-role="unavailable-state")
+    refute html =~ "Newest open"
+    refute html =~ "2 selected"
+    refute html =~ ~s(data-role="load-more")
+    assert html =~ ~s(name="status")
+
+    FixtureStore.recover_lists()
+    html = render_click(element(view, "[data-role='retry-read']"))
+
+    assert html =~ "Newest closed"
+    refute html =~ "Newest open"
+    assert List.last(FixtureStore.list_calls())[:filter] == %{status: "closed"}
   end
 
   test "exposes Phase 190 data-display group contract and cursor-gated pagination", %{

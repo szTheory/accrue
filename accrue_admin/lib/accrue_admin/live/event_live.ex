@@ -20,7 +20,17 @@ defmodule AccrueAdmin.Live.EventLive do
   def mount(%{"id" => event_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
 
-    case Events.detail(event_id, socket.assigns.current_owner_scope) do
+    case read_event(event_id, socket.assigns.current_owner_scope) do
+      :unavailable ->
+        {:ok,
+         socket
+         |> assign_shell(admin, event_id)
+         |> assign(:event, nil)
+         |> assign(:related_items, [])
+         |> assign(:activity_loaded?, false)
+         |> assign(:raw_json_loaded?, false)
+         |> assign(:read_unavailable?, true)}
+
       :not_found ->
         {:ok,
          socket
@@ -40,7 +50,43 @@ defmodule AccrueAdmin.Live.EventLive do
            related_items(event, mount_path, owner_scope)
          )
          |> assign(:activity_loaded?, false)
-         |> assign(:raw_json_loaded?, false)}
+         |> assign(:raw_json_loaded?, false)
+         |> assign(:read_unavailable?, false)}
+    end
+  end
+
+  def handle_event("retry_read", _params, socket) do
+    case read_event(socket.assigns.event_id, socket.assigns.current_owner_scope) do
+      {:ok, event} ->
+        {:noreply,
+         socket
+         |> assign(:event, event)
+         |> assign(
+           :related_items,
+           related_items(
+             event,
+             socket.assigns.admin_mount_path,
+             socket.assigns.current_owner_scope
+           )
+         )
+         |> assign(:read_unavailable?, false)}
+
+      :unavailable ->
+        {:noreply,
+         socket
+         |> assign(:event, nil)
+         |> assign(:related_items, [])
+         |> assign(:activity_loaded?, false)
+         |> assign(:raw_json_loaded?, false)
+         |> assign(:read_unavailable?, true)}
+
+      :not_found ->
+        admin = %{"mount_path" => socket.assigns.admin_mount_path}
+
+        {:noreply,
+         socket
+         |> put_flash(:error, AccrueAdmin.Copy.Locked.owner_access_denied())
+         |> redirect(to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/events"))}
     end
   end
 
@@ -66,7 +112,14 @@ defmodule AccrueAdmin.Live.EventLive do
       active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
+        <div :if={@read_unavailable?} class="ax-card ax-data-table-unavailable" data-role="event-unavailable" role="alert">
+          <p class="ax-heading">Event record unavailable</p>
+          <p class="ax-body">This event could not be loaded. Its identity and related evidence are unknown until the read succeeds.</p>
+          <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-event-read">Retry</button>
+        </div>
+
         <Breadcrumbs.breadcrumbs
+          :if={@event}
           items={[
             %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{label: "Events", href: scoped_events_path(@admin_mount_path, @current_owner_scope)},
@@ -74,7 +127,7 @@ defmodule AccrueAdmin.Live.EventLive do
           ]}
         />
 
-        <Detail.summary_card eyebrow={Copy.event_detail_eyebrow()} title={@event.type}>
+        <Detail.summary_card :if={@event} eyebrow={Copy.event_detail_eyebrow()} title={@event.type}>
           <:facts>
             <dl class="ax-summary-facts-dl">
               <dt class="ax-label">Actor</dt>
@@ -87,16 +140,16 @@ defmodule AccrueAdmin.Live.EventLive do
           </:facts>
         </Detail.summary_card>
 
-        <Detail.summary_list rows={summary_rows(@event, @admin_mount_path)} />
+        <Detail.summary_list :if={@event} rows={summary_rows(@event, @admin_mount_path)} />
 
-        <details class="ax-detail-section" data-ax-drill-section="event-details" open>
+        <details :if={@event} class="ax-detail-section" data-ax-drill-section="event-details" open>
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title"><%= Copy.event_detail_section_heading() %></span>
           </summary>
           <Detail.detail_field_list fields={event_detail_fields(@event)} />
         </details>
 
-        <div data-ax-related-resources>
+        <div :if={@event} data-ax-related-resources>
           <RelatedResources.related_resources items={@related_items} />
           <section :if={@related_items == []} class="ax-card ax-related" aria-label={Copy.event_detail_related_resources_title()}>
             <header class="ax-related-head">
@@ -106,7 +159,7 @@ defmodule AccrueAdmin.Live.EventLive do
           </section>
         </div>
 
-        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+        <details :if={@event} class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title"><%= Copy.event_detail_lazy_activity_heading() %></span>
           </summary>
@@ -149,6 +202,19 @@ defmodule AccrueAdmin.Live.EventLive do
   end
 
   # --- private ---
+
+  defp read_event(event_id, owner_scope) do
+    try do
+      if Application.get_env(:accrue_admin, :env) == :test and
+           Application.get_env(:accrue_admin, :phase238_read_failure_fixture) == :event_detail do
+        raise DBConnection.ConnectionError, message: "fixture database unavailable"
+      end
+
+      Events.detail(event_id, owner_scope)
+    rescue
+      _error in DBConnection.ConnectionError -> :unavailable
+    end
+  end
 
   defp summary_rows(event, _mount_path) do
     rows = [
@@ -217,6 +283,7 @@ defmodule AccrueAdmin.Live.EventLive do
     |> assign(:assets_css_path, admin["assets_css_path"])
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
+    |> assign(:event_id, event_id)
     |> assign(
       :current_path,
       (admin["mount_path"] || "/billing") <> "/events/#{event_id}"

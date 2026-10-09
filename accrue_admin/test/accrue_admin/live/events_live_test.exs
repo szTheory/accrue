@@ -324,6 +324,27 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert html =~ "invoice.payment_failed.exact_link"
   end
 
+  test "summary read failure is announced as unavailable and can be retried", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/events")
+
+    Application.put_env(:accrue_admin, :phase238_read_failure_fixture, :events_summary)
+
+    try do
+      html = render_click(view, "retry_summary", %{})
+
+      assert html =~ ~s(data-role="event-summary-unavailable")
+      assert html =~ "Event summary unavailable"
+      assert html =~ "Unavailable"
+      refute html =~ "fixture database unavailable"
+    after
+      Application.delete_env(:accrue_admin, :phase238_read_failure_fixture)
+    end
+
+    html = render_click(view, "retry_summary", %{})
+    refute html =~ ~s(data-role="event-summary-unavailable")
+  end
+
   test "active-organization event feed summary counts in-scope charge subjects", %{conn: conn} do
     allowed_org = "org_charge_allowed"
     denied_org = "org_charge_denied"

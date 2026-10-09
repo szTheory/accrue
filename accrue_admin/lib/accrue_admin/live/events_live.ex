@@ -56,6 +56,10 @@ defmodule AccrueAdmin.Live.EventsLive do
      )}
   end
 
+  def handle_event("retry_summary", _params, socket) do
+    {:noreply, assign(socket, :summary, event_summary(socket.assigns.current_owner_scope))}
+  end
+
   @impl true
   def handle_params(params, _uri, socket) do
     {:noreply,
@@ -92,16 +96,16 @@ defmodule AccrueAdmin.Live.EventsLive do
             <StatStrip.stat_strip label={Copy.billing_events_kpi_section_aria_label()}>
               <:stat
                 label={Copy.billing_events_kpi_label_ledger_rows()}
-                value={Integer.to_string(@summary.total_count)}
+                value={summary_value(@summary, :total_count)}
               />
               <:stat
                 label={Copy.billing_events_kpi_label_webhook_sourced()}
-                value={Integer.to_string(@summary.webhook_linked_count)}
+                value={summary_value(@summary, :webhook_linked_count)}
                 tone="cobalt"
               />
               <:stat
                 label={Copy.billing_events_kpi_label_last_24h()}
-                value={Integer.to_string(@summary.last_day_count)}
+                value={summary_value(@summary, :last_day_count)}
                 tone="moss"
               />
             </StatStrip.stat_strip>
@@ -119,6 +123,14 @@ defmodule AccrueAdmin.Live.EventsLive do
           </:filter_toolbar>
         </PageHeader.page_header>
 
+        <div :if={@summary == :unavailable} class="ax-card ax-data-table-unavailable" data-role="event-summary-unavailable" role="alert">
+          <p class="ax-heading">Event summary unavailable</p>
+          <p class="ax-body">The event history summary could not be loaded. Current evidence may be incomplete.</p>
+          <button type="button" phx-click="retry_summary" class="ax-button ax-button-secondary" data-role="retry-event-summary">
+            Retry summary
+          </button>
+        </div>
+
         <.live_component
           module={DataTable}
           id="events"
@@ -135,6 +147,8 @@ defmodule AccrueAdmin.Live.EventsLive do
           clear_href={clear_all_href(@params, @table_path)}
           row_label={Copy.events_list_result_label_pair()}
           filter_submit_label={Copy.billing_events_apply_filters()}
+          unavailable_copy="Event history could not be loaded. Current results are not a complete history. Retry the read."
+          partial_load_copy="More event history could not be loaded. The rows shown are incomplete. Retry to continue."
           columns={[
             %{
               id: :type,
@@ -195,28 +209,43 @@ defmodule AccrueAdmin.Live.EventsLive do
   end
 
   defp event_summary(owner_scope) do
-    day_ago = DateTime.add(DateTime.utc_now(), -86_400, :second)
-    base_query = Events.scoped_base_query(owner_scope)
+    try do
+      raise_fixture_read_failure!(:events_summary)
+      day_ago = DateTime.add(DateTime.utc_now(), -86_400, :second)
+      base_query = Events.scoped_base_query(owner_scope)
 
-    %{
-      total_count: Repo.aggregate(base_query, :count, :id),
-      webhook_linked_count:
-        base_query
-        |> where([event], not is_nil(event.caused_by_webhook_event_id))
-        |> Repo.aggregate(:count, :id),
-      admin_count:
-        base_query
-        |> where([event], event.actor_type == "admin")
-        |> Repo.aggregate(:count, :id),
-      last_day_count:
-        base_query
-        |> where([event], event.inserted_at >= ^day_ago)
-        |> Repo.aggregate(:count, :id),
-      unique_subject_types:
-        base_query
-        |> select([event], count(fragment("distinct ?", event.subject_type)))
-        |> Repo.one()
-    }
+      %{
+        total_count: Repo.aggregate(base_query, :count, :id),
+        webhook_linked_count:
+          base_query
+          |> where([event], not is_nil(event.caused_by_webhook_event_id))
+          |> Repo.aggregate(:count, :id),
+        admin_count:
+          base_query
+          |> where([event], event.actor_type == "admin")
+          |> Repo.aggregate(:count, :id),
+        last_day_count:
+          base_query
+          |> where([event], event.inserted_at >= ^day_ago)
+          |> Repo.aggregate(:count, :id),
+        unique_subject_types:
+          base_query
+          |> select([event], count(fragment("distinct ?", event.subject_type)))
+          |> Repo.one()
+      }
+    rescue
+      _error in DBConnection.ConnectionError -> :unavailable
+    end
+  end
+
+  defp summary_value(:unavailable, _key), do: "Unavailable"
+  defp summary_value(summary, key), do: summary |> Map.fetch!(key) |> Integer.to_string()
+
+  defp raise_fixture_read_failure!(source) do
+    if Application.get_env(:accrue_admin, :env) == :test and
+         Application.get_env(:accrue_admin, :phase238_read_failure_fixture) == source do
+      raise DBConnection.ConnectionError, message: "fixture database unavailable"
+    end
   end
 
   defp event_filter_fields do
@@ -362,8 +391,10 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   defp list_state_copy(state), do: Copy.resource_state_copy(:events, state)
 
+  defp first_run_empty?(params, :unavailable), do: !filter_active?(params)
+
   defp first_run_empty?(params, summary),
-    do: summary.total_count == 0 and !filter_active?(params)
+    do: is_map(summary) and summary.total_count == 0 and !filter_active?(params)
 
   defp phase197_loading_fixture?(params) do
     Application.get_env(:accrue_admin, :env) == :test and

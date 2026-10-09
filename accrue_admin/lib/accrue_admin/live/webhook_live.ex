@@ -32,7 +32,21 @@ defmodule AccrueAdmin.Live.WebhookLive do
   def mount(%{"id" => webhook_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
 
-    case Webhooks.detail(webhook_id, socket.assigns.current_owner_scope) do
+    case fetch_webhook(webhook_id, socket.assigns.current_owner_scope) do
+      :unavailable ->
+        {:ok,
+         socket
+         |> assign_shell(admin)
+         |> assign(:requested_webhook_id, webhook_id)
+         |> assign(:webhook, nil)
+         |> assign(:attempt_history, [])
+         |> assign(:derived_events, [])
+         |> assign(:related_items, [])
+         |> assign(:flashes, [])
+         |> assign_detail_state()
+         |> assign(:detail_unavailable?, true)
+         |> assign(:replay_state, :unavailable)}
+
       :not_found ->
         {:ok,
          socket
@@ -41,24 +55,65 @@ defmodule AccrueAdmin.Live.WebhookLive do
            to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/webhooks")
          )}
 
-      {:ok, webhook} ->
+      {:ok, webhook, attempts, events} ->
         {:ok,
          socket
          |> assign_shell(admin)
+         |> assign(:requested_webhook_id, webhook_id)
          |> assign(:flashes, [])
          |> assign_detail_state()
-         |> assign_webhook(webhook)}
+         |> assign_webhook(webhook, attempts, events)
+         |> assign(:detail_unavailable?, false)}
 
       {:ambiguous, proof_context} ->
         {:ok,
          socket
          |> assign_shell(admin)
+         |> assign(:requested_webhook_id, webhook_id)
          |> assign(:webhook, nil)
          |> assign(:attempt_history, [])
          |> assign(:derived_events, [])
          |> assign(:related_items, [])
          |> assign(:flashes, [])
          |> assign_detail_state()
+         |> assign(:replay_state, {:ambiguous, proof_context})
+         |> assign(:detail_unavailable?, false)}
+    end
+  end
+
+  def handle_event("retry_read", _params, socket) do
+    case fetch_webhook(socket.assigns.requested_webhook_id, socket.assigns.current_owner_scope) do
+      {:ok, webhook, attempts, events} ->
+        {:noreply,
+         socket
+         |> assign(:detail_unavailable?, false)
+         |> assign_webhook(webhook, attempts, events)}
+
+      :unavailable ->
+        {:noreply,
+         socket
+         |> clear_webhook_evidence()
+         |> assign(:detail_unavailable?, true)
+         |> assign(:replay_state, :unavailable)}
+
+      :not_found ->
+        {:noreply,
+         socket
+         |> put_flash(:error, Copy.Locked.owner_access_denied())
+         |> redirect(
+           to:
+             scoped_admin_path(
+               %{"mount_path" => socket.assigns.admin_mount_path},
+               socket.assigns.current_owner_scope,
+               "/webhooks"
+             )
+         )}
+
+      {:ambiguous, proof_context} ->
+        {:noreply,
+         socket
+         |> clear_webhook_evidence()
+         |> assign(:detail_unavailable?, false)
          |> assign(:replay_state, {:ambiguous, proof_context})}
     end
   end
@@ -148,6 +203,12 @@ defmodule AccrueAdmin.Live.WebhookLive do
         </Detail.summary_card>
 
         <FlashGroup.flash_group flashes={@flashes} />
+
+        <div :if={@detail_unavailable?} class="ax-card ax-data-table-unavailable" data-role="webhook-unavailable" role="alert">
+          <p class="ax-heading">Webhook history unavailable</p>
+          <p class="ax-body">This delivery and its local attempt history could not be loaded. Its current status and ownership are unknown.</p>
+          <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-webhook-read">Retry</button>
+        </div>
 
         <Detail.summary_list :if={@webhook} rows={summary_rows(@webhook, @attempt_history, @derived_events)} />
 
@@ -313,6 +374,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
     |> assign(:step_up_challenge, nil)
     |> assign(:step_up_error, nil)
     |> assign(:step_up_continuation, nil)
+    |> assign(:detail_unavailable?, false)
   end
 
   defp assign_webhook(socket, webhook) do
@@ -343,6 +405,74 @@ defmodule AccrueAdmin.Live.WebhookLive do
     |> assign(:replay_state, replay_state_for(webhook))
   end
 
+  defp assign_webhook(socket, webhook, attempts, events) do
+    socket
+    |> assign(:webhook, webhook)
+    |> assign(
+      :current_path,
+      scoped_mount_path(
+        socket.assigns.admin_mount_path,
+        "/webhooks",
+        socket.assigns.current_owner_scope,
+        %{}
+      )
+    )
+    |> assign(:attempt_history, attempts)
+    |> assign(:derived_events, events)
+    |> assign(
+      :related_items,
+      related_items(
+        webhook,
+        events,
+        socket.assigns.admin_mount_path,
+        socket.assigns.current_owner_scope
+      )
+    )
+    |> assign(:replay_state, replay_state_for(webhook))
+  end
+
+  defp clear_webhook_evidence(socket) do
+    socket
+    |> assign(:webhook, nil)
+    |> assign(:attempt_history, [])
+    |> assign(:derived_events, [])
+    |> assign(:related_items, [])
+  end
+
+  defp refresh_webhook_after_replay(socket, webhook_id) do
+    case fetch_webhook(webhook_id, socket.assigns.current_owner_scope) do
+      {:ok, webhook, attempts, events} ->
+        socket
+        |> assign(:detail_unavailable?, false)
+        |> assign_webhook(webhook, attempts, events)
+
+      _unavailable_or_inaccessible ->
+        socket
+        |> clear_webhook_evidence()
+        |> assign(:detail_unavailable?, true)
+        |> assign(:replay_state, :unavailable)
+    end
+  end
+
+  defp fetch_webhook(webhook_id, owner_scope) do
+    try do
+      if Application.get_env(:accrue_admin, :env) == :test and
+           Application.get_env(:accrue_admin, :phase238_read_failure_fixture) == :webhook_detail do
+        raise DBConnection.ConnectionError, message: "fixture database unavailable"
+      end
+
+      case Webhooks.detail(webhook_id, owner_scope) do
+        {:ok, webhook} ->
+          {:ok, webhook, attempt_history(webhook.id), derived_events(webhook.id)}
+
+        result ->
+          result
+      end
+    rescue
+      _error in DBConnection.ConnectionError -> :unavailable
+    end
+  end
+
   defp webhook_heading(%{webhook: nil}), do: "Webhook replay is unavailable"
   defp webhook_heading(%{webhook: webhook}), do: webhook.type
 
@@ -351,6 +481,9 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
   defp replay_heading(%{webhook: nil}), do: "Replay is unavailable"
   defp replay_heading(%{webhook: _webhook}), do: "Replay delivery"
+
+  defp replay_copy(%{webhook: nil, replay_state: :unavailable}),
+    do: "Replay is unavailable while delivery history cannot be loaded. Retry the read first."
 
   defp replay_copy(%{webhook: nil}), do: Copy.Locked.ambiguous_replay_blocked()
 
@@ -459,7 +592,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
          {:ok, replayed} <- DLQ.requeue(webhook.id) do
       socket
       |> record_single_replay(replayed)
-      |> assign_webhook(Repo.get(WebhookEvent, replayed.id))
+      |> refresh_webhook_after_replay(replayed.id)
       |> clear_replay_drawer()
       |> push_flash(:info, replay_success(socket.assigns.current_owner_scope))
     else

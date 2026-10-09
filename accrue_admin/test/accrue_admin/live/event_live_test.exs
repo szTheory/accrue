@@ -245,6 +245,31 @@ defmodule AccrueAdmin.EventLiveTest do
     assert flash["error"] != nil
   end
 
+  test "detail read failure is unavailable rather than not-found and retry restores the record",
+       %{
+         conn: conn,
+         event: event
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/events/#{event.id}")
+
+    on_exit(fn -> Application.delete_env(:accrue_admin, :phase238_read_failure_fixture) end)
+    Application.put_env(:accrue_admin, :phase238_read_failure_fixture, :event_detail)
+
+    html = render_click(view, "retry_read", %{})
+
+    assert html =~ ~s(data-role="event-unavailable")
+    assert html =~ "Event record unavailable"
+    refute html =~ event.type
+    refute html =~ "fixture database unavailable"
+
+    Application.delete_env(:accrue_admin, :phase238_read_failure_fixture)
+    html = render_click(view, "retry_read", %{})
+
+    assert html =~ event.type
+    refute html =~ ~s(data-role="event-unavailable")
+  end
+
   test "renders semantic dl/dt/dd facts inside summary_card", %{conn: conn, event: event} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 

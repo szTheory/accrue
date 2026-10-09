@@ -273,6 +273,29 @@ defmodule AccrueAdmin.WebhookLiveTest do
            )
   end
 
+  test "detail read failure is unavailable rather than not-found and retry restores evidence", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
+
+    on_exit(fn -> Application.delete_env(:accrue_admin, :phase238_read_failure_fixture) end)
+    Application.put_env(:accrue_admin, :phase238_read_failure_fixture, :webhook_detail)
+    html = render_click(view, "retry_read", %{})
+
+    assert html =~ ~s(data-role="webhook-unavailable")
+    assert html =~ "Webhook history unavailable"
+    refute html =~ webhook.processor_event_id
+    refute html =~ "fixture database unavailable"
+
+    Application.delete_env(:accrue_admin, :phase238_read_failure_fixture)
+    html = render_click(view, "retry_read", %{})
+
+    assert html =~ webhook.processor_event_id
+    refute html =~ ~s(data-role="webhook-unavailable")
+  end
+
   test "forensic payload section uses Detail.detail_section not hand-rolled ax-card", %{
     conn: conn,
     webhook: webhook
