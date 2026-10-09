@@ -162,6 +162,20 @@ None.
 
 The invoice list and detail review exemplar now has recurring mounted acceptance for the implemented responsive cases. Actual 400% browser zoom still needs a browser/host mechanism that can set it faithfully. Plan 240-04 remains the owner for full keyboard containment and the previously logged focus-trap/command-palette harness failures.
 
+## TDD Gate Compliance Addendum
+
+**Historical timing limitation:** During the original execution, the three targeted tests were observed failing before their fixes, and test commits precede their corresponding fix commits in history. However, the original executor did not preserve supported reporter output or obtain `RED_EVIDENCE_OK` before proceeding to GREEN. This is a procedural TDD evidence deviation. The supplemental reports below were generated after implementation; they prove the regression tests distinguish the original behavior from current behavior, but they do not establish that the original execution satisfied the report-and-classify-before-GREEN timing requirement.
+
+To create reviewable regression evidence without touching the shipped implementation, each RED target was run from an isolated local clone checked out at its original RED commit. Playwright’s native JUnit reports were captured unchanged. For the ExUnit target, a temporary scratch-only formatter converted actual ExUnit test-finished events into JUnit; it did not synthesize test outcomes. All three persisted records passed `GSD_RUNTIME=codex gsd_run check tdd-red-evidence <record> --raw` with `RED_EVIDENCE_OK` / `target_test_failed` before the separate current-source GREEN runs.
+
+| Task | Original source snapshot | RED evidence | Semantic RED result | Current-source GREEN |
+|------|--------------------------|--------------|---------------------|-----------------------|
+| 1 — unsupported invoice action copy | `30f90d4b` | `240-03-red-evidence/task1-invoice-state-copy.json` and its unchanged `.junit.xml` report; 23 observed events, 1 failure, 22 line-filter exclusions | The named LiveView assertion failed because the pre-fix detail output lacked the unavailable-state explanation. | `task1-invoice-state-copy.current-green.json`; 1 target passed, 0 failed, 22 excluded. |
+| 2 — invoice list coarse-pointer target | `a8d4a5d6` | `task2-invoice-list-coarse-pointer.json` and its unchanged `.junit.xml` report; 1 target failure | The planned 44px target assertion observed 40px. | `task2-invoice-list-coarse-pointer.current-green.json`; 1 target passed. |
+| 3 — invoice review coarse-pointer target | `3f6e161b` | `task3-invoice-detail-review-coarse-pointer.json` and its unchanged `.junit.xml` report; 1 target failure | The planned 44px review-control assertion observed 36px. | `task3-invoice-detail-review-coarse-pointer.current-green.json`; 1 target passed. |
+
+The JSON records include relative target/report paths, the actual command and exit code, the target test and expected/observed behavior, the semantic assessment, and fresh report timestamps. The `current-green` records are regression checks on the restored current source, not RED classifier inputs. No implementation task was re-executed, and project execution state remains at plan 4; this addendum does not mark the phase complete or erase the original timing deviation.
+
 ---
 *Phase: 240-shared-system-and-real-billing-exemplar*
 *Completed: 2026-10-09*
@@ -171,3 +185,4 @@ The invoice list and detail review exemplar now has recurring mounted acceptance
 - SUMMARY file exists at the required phase path.
 - All six measured task commits are ancestors of the current plan head.
 - Summary commit ledger matches `git rev-list --count`: 6 commits from the recorded base.
+- All three supplemental RED records and all three current GREEN reports are present, unmodified in their records, fresh, and classified as target failures/passes respectively.
