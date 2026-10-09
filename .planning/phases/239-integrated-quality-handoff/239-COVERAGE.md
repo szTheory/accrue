@@ -79,7 +79,7 @@ Each route row names its owner, auth/customer boundary, focused evidence and rec
 
 | Route or interaction | Owner / boundary | Focused evidence and disposition | Required CI gate / recurring value |
 |---|---|---|---|
-| `/` host entry | Example host; public Fake-backed navigation only | `examples/accrue_host/e2e/phase239-integrated-quality.spec.js` — heading and billing navigation landmarks, attached current PNG | `playwright-e2e` — mounted host entry and role navigation recur |
+| `/` host entry | Example host; public Fake-backed navigation only | `examples/accrue_host/e2e/phase239-integrated-quality.spec.js` — heading and billing navigation landmarks, direct 320 CSS px overflow assertion, authenticated read-only reload with zero non-GET requests, attached current PNG | `playwright-e2e` — mounted host entry, role navigation, narrow viewport and read-only reload recur |
 | `/app/billing` workspace billing | Example host; authenticated workspace owner/member | `examples/accrue_host/e2e/phase233-context.spec.js`, `examples/accrue_host/e2e/phase235-checkout.spec.js` and `examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs` — workspace scope and checkout continuity | `host-integration` — host account boundary recurs |
 | `/users/log-in` prerequisite | Example host; public auth entry then authenticated session | `examples/accrue_host/e2e/support/fixture.js` login helper and `examples/accrue_host/test/accrue_host_web/user_auth_test.exs` | `playwright-e2e` — every isolated browser journey authenticates through this entry |
 | `/app/organization-scope` selection and return | Example host; authenticated membership; POST reauthorizes selected organization | `examples/accrue_host/e2e/phase233-context.spec.js` and `examples/accrue_host/test/accrue_host_web/organization_scope_controller_test.exs` — valid/revoked selection and handoff | `playwright-e2e` — cross-mount context and redirect remain current |
@@ -116,7 +116,7 @@ This lists checked-in required CI definitions, not remote observations. Steps be
 
 | Stable acceptance check from Plans 01–04 | Checked-in required gate and exact step | Recurring regression value / disposition |
 |---|---|---|
-| Current Admin, Portal and host render assertions, viewport and no-write walkthrough | `playwright-e2e` → `Run Playwright shard`; new `Upload Phase 239 Playwright evidence` step retains HTML and `test-results` on success/failure | Current host/package render and journey request boundary recur; PNGs aid inspection but are not visual-golden assertions |
+| Current Admin, Portal and host render assertions, viewport and no-write walkthrough | `playwright-e2e` → `Run Playwright shard`; Phase 239 spec asserts host entry overflow at direct 320 CSS px and performs a post-login reload while collecting non-GET requests; new `Upload Phase 239 Playwright evidence` step retains HTML and `test-results` on success/failure | Current host/package render and journey request boundary recur; PNGs aid inspection but are not visual-golden assertions |
 | Compiled package route versus `package_route` ledger equality | `host-integration` → `Run host integration gate` → `bash scripts/ci/accrue_host_uat.sh` (which runs `mix verify.full`) | Any changed/added/removed compiled path fails until a row with disposition is updated |
 | Admin mounted asset/hash, copy export, component registry/examples | Existing Admin package test job → `mix test --warnings-as-errors` | Asset parity/export and component inventory are deterministic source contracts |
 | Portal mounted assets, CSP nonce/origin and checkout integrity | Existing Portal package test job → `mix test --warnings-as-errors` | Stable security/resource boundaries recur without live provider dependency |
@@ -146,10 +146,12 @@ This lists checked-in required CI definitions, not remote observations. Steps be
 | Portal representative — overflow | `/billing` at direct 320 CSS px and 640px viewport at 200% zoom | Phase 239 mounted spec uses both widths; assertion names route and viewport |
 | Portal representative — zero/one/many | Deterministic fixtures at cheapest credible layer, independent of representative capture | Portal list LiveView/controller suites |
 | Portal representative — long text | Long customer names/identifiers wrap/disclose without hiding actions | Phase 236 long billed-identity browser case |
-| Host preview — loading | Existing entry and preview navigation remain understandable; optional subjective feedback is not an automated result | Current Phase 239 `/` route render; no feedback-control mutation added |
-| Host preview — error | Unavailable mount/resource stays distinct from empty and has safe navigation/retry | Existing host navigation and auth/context failure tests; unavailable remains a disposition, not a success claim |
+| Host preview — loading | Existing entry and preview navigation remain understandable; optional subjective feedback is collected outside the app and is not an automated result | Current Phase 239 `/` route render; no in-app feedback widget or feedback loading control is claimed |
+| Host preview — error | Unavailable route/resource stays explicitly unavailable and has a safe restart/retry-after-readiness path | Handoff disposition and recurring `verify_package_docs.sh` literal contract; unavailable is not a success claim |
 | Host preview — overflow | Host entry route retains billing navigation/context at 320px effective width | Current host entry render attached; viewport is responsive assertion at 320px on Admin/Portal only |
-| Host preview — long text | Long route/feedback labels wrap or disclose without hiding context/actions | Existing Phase 236 Portal long identity and Phase 238 long Admin identifier evidence; no feedback widget was introduced |
+| Host preview — long text | No long-feedback-text behavior is claimed because optional feedback is collected outside the app | Existing Phase 236 Portal long identity and Phase 238 long Admin identifier evidence do not establish feedback-widget behavior |
+
+The additive accepted-scope and evidence-boundary disposition is recorded in [`239-SCOPE-DISPOSITION.md`](239-SCOPE-DISPOSITION.md). The host row above is exercised by the existing `playwright-e2e` shard; local results are recorded in the Phase 239 Plan 05 summary. Remote CI and provider outcomes remain unobserved.
 
 ## Probe edges and boundary notes
 

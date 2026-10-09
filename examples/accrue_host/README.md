@@ -9,6 +9,8 @@ operator surface remains **Accrue Admin**.
 
 Phase 239's [read-only preview handoff](../../.planning/phases/239-integrated-quality-handoff/239-HANDOFF.md) summarizes current local evidence, optional feedback boundaries, and the separate proof path.
 
+The Fake-backed preview does not establish live-provider parity or real customer billing outcomes.
+
 The whole happy path is three steps:
 
 ```bash
