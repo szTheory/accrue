@@ -21,24 +21,66 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
   def mount(%{"id" => promotion_code_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
 
-    case Repo.get(PromotionCode, promotion_code_id) |> maybe_preload_coupon() do
+    case read_promotion_code(promotion_code_id) do
+      :unavailable ->
+        {:ok,
+         socket
+         |> assign_shell(admin)
+         |> assign(:promotion_code_id, promotion_code_id)
+         |> assign(:promotion_code, nil)
+         |> assign(:related_items, [])
+         |> assign(:activity_loaded?, false)
+         |> assign(:raw_json_loaded?, false)
+         |> assign(:read_unavailable?, true)}
+
       nil ->
         {:ok,
          socket
          |> put_flash(:error, AccrueAdmin.Copy.promotion_code_not_found())
          |> redirect(to: admin_path(admin, "/promotion-codes"))}
 
-      promotion_code ->
+      {:ok, promotion_code} ->
         mount_path = admin["mount_path"] || "/billing"
         scope = socket.assigns.current_owner_scope
 
         {:ok,
          socket
          |> assign_shell(admin)
+         |> assign(:promotion_code_id, promotion_code_id)
          |> assign(:promotion_code, promotion_code)
          |> assign(:related_items, related_items(promotion_code, mount_path, scope))
          |> assign(:activity_loaded?, false)
-         |> assign(:raw_json_loaded?, false)}
+         |> assign(:raw_json_loaded?, false)
+         |> assign(:read_unavailable?, false)}
+    end
+  end
+
+  def handle_event("retry_read", _params, socket) do
+    case read_promotion_code(socket.assigns.promotion_code_id) do
+      {:ok, promotion_code} ->
+        {:noreply,
+         socket
+         |> assign(:promotion_code, promotion_code)
+         |> assign(
+           :related_items,
+           related_items(
+             promotion_code,
+             socket.assigns.admin_mount_path,
+             socket.assigns.current_owner_scope
+           )
+         )
+         |> assign(:read_unavailable?, false)}
+
+      :unavailable ->
+        {:noreply, assign(socket, :read_unavailable?, true)}
+
+      nil ->
+        {:noreply,
+         socket
+         |> put_flash(:error, AccrueAdmin.Copy.promotion_code_not_found())
+         |> redirect(
+           to: admin_path(%{"mount_path" => socket.assigns.admin_mount_path}, "/promotion-codes")
+         )}
     end
   end
 
@@ -64,7 +106,13 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
       active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
+        <div :if={@read_unavailable?} class="ax-card ax-data-table-unavailable" data-role="promotion-code-unavailable" role="alert">
+          <p class="ax-heading">Promotion code record unavailable</p>
+          <p class="ax-body">This promotion code and its parent coupon could not be loaded. Their details are unknown until the read succeeds.</p>
+          <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-promotion-code-read">Retry</button>
+        </div>
         <Breadcrumbs.breadcrumbs
+          :if={@promotion_code}
           items={[
             %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{
@@ -81,6 +129,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
         />
 
         <Detail.summary_card
+          :if={@promotion_code}
           eyebrow={AccrueAdmin.Copy.promotion_code_detail_eyebrow()}
           title={@promotion_code.code || @promotion_code.processor_id || @promotion_code.id}
         >
@@ -90,9 +139,9 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
           </:facts>
         </Detail.summary_card>
 
-        <Detail.summary_list rows={summary_rows(@promotion_code, @admin_mount_path)} />
+        <Detail.summary_list :if={@promotion_code} rows={summary_rows(@promotion_code, @admin_mount_path)} />
 
-        <section class="ax-stack-xl" aria-label="Promotion code details">
+        <section :if={@promotion_code} class="ax-stack-xl" aria-label="Promotion code details">
           <details class="ax-detail-section" data-ax-drill-section="parent-coupon" open>
             <summary class="ax-detail-section-head">
               <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.promotion_code_section_navigate_heading() %></span>
@@ -122,11 +171,11 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
           </details>
         </section>
 
-        <div data-ax-related-resources>
+        <div :if={@promotion_code} data-ax-related-resources>
           <RelatedResources.related_resources items={@related_items} />
         </div>
 
-        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+        <details :if={@promotion_code} class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.promotion_code_lazy_activity_heading() %></span>
           </summary>
@@ -144,7 +193,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
           <% end %>
         </details>
 
-        <details class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
+        <details :if={@promotion_code} class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.promotion_code_lazy_raw_data_heading() %></span>
           </summary>
@@ -161,6 +210,23 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
       </section>
     </AppShell.app_shell>
     """
+  end
+
+  defp read_promotion_code(promotion_code_id) do
+    try do
+      if Application.get_env(:accrue_admin, :env) == :test and
+           Application.get_env(:accrue_admin, :phase238_read_failure_fixture) ==
+             :promotion_code_detail do
+        raise DBConnection.ConnectionError, message: "fixture database unavailable"
+      end
+
+      case Repo.get(PromotionCode, promotion_code_id) |> maybe_preload_coupon() do
+        nil -> nil
+        promotion_code -> {:ok, promotion_code}
+      end
+    rescue
+      _error in DBConnection.ConnectionError -> :unavailable
+    end
   end
 
   defp assign_shell(socket, admin) do

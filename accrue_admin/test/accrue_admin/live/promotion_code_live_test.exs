@@ -220,6 +220,27 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert flash["error"] != nil
   end
 
+  test "detail read failure is distinct from not-found and retry restores code restrictions", %{
+    conn: conn,
+    promotion_code: promotion_code
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/promotion-codes/#{promotion_code.id}")
+    on_exit(fn -> Application.delete_env(:accrue_admin, :phase238_read_failure_fixture) end)
+    Application.put_env(:accrue_admin, :phase238_read_failure_fixture, :promotion_code_detail)
+
+    html = render_click(view, "retry_read", %{})
+    assert html =~ ~s(data-role="promotion-code-unavailable")
+    assert html =~ "Promotion code record unavailable"
+    refute html =~ "fixture database unavailable"
+
+    Application.delete_env(:accrue_admin, :phase238_read_failure_fixture)
+    html = render_click(view, "retry_read", %{})
+    refute html =~ ~s(data-role="promotion-code-unavailable")
+    assert html =~ "REFER15"
+    assert html =~ "Referral coupon"
+  end
+
   defp insert_coupon(attrs) do
     defaults = %{
       processor: "stripe",
