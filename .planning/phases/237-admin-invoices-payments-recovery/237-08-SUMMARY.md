@@ -93,7 +93,7 @@ status: complete
 ## Accomplishments
 
 - Added a focused served Playwright journey covering invoice collection, staged payment review, cancellation, real foreign-owner denial, and recovery window → scoped record → return navigation.
-- Captured current-source invoice collection, invoice review, and dark recovery screenshots. The manifest validates 8 source hashes and all 3 screenshot hashes/byte counts; it records `read_only: true` and `confirmed_or_dispatched: false`.
+- Captured current-source invoice collection, invoice review, and dark recovery screenshots. The manifest binds 9 source files and all 3 screenshot hashes/byte counts; it records `read_only: true` and `confirmed_or_dispatched: false`.
 - Confirmed the existing `.github/workflows/ci.yml` `playwright-e2e` job runs unrestricted `npx playwright test --shard=...`, and Playwright lists this spec under the current host configuration.
 - Added one deterministic recovery campaign to the existing host seed and its cleanup allowlist, keeping campaign timestamps on `Accrue.Clock`.
 
@@ -109,6 +109,9 @@ status: complete
 - `scripts/ci/accrue_host_seed_e2e.exs` - deterministic recovery campaign fixture and cleanup allowlist entry.
 - `accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex` - recovery windows use the canonical Accrue clock.
 - `accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs` - integration clock aligns with database timestamps and preserves UTC microsecond precision.
+- `accrue_admin/lib/accrue_admin/live/invoices_live.ex` and `copy/invoice.ex` - exact due-date/unavailable state and an accessible invoice action in the card view; status copy no longer exposes boolean false.
+- `accrue_admin/lib/accrue_admin/live/invoice_live.ex` - action-named payment confirmation label.
+- `accrue_admin/lib/accrue_admin/copy.ex`, `copy/dunning.ex`, and `live/analytics/recovery_live.ex` - recovery read-error copy aligned with the approved design contract.
 - `accrue_admin/assets/css/app.css`, `accrue_admin/priv/static/accrue_admin.css` - long customer identities wrap at narrow widths.
 
 ## Decisions Made
@@ -155,7 +158,10 @@ status: complete
 - `.github/workflows/ci.yml` `playwright-e2e` runs `npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}` with no spec exclusion; no workflow edit was needed.
 - `cd accrue_admin && mix test --warnings-as-errors` — 581 tests, 0 failures.
 - `git diff --check` — passed.
-- Manifest revalidation — 8/8 source files and 3/3 screenshots match recorded SHA-256 and byte counts; `source_sha` matches recomputation.
+- Manifest revalidation at source commit `1933bfe9` — 9/9 source files and 3/3 screenshots match recorded SHA-256 and byte counts; aggregate `source_sha` matches recomputation; `read_only: true`, `confirmed_or_dispatched: false`.
+- Post-UI-fix focused ExUnit suites — 62 tests, 0 failures; full `mix test --warnings-as-errors` — 581 tests, 0 failures.
+- Post-UI-fix served Playwright at source commit `1933bfe9` — 1 passed. It asserts visible due-date/unavailable state and “View invoice” at 320px, no boolean “False” leak, exact “Pay invoice” confirmation, and real Beta-under-Alpha denial; the payment review is canceled before dispatch.
+- `mix accrue_admin.assets.build` rebuilt the static CSS bundle used by the served browser test.
 
 ## Issues Encountered
 
@@ -184,4 +190,23 @@ All Phase 237 plans now have automated verification evidence, and the existing h
 - Added seed cleanup coverage proving the Beta-owned invoice/customer is removed and recreated with correct ownership on rerun.
 - Commit: `3de23b59` (`fix(237-08): verify denial against a real foreign invoice`).
 - Verification after the fix commit: `npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop` — 1 passed. The payment review remained canceled before confirmation or dispatch.
-- Security auditor retest is the remaining confirmation for this closure; no human UAT is required.
+- Security auditor retest closed all 21/21 declared threats; `threats_open: 0` is recorded in `237-SECURITY.md`.
+
+## UI Audit Follow-up (2026-10-09)
+
+- Added the due-date column and mobile card field, explicit “Due date unavailable” state, and keyboard-accessible “View invoice” action.
+- Removed false boolean leakage from lifecycle copy, changed the pay confirmation control to “Pay invoice,” and aligned recovery read-error copy with `237-UI-SPEC.md`.
+- Fixed the review drawer's content stretching and changed data-table card spacing to the contract's 4px minimum; reduced invoice queue emphasis to the contract's semibold weight.
+- Focused ExUnit 62/62 and the full Admin suite 581/581 pass. The served browser proof captures the unfocused page and asserts the mobile facts/action.
+- Fix commit: `bed31a44`; Playwright assertion-order follow-up: `1933bfe9`. The completed UI review scores 19/24; its three remaining polish findings are non-blocking and recorded in `237-UI-REVIEW.md`.
+
+## Final Regression Gate (2026-10-09 UTC)
+
+- Corrected the queue title to use `.ax-type-label` and rebuilt the Admin CSS bundle, removing the raw typography declarations rejected by the package-docs verifier.
+- Corrected recovery analytics test expectations to preserve absent currency as `nil`; the query groups on the observed JSON currency and does not invent USD.
+- `cd accrue && mix test --warnings-as-errors` — 70 properties, 2,077 tests, 0 failures (11 excluded).
+- `cd accrue_admin && mix test --warnings-as-errors` — 581 tests, 0 failures. `cd accrue_portal && mix test.ci` — 110 tests, 0 failures. `cd examples/accrue_host && mix test --warnings-as-errors` — 222 tests, 0 failures.
+- `cd accrue && mix test test/accrue/docs/package_docs_verifier_test.exs` — 46 tests, 0 failures; `mix accrue_admin.assets.build` succeeded.
+- Served browser regression: Phase 237 billing/recovery journey 1/1 passed at source commit `b24092fa`; Phase 234 subscription-detail journey 1/1 passed after the semantic type change. The earlier regression batch also passed: standard Fake lane 14, Phase 234 real-query search 1, Phase 233 Braintree lane 12, and Phase 236 Braintree lane 14.
+- Capture manifest revalidation: 9/9 source files, 3/3 screenshots, stylesheet hash and byte counts match; `source_head` is `b24092fa`; read-only/no-dispatch flags remain true.
+- Incremental code review covered six files and found no issues. No human UAT remains for deterministic acceptance.

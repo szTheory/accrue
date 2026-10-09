@@ -38,7 +38,7 @@ The plan/task/wave IDs and threat references below identify ownership; execution
 | 237-01-T1/T2; 237-04-T1/T2 | 237-01, 237-04 | 0, 1 | ADM-02 | T-237-01, T-237-08, T-237-09 | Wave 0 characterizes existing scoped invoice path and raw fixtures to green; plan 04 adds and greens overdue, money, and collection assertions | ExUnit + LiveView | `cd accrue_admin && mix test test/accrue_admin/live/invoices_live_test.exs`; `cd accrue_admin && mix test test/accrue_admin/live/invoice_live_test.exs` | Existing invoice suites; baseline/fixtures by 237-01 and behavior checks by 237-04 | green |
 | 237-02-T1/T2; 237-05-T1/T2; 237-06-T1/T2 | 237-02, 237-05, 237-06 | 0, 1, 2 | ADM-05 | T-237-03, T-237-04, T-237-05, T-237-10..15 | Wave 0 prepares green action/result fixtures; plans 05/06 add and green stale-dispatch and outcome assertions | LiveView + action contract | `cd accrue_admin && mix test test/accrue_admin/live/invoice_live_test.exs`; `cd accrue_admin && mix test test/accrue_admin/live/charge_live_test.exs` | Existing action suites; fixtures by 237-02 and stale-dispatch/result checks by 237-05/06 | green |
 | 237-03-T1/T2; 237-07-T1/T2 | 237-03, 237-07 | 0, 1 | ADM-06 | T-237-06, T-237-07, T-237-16..18 | Wave 0 prepares green raw event/window/owner fixtures; plan 07 adds and greens currency/history/return assertions | Query/LiveView | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs` | Existing recovery suite; fixtures by 237-03 and currency/history/navigation checks by 237-07 | green |
-| 237-08-T1/T2 | 237-08 | 3 | ADM-02, ADM-05, ADM-06 | T-237-19, T-237-20 | Read-only served navigation and staged-review inspection, focus/cancel, 320px reflow, theme, assets, denial of a real Beta-owned invoice under Alpha scope, and read-error; no confirm or dispatch | Playwright | `cd examples/accrue_host && npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop`; `cd examples/accrue_host && npx playwright test --list e2e/phase237-admin-billing.spec.js` | Phase-owned browser spec; existing blocking playwright-e2e discovery. Fake-backed LiveView plans 05/06 own pending, duplicate-submit, and result assertions. | green |
+| 237-08-T1/T2 | 237-08 | 3 | ADM-02, ADM-05, ADM-06 | T-237-19, T-237-20 | Read-only served navigation and staged-review inspection, focus/cancel, 320px reflow, due-date/unavailable state and visible row action, theme, assets, denial of a real Beta-owned invoice under Alpha scope, and read-error; no confirm or dispatch | Playwright | `cd examples/accrue_host && npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop`; `cd examples/accrue_host && npx playwright test --list e2e/phase237-admin-billing.spec.js` | Phase-owned browser spec; existing blocking playwright-e2e discovery. Fake-backed LiveView plans 05/06 own pending, duplicate-submit, and result assertions. | green |
 
 ## Criterion Evidence Index
 
@@ -129,7 +129,24 @@ All stable in-scope acceptance behavior should have automated ExUnit/LiveView or
 - [x] Focused feedback latency and test results are recorded during execution.
 - [x] nyquist_compliant is set true only after finalized coverage and passing evidence.
 
-Approval: automated validation passed 2026-10-08. Focused ExUnit suites: 87 tests, 0 failures; served Playwright journey: 1 passed and 1 discovered; full package suite: 581 tests, 0 failures (Phase 237 execution evidence). No human UAT remains for deterministic acceptance.
+Approval: automated validation passed 2026-10-09. Initial focused ExUnit suites: 87 tests, 0 failures; post-UI-fix focused suites: 62 tests, 0 failures; served Playwright journey: 1 passed and 1 discovered; full package suite: 581 tests, 0 failures. No human UAT remains for deterministic acceptance.
+
+## Final Regression Gate (2026-10-09 UTC)
+
+| Scope | Automated verification | Result |
+|---|---|---|
+| Core | `cd accrue && mix test --warnings-as-errors` | 70 properties, 2,077 tests, 0 failures (11 excluded) |
+| Admin | `cd accrue_admin && mix test --warnings-as-errors` | 581 tests, 0 failures |
+| Portal | `cd accrue_portal && mix test.ci` | 110 tests, 0 failures |
+| Host | `cd examples/accrue_host && mix test --warnings-as-errors` | 222 tests, 0 failures |
+| Package documentation verifier | `cd accrue && mix test test/accrue/docs/package_docs_verifier_test.exs` | 46 tests, 0 failures |
+| Phase 237 served browser | `cd examples/accrue_host && npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop` | 1 passed after source commit `b24092fa` |
+| Phase 234 subscription-detail browser | `cd examples/accrue_host && npx playwright test e2e/phase234-admin-customers-subscriptions.spec.js --project=chromium-desktop -g "Phase 234 served Admin journeys"` | 1 passed after the semantic typography change |
+| Broader browser regression lanes | Existing Fake, real-query, and Braintree lanes | 14 + 1 + 12 + 14 passed, respectively |
+
+The first full Core run exposed two stale contracts: raw type declarations in the admin stylesheet, and tests expecting missing currency to default to USD. The heading now composes the semantic `.ax-type-label` role and the built CSS was regenerated; the recovery tests now expect `nil` for absent currency. The focused documentation verifier and the complete Core/Admin suites pass after these corrections. `mix accrue_admin.assets.build` and `git diff --check` also pass.
+
+The refreshed Phase 237 capture manifest binds 9 source files and 3 screenshots to source `b24092fa`; every source, capture, and served stylesheet hash and byte count was checked. Code review covered six files with no findings. Stable deterministic acceptance remains fully automated; no human UAT is required.
 
 ## Validation Audit 2026-10-09
 
@@ -143,4 +160,6 @@ Approval: automated validation passed 2026-10-08. Focused ExUnit suites: 87 test
 
 - Added a real Beta-owned invoice to the deterministic host seed and asserted that its detail request under Alpha scope is denied without leaking the ID or invoice number.
 - The post-fix served Playwright rerun passed 1/1 after commit `3de23b59`; seed cleanup ownership is covered by `mix test test/accrue_host/seed_e2e_cleanup_test.exs`.
-- Security auditor retest pending; acceptance remains automated and requires no human UAT.
+- The security auditor retest closed all 21 declared threats; `threats_open: 0` is recorded in `237-SECURITY.md`.
+- UI audit findings are fixed: mobile cards expose date state and action, false boolean no longer leaks, pay confirmation names the action, recovery error copy matches the contract, and drawer content stays grouped. Full suite 581/581 passed; post-fix Playwright 1/1 passed and refreshed all three captures with 9 source hashes.
+- Acceptance remains automated and requires no human UAT.

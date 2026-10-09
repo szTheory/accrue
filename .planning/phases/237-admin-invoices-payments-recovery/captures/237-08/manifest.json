@@ -2,47 +2,51 @@
   "phase": "237-admin-invoices-payments-recovery",
   "evidence": "seeded deterministic host fixtures; not live-provider settlement",
   "layout_stress": "long identity and failure reason were injected in-memory, checked for wrapping, then restored before capture",
-  "captured_at": "2026-10-09T01:18:32.583Z",
-  "source_head": "3de23b59ac771d7a9b39d57917990b4828b05e12",
-  "source_sha": "d3e0113542c245626b63b8c6bca50bcaad17ad90b1c9ff3d189c9b352d3e11d0",
+  "captured_at": "2026-10-09T02:12:07.424Z",
+  "source_head": "b24092fa487ddb702e6f99c581d377ed739af349",
+  "source_sha": "9edad8e39b457ad21c61caa21b5de7901e93c836b1372712b15fc81722d1e892",
   "sources": {
     "accrue_admin/assets/css/app.css": {
-      "sha256": "4f324c3adfd9d5f6c8f57839d8ed05a090a55262ff51b60ebd456c36211548c0",
-      "bytes": 189745
+      "sha256": "2ef6566394886686b88a783e815a06abb5e62d980ac7a782de08d415dbda83d5",
+      "bytes": 190042
     },
     "accrue_admin/assets/css/theme.css": {
       "sha256": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
       "bytes": 17787
     },
     "accrue_admin/lib/accrue_admin/live/invoices_live.ex": {
-      "sha256": "182db6918b63795b9e536212b93733f36a4e79a2e0fd5e06cfe221835cf4c1a3",
-      "bytes": 16485
+      "sha256": "14b14a062352b07927da2bb5a3cb58c6b225be2595af2284acaf573abd61ed06",
+      "bytes": 17381
     },
     "accrue_admin/lib/accrue_admin/live/invoice_live.ex": {
-      "sha256": "4936231c59577181cb625cfa7c43732e7c108a23cdc7cffea506c4feb8c27a25",
-      "bytes": 54732
+      "sha256": "310dd52b0e228f157ed18a581f26cfbdc6042d2719cd1c9047f2babeee318d3d",
+      "bytes": 54860
     },
     "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": {
-      "sha256": "6d2db38e6d57e659c0d3530281af6b50c33ad36cd53dc00c5879512ff57985bc",
-      "bytes": 9400
+      "sha256": "8a3d2ccfac8adfd2fd0c9aabf387d1e82133c867dddd6a2cef57380a194ad962",
+      "bytes": 9369
     },
     "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs": {
-      "sha256": "c6d3c9f6c26cc01d2e4fa934773134aa253b8050bd812bd085cbc294004236ad",
-      "bytes": 27492
+      "sha256": "3cbbc9314214f099013f89f9ee16ae1ba3f38acc1f6f0fe82fbe34c723426ef2",
+      "bytes": 27575
     },
     "accrue_admin/lib/accrue_admin/components/at_risk_table.ex": {
-      "sha256": "cf106398f2777f28f973eef5ec2be2eb3c382032a6a3c503c43bb1ccd58fa741",
-      "bytes": 9842
+      "sha256": "66ede962598fe270505d0150f2f1ae4c057a95e8fb790a1b57626fba07a86f9a",
+      "bytes": 9903
     },
     "scripts/ci/accrue_host_seed_e2e.exs": {
       "sha256": "efe673aa37b234498f13ac85c4285320be971a9b4bb311a1af69d8b17342a0bf",
       "bytes": 33398
+    },
+    "examples/accrue_host/e2e/phase237-admin-billing.spec.js": {
+      "sha256": "66318b0cf8c9924bb3d4c9832acbe0ee2020fb2d42828f0118e722ab8b11b03e",
+      "bytes": 14422
     }
   },
   "stylesheet": {
-    "href": "/admin/assets/css-cd445a6e47a9d2c89c607e1876f4593f",
-    "bytes": 129744,
-    "sha256": "4172c5e52424d02061aefcaa9319f65d85f9499d5ab06624b194efff5e977e03"
+    "href": "/admin/assets/css-d4bb66d07d69e166a3fa12af8144210b",
+    "bytes": 130089,
+    "sha256": "fd3c33459318f72f7506c33c843ae167a7e9496aa19445d3be1cf6f0f5edf18e"
   },
   "viewport_and_theme": {
     "invoice-collection.png": {
@@ -52,18 +56,18 @@
         "height": 800
       },
       "theme": "light",
-      "sha256": "f1de362a9312373be19d62165c344f1ee5e29f02b76af4c466d2fe3c6af00421",
-      "bytes": 118802
+      "sha256": "c7080c4ef4d1e6f7e818cfc6aec5d65fc03c903c1d9bfbc41a6a77088f7a523d",
+      "bytes": 121341
     },
     "invoice-review.png": {
-      "route": "http://127.0.0.1:4101/admin/invoices/13bc9936-6f5b-47fb-8694-8c5f4d32141e?org=accrue-e2e-alpha",
+      "route": "http://127.0.0.1:4101/admin/invoices/3a70c08c-fd35-44af-88a0-14d5d9d4f68d?org=accrue-e2e-alpha",
       "viewport": {
         "width": 1280,
         "height": 900
       },
       "theme": "light",
-      "sha256": "42baa0a459020c5affe7d557ee2b51360de17d4a19594390bbd3a2d13393764f",
-      "bytes": 202859
+      "sha256": "b44088efb1da3646766a0e94a31e32b611b190bd69ee6af8fd904d8b0e8b46d0",
+      "bytes": 200404
     },
     "recovery.png": {
       "route": "http://127.0.0.1:4101/admin/analytics/recovery?org=accrue-e2e-alpha&window=30d",
@@ -72,8 +76,8 @@
         "height": 800
       },
       "theme": "dark",
-      "sha256": "ec4ecfcb0f67852d0bf8d31d15df9c36de1c2fd0277ea117e786e970d7fb99e3",
-      "bytes": 136404
+      "sha256": "4f876586907865d61ca3b956050b23ba4d34444cffde03b875491e77f2199561",
+      "bytes": 137000
     }
   },
   "read_only": true,

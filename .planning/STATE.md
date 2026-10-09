@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.63
 milestone_name: Admin and Portal UI refinement
-current_phase: 237
-current_phase_name: Admin Invoices, Payments & Recovery
-status: verifying
-stopped_at: Completed 237-08-PLAN.md
-last_updated: "2026-10-09T01:06:06.389Z"
+current_phase: 238
+current_phase_name: Admin Events, Webhooks & Remaining Billing Surfaces
+status: planning
+stopped_at: Phase 237 complete, ready to plan Phase 238
+last_updated: "2026-10-09T02:15:21.292Z"
 last_activity: 2026-10-08
-last_activity_desc: Phase 237 execution started
-state_head: 6d72e33d0e9d9c8656568dc6af4aba289c9ef75a
+last_activity_desc: Phase 237 complete, transitioned to Phase 238
+state_head: b6c7ada466577884894a9a888c3aa194b0c85eee
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 35
   completed_plans: 35
-  percent: 57
+  percent: 71
 ---
 
 # Project State
@@ -27,21 +27,21 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 237 — Admin Invoices, Payments & Recovery
-**Progress:** [██████░░░░] 57% (2 of 7 milestone phases complete)
+**Progress:** [███████░░░] 71% (2 of 7 milestone phases complete)
 **Planned work completed:** [████████████████████] 15/15 plans (100%); remaining phases await planning.
 
 ## Current Position
 
-Phase: 237 (Admin Invoices, Payments & Recovery) — EXECUTING
-Plan: 8 of 8
-Status: Phase complete — ready for verification
-Last activity: 2026-10-08 — Phase 237 execution started
+Phase: 238 — Admin Events, Webhooks & Remaining Billing Surfaces
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-08 — Phase 237 complete, transitioned to Phase 238
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 65
+- Total plans completed: 73
 - Average duration: —
 - Total execution time: —
 
@@ -60,6 +60,7 @@ Last activity: 2026-10-08 — Phase 237 execution started
 | 234 | 8 | - | - |
 | 235 | 6 | - | - |
 | 236 | 6 | - | - |
+| 237 | 8 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -357,7 +358,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-09T01:06:06.320Z
-Stopped at: Completed 237-08-PLAN.md
+Stopped at: Phase 237 complete, ready to plan Phase 238
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
