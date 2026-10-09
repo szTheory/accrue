@@ -7,6 +7,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
   alias Accrue.Events
   alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
+  alias Accrue.Webhooks.DLQ
   alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Events, as: EventQueries
@@ -264,6 +265,80 @@ defmodule AccrueAdmin.WebhookLiveTest do
 
     assert html =~ "Replay is blocked because this webhook isn&#39;t linked to a billable row"
     assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
+
+    refute TestRepo.exists?(
+             from(event in Event,
+               where:
+                 event.type == "admin.webhook.replay.completed" and
+                   event.subject_id == ^webhook.id
+             )
+           )
+  end
+
+  test "single replay revalidates organization ownership inside the claim transaction", %{
+    conn: conn
+  } do
+    customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    invoice = insert_invoice(customer, %{processor_id: "in_reassigned_single"})
+
+    webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_reassigned_single",
+        status: :dead,
+        data: %{"object" => %{"id" => invoice.processor_id}}
+      })
+
+    {:ok, _event} =
+      Events.record(%{
+        type: "invoice.payment_failed",
+        subject_type: "Invoice",
+        subject_id: invoice.id,
+        actor_type: "webhook",
+        actor_id: webhook.processor_event_id,
+        caused_by_webhook_event_id: webhook.id
+      })
+
+    prior_requeue_fun = Application.get_env(:accrue_admin, :webhook_requeue_fun)
+
+    on_exit(fn ->
+      if prior_requeue_fun do
+        Application.put_env(:accrue_admin, :webhook_requeue_fun, prior_requeue_fun)
+      else
+        Application.delete_env(:accrue_admin, :webhook_requeue_fun)
+      end
+    end)
+
+    Application.put_env(:accrue_admin, :webhook_requeue_fun, fn id, authorize_fun ->
+      customer
+      |> Ecto.Changeset.change(owner_id: "org_foreign")
+      |> TestRepo.update!()
+
+      DLQ.requeue(id, authorize_fun)
+    end)
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}?org=allowed-org")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, webhook.id)
+
+    _ = render_click(element(view, "[data-ax-primary-action]", "Replay webhook"))
+    _ = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm replay"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Replay is blocked because this webhook isn&#39;t linked to a billable row"
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :dead
+
+    refute TestRepo.exists?(
+             from(event in Event,
+               where: event.type == "webhook.replay_requested" and event.subject_id == ^webhook.id
+             )
+           )
 
     refute TestRepo.exists?(
              from(event in Event,

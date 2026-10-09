@@ -559,14 +559,16 @@ defmodule AccrueAdmin.Live.WebhookLive do
   end
 
   defp execute_replay(socket, webhook_id) do
-    with {:ok, webhook} <- Webhooks.detail(webhook_id, socket.assigns.current_owner_scope),
+    owner_scope = socket.assigns.current_owner_scope
+
+    with {:ok, webhook} <- Webhooks.detail(webhook_id, owner_scope),
          true <- replayable?(webhook),
-         {:ok, replayed} <- DLQ.requeue(webhook.id) do
+         {:ok, replayed} <- requeue_delivery(webhook.id, owner_scope) do
       socket
       |> record_single_replay(replayed)
       |> refresh_webhook_after_replay(replayed.id)
       |> clear_replay_drawer()
-      |> push_flash(:info, replay_success(socket.assigns.current_owner_scope))
+      |> push_flash(:info, replay_success(owner_scope))
     else
       :not_found ->
         replay_blocked(socket)
@@ -575,6 +577,9 @@ defmodule AccrueAdmin.Live.WebhookLive do
         replay_blocked(socket)
 
       false ->
+        replay_blocked(socket)
+
+      {:error, :out_of_scope} ->
         replay_blocked(socket)
 
       {:error, reason} ->
@@ -586,6 +591,19 @@ defmodule AccrueAdmin.Live.WebhookLive do
           :error,
           "Replay could not be queued. Confirm the delivery is still eligible and try again."
         )
+    end
+  end
+
+  defp requeue_delivery(id, owner_scope) do
+    authorize_fun = &Webhooks.owner_scope_allows_replay?(&1, owner_scope)
+
+    if Mix.env() == :test do
+      case Application.get_env(:accrue_admin, :webhook_requeue_fun) do
+        fun when is_function(fun, 2) -> fun.(id, authorize_fun)
+        _configured_fun -> DLQ.requeue(id, authorize_fun)
+      end
+    else
+      DLQ.requeue(id, authorize_fun)
     end
   end
 
