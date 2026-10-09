@@ -8,6 +8,8 @@
  */
 
 const { test, expect } = require("@playwright/test");
+const { readFileSync } = require("node:fs");
+const { join } = require("node:path");
 
 const {
   setPhase191Theme,
@@ -176,6 +178,32 @@ async function assertInitialDetailInvariants(page, target) {
       primaryActionRects.every((height) => height >= 44),
       "Invoice task actions retain the shared 44px minimum hit area"
     ).toBe(true);
+
+    const sectionGeometry = await page.locator(".ax-detail-section").first().evaluate((element) => ({
+      gap: getComputedStyle(element).rowGap,
+      structuralRule: (() => {
+        const probe = document.createElement("div");
+        probe.className = "ax-detail-section-separated";
+        document.body.append(probe);
+        const borderTopWidth = getComputedStyle(probe).borderTopWidth;
+        probe.remove();
+        return borderTopWidth;
+      })(),
+    }));
+    expect(sectionGeometry, "Invoice detail keeps the intentional dense and structural spacing").toEqual({
+      gap: "2px",
+      structuralRule: "1px",
+    });
+
+    const cssHref = await page.locator('link[rel="stylesheet"]').evaluateAll((links) =>
+      links.map((link) => link.href).find((href) => /\/assets\/css-[a-f0-9]+$/.test(href))
+    );
+    expect(cssHref, "The mounted route serves the package fingerprinted CSS").toBeTruthy();
+    const servedCSS = await page.request.get(cssHref);
+    expect(servedCSS.ok(), "The mounted package CSS responds successfully").toBe(true);
+    expect(await servedCSS.body(), "Served CSS bytes match the rebuilt package artifact").toEqual(
+      readFileSync(join(__dirname, "../priv/static/accrue_admin.css"))
+    );
   }
 
   const overflowMenus = await page.locator("[data-ax-action-overflow-menu]:visible").count();

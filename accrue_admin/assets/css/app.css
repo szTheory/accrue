@@ -6143,11 +6143,11 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 /* Detail section */
 .ax-detail-section {
   display: grid;
-  gap: 0.0625rem;
+  gap: var(--ax-space-2xs);
 }
 
 .ax-subscription-detail-page .ax-detail-section {
-  gap: 0;
+  gap: var(--ax-space-2xs);
   margin-block: 0;
 }
 
@@ -6216,8 +6216,8 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 }
 
 .ax-detail-action-band .ax-button {
-  min-height: 1.5rem;
-  padding: 0.125rem 0.4375rem;
+  min-height: 2.75rem;
+  padding: 0 var(--ax-space-md);
 }
 
 .ax-activity-audit-strip {
