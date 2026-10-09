@@ -181,6 +181,117 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert Enum.all?(scoped_rows, &(&1.owner_id == organization_id))
   end
 
+  test "overdue is a separate collection signal for open invoices strictly past due", %{
+    conn: conn
+  } do
+    now = Accrue.Clock.utc_now()
+    customer = insert_customer(%{name: "Boundary Customer"})
+    subscription = insert_subscription(customer)
+
+    overdue =
+      insert_invoice(customer, subscription, %{
+        number: "INV-OVERDUE-OPEN",
+        status: :open,
+        due_date: DateTime.add(now, -1, :second)
+      })
+
+    due_now =
+      insert_invoice(customer, subscription, %{
+        number: "INV-DUE-NOW",
+        status: :open,
+        due_date: now
+      })
+
+    future =
+      insert_invoice(customer, subscription, %{
+        number: "INV-DUE-FUTURE",
+        status: :open,
+        due_date: DateTime.add(now, 1, :second)
+      })
+
+    unknown =
+      insert_invoice(customer, subscription, %{
+        number: "INV-DUE-UNKNOWN",
+        status: :open,
+        due_date: nil
+      })
+
+    paid =
+      insert_invoice(customer, subscription, %{
+        number: "INV-PAID-PAST-DUE",
+        status: :paid,
+        due_date: DateTime.add(now, -1, :second)
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
+
+    doc = Floki.parse_document!(html)
+    overdue_row = Floki.find(doc, "[data-row-id='#{overdue.id}']") |> hd()
+    due_now_row = Floki.find(doc, "[data-row-id='#{due_now.id}']") |> hd()
+    future_row = Floki.find(doc, "[data-row-id='#{future.id}']") |> hd()
+    unknown_row = Floki.find(doc, "[data-row-id='#{unknown.id}']") |> hd()
+    paid_row = Floki.find(doc, "[data-row-id='#{paid.id}']") |> hd()
+
+    assert Floki.text(overdue_row) =~ "Overdue"
+    refute Floki.text(due_now_row) =~ "Overdue"
+    refute Floki.text(future_row) =~ "Overdue"
+    refute Floki.text(unknown_row) =~ "Overdue"
+    refute Floki.text(paid_row) =~ "Overdue"
+    assert Floki.text(paid_row) =~ "Paid"
+    assert Floki.text(overdue_row) =~ "Open"
+  end
+
+  test "invoice list formats supported precision and keeps unknown money unavailable", %{
+    conn: conn
+  } do
+    customer = insert_customer(%{name: "Money Boundary"})
+    subscription = insert_subscription(customer)
+
+    fixtures =
+      [
+        zero: {0, "usd"},
+        zero_decimal: {1_234, "jpy"},
+        three_decimal: {1_234, "kwd"},
+        unsupported: {1_234, "zzz"},
+        missing_currency: {50, nil},
+        missing_amount: {nil, "usd"}
+      ]
+      |> Map.new(fn {key, {amount, currency}} ->
+        invoice =
+          insert_invoice(customer, subscription, %{
+            number: "INV-LIST-MONEY-#{key}",
+            status: :open,
+            amount_due_minor: amount,
+            amount_remaining_minor: amount,
+            total_minor: amount,
+            currency: currency
+          })
+
+        {key, invoice}
+      end)
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
+    doc = Floki.parse_document!(html)
+
+    row_text = fn invoice ->
+      doc |> Floki.find("[data-row-id='#{invoice.id}']") |> hd() |> Floki.text()
+    end
+
+    assert row_text.(fixtures.zero) =~ "$0.00"
+
+    assert row_text.(fixtures.zero_decimal) =~ "¥" or row_text.(fixtures.zero_decimal) =~ "￥" or
+             row_text.(fixtures.zero_decimal) =~ "JPY",
+           inspect(row_text.(fixtures.zero_decimal))
+
+    assert row_text.(fixtures.zero_decimal) =~ "1,234"
+    assert row_text.(fixtures.three_decimal) =~ "1.234"
+    assert row_text.(fixtures.unsupported) =~ "-- due"
+    assert row_text.(fixtures.missing_currency) =~ "-- due"
+    assert row_text.(fixtures.missing_amount) =~ "-- due"
+  end
+
   test "renders Copy-backed filtered empty list when search excludes all invoices", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 

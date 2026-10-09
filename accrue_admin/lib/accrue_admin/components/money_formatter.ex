@@ -25,13 +25,24 @@ defmodule AccrueAdmin.Components.MoneyFormatter do
     """
   end
 
+  def format_money(amount_minor, currency, locale \\ nil)
+
+  def format_money(amount_minor, currency, locale)
+      when is_integer(amount_minor) do
+    case normalize_currency(currency) do
+      nil ->
+        "--"
+
+      normalized ->
+        Render.format_money(amount_minor, normalized, locale || Accrue.Config.default_locale())
+    end
+  end
+
+  def format_money(_amount_minor, _currency, _locale), do: "--"
+
   defp formatted_money(assigns) do
     with {:ok, amount_minor, currency} <- resolve_money(assigns) do
-      Render.format_money(
-        amount_minor,
-        currency,
-        resolved_locale(assigns.locale, assigns.customer)
-      )
+      format_money(amount_minor, currency, resolved_locale(assigns.locale, assigns.customer))
     else
       _ -> "--"
     end
@@ -55,10 +66,9 @@ defmodule AccrueAdmin.Components.MoneyFormatter do
   defp normalize_currency(currency) when is_binary(currency) do
     code = String.downcase(currency)
 
-    try do
-      String.to_existing_atom(code)
-    rescue
-      ArgumentError -> nil
+    case Elixir.Money.Currency.currency_for_code(code) do
+      {:ok, _currency} -> String.to_atom(code)
+      _ -> nil
     end
   end
 

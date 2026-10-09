@@ -14,6 +14,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     DataTable,
     FilterChipBar,
     FlashGroup,
+    MoneyFormatter,
     PageHeader,
     StatStrip
   }
@@ -244,10 +245,21 @@ defmodule AccrueAdmin.Live.InvoicesLive do
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
 
   defp status_summary(row) do
-    [row.status, row.finalized_at && "finalized", row.due_date && "due"]
+    [
+      row.status,
+      overdue?(row) && "overdue",
+      row.finalized_at && "finalized",
+      row.due_date && "due"
+    ]
     |> Enum.reject(&is_nil/1)
     |> Enum.map_join(" · ", &humanize/1)
   end
+
+  defp overdue?(%{status: :open, due_date: %DateTime{} = due_date}) do
+    DateTime.compare(due_date, Accrue.Clock.utc_now()) == :lt
+  end
+
+  defp overdue?(_row), do: false
 
   defp balance_summary(row) do
     due = format_money(row.amount_due_minor, row.currency)
@@ -259,28 +271,10 @@ defmodule AccrueAdmin.Live.InvoicesLive do
   defp card_title(row), do: row.number || row.processor_id || row.id
 
   defp format_money(amount_minor, currency) when is_integer(amount_minor) do
-    Accrue.Invoices.Render.format_money(
-      amount_minor,
-      normalize_currency(currency),
-      Accrue.Config.default_locale()
-    )
+    MoneyFormatter.format_money(amount_minor, currency, Accrue.Config.default_locale())
   end
 
   defp format_money(_amount_minor, _currency), do: "--"
-
-  defp normalize_currency(currency) when is_atom(currency), do: currency
-
-  defp normalize_currency(currency) when is_binary(currency) do
-    code = String.downcase(currency)
-
-    try do
-      String.to_existing_atom(code)
-    rescue
-      ArgumentError -> :usd
-    end
-  end
-
-  defp normalize_currency(_currency), do: :usd
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 
