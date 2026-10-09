@@ -233,12 +233,13 @@ Plans:
   4. Generated assets, fonts, mounts, CSP/SRI, copy exports, and host integration documentation match the source actually served; component examples/docs match production and task-owned debris is removed.
   5. A useful feedback preview remains available separately from mutation/reset proof, with a concise change summary for optional owner feedback.
 
-**Plans**: 4 plans
+**Plans**: 5 plans
 Plans:
 - [x] 239-01-PLAN.md — Current route and interaction evidence tracer
 - [x] 239-02-PLAN.md — Served asset, font, mount, CSP/SRI, and copy parity
 - [x] 239-03-PLAN.md — Component examples and state evidence parity
 - [x] 239-04-PLAN.md — Read-only feedback preview and handoff
+- [ ] 239-05-PLAN.md — Close handoff scope, host overflow/reload, and provider disclaimer gaps
 **UI hint**: yes
 
 ## Progress
@@ -251,7 +252,7 @@ Plans:
 | 236. Portal Billing Self-Service | 6/6 | Complete    | 2026-10-08 |
 | 237. Admin Invoices, Payments & Recovery | 8/8 | Complete    | 2026-10-08 |
 | 238. Admin Events, Webhooks & Remaining Billing Surfaces | 5/5 | Complete    | 2026-10-09 |
-| 239. Integrated Quality & Handoff | 4/4 | Ready for verification | - |
+| 239. Integrated Quality & Handoff | 4/5 | In Progress | - |
 
 <details>
 <summary>✅ v1.62 Release Integration & Repository Hygiene (Phases 229-232) — SHIPPED 2026-09-18</summary>
