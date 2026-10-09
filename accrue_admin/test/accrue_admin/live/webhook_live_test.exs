@@ -9,6 +9,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Events, as: EventQueries
   alias AccrueAdmin.Queries.Webhooks
   alias AccrueAdmin.TestRepo
 
@@ -385,6 +386,101 @@ defmodule AccrueAdmin.WebhookLiveTest do
 
     assert {:ambiguous, proof_context} = Webhooks.detail(ambiguous_webhook.id, owner_scope)
     assert proof_context.webhook_id == ambiguous_webhook.id
+  end
+
+  test "organization event feed includes only webhook replay records proven in scope", %{
+    conn: conn
+  } do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    allowed_invoice = insert_invoice(allowed_customer, %{processor_id: "in_replay_allowed"})
+    denied_invoice = insert_invoice(denied_customer, %{processor_id: "in_replay_denied"})
+
+    allowed_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_replay_allowed",
+        data: %{"object" => %{"id" => allowed_invoice.processor_id}}
+      })
+
+    denied_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_replay_denied",
+        data: %{"object" => %{"id" => denied_invoice.processor_id}}
+      })
+
+    {:ok, allowed_single} =
+      Events.record(%{
+        type: "admin.webhook.replay.completed",
+        subject_type: "WebhookEvent",
+        subject_id: allowed_webhook.id,
+        caused_by_webhook_event_id: allowed_webhook.id
+      })
+
+    {:ok, denied_single} =
+      Events.record(%{
+        type: "admin.webhook.replay.completed",
+        subject_type: "WebhookEvent",
+        subject_id: denied_webhook.id,
+        caused_by_webhook_event_id: denied_webhook.id
+      })
+
+    {:ok, allowed_batch} =
+      Events.record(%{
+        type: "admin.webhook.bulk_replay.completed",
+        subject_type: "WebhookBatch",
+        subject_id: "selected",
+        data: %{"ids" => [allowed_webhook.id]}
+      })
+
+    {:ok, mixed_batch} =
+      Events.record(%{
+        type: "admin.webhook.bulk_replay.completed",
+        subject_type: "WebhookBatch",
+        subject_id: "selected",
+        data: %{"ids" => [allowed_webhook.id, denied_webhook.id]}
+      })
+
+    scope = organization_owner_scope("org_allowed")
+
+    {single_rows, _cursor} =
+      EventQueries.list(owner_scope: scope, filter: %{subject_type: "WebhookEvent"})
+
+    assert Enum.any?(single_rows, &(&1.id == allowed_single.id))
+    refute Enum.any?(single_rows, &(&1.id == denied_single.id))
+    assert {:ok, %{id: id}} = EventQueries.detail(allowed_single.id, scope)
+    assert id == allowed_single.id
+    assert :not_found = EventQueries.detail(denied_single.id, scope)
+
+    {batch_rows, _cursor} =
+      EventQueries.list(owner_scope: scope, filter: %{subject_type: "WebhookBatch"})
+
+    assert Enum.any?(batch_rows, &(&1.id == allowed_batch.id))
+    refute Enum.any?(batch_rows, &(&1.id == mixed_batch.id))
+
+    owner_conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, webhook_html} =
+             live(owner_conn, "/billing/webhooks/#{allowed_webhook.id}?org=allowed-org")
+
+    event_path = "/billing/events/#{allowed_single.id}?org=allowed-org"
+    assert webhook_html =~ event_path
+
+    event_conn =
+      Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(),
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, event_html} = live(event_conn, event_path)
+    assert event_html =~ "admin.webhook.replay.completed"
   end
 
   test "out-of-scope webhook route redirects with denial flash before rendering detail", %{

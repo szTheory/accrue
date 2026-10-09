@@ -11,8 +11,10 @@ defmodule AccrueAdmin.Queries.Events do
   alias Accrue.Repo
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Behaviour
+  alias AccrueAdmin.Queries.Webhooks
 
   @time_field :inserted_at
+  @webhook_subject_types ["WebhookEvent", "WebhookBatch"]
   @customers_table Accrue.Migration.qualified_table(:accrue_customers)
   @subscriptions_table Accrue.Migration.qualified_table(:accrue_subscriptions)
   @invoices_table Accrue.Migration.qualified_table(:accrue_invoices)
@@ -62,25 +64,27 @@ defmodule AccrueAdmin.Queries.Events do
     cursor = Behaviour.decode_cursor(opts)
     owner_scope = Keyword.get(opts, :owner_scope)
 
-    Event
-    |> scope_query(owner_scope)
-    |> filter_query(filter)
-    |> Behaviour.apply_cursor(@time_field, cursor)
-    |> order_by([event], desc: event.inserted_at, desc: event.id)
-    |> limit(^Enum.max([limit + 1, 2]))
-    |> select([event], %{
-      id: event.id,
-      type: event.type,
-      actor_type: event.actor_type,
-      actor_id: event.actor_id,
-      subject_type: event.subject_type,
-      subject_id: event.subject_id,
-      caused_by_event_id: event.caused_by_event_id,
-      caused_by_webhook_event_id: event.caused_by_webhook_event_id,
-      inserted_at: event.inserted_at
-    })
-    |> Repo.all()
-    |> Behaviour.paginate(limit, @time_field)
+    query =
+      Event
+      |> filter_query(filter)
+      |> Behaviour.apply_cursor(@time_field, cursor)
+      |> order_by([event], desc: event.inserted_at, desc: event.id)
+
+    case owner_scope do
+      %OwnerScope{mode: :organization} = scope ->
+        query
+        |> organization_page(scope, limit)
+        |> Behaviour.paginate(limit, @time_field)
+
+      _global_or_unscoped ->
+        query
+        |> scope_query(owner_scope)
+        |> limit(^Enum.max([limit + 1, 2]))
+        |> select_event_rows()
+        |> Repo.all()
+        |> Enum.map(&Map.delete(&1, :data))
+        |> Behaviour.paginate(limit, @time_field)
+    end
   end
 
   @impl true
@@ -89,11 +93,24 @@ defmodule AccrueAdmin.Queries.Events do
     cursor = Behaviour.decode_cursor(opts)
     owner_scope = Keyword.get(opts, :owner_scope)
 
-    Event
-    |> scope_query(owner_scope)
-    |> filter_query(filter)
-    |> Behaviour.count_newer(@time_field, cursor)
-    |> Repo.aggregate(:count)
+    query = Event |> filter_query(filter) |> Behaviour.count_newer(@time_field, cursor)
+
+    case owner_scope do
+      %OwnerScope{mode: :organization} = scope ->
+        scoped_count = query |> scope_query(scope) |> Repo.aggregate(:count)
+
+        webhook_count =
+          query
+          |> where([event], event.subject_type in ^@webhook_subject_types)
+          |> select_event_rows()
+          |> Repo.all()
+          |> Enum.count(&webhook_event_in_scope?(&1, scope))
+
+        scoped_count + webhook_count
+
+      _global_or_unscoped ->
+        query |> scope_query(owner_scope) |> Repo.aggregate(:count)
+    end
   end
 
   def scoped_base_query(owner_scope) do
@@ -109,15 +126,23 @@ defmodule AccrueAdmin.Queries.Events do
   end
 
   def detail(id, owner_scope) when is_integer(id) do
-    Event
-    |> scope_query(owner_scope)
-    |> where([event], event.id == ^id)
-    |> Repo.one()
-    |> case do
-      nil -> :not_found
+    case Event |> scope_query(owner_scope) |> where([event], event.id == ^id) |> Repo.one() do
+      nil -> webhook_event_detail(id, owner_scope)
       event -> {:ok, event}
     end
   end
+
+  defp webhook_event_detail(id, %OwnerScope{mode: :organization} = scope) do
+    event =
+      from(event in Event,
+        where: event.id == ^id and event.subject_type in ^@webhook_subject_types
+      )
+      |> Repo.one()
+
+    if event && webhook_event_in_scope?(event, scope), do: {:ok, event}, else: :not_found
+  end
+
+  defp webhook_event_detail(_id, _owner_scope), do: :not_found
 
   @impl true
   def decode_filter(params) when is_map(params) do
@@ -174,6 +199,62 @@ defmodule AccrueAdmin.Queries.Events do
       {_unknown, _value}, query ->
         query
     end)
+  end
+
+  defp organization_page(query, scope, limit) do
+    scoped_rows =
+      query
+      |> scope_query(scope)
+      |> limit(^Enum.max([limit + 1, 2]))
+      |> select_event_rows()
+      |> Repo.all()
+
+    webhook_rows =
+      query
+      |> where([event], event.subject_type in ^@webhook_subject_types)
+      |> select_event_rows()
+      |> Repo.all()
+      |> Enum.filter(&webhook_event_in_scope?(&1, scope))
+
+    (scoped_rows ++ webhook_rows)
+    |> Enum.sort(&newer_event?/2)
+    |> Enum.take(Enum.max([limit + 1, 2]))
+    |> Enum.map(&Map.delete(&1, :data))
+  end
+
+  defp select_event_rows(query) do
+    select(query, [event], %{
+      id: event.id,
+      type: event.type,
+      actor_type: event.actor_type,
+      actor_id: event.actor_id,
+      subject_type: event.subject_type,
+      subject_id: event.subject_id,
+      caused_by_event_id: event.caused_by_event_id,
+      caused_by_webhook_event_id: event.caused_by_webhook_event_id,
+      inserted_at: event.inserted_at,
+      data: event.data
+    })
+  end
+
+  defp webhook_event_in_scope?(%{subject_type: "WebhookEvent", subject_id: id}, scope)
+       when is_binary(id) do
+    match?({:ok, _webhook}, Webhooks.detail(id, scope))
+  end
+
+  defp webhook_event_in_scope?(%{subject_type: "WebhookBatch", data: %{"ids" => ids}}, scope)
+       when is_list(ids) and ids != [] do
+    Enum.all?(ids, fn id -> match?({:ok, _webhook}, Webhooks.detail(id, scope)) end)
+  end
+
+  defp webhook_event_in_scope?(_event, _scope), do: false
+
+  defp newer_event?(left, right) do
+    case DateTime.compare(left.inserted_at, right.inserted_at) do
+      :gt -> true
+      :lt -> false
+      :eq -> left.id > right.id
+    end
   end
 
   defp scope_query(query, nil), do: query
