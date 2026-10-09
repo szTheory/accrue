@@ -360,6 +360,47 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert html =~ "Showing"
     assert html =~ "invoices"
     refute html =~ "total invoices"
+
+    document = Floki.parse_document!(html)
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-filter-chips]")) ==
+             1
+
+    assert length(Floki.find(document, "[data-role='list-status'] [data-ax-page-filter-toolbar]")) ==
+             1
+
+    assert length(Floki.find(document, "[data-ax-result-count]")) == 1
+    assert length(Floki.find(document, "[data-role='row-count']")) == 0
+    assert length(Floki.find(document, "[data-ax-clear-all]")) == 1
+    assert length(Floki.find(document, "[data-role='clear-filters']")) == 0
+  end
+
+  test "invoice filters, lens, active constraints, count, and clear share one hierarchy", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all&status=open&q=INV-0002")
+
+    document = Floki.parse_document!(html)
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-filter-chips]")) ==
+             1
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-filter='status']")) ==
+             1
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-filter='q']")) == 1
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-result-count]")) ==
+             1
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-clear-all]")) == 1
+
+    assert length(Floki.find(document, "[data-role='clear-filters']")) == 0
+
+    assert length(Floki.find(document, "[data-ax-result-count]")) == 1
+    assert length(Floki.find(document, "[data-role='row-count']")) == 0
   end
 
   test "invoice clear-all drops filters and preserves organization scope", %{conn: conn} do

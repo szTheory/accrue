@@ -1139,6 +1139,15 @@ html.accrue-admin[data-theme="dark"] .ax-theme-picker-option-active {
   padding: var(--ax-space-lg);
 }
 
+.ax-filter-chip-bar-compact {
+  display: grid;
+  gap: var(--ax-space-sm);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
 a.ax-kpi-card--linked {
   display: block;
   text-decoration: none;

@@ -117,16 +117,6 @@ defmodule AccrueAdmin.Live.InvoicesLive do
             </StatStrip.stat_strip>
           </:stat_strip>
 
-          <:filter_toolbar>
-            <DataTable.filter_toolbar
-              id="invoices"
-              filter_fields={invoice_filter_fields()}
-              filter_params={filter_params(@params)}
-              path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
-              clear_visible={filter_active?(@params)}
-            />
-          </:filter_toolbar>
         </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
@@ -144,6 +134,8 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
+          show_row_count={false}
+          show_empty_clear={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
             %{label: Copy.invoices_column_invoice(), render: &invoice_identity_cell(&1, @admin_mount_path, @current_owner_scope)},
@@ -182,14 +174,30 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           filtered_empty_copy={empty_copy(@params, @summary)}
         >
           <:list_status :let={status}>
+            <div
+              class="ax-stack-sm"
+              role="group"
+              aria-label="Invoice filters, view, and results"
+              data-ax-page-filter-toolbar
+            >
+              <DataTable.filter_toolbar
+                id="invoices"
+                filter_fields={invoice_filter_fields()}
+                filter_params={filter_params(@params)}
+                path={@table_path}
+                clear_href={clear_all_href(@params, @table_path)}
+                clear_visible={false}
+              />
             <FilterChipBar.filter_chip_bar
               items={work_queue_chips(@params, @table_path)}
               label="Invoice view"
+              compact
               result_count={status.visible_count}
               result_label={Copy.invoices_list_result_label_pair()}
               clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
+            </div>
           </:list_status>
         </.live_component>
       </section>

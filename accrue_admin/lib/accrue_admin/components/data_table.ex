@@ -55,6 +55,8 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:bulk_action_label, fn -> nil end)
       |> assign_new(:bulk_action_event, fn -> nil end)
       |> assign_new(:row_label, fn -> {"result", "results"} end)
+      |> assign_new(:show_row_count, fn -> true end)
+      |> assign_new(:show_empty_clear, fn -> true end)
       |> assign_new(:enable_polling, fn -> true end)
       |> assign_new(:poll_interval_ms, fn -> 5_000 end)
       |> assign_new(:newer_count, fn -> 0 end)
@@ -434,7 +436,7 @@ defmodule AccrueAdmin.Components.DataTable do
         <p class="ax-empty-title"><%= @resolved_empty_title %></p>
         <p class="ax-body ax-empty-copy"><%= @resolved_empty_copy %></p>
         <.link
-          :if={any_filter_active?(@filter_params)}
+          :if={any_filter_active?(@filter_params) and @show_empty_clear}
           patch={@clear_href}
           class="ax-button ax-button-secondary"
           data-role="clear-filters"
@@ -543,7 +545,7 @@ defmodule AccrueAdmin.Components.DataTable do
       </div>
 
       <footer :if={@render_rows} class="ax-data-table-footer">
-        <p class="ax-body" data-role="row-count"><%= Copy.data_table_row_count(length(@rows), @row_label) %></p>
+        <p :if={@show_row_count} class="ax-body" data-role="row-count"><%= Copy.data_table_row_count(length(@rows), @row_label) %></p>
         <button
           :if={@next_cursor}
           type="button"
