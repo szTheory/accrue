@@ -1,20 +1,17 @@
 ---
 gsd_state_version: "1.0"
-milestone: v1.63
-milestone_name: Admin and Portal UI refinement
-status: Awaiting next milestone
-stopped_at: Admin Operator UI Cleanup stocktake saved — formal milestone pending
-last_updated: "2026-10-09T15:29:55Z"
+milestone: v1.64
+milestone_name: Admin Operator UI Cleanup
+status: planning
+stopped_at: v1.64 approved — focused diligence and requirements definition
+last_updated: "2026-10-09T17:08:53.504Z"
 last_activity: 2026-10-09
-last_activity_desc: Milestone v1.63 completed and archived
-state_head: b113b182503f04c446815e0f67e1facc0a7435ae
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 45
-  completed_plans: 45
-  percent: 100
-current_phase: 239
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,16 +22,16 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Admin Operator UI Cleanup stocktake saved; formal activation is deferred at the maintainer's request. No new milestone is active. Read [the kickoff note](notes/2026-10-09-admin-operator-impeccable-kickoff.md) before the next command.
-**Progress:** [██████████] 100% (7 of 7 milestone phases complete)
-**Planned work completed:** 45/45 plans across Phases 233–239.
+**Current focus:** v1.64 Admin Operator UI Cleanup approved; complete one focused multi-lens diligence pass, then confirm scoped requirements and roadmap. Read the [kickoff note](notes/2026-10-09-admin-operator-impeccable-kickoff.md) and [focused diligence](research/v1.64/).
+**Progress:** [░░░░░░░░░░] 0% (new milestone; phase structure pending approval)
+**Planned work completed:** No v1.64 execution plans yet. v1.63 closed at 45/45 plans across Phases 233–239.
 
 ## Current Position
 
-Phase: Milestone v1.63 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-10-09 — Milestone v1.63 completed and archived
+Status: Defining requirements
+Last activity: 2026-10-09 — Milestone v1.64 started
 
 ## Performance Metrics
 
@@ -319,7 +316,7 @@ Last activity: 2026-10-09 — Milestone v1.63 completed and archived
 
 ### Pending Todos
 
-- When the maintainer is ready, run `$gsd-new-milestone Admin Operator UI Cleanup` using the [October 9 stocktake](notes/2026-10-09-admin-operator-impeccable-kickoff.md). Reuse completed Impeccable initialization and v1.63 contracts; proposed v1.64/first phase 240 await formal confirmation. No broad research or repeat setup interview is needed.
+- Finish the already-started `$gsd-new-milestone Admin Operator UI Cleanup`: scope/version approved, additional bounded diligence requested, requirements/roadmap confirmation pending. Reuse Impeccable initialization and closed v1.63 contracts. First new phase is expected at 240; do not restart the kickoff or repeat the stocktake.
 
 ### Deferred / Dormant
 
@@ -397,7 +394,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-09T15:29:55Z
-Stopped at: Admin Operator UI Cleanup stocktake saved — formal milestone pending
+Stopped at: v1.64 approved — focused diligence and requirements definition
 Resume file: .planning/notes/2026-10-09-admin-operator-impeccable-kickoff.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -527,5 +524,5 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Next command when ready: `$gsd-new-milestone Admin Operator UI Cleanup`.
-- Load the [new kickoff stocktake](notes/2026-10-09-admin-operator-impeccable-kickoff.md); Impeccable init is already complete and code-first is recorded. Phase 239/v1.63 are closed; expected first new phase is 240 after roadmap approval.
+- Continue the active new-milestone workflow through focused diligence, requirements confirmation, and roadmap approval; no fresh command is needed at this checkpoint.
+- Phase 239/v1.63 are closed. After roadmap approval, the expected next command is `$gsd-plan-phase 240`. Reuse the [kickoff stocktake](notes/2026-10-09-admin-operator-impeccable-kickoff.md); Impeccable init and code-first are settled.

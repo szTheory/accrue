@@ -1,14 +1,17 @@
 ---
 date: 2026-10-09
-status: pre-kickoff-stocktake
+status: consumed-by-kickoff
 proposed_name: Admin Operator UI Cleanup
 proposed_version: v1.64
-formal_activation: false
+formal_activation: true
+approved_milestone: v1.64
 ---
 
 # Accrue Admin Operator UI Cleanup: kickoff stocktake
 
 The maintainer explicitly requested an **Accrue** Admin/operator UI cleanup using Impeccable and the installed Emil Kowalski skills. Names of other projects in the pasted prompt are references for lessons, not implementation targets. The latest instruction is to take stock before fully opening the milestone. This note preserves that work; it does not create requirements, a roadmap, execution plans, or an active milestone.
+
+**Subsequent activation, 2026-10-09:** The maintainer invoked `$gsd-new-milestone Admin Operator UI Cleanup` and approved the compact v1.64 scope/version recommendation, adding one bounded multi-lens due diligence pass. This historical stocktake is now consumed by the active kickoff. [Focused diligence](../research/v1.64/) supplements it; requirements and roadmap retain their confirmation gates. The original pre-kickoff statements below describe the stocktake's state at capture, not a continuing activation block.
 
 ## Settled intent and continuity
 

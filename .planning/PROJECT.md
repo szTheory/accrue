@@ -35,7 +35,21 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Latest fully shipped milestone: v1.63 — Admin and Portal UI refinement, shipped and archived 2026-10-09.** All seven phases and 34 requirements completed. The milestone delivered scoped, capability-explicit Admin/Portal and checkout journeys, current served evidence, and recurring automated acceptance. Its audit found zero blockers; four pre-close items were explicitly acknowledged and recorded in `STATE.md` Deferred Items.
 
-**Next milestone:** No milestone is formally active. On 2026-10-09 the maintainer explicitly requested an **Admin Operator UI Cleanup** using Impeccable and the installed Kowalski skills, then asked for a stocktake before activation. This is an explicit strategy decision to continue flagship Admin refinement; the [new kickoff stocktake](notes/2026-10-09-admin-operator-impeccable-kickoff.md) preserves the proposed Admin-only scope, current evidence, sibling-project lessons, and automation/stopping rules. Reuse the completed Impeccable setup and v1.63 safety contracts. Proposed version v1.64 and phases starting at 240 await formal summary/roadmap confirmation; no new billing capabilities or additional Portal refinement are authorized by this stocktake.
+**Current milestone: v1.64 — Admin Operator UI Cleanup.** On 2026-10-09 the maintainer invoked the named kickoff and approved the compact version/scope recommendation, adding one bounded multi-lens due diligence pass before requirements and roadmap. This explicit strategy decision reopens flagship Admin refinement under the post-v1.48 pause rule. The [kickoff stocktake](notes/2026-10-09-admin-operator-impeccable-kickoff.md) remains the continuity source; [focused diligence](research/v1.64/) records decisions that affect delivery. Reuse completed Impeccable initialization, the established visual identity, and v1.63 safety contracts. Phase numbering continues at 240; requirements and roadmap still require their workflow confirmations.
+
+## Current Milestone: v1.64 Admin Operator UI Cleanup
+
+**Goal:** Make existing Accrue Admin journeys clearer, more consistent, responsive, and easier to operate, with recurring automated acceptance and bounded agent visual inspection.
+
+**Target features:**
+- Shared typography, spacing, hierarchy, controls, theme behavior, and responsive composition, proven through real list/detail/action exemplars.
+- Coherent customer, subscription, invoice, payment, and recovery work with preserved billing identity, exact money, authorization, and truthful outcomes.
+- Consistent investigation, webhook, catalog, Connect, navigation, and user-facing domain language across the existing Admin routes.
+- Deterministic interaction, accessibility, served-asset, and selected visual regression coverage in existing owners, plus a usable feedback preview.
+
+**Upstream decision rule:** Conduct one additional focused review across graphic design, UX, information architecture, content, accessibility, motion, implementation seams, and proof. Record alternatives and dispositions; stop when findings no longer change requirements, order, or acceptance. Source candidates require current mounted confirmation before fixes.
+
+**Scope boundaries:** Existing `accrue_admin` surfaces and necessary example-host proof/preview seams. No Portal refinement, new core billing or diagnosis capabilities, new rooms, rebrand, dependency migration, or parked paid-AI ratchet revival. SEED-004's delivered M1 is continuity; M2/M3 remain deferred. SEED-003 informs bounded hygiene rather than a separate release campaign.
 
 ## Shipped Milestone: v1.63 Admin and Portal UI refinement (**shipped & archived 2026-10-09**)
 
@@ -678,7 +692,9 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- No active requirements. The next milestone has not been selected.
+- v1.64 shared Admin system and real exemplars; scoped requirements are being defined.
+- v1.64 billing and investigation journeys, coherent language, and responsive interaction.
+- v1.64 automated acceptance and preview handoff; extend recurring proof with each delivery slice.
 
 ### Validated v1.63 (Phases 233–239 complete 2026-10-09)
 
@@ -913,6 +929,8 @@ Admin global search — 4/4 satisfied.
 | Keep global search bounded and owner-scoped, and prove real asynchronous Repo completion in the existing merge-blocking browser lane. | ✓ Good — Phase 234 verifies query completion, scoped navigation, and stale-result removal against the real Repo pool. |
 | Recheck actor, scope, target, eligibility, and material action facts immediately before dispatch; block blind retries when provider outcomes are uncertain. | ✓ Good — Phase 234 covers the reviewed dispatch boundary and evidence-specific outcomes. |
 | Shift testable acceptance into deterministic executable evidence and skip confirmation-only UAT when that evidence passes. | ✓ Good — v1.63 made recurring evidence the default across the milestone and records zero-human UAT as the future GSD posture. |
+| Refine the existing Admin under Impeccable Operate mode and preserve its identity and v1.63 safety contracts. | Approved v1.64 scope — existing routes and required host seams; no new billing capabilities or Portal refinement. |
+| Perform one bounded additional multi-lens review before v1.64 requirements, then carry its decisions into delivery without restarting research. | Approved 2026-10-09 — admit findings that change scope, sequencing, or acceptance; retain explicit stopping rules and optional owner feedback. |
 
 ## Evolution
 
@@ -932,4 +950,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-09 after v1.63 milestone archive; no next milestone has been selected.*
+*Last updated: 2026-10-09 after v1.64 scope/version approval and milestone kickoff.*
