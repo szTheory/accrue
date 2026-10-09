@@ -68,7 +68,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
      |> assign(:kpi_pairs, [])
      |> assign(:at_risk, [])
      |> assign(:recovery_loading?, false)
-     |> assign(:recovery_error, "Recovery data is temporarily unavailable. Retry this window.")}
+     |> assign(:recovery_error, Copy.recovery_data_error_copy())}
   end
 
   defp recovery_kpi_pairs(stats) do

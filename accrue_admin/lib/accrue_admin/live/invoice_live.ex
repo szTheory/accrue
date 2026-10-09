@@ -528,7 +528,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
               data-role="confirm-action"
               data-ax-action-drawer-confirm
             >
-              <%= Copy.invoice_confirm_action_verb() %> <%= invoice_action_label(@pending_action.type) %>
+              <%= invoice_confirmation_label(@pending_action.type) %>
             </button>
             <button phx-click="cancel_pending_action" class="ax-button ax-button-ghost"><%= Copy.invoice_confirm_cancel() %></button>
           </:footer>
@@ -549,7 +549,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                 data-role="confirm-action"
                 data-ax-action-drawer-confirm
               >
-                <%= Copy.invoice_confirm_action_verb() %> <%= invoice_action_label(@pending_action.type) %>
+                <%= invoice_confirmation_label(@pending_action.type) %>
               </button>
             <% else %>
               <.invoice_action_form
@@ -1439,6 +1439,11 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp invoice_action_label("documents"), do: Copy.invoice_action_documents()
   defp invoice_action_label(nil), do: "Invoice action"
   defp invoice_action_label(type), do: humanize(type)
+
+  defp invoice_confirmation_label("pay"), do: Copy.invoice_action_manual_pay()
+
+  defp invoice_confirmation_label(type),
+    do: "#{Copy.invoice_confirm_action_verb()} #{invoice_action_label(type)}"
 
   defp invoice_billing_effect("finalize"),
     do: "move the invoice status into the finalized billing workflow"

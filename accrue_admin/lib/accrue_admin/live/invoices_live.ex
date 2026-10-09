@@ -148,6 +148,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           columns={[
             %{label: Copy.invoices_column_invoice(), render: &invoice_identity_cell(&1, @admin_mount_path, @current_owner_scope)},
             %{label: Copy.invoices_column_status(), render: &status_summary/1},
+            %{label: Copy.invoices_column_due_date(), render: &due_date_summary/1},
             %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
             %{id: :collection_method, label: Copy.invoices_column_collection()},
             %{label: Copy.invoices_column_billing_signals(), render: &billing_signals_cell/1}
@@ -156,9 +157,15 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           card_fields={[
             %{label: Copy.invoices_card_customer(), render: &customer_label/1},
             %{label: Copy.invoices_column_status(), render: &status_summary/1},
+            %{label: Copy.invoices_column_due_date(), render: &due_date_summary/1},
             %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
             %{id: :collection_method, label: Copy.invoices_column_collection()},
-            %{label: Copy.invoices_column_billing_signals(), render: &billing_signals_cell/1}
+            %{label: Copy.invoices_column_billing_signals(), render: &billing_signals_cell/1},
+            %{
+              id: :action,
+              label: Copy.invoices_card_action(),
+              render: &invoice_action_cell(&1, @admin_mount_path, @current_owner_scope)
+            }
           ]}
           filter_fields={invoice_filter_fields()}
           empty_title={empty_title(@params, @summary)}
@@ -246,13 +253,26 @@ defmodule AccrueAdmin.Live.InvoicesLive do
 
   defp status_summary(row) do
     [
-      row.status,
-      overdue?(row) && "overdue",
-      row.finalized_at && "finalized",
-      row.due_date && "due"
+      humanize(row.status),
+      overdue?(row) && Copy.invoices_overdue_signal()
     ]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.map_join(" · ", &humanize/1)
+    |> Enum.reject(&(&1 in [nil, false]))
+    |> Enum.join(" · ")
+  end
+
+  defp due_date_summary(%{due_date: %DateTime{} = due_date}),
+    do: Calendar.strftime(due_date, "%b %d, %Y %H:%M UTC")
+
+  defp due_date_summary(_row), do: Copy.invoices_due_date_unavailable()
+
+  defp invoice_action_cell(row, mount_path, owner_scope) do
+    href = scoped_path(mount_path, "/invoices/#{row.id}", owner_scope)
+    label = Copy.invoices_card_action_label()
+    accessible_label = "#{label} #{card_title(row)}"
+
+    Phoenix.HTML.raw(
+      ~s(<a href="#{escape(href)}" class="ax-link" aria-label="#{escape(accessible_label)}">#{escape(label)}</a>)
+    )
   end
 
   defp overdue?(%{status: :open, due_date: %DateTime{} = due_date}) do

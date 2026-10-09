@@ -196,6 +196,16 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert html =~ "99.00"
     assert html =~ "(usd)"
 
+    confirm_labels =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("button[data-role='confirm-action']")
+      |> Enum.map(&Floki.text/1)
+      |> Enum.map(&String.trim/1)
+
+    assert "Pay invoice" in confirm_labels
+    refute "Confirm Pay invoice" in confirm_labels
+
     invoice
     |> Invoice.changeset(%{amount_remaining_minor: 10_100, currency: "eur"})
     |> TestRepo.update!()

@@ -16,7 +16,8 @@ const sourcePaths = [
   "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex",
   "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs",
   "accrue_admin/lib/accrue_admin/components/at_risk_table.ex",
-  "scripts/ci/accrue_host_seed_e2e.exs"
+  "scripts/ci/accrue_host_seed_e2e.exs",
+  "examples/accrue_host/e2e/phase237-admin-billing.spec.js"
 ];
 
 function sha256(bytes) {
@@ -65,6 +66,8 @@ async function assertThemeAndMotion(page, theme) {
   });
   expect(focusStyle.style).not.toBe("none");
   expect(focusStyle.width).not.toBe("0px");
+  await focus.evaluate((element) => element.blur());
+  await expect(focus).not.toBeFocused();
   return tokens;
 }
 
@@ -133,6 +136,10 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   expect(fixture.admin_beta_invoice_id).toBeTruthy();
   await expect(page.locator(`a[href^="/admin/invoices/${fixture.admin_beta_invoice_id}"]`)).toHaveCount(0);
   await expect(page.locator("body")).not.toContainText("HOST-BROWSER-FOREIGN01");
+  const invoiceCard = page.locator(`.ax-data-table-card[data-row-id="${fixture.invoice_id}"]`);
+  await expect(invoiceCard).toContainText("Due date unavailable");
+  await expect(invoiceCard).not.toContainText("False");
+  await expect(invoiceCard.getByRole("link", { name: /view invoice/i })).toBeVisible();
   const asset = await assertCurrentStylesheet(page);
   await page.setViewportSize({ width: 320, height: 800 });
   await assertNoOverflow(page);
@@ -160,6 +167,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(review).toContainText(fixture.invoice_id);
   await expect(review).toContainText(/1,?000|10\.00/);
   await expect(review).toContainText(/attempt manual payment/i);
+  await expect(page.locator('#invoice-action-drawer').getByRole("button", { name: "Pay invoice", exact: true })).toBeVisible();
   const cancel = page.locator('#invoice-action-drawer').getByRole("button", { name: /cancel/i });
   await expect(cancel).toBeVisible();
   const reviewShot = await page.screenshot({ fullPage: true });

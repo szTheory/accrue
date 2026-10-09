@@ -1601,6 +1601,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-detail-drawer-body {
   display: grid;
   gap: var(--ax-space-lg);
+  align-content: start;
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
@@ -3551,7 +3552,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-data-table-card-field {
   display: grid;
-  gap: var(--ax-space-2xs);
+  gap: var(--ax-space-xs);
 }
 
 .ax-data-table-card dd {
@@ -3559,7 +3560,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-data-table-card .ax-stack-sm {
-  gap: var(--ax-space-2xs);
+  gap: var(--ax-space-xs);
 }
 
 /* De-nested Signals/audit column: borderless fields grouped by spacing, not boxes */
@@ -5817,9 +5818,8 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 
 .ax-detail-open-invoice-queue .ax-inline-worklist-copy strong {
   color: var(--ax-accent-readable);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-md);
-  font-weight: 950;
+  font-weight: 600;
 }
 
 .ax-detail-open-invoice-list {

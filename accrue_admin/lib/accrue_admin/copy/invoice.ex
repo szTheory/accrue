@@ -74,10 +74,15 @@ defmodule AccrueAdmin.Copy.Invoice do
   def invoices_column_customer, do: "Customer"
   def invoices_column_billing_signals, do: "Billing signals"
   def invoices_column_status, do: "Status"
+  def invoices_column_due_date, do: "Due date"
   def invoices_column_balance, do: "Balance"
   def invoices_column_collection, do: "Collection"
 
   def invoices_card_customer, do: "Customer"
+  def invoices_card_action, do: "Action"
+  def invoices_card_action_label, do: "View invoice"
+  def invoices_due_date_unavailable, do: "Due date unavailable"
+  def invoices_overdue_signal, do: "Overdue"
 
   def invoices_filter_search, do: "Search"
   def invoices_filter_status, do: "Status"

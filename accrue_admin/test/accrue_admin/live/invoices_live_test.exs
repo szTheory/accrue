@@ -240,6 +240,17 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     refute Floki.text(paid_row) =~ "Overdue"
     assert Floki.text(paid_row) =~ "Paid"
     assert Floki.text(overdue_row) =~ "Open"
+    refute Floki.text(html) =~ "False"
+
+    overdue_card = Floki.find(doc, ".ax-data-table-card[data-row-id='#{overdue.id}']") |> hd()
+    unknown_card = Floki.find(doc, ".ax-data-table-card[data-row-id='#{unknown.id}']") |> hd()
+
+    assert Floki.text(overdue_card) =~
+             Calendar.strftime(overdue.due_date, "%b %d, %Y %H:%M UTC")
+
+    assert Floki.text(unknown_card) =~ "Due date unavailable"
+    assert Floki.text(overdue_card) =~ "Overdue"
+    assert Floki.find(overdue_card, "a[aria-label^='View invoice']") != []
   end
 
   test "invoice list formats supported precision and keeps unknown money unavailable", %{

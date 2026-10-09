@@ -269,6 +269,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate dunning_state_active(), to: Dunning
   defdelegate dunning_state_none(), to: Dunning
   defdelegate dunning_state_recovered(), to: Dunning
+  defdelegate recovery_data_error_copy(), to: Dunning
 
   defdelegate invoices_index_empty_title(), to: Invoice
   defdelegate invoices_index_empty_copy(), to: Invoice
@@ -304,9 +305,14 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoices_column_customer(), to: Invoice
   defdelegate invoices_column_billing_signals(), to: Invoice
   defdelegate invoices_column_status(), to: Invoice
+  defdelegate invoices_column_due_date(), to: Invoice
   defdelegate invoices_column_balance(), to: Invoice
   defdelegate invoices_column_collection(), to: Invoice
   defdelegate invoices_card_customer(), to: Invoice
+  defdelegate invoices_card_action(), to: Invoice
+  defdelegate invoices_card_action_label(), to: Invoice
+  defdelegate invoices_due_date_unavailable(), to: Invoice
+  defdelegate invoices_overdue_signal(), to: Invoice
   defdelegate invoices_filter_search(), to: Invoice
   defdelegate invoices_filter_status(), to: Invoice
   defdelegate invoices_filter_customer_id(), to: Invoice

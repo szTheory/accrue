@@ -274,7 +274,10 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
                )
 
       assert socket.assigns.recovery_loading? == false
-      assert socket.assigns.recovery_error =~ "temporarily unavailable"
+
+      assert socket.assigns.recovery_error ==
+               "We couldn't load this billing data. Refresh the page or return to the list and try again."
+
       assert socket.assigns.stats == %{recovered: [], lost: []}
       assert socket.assigns.at_risk == []
     end
