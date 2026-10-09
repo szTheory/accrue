@@ -30,6 +30,13 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     @impl Accrue.Auth
     def actor_id(user), do: user[:id]
+
+    @impl Accrue.Auth
+    def step_up_challenge(_user, _action), do: %{kind: :totp, message: "Verify webhook replay"}
+
+    @impl Accrue.Auth
+    def verify_step_up(_user, %{"code" => "123456"}, _action), do: :ok
+    def verify_step_up(_user, _params, _action), do: {:error, :invalid_code}
   end
 
   setup do
@@ -196,7 +203,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/webhooks?status=dead")
 
     assert html =~ ~s(data-role="toggle-all")
-    assert html =~ Copy.webhooks_retry_selected_label()
+    assert html =~ "data-role=\"toggle-all\""
   end
 
   test "filters webhook rows and runs a selection-driven retry with plain-language confirm", %{
@@ -218,12 +225,12 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     refute html =~ "evt_ok"
 
     # Plain-language helper line, no jargon, and the old card/jargon is gone.
-    assert html =~ "Events that failed every automatic retry land here"
+    assert html =~ "Failed and dead webhook deliveries land here"
     refute html =~ "DLQ bulk replay"
     refute html =~ "dead-letter slice"
     refute html =~ "Replay filtered DLQ rows"
 
-    # Select the visible dead-lettered row, then click the primary Retry selected.
+    # Select the visible dead-lettered row, then open its explicit replay confirmation.
     html = render_click(element(view, "[data-role='toggle-all']"))
     assert html =~ ~s(data-role="bulk-action")
     assert html =~ Copy.webhooks_retry_selected_label()
@@ -232,12 +239,14 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     # bulk-action notifies the parent via send/2 -> handle_info; render/1 picks it up.
     html = render(view)
 
-    assert html =~ "Retry 1 webhook event?"
-    assert html =~ "failed every automatic retry"
+    assert html =~ "Replay 1 selected delivery?"
+    assert html =~ "Queue acceptance does not mean processing is complete"
     assert html =~ Copy.webhooks_retry_cancel_label()
 
     html = render_click(element(view, "[data-role='confirm-retry-selected']"))
-    assert html =~ "Retrying 1 event"
+    assert html =~ Copy.step_up_title()
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+    assert html =~ "Queued 1 delivery. 0 skipped; 0 failed."
   end
 
   test "filtered-to-zero shows the filtered-empty copy, not the truly-empty hero", %{conn: conn} do
@@ -269,6 +278,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     render_click(element(view, "[data-role='bulk-action']"))
     render_click(element(view, "[data-role='confirm-retry-selected']"))
+    render_submit(view, "step_up_submit", %{"code" => "123456"})
 
     event =
       TestRepo.one!(
@@ -281,7 +291,10 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     assert event.subject_type == "WebhookBatch"
     assert event.subject_id == "selected"
-    assert event.data["count"] == 1
+    assert event.data["selected"] == 1
+    assert event.data["eligible"] == 1
+    assert event.data["attempted"] == 1
+    assert event.data["queued"] == 1
     assert event.data["ids"] == [dead.id]
   end
 

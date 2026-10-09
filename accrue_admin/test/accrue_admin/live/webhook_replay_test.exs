@@ -3,6 +3,7 @@ defmodule AccrueAdmin.WebhookReplayTest do
 
   import Ecto.Query
 
+  alias Accrue.Billing.{Customer, Invoice}
   alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
@@ -36,8 +37,18 @@ defmodule AccrueAdmin.WebhookReplayTest do
 
   setup do
     prior = Application.get_env(:accrue, :auth_adapter)
+    prior_requeue_fun = Application.get_env(:accrue_admin, :webhook_requeue_fun)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
-    on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
+
+    on_exit(fn ->
+      Application.put_env(:accrue, :auth_adapter, prior)
+
+      if prior_requeue_fun do
+        Application.put_env(:accrue_admin, :webhook_requeue_fun, prior_requeue_fun)
+      else
+        Application.delete_env(:accrue_admin, :webhook_requeue_fun)
+      end
+    end)
 
     webhook =
       insert_webhook(%{
@@ -133,6 +144,17 @@ defmodule AccrueAdmin.WebhookReplayTest do
     assert audit_count_after == audit_count_before + 1
 
     assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
+
+    _ = render_click(view, "confirm_retry_selected")
+    _ = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert TestRepo.aggregate(
+             from(event in Event, where: event.type == "admin.webhook.bulk_replay.completed"),
+             :count,
+             :id
+           ) == audit_count_before + 1
+
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
   end
 
   test "rejected bulk step-up leaves the selected delivery untouched and records no replay completion",
@@ -156,6 +178,216 @@ defmodule AccrueAdmin.WebhookReplayTest do
              :count,
              :id
            ) == 0
+  end
+
+  test "empty selection opens no confirmation and records no replay completion", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/webhooks?status=dead")
+
+    send(view.pid, {:data_table_bulk_action, "retry_selected", []})
+    html = render(view)
+
+    refute html =~ ~s(data-role="bulk-replay-confirm")
+    assert html =~ "Select at least one delivery to replay first."
+
+    assert TestRepo.aggregate(
+             from(event in Event, where: event.type == "admin.webhook.bulk_replay.completed"),
+             :count,
+             :id
+           ) == 0
+  end
+
+  test "duplicate ids collapse and mixed ineligible rows produce exact ordered audit outcomes", %{
+    conn: conn,
+    webhook: webhook,
+    bulk_webhooks: [_webhook, eligible, ineligible]
+  } do
+    fixed_time = ~U[2026-01-01 12:00:00.000000Z]
+    webhook = set_received_at(webhook, fixed_time)
+    eligible = set_received_at(eligible, fixed_time)
+    ineligible = set_received_at(ineligible, fixed_time)
+
+    ineligible
+    |> Ecto.Changeset.change(status: :received)
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/webhooks?status=failed,dead")
+    html = submit_selection(view, [eligible.id, webhook.id, eligible.id, ineligible.id])
+
+    assert html =~ "Queued 2 deliveries. 1 skipped; 0 failed."
+    refute html =~ "processed successfully"
+
+    event = bulk_replay_event!()
+    assert event.data["selected"] == 3
+    assert event.data["eligible"] == 2
+    assert event.data["attempted"] == 2
+    assert event.data["queued"] == 2
+    assert event.data["skipped"] == 1
+    assert event.data["failed"] == 0
+
+    assert Enum.map(event.data["outcomes"], & &1["id"]) ==
+             Enum.sort([webhook.id, eligible.id, ineligible.id], :desc)
+
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
+    assert TestRepo.get!(WebhookEvent, eligible.id).status == :received
+    assert TestRepo.get!(WebhookEvent, ineligible.id).status == :received
+  end
+
+  test "status changed after selection is skipped without a queue attempt", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/webhooks?status=dead")
+    send(view.pid, {:data_table_bulk_action, "retry_selected", [webhook.id]})
+    _ = render(view)
+
+    webhook
+    |> Ecto.Changeset.change(status: :succeeded)
+    |> TestRepo.update!()
+
+    _ = render_click(element(view, "[data-role='confirm-retry-selected']"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "No eligible deliveries were queued. 1 skipped; 0 failed."
+    event = bulk_replay_event!()
+    assert event.data["eligible"] == 0
+    assert event.data["attempted"] == 0
+    assert event.data["queued"] == 0
+    assert event.data["skipped"] == 1
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :succeeded
+  end
+
+  test "foreign owner selection is skipped without recording its id in replay audit data", %{
+    conn: conn
+  } do
+    foreign_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_foreign"})
+    foreign_invoice = insert_invoice(foreign_customer, %{processor_id: "in_foreign_webhook"})
+
+    foreign_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_foreign_bulk",
+        status: :dead,
+        data: %{"object" => %{"id" => foreign_invoice.processor_id}},
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_foreign_bulk",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => foreign_invoice.processor_id}}
+          })
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    {:ok, view, _html} = live(conn, "/billing/webhooks?org=allowed-org&status=dead")
+    html = submit_selection(view, [foreign_webhook.id])
+
+    assert html =~ "No eligible deliveries were queued. 1 skipped; 0 failed."
+    event = bulk_replay_event!()
+    assert event.data["selected"] == 1
+    assert event.data["eligible"] == 0
+    assert event.data["attempted"] == 0
+    assert event.data["queued"] == 0
+    assert event.data["skipped"] == 1
+    assert event.data["ids"] == []
+    assert event.data["outcomes"] == []
+    assert TestRepo.get!(WebhookEvent, foreign_webhook.id).status == :dead
+  end
+
+  test "a mid-batch queue failure preserves earlier results and continues to later deliveries", %{
+    conn: conn,
+    bulk_webhooks: [first, failed, last]
+  } do
+    first = set_received_at(first, ~U[2026-01-01 12:00:00.000000Z])
+    failed = set_received_at(failed, ~U[2026-01-01 11:00:00.000000Z])
+    last = set_received_at(last, ~U[2026-01-01 10:00:00.000000Z])
+
+    Application.put_env(:accrue_admin, :webhook_requeue_fun, fn id ->
+      if id == failed.id, do: {:error, :injected_failure}, else: Accrue.Webhooks.DLQ.requeue(id)
+    end)
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/webhooks?status=failed,dead")
+    html = submit_selection(view, [last.id, failed.id, first.id])
+
+    assert html =~ "Queued 2 deliveries. 0 skipped; 1 failed."
+    event = bulk_replay_event!()
+    assert event.data["selected"] == 3
+    assert event.data["eligible"] == 3
+    assert event.data["attempted"] == 3
+    assert event.data["queued"] == 2
+    assert event.data["failed"] == 1
+
+    assert Enum.map(event.data["outcomes"], &{&1["id"], &1["outcome"]}) ==
+             [{first.id, "queued"}, {failed.id, "failed"}, {last.id, "queued"}]
+
+    assert TestRepo.get!(WebhookEvent, first.id).status == :received
+    assert TestRepo.get!(WebhookEvent, failed.id).status == :dead
+    assert TestRepo.get!(WebhookEvent, last.id).status == :received
+  end
+
+  defp submit_selection(view, ids) do
+    send(view.pid, {:data_table_bulk_action, "retry_selected", ids})
+    _ = render(view)
+    _ = render_click(element(view, "[data-role='confirm-retry-selected']"))
+    render_submit(view, "step_up_submit", %{"code" => "123456"})
+  end
+
+  defp bulk_replay_event! do
+    TestRepo.one!(
+      from(event in Event,
+        where: event.type == "admin.webhook.bulk_replay.completed",
+        order_by: [desc: event.inserted_at, desc: event.id],
+        limit: 1
+      )
+    )
+  end
+
+  defp set_received_at(webhook, received_at) do
+    webhook
+    |> Ecto.Changeset.change(received_at: received_at)
+    |> TestRepo.update!()
+  end
+
+  defp insert_customer(attrs) do
+    defaults = %{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "stripe",
+      processor_id: "cus_" <> Integer.to_string(System.unique_integer([:positive])),
+      preferred_locale: "en",
+      metadata: %{},
+      data: %{}
+    }
+
+    %Customer{}
+    |> Customer.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_invoice(customer, attrs) do
+    defaults = %{
+      customer_id: customer.id,
+      processor: "stripe",
+      currency: "usd",
+      status: :open,
+      collection_method: "charge_automatically",
+      metadata: %{},
+      data: %{},
+      lock_version: 1,
+      processor_id: "in_" <> Integer.to_string(System.unique_integer([:positive]))
+    }
+
+    %Invoice{}
+    |> Invoice.force_status_changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
   end
 
   defp insert_webhook(attrs) do

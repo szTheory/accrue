@@ -1297,7 +1297,7 @@ defmodule AccrueAdmin.Copy do
   end
 
   @doc "Guard flash when Retry selected is triggered with nothing selected."
-  def webhooks_retry_no_selection_warning, do: "Select at least one event to retry first."
+  def webhooks_retry_no_selection_warning, do: "Select at least one delivery to replay first."
 
   @doc "Success flash after retrying selected events (plural-aware)."
   def webhooks_retry_success(count) do

@@ -6,8 +6,7 @@ test("Phase 238 queues one selected webhook only after confirmation and fresh st
   const fixture = readFixture();
   await login(page, fixture, fixture.admin_email, sandboxId);
 
-  const owner = encodeURIComponent(fixture.admin_org_alpha_slug);
-  await page.goto(`/admin/webhooks?org=${owner}&status=failed,dead`, { waitUntil: "domcontentloaded" });
+  await page.goto("/admin/webhooks?status=failed,dead", { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
 
   const row = page.locator(`input[data-role="toggle-row"][data-row-id="${fixture.webhook_id}"]`).first();

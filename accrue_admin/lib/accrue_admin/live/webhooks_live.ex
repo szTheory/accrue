@@ -199,13 +199,16 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           %{id: id} ->
             case Webhooks.detail(id, owner_scope) do
               {:ok, %{status: status}} when status in [:failed, :dead] ->
-                case DLQ.requeue(id) do
+                case requeue_delivery(id) do
                   {:ok, _queued} -> %{id: id, outcome: :queued, attempted: true}
                   {:error, _reason} -> %{id: id, outcome: :failed, attempted: true}
                 end
 
-              _stale_or_inaccessible ->
+              {:ok, _still_scoped_but_ineligible} ->
                 %{id: id, outcome: :skipped, attempted: false}
+
+              _stale_or_inaccessible ->
+                %{id: nil, outcome: :skipped, attempted: false}
             end
         end
       end)
@@ -228,6 +231,17 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     |> Enum.filter(&is_binary/1)
     |> Enum.uniq()
     |> Enum.sort()
+  end
+
+  if Mix.env() == :test do
+    defp requeue_delivery(id) do
+      case Application.get_env(:accrue_admin, :webhook_requeue_fun) do
+        fun when is_function(fun, 1) -> fun.(id)
+        _configured_fun -> DLQ.requeue(id)
+      end
+    end
+  else
+    defp requeue_delivery(id), do: DLQ.requeue(id)
   end
 
   defp bulk_step_up_action do
