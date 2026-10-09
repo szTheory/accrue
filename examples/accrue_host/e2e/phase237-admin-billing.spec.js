@@ -3,6 +3,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
+const { devices } = require("@playwright/test");
 const { test, expect } = require("./support/test.js");
 const { readFixture, login, waitForLiveView } = require("./support/fixture.js");
 
@@ -13,7 +14,11 @@ const sourcePaths = [
   "accrue_admin/assets/css/theme.css",
   "accrue_admin/lib/accrue_admin/live/invoices_live.ex",
   "accrue_admin/lib/accrue_admin/live/invoice_live.ex",
+  "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+  "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
   "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex",
+  "accrue_admin/test/accrue_admin/live/subscriptions_live_test.exs",
+  "accrue_admin/test/accrue_admin/live/subscription_live_test.exs",
   "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs",
   "accrue_admin/lib/accrue_admin/components/at_risk_table.ex",
   "scripts/ci/accrue_host_seed_e2e.exs",
@@ -109,7 +114,7 @@ async function assertLongRecoveryContentWraps(page) {
   }
 }
 
-test("Phase 237 served invoice and recovery journeys stay scoped and read-only", async ({ page, sandboxId }, testInfo) => {
+test("Phase 237 served invoice and recovery journeys stay scoped and read-only", async ({ page, browser, sandboxId }, testInfo) => {
   test.setTimeout(90_000);
   const fixture = readFixture();
   const owner = encodeURIComponent(fixture.admin_org_alpha_slug);
@@ -286,6 +291,118 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(page.locator("body")).not.toContainText(fixture.admin_beta_invoice_id);
   await expect(page.locator("body")).not.toContainText("HOST-BROWSER-FOREIGN01");
 
+  await page.goto(`/admin/subscriptions/${fixture.recovery_subscription_id}?org=${owner}`, { waitUntil: "domcontentloaded" });
+  await waitForLiveView(page);
+  await expect(page.getByRole("heading", { name: "admin-e2e-alpha-customer@example.test" })).toBeVisible();
+  await expect(page.locator("body")).toContainText("admin-e2e-alpha-customer@example.test");
+  await expect(page.locator("body")).toContainText("Price is not confirmed in admin");
+  await expect(page.locator("body")).toContainText("Current period is not shown in admin");
+  const scopedCustomerLink = page.getByRole("link", { name: "admin-e2e-alpha-customer@example.test" }).first();
+  await expect(scopedCustomerLink).toHaveAttribute("href", new RegExp(`/admin/customers/${fixture.admin_denial_customer_id}\\?org=${fixture.admin_org_alpha_slug}`));
+  const subscriptionOverflow = page.locator("[data-ax-action-overflow-menu]:visible");
+  await expect(subscriptionOverflow).toHaveCount(1);
+  const subscriptionAction = subscriptionOverflow.locator("summary");
+  await expect(subscriptionAction).toBeVisible();
+  const actionBounds = await subscriptionAction.boundingBox();
+  expect(actionBounds).not.toBeNull();
+  expect(actionBounds.height).toBeGreaterThanOrEqual(44);
+  await subscriptionAction.click();
+  await expect(subscriptionOverflow.locator('[role="menu"] [role="menuitem"]').first()).toBeVisible();
+
+  const subscriptionIdentity = page.locator(".ax-summary-fact").nth(1);
+  const originalIdentity = await subscriptionIdentity.evaluate((element) => ({
+    label: element.querySelector("strong")?.textContent?.trim() || "Customer",
+    value: element.textContent.replace(element.querySelector("strong")?.textContent || "", "").trim()
+  }));
+  const longIdentity = `customer-${"C".repeat(120)}@example.test`;
+  await page.setViewportSize({ width: 320, height: 800 });
+  await subscriptionIdentity.evaluate((element, text) => {
+    const label = element.querySelector("strong");
+    element.replaceChildren(label, document.createTextNode(text));
+  }, longIdentity);
+  const longIdentityMetrics = await subscriptionIdentity.evaluate((element) => ({
+    clientWidth: element.clientWidth,
+    scrollWidth: element.scrollWidth,
+    height: element.getBoundingClientRect().height,
+    lineHeight: Number.parseFloat(getComputedStyle(element).lineHeight)
+  }));
+  expect(longIdentityMetrics.scrollWidth).toBeLessThanOrEqual(longIdentityMetrics.clientWidth);
+  expect(longIdentityMetrics.height).toBeGreaterThan(longIdentityMetrics.lineHeight);
+  await subscriptionIdentity.evaluate((element, original) => {
+    const label = element.querySelector("strong");
+    element.replaceChildren(label, document.createTextNode(original.value));
+  }, originalIdentity);
+
+  const subscriptionResponsiveGeometry = [];
+  for (const width of [320, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await assertNoOverflow(page);
+    const geometry = await page.evaluate(() => {
+      const action = document.querySelector("[data-ax-action-overflow-menu] summary");
+      const bounds = action.getBoundingClientRect();
+      return {
+        viewport: document.documentElement.clientWidth,
+        document: document.documentElement.scrollWidth,
+        actionHeight: bounds.height,
+        actionLeft: bounds.left,
+        actionRight: bounds.right,
+        coarsePointer: matchMedia("(pointer: coarse)").matches
+      };
+    });
+    expect(geometry.actionHeight).toBeGreaterThanOrEqual(44);
+    expect(geometry.actionLeft).toBeGreaterThanOrEqual(0);
+    expect(geometry.actionRight).toBeLessThanOrEqual(width);
+    subscriptionResponsiveGeometry.push(geometry);
+  }
+
+  const mobileContext = await browser.newContext({
+    ...devices["Pixel 5"],
+    baseURL: `http://127.0.0.1:${process.env.ACCRUE_HOST_BROWSER_PORT || "4101"}`,
+    ...(sandboxId ? { userAgent: sandboxId } : {}),
+    extraHTTPHeaders: sandboxId ? { "x-sandbox-id": sandboxId } : {}
+  });
+  try {
+    const mobilePage = await mobileContext.newPage();
+    await login(mobilePage, fixture, fixture.admin_email, sandboxId);
+    await mobilePage.goto("/app/billing", { waitUntil: "domcontentloaded" });
+    await waitForLiveView(mobilePage);
+    await mobilePage.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
+    await waitForLiveView(mobilePage);
+    await mobilePage.goto(`/admin/subscriptions/${fixture.recovery_subscription_id}?org=${owner}`, { waitUntil: "domcontentloaded" });
+    await waitForLiveView(mobilePage);
+    await expect(mobilePage.getByRole("heading", { name: "admin-e2e-alpha-customer@example.test" })).toBeVisible();
+    const mobileAction = mobilePage.locator("[data-ax-action-overflow-menu] summary");
+    await expect(mobileAction).toBeVisible();
+    await mobileAction.click();
+    await expect(mobilePage.locator('[role="menu"] [role="menuitem"]').first()).toBeVisible();
+    for (const width of [320, 768, 1280]) {
+      await mobilePage.setViewportSize({ width, height: 900 });
+      await assertNoOverflow(mobilePage);
+      const geometry = await mobilePage.evaluate(() => {
+        const action = document.querySelector("[data-ax-action-overflow-menu] summary");
+        const bounds = action.getBoundingClientRect();
+        return {
+          viewport: document.documentElement.clientWidth,
+          document: document.documentElement.scrollWidth,
+          actionHeight: bounds.height,
+          actionLeft: bounds.left,
+          actionRight: bounds.right,
+          coarsePointer: matchMedia("(pointer: coarse)").matches
+        };
+      });
+      expect(geometry.coarsePointer).toBe(true);
+      expect(geometry.actionHeight).toBeGreaterThanOrEqual(44);
+      expect(geometry.actionLeft).toBeGreaterThanOrEqual(0);
+      expect(geometry.actionRight).toBeLessThanOrEqual(width);
+      subscriptionResponsiveGeometry.push({ ...geometry, device: "Pixel 5" });
+    }
+  } finally {
+    await mobileContext.close();
+  }
+  const subscriptionShot = await page.screenshot({ fullPage: true });
+  await testInfo.attach("phase240-subscription-detail-desktop.png", { body: subscriptionShot, contentType: "image/png" });
+  screenshots["subscription-detail.png"] = { bytes: subscriptionShot, route: page.url(), viewport: { width: 1280, height: 900 }, theme: "dark" };
+
   fs.mkdirSync(captureDir, { recursive: true });
   const manifest = {
     phase: "237-admin-invoices-payments-recovery",
@@ -302,6 +419,14 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
       liveview_ready_ms: Number(firstInvoiceRouteLiveViewReadyMs.toFixed(2)),
       task_ready_ms: Number(firstInvoiceRouteTaskReadyMs.toFixed(2)),
       resources: initialResourceDiagnostics
+    },
+    subscription_crosscheck: {
+      fixture: "disposable host Ecto sandbox; seeded Admin Alpha past-due subscription",
+      route: `/admin/subscriptions/${fixture.recovery_subscription_id}?org=${owner}`,
+      layout_stress: "customer identity was extended in-memory at 320px, checked for wrapping, then restored before capture",
+      missing_plan_and_period: "Price not shown in admin; Current period is not shown in admin",
+      responsive_geometry: subscriptionResponsiveGeometry,
+      long_identity: longIdentityMetrics
     },
     viewport_and_theme: Object.fromEntries(Object.entries(screenshots).map(([name, shot]) => [name, { route: shot.route, viewport: shot.viewport, theme: shot.theme, sha256: sha256(shot.bytes), bytes: shot.bytes.length }])),
     read_only: true,

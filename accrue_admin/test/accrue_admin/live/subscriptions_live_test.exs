@@ -178,6 +178,11 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert populated_html =~ ~s(data-ax-list="subscriptions")
     assert populated_html =~ ~s(data-ax-state="populated")
 
+    assert populated_html
+           |> Floki.parse_document!()
+           |> Floki.find("tbody > tr[data-row-id]")
+           |> length() >= 2
+
     empty_org = "org-empty-#{System.unique_integer([:positive])}"
 
     first_run_conn =
@@ -195,7 +200,38 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert first_run_html =~ ~s(data-ax-state="first-run-empty")
     assert first_run_html =~ ~s(data-ax-empty-reason="first-run")
     assert first_run_html =~ "No subscriptions yet."
+
+    assert first_run_html
+           |> Floki.parse_document!()
+           |> Floki.find("tbody > tr[data-row-id]")
+           |> length() == 0
+
     refute first_run_html =~ ~s(data-ax-clear-all)
+
+    single_org = "org-single-#{System.unique_integer([:positive])}"
+
+    %{subscription: single_subscription} =
+      Factory.active_subscription(%{owner_type: "Organization", owner_id: single_org})
+
+    single_conn =
+      Phoenix.ConnTest.build_conn()
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: single_org,
+        active_organization_slug: "single-org",
+        admin_organization_ids: [single_org]
+      )
+
+    assert {:ok, _view, single_html} =
+             live(single_conn, "/billing/subscriptions?org=single-org&view=all")
+
+    single_rows =
+      single_html
+      |> Floki.parse_document!()
+      |> Floki.find("tbody > tr[data-row-id]")
+
+    assert length(single_rows) == 1
+    assert Floki.text(hd(single_rows)) =~ single_subscription.processor_id
 
     filtered_conn =
       Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
