@@ -244,6 +244,28 @@ defmodule AccrueAdmin.CouponLiveTest do
     assert flash["error"] != nil
   end
 
+  test "detail read failure is distinct from not-found and retry restores coupon terms and codes",
+       %{
+         conn: conn,
+         coupon: coupon
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/coupons/#{coupon.id}")
+    on_exit(fn -> Application.delete_env(:accrue_admin, :phase238_read_failure_fixture) end)
+    Application.put_env(:accrue_admin, :phase238_read_failure_fixture, :coupon_detail)
+
+    html = render_click(view, "retry_read", %{})
+    assert html =~ ~s(data-role="coupon-unavailable")
+    assert html =~ "Coupon record unavailable"
+    refute html =~ "fixture database unavailable"
+
+    Application.delete_env(:accrue_admin, :phase238_read_failure_fixture)
+    html = render_click(view, "retry_read", %{})
+    refute html =~ ~s(data-role="coupon-unavailable")
+    assert html =~ "Annual discount"
+    assert html =~ "ANNUAL15"
+  end
+
   defp insert_coupon(attrs) do
     defaults = %{
       processor: "stripe",
