@@ -3615,7 +3615,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-dev-health-snapshot strong {
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .ax-dev-health-snapshot-header {
@@ -3644,7 +3644,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-dev-health-snapshot-header .ax-dev-health-status em {
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 750;
+  font-weight: 600;
 }
 
 .ax-dev-health-snapshot-header strong,
@@ -3655,7 +3655,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-dev-health-snapshot-header a {
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 900;
+  font-weight: 600;
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
@@ -5427,8 +5427,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: 0;
-  padding: 0;
+  gap: var(--ax-space-xs);
+  padding: var(--ax-space-md);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   /* border-box so the 1–2px status border sits inside the capped grid track
@@ -5474,8 +5474,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.03125rem 0.25rem;
-  padding: 0.03125rem 0.25rem;
+  gap: var(--ax-space-xs) var(--ax-space-sm);
+  padding: var(--ax-space-xs);
   /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
 }
@@ -5484,8 +5484,6 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   flex-basis: auto;
   color: var(--ax-primary);
   font: var(--ax-type-label-font);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 950;
 }
 
 .ax-detail-health-metric {
@@ -5499,16 +5497,13 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-font);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 950;
   box-shadow: var(--ax-shadow-sm);
 }
 
 .ax-detail-health-exposure strong {
   color: inherit;
   font: inherit;
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 950;
+  font-weight: 600;
 }
 
 .ax-detail-health-summary-amber .ax-detail-health-metric {
@@ -5549,15 +5544,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-detail-health-label {
   color: var(--ax-primary);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .ax-detail-health-verdict {
   color: var(--ax-primary);
   font: var(--ax-type-label-font);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 900;
 }
 
 .ax-detail-health-body {
@@ -5588,7 +5580,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-primary);
   /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .ax-detail-health-caveat {
@@ -6903,12 +6895,9 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   order: initial;
   width: 100%;
   margin-block: var(--ax-space-md);
-  padding: var(--ax-space-md);
 }
 
 .ax-subscription-detail-page .ax-detail-health-copy {
-  gap: var(--ax-space-xs) var(--ax-space-sm);
-  padding: var(--ax-space-xs);
   font: var(--ax-type-body-font);
 }
 

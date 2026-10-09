@@ -8,7 +8,7 @@ const { test, expect } = require("./support/test.js");
 const { readFixture, login, waitForLiveView } = require("./support/fixture.js");
 
 const repoRoot = path.resolve(__dirname, "../../..");
-const captureDir = path.join(repoRoot, ".planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar");
+const captureDir = process.env.PHASE237_CAPTURE_DIR || path.join(repoRoot, ".planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar");
 const sourcePaths = [
   "accrue_admin/assets/css/app.css",
   "accrue_admin/assets/css/theme.css",
@@ -405,6 +405,23 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(page.locator("body")).toContainText("admin-e2e-alpha-customer@example.test");
   await expect(page.locator("body")).toContainText("Price is not confirmed in admin");
   await expect(page.locator("body")).toContainText("Current period is not shown in admin");
+  const healthPresentation = await page.locator(".ax-detail-health-summary").evaluate((summary) => {
+    const summaryStyle = getComputedStyle(summary);
+    const copyStyle = getComputedStyle(summary.querySelector(".ax-detail-health-copy"));
+    const weights = Array.from(summary.querySelectorAll(".ax-detail-health-label, .ax-detail-health-answer, .ax-detail-health-verdict, .ax-detail-health-metric"))
+      .map((element) => Number.parseInt(getComputedStyle(element).fontWeight, 10));
+    return {
+      summaryGap: summaryStyle.rowGap,
+      summaryPadding: summaryStyle.padding,
+      copyGap: copyStyle.gap,
+      copyPadding: copyStyle.padding,
+      weights
+    };
+  });
+  expect(healthPresentation.summaryGap, "lifecycle summary separates its task facts").not.toBe("0px");
+  expect(healthPresentation.copyGap, "summary copy uses the incumbent spacing ladder").not.toContain("0.5px");
+  expect(healthPresentation.copyPadding, "summary copy avoids half-pixel task spacing").not.toContain("0.5px");
+  expect(healthPresentation.weights.every((weight) => weight === 400 || weight === 600), "summary uses only approved type weights").toBe(true);
   const scopedCustomerLink = page.getByRole("link", { name: "admin-e2e-alpha-customer@example.test" }).first();
   await expect(scopedCustomerLink).toHaveAttribute("href", new RegExp(`/admin/customers/${fixture.admin_denial_customer_id}\\?org=${fixture.admin_org_alpha_slug}`));
   const subscriptionOverflow = page.locator("[data-ax-action-overflow-menu]:visible");
