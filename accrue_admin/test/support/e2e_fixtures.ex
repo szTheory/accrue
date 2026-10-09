@@ -554,7 +554,7 @@ defmodule AccrueAdmin.E2E.Fixtures do
     reset!()
 
     owner_id = "19900000-0000-4000-8000-00000000f001"
-    now = DateTime.utc_now() |> DateTime.truncate(:microsecond)
+    now = Accrue.Clock.utc_now() |> DateTime.truncate(:microsecond)
     five_days_ago = DateTime.add(now, -5 * 86_400, :second)
     next_period = DateTime.add(now, 30 * 86_400, :second)
     long_processor_id = "proc_phase199_" <> String.duplicate("edge-route-overflow-", 4)

@@ -1,0 +1,15 @@
+{
+  "key": "phase199-route-acceptance-green",
+  "command": "CI=1 npx playwright test e2e/admin-interaction-overlay-phase199.spec.js --grep deterministic-route-flows --project=chromium-desktop --reporter=junit",
+  "exitCode": 0,
+  "reportPath": ".planning/phases/240-shared-system-and-real-billing-exemplar/240-04-acceptance-route-green.junit.xml",
+  "suites": [
+    {
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0
+    }
+  ],
+  "semanticAssessment": "Native Playwright JUnit report records the focused acceptance case(s) passing on their intended Chromium project(s).",
+  "output": "<testsuites id=\"\" name=\"\" tests=\"1\" failures=\"0\" skipped=\"0\" errors=\"0\" time=\"21.205299\">\n<testsuite name=\"admin-interaction-overlay-phase199.spec.js\" timestamp=\"2026-10-09T21:32:29.047Z\" hostname=\"chromium-desktop\" tests=\"1\" failures=\"0\" skipped=\"0\" time=\"16.499\" errors=\"0\">\n<testcase name=\"Phase 199 interaction and overlay contract › @phase199 @fixture deterministic route flows preserve focus, scroll, clipping, and back navigation\" classname=\"admin-interaction-overlay-phase199.spec.js\" time=\"16.499\">\n</testcase>\n</testsuite>\n</testsuites>\n"
+}

@@ -78,7 +78,11 @@ const PHASE199_ROUTE_FLOWS = Object.freeze([
     name: "Recovery list to campaign to subscription detail and back",
     route: () => "/billing/analytics/recovery",
     steps: [
-      { link: /phase199\.route-edge/i, expectedAfterClick: /\/billing\/analytics\/recovery\/subscriptions\/19900000-/ },
+      {
+        linkHref: ({ edgeStates }) => `/billing/analytics/recovery/subscriptions/${edgeStates.recovery_subscription_id}`,
+        linkAccessibleName: /phase199\.route-edge/i,
+        expectedAfterClick: /\/billing\/analytics\/recovery\/subscriptions\/19900000-/,
+      },
       { assertText: /Dunning Timeline|No dunning history/i },
       { link: /subscription detail/i, expectedAfterClick: /\/billing\/subscriptions\/19900000-/ },
       { assertText: /past_due|Payment methods|Subscription/i },
@@ -710,7 +714,7 @@ async function assertDrawerStepUp(page, flow, step) {
   }
 }
 
-async function runRouteFlowStep(page, flow, step) {
+async function runRouteFlowStep(page, flow, step, fixtures) {
   if (step.assertText) {
     await expect(page.locator("main"), `${flow.name}: route text`).toContainText(step.assertText);
     return;
@@ -729,10 +733,15 @@ async function runRouteFlowStep(page, flow, step) {
     return;
   }
 
-  const link = step.linkSelector
-    ? page.locator(step.linkSelector).first()
-    : page.getByRole("link", { name: step.link }).first();
+  const link = step.linkHref
+    ? page.locator(`a[href^="${step.linkHref(fixtures)}"]`).first()
+    : step.linkSelector
+      ? page.locator(step.linkSelector).first()
+      : page.getByRole("link", { name: step.link }).first();
   await expect(link, `${flow.name}: drill link`).toBeVisible();
+  if (step.linkAccessibleName) {
+    await expect(link, `${flow.name}: accessible drill link name`).toHaveAccessibleName(step.linkAccessibleName);
+  }
   await link.click();
   await expect(page, `${flow.name}: routed to related detail`).toHaveURL(step.expectedAfterClick);
   await assertRouteFocusAndScroll(page, `${flow.name}: related detail`);
@@ -1034,7 +1043,7 @@ test.describe("Phase 199 interaction and overlay contract", () => {
       await assertRouteFocusAndScroll(page, flow.name);
 
       for (const step of flow.steps) {
-        await runRouteFlowStep(page, flow, step);
+        await runRouteFlowStep(page, flow, step, fixtures);
       }
     }
   });
@@ -1108,12 +1117,12 @@ const RATCHET_AUTO_GUARDS = [
   {"finding_id":"f-4f474e99919ee505","kind":"focus-ring","selector":".ax-topbar"}, // @ratchet:f-4f474e99919ee505
   {"finding_id":"f-5b4fde509c9846f7","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-5b4fde509c9846f7
   {"finding_id":"f-66ff3aa97d803c81","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-66ff3aa97d803c81
-  {"finding_id":"f-68d2bf118467b34a","kind":"focus-ring","selector":"[data-ax-zone=attention-rail]","route":"/billing"}, // @ratchet:f-68d2bf118467b34a
+  {"finding_id":"f-68d2bf118467b34a","kind":"focus-ring","selector":".ax-home [data-command-palette-trigger]","route":"/billing"}, // @ratchet:f-68d2bf118467b34a
   {"finding_id":"f-8b82f34db2fd2d70","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-8b82f34db2fd2d70
   {"finding_id":"f-8d4e761ccec068a7","kind":"focus-ring","selector":".ax-primary-nav:visible, [data-sidebar-toggle='true']:visible"}, // @ratchet:f-8d4e761ccec068a7
   {"finding_id":"f-90ff4aae38ba2085","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-90ff4aae38ba2085
   {"finding_id":"f-988d2a9808195b53","kind":"focus-ring","selector":".ax-detail"}, // @ratchet:f-988d2a9808195b53
-  {"finding_id":"f-9e6f3e53a835a6d5","kind":"focus-ring","selector":"[data-ax-zone=attention-rail]","route":"/billing"}, // @ratchet:f-9e6f3e53a835a6d5
+  {"finding_id":"f-9e6f3e53a835a6d5","kind":"focus-ring","selector":".ax-home [data-command-palette-trigger]","route":"/billing"}, // @ratchet:f-9e6f3e53a835a6d5
   {"finding_id":"f-9f433603cde72097","kind":"focus-ring","selector":".ax-kpi-card"}, // @ratchet:f-9f433603cde72097
   {"finding_id":"f-a276757f4dcd510c","kind":"focus-ring","selector":".ax-related-resources"}, // @ratchet:f-a276757f4dcd510c
   {"finding_id":"f-a3421a7901c75b6b","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-a3421a7901c75b6b
