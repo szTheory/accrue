@@ -74,7 +74,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 **Propagation obligation**: Shared rules, interaction patterns, state distinctions and evidence owners established here must be exercised on every affected Phase 241–242 consumer. Do not declare broad route coverage from this exemplar. Preserve deliberate 2px dense and 1px structural exceptions; confirm suspected compression and action geometry in current mounted output before editing.
 **Early regression guard**: Strengthen the existing expected-Linux-snapshot set guard before propagation and prove its missing-set failure at the existing owner. EVR-03's final reviewed baseline closure remains Phase 243 ownership; the guard is not postponed until then.
-**Plans**: 4/6 plans executed
+**Plans**: 5/6 plans executed
 Plans:
 **Wave 1**
 - [x] 240-01-PLAN.md — Real invoice tracer, shared hierarchy and dense subscription cross-check
@@ -85,7 +85,7 @@ Plans:
 - [x] 240-04-PLAN.md — Effective theme and full keyboard review behavior
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 240-05-PLAN.md — Real busy completion and reconnect without action replay
+- [x] 240-05-PLAN.md — Real busy completion and reconnect without action replay
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 240-06-PLAN.md — Current coverage, served assets and exercised provenance
@@ -142,7 +142,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 240. Shared System and Real Billing Exemplar | v1.64 | 4/6 | In Progress | - |
+| 240. Shared System and Real Billing Exemplar | v1.64 | 5/6 | In Progress | - |
 | 241. Billing Operator Journeys | v1.64 | 0/TBD | Not started | - |
 | 242. Investigations and Remaining Admin Surfaces | v1.64 | 0/TBD | Not started | - |
 | 243. Integrated Evidence and Feedback Preview | v1.64 | 0/TBD | Not started | - |

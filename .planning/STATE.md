@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 240
 current_phase_name: Shared System and Real Billing Exemplar
-current_plan: 5
+current_plan: 6
 status: executing
-stopped_at: Completed 240-04-PLAN.md
-last_updated: "2026-10-09T21:23:29.457Z"
+stopped_at: Completed 240-05-PLAN.md
+last_updated: "2026-10-09T22:40:57.302Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 240 planned and independently checked; six plans across four waves ready to execute
-state_head: d185347cfd61cd1e01a87ec2b0ee5bb3d8c75a4c
+state_head: d224b7685e6c5723aab062fa827c1cde2f3b5e82
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -34,7 +34,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 ## Current Position
 
 Phase: 240 (Shared System and Real Billing Exemplar) — IN PROGRESS
-Current Plan: 5
+Current Plan: 6
 Total Plans in Phase: 6
 Status: Executing Wave 2
 Last activity: 2026-10-09 — Wave 1 complete; recovered interrupted 240-02 metadata closeout; 614 Admin tests passed
@@ -155,6 +155,7 @@ Last activity: 2026-10-09 — Wave 1 complete; recovered interrupted 240-02 meta
 | Phase 240 P01 | 18m | 3 tasks | 10 files |
 | Phase 240 P03 | 9min | 3 tasks | 7 files |
 | Phase 240 P04 | 12 | 2 tasks | 11 files |
+| Phase 240 P05 | 61 | 2 tasks | 23 files |
 
 ## Accumulated Context
 
@@ -329,6 +330,8 @@ Last activity: 2026-10-09 — Wave 1 complete; recovered interrupted 240-02 meta
 - [Phase 240]: Actual browser zoom remains unverified because the headless host provides only pinch/visual scaling; CSS enlargement and spacing checks remain separately recorded.
 - [Phase 240]: Keep stored theme preference and computed OS appearance as separate assertions; host-forced appearance wins.
 - [Phase 240]: Keep FocusTrap production behavior unchanged; supply browser focus APIs in its Node harness.
+- [Phase 240]: Browser online is only transport recovery; billing controls remain locked until LiveView reports reconnected.
+- [Phase 240]: Observe billing controls at document scope across overlay replacement and preserve each control's original disabled state.
 
 ### Pending Todos
 
@@ -409,8 +412,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T21:23:29.436Z
-Stopped at: Completed 240-04-PLAN.md
+Last session: 2026-10-09T22:40:57.280Z
+Stopped at: Completed 240-05-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
