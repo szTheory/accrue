@@ -33,11 +33,11 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 ## Current Position
 
-Phase: 239 (Integrated Quality & Handoff) — EXECUTING
+Phase: 239 (Integrated Quality & Handoff) — COMPLETE
 Current Plan: 5
 Total Plans in Phase: 5
 Status: Phase complete — verification passed
-Last activity: 2026-10-09 — Phase 239 execution started
+Last activity: 2026-10-09 — Phase 239 completed and re-verified
 
 ## Performance Metrics
 
@@ -523,5 +523,5 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Phase 238 is complete: 5/5 plans, 2/2 mapped requirements, 32/32 verification must-haves, zero behavior unverified, and zero open security threats. Stable in-scope acceptance is automated; no routine human UAT is required.
-- Next: plan Phase 239 — Integrated Quality & Handoff (`$gsd-plan-phase 239`).
+- Phase 239 is complete: 5/5 plans, 7/7 milestone phases, and 66/66 verification must-haves. Stable in-scope acceptance is automated; no routine human UAT is required. Remote CI and live-provider outcomes remain unobserved.
+- GSD recommends starting a new milestone (`$gsd-new-milestone`); define its goal before planning begins.

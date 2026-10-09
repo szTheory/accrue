@@ -85,7 +85,7 @@ gaps: []
 |---|---|---|---|---|
 | Compiled Admin/Portal router | `239-COVERAGE.md` | Host ExUnit route freshness test | ✓ WIRED | Exact mount path sets and order passed in the rerun. |
 | Route/interaction ledger | focused ExUnit, LiveView, and Playwright suites | Named evidence in each route/interaction row | ✓ WIRED | The ledger also names the recurring workflow step; no remote result is claimed. |
-| Mounted Admin/Portal/host pages | Phase 239 Playwright spec | Isolated fixture, response/landmark/identity assertions, attached screenshots | ✓ WIRED | Existing local report `.last-run.json` says `passed`; three PNGs are present. Test not rerun in this verification because the configured Playwright `webServer` starts a server, which this verification must not do. |
+| Mounted Admin/Portal/host pages | Phase 239 Playwright spec | Isolated fixture, response/landmark/identity assertions, attached screenshots | ✓ WIRED | The focused Playwright spec passed during Plan 05 execution, including the new host 320 CSS px overflow and post-login reload/no-write assertions. The separate goal-level verifier did not rerun it because the configured Playwright `webServer` starts a server. Three PNGs are present. |
 | README preview entry | `239-HANDOFF.md` | Relative link | ✓ WIRED | Link target exists; preview and proof steps are ordered and separated. |
 | Admin/Portal package assets and copy source | Host-served responses / generated fixture | Router response tests and exporter byte comparison | ✓ WIRED | Relevant focused suites rerun successfully. |
 
@@ -107,7 +107,7 @@ gaps: []
 | Portal mounted resources, CSP, and checkout SRI | `mix test test/accrue_portal/csp_plug_test.exs test/accrue_portal/live/checkout_live_test.exs` | 19 tests, 0 failures | ✓ PASS |
 | Component registry and Storybook parity | `mix test test/accrue_admin/dev/component_registry_test.exs test/accrue_admin/dev/storybook_coverage_test.exs` | 11 tests, 0 failures | ✓ PASS |
 | Package docs | `bash scripts/ci/verify_package_docs.sh` | Passed | ✓ PASS |
-| Current render browser smoke | Existing local Playwright report/output | Passed; three PNGs; not rerun because Playwright config starts its own server | Prior local evidence, not a verification-turn rerun |
+| Current render browser smoke | Plan 05 execution: `CI=1 npx playwright test e2e/phase239-integrated-quality.spec.js --project=chromium-desktop` | Passed, 1 test; includes host overflow at 320 CSS px and reload with the no-write collector active | ✓ PASS during Plan 05 execution; not rerun by the separate goal-level verifier |
 | Root regression gate | Root command resolved to `true` | No test runner configured; this is not test evidence | N/A |
 
 ## Probe Execution
