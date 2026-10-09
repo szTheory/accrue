@@ -7,9 +7,13 @@ findings:
     severity: warning
     disposition: fixed
     title: "Recovery table reports zero rows before the query succeeds"
+  - id: WR-02
+    severity: warning
+    disposition: fixed
+    title: "Onboarding browser spec misstates Braintree support"
 open: 0
-total: 1
-recorded: 2026-10-09T01:46:39Z
+total: 2
+recorded: 2026-10-09T02:12:32Z
 ---
 
 # Phase 237: Code Review Disposition
@@ -17,6 +21,7 @@ recorded: 2026-10-09T01:46:39Z
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
 | WR-01 | warning | fixed | commit 6de9ff36 (not in the current review) |
+| WR-02 | warning | fixed | commit 79922604 (not in the current review) |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 
