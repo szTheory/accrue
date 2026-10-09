@@ -38,24 +38,40 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     recovered_currencies = Enum.map(stats.recovered, & &1.currency)
     lost_currencies = Enum.map(stats.lost, & &1.currency)
     currencies = Enum.uniq(recovered_currencies ++ lost_currencies)
-
-    currencies =
-      if currencies == [],
-        do: [to_string(Accrue.Config.get!(:default_currency))],
-        else: currencies
+    supported_currencies = Enum.filter(currencies, &(not is_nil(known_currency_atom(&1))))
+    has_unavailable_currency = length(supported_currencies) != length(currencies)
+    currencies = supported_currencies ++ if(has_unavailable_currency, do: [nil], else: [])
 
     kpi_pairs =
       Enum.map(currencies, fn currency ->
-        recovered = Enum.find(stats.recovered, %{cents: 0}, &(&1.currency == currency))
-        lost = Enum.find(stats.lost, %{cents: 0}, &(&1.currency == currency))
+        if is_nil(currency) do
+          %{
+            currency: "Unavailable",
+            recovered_str: "Amount unavailable",
+            exhausted_str: "Amount unavailable"
+          }
+        else
+          recovered = Enum.find(stats.recovered, &(&1.currency == currency))
+          lost = Enum.find(stats.lost, &(&1.currency == currency))
 
-        currency_arg = known_currency_atom(currency)
-
-        %{
-          currency: to_string(currency),
-          recovered_str: format_recovery_money(recovered.cents, currency_arg, currency, locale),
-          exhausted_str: format_recovery_money(lost.cents, currency_arg, currency, locale)
-        }
+          %{
+            currency: to_string(currency),
+            recovered_str:
+              format_recovery_money(
+                recovered && recovered.cents,
+                known_currency_atom(currency),
+                currency,
+                locale
+              ),
+            exhausted_str:
+              format_recovery_money(
+                lost && lost.cents,
+                known_currency_atom(currency),
+                currency,
+                locale
+              )
+          }
+        end
       end)
 
     {:noreply,
@@ -82,6 +98,9 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
   defp format_recovery_money(cents, nil, currency, _locale) do
     "#{cents} #{currency |> to_string() |> String.upcase()}"
   end
+
+  defp format_recovery_money(nil, _currency, _original_currency, _locale),
+    do: "Amount unavailable"
 
   defp format_recovery_money(cents, currency, _original_currency, locale) do
     Accrue.Invoices.Render.format_money(cents, currency, locale)

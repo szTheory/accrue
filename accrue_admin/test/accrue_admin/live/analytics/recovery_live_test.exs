@@ -421,6 +421,49 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       assert html =~ "/analytics/recovery/subscriptions/" or html =~ "No active dunning campaigns"
     end
 
+    test "an empty authorized owner scope does not invent a default-currency total", %{conn: conn} do
+      owner_id = "org_empty_recovery"
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: owner_id,
+          active_organization_slug: "empty-org",
+          admin_organization_ids: [owner_id]
+        )
+
+      assert {:ok, _view, html} =
+               live(conn, "/billing/analytics/recovery?org=empty-org&window=7d")
+
+      assert active_window_label(html) =~ "7 days"
+      assert html =~ "No active dunning campaigns"
+      refute html =~ "Recovered MRR (USD)"
+      refute html =~ "Exhausted MRR (USD)"
+    end
+
+    test "unsupported currency stays unavailable while supported currency remains exact", %{
+      conn: conn
+    } do
+      fixture = recovery_navigation_fixture()
+      insert_raw_recovery_event(fixture.allowed_recovered.id, DateTime.utc_now(), nil, 9_999)
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      assert {:ok, _view, html} = live(conn, fixture.return_path)
+
+      assert html =~ "Recovered MRR (USD)"
+      assert html =~ "$12.34"
+      assert html =~ "Recovered MRR (UNAVAILABLE)"
+      assert html =~ "Amount unavailable"
+      refute html =~ "$99.99"
+    end
+
     test "organization scope excludes out-of-scope recovery metrics and at-risk rows", %{
       conn: conn
     } do
@@ -572,6 +615,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
     %{
       owner_id: "org_allowed",
+      allowed_recovered: allowed_recovered,
       allowed_at_risk: allowed_at_risk,
       denied_at_risk: denied_at_risk,
       return_path: "/billing/analytics/recovery?org=allowed-org&window=30d"

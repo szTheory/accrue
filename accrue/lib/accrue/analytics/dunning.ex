@@ -65,8 +65,8 @@ defmodule Accrue.Analytics.Dunning do
   """
   @doc since: "1.3.0"
   @spec recovered_vs_lost_mrr(keyword()) :: %{
-          recovered: [%{currency: String.t(), cents: non_neg_integer()}],
-          lost: [%{currency: String.t(), cents: non_neg_integer()}]
+          recovered: [%{currency: String.t() | nil, cents: non_neg_integer() | nil}],
+          lost: [%{currency: String.t() | nil, cents: non_neg_integer() | nil}]
         }
   def recovered_vs_lost_mrr(opts \\ []) when is_list(opts) do
     query =
@@ -77,7 +77,7 @@ defmodule Accrue.Analytics.Dunning do
           {e.type, fragment("?->>'currency'", e.data),
            sum(
              fragment(
-               "CASE WHEN jsonb_typeof((?->'mrr_value_cents')) = 'number' THEN (?->>'mrr_value_cents')::integer ELSE 0 END",
+               "CASE WHEN jsonb_typeof((?->'mrr_value_cents')) = 'number' THEN (?->>'mrr_value_cents')::integer ELSE NULL END",
                e.data,
                e.data
              )
@@ -87,7 +87,7 @@ defmodule Accrue.Analytics.Dunning do
 
     Repo.all(query)
     |> Enum.reduce(%{recovered: [], lost: []}, fn {type, currency, cents}, acc ->
-      entry = %{currency: currency || "usd", cents: cents || 0}
+      entry = %{currency: currency, cents: cents}
 
       case type do
         @recovered_type -> Map.update!(acc, :recovered, &[entry | &1])
@@ -267,6 +267,7 @@ defmodule Accrue.Analytics.Dunning do
         select: %{
           subscription_id: s.id,
           customer_id: s.customer_id,
+          current_status: s.status,
           customer_label: fragment("COALESCE(?, ?)", c.email, c.name),
           days_in_campaign:
             fragment(
