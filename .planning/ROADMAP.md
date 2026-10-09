@@ -233,7 +233,12 @@ Plans:
   4. Generated assets, fonts, mounts, CSP/SRI, copy exports, and host integration documentation match the source actually served; component examples/docs match production and task-owned debris is removed.
   5. A useful feedback preview remains available separately from mutation/reset proof, with a concise change summary for optional owner feedback.
 
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 239-01-PLAN.md — Current route and interaction evidence tracer
+- [ ] 239-02-PLAN.md — Served asset, font, mount, CSP/SRI, and copy parity
+- [ ] 239-03-PLAN.md — Component examples and state evidence parity
+- [ ] 239-04-PLAN.md — Read-only feedback preview and handoff
 **UI hint**: yes
 
 ## Progress
