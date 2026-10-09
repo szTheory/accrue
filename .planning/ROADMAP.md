@@ -184,7 +184,7 @@ Plans:
   4. Recovery views retain time window, owner, currency, and return context while keeping historical failures separate from current billing state.
   5. Changed money/recovery flows retain keyboard, responsive, theme, and relevant pending/denied/error evidence within this slice.
 
-**Plans**: 4/8 plans complete
+**Plans**: 6/8 plans complete
 Plans:
 - [x] 237-01-PLAN.md — Owner-scoped invoice tracer and Wave 0 boundary fixtures
 - [x] 237-02-PLAN.md — Wave 0 invoice and refund action/result fixtures
@@ -192,7 +192,7 @@ Plans:
 - [x] 237-04-PLAN.md — Invoice collection and detail truth
 - [ ] 237-05-PLAN.md — Invoice action revalidation and evidenced outcomes
 - [x] 237-06-PLAN.md — Charge/refund precision, revalidation, and outcomes
-- [ ] 237-07-PLAN.md — Recovery currency, history, scope, and return context
+- [x] 237-07-PLAN.md — Recovery currency, history, scope, and return context
 - [ ] 237-08-PLAN.md — Representative served browser and CI proof
 **UI hint**: yes
 

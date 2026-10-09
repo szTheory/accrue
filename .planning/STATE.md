@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 237
 current_phase_name: Admin Invoices, Payments & Recovery
 status: executing
-stopped_at: Completed 237-06-PLAN.md
-last_updated: "2026-10-09T00:26:54.038Z"
+stopped_at: Completed 237-07-PLAN.md
+last_updated: "2026-10-09T00:39:42.691Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 237 execution started
-state_head: 5023a5dfe3bb5139fd96186ac6ba507cc6107412
+state_head: dd714cf369fcc490ef38fa6ccbee69f9abcfb648
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 35
-  completed_plans: 32
+  completed_plans: 33
   percent: 57
 ---
 
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 237 (Admin Invoices, Payments & Recovery) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-10-08 — Phase 237 execution started
 
@@ -134,6 +134,7 @@ Last activity: 2026-10-08 — Phase 237 execution started
 | Phase 237 P03 | 5min | 2 tasks | 1 files |
 | Phase 237 P04 | 6 min | 2 tasks | 5 files |
 | Phase 237 P06 | 12min | 2 tasks | 4 files |
+| Phase 237 P07 | 11min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -273,6 +274,7 @@ Last activity: 2026-10-08 — Phase 237 execution started
 - [Phase 237]: Invoice money uses the shared MoneyFormatter; missing or unsupported evidence never defaults to USD.
 - [Phase 237]: Refund review binds to provider charge identity, exact integer amount/currency/status, and refundable balance; dispatch reauthorizes scope and reloads current charge facts after step-up.
 - [Phase 237]: Deterministic charge/refund outcomes are verified in automated LiveView and package tests; ADM-05 remains pending until its other plans complete.
+- [Phase 237]: Recovery amounts remain evidence-based; current subscription state is distinct from historical failures; async reads and validated return links retain authorized owner/window scope.
 
 ### Pending Todos
 
@@ -347,8 +349,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T00:26:53.943Z
-Stopped at: Completed 237-06-PLAN.md
+Last session: 2026-10-09T00:39:42.623Z
+Stopped at: Completed 237-07-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
