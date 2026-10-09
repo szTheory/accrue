@@ -1581,6 +1581,15 @@ jobs:
           ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
         run: cd examples/accrue_host && npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
 
+      - name: Run Phase 238 Admin browser contract with host-forced dark theme
+        if: matrix.shard == 1
+        env:
+          ACCRUE_HOST_ADMIN_THEME: dark
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+        run: >-
+          cd examples/accrue_host && npx playwright test
+          e2e/phase238-admin-events-webhooks.spec.js --project=chromium-desktop
+
       - name: Compile host for real async search lane
         if: matrix.shard == 1
         run: cd examples/accrue_host && ACCRUE_HOST_E2E_DISABLE_SQL_SANDBOX=1 mix compile --force

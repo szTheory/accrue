@@ -2,21 +2,21 @@
 gsd_state_version: "1.0"
 milestone: v1.63
 milestone_name: Admin and Portal UI refinement
-current_phase: 238
-current_phase_name: Admin Events, Webhooks & Remaining Billing Surfaces
-current_plan: 5
-status: verifying
-stopped_at: Completed 238-05-PLAN.md
-last_updated: "2026-10-09T04:19:01.787Z"
+current_phase: 239
+current_phase_name: Integrated Quality & Handoff
+current_plan: Not started
+status: planning
+stopped_at: Phase 238 complete, ready to plan Phase 239
+last_updated: "2026-10-09T06:03:27.878Z"
 last_activity: 2026-10-09
-last_activity_desc: Phase 235 complete, transitioned to Phase 238
-state_head: 093f850a620cfc06c0d42d728cc5b1d7082eede8
+last_activity_desc: Phase 238 complete, transitioned to Phase 239
+state_head: 28bd110f8e863ad0fd7c77bdd65520041023dc67
 progress:
   total_phases: 7
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 40
   completed_plans: 40
-  percent: 71
+  percent: 86
 ---
 
 # Project State
@@ -27,23 +27,23 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 237 — Admin Invoices, Payments & Recovery
-**Progress:** [███████░░░] 71% (2 of 7 milestone phases complete)
-**Planned work completed:** [████████████████████] 15/15 plans (100%); remaining phases await planning.
+**Current focus:** Phase 239 — Integrated Quality & Handoff
+**Progress:** [█████████░] 86% (6 of 7 milestone phases complete)
+**Planned work completed:** 40/40 plans across Phases 233–238; Phase 239 awaits planning.
 
 ## Current Position
 
-Phase: 238 (Admin Events, Webhooks & Remaining Billing Surfaces) — IN PROGRESS
-Current Plan: 5
-Total Plans in Phase: 5
-Status: Phase complete — ready for verification
-Last activity: 2026-10-09 — Completed Phase 238 Plan 01
+Phase: 239 — Integrated Quality & Handoff
+Current Plan: Not started
+Total Plans in Phase: TBD
+Status: Ready to plan
+Last activity: 2026-10-09 — Phase 238 complete, transitioned to Phase 239
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 73
+- Total plans completed: 78
 - Average duration: —
 - Total execution time: —
 
@@ -63,6 +63,7 @@ Last activity: 2026-10-09 — Completed Phase 238 Plan 01
 | 235 | 6 | - | - |
 | 236 | 6 | - | - |
 | 237 | 8 | - | - |
+| 238 | 5 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -375,7 +376,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-09T04:19:01.717Z
-Stopped at: Completed 238-05-PLAN.md
+Stopped at: Phase 238 complete, ready to plan Phase 239
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -505,5 +506,5 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Phase 234 is complete: 8/8 plans, 4/4 mapped requirements, 23/23 automated acceptance checks, 18/18 verification truths, zero behavior unverified, and zero open security threats.
-- Next: discuss Phase 235 — Customer Plan Selection & Checkout (`$gsd-discuss-phase 235`).
+- Phase 238 is complete: 5/5 plans, 2/2 mapped requirements, 32/32 verification must-haves, zero behavior unverified, and zero open security threats. Stable in-scope acceptance is automated; no routine human UAT is required.
+- Next: plan Phase 239 — Integrated Quality & Handoff (`$gsd-plan-phase 239`).

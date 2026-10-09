@@ -6,6 +6,12 @@ portal_theme =
     _ -> :system
   end
 
+admin_theme =
+  case System.get_env("ACCRUE_HOST_ADMIN_THEME") do
+    theme when theme in ["light", "dark"] -> String.to_atom(theme)
+    _ -> :system
+  end
+
 # Only in tests, remove the complexity from the password hashing algorithm
 config :bcrypt_elixir, :log_rounds, 1
 
@@ -55,7 +61,8 @@ config :accrue,
   ],
   admin_branding: [
     app_name: "Accrue Admin",
-    accent_color: "#5D79F6"
+    accent_color: "#5D79F6",
+    theme: admin_theme
   ]
 
 config :accrue_host, Oban,

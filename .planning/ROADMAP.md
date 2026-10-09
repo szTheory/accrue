@@ -37,7 +37,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 - [x] **Phase 235: Customer Plan Selection & Checkout** - Make existing checkout, payment hooks, provider handoffs, and safe returns understandable and reliable. (completed 2026-10-08)
 - [x] **Phase 236: Portal Billing Self-Service** - Refine existing customer billing pages and authorized payment/subscription tasks through one Portal. (completed 2026-10-08)
 - [x] **Phase 237: Admin Invoices, Payments & Recovery** - Make money and recovery work precise, scoped, and honest about outcomes.
-- [ ] **Phase 238: Admin Events, Webhooks & Remaining Billing Surfaces** - Improve event and delivery investigation plus existing coupon, promotion-code, and Connect surfaces.
+- [x] **Phase 238: Admin Events, Webhooks & Remaining Billing Surfaces** - Improve event and delivery investigation plus existing coupon, promotion-code, and Connect surfaces. (completed 2026-10-09)
 - [ ] **Phase 239: Integrated Quality & Handoff** - Close route coverage, cross-surface evidence, current-render inspection, and a usable feedback preview.
 
 ## Phase Details
@@ -245,7 +245,7 @@ Plans:
 | 235. Customer Plan Selection & Checkout | 6/6 | Complete    | 2026-10-08 |
 | 236. Portal Billing Self-Service | 6/6 | Complete    | 2026-10-08 |
 | 237. Admin Invoices, Payments & Recovery | 8/8 | Complete    | 2026-10-08 |
-| 238. Admin Events, Webhooks & Remaining Billing Surfaces | 4/5 | In Progress | - |
+| 238. Admin Events, Webhooks & Remaining Billing Surfaces | 5/5 | Complete    | 2026-10-09 |
 | 239. Integrated Quality & Handoff | 0/TBD | Not started | - |
 
 <details>

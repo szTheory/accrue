@@ -68,33 +68,67 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
   await expect(toolbar).toHaveCount(0);
   await firstRow.check();
   await expect(toolbar).toBeEnabled();
-  await toolbar.click();
+  await toolbar.focus();
+  await expect(toolbar).toBeFocused();
+  await page.keyboard.press("Enter");
   const singular = page.locator("[data-role='bulk-replay-confirm']");
   await expect(singular).toContainText("Replay 1 selected delivery?");
   await expect(singular).toContainText("Only deliveries still eligible when confirmed will be queued");
   await expect(singular).toContainText("Queue acceptance does not mean processing is complete");
-  await singular.getByRole("button", { name: "Keep deliveries" }).click();
+  const confirmSelected = singular.locator("[data-role='confirm-retry-selected']");
+  await expect(confirmSelected).toBeFocused();
+  const keepDeliveries = singular.getByRole("button", { name: "Keep deliveries" });
+  await page.keyboard.press("Tab");
+  await expect(keepDeliveries).toBeFocused();
+  await page.keyboard.press("Enter");
   await expect(singular).toBeHidden();
+  await expect(toolbar).toBeFocused();
 
   await firstRow.check();
   await secondRow.check();
-  await toolbar.click();
+  await toolbar.focus();
+  await page.keyboard.press("Enter");
   const confirmation = page.locator("[data-role='bulk-replay-confirm']");
   await expect(confirmation).toContainText("Replay 2 selected deliveries?");
-  await confirmation.getByRole("button", { name: "Queue eligible deliveries" }).click();
+  const queueEligible = confirmation.getByRole("button", { name: "Queue eligible deliveries" });
+  await queueEligible.focus();
+  await page.keyboard.press("Enter");
   const stepUp = page.getByRole("dialog", { name: "Step-up required" });
   await expect(stepUp).toBeVisible();
+  const stepUpCode = stepUp.getByRole("textbox", { name: "Verification code" });
+  const stepUpCancel = stepUp.getByRole("button", { name: "Cancel" });
+  const stepUpSubmit = stepUp.getByRole("button", { name: "Verify identity" });
+  await expect(stepUpCode).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(stepUpCancel).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(stepUpSubmit).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(stepUpCode).toBeFocused();
   await expectNoAxeViolations(page);
-  await expect(stepUp.getByRole("textbox", { name: "Verification code" })).toBeEnabled();
-  await stepUp.getByRole("textbox", { name: "Verification code" }).fill("000000");
-  await stepUp.getByRole("button", { name: "Verify identity" }).click();
+  await expect(stepUpCode).toBeEnabled();
+  await stepUpCode.fill("000000");
+  await page.keyboard.press("Enter");
   await expect(stepUp).toBeVisible();
   await expect(stepUp).toContainText(/incorrect|invalid|try again/i);
+  await expect(stepUpCode).toBeFocused();
   await expectNoAxeViolations(page);
   await expect(page.locator("[role='status']").filter({ hasText: /queued/i })).toHaveCount(0);
-  await stepUp.getByRole("textbox", { name: "Verification code" }).fill("123456");
-  await stepUp.getByRole("button", { name: "Verify identity" }).click();
+  await page.keyboard.press("Escape");
   await expect(stepUp).toBeHidden();
+  await expect(page.locator("#main-content")).toBeFocused();
+
+  await toolbar.focus();
+  await page.keyboard.press("Enter");
+  await expect(confirmation).toBeVisible();
+  await queueEligible.focus();
+  await page.keyboard.press("Enter");
+  await expect(stepUp).toBeVisible();
+  await expect(stepUpCode).toBeFocused();
+  await stepUpCode.fill("123456");
+  await page.keyboard.press("Enter");
+  await expect(stepUp).toBeHidden();
+  await expect(page.locator("#main-content")).toBeFocused();
   await expect(page.locator("[role='status'], [role='alert']").filter({ hasText: /Queued 2 deliveries/i })).toBeVisible();
   await expect(page.locator("body")).not.toContainText(/processed successfully/i);
   await testInfo.attach("phase238-replay-queued.png", { body: await page.screenshot({ fullPage: true }), contentType: "image/png" });
@@ -137,9 +171,35 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
   await waitForLiveView(page);
   await expect(page.getByText("Unknown", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Local platform fee override", { exact: true }).first()).toBeVisible();
+
+  const editOverride = page.getByRole("button", {
+    name: `Change platform fee override for acct_host_browser_no_snapshot`
+  });
+  await editOverride.focus();
+  await page.keyboard.press("Enter");
+  const overrideDrawer = page.locator("#connect-platform-fee-drawer");
+  await expect(overrideDrawer).toBeVisible();
+  const drawerClose = overrideDrawer.getByRole("button", { name: "Close" });
+  const percent = overrideDrawer.locator('input[name="override[percent]"]');
+  await expect(drawerClose).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(percent).toBeFocused();
+  await percent.fill("2.5");
+  const saveOverride = overrideDrawer.getByRole("button", { name: "Save platform fee override" });
+  await saveOverride.focus();
+  await page.keyboard.press("Enter");
+  await expect(stepUp).toBeVisible();
+  await expect(stepUpCode).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(stepUp).toBeHidden();
+  await expect(saveOverride).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(overrideDrawer).toBeHidden();
+  await expect(editOverride).toBeFocused();
 });
 
 test("Phase 238 admin evidence remains keyboard reachable, themed, and contained at narrow widths", async ({ page, sandboxId }) => {
+  test.skip(Boolean(process.env.ACCRUE_HOST_ADMIN_THEME), "The host locks the Admin theme in this lane");
   const fixture = readFixture();
   await openAdmin(page, fixture, sandboxId, `/admin/webhooks?status=dead&${orgQuery(fixture)}`);
 
@@ -179,3 +239,21 @@ test("Phase 238 admin evidence remains keyboard reachable, themed, and contained
     await firstIdentity.evaluate((node, value) => { node.textContent = value || ""; }, original);
   }
 });
+
+if (process.env.ACCRUE_HOST_ADMIN_THEME) {
+  test("Phase 238 host-forced Admin theme overrides preferences and keeps states usable", async ({ page, sandboxId }) => {
+    const fixture = readFixture();
+    const origin = `http://127.0.0.1:${process.env.ACCRUE_HOST_BROWSER_PORT || "4101"}`;
+    await page.context().addCookies([{ name: "accrue_theme", value: "light", url: origin }]);
+    await openAdmin(page, fixture, sandboxId, `/admin/webhooks?status=dead&${orgQuery(fixture)}`);
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", process.env.ACCRUE_HOST_ADMIN_THEME);
+    await expect(page.locator("[data-role='admin-theme-forced']")).toHaveText(
+      `${process.env.ACCRUE_HOST_ADMIN_THEME[0].toUpperCase()}${process.env.ACCRUE_HOST_ADMIN_THEME.slice(1)} theme set by host`
+    );
+    await expect(page.getByRole("radiogroup", { name: "Color theme" })).toHaveCount(0);
+    await expect(page.locator("article").filter({ hasText: "evt_host_browser_replay" }).first()).toContainText("Dead");
+    await expect(page.getByRole("combobox", { name: "Status" })).toBeEnabled();
+    await expectNoAxeViolations(page);
+  });
+}

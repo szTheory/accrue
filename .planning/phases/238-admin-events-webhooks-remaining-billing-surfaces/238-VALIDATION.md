@@ -52,7 +52,7 @@ Phase 238 plan/task IDs below bind each behavior to its focused seam before exec
 | 238-04-T1 | 238-04 | 1 | ADM-08 | T-238-09, T-238-10 | Connect list preserves separate provider and local facts and scoped identities. | ExUnit / LiveView | `cd accrue_admin && mix test test/accrue_admin/live/connect_accounts_live_test.exs` | Existing suite | ✅ pass (Admin 610/610; snapshot filter regressions included) |
 | 238-04-T2 | 238-04 | 1 | ADM-08 | T-238-08 | Local override save revalidates target and step-up without remote mutation. | ExUnit / LiveView | `cd accrue_admin && mix test test/accrue_admin/live/connect_account_live_test.exs` | Existing suite | ✅ pass (Admin 610/610) |
 | 238-05-T1 | 238-05 | 2 | ADM-07, ADM-08 | T-238-11, T-238-12 | Seeded mounted journeys assert exact links, route/result states, inspection boundaries, and rejected-step-up correction. | Mounted Playwright | `cd examples/accrue_host && npx playwright test e2e/phase238-admin-events-webhooks.spec.js --project=chromium-desktop` | Phase-owned spec + deterministic seed fixtures; ExUnit retains read-failure and mixed-outcome seams | ✅ pass (2/2, final code) |
-| 238-05-T2 | 238-05 | 2 | ADM-07, ADM-08 | T-238-13 | Keyboard, responsive, theme, long-text, axe, and required-shard discovery. | Mounted Playwright | `cd examples/accrue_host && npx playwright test --list e2e/phase238-admin-events-webhooks.spec.js` | New spec; unrestricted required Playwright shard | ✅ pass (2 tests listed; browser 2/2) |
+| 238-05-T2 | 238-05 | 2 | ADM-07, ADM-08 | T-238-13 | Keyboard, responsive, operator/host theme, long-text, axe, and required-shard discovery. | Mounted Playwright | `cd examples/accrue_host && npx playwright test e2e/phase238-admin-events-webhooks.spec.js --project=chromium-desktop` plus the host-forced dark-theme lane | Phase spec in the default and dark-theme CI lane | ✅ pass (3 tests discovered; default 2/2; forced-theme lane 2 passed, 1 expected skip) |
 | 238-05-T3 | 238-05 | 2 | ADM-07 | T-238-11 | Legacy copy regression assertion matches the explicit Phase 238 replay wording. | ExUnit | `cd accrue_admin && mix test test/accrue_admin/copy_test.exs` | Existing copy contract | ✅ pass (13 tests) |
 
 ---
@@ -83,13 +83,17 @@ All stable in-scope behavior has deterministic ExUnit/LiveView or mounted Playwr
 
 ### Phase 238-05 Execution Evidence (2026-10-09)
 
+This records the plan-time run before the goal-verifier gap-closure addendum below; the final CI wiring and counts are recorded there.
+
 - Focused mounted browser command: 2 tests passed, Chromium desktop; local fixtures prove application behavior only.
-- Required browser discovery: `playwright --list` listed both phase tests. `.github/workflows/ci.yml` runs the unrestricted Playwright shard, so no workflow edit was needed. No remote CI or branch-protection claim was made.
+- At plan time, default `playwright --list` listed both phase tests. No remote CI or branch-protection claim was made.
 - Focused copy suite: 13 tests passed.
 - Full Admin suite: `mix test --warnings-as-errors` passed, 601 tests, exit code 0 after removing two warnings that otherwise caused this required command to abort.
 - Read failures and mixed replay outcomes remain verified at the ExUnit seam. No production fault-injection hook was added.
 
 ### Phase 238 Final Post-Fix Evidence (2026-10-09)
+
+This was the final evidence before the subsequent goal-backward coverage audit; the later gap-closure addendum supersedes these counts and records the additional required lane.
 
 - Core package regression: `cd accrue && mix test` — 2,077 tests, 0 failures (11 excluded by configured tags).
 - Admin package regression: `cd accrue_admin && mix test --warnings-as-errors` — 610 tests, 0 failures.
@@ -105,4 +109,27 @@ All stable in-scope behavior has deterministic ExUnit/LiveView or mounted Playwr
 |---|---|
 | Gaps found | 0 |
 | Resolved | 0 |
+| Escalated | 0 |
+
+## Automated Verification Gap Closure (2026-10-09)
+
+The goal-backward verifier found two deterministic browser evidence gaps after the original Phase 238 plans had been marked complete. Both were closed in code, mounted browser assertions, and the recurring required CI lane; no human UAT or live-provider action was needed.
+
+- Keyboard path now activates bulk replay, confirmation dismissal, fresh step-up, rejected-code correction, StepUp dismissal, and Connect fee-override drawer/save by keyboard. Assertions cover initial focus, Tab containment, dismissal return focus, and nested modal-to-drawer focus restoration.
+- The re-verification lane exposed a timing race: Phoenix `JS.focus` repeated confirmation focus after two animation frames and could steal focus from the next Tab. The inline confirmation now uses a one-time initial-focus action from `FocusTrap`; focus stays with the keyboard user after opening.
+- Host Admin branding now supports `theme: :system | :light | :dark`; light/dark lock the mounted Admin theme and hide the theme picker. The browser case seeds a conflicting light preference and verifies the host-forced dark theme, accessible status, enabled filter, and axe-clean state.
+- `.github/workflows/ci.yml` runs the phase browser spec in the ordinary shard and adds a host-forced dark-theme run on shard 1. Default `playwright --list` lists 2 tests and forced-dark `playwright --list` lists 3. The ordinary run passed 2/2; the forced-theme run passed 2 tests with the preference-picker test intentionally skipped. The forced run uses `ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED=1`; rerunning it after the mutating default lane against the same fixture database passed, confirming each test's SQL Sandbox transaction rolls back its writes.
+- Final post-focus-fix browser evidence: default lane 2/2; forced-dark lane passed 2 with 1 expected skip in 3 consecutive full-lane runs after the default lane, with the same database and global seeding skipped.
+- Core regression: `cd accrue && mix test` — 2,078 tests passed, 11 excluded, 0 failures.
+- Admin regression: `cd accrue_admin && mix test --warnings-as-errors` — 612 tests, 0 failures.
+- No remote CI run was triggered or claimed. Routine human UAT remains none.
+
+**Final verification inputs:** all five plan summaries, source/test paths in the verifier's covered-file set, and this addendum. The verifier is being rerun after the post-verification focus fix.
+
+## Validation Audit 2026-10-09
+
+| Metric | Count |
+|---|---|
+| Gaps found | 2 |
+| Resolved | 2 |
 | Escalated | 0 |

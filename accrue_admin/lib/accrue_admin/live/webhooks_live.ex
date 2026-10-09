@@ -335,7 +335,16 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           <%= Copy.webhooks_retry_selected_helper() %>
         </p>
 
-        <section :if={@pending_bulk_replay} class="ax-card" data-role="bulk-replay-confirm">
+        <section
+          :if={@pending_bulk_replay}
+          id="bulk-replay-confirm"
+          class="ax-card"
+          data-role="bulk-replay-confirm"
+          phx-hook="FocusTrap"
+          data-focus-trap-active="false"
+          data-focus-trap-return-to="[data-role='bulk-action']"
+          data-focus-trap-initial="#confirm-retry-selected"
+        >
           <p class="ax-body">
             <%= Copy.webhooks_retry_confirm_question(@pending_bulk_replay.count) %>
           </p>
@@ -344,6 +353,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               type="button"
               phx-click="confirm_retry_selected"
               class="ax-button ax-button-primary"
+              id="confirm-retry-selected"
               data-role="confirm-retry-selected"
             >
               <%= Copy.webhooks_retry_queue_label() %>

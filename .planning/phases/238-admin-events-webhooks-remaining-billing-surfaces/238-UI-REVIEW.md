@@ -1,8 +1,8 @@
 # Phase 238 — UI Review
 
-**Audited:** 2026-10-09  
-**Baseline:** Approved `238-UI-SPEC.md` plus the implemented Admin component/theme system  
-**Screenshots:** NOT captured — localhost:8080 served the Traefik dashboard, not the Phase 238 Admin app; no phase-specific screenshots were available, so visual findings are code-derived.
+**Audited:** 2026-10-09
+**Baseline:** Approved `238-UI-SPEC.md`, Phase 238 plans/summaries/validation, and the current Admin implementation
+**Screenshots:** NOT captured — localhost:3000 and :5173 had no server; localhost:8080 answered but all three Playwright captures (desktop, mobile, tablet) failed. The responding endpoint was not verified as the Phase 238 Admin app, so visual findings are code-derived.
 **Interaction captures:** off (workflow.ui_interaction_capture is false)
 
 ---
@@ -11,12 +11,12 @@
 
 | Pillar | Score | Key Finding |
 |--------|-------|-------------|
-| 1. Copywriting | 3/4 | Replay language is precise, but webhook empty and unavailable copy diverges from the approved contract. |
-| 2. Visuals | 3/4 | DataTable preserves hierarchy and responsive card/table structure; rendered composition could not be inspected. |
-| 3. Color | 3/4 | Theme-backed semantic colors are used, but source-level contract compliance and actual 60/30/10 rendering were not visually verified. |
-| 4. Typography | 3/4 | Geist roles and mono values are present; shared theme exposes more size roles than the phase's four-role contract. |
-| 5. Spacing | 2/4 | Shared Admin CSS uses a 2px spacing token below the declared grid; the 12px table cell padding is on-grid. |
-| 6. Experience Design | 3/4 | Empty, loading, failure, retry, disclosure, and step-up states exist; the review could not exercise their mounted interaction states. |
+| 1. Copywriting | 3/4 | Replay copy is precise, but Webhooks empty and unavailable states still diverge from the approved wording. |
+| 2. Visuals | 3/4 | Responsive table/card and overlay structures are present; rendered hierarchy could not be inspected, and desktop columns put secondary fields before status. |
+| 3. Color | 3/4 | Forced light/dark policy is represented and tested; 60/30/10 rendering and accent distribution remain unverified without an Admin capture. |
+| 4. Typography | 3/4 | Geist roles are used, but the shared token scale exposes sizes beyond the phase's four documented roles. |
+| 5. Spacing | 2/4 | The shared 2px spacing token is used despite the contract's explicit 4px minimum. |
+| 6. Experience Design | 3/4 | Keyboard focus, modal/drawer containment, host-forced theme, and recovery paths have browser assertions; this audit could not exercise the mounted UI, and provider snapshot freshness remains unknown. |
 
 **Overall: 17/24**
 
@@ -24,9 +24,9 @@
 
 ## Top 3 Priority Fixes
 
-1. **Align webhook empty and unavailable messages with the contract** — operators see inconsistent recovery instructions and state labels — use “No deliveries to show” and the specified body for the empty view, and match the approved unavailable sentence and retry wording in the webhook table.
-2. **Keep phase-owned spacing on the 4px grid** — the shared theme's 2px `--ax-space-2xs` token is below this phase's declared base and appears in existing shared Admin styles; the DataTable's `0.75rem` cell padding is 12px and already falls on the 4px grid.
-3. **Capture the mounted screens at the contract breakpoints when the Admin app is available** — this audit could not inspect rendered balance or clipping because the detected server was the Traefik dashboard, not the Admin app. The existing Phase 238 Playwright shard already covers responsive and interaction acceptance.
+1. **Align Webhooks empty and unavailable copy with the approved contract** — operators get conflicting guidance about an empty queue or incomplete history — update the `:webhooks` resource-state strings and pass the specified unavailable copy to `DataTable`.
+2. **Remove the 2px spacing exception or amend the contract deliberately** — dense table/control gaps fall below the stated 4px base — replace `--ax-space-2xs` use with an on-grid token and keep target sizing separate.
+3. **Capture the mounted Admin views at contract breakpoints** — no rendered evidence exists to confirm hierarchy, clipping, theme contrast, or spacing — capture seeded Phase 238 routes in the host browser lane and retain desktop, tablet, and 320px evidence.
 
 ---
 
@@ -34,55 +34,53 @@
 
 ### Pillar 1: Copywriting (3/4)
 
-- **WARNING:** The approved contract specifies the empty heading “No deliveries to show” and body “No webhook deliveries match these filters. Clear a filter or review all deliveries.” The webhook state is derived from `Copy.resource_state_copy/2` in [webhooks_live.ex](../../../accrue_admin/lib/accrue_admin/live/webhooks_live.ex#L593), while the legacy webhook-specific copy provides alternate headings/bodies (“No webhook deliveries for this organization yet” / “No webhook deliveries match these filters”) at [copy.ex](../../../accrue_admin/lib/accrue_admin/copy.ex#L1269). Verify the rendered resource-state copy and consolidate it to the approved contract; the dedicated copy currently conflicts with that contract.
-- **WARNING:** The specified error copy is “Delivery history could not be loaded. Try again; the current results are not a complete history.” The live table currently passes different phrasing (retry instruction and “current results are not a complete history”) at [webhooks_live.ex](../../../accrue_admin/lib/accrue_admin/live/webhooks_live.ex#L383). Preserve the intent, but use the approved message consistently.
-- Positive evidence: bulk confirmation names the selected count and states queue acceptance is not processing completion; affirmative/dismissal labels are “Queue eligible deliveries” and “Keep deliveries” in [copy.ex](../../../accrue_admin/lib/accrue_admin/copy.ex#L1280).
+- **WARNING:** The contract requires “No deliveries to show” and “No webhook deliveries match these filters. Clear a filter or review all deliveries.” The `:webhooks` resource-state metadata instead defines “No webhook deliveries yet.” / “Deliveries appear after signed processor events are recorded.” and “No webhook deliveries match these filters.” / “Clear filters or adjust status and type filters to see deliveries.” (`accrue_admin/lib/accrue_admin/copy.ex:107-118`); `WebhooksLive` renders this resource-state copy for empty results (`accrue_admin/lib/accrue_admin/live/webhooks_live.ex:603-626`). The legacy `webhooks_index_*` helpers also conflict (`copy.ex:1263-1272`).
+- **WARNING:** The contract's unavailable message is “Delivery history could not be loaded. Try again; the current results are not a complete history.” The shared `DataTable` default says only “This history could not be loaded. Try again.” (`accrue_admin/lib/accrue_admin/components/data_table.ex:64`), and Webhooks does not provide an override (`webhooks_live.ex:384-422`). Pass the approved resource-specific text and include the incompleteness warning.
+- Positive evidence: bulk replay confirmation uses the precise queue-versus-processing wording and the requested “Queue eligible deliveries” / “Keep deliveries” controls (`webhooks_live.ex:348-367`; `accrue_admin/lib/accrue_admin/copy.ex:1280-1297`). The browser spec also asserts queue acceptance is not described as completed processing (`examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js:128-134`).
 
 ### Pillar 2: Visuals (3/4)
 
-- **WARNING:** No screenshot evidence was available: localhost:8080 served the Traefik dashboard rather than the Admin app. I could verify only the template structure, not actual visual balance, clipping, or focal hierarchy.
-- Positive structural evidence: the Webhooks table gives status, type, endpoint, and received-time data in both desktop columns and compact card fields, with accessible table caption and row selection labels in [webhooks_live.ex](../../../accrue_admin/lib/accrue_admin/live/webhooks_live.ex#L388) and [data_table.ex](../../../accrue_admin/lib/accrue_admin/components/data_table.ex#L482). The CSS switches to cards below 768px at [app.css](../../../accrue_admin/assets/css/app.css#L3776).
-- **WARNING:** This phase's design anchor is the delivery status and timestamp first, then a readable identifier and scoped evidence. The template's desktop order begins with “Webhook” then “Type” then “Status” ([webhooks_live.ex](../../../accrue_admin/lib/accrue_admin/live/webhooks_live.ex#L393)); the actual visual prominence cannot be confirmed without captures. Consider moving status/time ahead of secondary type/endpoint data if the current CSS does not visually restore the requested hierarchy.
+- **WARNING:** Screenshots were not captured. Ports 3000 and 5173 were unavailable; port 8080 answered but all Playwright screenshot attempts failed. Therefore actual hierarchy, 60/30/10 surface balance, clipping, and responsive appearance could not be judged in a rendered Phase 238 route.
+- **WARNING:** The approved visual anchor puts delivery status and timestamp first. The desktop column order is Webhook, Type, Status, Endpoint, Received (`accrue_admin/lib/accrue_admin/live/webhooks_live.ex:402-407`), so identifier/type precede status and time in the source order. Reorder to status/received first if the CSS does not visually restore the specified priority; rendered evidence is needed to confirm.
+- Positive structural evidence: mobile cards explicitly list Status before Type/Endpoint/Received (`webhooks_live.ex:409-415`); the shared table switches to cards below 768px (`accrue_admin/assets/css/app.css:3776-3792`). Overlay panels have a named dialog, modal semantics, and a heading fallback (`accrue_admin/lib/accrue_admin/components/overlay.ex:85-95`).
 
 ### Pillar 3: Color (3/4)
 
-- **WARNING:** The implementation uses semantic Admin classes and theme CSS variables, but screenshot failure leaves the required 60/30/10 visual-area split and accent restriction unverified. Do not treat the semantic class names alone as proof of the rendered balance.
-- Positive evidence: theme tokens define semantic base/elevated/accent/focus roles and light/dark variants in [theme.css](../../../accrue_admin/assets/css/theme.css#L137), while status colors have dedicated variables (success, warning, danger) in the same theme. Status text and badges are separate from primary action classes in the DataTable template.
-- **WARNING:** Ten audited LiveView modules repeat the hard-coded fallback brand accent `#5D79F6` (for example [events_live.ex](../../../accrue_admin/lib/accrue_admin/live/events_live.ex#L471)). This is a brand fallback value rather than a directly styled UI element, but route-local duplication makes accent configuration drift possible; centralize it or prove that all routes consume the same semantic theme mapping.
+- **WARNING:** The contract reserves accent for primary actions, active filters, focus, and primary links, and asks for an approximate 60/30/10 visual-area balance (`238-UI-SPEC.md:87-96`). Semantic theme roles exist in `accrue_admin/assets/css/theme.css:137-179`, with a distinct dark palette at `theme.css:233-250`; the current host-forced policy routes `:light`/`:dark` through `BrandPlug` and surfaces a host-set status while hiding the picker (`accrue_admin/lib/accrue_admin/brand_plug.ex:23-39`; `accrue_admin/lib/accrue_admin/components/topbar.ex:41-44`). The Playwright spec seeds a conflicting light preference and asserts forced theme/status/picker behavior (`examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js:243-257`). However, the unresolved screenshot failure prevents verification of actual surface distribution and contrast on the changed mounted Admin route.
+- **WARNING:** Brand fallback accent `#5D79F6` remains duplicated in layout and route fallback maps (`accrue_admin/lib/accrue_admin/layouts.ex:15,103`; `accrue_admin/lib/accrue_admin/live/webhooks_live.ex:743`; `accrue_admin/lib/accrue_admin/live/connect_account_live.ex:1016`). These fallbacks are not evidence of accent overuse on screen, but centralizing them would reduce visual drift between routes.
 
 ### Pillar 4: Typography (3/4)
 
-- **WARNING:** The phase contract defines four sizes (12/16/20/24px) and two weights (400/600). Shared theme roles include extra 14px, 18px, and 30px roles as well as several display/title roles in [theme.css](../../../accrue_admin/assets/css/theme.css#L80). The audited templates mostly use semantic `ax-*` classes, so this broader scale is inherited rather than proof that every phase page misuses type; verify the resulting rendered sizes against the four intended roles.
-- Positive evidence: Geist/Geist Mono are configured, with mono code roles at 12px and 14px; inline identifiers and payloads use the shared semantic component styling. Phase summaries report mounted browser assertions for long identifiers and labels, but those assertions were not independently rerun here.
+- **WARNING:** The phase declares four intended sizes (12, 16, 20, 24px) and two weights (400, 600) (`238-UI-SPEC.md:70-81`). Shared theme tokens also define 14, 18, 28, and 36px roles (`accrue_admin/assets/css/theme.css:16-23`) and composed title/display roles (`theme.css:82-105`). The broader global scale is not itself a defect on these screens, but code-only review cannot establish that Phase 238 content uses only the declared roles or that its hierarchy matches the contract.
+- Positive evidence: the contract's long identifiers/payloads have a monospace role, and the browser spec includes a 120-character identifier containment assertion (`examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js:231-240`).
 
 ### Pillar 5: Spacing (2/4)
 
-- **WARNING:** The approved scale states no spacing exceptions below the 4px base. The shared theme defines `--ax-space-2xs: 0.125rem` (2px) in [theme.css](../../../accrue_admin/assets/css/theme.css#L26), and existing Admin styles use it for small gaps and offsets. This is an inherited scale deviation in the shared UI foundation.
-- DataTable grid cells use `padding: 0.75rem` (12px) vertically in [app.css](../../../accrue_admin/assets/css/app.css#L3754); 12px is a multiple of four and does not violate the declared grid.
-- Positive evidence: primary table rhythm and filters use `--ax-space-md` (16px) and `--ax-space-xs` (4px), and mobile filters can shrink to avoid page overflow at 320px ([app.css](../../../accrue_admin/assets/css/app.css#L3386)).
+- **WARNING:** The contract states “No spacing exceptions below the 4px base grid” (`238-UI-SPEC.md:54-66`), while the shared Admin token scale defines `--ax-space-2xs: 0.125rem` (2px) and documents its dense-table use (`accrue_admin/assets/css/theme.css:25-33`). This directly violates the declared scale. The DataTable grid's 12px vertical padding is on-grid and not a violation (`accrue_admin/assets/css/app.css:3752-3758`).
+- Positive evidence: primary DataTable rhythm uses 16px and compact filters use the 4px token (`app.css:3384-3411`). Target dimensions are treated separately from spacing tokens by the contract.
 
 ### Pillar 6: Experience Design (3/4)
 
-- **WARNING:** Interaction capture was explicitly off, and screenshots failed; states were reviewed in templates and phase evidence, not exercised live during this audit.
-- Positive evidence: DataTable implements initial and partial read failures with `role="alert"`, retry actions, and a loading skeleton announced with `role="status"` in [data_table.ex](../../../accrue_admin/lib/accrue_admin/components/data_table.ex#L374). Selection count is a polite live region and the bulk CTA only renders when selection is nonempty ([data_table.ex](../../../accrue_admin/lib/accrue_admin/components/data_table.ex#L447)).
-- Positive evidence: payload/activity disclosure, fresh step-up, rejected-step-up recovery, disabled duplicate submission, and replay outcome handling have corresponding test evidence in `238-05-SUMMARY.md` and `238-VALIDATION.md`. The copy distinguishes queued from processed work.
-- **WARNING:** Connect explicitly labels provider data as a “last stored Stripe snapshot” and says the view does not track when Stripe last reported it at [connect_account_live.ex](../../../accrue_admin/lib/accrue_admin/live/connect_account_live.ex#L167). This is transparent, but the UI still cannot let an operator judge freshness from an observation timestamp; add that timestamp when the data model supports it.
-
----
+- **WARNING:** Interaction capture was off, and static screenshots failed, so this audit did not interact with the live UI. The current browser spec provides repeatable evidence for selection confirmation, keyboard initial focus, Tab containment, Escape dismissal, focus restoration, rejected step-up correction, Connect drawer keyboard save/cancel, and the host-forced theme lane (`examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js:65-134,175-198,243-258`). The recent `FocusTrap` change schedules a single initial-focus attempt for inactive confirmation content and preserves active-trap focus handling (`accrue_admin/assets/js/hooks/focus_trap.js:95-164`); this is aligned with the phase keyboard requirements.
+- **WARNING:** The Connect screen transparently says its Stripe readiness/capability values are a last stored snapshot but that the page does not track when Stripe last reported them (`accrue_admin/lib/accrue_admin/live/connect_account_live.ex:167-169`). Operators therefore cannot assess snapshot age from this view. Add an observation timestamp when the model supplies one; until then retain the explicit unknown-freshness wording.
+- Positive evidence: overlay semantics and escape behavior are wired in shared components (`overlay.ex:62-95`; `focus_trap.js:219-253`), and the host-forced theme check verifies persisted preference conflict does not break the filtered list, enabled status control, or axe scan (`phase238-admin-events-webhooks.spec.js:243-257`).
 
 ## Registry Safety
 
-`components.json` is absent and the approved UI spec records no third-party registries or added UI packages; registry source audit skipped.
+`components.json` is absent and `238-UI-SPEC.md` records no third-party registry or added UI package (`shadcn_initialized: false`; `238-UI-SPEC.md:142-148`). Registry source audit skipped.
 
 ## Files Audited
 
-- `.planning/phases/238-admin-events-webhooks-remaining-billing-surfaces/238-UI-SPEC.md`
 - `.planning/phases/238-admin-events-webhooks-remaining-billing-surfaces/238-01-PLAN.md` through `238-05-PLAN.md`
 - `.planning/phases/238-admin-events-webhooks-remaining-billing-surfaces/238-01-SUMMARY.md` through `238-05-SUMMARY.md`
+- `.planning/phases/238-admin-events-webhooks-remaining-billing-surfaces/238-UI-SPEC.md`
 - `.planning/phases/238-admin-events-webhooks-remaining-billing-surfaces/238-VALIDATION.md`
-- `.planning/phases/238-admin-events-webhooks-remaining-billing-surfaces/238-REVIEW.md` and `238-REVIEW-DISPOSITION.md`
-- `accrue_admin/lib/accrue_admin/live/{events_live,event_live,webhooks_live,webhook_live,coupons_live,coupon_live,promotion_codes_live,promotion_code_live,connect_accounts_live,connect_account_live}.ex`
-- `accrue_admin/lib/accrue_admin/components/{data_table,overlay}.ex`
-- `accrue_admin/lib/accrue_admin/copy.ex`
+- `.planning/phases/238-admin-events-webhooks-remaining-billing-surfaces/238-UI-REVIEW.md` (prior findings only)
+- `accrue_admin/lib/accrue_admin/components/{app_shell,overlay,step_up_auth_modal,topbar}.ex`
+- `accrue_admin/lib/accrue_admin/layouts.ex`
+- `accrue_admin/lib/accrue_admin/live/{connect_account_live,webhooks_live}.ex`
+- `accrue_admin/assets/js/hooks/focus_trap.js`
 - `accrue_admin/assets/css/{theme,app}.css`
+- `accrue_admin/lib/accrue_admin/{brand_plug,copy}.ex`
+- `accrue_admin/lib/accrue_admin/components/data_table.ex`
 - `examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js`

@@ -275,6 +275,10 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
           pending={@step_up_pending}
           challenge={@step_up_challenge}
           error={@step_up_error}
+          return_focus={
+            if @pending_override,
+              do: "#connect-platform-fee-drawer [data-role='save-override']"
+          }
         />
 
         <div :if={@step_up_pending} hidden aria-hidden="true" data-role="step-up-test-mirror">

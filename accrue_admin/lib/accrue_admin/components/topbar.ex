@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Components.Topbar do
   alias AccrueAdmin.Components.ThemePicker
 
   attr(:theme, :string, default: "system")
+  attr(:theme_forced, :boolean, default: false)
 
   def topbar(assigns) do
     ~H"""
@@ -37,7 +38,10 @@ defmodule AccrueAdmin.Components.Topbar do
           <span class="ax-icon-label">Menu</span>
         </button>
 
-        <ThemePicker.theme_picker theme={@theme} />
+        <p :if={@theme_forced} class="ax-label" role="status" data-role="admin-theme-forced">
+          <%= String.capitalize(@theme) %> theme set by host
+        </p>
+        <ThemePicker.theme_picker :if={!@theme_forced} theme={@theme} />
       </div>
     </header>
     """

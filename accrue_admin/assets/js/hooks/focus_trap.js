@@ -24,6 +24,19 @@ function focusWithoutScroll(node) {
   return true;
 }
 
+function restoreFocusAfterPatch(node, { requireFocusable = false } = {}) {
+  if (!node || typeof node.focus !== "function") return false;
+
+  const restore = () => {
+    if (!isConnected(node) || !isVisibleForFocus(node)) return;
+    if (requireFocusable && !isFocusable(node)) return;
+    focusWithoutScroll(node);
+  };
+
+  window.requestAnimationFrame(() => window.requestAnimationFrame(restore));
+  return true;
+}
+
 function isHidden(node) {
   return (
     !node ||
@@ -80,7 +93,7 @@ function isTopFocusTrap(hook) {
 
 export const FocusTrap = {
   mounted() {
-    this.previouslyFocused = null;
+    this.previouslyFocused = document.activeElement;
     this.focusTrapActive = false;
     this.initialFocusTimer = null;
     this.handleFocusTrapKeydown = this.handleFocusTrapKeydown.bind(this);
@@ -88,6 +101,8 @@ export const FocusTrap = {
 
     if (this.isFocusTrapActive()) {
       this.activateFocusTrap();
+    } else if (this.el?.dataset?.focusTrapInitial) {
+      this.scheduleInitialFocus({ requireActive: false });
     }
   },
 
@@ -138,13 +153,14 @@ export const FocusTrap = {
     }
   },
 
-  scheduleInitialFocus() {
+  scheduleInitialFocus({ requireActive = true } = {}) {
     this.initialFocusTimer = setTimeout(() => {
       this.initialFocusTimer = null;
-      if (!this.focusTrapActive) return;
-      if (!isTopFocusTrap(this)) return;
+      if (requireActive && !this.focusTrapActive) return;
+      if (this.focusTrapActive && !isTopFocusTrap(this)) return;
+      if (!this.focusTrapActive && this.isFocusTrapActive()) return;
       if (this.el.contains?.(document.activeElement)) return;
-      this.initialFocusTarget()?.focus?.();
+      focusWithoutScroll(this.initialFocusTarget());
     }, 0);
   },
 
@@ -175,18 +191,29 @@ export const FocusTrap = {
     const previous = this.previouslyFocused;
     this.previouslyFocused = null;
 
+    const returnSelector = this.el?.dataset?.focusTrapReturnTo;
+    const returnTarget = returnSelector ? document.querySelector(returnSelector) : null;
+    if (
+      isFocusable(returnTarget) &&
+      isVisibleForFocus(returnTarget) &&
+      typeof returnTarget.focus === "function"
+    ) {
+      restoreFocusAfterPatch(returnTarget, { requireFocusable: true });
+      return;
+    }
+
     if (isFocusable(previous) && isVisibleForFocus(previous) && typeof previous.focus === "function") {
-      focusWithoutScroll(previous);
+      restoreFocusAfterPatch(previous, { requireFocusable: true });
       return;
     }
 
     const fallback = this.fallbackFocusTarget();
-    if (fallback && !this.el.contains?.(fallback) && focusWithoutScroll(fallback)) return;
+    if (fallback && !this.el.contains?.(fallback) && restoreFocusAfterPatch(fallback)) return;
 
     const pageFallback = document.querySelector?.("#main-content, main");
-    if (focusWithoutScroll(pageFallback)) return;
+    if (restoreFocusAfterPatch(pageFallback)) return;
 
-    focusWithoutScroll(fallback);
+    restoreFocusAfterPatch(fallback);
   },
 
   handleFocusTrapKeydown(event) {
