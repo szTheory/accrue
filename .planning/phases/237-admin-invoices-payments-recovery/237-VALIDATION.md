@@ -38,7 +38,7 @@ The plan/task/wave IDs and threat references below identify ownership; execution
 | 237-01-T1/T2; 237-04-T1/T2 | 237-01, 237-04 | 0, 1 | ADM-02 | T-237-01, T-237-08, T-237-09 | Wave 0 characterizes existing scoped invoice path and raw fixtures to green; plan 04 adds and greens overdue, money, and collection assertions | ExUnit + LiveView | `cd accrue_admin && mix test test/accrue_admin/live/invoices_live_test.exs`; `cd accrue_admin && mix test test/accrue_admin/live/invoice_live_test.exs` | Existing invoice suites; baseline/fixtures by 237-01 and behavior checks by 237-04 | green |
 | 237-02-T1/T2; 237-05-T1/T2; 237-06-T1/T2 | 237-02, 237-05, 237-06 | 0, 1, 2 | ADM-05 | T-237-03, T-237-04, T-237-05, T-237-10..15 | Wave 0 prepares green action/result fixtures; plans 05/06 add and green stale-dispatch and outcome assertions | LiveView + action contract | `cd accrue_admin && mix test test/accrue_admin/live/invoice_live_test.exs`; `cd accrue_admin && mix test test/accrue_admin/live/charge_live_test.exs` | Existing action suites; fixtures by 237-02 and stale-dispatch/result checks by 237-05/06 | green |
 | 237-03-T1/T2; 237-07-T1/T2 | 237-03, 237-07 | 0, 1 | ADM-06 | T-237-06, T-237-07, T-237-16..18 | Wave 0 prepares green raw event/window/owner fixtures; plan 07 adds and greens currency/history/return assertions | Query/LiveView | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs` | Existing recovery suite; fixtures by 237-03 and currency/history/navigation checks by 237-07 | green |
-| 237-08-T1/T2 | 237-08 | 3 | ADM-02, ADM-05, ADM-06 | T-237-19, T-237-20 | Read-only served navigation and staged-review inspection, focus/cancel, 320px reflow, theme, assets, foreign-owner denial/read-error; no confirm or dispatch | Playwright | `cd examples/accrue_host && npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop`; `cd examples/accrue_host && npx playwright test --list e2e/phase237-admin-billing.spec.js` | Phase-owned browser spec; existing blocking playwright-e2e discovery. Fake-backed LiveView plans 05/06 own pending, duplicate-submit, and result assertions. | green |
+| 237-08-T1/T2 | 237-08 | 3 | ADM-02, ADM-05, ADM-06 | T-237-19, T-237-20 | Read-only served navigation and staged-review inspection, focus/cancel, 320px reflow, theme, assets, denial of a real Beta-owned invoice under Alpha scope, and read-error; no confirm or dispatch | Playwright | `cd examples/accrue_host && npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop`; `cd examples/accrue_host && npx playwright test --list e2e/phase237-admin-billing.spec.js` | Phase-owned browser spec; existing blocking playwright-e2e discovery. Fake-backed LiveView plans 05/06 own pending, duplicate-submit, and result assertions. | green |
 
 ## Criterion Evidence Index
 
@@ -138,3 +138,9 @@ Approval: automated validation passed 2026-10-08. Focused ExUnit suites: 87 test
 | Gaps found | 0 |
 | Resolved | 0 |
 | Escalated | 0 |
+
+## Security Audit Follow-up 2026-10-09
+
+- Added a real Beta-owned invoice to the deterministic host seed and asserted that its detail request under Alpha scope is denied without leaking the ID or invoice number.
+- The post-fix served Playwright rerun passed 1/1 after commit `3de23b59`; seed cleanup ownership is covered by `mix test test/accrue_host/seed_e2e_cleanup_test.exs`.
+- Security auditor retest pending; acceptance remains automated and requires no human UAT.

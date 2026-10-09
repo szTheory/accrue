@@ -92,7 +92,7 @@ status: complete
 
 ## Accomplishments
 
-- Added a focused served Playwright journey covering invoice collection, staged payment review, cancellation, generic foreign-owner denial, and recovery window → scoped record → return navigation.
+- Added a focused served Playwright journey covering invoice collection, staged payment review, cancellation, real foreign-owner denial, and recovery window → scoped record → return navigation.
 - Captured current-source invoice collection, invoice review, and dark recovery screenshots. The manifest validates 8 source hashes and all 3 screenshot hashes/byte counts; it records `read_only: true` and `confirmed_or_dispatched: false`.
 - Confirmed the existing `.github/workflows/ci.yml` `playwright-e2e` job runs unrestricted `npx playwright test --shard=...`, and Playwright lists this spec under the current host configuration.
 - Added one deterministic recovery campaign to the existing host seed and its cleanup allowlist, keeping campaign timestamps on `Accrue.Clock`.
@@ -176,3 +176,12 @@ All Phase 237 plans now have automated verification evidence, and the existing h
 - Summary file exists at the required phase path.
 - Task commit `6d72e33d` exists in the current history.
 - Manifest source and screenshot hashes were recomputed with zero mismatches.
+
+## Security Audit Follow-up (2026-10-09)
+
+- Closed the audit gap for `T-237-19`: the host seed now creates a real invoice owned by the Beta organization, and the served browser journey requests that invoice under Alpha scope.
+- The browser asserts the invoice ID and invoice number do not appear in Alpha’s collection or the restricted detail response; the UI shows the generic “Access restricted” message.
+- Added seed cleanup coverage proving the Beta-owned invoice/customer is removed and recreated with correct ownership on rerun.
+- Commit: `3de23b59` (`fix(237-08): verify denial against a real foreign invoice`).
+- Verification after the fix commit: `npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop` — 1 passed. The payment review remained canceled before confirmation or dispatch.
+- Security auditor retest is the remaining confirmation for this closure; no human UAT is required.

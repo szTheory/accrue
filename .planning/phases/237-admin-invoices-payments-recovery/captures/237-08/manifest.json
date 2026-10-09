@@ -2,9 +2,9 @@
   "phase": "237-admin-invoices-payments-recovery",
   "evidence": "seeded deterministic host fixtures; not live-provider settlement",
   "layout_stress": "long identity and failure reason were injected in-memory, checked for wrapping, then restored before capture",
-  "captured_at": "2026-10-09T01:03:56.953Z",
-  "source_head": "e89fc4351058401e4f4860d48f8a7c1dc7a1b444",
-  "source_sha": "878aef14320fe17e65301ac1c7316530d34b7f769e668290404e4b4c71e53dc6",
+  "captured_at": "2026-10-09T01:18:32.583Z",
+  "source_head": "3de23b59ac771d7a9b39d57917990b4828b05e12",
+  "source_sha": "d3e0113542c245626b63b8c6bca50bcaad17ad90b1c9ff3d189c9b352d3e11d0",
   "sources": {
     "accrue_admin/assets/css/app.css": {
       "sha256": "4f324c3adfd9d5f6c8f57839d8ed05a090a55262ff51b60ebd456c36211548c0",
@@ -35,8 +35,8 @@
       "bytes": 9842
     },
     "scripts/ci/accrue_host_seed_e2e.exs": {
-      "sha256": "3c9e74281be0bad314ca8247e0f66e71e89de1f2ac49ea0fdbdbe9daced967e2",
-      "bytes": 32848
+      "sha256": "efe673aa37b234498f13ac85c4285320be971a9b4bb311a1af69d8b17342a0bf",
+      "bytes": 33398
     }
   },
   "stylesheet": {
@@ -52,18 +52,18 @@
         "height": 800
       },
       "theme": "light",
-      "sha256": "6fa906aa7ef2b75bfc8c6dd97e8ceeafcc66a5b4ae79c1e979de93cef09c5d8a",
-      "bytes": 118826
+      "sha256": "f1de362a9312373be19d62165c344f1ee5e29f02b76af4c466d2fe3c6af00421",
+      "bytes": 118802
     },
     "invoice-review.png": {
-      "route": "http://127.0.0.1:4101/admin/invoices/4988d4c5-8d7d-4075-86d1-2bc321b0aa0d?org=accrue-e2e-alpha",
+      "route": "http://127.0.0.1:4101/admin/invoices/13bc9936-6f5b-47fb-8694-8c5f4d32141e?org=accrue-e2e-alpha",
       "viewport": {
         "width": 1280,
         "height": 900
       },
       "theme": "light",
-      "sha256": "ca4033a63a3ec158c1f4405d928b486abce2cec6a922b569d3b2cb9c2b566d66",
-      "bytes": 202543
+      "sha256": "42baa0a459020c5affe7d557ee2b51360de17d4a19594390bbd3a2d13393764f",
+      "bytes": 202859
     },
     "recovery.png": {
       "route": "http://127.0.0.1:4101/admin/analytics/recovery?org=accrue-e2e-alpha&window=30d",
@@ -72,7 +72,7 @@
         "height": 800
       },
       "theme": "dark",
-      "sha256": "97bf40e88aee64d4e93d70b14c7b0986ae6aaf212198840f694f5dad6075cb40",
+      "sha256": "ec4ecfcb0f67852d0bf8d31d15df9c36de1c2fd0277ea117e786e970d7fb99e3",
       "bytes": 136404
     }
   },
