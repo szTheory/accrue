@@ -12,6 +12,11 @@ const captureDir = path.join(repoRoot, ".planning/phases/237-admin-invoices-paym
 const sourcePaths = [
   "accrue_admin/assets/css/app.css",
   "accrue_admin/assets/css/theme.css",
+  "accrue_admin/assets/js/app.js",
+  "accrue_admin/priv/static/accrue_admin.css",
+  "accrue_admin/priv/static/accrue_admin.js",
+  "accrue_admin/priv/static/fonts/geist-sans-vf.woff2",
+  "accrue_admin/priv/static/fonts/geist-mono-vf.woff2",
   "accrue_admin/lib/accrue_admin/live/invoices_live.ex",
   "accrue_admin/lib/accrue_admin/live/invoice_live.ex",
   "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
@@ -76,15 +81,45 @@ async function assertThemeAndMotion(page, theme) {
   return tokens;
 }
 
-async function assertCurrentStylesheet(page) {
-  const href = await page.locator('link[rel="stylesheet"][href*="/admin/assets/css-"]').getAttribute("href");
-  expect(href).toMatch(/\/admin\/assets\/css-[a-f0-9]{32}$/);
-  const response = await page.request.get(href);
-  expect(response.ok()).toBeTruthy();
-  const served = await response.body();
-  const built = fs.readFileSync(path.join(repoRoot, "accrue_admin/priv/static/accrue_admin.css"));
-  expect(sha256(served)).toBe(sha256(built));
-  return { href, bytes: served.length, sha256: sha256(served) };
+async function assertAssetBytes(page, href, packagePath) {
+  const packageBytes = fs.readFileSync(path.join(repoRoot, packagePath));
+  const compiledPath = path.join(repoRoot, "examples/accrue_host/_build/test/lib/accrue_admin/priv", packagePath.replace("accrue_admin/priv/", ""));
+  const compiledBytes = fs.readFileSync(compiledPath);
+  const response = await page.evaluate(async (assetHref) => {
+    const result = await fetch(assetHref, { cache: "no-store" });
+    const bytes = Array.from(new Uint8Array(await result.arrayBuffer()));
+    const resourcePath = new URL(assetHref, location.href).pathname;
+    const loaded = performance.getEntriesByType("resource").some((entry) => new URL(entry.name).pathname === resourcePath);
+    return { status: result.status, bytes, loaded };
+  }, href);
+  expect(response.status, `served asset status for ${href}`).toBe(200);
+  const servedBytes = Buffer.from(response.bytes);
+  expect(sha256(packageBytes), `package build and compiled host differ for ${href}`).toBe(sha256(compiledBytes));
+  expect(sha256(servedBytes), `served response differs from package build for ${href}`).toBe(sha256(packageBytes));
+  expect(response.loaded, `browser did not request ${href}`).toBeTruthy();
+  expect(sha256(servedBytes), `browser-served bytes differ from package build for ${href}`).toBe(sha256(packageBytes));
+  return { path: new URL(href, page.url()).pathname, bytes: servedBytes.length, packageSha256: sha256(packageBytes), compiledSha256: sha256(compiledBytes), servedSha256: sha256(servedBytes), browserRequestSha256: sha256(servedBytes) };
+}
+
+async function assertCurrentAssets(page) {
+  const cssHref = await page.locator('link[rel="stylesheet"][href*="/admin/assets/css-"]').getAttribute("href");
+  expect(cssHref).toMatch(/\/admin\/assets\/css-[a-f0-9]{32}$/);
+  const jsHref = await page.locator('script[src*="/admin/assets/js-"]').getAttribute("src");
+  expect(jsHref).toMatch(/\/admin\/assets\/js-[a-f0-9]{32}$/);
+  await page.evaluate(async () => {
+    await document.fonts.load('14px "Geist"');
+    await document.fonts.load('14px "Geist Mono"');
+    await document.fonts.ready;
+  });
+  const sansPath = "/admin/assets/geist-sans-vf.woff2";
+  const monoPath = "/admin/assets/geist-mono-vf.woff2";
+  const assets = [
+    await assertAssetBytes(page, cssHref, "accrue_admin/priv/static/accrue_admin.css"),
+    await assertAssetBytes(page, jsHref, "accrue_admin/priv/static/accrue_admin.js"),
+    await assertAssetBytes(page, sansPath, "accrue_admin/priv/static/fonts/geist-sans-vf.woff2"),
+    await assertAssetBytes(page, monoPath, "accrue_admin/priv/static/fonts/geist-mono-vf.woff2")
+  ];
+  return Object.fromEntries(assets.map((asset) => [asset.path, asset]));
 }
 
 async function assertLongRecoveryContentWraps(page) {
@@ -169,7 +204,15 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
       resources
     };
   });
-  const asset = await assertCurrentStylesheet(page);
+  const assets = await assertCurrentAssets(page);
+  const jsHref = await page.locator('script[src*="/admin/assets/js-"]').getAttribute("src");
+  await page.route("**/admin/assets/js-*", async (route) => {
+    const response = await route.fetch();
+    const staleBytes = Buffer.from(await response.body());
+    staleBytes[0] ^= 1;
+    await route.fulfill({ response, body: staleBytes });
+  });
+  await assertAssetBytes(page, jsHref, "accrue_admin/priv/static/accrue_admin.js");
   await page.setViewportSize({ width: 320, height: 800 });
   await assertNoOverflow(page);
   const mobileSearch = await page.locator("#search-trigger").boundingBox();
@@ -412,7 +455,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
     source_head: sourceHead,
     source_sha: sourceSha,
     sources,
-    stylesheet: asset,
+    assets,
     first_fresh_invoice_diagnostics: {
       fixture: "disposable host Ecto sandbox; seeded Admin Alpha invoice",
       route: `/admin/invoices?org=${owner}`,
