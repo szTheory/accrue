@@ -5,16 +5,16 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 237
 current_phase_name: Admin Invoices, Payments & Recovery
 status: executing
-stopped_at: Completed 237-07-PLAN.md
-last_updated: "2026-10-09T00:39:42.691Z"
+stopped_at: Completed 237-05-PLAN.md
+last_updated: "2026-10-09T00:48:47.946Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 237 execution started
-state_head: dd714cf369fcc490ef38fa6ccbee69f9abcfb648
+state_head: c660b7fdf21005b2bbd9f88e3de48c699a0be30c
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 35
-  completed_plans: 33
+  completed_plans: 34
   percent: 57
 ---
 
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 237 (Admin Invoices, Payments & Recovery) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-10-08 — Phase 237 execution started
 
@@ -135,6 +135,7 @@ Last activity: 2026-10-08 — Phase 237 execution started
 | Phase 237 P04 | 6 min | 2 tasks | 5 files |
 | Phase 237 P06 | 12min | 2 tasks | 4 files |
 | Phase 237 P07 | 11min | 2 tasks | 9 files |
+| Phase 237 P05 | 9m | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -275,6 +276,8 @@ Last activity: 2026-10-08 — Phase 237 execution started
 - [Phase 237]: Refund review binds to provider charge identity, exact integer amount/currency/status, and refundable balance; dispatch reauthorizes scope and reloads current charge facts after step-up.
 - [Phase 237]: Deterministic charge/refund outcomes are verified in automated LiveView and package tests; ADM-05 remains pending until its other plans complete.
 - [Phase 237]: Recovery amounts remain evidence-based; current subscription state is distinct from historical failures; async reads and validated return links retain authorized owner/window scope.
+- [Phase 237]: Invoice actions re-resolve the actor and owner scope, reload the same invoice, and compare the exact reviewed action and money facts before each dispatch boundary.
+- [Phase 237]: Success messages use fresh scoped invoice evidence; requires-action remains incomplete, CardError is definitive, and other processor errors remain unconfirmed with no automatic retry.
 
 ### Pending Todos
 
@@ -349,8 +352,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T00:39:42.623Z
-Stopped at: Completed 237-07-PLAN.md
+Last session: 2026-10-09T00:48:47.883Z
+Stopped at: Completed 237-05-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
