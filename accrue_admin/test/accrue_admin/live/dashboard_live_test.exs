@@ -88,7 +88,9 @@ defmodule AccrueAdmin.DashboardLiveTest do
     :ok
   end
 
-  test "renders factual recent activity without unsupported health or aggregate claims", %{conn: conn} do
+  test "renders factual recent activity without unsupported health or aggregate claims", %{
+    conn: conn
+  } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing")

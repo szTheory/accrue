@@ -430,9 +430,7 @@ defmodule AccrueAdmin.DataTableTest do
 
   test "poll count failure keeps rows visible and an explicit retry recovers", %{conn: conn} do
     {:ok, view, html} =
-      live_isolated(conn, TableLive,
-        session: %{"params" => %{}, "poll_interval_ms" => 0}
-      )
+      live_isolated(conn, TableLive, session: %{"params" => %{}, "poll_interval_ms" => 0})
 
     assert html =~ "Newest open"
 

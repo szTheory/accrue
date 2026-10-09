@@ -873,7 +873,9 @@ defmodule AccrueAdmin.Components.DataTable do
 
         try do
           case socket.assigns.query_module.count_newer_than(opts) do
-            {:error, %DBConnection.ConnectionError{}} -> assign(socket, :poll_error?, true)
+            {:error, %DBConnection.ConnectionError{}} ->
+              assign(socket, :poll_error?, true)
+
             count ->
               socket
               |> assign(:newer_count, count)

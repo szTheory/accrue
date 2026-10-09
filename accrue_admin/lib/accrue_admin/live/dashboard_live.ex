@@ -121,7 +121,9 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   defp format_datetime(nil), do: "Time unavailable"
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%Y-%m-%d %H:%M UTC")
-  defp format_datetime(%NaiveDateTime{} = value), do: Calendar.strftime(value, "%Y-%m-%d %H:%M UTC")
+
+  defp format_datetime(%NaiveDateTime{} = value),
+    do: Calendar.strftime(value, "%Y-%m-%d %H:%M UTC")
 
   defp default_brand do
     %{

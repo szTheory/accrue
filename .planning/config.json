@@ -85,22 +85,18 @@
   "project_code": null,
   "phase_naming": "sequential",
   "agent_skills": {},
-  "resolve_model_ids": true,
   "mode": "yolo",
   "granularity": "standard",
-  "runtime": "claude",
-  "model_policy": {
-    "provider": "anthropic",
-    "high": "claude-opus-5",
-    "medium": "claude-sonnet-5",
-    "low": "claude-haiku-4-5",
-    "budget": "medium"
-  },
   "model_profile_overrides": {
     "codex": {
-      "opus": "gpt-5.6-sol",
-      "sonnet": "gpt-5.6-terra",
-      "haiku": "gpt-5.6-luna"
+      "opus": "gpt-6-sol",
+      "sonnet": "gpt-6-luna",
+      "haiku": "gpt-6-luna"
+    },
+    "claude": {
+      "opus": "claude-opus-5-5",
+      "sonnet": "claude-opus-5-5",
+      "haiku": "claude-sonnet-5-5"
     }
   },
   "effort": {

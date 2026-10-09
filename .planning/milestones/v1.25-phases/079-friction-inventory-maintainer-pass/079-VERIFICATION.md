@@ -1,6 +1,6 @@
 ---
 phase: 79-friction-inventory-maintainer-pass
-status: complete
+status: passed
 ---
 
 # Phase 79 — Friction inventory maintainer pass — Verification

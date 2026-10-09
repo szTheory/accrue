@@ -1,7 +1,7 @@
 ---
 phase: 099-refunds-and-invoice-parity
 verified: 2026-05-01T00:00:00Z
-status: passed_by_summary
+status: gaps_found
 score: 3/3 success criteria covered by plan summaries
 overrides_applied: 0
 re_verification:
@@ -12,6 +12,10 @@ re_verification:
     - "No live re-run of the Phase 99 Nyquist test bundle was performed during milestone close. Verification is reconstructed from the three plan SUMMARY.md self-checks (all PASSED) and from the merged commits. Treat as a known gap; re-run `099-VALIDATION.md` test commands before any production cut that depends solely on Phase 99."
   regressions: []
 human_verification: []
+audit_acknowledged:
+  milestone: v1.63
+  at: 2026-10-09
+  status: gaps_found
 ---
 
 # Phase 99: Refunds and Invoice Parity Verification Report

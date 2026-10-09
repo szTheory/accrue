@@ -1,6 +1,6 @@
 ---
 phase: 68-release-train
-status: complete
+status: passed
 ship_version: "0.3.1"
 ---
 
