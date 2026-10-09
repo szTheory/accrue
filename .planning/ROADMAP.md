@@ -208,7 +208,17 @@ Plans:
   3. Existing coupon, promotion-code, and Connect states and actions are understandable, provider-specific where needed, and never imply unsupported create/edit behavior.
   4. Each changed filter, payload, action, and empty/error state has relevant keyboard, responsive, theme, and interaction evidence in this slice.
 
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+**Wave 1**
+- [ ] 238-01-PLAN.md — Safe selected webhook replay and Wave 0 regression seams
+- [ ] 238-02-PLAN.md — Event and delivery evidence detail
+- [ ] 238-03-PLAN.md — Coupon and promotion-code inspection
+- [ ] 238-04-PLAN.md — Connect provider observation and local override
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 238-05-PLAN.md — Required mounted browser evidence and UI acceptance
+
 **UI hint**: yes
 
 ### Phase 239: Integrated Quality & Handoff
