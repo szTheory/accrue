@@ -171,7 +171,7 @@ defmodule AccrueAdmin.Components.Overlay do
   defp panel_class(_presentation), do: panel_class(:modal)
 
   defp panel_tag(:drawer), do: "aside"
-  defp panel_tag(:modal), do: "article"
+  defp panel_tag(:modal), do: "div"
   defp panel_tag(_presentation), do: "div"
 
   defp header_class(:drawer), do: "ax-detail-drawer-header"

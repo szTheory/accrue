@@ -214,7 +214,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
         <section :if={@webhook} class="ax-detail-section" data-ax-action-band>
           <header class="ax-detail-section-head">
-            <h3 class="ax-detail-section-title">Replay delivery</h3>
+            <h2 class="ax-detail-section-title">Replay delivery</h2>
           </header>
 
           <div class="ax-stack">

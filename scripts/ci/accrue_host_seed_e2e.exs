@@ -1,8 +1,10 @@
 defmodule AccrueHostSeedE2E do
   alias Accrue.Billing.Customer
+  alias Accrue.Billing.Coupon
   alias Accrue.Billing.DiscountMapping
   alias Accrue.Billing.Invoice
   alias Accrue.Billing.PaymentMethod
+  alias Accrue.Billing.PromotionCode
   alias Accrue.Billing.Subscription
   alias Accrue.Billing.SubscriptionItem
   alias Accrue.Checkout.LocalSession
@@ -35,9 +37,16 @@ defmodule AccrueHostSeedE2E do
     "admin-e2e-beta-customer@example.test",
     "host-org-checkout@example.test"
   ]
-  @fixture_processor_event_ids ["evt_host_browser_replay", "evt_host_browser_first_run"]
+  @fixture_processor_event_ids [
+    "evt_host_browser_replay",
+    "evt_host_browser_first_run",
+    "evt_host_browser_replay_second"
+  ]
+  @fixture_coupon_ids ["coupon_host_global_phase238"]
+  @fixture_promotion_code_ids ["promo_host_global_phase238"]
   @fixture_customer_processor_ids [
     "cus_host_browser_replay",
+    "cus_host_browser_replay_owner",
     # Plan 04 host edge_states.exs: long-name customer
     "cus_e2e_edge_1"
   ]
@@ -150,11 +159,14 @@ defmodule AccrueHostSeedE2E do
 
     recovery_subscription = insert_recovery_subscription!(admin_denial_customer)
     connect_account = insert_fixture_connect_account!(admin_org_alpha)
+    connect_no_snapshot = insert_fixture_connect_account_without_snapshot!(admin_org_alpha)
 
-    customer = insert_fixture_customer!(history_user)
+    customer = insert_fixture_customer!(history_user, admin_org_alpha)
     subscription = insert_fixture_subscription!(customer)
     insert_fixture_subscription_item!(subscription)
     webhook = insert_fixture_webhook!(customer, subscription)
+    second_webhook = insert_second_fixture_webhook!(customer, subscription)
+    {coupon, promotion_code} = insert_fixture_coupon_and_promotion_code!()
     portal_customer = insert_portal_checkout_customer!(normal_user)
     portal_payment_methods = insert_portal_payment_methods!(portal_customer)
     portal_subscription = insert_portal_subscription!(portal_customer)
@@ -232,6 +244,9 @@ defmodule AccrueHostSeedE2E do
       billing_manager_email: billing_manager.email,
       revocable_member_email: revocable_member.email,
       webhook_id: webhook.id,
+      second_webhook_id: second_webhook.id,
+      coupon_id: coupon.id,
+      promotion_code_id: promotion_code.id,
       subscription_id: subscription.id,
       first_run_webhook: first_run_webhook,
       org_alpha_slug: host_org_alpha.slug,
@@ -254,6 +269,7 @@ defmodule AccrueHostSeedE2E do
         deletable: admin_denial_payment_methods.deletable.id
       },
       connect_account_id: connect_account.id,
+      connect_no_snapshot_id: connect_no_snapshot.id,
       invoice_id: to_string(fixture_invoice.id),
       portal_payment_method_ids: %{
         default: portal_payment_methods.default.id,
@@ -462,6 +478,18 @@ defmodule AccrueHostSeedE2E do
     )
 
     Repo.delete_all(
+      from(account in Account,
+        where: account.stripe_account_id == "acct_host_browser_no_snapshot"
+      )
+    )
+
+    Repo.delete_all(
+      from(promo in PromotionCode, where: promo.processor_id in ^@fixture_promotion_code_ids)
+    )
+
+    Repo.delete_all(from(coupon in Coupon, where: coupon.processor_id in ^@fixture_coupon_ids))
+
+    Repo.delete_all(
       from(t in UserToken,
         join: u in User,
         on: t.user_id == u.id,
@@ -666,13 +694,56 @@ defmodule AccrueHostSeedE2E do
     |> Repo.insert!()
   end
 
-  defp insert_fixture_customer!(history_user) do
+  defp insert_fixture_connect_account_without_snapshot!(organization) do
+    %Account{}
+    |> Account.changeset(%{
+      stripe_account_id: "acct_host_browser_no_snapshot",
+      type: "express",
+      owner_type: "Organization",
+      owner_id: to_string(organization.id),
+      email: "connect-no-snapshot@example.test",
+      country: "us",
+      data: %{}
+    })
+    |> Repo.insert!()
+  end
+
+  defp insert_fixture_coupon_and_promotion_code! do
+    coupon =
+      %Coupon{}
+      |> Coupon.changeset(%{
+        processor: "stripe",
+        processor_id: "coupon_host_global_phase238",
+        name: "Phase 238 Global Coupon",
+        percent_off: Decimal.new("15"),
+        duration: "once",
+        valid: true,
+        data: %{"id" => "coupon_host_global_phase238", "object" => "coupon"}
+      })
+      |> Repo.insert!()
+
+    promotion_code =
+      %PromotionCode{}
+      |> PromotionCode.changeset(%{
+        processor: "stripe",
+        processor_id: "promo_host_global_phase238",
+        coupon_id: coupon.id,
+        code: "HOST238GLOBAL",
+        active: true,
+        data: %{"id" => "promo_host_global_phase238", "object" => "promotion_code"}
+      })
+      |> Repo.insert!()
+
+    {coupon, promotion_code}
+  end
+
+  defp insert_fixture_customer!(history_user, organization) do
     %Customer{}
     |> Customer.changeset(%{
-      owner_type: "User",
-      owner_id: history_user.id,
-      processor: "fake",
-      processor_id: "cus_host_browser_replay",
+      owner_type: "Organization",
+      owner_id: to_string(organization.id),
+      processor: "stripe",
+      processor_id: "cus_host_browser_replay_owner",
       email: history_user.email
     })
     |> Repo.insert!()
@@ -1029,6 +1100,37 @@ defmodule AccrueHostSeedE2E do
         "data" => %{
           "object" => %{
             "id" => "in_host_browser_replay",
+            "customer" => customer.processor_id,
+            "subscription" => subscription.processor_id
+          }
+        }
+      }
+    }
+    |> WebhookEvent.ingest_changeset()
+    |> Repo.insert!()
+    |> Ecto.Changeset.change(%{status: :dead})
+    |> Repo.update!()
+  end
+
+  defp insert_second_fixture_webhook!(customer, subscription) do
+    %{
+      processor: "stripe",
+      processor_event_id: "evt_host_browser_replay_second",
+      type: "customer.subscription.updated",
+      livemode: false,
+      endpoint: :default,
+      status: :dead,
+      raw_body:
+        Jason.encode!(%{
+          "id" => "evt_host_browser_replay_second",
+          "type" => "customer.subscription.updated"
+        }),
+      received_at: DateTime.utc_now(),
+      data: %{
+        "id" => "evt_host_browser_replay_second",
+        "type" => "customer.subscription.updated",
+        "data" => %{
+          "object" => %{
             "customer" => customer.processor_id,
             "subscription" => subscription.processor_id
           }
