@@ -76,3 +76,7 @@ The family mapping above preserves existing Phase 234–238 owners and the per-r
 | NO-GAP | adopter-document | README and guides make no competing static component inventory or unsupported universal-state claim; package-doc verifier passes. |
 | NO-GAP | state-family | All eight INT-04 families have a named current evidence owner and appropriate evidence layer above and in `239-COVERAGE.md`. |
 
+## Task 2 disposition
+
+No additional assertion or documentation correction required. No demonstrated gap remains open; Task 2 therefore requires only the report completeness check and does not repeat Task 1 suites.
+
