@@ -220,3 +220,137 @@ test.describe("Phase 196 Subscriptions LIST contract", () => {
     }
   });
 });
+
+test.describe("Phase 240 invoice list responsive contract", () => {
+  test("keeps seeded invoice identity, exact money, status, and target reachable at width boundaries", async ({
+    page,
+    request,
+  }) => {
+    const response = await request.post("/__e2e__/reset");
+    expect(response.ok()).toBeTruthy();
+    const seeded = await seedScenario(request, "phase191-matrix");
+    await login(page, "/billing/invoices?view=all");
+
+    const invoiceId = seeded.phase191_invoice_id;
+    const widths = [320, 600, 767, 768, 1024, 1280];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: 1000 });
+      const item = page.locator(`[data-row-id="${invoiceId}"]:visible`).first();
+      await expect(item, `invoice fixture at ${width}px`).toBeVisible();
+      await expect(item, `invoice number at ${width}px`).toContainText("E2E-191-JPY-001");
+      await expect(item, `customer identity at ${width}px`).toContainText(
+        "E2E Phase 191 株式会社 Café Boundary Customer"
+      );
+      await expect(item, `exact JPY amount at ${width}px`).toContainText("100,000");
+      await expect(item, `status at ${width}px`).toContainText("Open");
+
+      const invoiceLink = item.locator(`a[href="/billing/invoices/${invoiceId}"]`).first();
+      await expect(invoiceLink, `invoice target at ${width}px`).toBeVisible();
+      await invoiceLink.scrollIntoViewIfNeeded();
+      const geometry = await invoiceLink.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return {
+          width: rect.width,
+          height: rect.height,
+          outlineStyle: style.outlineStyle,
+          outlineWidth: style.outlineWidth,
+          textClientWidth: element.clientWidth,
+          textScrollWidth: element.scrollWidth,
+        };
+      });
+      expect(geometry.width, `visible target width at ${width}px`).toBeGreaterThan(0);
+      expect(geometry.height, `visible target height at ${width}px`).toBeGreaterThan(0);
+      expect(geometry.textScrollWidth, `identity does not clip at ${width}px`).toBeLessThanOrEqual(
+        geometry.textClientWidth
+      );
+      await invoiceLink.focus();
+      const focus = await invoiceLink.evaluate((element) => ({
+        style: getComputedStyle(element).outlineStyle,
+        width: getComputedStyle(element).outlineWidth,
+      }));
+      expect(focus.style, `visible keyboard focus at ${width}px`).not.toBe("none");
+      expect(Number.parseFloat(focus.width), `focus thickness at ${width}px`).toBeGreaterThan(0);
+      await assertNoHorizontalClip(page, "#main-content, main, [data-ax-list='invoices']", `invoice list ${width}px`);
+    }
+  });
+
+  test("records separate CSS text-enlargement, text-spacing, and page-scale evidence", async ({ page, request }) => {
+    const response = await request.post("/__e2e__/reset");
+    expect(response.ok()).toBeTruthy();
+    const seeded = await seedScenario(request, "phase191-matrix");
+    await login(page, "/billing/invoices?view=all");
+    await page.setViewportSize({ width: 320, height: 1000 });
+    const item = page.locator(`[data-row-id="${seeded.phase191_invoice_id}"]:visible`).first();
+
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "200%";
+    });
+    await expect(item, "CSS root-font enlargement retains invoice identity").toContainText("E2E-191-JPY-001");
+    await expect(item, "CSS root-font enlargement retains exact amount").toContainText("100,000");
+    await expect(item.locator(`a[href="/billing/invoices/${seeded.phase191_invoice_id}"]`).first()).toBeVisible();
+    await assertNoHorizontalClip(page, "#main-content, main, [data-ax-list='invoices']", "200% CSS font-size simulation");
+    await page.evaluate(() => {
+      document.documentElement.style.removeProperty("font-size");
+    });
+
+    await page.evaluate(() => {
+      const source = document.querySelector("style[nonce], script[nonce]");
+      const style = document.createElement("style");
+      style.nonce = source?.nonce || "";
+      style.dataset.phase240TextSpacing = "true";
+      style.textContent = `
+        :where(*) { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; }
+        :where(p) { margin-block-end: 2em !important; }
+      `;
+      document.head.append(style);
+    });
+    await expect(item, "WCAG text-spacing CSS simulation retains identity").toContainText("E2E-191-JPY-001");
+    await expect(item, "WCAG text-spacing CSS simulation retains exact amount").toContainText("100,000");
+    await expect(item.locator(`a[href="/billing/invoices/${seeded.phase191_invoice_id}"]`).first()).toBeVisible();
+    await assertNoHorizontalClip(page, "#main-content, main, [data-ax-list='invoices']", "text-spacing CSS simulation");
+
+    let zoomEvidence;
+    try {
+      const session = await page.context().newCDPSession(page);
+      await session.send("Emulation.setPageScaleFactor", { pageScaleFactor: 4 });
+      zoomEvidence = await page.evaluate(() => ({
+        visualScale: window.visualViewport?.scale,
+        cssViewportWidth: window.innerWidth,
+      }));
+      await session.send("Emulation.setPageScaleFactor", { pageScaleFactor: 1 });
+      await session.detach();
+    } catch (error) {
+      zoomEvidence = { unavailable: String(error.message || error) };
+    }
+    console.log(
+      `Phase 240 zoom evidence: ${JSON.stringify(zoomEvidence)}; CDP page scale is pinch/visual scaling, not browser page zoom. A faithful 400% browser zoom control is unavailable in this headless Playwright run.`
+    );
+  });
+});
+
+test.describe("Phase 240 intermediate coarse-pointer invoice list", () => {
+  test.use({ viewport: { width: 768, height: 1024 }, isMobile: true, hasTouch: true });
+
+  test("keeps identity, money, status, and action reachable with coarse pointer", async ({ page, request }) => {
+    const response = await request.post("/__e2e__/reset");
+    expect(response.ok()).toBeTruthy();
+    const seeded = await seedScenario(request, "phase191-matrix");
+    await login(page, "/billing/invoices?view=all");
+    expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
+
+    const item = page.locator(`[data-row-id="${seeded.phase191_invoice_id}"]:visible`).first();
+    await expect(item).toContainText("E2E Phase 191 株式会社 Café Boundary Customer");
+    await expect(item).toContainText("100,000");
+    await expect(item).toContainText("Open");
+    const action = item.locator(`a[href="/billing/invoices/${seeded.phase191_invoice_id}"]`).first();
+    await expect(action).toBeVisible();
+    const target = await action.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { width: rect.width, height: rect.height };
+    });
+    expect(target.width, "invoice action target width at coarse pointer").toBeGreaterThan(0);
+    expect(target.height, "invoice action target height at coarse pointer").toBeGreaterThanOrEqual(44);
+    await assertNoHorizontalClip(page, "#main-content, main, [data-ax-list='invoices']", "768px coarse-pointer invoice list");
+  });
+});
