@@ -4,17 +4,17 @@ milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 237
 current_phase_name: Admin Invoices, Payments & Recovery
-status: executing
-stopped_at: Completed 237-05-PLAN.md
-last_updated: "2026-10-09T00:48:47.946Z"
+status: verifying
+stopped_at: Completed 237-08-PLAN.md
+last_updated: "2026-10-09T01:06:06.389Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 237 execution started
-state_head: c660b7fdf21005b2bbd9f88e3de48c699a0be30c
+state_head: 6d72e33d0e9d9c8656568dc6af4aba289c9ef75a
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 35
-  completed_plans: 34
+  completed_plans: 35
   percent: 57
 ---
 
@@ -34,7 +34,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 
 Phase: 237 (Admin Invoices, Payments & Recovery) — EXECUTING
 Plan: 8 of 8
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-08 — Phase 237 execution started
 
 ## Performance Metrics
@@ -136,6 +136,7 @@ Last activity: 2026-10-08 — Phase 237 execution started
 | Phase 237 P06 | 12min | 2 tasks | 4 files |
 | Phase 237 P07 | 11min | 2 tasks | 9 files |
 | Phase 237 P05 | 9m | 2 tasks | 2 files |
+| Phase 237 P08 | 16min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -278,6 +279,9 @@ Last activity: 2026-10-08 — Phase 237 execution started
 - [Phase 237]: Recovery amounts remain evidence-based; current subscription state is distinct from historical failures; async reads and validated return links retain authorized owner/window scope.
 - [Phase 237]: Invoice actions re-resolve the actor and owner scope, reload the same invoice, and compare the exact reviewed action and money facts before each dispatch boundary.
 - [Phase 237]: Success messages use fresh scoped invoice evidence; requires-action remains incomplete, CardError is definitive, and other processor errors remain unconfirmed with no automatic retry.
+- [Phase 237]: Use the existing blocking host Playwright job for recurring served browser verification.
+- [Phase 237]: Keep payment review browser coverage read-only; cancel before confirmation or dispatch.
+- [Phase 237]: Use Accrue.Clock for recovery window bounds and deterministic campaign timestamps.
 
 ### Pending Todos
 
@@ -352,8 +356,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T00:48:47.883Z
-Stopped at: Completed 237-05-PLAN.md
+Last session: 2026-10-09T01:06:06.320Z
+Stopped at: Completed 237-08-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

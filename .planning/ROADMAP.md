@@ -36,7 +36,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 - [x] **Phase 234: Admin Customers & Subscriptions** - Refine operator search, customer/subscription investigation, lifecycle truth, scope, and supported actions. (completed 2026-10-07)
 - [x] **Phase 235: Customer Plan Selection & Checkout** - Make existing checkout, payment hooks, provider handoffs, and safe returns understandable and reliable. (completed 2026-10-08)
 - [x] **Phase 236: Portal Billing Self-Service** - Refine existing customer billing pages and authorized payment/subscription tasks through one Portal. (completed 2026-10-08)
-- [ ] **Phase 237: Admin Invoices, Payments & Recovery** - Make money and recovery work precise, scoped, and honest about outcomes.
+- [x] **Phase 237: Admin Invoices, Payments & Recovery** - Make money and recovery work precise, scoped, and honest about outcomes.
 - [ ] **Phase 238: Admin Events, Webhooks & Remaining Billing Surfaces** - Improve event and delivery investigation plus existing coupon, promotion-code, and Connect surfaces.
 - [ ] **Phase 239: Integrated Quality & Handoff** - Close route coverage, cross-surface evidence, current-render inspection, and a usable feedback preview.
 
@@ -193,7 +193,7 @@ Plans:
 - [x] 237-05-PLAN.md — Invoice action revalidation and evidenced outcomes
 - [x] 237-06-PLAN.md — Charge/refund precision, revalidation, and outcomes
 - [x] 237-07-PLAN.md — Recovery currency, history, scope, and return context
-- [ ] 237-08-PLAN.md — Representative served browser and CI proof
+- [x] 237-08-PLAN.md — Representative served browser and CI proof
 **UI hint**: yes
 
 ### Phase 238: Admin Events, Webhooks & Remaining Billing Surfaces
@@ -233,7 +233,7 @@ Plans:
 | 234. Admin Customers & Subscriptions | 8/8 | Complete    | 2026-10-07 |
 | 235. Customer Plan Selection & Checkout | 6/6 | Complete    | 2026-10-08 |
 | 236. Portal Billing Self-Service | 6/6 | Complete    | 2026-10-08 |
-| 237. Admin Invoices, Payments & Recovery | 7/8 | In Progress | - |
+| 237. Admin Invoices, Payments & Recovery | 8/8 | Complete | - |
 | 238. Admin Events, Webhooks & Remaining Billing Surfaces | 0/TBD | Not started | - |
 | 239. Integrated Quality & Handoff | 0/TBD | Not started | - |
 

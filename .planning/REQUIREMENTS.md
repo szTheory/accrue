@@ -16,11 +16,11 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 ### Admin
 
 - [x] **ADM-01**: Operators can distinguish a known subscription lifecycle from missing ancillary observations; missing data does not turn an active subscription into an inactive one.
-- [ ] **ADM-02**: Operators can distinguish draft, open, and overdue invoices and see missing due dates honestly; amounts preserve currency and minor-unit precision, including zero- and three-decimal currencies.
+- [x] **ADM-02**: Operators can distinguish draft, open, and overdue invoices and see missing due dates honestly; amounts preserve currency and minor-unit precision, including zero- and three-decimal currencies.
 - [x] **ADM-03**: Operators can search, enter a nondefault owner scope, navigate customer/subscription/related records, and return without losing the correct owner, object, or filter context.
 - [x] **ADM-04**: Operators can use only eligible subscription lifecycle actions, with existing confirmation, step-up, expiry, duplicate-protection, and truthful result-evidence behavior preserved.
-- [ ] **ADM-05**: Operators can review invoice payments/finalization and refunds with the exact amount, currency, and consequence, and distinguish accepted, requires-action, failed, and completed results.
-- [ ] **ADM-06**: Operators can review recovery with its time window, owner, and currency intact, while historical failures remain distinct from current billing state.
+- [x] **ADM-05**: Operators can review invoice payments/finalization and refunds with the exact amount, currency, and consequence, and distinguish accepted, requires-action, failed, and completed results.
+- [x] **ADM-06**: Operators can review recovery with its time window, owner, and currency intact, while historical failures remain distinct from current billing state.
 - [ ] **ADM-07**: Operators can investigate events and webhook deliveries and replay only eligible deliveries with precise evidence, step-up, and honest partial-selection outcomes.
 - [ ] **ADM-08**: Operators can inspect existing coupon, promotion-code, and Connect states and actions without the UI implying unsupported capabilities.
 
@@ -87,11 +87,11 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | SYS-01 | Phase 233 | Complete |
 | SYS-02 | Phase 233 | Complete |
 | ADM-01 | Phase 234 | Complete |
-| ADM-02 | Phase 237 | Pending |
+| ADM-02 | Phase 237 | Complete |
 | ADM-03 | Phase 234 | Complete |
 | ADM-04 | Phase 234 | Complete |
-| ADM-05 | Phase 237 | Pending |
-| ADM-06 | Phase 237 | Pending |
+| ADM-05 | Phase 237 | Complete |
+| ADM-06 | Phase 237 | Complete |
 | ADM-07 | Phase 238 | Pending |
 | ADM-08 | Phase 238 | Pending |
 | CKO-01 | Phase 235 | Complete |
