@@ -2,7 +2,7 @@
 milestone: v1.64
 name: Admin Operator UI Cleanup
 date: 2026-10-09
-status: milestone-initialized-ready-to-plan-phase-240
+status: phase-240-planned-ready-to-execute
 review_type: bounded-three-lens-upstream-review
 scope_version_approved: true
 requirements_approved: true
@@ -79,6 +79,6 @@ The maintainer approved the concrete [roadmap](../../ROADMAP.md) on 2026-10-09, 
 
 ## Continuation checkpoint
 
-The full approved list is in [REQUIREMENTS.md](../../REQUIREMENTS.md); the maintainer confirmed all 18 items and the concrete [roadmap](../../ROADMAP.md) on 2026-10-09. Phases 240–243 map 18/18 requirements exactly once. Milestone kickoff is complete. Next command: `$gsd-plan-phase 240`. Preserve v1.63's archive, use the recorded decisions, and continue without recreating the roadmap or repeating research, requirements/roadmap confirmation, or Impeccable init. A context clear is safe; these files retain the delivery and verification signal.
+The full approved list is in [REQUIREMENTS.md](../../REQUIREMENTS.md); the maintainer confirmed all 18 items and the concrete [roadmap](../../ROADMAP.md) on 2026-10-09. Phases 240–243 map 18/18 requirements exactly once. Phase 240 planning is now complete: six plans across four waves passed independent checking; [planning verification](../../phases/240-shared-system-and-real-billing-exemplar/240-PLAN-CHECK.md) records coverage, probe results and revision dispositions. Next command: `$gsd-execute-phase 240`. Execution has not started. Preserve v1.63's archive and continue without recreating the roadmap, replanning accepted work, repeating research/approval interviews or Impeccable init. A context clear is safe; the phase artifacts retain the delivery and verification signal.
 
 **Codex SDK dispatch:** Use `GSD_RUNTIME=codex` for GSD model/agent resolution calls in Codex sessions. The installed CLI otherwise resolved Claude models during this kickoff; the explicit runtime correctly resolved the roadmapper to the project's Codex model and effort. This is a per-command runtime selection, not a project/global config change.

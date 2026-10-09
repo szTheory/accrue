@@ -13,7 +13,7 @@ The maintainer explicitly requested an **Accrue** Admin/operator UI cleanup usin
 
 **Subsequent activation, 2026-10-09:** The maintainer invoked `$gsd-new-milestone Admin Operator UI Cleanup` and approved the compact v1.64 scope/version recommendation, adding one bounded multi-lens due diligence pass. This historical stocktake is now consumed by the active kickoff. [Focused diligence](../research/v1.64/) supplements it; requirements and roadmap retain their confirmation gates. The original pre-kickoff statements below describe the stocktake's state at capture, not a continuing activation block.
 
-**Kickoff complete, 2026-10-09:** All 18 requirements and the concrete four-phase roadmap are now approved. The current next command is `$gsd-plan-phase 240`; use [the decision summary](../research/v1.64/SUMMARY.md) and [approved roadmap](../ROADMAP.md). No further kickoff, diligence or initialization interview is needed.
+**Kickoff and Phase 240 planning complete, 2026-10-09:** All 18 requirements and the four-phase roadmap are approved. Six Phase 240 plans across four waves passed independent checking; the current next command is `$gsd-execute-phase 240`. Use [the decision summary](../research/v1.64/SUMMARY.md), [approved roadmap](../ROADMAP.md) and [planning verification](../phases/240-shared-system-and-real-billing-exemplar/240-PLAN-CHECK.md). No further kickoff, diligence, initialization interview or accepted-plan rewrite is needed.
 
 ## Settled intent and continuity
 
@@ -116,12 +116,12 @@ The current README link to the archived [Phase 239 preview handoff](../milestone
 
 ## Exact next action
 
-When ready to open the formal milestone, run:
+The stocktake and milestone kickoff are consumed. Phase 240 is planned and ready for execution. Run:
 
 ```text
-$gsd-new-milestone Admin Operator UI Cleanup
+$gsd-execute-phase 240
 ```
 
-Read this note first. Reuse the settled product/brand/build-path context and the closed v1.63 contracts. Confirm the compact milestone summary/version, promote scoped requirements and the approved roadmap, then report the actual first phase command (expected `$gsd-plan-phase 240`). No repeat Impeccable init, broad cross-project research, or re-execution of Phases 233–239 is needed.
+Reuse the settled product/brand/build-path context, closed v1.63 contracts and approved Phase 240 artifacts. No repeat stocktake, milestone/requirements/roadmap confirmation, Impeccable init, broad cross-project research, accepted planning or re-execution of Phases 233–239 is needed. Actual mounted delivery evidence remains execution work.
 
 Stocktake verification: no implementation tests run; nine capture-source fingerprints and three image digests matched; covered post-capture source changes inspected as formatting only; preview HTTP 404 reported honestly. Documentation/link and GSD bookkeeping checks are recorded with the stocktake commit.

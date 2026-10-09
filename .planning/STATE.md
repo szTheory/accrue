@@ -2,16 +2,18 @@
 gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
-status: planning
-stopped_at: Milestone v1.64 initialized — ready to plan Phase 240
-last_updated: "2026-10-09T17:36:50Z"
-last_activity: 2026-10-09
-last_activity_desc: v1.64 four-phase roadmap approved; 18/18 requirements mapped; ready to plan Phase 240
 current_phase: 240
+current_phase_name: Shared System and Real Billing Exemplar
+status: executing
+stopped_at: Phase 240 planned and independently checked — next $gsd-execute-phase 240
+last_updated: "2026-10-09T19:10:32.269Z"
+last_activity: 2026-10-09
+last_activity_desc: Phase 240 planned and independently checked; six plans across four waves ready to execute
+state_head: 49f058dec220c49af3b2e047ce1900fa651b3076
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 6
   completed_plans: 0
   percent: 0
 ---
@@ -24,16 +26,16 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 240 — Shared System and Real Billing Exemplar. v1.64 scope/version, [all 18 requirements](REQUIREMENTS.md), and the four-phase [roadmap](ROADMAP.md) are approved; bounded diligence is complete. Run `$gsd-plan-phase 240` using the [decision summary](research/v1.64/SUMMARY.md); no repeat stocktake, research, requirements/roadmap confirmation or Impeccable init.
+**Current focus:** Phase 240 — Shared System and Real Billing Exemplar. Six plans across four waves passed independent plan-checking; [planning verification](phases/240-shared-system-and-real-billing-exemplar/240-PLAN-CHECK.md) records all eight requirement, 14 decision and probe mappings. Next command: `$gsd-execute-phase 240`. Reuse the [decision summary](research/v1.64/SUMMARY.md), phase context, UI contract, validation map and plans; no repeat stocktake, research, accepted planning, approval interviews or Impeccable init.
 **Progress:** [░░░░░░░░░░] 0% (0 of 4 approved milestone phases complete)
-**Planned work completed:** No v1.64 execution plans yet. v1.63 closed at 45/45 plans across Phases 233–239.
+**Planned work completed:** Phase 240 has six verified execution plans; 0/6 executed. v1.63 closed at 45/45 plans across Phases 233–239.
 
 ## Current Position
 
-Phase: 240 — Shared System and Real Billing Exemplar (first of 4 milestone phases)
+Phase: 240 (Shared System and Real Billing Exemplar) — READY TO EXECUTE
 Plan: —
-Status: Ready to plan
-Last activity: 2026-10-09 — v1.64 milestone initialized; roadmap approved with 18/18 requirements mapped
+Status: Ready to execute
+Last activity: 2026-10-09 — Phase 240 planning complete; six plans, four waves, no remaining planning issues
 
 ## Performance Metrics
 
@@ -395,9 +397,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T17:36:50Z
-Stopped at: Milestone v1.64 initialized — ready to plan Phase 240
-Resume file: .planning/ROADMAP.md
+Last session: 2026-10-09T19:10:32.210Z
+Stopped at: Phase 240 planned and independently checked — next $gsd-execute-phase 240
+Resume file: .planning/phases/240-shared-system-and-real-billing-exemplar/240-PLAN-CHECK.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -526,5 +528,5 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Next command: `$gsd-plan-phase 240` — Shared System and Real Billing Exemplar.
-- Phase 239/v1.63 are closed; v1.64 kickoff and all approval gates are complete. Context can be cleared: roadmap, requirements, bounded diligence, automation defaults and stopping rules are recorded. Reuse Impeccable init/code-first and the closed safety contracts; no new interview is needed.
+- Next command: `$gsd-execute-phase 240` — execute six checked plans for Shared System and Real Billing Exemplar.
+- Phase 239/v1.63 are closed; Phase 240 is planned, with execution and implementation verification pending. Context can be cleared: scope, requirements, decisions, UI contract, validation map, recurring automation owners and stopping rules are recorded. Reuse Impeccable init/code-first and the closed safety contracts; no new interview or accepted-plan rewrite is needed.

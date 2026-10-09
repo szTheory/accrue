@@ -61,6 +61,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 ## Phase Details
 
 ### Phase 240: Shared System and Real Billing Exemplar
+
 **Goal**: Operators can use a coherent, truthful invoice list → detail → action review flow and a dense subscription view through the incumbent Admin system, with shared interaction and evidence patterns ready for other existing routes.
 **Depends on**: Phase 239 (shipped v1.63 baseline)
 **Requirements**: DSN-01, DSN-02, DSN-03, DSN-04, DSN-05, UXC-02, EVR-01, EVR-02
@@ -70,12 +71,29 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
   3. Keyboard operators can navigate and complete the exemplar review with visible focus, associated errors/status, contained overlays and logical focus return; controls remain correctly labeled, disabled and context-aware through real busy completion, repeated patches and reconnect without replaying a staged action. (DSN-04, DSN-05)
   4. Operators can distinguish empty, no-match, unavailable, partial, unsupported, denied, pending, failed and unknown exemplar states, see uncertainty and choose only a supported next step. (UXC-02)
   5. Maintainers can inspect a current route/component/state coverage inventory with source, fixture, compiled/served-asset and exercised-behavior provenance; existing acceptance owners provide recurring exemplar checks, focused failure controls, current served package assets and lightweight comparable resource diagnostics without confirmation-only human UAT. (EVR-01, EVR-02)
+
 **Propagation obligation**: Shared rules, interaction patterns, state distinctions and evidence owners established here must be exercised on every affected Phase 241–242 consumer. Do not declare broad route coverage from this exemplar. Preserve deliberate 2px dense and 1px structural exceptions; confirm suspected compression and action geometry in current mounted output before editing.
 **Early regression guard**: Strengthen the existing expected-Linux-snapshot set guard before propagation and prove its missing-set failure at the existing owner. EVR-03's final reviewed baseline closure remains Phase 243 ownership; the guard is not postponed until then.
-**Plans**: TBD
+**Plans**: 6 plans
+Plans:
+**Wave 1**
+- [ ] 240-01-PLAN.md — Real invoice tracer, shared hierarchy and dense subscription cross-check
+- [ ] 240-02-PLAN.md — Blocking complete Linux snapshot-set guard
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 240-03-PLAN.md — Truthful invoice states and responsive/content acceptance
+- [ ] 240-04-PLAN.md — Effective theme and full keyboard review behavior
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 240-05-PLAN.md — Real busy completion and reconnect without action replay
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 240-06-PLAN.md — Current coverage, served assets and exercised provenance
+
 **UI hint**: yes
 
 ### Phase 241: Billing Operator Journeys
+
 **Goal**: Operators can move through existing customer, subscription, invoice, payment and recovery work with truthful scoped destinations, bounded returns and self-contained billing action reviews.
 **Depends on**: Phase 240
 **Requirements**: JRN-01, JRN-02, JRN-03, JRN-04
@@ -84,11 +102,13 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
   2. Operators can enter supported filtered lists, open a record and return with validated owner, existing filter/lens and customer-tab context intact; foreign scope or arbitrary origin cannot redirect the return. (JRN-02)
   3. Direct campaign entry returns to scoped Recovery; entry from Recovery retains a valid selected recovery window and scope. (JRN-03)
   4. Before an existing billing action, operators can review exact target, material customer/scope, money/currency and consequence in one place; after action they see the evidence-specific accepted, pending, completed, failed or unknown result. Fresh authorization, step-up, duplicate protection and exact-money contracts remain visible through the flow. (JRN-04)
+
 **Propagation obligation**: Exercise Phase 240 shared hierarchy, responsive/theme behavior, keyboard/focus, busy/reconnect and state distinctions on each changed billing consumer. Verify auth, owner/target/material-state, capability and exact-money invariants at their existing owners; rebuild and confirm package served assets and add focused negative controls with each owning change. Supported returns are bounded existing meanings, not pagination/scroll preservation or a new subscription invoice filter.
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 242: Investigations and Remaining Admin Surfaces
+
 **Goal**: Operators can investigate existing events and deliveries, understand catalog and Connect relationships, and find the correct scoped record through a consistent Admin shell and domain language.
 **Depends on**: Phase 241
 **Requirements**: JRN-05, JRN-06, JRN-07, UXC-01
@@ -97,11 +117,13 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
   2. Operators can inspect existing discounts, promotion-code relationships and Connect facts, preserve bounded list/relationship context, and use supported actions with a clear distinction between stored provider facts and local policy. (JRN-06)
   3. Operators can find the correct scoped record from Home, navigation and search, with visible selection that agrees across pointer and keyboard input. (JRN-07)
   4. Across changed lists, details, filters and reviews, operators encounter coherent resource, collection-method and action language while diagnostic terms and locked audit/legal meaning stay exact. (UXC-01)
+
 **Propagation obligation**: Apply and verify Phase 240 system, accessibility, responsive/theme, state and evidence patterns on each changed investigation, catalog, Connect and shell consumer. Preserve fresh scope/authorization, capability and outcome truth; add focused checks at existing semantic owners, inspect mounted behavior, and confirm rebuilt served package assets. Reconcile earlier billing copy as needed for cross-route consistency.
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 243: Integrated Evidence and Feedback Preview
+
 **Goal**: Maintainers can review proven Admin cleanup across the existing route set and inspect a stable Fake-backed preview with evidence limits stated accurately.
 **Depends on**: Phase 242
 **Requirements**: EVR-03, EVR-04
@@ -109,6 +131,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
   1. Maintainers receive blocking Linux pixel results for the complete expected selected golden set; removal of all or part of that set fails, reviewed intended updates are visible, and masks leave identity, money, state, action and error meaning exposed. (EVR-03)
   2. Maintainers can start and use the documented Fake-backed `/admin` feedback preview without disposable mutation/reset proof disturbing it; the handoff distinguishes transport, local versus remote, provider, rendered and exercised evidence limits. (EVR-04)
   3. Maintainers can compare final changed route and state coverage with the Phase 240 inventory and slice-owned recurring evidence, including desktop/narrow and effective-theme inspections, served asset identity and any named remaining limits; no broad claim rests only on the initial exemplar. (EVR-03, EVR-04; reconciles EVR-01 and EVR-02 without remapping them)
+
 **Closure obligation**: Reconcile proofs from Phases 240–242 and repair named gaps in their owning surfaces. This phase does not defer first authorization, accessibility, responsive/theme, language or asset acceptance. Use selected stable snapshots, existing thresholds and bounded masks; no new CI matrix or required human sign-off.
 **Plans**: TBD
 **UI hint**: yes
