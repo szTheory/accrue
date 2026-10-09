@@ -189,6 +189,20 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await page.goto(`/admin/analytics/recovery?org=${owner}&window=30d`, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
   await expect(page.getByRole("heading", { name: /recovery/i }).first()).toBeVisible();
+  const windowSelector = page.getByRole("navigation", { name: "Time window (UTC)" });
+  for (const label of ["7 days UTC", "30 days UTC", "90 days UTC"]) {
+    const windowLink = windowSelector.getByRole("link", { name: label, exact: true });
+    await expect(windowLink).toBeVisible();
+    const bounds = await windowLink.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(320);
+  }
+  const windowMetrics = await windowSelector.evaluate((element) => ({
+    clientWidth: element.clientWidth,
+    scrollWidth: element.scrollWidth
+  }));
+  expect(windowMetrics.scrollWidth).toBeLessThanOrEqual(windowMetrics.clientWidth);
   const recoveryRow = page.getByRole("link", { name: /admin-e2e-alpha-customer@example\.test/i }).first();
   await expect(recoveryRow).toBeVisible();
   await expect(recoveryRow).toHaveAttribute("href", /window%3D30d/);

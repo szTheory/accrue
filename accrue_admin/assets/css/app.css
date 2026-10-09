@@ -4056,6 +4056,23 @@ details[open].ax-dropdown .ax-dropdown-panel {
   color: var(--ax-primary);
 }
 
+@media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
+  .ax-page[data-ax-overview="recovery"] .ax-tabs {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ax-space-2xs);
+    overflow-x: visible;
+  }
+
+  .ax-page[data-ax-overview="recovery"] .ax-tab {
+    justify-content: center;
+    min-width: 0;
+    padding-inline: var(--ax-space-2xs);
+    text-align: center;
+    white-space: normal;
+  }
+}
+
 .ax-tab-count {
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
