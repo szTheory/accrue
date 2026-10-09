@@ -110,6 +110,27 @@ defmodule AccrueAdmin.ChargeLiveTest do
     refute html =~ ~s(class="ax-kpi-grid")
   end
 
+  test "refund action fixture retains the scoped target and raw money contract", %{
+    conn: conn,
+    charge: charge,
+    customer: customer
+  } do
+    refund = TestRepo.one!(from(refund in Refund, where: refund.charge_id == ^charge.id))
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert customer.owner_type == "User"
+    assert is_binary(customer.owner_id)
+    assert charge.customer_id == customer.id
+    assert charge.status == "succeeded"
+    assert charge.amount_cents == 10_000
+    assert charge.currency == "usd"
+    assert refund.amount_minor == 2_500
+    assert refund.currency == "usd"
+
+    assert {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    assert has_element?(view, "[data-ax-primary-action]", "Refund charge")
+  end
+
   test "payment contextual return accepts only its loaded customer's local detail origin", %{
     conn: conn,
     charge: charge,
