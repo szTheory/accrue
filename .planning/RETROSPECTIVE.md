@@ -1756,12 +1756,56 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 ---
 
+
+## Milestone: v1.63 — Admin and Portal UI refinement
+
+**Shipped:** 2026-10-09
+**Phases:** 7 | **Plans:** 45 | **Tasks:** 96
+
+### What Was Built
+
+- Refined existing Admin, Portal, checkout, and host return journeys with fresh owner, actor, provider, eligibility, and target checks.
+- Made lifecycle, money, scope, provider capability, and uncertain outcomes explicit across customer and operator surfaces.
+- Added mounted browser, integration, accessibility, responsive, asset, copy, and documentation evidence for recurring CI use.
+
+### What Worked
+
+- Splitting the work into route-owned phases kept authorization, state truth, and visible outcomes close to the journeys they protect.
+- Using the real host, Repo, and served browser surfaces exposed integration gaps that package-local assertions alone would miss.
+- Recording executable acceptance evidence in each phase supported zero-human UAT for the tested claims.
+
+### What Was Inefficient
+
+- Closeout needed manual normalization of older verification metadata so the audit scanner could interpret their established outcomes consistently.
+- The archive command produced an overly long accomplishment list that needed editorial grouping.
+- Several closeout facts existed in multiple planning files and needed a final consistency pass after archiving.
+
+### Patterns Established
+
+- Signed context pins locate the displayed billing identity; authorization and exact target facts are reloaded at each protected action.
+- Keep operator actor, billed entity, Customer, provider, and target distinct, and report only outcomes supported by current evidence.
+- Shift testable acceptance left by default: use recurring deterministic CI checks and reserve human handoff for real decisions or unrepresentable evidence.
+
+### Key Lessons
+
+1. Keep verification status vocabulary canonical and machine-readable when writing the source artifact, so closeout does not need retroactive normalization.
+2. Run audit and evidence reconciliation during phase work; a clean milestone archive depends on current traceability across reports, roadmap, and requirements.
+3. A zero-human UAT target works best when each phase chooses the cheapest repeatable check that proves its acceptance claims and retains its output.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: multiple, 2026-10-07 → 2026-10-09.
+- Notable: local package, integration, browser, and documentation suites passed; the existing main-branch CI record was a separate remote-SHA check and did not certify this unpushed branch.
+
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.63 | multi (2026-10-07→10-09) | 7 | **ADMIN/PORTAL/CHECKOUT** — completed the scoped Admin and customer journeys, revalidated host/provider identity at action time, and shifted acceptance into recurring automated evidence. Audit `tech_debt`: 34/34 requirements, 7/7 phase verifications, 5/5 integration seams, 4/4 E2E flows, 0 blockers; four acknowledged closeout items. |
 | v1.62 | multi (2026-09-13→09-18) | 4 | **REPO/INTG/GATE/HYG/REL** — established reproducible repository + recovery truth, built a provenance-backed integration candidate without rewriting published history, recorded exact-SHA gate status per lane under a closed lexicon with no aggregate green boolean, and handed off bounded evidence-backed cleanup as PR #45. Audit `tech_debt`: 14/14 requirements, 4/4 phases, 5/5 integration seams, 1/1 flow, 0 blockers. Override closeout: 1 acknowledged deferral (dormant SEED-008). Candidate SHA honestly recorded **red** — releasing is the next milestone's work. |
 | v1.61 | multi (2026-08-08→09-12) | 4 | **REL/BASE/PATH/SAFE** — repaired required-lane causes, froze a repository-bound 20-path baseline, kept a one-edge exact-three candidate at a 1,125s median, and repaired Stripe boot/live fidelity. Verified closeout: 10/10 requirements, 4/4 phases, 13/13 automated UAT checks, 0 overrides. |
 | v1.59 | multi (2026-07-31→08-05) | 8 | **MULTI-RAIL/OFFLINE** — concurrent Stripe/Apple account projection, strict Apple intake/repair, device-bound offline proof/recovery, and first-adopter release proof. Audit `tech_debt`: 29/29 requirements, 11/11 integrations, 5/5 flows, and Nyquist validation passed; Crosswake runtime remains intentionally feasibility-blocked. |
@@ -1805,6 +1849,7 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.63 | Core 2,078 tests + 70 property checks; Admin 614; Portal 111; host 223; configured Braintree host 8; docs verifier 46. | 34/34 requirements; 7/7 phase verifications; 5/5 integration seams; 4/4 E2E flows; zero audit blockers; four acknowledged closeout items. | No new runtime dependencies or billing capabilities; existing packages and host were refined. |
 | v1.61 | Phase 227 strict verifier 11/11 plus exact-three live reconciliation; Phase 228 runtime/fixture/live-terminal suite 46/46 focused Elixir tests; recurring Stripe provider run 2/2 selected, 0 skipped. | 10/10 requirements; 4/4 phase verifications; Phase 227 UAT 7/7 and Phase 228 UAT 6/6; audit-open 0. | No new runtime dependency; CI evidence scripts and planning artifacts only, plus Stripe adapter/action compatibility fixes against the existing `lattice_stripe` dependency. |
 | v1.59 | 8/8 phase verifications; reference-host Apple ingress/recovery, deterministic scenarios, and release-contract gates. | 29/29 requirements; 11/11 integrations; 5/5 flows; all phases Nyquist-compliant. | No required dependency addition; Apple/Crosswake remain bounded host/runtime evidence lanes. |
 | v1.58 | Five phase verifications (63/63 combined must-haves), isolation verifier, package-doc verifier, 81 focused core tests, 37 focused admin/LiveView tests, and executable desktop/Pixel 5 browser UAT. | 11/11 requirements; 10/11 integrations; 5/5 flows | No new required dependency; existing `lattice_stripe` pin advanced to `~> 2.0`. Advisory sync remains default-off and non-authoritative. |

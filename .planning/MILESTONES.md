@@ -1,5 +1,31 @@
 # Milestones
 
+## v1.63 Admin and Portal UI refinement (Shipped: 2026-10-09)
+
+**Phases completed:** 7 phases, 45 plans, 96 tasks
+
+**Key accomplishments:**
+- Personal, organization, and mixed Portal billing now use a bounded host-owned resolver with fresh per-action authorization; signed context pins locate identity but never grant authority.
+- Admin, checkout, and Portal actions revalidate owner, target, provider, eligibility, and material state before dispatch, then report evidence-specific outcomes and safe recovery paths.
+- Existing billing journeys now preserve exact lifecycle, money, scope, provider capability, and uncertainty across customer, subscription, invoice, payment, recovery, event, webhook, coupon, promotion-code, and Connect surfaces.
+- Shared visual roles retain distinct Admin identity and host branding, with keyboard, accessibility, theme, narrow-layout, mounted-route, asset, copy, and docs evidence.
+- The example host's checkout, Braintree and Stripe returns, mounted Admin/Portal journeys, and read-only feedback preview have deterministic browser and integration coverage.
+- Testable acceptance is a durable shift-left default: recurring evidence runs in CI, zero-human UAT is the target, and confirmation is reserved for decisions or evidence that automation cannot establish.
+
+**Delivered:** A scoped, capability-explicit, responsive Admin and Portal baseline with current served evidence and recurring automated acceptance.
+
+**Verification:** Override closeout. The audit scored 34/34 requirements, 7/7 phases, 5/5 integration seams, and 4/4 E2E flows with zero blockers; every phase verification passed. Four pre-close items were explicitly acknowledged and recorded in `STATE.md` Deferred Items.
+
+**Known verification overrides:** 4 newly acknowledged, 0 carried forward (see `STATE.md` Deferred Items).
+
+**Stats:** 420 files changed, +44,734/-2,901; 2026-10-07 → 2026-10-09. Git range: `49d7026` → `b113b18`.
+
+**Archives:** [`milestones/v1.63-ROADMAP.md`](milestones/v1.63-ROADMAP.md), [`milestones/v1.63-REQUIREMENTS.md`](milestones/v1.63-REQUIREMENTS.md), [`milestones/v1.63-MILESTONE-AUDIT.md`](milestones/v1.63-MILESTONE-AUDIT.md), [`milestones/v1.63-phases/`](milestones/v1.63-phases/).
+
+**What's next:** No next milestone is selected. The maintainer will choose future scope after confirming a clean workspace; no additional UI cleanup is implied.
+
+---
+
 ## v1.62 Release Integration & Repository Hygiene (Shipped: 2026-09-18)
 
 **Phases completed:** 4 phases, 44 plans (229: 20, 230: 7, 231: 6, 232: 11)

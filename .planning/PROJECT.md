@@ -33,25 +33,19 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest fully shipped milestone: v1.62 — Release Integration & Repository Hygiene, shipped and archived 2026-09-18.** It completed the bounded repository-truth, integration-candidate, exact-SHA evidence, and hygiene work recorded in its milestone archive. Its release-handoff scope is closed; historical lane outcomes remain in the v1.62 evidence and are not active work for this milestone.
+**Latest fully shipped milestone: v1.63 — Admin and Portal UI refinement, shipped and archived 2026-10-09.** All seven phases and 34 requirements completed. The milestone delivered scoped, capability-explicit Admin/Portal and checkout journeys, current served evidence, and recurring automated acceptance. Its audit found zero blockers; four pre-close items were explicitly acknowledged and recorded in `STATE.md` Deferred Items.
 
-**Current focus:** Phase 235, Customer Plan Selection & Checkout, within v1.63 Admin and Portal UI refinement. Phase 233 established the current served baseline, shared semantic roles, and bounded host-owned Portal contract. Phase 234 completed the scoped Admin customer/subscription journeys, lifecycle truth, and supported actions, with all four mapped requirements verified and 23 automated acceptance checks.
+**Next milestone:** None selected. The maintainer will choose future scope after the workspace closeout; v1.63 does not authorize additional UI cleanup or new billing capability work.
 
-## Current Milestone: v1.63 Admin and Portal UI refinement
+## Shipped Milestone: v1.63 Admin and Portal UI refinement (**shipped & archived 2026-10-09**)
 
-**Goal:** Deliver a coherent, readable, responsive, and trustworthy baseline across existing Admin and Portal journeys and the example host's billing entry and return paths, with automated acceptance and bounded inspection of current rendered results.
+**Goal (achieved):** Deliver a coherent, readable, responsive, and trustworthy baseline across existing Admin and Portal journeys and the example host's billing entry and return paths, with automated acceptance and bounded inspection of current rendered results.
 
-**Target features:**
-- Refine all 21 Admin routes and embedded operator actions, and all seven Portal pages, four POST paths, and named host billing/auth-return seams.
-- Serve engineers and support/billing operators equally in Admin; keep customers and their authorized company representatives in the customer Portal under a separate permission boundary.
-- Support personal, organization/custom, and mixed billables through one Portal with compatible personal defaults and an optional host resolver plus fresh per-action authorizer. The host owns account selection, membership, and policy; actor, billable, Customer, processor, and target remain distinct.
-- Correct existing UI-derived billing truth, scope, navigation, feedback, secure-field wiring, and exact provider identity; preserve provider-specific capabilities and do not add new billing-engine or provider features.
-- Establish shared visual roles while preserving Admin identity and customer host branding. Prove keyboard, mobile, theme, focus, motion, accessibility, asset delivery, and representative route/state behavior in the owning slices.
-- Keep local implementations understandable, retain official payment SDK boundaries, reuse deterministic browser/test tooling, and leave a working feedback preview after bounded automated acceptance.
+**Delivered:** Personal, organization, and mixed Portal contexts use fresh host policy; Admin, Portal, and checkout actions revalidate exact scope and target; billing state and outcomes remain capability-explicit; and mounted routes, served assets, documentation, accessibility, and narrow layouts have repeatable evidence. No new billing engine or processor capability was added.
 
-**Reopen decision:** explicit strategy change for the existing adopter-facing Admin and customer Portal surfaces, based on the accepted maintainer request and source findings recorded in the October 2026 scope brief. This is a bounded refinement of existing journeys, not a general design-system ratchet or approval for new billing capabilities.
+**Verification:** Override closeout. The audit scored 34/34 requirements, 7/7 phases, 5/5 integration seams, and 4/4 E2E flows with zero blockers. All phase verifications passed. Four items were newly acknowledged at closeout; see `STATE.md` Deferred Items and the v1.63 audit archive.
 
-**Guardrails:** Provider-owned pages stay external boundaries; preserve personal-only installs, existing host ownership, server authorization, locked legal/replay wording, provider-specific cancellation and checkout behavior, public Portal tokens, CSP/SRI, alternate mounts, and package asset contracts. No forced organization model, universal account picker/roles, operator impersonation, dynamic processor routing, framework migration, custom card inputs, paid visual judge, or broad CI rearchitecture.
+**Guardrails retained:** Host-owned account selection and policy, separate actor/billable/Customer/provider identity, supported provider SDK boundaries, and existing package asset and mount contracts remain in force.
 
 ## Shipped Milestone: v1.62 Release Integration & Repository Hygiene (**shipped & archived 2026-09-18**)
 
@@ -653,9 +647,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 - **E2E Automation:** Comprehensive, non-flakey Playwright tests covering the happy-path journey (install, onboarding, checkout).
 - **Adoption DX Docs:** Clear guides with a simple "Start Here" DX summary at the top.
 
-## Current State
-
-**v1.57 — Admin Operator Control Plane (SEED-004 M1) is in flight (opened 2026-07-19, Phases 209–211).** Phase 209 (Reign Subscriptions list + detail CSS coordination) complete 2026-07-19 — `subscriptions_live.ex` recomposed onto the canonical spine (single StatusBadge verdict, one invoice-queue CTA, 4-stat money-at-risk StatStrip, five bespoke bands removed, compact `ax-stack-xs` / `ax-chip.ax-label` cells with no in-cell actions), the shared-CSS coordination with the out-of-scope subscription **detail** page resolved via a D-04 grep-gate + PNG parity check, tests migrated to the post-reign shape (12/12 green), and both generated artifacts (`accrue_admin.css`, `copy_strings.json`) rebuilt. Verified 12/12 must-haves, validating REIGN-01, REIGN-02, COMP-01. Next: Phase 210 (Reign Home + certify answer-first IA).
+## Archived context
 
 **v1.55 — OSS Quality Evaluation & Hardening Roadmap shipped & archived 2026-07-03.** Phase 201 produced the evidence-backed software-quality audit at `.planning/milestones/v1.55-phases/201-software-quality-evaluation/201-SOFTWARE-QUALITY-AUDIT.md`, verified 8/8 must-haves, and validated QLT-01 through QLT-05. Phase 202 produced the focused CI/CD performance and determinism audit at `.planning/milestones/v1.55-phases/202-ci-cd-performance-and-determinism-audit/202-CI-CD-PERFORMANCE-AUDIT.md`, verified 11/11 must-haves, and validated CI-01 through CI-05 with static topology evidence, explicit metrics-needed boundaries, provider proof classification, and Phase 204-ready handoff rows. Phase 203 produced the accepted database schema contract ADR at `.planning/milestones/v1.55-phases/203-database-schema-contract-adr/203-DB-SCHEMA-CONTRACT-ADR.md`, verified 5/5 must-haves, validated DB-01 through DB-04, kept `billing` as the default Accrue-owned Postgres schema, preserved explicit `public`, rejected a default `accrue` rename for v1.55, and handed schema-prefix hardening checks to Phase 204. Phase 204 produced the ranked hardening roadmap at `.planning/milestones/v1.55-phases/204-ranked-hardening-roadmap/204-HARDENING-ROADMAP.md`, verified 12/12 must-haves, validated RD-01 through RD-04, and grouped future hardening work around public truth, evaluator proof, provider semantics, release safety, CI baseline data, schema guards, package listing trust, host browser setup, release-gate cleanup, and portal readiness. The milestone stayed audit/ADR/roadmap-only: no product behavior, public API, DB default, CI topology, release automation, runtime UI, CSS, route, source, workflow, script, docs mirror, example host, or package metadata changes.
 
@@ -686,26 +678,15 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] Make existing Admin customer, subscription, invoice, payment, recovery, event, webhook, coupon, promotion-code, and Connect journeys readable, scoped, and truthful about observed state, amount, currency, dates, eligibility, and action results.
-- [ ] Make existing customer checkout and Portal self-service responsive and capability-aware, with visible outcomes, secure Hosted Fields lifecycle, safe host return, and no unsupported claims about access, payments, retention, or provider behavior.
-- [ ] Close route and interaction coverage with deterministic state/scope/browser evidence, inspected current renders, accurate assets/copy/docs, and a retained preview isolated from mutation/reset proof.
+- No active requirements. The next milestone has not been selected.
 
-### Validated v1.63 (Phase 233 complete 2026-10-07)
+### Validated v1.63 (Phases 233–239 complete 2026-10-09)
 
-- ✓ Establish a current-source inventory and shared visual direction across real Admin and Portal consumers, preserving package identity and host branding. — Phase 233 (BASE-01, SYS-01, SYS-02)
-- ✓ Add optional host billable resolution and fresh per-action authorization; preserve personal defaults, pin forms to exact Customer/provider identity, and keep human actors separate from billed entities. — Phase 233 (POR-08, SAFE-02, SAFE-03)
-- ✓ Demonstrate personal, custom, and mixed host adoption in the canonical example and executable adopter documentation. — Phase 233 (SHIP-04)
+- ✓ Deliver scoped and capability-explicit Admin, Portal, and checkout journeys while preserving host-owned authorization, exact billing identity, and provider boundaries. — Phases 233–238 (34 requirements)
+- ✓ Cover route, interaction, served-asset, documentation, accessibility, responsive, and cross-surface behavior with repeatable executable evidence. — Phase 239
+- ✓ Make deterministic automated acceptance and zero-human UAT the default for future phases whenever recurring evidence can establish the claim.
 
-Verification passed with zero unverified behavior. The Portal and host suites passed 72 and 219 tests; browser lanes passed 27 default cases and 4 Braintree cases, with 3 existing intentional default-suite skips. The inherited UI refinements remain in the owning route phases, as recorded in `233-UI-DISPOSITION.md`.
-
-### Validated v1.63 (Phase 234 complete 2026-10-07)
-
-- ✓ Distinguish subscription lifecycle from missing ancillary observations without inventing inactive state. — Phase 234 (ADM-01)
-- ✓ Search and navigate customers, subscriptions, and related records under the current owner scope while preserving valid return context. — Phase 234 (ADM-03)
-- ✓ Offer only eligible subscription actions and preserve fresh review, step-up expiry, duplicate protection, and truthful outcome evidence. — Phase 234 (ADM-04)
-- ✓ Preserve owner/customer denials and forged-action protections without exposing foreign records or payment-token data. — Phase 234 (SAFE-01)
-
-Verification passed with 18/18 truths verified and zero behavior unverified. All 23 acceptance checks are automated; the real database-backed search, step-up, accessibility, computed readability, and narrow-layout checks run in merge-blocking CI.
+All seven phase verifications passed. The milestone audit scored 34/34 requirements, 5/5 integration seams, and 4/4 E2E flows with zero blockers. Four pre-close items were acknowledged; see `.planning/milestones/v1.63-MILESTONE-AUDIT.md` and `STATE.md` Deferred Items.
 
 ### Validated v1.62 (Phase 229 complete 2026-09-15)
 
@@ -931,7 +912,7 @@ Admin global search — 4/4 satisfied.
 | Run Braintree checkout browser proof in a separate test-configured process from the normal Fake browser lane. | ✓ Good — Phase 233 aligns the LocalSession provider contract with deterministic SDK proof, with both lanes wired into CI and local full verification. |
 | Keep global search bounded and owner-scoped, and prove real asynchronous Repo completion in the existing merge-blocking browser lane. | ✓ Good — Phase 234 verifies query completion, scoped navigation, and stale-result removal against the real Repo pool. |
 | Recheck actor, scope, target, eligibility, and material action facts immediately before dispatch; block blind retries when provider outcomes are uncertain. | ✓ Good — Phase 234 covers the reviewed dispatch boundary and evidence-specific outcomes. |
-| Shift testable acceptance into deterministic executable evidence and skip confirmation-only UAT when that evidence passes. | ✓ Good — Phase 234 records 23 automated acceptance checks and zero behavior unverified, with recurring checks wired into CI. |
+| Shift testable acceptance into deterministic executable evidence and skip confirmation-only UAT when that evidence passes. | ✓ Good — v1.63 made recurring evidence the default across the milestone and records zero-human UAT as the future GSD posture. |
 
 ## Evolution
 
@@ -951,4 +932,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-07 after Phase 234 completion; Phase 235 is next.*
+*Last updated: 2026-10-09 after v1.63 milestone archive; no next milestone has been selected.*

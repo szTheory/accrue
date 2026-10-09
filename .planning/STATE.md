@@ -2,48 +2,45 @@
 gsd_state_version: "1.0"
 milestone: v1.63
 milestone_name: Admin and Portal UI refinement
-current_phase: 239
-current_phase_name: Integrated Quality & Handoff
-current_plan: 5
-status: complete
-stopped_at: Completed and re-verified 239-05-PLAN.md
-last_updated: "2026-10-09T12:18:21.442Z"
+status: Awaiting next milestone
+stopped_at: Phase 239 complete — all phases complete
+last_updated: "2026-10-09T13:56:25.182Z"
 last_activity: 2026-10-09
-last_activity_desc: Phase 239 plan execution and final verification complete
-state_head: 9ea1ddaf5f25fb86d71911aa3c7be12dddcf87d4
+last_activity_desc: Milestone v1.63 completed and archived
+state_head: b113b182503f04c446815e0f67e1facc0a7435ae
 progress:
   total_phases: 7
   completed_phases: 7
   total_plans: 45
   completed_plans: 45
   percent: 100
+current_phase: 239
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-10-07)
+See: `.planning/PROJECT.md` (updated 2026-10-09)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 239 — Integrated Quality & Handoff
+**Current focus:** Plan the next milestone when the maintainer selects its scope; none is active.
 **Progress:** [██████████] 100% (7 of 7 milestone phases complete)
 **Planned work completed:** 45/45 plans across Phases 233–239.
 
 ## Current Position
 
-Phase: 239 (Integrated Quality & Handoff) — COMPLETE
-Current Plan: 5
-Total Plans in Phase: 5
-Status: Phase complete — verification passed
-Last activity: 2026-10-09 — Phase 239 completed and re-verified
+Phase: Milestone v1.63 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-09 — Milestone v1.63 completed and archived
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 78
+- Total plans completed: 83
 - Average duration: —
 - Total execution time: —
 
@@ -64,6 +61,7 @@ Last activity: 2026-10-09 — Phase 239 completed and re-verified
 | 236 | 6 | - | - |
 | 237 | 8 | - | - |
 | 238 | 5 | - | - |
+| 239 | 5 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -363,13 +361,19 @@ None yet.
 
 ## Deferred Items
 
-| Category | Item | Status |
-|---|---|---|
-| requirement | HOST-01..03 | Deferred at v1.60 override closeout |
-| requirement | READY-01..02 | Deferred at v1.60 override closeout |
-| seed | SEED-008-mailglass-downstream-major-cap | dormant — acknowledged and deferred at v1.62 override closeout (2026-09-18) |
-| UI refinement | Phase 233 inherited Portal spacing/type/theme targets and narrow Admin density | Follow up in Phases 235/236 and 234/237; see 233-UI-DISPOSITION.md |
-| archived metadata | Extra executable-UAT probe starting at Phase 218 lacks a deterministic completion date | Outside configured CI scope; current CI self-test, opted-in scan, and all-since-229 checks pass |
+Items acknowledged and deferred at milestone close, most recent first:
+
+| Category | Item | Status | Deferred At | Milestone |
+|---|---|---|---|---|
+| requirement | HOST-01..03 | Deferred at v1.60 override closeout | — | v1.60 |
+| requirement | READY-01..02 | Deferred at v1.60 override closeout | — | v1.60 |
+| seed | SEED-008-mailglass-downstream-major-cap | dormant — acknowledged and deferred at v1.62 override closeout | 2026-09-18 | v1.62 |
+| UI refinement | Phase 233 inherited Portal spacing/type/theme targets and narrow Admin density | Follow up in Phases 235/236 and 234/237; see 233-UI-DISPOSITION.md | — | — |
+| archived metadata | Extra executable-UAT probe starting at Phase 218 lacks a deterministic completion date | Outside configured CI scope; current CI self-test, opted-in scan, and all-since-229 checks pass | — | — |
+| seeds | SEED-008 | dormant | 2026-10-09 | v1.63 |
+| verification_gaps | 239/239-VERIFICATION-INITIAL.md | gaps_found | 2026-10-09 | v1.63 |
+| verification_gaps | v1.32/099-VERIFICATION.md | gaps_found | 2026-10-09 | v1.63 |
+| deferred_items | 235/deferred-items.md: Deferred Items — Phase 235 Plan 01 — `accrue_admin/lib/accrue_admin/live/subscription_live.ex:172` emits an existing compiler warning because `handle_event/3` clauses are not grouped. This is unrelated to the mounted checkout hook and browser spec. — The host test application emits an existing `ex_money` warning about automatically starting the exchange rate service. This is unrelated to the mounted checkout hook and browser spec. | acknowledged | 2026-10-09 | v1.63 |
 
 ## Post-v1.48 Pause Rule
 
@@ -393,7 +397,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-09T12:18:21.350Z
-Stopped at: Completed and re-verified 239-05-PLAN.md
+Stopped at: Phase 239 complete — all phases complete
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -523,5 +527,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Phase 239 is complete: 5/5 plans, 7/7 milestone phases, and 66/66 verification must-haves. Stable in-scope acceptance is automated; no routine human UAT is required. Remote CI and live-provider outcomes remain unobserved.
-- GSD recommends starting a new milestone (`$gsd-new-milestone`); define its goal before planning begins.
+- Start the next milestone with /gsd-new-milestone
