@@ -1274,13 +1274,15 @@ defmodule AccrueAdmin.Copy do
   @doc "Helper line above the webhooks table — plain-language JTBD framing."
   def webhooks_retry_selected_helper,
     do:
-      "Events that failed every automatic retry land here. Filter, select the ones to re-run, then Retry selected."
+      "Failed and dead webhook deliveries land here. Select deliveries to review and queue eligible ones for replay."
 
   @doc "Primary selection action on the webhooks list."
-  def webhooks_retry_selected_label, do: "Retry selected"
+  def webhooks_retry_selected_label, do: "Replay selected deliveries"
+
+  def webhooks_retry_queue_label, do: "Queue eligible deliveries"
 
   @doc "Secondary action that dismisses bulk retry confirmation."
-  def webhooks_retry_cancel_label, do: "Cancel"
+  def webhooks_retry_cancel_label, do: "Keep deliveries"
 
   @doc """
   Plural-aware confirm question for retrying selected webhook events.
@@ -1289,9 +1291,9 @@ defmodule AccrueAdmin.Copy do
   def webhooks_retry_confirm_question(count), do: webhooks_retry_confirm_question(count, [])
 
   def webhooks_retry_confirm_question(count, _opts) do
-    word = if count == 1, do: "webhook event", else: "webhook events"
+    word = if count == 1, do: "delivery", else: "deliveries"
 
-    "Retry #{count} #{word}? They failed every automatic retry — retrying runs them through processing again."
+    "Replay #{count} selected #{word}? Only deliveries still eligible when confirmed will be queued. Queue acceptance does not mean processing is complete."
   end
 
   @doc "Guard flash when Retry selected is triggered with nothing selected."
@@ -1299,9 +1301,25 @@ defmodule AccrueAdmin.Copy do
 
   @doc "Success flash after retrying selected events (plural-aware)."
   def webhooks_retry_success(count) do
-    word = if count == 1, do: "event", else: "events"
-    "Retrying #{count} #{word}…"
+    word = if count == 1, do: "delivery", else: "deliveries"
+    "Queued #{count} #{word}."
   end
+
+  def webhooks_retry_result(%{queued: queued, skipped: skipped, failed: failed}) do
+    cond do
+      queued > 0 ->
+        "Queued #{queued} #{plural(queued, "delivery", "deliveries")}. #{skipped} skipped; #{failed} failed."
+
+      failed > 0 ->
+        "No deliveries were queued. #{skipped} skipped; #{failed} failed."
+
+      true ->
+        "No eligible deliveries were queued. #{skipped} skipped; 0 failed."
+    end
+  end
+
+  defp plural(1, singular, _plural), do: singular
+  defp plural(_count, _singular, plural), do: plural
 
   def step_up_submit_label, do: "Verify identity"
 

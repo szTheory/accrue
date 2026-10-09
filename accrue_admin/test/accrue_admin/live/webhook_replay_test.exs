@@ -25,6 +25,13 @@ defmodule AccrueAdmin.WebhookReplayTest do
 
     @impl Accrue.Auth
     def actor_id(user), do: user[:id]
+
+    @impl Accrue.Auth
+    def step_up_challenge(_user, _action), do: %{kind: :totp, message: "Verify webhook replay"}
+
+    @impl Accrue.Auth
+    def verify_step_up(_user, %{"code" => "123456"}, _action), do: :ok
+    def verify_step_up(_user, _params, _action), do: {:error, :invalid_code}
   end
 
   setup do
@@ -65,7 +72,9 @@ defmodule AccrueAdmin.WebhookReplayTest do
     {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
     _ = render_click(element(view, "[data-role='replay-single']"))
-    html = render_click(element(view, "[data-role='confirm-replay']"))
+    challenge = render_click(element(view, "[data-role='confirm-replay']"))
+    assert challenge =~ "Step-up required"
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
     assert html =~ "Webhook replay requested."
 
     updated = TestRepo.get!(WebhookEvent, webhook.id)
@@ -86,7 +95,7 @@ defmodule AccrueAdmin.WebhookReplayTest do
 
   test "selection-driven retry confirms once and records one admin audit event", %{
     conn: conn,
-    bulk_webhooks: bulk_webhooks
+    webhook: webhook
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
@@ -99,13 +108,20 @@ defmodule AccrueAdmin.WebhookReplayTest do
         :id
       )
 
-    # Select all visible matching rows, click Retry selected, confirm.
-    render_click(element(view, "[data-role='toggle-all']"))
-    render_click(element(view, "[data-role='bulk-action']"))
-    # bulk-action notifies the parent via send/2 -> handle_info.
-    _ = render(view)
-    html = render_click(element(view, "[data-role='confirm-retry-selected']"))
-    assert html =~ "Retrying"
+    # Exercise one selected row through the parent bulk-selection message.
+    send(view.pid, {:data_table_bulk_action, "retry_selected", [webhook.id]})
+    confirmation = render(view)
+    assert confirmation =~ "Only deliveries still eligible when confirmed will be queued"
+    assert confirmation =~ "Queue acceptance does not mean processing is complete"
+    assert confirmation =~ "Queue eligible deliveries"
+
+    challenge = render_click(element(view, "[data-role='confirm-retry-selected']"))
+    assert challenge =~ "Step-up required"
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :dead
+
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+    assert html =~ "Queued 1 delivery"
+    refute html =~ "processed"
 
     audit_count_after =
       TestRepo.aggregate(
@@ -116,15 +132,30 @@ defmodule AccrueAdmin.WebhookReplayTest do
 
     assert audit_count_after == audit_count_before + 1
 
-    webhook_ids = Enum.map(bulk_webhooks, & &1.id)
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
+  end
 
-    blocked_count =
-      from(webhook in WebhookEvent,
-        where: webhook.id in ^webhook_ids and webhook.status in [:failed, :dead]
-      )
-      |> TestRepo.aggregate(:count, :id)
+  test "rejected bulk step-up leaves the selected delivery untouched and records no replay completion",
+       %{
+         conn: conn,
+         webhook: webhook
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/webhooks?status=dead")
+    send(view.pid, {:data_table_bulk_action, "retry_selected", [webhook.id]})
+    _ = render(view)
+    _ = render_click(element(view, "[data-role='confirm-retry-selected']"))
 
-    assert blocked_count == 0
+    html = render_submit(view, "step_up_submit", %{"code" => "000000"})
+
+    assert html =~ "Step-up verification failed"
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :dead
+
+    assert TestRepo.aggregate(
+             from(event in Event, where: event.type == "admin.webhook.bulk_replay.completed"),
+             :count,
+             :id
+           ) == 0
   end
 
   defp insert_webhook(attrs) do
