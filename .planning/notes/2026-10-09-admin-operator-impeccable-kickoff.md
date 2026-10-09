@@ -13,6 +13,8 @@ The maintainer explicitly requested an **Accrue** Admin/operator UI cleanup usin
 
 **Subsequent activation, 2026-10-09:** The maintainer invoked `$gsd-new-milestone Admin Operator UI Cleanup` and approved the compact v1.64 scope/version recommendation, adding one bounded multi-lens due diligence pass. This historical stocktake is now consumed by the active kickoff. [Focused diligence](../research/v1.64/) supplements it; requirements and roadmap retain their confirmation gates. The original pre-kickoff statements below describe the stocktake's state at capture, not a continuing activation block.
 
+**Kickoff complete, 2026-10-09:** All 18 requirements and the concrete four-phase roadmap are now approved. The current next command is `$gsd-plan-phase 240`; use [the decision summary](../research/v1.64/SUMMARY.md) and [approved roadmap](../ROADMAP.md). No further kickoff, diligence or initialization interview is needed.
+
 ## Settled intent and continuity
 
 - Refine the existing operator interface toward familiar controls, clear task and information hierarchy, readable typography, coherent spacing, restrained state color, and consistent billing language. Serve common support work and deeper engineering investigation together.

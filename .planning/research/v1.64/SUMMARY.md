@@ -2,11 +2,12 @@
 milestone: v1.64
 name: Admin Operator UI Cleanup
 date: 2026-10-09
-status: diligence-complete-requirements-approved-roadmap-pending
+status: milestone-initialized-ready-to-plan-phase-240
 review_type: bounded-three-lens-upstream-review
 scope_version_approved: true
 requirements_approved: true
-roadmap_approved: false
+roadmap_approved: true
+roadmap_created: true
 ---
 
 # v1.64 upstream decisions and delivery direction
@@ -57,25 +58,27 @@ The maintainer approved v1.64's Admin-only scope/version, then explicitly reques
 7. The pixel workflow's any-PNG gate is fail-open for deletion of the entire baseline set. Strengthen its expected-set contract in the existing owner; don't demote/skip pixels.
 8. A page non-GET HTTP collector does not establish absence of LiveView mutations. Preserve the narrower claim or prove state/dispatch/audit invariants in disposable fixtures.
 
-## Recommended four-slice order (roadmap approval pending)
+## Approved four-slice order
 
-| Expected phase | Slice | First-order work and acceptance |
+| Phase | Slice | First-order work and acceptance |
 |---|---|---|
 | 240 | Shared system and real exemplars | Record incumbent roles/exceptions and user-facing vocabulary; mount current invoice list/detail/review; fix owning shared layout/control rules; include theme/focus/busy/served-assets and expected-snapshot checks needed by the exemplar. |
 | 241 | Billing operator journeys | Propagate through customer/subscription/invoice/payment/recovery; close truthful-destination and scoped return/window gaps; preserve self-contained action facts and existing safety evidence. |
 | 242 | Investigation and remaining surfaces | Events/webhooks/catalog/Connect and shell/search; exact diagnostic disclosure, events-versus-deliveries, bounded relationships/returns, changing-state and keyboard acceptance. |
 | 243 | Integrated evidence and feedback preview | Reconcile current coverage against the existing 21-route/registry owners; inspect final changed compositions within the budget, update justified reviewed Linux goldens, and leave reachable preview/remaining-limits handoff. |
 
-These are recommendations, not approved phases. Every phase owns acceptance with its changes; Phase 243 aggregates closure. It must not be the first owner of authorization, keyboard, responsive or served-asset proof.
+The maintainer approved the concrete [roadmap](../../ROADMAP.md) on 2026-10-09, with all 18 requirements mapped exactly once. Every phase owns acceptance with its changes; Phase 243 aggregates closure. It must not be the first owner of authorization, keyboard, responsive or served-asset proof. Primary mappings and complete success criteria live in that roadmap and [REQUIREMENTS.md](../../REQUIREMENTS.md).
 
 ## Settled, deferred and reopening rules
 
-- **Settled:** scope/version approval, Admin-only refinement, equal operator audiences, incumbent identity, code-first Impeccable setup, four-slice recommendation, zero required human UAT target and optional subjective feedback, existing acceptance owners, no paid evaluator.
+- **Settled:** scope/version/requirements/roadmap approval, Admin-only refinement, equal operator audiences, incumbent identity, code-first Impeccable setup, four-slice order, zero required human UAT target and optional subjective feedback, existing acceptance owners, no paid evaluator.
 - **Deferred:** Portal, core diagnosis/causality/new rooms (SEED-004 M2/M3), provider expansion/fidelity runs, global CI redesign, exhaustive snapshot matrix, unrelated release windows and historical verification debt. SEED-003 is a bounded hygiene constraint; its old release campaign is not new scope. Seeds remain unmodified.
 - **Delivery evidence outstanding:** fresh mounted candidates, actual input/zoom methods and limitations, controlled busy/reconnect cases, current served asset digests, selected golden/mask changes and execution outcomes.
-- **Owner decisions outstanding:** roadmap approval, as required by `gsd-new-milestone`. All 18 requirements were approved on 2026-10-09. No new product interview or aesthetic choice is needed.
+- **Owner decisions outstanding:** none at kickoff. All 18 requirements and the concrete four-phase roadmap were approved on 2026-10-09. No new product interview or aesthetic choice is needed.
 - **Reopen only for:** a named new defect, safety/behavior failure, changed task requirement, or explicit owner feedback. Preserve the original review budget; do not reset it by renaming the polish task. Necessary repair of a failed behavioral gate is not another aesthetic round.
 
 ## Continuation checkpoint
 
-The full approved list is in [REQUIREMENTS.md](../../REQUIREMENTS.md); the maintainer confirmed all 18 items on 2026-10-09. Generate the roadmap from them without repeating this research or requirements confirmation. Continue numbering at 240 and preserve v1.63's archive. Once roadmap approval completes, report the actual next command (`$gsd-plan-phase 240` expected). No fresh new-milestone invocation is necessary mid-checkpoint.
+The full approved list is in [REQUIREMENTS.md](../../REQUIREMENTS.md); the maintainer confirmed all 18 items and the concrete [roadmap](../../ROADMAP.md) on 2026-10-09. Phases 240–243 map 18/18 requirements exactly once. Milestone kickoff is complete. Next command: `$gsd-plan-phase 240`. Preserve v1.63's archive, use the recorded decisions, and continue without recreating the roadmap or repeating research, requirements/roadmap confirmation, or Impeccable init. A context clear is safe; these files retain the delivery and verification signal.
+
+**Codex SDK dispatch:** Use `GSD_RUNTIME=codex` for GSD model/agent resolution calls in Codex sessions. The installed CLI otherwise resolved Claude models during this kickoff; the explicit runtime correctly resolved the roadmapper to the project's Codex model and effort. This is a per-command runtime selection, not a project/global config change.

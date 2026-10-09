@@ -1,7 +1,7 @@
 # Requirements: Accrue v1.64 Admin Operator UI Cleanup
 
 **Defined:** 2026-10-09
-**Status:** Approved by maintainer on 2026-10-09 — roadmap creation/approval pending.
+**Status:** Requirements and four-phase roadmap approved by maintainer on 2026-10-09; implementation not started.
 **Core value:** A Phoenix developer can install Accrue and its companion Admin and launch subscription billing without avoidable integration or operational risk.
 
 ## Milestone requirements
@@ -72,30 +72,30 @@ No new future capability is promoted by this cleanup. SEED-004 diagnosis/causali
 
 ## Traceability
 
-Phase mapping follows requirements confirmation and roadmap creation. New numbering starts at 240; the four-slice recommendation in the diligence summary is not an approved roadmap.
+Each approved requirement has one primary phase owner in the approved roadmap. Shared safety, accessibility, responsive/theme, language, asset and acceptance obligations also apply to every affected later delivery slice without duplicating ownership.
 
 | Requirement | Phase | Status |
 |---|---|---|
-| DSN-01 | Not assigned | Pending |
-| DSN-02 | Not assigned | Pending |
-| DSN-03 | Not assigned | Pending |
-| DSN-04 | Not assigned | Pending |
-| DSN-05 | Not assigned | Pending |
-| JRN-01 | Not assigned | Pending |
-| JRN-02 | Not assigned | Pending |
-| JRN-03 | Not assigned | Pending |
-| JRN-04 | Not assigned | Pending |
-| JRN-05 | Not assigned | Pending |
-| JRN-06 | Not assigned | Pending |
-| JRN-07 | Not assigned | Pending |
-| UXC-01 | Not assigned | Pending |
-| UXC-02 | Not assigned | Pending |
-| EVR-01 | Not assigned | Pending |
-| EVR-02 | Not assigned | Pending |
-| EVR-03 | Not assigned | Pending |
-| EVR-04 | Not assigned | Pending |
+| DSN-01 | Phase 240 | Pending |
+| DSN-02 | Phase 240 | Pending |
+| DSN-03 | Phase 240 | Pending |
+| DSN-04 | Phase 240 | Pending |
+| DSN-05 | Phase 240 | Pending |
+| JRN-01 | Phase 241 | Pending |
+| JRN-02 | Phase 241 | Pending |
+| JRN-03 | Phase 241 | Pending |
+| JRN-04 | Phase 241 | Pending |
+| JRN-05 | Phase 242 | Pending |
+| JRN-06 | Phase 242 | Pending |
+| JRN-07 | Phase 242 | Pending |
+| UXC-01 | Phase 242 | Pending |
+| UXC-02 | Phase 240 | Pending |
+| EVR-01 | Phase 240 | Pending |
+| EVR-02 | Phase 240 | Pending |
+| EVR-03 | Phase 243 | Pending |
+| EVR-04 | Phase 243 | Pending |
 
-**Coverage:** 18 approved requirements; 0 mapped until roadmap creation; 18 deliberately unassigned before roadmap creation.
+**Coverage:** 18/18 approved requirements mapped once in the approved roadmap; 0 orphaned and 0 duplicated. Status remains Pending until implementation and verification.
 
 ---
-*Last updated: 2026-10-09 after maintainer requirements approval; awaiting roadmap creation/approval.*
+*Last updated: 2026-10-09 after maintainer roadmap approval; ready for Phase 240 planning.*

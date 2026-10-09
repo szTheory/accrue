@@ -35,7 +35,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Latest fully shipped milestone: v1.63 — Admin and Portal UI refinement, shipped and archived 2026-10-09.** All seven phases and 34 requirements completed. The milestone delivered scoped, capability-explicit Admin/Portal and checkout journeys, current served evidence, and recurring automated acceptance. Its audit found zero blockers; four pre-close items were explicitly acknowledged and recorded in `STATE.md` Deferred Items.
 
-**Current milestone: v1.64 — Admin Operator UI Cleanup.** On 2026-10-09 the maintainer invoked the named kickoff and approved the compact version/scope recommendation, adding one bounded multi-lens due diligence pass before requirements and roadmap. This explicit strategy decision reopens flagship Admin refinement under the post-v1.48 pause rule. That pass is now complete; the [decision summary](research/v1.64/SUMMARY.md) records alternatives, dispositions, specific source findings, existing proof owners, evidence limits and stopping rules. The [kickoff stocktake](notes/2026-10-09-admin-operator-impeccable-kickoff.md) remains continuity. Reuse completed Impeccable initialization, the established visual identity, and v1.63 safety contracts. Phase numbering continues at 240; the maintainer approved [all 18 requirements](REQUIREMENTS.md) on 2026-10-09. Roadmap creation and approval remain.
+**Current milestone: v1.64 — Admin Operator UI Cleanup.** On 2026-10-09 the maintainer approved scope/version, [all 18 requirements](REQUIREMENTS.md), and the [four-phase roadmap](ROADMAP.md) for Phases 240–243. This explicit strategy decision reopens flagship Admin refinement under the post-v1.48 pause rule. The additional bounded multi-lens diligence is complete; its [decision summary](research/v1.64/SUMMARY.md) records alternatives, dispositions, source findings, existing proof owners, evidence limits and stopping rules. Reuse completed Impeccable initialization, established identity, and v1.63 safety contracts. Milestone kickoff is complete; next command is `$gsd-plan-phase 240`. Do not repeat research or approval interviews.
 
 ## Current Milestone: v1.64 Admin Operator UI Cleanup
 
@@ -47,7 +47,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 - Consistent investigation, webhook, catalog, Connect, navigation, and user-facing domain language across the existing Admin routes.
 - Deterministic interaction, accessibility, served-asset, and selected visual regression coverage in existing owners, plus a usable feedback preview.
 
-**Upstream decision rule:** Conduct one additional focused review across graphic design, UX, information architecture, content, accessibility, motion, implementation seams, and proof. Record alternatives and dispositions; stop when findings no longer change requirements, order, or acceptance. Source candidates require current mounted confirmation before fixes.
+**Upstream decision rule (completed):** One additional focused review covered graphic design, UX, information architecture, content, accessibility, motion, implementation seams, and proof. Alternatives and dispositions are recorded. Stop further upstream scanning unless named new evidence changes requirements, order, or acceptance. Source candidates require current mounted confirmation before fixes.
 
 **Scope boundaries:** Existing `accrue_admin` surfaces and necessary example-host proof/preview seams. No Portal refinement, new core billing or diagnosis capabilities, new rooms, rebrand, dependency migration, or parked paid-AI ratchet revival. SEED-004's delivered M1 is continuity; M2/M3 remain deferred. SEED-003 informs bounded hygiene rather than a separate release campaign.
 
@@ -396,7 +396,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 - [x] **SCM-03..SCM-05** (Phase 118) — Stripe/Fake quantity and subscription-item changes are official, admin surfaces expose supported preview/change actions, and portal/host flows now support bounded plan-change preview and commit semantics.
 - [x] **SCM-06** (Phase 119) — Braintree plan swaps are finalized around the `:plan_resolver` contract, with public docs, host mirrors, and verifier scripts all pinned to the same swap-only boundary.
 
-**Closeout proof:** [milestones/v1.37-ROADMAP.md](milestones/v1.37-ROADMAP.md), [milestones/v1.37-REQUIREMENTS.md](milestones/v1.37-REQUIREMENTS.md), [117-VERIFICATION.md](/Users/dev/projects/accrue/.planning/milestones/v1.37-phases/117-contract-promotion-preview-truth/117-VERIFICATION.md), [118-VERIFICATION.md](/Users/dev/projects/accrue/.planning/milestones/v1.37-phases/118-admin-portal-change-flows/118-VERIFICATION.md), and [119-03-SUMMARY.md](/Users/dev/projects/accrue/.planning/milestones/v1.37-phases/119-braintree-bounded-plan-swap-closeout/119-03-SUMMARY.md). Milestone closeout accepted one known process gap: no dedicated `v1.37` milestone audit artifact was produced before archival.
+**Closeout proof:** [milestones/v1.37-ROADMAP.md](milestones/v1.37-ROADMAP.md), [milestones/v1.37-REQUIREMENTS.md](milestones/v1.37-REQUIREMENTS.md), [117-VERIFICATION.md](milestones/v1.37-phases/117-contract-promotion-preview-truth/117-VERIFICATION.md), [118-VERIFICATION.md](milestones/v1.37-phases/118-admin-portal-change-flows/118-VERIFICATION.md), and [119-03-SUMMARY.md](milestones/v1.37-phases/119-braintree-bounded-plan-swap-closeout/119-03-SUMMARY.md). Milestone closeout accepted one known process gap: no dedicated `v1.37` milestone audit artifact was produced before archival.
 
 ## Prior shipped milestone
 
@@ -410,7 +410,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 - [x] **PROC-22..PROC-23** (Phase 113, verification backfilled by Phase 115) — immediate cancellation is first-party across the shipped slice, while Braintree scheduled-end semantics stay explicit, typed, and provider-honest across runtime labels, docs, and UI copy.
 - [x] **PROC-24** (Phase 114, verification backfilled by Phase 116) — the processor support matrix, package docs, example-host proof docs, and support-contract verifier bundle now repeat one finalized contract and re-fail drift before merge.
 
-**Closeout proof:** [v1.36-v1.36-MILESTONE-AUDIT.md](v1.36-v1.36-MILESTONE-AUDIT.md), [milestones/v1.36-ROADMAP.md](milestones/v1.36-ROADMAP.md), [milestones/v1.36-REQUIREMENTS.md](milestones/v1.36-REQUIREMENTS.md), [113-VERIFICATION.md](/Users/dev/projects/accrue/.planning/milestones/v1.36-phases/113-cancellation-semantics-closure/113-VERIFICATION.md), and [114-VERIFICATION.md](/Users/dev/projects/accrue/.planning/milestones/v1.36-phases/114-contract-drift-gate-closeout/114-VERIFICATION.md).
+**Closeout proof:** [v1.36-v1.36-MILESTONE-AUDIT.md](v1.36-v1.36-MILESTONE-AUDIT.md), [milestones/v1.36-ROADMAP.md](milestones/v1.36-ROADMAP.md), [milestones/v1.36-REQUIREMENTS.md](milestones/v1.36-REQUIREMENTS.md), [113-VERIFICATION.md](milestones/v1.36-phases/113-cancellation-semantics-closure/113-VERIFICATION.md), and [114-VERIFICATION.md](milestones/v1.36-phases/114-contract-drift-gate-closeout/114-VERIFICATION.md).
 
 ## Prior shipped milestone
 
@@ -692,7 +692,7 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- v1.64 shared Admin system and real exemplars; scoped requirements are being defined.
+- v1.64 shared Admin system and real exemplars; all 18 scoped requirements and their phase mappings are approved.
 - v1.64 billing and investigation journeys, coherent language, and responsive interaction.
 - v1.64 automated acceptance and preview handoff; extend recurring proof with each delivery slice.
 
@@ -950,4 +950,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-09 after v1.64 scope/version approval and milestone kickoff.*
+*Last updated: 2026-10-09 after v1.64 requirements/roadmap approval and completed milestone initialization; ready for Phase 240 planning.*

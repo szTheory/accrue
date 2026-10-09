@@ -3,12 +3,13 @@ gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 status: planning
-stopped_at: v1.64 requirements approved — creating roadmap
-last_updated: "2026-10-09T17:19:59Z"
+stopped_at: Milestone v1.64 initialized — ready to plan Phase 240
+last_updated: "2026-10-09T17:36:50Z"
 last_activity: 2026-10-09
-last_activity_desc: v1.64 all 18 requirements approved; creating roadmap
+last_activity_desc: v1.64 four-phase roadmap approved; 18/18 requirements mapped; ready to plan Phase 240
+current_phase: 240
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -23,16 +24,16 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.64 scope/version and [all 18 requirements](REQUIREMENTS.md) approved; bounded diligence complete. Create and confirm the concrete roadmap from the [decision summary](research/v1.64/SUMMARY.md). No repeat stocktake, research, requirements confirmation or Impeccable init.
-**Progress:** [░░░░░░░░░░] 0% (new milestone; phase structure pending approval)
+**Current focus:** Phase 240 — Shared System and Real Billing Exemplar. v1.64 scope/version, [all 18 requirements](REQUIREMENTS.md), and the four-phase [roadmap](ROADMAP.md) are approved; bounded diligence is complete. Run `$gsd-plan-phase 240` using the [decision summary](research/v1.64/SUMMARY.md); no repeat stocktake, research, requirements/roadmap confirmation or Impeccable init.
+**Progress:** [░░░░░░░░░░] 0% (0 of 4 approved milestone phases complete)
 **Planned work completed:** No v1.64 execution plans yet. v1.63 closed at 45/45 plans across Phases 233–239.
 
 ## Current Position
 
-Phase: Not started (roadmap creation)
+Phase: 240 — Shared System and Real Billing Exemplar (first of 4 milestone phases)
 Plan: —
-Status: Creating roadmap
-Last activity: 2026-10-09 — v1.64 all 18 requirements approved
+Status: Ready to plan
+Last activity: 2026-10-09 — v1.64 milestone initialized; roadmap approved with 18/18 requirements mapped
 
 ## Performance Metrics
 
@@ -317,7 +318,7 @@ Last activity: 2026-10-09 — v1.64 all 18 requirements approved
 
 ### Pending Todos
 
-- Finish the already-started `$gsd-new-milestone Admin Operator UI Cleanup`: scope/version and all 18 requirements approved; focused diligence complete. Create the roadmap and collect its approval. Load [SUMMARY.md](research/v1.64/SUMMARY.md) and [REQUIREMENTS.md](REQUIREMENTS.md). First new phase is expected at 240; do not restart kickoff, research, requirements confirmation or Impeccable init.
+- Run `$gsd-plan-phase 240`. The v1.64 kickoff is complete: scope/version, all 18 requirements and Phases 240–243 approved; bounded diligence complete. Load [ROADMAP.md](ROADMAP.md), [REQUIREMENTS.md](REQUIREMENTS.md) and [SUMMARY.md](research/v1.64/SUMMARY.md). Do not recreate the roadmap or repeat kickoff, research, approval interviews or Impeccable init.
 
 ### Deferred / Dormant
 
@@ -394,9 +395,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T17:19:59Z
-Stopped at: v1.64 requirements approved — creating roadmap
-Resume file: .planning/research/v1.64/SUMMARY.md
+Last session: 2026-10-09T17:36:50Z
+Stopped at: Milestone v1.64 initialized — ready to plan Phase 240
+Resume file: .planning/ROADMAP.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -525,5 +526,5 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Review/approve the concrete roadmap when presented. Requirements confirmation and focused diligence are complete; no fresh command or repeated review is needed at this checkpoint.
-- Phase 239/v1.63 are closed. After roadmap approval, the expected next command is `$gsd-plan-phase 240`. Reuse the [kickoff stocktake](notes/2026-10-09-admin-operator-impeccable-kickoff.md); Impeccable init and code-first are settled.
+- Next command: `$gsd-plan-phase 240` — Shared System and Real Billing Exemplar.
+- Phase 239/v1.63 are closed; v1.64 kickoff and all approval gates are complete. Context can be cleared: roadmap, requirements, bounded diligence, automation defaults and stopping rules are recorded. Reuse Impeccable init/code-first and the closed safety contracts; no new interview is needed.
