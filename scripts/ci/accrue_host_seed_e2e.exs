@@ -32,6 +32,7 @@ defmodule AccrueHostSeedE2E do
   ]
   @fixture_org_customer_emails [
     "admin-e2e-alpha-customer@example.test",
+    "admin-e2e-beta-customer@example.test",
     "host-org-checkout@example.test"
   ]
   @fixture_processor_event_ids ["evt_host_browser_replay", "evt_host_browser_first_run"]
@@ -136,6 +137,17 @@ defmodule AccrueHostSeedE2E do
     )
 
     fixture_invoice = insert_fixture_invoice!(admin_denial_customer)
+
+    admin_foreign_customer =
+      insert_org_customer!(admin_org_beta, "admin-e2e-beta-customer@example.test")
+
+    admin_foreign_invoice =
+      insert_fixture_invoice!(
+        admin_foreign_customer,
+        "inv_host_browser_foreign",
+        "HOST-BROWSER-FOREIGN01"
+      )
+
     recovery_subscription = insert_recovery_subscription!(admin_denial_customer)
     connect_account = insert_fixture_connect_account!(admin_org_alpha)
 
@@ -147,6 +159,7 @@ defmodule AccrueHostSeedE2E do
     portal_payment_methods = insert_portal_payment_methods!(portal_customer)
     portal_subscription = insert_portal_subscription!(portal_customer)
     portal_partial_subscription = insert_portal_partial_subscription!(portal_customer)
+
     portal_invoice =
       insert_portal_invoice!(
         portal_customer,
@@ -158,6 +171,7 @@ defmodule AccrueHostSeedE2E do
 
     checkout_session = insert_portal_checkout_session!(portal_customer)
     org_checkout_customer = insert_org_checkout_customer!(host_org_alpha)
+
     org_portal_invoice =
       insert_portal_invoice!(
         org_checkout_customer,
@@ -229,7 +243,9 @@ defmodule AccrueHostSeedE2E do
       tax_invalid_customer_hint: "tax_invalid_e2e_hint",
       admin_org_alpha_slug: admin_org_alpha.slug,
       admin_org_beta_slug: admin_org_beta.slug,
+      admin_org_beta_id: to_string(admin_org_beta.id),
       admin_denial_customer_id: admin_denial_customer.id,
+      admin_beta_invoice_id: to_string(admin_foreign_invoice.id),
       recovery_subscription_id: to_string(recovery_subscription.id),
       admin_denial_payment_method_ids: %{
         in_use_blocked: admin_denial_payment_methods.in_use_blocked.id,
@@ -487,14 +503,14 @@ defmodule AccrueHostSeedE2E do
     |> Repo.update!()
   end
 
-  defp insert_org_customer!(organization) do
+  defp insert_org_customer!(organization, email \\ "admin-e2e-alpha-customer@example.test") do
     %Customer{}
     |> Customer.changeset(%{
       owner_type: "Organization",
       owner_id: to_string(organization.id),
       processor: "fake",
       processor_id: "cus_host_org_" <> String.replace(to_string(organization.id), "-", ""),
-      email: "admin-e2e-alpha-customer@example.test"
+      email: email
     })
     |> Repo.insert!()
   end
@@ -558,15 +574,19 @@ defmodule AccrueHostSeedE2E do
 
   # Deterministic VERIFY-01 invoice row for Admin E2E Alpha org (`accrue-e2e-alpha`).
   # processor_id prefix `inv_host_browser_%` is cleaned in `cleanup_fixture_footprint!/0`.
-  defp insert_fixture_invoice!(%Customer{} = organization_scoped_customer) do
+  defp insert_fixture_invoice!(
+         %Customer{} = organization_scoped_customer,
+         processor_id \\ "inv_host_browser_replay",
+         number \\ "HOST-BROWSER-VERIFY01"
+       ) do
     %Invoice{}
     |> Invoice.changeset(%{
       customer_id: organization_scoped_customer.id,
       subscription_id: nil,
       processor: "fake",
-      processor_id: "inv_host_browser_replay",
+      processor_id: processor_id,
       status: :open,
-      number: "HOST-BROWSER-VERIFY01",
+      number: number,
       currency: "usd",
       total_cents: 1_000,
       metadata: %{},

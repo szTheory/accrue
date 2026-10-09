@@ -130,6 +130,9 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   const invoiceLink = page.locator(`a[href^="/admin/invoices/${fixture.invoice_id}"]`).first();
   await expect(invoiceLink).toBeVisible();
   await expect(invoiceLink).toContainText("HOST-BROWSER-VERIFY01");
+  expect(fixture.admin_beta_invoice_id).toBeTruthy();
+  await expect(page.locator(`a[href^="/admin/invoices/${fixture.admin_beta_invoice_id}"]`)).toHaveCount(0);
+  await expect(page.locator("body")).not.toContainText("HOST-BROWSER-FOREIGN01");
   const asset = await assertCurrentStylesheet(page);
   await page.setViewportSize({ width: 320, height: 800 });
   await assertNoOverflow(page);
@@ -202,11 +205,14 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   expect(returnedUrl.searchParams.get("window")).toBe("30d");
   await assertNoOverflow(page);
 
-  const unknownInvoiceId = "00000000-0000-4000-8000-000000000000";
-  await page.goto(`/admin/invoices/${unknownInvoiceId}?org=${owner}`, { waitUntil: "domcontentloaded" });
+  expect(fixture.admin_org_beta_slug).not.toBe(fixture.admin_org_alpha_slug);
+  expect(fixture.admin_beta_invoice_id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+  expect(fixture.admin_beta_invoice_id).not.toBe(fixture.invoice_id);
+  await page.goto(`/admin/invoices/${fixture.admin_beta_invoice_id}?org=${owner}`, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
   await expect(page.getByLabel("Notifications")).toContainText(/Access restricted/i);
-  await expect(page.locator("body")).not.toContainText(unknownInvoiceId);
+  await expect(page.locator("body")).not.toContainText(fixture.admin_beta_invoice_id);
+  await expect(page.locator("body")).not.toContainText("HOST-BROWSER-FOREIGN01");
 
   fs.mkdirSync(captureDir, { recursive: true });
   const manifest = {
