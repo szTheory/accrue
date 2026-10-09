@@ -4,18 +4,18 @@ milestone: v1.63
 milestone_name: Admin and Portal UI refinement
 current_phase: 238
 current_phase_name: Admin Events, Webhooks & Remaining Billing Surfaces
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 238-02-PLAN.md
-last_updated: "2026-10-09T03:45:04.361Z"
+stopped_at: Completed 238-03-PLAN.md
+last_updated: "2026-10-09T03:49:01.315Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 235 complete, transitioned to Phase 238
-state_head: d8a721320da2b8e4694c0b589b6d59a6405a2a58
+state_head: b01f3bc323da6e78854992e67f6523a57f623f16
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 40
-  completed_plans: 37
+  completed_plans: 38
   percent: 71
 ---
 
@@ -34,7 +34,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 ## Current Position
 
 Phase: 238 (Admin Events, Webhooks & Remaining Billing Surfaces) — IN PROGRESS
-Current Plan: 3
+Current Plan: 4
 Total Plans in Phase: 5
 Status: Ready to execute
 Last activity: 2026-10-09 — Completed Phase 238 Plan 01
@@ -142,6 +142,7 @@ Last activity: 2026-10-09 — Completed Phase 238 Plan 01
 | Phase 237 P08 | 16min | 2 tasks | 10 files |
 | Phase 238 P01 | 7min | 2 tasks | 5 files |
 | Phase 238 P02 | 12min | 3 tasks | 8 files |
+| Phase 238 P03 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -292,6 +293,8 @@ Last activity: 2026-10-09 — Completed Phase 238 Plan 01
 - [Phase 238]: Only DBConnection.ConnectionError is converted to an unavailable state; backend exception details are never rendered.
 - [Phase 238]: A later-page retry keeps loaded rows and retries the failed cursor with the current filter and owner scope.
 - [Phase 238]: Read failures remain distinct from inaccessible or missing records.
+- [Phase 238]: Coupons and promotion codes are global platform projections; active organization context is preserved in navigation without implying tenant ownership.
+- [Phase 238]: Expected coupon and promotion-code detail read failures render generic unavailable states and retry only local reads.
 
 ### Pending Todos
 
@@ -366,8 +369,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T03:45:04.299Z
-Stopped at: Completed 238-02-PLAN.md
+Last session: 2026-10-09T03:49:01.255Z
+Stopped at: Completed 238-03-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

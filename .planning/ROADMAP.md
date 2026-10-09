@@ -213,7 +213,7 @@ Plans:
 **Wave 1**
 - [x] 238-01-PLAN.md — Safe selected webhook replay and Wave 0 regression seams
 - [x] 238-02-PLAN.md — Event and delivery evidence detail
-- [ ] 238-03-PLAN.md — Coupon and promotion-code inspection
+- [x] 238-03-PLAN.md — Coupon and promotion-code inspection
 - [ ] 238-04-PLAN.md — Connect provider observation and local override
 
 **Wave 2** *(blocked on Wave 1 completion)*

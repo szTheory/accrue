@@ -22,7 +22,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 - [x] **ADM-05**: Operators can review invoice payments/finalization and refunds with the exact amount, currency, and consequence, and distinguish accepted, requires-action, failed, and completed results.
 - [x] **ADM-06**: Operators can review recovery with its time window, owner, and currency intact, while historical failures remain distinct from current billing state.
 - [x] **ADM-07**: Operators can investigate events and webhook deliveries and replay only eligible deliveries with precise evidence, step-up, and honest partial-selection outcomes.
-- [ ] **ADM-08**: Operators can inspect existing coupon, promotion-code, and Connect states and actions without the UI implying unsupported capabilities.
+- [x] **ADM-08**: Operators can inspect existing coupon, promotion-code, and Connect states and actions without the UI implying unsupported capabilities.
 
 ### Checkout
 
@@ -93,7 +93,7 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | ADM-05 | Phase 237 | Complete |
 | ADM-06 | Phase 237 | Complete |
 | ADM-07 | Phase 238 | Complete |
-| ADM-08 | Phase 238 | Pending |
+| ADM-08 | Phase 238 | Complete |
 | CKO-01 | Phase 235 | Complete |
 | CKO-02 | Phase 235 | Complete |
 | CKO-03 | Phase 235 | Complete |
