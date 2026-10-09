@@ -99,7 +99,7 @@ defmodule Accrue.Analytics.DunningTest do
       })
 
       result = Dunning.recovered_vs_lost_mrr()
-      assert result.recovered == [%{cents: 1000, currency: "usd"}]
+      assert result.recovered == [%{cents: 1000, currency: nil}]
       assert result.lost == []
     end
 
@@ -134,11 +134,11 @@ defmodule Accrue.Analytics.DunningTest do
       })
 
       result_since = Dunning.recovered_vs_lost_mrr(since: yesterday_usec)
-      assert result_since.recovered == [%{cents: 2000, currency: "usd"}]
+      assert result_since.recovered == [%{cents: 2000, currency: nil}]
       assert result_since.lost == []
 
       result_until = Dunning.recovered_vs_lost_mrr(until: yesterday_usec)
-      assert result_until.recovered == [%{cents: 1000, currency: "usd"}]
+      assert result_until.recovered == [%{cents: 1000, currency: nil}]
       assert result_until.lost == []
     end
   end

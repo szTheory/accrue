@@ -357,7 +357,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
         <section class="ax-inline-worklist ax-detail-open-invoice-queue" aria-label="Global open invoice queue preview">
           <div class="ax-inline-worklist-copy">
-            <strong>Global open-invoice queue rows</strong>
+            <strong class="ax-type-label">Global open-invoice queue rows</strong>
             <span>Each row opens one invoice record; the full queue link lists every open invoice for review.</span>
           </div>
           <ol :if={@global_open_invoice_queue != []} class="ax-detail-open-invoice-list">
