@@ -4479,6 +4479,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   min-width: 0;
 }
 
+.ax-at-risk-card-identity .ax-heading {
+  overflow-wrap: anywhere;
+}
+
 .ax-at-risk-card-status {
   display: inline-flex;
   align-items: center;

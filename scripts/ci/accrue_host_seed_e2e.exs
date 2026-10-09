@@ -44,6 +44,7 @@ defmodule AccrueHostSeedE2E do
     "sub_host_browser_replay",
     "sub_bt_host_portal_fixture",
     "sub_bt_host_portal_partial",
+    "sub_host_browser_recovery",
     # Plan 04 host edge_states.exs: at-risk and canceling subscriptions
     "sub_e2e_edge_at_risk",
     "sub_e2e_edge_canceling"
@@ -135,6 +136,7 @@ defmodule AccrueHostSeedE2E do
     )
 
     fixture_invoice = insert_fixture_invoice!(admin_denial_customer)
+    recovery_subscription = insert_recovery_subscription!(admin_denial_customer)
     connect_account = insert_fixture_connect_account!(admin_org_alpha)
 
     customer = insert_fixture_customer!(history_user)
@@ -228,6 +230,7 @@ defmodule AccrueHostSeedE2E do
       admin_org_alpha_slug: admin_org_alpha.slug,
       admin_org_beta_slug: admin_org_beta.slug,
       admin_denial_customer_id: admin_denial_customer.id,
+      recovery_subscription_id: to_string(recovery_subscription.id),
       admin_denial_payment_method_ids: %{
         in_use_blocked: admin_denial_payment_methods.in_use_blocked.id,
         replacement_required_default:
@@ -578,6 +581,38 @@ defmodule AccrueHostSeedE2E do
       hosted_url: "https://example.test/e2e-hosted-invoice"
     })
     |> Repo.insert!()
+  end
+
+  defp insert_recovery_subscription!(%Customer{} = customer) do
+    campaign_started_at = DateTime.add(Accrue.Clock.utc_now(), -5 * 86_400, :second)
+
+    subscription =
+      %Subscription{}
+      |> Subscription.force_status_changeset(%{
+        customer_id: customer.id,
+        processor: "fake",
+        processor_id: "sub_host_browser_recovery",
+        status: :past_due,
+        past_due_since: campaign_started_at,
+        dunning_campaign_started_at: campaign_started_at,
+        cancel_at_period_end: false,
+        lock_version: 1,
+        metadata: %{},
+        data: %{}
+      })
+      |> Repo.insert!()
+
+    {:ok, _event} =
+      Events.record(%{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: subscription.id,
+        actor_type: "system",
+        actor_id: "phase237-admin-billing-e2e",
+        data: %{"campaign_anchor" => DateTime.to_iso8601(campaign_started_at)}
+      })
+
+    subscription
   end
 
   defp insert_org_fixture_subscription!(customer, payment_method) do

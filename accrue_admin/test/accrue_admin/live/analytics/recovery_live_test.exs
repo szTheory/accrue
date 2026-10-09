@@ -29,6 +29,13 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   end
 
   setup do
+    # Recovery windows use Accrue.Clock; align the fixed fake clock with the
+    # database's wall-clock inserted_at timestamps for these integration tests.
+    :ok =
+      Accrue.Processor.Fake.advance(
+        DateTime.diff(DateTime.utc_now(), Accrue.Clock.utc_now(), :second)
+      )
+
     prior = Application.get_env(:accrue, :auth_adapter)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
     on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
@@ -103,7 +110,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       # exercise the DISTINCT-(subject_id, campaign_anchor) tuple semantics of
       # Dunning.funnel/1 at the rendering boundary (ground-truth math is enforced
       # by Plan 01's unit tests).
-      now = DateTime.utc_now()
+      now = Accrue.Clock.utc_now()
       anchor_a = DateTime.to_iso8601(now)
       anchor_b = DateTime.to_iso8601(DateTime.add(now, -1, :day))
 
@@ -275,7 +282,10 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     test "window change re-queries KPI values rather than only changing the active button", %{
       conn: conn
     } do
-      ten_days_ago = DateTime.utc_now() |> DateTime.add(-10, :day)
+      ten_days_ago =
+        Accrue.Clock.utc_now()
+        |> DateTime.add(-10, :day)
+        |> then(&%{&1 | microsecond: {elem(&1.microsecond, 0), 6}})
 
       TestRepo.insert!(%Event{
         type: "dunning.recovered",
@@ -315,7 +325,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
   describe "Wave 0 raw recovery event fixtures" do
     test "keeps UTC bounds, event identity, currency, and minor units as stored facts" do
-      reference = DateTime.utc_now()
+      reference = Accrue.Clock.utc_now()
 
       fixtures =
         [7, 30, 90]
@@ -340,7 +350,9 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
         end)
 
       # Two distinct ledger rows at the same UTC instant remain distinguishable.
-      duplicate_timestamp = DateTime.add(reference, -7, :day)
+      duplicate_timestamp =
+        DateTime.add(reference, -7, :day)
+        |> then(&%{&1 | microsecond: {elem(&1.microsecond, 0), 6}})
 
       same_instant =
         insert_raw_recovery_event(
@@ -598,7 +610,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       conn: conn
     } do
       fixture = recovery_navigation_fixture()
-      insert_raw_recovery_event(fixture.allowed_recovered.id, DateTime.utc_now(), nil, 9_999)
+      insert_raw_recovery_event(fixture.allowed_recovered.id, Accrue.Clock.utc_now(), nil, 9_999)
 
       conn =
         Phoenix.ConnTest.init_test_session(conn,
@@ -710,6 +722,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   end
 
   defp insert_raw_recovery_event(subject_id, inserted_at, currency, cents) do
+    inserted_at = %{inserted_at | microsecond: {elem(inserted_at.microsecond, 0), 6}}
     data = %{"mrr_value_cents" => cents}
     data = if is_nil(currency), do: data, else: Map.put(data, "currency", currency)
 
@@ -746,13 +759,13 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     allowed_at_risk =
       insert_subscription(allowed_customer, %{
         status: :past_due,
-        dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -2 * 86_400, :second)
+        dunning_campaign_started_at: DateTime.add(Accrue.Clock.utc_now(), -2 * 86_400, :second)
       })
 
     denied_at_risk =
       insert_subscription(denied_customer, %{
         status: :past_due,
-        dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -3 * 86_400, :second)
+        dunning_campaign_started_at: DateTime.add(Accrue.Clock.utc_now(), -3 * 86_400, :second)
       })
 
     record_dunning_event("dunning.recovered", allowed_recovered, %{

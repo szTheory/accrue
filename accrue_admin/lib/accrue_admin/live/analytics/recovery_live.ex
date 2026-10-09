@@ -228,19 +228,19 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
   defp parse_window(_), do: "30d"
 
   defp window_bounds("7d") do
-    now = DateTime.utc_now()
+    now = Accrue.Clock.utc_now()
     since = DateTime.add(now, -7 * 86_400, :second)
     {since, now}
   end
 
   defp window_bounds("30d") do
-    now = DateTime.utc_now()
+    now = Accrue.Clock.utc_now()
     since = DateTime.add(now, -30 * 86_400, :second)
     {since, now}
   end
 
   defp window_bounds("90d") do
-    now = DateTime.utc_now()
+    now = Accrue.Clock.utc_now()
     since = DateTime.add(now, -90 * 86_400, :second)
     {since, now}
   end
