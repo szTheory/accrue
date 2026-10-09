@@ -1,8 +1,8 @@
 ---
 phase: 239-integrated-quality-handoff
-verified: 2026-10-09T12:00:36Z
-status: gaps_found
-score: 62/66 must-haves verified
+verified: 2026-10-09T12:14:57Z
+status: passed
+score: 66/66 must-haves verified
 covered_files:
   - .github/workflows/ci.yml
   - .planning/phases/239-integrated-quality-handoff/239-01-PLAN.md
@@ -13,9 +13,13 @@ covered_files:
   - .planning/phases/239-integrated-quality-handoff/239-03-SUMMARY.md
   - .planning/phases/239-integrated-quality-handoff/239-04-PLAN.md
   - .planning/phases/239-integrated-quality-handoff/239-04-SUMMARY.md
+  - .planning/phases/239-integrated-quality-handoff/239-05-PLAN.md
+  - .planning/phases/239-integrated-quality-handoff/239-05-SUMMARY.md
   - .planning/phases/239-integrated-quality-handoff/239-COMPONENT-PARITY.md
   - .planning/phases/239-integrated-quality-handoff/239-COVERAGE.md
   - .planning/phases/239-integrated-quality-handoff/239-HANDOFF.md
+  - .planning/phases/239-integrated-quality-handoff/239-SCOPE-DISPOSITION.md
+  - .planning/phases/239-integrated-quality-handoff/239-VERIFICATION-INITIAL.md
   - .planning/phases/239-integrated-quality-handoff/239-REVIEW-DISPOSITION.md
   - .planning/phases/239-integrated-quality-handoff/239-REVIEW.md
   - .planning/phases/239-integrated-quality-handoff/239-SECURITY.md
@@ -28,40 +32,19 @@ covered_files:
   - examples/accrue_host/README.md
   - examples/accrue_host/e2e/phase239-integrated-quality.spec.js
   - examples/accrue_host/test/accrue_host_web/phase239_route_coverage_contract_test.exs
-covered_digest: "v3:sha256:7e90d9d43ad0ad7a8722450fac32ddea49c8435c4c6b252c4390a598a0d23085"
+  - scripts/ci/verify_package_docs.sh
+covered_digest: "pending-fingerprint"
 behavior_unverified: 0
-overrides_applied: 0
-gaps:
-  - truth: "Plan 239-04 feedback-preview controls and their loading, narrow-layout, long-text, and reload behavior are present and verified."
-    status: failed
-    reason: "The delivered preview is the existing host app, with feedback recorded outside the app. The handoff explicitly says there is no feedback overlay/widget. Consequently its must-haves for feedback controls at loading and 320 CSS px, long feedback text, and repeated reload behavior are not met; the smoke navigates but does not reload or assert host overflow. The roadmap goal does not require a feedback widget, so this may be an intentional scope correction, but no accepted override records that decision."
-    artifacts:
-      - path: ".planning/phases/239-integrated-quality-handoff/239-04-PLAN.md"
-        issue: "Must-haves promise feedback controls/loading/320px/long-text/reload behaviors."
-      - path: ".planning/phases/239-integrated-quality-handoff/239-HANDOFF.md"
-        issue: "Documents feedback outside the app and explicitly says there is no separate feedback overlay/widget."
-      - path: "examples/accrue_host/e2e/phase239-integrated-quality.spec.js"
-        issue: "Checks Admin and Portal overflow; host entry is loaded at 320px but no host overflow assertion or reload is performed."
-    missing:
-      - "Either add the promised feedback UI and deterministic checks, or accept a verification override correcting the Plan 04 must-haves to the delivered off-app feedback workflow; if retaining a 320px host claim, assert host overflow explicitly."
-  - truth: "The flagged Plan 04 prohibition against presenting Fake preview data as live-provider evidence has a resolved verification disposition."
-    status: partial
-    reason: "The handoff clearly labels the preview Fake-backed and says it does not prove provider parity or actual billing outcomes, but the PLAN prohibition remains status: unverified and flagged: true, with no verification tier or accepted resolution. It cannot be silently counted green."
-    artifacts:
-      - path: ".planning/phases/239-integrated-quality-handoff/239-04-PLAN.md"
-        issue: "Transparency prohibition remains explicitly flagged unverified."
-      - path: ".planning/phases/239-integrated-quality-handoff/239-HANDOFF.md"
-        issue: "Evidence text substantively follows the prohibition; a maintainer disposition is still absent."
-    missing:
-      - "Record a maintainer resolution of the flagged transparency prohibition or add a deterministic contract that enforces the wording."
+overrides_applied: 1
+gaps: []
 ---
 
 # Phase 239: Integrated Quality & Handoff Verification Report
 
 **Phase Goal:** Maintainers can rely on current cross-surface evidence for the complete refinement and inspect the delivered result in a stable preview.
-**Verified:** 2026-10-09T12:00:36Z
-**Status:** gaps_found
-**Re-verification:** No — initial verification
+**Verified:** 2026-10-09T12:14:57Z
+**Status:** passed
+**Re-verification:** Yes — final local re-verification after Plan 05 closure
 
 ## Goal Achievement
 
@@ -74,9 +57,13 @@ gaps:
 | 3 | Owned routes and unique interactions have current dispositions, supported by required gates and inspected renders. | ✓ VERIFIED | `239-COVERAGE.md` contains 62 structured package-route rows and unique-interaction dispositions. I reran `mix test test/accrue_host_web/phase239_route_coverage_contract_test.exs`: 1 test, 0 failures; it exact-compares compiled Admin/Portal mount path sets against the ledger and checks ordering. The saved Playwright report is marked passed and contains the three attached renders. |
 | 4 | Generated/served resources, CSP/SRI, copy, examples, docs, and task debris are reconciled. | ✓ VERIFIED | `239-SERVED-PARITY.md` maps package files to mounted response tests and separates CSP from SRI. I reran Admin assets (4/4), Admin copy export (14/14), Portal CSP/SRI plus mounted assets (19/19), registry/example suites (11/11), and `bash scripts/ci/verify_package_docs.sh` (pass). The WR-01 race fix is present in `copy_test.exs` via a random exclusive temp directory and cleanup; disposition cites `67ddd960`. |
 | 5 | Maintainers can reach a useful, stable preview separately from mutation/reset proof, with an optional feedback summary. | ✓ VERIFIED | `examples/accrue_host/README.md` links to `239-HANDOFF.md`, which gives the Fake-backed preview startup/navigation path, concise change summary, read-only walkthrough boundary, and separate `accrue_host_dev` versus `accrue_host_test` proof/reset setup. Saved local Playwright HTML and PNG evidence exists. Provider and remote CI outcomes are explicitly unobserved. |
-| 6 | All Plan 239-04-specific preview feedback controls and states promised by its must-haves are delivered and checked. | ✗ FAILED | The handoff says there is no feedback overlay/widget and asks the reviewer to record observations outside the app. The Phase 239 browser spec has no feedback controls, does not reload, and does not assert host overflow (though it leaves host entry at 320px and attaches its render). This is an unaccepted deviation from the plan must-haves; see gaps. |
+| 6 | The accepted preview handoff scope and remaining recurring host claims have deterministic evidence. | ✓ VERIFIED | The dated maintainer-attributed additive disposition accepts off-app optional feedback, rejects in-app feedback widget/loading/long-text requirements, and states no routine UAT is required. The recurring package-doc verifier enforces this scope, safe unavailable recovery, and the Fake-provider boundary. Playwright now asserts host overflow at direct 320 CSS px and reloads the host entry while the post-login non-GET collector is active; the focused Chromium test passed. |
 
-**Score:** 62/66 truths verified. The roadmap's 5/5 success criteria are met. Of 61 plan-specific truths, the concrete unresolved mismatch is in Plan 04's feedback-control/reload claims; its separate flagged prohibition remains unverified and is listed as a partial gap.
+**Score:** 66/66 must-haves verified. The roadmap's 5/5 success criteria are met. Plan 04 remains unchanged; its feedback-control scope is reconciled by the explicit accepted disposition, and its Fake-provider transparency prohibition remains in force and is enforced by a recurring deterministic contract.
+
+## Accepted Scope Disposition
+
+`239-SCOPE-DISPOSITION.md` records the 2026-10-09 project-maintainer instruction. Optional feedback is off-app; no in-app feedback widget, feedback loading controls, or long-feedback-text behavior is claimed; routine human UAT is not required. Plan 04's original commitment and flagged prohibition remain intact. The prohibited Fake/live-provider claim is guarded by literal package-doc checks. The original `gaps_found` report is preserved byte-for-byte in `239-VERIFICATION-INITIAL.md` (SHA-256 `568702eae85d7d94e3bc18a754dffb54ce13e04bed4bdd833a46ce3763733820`).
 
 ## Required Artifacts
 
@@ -84,10 +71,12 @@ gaps:
 |---|---|---|---|
 | `239-COVERAGE.md` | Current route/interaction to evidence ledger | ✓ VERIFIED | 62 package-route records, explicit host-owned exclusions, state families, and gate map. |
 | `phase239_route_coverage_contract_test.exs` | Compiled router freshness contract | ✓ VERIFIED | Substantive test; rerun passed 1/1. |
-| `phase239-integrated-quality.spec.js` | Current mounted renders and viewport/no-write assertions | ⚠️ PARTIAL | Substantive and wired to existing `playwright-e2e`; saved local report passed with three screenshots. Admin/Portal overflow and navigation no-write are checked. Host entry is captured, but host overflow and reload are not asserted. |
+| `phase239-integrated-quality.spec.js` | Current mounted renders and viewport/no-write assertions | ✓ VERIFIED | Existing `playwright-e2e` spec passed locally. It checks direct 320 CSS px host overflow and reloads the host entry before asserting the post-login non-GET request list is empty. |
 | `239-SERVED-PARITY.md` | Source/build/served parity evidence | ✓ VERIFIED | Concrete package resource, copy, CSP, and SRI contracts and local-vs-CI boundary. |
 | `239-COMPONENT-PARITY.md` | Registry and state-family disposition | ✓ VERIFIED | Registry-derived 30 families/42 variants/8 groups and named owners for all eight state families. |
 | `239-HANDOFF.md` | Read-only feedback handoff and proof isolation | ✓ VERIFIED | Linked from host README; contains startup instructions, local evidence boundaries, and test DB separation. |
+| `239-SCOPE-DISPOSITION.md` | Accepted additive resolution preserving the original Plan 04 commitment | ✓ VERIFIED | Dated and attributed; scope and prohibition resolution are checked by the recurring package-doc verifier. |
+| `239-VERIFICATION-INITIAL.md` | Immutable initial gaps report | ✓ VERIFIED | Byte-identical to the initial report; SHA-256 `568702eae85d7d94e3bc18a754dffb54ce13e04bed4bdd833a46ce3763733820`. |
 | `examples/accrue_host/README.md` | Reachable preview entry | ✓ VERIFIED | Handoff link resolves in the documented Start Here section. |
 
 ## Key Link Verification
@@ -130,12 +119,12 @@ No concrete `probe-*.sh` was declared or found for Phase 239. The “probe edges
 | Requirement | Source Plan | Description | Status | Evidence |
 |---|---|---|---|---|
 | INT-01 | 239-01 | Keyboard navigation, focus containment/restoration, patches, nested overlays, removed triggers, reconnect | ✓ SATISFIED | Current ledger maps to the existing focused suites in Phases 234–238. |
-| INT-02 | 239-01 | Essential content/actions at 320 CSS px without page overflow | ✓ SATISFIED | Phase 239 checks Admin and Portal at 320px and 640px/200% zoom; earlier focused flows remain mapped. Plan 04's narrower feedback-control claim is separately unresolved. |
+| INT-02 | 239-01 | Essential content/actions at 320 CSS px without page overflow | ✓ SATISFIED | Phase 239 checks Admin, Portal, and host entry at direct 320 CSS px; Admin/Portal also retain 640px/200% zoom checks. |
 | INT-03 | 239-01 | Theme modes/handoff, repeated keyboard actions, reduced motion | ✓ SATISFIED | Coverage ledger maps to the Phase 236 forced-theme and interaction evidence; checked-in CI definitions preserve those lanes. |
 | INT-04 | 239-01, 239-03 | Eight empty/unavailable/error/long-content families assigned deliberate evidence | ✓ SATISFIED | Component parity report maps each family to current tests at appropriate layers. |
 | SHIP-01 | 239-02 | Generated assets/fonts/mounts/CSP/SRI/copy match served source | ✓ SATISFIED | Admin 4/4, copy 14/14, Portal 19/19 focused tests passed in this verification. |
 | SHIP-02 | 239-01 | Every owned route and interaction has disposition and required evidence | ✓ SATISFIED | Route contract rerun passed 1/1; ledger records route and interaction mappings. Remote CI status remains unobserved. |
-| SHIP-03 | 239-03, 239-04 | Component/docs parity, cleanup, and useful preview separated from proof | ⚠️ PARTIAL | Component/docs parity and preview/proof separation verified; Plan 04's in-app feedback-control must-haves are not present. |
+| SHIP-03 | 239-03, 239-04 | Component/docs parity, cleanup, and useful preview separated from proof | ✓ SATISFIED | Component/docs parity, explicit off-app feedback disposition, safe unavailable recovery, Fake/provider transparency contract, and preview/proof separation are verified locally. |
 
 Additional host pricing/reports/settings/mailbox/webhook ingress are explicitly identified as host-owned/out of the package route contract. The plan's repeated “root regression” gate resolves to `true` and is not counted as a passing test. Workflow definitions establish recurring gates; no remote CI/provider run was observed.
 
@@ -149,13 +138,13 @@ No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in Phase 239 changed
 
 ## Human Verification Required
 
-The two gaps are scope/disposition decisions, not routine visual UAT. The plan's transparency prohibition is explicitly flagged and unverified even though the handoff text clearly labels Fake evidence; a maintainer must either accept that wording as its judgment-tier resolution or add a deterministic enforcement contract. Remote CI and live-provider outcomes were not observed, but neither is claimed as completed evidence.
+No routine human UAT is required. Remote CI and live-provider outcomes were not observed and are not claimed. The accepted scope disposition and automated local checks close the Phase 239 gaps without representing unavailable provider evidence as verified.
 
 ## Gaps Summary
 
-The roadmap outcome is present: maintainers have a current route/evidence ledger, passing local route/resource/component contracts, saved current-render artifacts, and a reachable Fake-backed preview handoff separated from reset/proof work. The blocker is narrower but explicit: Plan 04 promises feedback controls and associated loading, narrow, long-text, and reload checks while the implementation deliberately has no in-app feedback widget and records feedback externally. The plan has no accepted override reconciling that scope. Its separate Fake-provider transparency prohibition also remains flagged unverified. Resolve those two plan dispositions before marking the phase complete.
+The roadmap outcome is present: maintainers have a current route/evidence ledger, passing local route/resource/component contracts, saved current-render artifacts, and a reachable Fake-backed preview handoff separated from reset/proof work. Plan 05 preserves the initial gaps report and resolves its two findings with an additive maintainer disposition, a recurring documentation contract, explicit unavailable recovery wording, and host 320 CSS px/read-only reload assertions. No remote CI or live-provider result is inferred.
 
 ---
 
-_Verified: 2026-10-09T12:00:36Z_  
-_Verifier: the agent (gsd-verifier)_
+_Verified: 2026-10-09T12:14:57Z_
+_Verifier: execution re-verification_

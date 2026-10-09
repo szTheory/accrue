@@ -52,6 +52,12 @@ test("Phase 239 current Admin, customer Portal, and host entry render in the iso
   await expect(page.getByRole("heading", { level: 2, name: "Three realistic billing roles" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Workspace billing" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Customer portal" })).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 900 });
+  await expectNoHorizontalOverflow(page, "host entry / at direct 320 CSS px");
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 2, name: "Three realistic billing roles" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Workspace billing" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Customer portal" })).toBeVisible();
   await capture(testInfo, "phase239-host-entry-current-render.png", page);
 
   expect(nonGetRequests, "post-login route walkthrough must not issue writes").toEqual([]);
