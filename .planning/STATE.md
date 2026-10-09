@@ -5,17 +5,17 @@ milestone_name: Admin and Portal UI refinement
 current_phase: 239
 current_phase_name: Integrated Quality & Handoff
 current_plan: 4
-status: executing
-stopped_at: Completed 239-03-PLAN.md
-last_updated: "2026-10-09T11:43:24.965Z"
+status: verifying
+stopped_at: Completed 239-04-PLAN.md
+last_updated: "2026-10-09T11:46:18.027Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 239 execution started
-state_head: 41168818056c85229a23554a4b2b56d47529f71b
+state_head: 371d1b23b745d2237eec2f9ff29f356913c5c0a2
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 44
-  completed_plans: 43
+  completed_plans: 44
   percent: 86
 ---
 
@@ -36,7 +36,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-07)
 Phase: 239 (Integrated Quality & Handoff) — EXECUTING
 Current Plan: 4
 Total Plans in Phase: 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-09 — Phase 239 execution started
 
 ## Performance Metrics
@@ -149,6 +149,7 @@ Last activity: 2026-10-09 — Phase 239 execution started
 | Phase 239 P1 | 6min | 2 tasks | 4 files |
 | Phase 239 P02 | 4min | 2 tasks | 4 files |
 | Phase 239 P03 | 2 min | 2 tasks | 2 files |
+| Phase 239 P04 | 1 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -312,6 +313,7 @@ Last activity: 2026-10-09 — Phase 239 execution started
 - [Phase 239]: Compared the complete generated copy export in a temporary path without modifying the checked-in fixture.
 - [Phase 239]: Kept ComponentRegistry as the sole component inventory; recorded provenance and intentional exceptions without a duplicate allowlist.
 - [Phase 239]: Retained existing owners for all eight INT-04 state families; no additional assertion or adopter-document correction was warranted.
+- [Phase 239]: Keep preview walkthrough guarantees scoped to the authenticated read-only browser journey; report gaps and provider/remote evidence boundaries explicitly.
 
 ### Pending Todos
 
@@ -386,8 +388,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-09T11:43:24.893Z
-Stopped at: Completed 239-03-PLAN.md
+Last session: 2026-10-09T11:46:17.961Z
+Stopped at: Completed 239-04-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
