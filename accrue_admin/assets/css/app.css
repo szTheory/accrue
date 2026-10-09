@@ -4347,6 +4347,10 @@ details[open].ax-dropdown .ax-dropdown-panel {
     align-items: center;
     min-block-size: 44px;
   }
+
+  #ax-overlay-root [data-ax-action-drawer-form] .ax-button {
+    min-block-size: 44px;
+  }
 }
 
 html.accrue-admin[data-theme="dark"] .ax-card.ax-data-table-shell {
