@@ -38,7 +38,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 - [x] **Phase 236: Portal Billing Self-Service** - Refine existing customer billing pages and authorized payment/subscription tasks through one Portal. (completed 2026-10-08)
 - [x] **Phase 237: Admin Invoices, Payments & Recovery** - Make money and recovery work precise, scoped, and honest about outcomes.
 - [x] **Phase 238: Admin Events, Webhooks & Remaining Billing Surfaces** - Improve event and delivery investigation plus existing coupon, promotion-code, and Connect surfaces. (completed 2026-10-09)
-- [ ] **Phase 239: Integrated Quality & Handoff** - Close route coverage, cross-surface evidence, current-render inspection, and a usable feedback preview.
+- [x] **Phase 239: Integrated Quality & Handoff** - Close route coverage, cross-surface evidence, current-render inspection, and a usable feedback preview. (completed 2026-10-09)
 
 ## Phase Details
 
@@ -239,7 +239,7 @@ Plans:
 - [x] 239-02-PLAN.md — Served asset, font, mount, CSP/SRI, and copy parity
 - [x] 239-03-PLAN.md — Component examples and state evidence parity
 - [x] 239-04-PLAN.md — Read-only feedback preview and handoff
-- [ ] 239-05-PLAN.md — Close handoff scope, host overflow/reload, and provider disclaimer gaps
+- [x] 239-05-PLAN.md — Close handoff scope, host overflow/reload, and provider disclaimer gaps
 **UI hint**: yes
 
 ## Progress
@@ -252,7 +252,7 @@ Plans:
 | 236. Portal Billing Self-Service | 6/6 | Complete    | 2026-10-08 |
 | 237. Admin Invoices, Payments & Recovery | 8/8 | Complete    | 2026-10-08 |
 | 238. Admin Events, Webhooks & Remaining Billing Surfaces | 5/5 | Complete    | 2026-10-09 |
-| 239. Integrated Quality & Handoff | 4/5 | In Progress | - |
+| 239. Integrated Quality & Handoff | 5/5 | Complete    | 2026-10-09 |
 
 <details>
 <summary>✅ v1.62 Release Integration & Repository Hygiene (Phases 229-232) — SHIPPED 2026-09-18</summary>
