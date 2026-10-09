@@ -214,7 +214,7 @@ Plans:
 - [x] 238-01-PLAN.md — Safe selected webhook replay and Wave 0 regression seams
 - [x] 238-02-PLAN.md — Event and delivery evidence detail
 - [x] 238-03-PLAN.md — Coupon and promotion-code inspection
-- [ ] 238-04-PLAN.md — Connect provider observation and local override
+- [x] 238-04-PLAN.md — Connect provider observation and local override
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 238-05-PLAN.md — Required mounted browser evidence and UI acceptance
@@ -245,7 +245,7 @@ Plans:
 | 235. Customer Plan Selection & Checkout | 6/6 | Complete    | 2026-10-08 |
 | 236. Portal Billing Self-Service | 6/6 | Complete    | 2026-10-08 |
 | 237. Admin Invoices, Payments & Recovery | 8/8 | Complete    | 2026-10-08 |
-| 238. Admin Events, Webhooks & Remaining Billing Surfaces | 1/5 | In Progress | - |
+| 238. Admin Events, Webhooks & Remaining Billing Surfaces | 4/5 | In Progress | - |
 | 239. Integrated Quality & Handoff | 0/TBD | Not started | - |
 
 <details>
