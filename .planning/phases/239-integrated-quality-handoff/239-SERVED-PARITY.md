@@ -13,6 +13,14 @@ Evidence below separates source/build contracts, mounted responses, local test r
 
 The HTTP response tests establish the host-visible package route and exact served bytes. They do not assert that a browser rasterized CSS or loaded a font face; browser rendering belongs to the existing Playwright host lane.
 
+## Generated copy export parity
+
+`accrue_admin/test/accrue_admin/copy_test.exs` now invokes the existing `mix accrue_admin.export_copy_strings --out PATH` task with a unique file under the OS temporary directory, compares the complete generated JSON bytes with `examples/accrue_host/e2e/generated/copy_strings.json`, and registers cleanup before generation so ExUnit removes the output after both passing and failing assertions. The checked-in fixture is read-only in this contract.
+
+- Local result: `cd accrue_admin && mix test test/accrue_admin/copy_test.exs --warnings-as-errors` — 14 tests, 0 failures.
+- Recurring gate: `.github/workflows/ci.yml` `release-gate` → `Accrue admin test` runs `cd accrue_admin && mix test --warnings-as-errors`, so the full-export parity test runs in each required Admin compatibility cell.
+- Remote CI remains unobserved.
+
 ## Independent security contracts
 
 | Control | Existing contract | Independence and local result | Recurring gate |

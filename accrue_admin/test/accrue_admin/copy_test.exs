@@ -539,6 +539,27 @@ defmodule AccrueAdmin.CopyTest do
     end
   end
 
+  test "generated copy export exactly matches the checked-in browser fixture" do
+    output =
+      Path.join(
+        System.tmp_dir!(),
+        "accrue-copy-strings-#{System.unique_integer([:positive])}.json"
+      )
+
+    fixture =
+      Path.expand("../../../examples/accrue_host/e2e/generated/copy_strings.json", __DIR__)
+
+    on_exit(fn -> File.rm(output) end)
+
+    assert {_, 0} =
+             System.cmd("mix", ["accrue_admin.export_copy_strings", "--out", output],
+               cd: Path.expand("../..", __DIR__),
+               stderr_to_stdout: true
+             )
+
+    assert File.read!(output) == File.read!(fixture)
+  end
+
   test "CPY-01 copy modules avoid generic fallbacks and bare action terms" do
     assert copy_module_guard(@raw_generic_guard) == []
   end
