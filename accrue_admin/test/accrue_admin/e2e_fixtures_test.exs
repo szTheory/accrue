@@ -391,6 +391,29 @@ defmodule AccrueAdmin.E2EFixturesTest do
     end
   end
 
+  @tag :phase240
+  test "Phase 240 cancellation hold counts the real Fake dispatch and releases its result" do
+    fixture = Fixtures.seed_phase191_matrix!()
+
+    assert {:ok, %{token: token, operation: "cancel_subscription"}} =
+             Fixtures.hold_phase240_subscription_cancel!(fixture.subscription_id)
+
+    task =
+      Task.async(fn ->
+        Accrue.Processor.Fake.cancel_subscription("sub_e2e_phase191_active", %{}, [])
+      end)
+
+    assert_receive {:phase240_action_entered, ^token, :cancel_subscription}
+    assert %{dispatch_count: 1, held: true, provider_calls: nil} =
+             Fixtures.phase240_action_status(token)
+
+    assert :ok = Fixtures.release_phase240_action!(token)
+    assert {:ok, %{id: "sub_e2e_phase191_active", status: "canceled"}} = Task.await(task)
+
+    assert %{dispatch_count: 1, held: false, provider_calls: 1} =
+             Fixtures.phase240_action_status(token)
+  end
+
   defp phase191_fixture_counts do
     %{
       customers: TestRepo.aggregate(Customer, :count, :id),

@@ -17,8 +17,11 @@ defmodule AccrueAdmin.E2E.Fixtures do
   alias Accrue.Connect.Account
   alias Accrue.Entitlements.Reconcile
   alias Accrue.Events
+  alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
+
+  @phase240_hold_key {__MODULE__, :phase240_action_hold}
 
   @public_tables ~w(
     oban_jobs
@@ -49,6 +52,8 @@ defmodule AccrueAdmin.E2E.Fixtures do
   ]
 
   def reset! do
+    release_current_phase240_action!()
+
     tables =
       @public_tables ++
         Enum.map(@accrue_tables, &Accrue.Migration.qualified_table/1)
@@ -58,6 +63,133 @@ defmodule AccrueAdmin.E2E.Fixtures do
     :ok = Accrue.Actor.put_operation_id("e2e-" <> Ecto.UUID.generate())
     Application.put_env(:accrue, :entitlements, @e2e_entitlements)
     :ok
+  end
+
+  @doc false
+  def hold_phase240_subscription_cancel!(subscription_id, owner_pid \\ self()) do
+    case :persistent_term.get(@phase240_hold_key, nil) do
+      nil ->
+        subscription = TestRepo.get!(Subscription, subscription_id)
+        now = Accrue.Clock.utc_now()
+
+        response = %{
+          id: subscription.processor_id,
+          status: "canceled",
+          cancel_at_period_end: false,
+          current_period_start: subscription.current_period_start,
+          current_period_end: subscription.current_period_end,
+          canceled_at: now,
+          ended_at: now,
+          metadata: subscription.metadata || %{}
+        }
+
+        hold = %{
+          token: Ecto.UUID.generate(),
+          operation: :cancel_subscription,
+          subscription_id: subscription.id,
+          processor_id: subscription.processor_id,
+          response: response,
+          owner_pid: owner_pid,
+          provider_pid: nil,
+          dispatch_count: 0,
+          released: false
+        }
+
+        :persistent_term.put(@phase240_hold_key, hold)
+
+        :ok =
+          Accrue.Processor.Fake.stub(:cancel_subscription, fn processor_id, _opts ->
+            current = :persistent_term.get(@phase240_hold_key, nil)
+
+            if current && processor_id == current.processor_id do
+              active = %{current | provider_pid: self(), dispatch_count: current.dispatch_count + 1}
+              :persistent_term.put(@phase240_hold_key, active)
+              send(active.owner_pid, {:phase240_action_entered, active.token, active.operation})
+
+              receive do
+                {:phase240_release_action, token} when token == active.token -> {:ok, active.response}
+              end
+            else
+              {:error, :not_found}
+            end
+          end)
+
+        {:ok, %{token: hold.token, operation: Atom.to_string(hold.operation)}}
+
+      _active ->
+        {:error, :action_already_held}
+    end
+  end
+
+  @doc false
+  def phase240_action_status(token) do
+    case :persistent_term.get(@phase240_hold_key, nil) do
+      %{token: ^token} = hold ->
+        subscription = TestRepo.get!(Subscription, hold.subscription_id)
+
+        canceled_events =
+          TestRepo.aggregate(
+            from(event in Event,
+              where: event.type == "subscription.canceled" and event.subject_id == ^subscription.id
+            ),
+            :count,
+            :id
+          )
+
+        admin_audit_events =
+          TestRepo.aggregate(
+            from(event in Event,
+              where:
+                event.type == "admin.subscription.action.completed" and
+                  event.subject_id == ^subscription.id
+            ),
+            :count,
+            :id
+          )
+
+        %{
+          token: hold.token,
+          operation: Atom.to_string(hold.operation),
+          dispatch_count: hold.dispatch_count,
+          held: is_pid(hold.provider_pid) and not hold.released,
+          provider_calls: if(hold.released, do: Accrue.Processor.Fake.call_count(hold.operation), else: nil),
+          status: Atom.to_string(subscription.status),
+          canceled_event_count: canceled_events,
+          admin_audit_count: admin_audit_events
+        }
+
+      _ ->
+        nil
+    end
+  end
+
+  @doc false
+  def release_phase240_action!(token) do
+    case :persistent_term.get(@phase240_hold_key, nil) do
+      %{token: ^token} = hold ->
+        if is_pid(hold.provider_pid) do
+          send(hold.provider_pid, {:phase240_release_action, token})
+        end
+
+        :ok = Accrue.Processor.Fake.unstub(hold.operation)
+        :persistent_term.put(@phase240_hold_key, %{hold | released: true, provider_pid: nil})
+        :ok
+
+      _ ->
+        {:error, :unknown_action_hold}
+    end
+  end
+
+  defp release_current_phase240_action! do
+    case :persistent_term.get(@phase240_hold_key, nil) do
+      %{token: token} ->
+        _ = release_phase240_action!(token)
+        :persistent_term.erase(@phase240_hold_key)
+        :ok
+
+      _ ->
+        :ok
+    end
   end
 
   def seed_advisory_entitlements! do
