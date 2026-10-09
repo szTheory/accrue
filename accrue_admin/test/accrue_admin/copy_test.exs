@@ -127,9 +127,10 @@ defmodule AccrueAdmin.CopyTest do
     assert single_webhook =~ "organization org_phase191"
     assert single_webhook =~ "admin audit event"
 
-    assert bulk_webhooks =~ "Retry 3 webhook events"
-    assert bulk_webhooks =~ "failed every automatic retry"
-    assert Copy.webhooks_retry_cancel_label() == "Cancel"
+    assert bulk_webhooks =~ "Replay 3 selected deliveries?"
+    assert bulk_webhooks =~ "Only deliveries still eligible when confirmed will be queued"
+    assert bulk_webhooks =~ "Queue acceptance does not mean processing is complete"
+    assert Copy.webhooks_retry_cancel_label() == "Keep deliveries"
 
     refute_vague_copy!([
       invoice,
