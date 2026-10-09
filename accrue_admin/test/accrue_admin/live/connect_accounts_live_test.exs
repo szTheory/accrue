@@ -320,7 +320,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     assert stats[Copy.connect_accounts_kpi_label_charges_enabled()] == "1"
   end
 
-  test "connect list separates Stripe-observed readiness from the local fee override", %{
+  test "connect list labels the stored Stripe snapshot separately from the local fee override", %{
     conn: conn
   } do
     unknown =
@@ -336,8 +336,8 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/connect?view=all")
 
-    assert html =~ "Stripe-observed"
-    assert html =~ "Stripe-observed: unavailable"
+    assert html =~ "Last stored Stripe snapshot"
+    assert html =~ "Last stored Stripe snapshot: unavailable"
     assert html =~ "Local platform fee override"
     assert html =~ "Override saved"
     assert html =~ "/billing/connect/#{unknown.id}"

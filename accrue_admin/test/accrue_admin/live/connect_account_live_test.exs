@@ -81,7 +81,7 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     assert data_attr_count(html, "data-ax-lazy-json") == 1
 
     for label <- [
-          "Stripe-observed readiness",
+          "Last stored Stripe snapshot readiness",
           "Owner",
           "Country",
           "Charges enabled",
@@ -93,6 +93,11 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     end
 
     assert html =~ "Capabilities / requirements"
+
+    assert html =~
+             "Provider readiness, capabilities, and requirements below are the last stored Stripe snapshot"
+
+    assert html =~ "this page does not track when Stripe last reported them"
     assert html =~ "Platform fee policy"
     assert html =~ "Unknown"
 
@@ -205,7 +210,7 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     {:ok, view, html} = live(conn, "/billing/connect/#{account.id}")
 
-    assert html =~ "Stripe-observed readiness"
+    assert html =~ "Last stored Stripe snapshot readiness"
     assert html =~ "Local platform fee override"
     assert html =~ "Ready"
 

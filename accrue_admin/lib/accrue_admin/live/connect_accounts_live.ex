@@ -156,14 +156,14 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
               render: &account_link(&1, @admin_mount_path, @current_owner_scope)
             },
             %{label: Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
-            %{label: "Stripe-observed readiness", render: &readiness_summary(&1, @current_owner_scope)},
+            %{label: "Last stored Stripe snapshot readiness", render: &readiness_summary(&1, @current_owner_scope)},
             %{label: "Local platform fee override", render: &override_summary(&1, @current_owner_scope)},
             %{label: Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
           card_title={&card_title/1}
           card_fields={[
             %{label: Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
-            %{label: "Stripe-observed readiness", render: &readiness_summary(&1, @current_owner_scope)},
+            %{label: "Last stored Stripe snapshot readiness", render: &readiness_summary(&1, @current_owner_scope)},
             %{label: "Local platform fee override", render: &override_summary(&1, @current_owner_scope)},
             %{label: Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
@@ -487,7 +487,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
   defp readiness_summary(row, owner_scope) do
     case load_scoped_account(row.id, owner_scope) do
       nil ->
-        "Stripe-observed: unavailable"
+        "Last stored Stripe snapshot: unavailable"
 
       account ->
         facts = [
@@ -502,9 +502,10 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
         ]
 
         if Enum.all?(facts, &(&1 == "Unknown")) do
-          "Stripe-observed: unavailable"
+          "Last stored Stripe snapshot: unavailable"
         else
-          "Stripe-observed: " <> Enum.join(facts, Copy.connect_accounts_readiness_joiner())
+          "Last stored Stripe snapshot: " <>
+            Enum.join(facts, Copy.connect_accounts_readiness_joiner())
         end
     end
   end

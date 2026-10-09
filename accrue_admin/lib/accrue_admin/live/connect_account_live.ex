@@ -164,6 +164,10 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
           </:facts>
         </Detail.summary_card>
 
+        <p class="ax-body" data-role="connect-provider-snapshot-note">
+          Provider readiness, capabilities, and requirements below are the last stored Stripe snapshot; this page does not track when Stripe last reported them.
+        </p>
+
         <Detail.summary_list rows={summary_rows(@account, @admin_mount_path, @current_owner_scope)} />
 
         <FlashGroup.flash_group flashes={@flashes} />
@@ -445,7 +449,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
 
     [
       %{
-        label: "Stripe-observed readiness",
+        label: "Last stored Stripe snapshot readiness",
         value: readiness_summary(account)
       },
       %{
