@@ -330,7 +330,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(review).toContainText(/1,?000|10\.00/);
   await expect(review).toContainText(/attempt manual payment/i);
   await expect(page.locator('#invoice-action-drawer').getByRole("button", { name: "Pay invoice", exact: true })).toBeVisible();
-  const cancel = page.locator('#invoice-action-drawer').getByRole("button", { name: /cancel/i });
+  const cancel = page.locator('#invoice-action-drawer').getByRole("button", { name: "Back to invoice", exact: true });
   await expect(cancel).toBeVisible();
   const reviewShot = await page.screenshot({ fullPage: true });
   screenshots["invoice-review.png"] = { bytes: reviewShot, route: page.url(), viewport: { width: 1280, height: 900 }, theme: "light" };

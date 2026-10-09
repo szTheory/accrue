@@ -209,6 +209,15 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     html = render(view)
 
+    dismissal_labels =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("button[phx-click='cancel_pending_action']")
+      |> Enum.map(&Floki.text/1)
+      |> Enum.map(&String.trim/1)
+
+    assert "Back to invoice" in dismissal_labels
+
     review =
       html
       |> Floki.parse_document!()

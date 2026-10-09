@@ -181,7 +181,9 @@ defmodule AccrueAdmin.Copy.Invoice do
 
   def invoice_confirm_action_verb, do: "Confirm"
 
-  def invoice_confirm_cancel, do: "Cancel"
+  def invoice_confirm_cancel, do: "Back to invoice"
+
+  def invoice_remove_manual_item_cancel, do: "Cancel"
 
   def invoice_review_invoice_label, do: "Invoice ID"
 

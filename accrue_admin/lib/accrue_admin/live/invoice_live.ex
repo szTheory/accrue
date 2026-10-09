@@ -430,7 +430,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                 <p class="ax-body"><%= Copy.invoice_remove_manual_item_confirm() %></p>
                 <div class="ax-stack-sm ax-stack-row ax-mt-md">
                   <button phx-click="confirm_remove_item" class="ax-button ax-button-primary"><%= Copy.invoice_confirm_action_verb() %></button>
-                  <button phx-click="cancel_remove_item" class="ax-button ax-button-ghost"><%= Copy.invoice_confirm_cancel() %></button>
+                  <button phx-click="cancel_remove_item" class="ax-button ax-button-ghost"><%= Copy.invoice_remove_manual_item_cancel() %></button>
                 </div>
               </div>
             </div>

@@ -364,6 +364,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoice_confirm_panel_label(), to: Invoice
   defdelegate invoice_confirm_action_verb(), to: Invoice
   defdelegate invoice_confirm_cancel(), to: Invoice
+  defdelegate invoice_remove_manual_item_cancel(), to: Invoice
   defdelegate invoice_confirm_workflow_message(action_label, source_suffix), to: Invoice
   defdelegate invoice_confirm_source_event_suffix(source_event_id), to: Invoice
   defdelegate invoice_pdf_section_eyebrow(), to: Invoice
