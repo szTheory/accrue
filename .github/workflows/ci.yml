@@ -1581,6 +1581,16 @@ jobs:
           ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
         run: cd examples/accrue_host && npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
 
+      - name: Upload Phase 239 Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase239-playwright-evidence-shard-${{ matrix.shard }}
+          path: |
+            examples/accrue_host/playwright-report
+            examples/accrue_host/test-results
+          if-no-files-found: ignore
+
       - name: Run Phase 238 Admin browser contract with host-forced dark theme
         if: matrix.shard == 1
         env:
