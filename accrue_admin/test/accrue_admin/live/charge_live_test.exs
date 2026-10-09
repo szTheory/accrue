@@ -480,6 +480,36 @@ defmodule AccrueAdmin.ChargeLiveTest do
     refute has_element?(view, "[data-role='confirm-panel']")
   end
 
+  test "refund confirmation revalidates the reviewed charge after step-up", %{
+    conn: conn,
+    charge: charge
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    _html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{"amount_minor" => "4000", "reason" => "requested_by_customer"}
+      )
+
+    _html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm refund"))
+
+    charge
+    |> Charge.changeset(%{amount_cents: 3_000})
+    |> TestRepo.update!()
+
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Charge details changed after review. No refund was submitted."
+
+    assert TestRepo.aggregate(
+             from(refund in Refund, where: refund.charge_id == ^charge.id),
+             :count
+           ) == 1
+  end
+
   test "charge detail preserves zero and three-decimal charge, refund, and fee evidence", %{
     conn: conn,
     charge: charge

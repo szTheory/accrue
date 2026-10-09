@@ -21,6 +21,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   }
 
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Charges
   alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.StepUp
@@ -344,6 +345,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
               class="ax-button ax-button-primary"
               data-role="confirm-refund"
               data-ax-action-drawer-confirm
+              phx-disable-with="Submitting refund..."
             >
               Confirm refund
             </button>
@@ -620,24 +622,109 @@ defmodule AccrueAdmin.Live.ChargeLive do
   end
 
   defp execute_refund(socket, action) do
-    result =
-      with_admin_context(socket.assigns.current_admin, fn operation_id ->
-        opts = refund_opts(action, socket.assigns.charge.currency, operation_id)
-        Billing.create_refund(socket.assigns.charge, opts)
-      end)
+    case revalidate_refund(socket, action) do
+      {:ok, charge} ->
+        result =
+          with_admin_context(socket.assigns.current_admin, fn operation_id ->
+            opts = refund_opts(action, action.currency, operation_id)
+            Billing.create_refund(charge, opts)
+          end)
 
-    case result do
-      {:ok, %Refund{} = refund} ->
+        case result do
+          {:ok, %Refund{} = refund} ->
+            socket
+            |> record_admin_audit(action, refund.id)
+            |> refresh_charge(charge.id)
+            |> push_flash(:info, Copy.charge_refund_created_info())
+
+          {:error, %Accrue.CardError{}} ->
+            push_flash(
+              socket,
+              :error,
+              "The provider declined the refund. No refund was accepted."
+            )
+
+          {:error, _reason} ->
+            push_flash(
+              socket,
+              :warning,
+              "Outcome not confirmed. Check scoped charge activity before deciding whether another action is needed; Accrue will not retry automatically."
+            )
+        end
+
+      {:changed, charge} ->
         socket
-        |> record_admin_audit(action, refund.id)
-        |> refresh_charge(socket.assigns.charge.id)
-        |> push_flash(:info, Copy.charge_refund_created_info())
+        |> assign_charge(charge)
+        |> push_flash(:warning, "Charge details changed after review. No refund was submitted.")
 
-      {:error, _reason} ->
-        push_flash(socket, :error, charge_refund_error_copy(socket))
+      :not_found ->
+        socket
+        |> push_flash(:error, Copy.Locked.owner_access_denied())
+        |> redirect(
+          to:
+            ScopedPath.build(
+              socket.assigns.admin_mount_path,
+              "/payments",
+              socket.assigns.current_owner_scope
+            )
+        )
+
+      :unauthorized ->
+        socket
+        |> push_flash(:error, Copy.Locked.owner_access_denied())
+        |> redirect(
+          to:
+            ScopedPath.build(
+              socket.assigns.admin_mount_path,
+              "/payments",
+              socket.assigns.current_owner_scope
+            )
+        )
     end
     |> assign(:pending_refund, nil)
     |> assign(:refund_drawer_open?, false)
+  end
+
+  defp revalidate_refund(socket, action) do
+    with {:ok, owner_scope} <- reauthorize_scope(socket),
+         {:ok, charge} <- Charges.detail(action.charge_id, owner_scope) do
+      refundable = refundable_minor(charge, charge.refunds || [])
+
+      if refund_eligible?(charge, charge.refunds || []) and
+           charge.id == action.charge_id and
+           charge.amount_cents == action.reviewed_amount_minor and
+           charge.status == action.reviewed_status and
+           charge.currency == action.currency and
+           refundable == action.reviewed_refundable_minor and
+           is_integer(refundable) and action.amount_minor <= refundable do
+        {:ok, charge}
+      else
+        {:changed, charge}
+      end
+    else
+      :not_found -> :not_found
+      {:error, _reason} -> :unauthorized
+    end
+  end
+
+  defp reauthorize_scope(socket) do
+    original_scope = socket.assigns.current_owner_scope
+    session = socket.assigns.accrue_admin_session
+
+    params =
+      if original_scope.mode == :organization,
+        do: %{"org" => original_scope.organization_slug},
+        else: %{}
+
+    with {:ok, fresh_scope} <- OwnerScope.resolve(session, params),
+         true <-
+           Auth.actor_id(fresh_scope.current_admin) == Auth.actor_id(socket.assigns.current_admin),
+         true <- fresh_scope.mode == original_scope.mode,
+         true <- fresh_scope.organization_id == original_scope.organization_id do
+      {:ok, fresh_scope}
+    else
+      _ -> {:error, :unauthorized}
+    end
   end
 
   defp refund_opts(action, currency, operation_id) do
