@@ -1,6 +1,6 @@
 ---
 phase: 235-customer-plan-selection-checkout
-verified: 2026-10-08T15:46:35Z
+verified: 2026-10-09T02:44:11Z
 status: passed
 score: 43/43 must-haves verified
 covered_files:
@@ -27,22 +27,28 @@ covered_files:
   - accrue_portal/test/accrue_portal/checkout_context_test.exs
   - accrue_portal/test/accrue_portal/live/checkout_live_discount_test.exs
   - accrue_portal/test/accrue_portal/live/checkout_live_test.exs
+  - examples/accrue_host/config/runtime.exs
   - examples/accrue_host/e2e/phase233-braintree-checkout.spec.js
   - examples/accrue_host/lib/accrue_host/billing.ex
   - examples/accrue_host/lib/accrue_host_web/components/layouts/root.html.heex
   - examples/accrue_host/lib/accrue_host_web/controllers/page_controller.ex
+  - examples/accrue_host/lib/accrue_host_web/controllers/page_html/pricing.html.heex
   - examples/accrue_host/lib/accrue_host_web/controllers/user_session_controller.ex
   - examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex
   - examples/accrue_host/test/accrue_host_web/live/subscription_live_braintree_test.exs
   - examples/accrue_host/test/accrue_host_web/live/subscription_live_test.exs
   - scripts/ci/accrue_host_seed_e2e.exs
-covered_digest: "v3:sha256:9867df2f9edc86a445830716822122070e85cae9f8f4931770099591110cc6b0"
+covered_digest: "v3:sha256:df854201f6386c55f9914316beb84f0df2861f88e6ed5e101bfb091f27e3db54"
 behavior_unverified: 0
 overrides_applied: 0
 prohibitions_verified: 2
+decision_coverage:
+  honored: 8
+  total: 8
+  not_honored: []
 re_verification:
   previous_status: passed
-  previous_score: 50/50
+  previous_score: 43/43
   gaps_closed: []
   gaps_remaining: []
   regressions: []
@@ -51,7 +57,7 @@ re_verification:
 # Phase 235: Customer Plan Selection & Checkout Verification Report
 
 **Phase Goal:** Customers can understand a selected offer, complete supported checkout through its actual browser integration, or leave safely with an honest outcome.
-**Verified:** 2026-10-08T15:46:35Z
+**Verified:** 2026-10-09T02:44:11Z
 **Status:** passed
 **Re-verification:** Yes — independent refresh of the existing passing report.
 
@@ -67,7 +73,7 @@ The five roadmap success criteria and all 38 distinct plan truths were checked. 
 | 2 | Hosted and mounted checkout handoffs are distinct and capability-aware; return navigation and Fake evidence cannot alone claim live payment. | ✓ VERIFIED | `subscription_live.ex` keeps Stripe's `cs_` provider session fetch/reconcile path separate from Braintree's plan/selection locator and persisted LocalSession lookup. Braintree completion requires current scope and matching customer, organization, processor, plan, and selection; Stripe requires a fetched matching paid session. Host tests cover completed/pending/forged/foreign/revoked cases. |
 | 3 | Expired/completed sessions, stale promotions, repeated submissions, and missing prices follow the contract without false payment claims or missing-price-as-zero. | ✓ VERIFIED | Portal POST and LiveView reload the persisted session and revalidate promotion, terms, target, and authorization before claiming. LocalSession provides atomic claim/status transitions. Tests cover strict expiry, stale promo, completed replay, repeated/concurrent claim, trusted zero, absent/invalid amount, and accepted-provider/local-persistence uncertainty. |
 | 4 | Plan selection survives sign-in and return; charge terms come only from trusted metadata; unknown terms/outcomes recover safely without blind retry. | ✓ VERIFIED | Host selection routes validate the exact plan and preserve a validated login return. Host server resolves and persists name, integer minor amount, currency, and interval; Portal renders those persisted terms and disables payment when they do not validate. Uncertain outcomes state not to resubmit and provide a safe billing destination. |
-| 5 | Keyboard, narrow-screen, theme, secure SDK, pending/error, and served asset behavior is checked with the changed checkout and handoff. | ✓ VERIFIED | The 14-test Braintree Playwright lane checks served JS/CSS, secure Hosted Fields boundary, focus/status behavior, host theme tokens, narrow viewport/long text without page overflow, loading/error/recovery and return flows. The phase UI review's screenshot capture was unavailable and records visual-polish recommendations; those do not contradict the automated roadmap assertions. |
+| 5 | Keyboard, narrow-screen, theme, secure SDK, pending/error, and served asset behavior is checked with the changed checkout and handoff. | ✓ VERIFIED | The 14-test checkout Playwright lane checks served JS/CSS, secure Hosted Fields boundary, focus/status behavior, narrow viewport/long text without page overflow, loading/error/recovery and returns. The merge-blocking Phase 236 Hosted Fields lane exercises the same `BraintreeHostedFields` hook and `hostedFieldStyles/1`, checks light/dark host theme changes, and asserts 4.5:1 text, placeholder, invalid, label and help contrast. Its current 14/14 result is included in the supplied browser evidence. The Phase 235 visual audit did not capture screenshots; its remaining visual-polish notes are recorded below. |
 | 6 | Plan 01: visible secure form tokenizes and submits once; repeated/interrupted actions do not replay and status/retry remain honest. | ✓ VERIFIED | `phase233-braintree-checkout.spec.js` covers visible submit, nonce count, double action, interrupted transport, teardown, invalid-card retry, SDK failure, and abandonment; checkout ExUnit tests cover server completion and replay. |
 | 7 | Plan 02: exact selected offer, customer, and processor survive login/resume; persisted terms are trusted and invalid/missing terms fail closed. | ✓ VERIFIED | Host LiveView tests cover exact-plan handoff/login return and persisted metadata; Portal populated/empty/partial/zero-one-many tests assert only verified terms render and invalid terms cannot submit. |
 | 8 | Plan 03: both transports enforce expiry, completion, stale promotion, authorization, at-most-one claim, and honest uncertain outcomes. | ✓ VERIFIED | Focused Portal tests exercise actual POST and LiveView event, provider call counts, stale/expired/replay cases, and completion persistence failure. `LocalSession` tests cover expiry boundary and parallel claim. |
@@ -86,7 +92,7 @@ The five roadmap success criteria and all 38 distinct plan truths were checked. 
 
 Both PLAN entries omit the `verification` tier and remain marked `status: unresolved`; I assessed the concrete negative-test evidence above. Neither prohibition is silently omitted from this report.
 
-Behavior-dependent claims are backed by the supplied completed evidence: Portal full suite 84/84, focused checkout 28/28, Braintree browser lane 14/14, core 2,076/2,076, Admin 551/551, and host 222/222. The browser Braintree success remains deterministic fixture evidence, not live-provider evidence; no live parity claim is made. Security audit reports 21/21 mitigations closed, zero open threats; validation audit reports zero new gaps; incremental code review reports zero findings/open items.
+Behavior-dependent claims are backed by the current supplied evidence after the latest source commit: Core 2,077/0, Admin 581/0, Portal 110/0, Host 222/0, package docs 46/0, standard Fake browser 14/0, real-query search browser 1/0, Braintree browser lanes 12/0 and 14/0, and Phase 234 and Phase 237 browser journeys 1/0 each. The checkout browser success uses a deterministic injected SDK and fixture-backed session; it is not live-provider evidence, and no live parity claim is made. Security reports 21/21 registered entries closed with zero open threats; validation reports zero uncovered behavior; current code review reports 20 files and zero findings.
 
 ## Required Artifacts
 
@@ -145,6 +151,25 @@ Not applicable. This phase is an application checkout/UI change; its plans and s
 
 All four requirements mapped to Phase 235 in `REQUIREMENTS.md` appear in plan frontmatter; no orphaned Phase 235 requirement was found.
 
+### Test Quality Audit
+
+| Test File / lane | Linked requirements | Active / skipped | Circular | Assertion level | Verdict |
+|---|---|---:|---|---|---|
+| `accrue/test/accrue/checkout/local_session_test.exs` | CKO-01, CKO-03 | Active / 0 | No fixture-generation writer found | Behavioral: expiry, atomic and concurrent claims | PASS |
+| Portal checkout context and LiveView suites | CKO-01, CKO-03, CKO-04 | Active / 0 | No fixture-generation writer found | Behavioral: actual POST/LiveView, exact values and provider-call counts | PASS |
+| Host subscription LiveView and Braintree suites | CKO-02, CKO-04 | Active / 0 | No fixture-generation writer found | Behavioral: selection, authorization and provider-specific returns | PASS |
+| `phase233-braintree-checkout.spec.js` | CKO-01–CKO-04 | Active / 0 | Mock SDK and local fixtures are explicitly labeled; no generated expected-value writer found | Behavioral: served journey, nonce, recovery and rendered outcomes | PASS |
+
+**Disabled tests on requirements:** 0. **Circular patterns detected:** 0. **Insufficient assertions:** 0 identified. The Braintree lane is deterministic integration evidence only, not live-provider parity.
+
+### Decision Coverage
+
+All trackable CONTEXT.md decisions are honored by shipped artifacts (8/8; 0 not honored).
+
+### UI Review Notes
+
+The current UI review scores 15/24. It records non-blocking copy, Hosted Fields font, typography and spacing deviations from the UI-SPEC, and notes that screenshot-based focal balance and actual host-theme rendering were not captured during that audit. The merge-blocking Phase 236 browser evidence covers the shared Hosted Fields theme and contrast behavior. The Phase 235 served lane verifies the selected-offer facts, responsive geometry, keyboard focus and live status. These remaining UI-review observations do not contradict CKO-01–CKO-04 or the five roadmap truths; no manual checkout UAT is required for the specified deterministic acceptance behavior.
+
 ## Advisory (New Scope, Unevidenced)
 
 | # | Finding | Category | Why Advisory |
@@ -163,9 +188,9 @@ None. The required user-visible checkout, recovery, handoff, served-asset, viewp
 
 ## Gaps Summary
 
-No goal-blocking gap remains. The host selection flows into trusted persisted session terms; the visible mounted form uses the actual Hosted Fields hook and one-time nonce transport; server paths enforce freshness, authorization and replay protection; provider returns use provider-specific evidence; and uncertain/expired cases stop safely with recovery guidance. Phase 235's current ROADMAP plan count is stale (it reports four plans while six 235 plans exist); verification included all six on-disk plans and their 38 truth assertions.
+No goal-blocking gap remains. The host selection flows into trusted persisted session terms; the visible mounted form uses the actual Hosted Fields hook and one-time nonce transport; server paths enforce freshness, authorization and replay protection; provider returns use provider-specific evidence; and uncertain/expired cases stop safely with recovery guidance. Verification includes the five roadmap success criteria and all 38 distinct truth assertions across the six current plans. UI-SPEC copy and visual-scale recommendations remain visible as non-blocking UI review findings.
 
 ---
 
-_Verified: 2026-10-08T15:46:35Z_
+_Verified: 2026-10-09T02:44:11Z_
 _Verifier: the agent (gsd-verifier)_

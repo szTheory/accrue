@@ -1,8 +1,8 @@
 # Phase 235 — UI Review
 
-**Audited:** 2026-10-08 (refreshed after LiveView success redirect policy change)  
+**Audited:** 2026-10-08 (re-audited against current source and served browser evidence)
 **Baseline:** Approved `235-UI-SPEC.md`  
-**Screenshots:** Not captured — `http://localhost:8080` responded, but Playwright captures failed for desktop (1440×900), mobile (375×812), and tablet (768×1024); code-only audit  
+**Screenshots:** Not captured — preserved existing captures; `http://localhost:8080` responds, and the current Phase 235 served Braintree browser lane passed 14/14 tests. Visual composition is scored from source/CSS because no screenshots were captured in this review.
 **Interaction captures:** off (workflow.ui_interaction_capture is false)
 
 ---
@@ -11,21 +11,21 @@
 
 | Pillar | Score | Key Finding |
 |--------|-------|-------------|
-| 1. Copywriting | 2/4 | The expired recovery action is now present, but unavailable-plan and hosted-handoff copy still diverge from the approved contract. |
-| 2. Visuals | 3/4 | Source order separates plan facts, secure fields, and the payment action; rendered hierarchy could not be inspected after capture failures. |
-| 3. Color | 2/4 | Portal surfaces/actions use semantic host tokens, while secure iframe text, error, and placeholder colors remain hard-coded. |
+| 1. Copywriting | 2/4 | Unavailable-plan and hosted-handoff copy still diverge from the approved contract. |
+| 2. Visuals | 3/4 | Source and served browser geometry separate plan facts, secure fields, and the payment action; screenshot-based visual balance remains unverified. |
+| 3. Color | 3/4 | Portal colors use semantic host tokens and Hosted Fields colors are computed for readable contrast; the embedded font is still fixed and rendered host-theme balance was not captured. |
 | 4. Typography | 2/4 | Portal CSS uses at least nine sizes and four weights; the contract allows four sizes and two weights. |
 | 5. Spacing | 2/4 | Checkout CSS includes numerous non-scale values such as 6, 10, 12, 14, 18, 20, and 28px. |
 | 6. Experience Design | 3/4 | LiveView completion now validates persisted success destinations and Braintree returns use scoped evidence; unavailable-plan state still lacks a fallback action when no recovery URL exists. |
 
-**Overall: 14/24**
+**Overall: 15/24**
 
 ---
 
 ## Top 3 Priority Fixes
 
 1. **Bring unavailable and handoff copy into contract** — customers receive less specific recovery guidance and the host handoff does not explain the secure checkout destination — render the contracted unavailable heading/body and label the provider handoff “Continue to secure checkout.” **WARNING**
-2. **Theme Hosted Fields styles through the semantic bridge** — embedded payment text can clash with host themes and reduce contrast — pass computed text, danger, placeholder, and configured font values into Hosted Fields, then verify supported theme contrast. **WARNING**
+2. **Use the configured host font in Hosted Fields** — embedded card text can look inconsistent with the branded Portal shell — pass the configured font mapping into Hosted Fields while preserving the current contrast calculations. **WARNING**
 3. **Normalize typography and checkout spacing to the declared tokens** — inconsistent scale weakens hierarchy and alignment across the payment summary and form — use the four declared type roles, two weights, and 4px-multiple spacing values while preserving the 40px control minimum. **WARNING**
 
 ---
@@ -43,19 +43,19 @@
 
 - Source order establishes a sensible hierarchy: “Secure checkout” eyebrow and heading, selected plan/billed-to/charge summary, secure card fields, then one primary amount-aware payment action. Summary facts use separate definition-list rows and wrap long values. [checkout_live.ex:309](../../../accrue_portal/lib/accrue_portal/live/checkout_live.ex:309), [accrue_portal.css:227](../../../accrue_portal/priv/static/accrue_portal.css:227)
 - The host return is a single status region with a distinct state message, and the plan handoff action is separate from the mounted Portal payment form. [subscription_live.ex:643](../../../examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex:643)
-- **WARNING:** The UI checker previously flagged that the primary visual anchor was not explicitly named in the contract. No screenshots could be inspected because all three Playwright captures failed, so focal balance, responsive composition, and actual host-theme rendering remain unverified. This score is based on markup/CSS structure only.
+- **WARNING:** The UI checker previously flagged that the primary visual anchor was not explicitly named in the contract. The served browser lane confirms checkout facts/actions remain in the viewport without overlap or horizontal scrolling at 320 CSS px, including long text; no screenshots were captured, so focal balance and actual host-theme rendering remain unverified. This score uses markup/CSS plus those browser geometry assertions.
 
-### Pillar 3: Color (2/4)
+### Pillar 3: Color (3/4)
 
 - Dominant page background, raised surfaces, body text, focus, and primary action map to `--accrue-*` roles and host accent tokens, consistent with the 60/30/10 hierarchy intent. [accrue_portal.css:14](../../../accrue_portal/priv/static/accrue_portal.css:14), [accrue_portal.css:345](../../../accrue_portal/priv/static/accrue_portal.css:345)
-- **WARNING:** Hosted Fields iframe styles hard-code `#111418` for text, `#B42318` for invalid input, and `#5D6A73` for placeholders. These bypass active host theme values. The iframe font family is also fixed instead of using the configured host font. [accrue_portal.js:215](../../../accrue_portal/priv/static/accrue_portal.js:215)
-- Accent use in Portal CSS is focused on links, focus, and primary actions rather than all controls. Because screenshots failed, actual accent contrast and 60/30/10 rendered surface balance remain unverified.
+- **WARNING:** Hosted Fields text, invalid-state, and placeholder colors are derived from computed Portal tokens and selected against iframe backgrounds for 4.5:1 contrast. The font family is fixed to a system stack rather than the configured host font, and fallback dark/light color constants remain in the readability helper. [accrue_portal.js:364](../../../accrue_portal/priv/static/accrue_portal.js:364), [accrue_portal.js:402](../../../accrue_portal/priv/static/accrue_portal.js:402)
+- Accent use in Portal CSS is focused on links, focus, selected offer emphasis, and primary actions rather than all controls. Browser assertions cover served bundle behavior, not a screenshot-based audit of rendered accent contrast or 60/30/10 surface balance.
 
 ### Pillar 4: Typography (2/4)
 
 - **WARNING:** Portal CSS contains at least nine distinct sizes: 12, 13, 14, 15, 16, 17, 19, 26, and 32px equivalents. The contract specifies only 12px metadata, 14px labels, 16px body/controls, and 26px page headings. Examples include 17px wordmark, 19px h2, 15px subtitle, 13px status, and 32px metric. [accrue_portal.css:47](../../../accrue_portal/priv/static/accrue_portal.css:47), [accrue_portal.css:271](../../../accrue_portal/priv/static/accrue_portal.css:271), [accrue_portal.css:290](../../../accrue_portal/priv/static/accrue_portal.css:290), [accrue_portal.css:410](../../../accrue_portal/priv/static/accrue_portal.css:410), [accrue_portal.css:419](../../../accrue_portal/priv/static/accrue_portal.css:419)
 - **WARNING:** Portal CSS uses 400, 500, 600, and 700 weights, while the approved contract permits regular 400 and semibold 600. [accrue_portal.css:48](../../../accrue_portal/priv/static/accrue_portal.css:48), [accrue_portal.css:164](../../../accrue_portal/priv/static/accrue_portal.css:164), [accrue_portal.css:337](../../../accrue_portal/priv/static/accrue_portal.css:337)
-- Hosted Fields' 16px/400 sizing matches the contract, but the fixed system font does not honor the host font mapping. [accrue_portal.js:218](../../../accrue_portal/priv/static/accrue_portal.js:218)
+- Hosted Fields' 16px/400 sizing matches the contract, but the fixed system font does not honor the host font mapping. [accrue_portal.js:389](../../../accrue_portal/priv/static/accrue_portal.js:389)
 
 ### Pillar 5: Spacing (2/4)
 
@@ -69,7 +69,7 @@
 - **FIXED/EXPANDED SINCE PRIOR REVIEW:** Braintree successful returns now resolve the selected plan/selection locator to the current authorized organization, customer, and matching persisted `LocalSession`; only `completed` yields completion copy, while open/processing/uncertain stays pending and mismatches are unavailable. Plan 06's browser completion uses a fixture-backed session, not a live provider transaction. [subscription_live.ex:366](../../../examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex:366), [235-06-SUMMARY.md](235-06-SUMMARY.md)
 - The mounted checkout has distinct unavailable, denied, expired, completed, uncertain, promo, loading, card-error, and pending submission feedback. Status regions use ARIA live announcements; JS disables submission during tokenization and clears the nonce for uncertain transport failures. [checkout_live.ex:328](../../../accrue_portal/lib/accrue_portal/live/checkout_live.ex:328), [accrue_portal.js:121](../../../accrue_portal/priv/static/accrue_portal.js:121), [accrue_portal.js:255](../../../accrue_portal/priv/static/accrue_portal.js:255)
 - **WARNING:** If trusted terms are unavailable and no validated recovery URL exists, the unavailable block renders no action. The design contract says to provide the existing safe fallback in that case. [checkout_live.ex:328](../../../accrue_portal/lib/accrue_portal/live/checkout_live.ex:328)
-- Plan summaries report deterministic browser coverage for selection, mounted checkout, return states, keyboard focus, and narrow layouts, but no fresh browser interaction capture was made during this review. `workflow.ui_interaction_capture` was configured off.
+- The current served Braintree browser lane passed 14/14 tests and covers pricing selection, mounted checkout, scoped complete/pending/forged returns, keyboard focus, live feedback, and 320 CSS px geometry. The deterministic injected SDK and fixture-backed LocalSession remain mock evidence, not live-provider proof. No interaction capture was made because `workflow.ui_interaction_capture` is off; this experience finding is based on source and served test evidence.
 
 ## Files Audited
 

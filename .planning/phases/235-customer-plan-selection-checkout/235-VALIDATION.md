@@ -93,3 +93,15 @@ All acceptance behaviors have automated verification paths. Do not require confi
 | Gaps found | 0 |
 | Resolved | 0 |
 | Escalated | 0 |
+
+## Stale Verification Refresh 2026-10-08
+
+Reconciled the task map against the latest post-source-change automated evidence recorded for this refresh. The existing checkout-specific ExUnit and served Braintree browser checks cover every Phase 235 acceptance row; no uncovered behavior or missing automated command was found, so no new test was warranted. The refresh evidence also includes Core (2,077 passed / 0 failed), Admin (581 / 0), Portal (110 / 0), Host (222 / 0), package docs (46 / 0), standard Fake browser (14 / 0), real-query search browser (1 / 0), and Braintree browser lanes (12 / 0 and 14 / 0). Phase 237 and Phase 234 browser journeys passed 1 / 0 each. These deterministic checks do not claim live-provider payment fidelity.
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+All Phase 235 task rows remain green; no human UAT is required for the deterministic acceptance criteria.
