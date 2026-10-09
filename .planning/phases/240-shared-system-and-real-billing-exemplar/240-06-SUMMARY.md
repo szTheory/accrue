@@ -99,7 +99,8 @@ coverage:
 - `MIX_ENV=test mix compile --warnings-as-errors` in `examples/accrue_host` — passed.
 - `CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop` — final run passed 1/1. Package/compiled/served SHA-256s matched for all four assets; the intentionally stale JS response failed its digest assertion and the restored response matched again.
 - `GSD_RUNTIME=codex gsd_run check tdd-red-evidence .planning/phases/240-shared-system-and-real-billing-exemplar/240-06-red-evidence.json --raw` — returned `RED_EVIDENCE_OK` / `target_test_failed` for the named mounted test. The actual unchanged JUnit report remains at `/private/tmp/24006-red-asset.xml`; its project record explicitly contains a privacy-safe path-redacted report copy, not the unchanged report.
-- `HEX_HOME=/private/tmp/accrue240-hex MIX_ENV=test mix verify.full` — ran the host suite but did not pass: existing `AccrueHostWeb.TrustSmokeTest` measured webhook ingest at 222ms against its 100ms budget. The threshold was not changed and the failure was recorded in `deferred-items.md` as out of this plan's scope.
+- Initial `HEX_HOME=/private/tmp/accrue240-hex MIX_ENV=test mix verify.full` — existing `AccrueHostWeb.TrustSmokeTest` measured webhook ingest at 222ms against its 100ms budget.
+- One unchanged diagnostic `mix verify.full` rerun on 2026-10-09 resolved pinned dependencies and stopped in the bounded ExUnit stage with `223 tests, 1 failure`; later compile, regression, dev-boot and browser stages did not run. The captured tool output omitted the detailed failure block and no native JUnit/report file or sanitized report copy was produced, so no second latency or failure identity is asserted. The timed interval itself covers `Plug.Test.conn` + `Router.init`/`Router.call` and database work, excluding fixture setup and suite startup. No threshold was changed; disposition and owner path are recorded in `deferred-items.md`.
 - The existing Admin full ExUnit owner (617 tests, 0 failures) and Phase 191 lifecycle owner (26 tests, 0 failures) are prior Wave 3 results in `240-WAVE-GATES.md`; this plan did not rerun those suites. Linux pixel comparison remains locally unrun on macOS.
 
 ## TDD Gate Compliance
@@ -138,7 +139,7 @@ coverage:
 
 ### Deferred Issues
 
-- The broader host `verify.full` lane stopped at the pre-existing TrustSmoke timing assertion (222ms > 100ms). This task did not edit its code or weaken its budget. It is recorded as open in phase `deferred-items.md` for owner follow-up.
+- Host `verify.full` remains open after its unchanged diagnostic rerun: the bounded suite reported 223 tests and 1 failure, but the captured output did not preserve the detailed failure block. This task did not edit the smoke assertion, its 100ms budget or backend behavior. The existing automated owner path and required evidence capture are recorded in `deferred-items.md`.
 - Actual 400% browser zoom and local Linux pixel comparison remain unavailable; Phase 243 owns final reviewed Linux goldens.
 
 **Total deviations:** 2 auto-fixed (1 Rule 1 test assertion, 1 Rule 3 cache blocker); 1 unrelated host integration failure deferred. **Impact:** The planned current ledger and mounted asset evidence are complete; the broader host suite's independent timing failure remains visible and unchanged.
