@@ -193,6 +193,14 @@ defmodule AccrueAdmin.InvoiceLiveTest do
         %{"action_type" => "pay"}
       )
 
+    review = Floki.find(html, "[data-role='confirm-panel']") |> Floki.text(sep: " ")
+
+    assert review =~ "Customer"
+    assert review =~ "invoice-detail@example.com"
+    assert review =~ "Owner scope"
+    assert review =~ "active organization scope"
+    assert review =~ invoice.id
+
     assert html =~ "99.00"
     assert html =~ "(usd)"
 

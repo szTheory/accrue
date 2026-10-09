@@ -138,6 +138,8 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(page.locator("body")).not.toContainText("HOST-BROWSER-FOREIGN01");
   const invoiceCard = page.locator(`.ax-data-table-card[data-row-id="${fixture.invoice_id}"]`);
   await expect(invoiceCard).toContainText("Due date unavailable");
+  await expect(invoiceCard).toContainText("Automatic");
+  await expect(invoiceCard).not.toContainText("charge_automatically");
   await expect(invoiceCard).not.toContainText("False");
   const asset = await assertCurrentStylesheet(page);
   await page.setViewportSize({ width: 320, height: 800 });
@@ -157,6 +159,25 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(page.getByRole("heading", { name: /HOST-BROWSER-VERIFY01/ })).toBeVisible();
   const payAction = page.getByRole("button", { name: /pay.*invoice/i });
   await expect(payAction).toBeVisible();
+  const detailShot = await page.screenshot({ fullPage: true });
+  await testInfo.attach("phase240-invoice-detail-desktop-before.png", { body: detailShot, contentType: "image/png" });
+  const detailGeometry = await page.evaluate(() => ({
+    detailSections: Array.from(document.querySelectorAll(".ax-detail-section")).map((element) => {
+      const bounds = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return { title: element.querySelector(".ax-detail-section-title")?.textContent?.trim(), top: bounds.top, height: bounds.height, marginTop: style.marginTop, paddingTop: style.paddingTop };
+    }),
+    actionBand: (() => {
+      const element = document.querySelector("[data-ax-action-band]");
+      const bounds = element.getBoundingClientRect();
+      return { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
+    })(),
+    actionTargets: Array.from(document.querySelectorAll("[data-ax-action-band] button")).map((element) => {
+      const bounds = element.getBoundingClientRect();
+      return { label: element.textContent.trim(), x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
+    })
+  }));
+  await testInfo.attach("phase240-invoice-detail-geometry.json", { body: Buffer.from(JSON.stringify(detailGeometry, null, 2)), contentType: "application/json" });
   await payAction.focus();
   await expect(payAction).toBeFocused();
   const focusOutline = await payAction.evaluate((element) => getComputedStyle(element).outlineWidth);
@@ -168,6 +189,8 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   const review = page.locator('#invoice-action-drawer [data-role="confirm-panel"]');
   await expect(review).toBeVisible();
   await expect(review).toContainText(fixture.invoice_id);
+  await expect(review).toContainText("admin-e2e-alpha-customer@example.test");
+  await expect(review).toContainText(fixture.admin_org_alpha_slug);
   await expect(review).toContainText(/1,?000|10\.00/);
   await expect(review).toContainText(/attempt manual payment/i);
   await expect(page.locator('#invoice-action-drawer').getByRole("button", { name: "Pay invoice", exact: true })).toBeVisible();
