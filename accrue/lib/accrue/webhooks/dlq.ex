@@ -55,6 +55,7 @@ defmodule Accrue.Webhooks.DLQ do
           :not_found
           | :already_replayed
           | :not_dead_lettered
+          | :out_of_scope
           | :replay_too_large
           | term()
 
@@ -62,8 +63,18 @@ defmodule Accrue.Webhooks.DLQ do
 
   @spec requeue(Ecto.UUID.t()) ::
           {:ok, WebhookEvent.t()} | {:error, replay_error()}
-  def requeue(id) when is_binary(id) do
-    case do_requeue(id) do
+  def requeue(id) when is_binary(id), do: requeue(id, fn _row -> true end)
+
+  @doc """
+  Requeue a dead-lettered event only when `authorize_fun` accepts the locked row.
+
+  The authorization callback runs inside the same transaction that locks and claims the
+  webhook row. This lets callers revalidate mutable scope data immediately before enqueue.
+  """
+  @spec requeue(Ecto.UUID.t(), (WebhookEvent.t() -> boolean())) ::
+          {:ok, WebhookEvent.t()} | {:error, replay_error()}
+  def requeue(id, authorize_fun) when is_binary(id) and is_function(authorize_fun, 1) do
+    case do_requeue(id, authorize_fun) do
       {:ok, _} = ok ->
         :telemetry.execute(
           [:accrue, :ops, :webhook_dlq, :replay],
@@ -81,16 +92,16 @@ defmodule Accrue.Webhooks.DLQ do
   @spec requeue!(Ecto.UUID.t()) :: WebhookEvent.t()
   def requeue!(id), do: unwrap!(requeue(id))
 
-  defp do_requeue(id) do
+  defp do_requeue(id, authorize_fun) do
     Repo.transact(fn ->
-      case fetch_replayable(id) do
+      case fetch_replayable(id, authorize_fun) do
         {:ok, row} -> commit_requeue(row)
         {:error, _} = err -> err
       end
     end)
   end
 
-  defp fetch_replayable(id) do
+  defp fetch_replayable(id, authorize_fun) do
     query =
       from(event in WebhookEvent,
         where: event.id == ^id,
@@ -98,10 +109,17 @@ defmodule Accrue.Webhooks.DLQ do
       )
 
     case Repo.one(query) do
-      nil -> {:error, :not_found}
-      %WebhookEvent{status: :replayed} -> {:error, :already_replayed}
-      %WebhookEvent{status: status} = row when status in [:dead, :failed] -> {:ok, row}
-      %WebhookEvent{} -> {:error, :not_dead_lettered}
+      nil ->
+        {:error, :not_found}
+
+      %WebhookEvent{status: :replayed} ->
+        {:error, :already_replayed}
+
+      %WebhookEvent{status: status} = row when status in [:dead, :failed] ->
+        if authorize_fun.(row), do: {:ok, row}, else: {:error, :out_of_scope}
+
+      %WebhookEvent{} ->
+        {:error, :not_dead_lettered}
     end
   end
 

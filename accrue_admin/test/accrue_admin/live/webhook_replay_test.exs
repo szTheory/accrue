@@ -318,6 +318,59 @@ defmodule AccrueAdmin.WebhookReplayTest do
     assert TestRepo.get!(WebhookEvent, foreign_webhook.id).status == :dead
   end
 
+  test "bulk replay revalidates organization ownership inside the claim transaction", %{
+    conn: conn
+  } do
+    allowed_customer =
+      insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+
+    invoice = insert_invoice(allowed_customer, %{processor_id: "in_reassigned_webhook"})
+
+    webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_reassigned_bulk",
+        status: :dead,
+        data: %{"object" => %{"id" => invoice.processor_id}}
+      })
+
+    # The initial scope read has already accepted the row when this seam runs. Move the
+    # customer before DLQ.requeue/2 so only the in-transaction authorization can reject it.
+    Application.put_env(:accrue_admin, :webhook_requeue_fun, fn id, authorize_fun ->
+      allowed_customer
+      |> Ecto.Changeset.change(owner_id: "org_foreign")
+      |> TestRepo.update!()
+
+      DLQ.requeue(id, authorize_fun)
+    end)
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    {:ok, view, _html} = live(conn, "/billing/webhooks?org=allowed-org&status=dead")
+    html = submit_selection(view, [webhook.id])
+
+    assert html =~ "No eligible deliveries were queued. 1 skipped; 0 failed."
+    event = bulk_replay_event!()
+    assert event.data["eligible"] == 1
+    assert event.data["attempted"] == 0
+    assert event.data["queued"] == 0
+    assert event.data["skipped"] == 1
+    assert event.data["ids"] == []
+    assert event.data["outcomes"] == []
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :dead
+
+    refute TestRepo.exists?(
+             from(event in Event,
+               where: event.type == "webhook.replay_requested" and event.subject_id == ^webhook.id
+             )
+           )
+  end
+
   test "a mid-batch queue failure preserves earlier results and continues to later deliveries", %{
     conn: conn,
     bulk_webhooks: [first, failed, last]
@@ -326,11 +379,11 @@ defmodule AccrueAdmin.WebhookReplayTest do
     failed = set_received_at(failed, ~U[2026-01-01 11:00:00.000000Z])
     last = set_received_at(last, ~U[2026-01-01 10:00:00.000000Z])
 
-    Application.put_env(:accrue_admin, :webhook_requeue_fun, fn id ->
+    Application.put_env(:accrue_admin, :webhook_requeue_fun, fn id, authorize_fun ->
       if id == failed.id do
         raise "injected queue exception"
       else
-        Accrue.Webhooks.DLQ.requeue(id)
+        DLQ.requeue(id, authorize_fun)
       end
     end)
 

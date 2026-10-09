@@ -183,7 +183,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
       Enum.count(selected_rows, fn %{row: row} -> row && row.status in [:failed, :dead] end)
 
     outcomes =
-      Enum.map(selected_rows, &replay_outcome/1)
+      Enum.map(selected_rows, &replay_outcome(&1, owner_scope))
 
     queued = Enum.count(outcomes, &(&1.outcome == :queued))
 
@@ -207,24 +207,33 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     _read_error -> %{id: nil, row: nil, read_failed?: true}
   end
 
-  defp replay_outcome(%{read_failed?: true}),
+  defp replay_outcome(%{read_failed?: true}, _owner_scope),
     do: %{id: nil, outcome: :failed, attempted: true}
 
-  defp replay_outcome(%{id: nil}),
+  defp replay_outcome(%{id: nil}, _owner_scope),
     do: %{id: nil, outcome: :skipped, attempted: false}
 
-  defp replay_outcome(%{id: id, row: %{status: status}}) when status not in [:failed, :dead],
-    do: %{id: id, outcome: :skipped, attempted: false}
+  defp replay_outcome(%{id: id, row: %{status: status}}, _owner_scope)
+       when status not in [:failed, :dead],
+       do: %{id: id, outcome: :skipped, attempted: false}
 
-  defp replay_outcome(%{id: id}) do
+  defp replay_outcome(%{id: id}, owner_scope) do
     try do
-      case requeue_delivery(id) do
-        {:ok, _queued} -> %{id: id, outcome: :queued, attempted: true}
+      case requeue_delivery(id, owner_scope) do
+        {:ok, _queued} ->
+          %{id: id, outcome: :queued, attempted: true}
+
+        {:error, :out_of_scope} ->
+          %{id: nil, outcome: :skipped, attempted: false}
+
         {:error, reason} when reason in [:already_replayed, :not_dead_lettered, :not_found] ->
           %{id: id, outcome: :skipped, attempted: false}
 
-        {:error, _reason} -> %{id: id, outcome: :failed, attempted: true}
-        _unexpected -> %{id: id, outcome: :failed, attempted: true}
+        {:error, _reason} ->
+          %{id: id, outcome: :failed, attempted: true}
+
+        _unexpected ->
+          %{id: id, outcome: :failed, attempted: true}
       end
     rescue
       _queue_error -> %{id: id, outcome: :failed, attempted: true}
@@ -238,15 +247,17 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     |> Enum.sort()
   end
 
-  if Mix.env() == :test do
-    defp requeue_delivery(id) do
+  defp requeue_delivery(id, owner_scope) do
+    authorize_fun = &Webhooks.owner_scope_allows_replay?(&1, owner_scope)
+
+    if Mix.env() == :test do
       case Application.get_env(:accrue_admin, :webhook_requeue_fun) do
-        fun when is_function(fun, 1) -> fun.(id)
-        _configured_fun -> DLQ.requeue(id)
+        fun when is_function(fun, 2) -> fun.(id, authorize_fun)
+        _configured_fun -> DLQ.requeue(id, authorize_fun)
       end
+    else
+      DLQ.requeue(id, authorize_fun)
     end
-  else
-    defp requeue_delivery(id), do: DLQ.requeue(id)
   end
 
   defp bulk_step_up_action do

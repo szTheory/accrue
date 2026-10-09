@@ -90,6 +90,16 @@ defmodule AccrueAdmin.Queries.Webhooks do
     end
   end
 
+  @doc """
+  Returns whether a webhook row currently belongs to the supplied owner scope.
+
+  Used by the DLQ claim transaction to recheck mutable organization ownership while the
+  webhook row is locked.
+  """
+  def owner_scope_allows_replay?(%WebhookEvent{} = webhook, owner_scope) do
+    match?({:ok, _webhook}, prove_row_scope(webhook, owner_scope, true))
+  end
+
   def bulk_replay_count(owner_scope, filter) when is_map(filter) do
     WebhookEvent
     |> filter_query(filter)
@@ -202,11 +212,19 @@ defmodule AccrueAdmin.Queries.Webhooks do
     end)
   end
 
-  defp prove_row_scope(%WebhookEvent{} = webhook, nil), do: {:ok, webhook}
-  defp prove_row_scope(%WebhookEvent{} = webhook, %OwnerScope{mode: :global}), do: {:ok, webhook}
+  defp prove_row_scope(webhook, owner_scope), do: prove_row_scope(webhook, owner_scope, false)
 
-  defp prove_row_scope(%WebhookEvent{} = webhook, %OwnerScope{mode: :organization} = owner_scope) do
-    matches = ownership_matches(webhook)
+  defp prove_row_scope(%WebhookEvent{} = webhook, nil, _lock_rows?), do: {:ok, webhook}
+
+  defp prove_row_scope(%WebhookEvent{} = webhook, %OwnerScope{mode: :global}, _lock_rows?),
+    do: {:ok, webhook}
+
+  defp prove_row_scope(
+         %WebhookEvent{} = webhook,
+         %OwnerScope{mode: :organization} = owner_scope,
+         lock_rows?
+       ) do
+    matches = ownership_matches(webhook, lock_rows?)
     scoped_matches = Enum.filter(matches, &(&1.owner_id == owner_scope.organization_id))
     out_of_scope_matches = Enum.reject(matches, &(&1.owner_id == owner_scope.organization_id))
 
@@ -226,125 +244,144 @@ defmodule AccrueAdmin.Queries.Webhooks do
     end
   end
 
-  defp ownership_matches(%WebhookEvent{} = webhook) do
-    ([invoice_match(webhook)] ++
-       [subscription_match(webhook)] ++
-       [customer_match(webhook)] ++
-       event_matches(webhook))
+  defp ownership_matches(%WebhookEvent{} = webhook, lock_rows?) do
+    ([invoice_match(webhook, lock_rows?)] ++
+       [subscription_match(webhook, lock_rows?)] ++
+       [customer_match(webhook, lock_rows?)] ++
+       event_matches(webhook, lock_rows?))
     |> List.flatten()
     |> Enum.reject(&is_nil/1)
     |> Enum.uniq_by(&{&1.owner_id, &1.source, &1.subject_type})
   end
 
-  defp invoice_match(webhook) do
+  defp invoice_match(webhook, lock_rows?) do
     object_id = payload_object_id(webhook)
 
     if is_binary(object_id) do
-      Invoice
-      |> where([invoice], invoice.processor_id == ^object_id)
-      |> maybe_match_binary_id(object_id)
-      |> join(:inner, [invoice], customer in Customer, on: customer.id == invoice.customer_id)
-      |> select([_invoice, customer], %{
-        owner_id: customer.owner_id,
-        source: :invoice,
-        subject_type: "Invoice"
-      })
-      |> limit(1)
-      |> Repo.one()
+      query =
+        Invoice
+        |> where([invoice], invoice.processor_id == ^object_id)
+        |> maybe_match_binary_id(object_id)
+        |> join(:inner, [invoice], customer in Customer, on: customer.id == invoice.customer_id)
+        |> select([_invoice, customer], %{
+          owner_id: customer.owner_id,
+          source: :invoice,
+          subject_type: "Invoice"
+        })
+        |> limit(1)
+
+      query |> maybe_lock_rows(lock_rows?) |> Repo.one()
     end
   end
 
-  defp subscription_match(webhook) do
+  defp subscription_match(webhook, lock_rows?) do
     object_id = payload_object_id(webhook)
 
     if is_binary(object_id) do
-      Subscription
-      |> where([subscription], subscription.processor_id == ^object_id)
-      |> maybe_match_binary_id(object_id)
-      |> join(:inner, [subscription], customer in Customer,
-        on: customer.id == subscription.customer_id
-      )
-      |> select([_subscription, customer], %{
-        owner_id: customer.owner_id,
-        source: :subscription,
-        subject_type: "Subscription"
-      })
-      |> limit(1)
-      |> Repo.one()
+      query =
+        Subscription
+        |> where([subscription], subscription.processor_id == ^object_id)
+        |> maybe_match_binary_id(object_id)
+        |> join(:inner, [subscription], customer in Customer,
+          on: customer.id == subscription.customer_id
+        )
+        |> select([_subscription, customer], %{
+          owner_id: customer.owner_id,
+          source: :subscription,
+          subject_type: "Subscription"
+        })
+        |> limit(1)
+
+      query |> maybe_lock_rows(lock_rows?) |> Repo.one()
     end
   end
 
-  defp customer_match(webhook) do
+  defp customer_match(webhook, lock_rows?) do
     customer_ref = payload_customer_id(webhook)
 
     if is_binary(customer_ref) do
-      Customer
-      |> where([customer], customer.processor_id == ^customer_ref)
-      |> maybe_match_binary_id(customer_ref)
-      |> select([customer], %{
-        owner_id: customer.owner_id,
-        source: :customer,
-        subject_type: "Customer"
-      })
-      |> limit(1)
-      |> Repo.one()
+      query =
+        Customer
+        |> where([customer], customer.processor_id == ^customer_ref)
+        |> maybe_match_binary_id(customer_ref)
+        |> select([customer], %{
+          owner_id: customer.owner_id,
+          source: :customer,
+          subject_type: "Customer"
+        })
+        |> limit(1)
+
+      query |> maybe_lock_rows(lock_rows?) |> Repo.one()
     end
   end
 
-  defp event_matches(webhook) do
-    from(event in Event,
-      where: event.caused_by_webhook_event_id == ^webhook.id,
-      select: %{subject_type: event.subject_type, subject_id: event.subject_id}
-    )
+  defp event_matches(webhook, lock_rows?) do
+    query =
+      from(event in Event,
+        where: event.caused_by_webhook_event_id == ^webhook.id,
+        select: %{subject_type: event.subject_type, subject_id: event.subject_id}
+      )
+
+    query
+    |> maybe_lock_rows(lock_rows?)
     |> Repo.all()
-    |> Enum.map(&event_subject_match/1)
+    |> Enum.map(&event_subject_match(&1, lock_rows?))
     |> Enum.reject(&is_nil/1)
   end
 
-  defp event_subject_match(%{subject_type: "Customer", subject_id: subject_id}) do
-    from(customer in Customer,
-      where: customer.id == ^subject_id,
-      select: %{
-        owner_id: customer.owner_id,
-        source: :event_subject,
-        subject_type: "Customer"
-      },
-      limit: 1
-    )
-    |> Repo.one()
+  defp event_subject_match(%{subject_type: "Customer", subject_id: subject_id}, lock_rows?) do
+    query =
+      from(customer in Customer,
+        where: customer.id == ^subject_id,
+        select: %{
+          owner_id: customer.owner_id,
+          source: :event_subject,
+          subject_type: "Customer"
+        },
+        limit: 1
+      )
+
+    query |> maybe_lock_rows(lock_rows?) |> Repo.one()
   end
 
-  defp event_subject_match(%{subject_type: "Subscription", subject_id: subject_id}) do
-    from(subscription in Subscription,
-      join: customer in Customer,
-      on: customer.id == subscription.customer_id,
-      where: subscription.id == ^subject_id,
-      select: %{
-        owner_id: customer.owner_id,
-        source: :event_subject,
-        subject_type: "Subscription"
-      },
-      limit: 1
-    )
-    |> Repo.one()
+  defp event_subject_match(%{subject_type: "Subscription", subject_id: subject_id}, lock_rows?) do
+    query =
+      from(subscription in Subscription,
+        join: customer in Customer,
+        on: customer.id == subscription.customer_id,
+        where: subscription.id == ^subject_id,
+        select: %{
+          owner_id: customer.owner_id,
+          source: :event_subject,
+          subject_type: "Subscription"
+        },
+        limit: 1
+      )
+
+    query |> maybe_lock_rows(lock_rows?) |> Repo.one()
   end
 
-  defp event_subject_match(%{subject_type: "Invoice", subject_id: subject_id}) do
-    from(invoice in Invoice,
-      join: customer in Customer,
-      on: customer.id == invoice.customer_id,
-      where: invoice.id == ^subject_id,
-      select: %{
-        owner_id: customer.owner_id,
-        source: :event_subject,
-        subject_type: "Invoice"
-      },
-      limit: 1
-    )
-    |> Repo.one()
+  defp event_subject_match(%{subject_type: "Invoice", subject_id: subject_id}, lock_rows?) do
+    query =
+      from(invoice in Invoice,
+        join: customer in Customer,
+        on: customer.id == invoice.customer_id,
+        where: invoice.id == ^subject_id,
+        select: %{
+          owner_id: customer.owner_id,
+          source: :event_subject,
+          subject_type: "Invoice"
+        },
+        limit: 1
+      )
+
+    query |> maybe_lock_rows(lock_rows?) |> Repo.one()
   end
 
-  defp event_subject_match(_event), do: nil
+  defp event_subject_match(_event, _lock_rows?), do: nil
+
+  defp maybe_lock_rows(query, true), do: lock(query, "FOR SHARE")
+  defp maybe_lock_rows(query, false), do: query
 
   defp payload_object_id(%WebhookEvent{data: data}) when is_map(data) do
     nested_value(data, ["object", "id"]) || nested_value(data, ["data", "object", "id"])
