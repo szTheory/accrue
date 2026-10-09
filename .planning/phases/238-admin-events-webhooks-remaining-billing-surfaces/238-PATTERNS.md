@@ -22,6 +22,12 @@ Research identifies only the bulk replay behavior as a concrete implementation g
 
 ## Pattern Assignments
 
+### `accrue_admin/lib/accrue_admin/components/data_table.ex` (shared stateful LiveComponent)
+
+**Analog:** `accrue_admin/lib/accrue_admin/components/at_risk_table.ex` and `accrue_admin/test/accrue_admin/components/at_risk_table_test.exs` (tracked; explicit loading/error/empty/pagination state contract).
+
+The DataTable currently derives empty/populated/list states from loaded rows and directly destructures query results in `reload/3` and `load-more`. Add a dedicated unavailable/partial-load state with safe retry behavior; do not map query errors to an empty list or expose exception text. Extend `accrue_admin/test/accrue_admin/components/data_table_test.exs` using its existing fixture query module to drive the error/recovery cases. Only expected database read failures should become user-visible unavailable states; unrelated implementation errors should still surface.
+
 ### `accrue_admin/lib/accrue_admin/live/webhooks_live.ex` (LiveView, request-response / event-driven)
 
 **Analog:** `accrue_admin/lib/accrue_admin/live/webhook_live.ex` (tracked; sibling detail LiveView with the safe single-replay flow).

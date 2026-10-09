@@ -44,3 +44,37 @@ issues:
 ## Recommendation
 
 Advisory only — no revision required. The plans are ready for execution. Record the actual CI result at execution and keep the stated limit on local evidence versus branch-protection configuration.
+
+## Amendment review — 238-02 T3
+
+**Date:** 2026-10-08  
+**Result:** Advisory only; no blocker or warning requires revision.  
+**Scope:** Static review of the added T3 against `238-RESEARCH.md`, `238-PATTERNS.md`, `238-UI-SPEC.md`, `238-VALIDATION.md`, the existing T1/T2 contract, and the named DataTable/Events/Event/Webhook implementation seams. No application tests or provider calls were run.
+
+### Assessment
+
+T3 is a focused scope adjustment. The concrete failure mode is present in the named code: `DataTable` directly destructures list-query results in `reload/3` and `load-more`, derives empty state from rows, and has no unavailable state; Events separately runs summary aggregates during mount and parameter changes; Event and Webhook detail mounts currently distinguish only success from not-found (plus the existing ambiguous webhook case). The added task stays within the affected shared component and the three relevant evidence routes, with adjacent deterministic tests. It does not expand provider/replay behavior, introduce packages, or call external systems.
+
+T3 is executable and bounded: one task, eight files, a targeted focused ExUnit command, named read-first analogs, expected database-read failure handling, explicit recovery/partial-page semantics, and negative requirements to preserve true-empty/no-match and not-found distinctions. Its test obligations include both first-page and later-page failure, retry recovery, stale selection/pagination clearing, and unchanged empty/filter behavior. The file count is at the plan's existing upper target (8), while the total plan is three tasks and the revised estimate is 27k tokens with low confidence; this is reasonable for the cross-cutting shared state and route regressions.
+
+The existing must-haves remain covered: event/delivery evidence and exact scope are T1/T2; retry eligibility and fresh step-up are T2; unavailable local history and recovery are T3; provider observation remains explicitly separate/unknown where relevant and is not conflated with local queue acceptance. No phase requirement is dropped.
+
+### Advisory
+
+1. The plan-level `<success_criteria>` still names only exact event/delivery evidence and safe single replay, omitting T3's unavailable/retry/partial-load outcome. T3 has its own explicit `<acceptance_criteria>` and `<done>`, so this does not block execution, but the plan-level completion summary would be clearer if it included the new contract.
+
+### Structured issues
+
+```yaml
+issues:
+  - plan: "238-02"
+    dimension: verification_derivation
+    severity: info
+    required_property: "Plan-level success criteria reflect all newly added must-have behavior"
+    description: "The added T3 acceptance criteria and done condition cover unavailable, retry, and partial-load states, but the plan-level success_criteria still names only scoped evidence and single replay."
+    fix_hint: "Optionally include the unavailable/read-recovery contract in the plan-level success_criteria."
+```
+
+### Recommendation
+
+Advisory only — no revision required. T3 is a focused and appropriately bounded response to the observed crash and missing recovery state.
