@@ -236,7 +236,7 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [x] 239-01-PLAN.md — Current route and interaction evidence tracer
-- [ ] 239-02-PLAN.md — Served asset, font, mount, CSP/SRI, and copy parity
+- [x] 239-02-PLAN.md — Served asset, font, mount, CSP/SRI, and copy parity
 - [ ] 239-03-PLAN.md — Component examples and state evidence parity
 - [ ] 239-04-PLAN.md — Read-only feedback preview and handoff
 **UI hint**: yes
@@ -251,7 +251,7 @@ Plans:
 | 236. Portal Billing Self-Service | 6/6 | Complete    | 2026-10-08 |
 | 237. Admin Invoices, Payments & Recovery | 8/8 | Complete    | 2026-10-08 |
 | 238. Admin Events, Webhooks & Remaining Billing Surfaces | 5/5 | Complete    | 2026-10-09 |
-| 239. Integrated Quality & Handoff | 1/4 | In Progress | - |
+| 239. Integrated Quality & Handoff | 2/4 | In Progress | - |
 
 <details>
 <summary>✅ v1.62 Release Integration & Repository Hygiene (Phases 229-232) — SHIPPED 2026-09-18</summary>

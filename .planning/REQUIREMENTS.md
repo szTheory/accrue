@@ -57,7 +57,7 @@ Requirements for the Admin and Portal UI refinement milestone. Each maps to exac
 
 ### Delivery and Evidence
 
-- [ ] **SHIP-01**: Generated Admin and Portal assets, fonts, mounts, CSP/SRI, copy exports, and host integration documentation match the source actually served by each package.
+- [x] **SHIP-01**: Generated Admin and Portal assets, fonts, mounts, CSP/SRI, copy exports, and host integration documentation match the source actually served by each package.
 - [x] **SHIP-02**: Every owned route and unique interaction has a coverage disposition supported by current required gates and inspected representative renders.
 - [ ] **SHIP-03**: Component examples and adopter docs match production; task-owned debris is removed; a useful feedback preview remains separate from mutation/reset proof.
 - [x] **SHIP-04**: Adopter documentation and the canonical example cover personal defaults plus organization/custom and mixed Portal resolution, while preserving actor attribution and requiring no new auth/runtime dependency.
@@ -113,7 +113,7 @@ This milestone adds no future feature commitment. Deferred capabilities require 
 | SAFE-01 | Phase 234 | Complete |
 | SAFE-02 | Phase 233 | Complete |
 | SAFE-03 | Phase 233 | Complete |
-| SHIP-01 | Phase 239 | Pending |
+| SHIP-01 | Phase 239 | Complete |
 | SHIP-02 | Phase 239 | Complete |
 | SHIP-03 | Phase 239 | Pending |
 | SHIP-04 | Phase 233 | Complete |
