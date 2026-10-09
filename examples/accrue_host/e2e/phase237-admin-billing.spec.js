@@ -139,10 +139,10 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   const invoiceCard = page.locator(`.ax-data-table-card[data-row-id="${fixture.invoice_id}"]`);
   await expect(invoiceCard).toContainText("Due date unavailable");
   await expect(invoiceCard).not.toContainText("False");
-  await expect(invoiceCard.getByRole("link", { name: /view invoice/i })).toBeVisible();
   const asset = await assertCurrentStylesheet(page);
   await page.setViewportSize({ width: 320, height: 800 });
   await assertNoOverflow(page);
+  await expect(invoiceCard.getByRole("link", { name: /view invoice/i })).toBeVisible();
   const lightTokens = await assertThemeAndMotion(page, "light");
   const collectionShot = await page.screenshot({ fullPage: true });
   screenshots["invoice-collection.png"] = { bytes: collectionShot, route: page.url(), viewport: { width: 320, height: 800 }, theme: "light" };
