@@ -14,6 +14,13 @@ defmodule AccrueHostWeb.Phase239RouteCoverageContractTest do
       |> Enum.map(fn [_, mount, path] -> {String.trim(mount), String.trim(path)} end)
       |> MapSet.new()
 
+    ordered_ledger_routes =
+      Regex.scan(~r/^\| package_route \| ([^|]+) \| ([^|]+) \|/m, ledger)
+      |> Enum.map(fn [_, mount, path] -> {String.trim(mount), String.trim(path)} end)
+
+    assert ordered_ledger_routes == Enum.sort_by(ordered_ledger_routes, fn {mount, path} -> {mount, path} end),
+           "package_route rows must remain ordered by mount then route path"
+
     package_mounts =
       routes
       |> Enum.filter(fn route ->
