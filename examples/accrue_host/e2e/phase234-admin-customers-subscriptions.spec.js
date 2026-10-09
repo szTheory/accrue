@@ -2,21 +2,12 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
-const { execFileSync } = require("node:child_process");
 const { test, expect } = require("./support/test.js");
 const { readFixture, login, waitForLiveView } = require("./support/fixture.js");
 const AxeBuilder = require("@axe-core/playwright").default;
 
 const repoRoot = path.resolve(__dirname, "../../..");
 const phase = "234-admin-customers-subscriptions";
-const captureDestination = ".planning/phases/234-admin-customers-subscriptions/captures/post-layout/234-06-final"; // archive-sweep-exempt: capture destination
-const captureNames = ["home.png", "search.png", "customer-list.png", "customer-detail.png", "subscription-list.png", "subscription-detail.png", "subscription-drawer.png"];
-const sourcePaths = [
-  "accrue_admin/assets/js/hooks/command_palette.js",
-  "accrue_admin/assets/js/hooks/overlay.js",
-  "accrue_admin/assets/js/hooks/focus_trap.js",
-  "accrue_admin/assets/css/app.css"
-];
 
 function sha256(bytes) {
   return crypto.createHash("sha256").update(bytes).digest("hex");
@@ -36,8 +27,11 @@ async function assertBaselineIsImmutable() {
 
 async function assertStoredCaptureIsIntact() {
   const { resolvePhaseEvidencePath } = await import("../../../scripts/ci/phase_evidence_path.mjs");
-  const resolve = (name) => resolvePhaseEvidencePath(phase, `captures/post-layout/234-06-final/${name}`, { root: repoRoot });
-  const manifest = JSON.parse(fs.readFileSync(resolve("manifest.json"), "utf8"));
+  const manifestPath = resolvePhaseEvidencePath(phase, "captures/post-layout/234-06-final/manifest.json", { root: repoRoot });
+  // Resolve the evidence set once. Independently resolving each image could mix
+  // an archived manifest with output from a later active-phase browser run.
+  const resolve = (name) => path.join(path.dirname(manifestPath), name);
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   expect(manifest.phase).toBe(phase);
   for (const [name, expected] of Object.entries(manifest.images)) {
     const bytes = fs.readFileSync(resolve(name));
@@ -111,13 +105,6 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
   test.setTimeout(90_000);
   const baseline = await assertBaselineIsImmutable();
   const fixture = readFixture();
-  const destination = path.join(repoRoot, captureDestination);
-  const existing = fs.existsSync(path.join(destination, "manifest.json"));
-  const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).trim();
-  const sources = Object.fromEntries(sourcePaths.map((source) => {
-    const bytes = fs.readFileSync(path.join(repoRoot, source));
-    return [source, { sha256: sha256(bytes), bytes: bytes.length }];
-  }));
   const owner = encodeURIComponent(fixture.admin_org_alpha_slug);
   const screenshots = {};
 
@@ -131,7 +118,7 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
   await expect(page.locator("html.accrue-admin")).toHaveCount(1);
   await expect(page.getByRole("heading", { name: /billing operations/i }).first()).toBeVisible();
   await capture(page, "home.png", screenshots, testInfo);
-  const asset = await servedStylesheet(page);
+  await servedStylesheet(page);
 
   const searchTrigger = page.locator("[data-command-palette-trigger]").first();
   await searchTrigger.focus();
@@ -185,7 +172,6 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
   await expect(subscriptionLink).toBeVisible();
   const subscriptionHref = await subscriptionLink.getAttribute("href");
   if (!subscriptionHref) throw new Error("authorized subscription row did not contain its detail path");
-  const subscriptionId = new URL(subscriptionHref, "http://localhost").pathname.split("/").pop();
   await assertDomIntegrity(page);
   await capture(page, "subscription-list.png", screenshots, testInfo);
   await page.goto(subscriptionHref, { waitUntil: "domcontentloaded" });
@@ -239,35 +225,8 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
   const reducedMotion = await page.locator("body").evaluate((element) => getComputedStyle(element).transitionDuration);
   expect(reducedMotion.split(",").every((duration) => parseFloat(duration) <= 0.01)).toBeTruthy();
 
-  if (existing) {
-    // These are immutable Phase 234-06 captures. Phase 234-08 intentionally
-    // updates typography, so current served-asset provenance is asserted above
-    // while the historical PNG bytes remain independently integrity-checked.
-    await assertStoredCaptureIsIntact();
-  } else {
-    fs.mkdirSync(destination, { recursive: true });
-    const images = {};
-    for (const name of captureNames) {
-      const bytes = screenshots[name].bytes;
-      fs.writeFileSync(path.join(destination, name), bytes, { flag: "wx" });
-      images[name] = { sha256: sha256(bytes), bytes: bytes.length };
-    }
-    const manifest = {
-      phase,
-      captured_at: new Date().toISOString(),
-      source_sha: sourceSha,
-      baseline_manifest_sha256: sha256(fs.readFileSync(path.join(repoRoot, ".planning/phases/234-admin-customers-subscriptions/captures/pre-layout/manifest.json"))),
-      sources,
-      assets: { built: { sha256: asset.sha256, bytes: asset.bytes }, served: { sha256: asset.sha256, bytes: asset.bytes, url: asset.href } },
-      fixture: { owner: fixture.admin_org_alpha_slug, customer_id: fixture.admin_denial_customer_id, subscription_id: subscriptionId },
-      viewport: testInfo.project.use.viewport,
-      theme: "light captures; dark theme and reduced motion verified after capture",
-      states: Object.fromEntries(captureNames.map((name) => [name, { route: screenshots[name].route, state: name.replace(".png", "") }])),
-      images
-    };
-    // Active write target: post-layout manifest; archive-sweep-exempt: capture destination
-    fs.writeFileSync(path.join(destination, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, { flag: "wx" });
-  }
+  // Historical captures stay immutable; current served assets are checked above.
+  await assertStoredCaptureIsIntact();
   expect(baseline.phase).toBe(phase);
 });
 

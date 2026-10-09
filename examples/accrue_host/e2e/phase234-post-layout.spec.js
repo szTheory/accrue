@@ -108,7 +108,10 @@ test("Phase 234 post-layout served Admin details evidence", async ({ page, sandb
   expect(subscriptionOverflow.document <= subscriptionOverflow.viewport).toBeTruthy();
   await expect(page.locator(".ax-subscription-detail-page .ax-summary-card")).toBeVisible();
   await expect(page.getByText("Subscription is active", { exact: true })).toBeVisible();
-  await expect(page.getByText("Price is not confirmed in admin", { exact: true }).first()).toBeVisible();
+  // This seeded record has a persisted price identity, but no confirmed amount.
+  // Keep those independent facts truthful instead of demanding a missing-price state.
+  await expect(page.locator(".ax-summary-facts")).toContainText("price_basic");
+  await expect(page.getByText("Amount is not confirmed in admin", { exact: true }).first()).toBeVisible();
   await expect(page.locator(".ax-subscription-detail-page [data-ax-action-band] .ax-button:visible").first()).toBeVisible();
   expect(await page.locator(".ax-subscription-detail-page [data-ax-action-band] .ax-button:visible").first().evaluate((button) => button.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
 

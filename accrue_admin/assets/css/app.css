@@ -5512,6 +5512,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-detail-health-exposure strong {
   color: inherit;
   font: inherit;
+  /* ax-type-exception: preserve inherited size for shared health emphasis; approved 600 weight matches the label role */
   font-weight: 600;
 }
 
@@ -5553,6 +5554,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-detail-health-label {
   color: var(--ax-primary);
+  /* ax-type-exception: preserve inherited size for shared health emphasis; approved 600 weight matches the label role */
   font-weight: 600;
 }
 

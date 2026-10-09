@@ -113,7 +113,7 @@ accrue_portal_version=$(extract_version "$ROOT_DIR/accrue_portal/mix.exs")
 
 first_hour_md="$ROOT_DIR/accrue/guides/first_hour.md"
 host_readme_md="$ROOT_DIR/examples/accrue_host/README.md"
-phase239_dir="$ROOT_DIR/.planning/phases/239-integrated-quality-handoff"
+phase239_dir="$ROOT_DIR/.planning/milestones/v1.63-phases/239-integrated-quality-handoff"
 
 # Phase 239 accepted handoff scope and evidence boundaries (Plan 05).
 require_fixed "$host_readme_md" 'The Fake-backed preview does not establish live-provider parity or real customer billing outcomes.'
