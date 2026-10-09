@@ -4060,14 +4060,14 @@ details[open].ax-dropdown .ax-dropdown-panel {
   .ax-page[data-ax-overview="recovery"] .ax-tabs {
     grid-auto-flow: row;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--ax-space-2xs);
+    gap: var(--ax-space-xs);
     overflow-x: visible;
   }
 
   .ax-page[data-ax-overview="recovery"] .ax-tab {
     justify-content: center;
     min-width: 0;
-    padding-inline: var(--ax-space-2xs);
+    padding-inline: var(--ax-space-xs);
     text-align: center;
     white-space: normal;
   }
