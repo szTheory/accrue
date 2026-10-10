@@ -10,6 +10,8 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../
 const custody = path.join(repoRoot, "scripts/ci/accrue_host_preview_custody.sh");
 const browserWrapper = path.join(repoRoot, "scripts/ci/accrue_host_verify_browser.sh");
 const devWrapper = path.join(repoRoot, "scripts/ci/accrue_host_verify_dev_boot.sh");
+const previewRunner = path.join(repoRoot, "examples/accrue_host/e2e/preview-runner.js");
+const { validatePreviewSelection } = await import(path.join(repoRoot, "examples/accrue_host/e2e/preview-routing.js"));
 
 function fixture(overrides = {}) {
   return {
@@ -222,6 +224,62 @@ test("direct Playwright config and setup execute the same failing collision pref
     assert.match(`${result.stdout}\n${result.stderr}`, /aliases preview database name/);
   }
   assert.equal(fs.existsSync(path.join(dir, "must-not-be-created")), false);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("preview URL fails closed unless the exclusive preservation spec is explicitly selected", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-preview-routing-"));
+  const markerPath = path.join(dir, "mutable-setup-ran");
+  const configPath = path.join(repoRoot, "examples/accrue_host/playwright.config.js");
+  const setupPath = path.join(repoRoot, "examples/accrue_host/e2e/global-setup.js");
+  const baseEnv = {
+    ...process.env,
+    ACCRUE_HOST_PREVIEW_BASE_URL: "http://accrue-host-phase243-preview.localhost",
+    ACCRUE_HOST_PREVIEW_INSTANCE: "accrue-host-phase243-preview",
+    ACCRUE_HOST_E2E_FIXTURE: markerPath
+  };
+  const runConfig = (args, extraEnv = {}) => spawnSync("node", ["-e", `process.argv = ["node", "playwright", ...${JSON.stringify(args)}]; const config = require(${JSON.stringify(configPath)}); if (config.webServer || config.globalSetup) process.exit(9); console.log(JSON.stringify(config.testMatch));`], {
+    cwd: repoRoot,
+    env: { ...baseEnv, ...extraEnv },
+    encoding: "utf8"
+  });
+  const runSetup = (args, extraEnv = {}) => spawnSync("node", ["-e", `process.argv = ["node", "playwright", ...${JSON.stringify(args)}]; require(${JSON.stringify(setupPath)})().then((teardown) => teardown && teardown());`], {
+    cwd: repoRoot,
+    env: { ...baseEnv, ...extraEnv },
+    encoding: "utf8"
+  });
+  const previewSpec = "examples/accrue_host/e2e/phase243-preview-preservation.spec.js";
+  const genericSpec = "examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js";
+  const previewEnv = {
+    ACCRUE_HOST_PREVIEW_MODE: "preservation",
+    ACCRUE_HOST_PREVIEW_SELECTION: "phase243-preview-preservation",
+    npm_lifecycle_event: "e2e:preview"
+  };
+
+  for (const [label, args, env] of [
+    ["URL without explicit mode", [genericSpec], {}],
+    ["REUSE_SERVER generic route", [genericSpec], { ...previewEnv, ACCRUE_HOST_REUSE_SERVER: "1" }]
+  ]) {
+    const result = runConfig(args, env);
+    assert.notEqual(result.status, 0, `accepted ${label}`);
+    assert.match(`${result.stdout}\n${result.stderr}`, /preview|preservation/i);
+    assert.equal(fs.existsSync(markerPath), false, `${label} reached mutable setup`);
+  }
+
+  for (const args of [[], [genericSpec], [previewSpec, genericSpec], [previewSpec, "--grep=all"]]) {
+    assert.throws(() => validatePreviewSelection(args), /select exactly|unsupported preview runner argument/);
+    const result = spawnSync("node", [previewRunner, ...args], { cwd: path.dirname(previewRunner), env: baseEnv, encoding: "utf8" });
+    assert.notEqual(result.status, 0, `preview runner accepted ${args.join(" ") || "all-spec selection"}`);
+    assert.equal(fs.existsSync(markerPath), false, "rejected preview selection reached mutable setup");
+  }
+  assert.doesNotThrow(() => validatePreviewSelection(["e2e/phase243-preview-preservation.spec.js", "--project=chromium-desktop", "--workers=1"]));
+
+  const accepted = runConfig([previewSpec, "--project=chromium-desktop", "--workers=1"], previewEnv);
+  assert.equal(accepted.status, 0, accepted.stderr || accepted.stdout);
+  assert.match(accepted.stdout, /e2e\/phase243-preview-preservation\.spec\.js/);
+  const setupAccepted = runSetup([previewSpec], previewEnv);
+  assert.equal(setupAccepted.status, 0, setupAccepted.stderr || setupAccepted.stdout);
+  assert.equal(fs.existsSync(markerPath), false, "preview global setup created a fixture or mutation marker");
   fs.rmSync(dir, { recursive: true, force: true });
 });
 

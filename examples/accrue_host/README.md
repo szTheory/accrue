@@ -325,6 +325,21 @@ volumes and rebuilds the showcase data. For a separate preview, pass the same
 DNS-safe name on every command, for example `make up INSTANCE=accrue-review`;
 the stable URL is then `http://accrue-review.localhost/admin`.
 
+The Phase 243 preservation check is restricted to its dedicated preview
+instance. Set `ACCRUE_HOST_PREVIEW_INSTANCE=accrue-host-phase243-preview`,
+`ACCRUE_HOST_PREVIEW_BASE_URL=http://accrue-host-phase243-preview.localhost`,
+`ACCRUE_HOST_PREVIEW_OPERATOR_EMAIL=admin@example.com`, and
+`ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD` to the existing local operator password,
+then run this explicit single-spec command from the repository root:
+
+```bash
+npm --prefix examples/accrue_host run e2e:preview -- e2e/phase243-preview-preservation.spec.js --project chromium-desktop --workers 1
+```
+
+The selector rejects all-suite and unrelated-spec arguments before Playwright
+starts. It authenticates against the named preview and performs the documented
+warm recovery, so run it when that preview can be restarted.
+
 ## Optional customer Portal context
 
 `/billing` is the personal-only mount: it has no account picker and no custom

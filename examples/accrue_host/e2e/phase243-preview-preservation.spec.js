@@ -66,8 +66,7 @@ async function warmRecoverAndWait(snapshotPath) {
 
   const launchOutput = fs.readFileSync(logPath, "utf8");
   expect(launchOutput).toContain(`http://${previewProject}.localhost/admin`);
-  const containerLogs = execFileSync("docker", compose("logs", "--since=5m", "web"), { cwd: hostRoot, encoding: "utf8" });
-  expect(containerLogs).toContain("seeds skipped (ACCRUE_HOST_SKIP_SEEDS=1)");
+  expect(launchOutput).toContain("seeds skipped (ACCRUE_HOST_SKIP_SEEDS=1)");
   capturePreviewSnapshot("assert-preserved", snapshotPath);
   fs.rmSync(logPath, { force: true });
 }

@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
+const { assertPreviewRouting } = require("./preview-routing");
 
 const projectRoot = path.resolve(__dirname, "..");
 const repoRoot = path.resolve(projectRoot, "..", "..");
@@ -46,6 +47,7 @@ function ensureDatabase() {
 }
 
 module.exports = async () => {
+  if (assertPreviewRouting()) return async () => {};
   preflight();
   const fixturePath = process.env.ACCRUE_HOST_E2E_FIXTURE || defaultFixturePath;
   const reuseServer = process.env.ACCRUE_HOST_REUSE_SERVER === "1";
