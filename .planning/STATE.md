@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 243
 current_phase_name: Integrated Evidence and Feedback Preview
-current_plan: Not started
+current_plan: 1
 status: executing
-stopped_at: Phase 243 planned and independently checked; ready to execute
-last_updated: "2026-10-10T17:37:52.903Z"
+stopped_at: Halted 243-01 after Task 1; awaiting remote source ref for Ubuntu mint
+last_updated: "2026-10-10T18:19:10.798Z"
 last_activity: 2026-10-10
-last_activity_desc: Phase 243 planned in 3 plans across 2 waves; independent plan checking passed; next command is $gsd-execute-phase 243
-state_head: 562e8ae3ae442d8714431faaea8b5c42d72db526
+last_activity_desc: Phase 243 execution started
+state_head: dd11264dfda532c8a5f8c4038c06c2c6c5a4b2bf
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 24
-  completed_plans: 21
+  completed_plans: 22
   percent: 75
 ---
 
@@ -27,17 +27,17 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 243 — Integrated Evidence and Feedback Preview. Three plans across two waves are ready to execute after focused research and independent plan checking. Next: `$gsd-execute-phase 243`. Phase 241 spacing closure remains verified.
+**Current focus:** Phase 243 — Integrated Evidence and Feedback Preview
 **Progress:** [████████░░] 75%
 **Planned work completed:** Phase 240 6/6 plans and 47/47 truths, Phase 241 8/8 plans and 32/32 truths, and Phase 242 7/7 plans and 80/80 truths. All three current verification fingerprints pass with zero unverified behavior. Phase 241 has 20 automated UAT items; Phase 242 has 19; required human UAT is zero. JRN-01–04 remain satisfied; milestone requirements remain 16/18 satisfied. Phase 243 owns reviewed Linux goldens and the stable preview; v1.63 remains archived and closed.
 
 ## Current Position
 
-Phase: 243 (Integrated Evidence and Feedback Preview) — READY TO EXECUTE
-Current Plan: Not started
+Phase: 243 (Integrated Evidence and Feedback Preview) — EXECUTING
+Current Plan: 1
 Total Plans in Phase: 3
-Status: Ready to execute
-Last activity: 2026-10-10 — Phase 243 planned in 3 plans across 2 waves; independent plan checking passed; next command is $gsd-execute-phase 243
+Status: Executing Phase 243
+Last activity: 2026-10-10 — Phase 243 execution started
 
 ## Performance Metrics
 
@@ -422,6 +422,7 @@ None. The next workflow action is recorded under Operator Next Steps; completed 
 - **Resolved by v1.62:** the `main`/v1.61 divergence, the stale local `main` ref, the four unpublished audit-closure commits, and the unavailable live-CI monitor. All are reconciled into the integration candidate with committed evidence.
 - **Historical v1.62 candidate:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
 - **Archived v1.62 validation debt:** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
+- Phase 243 Plan 01 Task 2 is blocked: the committed source branch gsd/phase-233-shared-direction-portal-contract has no origin ref, so GitHub returned HTTP 422 to the authorized Ubuntu baseline-mint dispatch. Four required invoice PNGs and the normal Linux comparison remain unavailable; do not complete EVR-03 until both workflows pass against the reviewed set.
 
 ### Quick Tasks Completed
 
@@ -476,9 +477,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T16:46:44.318Z
-Stopped at: Phase 243 context gathered
-Resume file: .planning/phases/243-integrated-evidence-and-feedback-preview/243-CONTEXT.md
+Last session: 2026-10-10T18:19:10.745Z
+Stopped at: Halted 243-01 after Task 1; awaiting remote source ref for Ubuntu mint
+Resume file: .planning/phases/243-integrated-evidence-and-feedback-preview/243-01-SUMMARY.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
