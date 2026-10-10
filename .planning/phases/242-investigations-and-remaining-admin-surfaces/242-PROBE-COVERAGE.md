@@ -157,4 +157,44 @@ The compiled UI probe ran after independent seven-dimension approval. Six actual
 
 ## Prohibition Recall Handoff
 
-The planner must perform the two-stage recall/precision protocol from the GSD prohibition-probe reference and record retained bespoke intent constraints, canon referrals, and routine-engineering drops. Use the owning projectProhibitions serializer for retained items in must_haves.prohibitions, descriptor-less as the fallback requires; do not invent wired check paths or dismiss constraints. Preserve planned behavioral safety assertions and disclose any flagged-unverified disposition honestly. Scope boundaries in D01–21 remain binding even when a generic candidate belongs to ordinary correctness or a canonical security owner. No new product interview is needed to carry approved boundaries forward.
+The planner performed two-stage recall/precision below. The four initially retained candidates were rechecked against current locked decisions, explicit edge/UI rows and executable test owners. Each is routine, already specified behavior, so none needs an additional descriptor-less `must_haves.prohibitions` declaration. The corresponding negative assertions remain in task acceptance criteria and owning tests. Current-owner authorization and external-path injection remain with ScopedPath/domain auth and STRIDE. No bespoke intent prohibition remains without a machine-verifiable owner; no test result is claimed during planning.
+
+
+## Planner Source and Probe Audit — execution pending
+
+| Source | Covered items | Plan |
+|---|---|---|
+| GOAL | Existing investigation, catalog/Connect and scoped shell with coherent language | 242-01–07 |
+| REQ | JRN-05, JRN-06, JRN-07, UXC-01 | 242-01–07 |
+| RESEARCH | Five decoder/encoder families, relationship proof, DLQ outcome contract, Connect policy, async search, Copy and mounted evidence | 242-01–07 |
+| CONTEXT | D-01–D-09 | 242-01–02 |
+| CONTEXT | D-10–D-12 | 242-03–04 |
+| CONTEXT | D-13–D-16 | 242-05–06 |
+| CONTEXT | D-17–D-21 | 242-07 and owning tasks |
+
+| Plan | Edge rows in must_haves.truths | UI rows in must_haves.truths |
+|---|---|---|
+| 242-01 | JRN-05/boundary, JRN-05/encoding | E1/empty, E1/loading, E1/error, E1/populated, E1/partial, E1/overflow, E1/zero-one-many, E1/long-text |
+| 242-02 | JRN-05/adjacency, JRN-05/empty, JRN-05/ordering, JRN-05/precision, JRN-05/idempotency, JRN-05/concurrency | E2/empty, E2/loading, E2/error, E2/populated, E2/partial, E2/overflow, E2/zero-one-many, E2/long-text |
+| 242-03 | JRN-06/boundary, JRN-06/adjacency, JRN-06/empty, JRN-06/encoding, JRN-06/ordering | E3/empty, E3/loading, E3/error, E3/populated, E3/partial, E3/overflow, E3/zero-one-many, E3/long-text |
+| 242-04 | JRN-06/precision, JRN-06/idempotency, JRN-06/concurrency | E4/empty, E4/loading, E4/error, E4/populated, E4/partial, E4/overflow, E4/zero-one-many, E4/long-text |
+| 242-05 | JRN-07/boundary, JRN-07/adjacency, JRN-07/empty, JRN-07/encoding, JRN-07/ordering, JRN-07/precision, JRN-07/idempotency, JRN-07/concurrency | E6/empty, E6/loading, E6/error, E6/populated, E6/partial, E6/overflow, E6/zero-one-many, E6/long-text |
+| 242-06 | UXC-01/adjacency, UXC-01/empty, UXC-01/encoding, UXC-01/ordering | E5/loading, E5/error, E5/overflow, E5/long-text |
+| 242-07 | — | — |
+
+**No-silent-drop equality:** 28 explicit resolved edge rows = 28 plan truths + 0 flagged assumptions. 44 explicit resolved UI rows = 44 plan truths + 0 flagged assumptions. Deferred ideas and Phase 243 closure are excluded.
+
+### Prohibition recall → precision
+
+Adversarial recall asked of each requirement what it could silently become that the author would reject. The raw ten candidates per requirement are listed below. Precision checked each against D-01–21 and the 28 edge/44 UI predicates; all are already ordinary domain correctness, accessible interaction, Copy fidelity or authorization requirements with explicit executable owners. No extra descriptor-less prohibition is retained.
+
+| Requirement | Ten recall candidates | Precision |
+|---|---|---|
+| JRN-05 | queued means processed; replay moves money; missing attempts mean healthy; failures hidden in JSON; dismiss dispatches; event counted as delivery; foreign subject link; ignored filter preserved; selected set changes; blind retry after acceptance | Drop extra descriptor: D-02/D-05 and JRN-05/precision/idempotency/concurrency already require these negatives; 242-02 T1/T2 acceptance and replay ExUnit assert them. Foreign scope stays with STRIDE/authorization. |
+| JRN-06 | stored readiness called live; fee changes Stripe readiness; unknown restriction unlimited; wrong coupon parent; owner hidden; fee independently rounded; dismissal saves; invented report time; default silently changed; stale actor accepted | Drop extra descriptor: D-10/D-11/D-12 and JRN-06/boundary/precision/idempotency/concurrency explicitly govern these; 242-03/04 acceptance and LiveView/Copy tests assert them. |
+| JRN-07 | previous-owner result selected; highlight differs from Enter; same-name wrong ID; extra result group; partial success lost; focus trapped; duplicate navigation; stale query promoted; long ID clipped; failed group called no-match | Drop extra descriptor: D-13/D-14/D-15 and JRN-07/adjacency/ordering/concurrency already specify exact selection and scope; 242-05 T1/T2 LiveComponent/Node and 242-07 mounted acceptance assert them. |
+| UXC-01 | dismiss called domain cancellation; audit meaning obscured; raw enum as routine label; Charge diagnostic renamed; locked text rewritten; delivery called event; unknown called zero; provider meaning changed; blameful wording; money consequence hidden | Drop extra descriptor: D-16 and UXC-01/adjacency/empty/encoding/ordering govern routine labels and protected exact text; 242-06 T2 Copy/render assertions cover them. No source-backed blameful wording rule is minted. |
+
+Canon referral: external-path injection and foreign-owner authorization remain with ScopedPath/domain auth and STRIDE. Routine engineering items remain in the 28 edge truths, 44 UI truths, locked decisions and owning test acceptance criteria. Four initially retained candidates were dropped after precision re-evaluation because they duplicate those requirements; zero bespoke projections remain, zero source behaviors were dismissed, and zero green enforcement or human confirmation is inferred. No descriptor-less resolved/test assertion remains to force a flagged-unverified/manual-proof loop.
+
+Gate observations: api-coverage returned detected:false for this existing Admin refinement; no external API matrix. assumption-delta scan 242 returned detected:false. No ORM schema-pattern file or package install is planned. ASVS level 1/high blocking applies in every plan.

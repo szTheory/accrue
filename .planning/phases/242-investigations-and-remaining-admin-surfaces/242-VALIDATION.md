@@ -33,17 +33,26 @@ created: "2026-10-10"
 
 ## Per-Task Verification Map
 
-Final task IDs, waves, requirements and unique threat references are filled by the planner from the executable PLAN files. Existing files below are proof owners; new scenario assertions are authored with their corresponding implementation task, not claimed to exist today.
+Every row names the exact plan/task owner and wave. Commands are planned, not run. Existing test files are proof owners; new assertions and fixture setup belong to their task before the command. The recurring check must select nonzero tests.
 
-| Slice | Requirement | Test type | Automated command | File exists | Status |
-|---|---|---|---|---|---|
-| Validated returns and matching family labels | JRN-05, JRN-06 | Unit and LiveView | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/scoped_path_test.exs` | Yes | Pending |
-| Event filter membership, related evidence and return | JRN-05 | Query and LiveView | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/queries/events_test.exs test/accrue_admin/live/events_live_test.exs test/accrue_admin/live/event_live_test.exs` | Yes | Pending |
-| Delivery review freshness, no dispatch on dismiss, truthful outcomes | JRN-05 | LiveView integration | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/webhooks_live_test.exs test/accrue_admin/live/webhook_replay_test.exs test/accrue_admin/live/webhook_live_test.exs` | Yes | Pending |
-| Coupon/code identity, restrictions, parent and filtered return | JRN-06 | LiveView and query | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/coupons_live_test.exs test/accrue_admin/live/coupon_live_test.exs test/accrue_admin/live/promotion_codes_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs` | Yes | Pending |
-| Connect observations, local fee review and policy freshness | JRN-06 | LiveView and Copy | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/connect_accounts_live_test.exs test/accrue_admin/live/connect_account_live_test.exs test/accrue_admin/copy/connect_test.exs` | Yes | Pending |
-| Search input selection, generations and owner scope | JRN-07 | LiveComponent and Node | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/components/global_search_test.exs && node --test test/js/command_palette_test.mjs` | Yes | Pending |
-| Coherent routine copy and verbatim locked wording | UXC-01 | Copy and changed LiveViews | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/copy` | Yes | Pending |
+| Plan/task | Wave | Requirement | Threat ref | Automated command | Fails when | Status |
+|---|---:|---|---|---|---|---|
+| 242-01/T1 | 1 | JRN-05, JRN-06 | T-242-01; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/scoped_path_test.exs test/accrue_admin/live/events_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-01/T2 | 1 | JRN-05, JRN-06 | T-242-01; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/queries/events_test.exs test/accrue_admin/live/event_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-02/T1 | 2 | JRN-05, UXC-01 | T-242-02; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/webhooks_live_test.exs test/accrue_admin/live/webhook_replay_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-02/T2 | 2 | JRN-05, UXC-01 | T-242-02; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/webhook_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-03/T1 | 2 | JRN-06, UXC-01 | T-242-03; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/coupons_live_test.exs test/accrue_admin/live/coupon_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-03/T2 | 2 | JRN-06, UXC-01 | T-242-03; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/promotion_codes_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-03/T3 | 2 | JRN-06, UXC-01 | T-242-03; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/coupons_live_test.exs test/accrue_admin/live/coupon_live_test.exs test/accrue_admin/live/promotion_codes_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-04/T1 | 2 | JRN-06 | T-242-04; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/connect_accounts_live_test.exs test/accrue_admin/live/connect_account_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-04/T2 | 2 | JRN-06 | T-242-04; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/copy/connect_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-05/T1 | 1 | JRN-07 | T-242-05; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/components/global_search_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-05/T2 | 1 | JRN-07 | T-242-05; T-242-SC | `cd accrue_admin && node --test test/js/command_palette_test.mjs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-06/T1 | 3 | JRN-07, UXC-01 | T-242-06; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/dashboard_live_test.exs test/accrue_admin/components/app_shell_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-06/T2 | 3 | JRN-07, UXC-01 | T-242-06; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/copy` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-07/T1 | 4 | JRN-05, JRN-06, JRN-07, UXC-01 | T-242-07; T-242-SC | `cd accrue_admin && mix accrue_admin.assets.build && cd .. && CI=1 npm --prefix accrue_admin run e2e:phase191 && CI=1 npm --prefix accrue_admin run e2e:phase199` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-07/T2 | 4 | JRN-05, JRN-06, JRN-07, UXC-01 | T-242-07; T-242-SC | `cd examples/accrue_host && CI=1 npx playwright test e2e/phase238-admin-events-webhooks.spec.js e2e/phase234-search-completion.spec.js --project=chromium-desktop --workers=1` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-07/T3 | 4 | JRN-05, JRN-06, JRN-07, UXC-01 | T-242-07; T-242-SC | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test && node --test test/js/*.mjs && cd ../examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test` | Nonzero exit, failed assertion or zero selected cases | Pending |
 
 ## Wave 0 Requirements
 
@@ -62,7 +71,7 @@ Existing infrastructure covers all phase requirements. New behavior assertions b
 
 Reuse Phase 191 page-flow, Phase 199 overlays, host Phase 238 events/webhooks and Phase 234 search completion owners. Final plans must select concrete new cases and grounded commands, not assume an old green suite exercises the change. Include changed catalog/Connect consumers, focus/disclosure/validation/correction/dismissal, busy/reconnect, supported narrow/theme/coarse-pointer and measured text stress. Apply and measure text stress atomically around LiveView replacement. Record source, fixture, built, compiled and served asset identity separately from behavior.
 
-Update incumbent route/state coverage and use existing CI lanes for recurring assertions. Canonical SUMMARY coverage uses `human_judgment: false`; generate automated UAT through the GSD owner and run the existing executable-UAT contract. No remote CI result is inferred from local proof. Phase 243 owns reviewed Linux goldens and the stable feedback preview.
+Update incumbent route/state coverage and use existing CI lanes for recurring assertions. After all seven canonical SUMMARYs and passing phase verification exist, the GSD phase execute/verify owner follows `242-EXECUTION-HANDOFF.md`: generate automated UAT through the existing owner and run `node scripts/ci/verify_executable_uat_contract.mjs --all-since 229`. This is a downstream phase-completion gate, not the 242-07/T3 pre-completion verify. No remote CI result is inferred from local proof. Phase 243 owns reviewed Linux goldens and the stable feedback preview.
 
 ## Manual-Only Verifications
 
