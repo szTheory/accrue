@@ -220,6 +220,58 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert html =~ ~s(href="/billing/customers/cus_exact_123")
     end
 
+    test "keeps same-name records as distinct scoped links and describes the active result status" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "Ada Lovelace",
+          results: %{
+            customers: [
+              %{
+                id: "cus_first",
+                name: "Ada Lovelace",
+                email: "ada@example.com",
+                owner_id: nil,
+                owner_type: nil,
+                processor_id: nil,
+                processor: nil
+              },
+              %{
+                id: "cus_second",
+                name: "Ada Lovelace",
+                email: "ada@example.com",
+                owner_id: nil,
+                owner_type: nil,
+                processor_id: nil,
+                processor: nil
+              }
+            ],
+            invoices: [],
+            subscriptions: []
+          },
+          failures: [],
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ ~s(aria-describedby="global-search-help global-search-active-result")
+      assert html =~ ~s(id="global-search-active-result" class="ax-visually-hidden" role="status")
+      assert html =~ ~s(href="/billing/customers/cus_first")
+      assert html =~ ~s(href="/billing/customers/cus_second")
+      assert html =~ "Customer ID: cus_first"
+      assert html =~ "Customer ID: cus_second"
+    end
+
+    test "retry selects only failed groups and keeps successful rows while loading" do
+      source = File.read!("lib/accrue_admin/components/global_search.ex")
+
+      assert source =~ "failed_groups = socket.assigns.failures"
+      assert source =~ "begin_search(socket, query, failed_groups, socket.assigns.results)"
+      assert source =~ "Enum.filter(fn {key, _func} -> key in groups end)"
+      assert source =~ "Enum.take(rows, @result_limit)"
+    end
+
     test "help copy lists only fields the three queries actually match" do
       html =
         render_component(GlobalSearch, %{

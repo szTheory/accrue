@@ -9,6 +9,8 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   alias AccrueAdmin.ScopedPath
 
   @max_query_length 100
+  @result_limit 5
+  @groups [:customers, :invoices, :subscriptions]
 
   @impl true
   def mount(socket) do
@@ -107,12 +109,22 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   end
 
   def handle_event("retry", _params, %{assigns: %{query: query}} = socket) when query != "" do
-    {:noreply, begin_search(socket, query)}
+    failed_groups = socket.assigns.failures
+
+    if failed_groups == [] do
+      {:noreply, socket}
+    else
+      {:noreply, begin_search(socket, query, failed_groups, socket.assigns.results)}
+    end
   end
 
   def handle_event("retry", _params, socket), do: {:noreply, socket}
 
   defp begin_search(socket, query) do
+    begin_search(socket, query, @groups, empty_results())
+  end
+
+  defp begin_search(socket, query, groups, initial_results) do
     generation = socket.assigns.generation + 1
     owner_scope = socket.assigns.current_owner_scope
     id = socket.assigns.id
@@ -122,13 +134,13 @@ defmodule AccrueAdmin.Components.GlobalSearch do
       assign(socket,
         query: query,
         generation: generation,
-        results: empty_results(),
+        results: initial_results,
         failures: [],
         loading: true
       )
 
     Task.start(fn ->
-      {results, failures} = fetch_results(query, owner_scope)
+      {results, failures} = fetch_results(query, owner_scope, groups)
 
       send_update(view_pid, __MODULE__,
         id: id,
@@ -158,7 +170,9 @@ defmodule AccrueAdmin.Components.GlobalSearch do
 
   defp close(socket), do: socket |> clear_query() |> assign(is_open: false)
 
-  defp fetch_results(query, owner_scope) do
+  defp fetch_results(query, owner_scope, groups) do
+    groups = if :lookup in groups, do: @groups, else: groups
+
     tasks = [
       customers: fn -> Customers.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) end,
       invoices: fn -> Invoices.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) end,
@@ -168,13 +182,14 @@ defmodule AccrueAdmin.Components.GlobalSearch do
     ]
 
     tasks
+    |> Enum.filter(fn {key, _func} -> key in groups end)
     |> Task.async_stream(fn {key, func} -> {key, safe_lookup(func)} end,
       on_timeout: :kill_task,
       timeout: 3_000
     )
     |> Enum.reduce({empty_results(), []}, fn
       {:ok, {key, {:ok, {rows, _cursor}}}}, {results, failures} ->
-        {Map.put(results, key, rows), failures}
+        {Map.put(results, key, Enum.take(rows, @result_limit)), failures}
 
       {:ok, {key, {:error, _reason}}}, {results, failures} ->
         {results, [key | failures]}
@@ -199,6 +214,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
       assigns
       |> Phoenix.Component.assign_new(:failures, fn -> [] end)
       |> Phoenix.Component.assign_new(:loading, fn -> false end)
+      |> Phoenix.Component.assign_new(:active_result_status, fn -> "" end)
 
     ~H"""
     <div
@@ -249,7 +265,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   class="ax-command-palette-input"
                   id="global-search-input"
                   data-focus-trap-initial
-                  aria-describedby="global-search-help"
+                  aria-describedby="global-search-help global-search-active-result"
                 />
                 <span id="search-spinner" class="ax-spinner" hidden={not @loading} aria-hidden="true"></span>
               </div>
@@ -257,6 +273,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                 Customers: name, email, owner ID, processor ID. Invoices: number, processor ID, customer name or email.
                 Subscriptions: processor ID, customer name or email. Up to five results per group.
               </p>
+              <span id="global-search-active-result" class="ax-visually-hidden" role="status" data-active-result-status><%= @active_result_status %></span>
             </form>
 
             <div class="ax-command-palette-body" aria-live="polite" aria-atomic="false">
