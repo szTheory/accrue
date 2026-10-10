@@ -220,6 +220,97 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     assert [%{id: ^invoice_new_id, number: "INV-0002", status: :open}] = rows
   end
 
+  test "open invoice destinations preserve customer membership and authorized scope" do
+    org_customer =
+      insert_customer(%{
+        owner_type: "Organization",
+        owner_id: "journey-org",
+        name: "Billing account"
+      })
+
+    other_org_customer =
+      insert_customer(%{
+        owner_type: "Organization",
+        owner_id: "other-org",
+        name: "Other account"
+      })
+
+    same_scope_customer =
+      insert_customer(%{
+        owner_type: "Organization",
+        owner_id: "journey-org",
+        processor: "braintree",
+        name: "Second billing account"
+      })
+
+    first_subscription = insert_subscription(org_customer, %{processor_id: "sub_first"})
+    second_subscription = insert_subscription(org_customer, %{processor_id: "sub_second"})
+
+    same_scope_subscription =
+      insert_subscription(same_scope_customer, %{processor_id: "sub_scope"})
+
+    excluded_subscription =
+      insert_subscription(other_org_customer, %{processor_id: "sub_excluded"})
+
+    first_invoice =
+      insert_invoice(org_customer, first_subscription, %{
+        status: :open,
+        number: "INV-JOURNEY-1",
+        amount_remaining_minor: 2_500
+      })
+
+    second_invoice =
+      insert_invoice(org_customer, second_subscription, %{
+        status: :open,
+        number: "INV-JOURNEY-2",
+        amount_remaining_minor: 2_500
+      })
+
+    scope_invoice =
+      insert_invoice(same_scope_customer, same_scope_subscription, %{
+        processor: "braintree",
+        status: :open,
+        number: "INV-JOURNEY-SCOPE"
+      })
+
+    excluded_invoice =
+      insert_invoice(other_org_customer, excluded_subscription, %{
+        status: :open,
+        number: "INV-JOURNEY-EXCLUDED"
+      })
+
+    owner_scope = organization_owner_scope("journey-org")
+
+    customer_filter =
+      Invoices.decode_filter(%{
+        "customer_id" => org_customer.id,
+        "status" => "open",
+        "subscription_id" => first_subscription.id
+      })
+
+    refute Map.has_key?(customer_filter, :subscription_id)
+
+    {customer_rows, _cursor} =
+      Invoices.list(filter: customer_filter, owner_scope: owner_scope, limit: 20)
+
+    assert Enum.map(customer_rows, & &1.id) |> Enum.sort() ==
+             Enum.map([first_invoice, second_invoice], & &1.id) |> Enum.sort()
+
+    {scope_rows, _cursor} =
+      Invoices.list(
+        filter: Invoices.decode_filter(%{"status" => "open"}),
+        owner_scope: owner_scope,
+        limit: 20
+      )
+
+    assert Enum.map(scope_rows, & &1.id) |> Enum.sort() ==
+             Enum.map([first_invoice, second_invoice, scope_invoice], & &1.id) |> Enum.sort()
+
+    refute Enum.any?(scope_rows, &(&1.id == excluded_invoice.id))
+    assert first_invoice.amount_remaining_minor == second_invoice.amount_remaining_minor
+    assert first_invoice.subscription_id != second_invoice.subscription_id
+  end
+
   test "charge queries surface fee settlement filters" do
     {rows, _cursor} = Charges.list(filter: Charges.decode_filter(%{"fees_settled" => "true"}))
 

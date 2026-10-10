@@ -98,30 +98,47 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert data_attr_count(html, "data-ax-drill-section") >= 3
 
     refute has_element?(view, "[data-ax-action-band] form")
-    refute has_element?(view, "[data-role='subscription-related-billing']")
+    assert has_element?(view, "[data-ax-related-resources] [aria-label='Related billing']")
     refute has_element?(view, "[data-role='subscription-dunning-state']")
     refute has_element?(view, "[data-role='confirm-panel']")
     refute html =~ ~s(class="ax-kpi-grid")
     refute html =~ Copy.subscription_kpi_canonical_predicates_label()
 
     assert html =~ "/billing/customers/#{subscription.customer_id}"
-    assert html =~ "subscription_id=#{subscription.id}"
     assert html =~ "subject_type=Subscription"
     assert html =~ "subject_id=#{subscription.id}"
     assert html =~ "Subscription events"
-    assert html =~ "Open local invoice context"
-
-    assert html =~ "Global invoice queue workspace"
-    assert html =~ "Work all open invoice records"
-    assert html =~ "Webhook debugger after invoice queue"
-    assert html =~ "Open local invoice context"
-    assert html =~ "Work global invoice queue"
+    assert html =~ "Open invoices for this customer"
+    assert html =~ "All open invoices in global scope"
+    assert html =~ "Customer-wide results; open status"
+    refute html =~ "subscription_id=#{subscription.id}"
+    refute html =~ "Filter this subscription&#39;s invoices"
+    refute html =~ "Global invoice queue workspace"
+    refute html =~ "Global open-invoice queue rows"
+    refute html =~ "subscription-related-billing"
     refute html =~ "Recovery workspace button"
     assert html =~ "Open dunning funnel and at-risk analytics"
     assert html =~ "Open Events audit log with subscription filter"
     assert html =~ "Audit event table: Actor / Action / Timestamp"
-    assert html =~ "Global open-invoice queue rows"
-    assert html =~ "Work all invoices in queue"
+
+    customer_invoice_href = link_href(view, "Open invoices for this customer")
+
+    customer_invoice_query =
+      customer_invoice_href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(customer_invoice_href).path == "/billing/invoices"
+    assert customer_invoice_query["status"] == "open"
+    assert customer_invoice_query["customer_id"] == subscription.customer_id
+
+    scope_invoice_href = link_href(view, "All open invoices in global scope")
+
+    scope_invoice_query =
+      scope_invoice_href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(scope_invoice_href).path == "/billing/invoices"
+    assert scope_invoice_query["status"] == "open"
+    refute Map.has_key?(scope_invoice_query, "customer_id")
+    refute Map.has_key?(scope_invoice_query, "subscription_id")
   end
 
   test "subscription detail returns to the validated originating list in the current organization scope",
@@ -157,6 +174,16 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
              )
 
     assert html =~ "Back to results"
+    assert html =~ "All open invoices for journey-org"
+
+    scoped_invoice_href = link_href(view, "All open invoices for journey-org")
+
+    scoped_invoice_query =
+      scoped_invoice_href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(scoped_invoice_href).path == "/billing/invoices"
+    assert scoped_invoice_query["org"] == "journey-org"
+    assert scoped_invoice_query["status"] == "open"
 
     back_path =
       view
@@ -200,10 +227,10 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Charge amount not shown"
     assert html =~ "Billing setup gaps"
     assert html =~ "Lifecycle state"
-    assert html =~ "Open local invoice context"
+    assert html =~ "Open invoices for this customer"
     assert html =~ "Global dunning funnel"
     assert html =~ "recovery analytics still shows at-risk accounts and funnel trends."
-    assert html =~ "Work global invoice queue"
+    assert html =~ "All open invoices in global scope"
     assert html =~ "Audit event table: Actor / Action / Timestamp"
     assert html =~ "Latest audit event summary"
     assert html =~ "Actor"
@@ -304,11 +331,13 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     {identity, _} = :binary.match(html, "detail-header-metadata-actions")
     {lifecycle, _} = :binary.match(html, "Subscription lifecycle summary")
     {action, _} = :binary.match(html, "data-ax-action-band")
+    {related, _} = :binary.match(html, "data-ax-related-resources")
     {billing, _} = :binary.match(html, "data-ax-drill-section=\"billing-items\"")
     {raw, _} = :binary.match(html, "data-ax-lazy-json")
     assert identity < lifecycle
     assert lifecycle < action
-    assert action < billing
+    assert action < related
+    assert related < billing
     assert billing < raw
 
     html = render_click(view, "load_raw_json", %{})
@@ -1265,6 +1294,16 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     |> then(&Regex.compile!("<" <> &1 <> "\\b"))
     |> Regex.scan(html)
     |> length()
+  end
+
+  defp link_href(view, label) do
+    view
+    |> element("a", label)
+    |> render()
+    |> Floki.parse_document!()
+    |> Floki.find("a")
+    |> Floki.attribute("href")
+    |> hd()
   end
 
   defp assert_text_order(html, labels) do

@@ -3,12 +3,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   use Phoenix.LiveView
 
-  import Ecto.Query
-
   alias Accrue.{Actor, Auth, Billing, Clock, Config, Events, PlanResolver}
-  alias Accrue.Billing.{Invoice, Subscription, UpcomingInvoice}
+  alias Accrue.Billing.{Subscription, UpcomingInvoice}
   alias Accrue.Dunning.Campaign
-  alias Accrue.Repo
 
   alias AccrueAdmin.Components.{
     AppShell,
@@ -17,7 +14,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     DetailDrawer,
     DropdownMenu,
     FlashGroup,
-    MoneyFormatter,
     JsonViewer,
     RelatedResources,
     StepUpAuthModal,
@@ -67,8 +63,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          )
          |> assign(:subscription, subscription)
          |> assign(:customer, subscription.customer)
-         |> assign(:open_invoice_summary, open_invoice_summary(subscription))
-         |> assign(:global_open_invoice_queue, global_open_invoice_queue(scope))
          |> assign(:timeline_events, events)
          |> assign(:timeline_events_loaded?, true)
          |> assign(:raw_json_loaded?, false)
@@ -320,75 +314,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
         </section>
 
-        <section class="ax-detail-priority-actions ax-detail-priority-actions-compact" aria-label="Global invoice queue workspace">
-          <span class="ax-label ax-detail-priority-label">Global invoice queue workspace</span>
-          <span class="ax-detail-queue-depth"><strong>Local context</strong><%= invoice_queue_summary(@open_invoice_summary) %></span>
-          <a
-            class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
-            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "return_to" => @return_path})}
-          >
-            Work all open invoice records
-          </a>
-          <div class="ax-detail-priority-links">
-            <a
-              class="ax-link-quiet"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id, "return_to" => @return_path})}
-            >
-              Filter this subscription's invoices
-            </a>
-            <a
-              class="ax-link-quiet"
-              href={
-                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead"
-                })
-              }
-            >
-              Webhook debugger after invoice queue
-            </a>
-            <a
-              class="ax-link-quiet"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Open dunning funnel and at-risk analytics
-            </a>
-          </div>
-        </section>
-
-        <section class="ax-inline-worklist ax-detail-open-invoice-queue" aria-label="Global open invoice queue preview">
-          <div class="ax-inline-worklist-copy">
-            <strong class="ax-type-label">Global open-invoice queue rows</strong>
-            <span>Each row opens one invoice record; the full queue link lists every open invoice for review.</span>
-          </div>
-          <ol :if={@global_open_invoice_queue != []} class="ax-detail-open-invoice-list">
-            <li :for={invoice <- @global_open_invoice_queue}>
-              <a href={global_invoice_row_href(@admin_mount_path, @current_owner_scope, invoice)} class="ax-detail-open-invoice-row">
-                <strong><%= global_invoice_row_customer(invoice) %></strong>
-                <span>
-                  <%= if is_integer(invoice.amount_remaining_minor) and is_binary(invoice.currency) do %>
-                    <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor} currency={invoice.currency} />
-                  <% else %>
-                    Amount not shown
-                  <% end %>
-                  remaining
-                </span>
-                <em><%= global_invoice_row_due(invoice) %></em>
-                <span class="ax-detail-open-invoice-action">Open invoice record</span>
-              </a>
-            </li>
-          </ol>
-          <span :if={@global_open_invoice_queue == []} class="ax-detail-open-invoice-empty">
-            No open invoice records in this owner scope.
-          </span>
-          <a class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "return_to" => @return_path})}>
-            Work all invoices in queue
-          </a>
-        </section>
-
-        <div data-ax-related-resources>
-          <RelatedResources.related_resources items={@related_items} />
-        </div>
-
         <Detail.summary_list
           rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)}
           class="ax-summary-list-compact"
@@ -452,6 +377,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </div>
         </section>
 
+        <div data-ax-related-resources>
+          <RelatedResources.related_resources items={@related_items} />
+        </div>
+
         <section class="ax-stack-md" aria-label="Subscription details">
           <details
             class="ax-detail-section"
@@ -511,27 +440,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 >
                   Open dunning funnel and at-risk analytics
                 </a>
-                <a
-                  class="ax-button ax-button-secondary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "return_to" => @return_path})}
-                >
-                  Work global invoice queue
-                </a>
-                <a
-                  class="ax-button ax-button-secondary ax-button-sm"
-                  href={
-                    ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
-                      "status" => "open",
-                      "subscription_id" => @subscription.id
-                    })
-                  }
-                >
-                  Open local invoice context
-                </a>
               </div>
-              <span class="ax-detail-hint-chip">
-                Global queue lists every open invoice for review; local context is secondary.
-              </span>
             </div>
           </details>
 
@@ -1098,93 +1007,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp collection_summary(%{status: :paused}), do: "Paused"
   defp collection_summary(_subscription), do: "Not paused"
-
-  defp open_invoice_summary(subscription) do
-    open_statuses = [:draft, :open]
-
-    Invoice
-    |> where(
-      [invoice],
-      invoice.subscription_id == ^subscription.id and invoice.status in ^open_statuses
-    )
-    |> select([invoice], %{count: count(invoice.id)})
-    |> Repo.one()
-    |> case do
-      %{count: count} ->
-        %{count: count || 0}
-
-      _summary ->
-        %{count: 0}
-    end
-  end
-
-  defp invoice_queue_summary(%{count: count}),
-    do: "#{pluralize(count, "open invoice")}; amounts shown per invoice"
-
-  defp invoice_queue_summary(_summary), do: "0 open invoices"
-
-  defp global_open_invoice_queue(owner_scope) do
-    open_statuses = [:draft, :open]
-
-    owner_scope
-    |> global_open_invoice_base(open_statuses)
-    |> order_by([invoice, _customer, _subscription],
-      asc_nulls_last: invoice.due_date,
-      desc: invoice.amount_remaining_minor
-    )
-    |> limit(3)
-    |> select([invoice, customer, subscription], %{
-      id: invoice.id,
-      number: invoice.number,
-      customer_id: customer.id,
-      customer_name: customer.name,
-      customer_email: customer.email,
-      subscription_id: invoice.subscription_id,
-      subscription_processor_id: subscription.processor_id,
-      amount_remaining_minor: invoice.amount_remaining_minor,
-      currency: invoice.currency,
-      due_date: invoice.due_date,
-      status: invoice.status
-    })
-    |> Repo.all()
-  end
-
-  defp global_open_invoice_base(
-         %{mode: :organization, organization_id: organization_id},
-         statuses
-       ) do
-    Invoice
-    |> join(:inner, [invoice], customer in assoc(invoice, :customer))
-    |> join(:left, [invoice, _customer], subscription in assoc(invoice, :subscription))
-    |> where(
-      [invoice, customer, _subscription],
-      invoice.status in ^statuses and customer.owner_type == "Organization" and
-        customer.owner_id == ^organization_id
-    )
-  end
-
-  defp global_open_invoice_base(_owner_scope, statuses) do
-    Invoice
-    |> join(:inner, [invoice], customer in assoc(invoice, :customer))
-    |> join(:left, [invoice, _customer], subscription in assoc(invoice, :subscription))
-    |> where([invoice, _customer, _subscription], invoice.status in ^statuses)
-  end
-
-  defp global_invoice_row_href(mount_path, owner_scope, invoice) do
-    ScopedPath.build(mount_path, "/invoices", owner_scope, %{
-      "status" => "open",
-      "invoice_id" => invoice.id
-    })
-  end
-
-  defp global_invoice_row_customer(invoice),
-    do:
-      invoice.customer_name || invoice.customer_email || invoice.customer_id || "Unknown customer"
-
-  defp global_invoice_row_due(%{due_date: %DateTime{} = due_date}),
-    do: "Due #{format_datetime(due_date)}"
-
-  defp global_invoice_row_due(_invoice), do: "Due date not shown"
 
   defp detail_health_summary(subscription) do
     cond do
@@ -2599,7 +2421,32 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         []
       end
 
+    invoice_items = [
+      %{
+        icon: :invoices,
+        label: "Open invoices for this customer",
+        value: "Customer-wide results; open status",
+        href:
+          ScopedPath.build(mount_path, "/invoices", scope, %{
+            "customer_id" => subscription.customer_id,
+            "status" => "open",
+            "return_to" => return_path
+          })
+      },
+      %{
+        icon: :invoices,
+        label: invoice_scope_label(scope),
+        value: "All authorized open invoices",
+        href:
+          ScopedPath.build(mount_path, "/invoices", scope, %{
+            "status" => "open",
+            "return_to" => return_path
+          })
+      }
+    ]
+
     customer_items ++
+      invoice_items ++
       [
         %{
           icon: :payments,
@@ -2627,6 +2474,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         }
       ]
   end
+
+  defp invoice_scope_label(%{mode: :organization} = scope) do
+    organization =
+      scope.organization_display_name || scope.organization_slug || "selected organization"
+
+    "All open invoices for #{organization}"
+  end
+
+  defp invoice_scope_label(_scope), do: "All open invoices in global scope"
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}
