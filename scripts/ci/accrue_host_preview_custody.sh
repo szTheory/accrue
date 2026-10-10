@@ -20,14 +20,10 @@ function requireIdentity(identity, label) {
   }
 }
 
-function fixtureTargets() {
-  if (process.env.ACCRUE_HOST_CUSTODY_TEST_MODE !== "1") return null;
-  const fixturePath = process.env.ACCRUE_HOST_CUSTODY_TEST_FIXTURE;
-  if (!fixturePath) fail("test fixture path is unavailable");
+function fixtureTargets(fixturePath) {
+  if (!fixturePath) return null;
   const fixtures = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
-  if (fixtures.target.process === "inspect-listener") {
-    fixtures.target.process = portOwner(fixtures.target.port);
-  }
+  if (fixtures.target.process === "inspect-listener") fixtures.target.process = portOwner(fixtures.target.port);
   return fixtures;
 }
 
@@ -183,14 +179,18 @@ function snapshot(command) {
   }
 }
 
-function run() {
+function run(options = {}) {
   const [command, mode] = process.argv.slice(2);
   if (command === "snapshot" || command === "assert-preserved") return snapshot(command);
   if (command !== "preflight" || !["browser", "dev"].includes(mode)) fail("usage: accrue_host_preview_custody.sh preflight <browser|dev> | snapshot | assert-preserved");
-  const fixtures = fixtureTargets();
+  if (process.env.ACCRUE_HOST_CUSTODY_TEST_MODE !== undefined || process.env.ACCRUE_HOST_CUSTODY_TEST_FIXTURE !== undefined) {
+    fail("caller-supplied test fixture environment is forbidden; use the test-only custody entry point");
+  }
+  const fixtures = fixtureTargets(options.fixturePath);
   const preview = fixtures ? fixtures.preview : previewIdentity();
   const target = fixtures ? fixtures.target : targetIdentity(mode);
   assertDistinct(preview, target, mode);
 }
 
-run();
+if (require.main === module) run();
+module.exports = { run };

@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const custody = path.join(repoRoot, "scripts/ci/accrue_host_preview_custody.sh");
+const custodyTestEntry = path.join(repoRoot, "scripts/ci/accrue_host_preview_custody_test_entry.mjs");
 const browserWrapper = path.join(repoRoot, "scripts/ci/accrue_host_verify_browser.sh");
 const devWrapper = path.join(repoRoot, "scripts/ci/accrue_host_verify_dev_boot.sh");
 const previewRunner = path.join(repoRoot, "examples/accrue_host/e2e/preview-runner.js");
@@ -47,13 +48,11 @@ function run(mode, data, extraEnv = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-test-"));
   const fixturePath = path.join(dir, "targets.json");
   fs.writeFileSync(fixturePath, JSON.stringify(data));
-  const result = spawnSync("node", [custody, "preflight", mode], {
+  const result = spawnSync("node", [custodyTestEntry, fixturePath, mode], {
     cwd: repoRoot,
     encoding: "utf8",
     env: {
       ...process.env,
-      ACCRUE_HOST_CUSTODY_TEST_FIXTURE: fixturePath,
-      ACCRUE_HOST_CUSTODY_TEST_MODE: "1",
       ...extraEnv
     }
   });
@@ -107,11 +106,9 @@ test("direct Playwright preflight permits only its exact listener PID and reject
   const env = {
     ...process.env,
     PATH: `${binDir}:${process.env.PATH}`,
-    ACCRUE_HOST_CUSTODY_TEST_MODE: "1",
-    ACCRUE_HOST_CUSTODY_TEST_FIXTURE: fixturePath,
     ACCRUE_HOST_DIRECT_PROOF_PID: "4242"
   };
-  const accepted = spawnSync("node", [custody, "preflight", "browser"], { cwd: repoRoot, env, encoding: "utf8" });
+  const accepted = spawnSync("node", [custodyTestEntry, fixturePath, "browser"], { cwd: repoRoot, env, encoding: "utf8" });
   assert.equal(accepted.status, 0, accepted.stderr || accepted.stdout);
   assert.match(accepted.stdout, /process=proof-server:4242/);
 
@@ -119,21 +116,24 @@ test("direct Playwright preflight permits only its exact listener PID and reject
   fs.writeFileSync(pidFile, "4242\n", { mode: 0o600 });
   const setupEnv = {
     ...env,
+    ACCRUE_HOST_CUSTODY_TEST_MODE: "1",
+    ACCRUE_HOST_CUSTODY_TEST_FIXTURE: fixturePath,
     ACCRUE_HOST_DIRECT_PROOF_PID_FILE: pidFile,
     ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1",
     ACCRUE_HOST_E2E_FIXTURE: fixtureFile
   };
   delete setupEnv.ACCRUE_HOST_DIRECT_PROOF_PID;
   const globalSetup = path.join(repoRoot, "examples/accrue_host/e2e/global-setup.js");
-  const setupAccepted = spawnSync("node", ["-e", `require(${JSON.stringify(globalSetup)})().then(teardown => teardown && teardown())`], {
+  const setupAccepted = spawnSync("node", ["-e", `require(${JSON.stringify(globalSetup)})()`], {
     cwd: repoRoot,
     env: setupEnv,
     encoding: "utf8"
   });
-  assert.equal(setupAccepted.status, 0, setupAccepted.stderr || setupAccepted.stdout);
-  assert.equal(fs.existsSync(pidFile), false, "global setup retained the one-run PID file");
+  assert.notEqual(setupAccepted.status, 0, "global setup accepted caller-supplied fixture environment");
+  assert.match(`${setupAccepted.stderr}\n${setupAccepted.stdout}`, /caller-supplied test fixture environment is forbidden/);
+  assert.equal(fs.existsSync(pidFile), true, "rejected global setup unexpectedly removed the PID marker");
 
-  const foreign = spawnSync("node", [custody, "preflight", "browser"], {
+  const foreign = spawnSync("node", [custodyTestEntry, fixturePath, "browser"], {
     cwd: repoRoot,
     env: { ...env, ACCRUE_HOST_DIRECT_PROOF_PID: "9999" },
     encoding: "utf8"
@@ -150,7 +150,7 @@ test("direct Playwright preflight permits only its exact listener PID and reject
   assert.notEqual(setupRejected.status, 0, "global setup accepted a foreign listener");
   assert.equal(fs.existsSync(path.join(dir, "must-not-be-created")), false, "global setup created fixtures before rejecting a foreign listener");
   fs.writeFileSync(path.join(binDir, "lsof"), "#!/bin/sh\nprintf '4242\\n4343\\n'\n");
-  const mixed = spawnSync("node", [custody, "preflight", "browser"], { cwd: repoRoot, env, encoding: "utf8" });
+  const mixed = spawnSync("node", [custodyTestEntry, fixturePath, "browser"], { cwd: repoRoot, env, encoding: "utf8" });
   assert.notEqual(mixed.status, 0, "multiple listener owners were accepted with one matching token");
   fs.rmSync(dir, { recursive: true, force: true });
 });
@@ -220,10 +220,26 @@ test("direct Playwright config and setup execute the same failing collision pref
     "require('./examples/accrue_host/e2e/global-setup.js')()"
   ]) {
     const result = spawnSync("node", ["-e", entry], { cwd: repoRoot, env, encoding: "utf8" });
-    assert.notEqual(result.status, 0, `${entry} accepted the preview DB alias`);
-    assert.match(`${result.stdout}\n${result.stderr}`, /aliases preview database name/);
+    assert.notEqual(result.status, 0, `${entry} accepted caller-supplied fixtures`);
+    assert.match(`${result.stdout}\n${result.stderr}`, /caller-supplied test fixture environment is forbidden/);
   }
   assert.equal(fs.existsSync(path.join(dir, "must-not-be-created")), false);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("production custody refuses fixture environment while test-only entry retains fixture coverage", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-production-entry-"));
+  const fixturePath = path.join(dir, "targets.json");
+  fs.writeFileSync(fixturePath, JSON.stringify(fixture()));
+  const result = spawnSync("node", [custody, "preflight", "browser"], {
+    cwd: repoRoot,
+    env: { ...process.env, ACCRUE_HOST_CUSTODY_TEST_MODE: "1", ACCRUE_HOST_CUSTODY_TEST_FIXTURE: fixturePath },
+    encoding: "utf8"
+  });
+  assert.notEqual(result.status, 0, "production custody accepted fixture environment");
+  assert.match(result.stderr, /caller-supplied test fixture environment is forbidden/);
+  const fixtureRun = run("browser", fixture());
+  assert.equal(fixtureRun.status, 0, fixtureRun.stderr || fixtureRun.stdout);
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
