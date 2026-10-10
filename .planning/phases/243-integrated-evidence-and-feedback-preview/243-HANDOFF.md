@@ -1,0 +1,23 @@
+# Phase 243 integrated evidence and feedback handoff
+
+## Preview entry
+
+Use the existing [Cadence host preview instructions](../../../examples/accrue_host/README.md#feedback-preview-first-bootstrap-and-warm-recovery) for first bootstrap, the authenticated Admin entry, stable local URL, warm recovery, and optional feedback. The currently running dedicated preview is `accrue-host-phase243-preview` at `http://accrue-host-phase243-preview.localhost/admin`; the README documents the ordinary `accrue.localhost` entry and loopback fallback. Operator credentials remain in the README only and are intentionally not copied here.
+
+Feedback is optional and collected outside the app after sign-in and inspection. A feedback walkthrough does not confirm billing actions or invoke reset, reseed, or mutation proof. Keep the same Compose instance and use the documented skip-seeds warm recovery. Do not use `make reset` for a feedback session.
+
+## Current evidence
+
+- The reviewed twelve-image Linux baseline set and unchanged blocking comparison passed on revision `0197f4bad11d7b667a6359aba7adfae666f9dd95` in workflow run `38083267168`. Mint artifact run `38082811261` supplied the reviewed images. This result is tied to its recorded revision; it is not a fresh Linux comparison after Plan02 or Plan03 source changes.
+- Phase243 Plan02 exercised the Fake preview, authenticated `/admin` navigation, warm skip-seed recovery, and the complete host verifier while preserving the authoritative preview invoice/audit/webhook/dispatch snapshot. It records the exact native proof DB, Compose volume, listener and build-path separation in `243-02-SUMMARY.md`.
+- Plan03's direct Phase238 owner passed 2/2 at checkout HEAD `f3b9a7a715832a71f4a4925bea1f985b5898c5af`, owner spec SHA-256 `07918db345530a379e084e5d5d02eae205c2be380e1f84f22b18811342ab27d6`, on disposable fixture `HOST-BROWSER-VERIFY01`, native `accrue_host_test`, and proof listener `127.0.0.1:4183`. Package, host-compiled, HTTP-served and actual browser response CSS all matched at SHA-256 `089878ed3cba5377be66c12c1958d728873d327c4666c7ec293e21cc8188633e`; JS tiers matched at `36974c751ef3c9df6f40a2ff7fa09c04d85819dac2de74804d8438f6c3be3085`. Altered CSS response `9748beceab1eb9e5b57b282e83a86410f73a4572b20ad8f4f81ef4e42ad89ec6` was rejected, and the original response hash was restored. The invoice action band rendered at 4px with `--ax-space-xs: 0.25rem`.
+- The current mounted proof screenshot showed the sidebar wordmark as the Accrue mark and text without a broken-image indicator. The earlier broken-logo observation came from a disposable package fixture configured with `https://example.test/logo.svg`; it does not reproduce on this host fixture. No logo change was made.
+- The Phase 240 ledger verifier passed with 21 routes and registry counts 30/42/8. Its negative control reported `self-test: valid=1 missing-route-rejected=1`.
+
+## Evidence boundaries
+
+The 21-route inventory above remains authoritative. Current exercised claims are limited to the named fixtures, routes, and states in the ledger. Aggregate ExUnit, Node, Playwright, or verifier success does not mean every route/state was mounted or every action executed. Phase243 browser proof uses a local Fake host and says nothing about live provider parity, real billing outcomes, or remote CI. Phase242's viewport, pointer, theme, and CSS stress results are emulation, not physical-device, OS preference, or actual browser-zoom proof. Axe checks do not establish screen-reader speech. No new comparable resource/timing measurement was taken; prior one-run diagnostics remain historical and are not an SLA.
+
+The generic host Playwright config currently applies `ACCRUE_HOST_PREVIEW_BASE_URL` to every selected spec and disables its owned webServer, while global setup can still prepare and seed the native test DB unless `ACCRUE_HOST_REUSE_SERVER=1`. Only the Phase243 preservation spec is intended to target the feedback preview. An initial Plan03 invocation accidentally inherited the preview URL: its `/api/sandbox` request received a non-token response and failed before test-body assertions. The immediate authoritative preview sentinel/audit/webhook/dispatch snapshot matched the pre-run snapshot. This is a real routing/custody gap assigned to the phase orchestrator; phase acceptance remains pending its fail-closed resolution and a clean regression check.
+
+No user feedback is required to accept the automated evidence. Independent phase verification and generated UAT remain in the orchestrator's ordered closeout after all plans and the custody gap are resolved.

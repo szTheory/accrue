@@ -86,6 +86,59 @@ owner explicitly exercised them; the full suite run is regression coverage, not 
 claim that every inventory state was mounted. See the Phase 242 execution gate for
 commands, current asset hashes, inspection record and evidence limits.
 
+## Phase 243 Plan 03 current closure evidence
+
+This additive record leaves the existing 21 production-route rows and the separate
+30-family / 42-variant / 8-group ComponentRegistry totals unchanged. It adds no
+second route or component registry. The route/state applicability above still
+governs; a suite result does not mean every route or state was mounted.
+
+| Changed consumer / route applicability | Current owner and result | Evidence limit |
+|---|---|---|
+| `/admin/invoices/:id` — populated detail/action band; exact money and action semantics remain with their incumbent owners | Phase 243 Plan03 mounted Phase238 owner: `CI=1 npm --prefix examples/accrue_host run e2e -- e2e/phase238-admin-events-webhooks.spec.js --project=chromium-desktop --workers=1` — 2 passed, 0 failed. It measured `.ax-detail-action-band .ax-page-actions` at `4px` with `--ax-space-xs: 0.25rem`. | Confirms this fixture's rendered spacing and asset identity. It does not execute an invoice action; Phase 241 Plan08 and the existing invoice semantic/action owners retain that scope. |
+| `/admin/webhooks` and `/admin/webhooks/:id` — filtered queue, payload, replay review/result; `/admin/events` and `/admin/events/:id` — event search and source webhook | Same current Phase238 command — 2 passed, 0 failed, including exact seeded membership, payload/activity inspection, review/step-up and queued outcome assertions. | One disposable host fixture and selected states only; the current test's replay result remains separate from a general no-mutation claim. |
+| Existing Phase 242 changed consumers — coupon→promotion-code relationship, Connect fee review, search selection, responsive shell/focus/theme | Phase 242 accepted owners: Phase191 29 passed / 1 incumbent skip; Phase199 27 passed / 15 incumbent skips; Phase234 2 passed. The plan's separate custody controls passed 11/11. | Historical relative to this Plan03 owner-spec revision. Responsive dimensions, pointer and theme settings are browser emulation, not physical-device or OS preference proof. |
+| Existing Phase 241 billing action consumers — invoice/subscription spacing, actions and exact money | Phase 241 Plan08 owner: focused desktop/mobile 2 passed; package asset owner 4 passed; invoice, subscription and active dunning gaps measured 4px. | Current Phase241 evidence for its recorded source revision; Plan03 freshly confirms the invoice action-band spacing on the mounted host. It does not re-exercise all billing actions. |
+| Selected visual golden set | Phase243 Plan01 reviewed twelve Ubuntu images; mint artifact run `38082811261` was reviewed and committed as `0197f4ba`. The normal unchanged comparison workflow run `38083267168` passed on committed source `0197f4ba`. Thresholds remain `0.2` and `0.01`. | The Linux comparison is accepted evidence for its recorded revision. It is not a same-SHA Linux run after later Phase243 Plan02 source `b93d1540` or this Plan03 owner change. |
+
+### Phase 243 mounted asset provenance
+
+The current focused browser run used checkout HEAD `f3b9a7a715832a71f4a4925bea1f985b5898c5af`
+with the Phase238 owner working-tree SHA-256
+`07918db345530a379e084e5d5d02eae205c2be380e1f84f22b18811342ab27d6`. It used the
+disposable `HOST-BROWSER-VERIFY01` fixture, native `accrue_host_test`, proof listener
+`127.0.0.1:4183`, and per-run host/admin build directories. Node 22.14.0 was first on
+`PATH`; no package was installed or lockfile changed.
+
+| Tier | Requested asset | SHA-256 | Bytes | Result |
+|---|---|---|---:|---|
+| Package-built CSS | `/admin/assets/css-b69a4acf8c2ca8f17e93e4179dd7597a` | `089878ed3cba5377be66c12c1958d728873d327c4666c7ec293e21cc8188633e` | 129,813 | Explicit `MIX_ENV=test mix accrue_admin.assets.build`; passed |
+| Host-compiled CSS | Same | `089878ed3cba5377be66c12c1958d728873d327c4666c7ec293e21cc8188633e` | 129,813 | Byte-identical to package |
+| HTTP-served CSS | `http://127.0.0.1:4183/admin/assets/css-b69a4acf8c2ca8f17e93e4179dd7597a` | `089878ed3cba5377be66c12c1958d728873d327c4666c7ec293e21cc8188633e` | 129,813 | Status 200; byte-identical |
+| Browser response CSS | Same URL and path | `089878ed3cba5377be66c12c1958d728873d327c4666c7ec293e21cc8188633e` | 129,813 | Actual browser response body hashed; byte-identical |
+| Package / compiled / HTTP / browser JS | `/admin/assets/js-12dea6a487034e08eb55a389ec473a5a` | `36974c751ef3c9df6f40a2ff7fa09c04d85819dac2de74804d8438f6c3be3085` | 161,130 | All four byte identities passed |
+| Altered CSS response negative control | Same CSS URL with a disposable query | `9748beceab1eb9e5b57b282e83a86410f73a4572b20ad8f4f81ef4e42ad89ec6` | — | Browser response differed and the package identity assertion rejected it; after removing interception the restored response returned to the package SHA |
+
+CSS source `accrue_admin/assets/css/app.css` SHA-256 is
+`6d6af462d2b1f9717ba5fae6f5aba8a3703978be3f49e1c21f2b930ae25e62dc`; package CSS
+was explicitly rebuilt and its output matched the isolated host compile, HTTP
+response, and browser response. A current mounted screenshot from the same disposable
+host fixture showed the sidebar wordmark rendering as the Accrue mark and text with
+no broken-image indicator. This closes the earlier package-only `example.test/logo.svg`
+observation for this host render; no logo source change was made.
+
+The first Plan03 attempt accidentally set `ACCRUE_HOST_PREVIEW_BASE_URL` for the
+generic Phase238 command. Playwright therefore used the preview URL while global
+setup still prepared the native test DB; the `/api/sandbox` request returned a
+non-token response and failed before either test body ran. The pre-run and immediate
+post-attempt authoritative preview sentinel/audit/webhook/dispatch snapshot compared
+identically. The successful run omitted the URL override; custody reported the
+preview on its dedicated Compose volume/port and the proof server on native test DB
+port 4183. The generic Playwright config currently applies that URL override to all
+selected specs, while only the Phase243 preservation spec is intended to target the
+preview; this routing/custody gap remains assigned to the phase orchestrator for
+resolution before phase acceptance.
+
 ## Current changed-owner acceptance results
 
 | Owner | Command / result |
