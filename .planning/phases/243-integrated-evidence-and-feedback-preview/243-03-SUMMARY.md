@@ -83,8 +83,8 @@ human_judgment: false
 
 ## Task Commits
 
-1. **Task 243-03-01: Observe corrected CSS at the mounted host HTTP and browser boundary** — `e4ba82cf` (test)
-2. **Task 243-03-02: Reconcile the 21-route inventory and close the bounded handoff** — `06f9053e` (docs)
+1. **Task 1: Observe corrected CSS at the mounted host HTTP and browser boundary** — `e4ba82cf` (test)
+2. **Task 2: Reconcile the 21-route inventory and close the bounded handoff** — `06f9053e` (docs)
 
 ## Files Created/Modified
 

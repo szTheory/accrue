@@ -94,15 +94,12 @@ status: complete
 
 ## Task Commits
 
-1. **Task 243-01-01: Prove one invoice journey and faithful rendered masks in the incumbent visual owner** — `dd11264d` (feat)
-2. **Align Browser UAT with current admin surfaces** — `7528b447` (fix)
-3. **Pass visual timestamp masks as locator list** — `2c59529b` (fix)
-4. **Validate rendered visual timestamp anchors** — `73f93cb6` (fix)
-5. **Task 243-01-02: Review deliberate Ubuntu goldens and pass the unchanged blocking comparison** — `0197f4ba` (test)
+1. **Task 1: Prove one invoice journey and faithful rendered masks in the incumbent visual owner** — `dd11264d` (feat), `7528b447` (browser UAT repair), `2c59529b` (mask locator list), `73f93cb6` (rendered timestamp anchors)
+2. **Task 2: Review deliberate Ubuntu goldens and pass the unchanged blocking comparison** — `0197f4ba` (test)
 
 ## Verification and Provenance
 
-- `node --test accrue_admin/test/js/visual_baseline_set_test.mjs` passed all 17 tests. The baseline-set guard passed against the twelve committed files.
+- `cd accrue_admin && node --test test/js/visual_baseline_set_test.mjs` passed all 17 tests. The baseline-set guard passed against the twelve committed files.
 - A disposable local Playwright visual run exercised all six light/dark compositions and produced twelve temporary captures outside the repository; those captures were inspection evidence only and were not committed.
 - Ubuntu mint run `38082811261` used source `73f93cb6786e767c8fd748e0ce886bf128102d97`. Its mint and upload succeeded. Reviewed artifact `phase211-visual-baselines`, ID `11681192100`, size 2,546,760 bytes, SHA-256 `548bdf297b0d196ee47079da8a25929b3f9d32d84e02eacd1fc7f86d00b8343c`, contained the twelve captures committed as `0197f4ba`. The artifact was retrieved from the workflow run and reviewed as a single bounded batch before commit.
 - The normal incumbent workflow then ran on committed source/image revision `0197f4bad11d7b667a6359aba7adfae666f9dd95`. Run `38083267168` completed successfully. Browser UAT passed, the Node hook and baseline set tests passed, the complete committed set guard passed, and `e2e:visual-regression` passed. Its accompanying Linux mint job also succeeded and uploaded artifact ID `11681422640`.

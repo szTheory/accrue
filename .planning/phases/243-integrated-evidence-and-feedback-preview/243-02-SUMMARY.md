@@ -14,13 +14,15 @@ affects: [243-03, host-verification, preview-operations]
 actuals:
   tokens: 10195
   tasks: 3
-  commits: 4
+  commits: 5
 tech-stack:
   added: []
   patterns: [custody preflight before mutation, authoritative read-only database snapshot, per-run build output isolation]
 key-files:
   created:
     - examples/accrue_host/e2e/phase243-preview-preservation.spec.js
+    - examples/accrue_host/e2e/preview-routing.js
+    - examples/accrue_host/e2e/preview-runner.js
     - scripts/ci/accrue_host_preview_custody.sh
     - scripts/ci/test_accrue_host_preview_custody.mjs
   modified:
@@ -28,6 +30,11 @@ key-files:
     - examples/accrue_host/e2e/global-setup.js
     - examples/accrue_host/config/dev.exs
     - examples/accrue_host/playwright.config.js
+    - examples/accrue_host/package.json
+    - examples/accrue_host/e2e/phase234-admin-customers-subscriptions.spec.js
+    - examples/accrue_host/e2e/phase237-admin-billing.spec.js
+    - examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js
+    - accrue_admin/lib/accrue_admin/live/subscription_live.ex
     - scripts/ci/accrue_host_verify_browser.sh
     - scripts/ci/accrue_host_verify_dev_boot.sh
 decisions:
@@ -41,7 +48,7 @@ coverage:
     requirement: EVR-04
     verification:
       - kind: unit
-        ref: scripts/ci/test_accrue_host_preview_custody.mjs (11 controls)
+        ref: scripts/ci/test_accrue_host_preview_custody.mjs (12 controls after routing remediation)
         status: pass
     human_judgment: false
   - id: D2
@@ -49,7 +56,7 @@ coverage:
     requirement: EVR-04
     verification:
       - kind: e2e
-        ref: CI=1 npm --prefix examples/accrue_host run e2e -- e2e/phase243-preview-preservation.spec.js --project=chromium-desktop --workers=1
+        ref: npm --prefix examples/accrue_host run e2e:preview -- e2e/phase243-preview-preservation.spec.js --project chromium-desktop --workers 1 (explicit documented preview environment; 1/1 after remediation)
         status: pass
     human_judgment: false
   - id: D3
@@ -111,8 +118,7 @@ The native development database data-only dump SHA256 remained `f221026bfbfb92bf
 
 1. **Task 1: Guard whole-command proof custody before mutation** - `5ceab3c5` (feat)
 2. **Task 2: Prove fresh preview and warm preservation** - `9eace18f` (feat)
-3. **Task 3: Prove the complete verifier remains separate** - `de9e4d5d` (fix)
-4. **Acceptance repair: direct custody and named Phase234 E2E** - `b93d1540` (fix)
+3. **Task 3: Prove the complete verifier remains separate** - `de9e4d5d` (isolation), `b93d1540` (direct ownership, return destination and focus), `f425645f` (exclusive preview routing)
 
 Plan metadata commits: `f1045971` and `f64a06e2` (original status/self-check records); `b93d1540` contains the final acceptance repair. The final canonical summary/state update follows in the metadata commit.
 
