@@ -6,16 +6,16 @@ current_phase: 241
 current_phase_name: Billing Operator Journeys
 current_plan: 08
 status: ready_to_execute
-stopped_at: Named Phase 241 spacing gap planned; next $gsd-execute-phase 241 --gaps-only
-last_updated: "2026-10-10T15:34:58Z"
+stopped_at: Completed 241-08-PLAN.md; Phase 241 verification pending
+last_updated: "2026-10-10T15:54:09.574Z"
 last_activity: 2026-10-10
-last_activity_desc: "Phase 241 truth 25 action-spacing gap assigned to Plan 08; Phase 242 remains verified 80/80; Phase 243 follows gap closure"
-state_head: f93415fa6e9cba748f576274df4414aa1fccd079
+last_activity_desc: Phase 241 truth 25 action-spacing gap assigned to Plan 08; Phase 242 remains verified 80/80; Phase 243 follows gap closure
+state_head: 65c4d0436ad1c0be7b583bdb778259946c6a3ed2
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 21
-  completed_plans: 20
+  completed_plans: 21
   percent: 50
 ---
 
@@ -174,6 +174,7 @@ Last activity: 2026-10-10 — current 241 verification found 28/29 truths; actio
 | Phase 242 P04 | 8 min | 2 tasks | 6 files |
 | Phase 242 P06 | 5min | 2 tasks | 11 files |
 | Phase 242 P07 | 19min | 3 tasks | 9 files |
+| Phase 241 P08 | 9min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -392,6 +393,7 @@ Last activity: 2026-10-10 — current 241 verification found 28/29 truths; actio
 - [Phase 242]: Render invoice collection methods through shared Copy labels; unknown enum values remain Unknown.
 - [Phase 242]: Use incumbent package and host browser owners and preserve their existing recurring CI ownership.
 - [Phase 242]: Measure source, package output, host-compiled output and served browser resources separately.
+- [Phase 241]: Billing invoice, subscription, and dunning action groups use the existing --ax-space-xs 4px spacing token.
 
 ### Pending Todos
 
@@ -473,8 +475,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T15:34:58Z
-Stopped at: Phase 241 Plan 08 gap closure planned; next $gsd-execute-phase 241 --gaps-only
+Last session: 2026-10-10T15:54:09.515Z
+Stopped at: Completed 241-08-PLAN.md; Phase 241 verification pending
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

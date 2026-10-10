@@ -104,7 +104,7 @@ Plans:
   4. Before an existing billing action, operators can review exact target, material customer/scope, money/currency and consequence in one place; after action they see the evidence-specific accepted, pending, completed, failed or unknown result. Fresh authorization, step-up, duplicate protection and exact-money contracts remain visible through the flow. (JRN-04)
 
 **Propagation obligation**: Exercise Phase 240 shared hierarchy, responsive/theme behavior, keyboard/focus, busy/reconnect and state distinctions on each changed billing consumer. Verify auth, owner/target/material-state, capability and exact-money invariants at their existing owners; rebuild and confirm package served assets and add focused negative controls with each owning change. Supported returns are bounded existing meanings, not pagination/scroll preservation or a new subscription invoice filter.
-**Plans**: 7/8 plans complete; Plan 08 closes the current verification gap
+**Plans**: 8/8 plans executed; Plan 08 closes the current verification gap
 **Wave 1**
 - [x] 241-01-PLAN.md
 - [x] 241-02-PLAN.md
@@ -121,7 +121,7 @@ Plans:
 - [x] 241-07-PLAN.md
 
 **Wave 5** *(gap closure after Wave 4 completion)*
-- [ ] 241-08-PLAN.md — Correct mounted billing action-control spacing to the approved 4px role and retain package asset proof.
+- [x] 241-08-PLAN.md — Correct mounted billing action-control spacing to the approved 4px role and retain package asset proof.
 
 **UI hint**: yes
 
@@ -176,6 +176,6 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | Complete    | 2026-10-10 |
-| 241. Billing Operator Journeys | v1.64 | 7/8 | Gap closure planned | 2026-10-10 (original plans) |
+| 241. Billing Operator Journeys | v1.64 | 8/8 | Gap closure planned | 2026-10-10 (original plans) |
 | 242. Investigations and Remaining Admin Surfaces | v1.64 | 7/7 | Complete    | 2026-10-10 |
 | 243. Integrated Evidence and Feedback Preview | v1.64 | 0/TBD | Not started | - |
