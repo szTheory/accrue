@@ -92,7 +92,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    return_path = customer_return_path(params, socket.assigns)
+    return_destination = customer_return_destination(params, socket.assigns)
 
     journey_path =
       ScopedPath.build(
@@ -105,38 +105,22 @@ defmodule AccrueAdmin.Live.CustomerLive do
     {:noreply,
      socket
      |> assign(:params, params)
-     |> assign(:return_path, return_path)
+     |> assign(:return_path, return_destination.path)
+     |> assign(:return_label, return_destination.label)
      |> assign(:journey_path, journey_path)
      |> assign_peer_record_set(params)}
   end
 
-  defp customer_return_path(params, assigns) do
+  defp customer_return_destination(params, assigns) do
     mount_path = assigns.admin_mount_path
 
-    case Map.get(params, "return_to") do
-      nil ->
-        ScopedPath.build(mount_path, "/customers", assigns.current_owner_scope)
-
-      raw_return_path ->
-        candidate =
-          ScopedPath.return_path(mount_path, raw_return_path, assigns.current_owner_scope)
-
-        fallback = ScopedPath.build(mount_path, "/subscriptions", assigns.current_owner_scope)
-        customer_prefix = mount_path <> "/customers/"
-        current_customer_prefix = customer_prefix <> assigns.customer.id
-
-        cond do
-          candidate == fallback ->
-            ScopedPath.build(mount_path, "/customers", assigns.current_owner_scope)
-
-          String.starts_with?(candidate, customer_prefix) and
-              not String.starts_with?(candidate, current_customer_prefix) ->
-            ScopedPath.build(mount_path, "/customers", assigns.current_owner_scope)
-
-          true ->
-            candidate
-        end
-    end
+    ScopedPath.return_destination(
+      mount_path,
+      Map.get(params, "return_to"),
+      assigns.current_owner_scope,
+      assigns.customer.id,
+      "/customers"
+    )
   end
 
   @impl true
@@ -274,7 +258,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
           ]}
         />
         <p class="ax-detail-back-link">
-          <a class="ax-link" href={@return_path}>Back to results</a>
+          <a class="ax-link" href={@return_path}><%= @return_label %></a>
         </p>
 
         <Detail.summary_card eyebrow="Customer detail" title={customer_label(@customer)}>

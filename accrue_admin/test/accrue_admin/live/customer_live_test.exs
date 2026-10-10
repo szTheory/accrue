@@ -288,7 +288,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
 
       href =
         view
-        |> element("a", "Back to results")
+        |> element("a", "Back to customers")
         |> render()
         |> Floki.parse_document!()
         |> Floki.find("a")
@@ -298,6 +298,55 @@ defmodule AccrueAdmin.CustomerLiveTest do
       assert URI.parse(href).path == "/billing/customers"
       refute href =~ "evil.example"
       refute href =~ foreign_id
+    end
+  end
+
+  test "customer return labels identify a matching peer tab and reject another customer's tab", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    foreign_id = Ecto.UUID.generate()
+
+    for {origin, expected_label, expected_path, expected_tab} <- [
+          {"/billing/customers/#{customer.id}?tab=payments", "Back to customer payments",
+           "/billing/customers/#{customer.id}", "payments"},
+          {"/billing/customers/#{foreign_id}?tab=payments", "Back to customers",
+           "/billing/customers", nil},
+          {"/billing/customers?q=Detail%20Customer&owner_type=User&has_default_payment_method=true&sort=unsafe",
+           "Back to customers", "/billing/customers", nil}
+        ] do
+      assert {:ok, view, _html} =
+               live(
+                 conn,
+                 "/billing/customers/#{customer.id}?return_to=#{URI.encode_www_form(origin)}"
+               )
+
+      href =
+        view
+        |> element("a", expected_label)
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.find("a")
+        |> Floki.attribute("href")
+        |> hd()
+
+      assert URI.parse(href).path == expected_path
+      query = if URI.parse(href).query, do: URI.decode_query(URI.parse(href).query), else: %{}
+      assert query["tab"] == expected_tab
+      assert query["sort"] == nil
+
+      if expected_path == "/billing/customers/#{customer.id}" do
+        assert {:ok, returned_view, returned_html} = live(conn, href)
+
+        assert has_element?(
+                 returned_view,
+                 "[aria-label='Customer peer record sets'] .ax-tab-active",
+                 "Payments"
+               )
+
+        assert returned_html =~ "ch_detail"
+      end
     end
   end
 

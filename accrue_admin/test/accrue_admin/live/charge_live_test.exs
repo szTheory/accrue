@@ -151,9 +151,9 @@ defmodule AccrueAdmin.ChargeLiveTest do
 
     other_customer_id = Ecto.UUID.generate()
 
-    for {origin_id, expected_path} <- [
-          {customer.id, "/billing/customers/#{customer.id}"},
-          {other_customer_id, "/billing/payments"}
+    for {origin_id, expected_path, expected_label} <- [
+          {customer.id, "/billing/customers/#{customer.id}", "Back to customer payments"},
+          {other_customer_id, "/billing/payments", "Back to payments"}
         ] do
       origin = "/billing/customers/#{origin_id}?tab=payments&org=foreign-org"
 
@@ -167,7 +167,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
 
       back_href =
         view
-        |> element("a", "Back to results")
+        |> element("a", expected_label)
         |> render()
         |> Floki.parse_document!()
         |> Floki.find("a")
@@ -179,6 +179,15 @@ defmodule AccrueAdmin.ChargeLiveTest do
 
       if expected_path == "/billing/customers/#{customer.id}" do
         assert URI.decode_query(URI.parse(back_href).query)["tab"] == "payments"
+        assert {:ok, returned_view, returned_html} = live(conn, back_href)
+
+        assert has_element?(
+                 returned_view,
+                 "[aria-label='Customer peer record sets'] .ax-tab-active",
+                 "Payments"
+               )
+
+        assert returned_html =~ "ch_detail"
       end
     end
   end
