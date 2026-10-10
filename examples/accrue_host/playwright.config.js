@@ -9,7 +9,7 @@ const previewBaseURL = process.env.ACCRUE_HOST_PREVIEW_BASE_URL;
 const baseURL = previewBaseURL || `http://127.0.0.1:${port}`;
 const proofRunId = process.env.ACCRUE_HOST_PROOF_RUN_ID || `${process.pid}-${Date.now()}`;
 process.env.ACCRUE_HOST_PROOF_RUN_ID = proofRunId;
-process.env.MIX_BUILD_PATH ||= path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`, "_build");
+process.env.MIX_BUILD_PATH ||= path.join(__dirname, "tmp", `accrue-host-proof-${proofRunId}`, "test");
 process.env.ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR ||= path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`, "playwright-results");
 process.env.ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR ||= path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`, "playwright-report");
 execFileSync("node", [path.resolve(__dirname, "../../scripts/ci/accrue_host_preview_custody.sh"), "preflight", "browser"], { stdio: "inherit" });

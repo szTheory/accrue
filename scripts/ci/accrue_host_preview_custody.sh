@@ -105,7 +105,10 @@ function targetIdentity(mode) {
     port,
     process: portOwner(port),
     databaseProcess: portOwner(connectionPort),
-    buildPath: path.resolve(process.env.MIX_BUILD_PATH || path.join(hostRoot, "_build"))
+    buildPath: [
+      path.resolve(process.env.MIX_BUILD_PATH || path.join(hostRoot, "_build/test")),
+      ...(mode === "browser" && process.env.ACCRUE_ADMIN_MIX_BUILD_PATH ? [path.resolve(process.env.ACCRUE_ADMIN_MIX_BUILD_PATH)] : [])
+    ].join(";")
   };
 }
 
@@ -140,9 +143,42 @@ function normalizeHost(host) {
   return ["localhost", "127.0.0.1", "::1"].includes(value) ? "loopback" : value;
 }
 
+function authoritativeSnapshot() {
+  const project = process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host";
+  const sql = `SELECT jsonb_build_object(
+    'invoice_sentinel', (SELECT jsonb_agg(to_jsonb(i) ORDER BY i.id) FROM billing.accrue_invoices i WHERE to_jsonb(i)::text LIKE '%in_showcase_paid_usd%'),
+    'accrue_events', (SELECT jsonb_agg(to_jsonb(e) ORDER BY e.id) FROM billing.accrue_events e WHERE to_jsonb(e)::text LIKE '%showcase%' OR to_jsonb(e)::text LIKE '%in_showcase_paid_usd%'),
+    'webhook_events', (SELECT jsonb_agg(to_jsonb(w) ORDER BY w.id) FROM billing.accrue_webhook_events w WHERE to_jsonb(w)::text LIKE '%in_showcase_paid_usd%' OR to_jsonb(w)::text LIKE '%showcase%'),
+    'oban_dispatch', (SELECT jsonb_agg(to_jsonb(j) ORDER BY j.id) FROM public.oban_jobs j WHERE to_jsonb(j)::text LIKE '%in_showcase_paid_usd%' OR to_jsonb(j)::text LIKE '%showcase%')
+  )::text`;
+  const output = execFileSync("docker", ["compose", "-p", project, "-f", path.join(hostRoot, "docker-compose.yml"), "exec", "-T", "db", "psql", "-U", "postgres", "-d", "accrue_host_dev", "-v", "ON_ERROR_STOP=1", "-Atc", sql], { cwd: hostRoot, encoding: "utf8", env: { ...process.env, COMPOSE_PROJECT_NAME: project } }).trim();
+  if (!output || output === "{}") fail(`authoritative preview snapshot unavailable for ${project}`);
+  let parsed;
+  try { parsed = JSON.parse(output); } catch { fail(`authoritative preview snapshot was not valid JSON for ${project}`); }
+  if (!Array.isArray(parsed.invoice_sentinel) || parsed.invoice_sentinel.length === 0) fail(`seeded invoice sentinel is missing for ${project}`);
+  if (!Array.isArray(parsed.accrue_events) || parsed.accrue_events.length === 0) fail(`showcase audit event is missing for ${project}`);
+  return output;
+}
+
+function snapshot(command) {
+  const file = process.env.ACCRUE_HOST_PREVIEW_SNAPSHOT;
+  if (!file) fail("ACCRUE_HOST_PREVIEW_SNAPSHOT path is required");
+  const value = authoritativeSnapshot();
+  if (command === "snapshot") {
+    fs.writeFileSync(file, value + "\n", { mode: 0o600 });
+    console.log(`[preview-custody] snapshot captured for ${process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host"}`);
+  } else {
+    if (!fs.existsSync(file)) fail(`preview snapshot is missing at ${file}`);
+    const before = fs.readFileSync(file, "utf8").trim();
+    if (before !== value) fail(`authoritative preview sentinel/audit/dispatch state changed for ${process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host"}`);
+    console.log(`[preview-custody] authoritative preview sentinel/audit/dispatch state preserved for ${process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host"}`);
+  }
+}
+
 function run() {
   const [command, mode] = process.argv.slice(2);
-  if (command !== "preflight" || !["browser", "dev"].includes(mode)) fail("usage: accrue_host_preview_custody.sh preflight <browser|dev>");
+  if (command === "snapshot" || command === "assert-preserved") return snapshot(command);
+  if (command !== "preflight" || !["browser", "dev"].includes(mode)) fail("usage: accrue_host_preview_custody.sh preflight <browser|dev> | snapshot | assert-preserved");
   const fixtures = fixtureTargets();
   const preview = fixtures ? fixtures.preview : previewIdentity();
   const target = fixtures ? fixtures.target : targetIdentity(mode);

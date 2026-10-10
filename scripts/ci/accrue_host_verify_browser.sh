@@ -61,10 +61,14 @@ fi
 browser_port="${ACCRUE_HOST_BROWSER_PORT:-4101}"
 proof_run_id="${ACCRUE_HOST_PROOF_RUN_ID:-$$}"
 export ACCRUE_HOST_PROOF_RUN_ID="$proof_run_id"
-export MIX_BUILD_PATH="${MIX_BUILD_PATH:-${TMPDIR:-/tmp}/accrue-host-proof-${proof_run_id}/_build}"
+export MIX_BUILD_PATH="${MIX_BUILD_PATH:-$host_dir/tmp/accrue-host-proof-${proof_run_id}/test}"
+export ACCRUE_ADMIN_MIX_BUILD_PATH="${ACCRUE_ADMIN_MIX_BUILD_PATH:-$repo_root/accrue_admin/_build/accrue-host-proof-${proof_run_id}/test}"
 export ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR="${ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR:-${TMPDIR:-/tmp}/accrue-host-proof-${proof_run_id}/playwright-results}"
 export ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR="${ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR:-${TMPDIR:-/tmp}/accrue-host-proof-${proof_run_id}/playwright-report}"
-node "$repo_root/scripts/ci/accrue_host_preview_custody.sh" preflight browser || setup_failure fixture_or_database
+custody_tool="$repo_root/scripts/ci/accrue_host_preview_custody.sh"
+export ACCRUE_HOST_PREVIEW_SNAPSHOT="${ACCRUE_HOST_PREVIEW_SNAPSHOT:-${TMPDIR:-/tmp}/accrue-host-preview-${proof_run_id}.snapshot}"
+node "$custody_tool" preflight browser || setup_failure fixture_or_database
+node "$custody_tool" snapshot
 fixture_file="$(mktemp)"
 browser_log_file="${ACCRUE_HOST_BROWSER_LOG:-$(mktemp)}"
 browser_failed=0
@@ -97,6 +101,8 @@ stop_process_tree() {
 }
 
 cleanup() {
+  local exit_status=$?
+  trap - EXIT
   if [ -n "${browser_server_pid:-}" ] && kill -0 "$browser_server_pid" >/dev/null 2>&1; then
     stop_process_tree "$browser_server_pid"
   fi
@@ -106,6 +112,12 @@ cleanup() {
   if [ -z "${ACCRUE_HOST_BROWSER_LOG:-}" ] && [ "$browser_failed" != "1" ]; then
     rm -f "$browser_log_file"
   fi
+
+  if ! node "$custody_tool" assert-preserved; then
+    exit_status=1
+  fi
+  rm -f "$ACCRUE_HOST_PREVIEW_SNAPSHOT"
+  exit "$exit_status"
 }
 
 trap cleanup EXIT
@@ -124,6 +136,7 @@ run_classified fixture_or_database bash "$repo_root/scripts/ci/verify_e2e_fixtur
 # Building assets requires a standalone Mix project cwd with its own `deps/` tree.
 (
   cd "$repo_root/accrue_admin"
+  export MIX_BUILD_PATH="$ACCRUE_ADMIN_MIX_BUILD_PATH"
   run_classified fixture_or_database mix deps.get --quiet
   run_classified fixture_or_database mix accrue_admin.assets.build
   run_classified fixture_or_database mkdir -p "$repo_root/examples/accrue_host/e2e/generated"

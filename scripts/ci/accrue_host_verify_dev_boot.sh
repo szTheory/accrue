@@ -18,8 +18,12 @@ port="${ACCRUE_HOST_PORT:-4100}"
 proof_run_id="${ACCRUE_HOST_PROOF_RUN_ID:-$$}"
 export ACCRUE_HOST_PROOF_RUN_ID="$proof_run_id"
 export ACCRUE_HOST_DEV_BOOT_DATABASE="${ACCRUE_HOST_DEV_BOOT_DATABASE:-accrue_host_dev_boot_proof}"
-export MIX_BUILD_PATH="${MIX_BUILD_PATH:-${TMPDIR:-/tmp}/accrue-host-dev-proof-${proof_run_id}/_build}"
-node "$(cd "$host_dir/../.." && pwd)/scripts/ci/accrue_host_preview_custody.sh" preflight dev
+export MIX_BUILD_PATH="${ACCRUE_HOST_DEV_BOOT_BUILD_PATH:-${MIX_BUILD_PATH:-$host_dir/tmp/accrue-host-dev-proof-${proof_run_id}/dev}}"
+repo_root="$(cd "$host_dir/../.." && pwd)"
+custody_tool="$repo_root/scripts/ci/accrue_host_preview_custody.sh"
+export ACCRUE_HOST_PREVIEW_SNAPSHOT="${ACCRUE_HOST_PREVIEW_SNAPSHOT:-${TMPDIR:-/tmp}/accrue-host-preview-${proof_run_id}-dev.snapshot}"
+node "$custody_tool" preflight dev
+node "$custody_tool" snapshot
 log_file="$(mktemp)"
 
 describe_port_owner() {
@@ -52,11 +56,18 @@ stop_process_tree() {
 }
 
 cleanup() {
+  local exit_status=$?
+  trap - EXIT
   if [ -n "${server_pid:-}" ] && kill -0 "$server_pid" >/dev/null 2>&1; then
     stop_process_tree "$server_pid"
   fi
 
   rm -f "$log_file"
+  if ! node "$custody_tool" assert-preserved; then
+    exit_status=1
+  fi
+  rm -f "$ACCRUE_HOST_PREVIEW_SNAPSHOT"
+  exit "$exit_status"
 }
 
 trap cleanup EXIT

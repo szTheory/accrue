@@ -111,6 +111,22 @@ test("both wrappers invoke custody before database mutation and dev uses its iso
   assert.match(dev, /ACCRUE_HOST_DEV_BOOT_DATABASE/);
 });
 
+test("both verifier wrappers snapshot the preview before work and assert preservation during cleanup", () => {
+  for (const wrapper of [browserWrapper, devWrapper]) {
+    const source = fs.readFileSync(wrapper, "utf8");
+    const preflight = source.indexOf('node "$custody_tool" preflight');
+    const snapshot = source.indexOf('node "$custody_tool" snapshot');
+    const cleanup = source.indexOf("cleanup() {");
+    const assertion = source.indexOf("assert-preserved");
+    assert.ok(preflight >= 0 && snapshot > preflight, `${wrapper} does not capture preview state after preflight`);
+    assert.ok(cleanup >= 0 && assertion > cleanup, `${wrapper} does not compare preview state during cleanup`);
+  }
+  const custodySource = fs.readFileSync(custody, "utf8");
+  assert.match(custodySource, /seeded invoice sentinel is missing/);
+  assert.match(custodySource, /showcase audit event is missing/);
+  assert.match(custodySource, /assert-preserved/);
+});
+
 test("direct Playwright config and setup both preflight before server or fixture work", () => {
   const config = fs.readFileSync(path.join(repoRoot, "examples/accrue_host/playwright.config.js"), "utf8");
   const setup = fs.readFileSync(path.join(repoRoot, "examples/accrue_host/e2e/global-setup.js"), "utf8");
