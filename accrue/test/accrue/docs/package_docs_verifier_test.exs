@@ -993,11 +993,14 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!(".planning/PROJECT.md", tmp_dir)
 
     copy_fixture!(
-      ".planning/phases/239-integrated-quality-handoff/239-SCOPE-DISPOSITION.md",
+      ".planning/milestones/v1.63-phases/239-integrated-quality-handoff/239-SCOPE-DISPOSITION.md",
       tmp_dir
     )
 
-    copy_fixture!(".planning/phases/239-integrated-quality-handoff/239-HANDOFF.md", tmp_dir)
+    copy_fixture!(
+      ".planning/milestones/v1.63-phases/239-integrated-quality-handoff/239-HANDOFF.md",
+      tmp_dir
+    )
     copy_fixture!(".planning/processor-support-matrix.md", tmp_dir)
     copy_fixture!(".planning/research/JTBD-FRONTIER.md", tmp_dir)
     copy_fixture!("accrue/mix.exs", tmp_dir)

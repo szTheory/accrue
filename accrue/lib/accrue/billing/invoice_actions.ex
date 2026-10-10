@@ -331,9 +331,6 @@ defmodule Accrue.Billing.InvoiceActions do
     })
   end
 
-  defp ensure_draft_invoice(%Invoice{status: :draft}), do: :ok
-  defp ensure_draft_invoice(%Invoice{} = invoice), do: {:error, draft_invoice_error(invoice)}
-
   defp draft_invoice_error(
          %Invoice{} = invoice,
          message \\ "manual invoice items require a draft invoice"
