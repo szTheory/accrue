@@ -175,3 +175,7 @@ Plan 07 acceptance evidence is ready for the downstream Phase 242 verification o
 - Summary and execution gate files exist.
 - Task commits `a66e068c`, `a80d6126`, `ffcfb9be` and `14ef0adf` are ancestors of HEAD.
 - `git diff --check` passed before writing this result.
+
+## Post-plan recurring CI closure — 2026-10-10
+
+During completion, current owner inspection found the package browser workflow's Node step only ran the 12-test visual-baseline guard. The existing step now runs all 44 Admin hook/focus/baseline tests with the already-passing `node --test test/js/*.mjs` command. This is a Rule 2 missing recurring-acceptance fix, not a new job, matrix or dependency. Added source owner: `.github/workflows/accrue_admin_browser.yml`. Current prior-phase regression mapping and fresh results are recorded in `242-REGRESSION.md`; original task results above remain historical.
