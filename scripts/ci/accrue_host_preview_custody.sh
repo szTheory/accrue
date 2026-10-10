@@ -24,7 +24,11 @@ function fixtureTargets() {
   if (process.env.ACCRUE_HOST_CUSTODY_TEST_MODE !== "1") return null;
   const fixturePath = process.env.ACCRUE_HOST_CUSTODY_TEST_FIXTURE;
   if (!fixturePath) fail("test fixture path is unavailable");
-  return JSON.parse(fs.readFileSync(fixturePath, "utf8"));
+  const fixtures = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
+  if (fixtures.target.process === "inspect-listener") {
+    fixtures.target.process = portOwner(fixtures.target.port);
+  }
+  return fixtures;
 }
 
 function previewIdentity() {
@@ -74,8 +78,12 @@ function portOwner(port) {
   const result = spawnSync("lsof", ["-nP", "-t", `-iTCP:${port}`, "-sTCP:LISTEN"], { encoding: "utf8" });
   if (result.error || result.status > 1) return "unavailable";
   const pids = result.stdout.trim().split(/\s+/).filter(Boolean);
-  if (process.env.ACCRUE_HOST_REUSE_SERVER === "1" && process.env.ACCRUE_HOST_PROOF_SERVER_PID && pids.includes(process.env.ACCRUE_HOST_PROOF_SERVER_PID)) {
-    return `proof-server:${process.env.ACCRUE_HOST_PROOF_SERVER_PID}`;
+  if (pids.length === 1) {
+    const [pid] = pids;
+    if (process.env.ACCRUE_HOST_REUSE_SERVER === "1" && process.env.ACCRUE_HOST_PROOF_SERVER_PID === pid) {
+      return `proof-server:${pid}`;
+    }
+    if (process.env.ACCRUE_HOST_DIRECT_PROOF_PID === pid) return `proof-server:${pid}`;
   }
   return pids.join(",") || "unoccupied";
 }

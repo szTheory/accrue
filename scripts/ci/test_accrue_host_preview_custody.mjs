@@ -90,6 +90,69 @@ test("rejects unknown target identity and occupied listener before mutation", ()
   assert.notEqual(run("browser", occupied).status, 0);
 });
 
+test("direct Playwright preflight permits only its exact listener PID and rejects foreign owners", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-direct-owner-"));
+  const binDir = path.join(dir, "bin");
+  const fixturePath = path.join(dir, "targets.json");
+  const fixtureFile = path.join(dir, "existing-fixture.json");
+  fs.mkdirSync(binDir);
+  fs.writeFileSync(fixtureFile, "{}");
+  fs.writeFileSync(path.join(binDir, "lsof"), "#!/bin/sh\nprintf '4242\\n'\n");
+  fs.chmodSync(path.join(binDir, "lsof"), 0o755);
+  const targets = fixture();
+  targets.target.process = "inspect-listener";
+  fs.writeFileSync(fixturePath, JSON.stringify(targets));
+  const env = {
+    ...process.env,
+    PATH: `${binDir}:${process.env.PATH}`,
+    ACCRUE_HOST_CUSTODY_TEST_MODE: "1",
+    ACCRUE_HOST_CUSTODY_TEST_FIXTURE: fixturePath,
+    ACCRUE_HOST_DIRECT_PROOF_PID: "4242"
+  };
+  const accepted = spawnSync("node", [custody, "preflight", "browser"], { cwd: repoRoot, env, encoding: "utf8" });
+  assert.equal(accepted.status, 0, accepted.stderr || accepted.stdout);
+  assert.match(accepted.stdout, /process=proof-server:4242/);
+
+  const pidFile = path.join(dir, "webserver.pid");
+  fs.writeFileSync(pidFile, "4242\n", { mode: 0o600 });
+  const setupEnv = {
+    ...env,
+    ACCRUE_HOST_DIRECT_PROOF_PID_FILE: pidFile,
+    ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1",
+    ACCRUE_HOST_E2E_FIXTURE: fixtureFile
+  };
+  delete setupEnv.ACCRUE_HOST_DIRECT_PROOF_PID;
+  const globalSetup = path.join(repoRoot, "examples/accrue_host/e2e/global-setup.js");
+  const setupAccepted = spawnSync("node", ["-e", `require(${JSON.stringify(globalSetup)})().then(teardown => teardown && teardown())`], {
+    cwd: repoRoot,
+    env: setupEnv,
+    encoding: "utf8"
+  });
+  assert.equal(setupAccepted.status, 0, setupAccepted.stderr || setupAccepted.stdout);
+  assert.equal(fs.existsSync(pidFile), false, "global setup retained the one-run PID file");
+
+  const foreign = spawnSync("node", [custody, "preflight", "browser"], {
+    cwd: repoRoot,
+    env: { ...env, ACCRUE_HOST_DIRECT_PROOF_PID: "9999" },
+    encoding: "utf8"
+  });
+  assert.notEqual(foreign.status, 0, "foreign listener was accepted");
+  assert.match(foreign.stderr, /occupied by process 4242/);
+
+  fs.writeFileSync(pidFile, "9999\n", { mode: 0o600 });
+  const setupRejected = spawnSync("node", ["-e", `require(${JSON.stringify(globalSetup)})()`], {
+    cwd: repoRoot,
+    env: { ...setupEnv, ACCRUE_HOST_E2E_FIXTURE: path.join(dir, "must-not-be-created", "fixture.json") },
+    encoding: "utf8"
+  });
+  assert.notEqual(setupRejected.status, 0, "global setup accepted a foreign listener");
+  assert.equal(fs.existsSync(path.join(dir, "must-not-be-created")), false, "global setup created fixtures before rejecting a foreign listener");
+  fs.writeFileSync(path.join(binDir, "lsof"), "#!/bin/sh\nprintf '4242\\n4343\\n'\n");
+  const mixed = spawnSync("node", [custody, "preflight", "browser"], { cwd: repoRoot, env, encoding: "utf8" });
+  assert.notEqual(mixed.status, 0, "multiple listener owners were accepted with one matching token");
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 test("rejects loopback host aliases and does not report DATABASE_URL credentials", () => {
   const data = fixture();
   data.preview.databaseHost = "localhost";

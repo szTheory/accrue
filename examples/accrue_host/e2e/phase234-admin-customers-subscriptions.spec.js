@@ -156,11 +156,17 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
 
   const relatedSubscription = page.locator('a[href*="/admin/subscriptions/"]').first();
   await expect(relatedSubscription).toBeVisible();
+  const relatedSubscriptionHref = await relatedSubscription.getAttribute("href");
+  if (!relatedSubscriptionHref) throw new Error("customer detail did not contain its subscription path");
   await relatedSubscription.click();
   await waitForLiveView(page);
   await expect(page).toHaveURL(/return_to=.*admin%2Fcustomers/);
-  const contextualReturn = page.getByRole("link", { name: /back to results/i });
+  const contextualReturn = page.getByRole("link", { name: /back to customers/i });
   await expect(contextualReturn).toBeVisible();
+  await expect(contextualReturn).toHaveAttribute(
+    "href",
+    new RegExp(`^/admin/customers/${fixture.admin_denial_customer_id}\\?`)
+  );
   await contextualReturn.click();
   await waitForLiveView(page);
   await expect(page).toHaveURL(new RegExp(`/admin/customers/${fixture.admin_denial_customer_id}\\?`));
@@ -168,13 +174,9 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
   await page.goto(`/admin/subscriptions?view=all&org=${owner}`, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
   await expect(page.getByRole("heading", { name: /subscriptions/i }).first()).toBeVisible();
-  const subscriptionLink = page.locator('a[href*="/admin/subscriptions/"]').first();
-  await expect(subscriptionLink).toBeVisible();
-  const subscriptionHref = await subscriptionLink.getAttribute("href");
-  if (!subscriptionHref) throw new Error("authorized subscription row did not contain its detail path");
   await assertDomIntegrity(page);
   await capture(page, "subscription-list.png", screenshots, testInfo);
-  await page.goto(subscriptionHref, { waitUntil: "domcontentloaded" });
+  await page.goto(relatedSubscriptionHref, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
   await expect(page.locator("main")).toContainText("admin-e2e-alpha-customer@example.test");
   await assertDomIntegrity(page);

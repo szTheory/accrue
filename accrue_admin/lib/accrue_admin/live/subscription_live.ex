@@ -544,6 +544,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <:footer>
             <button
               :if={@pending_action}
+              id="subscription-action-confirm"
               phx-click="confirm_action"
               class="ax-button ax-button-primary"
               data-role="confirm-action"
@@ -599,6 +600,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           pending={@step_up_pending}
           challenge={@step_up_challenge}
           error={@step_up_error}
+          return_focus="#subscription-action-confirm"
         />
 
         <div :if={@step_up_pending} hidden aria-hidden="true" data-role="step-up-test-mirror">

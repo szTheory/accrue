@@ -9,11 +9,20 @@ const repoRoot = path.resolve(projectRoot, "..", "..");
 const defaultFixturePath = path.join(os.tmpdir(), `accrue-host-e2e-fixture-${process.pid}-${Date.now()}.json`);
 
 function preflight() {
-  execFileSync("node", [path.join(repoRoot, "scripts/ci/accrue_host_preview_custody.sh"), "preflight", "browser"], {
-    cwd: projectRoot,
-    stdio: "inherit",
-    env: process.env
-  });
+  delete process.env.ACCRUE_HOST_DIRECT_PROOF_PID;
+  const pidFile = process.env.ACCRUE_HOST_DIRECT_PROOF_PID_FILE;
+  if (pidFile && fs.existsSync(pidFile)) {
+    process.env.ACCRUE_HOST_DIRECT_PROOF_PID = fs.readFileSync(pidFile, "utf8").trim();
+  }
+  try {
+    execFileSync("node", [path.join(repoRoot, "scripts/ci/accrue_host_preview_custody.sh"), "preflight", "browser"], {
+      cwd: projectRoot,
+      stdio: "inherit",
+      env: process.env
+    });
+  } finally {
+    delete process.env.ACCRUE_HOST_DIRECT_PROOF_PID;
+  }
 }
 
 function runMix(args, extraEnv = {}) {
@@ -62,4 +71,10 @@ module.exports = async () => {
   }
 
   process.env.ACCRUE_HOST_E2E_FIXTURE = fixturePath;
+  return async () => {
+    const pidFile = process.env.ACCRUE_HOST_DIRECT_PROOF_PID_FILE;
+    if (pidFile) {
+      try { fs.unlinkSync(pidFile); } catch (error) { if (error.code !== "ENOENT") throw error; }
+    }
+  };
 };
