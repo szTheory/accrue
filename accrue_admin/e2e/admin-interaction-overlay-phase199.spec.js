@@ -1099,6 +1099,112 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     await expect(page.locator("main")).toContainText("E2E-199-JPY-001");
   });
 
+  test("@phase241 action spacing uses the 4px token and stays reachable at narrow/coarse sizes", async ({
+    page,
+    request,
+    browser,
+  }) => {
+    const fixtures = await seedPhase199(request);
+    const surfaces = [
+      {
+        name: "invoice",
+        route: `/billing/invoices/${fixtures.edgeStates.jpy_invoice_id}`,
+        selector: ".ax-detail-action-band .ax-page-actions",
+      },
+      {
+        name: "subscription action band",
+        route: `/billing/subscriptions/${fixtures.dashboard.subscription_id}`,
+        selector: ".ax-detail-action-band .ax-page-actions",
+        checkHitTargets: true,
+      },
+      {
+        name: "subscription dunning action row",
+        route: `/billing/subscriptions/${fixtures.edgeStates.recovery_subscription_id}`,
+        selector: ".ax-detail-actions-row",
+        checkHitTargets: false,
+      },
+    ];
+
+    const measurements = [];
+    for (const surface of surfaces) {
+      await page.setViewportSize({ width: 320, height: 844 });
+      await login(page, surface.route);
+      const geometry = await page.locator(surface.selector).evaluate((group) => {
+        const style = getComputedStyle(group);
+        const tokenProbe = document.createElement("div");
+        tokenProbe.style.cssText = "display:flex;gap:var(--ax-space-xs);position:absolute;visibility:hidden";
+        document.body.append(tokenProbe);
+        const tokenGap = getComputedStyle(tokenProbe).gap;
+        tokenProbe.remove();
+        const controls = [...group.querySelectorAll("button, a")].filter((control) => {
+          const rect = control.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        });
+        const hitTargets = [...group.querySelectorAll("[data-ax-primary-action]")].filter((control) => {
+          const rect = control.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        });
+        return {
+          gap: style.gap,
+          tokenGap,
+          controlCount: controls.length,
+          controlHeights: hitTargets.map((control) => control.getBoundingClientRect().height),
+          pageOverflows: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        };
+      });
+
+      measurements.push({ ...surface, geometry });
+    }
+
+    console.log("Phase 241 action spacing measurements", JSON.stringify(measurements.map(({ name, geometry }) => ({
+      name,
+      gap: geometry.gap,
+      tokenGap: geometry.tokenGap,
+      controlHeights: geometry.controlHeights,
+      pageOverflows: geometry.pageOverflows,
+    }))));
+
+    for (const { name, geometry } of measurements) {
+      expect(geometry.controlCount, `${name} action controls are present`).toBeGreaterThan(0);
+      expect(geometry.gap, `${name} action gap equals the computed token`).toBe(geometry.tokenGap);
+      expect(geometry.gap, `${name} action gap computes to 4px`).toBe("4px");
+      expect(geometry.pageOverflows, `${name} has no ordinary page overflow at 320px`).toBe(false);
+      if (measurements.find((measurement) => measurement.name === name).checkHitTargets) {
+        expect(
+          geometry.controlHeights.every((height) => height >= 44),
+          `${name} action controls retain 44px hit height`,
+        ).toBe(true);
+      }
+    }
+
+    const coarseContext = await browser.newContext({
+      viewport: { width: 320, height: 844 },
+      isMobile: true,
+      hasTouch: true,
+    });
+    try {
+      const coarsePage = await coarseContext.newPage();
+      await login(coarsePage, surfaces[1].route);
+      const coarse = await coarsePage.locator(surfaces[1].selector).evaluate((group) => ({
+        coarsePointer: matchMedia("(pointer: coarse)").matches,
+        gap: getComputedStyle(group).gap,
+        controlHeights: [...group.querySelectorAll("[data-ax-primary-action]")]
+          .filter((control) => control.getBoundingClientRect().height > 0)
+          .map((control) => control.getBoundingClientRect().height),
+        pageOverflows: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      }));
+      expect(coarse.coarsePointer, "independent mobile context uses a coarse pointer").toBe(true);
+      expect(coarse.gap, "coarse-pointer action gap computes to 4px").toBe("4px");
+      expect(coarse.pageOverflows, "coarse-pointer layout has no ordinary page overflow").toBe(false);
+      expect(
+        coarse.controlHeights.every((height) => height >= 44),
+        "coarse-pointer action controls retain 44px hit height",
+      ).toBe(true);
+    } finally {
+      await coarseContext.close();
+    }
+  });
+
   test("@phase241 200% text, WCAG text spacing, and 400% reflow simulation keep changed billing consumers reachable", async ({
     page,
     request,
