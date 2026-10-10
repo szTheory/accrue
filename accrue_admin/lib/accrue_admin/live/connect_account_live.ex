@@ -383,12 +383,6 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
                   %{kind: :info, message: AccrueAdmin.Copy.connect_account_flash_override_saved()}
                 ])
 
-              {:error, changeset} ->
-                assign(socket, :override_preview, %{
-                  socket.assigns.override_preview
-                  | error: humanize_changeset_errors(changeset)
-                })
-
               {:error, :stale} ->
                 latest = load_account(account.id, socket.assigns.current_owner_scope)
 
@@ -403,6 +397,12 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
                     message: AccrueAdmin.Copy.Connect.connect_account_review_stale()
                   }
                 ])
+
+              {:error, changeset} ->
+                assign(socket, :override_preview, %{
+                  socket.assigns.override_preview
+                  | error: humanize_changeset_errors(changeset)
+                })
             end
         end
     end

@@ -241,7 +241,13 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     # The bulk path reports exact skipped/failed counts when every selected id is
     # inaccessible; it must not claim success or leak the foreign webhook id.
     expected_bulk_result =
-      AccrueAdmin.Copy.webhooks_retry_result(%{queued: 0, skipped: 2, failed: 0})
+      AccrueAdmin.Copy.webhooks_retry_result(%{
+        queued: 0,
+        skipped: 2,
+        denied: 0,
+        failed: 0,
+        unknown: 0
+      })
       |> Phoenix.HTML.html_escape()
       |> Phoenix.HTML.safe_to_string()
 
