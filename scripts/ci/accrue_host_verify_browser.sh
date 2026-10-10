@@ -60,6 +60,10 @@ fi
 
 browser_port="${ACCRUE_HOST_BROWSER_PORT:-4101}"
 proof_run_id="${ACCRUE_HOST_PROOF_RUN_ID:-$$}"
+if [[ ! "$proof_run_id" =~ ^[A-Za-z0-9_-]{1,80}$ ]]; then
+  echo "[preview-custody] REFUSED: ACCRUE_HOST_PROOF_RUN_ID must contain 1-80 letters, digits, underscores, or hyphens" >&2
+  exit 2
+fi
 export ACCRUE_HOST_PROOF_RUN_ID="$proof_run_id"
 export MIX_BUILD_PATH="${MIX_BUILD_PATH:-$host_dir/tmp/accrue-host-proof-${proof_run_id}/test}"
 export ACCRUE_ADMIN_MIX_BUILD_PATH="${ACCRUE_ADMIN_MIX_BUILD_PATH:-$repo_root/accrue_admin/_build/accrue-host-proof-${proof_run_id}/test}"

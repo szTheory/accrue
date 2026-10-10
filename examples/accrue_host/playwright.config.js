@@ -6,20 +6,52 @@ const { execFileSync } = require("node:child_process");
 const { defineConfig, devices } = require("@playwright/test");
 const { assertPreviewRouting } = require("./e2e/preview-routing");
 
+function safeProofPath(value, expectedRoot, label) {
+  const resolved = path.resolve(value);
+  const root = path.resolve(expectedRoot);
+  if (resolved === root || !resolved.startsWith(`${root}${path.sep}`)) {
+    throw new Error(`${label} must be inside its proof-run directory`);
+  }
+  try {
+    if (fs.lstatSync(root).isSymbolicLink()) throw new Error(`${label} proof-run directory cannot be a symbolic link`);
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  let cursor = root;
+  for (const part of path.relative(root, resolved).split(path.sep)) {
+    cursor = path.join(cursor, part);
+    try {
+      if (fs.lstatSync(cursor).isSymbolicLink()) throw new Error(`${label} cannot pass through a symbolic link`);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
+  return resolved;
+}
+
 const port = process.env.ACCRUE_HOST_BROWSER_PORT || "4101";
 const previewBaseURL = process.env.ACCRUE_HOST_PREVIEW_BASE_URL;
 const previewPreservationMode = assertPreviewRouting();
 const baseURL = previewBaseURL || `http://127.0.0.1:${port}`;
 const proofRunId = process.env.ACCRUE_HOST_PROOF_RUN_ID || `${process.pid}-${Date.now()}`;
+if (!/^[A-Za-z0-9_-]{1,80}$/.test(proofRunId)) {
+  throw new Error("ACCRUE_HOST_PROOF_RUN_ID must contain 1-80 letters, digits, underscores, or hyphens");
+}
 delete process.env.ACCRUE_HOST_DIRECT_PROOF_PID;
 delete process.env.ACCRUE_HOST_DIRECT_PROOF_PID_FILE;
 process.env.ACCRUE_HOST_PROOF_RUN_ID = proofRunId;
-process.env.MIX_BUILD_PATH ||= path.join(__dirname, "tmp", `accrue-host-proof-${proofRunId}`, "test");
-process.env.ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR ||= path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`, "playwright-results");
-process.env.ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR ||= path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`, "playwright-report");
+const hostProofRoot = path.join(__dirname, "tmp", `accrue-host-proof-${proofRunId}`);
+const tempProofRoot = path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`);
+process.env.MIX_BUILD_PATH = safeProofPath(process.env.MIX_BUILD_PATH || path.join(hostProofRoot, "test"), hostProofRoot, "MIX_BUILD_PATH");
+if (process.env.ACCRUE_ADMIN_MIX_BUILD_PATH) {
+  const adminProofRoot = path.resolve(__dirname, "..", "..", "accrue_admin", "_build", `accrue-host-proof-${proofRunId}`);
+  process.env.ACCRUE_ADMIN_MIX_BUILD_PATH = safeProofPath(process.env.ACCRUE_ADMIN_MIX_BUILD_PATH, adminProofRoot, "ACCRUE_ADMIN_MIX_BUILD_PATH");
+}
+process.env.ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR = safeProofPath(process.env.ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR || path.join(tempProofRoot, "playwright-results"), tempProofRoot, "Playwright output directory");
+process.env.ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR = safeProofPath(process.env.ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR || path.join(tempProofRoot, "playwright-report"), tempProofRoot, "Playwright report directory");
 const directServerPidFile = previewPreservationMode || process.env.ACCRUE_HOST_REUSE_SERVER === "1"
   ? null
-  : path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`, "webserver.pid");
+  : safeProofPath(path.join(tempProofRoot, "webserver.pid"), tempProofRoot, "Playwright PID marker");
 if (directServerPidFile) {
   process.env.ACCRUE_HOST_DIRECT_PROOF_PID_FILE = directServerPidFile;
   if (fs.existsSync(directServerPidFile)) {
