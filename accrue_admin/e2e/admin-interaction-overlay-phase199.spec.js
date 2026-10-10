@@ -1170,6 +1170,7 @@ test.describe("Phase 199 interaction and overlay contract", () => {
       expect(geometry.gap, `${name} action gap computes to 4px`).toBe("4px");
       expect(geometry.pageOverflows, `${name} has no ordinary page overflow at 320px`).toBe(false);
       if (measurements.find((measurement) => measurement.name === name).checkHitTargets) {
+        expect(geometry.controlHeights.length, `${name} has measured primary action controls`).toBeGreaterThan(0);
         expect(
           geometry.controlHeights.every((height) => height >= 44),
           `${name} action controls retain 44px hit height`,
@@ -1196,6 +1197,7 @@ test.describe("Phase 199 interaction and overlay contract", () => {
       expect(coarse.coarsePointer, "independent mobile context uses a coarse pointer").toBe(true);
       expect(coarse.gap, "coarse-pointer action gap computes to 4px").toBe("4px");
       expect(coarse.pageOverflows, "coarse-pointer layout has no ordinary page overflow").toBe(false);
+      expect(coarse.controlHeights.length, "coarse-pointer context has measured primary action controls").toBeGreaterThan(0);
       expect(
         coarse.controlHeights.every((height) => height >= 44),
         "coarse-pointer action controls retain 44px hit height",
