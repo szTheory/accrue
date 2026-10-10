@@ -83,7 +83,7 @@ status: complete
 ## TDD Evidence
 
 - **RED:** Before the CSS correction, the exact mounted measurements were invoice action band `2px`, subscription action band `2px`, active dunning action row `3px`, and computed token `4px`. Primary action heights were `44px`; the 320px document had no horizontal overflow. The focused desktop/mobile batch failed on the planned invoice computed-gap equality assertion (2 failures, 0 skipped). A single-project JUnit capture was accepted by `gsd_run check tdd-red-evidence` as `RED_EVIDENCE_OK` with `target_test_failed`.
-- **GREEN:** After the source correction and explicit package asset rebuild, one focused desktop/mobile batch passed (2 passed, 0 failed). All three mounted gaps were `4px`, each matched the computed token, both primary action groups retained `44px` action buttons, the separate coarse-pointer context passed, and no measured page overflowed.
+- **GREEN:** After the source correction and explicit package asset rebuild, the designated focused desktop/mobile acceptance batch passed (2 passed, 0 failed). All three mounted gaps were `4px`, each matched the computed token, both primary action groups retained `44px` action buttons, the separate coarse-pointer context passed, and no measured page overflowed. An earlier JUnit-reporter attempt made before the RED report-format correction also ran green in both projects; it is recorded below and was not treated as another acceptance batch.
 - **REFACTOR:** None needed.
 - **Commit sequence:** `c7600753` RED test commit, followed by `65c4d043` GREEN CSS/package build commit.
 
@@ -135,6 +135,7 @@ Task 2 reused Task 1's single confirming browser result and ran the package asse
 - The initial sandboxed Chromium launch failed before test execution due to macOS MachPort restrictions. The same bounded command was rerun with the authorized elevated execution path; subsequent browser runs reached the assertions.
 - The initial fixture assumption that the normal subscription route rendered `.ax-detail-actions-row` was false. The test now measures that selector on the active seeded recovery subscription and measures the standard action band on both invoice and subscription details.
 - A JUnit-format RED run initially included both projects and produced duplicate target identities; the single-project desktop report resolved uniquely and passed the required classifier. The final GREEN acceptance remained the planned desktop/mobile batch.
+- One JUnit-reporter attempt ran after the CSS correction and passed in both projects before the valid single-project RED capture was produced. The source and built CSS were restored to the verified pre-fix state for that RED capture, then corrected and rebuilt. The extra green reporter run is retained in this execution record and is not counted as an additional acceptance batch.
 
 ## Threat Flags
 
