@@ -34,7 +34,7 @@
 - [x] **EVR-01**: Maintainers can inspect current route, interaction, component and state coverage with source, fixture and served-asset provenance, keeping historical, rendered and exercised evidence distinct.
 - [x] **EVR-02**: Maintainers receive faithful recurring regression proof with each delivery slice in existing acceptance owners, including focused failure controls for new guards and no confirmation-only human UAT dependency.
 - [x] **EVR-03**: Maintainers receive blocking visual regression results for the complete expected Linux snapshot set, with reviewed intended updates and masks that preserve task-critical information.
-- [ ] **EVR-04**: Maintainers can start and use the documented Fake-backed Admin feedback preview without mutation/reset proof disturbing it, with honest transport, local/remote and provider evidence limits.
+- [x] **EVR-04**: Maintainers can start and use the documented Fake-backed Admin feedback preview without mutation/reset proof disturbing it, with honest transport, local/remote and provider evidence limits.
 
 ## Acceptance constraints
 
@@ -93,9 +93,9 @@ Each approved requirement has one primary phase owner in the approved roadmap. S
 | EVR-01 | Phase 240 | Complete |
 | EVR-02 | Phase 240 | Complete |
 | EVR-03 | Phase 243 | Complete |
-| EVR-04 | Phase 243 | Pending |
+| EVR-04 | Phase 243 | Complete |
 
-**Coverage:** 18/18 approved requirements mapped once in the approved roadmap; 0 orphaned and 0 duplicated. Sixteen requirements are Complete after Phases 240–242 implementation and independent verification; EVR-03 and EVR-04 remain Pending for Phase 243.
+**Coverage:** 18/18 approved requirements mapped once in the approved roadmap; 0 orphaned and 0 duplicated. EVR-03 and EVR-04 are complete from Phase 243 Plan01 and Plan02 evidence; Plan03 remains for final route/evidence reconciliation.
 
 ---
-*Last updated: 2026-10-10 after Phase 242 independent verification and completion; next: `$gsd-discuss-phase 243`.*
+*Last updated: 2026-10-10 after Phase 243 Plan02 complete verifier acceptance; next: execute Plan03.*

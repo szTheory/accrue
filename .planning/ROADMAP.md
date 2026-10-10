@@ -50,7 +50,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 ## v1.64 — Admin Operator UI Cleanup
 
-**Status:** Approved by maintainer on 2026-10-09. Scope/version, all 18 [requirements](REQUIREMENTS.md), and this four-phase structure are confirmed. [Bounded upstream decisions](research/v1.64/SUMMARY.md) are complete. Phases 240–242 pass current verification at 47/47, 32/32 and 80/80, with zero unverified behavior. Plan 241-08 closed the named action-spacing gap without replaying original plans. All 21 currently planned plans are executed; 16/18 requirements are satisfied. Next: `$gsd-discuss-phase 243` — Integrated Evidence and Feedback Preview.
+**Status:** Approved by maintainer on 2026-10-09. Scope/version, all 18 [requirements](REQUIREMENTS.md), and this four-phase structure are confirmed. [Bounded upstream decisions](research/v1.64/SUMMARY.md) are complete. Phases 240–242 pass current verification at 47/47, 32/32 and 80/80, with zero unverified behavior. Plan 241-08 closed the named action-spacing gap without replaying original plans. Plans 23/24 are executed; EVR-03 and EVR-04 are complete, with Phase 243 Plan03 still active for final route/evidence reconciliation.
 
 **Milestone goal:** Existing Admin journeys become clearer, consistent, responsive and easier to operate while preserving billing truth, authorization and scope, with recurring automated acceptance and a usable Fake-backed feedback preview.
 
@@ -179,7 +179,7 @@ Plans:
 
 ## Progress
 
-**Execution order:** 240 → 241 → 242 → 243. The additional named Phase 241 spacing closure is executed and verified; Phases 240–242 are complete. Phase 243 has approved context, focused research and three independently checked plans across two waves. Plan 243-01's Linux evidence and comparison are complete. Plan 243-02 remains halted on the existing Phase 234 return-link assertion; preview runtime evidence is pending resolution of that blocker.
+**Execution order:** 240 → 241 → 242 → 243. The additional named Phase 241 spacing closure is executed and verified; Phases 240–242 are complete. Phase 243 has approved context, focused research and three independently checked plans across two waves. Plan 243-01's Linux evidence and comparison are complete. Plan 243-02's isolated preview, custody, and complete-wrapper acceptance are complete; Plan 243-03 remains.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
