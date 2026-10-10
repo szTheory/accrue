@@ -105,6 +105,21 @@ Plans:
 
 **Propagation obligation**: Exercise Phase 240 shared hierarchy, responsive/theme behavior, keyboard/focus, busy/reconnect and state distinctions on each changed billing consumer. Verify auth, owner/target/material-state, capability and exact-money invariants at their existing owners; rebuild and confirm package served assets and add focused negative controls with each owning change. Supported returns are bounded existing meanings, not pagination/scroll preservation or a new subscription invoice filter.
 **Plans**: TBD
+**Wave 1**
+- [ ] 241-01-PLAN.md
+- [ ] 241-02-PLAN.md
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 241-03-PLAN.md
+- [ ] 241-04-PLAN.md
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 241-05-PLAN.md
+- [ ] 241-06-PLAN.md
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 241-07-PLAN.md
+
 **UI hint**: yes
 
 ### Phase 242: Investigations and Remaining Admin Surfaces
@@ -143,6 +158,6 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | Complete    | 2026-10-09 |
-| 241. Billing Operator Journeys | v1.64 | 0/TBD | Not started | - |
+| 241. Billing Operator Journeys | v1.64 | 0/7 | Planned     | - |
 | 242. Investigations and Remaining Admin Surfaces | v1.64 | 0/TBD | Not started | - |
 | 243. Integrated Evidence and Feedback Preview | v1.64 | 0/TBD | Not started | - |
