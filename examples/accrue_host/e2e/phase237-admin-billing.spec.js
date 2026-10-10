@@ -21,7 +21,11 @@ const sourcePaths = [
   "accrue_admin/lib/accrue_admin/live/invoice_live.ex",
   "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
   "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+  "accrue_admin/lib/accrue_admin/live/charge_live.ex",
+  "accrue_admin/lib/accrue_admin/live/customer_live.ex",
+  "accrue_admin/lib/accrue_admin/live/analytics/campaign_live.ex",
   "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex",
+  "accrue_admin/lib/accrue_admin/scoped_path.ex",
   "accrue_admin/test/accrue_admin/live/subscriptions_live_test.exs",
   "accrue_admin/test/accrue_admin/live/subscription_live_test.exs",
   "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs",
@@ -345,7 +349,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   const darkTokens = await assertThemeAndMotion(page, "dark");
   expect(lightTokens.background).not.toBe(darkTokens.background);
 
-  await page.goto(`/admin/analytics/recovery?org=${owner}&window=30d`, { waitUntil: "domcontentloaded" });
+  await page.goto(`/admin/analytics/recovery?org=${owner}&window=7d`, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
   await expect(page.getByRole("heading", { name: /recovery/i }).first()).toBeVisible();
   const windowSelector = page.getByRole("navigation", { name: "Time window (UTC)" });
@@ -364,7 +368,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   expect(windowMetrics.scrollWidth).toBeLessThanOrEqual(windowMetrics.clientWidth);
   const recoveryRow = page.getByRole("link", { name: /admin-e2e-alpha-customer@example\.test/i }).first();
   await expect(recoveryRow).toBeVisible();
-  await expect(recoveryRow).toHaveAttribute("href", /window%3D30d/);
+  await expect(recoveryRow).toHaveAttribute("href", /window%3D7d/);
   await assertLongRecoveryContentWraps(page);
   const recoveryShot = await page.screenshot({ fullPage: true });
   screenshots["recovery.png"] = { bytes: recoveryShot, route: page.url(), viewport: { width: 320, height: 800 }, theme: "dark" };
@@ -379,15 +383,15 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(page.locator("main")).toContainText(fixture.recovery_subscription_id);
   expect(recoveryReturn.pathname).toBe("/admin/analytics/recovery");
   expect(recoveryReturn.searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
-  expect(recoveryReturn.searchParams.get("window")).toBe("30d");
-  const returnLink = page.getByRole("link", { name: /back to results/i });
+  expect(recoveryReturn.searchParams.get("window")).toBe("7d");
+  const returnLink = page.getByRole("link", { name: "Back to Recovery" });
   await expect(returnLink).toBeVisible();
   await returnLink.click();
   await waitForLiveView(page);
   const returnedUrl = new URL(page.url());
   expect(returnedUrl.pathname).toBe("/admin/analytics/recovery");
   expect(returnedUrl.searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
-  expect(returnedUrl.searchParams.get("window")).toBe("30d");
+  expect(returnedUrl.searchParams.get("window")).toBe("7d");
   await assertNoOverflow(page);
 
   expect(fixture.admin_org_beta_slug).not.toBe(fixture.admin_org_alpha_slug);
@@ -399,6 +403,20 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(page.locator("body")).not.toContainText(fixture.admin_beta_invoice_id);
   await expect(page.locator("body")).not.toContainText("HOST-BROWSER-FOREIGN01");
 
+  await page.context().clearCookies();
+  await login(page, fixture, fixture.normal_email, sandboxId);
+  const portalResponse = await page.goto("/billing", { waitUntil: "domcontentloaded" });
+  expect(portalResponse && portalResponse.status()).toBe(200);
+  await waitForLiveView(page);
+  await expect(page.locator("main.portal-shell h1")).toHaveText("Account overview");
+  await expect(page.locator("html.accrue-admin")).toHaveCount(0);
+
+  await page.context().clearCookies();
+  await login(page, fixture, fixture.admin_email, sandboxId);
+  await page.goto("/app/billing", { waitUntil: "domcontentloaded" });
+  await waitForLiveView(page);
+  await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
+  await waitForLiveView(page);
   await page.goto(`/admin/subscriptions/${fixture.recovery_subscription_id}?org=${owner}`, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
   await expect(page.getByRole("heading", { name: "admin-e2e-alpha-customer@example.test" })).toBeVisible();
@@ -433,6 +451,13 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   expect(actionBounds.height).toBeGreaterThanOrEqual(44);
   await subscriptionAction.click();
   await expect(subscriptionOverflow.locator('[role="menu"] [role="menuitem"]').first()).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(subscriptionOverflow.locator('[role="menu"]')).toBeHidden();
+  const commandPalette = page.locator(".ax-command-palette");
+  if (await commandPalette.isVisible().catch(() => false)) {
+    await page.keyboard.press("Escape");
+    await expect(commandPalette).toBeHidden();
+  }
 
   const subscriptionIdentity = page.locator(".ax-summary-fact").nth(1);
   const originalIdentity = await subscriptionIdentity.evaluate((element) => ({
