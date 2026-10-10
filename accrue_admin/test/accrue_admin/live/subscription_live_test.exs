@@ -1000,12 +1000,33 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     render_click(view, "open_action_drawer", %{"action_type" => "cancel_now"})
     render_submit(view, "prepare_action", %{"action_type" => "cancel_now"})
+
     html = render_click(view, "cancel_pending_action")
 
     assert html =~ "Subscription actions"
     refute html =~ "subscription-action-review-facts"
     assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
     refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+  end
+
+  test "repeated non-destructive confirmation after completion does not dispatch twice", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_submit(view, "prepare_action", %{
+      "action_type" => "update_quantity",
+      "new_quantity" => "2"
+    })
+
+    first = render_click(view, "confirm_action")
+    repeated = render_click(view, "confirm_action")
+
+    assert first =~ Copy.subscription_action_recorded_info()
+    assert repeated =~ Copy.subscription_action_recorded_info()
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 1
   end
 
   test "crafted supported action params are rejected before staging", %{
