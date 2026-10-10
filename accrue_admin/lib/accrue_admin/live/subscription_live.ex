@@ -79,8 +79,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    return_path =
-      ScopedPath.return_path(
+    return_destination =
+      ScopedPath.return_destination(
         socket.assigns.admin_mount_path,
         Map.get(params, "return_to"),
         socket.assigns.current_owner_scope,
@@ -90,14 +90,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
     {:noreply,
      socket
-     |> assign(:return_path, return_path)
+     |> assign(:return_path, return_destination.path)
+     |> assign(:return_label, return_destination.label)
      |> assign(
        :related_items,
        related_items(
          socket.assigns.subscription,
          socket.assigns.admin_mount_path,
          socket.assigns.current_owner_scope,
-         return_path
+         return_destination.path
        )
      )}
   end
@@ -280,7 +281,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           ]}
         />
         <p class="ax-detail-back-link">
-          <a class="ax-link" href={@return_path}>Back to results</a>
+          <a class="ax-link" href={@return_path}><%= @return_label %></a>
         </p>
 
         <Detail.summary_card

@@ -174,7 +174,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
                "/billing/subscriptions/#{subscription.id}?org=journey-org&return_to=#{return_to}"
              )
 
-    assert html =~ "Back to results"
+    assert html =~ "Back to subscriptions"
     assert html =~ "All open invoices for journey-org"
 
     scoped_invoice_href = link_href(view, "All open invoices for journey-org")
@@ -188,7 +188,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     back_path =
       view
-      |> element("a", "Back to results")
+      |> element("a", "Back to subscriptions")
       |> render()
       |> Floki.parse_document!()
       |> Floki.find("a")
@@ -202,6 +202,44 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert back_query["status"] == "active"
     assert back_query["q"] == "phase234"
     refute html =~ "foreign-org"
+
+    assert {:ok, returned_view, returned_html} = live(conn, back_path)
+    assert has_element?(returned_view, "[name='q'][value='phase234']")
+    assert returned_html =~ subscription.processor_id
+  end
+
+  test "subscription detail returns to the matching customer's query-free subscriptions tab", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    origin = "/billing/customers/#{subscription.customer_id}?tab=subscriptions"
+
+    assert {:ok, detail_view, _html} =
+             live(
+               conn,
+               "/billing/subscriptions/#{subscription.id}?return_to=#{URI.encode_www_form(origin)}"
+             )
+
+    back_path = link_href(detail_view, "Back to customer subscriptions")
+    assert URI.parse(back_path).path == "/billing/customers/#{subscription.customer_id}"
+    assert URI.decode_query(URI.parse(back_path).query)["tab"] == "subscriptions"
+
+    assert {:ok, customer_view, customer_html} = live(conn, back_path)
+
+    assert has_element?(
+             customer_view,
+             "[aria-label='Customer peer record sets'] .ax-tab-active",
+             "Subscriptions"
+           )
+
+    assert customer_html =~ subscription.processor_id
+
+    detail_path = link_href(customer_view, subscription.processor_id)
+    assert URI.decode_query(URI.parse(detail_path).query)["return_to"] == back_path
+
+    assert {:ok, repeated_detail_view, _html} = live(conn, detail_path)
+    assert has_element?(repeated_detail_view, "a", "Back to customer subscriptions")
   end
 
   test "summary and drill bands replace page-level KPI and predicate noise", %{
