@@ -6,7 +6,7 @@ findings:
   - id: WR-01
     severity: warning
     disposition: fixed
-    title: "Invoice review dismissal does not explain its non-mutating action"
+    title: "Dismissing invoice step-up leaves confirmation locked"
   - id: WR-02
     severity: warning
     disposition: fixed
@@ -17,16 +17,16 @@ findings:
     title: "Shared health snapshot uses unapproved typography weights"
 open: 0
 total: 3
-recorded: 2026-10-09T23:39:32.081Z
+recorded: 2026-10-10T22:55:20.880Z
 ---
 
 # Phase 240: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| WR-01 | warning | fixed | 240-REVIEW-FIX.md |
-| WR-02 | warning | fixed | 240-REVIEW-FIX.md |
-| WR-03 | warning | fixed | 240-REVIEW-FIX.md |
+| WR-01 | warning | fixed | 240-REVIEW-FIX.md (not in the current review) |
+| WR-02 | warning | fixed | 240-REVIEW-FIX.md (not in the current review) |
+| WR-03 | warning | fixed | 240-REVIEW-FIX.md (not in the current review) |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.
