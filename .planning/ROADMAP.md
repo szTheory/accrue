@@ -166,12 +166,20 @@ Plans:
   3. Maintainers can compare final changed route and state coverage with the Phase 240 inventory and slice-owned recurring evidence, including desktop/narrow and effective-theme inspections, served asset identity and any named remaining limits; no broad claim rests only on the initial exemplar. (EVR-03, EVR-04; reconciles EVR-01 and EVR-02 without remapping them)
 
 **Closure obligation**: Reconcile proofs from Phases 240–242 and repair named gaps in their owning surfaces. This phase does not defer first authorization, accessibility, responsive/theme, language or asset acceptance. Use selected stable snapshots, existing thresholds and bounded masks; no new CI matrix or required human sign-off.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+**Wave 1**
+- [ ] 243-01-PLAN.md — Reviewed twelve-image Linux set and faithful masks
+- [ ] 243-02-PLAN.md — Isolated Fake preview startup, recovery and verifier custody
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 243-03-PLAN.md — Corrected served CSS and final route/evidence reconciliation
+
 **UI hint**: yes
 
 ## Progress
 
-**Execution order:** 240 → 241 → 242 → 243. The additional named Phase 241 spacing closure is executed and verified; Phases 240–242 are complete. Next command: `$gsd-discuss-phase 243`. Phase 243 remains the final milestone phase and has no context or plans yet.
+**Execution order:** 240 → 241 → 242 → 243. The additional named Phase 241 spacing closure is executed and verified; Phases 240–242 are complete. Phase 243 has approved context, focused research and three independently checked plans across two waves. Next command: `$gsd-execute-phase 243`. Required Linux and preview runtime evidence remains pending execution.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|

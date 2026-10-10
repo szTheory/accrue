@@ -266,17 +266,19 @@ This uses Compose env forwarding already declared in the host; verify live insta
 |---|-------|---------|---------------|
 | | None. Recommendations are constrained by CONTEXT.md; environment claims are from local read-only probes and opened source. | | |
 
-## Open Questions
+## Open Questions (RESOLVED for planning; runtime outcomes remain unobserved)
 
-1. **Which invoice composition, if any, should be added to the selected golden set?**
+1. **RESOLVED for planning — Which invoice composition, if any, should be added to the selected golden set?**
    - What we know: The invoice list → detail → action-review composition is the first candidate, while existing selected captures do not include it. `[VERIFIED: .planning/phases/243-integrated-evidence-and-feedback-preview/243-CONTEXT.md, D-02; accrue_admin/e2e/admin-visual-regression-phase211.spec.js:111-120]`
    - What's unclear: The exact composition/state and whether deterministic fixture time makes it robust without extra masking.
    - Recommendation: Planner should evaluate one representative stable resting composition against documented blind spots, choose filenames/state only with a recurring protection rationale, and extend expected-set plus negative controls atomically. Do not ask the user unless this analysis reveals a genuine product fork.
+   - Planning resolution: Add the existing seeded invoice list and exact invoice detail with the action-review drawer open, in light and dark themes, as `invoices.png`, `invoices-dark.png`, `invoice-detail.png`, and `invoice-detail-dark.png`. This protects list density/exact money and detail target/review hierarchy absent from the existing eight. The Phase191 seed already returns the invoice ID; the chosen plan needs no shared fixture edit. Timestamp-only semantic masks and rendered positive/exclusion assertions carry the remaining nondeterminism. Actual Ubuntu mint, diff review and comparison are execution evidence and have not been observed here.
 
-2. **Can the current full host verifier run while the feedback preview remains open?**
+2. **RESOLVED for planning — Can the current full host verifier run while the feedback preview remains open?**
    - What we know: The wrapper drops/reseeds a test DB and separately creates/migrates a dev DB and starts a dev server; host config uses `PGHOST` and different DB names. `[VERIFIED: examples/accrue_host/mix.exs:156-164; examples/accrue_host/config/dev.exs:3-11; examples/accrue_host/config/test.exs:32-37; scripts/ci/accrue_host_verify_dev_boot.sh:60-76; scripts/ci/accrue_host_verify_browser.sh:108-126]`
    - What's unclear: The effective target host, container/instance and port for a given invocation, and whether a local native service shares any preview-visible database or bind-mounted asset path.
    - Recommendation: Do not treat the entire wrapper as preview-safe based on the test DB name alone. During planning, assign disposable proof custody and specify the positive checks that prove connection/database/instance/port/process isolation before the command runs. If no safe target can be proven, use focused owner checks against isolated disposable fixtures and record the remaining runtime dependency.
+   - Planning resolution: One shared fail-closed custody preflight covers both complete-verifier wrappers and the host Playwright config/global setup used by direct npm browser commands. It checks effective database/connection, Compose instance/container/volume, port/listener process and build-path targets before wrapper mutation, direct webServer startup, and global setup create/migrate/seed. Dev boot receives a dedicated proof database. Known collision and distinct disposable positive controls decide guard behavior; authoritative preview sentinel/audit fingerprint before and after the complete verifier decides preservation. The effective environment identities, actual ability to run concurrently, and preservation result remain unobserved runtime evidence; an unavailable or colliding target leaves EVR-04 unresolved rather than assumed safe.
 
 ## Environment Availability
 
