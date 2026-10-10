@@ -77,6 +77,31 @@ defmodule AccrueAdmin.EventLiveTest do
     assert html =~ "webhook"
   end
 
+  test "event detail returns to the validated filtered event list", %{conn: conn, event: event} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    origin =
+      URI.encode_query(%{"return" => "/billing/events?type=invoice.payment_failed&q=payment"})
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/events/#{event.id}?#{origin}")
+
+    assert html =~ "Back to events"
+
+    return_href =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.attribute("a", "href")
+      |> Enum.find(&String.starts_with?(&1, "/billing/events?"))
+
+    assert URI.parse(return_href).query
+           |> URI.decode_query()
+           |> Map.take(["q", "type"]) == %{
+             "q" => "payment",
+             "type" => "invoice.payment_failed"
+           }
+  end
+
   test "D-02 D-14 D-15 D-16 D-17 renders event summary-first read-only detail contract",
        %{
          conn: conn,

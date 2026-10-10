@@ -13,6 +13,7 @@ defmodule AccrueAdmin.Live.EventLive do
   }
 
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.Queries.{Charges, Customers, Invoices, Subscriptions, Webhooks}
   alias AccrueAdmin.Queries.Events
   alias AccrueAdmin.ScopedPath
 
@@ -100,6 +101,20 @@ defmodule AccrueAdmin.Live.EventLive do
   end
 
   @impl true
+  def handle_params(params, _uri, socket) do
+    destination =
+      ScopedPath.return_destination(
+        socket.assigns.admin_mount_path,
+        params["return"],
+        socket.assigns.current_owner_scope,
+        nil,
+        "/events"
+      )
+
+    {:noreply, assign(socket, :return_destination, destination)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <AppShell.app_shell
@@ -122,7 +137,7 @@ defmodule AccrueAdmin.Live.EventLive do
           :if={@event}
           items={[
             %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
-            %{label: "Events", href: scoped_events_path(@admin_mount_path, @current_owner_scope)},
+            %{label: @return_destination.label, href: @return_destination.path},
             %{label: @event.type}
           ]}
         />
@@ -284,6 +299,11 @@ defmodule AccrueAdmin.Live.EventLive do
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
     |> assign(:event_id, event_id)
+    |> assign(:return_destination, %{
+      path:
+        scoped_events_path(admin["mount_path"] || "/billing", socket.assigns.current_owner_scope),
+      label: "Back to events"
+    })
     |> assign(
       :current_path,
       (admin["mount_path"] || "/billing") <> "/events/#{event_id}"
@@ -292,7 +312,7 @@ defmodule AccrueAdmin.Live.EventLive do
 
   defp related_items(event, mount_path, scope) do
     webhook_items =
-      if event.caused_by_webhook_event_id do
+      if authorized_detail?(Webhooks, event.caused_by_webhook_event_id, scope) do
         [
           %{
             icon: :webhooks,
@@ -346,27 +366,44 @@ defmodule AccrueAdmin.Live.EventLive do
   end
 
   defp actor_href(%{actor_type: "webhook", caused_by_webhook_event_id: id}, mount_path, scope)
-       when is_binary(id),
-       do: ScopedPath.build(mount_path, "/webhooks/#{id}", scope)
+       when is_binary(id) do
+    if authorized_detail?(Webhooks, id, scope),
+      do: ScopedPath.build(mount_path, "/webhooks/#{id}", scope)
+  end
 
   defp actor_href(_event, _mount_path, _scope), do: nil
 
   defp subject_href(%{subject_type: "Customer", subject_id: id}, mount_path, scope),
-    do: ScopedPath.build(mount_path, "/customers/#{id}", scope)
+    do: authorized_href(Customers, id, mount_path, "/customers/#{id}", scope)
 
   defp subject_href(%{subject_type: "Subscription", subject_id: id}, mount_path, scope),
-    do: ScopedPath.build(mount_path, "/subscriptions/#{id}", scope)
+    do: authorized_href(Subscriptions, id, mount_path, "/subscriptions/#{id}", scope)
 
   defp subject_href(%{subject_type: "Invoice", subject_id: id}, mount_path, scope),
-    do: ScopedPath.build(mount_path, "/invoices/#{id}", scope)
+    do: authorized_href(Invoices, id, mount_path, "/invoices/#{id}", scope)
 
   defp subject_href(%{subject_type: "Charge", subject_id: id}, mount_path, scope),
-    do: ScopedPath.build(mount_path, "/payments/#{id}", scope)
+    do: authorized_href(Charges, id, mount_path, "/payments/#{id}", scope)
 
   defp subject_href(%{subject_type: "WebhookEvent", subject_id: id}, mount_path, scope),
-    do: ScopedPath.build(mount_path, "/webhooks/#{id}", scope)
+    do: authorized_href(Webhooks, id, mount_path, "/webhooks/#{id}", scope)
 
   defp subject_href(_event, _mount_path, _scope), do: nil
+
+  defp authorized_href(module, id, mount_path, suffix, scope) do
+    if authorized_detail?(module, id, scope), do: ScopedPath.build(mount_path, suffix, scope)
+  end
+
+  defp authorized_detail?(module, id, scope) when is_binary(id) do
+    case apply(module, :detail, [id, scope]) do
+      {:ok, %{id: ^id}} -> true
+      _ -> false
+    end
+  rescue
+    _ -> false
+  end
+
+  defp authorized_detail?(_module, _id, _scope), do: false
 
   defp subject_icon("Customer"), do: :users
   defp subject_icon("Subscription"), do: :subscriptions
