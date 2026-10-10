@@ -371,6 +371,7 @@ test.describe("Phase 191 page-flow regression harness", () => {
     const staleAction = page.getByRole("button", { name: "Refund charge" });
     await expect(staleAction).toBeVisible();
     await context.setOffline(true);
+    await expect(page.getByText(/Connection lost\. Reconnecting before actions can run\./i)).toBeVisible();
     await expect(staleAction).toBeDisabled();
 
     await page.evaluate(() => window.dispatchEvent(new Event("online")));

@@ -1048,6 +1048,51 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     }
   });
 
+  test("@phase241 subscription open-invoice destination preserves customer scope and contextual return", async ({
+    page,
+    request,
+  }) => {
+    const fixtures = await seedPhase199(request);
+    const subscriptionId = fixtures.dashboard.subscription_id;
+    const customerId = fixtures.dashboard.customer_id;
+    await page.setViewportSize({ width: 320, height: 844 });
+    await login(page, `/billing/subscriptions/${subscriptionId}`);
+    await setPhase191Theme(page, "dark");
+
+    const customerInvoices = page.getByRole("link", { name: "Open invoices for this customer" });
+    await expect(customerInvoices).toBeVisible();
+    const destination = new URL(await customerInvoices.getAttribute("href"), page.url());
+    expect(destination.pathname).toBe("/billing/invoices");
+    expect(destination.searchParams.get("customer_id")).toBe(customerId);
+    expect(destination.searchParams.get("status")).toBe("open");
+    expect(destination.searchParams.has("subscription_id")).toBe(false);
+    expect(destination.searchParams.get("return_to")).toBe("/billing/subscriptions");
+
+    await customerInvoices.click();
+    await expect(page).toHaveURL(/\/billing\/invoices\?/);
+    await expect(page.locator("main")).toContainText("Showing 1 invoice");
+    const invoiceLinks = page.locator("main a[href^='/billing/invoices/']");
+    await expect(invoiceLinks).toHaveCount(2);
+    const resultIds = await invoiceLinks.evaluateAll((links) =>
+      [...new Set(links.map((link) => new URL(link.href).pathname.split("/").pop()))]
+    );
+    expect(resultIds).toEqual([fixtures.edgeStates.jpy_invoice_id]);
+
+    await login(page, `/billing/customers/${customerId}?tab=invoices`);
+    const customerInvoice = page.getByRole("link", { name: "E2E-199-JPY-001" });
+    await expect(customerInvoice).toBeVisible();
+    await customerInvoice.click();
+    await expect(page).toHaveURL(/\/billing\/invoices\/[0-9a-f-]+\?/i);
+    const returnLink = page.getByRole("link", { name: "Back to customer invoices" });
+    await expect(returnLink).toBeVisible();
+    const returnDestination = new URL(await returnLink.getAttribute("href"), page.url());
+    expect(returnDestination.pathname).toBe(`/billing/customers/${customerId}`);
+    expect(returnDestination.searchParams.get("tab")).toBe("invoices");
+    await returnLink.click();
+    await expect(page).toHaveURL(new RegExp(`/billing/customers/${customerId}\\?tab=invoices`));
+    await expect(page.locator("main")).toContainText("E2E-199-JPY-001");
+  });
+
   test("@phase199 @copy empty-state and repeated action labels use state-specific copy and hidden context", async ({
     page,
     request,
