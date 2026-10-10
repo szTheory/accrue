@@ -1,8 +1,0 @@
-19:41:41.872 [warning] [ex_money] Automatically starting the exchange rate service is deprecated. Set `auto_start_exchange_rate_service: false` and, if you use the service, add `Money.ExchangeRates.Retriever` to your supervision tree.
-wrote /var/folders/f3/f0clj9rd2zb85n2c849wcsrc0000gn/T/accrue-host-e2e-fixture.json
-<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="13.512808999999999">
-<testsuite name="phase237-admin-billing.spec.js" timestamp="2026-10-09T23:41:42.866Z" hostname="chromium-desktop" tests="1" failures="0" skipped="0" time="4.453" errors="0">
-<testcase name="Phase 237 served invoice and recovery journeys stay scoped and read-only" classname="phase237-admin-billing.spec.js" time="4.453">
-</testcase>
-</testsuite>
-</testsuites>

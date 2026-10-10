@@ -1,6 +1,0 @@
-<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="4.204761">
-<testsuite name="admin-spec-list-phase196.spec.js" timestamp="2026-10-09T21:07:43.542Z" hostname="chromium-desktop" tests="1" failures="0" skipped="0" time="0.678" errors="0">
-<testcase name="Phase 240 intermediate coarse-pointer invoice list › keeps identity, money, status, and action reachable with coarse pointer" classname="admin-spec-list-phase196.spec.js" time="0.678">
-</testcase>
-</testsuite>
-</testsuites>

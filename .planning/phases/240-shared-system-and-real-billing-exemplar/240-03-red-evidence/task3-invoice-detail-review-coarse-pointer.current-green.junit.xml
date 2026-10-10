@@ -1,6 +1,0 @@
-<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="4.8384469999999995">
-<testsuite name="admin-spec-detail-phase198.spec.js" timestamp="2026-10-09T21:07:52.699Z" hostname="chromium-desktop" tests="1" failures="0" skipped="0" time="1.386" errors="0">
-<testcase name="Phase 240 intermediate coarse-pointer invoice review › keeps invoice facts and staged action controls usable with coarse pointer" classname="admin-spec-detail-phase198.spec.js" time="1.386">
-</testcase>
-</testsuite>
-</testsuites>
