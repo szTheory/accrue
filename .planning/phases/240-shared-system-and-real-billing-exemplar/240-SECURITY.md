@@ -60,3 +60,11 @@ The configured L1 audit verifies the authored register against current source an
 - [x] L1 short-circuit applies: authored register, no open threats, ASVS level 1
 
 **Approval:** Verified 2026-10-09. Browser emulation, historical TDD timing, remote Linux pixels and provider limits remain explicit in their evidence; none is represented as a stronger security proof.
+
+## Security Audit 2026-10-10
+
+| Metric | Count |
+|---|---|
+| Threats found | 13 |
+| Closed | 13 |
+| Open | 0 |
