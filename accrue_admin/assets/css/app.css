@@ -6187,7 +6187,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-detail-actions-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.1875rem;
+  gap: var(--ax-space-xs);
 }
 
 .ax-detail-critical-actions {
@@ -6204,7 +6204,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-detail-action-band .ax-page-actions {
-  gap: 0.125rem;
+  gap: var(--ax-space-xs);
 }
 
 .ax-detail-action-band .ax-button {
