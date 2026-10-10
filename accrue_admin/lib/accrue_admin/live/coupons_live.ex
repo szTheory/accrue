@@ -160,7 +160,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
-            %{label: Copy.coupon_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope)},
+            %{label: Copy.coupon_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope, @params)},
             %{label: Copy.coupon_table_column_status(), render: &status_summary/1},
             %{label: Copy.coupon_table_column_discount(), render: &discount_summary/1},
             %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary/1},
@@ -223,9 +223,14 @@ defmodule AccrueAdmin.Live.CouponsLive do
     }
   end
 
-  defp coupon_link(row, mount_path, owner_scope) do
+  defp coupon_link(row, mount_path, owner_scope, params) do
     label = coupon_label(row)
-    href = scoped_path(mount_path, "/coupons/#{row.id}", owner_scope)
+    return_to = coupon_return_path(mount_path, owner_scope, params)
+
+    href =
+      AccrueAdmin.ScopedPath.build(mount_path, "/coupons/#{row.id}", owner_scope, %{
+        "return_to" => return_to
+      })
 
     processor_line =
       if row.processor_id && row.processor_id != label do
@@ -237,6 +242,13 @@ defmodule AccrueAdmin.Live.CouponsLive do
     Phoenix.HTML.raw(
       ~s(<span class="ax-stack-xs"><a href="#{href}" class="ax-link">#{escape(label)}</a>#{processor_line}</span>)
     )
+  end
+
+  defp coupon_return_path(mount_path, owner_scope, params) do
+    filters = filter_params(params)
+    view = Map.take(params, ["view"])
+
+    AccrueAdmin.ScopedPath.build(mount_path, "/coupons", owner_scope, Map.merge(filters, view))
   end
 
   defp coupon_label(row), do: row.name || row.processor_id || row.id

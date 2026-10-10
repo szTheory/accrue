@@ -70,6 +70,25 @@ defmodule AccrueAdmin.CouponsLiveTest do
     refute html =~ "Expired Deal"
   end
 
+  test "coupon detail links retain the validated query and validity lens", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/coupons?q=Spring&valid=true")
+
+    href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "Spring 25"))
+      |> Floki.attribute("href")
+      |> hd()
+
+    return_to =
+      href |> URI.parse() |> then(&URI.decode_query(&1.query)) |> Map.fetch!("return_to")
+
+    assert return_to =~ "/billing/coupons?q=Spring&valid=true"
+  end
+
   test "renders Coupons through PageHeader with the Phase 197 LIST chrome", %{conn: conn} do
     contract = ListContracts.fetch!(:coupons)
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")

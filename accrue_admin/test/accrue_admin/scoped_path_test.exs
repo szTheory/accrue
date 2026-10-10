@@ -168,11 +168,17 @@ defmodule AccrueAdmin.ScopedPathTest do
     scope = organization_scope()
 
     cases = [
-      {"/events", "q=invoice&type=paid&actor_type=admin&subject_type=Invoice&source_webhook_event_id=evt_1&subject_id=ignored", "Back to events"},
-      {"/webhooks", "type=invoice.payment_failed&status=failed,dead&livemode=false&query=ignored", "Back to webhooks"},
+      {"/events",
+       "q=invoice&type=paid&actor_type=admin&subject_type=Invoice&source_webhook_event_id=evt_1&subject_id=ignored",
+       "Back to events"},
+      {"/webhooks", "type=invoice.payment_failed&status=failed,dead&livemode=false&query=ignored",
+       "Back to webhooks"},
       {"/coupons", "view=all&q=summer&valid=true&status=ignored", "Back to coupons"},
-      {"/promotion-codes", "view=all&q=SUMMER&active=false&coupon_id=coupon_1&status=ignored", "Back to promotion codes"},
-      {"/connect", "view=all&q=acct_1&type=express&charges_enabled=true&payouts_enabled=false&details_submitted=true&deauthorized=false&needs_attention=true&status=ignored", "Back to Connect accounts"}
+      {"/promotion-codes", "view=all&q=SUMMER&active=false&coupon_id=coupon_1&status=ignored",
+       "Back to promotion codes"},
+      {"/connect",
+       "view=all&q=acct_1&type=express&charges_enabled=true&payouts_enabled=false&details_submitted=true&deauthorized=false&needs_attention=true&status=ignored",
+       "Back to Connect accounts"}
     ]
 
     for {suffix, query, label} <- cases do
@@ -192,6 +198,33 @@ defmodule AccrueAdmin.ScopedPathTest do
       refute result.path =~ "owner_id"
       refute result.path =~ "ignored"
     end
+  end
+
+  test "coupon and promotion code return filters round-trip from atom-key encoders" do
+    scope = organization_scope()
+
+    assert ScopedPath.return_destination(
+             "/billing",
+             "/billing/coupons?view=all&q=Spring&valid=true",
+             scope,
+             nil,
+             "/coupons"
+           ) == %{
+             path: "/billing/coupons?org=acme&q=Spring&valid=true&view=all",
+             label: "Back to coupons"
+           }
+
+    assert ScopedPath.return_destination(
+             "/billing",
+             "/billing/promotion-codes?view=all&q=SUMMER&active=false&coupon_id=coupon_1",
+             scope,
+             nil,
+             "/promotion-codes"
+           ) == %{
+             path:
+               "/billing/promotion-codes?active=false&coupon_id=coupon_1&org=acme&q=SUMMER&view=all",
+             label: "Back to promotion codes"
+           }
   end
 
   test "malformed or invalid consumed return filters fall back to the current family" do

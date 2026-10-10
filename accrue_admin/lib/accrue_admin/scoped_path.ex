@@ -14,7 +14,8 @@ defmodule AccrueAdmin.ScopedPath do
     "/webhooks" => ~w(type status livemode),
     "/coupons" => ~w(view q valid),
     "/promotion-codes" => ~w(view q active coupon_id),
-    "/connect" => ~w(view q type charges_enabled payouts_enabled details_submitted deauthorized needs_attention)
+    "/connect" =>
+      ~w(view q type charges_enabled payouts_enabled details_submitted deauthorized needs_attention)
   }
   @return_value_limits %{
     "view" => 32,
@@ -201,10 +202,10 @@ defmodule AccrueAdmin.ScopedPath do
     else
       supplied =
         pairs
-      |> Enum.filter(fn {key, value} ->
-        key in allowed_keys and safe_return_value?(key, value)
-      end)
-      |> Map.new()
+        |> Enum.filter(fn {key, value} ->
+          key in allowed_keys and safe_return_value?(key, value)
+        end)
+        |> Map.new()
 
       if Enum.any?(pairs, fn {key, value} ->
            key in allowed_keys and not safe_return_value?(key, value)
@@ -232,10 +233,19 @@ defmodule AccrueAdmin.ScopedPath do
     if not is_nil(module) do
       filters = Map.drop(params, extra_keys)
       decoded = apply(module, :decode_filter, [filters])
-      encoded = apply(module, :encode_filter, [decoded])
+
+      encoded =
+        module
+        |> apply(:encode_filter, [decoded])
+        |> Map.new(fn {key, value} -> {to_string(key), value} end)
 
       if map_size(filters) == map_size(encoded) and
-           Enum.all?(filters, fn {key, value} -> Map.get(encoded, key) == value end) do
+           Enum.all?(filters, fn {key, value} ->
+             case Map.fetch(encoded, key) do
+               {:ok, encoded_value} -> to_string(encoded_value) == value
+               :error -> false
+             end
+           end) do
         Map.merge(encoded, Map.take(params, extra_keys))
       else
         :error

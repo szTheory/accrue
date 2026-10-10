@@ -207,10 +207,54 @@ defmodule AccrueAdmin.CouponLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}?org=allowed-org")
 
     assert html =~
-             ~s(href="/billing/promotion-codes/#{promotion_code.id}?org=allowed-org")
+             ~s(href="/billing/promotion-codes/#{promotion_code.id}?org=allowed-org&amp;return_to=)
 
     assert html =~ ~s(href="/billing?org=allowed-org")
     assert html =~ ~s(href="/billing/coupons?org=allowed-org")
+  end
+
+  test "coupon detail returns to its validated filter context and constrains child codes", %{
+    conn: conn,
+    coupon: coupon
+  } do
+    other_coupon = insert_coupon(%{name: "Other coupon", processor_id: "coupon_other"})
+
+    other_code =
+      insert_promotion_code(other_coupon, %{code: "OTHER-CODE", processor_id: "promo_other"})
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/coupons/#{coupon.id}?return_to=%2Fbilling%2Fcoupons%3Fview%3Dall%26q%3DSpring%26valid%3Dtrue"
+             )
+
+    return_href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "Back to coupons"))
+      |> Floki.attribute("href")
+      |> hd()
+
+    assert URI.decode_query(URI.parse(return_href).query) == %{
+             "q" => "Spring",
+             "valid" => "true",
+             "view" => "all"
+           }
+
+    [child_link | _] =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a[href*='/promotion-codes/']")
+
+    child_href = Floki.attribute(child_link, "href") |> hd()
+
+    assert child_href =~ "/billing/promotion-codes/"
+    assert child_href =~ "return_to=%2Fbilling%2Fpromotion-codes%3Fcoupon_id%3D#{coupon.id}"
+    refute html =~ "OTHER-CODE"
+    refute html =~ other_code.id
   end
 
   test "lazy activity expands to quiet empty state when no coupon activity exists", %{

@@ -59,6 +59,23 @@ defmodule AccrueAdmin.Live.CouponLive do
     end
   end
 
+  @impl true
+  def handle_params(params, _uri, socket) do
+    destination =
+      ScopedPath.return_destination(
+        socket.assigns.admin_mount_path,
+        Map.get(params, "return_to"),
+        socket.assigns.current_owner_scope,
+        nil,
+        "/coupons"
+      )
+
+    {:noreply,
+     socket
+     |> assign(:return_path, destination.path)
+     |> assign(:return_label, destination.label)}
+  end
+
   def handle_event("retry_read", _params, socket) do
     case read_coupon(socket.assigns.coupon_id) do
       {:ok, coupon, codes} ->
@@ -127,6 +144,7 @@ defmodule AccrueAdmin.Live.CouponLive do
             %{label: coupon_label(@coupon)}
           ]}
         />
+        <p :if={@coupon} class="ax-body"><a class="ax-link" href={@return_path}><%= @return_label %></a></p>
 
         <Detail.summary_card
           :if={@coupon}
@@ -154,7 +172,8 @@ defmodule AccrueAdmin.Live.CouponLive do
                   ScopedPath.build(
                     @admin_mount_path,
                     "/promotion-codes/#{promotion_code.id}",
-                    @current_owner_scope
+                    @current_owner_scope,
+                    %{"return_to" => ScopedPath.build(@admin_mount_path, "/promotion-codes", @current_owner_scope, %{"coupon_id" => @coupon.id})}
                   )
                 }
                 class="ax-link"
@@ -409,7 +428,7 @@ defmodule AccrueAdmin.Live.CouponLive do
       %{
         icon: :promotions,
         label: "Promotion codes",
-        href: ScopedPath.build(mount_path, "/promotion-codes", scope)
+        href: ScopedPath.build(mount_path, "/promotion-codes", scope, %{"coupon_id" => coupon.id})
       },
       %{
         icon: :events,
