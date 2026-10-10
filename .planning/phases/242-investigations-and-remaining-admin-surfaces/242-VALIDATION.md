@@ -1,15 +1,15 @@
 ---
 phase: "242"
 slug: "investigations-and-remaining-admin-surfaces"
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-10-10"
 ---
 
 # Phase 242 — Validation Strategy
 
-> Planning contract. No Phase 242 product test or browser proof has run. The planner must reconcile the task map below to final plan/task IDs and unique threat IDs before plan checking. Execution and the validation audit own green statuses and compliance promotion.
+> Execution audit: all sixteen automated tasks have accepted nonzero test evidence in the seven canonical SUMMARYs and 242-EXECUTION-GATES.md. This validation coverage result does not replace independent phase-goal verification.
 
 ## Test Infrastructure
 
@@ -22,7 +22,7 @@ created: "2026-10-10"
 | Full Admin command | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test && node --test test/js/*.mjs` |
 | Full host command | `cd examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test` |
 | Assets | `cd accrue_admin && mix accrue_admin.assets.build`; build before current fresh-server browser proof and confirm package/compiled/HTTP-served bytes |
-| Runtime | Unmeasured for Phase 242; record actual task and suite timings during execution |
+| Runtime | Task execution durations and suite timing evidence are recorded in the canonical SUMMARYs and 242-EXECUTION-GATES.md |
 
 ## Sampling Rate
 
@@ -33,30 +33,30 @@ created: "2026-10-10"
 
 ## Per-Task Verification Map
 
-Every row names the exact plan/task owner and wave. Commands are planned, not run. Existing test files are proof owners; new assertions and fixture setup belong to their task before the command. The recurring check must select nonzero tests.
+Every row names the exact plan/task owner and wave. Every command owner ran with nonzero selected cases. Actual counts, adjustments and evidence limits are recorded in the corresponding canonical SUMMARY; Plan07 records combined suites and mounted owners. Existing tests contain the new behavior assertions.
 
 | Plan/task | Wave | Requirement | Threat ref | Automated command | Fails when | Status |
 |---|---:|---|---|---|---|---|
-| 242-01/T1 | 1 | JRN-05, JRN-06 | T-242-01; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/scoped_path_test.exs test/accrue_admin/live/events_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-01/T2 | 1 | JRN-05, JRN-06 | T-242-01; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/queries/events_test.exs test/accrue_admin/live/event_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-02/T1 | 2 | JRN-05, UXC-01 | T-242-02; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/webhooks_live_test.exs test/accrue_admin/live/webhook_replay_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-02/T2 | 2 | JRN-05, UXC-01 | T-242-02; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/webhook_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-03/T1 | 2 | JRN-06, UXC-01 | T-242-03; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/coupons_live_test.exs test/accrue_admin/live/coupon_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-03/T2 | 2 | JRN-06, UXC-01 | T-242-03; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/promotion_codes_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-03/T3 | 2 | JRN-06, UXC-01 | T-242-03; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/coupons_live_test.exs test/accrue_admin/live/coupon_live_test.exs test/accrue_admin/live/promotion_codes_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-04/T1 | 2 | JRN-06 | T-242-04; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/connect_accounts_live_test.exs test/accrue_admin/live/connect_account_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-04/T2 | 2 | JRN-06 | T-242-04; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/copy/connect_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-05/T1 | 1 | JRN-07 | T-242-05; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/components/global_search_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-05/T2 | 1 | JRN-07 | T-242-05; T-242-SC | `cd accrue_admin && node --test test/js/command_palette_test.mjs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-06/T1 | 3 | JRN-07, UXC-01 | T-242-06; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/dashboard_live_test.exs test/accrue_admin/components/app_shell_test.exs` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-06/T2 | 3 | JRN-07, UXC-01 | T-242-06; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/copy` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-07/T1 | 4 | JRN-05, JRN-06, JRN-07, UXC-01 | T-242-07; T-242-SC | `cd accrue_admin && mix accrue_admin.assets.build && cd .. && CI=1 npm --prefix accrue_admin run e2e:phase191 && CI=1 npm --prefix accrue_admin run e2e:phase199` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-07/T2 | 4 | JRN-05, JRN-06, JRN-07, UXC-01 | T-242-07; T-242-SC | `cd examples/accrue_host && CI=1 npx playwright test e2e/phase238-admin-events-webhooks.spec.js e2e/phase234-search-completion.spec.js --project=chromium-desktop --workers=1` | Nonzero exit, failed assertion or zero selected cases | Pending |
-| 242-07/T3 | 4 | JRN-05, JRN-06, JRN-07, UXC-01 | T-242-07; T-242-SC | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test && node --test test/js/*.mjs && cd ../examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test` | Nonzero exit, failed assertion or zero selected cases | Pending |
+| 242-01/T1 | 1 | JRN-05, JRN-06 | T-242-01; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/scoped_path_test.exs test/accrue_admin/live/events_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-01/T2 | 1 | JRN-05, JRN-06 | T-242-01; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/queries/events_test.exs test/accrue_admin/live/event_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-02/T1 | 2 | JRN-05, UXC-01 | T-242-02; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/webhooks_live_test.exs test/accrue_admin/live/webhook_replay_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-02/T2 | 2 | JRN-05, UXC-01 | T-242-02; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/webhook_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-03/T1 | 2 | JRN-06, UXC-01 | T-242-03; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/coupons_live_test.exs test/accrue_admin/live/coupon_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-03/T2 | 2 | JRN-06, UXC-01 | T-242-03; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/promotion_codes_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-03/T3 | 2 | JRN-06, UXC-01 | T-242-03; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/coupons_live_test.exs test/accrue_admin/live/coupon_live_test.exs test/accrue_admin/live/promotion_codes_live_test.exs test/accrue_admin/live/promotion_code_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-04/T1 | 2 | JRN-06 | T-242-04; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/connect_accounts_live_test.exs test/accrue_admin/live/connect_account_live_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-04/T2 | 2 | JRN-06 | T-242-04; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/copy/connect_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-05/T1 | 1 | JRN-07 | T-242-05; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/components/global_search_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-05/T2 | 1 | JRN-07 | T-242-05; T-242-SC | `cd accrue_admin && node --test test/js/command_palette_test.mjs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-06/T1 | 3 | JRN-07, UXC-01 | T-242-06; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/dashboard_live_test.exs test/accrue_admin/components/app_shell_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-06/T2 | 3 | JRN-07, UXC-01 | T-242-06; T-242-SC | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/copy test/accrue_admin/copy_test.exs` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-07/T1 | 4 | JRN-05, JRN-06, JRN-07, UXC-01 | T-242-07; T-242-SC | `cd accrue_admin && mix accrue_admin.assets.build && cd .. && CI=1 npm --prefix accrue_admin run e2e:phase191 && CI=1 npm --prefix accrue_admin run e2e:phase199` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-07/T2 | 4 | JRN-05, JRN-06, JRN-07, UXC-01 | T-242-07; T-242-SC | `cd examples/accrue_host && CI=1 npx playwright test e2e/phase238-admin-events-webhooks.spec.js e2e/phase234-search-completion.spec.js --project=chromium-desktop --workers=1` | Nonzero exit, failed assertion or zero selected cases | Green |
+| 242-07/T3 | 4 | JRN-05, JRN-06, JRN-07, UXC-01 | T-242-07; T-242-SC | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test && node --test test/js/*.mjs && cd ../examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test` | Nonzero exit, failed assertion or zero selected cases | Green |
 
 ## Wave 0 Requirements
 
-Existing infrastructure covers all phase requirements. New behavior assertions belong in incumbent owners with their implementation. The planner must name any new fixture prerequisites and order them before dependent browser assertions. Do not add a dependency or parallel coverage registry.
+Existing infrastructure covers all phase requirements. New behavior assertions belong in incumbent owners with their implementation. Fixture prerequisites were ordered before dependent browser assertions; Plan07 records the host replay fixture counter adjustment. Do not add a dependency or parallel coverage registry.
 
 ## Failure Controls and Safety Evidence
 
@@ -75,16 +75,24 @@ Update incumbent route/state coverage and use existing CI lanes for recurring as
 
 ## Manual-Only Verifications
 
-All accepted phase behaviors have planned automated verification. Required human UAT: zero. Actual browser zoom, physical devices, screen-reader speech, live-provider behavior and remote CI are distinct unobserved claims unless separately exercised; they do not become confirmation-only checkpoints.
+All four requirement IDs have executed automated verification through the sixteen tasks. Independent phase-goal verification remains the completion owner. Required human UAT: zero. Actual browser zoom, physical devices, screen-reader speech, live-provider behavior and remote CI are distinct unobserved claims unless separately exercised; they do not become confirmation-only checkpoints.
 
 ## Validation Sign-Off
 
-- [ ] Final task map matches all PLAN task IDs/waves and unique `T-242-NN` references.
-- [ ] Every task has a runnable automated owner and observable failure signal.
-- [ ] No three consecutive tasks lack automated feedback; no watch mode or zero-test acceptance.
-- [ ] New scenario/fixture prerequisites are ordered before consumers.
-- [ ] Current combined acceptance and asset provenance are recorded.
-- [ ] Actual timings and evidence limits are recorded.
-- [ ] Validation audit promotes `nyquist_compliant` only after execution proof.
+- [x] Final task map matches all PLAN task IDs/waves and unique `T-242-NN` references.
+- [x] Every task has a runnable automated owner and observable failure signal.
+- [x] No three consecutive tasks lack automated feedback; no watch mode or zero-test acceptance.
+- [x] New scenario/fixture prerequisites are ordered before consumers.
+- [x] Current combined acceptance and asset provenance are recorded.
+- [x] Actual timings and evidence limits are recorded.
+- [x] Validation audit promotes `nyquist_compliant` only after execution proof.
 
-**Approval:** Planning draft; execution pending.
+**Approval:** Automated validation audit passed. Sixteen task owners, four requirements, no missing validation owner and no manual-only gate. Combined proof: Admin 679/0, Node 44/0, host 223/0; package191 29 passed/1 incumbent skip, package199 27 passed/15 incumbent skips, host browsers 2 passed. Incumbent browser skips are explicitly bounded in 242-EXECUTION-GATES.md and do not establish changed-behavior acceptance. Source/build/compiled/served identity and observed visual limits remain in that record. Independent phase verification and generated executable UAT remain downstream.
+
+## Validation Audit 2026-10-10
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
