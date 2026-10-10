@@ -29,21 +29,19 @@ test.use({ reducedMotion: "reduce" });
 function timestampAnchors(page, name) {
   switch (name) {
     case "dashboard":
-      return [
-        // Timeline event timestamps.
-        page.locator("time.ax-timeline-time"),
-        // Audit-summary "Timestamp" <em>. The row renders three <em> (Actor,
-        // Action, Timestamp); only Timestamp is non-deterministic, so scope the
-        // mask to the Timestamp span (the plan's ambiguity note) — do NOT mask
-        // the deterministic Actor/Action <em> or the KPI counts.
-        page
-          .locator(".ax-dashboard-audit-summary span")
-          .filter({ hasText: "Timestamp" })
-          .locator("em")
-      ];
+      // The selected dashboard fixture seeds an audit event, so the current Home
+      // timeline must render a volatile timestamp for this capture.
+      return [page.locator("time.ax-timeline-time").filter({ hasText: TIMESTAMP_RE })];
     case "subscriptions":
-      // Match the date-bearing cell by its rendered value, not its column index.
-      return [page.locator("tbody tr td").filter({ hasText: TIMESTAMP_RE })];
+      // The time value is only volatile under the table explicitly labelled
+      // "Renews / ends"; other cells carry identity, money and state.
+      return [
+        page
+          .locator("table")
+          .filter({ has: page.getByRole("columnheader", { name: "Renews / ends" }) })
+          .locator("tbody tr td")
+          .filter({ hasText: TIMESTAMP_RE })
+      ];
     case "subscription-detail":
       return [
         // Timeline event timestamps.
@@ -54,13 +52,9 @@ function timestampAnchors(page, name) {
         // Filter the row by its deterministic <dt> label, then mask the value cell.
         page
           .locator(".ax-summary-list-row")
-          .filter({ hasText: /Current period|Renews \/ ends/ })
-          .locator(".ax-summary-list-value"),
-        // Header "Renewal" summary fact repeats the same renews/ends datetime.
-        page.locator(".ax-summary-fact").filter({ hasText: /Renewal/ }),
-        // Dunning campaign-"Started" line + any period `.ax-body` copy carrying a
-        // datetime (the plan's original `.ax-body` selector, kept as a superset).
-        page.locator(".ax-body").filter({ hasText: TIMESTAMP_RE }),
+          .filter({ hasText: /Current period|Renewal/ })
+          .locator(".ax-summary-list-value")
+          .filter({ hasText: TIMESTAMP_RE }),
         // "Activity audit log" section — all three render `subscription.inserted_at`
         // (seed-time now(), drifts every run). Confirmed leaking on the first CI mint.
         // (1) summary row Timestamp <em> (subscription_live.ex:483):
@@ -68,14 +62,20 @@ function timestampAnchors(page, name) {
           .locator(".ax-audit-summary-row span")
           .filter({ hasText: "Timestamp" })
           .locator("em"),
-        // (2) "…reviewed · Accrue system · <datetime>" subtitle (line 485):
-        page.locator(".ax-activity-audit-strip > p.ax-body").filter({ hasText: TIMESTAMP_RE }),
-        // (3) audit-list data-row <time> cells, excluding the static "Timestamp"
+        // Audit-list data-row <time> cells, excluding the static "Timestamp"
         //     header row (lines 505-509):
-        page.locator(".ax-audit-list .ax-audit-row:not(.ax-audit-row-head) time")
+        page
+          .locator(".ax-audit-list .ax-audit-row:not(.ax-audit-row-head) time")
+          .filter({ hasText: TIMESTAMP_RE })
       ];
     case "invoices":
-      return [page.locator("[data-row-id] td").filter({ hasText: TIMESTAMP_RE })];
+      return [
+        page
+          .locator("table")
+          .filter({ has: page.getByRole("columnheader", { name: /Issued|Created|Due date/i }) })
+          .locator("tbody tr td")
+          .filter({ hasText: TIMESTAMP_RE })
+      ];
     case "component-kitchen":
     case "invoice-detail":
       // The selected invoice fixture has no due/finalized boundary, and this
@@ -89,15 +89,22 @@ function timestampAnchors(page, name) {
 async function maskLocators(page, name) {
   const anchors = timestampAnchors(page, name);
   let wrapped = 0;
+  let renderedAnchors = 0;
   for (const anchor of anchors) {
     const anchorCount = await anchor.count();
     expect(anchorCount, `${name}: rendered timestamp anchor`).toBeGreaterThan(0);
+    if (anchorCount === 0) continue;
+    renderedAnchors += anchorCount;
+    const sourceText = await anchor.evaluateAll((elements) => elements.map((element) => element.textContent));
     const counts = await anchor.evaluateAll((elements) => elements.map((element) => {
       const pattern = /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}(?:\s+\d{1,2}:\d{2}(?:\s+[AP]M)?(?:\s+UTC)?)?|\b\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?(?:Z| UTC)?)?\b/g;
       if (element.querySelector("[data-ax-visual-timestamp-mask]")) return 0;
       const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
       const nodes = [];
-      while (walker.nextNode()) if (pattern.test(walker.currentNode.nodeValue || "")) nodes.push(walker.currentNode);
+      while (walker.nextNode()) {
+        pattern.lastIndex = 0;
+        if (pattern.test(walker.currentNode.nodeValue || "")) nodes.push(walker.currentNode);
+      }
       for (const node of nodes) {
         pattern.lastIndex = 0;
         const text = node.nodeValue || "";
@@ -120,16 +127,33 @@ async function maskLocators(page, name) {
       expect(count, `${name}: anchor contains a rendered volatile timestamp`).toBeGreaterThan(0);
       wrapped += count;
     }
+    const preservedText = await anchor.evaluateAll((elements) => elements.map((element) => element.textContent));
+    expect(preservedText, `${name}: timestamp wrapping preserves all rendered target text`).toEqual(sourceText);
   }
-  if (anchors.length > 0) expect(wrapped, `${name}: at least one timestamp is masked`).toBeGreaterThan(0);
+  if (renderedAnchors > 0) expect(wrapped, `${name}: at least one timestamp is masked`).toBeGreaterThan(0);
   return page.locator("[data-ax-visual-timestamp-mask]");
 }
 
 async function assertMaskExcludesProtectedFacts(name, masks) {
+  if (await masks.count() === 0) {
+    expect(name, "surfaces without rendered volatile values have no timestamp anchors").toMatch(
+      /^(component-kitchen|invoice-detail)$/
+    );
+    return;
+  }
   const text = (await masks.allInnerTexts()).join(" ");
-  expect(text, `${name}: masks contain timestamps only`).not.toMatch(
-    /customer|invoice|subscription|amount|balance|¥|\$|open|active|past due|void|cancel|refund|error|status|owner|plan|timestamp/i
-  );
+  expect(text, `${name}: timestamp masks match volatile date text`).toMatch(TIMESTAMP_RE);
+  const protectedFacts = [
+    ["identity", /customer|invoice|subscription|owner|plan/i],
+    ["money", /amount|balance|¥|\$|\bUSD\b|\bJPY\b/i],
+    ["state", /open|active|past due|succeeded|failed|dead|replayed/i],
+    ["action", /void|cancel|refund|replay|confirm|retry|queue/i],
+    ["error", /error|denied|unavailable|unknown/i],
+    ["label", /timestamp|renews|ends|issued|created|due date|current period|renewal/i]
+  ];
+  for (const [category, pattern] of protectedFacts) {
+    expect(text, `${name}: timestamp masks exclude ${category} copy`).not.toMatch(pattern);
+  }
 }
 
 test.describe("Phase 211 visual regression", () => {

@@ -152,8 +152,7 @@ async function login(page, target = "/billing") {
 }
 
 function resolveRepresentativeRoutes(fixtureData) {
-  const edge = fixtureData["edge-states"];
-  const opFlows = fixtureData["operator-flows"];
+  const edge = fixtureData["phase191-matrix"];
 
   return representativeRoutes.map((route) => {
     if (route.path.includes(":invoice_id")) {
@@ -161,7 +160,7 @@ function resolveRepresentativeRoutes(fixtureData) {
     }
 
     if (route.path.includes(":webhook_id")) {
-      return { ...route, path: route.path.replace(":webhook_id", encodeURIComponent(opFlows.single_webhook_id)) };
+      return { ...route, path: route.path.replace(":webhook_id", encodeURIComponent(edge.phase191_webhook_id)) };
     }
 
     return route;
@@ -479,10 +478,19 @@ async function assertRepresentativeRoute(page, route) {
   }
 
   if (route.category === "recovery-kpi") {
-    await expect(groupLocator(page, "kpi-chart-table").first()).toBeVisible();
-    await expect(page.locator(".ax-kpi-card").first()).toBeVisible();
-    await expect(page.locator(".ax-funnel-chart").first()).toBeVisible();
-    await expect(groupLocator(page, "table-empty-loading-error-pagination").first()).toBeVisible();
+    const overview = page.locator('[data-ax-overview="recovery"]');
+    await expect(overview).toBeVisible();
+    await expect(overview.locator("[data-ax-recovery-hero]")).toHaveCount(1);
+    await expect(overview.locator("[data-ax-recovery-work-queue]")).toBeVisible();
+    await expect(overview.locator("[data-ax-recovery-supporting-funnel]")).toBeVisible();
+    const order = await overview.evaluate((root) =>
+      [...root.querySelectorAll("[data-ax-recovery-hero], [data-ax-recovery-work-queue], [data-ax-recovery-supporting-funnel]")]
+        .map((node) => node.hasAttribute("data-ax-recovery-hero") ? "hero" :
+          node.hasAttribute("data-ax-recovery-work-queue") ? "work-queue" : "supporting-funnel")
+    );
+    expect(order, "Recovery overview keeps its three current zones in order").toEqual([
+      "hero", "work-queue", "supporting-funnel"
+    ]);
     await expect(groupLocator(page, "tabs-subviews").first()).toBeVisible();
     return;
   }
@@ -637,6 +645,7 @@ test.describe("Phase 190 representative live probes", () => {
       "operator-flows": await seed(request, "operator-flows"),
       dashboard: await seed(request, "dashboard"),
       "edge-states": await seed(request, "edge-states"),
+      "phase191-matrix": await seed(request, "phase191-matrix"),
     };
 
     const routes = resolveRepresentativeRoutes(fixtureData);

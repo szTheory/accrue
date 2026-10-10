@@ -1,9 +1,6 @@
 const { test, expect } = require("@playwright/test");
 const {
   DASHBOARD_BREADCRUMB_HOME,
-  HOME_ATTENTION_PRIORITY_HEADING,
-  DASHBOARD_KPI_OPEN_INVOICE_BALANCE_LABEL,
-  DASHBOARD_KPI_WEBHOOK_BACKLOG_LABEL
 } = require("../../examples/accrue_host/e2e/support/copy_dashboard.js");
 
 async function reset(request) {
@@ -38,16 +35,8 @@ test.describe("Phase 7 browser UAT", () => {
     // is now only a breadcrumb crumb, not a heading (redesign IA).
     await expect(page.getByRole("heading", { name: "Billing operations" })).toBeVisible();
     await expect(page.getByText(DASHBOARD_BREADCRUMB_HOME).first()).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: HOME_ATTENTION_PRIORITY_HEADING })
-    ).toBeVisible();
-    // The reigned Home surfaces these values in more than one place (StatStrip
-    // value + KpiCard + aria-labels + activity timeline), so scope to the first
-    // match — same pattern the breadcrumb assertion above already uses.
-    await expect(page.getByText(DASHBOARD_KPI_OPEN_INVOICE_BALANCE_LABEL).first()).toBeVisible();
-    await expect(page.getByText("$42.50").first()).toBeVisible();
-    await expect(page.getByText(DASHBOARD_KPI_WEBHOOK_BACKLOG_LABEL).first()).toBeVisible();
-    await expect(page.getByText("invoice.payment_failed").first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Recent audit activity" })).toBeVisible();
+    await expect(page.locator('.ax-home-section[aria-label="Recent audit activity"]')).toBeVisible();
 
     if (isMobile) {
       await page.evaluate(() => {
@@ -107,11 +96,15 @@ test.describe("Phase 7 browser UAT", () => {
     await page.locator("[data-role='toggle-all']").click();
     await page.locator("[data-role='bulk-action']").click();
     await expect(page.locator("[data-role='bulk-replay-confirm']")).toBeVisible();
-    await expect(page.locator("[data-role='bulk-replay-confirm']")).toContainText(
-      /failed every automatic retry/
-    );
+    const review = page.locator("[data-role='bulk-replay-confirm']");
+    await expect(review).toContainText(/Only deliveries still eligible when confirmed will be queued/);
+    await expect(review).toContainText(/Queue acceptance does not mean processing is complete/);
     await page.locator("[data-role='confirm-retry-selected']").click();
-    await expect(page.getByText(/Retrying \d+ events?…/)).toBeVisible({ timeout: 15_000 });
+    const retryStepUp = page.locator("#accrue-admin-step-up-dialog");
+    await expect(retryStepUp).toBeVisible();
+    await retryStepUp.locator('input[name="code"]').fill("123456");
+    await retryStepUp.locator('form[phx-submit="step_up_submit"]').evaluate((form) => form.requestSubmit());
+    await expect(page.getByText(/Queued \d+ delivery\. 0 skipped; 0 denied; 0 failed; 0 unknown\./)).toBeVisible({ timeout: 15_000 });
 
     const countsResponse = await request.get("/__e2e__/counts");
     const counts = await countsResponse.json();
