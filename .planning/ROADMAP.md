@@ -19,7 +19,7 @@
 - ✅ **v1.61 CI Evidence & Critical-Path Hardening** — Phases 225–228 (2026-09-12) — [archive](milestones/v1.61-ROADMAP.md)
 - ✅ **v1.62 Release Integration & Repository Hygiene** — Phases 229–232 (2026-09-18) — [archive](milestones/v1.62-ROADMAP.md)
 - ✅ **v1.63 Admin and Portal UI refinement** — Phases 233–239 (shipped 2026-10-09) — [archive](milestones/v1.63-ROADMAP.md)
-- 🚧 **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (4/4 verified complete; ready for milestone audit/archive)
+- 🚧 **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (4/4 phases completed; verification freshness audit before archive)
 
 ## Planning Doctrine
 
@@ -46,11 +46,11 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 - [x] **Phase 240: Shared System and Real Billing Exemplar** - Deliver invoice list/detail/review and dense subscription examples through shared Admin patterns. (completed 2026-10-10)
 - [x] **Phase 241: Billing Operator Journeys** - Make scoped billing destinations, returns, recovery and action reviews truthful. (8/8 plans completed 2026-10-10, including the named action-spacing gap closure)
 - [x] **Phase 242: Investigations and Remaining Admin Surfaces** - Clarify investigations, catalog, Connect, shell and domain language. (completed 2026-10-10)
-- [ ] **Phase 243: Integrated Evidence and Feedback Preview** - Close selected visual proof and provide a stable Fake-backed preview.
+- [x] **Phase 243: Integrated Evidence and Feedback Preview** - Close selected visual proof and provide a stable Fake-backed preview. (completed 2026-10-10)
 
 ## v1.64 — Admin Operator UI Cleanup
 
-**Status:** Approved by maintainer on 2026-10-09. Scope/version, all 18 [requirements](REQUIREMENTS.md), and this four-phase structure are confirmed. [Bounded upstream decisions](research/v1.64/SUMMARY.md) are complete. Phases 240–242 pass current verification at 47/47, 32/32 and 80/80, with zero unverified behavior. Plan 241-08 closed the named action-spacing gap without replaying original plans. Plans 23/24 are executed; EVR-03 and EVR-04 are complete, with Phase 243 Plan03 still active for final route/evidence reconciliation.
+**Status:** All four phases, 24 plans and 18 [requirements](REQUIREMENTS.md) are completed. Phase243 has current independent passed verification (3/3, zero unverified behavior) and seven passing automated UAT cases. Phases240–242 previously passed 47/47, 32/32 and 80/80, including the named Phase241 spacing closure; their covered-input fingerprints are now stale after Phase243 shared-source/evidence updates and require owner regeneration before milestone archive. Current Phase243 regression results remain recorded separately. Scope/version and [bounded upstream decisions](research/v1.64/SUMMARY.md) are unchanged.
 
 **Milestone goal:** Existing Admin journeys become clearer, consistent, responsive and easier to operate while preserving billing truth, authorization and scope, with recurring automated acceptance and a usable Fake-backed feedback preview.
 

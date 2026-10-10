@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.64 milestone audit/archive — all four phases complete
+**Current focus:** v1.64 verification freshness audit before milestone archive — all four phases completed
 **Progress:** [██████████] 100%
-**Planned work completed:** All four v1.64 phases and 24 plans are complete; all 18 requirements are satisfied. Phase243 independently passed 3/3 roadmap truths with behavior_unverified 0; generated UAT passed 7/7 after verification. The project-wide contract passed 15 phases, 113 summaries and 329 automated UAT cases. Code review findings CR-01/CR-02 are fixed; security has zero open threats. The Linux comparison is pinned to 0197f4ba, while later local mounted/preview regressions have their own recorded evidence. v1.63 remains archived and closed.
+**Planned work completed:** All four v1.64 phases and 24 plans are completed; all 18 requirements are satisfied by their recorded acceptance. Phase243 independently passed 3/3 roadmap truths with behavior_unverified 0; generated UAT passed 7/7 after verification. The project-wide contract passed 15 phases, 113 summaries and 329 automated UAT cases. Code review findings CR-01/CR-02 are fixed; security has zero open threats. The Linux comparison is pinned to 0197f4ba, while later local mounted/preview regressions have their own recorded evidence. v1.63 remains archived and closed.
 
 ## Current Position
 
@@ -428,7 +428,7 @@ None. The next workflow action is recorded under Operator Next Steps; completed 
 
 ### Blockers/Concerns
 
-- **Current v1.64:** No open phase acceptance, security or code-review findings. All four phases are complete; milestone audit/archive remains the next lifecycle action.
+- **Current v1.64:** Phase243 current verification passes with zero unverified behavior and no open review/security finding. Final owner checks classify the older Phase240–242 verification reports as stale after Phase243 shared-source/evidence changes. Their completed plan work is not replayed; regenerate verification through `$gsd-execute-phase 240`, `241` and `242` before milestone archive. Current Phase243 targeted regressions passed and remain separately recorded.
 - **Resolved by v1.62:** the `main`/v1.61 divergence, the stale local `main` ref, the four unpublished audit-closure commits, and the unavailable live-CI monitor. All are reconciled into the integration candidate with committed evidence.
 - **Historical v1.62 candidate:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
 - **Archived v1.62 validation debt:** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
@@ -621,7 +621,7 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 - **Last completed phase:** 243 — Integrated Evidence and Feedback Preview (3/3 plans, independent 3/3 verification, seven automated UAT items, zero unverified behavior).
 - **Additional closure completed:** Phase 241 Plan 08 corrected the named spacing gap; current verification is 32/32 with 20 automated UAT items. Original completed plans were not replayed.
-- **Next step:** `$gsd-complete-milestone v1.64` — audit/archive the completed four-phase, 18-requirement milestone.
+- **Next step:** Refresh older Phase240–242 verification through each owning `$gsd-execute-phase` verification path (no original plan replay), then `$gsd-complete-milestone v1.64` for audit/archive. Phase243 itself is current, passed and complete.
 - Context can be cleared. Read `phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md`; preserve approved decisions, verification fingerprint, acceptance owners and evidence limits. Do not rerun completed original 240–242 plans or restart milestone/research/Impeccable initialization.
 - Default to automated unit/integration/E2E/smoke/seam acceptance and existing CI when recurring value exists. Required human UAT is zero; subjective feedback stays optional. Preview data must remain separate from disposable mutation/reset fixtures.
 - Phase 243 completed the reviewed Linux golden set, stable Fake-backed `/admin` preview and final evidence reconciliation. Actual provider/device/speech/native-zoom and remote CI limits remain explicit; no broad certification is claimed.
