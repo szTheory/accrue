@@ -17,6 +17,7 @@ Completed 2026-10-10. This follow-up closes the three assigned acceptance gaps w
 - Evidence: `CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop --workers=1` — 1 passed. Host warnings-as-errors compilation passed. The first sandboxed browser launch was denied by macOS bootstrap permissions; the same command passed after the environment allowed Chromium startup.
 - Durable screenshots and manifest: `.planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/` (manifest records source, asset and capture hashes, with provider count 0→0).
 - Commit: `a009148b` (`test(241-security): measure mounted review dispatches`).
+- Evidence commit: `f85e07cd` (`docs(241-security): preserve mounted host evidence`).
 
 ## T-241-07 — Subscription staged-action navigation
 
@@ -27,6 +28,6 @@ Completed 2026-10-10. This follow-up closes the three assigned acceptance gaps w
 ## Evidence limits
 
 - The host proof covers the exercised staged invoice review and Escape dismissal; it makes no claim about live-provider behavior.
-- The E2E runner refreshed the five tracked Phase 240 capture files in place. No pre-run status was recorded, so those working copies were preserved as found; fresh run artifacts are also copied under the Phase 241 evidence directory.
+- The E2E runner refreshed five tracked Phase 240 capture files in place. The parent confirmed they were clean before the run; fresh artifacts were preserved under the Phase 241 evidence directory, then only those five Phase 240 generated files were restored from HEAD.
 - Phase 241 Plan 07's duration remains reported as 66 minutes in its Performance section and 228 minutes in its metrics. Available timestamps do not substantiate a correction, so the existing discrepancy is preserved.
 - Detailed touched-file coverage is recorded in `241-06-SUMMARY.md` and `241-07-SUMMARY.md`.
