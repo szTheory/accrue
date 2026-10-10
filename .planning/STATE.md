@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 241
 current_phase_name: Billing Operator Journeys
-current_plan: 5
+current_plan: 6
 status: executing
-stopped_at: Completed 241-04-PLAN.md
-last_updated: "2026-10-10T01:43:35.185Z"
+stopped_at: Completed 241-05-PLAN.md
+last_updated: "2026-10-10T01:52:06.727Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 241 execution started
-state_head: b714e828f4d798333c0b0f408b5186357c3fb8c8
+state_head: 55833ee6d1f3ccf15642e92ec6485d0743ebb825
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 25
 ---
 
@@ -34,7 +34,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 ## Current Position
 
 Phase: 241 (Billing Operator Journeys) — EXECUTING
-Current Plan: 5
+Current Plan: 6
 Total Plans in Phase: 7
 Status: Ready to execute
 Last activity: 2026-10-09 — Phase 241 execution started
@@ -162,6 +162,7 @@ Last activity: 2026-10-09 — Phase 241 execution started
 | Phase 241 P02 | 5 min | 2 tasks | 4 files |
 | Phase 241 P03 | 5 min | 2 tasks | 6 files |
 | Phase 241 P04 | 5 min | 2 tasks | 4 files |
+| Phase 241 P05 | 8 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -350,6 +351,8 @@ Last activity: 2026-10-09 — Phase 241 execution started
 - [Phase 241]: Existing billing mutation, fresh-scope, and stale-review checks remain in their current route owners.
 - [Phase 241]: Campaign detail accepts only a validated Recovery origin and falls back to current-scope Recovery for direct or unsupported origins.
 - [Phase 241]: Recovery window context describes the originating dashboard query; the campaign historical timeline remains unfiltered.
+- [Phase 241]: Subscription reviews show exact target/customer/owner/state and keep unsupported money or preview unavailable.
+- [Phase 241]: Review dismissal uses Back to subscription and remains separate from the subscription action.
 
 ### Pending Todos
 
@@ -430,8 +433,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T01:43:35.123Z
-Stopped at: Completed 241-04-PLAN.md
+Last session: 2026-10-10T01:52:06.666Z
+Stopped at: Completed 241-05-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
