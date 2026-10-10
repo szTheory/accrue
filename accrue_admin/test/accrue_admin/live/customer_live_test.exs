@@ -444,10 +444,49 @@ defmodule AccrueAdmin.CustomerLiveTest do
     |> Customer.changeset(%{default_payment_method_id: payment_method.id})
     |> TestRepo.update!()
 
-    html = render_click(view, "confirm_payment_method_action", %{})
+    render_click(view, "confirm_payment_method_action", %{})
+    html = render(view)
 
     assert html =~ Copy.customer_payment_methods_already_default_warning()
     assert TestRepo.get!(Customer, customer.id).default_payment_method_id == payment_method.id
+  end
+
+  test "payment-method confirms use authoritative provider counts and timeout never auto-retries",
+       %{
+         conn: conn,
+         customer: customer,
+         deletable_payment_method: payment_method
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    render_click(view, "open_payment_method_action", %{
+      "action_type" => "delete",
+      "payment_method_id" => payment_method.id
+    })
+
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == 0
+    Accrue.Processor.Fake.scripted_response(:detach_payment_method, {:error, :timeout})
+    render_click(view, "confirm_payment_method_action", %{})
+    html = render(view)
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == 1
+    assert html =~ "Outcome not confirmed"
+
+    render_click(view, "confirm_payment_method_action", %{})
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == 1
+
+    {:ok, reconnected_view, _html} = live(conn, "/billing/customers/#{customer.id}")
+    refute has_element?(reconnected_view, "[data-role='confirm-payment-method-action']")
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == 1
+
+    render_click(reconnected_view, "open_payment_method_action", %{
+      "action_type" => "set_default",
+      "payment_method_id" => payment_method.id
+    })
+
+    assert Accrue.Processor.Fake.call_count(:set_default_payment_method) == 0
+    render_click(reconnected_view, "confirm_payment_method_action", %{})
+    assert Accrue.Processor.Fake.call_count(:set_default_payment_method) == 1
   end
 
   test "D-09 blocks deleting payment methods tied to active subscriptions for any processor", %{

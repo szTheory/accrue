@@ -1290,11 +1290,16 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp payment_method_error_message(:payment_method_action_invalid),
     do: "Select a valid payment method action."
 
+  defp payment_method_error_message(reason) when reason in [:timeout, :econnreset, :closed],
+    do:
+      "Outcome not confirmed. Reload this customer's payment methods before deciding whether another action is needed; Accrue will not retry automatically."
+
   defp payment_method_error_message(reason) when reason in [:in_use, :replacement_required],
     do: blocked_reason_copy(reason)
 
   defp payment_method_error_message(_reason),
-    do: "We couldn't update the payment methods for this customer."
+    do:
+      "Outcome not confirmed. Reload this customer's payment methods before deciding whether another action is needed; Accrue will not retry automatically."
 
   defp tax_risk_summary(customer) do
     subscriptions =

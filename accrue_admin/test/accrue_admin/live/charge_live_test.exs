@@ -642,6 +642,33 @@ defmodule AccrueAdmin.ChargeLiveTest do
            ) == 1
   end
 
+  test "refund timeout is counted at the provider boundary and cannot be blindly retried", %{
+    conn: conn,
+    charge: charge
+  } do
+    Accrue.Processor.Fake.scripted_response(:create_refund, {:error, :timeout})
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    render_submit(
+      element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+      %{"amount_minor" => "4000", "reason" => "requested_by_customer"}
+    )
+
+    render_click(element(view, "[data-ax-action-drawer-confirm]"))
+    render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    html = render(view)
+    assert html =~ "Outcome not confirmed"
+    refute has_element?(view, "[data-role='confirm-refund']")
+    assert Accrue.Processor.Fake.call_count(:create_refund) == 1
+
+    html = render_click(view, "confirm_refund", %{})
+    assert html =~ "Outcome not confirmed"
+    assert Accrue.Processor.Fake.call_count(:create_refund) == 1
+  end
+
   test "charge detail preserves zero and three-decimal charge, refund, and fee evidence", %{
     conn: conn,
     charge: charge
