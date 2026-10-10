@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 242
 current_phase_name: Investigations and Remaining Admin Surfaces
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 242-05-PLAN.md
-last_updated: "2026-10-10T12:47:43.714Z"
+stopped_at: Completed 242-02-PLAN.md
+last_updated: "2026-10-10T12:57:11.869Z"
 last_activity: 2026-10-10
 last_activity_desc: "Phase 242 planning passed independent review (7 plans, 4 waves, 16 automated tasks); last executed phase: 241; next: $gsd-execute-phase 242"
-state_head: 0ca44aa840915676889a0a1866918204cf4f0cca
+state_head: a1e303a16efa0dc528de8e1a07d90897be4ea627
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 20
-  completed_plans: 15
+  completed_plans: 16
   percent: 50
 ---
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 ## Current Position
 
 Phase: 242 (Investigations and Remaining Admin Surfaces) — READY TO EXECUTE
-Current Plan: 3
+Current Plan: 4
 Total Plans in Phase: 7
 Status: Ready to execute
 Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 plans, 4 waves, 16 automated tasks); last executed phase: 241; next: $gsd-execute-phase 242
@@ -168,6 +168,7 @@ Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 pl
 | Phase 241 P07 | 66 min | 2 tasks | 3 files |
 | Phase 242 P01 | 8min | 2 tasks | 7 files |
 | Phase 242 P05 | 4min | 2 tasks | 4 files |
+| Phase 242 P02 | 8min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -371,6 +372,8 @@ Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 pl
 - [Phase 242]: Event related links require an owner-scoped exact identity match.
 - [Phase 242]: Global search keeps native result links and describes one active link through an input-associated status node.
 - [Phase 242]: Search selection persists by exact item identity only within the same query and owner context; otherwise it falls back to the first current item or none.
+- [Phase 242]: Bulk replay binds to unique reviewed delivery identities and records exact observed outcomes.
+- [Phase 242]: Single delivery replay uses validated contextual return and distinguishes accepted enqueue from processing.
 
 ### Pending Todos
 
@@ -451,8 +454,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T12:47:43.596Z
-Stopped at: Completed 242-05-PLAN.md
+Last session: 2026-10-10T12:57:11.809Z
+Stopped at: Completed 242-02-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

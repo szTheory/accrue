@@ -26,7 +26,7 @@
 
 ### Domain language and state communication
 
-- [ ] **UXC-01**: Operators see coherent resource, collection-method and action language across lists, details, filters and reviews, while exact diagnostic terms and locked audit/legal meaning remain intact.
+- [x] **UXC-01**: Operators see coherent resource, collection-method and action language across lists, details, filters and reviews, while exact diagnostic terms and locked audit/legal meaning remain intact.
 - [x] **UXC-02**: Operators can distinguish empty, no-match, unavailable, partial, unsupported, denied, pending, failed and unknown states and choose the supported next step without inferred health or completion claims.
 
 ### Delivery and evidence
@@ -88,7 +88,7 @@ Each approved requirement has one primary phase owner in the approved roadmap. S
 | JRN-05 | Phase 242 | Complete |
 | JRN-06 | Phase 242 | Complete |
 | JRN-07 | Phase 242 | Complete |
-| UXC-01 | Phase 242 | Pending |
+| UXC-01 | Phase 242 | Complete |
 | UXC-02 | Phase 240 | Complete |
 | EVR-01 | Phase 240 | Complete |
 | EVR-02 | Phase 240 | Complete |
