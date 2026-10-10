@@ -1,0 +1,374 @@
+{
+  "phase": "237-admin-invoices-payments-recovery",
+  "evidence": "seeded deterministic host fixtures; not live-provider settlement",
+  "layout_stress": "long identity and failure reason were injected in-memory, checked for wrapping, then restored before capture",
+  "captured_at": "2026-10-10T08:34:34.468Z",
+  "source_head": "4825c92881996e55013b7d56ad41a93d99146a38",
+  "source_sha": "42ded93562a421dad91a39bc7a4751add53021807db810687e225243b0930aae",
+  "sources": {
+    "accrue_admin/assets/css/app.css": {
+      "sha256": "00b9435dbf82d8a383e5e4df0bde0f09de40f58071697b8b64033eb236694df7",
+      "bytes": 190078
+    },
+    "accrue_admin/assets/css/theme.css": {
+      "sha256": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+      "bytes": 17787
+    },
+    "accrue_admin/assets/js/app.js": {
+      "sha256": "6b11d62588e4af92b858035121874d1b510aff6e43519e7c8d7198f6af526dae",
+      "bytes": 1995
+    },
+    "accrue_admin/priv/static/accrue_admin.css": {
+      "sha256": "d2ca57e4aa4209fbd68ac2a87dbd630cc3028bb4e999c044424674f5d0c1593f",
+      "bytes": 130453
+    },
+    "accrue_admin/priv/static/accrue_admin.js": {
+      "sha256": "c852628a1ab87ba56d8e72153c972d8ce85e6421066b0aef6f3368e6a8186d0a",
+      "bytes": 159939
+    },
+    "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": {
+      "sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
+      "bytes": 56800
+    },
+    "accrue_admin/priv/static/fonts/geist-mono-vf.woff2": {
+      "sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a",
+      "bytes": 58048
+    },
+    "accrue_admin/lib/accrue_admin/live/invoices_live.ex": {
+      "sha256": "3fa955ff26264e7b806b8982594d2e58e1bd7e8a10ce6f5a805903a5ef61e52d",
+      "bytes": 18349
+    },
+    "accrue_admin/lib/accrue_admin/live/invoice_live.ex": {
+      "sha256": "7db22da2c436b6ca3dd3a667f49d1f6bf115805166af6a7d0856bfaf9c836662",
+      "bytes": 56003
+    },
+    "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": {
+      "sha256": "657d1999abcf8f6949ecdcea81d84d4f81b0f90bb6c97362859a5230d3378070",
+      "bytes": 23255
+    },
+    "accrue_admin/lib/accrue_admin/live/subscription_live.ex": {
+      "sha256": "4692444f18a456df333abc95cddf1cfaefdc17dd2ab0256d6fc934276ab39477",
+      "bytes": 88848
+    },
+    "accrue_admin/lib/accrue_admin/live/charge_live.ex": {
+      "sha256": "7be3ea61e68b63202e55f815fa5e3b3f3875796d39bbc998070de9e21fa1e381",
+      "bytes": 37504
+    },
+    "accrue_admin/lib/accrue_admin/live/customer_live.ex": {
+      "sha256": "e2b7edcbb12895c5df82f704790993ddb1364e64d0e31e0e463422d7f7bb1ca5",
+      "bytes": 54582
+    },
+    "accrue_admin/lib/accrue_admin/live/analytics/campaign_live.ex": {
+      "sha256": "1896050b5409c9ba9413038d5a9f07ff24187093bba6022e6dbe9791ae7524e2",
+      "bytes": 8132
+    },
+    "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": {
+      "sha256": "7c00a6ac624c4905743954e0c29a85e0fdb8677760b01b6255339a1307221430",
+      "bytes": 9384
+    },
+    "accrue_admin/lib/accrue_admin/scoped_path.ex": {
+      "sha256": "502b0cabc5b59f025ad7285d0ab7c6f99ebcdf25e5df2f510bf1e5db8cf28291",
+      "bytes": 7395
+    },
+    "accrue_admin/test/accrue_admin/live/subscriptions_live_test.exs": {
+      "sha256": "d80addd5c1aa772d45a9f1bf7a6af69b7a9a6d1ea344c1bc8fb91e896361f3a6",
+      "bytes": 16122
+    },
+    "accrue_admin/test/accrue_admin/live/subscription_live_test.exs": {
+      "sha256": "420907bf0bd3ec674a3a730bbebba211ad0fd90ab4bc5c0a28ba4dd4ef5fd397",
+      "bytes": 61426
+    },
+    "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs": {
+      "sha256": "12c3b61ad96e36e0bf8ab5dcb52f77607ecafd910fc27c81112196d1a9741f36",
+      "bytes": 29575
+    },
+    "accrue_admin/lib/accrue_admin/components/at_risk_table.ex": {
+      "sha256": "5fddb670b6c4477c110d41e79546bb884da86ab329309ac7135036e600d5b400",
+      "bytes": 10138
+    },
+    "scripts/ci/accrue_host_seed_e2e.exs": {
+      "sha256": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+      "bytes": 36636
+    },
+    "examples/accrue_host/e2e/phase237-admin-billing.spec.js": {
+      "sha256": "28301c8eb506522d2fdeccd587f61c02ac520472db330e65673b1c614d91e289",
+      "bytes": 36001
+    },
+    "examples/accrue_host/lib/accrue_host_web/router.ex": {
+      "sha256": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
+      "bytes": 5988
+    },
+    "examples/accrue_host/lib/accrue_host_web/controllers/organization_scope_controller.ex": {
+      "sha256": "c1912345fd2f888a93c11a648040a929bac1587c5fcc5264cf8ea00dfe236807",
+      "bytes": 4544
+    }
+  },
+  "assets": {
+    "/admin/assets/css-b7be90e74cb3ed1397b86a7b43eaa5b3": {
+      "path": "/admin/assets/css-b7be90e74cb3ed1397b86a7b43eaa5b3",
+      "bytes": 130453,
+      "packageSha256": "d2ca57e4aa4209fbd68ac2a87dbd630cc3028bb4e999c044424674f5d0c1593f",
+      "compiledSha256": "d2ca57e4aa4209fbd68ac2a87dbd630cc3028bb4e999c044424674f5d0c1593f",
+      "servedSha256": "d2ca57e4aa4209fbd68ac2a87dbd630cc3028bb4e999c044424674f5d0c1593f",
+      "browserRequestSha256": "d2ca57e4aa4209fbd68ac2a87dbd630cc3028bb4e999c044424674f5d0c1593f"
+    },
+    "/admin/assets/js-308a1387d3286f67b833724b2b70ca50": {
+      "path": "/admin/assets/js-308a1387d3286f67b833724b2b70ca50",
+      "bytes": 159939,
+      "packageSha256": "c852628a1ab87ba56d8e72153c972d8ce85e6421066b0aef6f3368e6a8186d0a",
+      "compiledSha256": "c852628a1ab87ba56d8e72153c972d8ce85e6421066b0aef6f3368e6a8186d0a",
+      "servedSha256": "c852628a1ab87ba56d8e72153c972d8ce85e6421066b0aef6f3368e6a8186d0a",
+      "browserRequestSha256": "c852628a1ab87ba56d8e72153c972d8ce85e6421066b0aef6f3368e6a8186d0a"
+    },
+    "/admin/assets/geist-sans-vf.woff2": {
+      "path": "/admin/assets/geist-sans-vf.woff2",
+      "bytes": 56800,
+      "packageSha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
+      "compiledSha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
+      "servedSha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
+      "browserRequestSha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630"
+    },
+    "/admin/assets/geist-mono-vf.woff2": {
+      "path": "/admin/assets/geist-mono-vf.woff2",
+      "bytes": 58048,
+      "packageSha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a",
+      "compiledSha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a",
+      "servedSha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a",
+      "browserRequestSha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
+    }
+  },
+  "stale_asset_negative": {
+    "path": "/admin/assets/js-308a1387d3286f67b833724b2b70ca50",
+    "injectedFirstByteMutation": true,
+    "expectedFailure": "served response differs from package build for /admin/assets/js-308a1387d3286f67b833724b2b70ca50",
+    "restoredServedSha256": "c852628a1ab87ba56d8e72153c972d8ce85e6421066b0aef6f3368e6a8186d0a",
+    "restoredToPackageSha256": true
+  },
+  "browser_environment": {
+    "browser": "chromium",
+    "browserVersion": "147.0.7727.15",
+    "os": "darwin 25.6.0",
+    "node": "v22.14.0",
+    "runner": "CI=1",
+    "packageLockSha256": "b70a34de9865925c1d5d38b7dc564d43a9781aa91044b36878ac611c0e67df90",
+    "packageAssetBuildCommand": "cd accrue_admin && mix accrue_admin.assets.build",
+    "hostCompileCommand": "cd examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors",
+    "browserCommand": "CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop"
+  },
+  "theme_provenance": {
+    "stored_theme_before_visual_override": {
+      "localStorage": "system",
+      "cookie": null,
+      "rendered": "system",
+      "prefersColorScheme": "light"
+    },
+    "effective_theme_checks": [
+      {
+        "background": "rgb(250, 251, 252)",
+        "color": "rgb(17, 20, 24)",
+        "reducedMotionDuration": "0ms linear"
+      },
+      {
+        "background": "rgb(15, 19, 24)",
+        "color": "rgb(244, 247, 250)",
+        "reducedMotionDuration": "0ms linear"
+      }
+    ],
+    "visual_override_method": "Playwright prefers-color-scheme emulation plus data-theme DOM setter; not a stored preference mutation"
+  },
+  "first_fresh_invoice_diagnostics": {
+    "fixture": "disposable host Ecto sandbox; seeded Admin Alpha invoice",
+    "route": "/admin/invoices?org=accrue-e2e-alpha",
+    "query": "org=accrue-e2e-alpha",
+    "cold": {
+      "liveview_ready_ms": 165.83,
+      "task_ready_ms": 204.53
+    },
+    "warm": {
+      "liveview_ready_ms": 30.81,
+      "task_ready_ms": 38.68
+    },
+    "drawer_ready_ms": 110.83,
+    "action_review_ready_ms": 121.66,
+    "raw_and_encoded_resource_diagnostics": {
+      "resourceCount": 5,
+      "encodedBodyBytes": 409976,
+      "decodedBodyBytes": 409976,
+      "transferBytes": 411476,
+      "layoutShift": {
+        "supported": true,
+        "entries": 0,
+        "value": 0
+      },
+      "longTasks": {
+        "supported": true,
+        "entries": 0,
+        "totalDurationMs": 0
+      },
+      "resources": [
+        {
+          "path": "/admin/assets/brand-8df88262e9e089a77537a642a7de9585",
+          "initiatorType": "link",
+          "encodedBodyBytes": 4736,
+          "decodedBodyBytes": 4736,
+          "transferBytes": 5036,
+          "durationMs": 0.9
+        },
+        {
+          "path": "/admin/assets/css-b7be90e74cb3ed1397b86a7b43eaa5b3",
+          "initiatorType": "link",
+          "encodedBodyBytes": 130453,
+          "decodedBodyBytes": 130453,
+          "transferBytes": 130753,
+          "durationMs": 0.9
+        },
+        {
+          "path": "/admin/assets/js-308a1387d3286f67b833724b2b70ca50",
+          "initiatorType": "script",
+          "encodedBodyBytes": 159939,
+          "decodedBodyBytes": 159939,
+          "transferBytes": 160239,
+          "durationMs": 1.3
+        },
+        {
+          "path": "/admin/assets/geist-sans-vf.woff2",
+          "initiatorType": "css",
+          "encodedBodyBytes": 56800,
+          "decodedBodyBytes": 56800,
+          "transferBytes": 57100,
+          "durationMs": 23
+        },
+        {
+          "path": "/admin/assets/geist-mono-vf.woff2",
+          "initiatorType": "css",
+          "encodedBodyBytes": 58048,
+          "decodedBodyBytes": 58048,
+          "transferBytes": 58348,
+          "durationMs": 23.1
+        }
+      ]
+    },
+    "first_fresh_timing_is_diagnostic_only": true
+  },
+  "subscription_crosscheck": {
+    "fixture": "disposable host Ecto sandbox; seeded Admin Alpha past-due subscription",
+    "route": "/admin/subscriptions/45d94334-9140-4c0f-8e4b-c61e47f5f6c3?org=accrue-e2e-alpha",
+    "layout_stress": "customer identity was extended in-memory at 320px, checked for wrapping, then restored before capture",
+    "missing_plan_and_period": "Price not shown in admin; Current period is not shown in admin",
+    "responsive_geometry": [
+      {
+        "viewport": 320,
+        "document": 320,
+        "actionHeight": 44,
+        "actionLeft": 21,
+        "actionRight": 299,
+        "coarsePointer": false
+      },
+      {
+        "viewport": 768,
+        "document": 768,
+        "actionHeight": 46,
+        "actionLeft": 25,
+        "actionRight": 161.734375,
+        "coarsePointer": false
+      },
+      {
+        "viewport": 1280,
+        "document": 1280,
+        "actionHeight": 46,
+        "actionLeft": 273,
+        "actionRight": 409.734375,
+        "coarsePointer": false
+      },
+      {
+        "viewport": 320,
+        "document": 320,
+        "actionHeight": 44,
+        "actionLeft": 21,
+        "actionRight": 299,
+        "coarsePointer": true,
+        "device": "Pixel 5"
+      },
+      {
+        "viewport": 768,
+        "document": 768,
+        "actionHeight": 46,
+        "actionLeft": 25,
+        "actionRight": 161.734375,
+        "coarsePointer": true,
+        "device": "Pixel 5"
+      },
+      {
+        "viewport": 1280,
+        "document": 1280,
+        "actionHeight": 46,
+        "actionLeft": 273,
+        "actionRight": 409.734375,
+        "coarsePointer": true,
+        "device": "Pixel 5"
+      }
+    ],
+    "long_identity": {
+      "clientWidth": 270,
+      "scrollWidth": 270,
+      "height": 156.75,
+      "lineHeight": 19.6
+    }
+  },
+  "viewport_and_theme": {
+    "invoice-collection.png": {
+      "route": "http://127.0.0.1:4101/admin/invoices?org=accrue-e2e-alpha&status=open%2Cuncollectible",
+      "viewport": {
+        "width": 320,
+        "height": 800
+      },
+      "theme": "light",
+      "sha256": "cc5c10bb27c4ee1c1cf9ff6a236e4242d7045d23bc711c738310e2317d04ff71",
+      "bytes": 118535
+    },
+    "invoice-review.png": {
+      "route": "http://127.0.0.1:4101/admin/invoices/15e08f33-1d9d-49f7-aef6-ec55b5361b5c?org=accrue-e2e-alpha",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "sha256": "d40fb4c9c11a9631ded06a49455bf56025150280163056fad998d47cd61adc60",
+      "bytes": 237834
+    },
+    "recovery.png": {
+      "route": "http://127.0.0.1:4101/admin/analytics/recovery?org=accrue-e2e-alpha&window=7d",
+      "viewport": {
+        "width": 320,
+        "height": 800
+      },
+      "theme": "dark",
+      "sha256": "c92a8fce254ac1fad09c6f763cd71267251f2e1742c2a00930c3ddc1b8508922",
+      "bytes": 137266
+    },
+    "subscription-detail.png": {
+      "route": "http://127.0.0.1:4101/admin/subscriptions/45d94334-9140-4c0f-8e4b-c61e47f5f6c3?org=accrue-e2e-alpha",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "dark",
+      "sha256": "4b2ccb1c2c13cf86d1d47a112760dc0d8a398f41ae300446ec020a3225c52cc1",
+      "bytes": 380053
+    }
+  },
+  "route_and_interaction": {
+    "route": "/admin/invoices/15e08f33-1d9d-49f7-aef6-ec55b5361b5c?org=accrue-e2e-alpha",
+    "action_review_target": "15e08f33-1d9d-49f7-aef6-ec55b5361b5c",
+    "action_review_opened": true,
+    "action_confirmed_or_dispatched": false,
+    "authoritative_dispatch_count": {
+      "operation": "invoice_action",
+      "before_review": 0,
+      "after_escape_dismissal": 0,
+      "delta": 0
+    }
+  },
+  "read_only": true,
+  "confirmed_or_dispatched": false
+}

@@ -34,7 +34,12 @@ tech-stack:
     - Keep Admin /admin and customer Portal /billing assertions separate.
 
 key-files:
-  created: []
+  created:
+    - .planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/manifest.json
+    - .planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/invoice-review.png
+    - .planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/invoice-collection.png
+    - .planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/recovery.png
+    - .planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/subscription-detail.png
   modified:
     - accrue_admin/e2e/admin-page-flow-phase191.spec.js
     - accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js
@@ -198,6 +203,8 @@ The dedicated review fixture supports the browser acceptance without changing th
 ### Security acceptance follow-up
 
 The host invoice review now reads `invoice_action` provider callback counts from an authenticated GET oracle mounted only when the existing SQL-sandbox test configuration is enabled; the controller also returns 404 when that runtime flag is off. On the disposable host fixture, the mounted spec measured `0` before review and `0` after Escape dismissal (`delta: 0`) and recorded both values in the capture manifest. This proves the staged/dismissed review did not dispatch through the Fake provider; it does not infer dispatch state from persisted rows or HTTP method observation. The browser runner passed 1/1 after sandbox launch permissions were granted.
+
+Fresh Playwright output is preserved at `.planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/`; its manifest includes the authoritative count and hashes for the screenshots. The test runner also refreshed the existing Phase 240 capture working copies; these copies are retained as found because their pre-run cleanliness was not established.
 
 Follow-up commit: `a009148b` (`test(241-security): measure mounted review dispatches`).
 
