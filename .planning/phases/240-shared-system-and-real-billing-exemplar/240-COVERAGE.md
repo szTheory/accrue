@@ -67,6 +67,25 @@ Four current screenshots plus the exact render/resource manifest are captured in
 
 The first-fresh resource measurements have no invented SLA. Preview Fake DB is never selected by this proof.
 
+## Phase 242-07 Current Owner Acceptance
+
+This record adds current evidence from Phase 242 Plan 07. It does not convert other
+route states to exercised merely because their owners ran in the combined suite.
+
+| Changed consumer | Current owner / observable states | Result |
+|---|---|---|
+| Coupon → promotion code → exact coupon parent; Connect detail → exact fee review target | `accrue_admin/e2e/admin-page-flow-phase191.spec.js` (`@phase242`) | `CI=1 npm --prefix accrue_admin run e2e:phase191`: 29 passed, 1 incumbent skip, 0 failed. |
+| Shell overlays, focus, responsive widths, theme modes, atomic CSS text enlargement/spacing stress | `accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js` (`@phase242`) | `CI=1 npm --prefix accrue_admin run e2e:phase199`: 27 passed, 15 incumbent skips, 0 failed. Playwright viewport/pointer/theme emulation only. |
+| Events filtered membership and exact source webhook; single/bulk reviewed replay target | `examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js`; `accrue_admin/test/accrue_admin/live/webhook_replay_test.exs`; `webhooks_live_test.exs` | Host Phase 238 owner passed; replay ExUnit owner pair: 25 tests, 0 failures. Underlying ExUnit asserts jobs, audit and domain state for dismissal, duplicates, stale scope/eligibility and read failure. |
+| Search current-result pointer → Arrow → Enter, no-match/reopen and scoped real link | `examples/accrue_host/e2e/phase234-search-completion.spec.js` | Host Phase 234 owner passed as part of the 2-test host command. |
+| Combined changed-consumer regression | Admin full ExUnit + Node; host full ExUnit | Admin 679 tests, Node 44/44, host 223 tests, all 0 failures; both warnings-as-errors compiles passed. |
+
+The route inventory above remains the route/state authority. In this plan, loading,
+error, partial and zero/one/many states are only marked current where the selected
+owner explicitly exercised them; the full suite run is regression coverage, not a
+claim that every inventory state was mounted. See the Phase 242 execution gate for
+commands, current asset hashes, inspection record and evidence limits.
+
 ## Current changed-owner acceptance results
 
 | Owner | Command / result |
