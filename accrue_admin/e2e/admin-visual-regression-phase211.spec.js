@@ -131,17 +131,17 @@ async function maskLocators(page, name) {
     expect(preservedText, `${name}: timestamp wrapping preserves all rendered target text`).toEqual(sourceText);
   }
   if (renderedAnchors > 0) expect(wrapped, `${name}: at least one timestamp is masked`).toBeGreaterThan(0);
-  return page.locator("[data-ax-visual-timestamp-mask]");
+  return await page.locator("[data-ax-visual-timestamp-mask]").all();
 }
 
 async function assertMaskExcludesProtectedFacts(name, masks) {
-  if (await masks.count() === 0) {
+  if (masks.length === 0) {
     expect(name, "surfaces without rendered volatile values have no timestamp anchors").toMatch(
       /^(component-kitchen|invoice-detail)$/
     );
     return;
   }
-  const text = (await masks.allInnerTexts()).join(" ");
+  const text = (await Promise.all(masks.map((mask) => mask.innerText()))).join(" ");
   expect(text, `${name}: timestamp masks match volatile date text`).toMatch(TIMESTAMP_RE);
   const protectedFacts = [
     ["identity", /customer|invoice|subscription|owner|plan/i],
