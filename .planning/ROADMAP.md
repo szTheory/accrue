@@ -174,5 +174,5 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | Complete    | 2026-10-10 |
 | 241. Billing Operator Journeys | v1.64 | 7/7 | Complete    | 2026-10-10 |
-| 242. Investigations and Remaining Admin Surfaces | v1.64 | 7/7 | In Progress | - |
+| 242. Investigations and Remaining Admin Surfaces | v1.64 | 7/7 | Complete    | 2026-10-10 |
 | 243. Integrated Evidence and Feedback Preview | v1.64 | 0/TBD | Not started | - |
