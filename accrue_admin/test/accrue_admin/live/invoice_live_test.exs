@@ -970,6 +970,85 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert html =~ Copy.invoice_remove_manual_item_success()
   end
 
+  test "rejects client requests to remove priced invoice items", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    priced_item =
+      insert_invoice_item(invoice, %{
+        stripe_id: "ii_priced",
+        description: "Subscription plan",
+        price_ref: "price_monthly"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    html = render_click(view, "stage_remove_item", %{"id" => priced_item.id})
+
+    refute html =~ Copy.invoice_remove_manual_item_confirm()
+    assert html =~ "manual invoice line item"
+
+    # A forged confirmation with no staged, eligible item must be harmless.
+    html = render_click(view, "confirm_remove_item", %{})
+
+    assert html =~ "manual invoice line item"
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :invoice_item_delete end)
+    assert TestRepo.get!(InvoiceItem, priced_item.id)
+  end
+
+  test "rechecks manual-item eligibility before removal", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    item =
+      insert_invoice_item(invoice, %{
+        stripe_id: "ii_manual_rechecked",
+        description: "Manual setup fee"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    render_click(view, "stage_remove_item", %{"id" => item.id})
+
+    item
+    |> InvoiceItem.changeset(%{price_ref: "price_now_managed"})
+    |> TestRepo.update!()
+
+    html = render_click(view, "confirm_remove_item", %{})
+
+    assert html =~ "manual invoice line item"
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :invoice_item_delete end)
+    assert TestRepo.get!(InvoiceItem, item.id)
+  end
+
+  test "rechecks invoice draft status before removing a staged item", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    item =
+      insert_invoice_item(invoice, %{
+        stripe_id: "ii_manual_status_rechecked",
+        description: "Manual setup fee"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    render_click(view, "stage_remove_item", %{"id" => item.id})
+
+    invoice
+    |> Invoice.force_status_changeset(%{status: :open})
+    |> TestRepo.update!()
+
+    html = render_click(view, "confirm_remove_item", %{})
+
+    assert html =~ "manual invoice line item"
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :invoice_item_delete end)
+    assert TestRepo.get!(InvoiceItem, item.id)
+  end
+
   test "applies ax-measure to tax-risk prose paragraphs", %{
     conn: conn,
     invoice: invoice

@@ -100,6 +100,27 @@ defmodule Accrue.Billing.InvoiceItemActionsTest do
 
       assert Keyword.has_key?(changeset.errors, :status)
     end
+
+    test "rechecks persisted draft status before processor creation", %{invoice: invoice} do
+      invoice
+      |> Invoice.force_status_changeset(%{status: :open})
+      |> Repo.update!()
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Billing.add_invoice_item(invoice, %{
+                 amount: 125,
+                 currency: "usd",
+                 description: "Do not add after concurrent finalization"
+               })
+
+      assert Keyword.has_key?(changeset.errors, :status)
+
+      refute Enum.any?(Fake.calls(), fn {operation, _args} ->
+               operation == :invoice_item_create
+             end)
+
+      assert Repo.aggregate(InvoiceItem, :count, :id) == 0
+    end
   end
 
   describe "remove_invoice_item/3" do
@@ -156,6 +177,55 @@ defmodule Accrue.Billing.InvoiceItemActionsTest do
                Billing.remove_invoice_item(open_invoice, item)
 
       assert Keyword.has_key?(changeset.errors, :status)
+    end
+
+    test "rechecks persisted draft status before processor deletion", %{invoice: invoice} do
+      {:ok, updated} =
+        Billing.add_invoice_item(invoice, %{
+          amount: 125,
+          currency: "usd",
+          description: "Remove after concurrent finalization"
+        })
+
+      [item] = Repo.preload(updated, :items, force: true).items
+
+      updated
+      |> Invoice.force_status_changeset(%{status: :open})
+      |> Repo.update!()
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Billing.remove_invoice_item(updated, item)
+
+      assert Keyword.has_key?(changeset.errors, :status)
+
+      refute Enum.any?(Fake.calls(), fn {operation, _args} ->
+               operation == :invoice_item_delete
+             end)
+
+      assert Repo.get!(InvoiceItem, item.id)
+    end
+
+    test "rechecks persisted item eligibility before processor deletion", %{invoice: invoice} do
+      {:ok, updated} =
+        Billing.add_invoice_item(invoice, %{
+          amount: 125,
+          currency: "usd",
+          description: "Manual item changed by synchronization"
+        })
+
+      [item] = Repo.preload(updated, :items, force: true).items
+
+      item
+      |> InvoiceItem.changeset(%{price_ref: "price_now_managed"})
+      |> Repo.update!()
+
+      assert {:error, :invoice_item_not_manual} = Billing.remove_invoice_item(updated, item)
+
+      refute Enum.any?(Fake.calls(), fn {operation, _args} ->
+               operation == :invoice_item_delete
+             end)
+
+      assert Repo.get!(InvoiceItem, item.id)
     end
   end
 end

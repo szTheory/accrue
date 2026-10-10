@@ -279,8 +279,27 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   def handle_event("stage_remove_item", %{"id" => item_id}, socket) do
-    item = Enum.find(socket.assigns.line_items, &(&1.id == item_id))
-    {:noreply, assign(socket, :pending_remove_item, item)}
+    case manual_invoice_item(socket, item_id) do
+      {:ok, invoice, item} ->
+        {:noreply,
+         socket
+         |> assign(:invoice, invoice)
+         |> assign(:line_items, invoice.items || [])
+         |> assign(:pending_remove_item, item)}
+
+      :error ->
+        {:noreply,
+         socket
+         |> assign(:pending_remove_item, nil)
+         |> push_flash(:error, invoice_remove_item_error_copy())}
+    end
+  end
+
+  def handle_event("stage_remove_item", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:pending_remove_item, nil)
+     |> push_flash(:error, invoice_remove_item_error_copy())}
   end
 
   def handle_event("cancel_remove_item", _params, socket) do
@@ -288,15 +307,30 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   def handle_event("confirm_remove_item", _params, socket) do
-    case Billing.remove_invoice_item(socket.assigns.invoice, socket.assigns.pending_remove_item) do
-      {:ok, _item} ->
-        {:noreply,
-         socket
-         |> refresh_invoice(socket.assigns.invoice.id)
-         |> assign(:pending_remove_item, nil)
-         |> push_flash(:info, Copy.invoice_remove_manual_item_success())}
+    case socket.assigns[:pending_remove_item] do
+      %{id: item_id} ->
+        case manual_invoice_item(socket, item_id) do
+          {:ok, invoice, item} ->
+            case Billing.remove_invoice_item(invoice, item) do
+              {:ok, _updated_invoice} ->
+                {:noreply,
+                 socket
+                 |> refresh_invoice(invoice.id)
+                 |> assign(:pending_remove_item, nil)
+                 |> push_flash(:info, Copy.invoice_remove_manual_item_success())}
 
-      {:error, _reason} ->
+              {:error, _reason} ->
+                {:noreply, push_flash(socket, :error, invoice_remove_item_error_copy())}
+            end
+
+          :error ->
+            {:noreply,
+             socket
+             |> assign(:pending_remove_item, nil)
+             |> push_flash(:error, invoice_remove_item_error_copy())}
+        end
+
+      _missing_item ->
         {:noreply, push_flash(socket, :error, invoice_remove_item_error_copy())}
     end
   end
@@ -1373,6 +1407,21 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         )
     end
   end
+
+  defp manual_invoice_item(socket, item_id) when is_binary(item_id) do
+    with {:ok, %Invoice{status: :draft} = invoice} <-
+           Invoices.detail(socket.assigns.invoice.id, socket.assigns.current_owner_scope),
+         %{} = item <-
+           Enum.find(invoice.items || [], fn item ->
+             item.id == item_id and is_nil(item.price_ref)
+           end) do
+      {:ok, invoice, item}
+    else
+      _ -> :error
+    end
+  end
+
+  defp manual_invoice_item(_socket, _item_id), do: :error
 
   defp related_items(invoice, customer, mount_path, scope, return_path) do
     customer_items =

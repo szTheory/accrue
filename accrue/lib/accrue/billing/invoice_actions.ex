@@ -26,6 +26,8 @@ defmodule Accrue.Billing.InvoiceActions do
   `{:error, %Ecto.Changeset{}}`.
   """
 
+  import Ecto.Query
+
   alias Accrue.Actor
   alias Accrue.Billing.IntentResult
   alias Accrue.Billing.Invoice
@@ -106,28 +108,38 @@ defmodule Accrue.Billing.InvoiceActions do
           {:ok, Invoice.t()} | {:error, term()}
   def add_invoice_item(%Invoice{} = invoice, attrs, opts \\ [])
       when is_map(attrs) and is_list(opts) do
-    with :ok <- ensure_draft_invoice(invoice) do
-      op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
+    op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
 
-      processor_opts =
-        [idempotency_key: Idempotency.key(:invoice_item_create, invoice.id, op_id)] ++
-          sanitize_opts(opts)
+    Repo.transact(fn ->
+      case lock_invoice(invoice.id) do
+        %Invoice{status: :draft} = current_invoice ->
+          add_locked_invoice_item(current_invoice, attrs, opts, op_id)
 
-      params = invoice_item_params(invoice, attrs)
+        %Invoice{} = current_invoice ->
+          {:error, draft_invoice_error(current_invoice)}
 
-      Repo.transact(fn ->
-        with {:ok, created_item} <- Processor.invoice_item_create(params, processor_opts),
-             {:ok, stripe_invoice} <-
-               Processor.__impl__().retrieve_invoice(invoice.processor_id, sanitize_opts(opts)),
-             {:ok, %{invoice_attrs: invoice_attrs, item_attrs: item_attrs_list}} <-
-               InvoiceProjection.decompose(stripe_invoice),
-             {:ok, updated} <- update_invoice_row(invoice, invoice_attrs),
-             {:ok, _} <- sync_items(updated, item_attrs_list),
-             {:ok, _event} <-
-               record_event("invoice.item_added", updated, event_data(created_item)) do
-          {:ok, Repo.preload(updated, :items, force: true)}
-        end
-      end)
+        nil ->
+          {:error, :invoice_not_found}
+      end
+    end)
+  end
+
+  defp add_locked_invoice_item(invoice, attrs, opts, op_id) do
+    processor_opts =
+      [idempotency_key: Idempotency.key(:invoice_item_create, invoice.id, op_id)] ++
+        sanitize_opts(opts)
+
+    params = invoice_item_params(invoice, attrs)
+
+    with {:ok, created_item} <- Processor.invoice_item_create(params, processor_opts),
+         {:ok, stripe_invoice} <-
+           Processor.__impl__().retrieve_invoice(invoice.processor_id, sanitize_opts(opts)),
+         {:ok, %{invoice_attrs: invoice_attrs, item_attrs: item_attrs_list}} <-
+           InvoiceProjection.decompose(stripe_invoice),
+         {:ok, updated} <- update_invoice_row(invoice, invoice_attrs),
+         {:ok, _} <- sync_items(updated, item_attrs_list),
+         {:ok, _event} <- record_event("invoice.item_added", updated, event_data(created_item)) do
+      {:ok, Repo.preload(updated, :items, force: true)}
     end
   end
 
@@ -139,32 +151,67 @@ defmodule Accrue.Billing.InvoiceActions do
           {:ok, Invoice.t()} | {:error, term()}
   def remove_invoice_item(%Invoice{} = invoice, %InvoiceItem{} = item, opts \\ [])
       when is_list(opts) do
-    with :ok <- ensure_draft_invoice(invoice) do
-      op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
-      processor_id = item.stripe_id || item.data["id"] || item.data[:id]
+    op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
 
-      Repo.transact(fn ->
-        with true <-
-               is_binary(processor_id) ||
-                 {:error, draft_invoice_error(invoice, "invoice item must have a processor id")},
-             {:ok, _deleted} <-
-               Processor.invoice_item_delete(
-                 processor_id,
-                 %{},
-                 [idempotency_key: Idempotency.key(:invoice_item_delete, item.id, op_id)] ++
-                   sanitize_opts(opts)
-               ),
-             {:ok, stripe_invoice} <-
-               Processor.__impl__().retrieve_invoice(invoice.processor_id, sanitize_opts(opts)),
-             {:ok, %{invoice_attrs: invoice_attrs, item_attrs: item_attrs_list}} <-
-               InvoiceProjection.decompose(stripe_invoice),
-             {:ok, updated} <- update_invoice_row(invoice, invoice_attrs),
-             {:ok, _} <- sync_items(updated, item_attrs_list),
-             {:ok, _event} <- record_event("invoice.item_removed", updated, event_data(item)) do
-          {:ok, Repo.preload(updated, :items, force: true)}
-        end
-      end)
+    Repo.transact(fn ->
+      current_invoice = lock_invoice(invoice.id)
+
+      case current_invoice do
+        %Invoice{status: :draft} = current_invoice ->
+          current_item =
+            from(current in InvoiceItem,
+              where: current.id == ^item.id and current.invoice_id == ^current_invoice.id,
+              lock: "FOR UPDATE"
+            )
+            |> Repo.one()
+
+          case current_item do
+            %InvoiceItem{price_ref: nil} = current_item ->
+              remove_locked_invoice_item(current_invoice, current_item, op_id, opts)
+
+            %InvoiceItem{} ->
+              {:error, :invoice_item_not_manual}
+
+            nil ->
+              {:error, :invoice_item_not_found}
+          end
+
+        %Invoice{} = current_invoice ->
+          {:error, draft_invoice_error(current_invoice)}
+
+        nil ->
+          {:error, :invoice_not_found}
+      end
+    end)
+  end
+
+  defp remove_locked_invoice_item(invoice, item, op_id, opts) do
+    processor_id = item.stripe_id || item.data["id"] || item.data[:id]
+
+    with true <-
+           is_binary(processor_id) ||
+             {:error, draft_invoice_error(invoice, "invoice item must have a processor id")},
+         {:ok, _deleted} <-
+           Processor.invoice_item_delete(
+             processor_id,
+             %{},
+             [idempotency_key: Idempotency.key(:invoice_item_delete, item.id, op_id)] ++
+               sanitize_opts(opts)
+           ),
+         {:ok, stripe_invoice} <-
+           Processor.__impl__().retrieve_invoice(invoice.processor_id, sanitize_opts(opts)),
+         {:ok, %{invoice_attrs: invoice_attrs, item_attrs: item_attrs_list}} <-
+           InvoiceProjection.decompose(stripe_invoice),
+         {:ok, updated} <- update_invoice_row(invoice, invoice_attrs),
+         {:ok, _} <- sync_items(updated, item_attrs_list),
+         {:ok, _event} <- record_event("invoice.item_removed", updated, event_data(item)) do
+      {:ok, Repo.preload(updated, :items, force: true)}
     end
+  end
+
+  defp lock_invoice(invoice_id) do
+    from(invoice in Invoice, where: invoice.id == ^invoice_id, lock: "FOR UPDATE")
+    |> Repo.one()
   end
 
   @spec remove_invoice_item!(Invoice.t(), InvoiceItem.t(), keyword()) :: Invoice.t()
