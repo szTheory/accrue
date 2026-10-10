@@ -23,12 +23,14 @@ function createCompleteSet(directory) {
   for (const name of EXPECTED_BASELINES) writeFileSync(path.join(directory, name), "png fixture");
 }
 
-test("expected set names exactly the eight Phase 211 light/dark captures", () => {
+test("expected set names exactly the twelve selected light/dark captures", () => {
   assert.deepEqual(EXPECTED_BASELINES, [
     "dashboard.png", "dashboard-dark.png",
     "subscriptions.png", "subscriptions-dark.png",
     "subscription-detail.png", "subscription-detail-dark.png",
-    "component-kitchen.png", "component-kitchen-dark.png"
+    "component-kitchen.png", "component-kitchen-dark.png",
+    "invoices.png", "invoices-dark.png",
+    "invoice-detail.png", "invoice-detail-dark.png"
   ]);
 });
 
@@ -38,11 +40,11 @@ test("complete set passes the pure check and CLI", () => {
     assert.deepEqual(checkBaselineSet(directory).missing, []);
     const result = spawnSync(process.execPath, [validator, directory], { encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /all 8 required visual baselines/);
+    assert.match(result.stdout, /all 12 required visual baselines/);
   });
 });
 
-test("missing directory fails and names all eight expected files", () => {
+test("missing directory fails and names all twelve expected files", () => {
   withBaselineDirectory((parent) => {
     const directory = path.join(parent, "absent");
     const result = spawnSync(process.execPath, [validator, directory], { encoding: "utf8" });
@@ -51,11 +53,21 @@ test("missing directory fails and names all eight expected files", () => {
   });
 });
 
-test("empty directory fails and names all eight expected files", () => {
+test("empty directory fails and names all twelve expected files", () => {
   withBaselineDirectory((directory) => {
     const result = spawnSync(process.execPath, [validator, directory], { encoding: "utf8" });
     assert.notEqual(result.status, 0);
     for (const name of EXPECTED_BASELINES) assert.match(result.stderr, new RegExp(name));
+  });
+});
+
+test("a one-image directory remains incomplete and reports every omitted file", () => {
+  withBaselineDirectory((directory) => {
+    writeFileSync(path.join(directory, EXPECTED_BASELINES[0]), "png fixture");
+    const result = spawnSync(process.execPath, [validator, directory], { encoding: "utf8" });
+    assert.notEqual(result.status, 0);
+    assert.deepEqual(checkBaselineSet(directory).missing, EXPECTED_BASELINES.slice(1));
+    for (const name of EXPECTED_BASELINES.slice(1)) assert.match(result.stderr, new RegExp(name));
   });
 });
 

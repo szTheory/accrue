@@ -9,7 +9,11 @@ const EXPECTED_BASELINES = Object.freeze([
   "subscription-detail.png",
   "subscription-detail-dark.png",
   "component-kitchen.png",
-  "component-kitchen-dark.png"
+  "component-kitchen-dark.png",
+  "invoices.png",
+  "invoices-dark.png",
+  "invoice-detail.png",
+  "invoice-detail-dark.png"
 ]);
 
 function checkBaselineSet(directory) {
