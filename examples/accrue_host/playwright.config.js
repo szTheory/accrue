@@ -5,7 +5,8 @@ const { execFileSync } = require("node:child_process");
 const { defineConfig, devices } = require("@playwright/test");
 
 const port = process.env.ACCRUE_HOST_BROWSER_PORT || "4101";
-const baseURL = `http://127.0.0.1:${port}`;
+const previewBaseURL = process.env.ACCRUE_HOST_PREVIEW_BASE_URL;
+const baseURL = previewBaseURL || `http://127.0.0.1:${port}`;
 const proofRunId = process.env.ACCRUE_HOST_PROOF_RUN_ID || `${process.pid}-${Date.now()}`;
 process.env.ACCRUE_HOST_PROOF_RUN_ID = proofRunId;
 process.env.MIX_BUILD_PATH ||= path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`, "_build");
@@ -46,7 +47,7 @@ module.exports = defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure"
   },
-  webServer: {
+  webServer: previewBaseURL ? undefined : {
     command: `PORT=${port} PHX_SERVER=true MIX_ENV=test mix phx.server`,
     url: `${baseURL}/`,
     reuseExistingServer: process.env.ACCRUE_HOST_REUSE_SERVER === "1",

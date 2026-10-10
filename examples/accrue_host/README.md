@@ -295,6 +295,36 @@ mix verify
 Package-facing docs mirror the same order in
 [`../../accrue/guides/first_hour.md`](../../accrue/guides/first_hour.md).
 
+### Feedback preview: first bootstrap and warm recovery
+
+For the persistent Fake-backed Admin preview, use Docker Compose from this
+directory. First bootstrap creates the instance's database, applies migrations,
+and seeds the showcase records:
+
+```bash
+make up
+```
+
+Read the launch banner for the stable `http://accrue.localhost/admin` URL and
+the loopback fallback; `make url` prints both again. The stable host requires
+the shared proxy (`make proxy`, once). Sign in with the existing operator
+credentials documented above, inspect `/admin`, open the seeded invoice and
+Events views, then reload and record optional feedback outside the app. `/admin`
+is the operator surface; `/billing` is the customer Portal.
+
+To recover a warm preview, keep the same Compose instance and skip only the
+seed step:
+
+```bash
+ACCRUE_HOST_SKIP_SEEDS=1 make up
+```
+
+This keeps its named database volume and applies normal startup migrations.
+Do not use `make reset` for feedback sessions: it removes this instance's
+volumes and rebuilds the showcase data. For a separate preview, pass the same
+DNS-safe name on every command, for example `make up INSTANCE=accrue-review`;
+the stable URL is then `http://accrue-review.localhost/admin`.
+
 ## Optional customer Portal context
 
 `/billing` is the personal-only mount: it has no account picker and no custom

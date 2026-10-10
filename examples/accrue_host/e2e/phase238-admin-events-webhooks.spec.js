@@ -27,7 +27,7 @@ async function assertCurrentAdminAssets(page, testInfo) {
     const packageBytes = fs.readFileSync(path.join(repoRoot, packagePath));
     const compiledPath = path.join(
       repoRoot,
-      "examples/accrue_host/_build/test/lib/accrue_admin/priv",
+      path.join(process.env.MIX_BUILD_PATH || path.join(repoRoot, "examples/accrue_host/_build"), "test/lib/accrue_admin/priv"),
       packagePath.replace("accrue_admin/priv/", "")
     );
     const compiledBytes = fs.readFileSync(compiledPath);
