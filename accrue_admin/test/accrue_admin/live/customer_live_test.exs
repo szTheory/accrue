@@ -489,6 +489,47 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert Accrue.Processor.Fake.call_count(:set_default_payment_method) == 1
   end
 
+  test "ambiguous provider API errors keep payment-method outcomes unconfirmed without retry", %{
+    conn: conn,
+    customer: customer,
+    deletable_payment_method: payment_method
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    render_click(view, "open_payment_method_action", %{
+      "action_type" => "delete",
+      "payment_method_id" => payment_method.id
+    })
+
+    Fake.scripted_response(
+      :detach_payment_method,
+      {:error,
+       %Accrue.APIError{
+         code: "api_error",
+         http_status: 500,
+         message: "Provider internal failure"
+       }}
+    )
+
+    render_click(view, "confirm_payment_method_action", %{})
+    html = render(view)
+    text = html |> Floki.parse_document!() |> Floki.text()
+    assert Fake.call_count(:detach_payment_method) == 1
+    assert text =~ "Outcome not confirmed"
+    assert text =~ "Reload this customer's payment methods"
+    assert text =~ "will not retry automatically"
+    refute text =~ "Provider internal failure"
+    refute has_element?(view, "[data-role='confirm-payment-method-action']")
+
+    render_click(view, "confirm_payment_method_action", %{})
+    assert Fake.call_count(:detach_payment_method) == 1
+
+    {:ok, reconnected_view, _html} = live(conn, "/billing/customers/#{customer.id}")
+    refute has_element?(reconnected_view, "[data-role='confirm-payment-method-action']")
+    assert Fake.call_count(:detach_payment_method) == 1
+  end
+
   test "D-09 blocks deleting payment methods tied to active subscriptions for any processor", %{
     conn: conn,
     customer: customer,

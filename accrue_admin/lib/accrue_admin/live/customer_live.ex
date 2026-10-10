@@ -1275,9 +1275,6 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp payment_method_error_message(%APIError{code: "payment_method_replacement_required"}),
     do: Copy.customer_payment_methods_delete_blocked_replacement_required()
 
-  defp payment_method_error_message(%APIError{message: message}) when is_binary(message),
-    do: message
-
   defp payment_method_error_message(:payment_method_not_found), do: "Payment method not found."
 
   defp payment_method_error_message(:payment_method_already_default),
