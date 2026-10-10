@@ -13,11 +13,31 @@ function sha256(bytes) {
   return crypto.createHash("sha256").update(bytes).digest("hex");
 }
 
+function assertAssetHashMatches(actualHash, expectedHash, label) {
+  if (actualHash !== expectedHash) {
+    throw new Error(`${label} differs from the package build`);
+  }
+}
+
 async function assertCurrentAdminAssets(page, testInfo) {
   const cssHref = await page.locator('link[rel="stylesheet"][href*="/admin/assets/css-"]').getAttribute("href");
   const jsHref = await page.locator('script[src*="/admin/assets/js-"]').getAttribute("src");
   expect(cssHref).toMatch(/\/admin\/assets\/css-[a-f0-9]{32}$/);
   expect(jsHref).toMatch(/\/admin\/assets\/js-[a-f0-9]{32}$/);
+
+  const responseWaiters = new Map();
+  for (const href of [cssHref, jsHref]) {
+    const pathname = new URL(href, page.url()).pathname;
+    responseWaiters.set(pathname, page.waitForResponse((response) => new URL(response.url()).pathname === pathname));
+  }
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await waitForLiveView(page);
+  const browserResponses = new Map();
+  for (const [pathname, responsePromise] of responseWaiters) {
+    const response = await responsePromise;
+    expect(response.status(), `browser response status for ${pathname}`).toBe(200);
+    browserResponses.set(pathname, await response.body());
+  }
 
   const rows = [];
   for (const [href, packagePath] of [
@@ -35,25 +55,74 @@ async function assertCurrentAdminAssets(page, testInfo) {
     expect(response.status(), `served asset status for ${href}`).toBe(200);
     const servedBytes = await response.body();
     const servedPath = new URL(href, page.url()).pathname;
-    const browserRequested = await page.evaluate((pathname) =>
-      performance.getEntriesByType("resource").some((entry) => new URL(entry.name).pathname === pathname),
-      servedPath
-    );
+    const browserBytes = browserResponses.get(servedPath);
+    expect(browserBytes, `browser requested current asset ${servedPath}`).toBeTruthy();
     expect(sha256(packageBytes), `compiled host matches package build: ${packagePath}`).toBe(sha256(compiledBytes));
     expect(sha256(servedBytes), `HTTP response matches package build: ${packagePath}`).toBe(sha256(packageBytes));
-    expect(browserRequested, `browser used current served asset ${servedPath}`).toBeTruthy();
+    assertAssetHashMatches(sha256(browserBytes), sha256(packageBytes), `browser response for ${servedPath}`);
     rows.push({
+      url: new URL(href, page.url()).href,
       path: servedPath,
       package: { sha256: sha256(packageBytes), bytes: packageBytes.length },
       hostCompiled: { sha256: sha256(compiledBytes), bytes: compiledBytes.length },
       httpServed: { sha256: sha256(servedBytes), bytes: servedBytes.length },
-      browserRequestSha256: sha256(servedBytes),
+      browserRequested: { sha256: sha256(browserBytes), bytes: browserBytes.length },
     });
   }
-  await testInfo.attach("phase242-served-asset-provenance.json", {
-    body: Buffer.from(JSON.stringify(rows, null, 2)),
+
+  const packageCssHash = rows[0].package.sha256;
+  await page.route("**/admin/assets/css-*", async (route) => {
+    const response = await route.fetch();
+    const altered = Buffer.from(await response.body());
+    altered[0] ^= 0xff;
+    await route.fulfill({ response, body: altered });
+  });
+  const staleResponseHash = await page.evaluate(async (href) => {
+    const response = await fetch(`${href}?phase243-stale-control=1`, { cache: "no-store" });
+    const bytes = await response.arrayBuffer();
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  }, cssHref);
+  expect(staleResponseHash).not.toBe(packageCssHash);
+  expect(() => assertAssetHashMatches(staleResponseHash, packageCssHash, "stale CSS response"))
+    .toThrow("stale CSS response differs from the package build");
+  await page.unroute("**/admin/assets/css-*");
+  const restoredResponseHash = await page.evaluate(async (href) => {
+    const response = await fetch(href, { cache: "no-store" });
+    const bytes = await response.arrayBuffer();
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  }, cssHref);
+  assertAssetHashMatches(restoredResponseHash, packageCssHash, "restored CSS response");
+
+  const evidence = {
+    checkoutHead: require("node:child_process").execFileSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).trim(),
+    ownerSpecSha256: sha256(fs.readFileSync(__filename)),
+    fixture: "disposable HOST-BROWSER-VERIFY01 fixture",
+    assets: rows,
+    staleResponseControl: {
+      sha256: staleResponseHash,
+      rejectedByPackageIdentityAssertion: true,
+      restoredHttpSha256: restoredResponseHash,
+    },
+  };
+  console.log(`[phase243-asset-evidence] ${JSON.stringify(evidence)}`);
+  await testInfo.attach("phase243-served-asset-provenance.json", {
+    body: Buffer.from(JSON.stringify(evidence, null, 2)),
     contentType: "application/json",
   });
+}
+
+async function assertCorrectedInvoiceActionSpacing(page, fixture) {
+  await page.goto(`/admin/invoices/${fixture.invoice_id}?${orgQuery(fixture)}`, { waitUntil: "domcontentloaded" });
+  await waitForLiveView(page);
+  const actionBand = page.locator(".ax-detail-action-band .ax-page-actions");
+  await expect(actionBand).toBeVisible();
+  const spacing = await actionBand.evaluate((element) => ({
+    gap: getComputedStyle(element).gap,
+    token: getComputedStyle(document.documentElement).getPropertyValue("--ax-space-xs").trim()
+  }));
+  expect(spacing).toEqual({ gap: "4px", token: "0.25rem" });
 }
 
 async function openAdmin(page, fixture, sandboxId, path) {
@@ -85,6 +154,9 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
 
   await openAdmin(page, fixture, sandboxId, `/admin/webhooks?status=dead&${owner}`);
   await assertCurrentAdminAssets(page, testInfo);
+  await assertCorrectedInvoiceActionSpacing(page, fixture);
+  await page.goto(`/admin/webhooks?status=dead&${owner}`);
+  await waitForLiveView(page);
   const firstRow = page.locator(`input[data-role="toggle-row"][data-row-id="${fixture.webhook_id}"]:visible`).first();
   const secondRow = page.locator(`input[data-role="toggle-row"][data-row-id="${fixture.second_webhook_id}"]:visible`).first();
   await expect(firstRow).toBeVisible();
