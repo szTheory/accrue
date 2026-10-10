@@ -1,7 +1,7 @@
 # Requirements: Accrue v1.64 Admin Operator UI Cleanup
 
 **Defined:** 2026-10-09
-**Status:** Approved 2026-10-09; Phases 240–242 verified complete (16/18 requirements); Phase 243 remains.
+**Status:** All 18 requirements verified complete across Phases 240–243 on 2026-10-10; milestone audit/archive is next.
 **Core value:** A Phoenix developer can install Accrue and its companion Admin and launch subscription billing without avoidable integration or operational risk.
 
 ## Milestone requirements
@@ -95,7 +95,7 @@ Each approved requirement has one primary phase owner in the approved roadmap. S
 | EVR-03 | Phase 243 | Complete |
 | EVR-04 | Phase 243 | Complete |
 
-**Coverage:** 18/18 approved requirements mapped once in the approved roadmap; 0 orphaned and 0 duplicated. EVR-03 and EVR-04 are complete from Phase 243 Plan01 and Plan02 evidence; Plan03 remains for final route/evidence reconciliation.
+**Coverage:** 18/18 approved requirements mapped once in the approved roadmap; 0 orphaned and 0 duplicated. EVR-03 and EVR-04 are complete with Phase243 independent verification, final route/evidence reconciliation, and seven passing generated automated UAT cases.
 
 ---
-*Last updated: 2026-10-10 after Phase 243 Plan02 complete verifier acceptance; next: execute Plan03.*
+*Last updated: 2026-10-10 after Phase243 verification and ordered automated UAT; next: complete v1.64 milestone.*

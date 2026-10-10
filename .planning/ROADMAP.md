@@ -19,7 +19,7 @@
 - ✅ **v1.61 CI Evidence & Critical-Path Hardening** — Phases 225–228 (2026-09-12) — [archive](milestones/v1.61-ROADMAP.md)
 - ✅ **v1.62 Release Integration & Repository Hygiene** — Phases 229–232 (2026-09-18) — [archive](milestones/v1.62-ROADMAP.md)
 - ✅ **v1.63 Admin and Portal UI refinement** — Phases 233–239 (shipped 2026-10-09) — [archive](milestones/v1.63-ROADMAP.md)
-- 🚧 **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (3/4 verified complete; next: Phase 243 discussion)
+- 🚧 **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (4/4 verified complete; ready for milestone audit/archive)
 
 ## Planning Doctrine
 
@@ -166,7 +166,7 @@ Plans:
   3. Maintainers can compare final changed route and state coverage with the Phase 240 inventory and slice-owned recurring evidence, including desktop/narrow and effective-theme inspections, served asset identity and any named remaining limits; no broad claim rests only on the initial exemplar. (EVR-03, EVR-04; reconciles EVR-01 and EVR-02 without remapping them)
 
 **Closure obligation**: Reconcile proofs from Phases 240–242 and repair named gaps in their owning surfaces. This phase does not defer first authorization, accessibility, responsive/theme, language or asset acceptance. Use selected stable snapshots, existing thresholds and bounded masks; no new CI matrix or required human sign-off.
-**Plans**: 3/3 plans executed
+**Plans**: 3/3 plans complete
 Plans:
 **Wave 1**
 - [x] 243-01-PLAN.md — Reviewed twelve-image Linux set and faithful masks
@@ -179,11 +179,11 @@ Plans:
 
 ## Progress
 
-**Execution order:** 240 → 241 → 242 → 243. The additional named Phase 241 spacing closure is executed and verified; Phases 240–242 are complete. Phase 243 has approved context, focused research and three independently checked plans across two waves. Plan 243-01's Linux evidence and comparison are complete. Plan 243-02's isolated preview, custody, and complete-wrapper acceptance are complete; Plan 243-03 remains.
+**Execution order:** 240 → 241 → 242 → 243. All four phases and 24 plans are complete, including the named Phase241 spacing closure. Phase243 independent verification passed 3/3 with zero unverified behavior; seven automated UAT cases and the project-wide contract passed after verification. Reviewed Linux goldens, preserved Fake preview and final evidence reconciliation are recorded at their actual revisions. Next: `$gsd-complete-milestone v1.64`.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | Complete    | 2026-10-10 |
 | 241. Billing Operator Journeys | v1.64 | 8/8 | Complete    | 2026-10-10 |
 | 242. Investigations and Remaining Admin Surfaces | v1.64 | 7/7 | Complete    | 2026-10-10 |
-| 243. Integrated Evidence and Feedback Preview | v1.64 | 3/3 | In Progress | - |
+| 243. Integrated Evidence and Feedback Preview | v1.64 | 3/3 | Complete    | 2026-10-10 |

@@ -35,7 +35,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Latest fully shipped milestone: v1.63 — Admin and Portal UI refinement, shipped and archived 2026-10-09.** All seven phases and 34 requirements completed. The milestone delivered scoped, capability-explicit Admin/Portal and checkout journeys, current served evidence, and recurring automated acceptance. Its audit found zero blockers; four pre-close items were explicitly acknowledged and recorded in `STATE.md` Deferred Items.
 
-**Current milestone: v1.64 — Admin Operator UI Cleanup.** Scope/version, [all 18 requirements](REQUIREMENTS.md), and the [four-phase roadmap](ROADMAP.md) are approved. The bounded [upstream diligence](research/v1.64/SUMMARY.md) and Impeccable initialization are complete; reuse Operate / Cobalt / Geist / `--ax-*` and the installed skill version. Phases 240–242 pass current verification: 21 plans; independent 47/47, 32/32 and [80/80](phases/242-investigations-and-remaining-admin-surfaces/242-VERIFICATION.md) must-haves, with zero unverified behavior. The additional Plan 241-08 spacing gap is closed. Phase 241 has 20 automated UAT items; Phase 242 has 19; required human UAT is zero. Broad Admin 679/0 and host 223/0 suites and package/host browsers passed before the final spacing correction. Current correction evidence is focused desktop/mobile browser 2/2, package asset 4/0, Node 44/0, host mount 5/0, warnings-as-errors compiles and package/host compiled CSS identity; host HTTP identity for the corrected CSS was not rerun. The project-wide contract passes across 14 phases, 110 summaries and 322 automated UAT items. Next command is `$gsd-discuss-phase 243` — Integrated Evidence and Feedback Preview. The milestone is 3/4 phases and 16/18 requirements complete; Phase 243 owns reviewed Linux goldens, stable Fake preview and final reconciliation. Read the [Phase 242 handoff](phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-HANDOFF.md) after clearing context. Do not repeat completed research, planning, execution or approval interviews.
+**Current milestone: v1.64 — Admin Operator UI Cleanup.** All four phases, 24 plans and 18 requirements are verified complete; the milestone is ready for audit/archive. Phase243 independently passed 3/3 roadmap truths with zero unverified behavior and seven generated automated UAT cases. The project-wide contract passed across 15 phases, 113 summaries and 329 automated UAT cases. The reviewed twelve-image Ubuntu pixel comparison passed at its recorded revision `0197f4ba` (run 38083267168); later local source changes are not represented as a new Linux comparison. Current mounted host regression passed 6/6, dedicated search 1/1, preview warm preservation 1/1, prior Admin ExUnit 443/0 and Node 37/37, package browsers 100 passed/20 incumbent applicability skips, and host ExUnit 3/0. The stable Fake preview is `http://accrue-host-phase243-preview.localhost/admin`; exact authoritative state remained preserved. See the [Phase243 handoff](phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md) for evidence boundaries and preview entry. Next command: `$gsd-complete-milestone v1.64`. v1.63 remains shipped and archived; no merge or new release is implied by this phase completion.
 
 ## Current Milestone: v1.64 Admin Operator UI Cleanup
 
@@ -692,15 +692,17 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- v1.64 complete reviewed Linux visual baseline evidence and stable Fake-backed Admin feedback preview — EVR-03–04, Phase 243.
+None within the approved v1.64 scope. All 18 requirements are validated; milestone audit/archive follows.
 
-### Validated v1.64 (Phases 240–242 complete; updated 2026-10-10)
+### Validated v1.64 (Phases 240–243 complete; updated 2026-10-10)
 
 - ✓ Shared Admin invoice list/detail/review and dense subscription exemplar, with responsive/theme, keyboard/focus, real busy/reconnect and truthful state patterns — DSN-01–05, UXC-02.
-- ✓ Current 21-route/registry/provenance ledger and recurring acceptance owners, including the early fail-closed eight-baseline guard — EVR-01–02. Independent verification: 47/47, refreshed after Phase 242 and the named Phase 241 spacing closure; required maintainer UAT: 0. Consumer propagation is delivered through Phases 241–242; final reviewed Linux goldens belong to Phase 243.
+- ✓ Current 21-route/registry/provenance ledger and recurring acceptance owners, including the early fail-closed eight-baseline guard — EVR-01–02. Independent verification: 47/47, refreshed after Phase 242 and the named Phase 241 spacing closure; required maintainer UAT: 0. Consumer propagation is delivered through Phases 241–242; Phase243 completed the reviewed twelve-image Linux golden set at its recorded Ubuntu revision.
 - ✓ Customer-scoped open invoices and separately named queues, validated paired return paths/labels, Recovery window round trips, and self-contained subscription/refund/payment-method reviews — JRN-01–04, Phase 241. Independent verification: 32/32, including Plan 08's named action-spacing closure; automated UAT: 20; required maintainer UAT: 0. Fresh authorization, exact money, step-up, dismissal zero-dispatch, provider uncertainty and duplicate/reconnect controls remain proved at their owners.
 
 - ✓ Investigation returns/replay review, exact catalog relationships and truthful Connect policy/snapshot boundaries, scoped Home/search selection and coherent domain language — JRN-05–07, UXC-01, Phase 242. Independent verification: 80/80; automated UAT: 19; required maintainer UAT: 0. Four UI corrections and the search retry regression are closed with executed acceptance.
+
+- ✓ Reviewed complete Linux goldens, stable authenticated Fake Admin preview with warm preservation and isolated proof custody, plus current mounted CSS/JS identity and final route/evidence reconciliation — EVR-03–04, Phase243. Independent verification 3/3; automated UAT 7/7; zero unverified behavior.
 
 ### Validated v1.63 (Phases 233–239 complete 2026-10-09)
 
@@ -920,6 +922,9 @@ Admin global search — 4/4 satisfied.
 
 | Decision | Outcome |
 | --- | --- |
+| Keep Linux golden generation separate from the blocking comparison and state the accepted source revision. | ✓ Phase243 — reviewed twelve-image mint followed by successful normal Ubuntu comparison at 0197f4ba; thresholds unchanged. |
+| Prove full command custody before mutation, with real identities, safe proof paths and an exclusive preview runner. | ✓ Phase243 — 13 custody and one proof-path control pass; synthetic caller identities fail closed; authoritative warm preview state preserved. |
+| Hash actual mounted browser response bytes and reconcile changed evidence against the existing inventory. | ✓ Phase243 — package/compiled/HTTP/browser identity and altered-response rejection pass; inventory remains 21 routes and registry 30/42/8. |
 | Require nonempty mounted targets before universal geometry assertions, and retain all executed reporter/check batches in the evidence budget. | ✓ Good — Phase 241 Plan 08 guards against vacuous passes and records its complete RED/GREEN chronology; named spacing closure verified 32/32. |
 | Treat identical matrix-cell failures as one root-cause incident while retaining each required check identity and artifact. | ✓ Good — Phase 225 repaired the shared causes and preserved the required/advisory distinction. |
 | Bind CI evidence to repository, immutable run/job URLs, workflow topology, timestamps, and explicit provider proof state before comparing performance. | ✓ Good — Phase 226 produced a reproducible 20-path baseline and fail-closed evidence contracts. |
@@ -966,4 +971,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-10 after Phase 242 completion and verified Phase 241 spacing closure; next: `$gsd-discuss-phase 243`.*
+*Last updated: 2026-10-10 after Phase243 completion; next: `$gsd-complete-milestone v1.64`.*

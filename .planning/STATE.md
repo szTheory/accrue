@@ -3,20 +3,19 @@ gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 243
-current_phase_name: Integrated Evidence and Feedback Preview
-current_plan: 3
-status: verifying
-stopped_at: Resolved 243-02 preview routing custody; phase review and verification pending
-last_updated: "2026-10-10T21:37:10.158Z"
+current_plan: 3 of 3 (complete)
+status: completed
+stopped_at: Phase 243 complete — all phases complete
+last_updated: "2026-10-10T22:09:12.942Z"
 last_activity: 2026-10-10
-last_activity_desc: Phase 243 plan implementation complete; preview routing custody fix verified
-state_head: f425645f921f4819e745c4e26f2db85d7d39ef43
+last_activity_desc: Phase 243 complete
+state_head: 151d90983777cfdf9d8182c94455e3eea6106588
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 24
   completed_plans: 24
-  percent: 75
+  percent: 100
 ---
 
 # Project State
@@ -27,23 +26,23 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 243 — Integrated Evidence and Feedback Preview
-**Progress:** [████████░░] 75%
-**Planned work completed:** Phase 240 6/6 plans and 47/47 truths, Phase 241 8/8 plans and 32/32 truths, and Phase 242 7/7 plans and 80/80 truths. All three current verification fingerprints pass with zero unverified behavior. Phase 241 has 20 automated UAT items; Phase 242 has 19; required human UAT is zero. Phase 243's three plans have executed; EVR-03/EVR-04 evidence is reconciled, and the generic preview routing custody defect is fixed and retested. Independent review, phase verification, and ordered UAT closeout remain pending. v1.63 remains archived and closed.
+**Current focus:** v1.64 milestone audit/archive — all four phases complete
+**Progress:** [██████████] 100%
+**Planned work completed:** All four v1.64 phases and 24 plans are complete; all 18 requirements are satisfied. Phase243 independently passed 3/3 roadmap truths with behavior_unverified 0; generated UAT passed 7/7 after verification. The project-wide contract passed 15 phases, 113 summaries and 329 automated UAT cases. Code review findings CR-01/CR-02 are fixed; security has zero open threats. The Linux comparison is pinned to 0197f4ba, while later local mounted/preview regressions have their own recorded evidence. v1.63 remains archived and closed.
 
 ## Current Position
 
-Phase: 243 (Integrated Evidence and Feedback Preview) — EXECUTING
-Current Plan: 3
+Phase: 243
+Current Plan: 3 of 3 (complete)
 Total Plans in Phase: 3
-Status: Implementation complete — independent review and verification pending
-Last activity: 2026-10-10 — Phase 243 preview routing custody remediation verified
+Status: All phases complete
+Last activity: 2026-10-10 — Phase 243 complete
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 104
+- Total plans completed: 107
 - Average duration: —
 - Total execution time: —
 
@@ -68,6 +67,7 @@ Last activity: 2026-10-10 — Phase 243 preview routing custody remediation veri
 | 240 | 6 | - | - |
 | 241 | 8 | - | - |
 | 242 | 7 | - | - |
+| 243 | 3 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -428,12 +428,12 @@ None. The next workflow action is recorded under Operator Next Steps; completed 
 
 ### Blockers/Concerns
 
-- **Current v1.64:** Phase 242 has no open acceptance or security findings. Phase 243 remains planned milestone scope, not Phase 242 verification debt.
+- **Current v1.64:** No open phase acceptance, security or code-review findings. All four phases are complete; milestone audit/archive remains the next lifecycle action.
 - **Resolved by v1.62:** the `main`/v1.61 divergence, the stale local `main` ref, the four unpublished audit-closure commits, and the unavailable live-CI monitor. All are reconciled into the integration candidate with committed evidence.
 - **Historical v1.62 candidate:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
 - **Archived v1.62 validation debt:** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
 - Phase 243 Plan 01 and EVR-03 are complete: the twelve reviewed Linux baselines passed the complete-set guard and Phase 211 pixel comparison in GitHub Actions run 38083267168.
-- Plan 243-02 is complete: the Phase234 destination-specific return assertion and direct-run custody are repaired; full `mix verify.full` exited 0 with the preview snapshot preserved. The exact original default-volume fingerprint procedure matched before and after verification/reboot. Plan 243-03 remains.
+- Phase243 Plans02/03 are complete: full-wrapper and later mounted custody/asset/preview checks passed at their recorded revisions with authoritative state preserved. Default-volume fingerprint reconciliation matched the original procedure; final independent verification and ordered UAT passed.
 
 ### Quick Tasks Completed
 
@@ -488,8 +488,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T21:37:10.100Z
-Stopped at: Resolved 243-02 preview routing custody; phase review and verification pending
+Last session: 2026-10-10T22:31:20.398031Z
+Stopped at: Phase 243 complete — all phases complete
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -619,11 +619,11 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- **Last completed phase:** 242 — Investigations and Remaining Admin Surfaces (7/7 plans, independent 80/80 verification, 19 automated UAT items, zero human UAT).
+- **Last completed phase:** 243 — Integrated Evidence and Feedback Preview (3/3 plans, independent 3/3 verification, seven automated UAT items, zero unverified behavior).
 - **Additional closure completed:** Phase 241 Plan 08 corrected the named spacing gap; current verification is 32/32 with 20 automated UAT items. Original completed plans were not replayed.
-- **Next step:** Complete independent review and phase verification for Phase 243. Generate automated UAT and run the project-wide executable-UAT contract only after verification passes. The preview routing custody defect discovered by Plan03 is fixed and has current positive and negative runtime evidence.
-- Context can be cleared. Read `phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-HANDOFF.md`; preserve approved decisions, verification fingerprint, acceptance owners and evidence limits. Do not rerun completed original 240–242 plans or restart milestone/research/Impeccable initialization.
+- **Next step:** `$gsd-complete-milestone v1.64` — audit/archive the completed four-phase, 18-requirement milestone.
+- Context can be cleared. Read `phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md`; preserve approved decisions, verification fingerprint, acceptance owners and evidence limits. Do not rerun completed original 240–242 plans or restart milestone/research/Impeccable initialization.
 - Default to automated unit/integration/E2E/smoke/seam acceptance and existing CI when recurring value exists. Required human UAT is zero; subjective feedback stays optional. Preview data must remain separate from disposable mutation/reset fixtures.
 - Phase 243 completed the reviewed Linux golden set, stable Fake-backed `/admin` preview and final evidence reconciliation. Actual provider/device/speech/native-zoom and remote CI limits remain explicit; no broad certification is claimed.
-- Completion returned five summary reference warnings for eleven command strings parsed as file paths. All 24 referenced package/host test owners resolve, including the Node glob; actual checks passed. These are bookkeeping false positives, not missing evidence or new work.
-- All Phase 242 changes are local commits; no push, merge, publication or remote main-CI result is claimed.
+- Phase243 completion emitted three summary-reference warnings: command strings and one package-relative `e2e/global-setup.js` were treated as repository-relative filenames. Each actual full owner path exists and its checks passed; these heuristic warnings add no missing artifact or verification debt. Original Phase242 reference warnings remain historical.
+- Phase243 Linux source was published only to the explicitly authorized `gsd/phase-243-linux-evidence` validation ref. No main merge or release occurred; the accepted remote result remains pinned to 0197f4ba.
