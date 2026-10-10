@@ -5,14 +5,14 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   import Ecto.Query
 
-  alias Accrue.APIError
-  alias Accrue.Billing
+  alias Accrue.{APIError, Auth, Billing}
   alias Accrue.Billing.{Charge, Invoice, PaymentMethod, Subscription}
   alias Accrue.Events
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Customers
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.ScopedPath
 
   alias AccrueAdmin.Components.{
@@ -179,18 +179,21 @@ defmodule AccrueAdmin.Live.CustomerLive do
   def handle_event("confirm_payment_method_action", _params, socket) do
     case socket.assigns.pending_payment_method_action do
       %{type: "set_default", payment_method: %PaymentMethod{id: payment_method_id}} ->
-        with {:ok, payment_method} <-
-               fetch_customer_payment_method(socket.assigns.customer, payment_method_id),
+        with {:ok, fresh_scope, customer, payment_method} <-
+               revalidate_payment_method_action(
+                 socket,
+                 socket.assigns.pending_payment_method_action
+               ),
              :ok <-
                validate_payment_method_action(
-                 socket.assigns.customer,
+                 customer,
                  "set_default",
                  payment_method
                ),
-             {:ok, _customer} <-
-               Billing.set_default_payment_method(socket.assigns.customer, payment_method, []) do
+             {:ok, _customer} <- Billing.set_default_payment_method(customer, payment_method, []) do
           {:noreply,
            socket
+           |> assign(:current_owner_scope, fresh_scope)
            |> push_flash(:info, Copy.customer_payment_methods_set_default_success())
            |> clear_payment_method_action()
            |> refresh_customer_detail()}
@@ -205,13 +208,17 @@ defmodule AccrueAdmin.Live.CustomerLive do
         end
 
       %{type: "delete", payment_method: %PaymentMethod{id: payment_method_id}} ->
-        with {:ok, payment_method} <-
-               fetch_customer_payment_method(socket.assigns.customer, payment_method_id),
-             :ok <-
-               validate_payment_method_action(socket.assigns.customer, "delete", payment_method),
+        with {:ok, fresh_scope, customer, payment_method} <-
+               revalidate_payment_method_action(
+                 socket,
+                 socket.assigns.pending_payment_method_action
+               ),
+             :ok <- validate_payment_method_action(customer, "delete", payment_method),
              {:ok, _payment_method} <- Billing.delete_payment_method(payment_method, []) do
           {:noreply,
            socket
+           |> assign(:customer, customer)
+           |> assign(:current_owner_scope, fresh_scope)
            |> reconcile_deleted_payment_method(payment_method)
            |> push_flash(:info, Copy.customer_payment_methods_delete_success())
            |> clear_payment_method_action()
@@ -461,11 +468,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
               class="ax-button ax-button-primary"
               data-role="confirm-payment-method-action"
               data-ax-action-drawer-confirm
+              phx-disable-with={payment_method_submitting_label(@pending_payment_method_action.type)}
             >
               Confirm <%= payment_method_action_label(@pending_payment_method_action.type) %>
             </button>
             <button phx-click="cancel_payment_method_action" class="ax-button ax-button-ghost">
-              <%= Copy.customer_payment_methods_cancel_action() %>
+              Back to customer
             </button>
           </:footer>
         </DetailDrawer.detail_drawer>
@@ -487,6 +495,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
               class="ax-button ax-button-primary"
               data-role="confirm-payment-method-action"
               data-ax-action-drawer-confirm
+              phx-disable-with={payment_method_submitting_label(@pending_payment_method_action.type)}
             >
               Confirm <%= payment_method_action_label(@pending_payment_method_action.type) %>
             </button>
@@ -504,6 +513,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
     <div class="ax-stack-md" data-role="payment-method-action-content">
       <p class="ax-body"><%= payment_method_action_copy(@pending_action) %></p>
       <Detail.detail_field_list fields={payment_method_action_fields(@pending_action)} />
+      <p class="ax-body ax-measure"><%= payment_method_action_consequence(@pending_action) %></p>
     </div>
     """
   end
@@ -1013,7 +1023,15 @@ defmodule AccrueAdmin.Live.CustomerLive do
     with {:ok, normalized_action_type} <- normalize_payment_method_action_type(action_type),
          {:ok, payment_method} <- fetch_customer_payment_method(customer, payment_method_id),
          :ok <- validate_payment_method_action(customer, normalized_action_type, payment_method) do
-      {:ok, %{type: normalized_action_type, payment_method: payment_method}}
+      {:ok,
+       %{
+         type: normalized_action_type,
+         payment_method: payment_method,
+         customer: customer,
+         reviewed_default?: default_payment_method?(customer, payment_method),
+         reviewed_customer_default_id: customer.default_payment_method_id,
+         reviewed_in_use?: active_subscription_payment_method?(customer, payment_method)
+       }}
     end
   end
 
@@ -1059,6 +1077,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp payment_method_action_label(_action_type),
     do: Copy.customer_payment_methods_section_heading()
 
+  defp payment_method_submitting_label("set_default"), do: "Setting default payment method..."
+  defp payment_method_submitting_label("delete"), do: "Deleting payment method..."
+
   defp payment_method_action_copy(%{type: "set_default"}),
     do: Copy.customer_payment_methods_set_default_drawer_body()
 
@@ -1067,12 +1088,42 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   defp payment_method_action_copy(_action), do: Copy.customer_payment_methods_delete_warning()
 
-  defp payment_method_action_fields(%{payment_method: %PaymentMethod{} = payment_method}) do
+  defp payment_method_action_fields(%{payment_method: %PaymentMethod{} = payment_method} = action) do
+    customer = action.customer
+
     [
+      %{label: "Customer", value: customer_label(customer)},
+      %{label: "Customer ID", value: customer.id},
+      %{label: "Owner", value: owner_summary(customer)},
       %{label: "Payment method", value: payment_method_label(payment_method)},
-      %{label: "Processor ID", value: payment_method.processor_id || payment_method.id}
+      %{label: "Payment method record ID", value: payment_method.id},
+      %{label: "Processor ID", value: payment_method.processor_id || payment_method.id},
+      %{
+        label: "Current default",
+        value: if(action.reviewed_default?, do: "Yes", else: "No")
+      },
+      %{
+        label: "Current use",
+        value:
+          if(action.reviewed_in_use?,
+            do: "Used by an active subscription",
+            else: "Not found on an active subscription"
+          )
+      },
+      %{label: "Action", value: payment_method_action_label(action.type)}
     ]
   end
+
+  defp payment_method_action_consequence(%{type: "set_default"}),
+    do:
+      "This makes the selected payment method the customer's default for future billing. It does not change existing invoices or confirm a payment."
+
+  defp payment_method_action_consequence(%{type: "delete"}),
+    do:
+      "This removes the selected payment method from the customer. Accrue will show the result returned by the current processor integration; deletion is not proof of any prior payment outcome."
+
+  defp payment_method_action_consequence(_action),
+    do: Copy.customer_payment_methods_delete_warning()
 
   defp clear_payment_method_action(socket) do
     socket
@@ -1107,7 +1158,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
     do: Copy.customer_payment_methods_delete_blocked_replacement_required()
 
   defp payment_method_action_flash_kind(reason)
-       when reason in [:in_use, :replacement_required, :payment_method_already_default],
+       when reason in [
+              :in_use,
+              :replacement_required,
+              :payment_method_already_default,
+              :payment_method_changed
+            ],
        do: :warning
 
   defp payment_method_action_flash_kind(_reason), do: :error
@@ -1153,6 +1209,37 @@ defmodule AccrueAdmin.Live.CustomerLive do
     end
   end
 
+  defp revalidate_payment_method_action(socket, action) do
+    original_scope = socket.assigns.current_owner_scope
+    session = socket.assigns.accrue_admin_session
+
+    params =
+      if original_scope.mode == :organization,
+        do: %{"org" => original_scope.organization_slug},
+        else: %{}
+
+    with {:ok, fresh_scope} <- OwnerScope.resolve(session, params),
+         true <-
+           Auth.actor_id(fresh_scope.current_admin) == Auth.actor_id(socket.assigns.current_admin),
+         true <- fresh_scope.mode == original_scope.mode,
+         true <- fresh_scope.organization_id == original_scope.organization_id,
+         {:ok, customer} <- Customers.detail(socket.assigns.customer.id, fresh_scope),
+         {:ok, payment_method} <-
+           fetch_customer_payment_method(customer, action.payment_method.id),
+         :ok <- validate_payment_method_action(customer, action.type, payment_method),
+         true <- customer.default_payment_method_id == action.reviewed_customer_default_id,
+         true <- default_payment_method?(customer, payment_method) == action.reviewed_default?,
+         true <-
+           active_subscription_payment_method?(customer, payment_method) ==
+             action.reviewed_in_use? do
+      {:ok, fresh_scope, customer, payment_method}
+    else
+      false -> {:error, :payment_method_changed}
+      :not_found -> {:error, :payment_method_not_found}
+      {:error, _reason} = error -> error
+    end
+  end
+
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
   end
@@ -1195,6 +1282,10 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   defp payment_method_error_message(:payment_method_already_default),
     do: Copy.customer_payment_methods_already_default_warning()
+
+  defp payment_method_error_message(:payment_method_changed),
+    do:
+      "Customer payment-method details changed after review. Review the current method before confirming."
 
   defp payment_method_error_message(:payment_method_action_invalid),
     do: "Select a valid payment method action."

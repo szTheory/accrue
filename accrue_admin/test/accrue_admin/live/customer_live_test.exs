@@ -389,6 +389,67 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert has_element?(view, "[data-role='confirm-payment-method-action']")
   end
 
+  test "set-default and delete reviews identify the selected method and customer effect", %{
+    conn: conn,
+    customer: customer,
+    deletable_payment_method: deletable_payment_method
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    for {action_type, expected_effect} <- [
+          {"set_default", "future billing"},
+          {"delete", "removes the selected payment method from the customer"}
+        ] do
+      html =
+        render_click(view, "open_payment_method_action", %{
+          "action_type" => action_type,
+          "payment_method_id" => deletable_payment_method.id
+        })
+
+      assert html =~ deletable_payment_method.card_last4
+      assert html =~ deletable_payment_method.id
+      assert html =~ deletable_payment_method.processor_id
+      assert html =~ customer.name
+      assert html =~ customer.id
+      assert html =~ "Current default"
+      assert html =~ "Current use"
+      assert html =~ expected_effect
+      assert html =~ "Back to customer"
+      assert has_element?(view, "[data-role='confirm-payment-method-action']")
+
+      html = render_click(view, "cancel_payment_method_action")
+      refute html =~ ~s(data-role="payment-method-action-drawer-test-mirror")
+    end
+
+    refreshed_customer = TestRepo.get!(Customer, customer.id)
+    assert refreshed_customer.default_payment_method_id == customer.default_payment_method_id
+    assert TestRepo.get!(PaymentMethod, deletable_payment_method.id)
+  end
+
+  test "payment-method confirmation rejects customer default changes made after review", %{
+    conn: conn,
+    customer: customer,
+    deletable_payment_method: payment_method
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    render_click(view, "open_payment_method_action", %{
+      "action_type" => "set_default",
+      "payment_method_id" => payment_method.id
+    })
+
+    customer
+    |> Customer.changeset(%{default_payment_method_id: payment_method.id})
+    |> TestRepo.update!()
+
+    html = render_click(view, "confirm_payment_method_action", %{})
+
+    assert html =~ Copy.customer_payment_methods_already_default_warning()
+    assert TestRepo.get!(Customer, customer.id).default_payment_method_id == payment_method.id
+  end
+
   test "D-09 blocks deleting payment methods tied to active subscriptions for any processor", %{
     conn: conn,
     customer: customer,
