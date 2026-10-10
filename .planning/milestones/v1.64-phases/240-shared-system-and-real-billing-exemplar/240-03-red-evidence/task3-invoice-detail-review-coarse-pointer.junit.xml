@@ -1,0 +1,47 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="4.692192">
+<testsuite name="admin-spec-detail-phase198.spec.js" timestamp="2026-10-09T21:05:37.894Z" hostname="chromium-desktop" tests="1" failures="1" skipped="0" time="1.231" errors="0">
+<testcase name="Phase 240 intermediate coarse-pointer invoice review › keeps invoice facts and staged action controls usable with coarse pointer" classname="admin-spec-detail-phase198.spec.js" time="1.231">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../playwright-3/admin-spec-detail-phase198-20912--usable-with-coarse-pointer-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|../../playwright-3/admin-spec-detail-phase198-20912--usable-with-coarse-pointer-chromium-desktop/error-context.md]]
+
+[[ATTACHMENT|../../playwright-3/admin-spec-detail-phase198-20912--usable-with-coarse-pointer-chromium-desktop/trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBeGreaterThanOrEqual(expected)" type="expect.toBeGreaterThanOrEqual">
+<![CDATA[  [chromium-desktop] › admin-spec-detail-phase198.spec.js:522:3 › Phase 240 intermediate coarse-pointer invoice review › keeps invoice facts and staged action controls usable with coarse pointer 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 44
+    Received:    36
+
+      548 |       return { width: rect.width, height: rect.height };
+      549 |     });
+    > 550 |     expect(reviewSize.height).toBeGreaterThanOrEqual(44);
+          |                               ^
+      551 |     await reviewButton.click();
+      552 |     await expect(page.locator("#ax-overlay-root [data-role='confirm-panel']:visible").first()).toContainText(
+      553 |       "Owner target"
+        at /private/tmp/accrue-240-03-red/repo/accrue_admin/e2e/admin-spec-detail-phase198.spec.js:550:31
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../../playwright-3/admin-spec-detail-phase198-20912--usable-with-coarse-pointer-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../playwright-3/admin-spec-detail-phase198-20912--usable-with-coarse-pointer-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../../playwright-3/admin-spec-detail-phase198-20912--usable-with-coarse-pointer-chromium-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../../playwright-3/admin-spec-detail-phase198-20912--usable-with-coarse-pointer-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

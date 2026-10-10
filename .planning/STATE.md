@@ -2,20 +2,19 @@
 gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
-current_phase: 243
-current_plan: Not started
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 243 complete — all phases complete
-last_updated: "2026-10-10T23:44:30.761Z"
+last_updated: "2026-10-10T23:50:13.712Z"
 last_activity: 2026-10-10
-last_activity_desc: Phase 243 complete
-state_head: 849f72084a6460ed54ecc06bc261054b15efdde0
+last_activity_desc: Milestone v1.64 completed and archived
+state_head: d33cd11e9d5b3dc16f50732f66b477031eb1e8a0
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 24
   completed_plans: 24
   percent: 100
+current_phase: 243
 ---
 
 # Project State
@@ -26,17 +25,16 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 242 — Investigations and Remaining Admin Surfaces
+**Current focus:** v1.64 shipped and archived; no active milestone
 **Progress:** [██████████] 100%
-**Planned work completed:** All four v1.64 phases and 24 plans are completed; all 18 requirements are satisfied by their recorded acceptance. Phase243 independently passed 3/3 roadmap truths with behavior_unverified 0; generated UAT passed 7/7 after verification. The project-wide contract passed 15 phases, 113 summaries and 329 automated UAT cases. Code review findings CR-01/CR-02 are fixed; security has zero open threats. The Linux comparison is pinned to 0197f4ba, while later local mounted/preview regressions have their own recorded evidence. v1.63 remains archived and closed.
+**Planned work completed:** All four v1.64 phases, 24 plans, and 18 requirements are complete. Fresh independent phase verification passed 47/47, 32/32, 80/80, and 3/3 with zero unverified behavior; the project-wide contract passed 15 phases, 113 summaries, and 329 automated UAT cases. Code review findings CR-01/CR-02 are fixed; security has zero open threats. Current-source Linux Browser UAT and Mint baselines passed in run 38094642350 at `849f72084a6460ed54ecc06bc261054b15efdde0`. The audit has zero blockers and records two newly acknowledged notices plus four carried-forward acknowledgements. v1.63 remains archived and closed.
 
 ## Current Position
 
-Phase: 243
-Current Plan: Not started
-Total Plans in Phase: 7
-Status: All phases complete
-Last activity: 2026-10-10 — Phase 243 complete
+Phase: Milestone v1.64 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-10 — Milestone v1.64 completed and archived
 
 ## Performance Metrics
 
@@ -457,6 +455,8 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 | Category | Item | Status | Deferred At | Milestone |
 |---|---|---|---|---|
+| deferred_items | 240/deferred-items.md: Admin asset build reports unavailable development Storybook CSS/JS asset paths while completing the package build successfully | acknowledged | 2026-10-10 | v1.64 |
+| deferred_items | 240/deferred-items.md: ExMoney reports deprecated automatic exchange-rate service startup during the Admin ExUnit suite | acknowledged | 2026-10-10 | v1.64 |
 | requirement | HOST-01..03 | Deferred at v1.60 override closeout | — | v1.60 |
 | requirement | READY-01..02 | Deferred at v1.60 override closeout | — | v1.60 |
 | seed | SEED-008-mailglass-downstream-major-cap | dormant — acknowledged and deferred at v1.62 override closeout | 2026-09-18 | v1.62 |
@@ -619,11 +619,8 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- **Last completed phase:** 243 — Integrated Evidence and Feedback Preview (3/3 plans, independent 3/3 verification, seven automated UAT items, zero unverified behavior).
-- **Additional closure completed:** Phase 241 Plan 08 corrected the named spacing gap; current verification is 32/32 with 20 automated UAT items. Original completed plans were not replayed.
-- **Next step:** Refresh older Phase240–242 verification through each owning `$gsd-execute-phase` verification path (no original plan replay), then `$gsd-complete-milestone v1.64` for audit/archive. Phase243 itself is current, passed and complete.
-- Context can be cleared. Read `phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md`; preserve approved decisions, verification fingerprint, acceptance owners and evidence limits. Do not rerun completed original 240–242 plans or restart milestone/research/Impeccable initialization.
-- Default to automated unit/integration/E2E/smoke/seam acceptance and existing CI when recurring value exists. Required human UAT is zero; subjective feedback stays optional. Preview data must remain separate from disposable mutation/reset fixtures.
-- Phase 243 completed the reviewed Linux golden set, stable Fake-backed `/admin` preview and final evidence reconciliation. Actual provider/device/speech/native-zoom and remote CI limits remain explicit; no broad certification is claimed.
-- Phase243 completion emitted three summary-reference warnings: command strings and one package-relative `e2e/global-setup.js` were treated as repository-relative filenames. Each actual full owner path exists and its checks passed; these heuristic warnings add no missing artifact or verification debt. Original Phase242 reference warnings remain historical.
-- Phase243 Linux source was published only to the explicitly authorized `gsd/phase-243-linux-evidence` validation ref. No main merge or release occurred; the accepted remote result remains pinned to 0197f4ba.
+- **Last completed phase:** 243 — Integrated Evidence and Feedback Preview (3/3 plans; fresh 3/3 verification; seven automated UAT cases; zero unverified behavior).
+- **Milestone closed:** v1.64 Admin Operator UI Cleanup; all four phases, 24 plans, and 18 requirements are complete. Audit status is `tech_debt` with zero blockers; Phase 240's two build/deprecation notices are acknowledged, and four earlier acknowledgements are carried forward.
+- **Current-source Linux evidence:** GitHub Actions run 38094642350 passed Browser UAT and Mint visual baselines at source SHA `849f72084a6460ed54ecc06bc261054b15efdde0` on the authorized `gsd/phase-243-linux-evidence` branch.
+- **Next GSD command:** `$gsd-new-milestone`.
+- Context can be cleared. Phase artifacts and the Phase 243 handoff are archived under `milestones/v1.64-phases/`; the current audit is `milestones/v1.64-MILESTONE-AUDIT.md`. Quick-task folders remain in place by choice.

@@ -1,0 +1,31 @@
+# Phase 243 integrated evidence and feedback handoff
+
+## Preview entry
+
+Use the existing [Cadence host preview instructions](../../../examples/accrue_host/README.md#feedback-preview-first-bootstrap-and-warm-recovery) for first bootstrap, the authenticated Admin entry, stable local URL, warm recovery, and optional feedback. The currently running dedicated preview is `accrue-host-phase243-preview` at `http://accrue-host-phase243-preview.localhost/admin`; the README documents the ordinary `accrue.localhost` entry and loopback fallback. Operator credentials remain in the README only and are intentionally not copied here.
+
+Feedback is optional and collected outside the app after sign-in and inspection. A feedback walkthrough does not confirm billing actions or invoke reset, reseed, or mutation proof. Keep the same Compose instance and use the documented skip-seeds warm recovery. Do not use `make reset` for a feedback session.
+
+## Current evidence
+
+- The reviewed twelve-image Linux baseline set and unchanged blocking comparison passed on revision `0197f4bad11d7b667a6359aba7adfae666f9dd95` in workflow run `38083267168`. Mint artifact run `38082811261` supplied the reviewed images. This result is tied to its recorded revision; it is not a fresh Linux comparison after Plan02 or Plan03 source changes.
+- Phase243 Plan02 exercised the Fake preview, authenticated `/admin` navigation, warm skip-seed recovery, and the complete host verifier while preserving the authoritative preview invoice/audit/webhook/dispatch snapshot. It records the exact native proof DB, Compose volume, listener and build-path separation in `243-02-SUMMARY.md`.
+- Plan03's direct Phase238 owner passed 2/2 at checkout HEAD `f3b9a7a715832a71f4a4925bea1f985b5898c5af`, owner spec SHA-256 `07918db345530a379e084e5d5d02eae205c2be380e1f84f22b18811342ab27d6`, on disposable fixture `HOST-BROWSER-VERIFY01`, native `accrue_host_test`, and proof listener `127.0.0.1:4183`. Package, host-compiled, HTTP-served and actual browser response CSS all matched at SHA-256 `089878ed3cba5377be66c12c1958d728873d327c4666c7ec293e21cc8188633e`; JS tiers matched at `36974c751ef3c9df6f40a2ff7fa09c04d85819dac2de74804d8438f6c3be3085`. Altered CSS response `9748beceab1eb9e5b57b282e83a86410f73a4572b20ad8f4f81ef4e42ad89ec6` was rejected, and the original response hash was restored. The invoice action band rendered at 4px with `--ax-space-xs: 0.25rem`.
+- The current mounted proof screenshot showed the sidebar wordmark as the Accrue mark and text without a broken-image indicator. The earlier broken-logo observation came from a disposable package fixture configured with `https://example.test/logo.svg`; it does not reproduce on this host fixture. No logo change was made.
+- The Phase 240 ledger verifier passed with 21 routes and registry counts 30/42/8. Its negative control reported `self-test: valid=1 missing-route-rejected=1`.
+
+## Evidence boundaries
+
+The 21-route inventory above remains authoritative. Current exercised claims are limited to the named fixtures, routes, and states in the ledger. Aggregate ExUnit, Node, Playwright, or verifier success does not mean every route/state was mounted or every action executed. Phase243 browser proof uses a local Fake host and says nothing about live provider parity, real billing outcomes, or remote CI. Phase242's viewport, pointer, theme, and CSS stress results are emulation, not physical-device, OS preference, or actual browser-zoom proof. Axe checks do not establish screen-reader speech. No new comparable resource/timing measurement was taken; prior one-run diagnostics remain historical and are not an SLA.
+
+The first Plan03 Phase238 invocation inherited `ACCRUE_HOST_PREVIEW_BASE_URL`, routed its `/api/sandbox` request to the preview, and failed before its test-body assertions. Its immediate authoritative preview snapshot matched the pre-run snapshot. This failure is preserved in the Plan03 history and was resolved in commit `f425645f`: the generic config now refuses preview URL routing, while the explicit `e2e:preview` runner accepts only `e2e/phase243-preview-preservation.spec.js`, restricts Playwright discovery to that owner, and bypasses generic database setup and server startup. Its README command and required inputs are documented in the linked preview instructions. Custody controls passed 12/12; the dedicated preservation spec passed 1/1 with identical authoritative before/after state; and the generic Phase238 owner passed 2/2 against isolated proof targets while the dedicated preview stayed on Compose port 56466. Broken-windows entry 35 is fixed with this evidence.
+
+No user feedback is required to accept the automated evidence. The independent verification verdict is recorded in `243-VERIFICATION.md`; automated acceptance cases belong to `243-UAT.md`, generated only after verification in the ordered closeout.
+
+The required UI audit scored the existing captures 16/24. Its suggestions are advisory: the broken logo is confined to the package fixture while the mounted host wordmark works; the proposed 8px action gap would change the approved 4px spacing contract; invoice-row separation and section density are recorded presentation refinements. These observations do not establish a new mounted behavioral defect or require human UAT. The audit used existing captures and source and did not expand the bounded capture budget.
+
+## Code review custody corrections
+
+Review findings CR-01 and CR-02 are fixed in `388483ce` and `12649d27`. Proof run IDs and direct derived paths fail closed, and production preflight refuses caller synthetic identity fixtures. The proof-path control passed 1/1, custody controls passed 13/13, and the disposition ledger has zero open findings. Earlier successful runtime and Linux results remain tied to their recorded revisions.
+
+Post-review runtime checks passed on the corrected source: mounted host 6/6; dedicated search 1/1 after `3c5fa035`; explicit preview 1/1; authoritative snapshot identical after all runs. Prior-phase Admin checks passed 443 ExUnit and 37 Node tests; package browser checks passed 100 with 20 existing applicability skips; host ExUnit checks passed 3. These targeted regressions do not replace the historical full-wrapper or pinned Ubuntu results.

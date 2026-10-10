@@ -1,0 +1,13 @@
+{
+  "command": "npm_config_cache=/private/tmp/accrue240-npm-cache npx playwright test e2e/admin-page-flow-phase191.spec.js --grep 'online signal keeps staged|subscription action stays busy' --project=chromium-desktop --workers=1 --reporter=junit",
+  "exitCode": 1,
+  "output": "<testsuites id=\"\" name=\"\" tests=\"2\" failures=\"1\" skipped=\"0\" errors=\"0\" time=\"10.234577\">\n<testsuite name=\"admin-page-flow-phase191.spec.js\" timestamp=\"2026-10-09T22:04:05.114Z\" hostname=\"chromium-desktop\" tests=\"2\" failures=\"1\" skipped=\"0\" time=\"7.606\" errors=\"0\">\n<testcase name=\"Phase 191 page-flow regression harness › browser online signal keeps staged billing action disabled until LiveView reconnects @reconnect @ax187\" classname=\"admin-page-flow-phase191.spec.js\" time=\"0.826\"></testcase>\n<testcase name=\"Phase 191 page-flow regression harness › disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187\" classname=\"admin-page-flow-phase191.spec.js\" time=\"6.78\">\n<failure message=\"expect(received).toBe(expected) // Object.is equality\" type=\"expect.toBe\"><![CDATA[Expected: \\\"canceled\\\"\nReceived: \\\"active\\\"\nHeld Fake dispatch_count was 1; after release, action-status stayed active.]]></failure>\n</testcase>\n</testsuite>\n</testsuites>",
+  "targetTest": "admin-page-flow-phase191.spec.js#Phase 191 page-flow regression harness › disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187",
+  "targetFile": "accrue_admin/e2e/admin-page-flow-phase191.spec.js",
+  "expected": "After the held Fake provider response is released, the real billing action persists canceled state and its subscription/audit events exactly once.",
+  "actual": "The provider was dispatched once, but the subscription remained active after release because the fixture stub returned a bare map instead of the processor's {:ok, response} result.",
+  "semanticAssessment": "The named target reached dispatch_count=1 and held=true before release, then failed the persisted-status assertion after completion. This is a real processor-result contract defect in the fixture implementation, not an E2E setup failure.",
+  "reportPath": ".planning/phases/240-shared-system-and-real-billing-exemplar/240-05-phase191-target-green5.junit.xml",
+  "runStartedAt": "2026-10-09T22:04:02Z",
+  "reportModifiedAt": "2026-10-09T22:04:05.114Z"
+}

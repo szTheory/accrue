@@ -1,5 +1,31 @@
 # Milestones
 
+## v1.64 Admin Operator UI Cleanup (Shipped: 2026-10-10)
+
+**Phases completed:** 4 phases, 24 plans, 53 tasks
+
+**Key accomplishments:**
+- Established shared Admin invoice/subscription patterns with responsive, theme, keyboard, busy/reconnect, state, and served-asset proof.
+- Completed scoped billing journeys, validated return paths, self-contained action reviews, and the approved mounted action-control spacing.
+- Extended truthful investigation, webhook, catalog, Connect, Home, and search behavior across the remaining Admin surfaces.
+- Passed current served-asset and mounted browser evidence against the existing 21-route inventory, preserving route and provider scope limits.
+- Completed the reviewed twelve-image Linux visual set and blocking Ubuntu comparison at the unchanged thresholds.
+- Delivered an isolated Fake `/admin` feedback preview with custody, warm-recovery, and authoritative-state preservation evidence.
+
+**Delivered:** A consistent, scoped Admin operator experience with recurring mounted acceptance and current-source visual evidence; no new billing capability or Portal scope was added.
+
+**Verification:** Override closeout; audit `tech_debt`, with 18/18 requirements, 4/4 phase verifications, 10/10 integration seams, 6/6 end-to-end flows, 4/4 Nyquist-compliant phases, and zero blockers.
+
+**Linux evidence:** [GitHub Actions run 38094642350](https://github.com/szTheory/accrue/actions/runs/38094642350) passed Browser UAT and Mint visual baselines against source SHA `849f72084a6460ed54ecc06bc261054b15efdde0` on `gsd/phase-243-linux-evidence`.
+
+**Known verification overrides:** 2 newly acknowledged, 4 carried forward from a prior close (see `STATE.md` Deferred Items).
+
+**Stats:** 320 files changed, +26,725/-1,260; 2026-10-09 → 2026-10-10. Git range: `49f058d` → `d33cd11`.
+
+**Archives:** [`milestones/v1.64-ROADMAP.md`](milestones/v1.64-ROADMAP.md), [`milestones/v1.64-REQUIREMENTS.md`](milestones/v1.64-REQUIREMENTS.md), [`milestones/v1.64-MILESTONE-AUDIT.md`](milestones/v1.64-MILESTONE-AUDIT.md), [`milestones/v1.64-phases/`](milestones/v1.64-phases/).
+
+---
+
 ## v1.63 Admin and Portal UI refinement (Shipped: 2026-10-09)
 
 **Phases completed:** 7 phases, 45 plans, 96 tasks

@@ -33,11 +33,21 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest fully shipped milestone: v1.63 — Admin and Portal UI refinement, shipped and archived 2026-10-09.** All seven phases and 34 requirements completed. The milestone delivered scoped, capability-explicit Admin/Portal and checkout journeys, current served evidence, and recurring automated acceptance. Its audit found zero blockers; four pre-close items were explicitly acknowledged and recorded in `STATE.md` Deferred Items.
+**Latest fully shipped milestone: v1.64 — Admin Operator UI Cleanup, shipped and archived 2026-10-10.** All four phases, 24 plans and 18 requirements completed. The audit scored 18/18 requirements, 4/4 phase verifications, 10/10 integration seams and 6/6 end-to-end flows with no blockers; it records two newly acknowledged Phase 240 notices and four acknowledgements carried from earlier closeouts. All four phase verifications are fresh and passed (47/47, 32/32, 80/80 and 3/3), with zero unverified behavior. The current-source twelve-image Linux comparison passed in [run 38094642350](https://github.com/szTheory/accrue/actions/runs/38094642350) at `849f72084a6460ed54ecc06bc261054b15efdde0`; the Fake `/admin` preview and its evidence limits are documented in the [archived Phase 243 handoff](milestones/v1.64-phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md). The next milestone has not been opened; run `$gsd-new-milestone` to continue.
 
-**Current milestone: v1.64 — Admin Operator UI Cleanup.** All four phases, 24 plans and 18 requirements are completed; milestone freshness audit precedes archive. Phase243 independently passed 3/3 roadmap truths with zero unverified behavior and seven generated automated UAT cases. The project-wide contract passed across 15 phases, 113 summaries and 329 automated UAT cases. The reviewed twelve-image Ubuntu pixel comparison passed at its recorded revision `0197f4ba` (run 38083267168); later local source changes are not represented as a new Linux comparison. Current mounted host regression passed 6/6, dedicated search 1/1, preview warm preservation 1/1, prior Admin ExUnit 443/0 and Node 37/37, package browsers 100 passed/20 incumbent applicability skips, and host ExUnit 3/0. The stable Fake preview is `http://accrue-host-phase243-preview.localhost/admin`; exact authoritative state remained preserved. See the [Phase243 handoff](phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md) for evidence boundaries and preview entry. The older Phase240–242 verification fingerprints became stale after Phase243 shared-source/evidence updates; refresh them through their owning `$gsd-execute-phase` verification path before archival. Next lifecycle command: `$gsd-complete-milestone v1.64`. v1.63 remains shipped and archived; no merge or new release is implied by this phase completion.
+## Shipped Milestone: v1.64 Admin Operator UI Cleanup (**shipped & archived 2026-10-10**)
 
-## Current Milestone: v1.64 Admin Operator UI Cleanup
+**Outcome:** Existing Admin journeys now have consistent shared interaction patterns, scoped and truthful billing flows, investigations and catalog/Connect navigation, recurring mounted acceptance, current served-asset identity, a blocking Linux visual comparison, and an isolated Fake-backed feedback preview. No new billing capability or Portal scope was introduced.
+
+**Closeout:** Audit `tech_debt`, with 18/18 requirements, 4/4 phase verifications, 10/10 integration seams, 6/6 flows, 4/4 Nyquist-compliant phases, and zero blockers. Two Phase 240 notices were newly acknowledged; four earlier acknowledgements were carried forward in `STATE.md` Deferred Items.
+
+**Evidence:** The blocking Ubuntu comparison passed in run 38094642350 against source `849f72084a6460ed54ecc06bc261054b15efdde0`. The audit and phase artifacts are preserved under `milestones/v1.64-*`.
+
+## Current Milestone
+
+None. Start the next cycle with `$gsd-new-milestone`.
+
+### v1.64 delivery contract (archived context)
 
 **Goal:** Make existing Accrue Admin journeys clearer, more consistent, responsive, and easier to operate, with recurring automated acceptance and bounded agent visual inspection.
 
@@ -692,7 +702,7 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-None within the approved v1.64 scope. All 18 requirements are validated; milestone audit/archive follows.
+None. All 18 v1.64 requirements are validated and archived in `milestones/v1.64-REQUIREMENTS.md`.
 
 ### Validated v1.64 (Phases 240–243 complete; updated 2026-10-10)
 
@@ -922,7 +932,7 @@ Admin global search — 4/4 satisfied.
 
 | Decision | Outcome |
 | --- | --- |
-| Keep Linux golden generation separate from the blocking comparison and state the accepted source revision. | ✓ Phase243 — reviewed twelve-image mint followed by successful normal Ubuntu comparison at 0197f4ba; thresholds unchanged. |
+| Keep Linux golden generation separate from the blocking comparison and state the accepted source revision. | ✓ Phase243 — reviewed twelve-image mint followed by successful normal Ubuntu comparison at `849f72084a6460ed54ecc06bc261054b15efdde0` (run 38094642350); thresholds unchanged. |
 | Prove full command custody before mutation, with real identities, safe proof paths and an exclusive preview runner. | ✓ Phase243 — 13 custody and one proof-path control pass; synthetic caller identities fail closed; authoritative warm preview state preserved. |
 | Hash actual mounted browser response bytes and reconcile changed evidence against the existing inventory. | ✓ Phase243 — package/compiled/HTTP/browser identity and altered-response rejection pass; inventory remains 21 routes and registry 30/42/8. |
 | Require nonempty mounted targets before universal geometry assertions, and retain all executed reporter/check batches in the evidence budget. | ✓ Good — Phase 241 Plan 08 guards against vacuous passes and records its complete RED/GREEN chronology; named spacing closure verified 32/32. |
