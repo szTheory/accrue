@@ -96,6 +96,8 @@ Package CSS input digests were app.css fba4273889fbf4da70175e5570c7bf0d5a54b911f
 
 The browser batch exercised direct 320px and intermediate/desktop layouts, dark/light/System theme behavior, reduced-motion styling, coarse-pointer hit geometry, and long-text wrapping. Effective OS theme changes were emulated by the existing package owner. Actual browser zoom controls, physical devices, assistive-technology speech, and live-provider outcomes were not observed; this execution did not run a separate 200% text-spacing or 400% zoom simulation.
 
+The browser owners exercised representative subscription, invoice, and refund reviews. The full Admin suite covers every eligible subscription and payment-method review variant at the route owners, but this plan did not establish a browser interaction for every individual variant. A temporary loop against the phase191 seed did not reach the review panel for its first action and was removed rather than retained as misleading evidence. This remains an explicit browser-coverage gap.
+
 ## Deviations from Plan
 
 ### Auto-fixed Issues

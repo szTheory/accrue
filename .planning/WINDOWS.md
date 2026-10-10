@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 11
+open_count: 12
 waived_count: 6
 fixed_count: 14
-total_count: 31
-last_updated: 2026-10-10T03:10:50.370Z
+total_count: 32
+last_updated: 2026-10-10T03:27:48.492Z
 ---
 
 # Broken Windows Ledger
@@ -46,6 +46,7 @@ last_updated: 2026-10-10T03:10:50.370Z
 | 29 | 241 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex |  | Confirmation controls expose disabled/loading state while step-up or dispatch is pending. | open |  | 2026-10-10T01:52:12.988Z |  |
 | 30 | 241 | deviation | examples/accrue_host/e2e/generated/copy_strings.json |  | Generated browser copy strings are regenerated to match the updated subscription action labels. | open |  | 2026-10-10T01:52:13.282Z |  |
 | 31 | 241 | unrun-verify | .planning/phases/241-billing-operator-journeys/241-07-PLAN.md |  | A separate 200% text-spacing and supported 400% zoom simulation was not run in Plan 241-07; direct narrow-width and long-text evidence ran. | open |  | 2026-10-10T03:10:50.370Z |  |
+| 32 | 241 | unrun-verify | accrue_admin/e2e/admin-page-flow-phase191.spec.js |  | Per-variant browser review interactions were not established; the complete Admin suite covers subscription and payment-method review variants at the route owners. | open |  | 2026-10-10T03:27:48.492Z |  |
 
 ````json
 [
@@ -439,6 +440,19 @@ last_updated: 2026-10-10T03:10:50.370Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-10T03:10:50.370Z",
+    "resolved_at": null,
+    "milestone": "v1.64"
+  },
+  {
+    "id": 32,
+    "kind": "unrun-verify",
+    "phase": "241",
+    "file": "accrue_admin/e2e/admin-page-flow-phase191.spec.js",
+    "line": null,
+    "description": "Per-variant browser review interactions were not established; the complete Admin suite covers subscription and payment-method review variants at the route owners.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-10T03:27:48.492Z",
     "resolved_at": null,
     "milestone": "v1.64"
   }
