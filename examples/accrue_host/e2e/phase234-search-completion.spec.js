@@ -46,8 +46,20 @@ test("global search completes real scoped database queries and removes stale mat
   await expect(result).toHaveClass(/ax-active/);
   await expect(activeStatus).toContainText(email);
   await input.focus();
+  const matches = dialog.locator("[data-search-group] a");
+  const matchCount = await matches.count();
+  expect(matchCount).toBeGreaterThan(0);
+  // Other mounted owners may have added an invoice for this customer. Arrow
+  // navigation follows every matching group, then returns to the customer.
   await page.keyboard.press("ArrowDown");
+  if (matchCount > 1) {
+    await expect(result).not.toHaveClass(/ax-active/);
+    await expect(matches.nth(1)).toHaveClass(/ax-active/);
+    await expect(activeStatus).toHaveText(await matches.nth(1).innerText());
+    await page.keyboard.press("ArrowUp");
+  }
   await expect(result).toHaveClass(/ax-active/);
+  await expect(activeStatus).toContainText(`Customer ID: ${customerId}`);
   await page.keyboard.press("Enter");
   await waitForLiveView(page);
   await expect(page).toHaveURL(new RegExp(`/admin/customers/${customerId}\\?`));
