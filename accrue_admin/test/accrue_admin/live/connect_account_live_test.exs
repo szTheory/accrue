@@ -226,6 +226,33 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     refute html =~ "No override saved"
   end
 
+  test "fee preview applies the domain minimum and maximum clamps without persisting", %{
+    conn: conn,
+    account: account
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/connect/#{account.id}")
+    render_click(element(view, "[data-ax-primary-action]", "Edit platform fee override"))
+
+    html =
+      render_change(
+        element(view, "form[data-ax-action-drawer-form][phx-submit=\"save_override\"]"),
+        %{
+          "override" => %{
+            "percent" => "1.9",
+            "fixed_cents" => "500",
+            "min_cents" => "300",
+            "max_cents" => "400",
+            "preview_amount_minor" => "10000",
+            "preview_currency" => "usd"
+          }
+        }
+      )
+
+    assert html =~ "$4.00"
+    assert TestRepo.get!(Account, account.id).data["platform_fee_override"] == nil
+  end
+
   test "same-value override save preserves independent Stripe observations", %{
     conn: conn,
     account: account
