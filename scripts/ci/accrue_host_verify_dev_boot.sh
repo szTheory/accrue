@@ -15,6 +15,11 @@ if [ "${ACCRUE_HOST_SKIP_DEV_BOOT:-}" = "1" ]; then
 fi
 
 port="${ACCRUE_HOST_PORT:-4100}"
+proof_run_id="${ACCRUE_HOST_PROOF_RUN_ID:-$$}"
+export ACCRUE_HOST_PROOF_RUN_ID="$proof_run_id"
+export ACCRUE_HOST_DEV_BOOT_DATABASE="${ACCRUE_HOST_DEV_BOOT_DATABASE:-accrue_host_dev_boot_proof}"
+export MIX_BUILD_PATH="${MIX_BUILD_PATH:-${TMPDIR:-/tmp}/accrue-host-dev-proof-${proof_run_id}/_build}"
+node "$(cd "$host_dir/../.." && pwd)/scripts/ci/accrue_host_preview_custody.sh" preflight dev
 log_file="$(mktemp)"
 
 describe_port_owner() {
@@ -59,10 +64,10 @@ trap 'exit 130' INT TERM
 
 ensure_port_available "$port"
 
-MIX_ENV=dev mix ecto.create --quiet
-MIX_ENV=dev mix ecto.migrate --quiet
+ACCRUE_HOST_DEV_BOOT_DATABASE="$ACCRUE_HOST_DEV_BOOT_DATABASE" MIX_ENV=dev mix ecto.create --quiet
+ACCRUE_HOST_DEV_BOOT_DATABASE="$ACCRUE_HOST_DEV_BOOT_DATABASE" MIX_ENV=dev mix ecto.migrate --quiet
 
-PORT="$port" MIX_ENV=dev mix phx.server >"$log_file" 2>&1 &
+PORT="$port" ACCRUE_HOST_DEV_BOOT_DATABASE="$ACCRUE_HOST_DEV_BOOT_DATABASE" MIX_ENV=dev mix phx.server >"$log_file" 2>&1 &
 server_pid=$!
 
 for _ in $(seq 1 30); do

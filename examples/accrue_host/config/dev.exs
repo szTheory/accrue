@@ -5,7 +5,7 @@ config :accrue_host, AccrueHost.Repo,
   username: "postgres",
   password: "postgres",
   hostname: System.get_env("PGHOST") || "localhost",
-  database: "accrue_host_dev",
+  database: System.get_env("ACCRUE_HOST_DEV_BOOT_DATABASE") || "accrue_host_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10

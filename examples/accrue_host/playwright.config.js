@@ -1,9 +1,17 @@
 // @ts-check
 const path = require("node:path");
+const os = require("node:os");
+const { execFileSync } = require("node:child_process");
 const { defineConfig, devices } = require("@playwright/test");
 
 const port = process.env.ACCRUE_HOST_BROWSER_PORT || "4101";
 const baseURL = `http://127.0.0.1:${port}`;
+const proofRunId = process.env.ACCRUE_HOST_PROOF_RUN_ID || `${process.pid}-${Date.now()}`;
+process.env.ACCRUE_HOST_PROOF_RUN_ID = proofRunId;
+process.env.MIX_BUILD_PATH ||= path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`, "_build");
+process.env.ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR ||= path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`, "playwright-results");
+process.env.ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR ||= path.join(os.tmpdir(), `accrue-host-proof-${proofRunId}`, "playwright-report");
+execFileSync("node", [path.resolve(__dirname, "../../scripts/ci/accrue_host_preview_custody.sh"), "preflight", "browser"], { stdio: "inherit" });
 const workers = process.env.ACCRUE_HOST_PLAYWRIGHT_WORKERS
   ? Number.parseInt(process.env.ACCRUE_HOST_PLAYWRIGHT_WORKERS, 10)
   : process.env.CI
@@ -31,7 +39,7 @@ module.exports = defineConfig({
   fullyParallel: false,
   workers,
   reporter: process.env.CI
-    ? [["github"], ["html", { open: "never", outputFolder: "playwright-report" }]]
+    ? [["github"], ["html", { open: "never", outputFolder: process.env.ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR }]]
     : [["list"]],
   use: {
     baseURL,
@@ -59,5 +67,5 @@ module.exports = defineConfig({
       use: { ...devices["Pixel 5"] }
     }
   ],
-  outputDir: "test-results"
+  outputDir: process.env.ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR
 });

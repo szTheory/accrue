@@ -59,6 +59,12 @@ if [ -n "${ACCRUE_HOST_SETUP_DIAGNOSTIC_FIXTURE:-}" ]; then
 fi
 
 browser_port="${ACCRUE_HOST_BROWSER_PORT:-4101}"
+proof_run_id="${ACCRUE_HOST_PROOF_RUN_ID:-$$}"
+export ACCRUE_HOST_PROOF_RUN_ID="$proof_run_id"
+export MIX_BUILD_PATH="${MIX_BUILD_PATH:-${TMPDIR:-/tmp}/accrue-host-proof-${proof_run_id}/_build}"
+export ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR="${ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR:-${TMPDIR:-/tmp}/accrue-host-proof-${proof_run_id}/playwright-results}"
+export ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR="${ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR:-${TMPDIR:-/tmp}/accrue-host-proof-${proof_run_id}/playwright-report}"
+node "$repo_root/scripts/ci/accrue_host_preview_custody.sh" preflight browser || setup_failure fixture_or_database
 fixture_file="$(mktemp)"
 browser_log_file="${ACCRUE_HOST_BROWSER_LOG:-$(mktemp)}"
 browser_failed=0
@@ -146,7 +152,7 @@ for _ in $(seq 1 30); do
     # Full Playwright suite (blocking PR gate via host-integration). Includes
     # mounted-admin axe checks: e2e/verify01-admin-a11y.spec.js (light + dark).
     ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED=1 \
-      ACCRUE_HOST_REUSE_SERVER=1 ACCRUE_HOST_BROWSER_PORT="$browser_port" ACCRUE_HOST_E2E_FIXTURE="$fixture_file" npm run e2e
+      ACCRUE_HOST_REUSE_SERVER=1 ACCRUE_HOST_PROOF_SERVER_PID="$browser_server_pid" ACCRUE_HOST_BROWSER_PORT="$browser_port" ACCRUE_HOST_E2E_FIXTURE="$fixture_file" npm run e2e
     e2e_status=$?
     set -e
 
@@ -179,6 +185,7 @@ for _ in $(seq 1 30); do
         set +e
         ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED=1 \
           ACCRUE_HOST_REUSE_SERVER=1 \
+          ACCRUE_HOST_PROOF_SERVER_PID="$browser_server_pid" \
           ACCRUE_HOST_BROWSER_PORT="$browser_port" \
           ACCRUE_HOST_E2E_FIXTURE="$fixture_file" \
           npm run e2e:braintree-checkout

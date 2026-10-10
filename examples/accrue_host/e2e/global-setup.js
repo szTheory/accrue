@@ -1,12 +1,19 @@
 // @ts-check
 const fs = require("node:fs");
-const os = require("node:os");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 
 const projectRoot = path.resolve(__dirname, "..");
 const repoRoot = path.resolve(projectRoot, "..", "..");
-const defaultFixturePath = path.join(os.tmpdir(), "accrue-host-e2e-fixture.json");
+const defaultFixturePath = path.join(os.tmpdir(), `accrue-host-e2e-fixture-${process.pid}-${Date.now()}.json`);
+
+function preflight() {
+  execFileSync("node", [path.join(repoRoot, "scripts/ci/accrue_host_preview_custody.sh"), "preflight", "browser"], {
+    cwd: projectRoot,
+    stdio: "inherit",
+    env: process.env
+  });
+}
 
 function runMix(args, extraEnv = {}) {
   execFileSync("mix", args, {
@@ -29,6 +36,7 @@ function ensureDatabase() {
 }
 
 module.exports = async () => {
+  preflight();
   const fixturePath = process.env.ACCRUE_HOST_E2E_FIXTURE || defaultFixturePath;
   const reuseServer = process.env.ACCRUE_HOST_REUSE_SERVER === "1";
 
