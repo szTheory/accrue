@@ -134,6 +134,6 @@ None - no external service configuration required.
 ## Self-Check: PASSED
 
 - Evaluation scope resolved this plan and found both task commits on the current branch.
-- Both summary files' listed source and test files exist; the planned focused suite passed (36 tests, 0 failures).
+- All four changed source and test files exist; the planned focused suite passed (36 tests, 0 failures).
 - Coverage assertions record passing unit and integration tests with `human_judgment: false`.
 
