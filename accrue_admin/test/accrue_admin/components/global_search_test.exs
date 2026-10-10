@@ -263,13 +263,34 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert html =~ "Customer ID: cus_second"
     end
 
-    test "retry selects only failed groups and keeps successful rows while loading" do
-      source = File.read!("lib/accrue_admin/components/global_search.ex")
+    test "retry fetch preserves completed groups while replacing only the retried group" do
+      customer = %{id: "cus_preserved"}
+      invoice = %{id: "inv_retried"}
+      initial = %{customers: [customer], invoices: [], subscriptions: []}
 
-      assert source =~ "failed_groups = socket.assigns.failures"
-      assert source =~ "begin_search(socket, query, failed_groups, socket.assigns.results)"
-      assert source =~ "Enum.filter(fn {key, _func} -> key in groups end)"
-      assert source =~ "Enum.take(rows, @result_limit)"
+      {results, failures} =
+        GlobalSearch.run_group_lookups([:invoices], initial, fn :invoices ->
+          {[invoice], nil}
+        end)
+
+      assert results == %{customers: [customer], invoices: [invoice], subscriptions: []}
+      assert failures == []
+
+      {failed_results, failed_groups} =
+        GlobalSearch.run_group_lookups([:invoices], initial, fn :invoices ->
+          raise "invoice query unavailable"
+        end)
+
+      assert failed_results == initial
+      assert failed_groups == [:invoices]
+
+      # A fresh full query deliberately starts from an empty result map.
+      {fresh_results, _} =
+        GlobalSearch.run_group_lookups([:customers], %{customers: [], invoices: [], subscriptions: []}, fn :customers ->
+          {[], nil}
+        end)
+
+      assert fresh_results == %{customers: [], invoices: [], subscriptions: []}
     end
 
     test "help copy lists only fields the three queries actually match" do

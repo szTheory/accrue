@@ -140,7 +140,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
       )
 
     Task.start(fn ->
-      {results, failures} = fetch_results(query, owner_scope, groups)
+      {results, failures} = fetch_results(query, owner_scope, groups, initial_results)
 
       send_update(view_pid, __MODULE__,
         id: id,
@@ -170,16 +170,24 @@ defmodule AccrueAdmin.Components.GlobalSearch do
 
   defp close(socket), do: socket |> clear_query() |> assign(is_open: false)
 
-  defp fetch_results(query, owner_scope, groups) do
+  defp fetch_results(query, owner_scope, groups, initial_results) do
     groups = if :lookup in groups, do: @groups, else: groups
 
-    tasks = [
-      customers: fn -> Customers.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) end,
-      invoices: fn -> Invoices.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope) end,
-      subscriptions: fn ->
-        Subscriptions.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)
+    run_group_lookups(groups, initial_results, fn key ->
+      case key do
+        :customers -> Customers.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)
+        :invoices -> Invoices.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)
+        :subscriptions ->
+          Subscriptions.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)
       end
-    ]
+    end)
+  end
+
+  @doc false
+  def run_group_lookups(groups, initial_results, lookup) do
+    groups = if :lookup in groups, do: @groups, else: groups
+
+    tasks = Enum.map(groups, fn key -> {key, fn -> lookup.(key) end} end)
 
     tasks
     |> Enum.filter(fn {key, _func} -> key in groups end)
@@ -187,7 +195,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
       on_timeout: :kill_task,
       timeout: 3_000
     )
-    |> Enum.reduce({empty_results(), []}, fn
+    |> Enum.reduce({initial_results, []}, fn
       {:ok, {key, {:ok, {rows, _cursor}}}}, {results, failures} ->
         {Map.put(results, key, Enum.take(rows, @result_limit)), failures}
 
