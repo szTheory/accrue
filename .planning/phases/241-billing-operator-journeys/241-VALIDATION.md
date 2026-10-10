@@ -1,15 +1,15 @@
 ---
 phase: "241"
 slug: "billing-operator-journeys"
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-10-09"
 ---
 
 # Phase 241 — Validation Strategy
 
-> Draft execution contract derived from focused research. Planning checks command paths and coverage; execution supplies behavioral evidence and measured timings.
+> Execution audit: every planned task is backed by a focused behavioral owner and the combined phase gates passed. The evidence and limits below distinguish browser viewport simulations from physical zoom/device/provider observations.
 
 ## Test Infrastructure
 
@@ -23,7 +23,7 @@ created: "2026-10-09"
 | Package browser owner | Existing Phase 191 page-flow and Phase 199 overlay owners; exact focused title/selection must include new cases and report a nonzero executed count |
 | Host browser owner | `cd examples/accrue_host && npm run e2e -- e2e/phase237-admin-billing.spec.js --project=chromium-desktop --workers=1` |
 | Assets | `cd accrue_admin && mix accrue_admin.assets.build` runs once in 241-07 T1 before package browsers; tracked CSS/JS are retained for T2 Admin/host compile and HTTP-served byte proof |
-| Estimated latency | Not measured during planning. Use a targeted owner per task; execution records cheap feedback latency and separates full/browser gates |
+| Recorded task durations | 241-01 4 min; 241-02 5 min; 241-03 5 min; 241-04 5 min; 241-05 8 min; 241-06 9 min; 241-07 summary records 66 min in Performance and 228 min in metrics (source discrepancy retained) |
 
 ## Sampling Rate
 
@@ -35,24 +35,24 @@ created: "2026-10-09"
 
 ## Per-Task Verification Map
 
-All commands assume repository-root cwd and select existing tracked owners. The new assertions are written by their owning tasks; planning did not run them. Each PLAN task pairs its exact command with a `fails_when` signal. Wave dependencies serialize overlapping source owners.
+All commands assume repository-root cwd and select existing tracked owners. Every command below ran during execution; task-level behavioral evidence is cross-referenced in its SUMMARY. Each PLAN task pairs its command with a `fails_when` signal. Wave dependencies serialize overlapping source owners.
 
 | Task | Wave | Requirement / threat | Owner and acceptance | Automated command |
 |------|------|----------------------|----------------------|-------------------|
-| 241-01 T1 | 1 | JRN-01 / T-241-01 | Subscription links plus exact invoice query membership | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/queries/query_modules_test.exs` |
-| 241-01 T2 | 1 | JRN-01 / T-241-02 | Subscription fact and related-billing states | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs` |
-| 241-02 T1 | 1 | JRN-02 / T-241-03, T-241-04, T-241-05 | ScopedPath decoder parity, safe fallback and current-owner rebuilding | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/scoped_path_test.exs` |
-| 241-02 T2 | 1 | JRN-02 / T-241-03 | Invoice contextual return label and exact destination rows | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/invoice_live_test.exs test/accrue_admin/scoped_path_test.exs` |
-| 241-03 T1 | 2 | JRN-02 / T-241-06 | Payment/customer returns and same-customer tabs | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/charge_live_test.exs test/accrue_admin/live/customer_live_test.exs` |
-| 241-03 T2 | 2 | JRN-02 / T-241-06, T-241-07 | Subscription return, tab and repeated-navigation controls | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs` |
-| 241-04 T1 | 2 | JRN-03 / T-241-08 | Direct/invalid campaign returns and distinct timeline | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/analytics/campaign_live_test.exs` |
-| 241-04 T2 | 2 | JRN-03 / T-241-09 | 7d/30d/90d Recovery round trips | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/analytics/recovery_live_test.exs test/accrue_admin/live/analytics/campaign_live_test.exs` |
-| 241-05 T1 | 3 | JRN-04 / T-241-10 | All rendered subscription review variants and exact intent | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs` |
-| 241-05 T2 | 3 | JRN-04 / T-241-10, T-241-11 | Subscription stale/repeated/unknown action controls | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs` |
-| 241-06 T1 | 3 | JRN-04 / T-241-12, T-241-14 | Refund exact money, safety and result controls | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/charge_live_test.exs` |
-| 241-06 T2 | 3 | JRN-04 / T-241-13, T-241-14 | Set-default/delete method review and revalidation | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/customer_live_test.exs` |
-| 241-07 T1 | 4 | JRN-01..04 / T-241-15 | Build tracked package CSS/JS, then exercise keyboard, narrow, theme and reconnect owners against a fresh Playwright server | `cd accrue_admin && mix accrue_admin.assets.build && cd .. && CI=1 npm --prefix accrue_admin run e2e:phase191 && CI=1 npm --prefix accrue_admin run e2e:phase199` |
-| 241-07 T2 | 4 | JRN-01..04 / T-241-15, T-241-16 | Compile Admin and host, run full Admin check and prove host-served journeys/assets from T1's build | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test && cd ../examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors && CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop --workers=1` |
+| 241-01 T1 | 1 | JRN-01 / T-241-01 | PASS — exact customer and authorized-scope invoice IDs, distinct filters | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/queries/query_modules_test.exs` |
+| 241-01 T2 | 1 | JRN-01 / T-241-02 | PASS — lifecycle, missing observations, empty sets and supported actions | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs` |
+| 241-02 T1 | 1 | JRN-02 / T-241-03, T-241-04, T-241-05 | PASS — validated local origins, hostile/cross-mount controls, owner rebuilding | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/scoped_path_test.exs` |
+| 241-02 T2 | 1 | JRN-02 / T-241-03 | PASS — label/href agreement and exact authorized invoice results | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/invoice_live_test.exs test/accrue_admin/scoped_path_test.exs` |
+| 241-03 T1 | 2 | JRN-02 / T-241-06 | PASS — customer/payment return context and foreign-customer rejection | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/charge_live_test.exs test/accrue_admin/live/customer_live_test.exs` |
+| 241-03 T2 | 2 | JRN-02 / T-241-06, T-241-07 | PASS — subscription list/tab restore with matching customer | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs` |
+| 241-04 T1 | 2 | JRN-03 / T-241-08 | PASS — direct/untrusted Recovery returns and complete historical timeline | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/analytics/campaign_live_test.exs` |
+| 241-04 T2 | 2 | JRN-03 / T-241-09 | PASS — 7d/30d/90d round trips, current owner and invalid default | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/analytics/recovery_live_test.exs test/accrue_admin/live/analytics/campaign_live_test.exs` |
+| 241-05 T1 | 3 | JRN-04 / T-241-10 | PASS — every eligible subscription review variant names exact target/evidence | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs` |
+| 241-05 T2 | 3 | JRN-04 / T-241-10, T-241-11 | PASS — dismissal, stale/repeated confirmation, unknown outcome controls | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs` |
+| 241-06 T1 | 3 | JRN-04 / T-241-12, T-241-14 | PASS — exact refund amount/currency, boundary and safe-result behavior | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/charge_live_test.exs` |
+| 241-06 T2 | 3 | JRN-04 / T-241-13, T-241-14 | PASS — selected method review and stale-default rejection | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/customer_live_test.exs` |
+| 241-07 T1 | 4 | JRN-01..04 / T-241-15 | PASS — Phase191 28/28; Phase199 24 pass, 15 incumbent skips; new text/reflow and review cases pass | `cd accrue_admin && mix accrue_admin.assets.build && cd .. && CI=1 npm --prefix accrue_admin run e2e:phase191 && CI=1 npm --prefix accrue_admin run e2e:phase199` |
+| 241-07 T2 | 4 | JRN-01..04 / T-241-15, T-241-16 | PASS — Admin compile/full suite 642/0; host compile and mounted host 1/1 pass | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test && cd ../examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors && CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop --workers=1` |
 
 ## Source and Probe Coverage Audit
 
@@ -89,7 +89,16 @@ There is no separate Wave 0. Each owning task creates its new assertion before i
 
 ## Manual-Only Verifications
 
-No required human UAT. All phase acceptance is assigned executable assertions or bounded agent inspection with committed evidence. Subjective owner feedback is optional. Actual browser zoom, physical-device behavior, screen-reader speech and live-provider fidelity are honest evidence limits, not recurring handoff gates.
+**Required manual-only verifications: 0.** All phase acceptance has executable behavioral evidence; no human UAT gate remains. Actual browser zoom controls, physical-device behavior, screen-reader speech, live-provider outcomes, and Phase 243 Linux visual goldens were not observed and are not claimed. The reflow result is a 320 CSS-pixel viewport simulation; text enlargement doubles measured computed font sizes with WCAG text-spacing overrides.
+
+## Execution Evidence and Limits
+
+- Plans 241-01 through 241-06 report durations of 4, 5, 5, 5, 8, and 9 minutes. Plan 241-07 reports 66 minutes in its Performance section but 228 minutes in frontmatter metrics; this source discrepancy is preserved rather than reconciled by inference.
+- The current Admin package completed `MIX_ENV=test mix compile --warnings-as-errors` and the full suite: 642 tests, 0 failures. The captured run is `/private/tmp/accrue241-wave4-test.log`.
+- Browser evidence: Phase191 28 passed; Phase199 24 passed and 15 incumbent project-specific skips. One incumbent Phase199 drawer test timed out during Chromium launch at 180 seconds and passed 1/1 on isolated rerun. Both newly added Phase241 cases ran and passed. The focused responsive stress case passed across seven consumers; the review matrix passed with ten subscription and two payment-method reviews.
+- Component and host evidence: AtRiskTable 6 passed; Admin and mounted-host warnings-as-errors compiles passed; the Phase237 mounted-host spec passed 1/1 after CSS rebuild and host recompile. The host run checked Recovery window/owner return and package, compiled-host, HTTP-served, and browser-request asset bytes.
+- JRN-01..04 are covered by task owners 241-01..07 as mapped above. The 40 applicable UI criteria and 20 edge probes in the UI-SPEC and PROBE-COVERAGE have explicit owning evidence; they are criteria inventories, not standalone claims that physical zoom or provider behavior was observed.
+- The phase SUMMARY records that automated-UAT artifact generation requires a genuine `241-VERIFICATION.md`; none was fabricated. This does not replace or weaken the executed test evidence above.
 
 ## CI and Evidence Ownership
 
@@ -99,10 +108,18 @@ Use existing `release-gate`, Admin guardrails, component and `host-integration` 
 
 - [x] Final task map has exact IDs/waves and unique `T-241-NN` references.
 - [x] Every task has a runnable automated command and immediately paired observable failure signal.
-- [ ] No three consecutive tasks lack automated feedback; no watch mode or zero-test acceptance.
-- [ ] New scenarios and fixture prerequisites are covered with owning implementation.
-- [x] Command directories/scripts and tracked owner paths were checked at planning; selected test counts remain execution evidence.
-- [ ] Execution timings, current evidence and automated UAT are recorded.
-- [ ] Validation audit sets `nyquist_compliant: true` only after its evidence gate.
+- [x] No three consecutive tasks lack automated feedback; no watch mode or zero-test acceptance.
+- [x] New scenarios and fixture prerequisites are covered with owning implementation and executed owners.
+- [x] Command directories/scripts and tracked owner paths were checked; all task owners have behavioral evidence.
+- [x] Execution timings, current evidence, caveats, and unobserved limits are recorded.
+- [x] Validation audit sets `nyquist_compliant: true` after the evidence gate.
 
-**Approval:** Pending execution evidence; no tests ran during planning.
+**Audit:** Validated 2026-10-10. Gaps found: 0. Resolved: all 14 planned tasks across JRN-01..04. Escalated: 0. Manual-only: 0. Phase199's incumbent launch timeout passed on isolated rerun; incumbent skips and physical/provider evidence limits are recorded above.
+
+## Validation Audit 2026-10-10
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 14 |
+| Escalated | 0 |
