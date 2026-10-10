@@ -2,12 +2,13 @@ import { FocusTrap } from "./focus_trap.js";
 
 export const CommandPalette = {
   mounted() {
-    this.activeIndex = 0;
+    this.activeIndex = -1;
     // Track previous focus to restore on close (WCAG 2.4.3 Focus Order)
     this.previousFocus = null;
     this.wasOpen = this.isOpen();
     this.handleGlobalKeydown = this.handleGlobalKeydown.bind(this);
     this.handleInputKeydown = this.handleInputKeydown.bind(this);
+    this.handlePointerMove = this.handlePointerMove.bind(this);
     this.handleDocumentClick = this.handleDocumentClick.bind(this);
     this.focusTrap = {
       ...FocusTrap,
@@ -21,6 +22,7 @@ export const CommandPalette = {
     document.addEventListener("click", this.handleDocumentClick);
 
     this.el.addEventListener("keydown", this.handleInputKeydown);
+    this.el.addEventListener("pointermove", this.handlePointerMove);
 
     // Initial setup if already open
     this.setupItems();
@@ -32,7 +34,6 @@ export const CommandPalette = {
   },
 
   updated() {
-    this.activeIndex = 0;
     this.setupItems();
     if (this.focusTrap) {
       this.focusTrap.el = this.el;
@@ -67,6 +68,7 @@ export const CommandPalette = {
     window.removeEventListener("keydown", this.handleGlobalKeydown);
     document.removeEventListener("click", this.handleDocumentClick);
     this.el.removeEventListener("keydown", this.handleInputKeydown);
+    this.el.removeEventListener("pointermove", this.handlePointerMove);
   },
 
   handleGlobalKeydown(e) {
@@ -94,6 +96,15 @@ export const CommandPalette = {
     }
   },
 
+  handlePointerMove(e) {
+    const item = e.target.closest?.(".ax-command-palette-item[data-path], .ax-command-palette-item[data-action]");
+    const index = item ? this.items?.indexOf(item) : -1;
+    if (index >= 0 && index !== this.activeIndex) {
+      this.activeIndex = index;
+      this.updateActiveItem();
+    }
+  },
+
   handleDocumentClick(e) {
     const trigger = e.target.closest?.("[data-command-palette-trigger]");
     if (trigger) {
@@ -111,10 +122,38 @@ export const CommandPalette = {
   },
 
   setupItems() {
+    const previousItem = this.items?.[this.activeIndex];
+    const previousIdentity = previousItem ? this.itemIdentity(previousItem) : null;
+    const previousContext = this.selectionContext;
     this.items = Array.from(
       this.el.querySelectorAll(".ax-command-palette-item[data-path], .ax-command-palette-item[data-action]")
     );
+
+    const input = this.el.querySelector?.("input");
+    this.selectionContext = this.contextFor(input?.value || "", this.items);
+    const preservedIndex = previousContext === this.selectionContext && previousIdentity
+      ? this.items.findIndex(item => this.itemIdentity(item) === previousIdentity)
+      : -1;
+    this.activeIndex = preservedIndex >= 0 ? preservedIndex : (this.items.length ? 0 : -1);
     this.updateActiveItem();
+  },
+
+  itemIdentity(item) {
+    return item.dataset.path ? `path:${item.dataset.path}` : `action:${item.dataset.action}`;
+  },
+
+  contextFor(query, items) {
+    const path = items[0]?.dataset.path;
+    if (!path) return query;
+
+    try {
+      const url = new URL(path, "http://localhost");
+      const base = url.pathname.replace(/\/(customers|invoices|subscriptions)(\/.*)?$/, "");
+      const owner = url.searchParams.get("org") || "";
+      return `${query}\u0000${base}\u0000${owner}`;
+    } catch {
+      return query;
+    }
   },
 
   isOpen() {
@@ -150,12 +189,13 @@ export const CommandPalette = {
 
   moveActive(step) {
     if (!this.items || this.items.length === 0) return;
-    this.activeIndex = (this.activeIndex + step + this.items.length) % this.items.length;
+    const current = this.activeIndex < 0 ? (step > 0 ? -1 : 0) : this.activeIndex;
+    this.activeIndex = (current + step + this.items.length) % this.items.length;
     this.updateActiveItem();
   },
 
   updateActiveItem() {
-    if (!this.items || this.items.length === 0) return;
+    if (!this.items) return;
     
     this.items.forEach(item => item.classList.remove("ax-active"));
     
@@ -164,6 +204,9 @@ export const CommandPalette = {
       activeItem.classList.add("ax-active");
       activeItem.scrollIntoView({ block: "nearest" });
     }
+
+    const status = this.el.querySelector?.("[data-active-result-status]");
+    if (status) status.textContent = activeItem ? (activeItem.textContent || "").trim() : "";
   },
 
   selectActive(e) {

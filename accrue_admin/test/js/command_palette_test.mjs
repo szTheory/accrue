@@ -141,10 +141,35 @@ function waitForTimers() {
 }
 
 function item(dataset) {
+  const classes = new Set();
   return {
     dataset,
-    classList: { add() {}, remove() {} },
-    scrollIntoView() {}
+    textContent: dataset.label || dataset.path || dataset.action || "",
+    classList: {
+      add(value) { classes.add(value); },
+      remove(value) { classes.delete(value); },
+      contains(value) { return classes.has(value); }
+    },
+    scrollIntoView() {},
+    get classes() { return classes; }
+  };
+}
+
+function paletteElement(items, query = "ada", status = { textContent: "" }) {
+  const input = { value: query, focus() {} };
+  return {
+    dataset: { target: "#global-search" },
+    addEventListener() {},
+    removeEventListener() {},
+    querySelector(selector) {
+      if (selector === "input") return input;
+      if (selector === "[data-active-result-status]") return status;
+      return null;
+    },
+    querySelectorAll() { return items; },
+    closest() { return { dataset: { open: "true" } }; },
+    input,
+    status
   };
 }
 
@@ -514,4 +539,89 @@ test("Tab stays contained inside an open command palette dialog", () => {
 
     hook.destroyed();
   });
+});
+
+test("pointer and Arrow wrap keep highlight, status and Enter on one scoped link", () => {
+  const first = item({ path: "/billing/customers/cus_1?org=acme", label: "Ada · Customer ID cus_1" });
+  const second = item({ path: "/billing/customers/cus_2?org=acme", label: "Ada · Customer ID cus_2" });
+  const el = paletteElement([first, second]);
+  const patches = [];
+  const pushedEvents = [];
+  const hook = {
+    ...CommandPalette,
+    el,
+    pushEventTo(...args) { pushedEvents.push(args); }
+  };
+
+  hook.setupItems();
+  assert.equal(hook.activeIndex, 0);
+  assert.equal(first.classes.has("ax-active"), true);
+  assert.equal(el.status.textContent, "Ada · Customer ID cus_1");
+
+  hook.handlePointerMove({ target: { closest: () => second } });
+  assert.equal(hook.activeIndex, 1);
+  assert.equal(first.classes.has("ax-active"), false);
+  assert.equal(second.classes.has("ax-active"), true);
+  assert.equal(el.status.textContent, "Ada · Customer ID cus_2");
+
+  hook.moveActive(1);
+  assert.equal(hook.activeIndex, 0);
+  assert.equal(el.status.textContent, "Ada · Customer ID cus_1");
+
+  withWindow({ liveSocket: { pushHistoryPatch(...args) { patches.push(args); } } }, () => {
+    hook.selectActive({ key: "Enter" });
+  });
+  assert.equal(patches[0][1], "/billing/customers/cus_1?org=acme");
+  assert.deepEqual(pushedEvents, [["#global-search", "close", {}]]);
+});
+
+test("replacement preserves exact identity only inside the same query and owner context", () => {
+  const selected = item({ path: "/billing/customers/cus_2?org=acme", label: "Ada two" });
+  const hook = { ...CommandPalette, el: paletteElement([selected]) };
+  hook.setupItems();
+  hook.activeIndex = 0;
+
+  const reordered = [
+    item({ path: "/billing/customers/cus_1?org=acme", label: "Ada one" }),
+    item({ path: "/billing/customers/cus_2?org=acme", label: "Ada two" })
+  ];
+  hook.el.querySelectorAll = () => reordered;
+  hook.setupItems();
+  assert.equal(hook.activeIndex, 1);
+  assert.equal(reordered[1].classes.has("ax-active"), true);
+
+  hook.el.querySelectorAll = () => [item({ path: "/billing/customers/cus_2?org=other", label: "Ada two" })];
+  hook.setupItems();
+  assert.equal(hook.activeIndex, 0);
+
+  hook.el.querySelectorAll = () => [];
+  hook.setupItems();
+  assert.equal(hook.activeIndex, -1);
+  assert.equal(hook.el.status.textContent, "");
+});
+
+test("pointer listener is removed and empty selection cannot dispatch navigation", () => {
+  const listeners = new Map();
+  const pushedEvents = [];
+  const el = paletteElement([]);
+  el.addEventListener = (type, handler) => listeners.set(type, handler);
+  el.removeEventListener = (type) => listeners.delete(type);
+  const hook = {
+    ...CommandPalette,
+    el,
+    pushEventTo(...args) { pushedEvents.push(args); }
+  };
+  const windowLike = fakeWindow();
+  const documentLike = fakeDocument();
+
+  withBrowser(documentLike, windowLike, () => {
+    hook.mounted();
+    assert.equal(listeners.has("pointermove"), true);
+    hook.selectActive({ key: "Enter" });
+    hook.destroyed();
+  });
+
+  assert.equal(listeners.has("pointermove"), false);
+  assert.deepEqual(pushedEvents, []);
+  assert.equal(el.status.textContent, "");
 });
