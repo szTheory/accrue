@@ -178,7 +178,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   def handle_event("confirm_payment_method_action", _params, socket) do
     case socket.assigns.pending_payment_method_action do
-      %{type: "set_default", payment_method: %PaymentMethod{id: payment_method_id}} ->
+      %{type: "set_default"} ->
         with {:ok, fresh_scope, customer, payment_method} <-
                revalidate_payment_method_action(
                  socket,
@@ -207,7 +207,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
              )}
         end
 
-      %{type: "delete", payment_method: %PaymentMethod{id: payment_method_id}} ->
+      %{type: "delete"} ->
         with {:ok, fresh_scope, customer, payment_method} <-
                revalidate_payment_method_action(
                  socket,
