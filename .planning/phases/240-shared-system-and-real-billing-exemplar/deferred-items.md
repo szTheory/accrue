@@ -12,12 +12,12 @@
   **Verification:** `CI=1 npm run e2e:phase199` passes 21 tests with 15 existing skips; separate route and ratchet JUnit reports pass (the ratchet runs on desktop and mobile).
 
 - Admin asset build reports unavailable development Storybook CSS/JS asset paths, while completing the package build successfully.
-  status: open
+  status: acknowledged
   **Found during:** Plan 240-05 Task 2 (`mix accrue_admin.assets.build`)
   **Scope:** Existing development Storybook asset resolution; no runtime or build failure in the package hook change.
 
 - ExMoney reports automatic exchange-rate service startup is deprecated during the Admin ExUnit suite.
-  status: open
+  status: acknowledged
   **Found during:** Plan 240-05 Task 1 (`mix test`)
   **Scope:** Existing test/application exchange-rate startup configuration; unrelated to the disposable cancellation fixture.
 
