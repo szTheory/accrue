@@ -276,7 +276,11 @@ defmodule AccrueAdmin.Live.CouponLive do
       %{label: "Duration", value: duration_summary(coupon)},
       %{label: "Redeem by", value: redeem_by_summary(coupon)},
       %{label: "Max redemptions", value: max_redemptions_summary(coupon)},
-      %{label: "Current redemptions", value: Integer.to_string(coupon.times_redeemed || 0)},
+      %{label: "Current redemptions", value: redemptions_summary(coupon)},
+      %{
+        label: "Provider restrictions",
+        value: AccrueAdmin.Copy.Coupon.coupon_provider_restrictions_unknown()
+      },
       %{label: "Promotion codes", value: Integer.to_string(length(promotion_codes))}
     ]
   end
@@ -341,6 +345,7 @@ defmodule AccrueAdmin.Live.CouponLive do
 
   defp status_summary(%{valid: true}), do: AccrueAdmin.Copy.coupon_status_valid()
   defp status_summary(%{valid: false}), do: AccrueAdmin.Copy.coupon_status_invalid()
+  defp status_summary(_coupon), do: AccrueAdmin.Copy.Coupon.coupon_unknown_value()
 
   defp redeem_by_summary(%{redeem_by: %DateTime{} = value}), do: format_datetime(value)
   defp redeem_by_summary(_coupon), do: AccrueAdmin.Copy.coupon_redeem_by_no_expiry()
@@ -349,6 +354,11 @@ defmodule AccrueAdmin.Live.CouponLive do
     do: AccrueAdmin.Copy.coupon_kpi_meta_redemptions_cap()
 
   defp max_redemptions_summary(%{max_redemptions: max}), do: "#{max} max"
+
+  defp redemptions_summary(%{times_redeemed: count}) when is_integer(count),
+    do: Integer.to_string(count)
+
+  defp redemptions_summary(_coupon), do: AccrueAdmin.Copy.Coupon.coupon_redemptions_unknown()
 
   defp duration_summary(%{duration: nil}), do: "One-off"
 
@@ -372,11 +382,13 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp promotion_code_status(%{active: false}),
     do: AccrueAdmin.Copy.coupon_promotion_code_status_inactive()
 
-  defp promotion_code_redemptions(%{times_redeemed: used, max_redemptions: nil}),
-    do: "#{used || 0} used"
+  defp promotion_code_status(_promotion_code), do: AccrueAdmin.Copy.Coupon.coupon_unknown_value()
 
-  defp promotion_code_redemptions(%{times_redeemed: used, max_redemptions: max}),
-    do: "#{used || 0} of #{max}"
+  defp promotion_code_redemptions(%{times_redeemed: used}) when is_integer(used),
+    do: Integer.to_string(used)
+
+  defp promotion_code_redemptions(_promotion_code),
+    do: AccrueAdmin.Copy.Coupon.coupon_redemptions_unknown()
 
   defp format_minor(amount_minor, currency) when is_integer(amount_minor) do
     case normalize_currency(currency) do

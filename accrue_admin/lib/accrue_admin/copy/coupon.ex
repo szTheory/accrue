@@ -126,7 +126,15 @@ defmodule AccrueAdmin.Copy.Coupon do
 
   def coupon_lazy_raw_data_prompt, do: "Open this section to load the escaped coupon payload."
 
-  def coupon_kpi_meta_redemptions_cap, do: "Unlimited cap"
+  def coupon_kpi_meta_redemptions_cap, do: "Limit not recorded"
+
+  def coupon_unknown_value, do: "Not recorded"
+
+  def coupon_redemptions_unknown, do: "Redemption count not recorded"
+
+  def coupon_provider_restrictions_unknown, do: "Provider restrictions not recorded"
+
+  def coupon_promotion_code_unavailable(id), do: "Coupon record unavailable (#{id})"
 
   def coupon_kpi_meta_promotion_codes_linked, do: "Explicit child codes linked to this coupon"
 

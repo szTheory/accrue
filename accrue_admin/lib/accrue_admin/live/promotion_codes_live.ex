@@ -283,13 +283,12 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
 
   defp status_summary(%{active: true}), do: Copy.promotion_codes_status_active()
   defp status_summary(%{active: false}), do: Copy.promotion_codes_status_inactive()
+  defp status_summary(_row), do: Copy.PromotionCode.promotion_code_status_unknown()
 
   defp redemption_summary(row) do
-    used = row.times_redeemed || 0
-
-    case row.max_redemptions do
-      nil -> "#{used} used"
-      max -> "#{used} of #{max}"
+    case row.times_redeemed do
+      used when is_integer(used) -> Integer.to_string(used)
+      _ -> Copy.PromotionCode.promotion_code_redemptions_unknown()
     end
   end
 

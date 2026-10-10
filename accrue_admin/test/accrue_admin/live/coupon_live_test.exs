@@ -95,6 +95,36 @@ defmodule AccrueAdmin.CouponLiveTest do
            ]
   end
 
+  test "coupon detail identifies unrecorded limits and counts", %{conn: conn} do
+    coupon =
+      insert_coupon(%{
+        name: "Incomplete definition",
+        processor_id: "coupon_incomplete",
+        max_redemptions: nil,
+        times_redeemed: 0,
+        valid: true
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+    assert html =~ "Limit not recorded"
+    assert html =~ "Current redemptions"
+    assert html =~ ">0</dd>"
+    assert html =~ "Provider restrictions not recorded"
+
+    zero_coupon =
+      insert_coupon(%{
+        name: "Zero limit definition",
+        processor_id: "coupon_zero_limit",
+        max_redemptions: 0,
+        times_redeemed: 0,
+        valid: true
+      })
+
+    assert {:ok, _view, zero_html} = live(conn, "/billing/coupons/#{zero_coupon.id}")
+    assert zero_html =~ "0 max"
+  end
+
   test "fixed discount with unsupported currency is never shown as USD", %{conn: conn} do
     coupon =
       insert_coupon(%{

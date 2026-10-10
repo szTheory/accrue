@@ -92,6 +92,35 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
            ]
   end
 
+  test "promotion code detail identifies unrecorded limits and counts", %{conn: conn} do
+    code =
+      insert_promotion_code(nil, %{
+        code: "INCOMPLETE",
+        processor_id: "promo_incomplete",
+        active: true,
+        max_redemptions: nil,
+        times_redeemed: 0
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/promotion-codes/#{code.id}")
+    assert html =~ "Limit not recorded"
+    assert html =~ "Redemption count"
+    assert html =~ "Customer restriction not recorded"
+
+    zero_code =
+      insert_promotion_code(nil, %{
+        code: "ZERO-LIMIT",
+        processor_id: "promo_zero_limit",
+        active: true,
+        max_redemptions: 0,
+        times_redeemed: 0
+      })
+
+    assert {:ok, _view, zero_html} = live(conn, "/billing/promotion-codes/#{zero_code.id}")
+    assert zero_html =~ "0 max"
+  end
+
   test "renders RelatedResources card with coupon link and events link", %{
     conn: conn,
     promotion_code: promotion_code

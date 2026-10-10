@@ -267,16 +267,15 @@ defmodule AccrueAdmin.Live.CouponsLive do
   defp discount_summary(_row), do: Copy.coupon_discount_processor_defined()
 
   defp redemption_summary(row) do
-    used = row.times_redeemed || 0
-
-    case row.max_redemptions do
-      nil -> "#{used} used"
-      max -> "#{used} of #{max}"
+    case row.times_redeemed do
+      used when is_integer(used) -> Integer.to_string(used)
+      _ -> Copy.Coupon.coupon_redemptions_unknown()
     end
   end
 
   defp status_summary(%{valid: true}), do: Copy.coupon_status_valid()
   defp status_summary(%{valid: false}), do: Copy.coupon_status_invalid()
+  defp status_summary(_row), do: Copy.Coupon.coupon_unknown_value()
 
   defp redeem_by_summary(%{redeem_by: %DateTime{} = value}), do: format_datetime(value)
   defp redeem_by_summary(_row), do: Copy.coupon_redeem_by_no_expiry()

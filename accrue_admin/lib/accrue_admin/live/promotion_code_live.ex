@@ -272,7 +272,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
       },
       %{label: "Parent coupon", value: coupon_label(promotion_code)},
       %{label: "Expiry", value: expires_summary(promotion_code)},
-      %{label: "Redemption count", value: Integer.to_string(promotion_code.times_redeemed || 0)},
+      %{label: "Redemption count", value: redemption_count_summary(promotion_code)},
       %{label: "Redemption limit", value: max_redemptions_summary(promotion_code)},
       %{label: "Customer restriction", value: customer_restriction_summary(promotion_code)}
     ]
@@ -283,7 +283,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
       %{label: "Coupon", value: coupon_label(promotion_code)},
       %{
         label: "Coupon id",
-        value: promotion_code.coupon_id || AccrueAdmin.Copy.promotion_codes_coupon_none_label()
+        value: coupon_identity_summary(promotion_code)
       }
     ]
   end
@@ -308,7 +308,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
     [
       %{label: "Active state", value: status_summary(promotion_code)},
       %{label: "Expiry", value: expires_summary(promotion_code)},
-      %{label: "Redemption count", value: Integer.to_string(promotion_code.times_redeemed || 0)},
+      %{label: "Redemption count", value: redemption_count_summary(promotion_code)},
       %{label: "Redemption limit", value: max_redemptions_summary(promotion_code)}
     ]
   end
@@ -325,13 +325,17 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
     }
   end
 
-  defp coupon_label(%{coupon: %{name: name}}) when is_binary(name), do: name
+  defp coupon_label(%{coupon: %{id: id, name: name}, coupon_id: id}) when is_binary(name),
+    do: name
 
-  defp coupon_label(%{coupon: %{processor_id: processor_id}}) when is_binary(processor_id),
-    do: processor_id
+  defp coupon_label(%{coupon: %{id: id, processor_id: processor_id}, coupon_id: id})
+       when is_binary(processor_id),
+       do: processor_id
 
   defp coupon_label(%{coupon_id: nil}), do: AccrueAdmin.Copy.promotion_codes_coupon_none_label()
-  defp coupon_label(%{coupon_id: coupon_id}), do: coupon_id
+
+  defp coupon_label(%{coupon_id: coupon_id}),
+    do: AccrueAdmin.Copy.PromotionCode.promotion_code_coupon_unavailable(coupon_id)
 
   defp status_summary(%{active: true, expires_at: %DateTime{} = expires_at}),
     do:
@@ -340,17 +344,38 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
   defp status_summary(%{active: true}), do: AccrueAdmin.Copy.promotion_codes_status_active()
   defp status_summary(%{active: false}), do: AccrueAdmin.Copy.promotion_codes_status_inactive()
-  defp status_summary(_promotion_code), do: AccrueAdmin.Copy.promotion_codes_status_inactive()
 
-  defp redemption_summary(%{times_redeemed: used, max_redemptions: nil}), do: "#{used || 0} used"
+  defp status_summary(_promotion_code),
+    do: AccrueAdmin.Copy.PromotionCode.promotion_code_status_unknown()
 
-  defp redemption_summary(%{times_redeemed: used, max_redemptions: max}),
-    do: "#{used || 0} of #{max}"
+  defp redemption_summary(%{times_redeemed: used, max_redemptions: nil}) when is_integer(used),
+    do: "#{used}"
+
+  defp redemption_summary(%{times_redeemed: used, max_redemptions: max})
+       when is_integer(used) and is_integer(max),
+       do: "#{used} of #{max}"
+
+  defp redemption_summary(_promotion_code),
+    do: AccrueAdmin.Copy.PromotionCode.promotion_code_redemptions_unknown()
 
   defp max_redemptions_summary(%{max_redemptions: nil}),
     do: AccrueAdmin.Copy.promotion_code_kpi_meta_unlimited_cap()
 
   defp max_redemptions_summary(%{max_redemptions: max}), do: "#{max} max"
+
+  defp redemption_count_summary(%{times_redeemed: count}) when is_integer(count),
+    do: Integer.to_string(count)
+
+  defp redemption_count_summary(_promotion_code),
+    do: AccrueAdmin.Copy.PromotionCode.promotion_code_redemptions_unknown()
+
+  defp coupon_identity_summary(%{coupon_id: nil}),
+    do: AccrueAdmin.Copy.promotion_codes_coupon_none_label()
+
+  defp coupon_identity_summary(%{coupon: %{id: id}, coupon_id: id}), do: id
+
+  defp coupon_identity_summary(%{coupon_id: id}),
+    do: AccrueAdmin.Copy.PromotionCode.promotion_code_coupon_unavailable(id)
 
   defp expires_summary(%{expires_at: %DateTime{} = value}), do: format_datetime(value)
   defp expires_summary(_promotion_code), do: AccrueAdmin.Copy.promotion_code_redeem_by_no_expiry()
@@ -359,11 +384,12 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
     case Map.get(data, "customer") || Map.get(data, :customer) || Map.get(data, "customer_id") ||
            Map.get(data, :customer_id) do
       customer when is_binary(customer) and customer != "" -> customer
-      _customer -> "None"
+      _customer -> AccrueAdmin.Copy.PromotionCode.promotion_code_customer_restriction_unknown()
     end
   end
 
-  defp customer_restriction_summary(_promotion_code), do: "None"
+  defp customer_restriction_summary(_promotion_code),
+    do: AccrueAdmin.Copy.PromotionCode.promotion_code_customer_restriction_unknown()
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
 
