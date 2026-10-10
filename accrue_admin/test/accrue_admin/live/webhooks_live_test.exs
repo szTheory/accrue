@@ -246,7 +246,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     html = render_click(element(view, "[data-role='confirm-retry-selected']"))
     assert html =~ Copy.step_up_title()
     html = render_submit(view, "step_up_submit", %{"code" => "123456"})
-    assert html =~ "Queued 1 delivery. 0 skipped; 0 failed."
+    assert html =~ "Queued 1 delivery. 0 skipped; 0 denied; 0 failed; 0 unknown."
   end
 
   test "filtered-to-zero shows the filtered-empty copy, not the truly-empty hero", %{conn: conn} do

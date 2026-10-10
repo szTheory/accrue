@@ -98,7 +98,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     if ids == [] do
       {:noreply, push_flash(socket, :warning, Copy.webhooks_retry_no_selection_warning())}
     else
-      {:noreply, assign(socket, :pending_bulk_replay, %{ids: ids, count: length(ids)})}
+      reviewed = review_bulk_selection(ids, socket)
+      {:noreply, assign(socket, :pending_bulk_replay, reviewed)}
     end
   end
 
@@ -118,12 +119,18 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   def handle_event(
         "confirm_retry_selected",
-        _params,
-        %{assigns: %{pending_bulk_replay: %{ids: ids}}} = socket
+        params,
+        %{assigns: %{pending_bulk_replay: %{ids: ids} = review}} = socket
       ) do
     socket = assign(socket, :pending_bulk_replay, nil)
 
-    case StepUp.require_fresh(socket, bulk_step_up_action(), &execute_bulk_replay(&1, ids)) do
+    selection_matches? = reviewed_selection_matches?(params, ids)
+
+    case StepUp.require_fresh(
+           socket,
+           bulk_step_up_action(),
+           &execute_bulk_replay(&1, review, selection_matches?)
+         ) do
       {:ok, socket} ->
         {:noreply, socket}
 
@@ -154,8 +161,15 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   def handle_event("step_up_escape", _params, socket), do: {:noreply, dismiss_step_up(socket)}
   def handle_event("step_up_dismiss", _params, socket), do: {:noreply, dismiss_step_up(socket)}
 
-  defp execute_bulk_replay(socket, ids) do
-    result = replay_scoped_rows(ids, socket.assigns.current_owner_scope)
+  defp execute_bulk_replay(socket, review, selection_matches?) do
+    result =
+      if selection_matches? and
+           review.scope_key == scope_key(socket.assigns.current_owner_scope) and
+           review.actor_id == Auth.actor_id(socket.assigns.current_admin) do
+        replay_scoped_rows(review, socket.assigns.current_owner_scope)
+      else
+        denied_bulk_result(review)
+      end
 
     socket
     |> record_bulk_replay(result)
@@ -163,10 +177,45 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     |> push_flash(:info, Copy.webhooks_retry_result(result))
   end
 
-  defp replay_scoped_rows(ids, owner_scope) do
+  defp reviewed_selection_matches?(params, ids) do
+    case Map.get(params, "reviewed_ids") || Map.get(params, "reviewed-ids") do
+      nil ->
+        true
+
+      reviewed_ids when is_binary(reviewed_ids) ->
+        canonical_ids(String.split(reviewed_ids, ",")) == ids
+
+      _other ->
+        false
+    end
+  end
+
+  defp review_bulk_selection(ids, socket) do
+    owner_scope = socket.assigns.current_owner_scope
+
+    rows =
+      Enum.zip(ids, Enum.map(ids, &selected_replay_row(&1, owner_scope)))
+      |> Enum.map(fn {selected_id, row} -> Map.put(row, :selected_id, selected_id) end)
+
+    %{
+      ids: ids,
+      count: length(ids),
+      rows: rows,
+      scope_key: scope_key(owner_scope),
+      scope_label: owner_scope_label(owner_scope),
+      eligible_count: Enum.count(rows, &(&1.status in [:dead, :failed])),
+      actor_id: Auth.actor_id(socket.assigns.current_admin)
+    }
+  end
+
+  defp replay_scoped_rows(%{ids: ids, rows: reviewed_rows}, owner_scope) do
     selected_rows =
       ids
-      |> Enum.map(&selected_replay_row(&1, owner_scope))
+      |> Enum.zip(reviewed_rows)
+      |> Enum.map(fn {id, reviewed} ->
+        current = selected_replay_row(id, owner_scope)
+        Map.merge(current, %{reviewed_status: reviewed[:status], reviewed_id: reviewed[:id]})
+      end)
       |> Enum.sort_by(
         fn %{id: id, row: row} ->
           received_at =
@@ -193,52 +242,114 @@ defmodule AccrueAdmin.Live.WebhooksLive do
       attempted: Enum.count(outcomes, & &1.attempted),
       queued: queued,
       skipped: Enum.count(outcomes, &(&1.outcome == :skipped)),
+      denied: Enum.count(outcomes, &(&1.outcome == :denied)),
       failed: Enum.count(outcomes, &(&1.outcome == :failed)),
+      unknown: Enum.count(outcomes, &(&1.outcome == :unknown)),
+      reread_unknown: Enum.count(outcomes, &(&1[:reread] == :unknown)),
+      outcomes: outcomes
+    }
+  end
+
+  defp denied_bulk_result(review) do
+    outcomes = Enum.map(review.ids, &%{id: &1, outcome: :denied, attempted: false})
+
+    %{
+      selected: length(review.ids),
+      eligible: 0,
+      attempted: 0,
+      queued: 0,
+      skipped: 0,
+      denied: length(review.ids),
+      failed: 0,
+      unknown: 0,
+      reread_unknown: 0,
       outcomes: outcomes
     }
   end
 
   defp selected_replay_row(id, owner_scope) do
-    case Webhooks.detail(id, owner_scope) do
-      {:ok, row} -> %{id: row.id, row: row}
-      _inaccessible -> %{id: nil, row: nil}
+    case replay_detail(id, owner_scope) do
+      {:ok, row} -> %{id: row.id, row: row, status: row.status}
+      _inaccessible -> %{id: nil, row: nil, status: nil}
     end
   rescue
-    _read_error -> %{id: nil, row: nil, read_failed?: true}
+    _read_error -> %{id: nil, row: nil, status: nil, read_failed?: true}
+  end
+
+  defp replay_detail(id, owner_scope) do
+    if Mix.env() == :test do
+      case Application.get_env(:accrue_admin, :webhook_replay_detail_fun) do
+        fun when is_function(fun, 2) -> fun.(id, owner_scope)
+        _configured_fun -> Webhooks.detail(id, owner_scope)
+      end
+    else
+      Webhooks.detail(id, owner_scope)
+    end
   end
 
   defp replay_outcome(%{read_failed?: true}, _owner_scope),
-    do: %{id: nil, outcome: :failed, attempted: true}
+    do: %{id: nil, outcome: :unknown, attempted: false}
 
   defp replay_outcome(%{id: nil}, _owner_scope),
     do: %{id: nil, outcome: :skipped, attempted: false}
 
   defp replay_outcome(%{id: id, row: %{status: status}}, _owner_scope)
        when status not in [:failed, :dead],
-       do: %{id: id, outcome: :skipped, attempted: false}
+       do: %{id: id, outcome: :skipped, attempted: false, reread: :not_applicable}
+
+  defp replay_outcome(%{id: id, row: %{status: status}, reviewed_status: reviewed}, _owner_scope)
+       when status != reviewed,
+       do: %{id: id, outcome: :skipped, attempted: false, reread: :not_applicable}
 
   defp replay_outcome(%{id: id}, owner_scope) do
-    try do
-      case requeue_delivery(id, owner_scope) do
-        {:ok, _queued} ->
-          %{id: id, outcome: :queued, attempted: true}
-
-        {:error, :out_of_scope} ->
-          %{id: nil, outcome: :skipped, attempted: false}
-
-        {:error, reason} when reason in [:already_replayed, :not_dead_lettered, :not_found] ->
-          %{id: id, outcome: :skipped, attempted: false}
-
-        {:error, _reason} ->
-          %{id: id, outcome: :failed, attempted: true}
-
-        _unexpected ->
-          %{id: id, outcome: :failed, attempted: true}
+    enqueue_result =
+      try do
+        requeue_delivery(id, owner_scope)
+      rescue
+        _queue_error -> :unknown_dispatch_outcome
       end
-    rescue
-      _queue_error -> %{id: id, outcome: :failed, attempted: true}
+
+    case enqueue_result do
+      {:ok, _queued} ->
+        %{
+          id: id,
+          outcome: :queued,
+          attempted: true,
+          reread: post_enqueue_status(id, owner_scope)
+        }
+
+      {:error, :out_of_scope} ->
+        %{id: nil, outcome: :denied, attempted: false, reread: :not_applicable}
+
+      {:error, reason} when reason in [:already_replayed, :not_dead_lettered, :not_found] ->
+        %{id: id, outcome: :skipped, attempted: false, reread: :not_applicable}
+
+      {:error, _reason} ->
+        %{id: id, outcome: :failed, attempted: true, reread: :not_applicable}
+
+      _unclassifiable ->
+        %{id: id, outcome: :unknown, attempted: true, reread: :not_applicable}
     end
   end
+
+  defp post_enqueue_status(id, owner_scope) do
+    case selected_replay_row(id, owner_scope) do
+      %{row: %{status: status}} -> status
+      _unavailable -> :unknown
+    end
+  rescue
+    _read_error -> :unknown
+  end
+
+  defp scope_key(%{mode: mode, organization_id: organization_id, organization_slug: slug}),
+    do: {mode, organization_id, slug}
+
+  defp scope_key(_scope), do: :global
+
+  defp owner_scope_label(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
+    do: "Organization #{slug}"
+
+  defp owner_scope_label(_scope), do: "Global admin"
 
   defp canonical_ids(ids) do
     ids
@@ -348,10 +459,22 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           <p class="ax-body">
             <%= Copy.webhooks_retry_confirm_question(@pending_bulk_replay.count) %>
           </p>
+          <p class="ax-body" data-role="bulk-replay-review-scope">
+            Reviewed for <%= @pending_bulk_replay.scope_label %> ·
+            <%= @pending_bulk_replay.eligible_count %> of
+            <%= @pending_bulk_replay.count %> currently eligible
+          </p>
+          <ul class="ax-list" data-role="bulk-replay-reviewed-deliveries">
+            <li :for={reviewed <- @pending_bulk_replay.rows} class="ax-body">
+              <code><%= reviewed.selected_id %></code> ·
+              <%= if reviewed.row, do: humanize(reviewed.status), else: "Unavailable in this scope" %>
+            </li>
+          </ul>
           <div class="ax-page-header">
             <button
               type="button"
               phx-click="confirm_retry_selected"
+              phx-value-reviewed-ids={Enum.join(@pending_bulk_replay.ids, ",")}
               class="ax-button ax-button-primary"
               id="confirm-retry-selected"
               data-role="confirm-retry-selected"
@@ -396,7 +519,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           selectable={true}
-          row_label={{"event", "events"}}
+          row_label={{"delivery", "deliveries"}}
           bulk_action_label={Copy.webhooks_retry_selected_label()}
           bulk_action_event="retry_selected"
           columns={[
@@ -652,10 +775,19 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           "attempted" => result.attempted,
           "queued" => result.queued,
           "skipped" => result.skipped,
+          "denied" => result.denied,
           "failed" => result.failed,
+          "unknown" => result.unknown,
+          "reread_unknown" => result.reread_unknown,
           "ids" => scoped_ids,
           "outcomes" =>
-            Enum.map(scoped_outcomes, &%{"id" => &1.id, "outcome" => Atom.to_string(&1.outcome)})
+            Enum.map(scoped_outcomes, fn outcome ->
+              %{
+                "id" => outcome.id,
+                "outcome" => Atom.to_string(outcome.outcome),
+                "reread" => outcome[:reread] && to_string(outcome.reread)
+              }
+            end)
         }
       })
 
@@ -667,7 +799,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
         attempted: result.attempted,
         queued: result.queued,
         skipped: result.skipped,
+        denied: result.denied,
         failed: result.failed,
+        unknown: result.unknown,
+        reread_unknown: result.reread_unknown,
         ids: scoped_ids,
         source: :accrue_admin
       })

@@ -1307,16 +1307,36 @@ defmodule AccrueAdmin.Copy do
     "Queued #{count} #{word}."
   end
 
-  def webhooks_retry_result(%{queued: queued, skipped: skipped, failed: failed}) do
+  def webhooks_retry_result(
+        %{
+          queued: queued,
+          skipped: skipped,
+          denied: denied,
+          failed: failed,
+          unknown: unknown
+        } = result
+      ) do
+    counts =
+      "#{skipped} skipped; #{denied} denied; #{failed} failed; #{unknown} unknown."
+
+    reread =
+      case Map.get(result, :reread_unknown, 0) do
+        0 ->
+          ""
+
+        count ->
+          " #{count} accepted enqueue(s) could not be reread; processing status is unknown."
+      end
+
     cond do
       queued > 0 ->
-        "Queued #{queued} #{plural(queued, "delivery", "deliveries")}. #{skipped} skipped; #{failed} failed."
+        "Queued #{queued} #{plural(queued, "delivery", "deliveries")}. #{counts}#{reread}"
 
-      failed > 0 ->
-        "No deliveries were queued. #{skipped} skipped; #{failed} failed."
+      failed > 0 or denied > 0 or unknown > 0 ->
+        "No deliveries were queued. #{counts}#{reread}"
 
       true ->
-        "No eligible deliveries were queued. #{skipped} skipped; 0 failed."
+        "No eligible deliveries were queued. #{counts}#{reread}"
     end
   end
 
