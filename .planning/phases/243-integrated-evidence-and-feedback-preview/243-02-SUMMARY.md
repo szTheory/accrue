@@ -103,7 +103,7 @@ The native development database data-only dump SHA256 remained `f221026bfbfb92bf
 2. **Task 2: Prove fresh preview and warm preservation** - `9eace18f` (feat)
 3. **Task 3: Prove the complete verifier remains separate** - `de9e4d5d` (fix)
 
-The plan metadata commit is pending.
+Plan metadata commits: `f1045971` (state/roadmap/summary/deferred finding) and the final self-check correction.
 
 ## Files Created/Modified
 
@@ -173,4 +173,4 @@ Plan 243-03 can use the custody preflight and runtime evidence. Plan 243-02 rema
 
 ## Self-Check: PASSED
 
-The summary and preservation spec exist, and task commits `5ceab3c5`, `9eace18f`, and `de9e4d5d` are ancestors of the current branch head.
+The summary and preservation spec exist, and task commits `5ceab3c5`, `9eace18f`, and `de9e4d5` plus metadata commit `f1045971` are ancestors of the current branch head.
