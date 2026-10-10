@@ -424,10 +424,11 @@ Phoenix LiveView 1.1.31 docs state route params are public/user-modifiable and t
 
 ## Open Questions
 
-1. **Do both package and host mounted routes need new Playwright cases?**
+1. **Do both package and host mounted routes need new Playwright cases? (RESOLVED 2026-10-10)**
    - What we know: package fixture `/billing` is Admin; host `/admin` is Admin and `/billing` is Portal.
    - What's unclear: host needs a case only where it provides behavior absent from package fixture.
    - Recommendation: use package browser for consumer interaction; add host mounted case only where deployed composition/asset serving differs, using disposable fixture setup.
+   - Resolution: completed `241-07-SUMMARY.md` records Phase191/199 package browser cases for consumer interaction and a Phase237 mounted host case for host-specific `/admin` versus Portal `/billing` route and served CSS/JS/font identity. The current 241-08 named spacing gap adds its recurring computed-style assertion to the package Phase199 owner; it does not change the historical host-capture owner.
 
 ## Metadata
 

@@ -94,15 +94,30 @@ There is no separate Wave 0. Each owning task creates its new assertion before i
 ## Execution Evidence and Limits
 
 - Plans 241-01 through 241-06 report durations of 4, 5, 5, 5, 8, and 9 minutes. Plan 241-07 reports 66 minutes in its Performance section but 228 minutes in frontmatter metrics; this source discrepancy is preserved rather than reconciled by inference.
-- The current Admin package completed `MIX_ENV=test mix compile --warnings-as-errors` and the full suite: 642 tests, 0 failures. The captured run is `/private/tmp/accrue241-wave4-test.log`.
-- Browser evidence: Phase191 28 passed; Phase199 24 passed and 15 incumbent project-specific skips. One incumbent Phase199 drawer test timed out during Chromium launch at 180 seconds and passed 1/1 on isolated rerun. Both newly added Phase241 cases ran and passed. The focused responsive stress case passed across seven consumers; the review matrix passed with ten subscription and two payment-method reviews.
+- At Phase 241 completion, the Admin package passed warnings-as-errors compilation and its final full suite passed 646 tests, 0 failures (`/private/tmp/accrue241-final-admin-tests.log`). This is the phase-time result; later regression evidence is recorded below.
+- At Phase 241 completion, Phase191 browser acceptance was 28 passed on the initial run; after the correction batch, the broad run had 26 passed/2 failed and both failed owners passed an isolated 12/12 rerun. Phase199 had 24 passed/15 incumbent skips plus one Chromium launch timeout, which passed 1/1 in isolation. Both newly added Phase241 cases ran and passed. The focused responsive stress case passed across seven consumers; the review matrix passed with ten subscription and two payment-method reviews. Later package-owner regression totals are recorded below.
 - Component and host evidence: AtRiskTable 6 passed; Admin and mounted-host warnings-as-errors compiles passed; the Phase237 mounted-host spec passed 1/1 after CSS rebuild and host recompile. The host run checked Recovery window/owner return and package, compiled-host, HTTP-served, and browser-request asset bytes.
 - JRN-01..04 are covered by task owners 241-01..07 as mapped above. The 40 applicable UI criteria and 20 edge probes in the UI-SPEC and PROBE-COVERAGE have explicit owning evidence; they are criteria inventories, not standalone claims that physical zoom or provider behavior was observed.
 - The phase SUMMARY records that automated-UAT artifact generation requires a genuine `241-VERIFICATION.md`; none was fabricated. This does not replace or weaken the executed test evidence above.
 
 ## CI and Evidence Ownership
 
-Security's stronger register audit found three additional scenario gaps after the initial Nyquist owner map was reconciled. `241-SECURITY-FIX.md` records their closure and the APIError recheck correction. Final Admin warnings-as-errors compilation passed and the full suite passed 646 tests, 0 failures; mounted host measured Fake invoice dispatch 0→0. No manual-only verification was introduced.
+Security's stronger register audit found three additional scenario gaps after the initial Nyquist owner map was reconciled. `241-SECURITY-FIX.md` records their closure and the APIError recheck correction. At phase completion, Admin warnings-as-errors compilation passed and the full suite passed 646 tests, 0 failures; mounted host measured Fake invoice dispatch 0→0. No manual-only verification was introduced.
+
+## Fresh regression evidence (2026-10-10)
+
+The parent verification run re-executed the current owners against the current source. These results confirm the behavioral owners above; they do not replace the phase-time task logs or establish physical-device/provider behavior.
+
+| Owner | Command / evidence | Result |
+|---|---|---|
+| Admin full suite | `cd accrue_admin && MIX_ENV=test mix test` (`/private/tmp/accrue242-final-regression.log`) | 679 tests, 0 failures |
+| Node owners and guards | `cd accrue_admin && node --test test/js/*.mjs` (`/private/tmp/accrue242-node-test.log`) | 44 passed, 0 failures/skips |
+| Phase191 package browser | `cd accrue_admin && CI=1 npm run e2e:phase191` (`/private/tmp/accrue242-phase191-final.log`) | 29 passed, 1 incumbent skip |
+| Phase199 package browser | `cd accrue_admin && CI=1 npm run e2e:phase199` (`/private/tmp/accrue242-phase199.log`) | 27 passed, 15 incumbent skips |
+| Host server integration owners | `cd examples/accrue_host && MIX_ENV=test mix test` (`/private/tmp/accrue242-final-regression.log`) | 223 tests, 0 failures |
+| Mounted host browser | `cd examples/accrue_host && CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop --workers=1` (`/private/tmp/accrue242-host-browser.log`) | 2 passed |
+
+The later package-browser skip counts are incumbent skips; the new Phase241 interactions were exercised by the phase-time focused cases and included in the fresh package-browser runs. The host browser rerun exercised the mounted billing owner. All fourteen PLAN task-level commands and their behavioral assertions remain present in the map above; the fresh full Admin run re-executed those LiveView and query owners together.
 
 Use existing `release-gate`, Admin guardrails, component and `host-integration` lanes where they already execute the changed owners. Preserve Linux baseline guards, approved masks and pixel thresholds; final reviewed Linux goldens belong to Phase 243. Do not claim remote CI ran during planning.
 

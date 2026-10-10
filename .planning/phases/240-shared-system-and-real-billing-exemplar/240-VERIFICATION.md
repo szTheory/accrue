@@ -1,10 +1,11 @@
 ---
 phase: 240-shared-system-and-real-billing-exemplar
-verified: 2026-10-10T10:33:50Z
+verified: 2026-10-10T15:15:03Z
 status: passed
 score: 47/47 must-haves verified
 covered_files:
   - .github/workflows/accrue_admin_browser.yml
+  - .planning/REQUIREMENTS.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-01-PLAN.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-01-SUMMARY.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-02-PLAN.md
@@ -17,19 +18,21 @@ covered_files:
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-05-SUMMARY.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-06-PLAN.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-06-SUMMARY.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-CONTEXT.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-COVERAGE.md
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-UAT.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-PATTERNS.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-RESEARCH.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-REVIEW-DISPOSITION.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-REVIEW-FIX.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-REVIEW.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-SECURITY.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-UI-REVIEW.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-UI-SPEC.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-VALIDATION.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/final-gates/exemplar-privacy-copy.xml
   - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/final-gates/package-browser-privacy-copy.xml
   - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/final-gates/results.json
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar/invoice-collection.png
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar/invoice-review.png
   - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar/manifest.json
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar/recovery.png
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar/subscription-detail.png
-  - .planning/phases/241-billing-operator-journeys/241-07-SUMMARY.md
-  - .planning/phases/241-billing-operator-journeys/241-EXECUTION-GATES.md
-  - .planning/phases/241-billing-operator-journeys/241-UI-FIX.md
   - accrue_admin/assets/css/app.css
   - accrue_admin/assets/js/hooks/accrue_theme.js
   - accrue_admin/assets/js/hooks/connection_state.js
@@ -63,7 +66,7 @@ covered_files:
   - examples/accrue_host/e2e/phase237-admin-billing.spec.js
   - examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js
   - scripts/ci/verify_phase240_evidence.mjs
-covered_digest: "v3:sha256:e06c636e01564b9f495bc3b220c3a99d4e4c5f2b1058e207218b707681994f62"
+covered_digest: "v3:sha256:9fce478e4c025f8c622e843fd3487618f10b43fcfc3e0d6596126ec63e7f7027"
 behavior_unverified: 0
 re_verification:
   previous_status: passed
@@ -84,9 +87,9 @@ deferred:
 # Phase 240: Shared System and Real Billing Exemplar Verification Report
 
 **Phase Goal:** Operators can use a coherent, truthful invoice list → detail → action review flow and a dense subscription view through the incumbent Admin system, with shared interaction and evidence patterns ready for other existing routes.
-**Verified:** 2026-10-10T10:33:50Z
+**Verified:** 2026-10-10T15:15:03Z
 **Status:** passed
-**Re-verification:** Yes — shared-source and consumer changes in Phase 241 required current verification
+**Re-verification:** Yes — shared-source and consumer changes in Phases 241–242 required current verification
 
 ## Goal Achievement
 
@@ -201,11 +204,19 @@ None. Phase policy requires zero maintainer UAT; automated mounted appearance, i
 
 Phase 241 changed shared Admin styles/JS and the invoice/subscription consumers, so Phase 240's previous digest and pass timestamp were stale. Current regression evidence is recorded in `.planning/phases/241-billing-operator-journeys/241-EXECUTION-GATES.md`, `.planning/phases/241-billing-operator-journeys/241-UI-FIX.md`, and `241-07-SUMMARY.md`. The owner runs report Admin 646/0 with warnings-as-errors compile passing, Node 41/0, host 223/0, invoice list/detail browser 42/0/4 incumbent skips, focused Phase 191 1/1 and Phase 199 2/2, and mounted host 1/1 with current served-asset hashes. The canonical Phase 240 UAT is at a generator fixed point (18/18, 0 issues); the project-wide executable UAT contract reports PASS across 13 phases, 102 summaries and 302 items. These checks preserve the original evidence limits: actual browser zoom and physical-device behavior are not claimed, and selected reviewed Linux goldens remain Phase 243 work.
 
+## Current-source regeneration (2026-10-10)
+
+The prior report became stale after later phases changed shared Admin sources and CI. All 47 plan must-haves were rechecked against current LiveViews, query/action owners, browser/host wiring, current UI contracts and current regression evidence. The five roadmap outcomes are covered by the same verified plan truths. Prose-only artifact and key-link declarations were not treated as evidence; source, call paths, repository queries and named executed owners were inspected.
+
+Fresh regression runs in `/private/tmp/accrue242-final-regression.log` and `/private/tmp/accrue242-prior-browser-regression-permitted.log` passed warnings-as-errors compiles, Admin 679/0, Node 44/0 and host 223/0. Current browser evidence reports Phase191 29 passed/1 incumbent skip, Phase199 27 passed/15 incumbent skips, invoice list/detail 42 passed/4 incumbent skips, prior mounted host 1 passed, and current mounted host 1 passed. The parent’s integrated acceptance record and Phase242 gate ledger preserve other owner outcomes and earlier failing attempts. No remote CI pass is claimed. Nyquist remains validated/compliant; security audit confirms 13/13 unique IDs closed, `threats_open: 0`, ASVS L1; current code-review delta covered five overlapping files with 0 findings.
+
+The current UI audit is 14/24. It records warnings in unreferenced legacy `.ax-summary-health-*` CSS (0px gap/0.5px vertical padding and 900/950 weights). The active subscription lifecycle markup uses separate `.ax-detail-health-*` classes with token spacing, and the flagged legacy classes have no LiveView caller. These warnings do not fail a plan must-have. Historical captures/measurements are not presented as fresh visual confirmation; no image was inspected or captured. Actual browser zoom, physical device, assistive speech, live-provider and remote CI behavior are not claimed. Phase243 owns final reviewed Linux goldens.
+
 ## Gaps Summary
 
 No blocking or uncertain must-have remains. The current implementation delivers the invoice list → detail → staged action-review path and dense subscription view through the incumbent Admin system. Source, focused tests, mounted assertions and current served-asset evidence connect the behavior end to end. The UI review's remaining subscription global invoice-queue composition/destination work is explicitly assigned to Phase 241, and reviewed Linux golden closure is assigned to Phase 243; neither is pulled into this phase's contract. The original Phase 240-03 TDD RED timing deviation remains historical and is not represented by retrospective reports as timing proof.
 
 ---
 
-_Verified: 2026-10-10T10:33:50Z_
+_Verified: 2026-10-10T15:15:03Z_
 _Verifier: the agent (gsd-verifier)_

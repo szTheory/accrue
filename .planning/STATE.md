@@ -2,21 +2,21 @@
 gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
-current_phase: 243
-current_phase_name: Integrated Evidence and Feedback Preview
-current_plan: Not started
-status: planning
-stopped_at: Phase 242 complete; next $gsd-discuss-phase 243
-last_updated: "2026-10-10T15:00:43Z"
+current_phase: 241
+current_phase_name: Billing Operator Journeys
+current_plan: 08
+status: ready_to_execute
+stopped_at: Named Phase 241 spacing gap planned; next $gsd-execute-phase 241 --gaps-only
+last_updated: "2026-10-10T15:34:58Z"
 last_activity: 2026-10-10
-last_activity_desc: "Phase 242 verified complete (7/7 plans, 80/80 must-haves, 19 automated UAT); next: $gsd-discuss-phase 243"
+last_activity_desc: "Phase 241 truth 25 action-spacing gap assigned to Plan 08; Phase 242 remains verified 80/80; Phase 243 follows gap closure"
 state_head: f93415fa6e9cba748f576274df4414aa1fccd079
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 20
+  completed_phases: 2
+  total_plans: 21
   completed_plans: 20
-  percent: 75
+  percent: 50
 ---
 
 # Project State
@@ -27,17 +27,17 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 243 — Integrated Evidence and Feedback Preview; no Phase 243 context or plans yet; next: `$gsd-discuss-phase 243`
-**Progress:** [████████░░] 75% (3 of 4 milestone phases complete; all 20 currently planned plans executed; Phase 243 is not planned)
-**Planned work completed:** Phases 240–242 complete: 6/6, 7/7 and 7/7 plans; 47/47, 29/29 and 80/80 must-haves. Phase 242 has 19 automated UAT items and zero required human UAT. Current Admin 679/0, Node 44/0, host 223/0; existing browser owners and the project-wide executable-UAT contract pass. Milestone requirements: 16/18 complete. See phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-HANDOFF.md. Phase 243 owns reviewed Linux goldens and the stable preview; v1.63 remains archived and closed.
+**Current focus:** Phase 241 named gap closure — Plan 08 addresses action-control spacing; next: `$gsd-execute-phase 241 --gaps-only`. Phase 243 remains the remaining milestone work after this closure.
+**Progress:** [█████░░░░░] 50% (Phase 240 and Phase 242 are verified complete; Phase 241 reopened on one named verification gap; 20 of 21 currently planned plans executed; Phase 243 is not planned)
+**Planned work completed:** Phase 240 6/6 plans and 47/47 truths, Phase 241 original 7/7 plans with current verification 28/29 truths, and Phase 242 7/7 plans with 80/80 truths. Phase 242 retains 19 automated UAT items and zero required human UAT. JRN-01–04 remain satisfied; milestone requirements remain 16/18 satisfied. Phase 243 owns reviewed Linux goldens and the stable preview; v1.63 remains archived and closed.
 
 ## Current Position
 
-Phase: 243 — Integrated Evidence and Feedback Preview
-Current Plan: Not started
-Total Plans in Phase: Not planned
-Status: Ready for discussion; next $gsd-discuss-phase 243
-Last activity: 2026-10-10 — Phase 242 complete, transitioned to Phase 243
+Phase: 241 — Billing Operator Journeys named gap closure
+Current Plan: 08 (gap_closure)
+Total Plans in Phase: 8 (7 original plans executed)
+Status: Ready to execute Plan 08 with --gaps-only; Phase 243 discussion follows verification
+Last activity: 2026-10-10 — current 241 verification found 28/29 truths; action-control spacing assigned to Plan 08
 
 ## Performance Metrics
 
@@ -473,8 +473,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T15:00:43Z
-Stopped at: Phase 242 complete; next $gsd-discuss-phase 243
+Last session: 2026-10-10T15:34:58Z
+Stopped at: Phase 241 Plan 08 gap closure planned; next $gsd-execute-phase 241 --gaps-only
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -605,8 +605,8 @@ any published package. Closed -- no decision pending, no remediation warranted.
 ## Operator Next Steps
 
 - **Last completed phase:** 242 — Investigations and Remaining Admin Surfaces (7/7 plans, independent 80/80 verification, 19 automated UAT items, zero human UAT).
-- **Next command:** `$gsd-discuss-phase 243` — Integrated Evidence and Feedback Preview. Phase 243 has no context/plans yet. Milestone v1.64 is 3/4 phases complete; 16/18 requirements are complete.
-- Context can be cleared. Read `phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-HANDOFF.md`; preserve approved decisions, verification fingerprint, acceptance owners and evidence limits. Do not rerun 240–242 or restart milestone/research/Impeccable initialization.
+- **Next command:** `$gsd-execute-phase 241 --gaps-only` — execute only Plan 08 for the named action-control spacing gap, then reverify Phase 241. Phase 243 discussion remains next milestone work after closure. Milestone requirements remain 16/18 satisfied.
+- Context can be cleared. Read `phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-HANDOFF.md`; preserve approved decisions, verification fingerprint, acceptance owners and evidence limits. Do not rerun completed original 240–242 plans or restart milestone/research/Impeccable initialization.
 - Default to automated unit/integration/E2E/smoke/seam acceptance and existing CI when recurring value exists. Required human UAT is zero; subjective feedback stays optional. Preview data must remain separate from disposable mutation/reset fixtures.
 - Phase 243 owns the complete reviewed Linux golden set, stable Fake-backed `/admin` preview and final evidence reconciliation. Actual provider/device/speech/native-zoom and remote CI limits remain explicit; no broad certification is claimed.
 - Completion returned five summary reference warnings for eleven command strings parsed as file paths. All 24 referenced package/host test owners resolve, including the Node glob; actual checks passed. These are bookkeeping false positives, not missing evidence or new work.

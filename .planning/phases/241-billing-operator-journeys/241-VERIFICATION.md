@@ -1,9 +1,10 @@
 ---
 phase: 241-billing-operator-journeys
-verified: 2026-10-10T10:03:58Z
-status: passed
-score: 29/29 must-haves verified
+verified: 2026-10-10T15:15:03Z
+status: gaps_found
+score: 28/29 must-haves verified
 covered_files:
+  - .planning/REQUIREMENTS.md
   - .planning/phases/241-billing-operator-journeys/241-01-PLAN.md
   - .planning/phases/241-billing-operator-journeys/241-01-SUMMARY.md
   - .planning/phases/241-billing-operator-journeys/241-02-PLAN.md
@@ -18,8 +19,16 @@ covered_files:
   - .planning/phases/241-billing-operator-journeys/241-06-SUMMARY.md
   - .planning/phases/241-billing-operator-journeys/241-07-PLAN.md
   - .planning/phases/241-billing-operator-journeys/241-07-SUMMARY.md
-  - .planning/phases/241-billing-operator-journeys/241-UAT.md
+  - .planning/phases/241-billing-operator-journeys/241-CONTEXT.md
+  - .planning/phases/241-billing-operator-journeys/241-PATTERNS.md
+  - .planning/phases/241-billing-operator-journeys/241-PROBE-COVERAGE.md
+  - .planning/phases/241-billing-operator-journeys/241-RESEARCH.md
+  - .planning/phases/241-billing-operator-journeys/241-REVIEW.md
+  - .planning/phases/241-billing-operator-journeys/241-SECURITY.md
+  - .planning/phases/241-billing-operator-journeys/241-UI-FIX.md
+  - .planning/phases/241-billing-operator-journeys/241-UI-REVIEW.md
   - .planning/phases/241-billing-operator-journeys/241-UI-SPEC.md
+  - .planning/phases/241-billing-operator-journeys/241-VALIDATION.md
   - accrue_admin/assets/css/app.css
   - accrue_admin/assets/js/app.js
   - accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js
@@ -52,17 +61,28 @@ covered_files:
   - examples/accrue_host/e2e/phase237-admin-billing.spec.js
   - examples/accrue_host/lib/accrue_host_web/controllers/organization_scope_controller.ex
   - examples/accrue_host/lib/accrue_host_web/router.ex
-covered_digest: "v3:sha256:0bc68c5e585fa093167ce8420d6533989056f878e161afef6870e5211e47a599"
+covered_digest: "v3:sha256:76301d4ec704445b488976df0c010552de4dab29cf788f4daa126b3caa846ce8"
 behavior_unverified: 0
 overrides_applied: 0
+gaps:
+  - truth: "D-16/D-18/D-19/D-20: changed consumers use the incumbent hierarchy and approved spacing rhythm, with 2px spacing limited to dense data and 1px limited to structural rules."
+    status: failed
+    reason: "Current source puts a 2px gap between action controls and a 3px gap in a detail action row. The locked UI contract allows 2px only for dense data, so the action-group spacing does not meet the phase must-have."
+    artifacts:
+      - path: "accrue_admin/assets/css/app.css"
+        issue: "`.ax-detail-action-band .ax-page-actions` uses `gap: 0.125rem` (2px) and `.ax-detail-actions-row` uses `gap: 0.1875rem` (3px); current callers include invoice and subscription detail action bands."
+      - path: ".planning/phases/241-billing-operator-journeys/241-UI-SPEC.md"
+        issue: "The approved exception is 2px dense-data spacing only; action controls use the package 4px rhythm."
+    missing:
+      - "Use approved 4px spacing for action-control groups or document an approved scoped exception, and add a current computed-style assertion in an existing browser owner."
 ---
 
 # Phase 241: Billing Operator Journeys Verification Report
 
 **Phase Goal:** Operators can move through existing customer, subscription, invoice, payment and recovery work with truthful scoped destinations, bounded returns and self-contained billing action reviews.
-**Verified:** 2026-10-10T10:03:58Z
-**Status:** passed
-**Re-verification:** No — initial verification
+**Verified:** 2026-10-10T15:15:03Z
+**Status:** gaps_found
+**Re-verification:** Yes — shared-source changes and UI contract audit required current verification
 
 ## Goal Achievement
 
@@ -96,7 +116,7 @@ The four roadmap success criteria are the phase contract. They overlap the seven
 | 22 | Back/Escape dismiss only; fresh authorization, target/state, step-up/capability and duplicate checks remain at existing owners with evidence-specific result. | ✓ VERIFIED | Charge/customer confirm handlers reload current records and compare reviewed data before step-up/dispatch; dismissal/reconnect/repeat tests assert authoritative Fake counts and result distinctions. |
 | 23 | Blank/stale intent cannot select a new target; repeated confirm/reconnect dispatches at most once. | ✓ VERIFIED | `charge_live_test.exs` and `customer_live_test.exs` use Fake callback counters for stale/duplicate/reconnect cases; security follow-up added HTTP500 regression. |
 | 24 | Refund blank/zero/negative/remaining/over-remaining and zero-decimal inputs obey exact minor-unit contract without float conversion. | ✓ VERIFIED | Charge amount parser and remaining-balance guard operate on integer minor units; boundary and zero-decimal tests assert exact requests. |
-| 25 | Changed consumers use incumbent hierarchy, effective theme, keyboard/focus/busy behavior and current served package assets. | ✓ VERIFIED | Phase 191/199 browser owners, mounted host `phase237-admin-billing.spec.js`, and source/package/compiled/HTTP/browser byte digests cover changed consumers. Current mounted checks confirm title/spacing and unique Recovery link. |
+| 25 | Changed consumers use incumbent hierarchy, effective theme, keyboard/focus/busy behavior and current served package assets. | ✗ FAILED | Fresh owner tests and served-asset checks pass, but current CSS action-control gaps violate the locked Phase 241 spacing exception. See Gaps Summary. |
 | 26 | Each changed consumer has viewport and content stress evidence. | ✓ VERIFIED | Executed package and mounted owners record narrow/desktop, intermediate, text enlargement/text-spacing and long-content checks; final corrections have confirming captures. |
 | 27 | Changed read/action states remain distinct under patch/reconnect. | ✓ VERIFIED | LiveView owners assert state branches; action owners exercise reconnect and no replay; focused final Phase 191 review matrix and Phase 199 text/reflow cases passed. |
 | 28 | Browser focus and authoritative no-replay proof cover changed action consumers. | ✓ VERIFIED | Keyboard/focus owners exercise dismissal/restoration; action ExUnit Fake boundaries count dispatches. Mounted host measured invoice action 0→0 on Escape. |
@@ -104,7 +124,7 @@ The four roadmap success criteria are the phase contract. They overlap the seven
 
 **Roadmap criteria:** (1) truths 1–5; (2) truths 6–12; (3) truths 13–16; (4) truths 17–24. Each criterion is VERIFIED.
 
-**Score:** 29/29 truths verified (0 present, behavior-unverified)
+**Score:** 28/29 truths verified (0 present, behavior-unverified)
 
 ### Required Artifacts
 
@@ -165,7 +185,7 @@ Not applicable. None of the seven plans or summaries declares a runnable probe p
 | JRN-03 | 241-04 | Direct campaign returns to scoped Recovery; navigated campaign retains supported recovery window and scope. | ✓ SATISFIED | Observable truths 13–16; campaign/Recovery owner tests. |
 | JRN-04 | 241-05, 241-06 | Billing reviews are self-contained, exact, freshly authorized, dismiss-safe and show evidence-specific action outcomes. | ✓ SATISFIED | Observable truths 17–24; action owners, security controls and mounted no-dispatch proof. |
 
-No additional Phase 241 requirement mapping was found in REQUIREMENTS.md; no orphaned requirements.
+No additional Phase 241 requirement mapping was found in REQUIREMENTS.md; no orphaned requirements. JRN-01 through JRN-04 remain satisfied by current behavior and fresh owner evidence.
 
 ### Anti-Patterns Found
 
@@ -178,11 +198,19 @@ No in-scope production stub or untracked debt marker found. Exact grep-style dec
 
 The local deterministic evidence does not claim remote CI completion, physical-device behavior, actual browser 400% zoom controls, assistive-technology speech output or live-provider outcomes. Text enlargement, text-spacing overrides, narrow viewport simulation and Fake provider boundaries were exercised. Phase 243 retains final reviewed Linux visual goldens. These are scoped observation limits, not unresolved phase behaviors or a manual UAT checkpoint.
 
+### Current-source regeneration (2026-10-10)
+
+This report was stale after later changes to shared Admin sources and CI. All 29 plan must-haves were checked again against current source and fresh owner evidence. JRN-01 through JRN-04 remain requirement-satisfied: exact scoped invoice membership, bounded contextual returns, Recovery window preservation, and billing-action review safeguards all remain implemented and exercised. Current requirements still map only these four IDs to Phase 241; no orphan was found. The one failed plan truth is the Phase 241 UI contract deviation recorded in frontmatter and row 25 above.
+
+Current fresh runs from `/private/tmp/accrue242-final-regression.log` and `/private/tmp/accrue242-prior-browser-regression-permitted.log`: warnings-as-errors compiles pass; Admin 679/0; Node 44/0; host 223/0; Phase191 29 passed/1 incumbent skip; Phase199 27 passed/15 incumbent skips; prior invoice list/detail browsers 42 passed/4 incumbent skips; current mounted Phase237 owner 1 passed. Focused stale-origin/review and host outcomes remain individually mapped in the execution records. Security re-audit is SECURED, 16/16 threats closed, `threats_open: 0`, ASVS L1. Nyquist remains mapped across all 14 tasks with current regression coverage. Current code review delta covered seven files with 0 findings; the independent UI recheck scores 18/24 and identifies the exact source-contract mismatch.
+
+The CSS values are source facts and the selectors have current invoice/subscription callers. Historical computed-style measurements and captures do not supersede those current declarations. No new screenshot was captured or inspected. Physical zoom, screen-reader speech, live-provider behavior, remote CI, and reviewed Linux goldens remain unclaimed; Phase243 owns final Linux goldens. These observation limits do not create human UAT items.
+
 ### Gaps Summary
 
-No must-have failed. All four roadmap criteria and all 29 distinct plan truths are supported by current source wiring and behavioral owner evidence. Broad browser-run failures and incumbent skips are preserved in the execution record rather than summarized as a fully green CI run.
+One must-have failed: the current detail action-control spacing is outside the approved Phase 241 exception. The scoped return, Recovery, data-flow, authorization, exact-money and action-outcome behavior remains verified. The phase cannot be marked passed until the owning CSS control is corrected and its computed result is asserted in an existing owner. Broad browser-run failures and incumbent skips remain explicitly recorded; the current green evidence does not erase those historical outcomes.
 
 ---
 
-_Verified: 2026-10-10T10:03:58Z_  
+_Verified: 2026-10-10T15:15:03Z_
 _Verifier: the agent (gsd-verifier)_

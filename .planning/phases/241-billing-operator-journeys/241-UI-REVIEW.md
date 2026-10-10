@@ -1,85 +1,68 @@
 # Phase 241 — UI Review
 
-**Audited:** 2026-10-10; bounded recheck after `241-UI-FIX.md`  
-**Baseline:** Approved `241-UI-SPEC.md` and Phase 240 incumbent roles  
-**Screenshots:** Captured mounted desktop (1280×900) and narrow (320×900) subscription views; refreshed evidence is under `evidence/phase237-exemplar/`. Package, compiled-host, and served asset digests match.  
+**Audited:** 2026-10-10; source-only bounded recheck after `241-UI-FIX.md`\
+**Baseline:** Approved `241-UI-SPEC.md`, inherited Phase 240 incumbent roles, and the scoped corrections recorded in `241-UI-FIX.md`\
+**Screenshots:** Not captured for this recheck. Existing `evidence/phase237-exemplar/` captures and their mounted measurements are historical evidence from the prior correction batch; they are not treated as proof of current served output.\
 **Interaction captures:** off (workflow.ui_interaction_capture is false)
 
-The initial audit scored **15/24**. The scoped recheck scores **24/24**: all named visual, spacing, color, and experience findings are closed by current source, computed styles, and mounted evidence. The copy concern is nonblocking and closed without a copy change because the current labels explicitly limit what is unknown to Admin; they do not imply a provider-side state.
-
----
+The prior review recorded 24/24 after its correction batch. This recheck confirms the copy, title role, and single scoped Recovery destination in current source, but it cannot renew the prior mounted claims without fresh served-output inspection. Current CSS also leaves 2px internal gaps in the subscription action controls; the contract reserves 2px for dense data, so the prior blanket 24/24 disposition does not hold for the source snapshot inspected here. No implementation correction or new capture was made.
 
 ## Pillar Scores
 
-| Pillar | Initial | Current | Recheck disposition |
-|--------|---------|---------|---------------------|
-| 1. Copywriting | 3/4 | 4/4 | Nonblocking wording advisory; current “in Admin” scope is explicit and truthful. |
-| 2. Visuals | 2/4 | 4/4 | Summary spacing and duplicate Recovery destination corrected. |
-| 3. Color | 3/4 | 4/4 | The single Recovery link uses the accent link role; warning color remains with status information. |
-| 4. Typography | 2/4 | 4/4 | Subscription title now computes to 24px/600. |
-| 5. Spacing | 2/4 | 4/4 | Summary and action-header gaps now compute to 4px. |
-| 6. Experience Design | 3/4 | 4/4 | No-campaign state has one scoped Recovery link. |
+| Pillar | Score | Key Finding |
+|--------|-------|-------------|
+| 1. Copywriting | 4/4 | Current unavailable-value strings scope claims to Admin; action and destination labels remain specific. |
+| 2. Visuals | 3/4 | Source preserves identity, lifecycle, actions, and related-resource ordering; current rendered hierarchy was not recaptured. |
+| 3. Color | 3/4 | Current Recovery action is a purposeful `ax-link`; current composition and contrast across themes are unverified. |
+| 4. Typography | 3/4 | Subscription title uses the approved 24px/600 token role; current served typography was not measured. |
+| 5. Spacing | 2/4 | The action-control group uses a 2px gap despite the contract limiting that exception to dense data. |
+| 6. Experience Design | 3/4 | Mutually exclusive Recovery branches and explicit status markup are present; interaction behavior was not freshly exercised. |
 
-**Initial overall: 15/24**  
-**Current scoped recheck: 24/24**
-
----
+**Overall: 18/24**
 
 ## Top 3 Priority Fixes
 
-All three priority fixes from the initial review are closed:
-
-1. **Subscription identity typography** — changed to the incumbent 24px/600 title role; mounted computed style confirms `fontSize: 24px`, `fontWeight: 600`.
-2. **Subscription summary spacing** — main, fact-row, and label/value gaps now compute to 4px; the desktop and 320px captures show wrapped facts remain readable.
-3. **Recovery CTA duplication and color** — the no-campaign branch renders one scoped `ax-link`; the amber status treatment remains on the dunning state summary.
-
----
+1. **Resolve the 2px action-control gap** — operators can get crowded controls, and 2px is outside the approved dense-data exception — use the 4px token or document an approved action-group exception, then verify served geometry.
+2. **Refresh current served-output evidence** — the prior capture manifest predates the source state under review, so the old 24/24 result cannot establish current visuals — rebuild and inspect the corrected package/host output when the visual-evidence budget allows.
+3. **Recheck visual behavior across themes and narrow layouts** — contract requirements for effective contrast, focus, and current layout remain unverified by this source-only pass — use the existing bounded desktop/narrow and effective-theme owner checks; reserve Linux goldens for Phase 243.
 
 ## Detailed Findings
 
-### Pillar 1: Copywriting (4/4; initial 3/4)
+### Pillar 1: Copywriting (4/4)
 
-- **Closed as nonblocking advisory; no copy change warranted.** The previously questioned labels say “Price is not confirmed in admin” and “Current period is not shown in admin.” “In admin” limits the claim to the current surface’s available projection; it does not assert that the provider lacks the value. The refreshed mounted fixture shows a known price and an unavailable period, while no missing value becomes zero. Current strings are in [subscription_live.ex](accrue_admin/lib/accrue_admin/live/subscription_live.ex:1240).
-- Domain action and return labels remain specific (`Cancel renewal`, `Pause collection`, `Back to subscription`, and `Back to Recovery`) and match their route or action meaning.
+- Current unavailable-value copy says “Amount is not confirmed in admin,” “Current period is not shown in admin,” and “Price is not confirmed in admin,” limiting claims to the Admin projection ([subscription_live.ex](../../../accrue_admin/lib/accrue_admin/live/subscription_live.ex:1240)). The action labels and route text remain domain-specific in the subscription owner.
+- The no-campaign state names the destination as “Open dunning funnel and at-risk analytics” and the state as “No subscription-level campaign here” ([subscription_live.ex](../../../accrue_admin/lib/accrue_admin/live/subscription_live.ex:423)). This is specific to the actual Recovery destination.
 
-### Pillar 2: Visuals (4/4; initial 2/4)
+### Pillar 2: Visuals (3/4)
 
-- **Closed.** The subscription title and five summary facts now have readable separation at desktop and narrow widths. The fresh mounted captures show the record identity, lifecycle state, current facts, actions, and related billing in that order. Layout is defined in [subscription_live.ex](accrue_admin/lib/accrue_admin/live/subscription_live.ex:287) and [app.css](accrue_admin/assets/css/app.css:5333).
-- **Closed.** The no-campaign state and active-campaign shortcut are mutually exclusive, so each renders at most one Recovery destination. See [subscription_live.ex](accrue_admin/lib/accrue_admin/live/subscription_live.ex:422) and [subscription_live.ex](accrue_admin/lib/accrue_admin/live/subscription_live.ex:437); the mounted host asserts exactly one link in the no-campaign state.
-- Existing invoice review capture still shows the exact invoice, customer, owner scope, and amount together; the narrow Recovery capture retains distinct customer cards.
+- Current markup leads with the subscription identity and summary facts, then lifecycle summary, actions, related resources, and deeper detail ([subscription_live.ex](../../../accrue_admin/lib/accrue_admin/live/subscription_live.ex:287)). That source order follows the contract, but this recheck did not observe current rendered hierarchy.
+- Source conditionally renders the no-campaign shortcut or active-campaign shortcut, so only one Recovery destination is emitted per state ([subscription_live.ex](../../../accrue_admin/lib/accrue_admin/live/subscription_live.ex:422), [subscription_live.ex](../../../accrue_admin/lib/accrue_admin/live/subscription_live.ex:437)).
+- The prior review’s desktop and 320px viewport captures support the earlier correction batch only. The evidence manifest records source head `c1e3224f` and source hashes from that capture run; those measurements are historical and were not treated as current visual proof. Actual zoom, physical-device behavior, and Phase 243 Linux goldens remain outside that evidence.
 
-### Pillar 3: Color (4/4; initial 3/4)
+### Pillar 3: Color (3/4)
 
-- **Closed.** The no-campaign recovery destination is now a single `ax-link`, using the current accent link role. Amber remains on the no-campaign/status panel, not on an action control. Current markup is in [subscription_live.ex](accrue_admin/lib/accrue_admin/live/subscription_live.ex:422); obsolete amber action rules were removed from `app.css`.
-- The shared theme continues to provide semantic light/dark/system roles in [theme.css](accrue_admin/assets/css/theme.css:12), and mounted asset provenance confirms the host served the package CSS and JS bytes used for the captures.
+- The Recovery destination uses `ax-link` rather than the removed warning-colored action treatment ([subscription_live.ex](../../../accrue_admin/lib/accrue_admin/live/subscription_live.ex:425)). Shared design tokens remain the declared source of theme color roles ([theme.css](../../../accrue_admin/assets/css/theme.css:12)).
+- The current source inspection confirms semantic class use but cannot substantiate the 60/30/10 composition or contrast in current light, dark, system, and host-forced rendered output. The previous mounted theme and asset measurements remain historical.
 
-### Pillar 4: Typography (4/4; initial 2/4)
+### Pillar 4: Typography (3/4)
 
-- **Closed.** The subscription identity title now uses `--ax-type-xl` at weight 600, the approved 24px title role. The refreshed mounted computed style reports 24px/600. See [app.css](accrue_admin/assets/css/app.css:5360).
+- Subscription identity now selects `--ax-type-xl` at weight 600, matching the contract’s 24px/600 role ([app.css](../../../accrue_admin/assets/css/app.css:5364)). The current source has the intended role; the 24px computed value in the prior review is historical because this pass did not inspect served CSS.
+- The contract permits 400 and 600 weights and the incumbent role map; no migration or generic four-size ceiling is implied. No current cross-surface computed-style distribution was measured.
 
-### Pillar 5: Spacing (4/4; initial 2/4)
+### Pillar 5: Spacing (2/4)
 
-- **Closed.** Mounted computed styles report 4px for summary-main, fact-row, label/value, and action-header gaps. Source uses `--ax-space-xs` for those roles in [app.css](accrue_admin/assets/css/app.css:5333), [app.css](accrue_admin/assets/css/app.css:5377), [app.css](accrue_admin/assets/css/app.css:5387), and [app.css](accrue_admin/assets/css/app.css:6197). Long fact text retains `overflow-wrap:anywhere`.
+- Summary main and fact spacing use the approved 4px token, and the fact label/value gap is also 4px ([app.css](../../../accrue_admin/assets/css/app.css:5337), [app.css](../../../accrue_admin/assets/css/app.css:5381), [app.css](../../../accrue_admin/assets/css/app.css:5391)).
+- The action header’s outer gap uses the 4px token, but its child control group uses `gap: 0.125rem` (2px) ([app.css](../../../accrue_admin/assets/css/app.css:6201), [app.css](../../../accrue_admin/assets/css/app.css:6206)). The UI contract reserves 2px for dense-data detail, not action controls. This source finding conflicts with the prior review’s generalized statement that action-header spacing was confirmed at 4px; the prior measured values are historical and do not override the current selector. A related action row also uses a raw `0.1875rem` gap ([app.css](../../../accrue_admin/assets/css/app.css:6188)), which should be normalized or explicitly justified against the contract.
 
-### Pillar 6: Experience Design (4/4; initial 3/4)
+### Pillar 6: Experience Design (3/4)
 
-- **Closed.** The no-campaign branch renders one Recovery link; the active-campaign link only renders when a campaign is active. The mounted host and subscription LiveView owner assert the unique destination.
-- The corrected run record reports Subscription LiveView 39/0, Admin full suite 646/0, both warnings-as-errors compiles passed, host mounted spec 1/1, focused Phase 191 review case 1/1, and focused Phase 199 cases 2/2. The broad Phase 191 run was 26 passed/2 failed; the same two cases passed in an exact desktop/mobile rerun (12/12). This test-run caveat is preserved in [241-UI-FIX.md](241-UI-FIX.md).
-- **Evidence limits:** Interaction capture remained off. Browser evidence used a deterministic mounted host and Chromium on macOS. The 320px capture is a viewport simulation, not physical-device or actual browser-zoom evidence. Assistive-technology speech and live-provider outcomes were not observed. Phase 243 still owns final Linux visual goldens.
+- Current subscription source keeps the Recovery link mutually exclusive across active/no-campaign states, and action results use `role="status"` plus `aria-live="polite"` ([subscription_live.ex](../../../accrue_admin/lib/accrue_admin/live/subscription_live.ex:422), [subscription_live.ex](../../../accrue_admin/lib/accrue_admin/live/subscription_live.ex:437), [subscription_live.ex](../../../accrue_admin/lib/accrue_admin/live/subscription_live.ex:326)).
+- `241-UI-FIX.md` records the earlier focused browser, mounted-host, and Admin test outcomes. No interaction capture was enabled and this bounded audit did not replay controls, keyboard focus, busy/reconnect, or dismissal behavior. Current interaction claims therefore remain source-derived; the old runs are not represented as fresh validation.
 
 ## Files Audited
 
-- `241-UI-SPEC.md`, `241-CONTEXT.md`, `241-VALIDATION.md`, `241-SECURITY.md`, `241-01..07-PLAN.md`, and `241-01..07-SUMMARY.md`
-- `241-UI-FIX.md`
-- `evidence/phase237-exemplar/manifest.json` and the refreshed desktop and narrow subscription captures, plus the invoice and Recovery mounted captures
+- `.planning/phases/241-billing-operator-journeys/241-UI-SPEC.md`, `241-UI-REVIEW.md` (prior), `241-UI-FIX.md`, `241-EXECUTION-GATES.md`, `241-CONTEXT.md`, and phase plan/summary records
+- `.planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/manifest.json` (historical provenance only; no images inspected)
 - `accrue_admin/lib/accrue_admin/live/subscription_live.ex`
-- `accrue_admin/lib/accrue_admin/live/invoice_live.ex`
-- `accrue_admin/lib/accrue_admin/live/charge_live.ex`
-- `accrue_admin/lib/accrue_admin/live/customer_live.ex`
-- `accrue_admin/lib/accrue_admin/live/analytics/campaign_live.ex`
-- `accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex`
-- `accrue_admin/lib/accrue_admin/components/at_risk_table.ex`
-- `accrue_admin/assets/css/app.css`, `accrue_admin/assets/css/theme.css`
-- `accrue_admin/lib/accrue_admin/copy/subscription.ex`, `accrue_admin/lib/accrue_admin/copy/invoice.ex`
-- `examples/accrue_host/e2e/phase237-admin-billing.spec.js`
-
+- `accrue_admin/assets/css/app.css`
+- `accrue_admin/assets/css/theme.css`
