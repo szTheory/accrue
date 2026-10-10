@@ -16,12 +16,12 @@ provides:
 affects: [241-07]
 
 actuals:
-  tokens: 4522
+  tokens: 4580
   tasks: 2
-  commits: 2
-commits: 2
+  commits: 5
+commits: 5
 plan_head_before: d86261927e0bf232c3f7a0515deab74fe85d9f9c
-plan_head_after: 3c6fc18caaa08334cf424aca935503988d8779b0
+plan_head_after: e1013955dfae0296f6dfaf713aa7285aab762465
 
 tech-stack:
   added: []
@@ -109,6 +109,8 @@ status: complete
 1. **Task 1: Make refund review exact and preserve its held action** - `d69a5044` (feat)
 2. **Task 2: Make payment-method review identify the selected method** - `3c6fc18c` (feat)
 
+Post-wave integration correction: `e1013955` (fix) removes two obsolete pattern bindings found by the warnings-as-errors compile.
+
 ## Files Created/Modified
 
 - `accrue_admin/lib/accrue_admin/live/charge_live.ex` - Renders exact refund review facts, evidence limits, clear dismissal, and step-up disabled state.
@@ -134,7 +136,15 @@ status: complete
 - **Verification:** CustomerLive suite passed (19 tests, 0 failures); stale default change is explicitly rejected.
 - **Committed in:** `3c6fc18c`
 
-**Total deviations:** 1 auto-fixed (Rule 2: 1). **Impact:** Closes a stale-owner/state gap within the planned customer payment-method action owner; no new service, dependency, or billing capability was introduced.
+**2. [Rule 3 - Blocking issue] Remove stale pattern bindings after fresh action revalidation**
+- **Found during:** Post-wave integrated warnings-as-errors compile
+- **Issue:** The set-default and delete event patterns bound method IDs that were no longer read after confirmation switched to the staged-action revalidation helper.
+- **Fix:** Match those branches on action type only; the helper continues to resolve and validate the staged method ID.
+- **Files modified:** `accrue_admin/lib/accrue_admin/live/customer_live.ex`
+- **Verification:** `MIX_ENV=test mix compile --warnings-as-errors` passed; full `MIX_ENV=test mix test` passed (642 tests, 0 failures).
+- **Committed in:** `e1013955`
+
+**Total deviations:** 2 auto-fixed (Rule 2: 1; Rule 3: 1). **Impact:** Preserved fresh confirmation checks and resolved the integrated warnings-as-errors failure without changing behavior.
 
 ## Issues Encountered
 
@@ -148,13 +158,14 @@ None - no external service configuration required.
 ## Next Phase Readiness
 
 - The two action owners have focused automated coverage. Plan 241-07 remains responsible for the combined build, mounted-host/browser, held-busy/reconnect, keyboard/focus, and served-asset checks; JRN-04 phase-level closure remains pending that integration proof.
+- Post-wave validation passed: warnings-as-errors compilation and the complete Admin package test suite (642 tests, 0 failures).
 
 ## Self-Check: PASSED
 
 - All four modified source/test files exist.
-- Task commits `d69a5044` and `3c6fc18c` are ancestors of HEAD.
-- Plan evaluation scope resolved both commits on this branch.
-- ChargeLive owner suite: 20 tests, 0 failures. CustomerLive owner suite: 19 tests, 0 failures.
+- Task commits `d69a5044`, `3c6fc18c`, and post-wave correction `e1013955` are ancestors of HEAD.
+- Plan evaluation scope resolved the plan commits on this branch.
+- ChargeLive owner suite: 20 tests, 0 failures. CustomerLive owner suite: 19 tests, 0 failures. Full Admin suite: 642 tests, 0 failures; warnings-as-errors compile passed.
 - No new placeholder/TODO/FIXME stub pattern was introduced.
 
 ---
