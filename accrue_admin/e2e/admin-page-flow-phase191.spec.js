@@ -641,4 +641,49 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await expect(page.locator("body")).not.toContainText(/\bare you sure\?\b|\boops\b|request failed|something failed/i);
     await expect(page.locator("body")).toContainText(/webhook|event|owner scope|Retry|Replay webhook/i);
   });
+
+  test("@phase242 coupon, promotion-code, and Connect routes retain exact relationships and fee review target", async ({
+    page,
+    request,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-desktop", "catalog and Connect consumer flow runs once");
+
+    await reset(request);
+    const fixtures = await seedPhase191Matrix(request);
+
+    await login(page, `/billing/coupons/${fixtures.phase191_coupon_id}`);
+    await expect(page.locator("main")).toContainText(/coupon_e2e_phase191/i);
+    const promotionCodes = page.locator('a[href^="/billing/promotion-codes?"]');
+    await expect(promotionCodes.first(), "coupon links to its actual child-code list").toBeVisible();
+    const codeList = new URL(await promotionCodes.first().getAttribute("href"), page.url());
+    expect(codeList.searchParams.get("coupon_id")).toBe(fixtures.phase191_coupon_id);
+    await promotionCodes.first().click();
+    await expect(page).toHaveURL(/\/billing\/promotion-codes\?/);
+    const code = page.locator(`a[href^="/billing/promotion-codes/${fixtures.phase191_promo_code_id}"]`).first();
+    await expect(code, "the filtered child list contains the exact seeded code").toBeVisible();
+    await code.click();
+    await expect(page).toHaveURL(new RegExp(`/billing/promotion-codes/${fixtures.phase191_promo_code_id}`));
+    await expect(page.locator(`a[href^="/billing/coupons/${fixtures.phase191_coupon_id}"]`).first()).toBeVisible();
+
+    await login(page, `/billing/connect/${fixtures.phase191_connect_account_id}`);
+    await expect(page.locator("main")).toContainText(/Last stored Stripe snapshot readiness/);
+    await expect(page.locator("main")).toContainText(/Local platform fee override/);
+    const editFee = page.getByRole("button", { name: "Change platform fee override for acct_e2e_phase191" });
+    await editFee.focus();
+    await page.keyboard.press("Enter");
+    const drawer = page.locator("#connect-platform-fee-drawer");
+    await expect(drawer).toBeVisible();
+    await expect(drawer).toContainText("acct_e2e_phase191");
+    await expect(drawer.getByRole("button", { name: "Close" })).toBeFocused();
+    await page.keyboard.press("Tab");
+    const percent = drawer.locator('input[name="override[percent]"]');
+    await expect(percent).toBeFocused();
+    await percent.fill("invalid");
+    await expect(drawer).toContainText(/invalid|must be|percentage/i);
+    await percent.fill("2.5");
+    await expect(drawer).toContainText(/2\.5%/);
+    await page.keyboard.press("Escape");
+    await expect(drawer).toBeHidden();
+    await expect(editFee).toBeFocused();
+  });
 });

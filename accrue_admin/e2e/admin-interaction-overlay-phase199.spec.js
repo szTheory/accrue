@@ -1207,6 +1207,80 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     await zoomPage.close();
   });
 
+  test("@phase242 mounted CSS stress stays scoped across changed routes and input modes", async ({
+    page,
+    request,
+  }, testInfo) => {
+    const fixtures = await seedPhase199(request);
+    await page.setViewportSize({ width: 320, height: 844 });
+    await login(page, "/billing");
+    const coarsePointer = await page.evaluate(() => window.matchMedia("(pointer: coarse)").matches);
+    expect(coarsePointer, "mobile project emulates coarse pointer input; no physical-device claim").toBe(
+      testInfo.project.name === "chromium-mobile"
+    );
+
+    const routes = [
+      ["events", "/billing/events"],
+      ["webhook delivery", `/billing/webhooks/${fixtures.phase199.single_webhook_id}`],
+      ["Connect account", `/billing/connect/${fixtures.phase199.connect_account_id}`],
+      ["Home and shell", "/billing"],
+    ];
+
+    for (const [surface, route] of routes) {
+      await page.setViewportSize({ width: 320, height: 844 });
+      await login(page, route);
+      for (const theme of ["light", "dark", "system"]) {
+        await page.emulateMedia({ colorScheme: theme === "dark" ? "dark" : "light" });
+        await page.evaluate((value) => {
+          document.documentElement.dataset.theme = value;
+          document.documentElement.setAttribute("data-theme", value);
+        }, theme);
+        await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+
+        const stress = await page.evaluate(() => {
+          const main = document.querySelector("#main-content, main");
+          if (!main) throw new Error("Phase 242 text stress could not find the mounted main region");
+          const base = [main, ...main.querySelectorAll("*")].map((element) => [element, getComputedStyle(element).fontSize]);
+          const baseline = Number.parseFloat(getComputedStyle(main).fontSize);
+          if (!Number.isFinite(baseline) || baseline <= 0) throw new Error("Phase 242 baseline font size is not finite");
+          const style = document.createElement("style");
+          style.dataset.phase242TextSpacing = "true";
+          style.textContent = "#main-content *, main * { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; } #main-content p, main p { margin-bottom: 2em !important; }";
+          document.head.append(style);
+          for (const [element, size] of base) {
+            const parsed = Number.parseFloat(size);
+            if (Number.isFinite(parsed) && parsed > 0) element.style.setProperty("font-size", `${parsed * 2}px`, "important");
+          }
+          const enlarged = Number.parseFloat(getComputedStyle(main).fontSize);
+          const result = {
+            scale: enlarged / baseline,
+            width: document.documentElement.scrollWidth,
+            viewport: window.innerWidth,
+            text: main.innerText.slice(0, 120),
+          };
+          style.remove();
+          for (const [element] of base) element.style.removeProperty("font-size");
+          return result;
+        });
+        expect(stress.scale, `${surface}/${theme}: 200% text captured atomically`).toBeCloseTo(2, 1);
+        expect(stress.width, `${surface}/${theme}: 320 CSS px text-spacing reflow`).toBeLessThanOrEqual(stress.viewport + 1);
+        expect(stress.text.length, `${surface}/${theme}: mounted content exists`).toBeGreaterThan(0);
+      }
+      if (surface === "Home and shell") {
+        await page.emulateMedia({ colorScheme: "dark" });
+        await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
+        await testInfo.attach("phase242-home-dark-320.png", {
+          body: await page.screenshot({ fullPage: true }),
+          contentType: "image/png",
+        });
+      }
+      await page.setViewportSize({ width: 768, height: 1024 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(769);
+      await page.setViewportSize({ width: 1280, height: 900 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1281);
+    }
+  });
+
   test("@phase199 @copy empty-state and repeated action labels use state-specific copy and hidden context", async ({
     page,
     request,
