@@ -5,17 +5,17 @@ milestone_name: Admin Operator UI Cleanup
 current_phase: 241
 current_phase_name: Billing Operator Journeys
 current_plan: 7
-status: executing
-stopped_at: Completed 241-06-PLAN.md
-last_updated: "2026-10-10T02:05:44.819Z"
+status: verifying
+stopped_at: Completed 241-07-PLAN.md
+last_updated: "2026-10-10T03:10:36.201Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 241 execution started
-state_head: 7cb5f0603a51fb32f4d159b43593c86b397c126e
+state_head: 5b33e9c24846639397ad2d73710e4ed0889884a1
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
   percent: 25
 ---
 
@@ -36,7 +36,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 Phase: 241 (Billing Operator Journeys) — EXECUTING
 Current Plan: 7
 Total Plans in Phase: 7
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-09 — Phase 241 execution started
 
 ## Performance Metrics
@@ -164,6 +164,7 @@ Last activity: 2026-10-09 — Phase 241 execution started
 | Phase 241 P04 | 5 min | 2 tasks | 4 files |
 | Phase 241 P05 | 8 min | 2 tasks | 6 files |
 | Phase 241 P06 | 9min | 2 tasks | 4 files |
+| Phase 241 P07 | 48 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -357,6 +358,9 @@ Last activity: 2026-10-09 — Phase 241 execution started
 - [Phase 241]: Refund reviews use integer minor units and show the exact reviewed amount, currency, and remaining balance.
 - [Phase 241]: Payment-method confirmation reloads the customer and method under a freshly resolved actor and owner scope.
 - [Phase 241]: Billing-review dismissal is distinct from the domain action and clears staged intent.
+- [Phase 241]: Build package assets before browsers and retain the byte-identical checked-in CSS/JS outputs.
+- [Phase 241]: Use a 7-day Recovery selection to prove scoped campaign return-window preservation.
+- [Phase 241]: Keep Admin /admin and customer Portal /billing browser evidence separate.
 
 ### Pending Todos
 
@@ -437,8 +441,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T02:05:44.770Z
-Stopped at: Completed 241-06-PLAN.md
+Last session: 2026-10-10T03:10:36.168Z
+Stopped at: Completed 241-07-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

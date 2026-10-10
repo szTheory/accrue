@@ -16,10 +16,10 @@
 
 ### Operator journeys
 
-- [ ] **JRN-01**: Operators following subscription invoice links reach exactly the supported customer or owner result set described by the visible label.
-- [ ] **JRN-02**: Operators can enter existing filtered lists, open details and return with supported owner, filter/lens and customer-tab context intact through validated local destinations.
-- [ ] **JRN-03**: Operators opening a campaign directly return to Recovery, while navigated campaign returns preserve the selected recovery window and scope.
-- [ ] **JRN-04**: Operators can review supported billing actions in self-contained content showing the exact target, material customer/scope, money and consequence, then receive evidence-specific outcomes.
+- [x] **JRN-01**: Operators following subscription invoice links reach exactly the supported customer or owner result set described by the visible label.
+- [x] **JRN-02**: Operators can enter existing filtered lists, open details and return with supported owner, filter/lens and customer-tab context intact through validated local destinations.
+- [x] **JRN-03**: Operators opening a campaign directly return to Recovery, while navigated campaign returns preserve the selected recovery window and scope.
+- [x] **JRN-04**: Operators can review supported billing actions in self-contained content showing the exact target, material customer/scope, money and consequence, then receive evidence-specific outcomes.
 - [ ] **JRN-05**: Operators can trace existing events and webhook deliveries through related evidence and supported replay review without hiding material failures, uncertainty or exact diagnostic detail.
 - [ ] **JRN-06**: Operators can inspect existing discounts, promotion-code relationships and Connect facts with supported actions and explicit stored-provider versus local-policy boundaries.
 - [ ] **JRN-07**: Operators can find the correct scoped record using the existing Home, navigation and search, with consistent visible selection across pointer and keyboard input.
@@ -81,10 +81,10 @@ Each approved requirement has one primary phase owner in the approved roadmap. S
 | DSN-03 | Phase 240 | Complete |
 | DSN-04 | Phase 240 | Complete |
 | DSN-05 | Phase 240 | Complete |
-| JRN-01 | Phase 241 | Pending |
-| JRN-02 | Phase 241 | Pending |
-| JRN-03 | Phase 241 | Pending |
-| JRN-04 | Phase 241 | Pending |
+| JRN-01 | Phase 241 | Complete |
+| JRN-02 | Phase 241 | Complete |
+| JRN-03 | Phase 241 | Complete |
+| JRN-04 | Phase 241 | Complete |
 | JRN-05 | Phase 242 | Pending |
 | JRN-06 | Phase 242 | Pending |
 | JRN-07 | Phase 242 | Pending |

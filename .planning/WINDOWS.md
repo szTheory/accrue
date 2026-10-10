@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 10
+open_count: 11
 waived_count: 6
 fixed_count: 14
-total_count: 30
-last_updated: 2026-10-10T01:52:13.282Z
+total_count: 31
+last_updated: 2026-10-10T03:10:50.370Z
 ---
 
 # Broken Windows Ledger
@@ -45,6 +45,7 @@ last_updated: 2026-10-10T01:52:13.282Z
 | 28 | 241 | deviation | accrue_admin/lib/accrue_admin/live/charge_live.ex | 80 | Renamed the validated return destination value and corrected two related-resource arguments after a focused compile error. | open |  | 2026-10-10T01:36:59.322Z |  |
 | 29 | 241 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex |  | Confirmation controls expose disabled/loading state while step-up or dispatch is pending. | open |  | 2026-10-10T01:52:12.988Z |  |
 | 30 | 241 | deviation | examples/accrue_host/e2e/generated/copy_strings.json |  | Generated browser copy strings are regenerated to match the updated subscription action labels. | open |  | 2026-10-10T01:52:13.282Z |  |
+| 31 | 241 | unrun-verify | .planning/phases/241-billing-operator-journeys/241-07-PLAN.md |  | A separate 200% text-spacing and supported 400% zoom simulation was not run in Plan 241-07; direct narrow-width and long-text evidence ran. | open |  | 2026-10-10T03:10:50.370Z |  |
 
 ````json
 [
@@ -425,6 +426,19 @@ last_updated: 2026-10-10T01:52:13.282Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-10T01:52:13.282Z",
+    "resolved_at": null,
+    "milestone": "v1.64"
+  },
+  {
+    "id": 31,
+    "kind": "unrun-verify",
+    "phase": "241",
+    "file": ".planning/phases/241-billing-operator-journeys/241-07-PLAN.md",
+    "line": null,
+    "description": "A separate 200% text-spacing and supported 400% zoom simulation was not run in Plan 241-07; direct narrow-width and long-text evidence ran.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-10T03:10:50.370Z",
     "resolved_at": null,
     "milestone": "v1.64"
   }
