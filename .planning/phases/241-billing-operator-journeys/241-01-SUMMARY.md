@@ -90,6 +90,8 @@ status: complete
 1. **Task 1: Trace subscription to customer open-invoice results** - `b36fe0d0` (feat)
 2. **Task 2: Cover subscription facts and result states at the owning view** - `ad73b9f5` (test)
 
+**Follow-up UI audit correction:** `e51f3e31` (`fix(241-ui): close subscription audit findings`) restores the approved subscription title/fact spacing and single scoped Recovery link; the correction adds a rendered one-link assertion to the owning LiveView test.
+
 ## Files Created/Modified
 
 - `accrue_admin/lib/accrue_admin/live/subscription_live.ex` - Removed duplicate queue previews and added accurately scoped invoice links after subscription actions.

@@ -17,7 +17,7 @@ The approved unavailable-fact copy remains unchanged. The mounted no-campaign fi
 ## Verification
 
 - `MIX_ENV=test mix test test/accrue_admin/live/subscription_live_test.exs`: **39 passed, 0 failed**.
-- `mix accrue_admin.assets.build`: **passed** using a temporary npm cache after the default cache returned `EPERM`; generated package CSS/JS are tracked outputs. No package was installed as a workaround.
+- `mix accrue_admin.assets.build`: **passed** using a temporary npm cache after the default cache returned `EPERM`; generated package CSS/JS are tracked outputs. No dependency manifest changed.
 - Admin `MIX_ENV=test mix compile --warnings-as-errors`: **passed**.
 - Admin `MIX_ENV=test mix test`: **646 passed, 0 failed**.
 - Host `MIX_ENV=test mix compile --warnings-as-errors`: **passed**.

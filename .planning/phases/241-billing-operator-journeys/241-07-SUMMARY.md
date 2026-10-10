@@ -40,6 +40,8 @@ key-files:
     - .planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/invoice-collection.png
     - .planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/recovery.png
     - .planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/subscription-detail.png
+    - .planning/phases/241-billing-operator-journeys/evidence/phase237-exemplar/subscription-detail-narrow.png
+    - .planning/phases/241-billing-operator-journeys/241-UI-FIX.md
   modified:
     - accrue_admin/e2e/admin-page-flow-phase191.spec.js
     - accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js
@@ -48,6 +50,8 @@ key-files:
     - accrue_admin/lib/accrue_admin/components/at_risk_table.ex
     - accrue_admin/test/accrue_admin/components/at_risk_table_test.exs
     - accrue_admin/assets/css/app.css
+    - accrue_admin/lib/accrue_admin/live/subscription_live.ex
+    - accrue_admin/test/accrue_admin/live/subscription_live_test.exs
     - accrue_admin/priv/static/accrue_admin.css
     - examples/accrue_host/e2e/phase237-admin-billing.spec.js
     - examples/accrue_host/lib/accrue_host_web/router.ex
@@ -60,6 +64,7 @@ key-decisions:
   - "Keep the seven-column Recovery table keyboard-reachable in a labeled local scroll region under text and viewport stress."
   - "Use a 7-day Recovery selection to prove window preservation through the campaign detail and return."
   - "Keep mounted host asset provenance and Portal separation in the existing Phase 237 host spec."
+  - "Close the Phase 241 subscription UI audit findings in e51f3e31 and record current captures, computed styles, and bounded verification results in 241-UI-FIX.md."
 
 requirements-completed: [JRN-01, JRN-02, JRN-03, JRN-04]
 
@@ -290,3 +295,11 @@ All listed acceptance coverage uses automated evidence with human_judgment: fals
 ---
 *Phase: 241-billing-operator-journeys*
 *Completed: 2026-10-10*
+
+## UI Audit Correction Batch
+
+- **Commit:** `e51f3e31` (`fix(241-ui): close subscription audit findings`).
+- Restored 24px/600 subscription title type and 4px summary/action spacing; kept the existing effective facts row rule and its wrap behavior.
+- Replaced duplicated warning-styled recovery navigation in the no-campaign state with one scoped `ax-link`; retained the warning status and missing-fact wording.
+- Added owning LiveView uniqueness coverage, mounted-host exact-link/computed-style checks, and synchronous Phase 241 2× text-size measurement to avoid LiveView root-swap races.
+- Verification details, current desktop/narrow evidence, browser run results and limits: `241-UI-FIX.md`.
