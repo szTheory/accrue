@@ -534,6 +534,61 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       refute html =~ "%26window%3D7d"
     end
 
+    test "campaign round trips preserve each supported window and current owner", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      for window <- ["7d", "30d", "90d"] do
+        {:ok, _view, html} =
+          live_recovery(conn, "/billing/analytics/recovery?org=allowed-org&window=#{window}")
+
+        [campaign_path] =
+          Regex.run(
+            ~r|href="([^\"]*/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}[^\"]*)"|,
+            html,
+            capture: :all_but_first
+          )
+
+        campaign_path = String.replace(campaign_path, "&amp;", "&")
+        assert campaign_path =~ "%26window%3D#{window}"
+
+        {:ok, _campaign, campaign_html} = live(conn, campaign_path)
+
+        assert campaign_html =~ "Back to Recovery"
+
+        assert campaign_html =~
+                 ~r|href="/billing/analytics/recovery\?[^\"]*window=#{window}[^\"]*org=allowed-org| or
+                 campaign_html =~
+                   ~r|href="/billing/analytics/recovery\?[^\"]*org=allowed-org[^\"]*window=#{window}|
+      end
+    end
+
+    test "invalid Recovery window falls back to the existing 30 day selection", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      {:ok, _view, html} =
+        live_recovery(conn, "/billing/analytics/recovery?org=allowed-org&window=invalid")
+
+      assert active_window_label(html) =~ "30 days"
+      assert html =~ "%26window%3D30d"
+      refute html =~ "%26window%3Dinvalid"
+    end
+
     test "returning from campaign detail restores validated owner and window", %{conn: conn} do
       fixture = recovery_navigation_fixture()
 
@@ -557,7 +612,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
                  "/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}?return_to=#{return_to}&org=allowed-org"
                )
 
-      assert html =~ "Back to results"
+      assert html =~ "Back to Recovery"
 
       assert html =~ ~r|href="/billing/analytics/recovery\?[^\"]*window=7d[^\"]*org=allowed-org| or
                html =~ ~r|href="/billing/analytics/recovery\?[^\"]*org=allowed-org[^\"]*window=7d|
@@ -583,9 +638,9 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
                )
 
       [_, href] =
-        Regex.run(~r|<a class="ax-link" href="([^"]+)">Back to results</a>|, html)
+        Regex.run(~r|<a class="ax-link" href="([^"]+)">Back to Recovery</a>|, html)
 
-      assert href == "/billing/subscriptions?org=allowed-org"
+      assert href == "/billing/analytics/recovery?org=allowed-org"
       refute html =~ "evil.example"
     end
 

@@ -153,6 +153,43 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       refute html =~ ~s(class="ax-kpi-grid")
     end
 
+    test "selected Recovery window does not filter the historical campaign timeline", %{
+      conn: conn
+    } do
+      subscription_id = insert_subscription().id
+      historical_at = DateTime.add(DateTime.utc_now(), -120, :day)
+
+      for {type, step} <- [{"dunning.campaign_started", nil}, {"dunning.step_sent", "email_1"}] do
+        data = %{"campaign_anchor" => "historical_campaign"}
+        data = if step, do: Map.put(data, "step", step), else: data
+
+        Accrue.Repo.insert!(%Accrue.Events.Event{
+          type: type,
+          subject_type: "Subscription",
+          subject_id: subscription_id,
+          actor_id: Ecto.UUID.generate(),
+          actor_type: "system",
+          data: data,
+          inserted_at: historical_at
+        })
+      end
+
+      return_to = URI.encode_query(%{"return_to" => "/billing/analytics/recovery?window=7d"})
+
+      {:ok, _view, html} =
+        conn
+        |> init_test_session(%{
+          "admin_token" => "admin",
+          "accrue_admin" => %{"mount_path" => "/billing"}
+        })
+        |> live("/billing/analytics/recovery/subscriptions/#{subscription_id}?#{return_to}")
+
+      assert html =~ "In progress"
+      assert html =~ "Step sent"
+      assert html =~ "Back to Recovery"
+      assert html =~ ~r|href="/billing/analytics/recovery\?window=7d"|
+    end
+
     test "renders dunning timeline for subscription with 2 campaign arcs", %{conn: conn} do
       subscription_id = insert_subscription().id
       # Seed events via Repo directly or Events

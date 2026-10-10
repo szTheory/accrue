@@ -25,7 +25,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
 
   @impl true
   def handle_params(params, uri, socket) do
-    window = parse_window(params["window"])
+    window = parse_window(Map.get(params, "window"))
     {since, until} = window_bounds(window)
     owner_scope = socket.assigns.current_owner_scope
 
@@ -197,9 +197,9 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
             rows={@at_risk}
             base_path={@admin_mount_path}
             owner_scope={@current_owner_scope}
-          current_window={@window}
-          loading={@recovery_loading?}
-          error={@recovery_error}
+            current_window={@window}
+            loading={@recovery_loading?}
+            error={@recovery_error}
             empty_copy={Copy.resource_state_copy(:dunning, :queue_empty)}
           />
         </section>
