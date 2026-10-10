@@ -37,6 +37,7 @@ key-files:
     - accrue_admin/test/accrue_admin/live/charge_live_test.exs
     - accrue_admin/lib/accrue_admin/live/customer_live.ex
     - accrue_admin/test/accrue_admin/live/customer_live_test.exs
+    - accrue_admin/test/accrue_admin/live/subscription_live_test.exs
 
 key-decisions:
   - "Keep refund amount parsing in integer minor units and show the exact reviewed amount and remaining balance without a parallel money policy."
@@ -66,6 +67,9 @@ coverage:
       - kind: integration
         ref: accrue_admin/test/accrue_admin/live/charge_live_test.exs#Back to payment dismisses a staged refund and its step-up continuation
         status: pass
+      - kind: integration
+        ref: accrue_admin/test/accrue_admin/live/charge_live_test.exs#refund timeout is counted at the provider boundary and cannot be blindly retried
+        status: pass
     human_judgment: false
   - id: D2
     description: Both payment-method action reviews identify the selected method, customer, owner, current default/use state, action consequence, and safe return; stale state is rejected before dispatch.
@@ -76,6 +80,12 @@ coverage:
         status: pass
       - kind: integration
         ref: accrue_admin/test/accrue_admin/live/customer_live_test.exs#payment-method confirmation rejects customer default changes made after review
+        status: pass
+      - kind: integration
+        ref: accrue_admin/test/accrue_admin/live/customer_live_test.exs#payment-method confirms use authoritative provider counts and timeout never auto-retries
+        status: pass
+      - kind: integration
+        ref: accrue_admin/test/accrue_admin/live/subscription_live_test.exs#staged subscription confirmation stays inert across detail, return, and reopen navigation
         status: pass
     human_judgment: false
 
@@ -158,6 +168,13 @@ None - no external service configuration required.
 ## Next Phase Readiness
 
 - The two action owners have focused automated coverage. Plan 241-07 remains responsible for the combined build, mounted-host/browser, held-busy/reconnect, keyboard/focus, and served-asset checks; JRN-04 phase-level closure remains pending that integration proof.
+
+## Security Acceptance Follow-up
+
+- Follow-up added authoritative `Accrue.Processor.Fake.call_count/1` assertions for refund and payment-method actions, including timeout/reconnect/no-repeat cases. Persisted refund rows are not used as provider-call evidence.
+- The subscription navigation/reopen regression asserts zero provider calls for a staged and dismissed action.
+- Combined focused verification after the follow-up: ChargeLive, CustomerLive, and SubscriptionLive, 80 tests, 0 failures; both Admin and host warnings-as-errors compiles passed. Commit is recorded in `241-SECURITY-FIX.md`.
+- Follow-up commits: `9001df28` covers refund/payment-method dispatch and uncertain results; `3ee303c6` covers subscription navigation and stale confirmation.
 - Post-wave validation passed: warnings-as-errors compilation and the complete Admin package test suite (642 tests, 0 failures).
 
 ## Self-Check: PASSED

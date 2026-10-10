@@ -45,6 +45,8 @@ key-files:
     - accrue_admin/assets/css/app.css
     - accrue_admin/priv/static/accrue_admin.css
     - examples/accrue_host/e2e/phase237-admin-billing.spec.js
+    - examples/accrue_host/lib/accrue_host_web/router.ex
+    - examples/accrue_host/lib/accrue_host_web/controllers/organization_scope_controller.ex
 
 key-decisions:
   - "Rebuild the package CSS after the Recovery table overflow fix, then verify the compiled-host and HTTP-served bytes against the package output."
@@ -126,6 +128,14 @@ coverage:
         ref: "examples/accrue_host/e2e/phase237-admin-billing.spec.js#Phase 237 served invoice and recovery journeys stay scoped and read-only"
         status: pass
     human_judgment: false
+  - id: D7
+    description: A staged invoice review can be dismissed without invoking the Fake provider action callback, measured directly in the disposable host Ecto sandbox.
+    requirement: JRN-04
+    verification:
+      - kind: browser
+        ref: "examples/accrue_host/e2e/phase237-admin-billing.spec.js#Phase 237 served invoice and recovery journeys stay scoped and read-only (authoritative invoice_action count delta 0)"
+        status: pass
+    human_judgment: false
 
 actuals:
   tokens: 79747
@@ -183,7 +193,13 @@ Package CSS input digests are app.css 00b9435dbf82d8a383e5e4df0bde0f09de40f58071
 
 The browser batch exercised direct 320px and intermediate/desktop layouts, dark/light/System theme behavior, reduced-motion styling, coarse-pointer hit geometry, and long-text wrapping. The new text stress case applies a measured 2x computed font size to each rendered element before applying WCAG-style line, letter, and word spacing. The 400% check is a supported viewport simulation: a 1280 CSS-pixel reference becomes a 320 CSS-pixel viewport. It does not operate the browser zoom control or represent a physical zoom session. Physical devices, assistive-technology speech, and live-provider outcomes were not observed; final Linux visual goldens remain owned by Phase 243.
 
-The dedicated review fixture supports the browser acceptance without changing the shared Phase191/199 route seeds. The test targets the canonical action controls, checks exact review facts, and returns to the detail view without dispatching. The Recovery table correction is limited to making its existing seven-column content scroll locally and keyboard-reachably when it exceeds the available width.
+The dedicated review fixture supports the browser acceptance without changing the shared Phase191/199 route seeds. The test targets the canonical action controls, checks exact review facts, and returns to the detail view without dispatching. The mounted host dismissal now compares authoritative Fake `invoice_action` call counts immediately before staging and after Escape; the observed count was 0→0. The Recovery table correction is limited to making its existing seven-column content scroll locally and keyboard-reachably when it exceeds the available width.
+
+### Security acceptance follow-up
+
+The host invoice review now reads `invoice_action` provider callback counts from an authenticated GET oracle mounted only when the existing SQL-sandbox test configuration is enabled; the controller also returns 404 when that runtime flag is off. On the disposable host fixture, the mounted spec measured `0` before review and `0` after Escape dismissal (`delta: 0`) and recorded both values in the capture manifest. This proves the staged/dismissed review did not dispatch through the Fake provider; it does not infer dispatch state from persisted rows or HTTP method observation. The browser runner passed 1/1 after sandbox launch permissions were granted.
+
+Follow-up commit: `a009148b` (`test(241-security): measure mounted review dispatches`).
 
 ## Deviations from Plan
 
@@ -237,7 +253,7 @@ The dedicated review fixture supports the browser acceptance without changing th
 - **Verification:** Focused browser test passed; Phase191 owner suite passed 28/28.
 - **Commit:** 1b902e9f
 
-No route or trust-boundary changes were introduced. The rebuilt package CSS includes the Recovery table scroll-region rule; the generated JavaScript remained byte-identical.
+No production route or trust-boundary changes were introduced. The follow-up adds only the authenticated, SQL-sandbox-gated test oracle described below. The rebuilt package CSS includes the Recovery table scroll-region rule; the generated JavaScript remained byte-identical.
 
 ## Coverage
 
@@ -246,15 +262,22 @@ No route or trust-boundary changes were introduced. The rebuilt package CSS incl
 - **JRN-03 — PASS:** Existing package route flows and the host Recovery journey preserve their selected destination meaning and owner context.
 - **JRN-04 — PASS:** Browser acceptance opens all nine active subscription action reviews, the eligible Resume review, and both payment-method reviews, checks the exact records/effects, then dismisses without dispatch.
 
+## Threat Flags
+
+| Flag | File | Description |
+|------|------|-------------|
+| threat_flag: test_only_observability | `examples/accrue_host/lib/accrue_host_web/router.ex` | Authenticated Fake callback-count GET route is compiled into the existing SQL-sandbox host test router only; controller runtime-checks the same flag and returns 404 when disabled. |
+
 All listed acceptance coverage uses automated evidence with human_judgment: false; no human UAT gate was introduced. Linux visual goldens remain owned by Phase 243. The executable-UAT generator validated the summary coverage entries but cannot produce `241-UAT.md` because the phase has no `241-VERIFICATION.md`; no verifier artifact was fabricated. Physical zoom controls, speech output, and live-provider outcomes remain limited as recorded above.
 
 ## Self-Check: PASSED
 
-- All six YAML coverage entries include executable verification references and `human_judgment: false`.
+- All seven YAML coverage entries include executable verification references and `human_judgment: false`.
 - Both new browser cases ran and passed; neither was skipped. Phase191 passed 28/28; Phase199 had 24 passes, 15 incumbent skips, and one incumbent launch timeout that passed in isolation.
 - The at-risk component test passed 6/6, package assets rebuilt, host compiled, and the mounted-host browser owner passed 1/1.
 - Physical zoom controls, assistive-technology speech, and live-provider outcomes remain outside this automated evidence; the 400% check is a documented 320 CSS-pixel viewport simulation.
 - The summary coverage entries pass the validator's field checks, but the validator cannot generate its separate automated UAT artifact until a genuine `241-VERIFICATION.md` exists; no artifact was fabricated.
+- Security follow-up host evidence measured the Fake invoice action callback at 0 before review and 0 after Escape dismissal; see `241-SECURITY-FIX.md`.
 
 ---
 *Phase: 241-billing-operator-journeys*
