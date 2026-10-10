@@ -137,7 +137,7 @@ All coverage uses automated evidence with human_judgment: false; no human UAT ga
 
 ## Self-Check: PASSED
 
-- Both task commits are ancestors of HEAD; evaluation scope resolves exactly two plan commits.
+- Both task commits are ancestors of HEAD; evaluation scope resolves both task commits alongside the completion metadata commits.
 - All three modified spec files exist and have no whitespace errors.
 - Package and host compile/browser acceptance commands passed; full Admin suite passed with 642 tests and 0 failures.
 - No new skip, zero-selected run, stub, TODO, FIXME, route, auth, or schema surface was introduced.
