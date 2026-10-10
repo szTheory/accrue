@@ -25,6 +25,12 @@ Completed 2026-10-10. This follow-up closes the three assigned acceptance gaps w
 - Evidence: included in the focused three-owner run above (80 tests, 0 failures).
 - Commit: `3ee303c6` (`test(241-security): cover staged subscription navigation`).
 
+## T-241-14 — APIError recheck correction
+
+- Independent recheck found the generic `%APIError{message: ...}` clause bypassed uncertainty guidance for HTTP500/connection failures. The new HTTP500 behavioral test reproduced that defect (21 tests, 1 failure before correction).
+- Commit `f44f36dd` removes that passthrough while preserving the two recognized blocked-action code messages. The test asserts guidance, no raw provider text, no confirm affordance, and exactly one Fake callback through repeated confirmation and reconnect.
+- Final warnings-as-errors compile passed; the complete Admin suite passed 646 tests, 0 failures. The security auditor rechecked actual source/assertions and returned SECURED, all 16 threats closed.
+
 ## Evidence limits
 
 - The host proof covers the exercised staged invoice review and Escape dismissal; it makes no claim about live-provider behavior.

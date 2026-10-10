@@ -121,6 +121,8 @@ status: complete
 
 Post-wave integration correction: `e1013955` (fix) removes two obsolete pattern bindings found by the warnings-as-errors compile.
 
+Security acceptance corrections: `9001df28` adds authoritative dispatch controls; `f44f36dd` closes the ambiguous APIError guidance path with a failing-before-fix HTTP500 regression. Final Admin compile passed with warnings-as-errors; full suite passed 646 tests, 0 failures.
+
 ## Files Created/Modified
 
 - `accrue_admin/lib/accrue_admin/live/charge_live.ex` - Renders exact refund review facts, evidence limits, clear dismissal, and step-up disabled state.

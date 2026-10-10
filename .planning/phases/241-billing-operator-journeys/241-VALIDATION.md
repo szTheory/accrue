@@ -102,6 +102,8 @@ There is no separate Wave 0. Each owning task creates its new assertion before i
 
 ## CI and Evidence Ownership
 
+Security's stronger register audit found three additional scenario gaps after the initial Nyquist owner map was reconciled. `241-SECURITY-FIX.md` records their closure and the APIError recheck correction. Final Admin warnings-as-errors compilation passed and the full suite passed 646 tests, 0 failures; mounted host measured Fake invoice dispatch 0→0. No manual-only verification was introduced.
+
 Use existing `release-gate`, Admin guardrails, component and `host-integration` lanes where they already execute the changed owners. Preserve Linux baseline guards, approved masks and pixel thresholds; final reviewed Linux goldens belong to Phase 243. Do not claim remote CI ran during planning.
 
 ## Validation Sign-Off
