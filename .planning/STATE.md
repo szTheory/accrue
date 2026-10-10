@@ -2,21 +2,21 @@
 gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
-current_phase: 241
-current_phase_name: Billing Operator Journeys
-current_plan: 08
-status: ready_to_execute
-stopped_at: Completed 241-08-PLAN.md; Phase 241 verification pending
-last_updated: "2026-10-10T15:54:09.574Z"
+current_phase: 243
+current_phase_name: Integrated Evidence and Feedback Preview
+current_plan: Not started
+status: planning
+stopped_at: Phase 242 complete; Phase 241 spacing gap closed; ready to discuss Phase 243
+last_updated: "2026-10-10T16:18:27Z"
 last_activity: 2026-10-10
-last_activity_desc: Phase 241 truth 25 action-spacing gap assigned to Plan 08; Phase 242 remains verified 80/80; Phase 243 follows gap closure
-state_head: 65c4d0436ad1c0be7b583bdb778259946c6a3ed2
+last_activity_desc: Phase 242 complete and Phase 241 gap verified; next command is $gsd-discuss-phase 243
+state_head: 8fbeb7270512a22c0fa4658d8ec53d2cd115d897
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 21
   completed_plans: 21
-  percent: 50
+  percent: 75
 ---
 
 # Project State
@@ -27,23 +27,23 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 241 named gap closure — Plan 08 addresses action-control spacing; next: `$gsd-execute-phase 241 --gaps-only`. Phase 243 remains the remaining milestone work after this closure.
-**Progress:** [█████░░░░░] 50% (Phase 240 and Phase 242 are verified complete; Phase 241 reopened on one named verification gap; 20 of 21 currently planned plans executed; Phase 243 is not planned)
-**Planned work completed:** Phase 240 6/6 plans and 47/47 truths, Phase 241 original 7/7 plans with current verification 28/29 truths, and Phase 242 7/7 plans with 80/80 truths. Phase 242 retains 19 automated UAT items and zero required human UAT. JRN-01–04 remain satisfied; milestone requirements remain 16/18 satisfied. Phase 243 owns reviewed Linux goldens and the stable preview; v1.63 remains archived and closed.
+**Current focus:** Phase 243 — Integrated Evidence and Feedback Preview. Next: `$gsd-discuss-phase 243`; Phase 241's named action-control spacing gap is closed through Plan 08.
+**Progress:** [████████████████████] 21/21 plans (100% of currently planned work); milestone 3/4 phases (75%). Phase 243 is not planned.
+**Planned work completed:** Phase 240 6/6 plans and 47/47 truths, Phase 241 8/8 plans and 32/32 truths, and Phase 242 7/7 plans and 80/80 truths. All three current verification fingerprints pass with zero unverified behavior. Phase 241 has 20 automated UAT items; Phase 242 has 19; required human UAT is zero. JRN-01–04 remain satisfied; milestone requirements remain 16/18 satisfied. Phase 243 owns reviewed Linux goldens and the stable preview; v1.63 remains archived and closed.
 
 ## Current Position
 
-Phase: 241 — Billing Operator Journeys named gap closure
-Current Plan: 08 (gap_closure)
-Total Plans in Phase: 8 (7 original plans executed)
-Status: Ready to execute Plan 08 with --gaps-only; Phase 243 discussion follows verification
-Last activity: 2026-10-10 — current 241 verification found 28/29 truths; action-control spacing assigned to Plan 08
+Phase: 243 — Integrated Evidence and Feedback Preview
+Current Plan: Not started
+Total Plans in Phase: Not planned
+Status: Ready for discussion — `$gsd-discuss-phase 243`
+Last activity: 2026-10-10 — Phase 242 complete; Phase 241 Plan 08 verified; all three current phase reports pass
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 103
+- Total plans completed: 104
 - Average duration: —
 - Total execution time: —
 
@@ -66,7 +66,7 @@ Last activity: 2026-10-10 — current 241 verification found 28/29 truths; actio
 | 238 | 5 | - | - |
 | 239 | 5 | - | - |
 | 240 | 6 | - | - |
-| 241 | 7 | - | - |
+| 241 | 8 | - | - |
 | 242 | 7 | - | - |
 **Per-Plan Metrics:**
 
@@ -394,10 +394,11 @@ Last activity: 2026-10-10 — current 241 verification found 28/29 truths; actio
 - [Phase 242]: Use incumbent package and host browser owners and preserve their existing recurring CI ownership.
 - [Phase 242]: Measure source, package output, host-compiled output and served browser resources separately.
 - [Phase 241]: Billing invoice, subscription, and dunning action groups use the existing --ax-space-xs 4px spacing token.
+- [Phase 241]: Assert that mounted targets exist before checking every target's geometry. Preserve the complete test/reporter chronology and capture budget; a reporter change does not reset the verification budget.
 
 ### Pending Todos
 
-- Run `$gsd-discuss-phase 241` — Billing Operator Journeys. Confirm only phase-specific unresolved decisions; carry forward the approved roadmap, Phase 240 shared contract and named subscription queue finding. No repeat milestone interview, research or accepted execution.
+None. The next workflow action is recorded under Operator Next Steps; completed Phase 241 discussion and its named spacing closure are not pending work.
 
 ### Deferred / Dormant
 
@@ -475,8 +476,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T15:54:09.515Z
-Stopped at: Completed 241-08-PLAN.md; Phase 241 verification pending
+Last session: 2026-10-10T16:18:27Z
+Stopped at: Phase 242 complete; Phase 241 spacing gap closed; ready to discuss Phase 243
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -607,7 +608,8 @@ any published package. Closed -- no decision pending, no remediation warranted.
 ## Operator Next Steps
 
 - **Last completed phase:** 242 — Investigations and Remaining Admin Surfaces (7/7 plans, independent 80/80 verification, 19 automated UAT items, zero human UAT).
-- **Next command:** `$gsd-execute-phase 241 --gaps-only` — execute only Plan 08 for the named action-control spacing gap, then reverify Phase 241. Phase 243 discussion remains next milestone work after closure. Milestone requirements remain 16/18 satisfied.
+- **Additional closure completed:** Phase 241 Plan 08 corrected the named spacing gap; current verification is 32/32 with 20 automated UAT items. Original completed plans were not replayed.
+- **Next command:** `$gsd-discuss-phase 243` — Integrated Evidence and Feedback Preview. Phases 240–242 all pass current verification; milestone requirements remain 16/18 satisfied.
 - Context can be cleared. Read `phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-HANDOFF.md`; preserve approved decisions, verification fingerprint, acceptance owners and evidence limits. Do not rerun completed original 240–242 plans or restart milestone/research/Impeccable initialization.
 - Default to automated unit/integration/E2E/smoke/seam acceptance and existing CI when recurring value exists. Required human UAT is zero; subjective feedback stays optional. Preview data must remain separate from disposable mutation/reset fixtures.
 - Phase 243 owns the complete reviewed Linux golden set, stable Fake-backed `/admin` preview and final evidence reconciliation. Actual provider/device/speech/native-zoom and remote CI limits remain explicit; no broad certification is claimed.

@@ -19,7 +19,7 @@
 - ✅ **v1.61 CI Evidence & Critical-Path Hardening** — Phases 225–228 (2026-09-12) — [archive](milestones/v1.61-ROADMAP.md)
 - ✅ **v1.62 Release Integration & Repository Hygiene** — Phases 229–232 (2026-09-18) — [archive](milestones/v1.62-ROADMAP.md)
 - ✅ **v1.63 Admin and Portal UI refinement** — Phases 233–239 (shipped 2026-10-09) — [archive](milestones/v1.63-ROADMAP.md)
-- 🚧 **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (2/4 currently verified; Phase 241 named gap closure next, then Phase 243 discussion)
+- 🚧 **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (3/4 verified complete; next: Phase 243 discussion)
 
 ## Planning Doctrine
 
@@ -44,13 +44,13 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 </details>
 
 - [x] **Phase 240: Shared System and Real Billing Exemplar** - Deliver invoice list/detail/review and dense subscription examples through shared Admin patterns. (completed 2026-10-10)
-- [ ] **Phase 241: Billing Operator Journeys** - Make scoped billing destinations, returns, recovery and action reviews truthful. (7 original plans completed 2026-10-10; named action-spacing verification gap reopened for Plan 08)
+- [x] **Phase 241: Billing Operator Journeys** - Make scoped billing destinations, returns, recovery and action reviews truthful. (8/8 plans completed 2026-10-10, including the named action-spacing gap closure)
 - [x] **Phase 242: Investigations and Remaining Admin Surfaces** - Clarify investigations, catalog, Connect, shell and domain language. (completed 2026-10-10)
 - [ ] **Phase 243: Integrated Evidence and Feedback Preview** - Close selected visual proof and provide a stable Fake-backed preview.
 
 ## v1.64 — Admin Operator UI Cleanup
 
-**Status:** Approved by maintainer on 2026-10-09. Scope/version, all 18 [requirements](REQUIREMENTS.md), and this four-phase structure are confirmed. [Bounded upstream decisions](research/v1.64/SUMMARY.md) are complete. Phase 241's current verification is 28/29 with one named action-spacing gap; its original seven plans and Phase 242's 80/80 remain completed. Plan 241-08 is the sole pending gap closure (20/21 planned plans executed); 16/18 requirements remain satisfied. Next: `$gsd-execute-phase 241 --gaps-only`, then Phase 243 discussion after closure.
+**Status:** Approved by maintainer on 2026-10-09. Scope/version, all 18 [requirements](REQUIREMENTS.md), and this four-phase structure are confirmed. [Bounded upstream decisions](research/v1.64/SUMMARY.md) are complete. Phases 240–242 pass current verification at 47/47, 32/32 and 80/80, with zero unverified behavior. Plan 241-08 closed the named action-spacing gap without replaying original plans. All 21 currently planned plans are executed; 16/18 requirements are satisfied. Next: `$gsd-discuss-phase 243` — Integrated Evidence and Feedback Preview.
 
 **Milestone goal:** Existing Admin journeys become clearer, consistent, responsive and easier to operate while preserving billing truth, authorization and scope, with recurring automated acceptance and a usable Fake-backed feedback preview.
 
@@ -104,7 +104,7 @@ Plans:
   4. Before an existing billing action, operators can review exact target, material customer/scope, money/currency and consequence in one place; after action they see the evidence-specific accepted, pending, completed, failed or unknown result. Fresh authorization, step-up, duplicate protection and exact-money contracts remain visible through the flow. (JRN-04)
 
 **Propagation obligation**: Exercise Phase 240 shared hierarchy, responsive/theme behavior, keyboard/focus, busy/reconnect and state distinctions on each changed billing consumer. Verify auth, owner/target/material-state, capability and exact-money invariants at their existing owners; rebuild and confirm package served assets and add focused negative controls with each owning change. Supported returns are bounded existing meanings, not pagination/scroll preservation or a new subscription invoice filter.
-**Plans**: 8/8 plans executed; Plan 08 closes the current verification gap
+**Plans**: 8/8 plans complete; Plan 08 closed the named spacing gap, and current verification passes 32/32
 **Wave 1**
 - [x] 241-01-PLAN.md
 - [x] 241-02-PLAN.md
@@ -171,11 +171,11 @@ Plans:
 
 ## Progress
 
-**Execution order:** 240 → 241 → 242 → 241 named gap closure → 243. Phase 241 needs Plan 08 and fresh verification before its current verdict can pass; Phase 242 remains complete. Next command is `$gsd-execute-phase 241 --gaps-only`; Phase 243 remains the remaining milestone work afterward.
+**Execution order:** 240 → 241 → 242 → 243. The additional named Phase 241 spacing closure is executed and verified; Phases 240–242 are complete. Next command: `$gsd-discuss-phase 243`. Phase 243 remains the final milestone phase and has no context or plans yet.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | Complete    | 2026-10-10 |
-| 241. Billing Operator Journeys | v1.64 | 8/8 | Gap closure planned | 2026-10-10 (original plans) |
+| 241. Billing Operator Journeys | v1.64 | 8/8 | Complete    | 2026-10-10 |
 | 242. Investigations and Remaining Admin Surfaces | v1.64 | 7/7 | Complete    | 2026-10-10 |
 | 243. Integrated Evidence and Feedback Preview | v1.64 | 0/TBD | Not started | - |
