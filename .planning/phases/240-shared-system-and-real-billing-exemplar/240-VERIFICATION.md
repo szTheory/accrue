@@ -1,11 +1,12 @@
 ---
 phase: 240-shared-system-and-real-billing-exemplar
-verified: 2026-10-10T16:07:36Z
+verified: 2026-10-10T23:09:13Z
 status: passed
 score: 47/47 must-haves verified
 covered_files:
   - .github/workflows/accrue_admin_browser.yml
   - .planning/REQUIREMENTS.md
+  - .planning/ROADMAP.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-01-PLAN.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-01-SUMMARY.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-02-PLAN.md
@@ -20,22 +21,20 @@ covered_files:
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-06-SUMMARY.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-CONTEXT.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-COVERAGE.md
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-PATTERNS.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-RESEARCH.md
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-REVIEW-DISPOSITION.md
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-REVIEW-FIX.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-REVIEW-DELTA.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-REVIEW.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-SECURITY.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-UI-REVIEW.md
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-UI-SPEC.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-VALIDATION.md
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/final-gates/exemplar-privacy-copy.xml
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/final-gates/package-browser-privacy-copy.xml
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/final-gates/results.json
-  - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar/manifest.json
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/deferred-items.md
+  - accrue/lib/accrue/billing/invoice_actions.ex
+  - accrue/test/accrue/billing/invoice_item_actions_test.exs
+  - accrue/test/accrue/docs/package_docs_verifier_test.exs
   - accrue_admin/assets/css/app.css
   - accrue_admin/assets/js/hooks/accrue_theme.js
   - accrue_admin/assets/js/hooks/connection_state.js
+  - accrue_admin/assets/js/hooks/focus_trap.js
   - accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js
   - accrue_admin/e2e/admin-page-flow-phase191.spec.js
   - accrue_admin/e2e/admin-spec-detail-phase198.spec.js
@@ -49,17 +48,13 @@ covered_files:
   - accrue_admin/lib/accrue_admin/live/invoices_live.ex
   - accrue_admin/lib/accrue_admin/live/subscription_live.ex
   - accrue_admin/lib/accrue_admin/live/subscriptions_live.ex
-  - accrue_admin/lib/accrue_admin/scoped_path.ex
   - accrue_admin/priv/static/accrue_admin.css
-  - accrue_admin/test/accrue_admin/assets_test.exs
-  - examples/accrue_host/_build/test/lib/accrue_admin/priv/static/accrue_admin.css
   - accrue_admin/priv/static/accrue_admin.js
   - accrue_admin/test/accrue_admin/e2e_fixtures_test.exs
   - accrue_admin/test/accrue_admin/live/invoice_live_test.exs
   - accrue_admin/test/accrue_admin/live/invoices_live_test.exs
   - accrue_admin/test/accrue_admin/live/subscription_live_test.exs
   - accrue_admin/test/accrue_admin/live/subscriptions_live_test.exs
-  - accrue_admin/test/accrue_admin/scoped_path_test.exs
   - accrue_admin/test/js/command_palette_test.mjs
   - accrue_admin/test/js/focus_trap_test.mjs
   - accrue_admin/test/js/visual_baseline_set_test.mjs
@@ -68,157 +63,153 @@ covered_files:
   - examples/accrue_host/e2e/phase237-admin-billing.spec.js
   - examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js
   - scripts/ci/verify_phase240_evidence.mjs
-covered_digest: "v3:sha256:e8b26a3f0bb41c4114ac13907e6f7a03d83fa3954b5ddbb104db85aaf95c3568"
+covered_digest: "v3:sha256:1951f17532c6c1d841cd318393bc1923fcd53dc7670d1bef6f6abb8363c0528f"
 behavior_unverified: 0
+overrides_applied: 0
 re_verification:
   previous_status: passed
   previous_score: 47/47
   gaps_closed: []
   gaps_remaining: []
   regressions: []
-overrides_applied: 0
 deferred:
-  - truth: "Subscription detail's adjacent global invoice-queue panels and their route-specific presentation are not consolidated in this exemplar."
-    addressed_in: "Phase 241"
-    evidence: "ROADMAP Phase 241 success criterion 1 assigns subscription invoice destinations and separately labeled owner-queue links; 240-CONTEXT and 240-REVIEW-DISPOSITION explicitly defer queue composition/destinations to that journey phase."
-  - truth: "Final reviewed Linux visual comparisons for selected goldens have not been executed on this macOS host."
+  - truth: "Final reviewed Linux visual comparisons for selected goldens are outside Phase 240's local macOS run."
     addressed_in: "Phase 243"
-    evidence: "ROADMAP Phase 243 success criterion 1 owns reviewed Linux baselines; Phase 240's early eight-file failure guard is already wired and its 12 focused controls pass."
+    evidence: "Phase 243 owns the final reviewed Linux baselines and separate milestone-wide Linux Browser UAT evidence; it does not replace the local Phase 240 compile and test runs recorded here."
 ---
 
 # Phase 240: Shared System and Real Billing Exemplar Verification Report
 
 **Phase Goal:** Operators can use a coherent, truthful invoice list → detail → action review flow and a dense subscription view through the incumbent Admin system, with shared interaction and evidence patterns ready for other existing routes.
-**Verified:** 2026-10-10T16:07:36Z
+**Verified:** 2026-10-10T23:09:13Z
 **Status:** passed
-**Re-verification:** Yes — shared-source and consumer changes in Phases 241–242 required current verification
+**Re-verification:** Yes — current regression fixes and full local package suites
 
 ## Goal Achievement
 
 ### Observable Truths
 
-The six PLAN files contain 47 observable truths. The five ROADMAP success criteria restate outcomes covered by those truths, so the merged contract contains 47 distinct must-haves. This re-verification was triggered by Phase 241 updates to shared CSS/JS and the invoice/subscription consumers, including the new scoped-return helper. I rechecked all 47 against current source and the latest executable owner evidence; all 47 remain satisfied. The prior phase verification remains historical evidence for unchanged cohorts, while current Admin, Node, host, invoice browser, mounted-host and Phase 241 owner runs cover the changed shared paths.
+The five roadmap success criteria are the outcome contract; all 47 distinct plan truths were also checked against current source, test owners and the supplied fresh regression runs. Plans add detail but do not reduce roadmap scope.
 
 | # | Roadmap truth | Status | Evidence |
 |---|---|---|---|
-| 1 | Invoice list/detail/review and dense subscription surfaces preserve identity, scope, exact current facts, supported actions and evidence; the tested narrow, intermediate/coarse-pointer and enlargement cases retain essential access. | ✓ VERIFIED | LiveView list/detail source uses scoped repository data and canonical MoneyFormatter; Phase 196/198 browser owners assert JPY identity/money/state/target, hit geometry, coarse-pointer access and CSS enlargement/text spacing. Phase 237 manifest records mounted subscription long-identity wrapping and no document overflow at 320/768/1280px, fine/coarse pointer. |
-| 2 | Light, Dark and System selection persists, effective styles follow System OS changes, and host-forced appearance takes precedence. | ✓ VERIFIED | Phase 199 browser assertions and Phase 238 host test exercise stored preference separately from computed colors across OS changes, patch/reload and forced host theme; theme hook synchronizes replaced controls. |
-| 3 | Keyboard review, validation, focus containment/return, busy completion and reconnect preserve accurate controls and do not replay staged actions. | ✓ VERIFIED | Phase 199 keyboard owner checks Tab/Shift+Tab, associated invalid feedback, correction, submission and removed-opener fallback. Phase 191 held-action browser owner exercises busy state, repeated patches/replaced controls, online-before-ready lock, actual completion, dispatch/audit count and no replay. Node FocusTrap owner passes 41 tests. |
-| 4 | Empty, no-match, unavailable, partial, unsupported, denied, pending, failed and unknown states communicate uncertainty and only supported next steps. | ✓ VERIFIED | Invoice/subscription state branches and copy are exercised by LiveView owners; invoice tests cover stale/foreign target rejection, unsupported recovery, exact amount/currency, pending/requires-action vs completed, ambiguous/unknown outcomes and duplicate confirmation. |
-| 5 | Current route/component/state coverage, provenance, recurring acceptance owners, focused failure controls and lightweight diagnostics are inspectable. | ✓ VERIFIED | `240-COVERAGE.md` plus ledger CLI validates 21 production routes, 8 requirement owners, registry 30/42/8 and 43 source modules; mounted manifest binds fixture/source/render state to package/compiled/served CSS, JS and Geist font hashes, and records diagnostics. Guard, docs and asset owners are present and green. |
+| 1 | Invoice list/detail/review and dense subscription retain identity, scope, exact current facts, supported action and evidence through the required responsive/content cases. | ✓ VERIFIED | Current `invoices_live.ex`, `invoice_live.ex`, subscription LiveViews and MoneyFormatter render scoped repository data. Owner tests and mounted Phase 196/198/237 checks exercise target, money, facts, width, coarse-pointer and enlargement behavior. Shared spacing retains the deliberate 2px dense and 1px structural roles. |
+| 2 | Light, Dark and System selection persists, effective styles track OS preference, and host force takes precedence. | ✓ VERIFIED | Theme hook, ThemePicker/Theme tests and Phase 199/238 mounted owners assert selection separately from computed style, patch/reload behavior and host-forced precedence. |
+| 3 | Keyboard review, busy state and reconnect preserve focus, truthful controls and exactly-once behavior. | ✓ VERIFIED | Phase 199 and FocusTrap owners exercise containment, correction, submit, dismissal and replacement focus. Phase 191 uses a server-held disposable action and fixture dispatch/audit counts to prove busy completion, reconnect readiness and no replay. |
+| 4 | Empty, no-match, unavailable, partial, unsupported, denied, pending, failed and unknown states state uncertainty and only supported next steps. | ✓ VERIFIED | Current invoice/subscription state branches and copy are backed by LiveView owner tests for unavailable/partial facts, unsupported recovery, stale/foreign rejection, exact amounts and distinct pending, failure, unknown and completion outcomes. |
+| 5 | Current route/component/state coverage and source-to-served provenance are inspectable, and recurring acceptance owners exercise the exemplar and guards. | ✓ VERIFIED | `240-COVERAGE.md` and its verifier validate 21 routes, eight requirements, incumbent registry counts 30/42/8 and 43 source modules. Mounted manifest/Phase 237 owner compares package, host-compiled and served CSS/JS/fonts and records route, fixture and diagnostics. Expected baseline preflight is wired before the blocking visual command. |
+
+**Score:** 47/47 truths verified (0 present, behavior-unverified).
 
 ### Plan-Specific Truth Coverage
 
-The additional plan-specific details were also verified, including the conditions not repeated in ROADMAP wording. Plan counts are 7 + 4 + 13 + 10 + 6 + 7 = 47, with roadmap outcomes deduplicated against them.
-
-| Plan cohort | Count | Status | Evidence checked |
+| Plan | Truths | Status | Evidence inspected |
 |---|---:|---|---|
-| 240-01 invoice tracer, action authority, shared geometry and subscription cross-check | 7 | ✓ VERIFIED | `invoice_live.ex`/`invoices_live.ex`/`subscription_live.ex`; invoice and subscription owner tests; Phase 237 mounted assertions; source keeps `--ax-*` hierarchy and 2px dense / 1px structural roles. |
-| 240-02 exact Linux baseline set, unchanged masks/thresholds and blocking order | 4 | ✓ VERIFIED | Exact eight-name validator; 12 Node controls; `.github/workflows/accrue_admin_browser.yml` unconditionally invokes guard, complete-set preflight, then existing blocking pixel command. |
-| 240-03 distinct invoice state/copy, width/content boundaries, zoom limits, empty/error/partial/long/zero-one-many cases | 13 | ✓ VERIFIED | Invoice Copy/LiveView and owner tests plus Phase 196/198 mounted cases. Browser logs label CDP 3x/4x page scale as pinch/visual scaling and explicitly state faithful 400% browser zoom is unavailable; this does not claim actual zoom. |
-| 240-04 stored/effective theme, forced theme, disabled/loading controls, keyboard review, focus lifecycle and reduced-motion teardown | 10 | ✓ VERIFIED | Theme hook/owners, Phase 199 and Phase 238 browser owners, FocusTrap Node tests. Browser and harness assertions exercise transitions rather than symbol presence alone. |
-| 240-05 server-held busy completion, repeated patches, online/reconnect readiness and exactly-once dispatch | 6 | ✓ VERIFIED | Test-only fixture hold/release and authoritative provider/event/audit state; Phase 191 owner asserts original disabled state and no replay across reconnect. |
-| 240-06 current inventory, source/fixture/build/served/exercised provenance, resource diagnostics and acceptance-owner map | 7 | ✓ VERIFIED | Evidence CLI self-test rejects a missing route; current ledger and manifest tie actual mounted route to package, compiled host and served assets and identify fixture/theme/viewport/browser limits. |
+| 240-01 invoice tracer, hierarchy, action authority and subscription cross-check | 7 | ✓ VERIFIED | Scoped LiveView loaders, canonical formatting, review validation and owner tests; mounted host assertion. |
+| 240-02 expected Linux baseline set and blocking ordering | 4 | ✓ VERIFIED | Explicit expected-set validator, Node negative controls, workflow guard before the unchanged blocking pixel comparison. |
+| 240-03 truthful states, responsive/content boundaries and zoom limits | 13 | ✓ VERIFIED | Invoice copy/branches, ExUnit and Phase 196/198 owners; browser report correctly labels the unavailable faithful 400% browser zoom method rather than treating CSS or pinch scale as zoom. |
+| 240-04 theme, keyboard review and focus lifecycle | 10 | ✓ VERIFIED | Theme and FocusTrap tests plus Phase 199 and Phase 238 mounted owners. |
+| 240-05 controlled busy completion and reconnect without replay | 6 | ✓ VERIFIED | Test-only hold/release seam, production readiness lock and Phase 191 authoritative dispatch/audit assertions. |
+| 240-06 current inventory and asset/execution provenance | 7 | ✓ VERIFIED | Route evidence CLI and self-test, current coverage ledger, mounted asset manifest and served-byte assertions. |
 
-## Required Artifacts
+### Current Regression Runs
 
-| Artifact | Expected | Status | Details |
+These are the fresh local results supplied for this verification and were considered alongside source inspection; the earlier SUMMARY counts were not used as proof.
+
+| Owner | Result |
+|---|---|
+| Core | `MIX_ENV=test mix compile --warnings-as-errors` passed; full `MIX_ENV=test mix test`: 2,081 tests, 0 failures (11 excluded). |
+| Admin | Warnings-as-errors compile passed; full suite: 683 tests, 0 failures. |
+| Host | Warnings-as-errors compile passed; full suite: 223 tests, 0 failures. |
+| Admin JavaScript | `node --test test/js/*.mjs`: 49 tests, 0 failures. |
+| Package-doc verifier | Focused suite: 46 tests, 0 failures. |
+
+The first broad Core attempt's 45 failures all came from the stale Phase 239 fixture path. The fixture now uses the canonical v1.63 archive path, and the rerun passed. The two acknowledged non-failing notices are the package asset build's missing Storybook-only CSS/JS paths and ExMoney's automatic exchange-rate startup deprecation notice. Neither prevented compilation or tests.
+
+The remote Phase 243 Browser UAT run is separate milestone-wide Linux evidence. It is not used as a substitute for any local Phase 240 compile or test result. The existing UI audit is reused because the current regression fixes did not change rendered layout; no new layout capture was needed.
+
+### Required Artifacts
+
+| Artifact | Status | Evidence |
+|---|---|---|
+| Invoice collection/detail/review: `accrue_admin/lib/accrue_admin/live/{invoices_live,invoice_live}.ex` | ✓ VERIFIED | Substantive scoped queries/rendering, canonical money, target/scope review, fresh actor/scope/eligibility/fingerprint checks and duplicate dispatch guard. |
+| Dense subscription list/detail: `accrue_admin/lib/accrue_admin/live/{subscriptions_live,subscription_live}.ex` | ✓ VERIFIED | Scoped database-backed facts, explicit unavailable values, action eligibility and fresh server validation; tests exercise zero/one/many and action outcomes. |
+| Billing action guard: `accrue/lib/accrue/billing/invoice_actions.ex` | ✓ VERIFIED | Current add/remove paths lock/recheck persisted draft status and item ownership/eligibility before mutation; invoice-item tests cover stale state and forged/stale targets. |
+| Baseline guard and CI workflow | ✓ VERIFIED | Named expected set rejects missing paths/non-files, and CI invokes guard before the blocking pixel run. |
+| Theme, focus and reconnect hooks | ✓ VERIFIED | Hook code is wired into recurring browser owners; supplied Node suite passes 49/0 and Admin suite passes 683/0. |
+| Evidence ledger | ✓ VERIFIED | Current CLI validates route/requirement inventory and rejects a missing-route fixture. |
+| Package-doc verifier archive fixture | ✓ VERIFIED | Test fixture references canonical archived Phase 239 documents; focused 46/0 run confirms the regression fix. |
+
+### Key Link Verification
+
+| From | To | Via | Status | Evidence |
+|---|---|---|---|---|
+| Invoice collection | Scoped invoice detail | Row navigation carries current owner scope | ✓ WIRED | LiveView uses scoped path construction; mounted list/detail owner opens the seeded invoice. |
+| Invoice review | Billing mutation | Submit → fresh actor/scope/target/state/money checks → server action | ✓ WIRED | Review handler and billing action owners preserve independent validation and duplicate protection. |
+| LiveView/component classes | Served Admin styling | `--ax-*` roles → rebuilt package assets → host response | ✓ WIRED | Phase 198/237 owners compare built, compiled and served asset bytes. |
+| Theme preference | Effective theme | Stored choice → hook/media query → host force | ✓ WIRED | Theme browser owners verify preference, computed styles and host precedence. |
+| Overlay opener | Review completion/focus return | Focus trap → form feedback → dismissal/replacement fallback | ✓ WIRED | Phase 199 browser owner and FocusTrap Node owner exercise transitions. |
+| Held fixture action | Busy/completion UI | Hold/release → LiveView state → fixture dispatch/audit oracle | ✓ WIRED | Phase 191 browser owner proves completion and no replay from authoritative counters. |
+| Network reconnect | Fresh action eligibility | `connection_state.js` waits for LiveView readiness | ✓ WIRED | Browser owner covers online-before-ready, patches and replacement controls. |
+| Expected snapshot set | Linux pixel gate | Exact-set preflight → existing pixel regression command | ✓ WIRED | Workflow has unconditional guard and blocking pixel command; missing-set tests are focused. |
+
+### Data-Flow Trace (Level 4)
+
+| Artifact | Data | Source | Status |
 |---|---|---|---|
-| `accrue_admin/lib/accrue_admin/live/invoices_live.ex` | Scoped invoice collection and truthful current facts | ✓ VERIFIED | Renders database-backed rows; scoped links and canonical amount formatting are exercised by ExUnit and mounted Phase 196/237 owners. |
-| `accrue_admin/lib/accrue_admin/live/invoice_live.ex` | Invoice detail, action review and fresh server validation | ✓ VERIFIED | Real LiveView handlers and repository loader; review names invoice/customer/owner target and exact money; owner tests reject stale/foreign/duplicate dispatch. |
-| `accrue_admin/lib/accrue_admin/live/subscriptions_live.ex`, `subscription_live.ex` | Dense list/detail with exact facts, current actions and honest unknowns | ✓ VERIFIED | Repository-backed scoped data, identity/status/price/period/action rendering; tests cover empty, one/many, unavailable facts, stale actions and long mounted identity. Queue composition is recorded under the Phase 241 deferral. |
-| `accrue_admin/e2e/visual-baseline-set.cjs` and `test/js/visual_baseline_set_test.mjs` | Exact expected-set validator and negative controls | ✓ VERIFIED | 12 focused Node tests; full set has 8/8 PNGs. |
-| `.github/workflows/accrue_admin_browser.yml` | Fail-closed guard wired ahead of blocking pixel comparison | ✓ VERIFIED | Workflow runs expected-set tests and exact-set check before the unconditional existing visual regression step. |
-| `accrue_admin/e2e/admin-spec-list-phase196.spec.js`, `admin-spec-detail-phase198.spec.js` | Responsive invoice assertions | ✓ VERIFIED | Desktop/mobile evidence covers target/money/state, enlargement, text spacing, coarse pointer and accurate zoom-method disclosure. |
-| `accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js`, `admin-page-flow-phase191.spec.js` | Theme, keyboard, busy, patch and reconnect behavior | ✓ VERIFIED | Existing browser owners are wired to fixture-backed state transitions; results are in final JUnit privacy copy. |
-| `accrue_admin/test/accrue_admin/live/*invoice*`, `*subscription*` and fixture owners | Server-side states, exact money and authorization | ✓ VERIFIED | Full Admin suite completed 618 tests, 0 failures, warnings-as-errors compile. |
-| `scripts/ci/verify_phase240_evidence.mjs` and `240-COVERAGE.md` | Current route and evidence ledger | ✓ VERIFIED | CLI validates 21 routes, all 8 Phase 240 requirements and incumbent registry/module counts; missing-route negative was observed. |
-| `examples/accrue_host/e2e/phase237-admin-billing.spec.js` and capture manifest | Mounted exemplar and served asset/resource evidence | ✓ VERIFIED | Native privacy-copy JUnit: 1 test, 0 failures. Package/compiled/served/browser-request digests match for CSS, JS and both Geist fonts; stale-JS negative was rejected then restored. |
+| Invoice list/detail | Invoice/customer/owner/state/minor-unit amount | Owner-scoped repository loaders and canonical formatter | ✓ FLOWING |
+| Subscription list/detail | Subscription/customer/status/plan/period/actions | Owner-scoped subscription query and formatter | ✓ FLOWING |
+| Theme controls | Stored preference and computed colors | Browser storage, OS media preference and host override | ✓ FLOWING |
+| Busy/reconnect controls | Busy/result/disabled state and dispatch count | Test-only hold fixture and real LiveView/provider adapter | ✓ FLOWING |
+| Evidence ledger | Route and owner rows | Phase 239 route authority and live component registry | ✓ FLOWING |
 
-## Key Link Verification
+### Behavioral Spot-Checks
 
-| From | To | Via | Status | Details |
-|---|---|---|---|---|
-| Invoice list | Scoped invoice detail | Real row/card link and owner scope | ✓ WIRED | LiveView builds scoped detail path; mounted owner opens the seeded list record and checks the detail target. |
-| Invoice detail/review | Existing server-authorized action dispatch | LiveView events, fresh target/material-state checks, step-up and duplicate guard | ✓ WIRED | `invoice_live.ex` handlers call server validation; ExUnit asserts stale/foreign/repeated submissions do not dispatch. |
-| Invoice/subscription LiveViews and Detail | Shared `--ax-*` roles and rebuilt package assets | Component classes → package build → host `/admin` | ✓ WIRED | Phase 198 compares mounted served CSS bytes with package artifact; Phase 237 binds package, compiled and served CSS/JS/font bytes. |
-| Stored theme selection | Effective rendered theme | `accrue_theme` hook, OS media changes, forced host theme | ✓ WIRED | Phase 199 and Phase 238 exercise selection, replacement, reload and host precedence. |
-| Review opener | Overlay focus/validation/focus return | Focus trap and actual form events | ✓ WIRED | Mounted Phase 199 interaction checks both-direction focus containment, associated error/correction/submission, dismissal and fallback focus. |
-| Held fixture action | LiveView busy state and completion | Test-only hold/release with authoritative fixture counters | ✓ WIRED | Phase 191 observes actual completion and matching provider dispatch/event/audit count. |
-| Network reconnect | Fresh LiveView readiness and eligible controls | `connection_state.js` waits for LiveView reconnected state | ✓ WIRED | Browser owner proves online alone does not unlock, replacements preserve original disabled state, and reconnect does not replay. |
-| Expected PNG set | Existing blocking Linux pixel job | Workflow exact-set preflight followed by pixel command | ✓ WIRED | Guard unit suite proves all/partial missing rejection; workflow has no any-PNG conditional skip. |
-| Compiled route/registry authorities | Evidence ledger and recurring owners | Phase 239 route source and live registry APIs | ✓ WIRED | Ledger CLI verifies 21 current routes, owner rows and live registry counts; self-test rejects an omitted route. |
+| Behavior | Command/result | Status |
+|---|---|---|
+| Core compilation and tests | Warnings-as-errors compile passed; 2,081 tests, 0 failures (11 excluded) | ✓ PASS |
+| Admin compilation and tests | Warnings-as-errors compile passed; 683 tests, 0 failures | ✓ PASS |
+| Host compilation and tests | Warnings-as-errors compile passed; 223 tests, 0 failures | ✓ PASS |
+| Admin JavaScript tests | `node --test test/js/*.mjs`: 49/0 | ✓ PASS |
+| Package-doc verifier | Focused suite: 46/0 | ✓ PASS |
+| Phase 240 ledger/negative control | Existing self-test requires valid ledger and rejects omitted route; 21 routes and eight requirements checked | ✓ PASS |
+| Faithful 400% browser zoom | Installed headless browser did not expose a faithful browser-zoom control; CSS/pinch scaling is documented separately | ? LIMIT RECORDED |
+| Final reviewed Linux pixel run | Owned separately by Phase 243; not inferred from local/macOS evidence | Deferred to Phase 243 |
 
-## Data-Flow Trace (Level 4)
+### Probe Execution
 
-| Artifact | Rendered data | Source | Produces real data | Status |
-|---|---|---|---|---|
-| Invoice list/detail | Invoice, customer, owner, state and minor-unit amount | Owner-scoped repository loaders and canonical MoneyFormatter | Yes; seeded disposable fixture reaches mounted route; owner tests cover scope and state | ✓ FLOWING |
-| Subscription list/detail | Subscription/customer, lifecycle, plan amount/period and related invoice facts | Owner-scoped repository queries and MoneyFormatter | Yes; fixture-backed tests and mounted subscription cross-check; absent plan/period remains explicit | ✓ FLOWING |
-| Theme controls | Stored choice and effective CSS appearance | `accrue_theme` local preference plus OS/host precedence | Yes; browser tests independently inspect preference and computed style | ✓ FLOWING |
-| Held action/reconnect state | Busy/result/disabled controls and dispatch count | Test-only fixture hold/release, actual LiveView and provider adapter | Yes; observed completion, state and audit/event counters | ✓ FLOWING |
-| Evidence ledger and mounted assets | Route/component rows and asset digests | Compiled Phase 239 route authority, live component registry and actual package/host/served responses | Yes; valid ledger and missing-route rejection; hash equality and stale-asset negative | ✓ FLOWING |
+No `probe-*.sh` is declared by the six plans or roadmap criteria; no shell probe was required. The Node evidence validator and its positive/negative self-test are recorded above.
 
-## Behavioral Spot-Checks
+### Requirements Coverage
 
-| Behavior | Command / recorded owner | Result | Status |
+| Requirement | Source | Status | Evidence |
 |---|---|---|---|
-| Current Admin server state and authorization owners | Phase 241 final `cd accrue_admin && MIX_ENV=test mix test` plus warnings-as-errors compile | 646 tests, 0 failures; compile passed | ✓ PASS |
-| Hook, focus and baseline guard behaviors | Phase 241 final `cd accrue_admin && node --test test/js/*.mjs` | 41 tests, 0 failures; baseline-set owner contributes 12 controls | ✓ PASS |
-| Responsive/list/detail and interaction browser owners | Desktop and mobile JUnit privacy copy | 89 passed, 19 incumbent skips, 0 failures/errors | ✓ PASS |
-| Mounted Phase 237 invoice/subscription exemplar and asset provenance | Current host mounted owner, Phase 241 execution gates and final capture | 1/1 pass; package/compiled/served/browser CSS/JS/font hashes match; action count 0→0 | ✓ PASS |
-| Host verification and existing acceptance paths | `MIX_ENV=test mix verify.full` recorded final result | Exit 0; bounded 64/0, full 223/0, dev boot pass, browser 37 pass/16 incumbent skips, checkout 14/0 | ✓ PASS |
-| Route ledger negative control | `node scripts/ci/verify_phase240_evidence.mjs --self-test .planning/phases/240-shared-system-and-real-billing-exemplar/240-COVERAGE.md` | `valid=1 missing-route-rejected=1`; normal CLI validates 21 routes | ✓ PASS |
-| Complete expected baseline set | `node accrue_admin/e2e/visual-baseline-set.cjs accrue_admin/e2e/__screenshots__/visual-desktop` | 8 expected, 8 present; 12 focused controls pass | ✓ PASS |
-| Package docs and contrast guard | `bash scripts/ci/verify_package_docs.sh` (recorded final result) | Passed | ✓ PASS |
+| DSN-01 | Plans 01/03/06 | ✓ SATISFIED | Invoice and subscription identity/facts/action hierarchy, owner tests and mounted exemplar. |
+| DSN-02 | Plan 03 | ✓ SATISFIED | Width/content/coarse-pointer/enlargement owners and zoom-method limits recorded truthfully. |
+| DSN-03 | Plan 04 | ✓ SATISFIED | Stored/effective theme tests and host-forced mounted check. |
+| DSN-04 | Plan 05 | ✓ SATISFIED | Held completion, reconnect readiness and exactly-once assertions. |
+| DSN-05 | Plan 04 | ✓ SATISFIED | Focus containment, validation, dismissal and replacement focus owners. |
+| UXC-02 | Plans 01/03/05 | ✓ SATISFIED | Distinct state copy and safe next-step assertions across real branches. |
+| EVR-01 | Plan 06 | ✓ SATISFIED | Current route/component/evidence inventory and served asset provenance. |
+| EVR-02 | Plans 01–06 | ✓ SATISFIED | Recurring local owners, focused negative controls, and current full regression runs. |
 
-## Probe Execution
+All requirement IDs assigned by the roadmap are present in plan frontmatter; no phase-owned requirement is orphaned. CONTEXT decision coverage query: 14/14 honored, 0 unhonored.
 
-No `probe-*.sh` is declared by the six plans or success criteria. The phase's evidence validator is a Node CLI and its positive/negative self-test is recorded above; no shell probe is missing.
+### Anti-Patterns Found
 
-## Requirements Coverage
+| File | Pattern | Severity | Impact |
+|---|---|---|---|
+| — | No unresolved implementation debt marker or stub found in the audited phase owners. | — | The two acknowledged notices above are build/test environment notices, not unimplemented code. |
 
-| Requirement | Source plans | Description | Status | Evidence |
-|---|---|---|---|---|
-| DSN-01 | 01, 03, 06 | Shared identity/facts/action hierarchy | ✓ SATISFIED | Invoice list/detail/review and dense subscription owners plus mounted geometry evidence. |
-| DSN-02 | 01, 03, 06 | Responsive access, long/missing data and enlargement | ✓ SATISFIED | Phase 196/198 and Phase 237 width/coarse-pointer/enlargement checks; actual zoom limitation is explicit. |
-| DSN-03 | 04, 06 | Stored Light/Dark/System and effective theme/host force | ✓ SATISFIED | Theme ExUnit, Phase 199 and Phase 238 host-forced browser owners. |
-| DSN-04 | 05, 06 | Accurate busy/completion/reconnect without replay | ✓ SATISFIED | Fixture-backed held action and Phase 191 repeated patch/reconnect/dispatch-count assertions. |
-| DSN-05 | 04, 06 | Keyboard focus, validation and overlay lifecycle | ✓ SATISFIED | Node FocusTrap owner and Phase 199 mounted keyboard case. |
-| UXC-02 | 01, 03, 05, 06 | Distinct uncertainty/outcome states and supported next steps | ✓ SATISFIED | Invoice/subscription outcome and unavailable-state owner tests. |
-| EVR-01 | 06 | Current route/component/state evidence inventory | ✓ SATISFIED | Ledger CLI and current coverage report. |
-| EVR-02 | 01–06 | Recurring checks and focused regression controls | ✓ SATISFIED | Existing acceptance owners plus guard negatives, package/host checks and asset provenance. |
+### Human Verification Required
 
-No Phase 240 requirement mapped in `REQUIREMENTS.md` is absent from plan requirements. All eight required IDs are covered; no orphaned Phase 240 requirement was found.
+None. Actual browser zoom limitations are explicitly recorded and are not represented as a successful zoom observation. Visual audit reuse follows the agreed no-rendered-layout-change decision.
 
-## Anti-Patterns Found
+### Gaps Summary
 
-| File | Line | Pattern | Severity | Impact |
-|---|---:|---|---|---|
-
-No unreferenced `TBD`, `FIXME`, or `XXX` debt marker was found in the changed implementation/test owners; Phase 241's standard-depth review covered 30 files with 0 findings. The scan matches for `return null`, empty returns and `console.log` are legitimate guard branches, test helpers, or explicit browser evidence output; none is a user-visible stub. The known subscription queue composition finding is handled in Deferred Items, consistent with the locked Phase 241 boundary.
-
-## Human Verification Required
-
-None. Phase policy requires zero maintainer UAT; automated mounted appearance, interaction and state owners exist, and subjective owner feedback remains optional. Linux pixel comparison is handled by the Phase 243 owner. Browser zoom was explicitly reported as unavailable rather than treated as verified by viewport or pinch emulation.
-
-## Re-verification Evidence
-
-Phase 241 changed shared Admin styles/JS and the invoice/subscription consumers, so Phase 240's previous digest and pass timestamp were stale. Current regression evidence is recorded in `.planning/phases/241-billing-operator-journeys/241-EXECUTION-GATES.md`, `.planning/phases/241-billing-operator-journeys/241-UI-FIX.md`, and `241-07-SUMMARY.md`. The owner runs report Admin 646/0 with warnings-as-errors compile passing, Node 41/0, host 223/0, invoice list/detail browser 42/0/4 incumbent skips, focused Phase 191 1/1 and Phase 199 2/2, and mounted host 1/1 with current served-asset hashes. The canonical Phase 240 UAT is at a generator fixed point (18/18, 0 issues); the project-wide executable UAT contract reports PASS across 13 phases, 102 summaries and 302 items. These checks preserve the original evidence limits: actual browser zoom and physical-device behavior are not claimed, and selected reviewed Linux goldens remain Phase 243 work.
-
-## Current-source regeneration (2026-10-10)
-
-The prior report became stale after later phases changed shared Admin sources and CI. All 47 plan must-haves were rechecked against current LiveViews, query/action owners, browser/host wiring, current UI contracts and named owner evidence. The later Phase 241 Plan 08 changes only two action-gap CSS declarations, one existing browser assertion, and rebuilt package CSS; the final mounted test measures the corrected geometry against the token. The five roadmap outcomes remain covered by the verified plan truths. Prose-only artifact and key-link declarations were not treated as evidence.
-
-Fresh broad regression runs in `/private/tmp/accrue242-final-regression.log` and `/private/tmp/accrue242-prior-browser-regression-permitted.log` passed warnings-as-errors compiles, Admin 679/0, Node 44/0 and host 223/0 before the final Plan 08 CSS correction. The current 4px action-spacing correction has its own executed Phase 199 mounted desktop/mobile owner (2/0, with three post-fix batches total) and asset-byte owner (4/0). This refresh also reran Admin/host warnings-as-errors compiles, Node 44/0, package assets 4/0, and host admin mount 5/0. Historical browser matrices remain historical; no remote CI pass is claimed. Nyquist remains validated/compliant; security audit confirms 13/13 unique IDs closed, `threats_open: 0`, ASVS L1; code-review delta is clean.
-
-The source-only UI audit is 14/24. It records warnings in unreferenced legacy `.ax-summary-health-*` CSS (0px gap/0.5px vertical padding and 900/950 weights). The active subscription lifecycle markup uses separate `.ax-detail-health-*` classes with token spacing, and the flagged legacy classes have no LiveView caller. The Phase 241 action-gap correction is also recorded as using the 4px token. After the host compile, compiled host package CSS and tracked package CSS both measured 129,813 bytes with SHA-256 `089878ed…`. The latest HTTP-served byte assertion remains the earlier mounted browser run; no HTTP request or screenshot was produced for the updated CSS. These warnings do not fail a plan must-have. Actual browser zoom, physical device, assistive speech, live-provider and remote CI behavior are not claimed. Phase 243 owns final reviewed Linux goldens.
-
-## Gaps Summary
-
-No blocking or uncertain must-have remains. The current implementation delivers the invoice list → detail → staged action-review path and dense subscription view through the incumbent Admin system. Source, focused tests, mounted assertions and current served-asset evidence connect the behavior end to end. The UI review's remaining subscription global invoice-queue composition/destination work is explicitly assigned to Phase 241, and reviewed Linux golden closure is assigned to Phase 243; neither is pulled into this phase's contract. The original Phase 240-03 TDD RED timing deviation remains historical and is not represented by retrospective reports as timing proof.
+No blocking gap remains. Phase 243 owns the final reviewed Linux visual comparison and separate milestone-wide Linux Browser UAT; this does not weaken or replace Phase 240's local regression evidence. Historical Core failures were confined to the stale archived-fixture path and passed after correction.
 
 ---
 
-_Verified: 2026-10-10T16:07:36Z_
+_Verified: 2026-10-10T23:09:13Z_  
 _Verifier: the agent (gsd-verifier)_

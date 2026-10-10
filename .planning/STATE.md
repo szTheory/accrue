@@ -2,14 +2,14 @@
 gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
-current_phase: 243
-current_plan: 3 of 3 (complete)
+current_phase: 240
+current_plan: Not started
 status: completed
-stopped_at: Phase 243 complete — all phases complete
-last_updated: "2026-10-10T22:09:12.942Z"
+stopped_at: Phase 240 complete — all phases complete
+last_updated: "2026-10-10T23:09:40.676Z"
 last_activity: 2026-10-10
-last_activity_desc: Phase 243 complete
-state_head: 151d90983777cfdf9d8182c94455e3eea6106588
+last_activity_desc: Phase 240 complete
+state_head: bbfc7b2c535dbfbc09d921db64b0434e1e74cf4a
 progress:
   total_phases: 4
   completed_phases: 4
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.64 verification freshness audit before milestone archive — all four phases completed
+**Current focus:** Phase 240 — Shared System and Real Billing Exemplar
 **Progress:** [██████████] 100%
 **Planned work completed:** All four v1.64 phases and 24 plans are completed; all 18 requirements are satisfied by their recorded acceptance. Phase243 independently passed 3/3 roadmap truths with behavior_unverified 0; generated UAT passed 7/7 after verification. The project-wide contract passed 15 phases, 113 summaries and 329 automated UAT cases. Code review findings CR-01/CR-02 are fixed; security has zero open threats. The Linux comparison is pinned to 0197f4ba, while later local mounted/preview regressions have their own recorded evidence. v1.63 remains archived and closed.
 
 ## Current Position
 
-Phase: 243
-Current Plan: 3 of 3 (complete)
-Total Plans in Phase: 3
+Phase: 240
+Current Plan: Not started
+Total Plans in Phase: 6
 Status: All phases complete
-Last activity: 2026-10-10 — Phase 243 complete
+Last activity: 2026-10-10 — Phase 240 complete
 
 ## Performance Metrics
 
@@ -489,7 +489,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-10T22:31:20.398031Z
-Stopped at: Phase 243 complete — all phases complete
+Stopped at: Phase 240 complete — all phases complete
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
