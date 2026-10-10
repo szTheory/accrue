@@ -153,7 +153,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
           columns={[
             %{
               label: Copy.connect_accounts_table_column_account(),
-              render: &account_link(&1, @admin_mount_path, @current_owner_scope)
+              render: &account_link(&1, @admin_mount_path, @current_owner_scope, @params)
             },
             %{label: Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
             %{label: "Last stored Stripe snapshot readiness", render: &readiness_summary(&1, @current_owner_scope)},
@@ -474,12 +474,21 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
 
   defp scoped_accounts(_owner_scope), do: Account
 
-  defp account_link(row, mount_path, owner_scope),
-    do:
-      safe_link(
-        ScopedPath.build(mount_path, "/connect/#{row.id}", owner_scope),
-        row.stripe_account_id || row.id
-      )
+  defp account_link(row, mount_path, owner_scope, params) do
+    filters = filter_params(params)
+    return_params = Map.take(params, ["view"]) |> Map.merge(stringify_keys(filters))
+    return_to = ScopedPath.build(mount_path, "/connect", owner_scope, return_params)
+
+    href =
+      ScopedPath.build(mount_path, "/connect/#{row.id}", owner_scope, %{
+        "return_to" => return_to
+      })
+
+    safe_link(href, row.stripe_account_id || row.id)
+  end
+
+  defp stringify_keys(map),
+    do: Map.new(map, fn {key, value} -> {to_string(key), to_string(value)} end)
 
   defp owner_summary(row),
     do: "#{row.owner_type || Copy.connect_accounts_row_owner_fallback()} #{row.owner_id || "--"}"

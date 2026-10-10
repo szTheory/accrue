@@ -51,8 +51,28 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
          |> assign(:raw_json_loaded?, false)
          |> assign(:drawer_action_type, nil)
          |> assign(:pending_override, nil)
+         |> assign(:return_destination, %{
+           path: ScopedPath.build(mount_path, "/connect", scope),
+           label: AccrueAdmin.Copy.Connect.connect_account_back_to_connect()
+         })
          |> assign(:flashes, [])}
     end
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    {:noreply,
+     assign(
+       socket,
+       :return_destination,
+       ScopedPath.return_destination(
+         socket.assigns.admin_mount_path,
+         Map.get(params, "return_to"),
+         socket.assigns.current_owner_scope,
+         nil,
+         "/connect"
+       )
+     )}
   end
 
   @impl true
@@ -146,8 +166,8 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
               href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
             },
             %{
-              label: AccrueAdmin.Copy.connect_account_breadcrumb_connect(),
-              href: ScopedPath.build(@admin_mount_path, "/connect", @current_owner_scope)
+              label: @return_destination.label,
+              href: @return_destination.path
             },
             %{label: @account.stripe_account_id || @account.id}
           ]}
@@ -165,7 +185,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         </Detail.summary_card>
 
         <p class="ax-body" data-role="connect-provider-snapshot-note">
-          Provider readiness, capabilities, and requirements below are the last stored Stripe snapshot; this page does not track when Stripe last reported them.
+          <%= AccrueAdmin.Copy.Connect.connect_account_provider_snapshot_note() %>
         </p>
 
         <Detail.summary_list rows={summary_rows(@account, @admin_mount_path, @current_owner_scope)} />
@@ -253,6 +273,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         >
           <.override_drawer_form
             preview={@override_preview}
+            account={@account}
             default_fee_config={@default_fee_config}
           />
         </DetailDrawer.detail_drawer>
@@ -266,6 +287,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
           <section data-ax-overlay-panel data-presentation="drawer">
             <.override_drawer_form
               preview={@override_preview}
+              account={@account}
               default_fee_config={@default_fee_config}
             />
           </section>
@@ -326,29 +348,76 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         |> assign(:flashes, [%{kind: :error, message: Copy.connect_account_not_found()}])
 
       %Account{} = account ->
-        data = merged_data(account, override_payload)
-
-        case account |> Account.changeset(%{data: data}) |> Repo.update() do
-          {:ok, updated_account} ->
+        cond do
+          not fresh_review?(socket, account) ->
             socket
-            |> record_override_update(updated_account, override_payload)
-            |> assign_account(updated_account)
+            |> assign(:pending_override, nil)
+            |> assign_account(account)
+            |> assign(:flashes, [
+              %{kind: :error, message: AccrueAdmin.Copy.Connect.connect_account_review_stale()}
+            ])
+
+          platform_fee_override(account) == override_payload ->
+            socket
+            |> assign_account(account)
             |> assign(:drawer_action_type, nil)
             |> assign(:pending_override, nil)
             |> assign(:flashes, [
-              %{kind: :info, message: AccrueAdmin.Copy.connect_account_flash_override_saved()}
+              %{
+                kind: :info,
+                message: AccrueAdmin.Copy.Connect.connect_account_override_unchanged()
+              }
             ])
 
-          {:error, changeset} ->
-            assign(socket, :override_preview, %{
-              socket.assigns.override_preview
-              | error: humanize_changeset_errors(changeset)
-            })
+          true ->
+            data = merged_data(account, override_payload)
+
+            case persist_override(account, data) do
+              {:ok, updated_account} ->
+                socket
+                |> record_override_update(updated_account, override_payload)
+                |> assign_account(updated_account)
+                |> assign(:drawer_action_type, nil)
+                |> assign(:pending_override, nil)
+                |> assign(:flashes, [
+                  %{kind: :info, message: AccrueAdmin.Copy.connect_account_flash_override_saved()}
+                ])
+
+              {:error, changeset} ->
+                assign(socket, :override_preview, %{
+                  socket.assigns.override_preview
+                  | error: humanize_changeset_errors(changeset)
+                })
+
+              {:error, :stale} ->
+                latest = load_account(account.id, socket.assigns.current_owner_scope)
+
+                socket
+                |> assign(:pending_override, nil)
+                |> then(fn socket ->
+                  if latest, do: assign_account(socket, latest), else: socket
+                end)
+                |> assign(:flashes, [
+                  %{
+                    kind: :error,
+                    message: AccrueAdmin.Copy.Connect.connect_account_review_stale()
+                  }
+                ])
+            end
         end
     end
   end
 
+  defp persist_override(account, data) do
+    account
+    |> Account.changeset(%{data: data})
+    |> Repo.update()
+  rescue
+    Ecto.StaleEntryError -> {:error, :stale}
+  end
+
   attr(:preview, :map, required: true)
+  attr(:account, :map, required: true)
   attr(:default_fee_config, :list, required: true)
 
   defp override_drawer_form(assigns) do
@@ -360,8 +429,24 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
 
       <Detail.detail_field_list fields={[
         %{
+          label: AccrueAdmin.Copy.Connect.connect_account_detail_label_review_account(),
+          value: @account.stripe_account_id || @account.id
+        },
+        %{
+          label: AccrueAdmin.Copy.Connect.connect_account_detail_label_review_owner(),
+          value: owner_summary(@account)
+        },
+        %{
+          label: AccrueAdmin.Copy.Connect.connect_account_detail_label_current_override(),
+          value: describe_override(@account)
+        },
+        %{
           label: AccrueAdmin.Copy.connect_account_detail_label_default_policy(),
           value: describe_config(@default_fee_config)
+        },
+        %{
+          label: AccrueAdmin.Copy.Connect.connect_account_detail_label_proposed_override(),
+          value: describe_proposed_override(@preview.override_payload)
         },
         %{
           label: AccrueAdmin.Copy.connect_account_detail_label_preview_gross(),
@@ -863,6 +948,9 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     |> Enum.join(" · ")
   end
 
+  defp describe_config(config) when config in [nil, []],
+    do: AccrueAdmin.Copy.Connect.connect_account_default_policy_unavailable()
+
   defp describe_config(config) do
     payload = %{}
 
@@ -886,7 +974,36 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         do: Map.put(payload, "max_cents", Integer.to_string(config[:max].amount_minor)),
         else: payload
 
-    describe_override_payload(payload)
+    if map_size(payload) == 0,
+      do: AccrueAdmin.Copy.Connect.connect_account_default_policy_unavailable(),
+      else: describe_override_payload(payload)
+  end
+
+  defp describe_proposed_override(payload) when map_size(payload) == 0,
+    do: AccrueAdmin.Copy.Connect.connect_account_proposed_use_default()
+
+  defp describe_proposed_override(payload), do: describe_override_payload(payload)
+
+  defp fresh_review?(socket, account) do
+    reviewed = socket.assigns.account
+
+    reviewed_state = {
+      reviewed.id,
+      reviewed.stripe_account_id,
+      reviewed.owner_type,
+      reviewed.owner_id,
+      platform_fee_override(reviewed)
+    }
+
+    current_state = {
+      account.id,
+      account.stripe_account_id,
+      account.owner_type,
+      account.owner_id,
+      platform_fee_override(account)
+    }
+
+    reviewed_state == current_state and socket.assigns.default_fee_config == default_fee_config()
   end
 
   defp preview_gross_summary(form) do

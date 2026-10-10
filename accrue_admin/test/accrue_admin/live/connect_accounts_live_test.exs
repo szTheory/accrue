@@ -31,7 +31,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
     on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
 
-    _match =
+    match =
       insert_account(%{
         stripe_account_id: "acct_match",
         owner_type: "Team",
@@ -59,7 +59,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
         details_submitted: false
       })
 
-    :ok
+    {:ok, match: match}
   end
 
   test "renders Connect accounts through PageHeader with exactly one h1", %{conn: conn} do
@@ -274,6 +274,46 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     assert html =~ "Override saved"
     assert html =~ "/billing/connect/"
     refute html =~ "acct_other"
+  end
+
+  test "account detail return keeps the exact Connect lens and filters", %{
+    conn: conn,
+    match: match
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/connect?view=all&type=express&charges_enabled=true&q=acct_match"
+             )
+
+    [account_link] =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a[href*='/billing/connect/#{match.id}']")
+
+    detail_path = account_link |> Floki.attribute("href") |> hd()
+
+    detail_conn =
+      Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
+
+    assert {:ok, _view, detail_html} = live(detail_conn, detail_path)
+
+    [return_link] =
+      detail_html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.filter(&(Floki.text(&1) =~ "Back to Connect accounts"))
+
+    return_href = return_link |> Floki.attribute("href") |> hd()
+
+    assert URI.parse(return_href).query |> URI.decode_query() == %{
+             "charges_enabled" => "true",
+             "q" => "acct_match",
+             "type" => "express",
+             "view" => "all"
+           }
   end
 
   test "provider boolean filters and KPI counts use observations stored in account data", %{
