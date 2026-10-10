@@ -1799,12 +1799,54 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 - Notable: local package, integration, browser, and documentation suites passed; the existing main-branch CI record was a separate remote-SHA check and did not certify this unpushed branch.
 
 
+## Milestone: v1.64 — Admin Operator UI Cleanup
+
+**Shipped:** 2026-10-10
+**Phases:** 4 | **Plans:** 24 | **Tasks:** 53
+
+### What Was Built
+
+- Completed the existing Admin billing, investigation, catalog, Connect, Home, and search journeys with scoped destinations, fresh action checks, truthful outcomes, and shared interaction patterns.
+- Added recurring mounted and served-asset acceptance, a complete reviewed twelve-image Linux visual set with a blocking Ubuntu comparison, and an isolated Fake-backed feedback preview.
+- Reconciled 18 requirements, four fresh phase verifications, ten integration seams, and six end-to-end flows; the audit found zero blockers.
+
+### What Worked
+
+- Keeping proof in existing package, host, browser, and Linux owners preserved recurring value without adding a parallel CI matrix.
+- The integration audit traced shared patterns through consumers and data sources, which made route and evidence boundaries visible before archive.
+- Refreshing phase verifications against current source made the final closeout report reflect the shipped revision rather than historical green results.
+
+### What Was Inefficient
+
+- Later shared-source and evidence changes invalidated earlier phase fingerprints, requiring four owner-specific verification refreshes at closeout.
+- The milestone command generated a long flat accomplishment list; grouping results by outcome made the durable archive easier to scan.
+- Closeout needed a final consistency pass across live project state, archived roadmap, audit, milestone index, and deferred-item counts.
+
+### Patterns Established
+
+- Keep route inventories explicit about source-only, historical, mounted, and current served evidence; additive evidence must not broaden the claim silently.
+- Bind Linux visual results to the exact source SHA, workflow run, complete expected image set, and unchanged blocking thresholds.
+- Carry acknowledged items forward with separate counts for newly acknowledged and previously acknowledged notices.
+
+### Key Lessons
+
+1. Refresh covered-input fingerprints after the last shared-source change and before the integration audit, so the milestone does not pay the same verification tax at archive time.
+2. Treat the integration audit as a cross-phase traceability check and preserve its evidence boundaries in both live state and archived documents.
+3. Curate milestone-level outcomes when archiving; retain detailed plan accomplishments in phase records rather than duplicating them as an unfiltered list.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: multi-session, 2026-10-09 → 2026-10-10.
+- Notable: the closeout span from the first Phase 240 planning commit through the integration audit changed 320 files (+26,725/-1,260); the source-package subset changed 100 files (+6,337/-906).
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.64 | multi (2026-10-09→10-10) | 4 | **ADMIN/BILLING/INVESTIGATION/EVIDENCE** — completed scoped operator journeys and current served proof across the 21-route inventory; passed current-source Ubuntu comparison and isolated Fake preview acceptance. Audit `tech_debt`: 18/18 requirements, 4/4 phases, 10/10 integration seams, 6/6 flows, 0 blockers. Override closeout: 2 newly acknowledged and 4 carried forward. |
 | v1.63 | multi (2026-10-07→10-09) | 7 | **ADMIN/PORTAL/CHECKOUT** — completed the scoped Admin and customer journeys, revalidated host/provider identity at action time, and shifted acceptance into recurring automated evidence. Audit `tech_debt`: 34/34 requirements, 7/7 phase verifications, 5/5 integration seams, 4/4 E2E flows, 0 blockers; four acknowledged closeout items. |
 | v1.62 | multi (2026-09-13→09-18) | 4 | **REPO/INTG/GATE/HYG/REL** — established reproducible repository + recovery truth, built a provenance-backed integration candidate without rewriting published history, recorded exact-SHA gate status per lane under a closed lexicon with no aggregate green boolean, and handed off bounded evidence-backed cleanup as PR #45. Audit `tech_debt`: 14/14 requirements, 4/4 phases, 5/5 integration seams, 1/1 flow, 0 blockers. Override closeout: 1 acknowledged deferral (dormant SEED-008). Candidate SHA honestly recorded **red** — releasing is the next milestone's work. |
 | v1.61 | multi (2026-08-08→09-12) | 4 | **REL/BASE/PATH/SAFE** — repaired required-lane causes, froze a repository-bound 20-path baseline, kept a one-edge exact-three candidate at a 1,125s median, and repaired Stripe boot/live fidelity. Verified closeout: 10/10 requirements, 4/4 phases, 13/13 automated UAT checks, 0 overrides. |
