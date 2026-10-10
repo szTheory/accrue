@@ -29,14 +29,24 @@ defmodule AccrueAdmin.Live.WebhookLive do
   alias AccrueAdmin.StepUp
 
   @impl true
-  def mount(%{"id" => webhook_id}, session, socket) do
+  def mount(%{"id" => webhook_id} = params, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
+
+    return_destination =
+      ScopedPath.return_destination(
+        admin["mount_path"] || "/billing",
+        Map.get(params, "return_to"),
+        socket.assigns.current_owner_scope,
+        nil,
+        "/webhooks"
+      )
 
     case fetch_webhook(webhook_id, socket.assigns.current_owner_scope) do
       :unavailable ->
         {:ok,
          socket
          |> assign_shell(admin)
+         |> assign(:return_destination, return_destination)
          |> assign(:requested_webhook_id, webhook_id)
          |> assign(:webhook, nil)
          |> assign(:attempt_history, [])
@@ -59,6 +69,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
         {:ok,
          socket
          |> assign_shell(admin)
+         |> assign(:return_destination, return_destination)
          |> assign(:requested_webhook_id, webhook_id)
          |> assign(:flashes, [])
          |> assign_detail_state()
@@ -69,6 +80,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
         {:ok,
          socket
          |> assign_shell(admin)
+         |> assign(:return_destination, return_destination)
          |> assign(:requested_webhook_id, webhook_id)
          |> assign(:webhook, nil)
          |> assign(:attempt_history, [])
@@ -189,7 +201,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
         <Breadcrumbs.breadcrumbs
           items={[
             %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope, %{})},
-            %{label: "Webhooks", href: scoped_mount_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{})},
+            %{label: @return_destination.label, href: @return_destination.path},
             %{label: breadcrumb_label(assigns)}
           ]}
         />
@@ -433,7 +445,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
         raise DBConnection.ConnectionError, message: "fixture database unavailable"
       end
 
-      case Webhooks.detail(webhook_id, owner_scope) do
+      case read_webhook_detail(webhook_id, owner_scope) do
         {:ok, webhook} ->
           {:ok, webhook, attempt_history(webhook.id), derived_events(webhook.id)}
 
@@ -443,6 +455,19 @@ defmodule AccrueAdmin.Live.WebhookLive do
     rescue
       _error in DBConnection.ConnectionError -> :unavailable
     end
+  end
+
+  defp read_webhook_detail(webhook_id, owner_scope) do
+    if Mix.env() == :test do
+      case Application.get_env(:accrue_admin, :webhook_detail_fun) do
+        fun when is_function(fun, 2) -> fun.(webhook_id, owner_scope)
+        _configured_fun -> Webhooks.detail(webhook_id, owner_scope)
+      end
+    else
+      Webhooks.detail(webhook_id, owner_scope)
+    end
+  rescue
+    _error in DBConnection.ConnectionError -> :unavailable
   end
 
   defp webhook_heading(%{webhook: nil}), do: "Webhook replay is unavailable"
@@ -487,8 +512,23 @@ defmodule AccrueAdmin.Live.WebhookLive do
       %{label: "Verification", value: verification_summary(webhook)},
       %{label: "Attempts", value: Integer.to_string(length(attempts))},
       %{label: "Livemode", value: mode_label(webhook.livemode)},
+      %{label: "Failure", value: failure_summary(attempts)},
       %{label: "Derived event count", value: Integer.to_string(length(derived_events))}
     ]
+  end
+
+  defp failure_summary(attempts) do
+    case List.last(attempts) do
+      %{errors: [_ | _] = errors} ->
+        case List.last(errors) do
+          %{"error" => message} when is_binary(message) and message != "" -> message
+          %{error: message} when is_binary(message) and message != "" -> message
+          _error -> "A dispatch attempt failed; inspect Activity for its recorded error."
+        end
+
+      _ ->
+        "No recorded failure detail"
+    end
   end
 
   defp replay_eligibility_fields(webhook, owner_scope) do
@@ -561,7 +601,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp execute_replay(socket, webhook_id) do
     owner_scope = socket.assigns.current_owner_scope
 
-    with {:ok, webhook} <- Webhooks.detail(webhook_id, owner_scope),
+    with {:ok, webhook} <- read_webhook_detail(webhook_id, owner_scope),
          true <- replayable?(webhook),
          {:ok, replayed} <- requeue_delivery(webhook.id, owner_scope) do
       socket
@@ -581,6 +621,14 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
       {:error, :out_of_scope} ->
         replay_blocked(socket)
+
+      :unavailable ->
+        socket
+        |> clear_replay_drawer()
+        |> push_flash(
+          :warning,
+          "Replay was not queued because current delivery ownership could not be verified."
+        )
 
       {:error, reason} ->
         _ = reason
