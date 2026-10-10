@@ -4471,6 +4471,13 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   flex-wrap: wrap;
 }
 
+.ax-at-risk-scroll-region {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
 .ax-at-risk-grid {
   display: none;
   width: 100%;

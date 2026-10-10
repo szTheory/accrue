@@ -13,6 +13,10 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
       assert html =~ ~s(data-component-group="table-empty-loading-error-pagination")
       assert html =~ ~s(data-state="no-pagination")
       assert html =~ ~s(class="ax-at-risk-grid")
+      assert html =~ ~s(class="ax-at-risk-scroll-region")
+      assert html =~ ~s(role="region")
+      assert html =~ ~s(aria-label="At-risk subscriptions table")
+      assert html =~ ~s(tabindex="0")
       assert html =~ ~s(class="ax-at-risk-cards")
 
       assert html =~ "Northwind Finance"

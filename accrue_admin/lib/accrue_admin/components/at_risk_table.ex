@@ -77,37 +77,45 @@ defmodule AccrueAdmin.Components.AtRiskTable do
         <p class="ax-body">{error_message(@error)}</p>
       </div>
 
-      <table :if={@state in ["no-pagination", "has-pagination"]} class="ax-at-risk-grid">
-        <thead>
-          <tr>
-            <th scope="col" class="ax-label">Customer</th>
-            <th scope="col" class="ax-label">Current subscription status</th>
-            <th scope="col" class="ax-label">Amount</th>
-            <th scope="col" class="ax-label">Campaign Age</th>
-            <th scope="col" class="ax-label">Current Step</th>
-            <th scope="col" class="ax-label">Next-Step ETA</th>
-            <th scope="col" class="ax-label">Last Failure Reason</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr :for={row <- @rows}>
-            <td>
-              <a
-                href={subscription_href(@base_path, row, @owner_scope, @current_window)}
-                class="ax-link"
-              >
-                {row.customer_label || "—"}
-              </a>
-            </td>
-            <td class="ax-body">{current_status(row)}</td>
-            <td class="ax-body">{format_amount(row)}</td>
-            <td class="ax-body">{campaign_age(row)}</td>
-            <td class="ax-body">{step_label(row)}</td>
-            <td class="ax-body">{format_eta(row.next_step_eta)}</td>
-            <td class="ax-body ax-muted">{format_failure(row.failure_reason)}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div
+        :if={@state in ["no-pagination", "has-pagination"]}
+        class="ax-at-risk-scroll-region"
+        role="region"
+        aria-label="At-risk subscriptions table"
+        tabindex="0"
+      >
+        <table class="ax-at-risk-grid">
+          <thead>
+            <tr>
+              <th scope="col" class="ax-label">Customer</th>
+              <th scope="col" class="ax-label">Current subscription status</th>
+              <th scope="col" class="ax-label">Amount</th>
+              <th scope="col" class="ax-label">Campaign Age</th>
+              <th scope="col" class="ax-label">Current Step</th>
+              <th scope="col" class="ax-label">Next-Step ETA</th>
+              <th scope="col" class="ax-label">Last Failure Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr :for={row <- @rows}>
+              <td>
+                <a
+                  href={subscription_href(@base_path, row, @owner_scope, @current_window)}
+                  class="ax-link"
+                >
+                  {row.customer_label || "—"}
+                </a>
+              </td>
+              <td class="ax-body">{current_status(row)}</td>
+              <td class="ax-body">{format_amount(row)}</td>
+              <td class="ax-body">{campaign_age(row)}</td>
+              <td class="ax-body">{step_label(row)}</td>
+              <td class="ax-body">{format_eta(row.next_step_eta)}</td>
+              <td class="ax-body ax-muted">{format_failure(row.failure_reason)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <div :if={@state in ["no-pagination", "has-pagination"]} class="ax-at-risk-cards" data-role="card-list">
         <article :for={row <- @rows} class="ax-at-risk-card">

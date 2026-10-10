@@ -90,6 +90,14 @@ defmodule AccrueAdmin.E2E.Plug do
     json(conn, 200, Fixtures.seed_phase199_interaction_matrix!())
   end
 
+  post "/__e2e__/seed/phase241-review-matrix" do
+    json(conn, 200, Fixtures.seed_phase241_review_matrix!())
+  end
+
+  post "/seed/phase241-review-matrix" do
+    json(conn, 200, Fixtures.seed_phase241_review_matrix!())
+  end
+
   post "/__e2e__/reset" do
     Fixtures.reset!()
     json(conn, 200, %{ok: true})

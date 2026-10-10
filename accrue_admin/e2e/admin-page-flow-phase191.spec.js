@@ -150,6 +150,15 @@ async function seedPhase191Matrix(request) {
   };
 }
 
+async function seedPhase241ReviewMatrix(request) {
+  const response = await request.post("/__e2e__/seed/phase241-review-matrix");
+  expect(
+    response.ok(),
+    `Phase 241 disposable review matrix seeds (HTTP ${response.status()}): ${await response.text()}`
+  ).toBeTruthy();
+  return response.json();
+}
+
 async function login(page, target = "/billing") {
   await page.goto(`/__e2e__/login?to=${encodeURIComponent(target)}`);
   await expect(page.locator("#main-content, main").first()).toBeVisible();
@@ -160,6 +169,83 @@ function allAx187Ids() {
 }
 
 test.describe("Phase 191 page-flow regression harness", () => {
+  test("@phase241 every eligible subscription and payment-method review opens in the browser", async ({
+    page,
+    request,
+  }) => {
+    const fixtures = await seedPhase241ReviewMatrix(request);
+    const actions = [
+      { label: /^Change plan for subscription/i, type: "swap_plan", fields: { new_price_id: "price_phase241_review_next", proration: "none" } },
+      { label: /^Cancel renewal for subscription/i, type: "cancel_at_period_end" },
+      { label: /Cancel immediately/i, type: "cancel_now" },
+      { label: /Comp this subscription/i, type: "comp_subscription", fields: { new_price_id: "price_phase241_comp" } },
+      { label: /Pause collection/i, type: "pause", fields: { pause_behavior: "keep_as_draft" } },
+      { label: /Update quantity/i, type: "update_quantity", fields: { new_quantity: "3" } },
+      { label: /Add item/i, type: "add_item", fields: { new_price_id: "price_phase241_addon", new_quantity: "2", proration: "none" } },
+      { label: /Update item quantity/i, type: "update_item_quantity", fields: { item_id: fixtures.subscription_item_id, new_quantity: "4", proration: "none" } },
+      { label: /Remove item/i, type: "remove_item", fields: { item_id: fixtures.subscription_item_id, proration: "none" } },
+    ];
+
+    await login(page, `/billing/subscriptions/${fixtures.subscription_id}`);
+    for (const action of actions) {
+      await clickActionTrigger(page, {
+        name: `subscription ${action.type}`,
+        trigger: action.label,
+        // The plan and renewal actions also have summary controls with similar
+        // labels; these anchored names select the canonical action buttons.
+        preferMenu: !["swap_plan", "cancel_at_period_end"].includes(action.type),
+      });
+      const drawer = await visibleDrawer(page, `subscription ${action.type}`);
+      const form = drawer.locator("[data-ax-action-drawer-form]");
+      await expect(form, `${action.type}: action-specific form`).toBeVisible();
+      for (const [name, value] of Object.entries(action.fields || {})) {
+        const field = form.locator(`[name="${name}"]`);
+        if (name === "item_id" || name === "pause_behavior" || name === "proration") {
+          await field.selectOption(value);
+        } else {
+          await field.fill(value);
+        }
+      }
+      await form.evaluate((element) => element.requestSubmit());
+      const review = drawer.locator('[data-role="subscription-action-review-facts"]');
+      await expect(review, `${action.type}: review facts`).toBeVisible();
+      await expect(review).toContainText(`Subscription ID: ${fixtures.subscription_id}`);
+      await expect(review).toContainText(action.type === "swap_plan" ? "price_phase241_review_next" : /Current state/);
+      await expect(review).toContainText(/Back to subscription|Current state/);
+      await drawer.getByRole("button", { name: "Back to subscription" }).first().click();
+      await expect(drawer.locator("[data-ax-action-drawer-form]")).toBeHidden();
+    }
+
+    await login(page, `/billing/subscriptions/${fixtures.resume_subscription_id}`);
+    await clickActionTrigger(page, { name: "subscription resume", trigger: /Resume subscription/i });
+    let drawer = await visibleDrawer(page, "subscription resume");
+    let form = drawer.locator("[data-ax-action-drawer-form]");
+    await form.evaluate((element) => element.requestSubmit());
+    let review = drawer.locator('[data-role="subscription-action-review-facts"]');
+    await expect(review).toBeVisible();
+    await expect(drawer).toContainText("Resume subscription");
+    await drawer.getByRole("button", { name: "Back to subscription" }).first().click();
+
+    await login(page, `/billing/customers/${fixtures.customer_id}?tab=payment_methods`);
+    for (const [role, action, effect] of [
+      ["open-set-default-payment-method", "set default", /future billing/i],
+      ["open-delete-payment-method", "delete", /removes the selected payment method from the customer/i],
+    ]) {
+      const trigger = page.locator(`[data-role="${role}"][phx-value-payment_method_id="${fixtures.payment_method_id}"]`);
+      await expect(trigger, `${action}: seeded non-default payment method control`).toBeVisible();
+      await trigger.click();
+      const paymentDrawer = page.locator("#customer-payment-method-action-drawer [data-ax-overlay-panel]");
+      await expect(paymentDrawer, `${action}: review drawer`).toBeVisible();
+      const content = paymentDrawer.locator('[data-role="payment-method-action-content"]');
+      await expect(content).toContainText(fixtures.payment_method_id);
+      await expect(content).toContainText("5454");
+      await expect(content).toContainText(effect);
+      await expect(paymentDrawer.getByRole("button", { name: "Confirm", exact: false })).toBeVisible();
+      await paymentDrawer.getByRole("button", { name: "Back to customer" }).first().click();
+      await expect(paymentDrawer).toBeHidden();
+    }
+  });
+
   test("AX187 source map covers owner-phase 191 rows and D-30 categories @ax187", async () => {
     const defects = loadPhase191Defects();
     const high = defects.filter((defect) => defect.severity === "high").map((defect) => defect.id).sort();

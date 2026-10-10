@@ -9,6 +9,7 @@ defmodule AccrueAdmin.E2E.Fixtures do
     Customer,
     Invoice,
     PromotionCode,
+    PaymentMethod,
     Refund,
     Subscription,
     SubscriptionItem
@@ -868,6 +869,83 @@ defmodule AccrueAdmin.E2E.Fixtures do
   end
 
   def seed_phase199_interaction_matrix!, do: seed_phase199_interactions!()
+
+  # Dedicated disposable fixture for Phase 241 browser review and text-scale
+  # coverage. Keep the existing Phase 191/199 route matrices unchanged.
+  def seed_phase241_review_matrix! do
+    fixtures = seed_phase199_interactions!()
+    customer = TestRepo.get!(Customer, fixtures.customer_id)
+    subscription = TestRepo.get!(Subscription, fixtures.subscription_id)
+
+    item =
+      insert_subscription_item(subscription, %{
+        processor_id: "si_e2e_phase241_review",
+        price_id: "price_phase241_review",
+        processor_plan_id: "price_phase241_review",
+        quantity: 1
+      })
+
+    default_method =
+      TestRepo.insert!(
+        PaymentMethod.changeset(%PaymentMethod{}, %{
+          customer_id: customer.id,
+          processor: "fake",
+          processor_id: "pm_e2e_phase241_default",
+          type: "card",
+          is_default: true,
+          fingerprint: "phase241-default",
+          card_brand: "visa",
+          card_last4: "4242",
+          exp_month: 12,
+          exp_year: 2032
+        })
+      )
+
+    review_method =
+      TestRepo.insert!(
+        PaymentMethod.changeset(%PaymentMethod{}, %{
+          customer_id: customer.id,
+          processor: "fake",
+          processor_id: "pm_e2e_phase241_review",
+          type: "card",
+          is_default: false,
+          fingerprint: "phase241-review",
+          card_brand: "mastercard",
+          card_last4: "5454",
+          exp_month: 4,
+          exp_year: 2034
+        })
+      )
+
+    customer
+    |> Customer.changeset(%{default_payment_method_id: default_method.id})
+    |> TestRepo.update!()
+
+    resume_subscription =
+      insert_subscription(customer, %{
+        processor_id: "sub_e2e_phase241_resume",
+        status: :active,
+        cancel_at_period_end: true,
+        current_period_end: DateTime.add(DateTime.utc_now(), 30 * 86_400, :second)
+      })
+
+    %{
+      phase199: fixtures,
+      dashboard: fixtures,
+      edgeStates: fixtures,
+      operatorFlows: fixtures,
+      phase191: fixtures,
+      customer_id: customer.id,
+      invoice_id: fixtures.invoice_id,
+      charge_id: fixtures.charge_id,
+      recovery_subscription_id: fixtures.recovery_subscription_id,
+      subscription_id: subscription.id,
+      subscription_item_id: item.id,
+      resume_subscription_id: resume_subscription.id,
+      payment_method_id: review_method.id,
+      default_payment_method_id: default_method.id
+    }
+  end
 
   def current_counts do
     %{

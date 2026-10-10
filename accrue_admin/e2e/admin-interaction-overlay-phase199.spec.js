@@ -306,6 +306,12 @@ async function seedPhase199(request) {
   };
 }
 
+async function seedPhase241Reviews(request) {
+  const response = await request.post("/__e2e__/seed/phase241-review-matrix");
+  expect(response.ok(), "Phase 241 disposable review matrix seeds").toBeTruthy();
+  return response.json();
+}
+
 async function login(page, target = "/billing") {
   await page.goto(`/__e2e__/login?to=${encodeURIComponent(target)}`);
   await expect(page.locator("#main-content, main").first()).toBeVisible();
@@ -1091,6 +1097,110 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     await returnLink.click();
     await expect(page).toHaveURL(new RegExp(`/billing/customers/${customerId}\\?tab=invoices`));
     await expect(page.locator("main")).toContainText("E2E-199-JPY-001");
+  });
+
+  test("@phase241 200% text, WCAG text spacing, and 400% reflow simulation keep changed billing consumers reachable", async ({
+    page,
+    request,
+  }) => {
+    test.setTimeout(120_000);
+    const fixtures = await seedPhase241Reviews(request);
+    const zoomPage = await page.context().newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await zoomPage.setViewportSize({ width: 320, height: 844 });
+    const routes = [
+      ["subscription detail", `/billing/subscriptions/${fixtures.subscription_id}`],
+      ["invoice results", `/billing/invoices?customer_id=${fixtures.customer_id}`],
+      ["invoice detail", `/billing/invoices/${fixtures.invoice_id}`],
+      ["payment detail", `/billing/payments/${fixtures.charge_id}`],
+      ["customer payment methods", `/billing/customers/${fixtures.customer_id}?tab=payment_methods`],
+      ["Recovery list", "/billing/analytics/recovery?window=30d"],
+      ["campaign detail", `/billing/analytics/recovery/subscriptions/${fixtures.recovery_subscription_id}`],
+    ];
+
+    for (const [surface, route] of routes) {
+      await login(page, route);
+      await page.evaluate(() => {
+        const style = document.createElement("style");
+        style.dataset.phase241TextStress = "true";
+        style.nonce = document.querySelector("style[nonce]")?.nonce || "";
+        style.textContent = `
+          p, li, dt, dd, th, td, button, a, label, input, select, textarea {
+            line-height: 1.5 !important;
+            letter-spacing: .12em !important;
+            word-spacing: .16em !important;
+          }
+          p { margin-bottom: 2em !important; }
+        `;
+        document.head.append(style);
+        const elements = [...document.querySelectorAll("body *")];
+        const fontSizes = elements.map((element) => Number.parseFloat(getComputedStyle(element).fontSize));
+        elements.forEach((element, index) => {
+          const fontSize = fontSizes[index];
+          if (Number.isFinite(fontSize) && fontSize > 0) {
+            element.dataset.phase241BaseFontSize = String(fontSize);
+            element.style.setProperty("font-size", `${fontSize * 2}px`, "important");
+          }
+        });
+      });
+
+      const enlarged = await page.evaluate(() => ({
+        headingScale: (() => {
+          const heading = document.querySelector("#main-content, main");
+          return Number.parseFloat(getComputedStyle(heading).fontSize) /
+            Number.parseFloat(heading.dataset.phase241BaseFontSize);
+        })(),
+        pageWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+        overflowDescendants: [...document.querySelectorAll("body *")]
+          .map((element) => {
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return {
+              tag: element.tagName.toLowerCase(),
+              id: element.id,
+              className: String(element.className || "").slice(0, 100),
+              role: element.getAttribute("role"),
+              left: Math.round(rect.left),
+              right: Math.round(rect.right),
+              width: Math.round(rect.width),
+              scrollWidth: element.scrollWidth,
+              clientWidth: element.clientWidth,
+              overflowX: style.overflowX,
+              text: (element.textContent || "").trim().replace(/\s+/g, " ").slice(0, 45),
+            };
+          })
+          .filter((element) => element.right > window.innerWidth + 1 || element.left < -1)
+          .slice(0, 12),
+      }));
+      expect(enlarged.headingScale, `${surface}: 200% text enlargement applied`).toBeCloseTo(2, 1);
+      if (enlarged.pageWidth > enlarged.viewportWidth + 1) {
+        throw new Error(`${surface}: 200% text layout overflow ${JSON.stringify(enlarged)}`);
+      }
+      // At a 1280 CSS-pixel reference width, a 400% browser zoom exposes a
+      // 320 CSS-pixel layout viewport. A separate page keeps this reflow
+      // simulation independent of the text enlargement override and does not
+      // claim to exercise the browser zoom control.
+      await login(zoomPage, route);
+      const reflow = await zoomPage.evaluate(() => ({
+        pageWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+        width: window.innerWidth,
+        main: (() => {
+          const rect = document.querySelector("#main-content, main").getBoundingClientRect();
+          return { left: Math.round(rect.left), right: Math.round(rect.right) };
+        })(),
+      }));
+      expect(reflow.width, `${surface}: 400% zoom equivalent viewport`).toBe(320);
+      expect(reflow.pageWidth, `${surface}: 400% reflow has no page overflow`).toBeLessThanOrEqual(
+        reflow.viewportWidth + 1
+      );
+      expect(reflow.main.left, `${surface}: 400% main content remains onscreen`).toBeGreaterThanOrEqual(-1);
+      expect(reflow.main.right, `${surface}: 400% main content remains within viewport`).toBeLessThanOrEqual(
+        reflow.viewportWidth + 1
+      );
+    }
+    await zoomPage.close();
   });
 
   test("@phase199 @copy empty-state and repeated action labels use state-specific copy and hidden context", async ({
