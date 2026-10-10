@@ -35,7 +35,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Latest fully shipped milestone: v1.63 — Admin and Portal UI refinement, shipped and archived 2026-10-09.** All seven phases and 34 requirements completed. The milestone delivered scoped, capability-explicit Admin/Portal and checkout journeys, current served evidence, and recurring automated acceptance. Its audit found zero blockers; four pre-close items were explicitly acknowledged and recorded in `STATE.md` Deferred Items.
 
-**Current milestone: v1.64 — Admin Operator UI Cleanup.** On 2026-10-09 the maintainer approved scope/version, [all 18 requirements](REQUIREMENTS.md), and the [four-phase roadmap](ROADMAP.md) for Phases 240–243. This explicit strategy decision reopens flagship Admin refinement under the post-v1.48 pause rule. The additional bounded multi-lens diligence is complete; its [decision summary](research/v1.64/SUMMARY.md) records alternatives, dispositions, source findings, existing proof owners, evidence limits and stopping rules. Reuse completed Impeccable initialization, established identity, and v1.63 safety contracts. Phases 240 and 241 are complete: 13 plans, with [47/47](phases/240-shared-system-and-real-billing-exemplar/240-VERIFICATION.md) and [29/29](phases/241-billing-operator-journeys/241-VERIFICATION.md) independent must-haves verified. Phase 241 has 19 automated UAT items and zero required human UAT; its [handoff](phases/241-billing-operator-journeys/241-HANDOFF.md) records current owners, mounted assets, corrections and limits. Next command is `$gsd-discuss-phase 242` — Investigations and Remaining Admin Surfaces. The milestone is 2/4 phases complete; Phase 243 still owns reviewed Linux goldens and the feedback preview. Use current STATE and the ROADMAP completion table for position; the roadmap's dated Phase 240 narrative is historical. Do not repeat completed research, planning, execution or approval interviews.
+**Current milestone: v1.64 — Admin Operator UI Cleanup.** Scope/version, [all 18 requirements](REQUIREMENTS.md), and the [four-phase roadmap](ROADMAP.md) are approved. The bounded [upstream diligence](research/v1.64/SUMMARY.md) and Impeccable initialization are complete; reuse Operate / Cobalt / Geist / `--ax-*` and the installed skill version. Phases 240–242 are verified complete: 20 plans; independent 47/47, 29/29 and [80/80](phases/242-investigations-and-remaining-admin-surfaces/242-VERIFICATION.md) must-haves. Phase 242 has 19 automated UAT items, zero human UAT and no open audit findings. Current acceptance is Admin 679/0, Node 44/0 and host 223/0, with passing existing package/host browser owners and served asset identity. The project-wide contract passes across 14 phases, 109 summaries and 321 automated UAT items. Next command is `$gsd-discuss-phase 243` — Integrated Evidence and Feedback Preview. The milestone is 3/4 phases and 16/18 requirements complete; Phase 243 owns reviewed Linux goldens, stable Fake preview and final reconciliation. Read the [Phase 242 handoff](phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-HANDOFF.md) after clearing context. Do not repeat completed research, planning, execution or approval interviews.
 
 ## Current Milestone: v1.64 Admin Operator UI Cleanup
 
@@ -692,14 +692,15 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- v1.64 investigation, catalog, Connect and shell journeys, coherent language, and responsive interaction — Phase 242.
-- v1.64 automated acceptance and preview handoff; extend recurring proof with each delivery slice.
+- v1.64 complete reviewed Linux visual baseline evidence and stable Fake-backed Admin feedback preview — EVR-03–04, Phase 243.
 
-### Validated v1.64 (Phases 240–241 complete; updated 2026-10-10)
+### Validated v1.64 (Phases 240–242 complete; updated 2026-10-10)
 
 - ✓ Shared Admin invoice list/detail/review and dense subscription exemplar, with responsive/theme, keyboard/focus, real busy/reconnect and truthful state patterns — DSN-01–05, UXC-02.
-- ✓ Current 21-route/registry/provenance ledger and recurring acceptance owners, including the early fail-closed eight-baseline guard — EVR-01–02. Independent verification: 47/47, refreshed after Phase 241's shared-source changes; required maintainer UAT: 0. Remaining consumer propagation and reviewed Linux goldens belong to Phases 242–243.
+- ✓ Current 21-route/registry/provenance ledger and recurring acceptance owners, including the early fail-closed eight-baseline guard — EVR-01–02. Independent verification: 47/47, refreshed after Phase 241's shared-source changes; required maintainer UAT: 0. Consumer propagation is delivered through Phases 241–242; final reviewed Linux goldens belong to Phase 243.
 - ✓ Customer-scoped open invoices and separately named queues, validated paired return paths/labels, Recovery window round trips, and self-contained subscription/refund/payment-method reviews — JRN-01–04, Phase 241. Independent verification: 29/29; automated UAT: 19; required maintainer UAT: 0. Fresh authorization, exact money, step-up, dismissal zero-dispatch, provider uncertainty and duplicate/reconnect controls remain proved at their owners.
+
+- ✓ Investigation returns/replay review, exact catalog relationships and truthful Connect policy/snapshot boundaries, scoped Home/search selection and coherent domain language — JRN-05–07, UXC-01, Phase 242. Independent verification: 80/80; automated UAT: 19; required maintainer UAT: 0. Four UI corrections and the search retry regression are closed with executed acceptance.
 
 ### Validated v1.63 (Phases 233–239 complete 2026-10-09)
 
@@ -942,6 +943,9 @@ Admin global search — 4/4 satisfied.
 | Derive bounded return destinations and labels together from the filters the destination actually consumes, under the fresh current owner. | ✓ Phase 241 — supported list/lens/tab/window returns pass; malformed, foreign and hostile origins fall back safely. |
 | Review exact material action facts, revalidate before dispatch, and provide supported investigation paths for uncertain results. | ✓ Phase 241 — actual provider callback counters and mounted GET counters prove dismissal and navigation send no billing action; uncertainty prevents blind retry. |
 | Reuse computed-style, atomic text-stress and existing package/host browser owners for consumer acceptance; serialize UAT through its generator before the CI contract. | ✓ Phase 241 — scoped UI findings closed, 19 automated UAT items passed, and the existing project-wide contract passes across 13 phases without new dependencies or required human UAT. |
+| Preserve completed search groups when retrying failed groups, while rejecting stale query, generation and owner results. | ✓ Phase 242 — semantic retry controls passed; all 44 hook/focus/baseline controls now recur in the existing browser CI step. |
+| Preserve the incumbent global catalog model and prove exact relationships rather than inventing tenant ownership fields. | ✓ Phase 242 — exact parent/child IDs and route/session context are verified; schema and capability scope stay unchanged. |
+| Inspect fixture capture destinations before regression execution and keep generated output from overwriting historical evidence. | Phase 242 lesson — only this run’s generated historical captures were preserved in scratch and restored; no extra visual claim or correction loop. |
 
 ## Evolution
 
@@ -961,4 +965,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-10 after Phase 241 verified completion; next: `$gsd-discuss-phase 242`.*
+*Last updated: 2026-10-10 after Phase 242 verified completion; next: `$gsd-discuss-phase 243`.*

@@ -19,7 +19,7 @@
 - ✅ **v1.61 CI Evidence & Critical-Path Hardening** — Phases 225–228 (2026-09-12) — [archive](milestones/v1.61-ROADMAP.md)
 - ✅ **v1.62 Release Integration & Repository Hygiene** — Phases 229–232 (2026-09-18) — [archive](milestones/v1.62-ROADMAP.md)
 - ✅ **v1.63 Admin and Portal UI refinement** — Phases 233–239 (shipped 2026-10-09) — [archive](milestones/v1.63-ROADMAP.md)
-- 🚧 **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (1/4 complete; next: Phase 241 discussion)
+- 🚧 **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (3/4 complete; next: Phase 243 discussion)
 
 ## Planning Doctrine
 
@@ -45,12 +45,12 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 - [x] **Phase 240: Shared System and Real Billing Exemplar** - Deliver invoice list/detail/review and dense subscription examples through shared Admin patterns. (completed 2026-10-10)
 - [x] **Phase 241: Billing Operator Journeys** - Make scoped billing destinations, returns, recovery and action reviews truthful. (completed 2026-10-10)
-- [ ] **Phase 242: Investigations and Remaining Admin Surfaces** - Clarify investigations, catalog, Connect, shell and domain language.
+- [x] **Phase 242: Investigations and Remaining Admin Surfaces** - Clarify investigations, catalog, Connect, shell and domain language. (completed 2026-10-10)
 - [ ] **Phase 243: Integrated Evidence and Feedback Preview** - Close selected visual proof and provide a stable Fake-backed preview.
 
 ## v1.64 — Admin Operator UI Cleanup
 
-**Status:** Approved by maintainer on 2026-10-09. Scope/version, all 18 [requirements](REQUIREMENTS.md), and this four-phase structure are confirmed. [Bounded upstream decisions](research/v1.64/SUMMARY.md) are complete. Phase 240 completed on 2026-10-09 (6/6 plans; 47/47 must-haves). Next: `$gsd-discuss-phase 241`; no repeat kickoff, research or approval interview is needed.
+**Status:** Approved by maintainer on 2026-10-09. Scope/version, all 18 [requirements](REQUIREMENTS.md), and this four-phase structure are confirmed. [Bounded upstream decisions](research/v1.64/SUMMARY.md) are complete. Phases 240–242 are verified complete (20/20 planned plans; 16/18 requirements). Next: `$gsd-discuss-phase 243`; no repeat kickoff, research or approval interview is needed.
 
 **Milestone goal:** Existing Admin journeys become clearer, consistent, responsive and easier to operate while preserving billing truth, authorization and scope, with recurring automated acceptance and a usable Fake-backed feedback preview.
 
@@ -104,7 +104,7 @@ Plans:
   4. Before an existing billing action, operators can review exact target, material customer/scope, money/currency and consequence in one place; after action they see the evidence-specific accepted, pending, completed, failed or unknown result. Fresh authorization, step-up, duplicate protection and exact-money contracts remain visible through the flow. (JRN-04)
 
 **Propagation obligation**: Exercise Phase 240 shared hierarchy, responsive/theme behavior, keyboard/focus, busy/reconnect and state distinctions on each changed billing consumer. Verify auth, owner/target/material-state, capability and exact-money invariants at their existing owners; rebuild and confirm package served assets and add focused negative controls with each owning change. Supported returns are bounded existing meanings, not pagination/scroll preservation or a new subscription invoice filter.
-**Plans**: TBD
+**Plans**: 7/7 plans complete
 **Wave 1**
 - [x] 241-01-PLAN.md
 - [x] 241-02-PLAN.md
@@ -134,7 +134,7 @@ Plans:
   4. Across changed lists, details, filters and reviews, operators encounter coherent resource, collection-method and action language while diagnostic terms and locked audit/legal meaning stay exact. (UXC-01)
 
 **Propagation obligation**: Apply and verify Phase 240 system, accessibility, responsive/theme, state and evidence patterns on each changed investigation, catalog, Connect and shell consumer. Preserve fresh scope/authorization, capability and outcome truth; add focused checks at existing semantic owners, inspect mounted behavior, and confirm rebuilt served package assets. Reconcile earlier billing copy as needed for cross-route consistency.
-**Plans**: TBD
+**Plans**: 7/7 plans complete
 **Wave 1**
 - [x] 242-01-PLAN.md
 - [x] 242-05-PLAN.md
@@ -168,7 +168,7 @@ Plans:
 
 ## Progress
 
-**Execution order:** 240 → 241 → 242 → 243. Phase 240 is verified complete; next command is `$gsd-discuss-phase 241`.
+**Execution order:** 240 → 241 → 242 → 243. Phases 240–242 are verified complete; next command is `$gsd-discuss-phase 243`.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|

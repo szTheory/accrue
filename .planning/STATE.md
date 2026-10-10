@@ -6,10 +6,10 @@ current_phase: 243
 current_phase_name: Integrated Evidence and Feedback Preview
 current_plan: Not started
 status: planning
-stopped_at: Phase 242 complete, ready to plan Phase 243
-last_updated: "2026-10-10T14:37:42.415Z"
+stopped_at: Phase 242 complete; next $gsd-discuss-phase 243
+last_updated: "2026-10-10T15:00:43Z"
 last_activity: 2026-10-10
-last_activity_desc: Phase 242 complete, transitioned to Phase 243
+last_activity_desc: "Phase 242 verified complete (7/7 plans, 80/80 must-haves, 19 automated UAT); next: $gsd-discuss-phase 243"
 state_head: f93415fa6e9cba748f576274df4414aa1fccd079
 progress:
   total_phases: 4
@@ -27,16 +27,16 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 242 — Investigations and Remaining Admin Surfaces; Plans 242-01 through 242-06 executed; next: $gsd-execute-phase 242 (Plan 242-07)
-**Progress:** [████████░░] 75% (2 of 4 milestone phases complete; 19 of 20 currently planned plans executed)
-**Planned work completed:** Phases 240 and 241 complete: 6/6 and 7/7 plans; 47/47 and 29/29 must-haves; required human UAT: 0. Current Admin 646/0, Node 41/0, host 223/0, invoice browsers 42 passed / 4 incumbent skips. Phases 242–243 remain; see phases/241-billing-operator-journeys/241-HANDOFF.md. v1.63 remains archived and closed.
+**Current focus:** Phase 243 — Integrated Evidence and Feedback Preview; no Phase 243 context or plans yet; next: `$gsd-discuss-phase 243`
+**Progress:** [████████░░] 75% (3 of 4 milestone phases complete; all 20 currently planned plans executed; Phase 243 is not planned)
+**Planned work completed:** Phases 240–242 complete: 6/6, 7/7 and 7/7 plans; 47/47, 29/29 and 80/80 must-haves. Phase 242 has 19 automated UAT items and zero required human UAT. Current Admin 679/0, Node 44/0, host 223/0; existing browser owners and the project-wide executable-UAT contract pass. Milestone requirements: 16/18 complete. See phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-HANDOFF.md. Phase 243 owns reviewed Linux goldens and the stable preview; v1.63 remains archived and closed.
 
 ## Current Position
 
 Phase: 243 — Integrated Evidence and Feedback Preview
 Current Plan: Not started
-Total Plans in Phase: 7
-Status: Ready to plan
+Total Plans in Phase: Not planned
+Status: Ready for discussion; next $gsd-discuss-phase 243
 Last activity: 2026-10-10 — Phase 242 complete, transitioned to Phase 243
 
 ## Performance Metrics
@@ -178,6 +178,10 @@ Last activity: 2026-10-10 — Phase 242 complete, transitioned to Phase 243
 ## Accumulated Context
 
 ### Decisions
+
+- [Phase 242]: Preserve successful search groups on failed-group retry while retaining current query/generation/owner checks; semantic regressions and all 44 hook controls recur in the existing browser CI job.
+- [Phase 242]: Catalog ownership follows the incumbent global schema; exact parent/child identity and current admin/session context are proved without invented tenant filtering.
+- [Phase 242]: Phase acceptance is complete with zero human UAT; Phase 243 owns reviewed Linux goldens and stable Fake preview. Inspect regression capture destinations before invoking owners that write historical evidence.
 
 - v1.62 is release integration and repository hygiene only; no product capability is in scope.
 - Published history and the v1.61 tag remain immutable: no force-push, tag movement, destructive cleanup, required-check weakening, merge to `main`, Release Please merge, or package publication.
@@ -411,9 +415,10 @@ Last activity: 2026-10-10 — Phase 242 complete, transitioned to Phase 243
 
 ### Blockers/Concerns
 
+- **Current v1.64:** Phase 242 has no open acceptance or security findings. Phase 243 remains planned milestone scope, not Phase 242 verification debt.
 - **Resolved by v1.62:** the `main`/v1.61 divergence, the stale local `main` ref, the four unpublished audit-closure commits, and the unavailable live-CI monitor. All are reconciled into the integration candidate with committed evidence.
-- **Open:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
-- **Open (coverage):** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
+- **Historical v1.62 candidate:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
+- **Archived v1.62 validation debt:** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
 
 ### Quick Tasks Completed
 
@@ -468,8 +473,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T13:52:25.143Z
-Stopped at: Phase 242 complete, ready to plan Phase 243
+Last session: 2026-10-10T15:00:43Z
+Stopped at: Phase 242 complete; next $gsd-discuss-phase 243
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -599,9 +604,10 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- **Next command:** `$gsd-discuss-phase 241` — Billing Operator Journeys. Phase 241 has no context/plans yet. Phase 240 is complete, not the milestone (1/4 phases; 8/18 requirements).
-- Context can be cleared: approved decisions, six execution summaries, independent 47/47 verification, validation/security/review dispositions, fresh captures and test results are committed. Do not rerun Phase 240 or restart upstream diligence.
-- Default to automated acceptance at existing unit/integration/E2E/smoke/seam owners and CI when recurring value exists. Required human UAT: 0; subjective feedback remains optional. Keep mutations in disposable fixtures, separate from the feedback preview.
-- Carry concrete scope owners forward: Phase 241 subscription global-invoice queue composition/destinations and other billing journeys; Phase 242 remaining route consumers; Phase 243 reviewed Linux goldens and preview handoff. Actual browser zoom and locally unrun Linux pixels remain explicit evidence limits, not claims or new mandatory owner UAT.
-- Two completion reference-parser warnings were inspected and classified as bookkeeping false positives: shell command strings were read as file paths; package-relative `priv/static/accrue_admin.css` and phase-relative `240-03-red-evidence/task1-invoice-state-copy.json` both exist at their documented owners. Commands passed and native report copies are present. No acceptance evidence is missing; preserve historical summaries and their fingerprint rather than rewriting completed work for parser churn.
-- No push, merge, publication or remote main-CI verification occurred in this execution; local green checks do not establish remote CI status.
+- **Last completed phase:** 242 — Investigations and Remaining Admin Surfaces (7/7 plans, independent 80/80 verification, 19 automated UAT items, zero human UAT).
+- **Next command:** `$gsd-discuss-phase 243` — Integrated Evidence and Feedback Preview. Phase 243 has no context/plans yet. Milestone v1.64 is 3/4 phases complete; 16/18 requirements are complete.
+- Context can be cleared. Read `phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-HANDOFF.md`; preserve approved decisions, verification fingerprint, acceptance owners and evidence limits. Do not rerun 240–242 or restart milestone/research/Impeccable initialization.
+- Default to automated unit/integration/E2E/smoke/seam acceptance and existing CI when recurring value exists. Required human UAT is zero; subjective feedback stays optional. Preview data must remain separate from disposable mutation/reset fixtures.
+- Phase 243 owns the complete reviewed Linux golden set, stable Fake-backed `/admin` preview and final evidence reconciliation. Actual provider/device/speech/native-zoom and remote CI limits remain explicit; no broad certification is claimed.
+- Completion returned five summary reference warnings for eleven command strings parsed as file paths. All 24 referenced package/host test owners resolve, including the Node glob; actual checks passed. These are bookkeeping false positives, not missing evidence or new work.
+- All Phase 242 changes are local commits; no push, merge, publication or remote main-CI result is claimed.
