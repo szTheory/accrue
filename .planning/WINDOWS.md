@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 9
+open_count: 10
 waived_count: 6
 fixed_count: 19
-total_count: 34
-last_updated: 2026-10-10T20:40:35.310Z
+total_count: 35
+last_updated: 2026-10-10T21:23:22.852Z
 ---
 
 # Broken Windows Ledger
@@ -49,6 +49,7 @@ last_updated: 2026-10-10T20:40:35.310Z
 | 32 | 241 | unrun-verify | accrue_admin/e2e/admin-page-flow-phase191.spec.js |  | Per-variant browser review interactions were not established; the complete Admin suite covers subscription and payment-method review variants at the route owners. | fixed |  | 2026-10-10T03:27:48.492Z | 2026-10-10T06:34:44.612Z |
 | 33 | 242 | deviation | accrue_admin/lib/accrue_admin/live/connect_account_live.ex |  | Optimistic-lock races after fee-review reread return stale-review feedback instead of escaping as an error. | fixed |  | 2026-10-10T13:22:18.081Z | 2026-10-10T13:22:22.341Z |
 | 34 | 243 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Ubuntu mint and normal selected visual comparison were unavailable because the committed phase source ref does not exist on origin. | fixed |  | 2026-10-10T18:19:10.468Z | 2026-10-10T20:40:35.186Z |
+| 35 | 243 | deviation | examples/accrue_host/playwright.config.js |  | Generic Playwright preview URL override can route unrelated specs to the feedback preview while global setup prepares the native test database. | open |  | 2026-10-10T21:23:22.852Z |  |
 
 ````json
 [
@@ -482,6 +483,19 @@ last_updated: 2026-10-10T20:40:35.310Z
     "reason": "",
     "recorded_at": "2026-10-10T18:19:10.468Z",
     "resolved_at": "2026-10-10T20:40:35.186Z",
+    "milestone": "v1.64"
+  },
+  {
+    "id": 35,
+    "kind": "deviation",
+    "phase": "243",
+    "file": "examples/accrue_host/playwright.config.js",
+    "line": null,
+    "description": "Generic Playwright preview URL override can route unrelated specs to the feedback preview while global setup prepares the native test database.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-10T21:23:22.852Z",
+    "resolved_at": null,
     "milestone": "v1.64"
   }
 ]

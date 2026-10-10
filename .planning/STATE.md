@@ -5,17 +5,17 @@ milestone_name: Admin Operator UI Cleanup
 current_phase: 243
 current_phase_name: Integrated Evidence and Feedback Preview
 current_plan: 3
-status: executing
-stopped_at: Completed 243-02-PLAN.md
-last_updated: "2026-10-10T21:13:20.545Z"
+status: verifying
+stopped_at: Completed 243-03-PLAN.md
+last_updated: "2026-10-10T21:24:31.653Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 243 Plan02 complete; full verifier and preview custody passed
-state_head: b93d15404a8e6426fe858ab5bc55ce7f705eeee2
+state_head: 06f9053edd48daff35699390c20b2780e36ebe3e
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 24
-  completed_plans: 23
+  completed_plans: 24
   percent: 75
 ---
 
@@ -36,7 +36,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 Phase: 243 (Integrated Evidence and Feedback Preview) — EXECUTING
 Current Plan: 3
 Total Plans in Phase: 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-10 — Phase 243 execution started
 
 ## Performance Metrics
@@ -177,6 +177,7 @@ Last activity: 2026-10-10 — Phase 243 execution started
 | Phase 241 P08 | 9min | 2 tasks | 3 files |
 | Phase 243 P02 | 173min | 3 tasks | 17 files |
 | Phase 243 P01 | 144min | 2 tasks | 17 files |
+| Phase 243 P03 | 10min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -401,6 +402,9 @@ Last activity: 2026-10-10 — Phase 243 execution started
 - [Phase 243]: Selected the seeded invoice list and open action-review composition in light and dark themes.
 - [Phase 243]: Published reviewed Linux evidence only to the authorized gsd/phase-243-linux-evidence validation ref.
 - [Phase 243]: Direct Playwright proof is restricted to its exact private per-run server PID; the documented verifier retains preview custody while using separate proof databases and build outputs.
+- [Phase 243]: Hash actual browser response bodies independently from package, compiled, and direct HTTP responses.
+- [Phase 243]: Keep the existing Phase 240 route and component registry as the sole inventory authority.
+- [Phase 243]: Leave the logo source unchanged after the current mounted host screenshot showed a working wordmark.
 
 ### Pending Todos
 
@@ -484,8 +488,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T21:12:45.301Z
-Stopped at: Completed 243-02-PLAN.md
+Last session: 2026-10-10T21:24:31.601Z
+Stopped at: Completed 243-03-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
