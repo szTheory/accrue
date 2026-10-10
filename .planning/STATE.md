@@ -7,15 +7,15 @@ current_phase_name: Integrated Evidence and Feedback Preview
 current_plan: 1
 status: executing
 stopped_at: Halted 243-01 after Task 1; awaiting remote source ref for Ubuntu mint
-last_updated: "2026-10-10T18:19:10.798Z"
+last_updated: "2026-10-10T19:00:05.698Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 243 execution started
-state_head: dd11264dfda532c8a5f8c4038c06c2c6c5a4b2bf
+state_head: de9e4d5d4571677a053abf66a8321703ce3608c1
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 24
-  completed_plans: 22
+  completed_plans: 23
   percent: 75
 ---
 
@@ -175,6 +175,7 @@ Last activity: 2026-10-10 — Phase 243 execution started
 | Phase 242 P06 | 5min | 2 tasks | 11 files |
 | Phase 242 P07 | 19min | 3 tasks | 9 files |
 | Phase 241 P08 | 9min | 2 tasks | 3 files |
+| Phase 243 P02 | 80 | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -395,6 +396,7 @@ Last activity: 2026-10-10 — Phase 243 execution started
 - [Phase 242]: Measure source, package output, host-compiled output and served browser resources separately.
 - [Phase 241]: Billing invoice, subscription, and dunning action groups use the existing --ax-space-xs 4px spacing token.
 - [Phase 241]: Assert that mounted targets exist before checking every target's geometry. Preserve the complete test/reporter chronology and capture budget; a reporter change does not reset the verification budget.
+- [Phase 243]: Keep verifier proof on isolated Compose, database, listener, and per-run build identities; compare exact invoice/audit/dispatch state.
 
 ### Pending Todos
 
@@ -423,6 +425,7 @@ None. The next workflow action is recorded under Operator Next Steps; completed 
 - **Historical v1.62 candidate:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
 - **Archived v1.62 validation debt:** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
 - Phase 243 Plan 01 Task 2 is blocked: the committed source branch gsd/phase-233-shared-direction-portal-contract has no origin ref, so GitHub returned HTTP 422 to the authorized Ubuntu baseline-mint dispatch. Four required invoice PNGs and the normal Linux comparison remain unavailable; do not complete EVR-03 until both workflows pass against the reviewed set.
+- Plan 243-02 halted: mix verify.full fails an existing Phase 234 Back to results assertion; historical default Docker volume aggregate hash comparison is unresolved.
 
 ### Quick Tasks Completed
 
@@ -477,7 +480,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T18:19:10.745Z
+Last session: 2026-10-10T19:00:05.631Z
 Stopped at: Halted 243-01 after Task 1; awaiting remote source ref for Ubuntu mint
 Resume file: .planning/phases/243-integrated-evidence-and-feedback-preview/243-01-SUMMARY.md
 

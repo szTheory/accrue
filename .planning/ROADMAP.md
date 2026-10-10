@@ -166,11 +166,11 @@ Plans:
   3. Maintainers can compare final changed route and state coverage with the Phase 240 inventory and slice-owned recurring evidence, including desktop/narrow and effective-theme inspections, served asset identity and any named remaining limits; no broad claim rests only on the initial exemplar. (EVR-03, EVR-04; reconciles EVR-01 and EVR-02 without remapping them)
 
 **Closure obligation**: Reconcile proofs from Phases 240–242 and repair named gaps in their owning surfaces. This phase does not defer first authorization, accessibility, responsive/theme, language or asset acceptance. Use selected stable snapshots, existing thresholds and bounded masks; no new CI matrix or required human sign-off.
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 Plans:
 **Wave 1**
 - [x] 243-01-PLAN.md — Reviewed twelve-image Linux set and faithful masks
-- [ ] 243-02-PLAN.md — Isolated Fake preview startup, recovery and verifier custody
+- [x] 243-02-PLAN.md — Isolated Fake preview startup, recovery and verifier custody
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 243-03-PLAN.md — Corrected served CSS and final route/evidence reconciliation
@@ -186,4 +186,4 @@ Plans:
 | 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | Complete    | 2026-10-10 |
 | 241. Billing Operator Journeys | v1.64 | 8/8 | Complete    | 2026-10-10 |
 | 242. Investigations and Remaining Admin Surfaces | v1.64 | 7/7 | Complete    | 2026-10-10 |
-| 243. Integrated Evidence and Feedback Preview | v1.64 | 1/3 | In Progress | - |
+| 243. Integrated Evidence and Feedback Preview | v1.64 | 2/3 | In Progress | - |
