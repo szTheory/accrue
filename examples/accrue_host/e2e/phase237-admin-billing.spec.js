@@ -31,7 +31,9 @@ const sourcePaths = [
   "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs",
   "accrue_admin/lib/accrue_admin/components/at_risk_table.ex",
   "scripts/ci/accrue_host_seed_e2e.exs",
-  "examples/accrue_host/e2e/phase237-admin-billing.spec.js"
+  "examples/accrue_host/e2e/phase237-admin-billing.spec.js",
+  "examples/accrue_host/lib/accrue_host_web/router.ex",
+  "examples/accrue_host/lib/accrue_host_web/controllers/organization_scope_controller.ex"
 ];
 
 function sha256(bytes) {
@@ -130,6 +132,14 @@ async function assertCurrentAssets(page) {
     await assertAssetBytes(page, monoPath, "accrue_admin/priv/static/fonts/geist-mono-vf.woff2")
   ];
   return Object.fromEntries(assets.map((asset) => [asset.path, asset]));
+}
+
+async function invoiceActionDispatchCount(page) {
+  const response = await page.request.get("/api/e2e/dispatch-counts");
+  expect(response.status(), "test-only dispatch oracle must be mounted").toBe(200);
+  const counts = await response.json();
+  expect(counts.invoice_action).toEqual(expect.any(Number));
+  return counts.invoice_action;
 }
 
 async function assertLongRecoveryContentWraps(page) {
@@ -293,6 +303,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await page.goto(`/admin/invoices/${fixture.invoice_id}?org=${owner}`, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
   await expect(page.getByRole("heading", { name: /HOST-BROWSER-VERIFY01/ })).toBeVisible();
+  const invoiceActionCountBeforeReview = await invoiceActionDispatchCount(page);
   const payAction = page.getByRole("button", { name: /pay.*invoice/i });
   await expect(payAction).toBeVisible();
   const detailShot = await page.screenshot({ fullPage: true });
@@ -343,6 +354,8 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(review).toBeHidden();
   await expect(payAction).toBeFocused();
   await expect(page.locator('[data-role="invoice-action-result"]')).toHaveCount(0);
+  const invoiceActionCountAfterDismissal = await invoiceActionDispatchCount(page);
+  expect(invoiceActionCountAfterDismissal).toBe(invoiceActionCountBeforeReview);
 
   await page.setViewportSize({ width: 320, height: 800 });
   await assertNoOverflow(page);
@@ -601,7 +614,12 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
       action_review_target: fixture.invoice_id,
       action_review_opened: true,
       action_confirmed_or_dispatched: false,
-      no_mutation_claim_from_http_method_observation: true
+      authoritative_dispatch_count: {
+        operation: "invoice_action",
+        before_review: invoiceActionCountBeforeReview,
+        after_escape_dismissal: invoiceActionCountAfterDismissal,
+        delta: invoiceActionCountAfterDismissal - invoiceActionCountBeforeReview
+      }
     },
     read_only: true,
     confirmed_or_dispatched: false

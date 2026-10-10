@@ -56,6 +56,8 @@ defmodule AccrueHostWeb.Router do
     post("/app/organization-scope", OrganizationScopeController, :update)
 
     if Application.compile_env(:accrue_host, :sql_sandbox) do
+      get("/api/e2e/dispatch-counts", OrganizationScopeController, :dispatch_counts_for_e2e)
+
       post(
         "/api/e2e/revoke-membership",
         OrganizationScopeController,

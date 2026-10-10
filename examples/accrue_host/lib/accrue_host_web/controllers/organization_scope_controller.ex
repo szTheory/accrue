@@ -95,6 +95,16 @@ defmodule AccrueHostWeb.OrganizationScopeController do
 
   def revoke_membership_for_e2e(conn, _params), do: send_resp(conn, :bad_request, "")
 
+  # This read-only oracle is mounted only by the SQL-sandbox test router. Keep
+  # the runtime guard as a second fail-closed boundary for production hosts.
+  def dispatch_counts_for_e2e(conn, _params) do
+    if Application.get_env(:accrue_host, :sql_sandbox, false) do
+      json(conn, %{invoice_action: Accrue.Processor.Fake.call_count(:invoice_action)})
+    else
+      send_resp(conn, :not_found, "")
+    end
+  end
+
   defp other_member_organization(user_id) do
     from(organization in Organization,
       join: membership in OrganizationMembership,
