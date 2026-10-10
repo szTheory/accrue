@@ -489,6 +489,129 @@ defmodule AccrueAdmin.ChargeLiveTest do
     refute has_element?(view, "[data-role='confirm-panel']")
   end
 
+  test "refund review shows exact payment, customer, owner, state, requested and remaining money",
+       %{
+         conn: conn,
+         charge: charge,
+         customer: customer
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{"amount_minor" => "4321", "reason" => "requested_by_customer"}
+      )
+
+    assert html =~ "Payment record ID"
+    assert html =~ charge.id
+    assert html =~ charge.processor_id
+    assert html =~ customer.id
+    assert html =~ customer.name
+    assert html =~ "Owner"
+    assert html =~ "succeeded"
+    assert html =~ "Refund amount"
+    assert html =~ "43.21"
+    assert html =~ "Remaining refundable before this request"
+    assert html =~ "75.00"
+    assert html =~ "USD"
+    assert html =~ "does not confirm settlement"
+    assert html =~ "Back to payment"
+  end
+
+  test "refund amount boundaries preserve blank remaining intent and reject zero, negative, and excess",
+       %{
+         conn: conn,
+         charge: charge
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+
+    for amount <- ["", "0", "-1", "7501"] do
+      open_refund_drawer(view)
+
+      html =
+        render_submit(
+          element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+          %{"amount_minor" => amount, "reason" => "requested_by_customer"}
+        )
+
+      if amount == "" do
+        assert html =~ "$75.00"
+        assert has_element?(view, "[data-role='confirm-refund']")
+        render_click(view, "cancel_pending_refund", %{})
+      else
+        assert html =~
+                 if(amount == "7501",
+                   do: "Refund amount cannot exceed the remaining refundable balance.",
+                   else: "Refund amount must be greater than zero."
+                 )
+
+        refute has_element?(view, "[data-role='confirm-refund']")
+      end
+    end
+  end
+
+  test "Back to payment dismisses a staged refund and its step-up continuation", %{
+    conn: conn,
+    charge: charge
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    render_submit(
+      element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+      %{"amount_minor" => "4000", "reason" => "requested_by_customer"}
+    )
+
+    render_click(element(view, "[data-ax-action-drawer-confirm]"))
+    assert render(view) =~ "Step-up required"
+
+    html = render_click(view, "cancel_pending_refund")
+    refute html =~ ~s(id="accrue-admin-step-up-dialog")
+
+    render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert TestRepo.aggregate(
+             from(refund in Refund, where: refund.charge_id == ^charge.id),
+             :count
+           ) == 1
+  end
+
+  test "refund review keeps large and zero-decimal minor units exact", %{conn: conn} do
+    customer = insert_customer(%{name: "JPY Review", email: "jpy-review@example.com"})
+    subscription = insert_subscription(customer)
+
+    charge =
+      insert_charge(customer, subscription, %{
+        processor: "fake",
+        processor_id: "ch_jpy_review",
+        status: "succeeded",
+        amount_cents: 2_147_483_000,
+        currency: "jpy"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{"amount_minor" => "2147483000", "reason" => "requested_by_customer"}
+      )
+
+    assert html =~ "2,147,483,000"
+
+    assert html =~
+             AccrueAdmin.Components.MoneyFormatter.format_money(2_147_483_000, "jpy")
+
+    refute html =~ "2,147,482,999"
+  end
+
   test "refund confirmation revalidates the reviewed charge after step-up", %{
     conn: conn,
     charge: charge

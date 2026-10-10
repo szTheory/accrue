@@ -125,6 +125,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   def handle_event("cancel_pending_refund", _params, socket) do
     {:noreply,
      socket
+     |> dismiss_step_up_if_pending()
      |> assign(:pending_refund, nil)
      |> assign(:refund_drawer_open?, false)}
   end
@@ -330,7 +331,11 @@ defmodule AccrueAdmin.Live.ChargeLive do
           close_event="cancel_pending_refund"
         >
           <%= if @pending_refund do %>
-            <.refund_confirm_panel pending_refund={@pending_refund} charge={@charge} />
+            <.refund_confirm_panel
+              pending_refund={@pending_refund}
+              charge={@charge}
+              customer={@customer}
+            />
           <% else %>
             <.refund_form
               charge={@charge}
@@ -347,11 +352,12 @@ defmodule AccrueAdmin.Live.ChargeLive do
               class="ax-button ax-button-primary"
               data-role="confirm-refund"
               data-ax-action-drawer-confirm
+              disabled={@step_up_pending}
               phx-disable-with="Submitting refund..."
             >
               Confirm refund
             </button>
-            <button phx-click="cancel_pending_refund" class="ax-button ax-button-ghost">Cancel</button>
+            <button phx-click="cancel_pending_refund" class="ax-button ax-button-ghost">Back to payment</button>
           </:footer>
         </DetailDrawer.detail_drawer>
 
@@ -363,12 +369,17 @@ defmodule AccrueAdmin.Live.ChargeLive do
         >
           <section data-ax-overlay-panel data-presentation="drawer">
             <%= if @pending_refund do %>
-              <.refund_confirm_panel pending_refund={@pending_refund} charge={@charge} />
+              <.refund_confirm_panel
+                pending_refund={@pending_refund}
+                charge={@charge}
+                customer={@customer}
+              />
               <button
                 phx-click="confirm_refund"
                 class="ax-button ax-button-primary"
                 data-role="confirm-refund"
                 data-ax-action-drawer-confirm
+                disabled={@step_up_pending}
               >
                 Confirm refund
               </button>
@@ -427,12 +438,19 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
   attr(:pending_refund, :map, required: true)
   attr(:charge, :map, required: true)
+  attr(:customer, :map, required: true)
 
   defp refund_confirm_panel(assigns) do
     ~H"""
     <section class="ax-stack-md" data-role="confirm-panel">
       <p class="ax-label">Confirm refund</p>
       <p class="ax-body ax-measure"><%= refund_copy(@pending_refund, @charge) %></p>
+      <Detail.detail_field_list
+        fields={refund_review_fields(@pending_refund, @charge, @customer)}
+      />
+      <p class="ax-body ax-measure">
+        This creates a refund request in Accrue. Provider acceptance or a new refund record does not confirm settlement; check charge activity for the observed result.
+      </p>
     </section>
     """
   end
@@ -998,6 +1016,24 @@ defmodule AccrueAdmin.Live.ChargeLive do
       audit_subject: "a refund ledger row",
       source_event_id: action.source_event_id
     )
+  end
+
+  defp refund_review_fields(action, charge, customer) do
+    [
+      %{label: "Payment", value: charge.processor_id || charge.id},
+      %{label: "Payment record ID", value: charge.id},
+      %{label: "Customer", value: customer_label(customer)},
+      %{label: "Customer ID", value: customer.id},
+      %{label: "Owner", value: charge_owner_summary(customer)},
+      %{label: "Current payment state", value: humanize(charge.status)},
+      %{label: "Refund amount", value: money_text(action.amount_minor, action.currency)},
+      %{
+        label: "Remaining refundable before this request",
+        value: money_text(action.reviewed_refundable_minor, action.currency)
+      },
+      %{label: "Requested amount in minor units", value: Integer.to_string(action.amount_minor)},
+      %{label: "Currency", value: String.upcase(action.currency)}
+    ]
   end
 
   defp charge_refund_error_copy(socket) do
