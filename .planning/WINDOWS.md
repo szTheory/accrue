@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 11
+open_count: 9
 waived_count: 6
-fixed_count: 17
+fixed_count: 19
 total_count: 34
-last_updated: 2026-10-10T18:19:10.468Z
+last_updated: 2026-10-10T20:40:35.310Z
 ---
 
 # Broken Windows Ledger
@@ -41,14 +41,14 @@ last_updated: 2026-10-10T18:19:10.468Z
 | 24 | 238 | deviation | accrue_admin/test/accrue_admin/components/data_table_test.exs |  | The required warnings-as-errors Admin command was blocked by an unused test binding and unused private helper; both warnings were removed and the suite passed. | fixed |  | 2026-10-09T04:19:36.443Z | 2026-10-09T04:19:40.710Z |
 | 25 | 239 | deviation | .planning/phases/239-integrated-quality-handoff/239-COVERAGE.md |  | Phase 239 route ledger duplicate stylesheet row was corrected and deterministic ordering is now enforced by ExUnit. | fixed |  | 2026-10-09T06:55:22.555Z | 2026-10-09T06:55:27.423Z |
 | 26 | 239 | deviation | .planning/ROADMAP.md |  | The roadmap progress SDK missed its existing Phase 239 checklist and row; the current plan checkbox and 1/4 In Progress row were reconciled directly. | fixed |  | 2026-10-09T06:56:00.230Z | 2026-10-09T06:56:00.293Z |
-| 27 | 240 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Linux Phase 211 visual comparison was not run on macOS; the baseline set is Linux-specific. | open |  | 2026-10-09T19:50:49.478Z |  |
+| 27 | 240 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Linux Phase 211 visual comparison was not run on macOS; the baseline set is Linux-specific. | fixed |  | 2026-10-09T19:50:49.478Z | 2026-10-10T20:40:35.310Z |
 | 28 | 241 | deviation | accrue_admin/lib/accrue_admin/live/charge_live.ex | 80 | Renamed the validated return destination value and corrected two related-resource arguments after a focused compile error. | open |  | 2026-10-10T01:36:59.322Z |  |
 | 29 | 241 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex |  | Confirmation controls expose disabled/loading state while step-up or dispatch is pending. | open |  | 2026-10-10T01:52:12.988Z |  |
 | 30 | 241 | deviation | examples/accrue_host/e2e/generated/copy_strings.json |  | Generated browser copy strings are regenerated to match the updated subscription action labels. | open |  | 2026-10-10T01:52:13.282Z |  |
 | 31 | 241 | unrun-verify | .planning/phases/241-billing-operator-journeys/241-07-PLAN.md |  | A separate 200% text-spacing and supported 400% zoom simulation was not run in Plan 241-07; direct narrow-width and long-text evidence ran. | fixed |  | 2026-10-10T03:10:50.370Z | 2026-10-10T03:54:19.174Z |
 | 32 | 241 | unrun-verify | accrue_admin/e2e/admin-page-flow-phase191.spec.js |  | Per-variant browser review interactions were not established; the complete Admin suite covers subscription and payment-method review variants at the route owners. | fixed |  | 2026-10-10T03:27:48.492Z | 2026-10-10T06:34:44.612Z |
 | 33 | 242 | deviation | accrue_admin/lib/accrue_admin/live/connect_account_live.ex |  | Optimistic-lock races after fee-review reread return stale-review feedback instead of escaping as an error. | fixed |  | 2026-10-10T13:22:18.081Z | 2026-10-10T13:22:22.341Z |
-| 34 | 243 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Ubuntu mint and normal selected visual comparison were unavailable because the committed phase source ref does not exist on origin. | open |  | 2026-10-10T18:19:10.468Z |  |
+| 34 | 243 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Ubuntu mint and normal selected visual comparison were unavailable because the committed phase source ref does not exist on origin. | fixed |  | 2026-10-10T18:19:10.468Z | 2026-10-10T20:40:35.186Z |
 
 ````json
 [
@@ -387,10 +387,10 @@ last_updated: 2026-10-10T18:19:10.468Z
     "file": ".github/workflows/accrue_admin_browser.yml",
     "line": null,
     "description": "Linux Phase 211 visual comparison was not run on macOS; the baseline set is Linux-specific.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-09T19:50:49.478Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-10T20:40:35.310Z",
     "milestone": "v1.64"
   },
   {
@@ -478,10 +478,10 @@ last_updated: 2026-10-10T18:19:10.468Z
     "file": ".github/workflows/accrue_admin_browser.yml",
     "line": null,
     "description": "Ubuntu mint and normal selected visual comparison were unavailable because the committed phase source ref does not exist on origin.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-10T18:19:10.468Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-10T20:40:35.186Z",
     "milestone": "v1.64"
   }
 ]

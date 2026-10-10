@@ -33,7 +33,7 @@
 
 - [x] **EVR-01**: Maintainers can inspect current route, interaction, component and state coverage with source, fixture and served-asset provenance, keeping historical, rendered and exercised evidence distinct.
 - [x] **EVR-02**: Maintainers receive faithful recurring regression proof with each delivery slice in existing acceptance owners, including focused failure controls for new guards and no confirmation-only human UAT dependency.
-- [ ] **EVR-03**: Maintainers receive blocking visual regression results for the complete expected Linux snapshot set, with reviewed intended updates and masks that preserve task-critical information.
+- [x] **EVR-03**: Maintainers receive blocking visual regression results for the complete expected Linux snapshot set, with reviewed intended updates and masks that preserve task-critical information.
 - [ ] **EVR-04**: Maintainers can start and use the documented Fake-backed Admin feedback preview without mutation/reset proof disturbing it, with honest transport, local/remote and provider evidence limits.
 
 ## Acceptance constraints
@@ -92,7 +92,7 @@ Each approved requirement has one primary phase owner in the approved roadmap. S
 | UXC-02 | Phase 240 | Complete |
 | EVR-01 | Phase 240 | Complete |
 | EVR-02 | Phase 240 | Complete |
-| EVR-03 | Phase 243 | Pending |
+| EVR-03 | Phase 243 | Complete |
 | EVR-04 | Phase 243 | Pending |
 
 **Coverage:** 18/18 approved requirements mapped once in the approved roadmap; 0 orphaned and 0 duplicated. Sixteen requirements are Complete after Phases 240–242 implementation and independent verification; EVR-03 and EVR-04 remain Pending for Phase 243.

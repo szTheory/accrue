@@ -179,7 +179,7 @@ Plans:
 
 ## Progress
 
-**Execution order:** 240 → 241 → 242 → 243. The additional named Phase 241 spacing closure is executed and verified; Phases 240–242 are complete. Phase 243 has approved context, focused research and three independently checked plans across two waves. Next command: `$gsd-execute-phase 243`. Required Linux and preview runtime evidence remains pending execution.
+**Execution order:** 240 → 241 → 242 → 243. The additional named Phase 241 spacing closure is executed and verified; Phases 240–242 are complete. Phase 243 has approved context, focused research and three independently checked plans across two waves. Plan 243-01's Linux evidence and comparison are complete. Plan 243-02 remains halted on the existing Phase 234 return-link assertion; preview runtime evidence is pending resolution of that blocker.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
