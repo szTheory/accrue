@@ -1,39 +1,77 @@
 ---
 phase: 240-shared-system-and-real-billing-exemplar
-reviewed: 2026-10-10T15:08:49Z
+reviewed: 2026-10-10T22:43:22Z
 depth: standard
-files_reviewed: 5
+files_reviewed: 27
 files_reviewed_list:
+  - .github/workflows/accrue_admin_browser.yml
   - accrue_admin/assets/css/app.css
+  - accrue_admin/assets/js/hooks/accrue_theme.js
+  - accrue_admin/assets/js/hooks/connection_state.js
   - accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js
+  - accrue_admin/e2e/admin-page-flow-phase191.spec.js
+  - accrue_admin/e2e/admin-spec-detail-phase198.spec.js
+  - accrue_admin/e2e/admin-spec-list-phase196.spec.js
+  - accrue_admin/lib/accrue_admin/components/step_up_auth_modal.ex
+  - accrue_admin/lib/accrue_admin/copy/invoice.ex
+  - accrue_admin/lib/accrue_admin/live/charge_live.ex
+  - accrue_admin/lib/accrue_admin/live/invoice_live.ex
+  - accrue_admin/lib/accrue_admin/live/invoices_live.ex
   - accrue_admin/priv/static/accrue_admin.css
   - accrue_admin/priv/static/accrue_admin.js
+  - accrue_admin/test/accrue_admin/components/theme_picker_test.exs
+  - accrue_admin/test/accrue_admin/e2e_fixtures_test.exs
+  - accrue_admin/test/accrue_admin/live/invoice_live_test.exs
+  - accrue_admin/test/accrue_admin/live/subscription_live_test.exs
+  - accrue_admin/test/accrue_admin/live/subscriptions_live_test.exs
+  - accrue_admin/test/accrue_admin/theme_test.exs
+  - accrue_admin/test/js/command_palette_test.mjs
+  - accrue_admin/test/js/focus_trap_test.mjs
+  - accrue_admin/test/support/e2e_fixtures.ex
+  - accrue_admin/test/support/e2e_plug.ex
+  - examples/accrue_host/e2e/phase237-admin-billing.spec.js
   - examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js
 findings:
   critical: 0
-  warning: 0
+  warning: 1
   info: 0
-  total: 0
-status: clean
+  total: 1
+status: issues_found
 ---
 
 # Phase 240: Code Review Report
 
-**Reviewed:** 2026-10-10T15:08:49Z\
-**Depth:** standard\
-**Files Reviewed:** 5\
-**Status:** clean
+**Reviewed:** 2026-10-10T22:43:22Z
+**Depth:** standard
+**Files Reviewed:** 27
+**Status:** issues_found
 
 ## Summary
 
-This is an incremental post-review of the five current Phase 242 files that overlap Phase 240's Admin contract and source surface. The Phase 242 CSS and interaction assertion changes, generated Admin assets, and Phase 238 host acceptance copy were reviewed in context. The prior fixed findings remain fixed where relevant: invoice dismissal copy is still “Back to invoice” (`invoice.ex:193`), the invoice list presents its filters and view/results together in one labeled group (`invoices_live.ex:176-200`), and shared health typography remains at the approved 600 weight (`app.css:5527-5532, 5570-5574`). No current defects were found in the requested scope. No tests or visual inspection were performed.
+Reviewed all 27 listed files. One warning affects retrying a destructive invoice action after the operator dismisses its step-up challenge.
 
-## Narrative Findings (AI reviewer)
+## Warnings
 
-All reviewed files meet quality standards. No issues found.
+### WR-01: Dismissing invoice step-up leaves confirmation locked
+
+**Severity:** WARNING
+**File:** `accrue_admin/lib/accrue_admin/live/invoice_live.ex:211-216`
+**Issue:** `confirm_action` sets `dispatch_state` to `:awaiting_step_up` before opening the challenge. Escape and the explicit step-up dismiss event clear the challenge through `StepUp.dismiss_challenge/1`, but leave `dispatch_state` unchanged. A subsequent `confirm_action` is therefore ignored by the guard at line 164, and the operator must cancel and stage the invoice action again to recover.
+**Fix:** Reset the dispatch state when dismissing the challenge, for example:
+
+```elixir
+def handle_event("step_up_escape", _params, socket) do
+  {:noreply,
+   socket
+   |> dismiss_step_up_if_pending()
+   |> assign(:dispatch_state, :staged)}
+end
+```
+
+Apply the same reset to `step_up_dismiss` so both dismissal paths restore a retryable confirmation state.
 
 ---
 
-_Reviewed: 2026-10-10T15:08:49Z_\
-_Reviewer: the agent (gsd-code-reviewer)_\
+_Reviewed: 2026-10-10T22:43:22Z_
+_Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
