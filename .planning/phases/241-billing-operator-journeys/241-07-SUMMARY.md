@@ -19,6 +19,9 @@ requires:
     provides: Refund and payment-method action reviews
 provides:
   - Package browser evidence for current customer-open-invoice membership and customer invoice-tab return
+  - Browser evidence for every eligible subscription and payment-method review variant
+  - Executable text-enlargement and 400%-equivalent reflow evidence across changed billing consumers
+  - Recovery table overflow containment through a named keyboard-focusable local scroll region
   - Reconnect assertion waits for the established offline state before checking locked controls
   - Mounted host proof for the selected Recovery window, scoped campaign return, and package-served assets
 affects: [243]
@@ -35,29 +38,109 @@ key-files:
   modified:
     - accrue_admin/e2e/admin-page-flow-phase191.spec.js
     - accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js
+    - accrue_admin/test/support/e2e_fixtures.ex
+    - accrue_admin/test/support/e2e_plug.ex
+    - accrue_admin/lib/accrue_admin/components/at_risk_table.ex
+    - accrue_admin/test/accrue_admin/components/at_risk_table_test.exs
+    - accrue_admin/assets/css/app.css
+    - accrue_admin/priv/static/accrue_admin.css
     - examples/accrue_host/e2e/phase237-admin-billing.spec.js
 
 key-decisions:
-  - "Build package assets once before the package browser runs; their checked-in CSS and JS bytes were already current and remained unchanged."
+  - "Rebuild the package CSS after the Recovery table overflow fix, then verify the compiled-host and HTTP-served bytes against the package output."
+  - "Use a dedicated disposable review matrix to exercise all supported subscription and payment-method variants without changing shared route seeds."
+  - "Measure 200% text enlargement by doubling snapshotted computed font sizes; simulate supported 400% reflow with a 320 CSS-pixel viewport."
+  - "Keep the seven-column Recovery table keyboard-reachable in a labeled local scroll region under text and viewport stress."
   - "Use a 7-day Recovery selection to prove window preservation through the campaign detail and return."
   - "Keep mounted host asset provenance and Portal separation in the existing Phase 237 host spec."
 
 requirements-completed: [JRN-01, JRN-02, JRN-03, JRN-04]
 
-actuals:
-  tokens: 2378
-  tasks: 2
-  commits: 2
+coverage:
+  - id: D1
+    description: Package subscription navigation returns the exact customer-open invoice set, and opening an invoice from the customer tab returns to that same tab.
+    requirement: JRN-01
+    verification:
+      - kind: browser
+        ref: "accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js#@phase241 subscription open-invoice destination preserves customer scope and contextual return"
+        status: pass
+      - kind: browser-suite
+        ref: "CI=1 npm run e2e:phase191 (28 passed)"
+        status: pass
+    human_judgment: false
+  - id: D2
+    description: Contextual billing destinations preserve their return context, Recovery selection, and scoped campaign return.
+    requirement: JRN-02
+    verification:
+      - kind: browser
+        ref: "examples/accrue_host/e2e/phase237-admin-billing.spec.js#Phase 237 served invoice and recovery journeys stay scoped and read-only"
+        status: pass
+      - kind: browser
+        ref: "accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js#@phase241 subscription open-invoice destination preserves customer scope and contextual return"
+        status: pass
+    human_judgment: false
+  - id: D3
+    description: Every eligible subscription action review, Resume review, and both payment-method action reviews opens in the browser and shows the exact selected record and consequence before dismissal.
+    requirement: JRN-04
+    verification:
+      - kind: browser
+        ref: "accrue_admin/e2e/admin-page-flow-phase191.spec.js#@phase241 every eligible subscription and payment-method review opens in the browser (10 subscription reviews; 2 payment-method reviews)"
+        status: pass
+      - kind: browser-suite
+        ref: "CI=1 npm run e2e:phase191 (28 passed; new case not skipped)"
+        status: pass
+    human_judgment: false
+  - id: D4
+    description: Seven changed billing consumers retain reachable geometry with measured 2x text sizing plus WCAG text spacing and a 320 CSS-pixel viewport simulation of 400% zoom.
+    requirement: JRN-03
+    verification:
+      - kind: browser
+        ref: "accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js#@phase241 200% text, WCAG text spacing, and 400% reflow simulation keep changed billing consumers reachable"
+        status: pass
+      - kind: browser-suite
+        ref: "CI=1 npm run e2e:phase199 (new stress case passed; 24 passed, 15 incumbent skips)"
+        status: pass
+    human_judgment: false
+  - id: D5
+    description: The Recovery at-risk table exposes its wide data as a named, keyboard-focusable local scroll region while keeping the page itself within the viewport.
+    requirement: JRN-03
+    verification:
+      - kind: integration
+        ref: "accrue_admin/test/accrue_admin/components/at_risk_table_test.exs#renders desktop table and mobile cards under the shared group contract"
+        status: pass
+      - kind: browser
+        ref: "examples/accrue_host/e2e/phase237-admin-billing.spec.js (1 passed after host recompile)"
+        status: pass
+    human_judgment: false
+  - id: D6
+    description: Existing browser owners retain keyboard focus, reconnect and busy behavior, effective theme, responsive geometry, and mounted-host asset provenance across changed billing consumers.
+    requirement: JRN-02
+    verification:
+      - kind: browser
+        ref: "accrue_admin/e2e/admin-page-flow-phase191.spec.js#LiveView patch and reconnect states keep focus stable"
+        status: pass
+      - kind: browser
+        ref: "accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js#System keeps one stored choice while effective colors follow OS through patch and reload"
+        status: pass
+      - kind: browser
+        ref: "examples/accrue_host/e2e/phase237-admin-billing.spec.js#Phase 237 served invoice and recovery journeys stay scoped and read-only"
+        status: pass
+    human_judgment: false
 
-commits: 2
+actuals:
+  tokens: 79747
+  tasks: 2
+  commits: 7
+
+commits: 7
 plan_head_before: d207426353ceb55cfe33ad051550292321601887
-plan_head_after: 5b33e9c24846639397ad2d73710e4ed0889884a1
+plan_head_after: 1b902e9fa77446e56039f7214f451a182667c18c
 
 metrics:
-  duration: 66 min
+  duration: 228 min
   completed: 2026-10-10
   tasks: 2
-  files: 3
+  files: 8
 status: complete
 ---
 
@@ -69,34 +152,38 @@ status: complete
 
 - **Duration:** 66 min
 - **Tasks:** 2
-- **Files modified:** 3
+- **Files modified:** 8
 
 ## Accomplishments
 
-- Built accrue_admin assets before fresh-server package browser runs. The build completed successfully; generated CSS and JS matched their checked-in bytes, so neither tracked asset required a diff.
+- Built accrue_admin assets before package browser runs. Acceptance stress exposed a wide Recovery table expanding the document; added a labeled, keyboard-focusable local scroll region, rebuilt CSS, and recompiled the mounted host. Package, compiled-host, HTTP-served, and browser-request CSS hashes matched. JS remained byte-identical.
 - Added a package browser journey that clicks the subscription customer-open-invoice destination, checks the customer and open-status filters, confirms the exact single invoice ID, then opens that invoice from the customer invoice tab and returns to the same customer/tab.
 - Made the incumbent offline-action check wait for the visible LiveView connection-loss state before asserting that the action is disabled.
 - Extended the mounted-host browser owner to click a 7-day Recovery campaign, verify owner and window on the return destination, and return to the same scoped window. The host test also checks /admin Admin separately from /billing customer Portal.
 - Added the changed billing route sources to host provenance. The assertAssetBytes seam matched package, compiled-host, HTTP-served, and browser-request SHA-256 values for CSS, JS, Geist Sans, and Geist Mono.
+- Added a disposable review-matrix fixture endpoint because the existing shared phase191/199 seeds did not contain both payment-method records and a scheduled-cancel subscription. The new case opens all nine eligible subscription mutation reviews, the eligible Resume review, and both payment-method reviews, then dismisses without dispatch.
+- Added measured 2x computed text sizing with WCAG text-spacing overrides and a separate 320 CSS-pixel reflow simulation across subscription, invoice results/detail, payment detail, customer payment methods, Recovery list, and campaign detail.
 
 ## Verification
 
 | Owner | Result |
 |---|---|
-| CI=1 npm --prefix accrue_admin run e2e:phase191 | 26 passed |
-| CI=1 npm --prefix accrue_admin run e2e:phase199 | 23 passed; 15 incumbent project-specific skips |
+| CI=1 npm run e2e:phase191 | 28 passed |
+| CI=1 npm run e2e:phase199 | 24 passed; 15 incumbent skips; one incumbent Chromium launch timeout (isolated rerun: 1 passed) |
+| Focused Phase241 text and reflow acceptance | 1 passed across 7 consumers |
+| Focused Phase241 subscription/payment-method review acceptance | 1 passed; 10 subscription reviews and 2 payment-method reviews |
+| MIX_ENV=test mix test test/accrue_admin/components/at_risk_table_test.exs | 6 passed |
 | MIX_ENV=test mix compile --warnings-as-errors in accrue_admin | Passed |
-| MIX_ENV=test mix test in accrue_admin | 642 passed, 0 failures |
 | MIX_ENV=test mix compile --warnings-as-errors in examples/accrue_host | Passed |
-| CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop --workers=1 | 1 passed |
+| CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop --workers=1 | 1 passed after CSS rebuild and host recompile |
 
-The new Phase 241 invoice journey ran in both package projects and passed in both. The 15 phase199 skips come from existing desktop-only test guards on the mobile project; no newly added test was skipped and all owner commands selected a positive test count.
+The 15 Phase199 skips are incumbent project-specific skips; neither new acceptance test was skipped. The Phase199 owner command had one unrelated incumbent drawer test fail because Chromium launch exceeded 180 seconds; that same test passed when rerun alone. The Phase191 suite passed in full after correcting the new test's ambiguous summary-action locator.
 
-Package CSS input digests were app.css fba4273889fbf4da70175e5570c7bf0d5a54b911feff22b946f2fc529fb0af9f and theme.css 079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e. Package JS input app.js was 6b11d62588e4af92b858035121874d1b510aff6e43519e7c8d7198f6af526dae. Built CSS 4b971b0b94e08ee1bb62d47c4142be59ec270daf79e2bad4af73e746d9bb478f and JS c852628a1ab87ba56d8e72153c972d8ce85e6421066b0aef6f3368e6a8186d0a matched compiled and HTTP-served bytes. The host manifest source digest was 34ab002a34b8645aac0dc846c4809b6ba3fd88445f77a44bb75ec5b0d587bb48. Font hashes also matched across package, compiled host, and HTTP response: Geist Sans 28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630; Geist Mono 5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a.
+Package CSS input digests are app.css 00b9435dbf82d8a383e5e4df0bde0f09de40f58071697b8b64033eb236694df7 and theme.css 079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e. Package JS input app.js is 6b11d62588e4af92b858035121874d1b510aff6e43519e7c8d7198f6af526dae. Built CSS d2ca57e4aa4209fbd68ac2a87dbd630cc3028bb4e999c044424674f5d0c1593f and JS c852628a1ab87ba56d8e72153c972d8ce85e6421066b0aef6f3368e6a8186d0a matched compiled-host bytes; the Phase237 browser owner also verified HTTP-served and browser-request hashes. Font hashes matched across package, compiled host, and HTTP response: Geist Sans 28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630; Geist Mono 5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a.
 
-The browser batch exercised direct 320px and intermediate/desktop layouts, dark/light/System theme behavior, reduced-motion styling, coarse-pointer hit geometry, and long-text wrapping. Effective OS theme changes were emulated by the existing package owner. Actual browser zoom controls, physical devices, assistive-technology speech, and live-provider outcomes were not observed; this execution did not run a separate 200% text-spacing or 400% zoom simulation.
+The browser batch exercised direct 320px and intermediate/desktop layouts, dark/light/System theme behavior, reduced-motion styling, coarse-pointer hit geometry, and long-text wrapping. The new text stress case applies a measured 2x computed font size to each rendered element before applying WCAG-style line, letter, and word spacing. The 400% check is a supported viewport simulation: a 1280 CSS-pixel reference becomes a 320 CSS-pixel viewport. It does not operate the browser zoom control or represent a physical zoom session. Physical devices, assistive-technology speech, and live-provider outcomes were not observed; final Linux visual goldens remain owned by Phase 243.
 
-The browser owners exercised representative subscription, invoice, and refund reviews. The full Admin suite covers every eligible subscription and payment-method review variant at the route owners, but this plan did not establish a browser interaction for every individual variant. A temporary loop against the phase191 seed did not reach the review panel for its first action and was removed rather than retained as misleading evidence. This remains an explicit browser-coverage gap.
+The dedicated review fixture supports the browser acceptance without changing the shared Phase191/199 route seeds. The test targets the canonical action controls, checks exact review facts, and returns to the detail view without dispatching. The Recovery table correction is limited to making its existing seven-column content scroll locally and keyboard-reachably when it exceeds the available width.
 
 ## Deviations from Plan
 
@@ -126,23 +213,48 @@ The browser owners exercised representative subscription, invoice, and refund re
 - **Verification:** Final Phase237 mounted-host browser spec passed (1 test, 0 failures).
 - **Commit:** 5b33e9c2
 
-No production route or trust-boundary changes were introduced. Built CSS/JS remained byte-identical to the checked-in package output.
+**4. [Rule 1 - Bug] Keep the wide Recovery table from expanding the browser page**
+- **Found during:** Acceptance gap closure
+- **Issue:** The seven-column at-risk table expanded the document beyond the viewport during the 2x text and spacing stress case.
+- **Fix:** Put the existing table in a labeled, keyboard-focusable local horizontal scroll region and rebuild the package stylesheet.
+- **Files modified:** accrue_admin/lib/accrue_admin/components/at_risk_table.ex, accrue_admin/assets/css/app.css, accrue_admin/priv/static/accrue_admin.css
+- **Verification:** At-risk component test passed 6/6; Phase199 stress test passed; host compiled and Phase237 browser owner passed.
+- **Commit:** 1b902e9f
+
+**5. [Rule 3 - Blocking test issue] Add disposable fixtures for every eligible review variant**
+- **Found during:** Acceptance gap closure
+- **Issue:** Existing phase191/199 shared route seeds lacked a scheduled-cancel subscription and two distinct payment methods, so the browser could not open every supported review.
+- **Fix:** Add a dedicated E2E-only review-matrix seed and route; keep existing shared route seeds unchanged. The test dismisses every review without dispatch.
+- **Files modified:** accrue_admin/test/support/e2e_fixtures.ex, accrue_admin/test/support/e2e_plug.ex, accrue_admin/e2e/admin-page-flow-phase191.spec.js
+- **Verification:** Focused browser test passed; Phase191 owner suite passed 28/28.
+- **Commit:** 1b902e9f
+
+**6. [Rule 1 - Bug] Target canonical subscription review controls in browser coverage**
+- **Found during:** Phase191 owner confirmation
+- **Issue:** The broad “Change plan” locator selected a summary control rather than the intended action-review button.
+- **Fix:** Anchor the action labels to the canonical subscription action names.
+- **Files modified:** accrue_admin/e2e/admin-page-flow-phase191.spec.js
+- **Verification:** Focused browser test passed; Phase191 owner suite passed 28/28.
+- **Commit:** 1b902e9f
+
+No route or trust-boundary changes were introduced. The rebuilt package CSS includes the Recovery table scroll-region rule; the generated JavaScript remained byte-identical.
 
 ## Coverage
 
 - **JRN-01 — PASS:** The package browser confirms customer-wide open invoice filters and exact returned invoice membership from the subscription destination.
 - **JRN-02 — PASS:** The package browser clicks the customer invoice detail and returns to the same customer invoice tab; owner integration tests remain in the invoice and scoped-path owners.
 - **JRN-03 — PASS:** Existing package route flows and the host Recovery journey preserve their selected destination meaning and owner context.
-- **JRN-04 — PASS:** Browser owners cover representative review, Escape/focus, held-busy/reconnect, and no-dispatch paths; the complete Admin suite includes exhaustive subscription and payment-method review owner tests.
+- **JRN-04 — PASS:** Browser acceptance opens all nine active subscription action reviews, the eligible Resume review, and both payment-method reviews, checks the exact records/effects, then dismisses without dispatch.
 
-All coverage uses automated evidence with human_judgment: false; no human UAT gate was introduced. Linux visual goldens remain owned by Phase 243.
+All listed acceptance coverage uses automated evidence with human_judgment: false; no human UAT gate was introduced. Linux visual goldens remain owned by Phase 243. The executable-UAT generator validated the summary coverage entries but cannot produce `241-UAT.md` because the phase has no `241-VERIFICATION.md`; no verifier artifact was fabricated. Physical zoom controls, speech output, and live-provider outcomes remain limited as recorded above.
 
 ## Self-Check: PASSED
 
-- Both task commits are ancestors of HEAD; evaluation scope resolves both task commits alongside the completion metadata commits.
-- All three modified spec files exist and have no whitespace errors.
-- Package and host compile/browser acceptance commands passed; full Admin suite passed with 642 tests and 0 failures.
-- No new skip, zero-selected run, stub, TODO, FIXME, route, auth, or schema surface was introduced.
+- All six YAML coverage entries include executable verification references and `human_judgment: false`.
+- Both new browser cases ran and passed; neither was skipped. Phase191 passed 28/28; Phase199 had 24 passes, 15 incumbent skips, and one incumbent launch timeout that passed in isolation.
+- The at-risk component test passed 6/6, package assets rebuilt, host compiled, and the mounted-host browser owner passed 1/1.
+- Physical zoom controls, assistive-technology speech, and live-provider outcomes remain outside this automated evidence; the 400% check is a documented 320 CSS-pixel viewport simulation.
+- The summary coverage entries pass the validator's field checks, but the validator cannot generate its separate automated UAT artifact until a genuine `241-VERIFICATION.md` exists; no artifact was fabricated.
 
 ---
 *Phase: 241-billing-operator-journeys*
