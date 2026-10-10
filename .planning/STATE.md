@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 241
 current_phase_name: Billing Operator Journeys
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 241-02-PLAN.md
-last_updated: "2026-10-10T01:32:01.844Z"
+stopped_at: Completed 241-03-PLAN.md
+last_updated: "2026-10-10T01:37:53.811Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 241 execution started
-state_head: ba7e7ceb6ef2f465e4d3de9411a72166f52c59d9
+state_head: 1a005a564e8845f1608078a9d3a11c398a640954
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 13
-  completed_plans: 8
+  completed_plans: 9
   percent: 25
 ---
 
@@ -34,7 +34,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 ## Current Position
 
 Phase: 241 (Billing Operator Journeys) — EXECUTING
-Current Plan: 3
+Current Plan: 4
 Total Plans in Phase: 7
 Status: Ready to execute
 Last activity: 2026-10-09 — Phase 241 execution started
@@ -160,6 +160,7 @@ Last activity: 2026-10-09 — Phase 241 execution started
 | Phase 240 P06 | 15 min | 2 tasks | 12 files |
 | Phase 241 P01 | 4 min | 2 tasks | 3 files |
 | Phase 241 P02 | 5 min | 2 tasks | 4 files |
+| Phase 241 P03 | 5 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -343,6 +344,9 @@ Last activity: 2026-10-09 — Phase 241 execution started
 - [Phase 241]: The broader invoice destination names the current global or selected-organization scope.
 - [Phase 241]: Return labels and paths come from one validated destination pair; caller labels and owner values are ignored.
 - [Phase 241]: Invoice return origins retain supported decoder filters and drop unsupported sort and cursor state.
+- [Phase 241]: Return labels and hrefs for payment, customer, and subscription detail come from the same ScopedPath validated destination.
+- [Phase 241]: Customer detail return origins must match the loaded customer, and the current owner is rebuilt by ScopedPath.
+- [Phase 241]: Existing billing mutation, fresh-scope, and stale-review checks remain in their current route owners.
 
 ### Pending Todos
 
@@ -423,8 +427,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T01:32:01.792Z
-Stopped at: Completed 241-02-PLAN.md
+Last session: 2026-10-10T01:37:53.768Z
+Stopped at: Completed 241-03-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

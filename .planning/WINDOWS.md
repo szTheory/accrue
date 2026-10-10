@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 7
+open_count: 8
 waived_count: 6
 fixed_count: 14
-total_count: 27
-last_updated: 2026-10-09T19:50:49.478Z
+total_count: 28
+last_updated: 2026-10-10T01:36:59.322Z
 ---
 
 # Broken Windows Ledger
@@ -42,6 +42,7 @@ last_updated: 2026-10-09T19:50:49.478Z
 | 25 | 239 | deviation | .planning/phases/239-integrated-quality-handoff/239-COVERAGE.md |  | Phase 239 route ledger duplicate stylesheet row was corrected and deterministic ordering is now enforced by ExUnit. | fixed |  | 2026-10-09T06:55:22.555Z | 2026-10-09T06:55:27.423Z |
 | 26 | 239 | deviation | .planning/ROADMAP.md |  | The roadmap progress SDK missed its existing Phase 239 checklist and row; the current plan checkbox and 1/4 In Progress row were reconciled directly. | fixed |  | 2026-10-09T06:56:00.230Z | 2026-10-09T06:56:00.293Z |
 | 27 | 240 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Linux Phase 211 visual comparison was not run on macOS; the baseline set is Linux-specific. | open |  | 2026-10-09T19:50:49.478Z |  |
+| 28 | 241 | deviation | accrue_admin/lib/accrue_admin/live/charge_live.ex | 80 | Renamed the validated return destination value and corrected two related-resource arguments after a focused compile error. | open |  | 2026-10-10T01:36:59.322Z |  |
 
 ````json
 [
@@ -383,6 +384,19 @@ last_updated: 2026-10-09T19:50:49.478Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-09T19:50:49.478Z",
+    "resolved_at": null,
+    "milestone": "v1.64"
+  },
+  {
+    "id": 28,
+    "kind": "deviation",
+    "phase": "241",
+    "file": "accrue_admin/lib/accrue_admin/live/charge_live.ex",
+    "line": 80,
+    "description": "Renamed the validated return destination value and corrected two related-resource arguments after a focused compile error.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-10T01:36:59.322Z",
     "resolved_at": null,
     "milestone": "v1.64"
   }
