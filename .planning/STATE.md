@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 242
 current_phase_name: Investigations and Remaining Admin Surfaces
-current_plan: 6
+current_plan: 7
 status: executing
-stopped_at: Completed 242-06-PLAN.md
-last_updated: "2026-10-10T13:28:18.392Z"
+stopped_at: Completed 242-07-PLAN.md
+last_updated: "2026-10-10T13:52:25.184Z"
 last_activity: 2026-10-10
 last_activity_desc: "Phase 242 planning passed independent review (7 plans, 4 waves, 16 automated tasks); last executed phase: 241; next: $gsd-execute-phase 242"
-state_head: 7711400e4353d5d971e4f306f2e28aeb5e904289
+state_head: 14ef0adf50848bd861ce520a15c6e51237fe8bf3
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 20
-  completed_plans: 19
+  completed_plans: 20
   percent: 50
 ---
 
@@ -34,9 +34,9 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 ## Current Position
 
 Phase: 242 (Investigations and Remaining Admin Surfaces) — EXECUTING
-Current Plan: 6
+Current Plan: 7
 Total Plans in Phase: 7
-Status: In Progress
+Status: Ready to execute
 Last activity: 2026-10-10 — Plan 242-06 completed with 2/2 task commits and passing focused verification; next: Plan 242-07
 
 ## Performance Metrics
@@ -172,6 +172,7 @@ Last activity: 2026-10-10 — Plan 242-06 completed with 2/2 task commits and pa
 | Phase 242 P03 | 13m | 3 tasks | 12 files |
 | Phase 242 P04 | 8 min | 2 tasks | 6 files |
 | Phase 242 P06 | 5min | 2 tasks | 11 files |
+| Phase 242 P07 | 19min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -384,6 +385,8 @@ Last activity: 2026-10-10 — Plan 242-06 completed with 2/2 task commits and pa
 - [Phase 242]: Fee saves recheck reviewed local account/default state, retain StepUp and optimistic locking, and make identical policy submissions no-ops.
 - [Phase 242]: Build Home's current route through ScopedPath and the resolved owner scope so shell navigation matches scoped destinations.
 - [Phase 242]: Render invoice collection methods through shared Copy labels; unknown enum values remain Unknown.
+- [Phase 242]: Use incumbent package and host browser owners and preserve their existing recurring CI ownership.
+- [Phase 242]: Measure source, package output, host-compiled output and served browser resources separately.
 
 ### Pending Todos
 
@@ -464,8 +467,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T13:28:18.310Z
-Stopped at: Completed 242-06-PLAN.md
+Last session: 2026-10-10T13:52:25.143Z
+Stopped at: Completed 242-07-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
