@@ -54,7 +54,7 @@ defmodule AccrueAdmin.ScopedPathTest do
     assert path =~ "tab=invoices"
   end
 
-  test "return path preserves supported list state in the configured mount and current owner" do
+  test "return path keeps destination filters and drops unsupported list state and caller owner" do
     scope = organization_scope()
 
     assert ScopedPath.return_path(
@@ -62,7 +62,7 @@ defmodule AccrueAdmin.ScopedPathTest do
              "/admin/subscriptions?view=all&q=ada&sort=created_at&cursor=next&org=foreign",
              scope
            ) ==
-             "/admin/subscriptions?cursor=next&org=acme&q=ada&sort=created_at&view=all"
+             "/admin/subscriptions?org=acme&q=ada&view=all"
   end
 
   test "direct links and cross-mount return paths fall back to the current subscriptions list" do
@@ -98,6 +98,87 @@ defmodule AccrueAdmin.ScopedPathTest do
              "/billing/subscriptions?view=bogus&q=%00bad&cursor=#{String.duplicate("x", 2_049)}",
              scope
            ) == "/billing/subscriptions?org=acme"
+  end
+
+  test "return destination labels and paths share supported invoice meaning in both mounts" do
+    scope = organization_scope()
+
+    origin =
+      "/billing/invoices?view=all&q=R%C3%A9sum%C3%A9&status=open&customer_id=cus_1&collection_method=send_invoice&sort=ignored&org=foreign"
+
+    for mount <- ["/billing", "/admin"] do
+      prefixed_origin = String.replace_prefix(origin, "/billing", mount)
+
+      assert ScopedPath.return_destination(mount, prefixed_origin, scope, nil, "/invoices") == %{
+               path:
+                 "#{mount}/invoices?collection_method=send_invoice&customer_id=cus_1&org=acme&q=R%C3%A9sum%C3%A9&status=open&view=all",
+               label: "Back to customer invoices"
+             }
+    end
+  end
+
+  test "query-free recognized routes are valid and get route-specific labels" do
+    scope = organization_scope()
+
+    assert ScopedPath.return_destination(
+             "/admin",
+             "/admin/invoices",
+             scope,
+             nil,
+             "/invoices"
+           ) == %{path: "/admin/invoices?org=acme", label: "Back to invoices"}
+
+    assert ScopedPath.return_destination(
+             "/billing",
+             "/billing/payments?fees_settled=false&view=all",
+             scope,
+             nil,
+             "/invoices"
+           ) == %{
+             path: "/billing/payments?fees_settled=false&org=acme&view=all",
+             label: "Back to payments"
+           }
+  end
+
+  test "customer detail return requires matching record and supported tab" do
+    scope = organization_scope()
+    customer_id = Ecto.UUID.generate()
+
+    assert ScopedPath.return_destination(
+             "/billing",
+             "/billing/customers/#{customer_id}?tab=payments&org=foreign",
+             scope,
+             customer_id,
+             "/invoices"
+           ) == %{
+             path: "/billing/customers/#{customer_id}?org=acme&tab=payments",
+             label: "Back to customer payments"
+           }
+
+    assert ScopedPath.return_destination(
+             "/billing",
+             "/billing/customers/#{Ecto.UUID.generate()}?tab=payments",
+             scope,
+             customer_id,
+             "/invoices"
+           ) == %{path: "/billing/invoices?org=acme", label: "Back to invoices"}
+  end
+
+  test "ambiguous, malformed, external, scheme-relative, and cross-mount origins use fallback" do
+    scope = organization_scope()
+
+    for origin <- [
+          "/admin/invoices?status=open&status=paid",
+          "/admin/invoices?q=%ZZ",
+          "//evil.example/admin/invoices",
+          "https://evil.example/admin/invoices",
+          "/billing/invoices"
+        ] do
+      assert ScopedPath.return_destination("/admin", origin, scope, nil, "/payments") == %{
+               path: "/admin/payments?org=acme",
+               label: "Back to payments"
+             }
+    end
   end
 
   test "customer detail returns are bound to the loaded record and current mount and owner" do

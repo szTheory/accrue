@@ -4,19 +4,18 @@ defmodule AccrueAdmin.ScopedPath do
   alias AccrueAdmin.OwnerScope
 
   @return_routes %{
-    "/subscriptions" => ~w(view status q sort direction cursor customer_id),
-    "/customers" => ~w(q owner_type has_default_payment_method sort direction cursor tab),
-    "/invoices" => ~w(q status sort direction cursor),
-    "/payments" => ~w(q status sort direction cursor),
+    "/subscriptions" => ~w(view status q customer_id),
+    "/customers" => ~w(q owner_type has_default_payment_method),
+    "/invoices" => ~w(view q status customer_id collection_method),
+    "/payments" => ~w(view q status customer_id fees_settled),
     "/analytics/recovery" => ~w(window)
   }
   @return_value_limits %{
     "view" => 32,
     "status" => 128,
     "q" => 200,
-    "sort" => 64,
-    "direction" => 8,
-    "cursor" => 2_048,
+    "collection_method" => 64,
+    "fees_settled" => 8,
     "customer_id" => 128,
     "tab" => 32,
     "owner_type" => 64,
@@ -55,10 +54,7 @@ defmodule AccrueAdmin.ScopedPath do
   """
   def return_path(mount_path, raw_return_path, owner_scope)
       when is_binary(mount_path) do
-    case validate_return_path(mount_path, raw_return_path) do
-      {:ok, suffix, params} -> build(mount_path, suffix, owner_scope, params)
-      :error -> build(mount_path, "/subscriptions", owner_scope)
-    end
+    return_destination(mount_path, raw_return_path, owner_scope, nil, "/subscriptions").path
   end
 
   def return_path(mount_path, _raw_return_path, owner_scope),
@@ -67,42 +63,78 @@ defmodule AccrueAdmin.ScopedPath do
   @doc false
   def return_path(mount_path, raw_return_path, owner_scope, expected_customer_id)
       when is_binary(mount_path) and is_binary(expected_customer_id) do
-    case validate_return_path(mount_path, raw_return_path) do
-      {:ok, "/customers/" <> customer_id = suffix, params}
-      when customer_id == expected_customer_id ->
-        build(mount_path, suffix, owner_scope, params)
-
-      {:ok, "/customers/" <> _customer_id, _params} ->
-        build(mount_path, "/subscriptions", owner_scope)
-
-      {:ok, suffix, params} ->
-        build(mount_path, suffix, owner_scope, params)
-
-      :error ->
-        build(mount_path, "/subscriptions", owner_scope)
-    end
+    return_destination(
+      mount_path,
+      raw_return_path,
+      owner_scope,
+      expected_customer_id,
+      "/subscriptions"
+    ).path
   end
 
   def return_path(mount_path, raw_return_path, owner_scope, _expected_customer_id),
     do: return_path(mount_path, raw_return_path, owner_scope)
 
+  @doc """
+  Validates a local return origin once and returns its rebuilt path and matching label.
+
+  Only destination-supported route meanings survive; the current owner is applied afresh.
+  """
+  def return_destination(
+        mount_path,
+        raw_return_path,
+        owner_scope,
+        expected_customer_id,
+        fallback_suffix
+      )
+      when is_binary(mount_path) and is_binary(fallback_suffix) do
+    case validate_return_path(mount_path, raw_return_path) do
+      {:ok, "/customers/" <> customer_id = suffix, params}
+      when is_binary(expected_customer_id) and customer_id == expected_customer_id ->
+        destination(mount_path, suffix, params, owner_scope)
+
+      {:ok, "/customers/" <> _customer_id, _params} ->
+        destination(mount_path, fallback_suffix, %{}, owner_scope)
+
+      {:ok, suffix, params} ->
+        destination(mount_path, suffix, params, owner_scope)
+
+      :error ->
+        destination(mount_path, fallback_suffix, %{}, owner_scope)
+    end
+  end
+
+  defp destination(mount_path, suffix, params, owner_scope) do
+    %{path: build(mount_path, suffix, owner_scope, params), label: return_label(suffix, params)}
+  end
+
+  defp return_label("/customers/" <> _id, %{"tab" => "invoices"}), do: "Back to customer invoices"
+  defp return_label("/customers/" <> _id, %{"tab" => "payments"}), do: "Back to customer payments"
+
+  defp return_label("/customers/" <> _id, %{"tab" => "subscriptions"}),
+    do: "Back to customer subscriptions"
+
+  defp return_label("/customers/" <> _id, _params), do: "Back to customers"
+  defp return_label("/invoices", %{"customer_id" => _}), do: "Back to customer invoices"
+  defp return_label("/invoices", _params), do: "Back to invoices"
+  defp return_label("/payments", %{"customer_id" => _}), do: "Back to customer payments"
+  defp return_label("/payments", _params), do: "Back to payments"
+  defp return_label("/subscriptions", %{"customer_id" => _}), do: "Back to customer subscriptions"
+  defp return_label("/subscriptions", _params), do: "Back to subscriptions"
+  defp return_label("/customers", _params), do: "Back to customers"
+  defp return_label("/analytics/recovery", _params), do: "Back to Recovery"
+  defp return_label(_, _params), do: "Back to invoices"
+
   @doc false
   def return_path(mount_path, raw_return_path, owner_scope, expected_customer_id, fallback_suffix)
       when is_binary(fallback_suffix) do
-    case validate_return_path(mount_path, raw_return_path) do
-      {:ok, "/customers/" <> customer_id = suffix, params}
-      when customer_id == expected_customer_id ->
-        build(mount_path, suffix, owner_scope, params)
-
-      {:ok, "/customers/" <> _customer_id, _params} ->
-        build(mount_path, fallback_suffix, owner_scope)
-
-      {:ok, suffix, params} ->
-        build(mount_path, suffix, owner_scope, params)
-
-      :error ->
-        build(mount_path, fallback_suffix, owner_scope)
-    end
+    return_destination(
+      mount_path,
+      raw_return_path,
+      owner_scope,
+      expected_customer_id,
+      fallback_suffix
+    ).path
   end
 
   defp validate_return_path(_mount_path, raw) when not is_binary(raw), do: :error
@@ -114,16 +146,9 @@ defmodule AccrueAdmin.ScopedPath do
            is_nil(uri.scheme) and is_nil(uri.host) and is_nil(uri.userinfo) and
              is_nil(uri.fragment),
          {suffix, allowed_keys} <- return_route(mount_path, uri.path),
-         true <- is_binary(uri.query) do
-      params =
-        uri.query
-        |> URI.decode_query()
-        |> Enum.filter(fn {key, value} ->
-          key in allowed_keys and safe_return_value?(key, value)
-        end)
-        |> Map.new()
-
-      {:ok, suffix, params}
+         true <- is_nil(uri.path) or not String.contains?(uri.path, "\\") do
+      params = decode_return_params(uri.query, allowed_keys)
+      if params == :error, do: :error, else: {:ok, suffix, params}
     else
       _ -> :error
     end
@@ -132,6 +157,33 @@ defmodule AccrueAdmin.ScopedPath do
   end
 
   defp validate_return_path(_mount_path, _raw), do: :error
+
+  defp decode_return_params(nil, _allowed_keys), do: %{}
+
+  defp decode_return_params(query, allowed_keys) do
+    if String.match?(query, ~r/%(?![0-9A-Fa-f]{2})/) do
+      :error
+    else
+      decode_return_pairs(query, allowed_keys)
+    end
+  end
+
+  defp decode_return_pairs(query, allowed_keys) do
+    pairs = URI.query_decoder(query) |> Enum.to_list()
+    keys = Enum.map(pairs, &elem(&1, 0))
+
+    if length(keys) != MapSet.size(MapSet.new(keys)) do
+      :error
+    else
+      pairs
+      |> Enum.filter(fn {key, value} ->
+        key in allowed_keys and safe_return_value?(key, value)
+      end)
+      |> Map.new()
+    end
+  rescue
+    ArgumentError -> :error
+  end
 
   defp return_route(mount_path, path) do
     Enum.find(@return_routes, fn {route, _keys} -> path == mount_path <> route end) ||
@@ -155,9 +207,9 @@ defmodule AccrueAdmin.ScopedPath do
 
     is_binary(value) and byte_size(value) <= max_bytes and
       not String.match?(value, ~r/[\x00-\x1F\x7F]/) and
-      (key != "view" or value in ["all", "at_risk"]) and
-      (key != "direction" or value in ["asc", "desc"]) and
+      (key != "view" or value == "all") and
       (key != "window" or value in ["7d", "30d", "90d"]) and
-      (key != "tab" or value in ~w(subscriptions invoices payments))
+      (key != "tab" or value in ~w(subscriptions invoices payments)) and
+      (key != "fees_settled" or value in ["true", "false"])
   end
 end
