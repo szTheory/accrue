@@ -389,6 +389,12 @@ defmodule AccrueAdmin.Live.EventsLive do
     if first_run_empty?(params, summary), do: :first_run_empty, else: :filtered_empty
   end
 
+  defp list_state_copy(:filtered_empty) do
+    Copy.resource_state_copy(:events, :filtered_empty)
+    |> Map.put(:heading, Copy.events_list_filtered_empty_title())
+    |> Map.put(:body, Copy.events_list_filtered_empty_body())
+  end
+
   defp list_state_copy(state), do: Copy.resource_state_copy(:events, state)
 
   defp first_run_empty?(params, :unavailable), do: !filter_active?(params)
@@ -417,7 +423,10 @@ defmodule AccrueAdmin.Live.EventsLive do
   defp event_cell(row, mount_path, owner_scope, params) do
     label = row.type || Copy.billing_events_when_unknown()
     list_return = scoped_events_return(mount_path, owner_scope, params)
-    href = ScopedPath.build(mount_path, "/events/#{row.id}", owner_scope, %{"return" => list_return})
+
+    href =
+      ScopedPath.build(mount_path, "/events/#{row.id}", owner_scope, %{"return" => list_return})
+
     escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
     Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
   end

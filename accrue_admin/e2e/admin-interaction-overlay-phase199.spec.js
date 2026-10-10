@@ -1276,6 +1276,15 @@ test.describe("Phase 199 interaction and overlay contract", () => {
       }
       await page.setViewportSize({ width: 768, height: 1024 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(769);
+      if (surface === "Home and shell" && coarsePointer) {
+        const shortcutHeights = await page
+          .locator(".ax-home .ax-page-header-actions > .ax-button")
+          .evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().height));
+        expect(shortcutHeights, "Home customer, search and subscription shortcuts are mounted").toHaveLength(3);
+        for (const height of shortcutHeights) {
+          expect(height, "intermediate-width coarse-pointer shortcut hit target is at least 44 CSS px").toBeGreaterThanOrEqual(44);
+        }
+      }
       await page.setViewportSize({ width: 1280, height: 900 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1281);
     }

@@ -202,7 +202,7 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
   ).toBeVisible();
   await page.goto(`/admin/events?${owner}&q=does-not-match-phase238`);
   await waitForLiveView(page);
-  await expect(page.getByText("No event ledger rows match these filters.")).toBeVisible();
+  await expect(page.getByText("No ledger rows match these filters.", { exact: true })).toBeVisible();
 
   await page.goto(`/admin/coupons?${owner}`);
   await waitForLiveView(page);

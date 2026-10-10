@@ -189,7 +189,7 @@ defmodule AccrueAdmin.ListContracts do
       states: %{
         first_run_empty: "No billing events yet.",
         queue_empty: nil,
-        filtered_empty: "No event ledger rows match these filters.",
+        filtered_empty: "No ledger rows match these filters.",
         loading: "Loading billing events."
       },
       clear_all_on_default?: false

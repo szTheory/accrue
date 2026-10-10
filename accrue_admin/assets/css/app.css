@@ -913,8 +913,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 
 .ax-body {
   margin: 0;
-  font: var(--ax-type-body-relaxed-font);
-  letter-spacing: var(--ax-type-body-relaxed-tracking); /* ax-type-exception: semantic body class exposes composed role tracking. */
+  font: var(--ax-type-body-font);
+  letter-spacing: var(--ax-type-body-tracking); /* ax-type-exception: semantic body class exposes composed role tracking. */
   overflow-wrap: anywhere;
 }
 
@@ -4351,6 +4351,10 @@ details[open].ax-dropdown .ax-dropdown-panel {
    Preserve compact rows for fine pointers, but give table links the shared
    44px frequent-action target when the input is coarse. */
 @media (pointer: coarse) {
+  .ax-home .ax-page-header-actions > .ax-button {
+    min-block-size: 44px;
+  }
+
   .ax-data-table-shell .ax-link {
     display: inline-flex;
     align-items: center;
@@ -4363,20 +4367,20 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 html.accrue-admin[data-theme="dark"] .ax-card.ax-data-table-shell {
-  background-color: #171d24 !important;
+  background-color: var(--ax-elevated) !important;
 }
 
 html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
-  color: #f4f7fa !important;
+  color: var(--ax-primary) !important;
 }
 
 @media (prefers-color-scheme: dark) {
   html.accrue-admin[data-theme="system"] .ax-card.ax-data-table-shell {
-    background-color: #171d24 !important;
+    background-color: var(--ax-elevated) !important;
   }
 
   html.accrue-admin[data-theme="system"] .ax-data-table-shell .ax-link {
-    color: #f4f7fa !important;
+    color: var(--ax-primary) !important;
   }
 }
 
