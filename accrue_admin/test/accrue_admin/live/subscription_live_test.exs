@@ -8,6 +8,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
   alias Accrue.Test.Factory
   alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Invoices
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.TestRepo
 
@@ -252,8 +253,19 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     conn: conn,
     subscription: subscription
   } do
+    long_subscription_id = "sub_" <> String.duplicate("long-identifier-", 12)
+    long_customer_name = String.duplicate("Northstar billing account ", 8)
+
     subscription
-    |> Subscription.changeset(%{current_period_start: nil, current_period_end: nil})
+    |> Subscription.changeset(%{
+      processor_id: long_subscription_id,
+      current_period_start: nil,
+      current_period_end: nil
+    })
+    |> TestRepo.update!()
+
+    TestRepo.get!(Customer, subscription.customer_id)
+    |> Customer.changeset(%{name: long_customer_name})
     |> TestRepo.update!()
 
     TestRepo.delete_all(
@@ -261,10 +273,12 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     )
 
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
     assert html =~ "Lifecycle"
     assert html =~ "Subscription is active"
+    assert html =~ long_subscription_id
+    assert html =~ long_customer_name
     assert html =~ "Price is not confirmed in admin"
     assert html =~ "Current period is not shown in admin"
     assert html =~ "Amount is not confirmed in admin"
@@ -273,6 +287,27 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute html =~ "Setup incomplete - active billing unverified"
     refute html =~ "Billing is not active"
     refute html =~ "Due now"
+
+    assert has_element?(view, "[data-ax-action-band]")
+    assert has_element?(view, "[data-ax-related-resources]")
+    refute html =~ "0 open invoices"
+
+    {invoice_rows, _cursor} =
+      Invoices.list(
+        filter:
+          Invoices.decode_filter(%{
+            "customer_id" => subscription.customer_id,
+            "status" => "open"
+          }),
+        limit: 20
+      )
+
+    assert invoice_rows == []
+
+    invoice_href = link_href(view, "Open invoices for this customer")
+    invoice_query = invoice_href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    assert invoice_query["customer_id"] == subscription.customer_id
+    assert invoice_query["status"] == "open"
   end
 
   test "lifecycle states stay distinct from scheduled cancellation and collection pause", %{
