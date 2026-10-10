@@ -1,6 +1,7 @@
 ---
 phase: 240-shared-system-and-real-billing-exemplar
 plan: "03"
+status: complete
 subsystem: billing-ui
 tags: [invoice, phoenix-liveview, playwright, responsive-css, accessibility]
 requires:
