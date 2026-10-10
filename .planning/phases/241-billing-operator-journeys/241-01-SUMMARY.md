@@ -121,3 +121,9 @@ None - no external service configuration required.
 ---
 *Phase: 241-billing-operator-journeys*
 *Completed: 2026-10-10*
+
+## Self-Check: PASSED
+
+- Summary exists and is committed.
+- Task 1 (`b36fe0d0`) and Task 2 (`ad73b9f5`) are ancestors of HEAD.
+- Evaluation scope resolved all three plan commits; the coverage classifier auto-passed both deliverables.

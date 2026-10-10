@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 241
 current_phase_name: Billing Operator Journeys
-current_plan: Not started
+current_plan: 2
 status: executing
-stopped_at: Phase 241 plans verified; next command $gsd-execute-phase 241
-last_updated: "2026-10-10T01:17:24.039Z"
+stopped_at: Completed 241-01-PLAN.md
+last_updated: "2026-10-10T01:26:40.708Z"
 last_activity: 2026-10-09
-last_activity_desc: Phase 241 plans independently verified; ready to execute
-state_head: ec521493d1b44f08801689cf137cc7c20253d0e3
+last_activity_desc: Phase 241 execution started
+state_head: "0b2fa4bcce37040ed690c213f7c8de3828667b24"
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 13
-  completed_plans: 6
+  completed_plans: 7
   percent: 25
 ---
 
@@ -27,17 +27,17 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 241 - Billing Operator Journeys. Planning passed: 7 plans across 4 waves, all 4 requirements and 20 decisions covered. Next command: $gsd-execute-phase 241. Phase 240 remains the last completed implementation; do not repeat discussion or planning. See 241-PLAN-CHECK.md for the current handoff.
+**Current focus:** Phase 241 — Billing Operator Journeys
 **Progress:** [███░░░░░░░] 25% (1 of 4 milestone phases complete; 6 of 13 planned plans executed)
 **Planned work completed:** Phase 240: 6/6 plans, current Admin 618/0, Node 41/0, package browser 89 passed / 19 incumbent skips, full host gate passed. Phases 241–243 remain. v1.63 is archived and closed.
 
 ## Current Position
 
-Phase: 241 (Billing Operator Journeys) — READY TO EXECUTE
-Current Plan: Not started
+Phase: 241 (Billing Operator Journeys) — EXECUTING
+Current Plan: 2
 Total Plans in Phase: 7
 Status: Ready to execute
-Last activity: 2026-10-09 - Phase 241 plans independently verified; ready to execute
+Last activity: 2026-10-09 — Phase 241 execution started
 
 ## Performance Metrics
 
@@ -158,6 +158,7 @@ Last activity: 2026-10-09 - Phase 241 plans independently verified; ready to exe
 | Phase 240 P04 | 12 | 2 tasks | 11 files |
 | Phase 240 P05 | 61 | 2 tasks | 23 files |
 | Phase 240 P06 | 15 min | 2 tasks | 12 files |
+| Phase 241 P01 | 4 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -337,6 +338,8 @@ Last activity: 2026-10-09 - Phase 241 plans independently verified; ready to exe
 - [Phase 240]: Use Phase 239 route authority and live ComponentRegistry APIs rather than adding a second route or component registry.
 - [Phase 240]: Keep first-fresh performance values diagnostic only and keep future behavior guarded by existing owner tests.
 - [Phase 240]: Preserve the 100ms TrustSmoke budget and original 222ms observation; final full host gate passed after repairing archive/test contracts. No open Phase 240 host failure remains.
+- [Phase 241]: Customer invoice links use customer_id and status=open; no subscription-only filter or count is implied.
+- [Phase 241]: The broader invoice destination names the current global or selected-organization scope.
 
 ### Pending Todos
 
@@ -417,9 +420,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T01:17:23.983Z
-Stopped at: Phase 241 plans verified; next command $gsd-execute-phase 241
-Resume file: .planning/phases/241-billing-operator-journeys/241-PLAN-CHECK.md
+Last session: 2026-10-10T01:26:40.673Z
+Stopped at: Completed 241-01-PLAN.md
+Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
