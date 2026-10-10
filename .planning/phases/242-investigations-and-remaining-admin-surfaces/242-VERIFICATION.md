@@ -1,6 +1,6 @@
 ---
 phase: 242-investigations-and-remaining-admin-surfaces
-verified: 2026-10-10T14:33:13Z
+verified: 2026-10-10T16:07:36Z
 status: passed
 score: 80/80 must-haves verified
 covered_files:
@@ -21,10 +21,8 @@ covered_files:
   - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-07-PLAN.md
   - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-07-SUMMARY.md
   - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-CONTEXT.md
-  - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-GATES.md
   - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-PATTERNS.md
   - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-PROBE-COVERAGE.md
-  - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-REGRESSION.md
   - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-RESEARCH.md
   - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-REVIEW-DISPOSITION.md
   - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-REVIEW-FIX.md
@@ -35,6 +33,8 @@ covered_files:
   - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-UI-SPEC.md
   - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-VALIDATION.md
   - accrue_admin/assets/css/app.css
+  - accrue_admin/test/accrue_admin/assets_test.exs
+  - examples/accrue_host/_build/test/lib/accrue_admin/priv/static/accrue_admin.css
   - accrue_admin/assets/css/theme.css
   - accrue_admin/assets/js/hooks/command_palette.js
   - accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js
@@ -87,17 +87,23 @@ covered_files:
   - examples/accrue_host/e2e/phase234-search-completion.spec.js
   - examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js
   - examples/accrue_host/test/accrue_host_web/admin_webhook_replay_test.exs
-covered_digest: "v3:sha256:e1f5a6b7d383057a2869a039e98d65188ea8559643d14cee126ddcb56e74c855"
+covered_digest: "v3:sha256:79d3d0236833e8f846dfb77f7990077282a7de1caaa25d856cd0e7cdc6365c2a"
 behavior_unverified: 0
+re_verification:
+  previous_status: passed
+  previous_score: 80/80
+  gaps_closed: []
+  gaps_remaining: []
+  regressions: []
 overrides_applied: 0
 ---
 
 # Phase 242: Investigations and Remaining Admin Surfaces — Verification Report
 
 **Phase Goal:** Operators can investigate existing events and deliveries, understand catalog and Connect relationships, and find the correct scoped record through a consistent Admin shell and domain language.
-**Verified:** 2026-10-10T14:33:13Z
+**Verified:** 2026-10-10T16:07:36Z
 **Status:** passed
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — shared stylesheet and asset updates required current-source verification
 
 ## Goal Achievement
 
@@ -154,13 +160,14 @@ All declared plan artifacts passed `verify.artifacts`: Plan 01 8/8, Plan 02 6/6,
 | Connect list/detail | connected-account snapshot and local fee policy | account query and persisted local policy | Yes; snapshot freshness not claimed | FLOWING |
 | Global search | Customer/Invoice/Subscription groups | existing scoped query modules, limit 5 each | Yes | FLOWING |
 | Home/shell | route and owner labels | resolved Admin mount/session scope | Yes | FLOWING |
-| Browser assets | CSS/JS | package build artifacts and served resource bytes | Yes | FLOWING |
+| Browser assets | CSS/JS | current package asset owner and host compile; historical host Phase 238 identity assertion | Yes | FLOWING; host HTTP identity predates final CSS update |
 
 ## Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 |---|---|---|---|
-| Combined Admin, hook, and host regression | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test && node --test test/js/*.mjs && cd ../examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test` | Exit 0; Admin 679/0, Node 44/44, host 223/0; both warnings-as-errors compiles passed. Executed by the parent verification runner; log `/private/tmp/accrue242-final-regression.log`. | ✓ PASS |
+| Combined Admin, hook, and host regression | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test && node --test test/js/*.mjs && cd ../examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test` | Exit 0; Admin 679/0, Node 44/44, host 223/0; both warnings-as-errors compiles passed before the final Phase 241 CSS correction. Log `/private/tmp/accrue242-final-regression.log`. | ✓ PASS (historical for final CSS) |
+| Current targeted source/asset regression | GSD bounded command: Admin warnings-as-errors compile + assets test + all Node tests; host warnings-as-errors compile + `admin_mount_test.exs` | Exit 0: assets 4/0, Node 44/0, host mount 5/0; both compiles passed after current CSS was built. | ✓ PASS |
 | Package browser consumers | `CI=1 npm --prefix accrue_admin run e2e:phase191` and `... run e2e:phase199` | 29 passed/1 incumbent applicability skip; 27 passed/15 incumbent applicability skips. No acceptance assertion or threshold was relaxed. | ✓ PASS |
 | Mounted host consumers and served asset identity | `cd examples/accrue_host && CI=1 npx playwright test e2e/phase238-admin-events-webhooks.spec.js e2e/phase234-search-completion.spec.js --project=chromium-desktop --workers=1` | 2 passed; package/compiled/HTTP/browser CSS and JS identity checks passed. | ✓ PASS |
 | Prior Phase 240/241 browser regressions | Phase 196 14/0; Phase 198 28 passed/4 incumbent skips; Phase 237 1/0 | Permitted runner passed; `/private/tmp/accrue242-prior-browser-regression-permitted.log`. | ✓ PASS |
@@ -189,7 +196,7 @@ Every requirement listed by all seven PLAN frontmatters resolves to REQUIREMENTS
 - Validation audit: `validated`, Nyquist compliant, wave 0 complete; all 16 task owners have nonzero accepted evidence.
 - Security audit: `verified`, ASVS L1, 8/8 threats closed, 0 open; planned existing-dependency risk is recorded as accepted.
 - Code review: WR-01 fixed; specific semantic retry regression passed; disposition records `open: 0`.
-- UI review: 16/24 initially; one bounded corrective batch addressed body 16px/400/1.4, Home 44px coarse-pointer geometry, exact filtered-Events title and dark table token usage. CSS/JS acceptance and compiled/served identity passed.
+- UI review: source-only final score 21/24. The bounded corrective batch addressed body 16px/400/1.4, Home 44px coarse-pointer geometry, exact filtered-Events title and dark table token usage; retry preservation is also verified. Residual warnings remain scoped; no new visual confirmation is claimed.
 - Debt/stub scan on changed implementation and owner-test files found no unreferenced `TBD`, `FIXME`, or `XXX`, no user-visible placeholders, and no empty-return implementation feeding rendered output. Matches in tests, intentional input placeholders and safety guard branches are not stubs.
 - Anti-patterns blocking the phase: none.
 
@@ -203,7 +210,7 @@ Every requirement listed by all seven PLAN frontmatters resolves to REQUIREMENTS
 - **Semantic ExUnit/Node evidence:** tests exercised exact database/query membership, state/result distinctions, owner and generation guards, retries, validation, jobs/audit effects, and hook selection using the owning test harnesses.
 - **Mounted browser evidence:** Playwright exercised named package and host paths on current built and served assets; host assertions verified resource identity. This does not imply every route/state combination ran in a browser.
 - **Emulated checks:** viewport widths, effective themes, coarse-pointer media and text-spacing/enlargement stress are browser emulations. They are not physical device, native zoom, host-forced theme or speech-only screen-reader tests.
-- **Visual observation:** one historical Connect screenshot was inspected before the single corrective batch; zero confirming inspections followed. No image from the later incidental regression capture batch was inspected. No new capture/scan was made during this verification.
+- **Visual observation:** one historical Connect screenshot was inspected before the single corrective batch; zero confirming inspections followed. No image from the later incidental regression capture batch was inspected. No new capture/scan was made during this verification. The final UI audit is source-only, not a visual confirmation.
 - **Unobserved external claims:** no remote CI result, live-provider result, Linux golden review, physical device/native browser zoom or screen-reader speech is claimed. Phase 243 owns Linux goldens and the stable Fake preview; these limits are not confirmation-only human UAT tasks for this phase.
 
 ### Decision Coverage
@@ -216,9 +223,9 @@ None. The requested phase acceptance is decided by repeatable semantic and mount
 
 ### Gaps Summary
 
-No blocking gap found. All four roadmap success criteria and all seven plans' 80 frontmatter truths are supported by substantive, wired code and their named executed owners. The 28 edge and 44 UI predicates retain their individual owners; aggregate suite totals are not treated as proof of universal coverage. No UAT file was generated here because the canonical handoff assigns executable UAT generation and contract execution after this verification report to the phase-completion owner.
+No blocking gap found. All four roadmap success criteria and all seven plans' 80 frontmatter truths are supported by substantive, wired code and named owners. The 28 edge and 44 UI predicates retain their individual owners; aggregate totals are not treated as universal coverage. The additional current package asset gate passed 4/0; broad suites and browser matrices remain separately identified by date and scope. No UAT file was generated here because executable UAT generation and contract execution belong to the phase-completion owner.
 
 ---
 
-_Verified: 2026-10-10T14:33:13Z_  
+_Verified: 2026-10-10T16:07:36Z_\
 _Verifier: the agent (gsd-verifier)_

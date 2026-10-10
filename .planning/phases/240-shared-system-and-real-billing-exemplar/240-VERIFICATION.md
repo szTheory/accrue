@@ -1,6 +1,6 @@
 ---
 phase: 240-shared-system-and-real-billing-exemplar
-verified: 2026-10-10T15:15:03Z
+verified: 2026-10-10T16:07:36Z
 status: passed
 score: 47/47 must-haves verified
 covered_files:
@@ -51,6 +51,8 @@ covered_files:
   - accrue_admin/lib/accrue_admin/live/subscriptions_live.ex
   - accrue_admin/lib/accrue_admin/scoped_path.ex
   - accrue_admin/priv/static/accrue_admin.css
+  - accrue_admin/test/accrue_admin/assets_test.exs
+  - examples/accrue_host/_build/test/lib/accrue_admin/priv/static/accrue_admin.css
   - accrue_admin/priv/static/accrue_admin.js
   - accrue_admin/test/accrue_admin/e2e_fixtures_test.exs
   - accrue_admin/test/accrue_admin/live/invoice_live_test.exs
@@ -66,7 +68,7 @@ covered_files:
   - examples/accrue_host/e2e/phase237-admin-billing.spec.js
   - examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js
   - scripts/ci/verify_phase240_evidence.mjs
-covered_digest: "v3:sha256:9fce478e4c025f8c622e843fd3487618f10b43fcfc3e0d6596126ec63e7f7027"
+covered_digest: "v3:sha256:e8b26a3f0bb41c4114ac13907e6f7a03d83fa3954b5ddbb104db85aaf95c3568"
 behavior_unverified: 0
 re_verification:
   previous_status: passed
@@ -87,7 +89,7 @@ deferred:
 # Phase 240: Shared System and Real Billing Exemplar Verification Report
 
 **Phase Goal:** Operators can use a coherent, truthful invoice list → detail → action review flow and a dense subscription view through the incumbent Admin system, with shared interaction and evidence patterns ready for other existing routes.
-**Verified:** 2026-10-10T15:15:03Z
+**Verified:** 2026-10-10T16:07:36Z
 **Status:** passed
 **Re-verification:** Yes — shared-source and consumer changes in Phases 241–242 required current verification
 
@@ -206,11 +208,11 @@ Phase 241 changed shared Admin styles/JS and the invoice/subscription consumers,
 
 ## Current-source regeneration (2026-10-10)
 
-The prior report became stale after later phases changed shared Admin sources and CI. All 47 plan must-haves were rechecked against current LiveViews, query/action owners, browser/host wiring, current UI contracts and current regression evidence. The five roadmap outcomes are covered by the same verified plan truths. Prose-only artifact and key-link declarations were not treated as evidence; source, call paths, repository queries and named executed owners were inspected.
+The prior report became stale after later phases changed shared Admin sources and CI. All 47 plan must-haves were rechecked against current LiveViews, query/action owners, browser/host wiring, current UI contracts and named owner evidence. The later Phase 241 Plan 08 changes only two action-gap CSS declarations, one existing browser assertion, and rebuilt package CSS; the final mounted test measures the corrected geometry against the token. The five roadmap outcomes remain covered by the verified plan truths. Prose-only artifact and key-link declarations were not treated as evidence.
 
-Fresh regression runs in `/private/tmp/accrue242-final-regression.log` and `/private/tmp/accrue242-prior-browser-regression-permitted.log` passed warnings-as-errors compiles, Admin 679/0, Node 44/0 and host 223/0. Current browser evidence reports Phase191 29 passed/1 incumbent skip, Phase199 27 passed/15 incumbent skips, invoice list/detail 42 passed/4 incumbent skips, prior mounted host 1 passed, and current mounted host 1 passed. The parent’s integrated acceptance record and Phase242 gate ledger preserve other owner outcomes and earlier failing attempts. No remote CI pass is claimed. Nyquist remains validated/compliant; security audit confirms 13/13 unique IDs closed, `threats_open: 0`, ASVS L1; current code-review delta covered five overlapping files with 0 findings.
+Fresh broad regression runs in `/private/tmp/accrue242-final-regression.log` and `/private/tmp/accrue242-prior-browser-regression-permitted.log` passed warnings-as-errors compiles, Admin 679/0, Node 44/0 and host 223/0 before the final Plan 08 CSS correction. The current 4px action-spacing correction has its own executed Phase 199 mounted desktop/mobile owner (2/0, with three post-fix batches total) and asset-byte owner (4/0). This refresh also reran Admin/host warnings-as-errors compiles, Node 44/0, package assets 4/0, and host admin mount 5/0. Historical browser matrices remain historical; no remote CI pass is claimed. Nyquist remains validated/compliant; security audit confirms 13/13 unique IDs closed, `threats_open: 0`, ASVS L1; code-review delta is clean.
 
-The current UI audit is 14/24. It records warnings in unreferenced legacy `.ax-summary-health-*` CSS (0px gap/0.5px vertical padding and 900/950 weights). The active subscription lifecycle markup uses separate `.ax-detail-health-*` classes with token spacing, and the flagged legacy classes have no LiveView caller. These warnings do not fail a plan must-have. Historical captures/measurements are not presented as fresh visual confirmation; no image was inspected or captured. Actual browser zoom, physical device, assistive speech, live-provider and remote CI behavior are not claimed. Phase243 owns final reviewed Linux goldens.
+The source-only UI audit is 14/24. It records warnings in unreferenced legacy `.ax-summary-health-*` CSS (0px gap/0.5px vertical padding and 900/950 weights). The active subscription lifecycle markup uses separate `.ax-detail-health-*` classes with token spacing, and the flagged legacy classes have no LiveView caller. The Phase 241 action-gap correction is also recorded as using the 4px token. After the host compile, compiled host package CSS and tracked package CSS both measured 129,813 bytes with SHA-256 `089878ed…`. The latest HTTP-served byte assertion remains the earlier mounted browser run; no HTTP request or screenshot was produced for the updated CSS. These warnings do not fail a plan must-have. Actual browser zoom, physical device, assistive speech, live-provider and remote CI behavior are not claimed. Phase 243 owns final reviewed Linux goldens.
 
 ## Gaps Summary
 
@@ -218,5 +220,5 @@ No blocking or uncertain must-have remains. The current implementation delivers 
 
 ---
 
-_Verified: 2026-10-10T15:15:03Z_
+_Verified: 2026-10-10T16:07:36Z_
 _Verifier: the agent (gsd-verifier)_

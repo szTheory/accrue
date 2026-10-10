@@ -9,7 +9,7 @@ created: "2026-10-10"
 
 # Phase 241 — Security
 
-Authored register verified by the independent security auditor at ASVS L1, with `block_on: high`. All 16 mitigations are closed; none was accepted to bypass missing evidence.
+Authored register verified by the independent security auditor at ASVS L1, with `block_on: high`. All 17 mitigations are closed; one explicitly documented low-severity dependency risk is accepted.
 
 ## Trust Boundaries
 
@@ -39,12 +39,16 @@ Authored register verified by the independent security auditor at ASVS L1, with 
 | T-241-14 | Repudiation | Action result/reconnect | high | mitigate | Direct Fake callback counts for refund/method actions, timeout and APIError HTTP500 guidance, no repeat/reconnect dispatch; `charge_live_test.exs:645`, `customer_live_test.exs:454` | closed |
 | T-241-15 | Tampering | Mounted billing journey | high | mitigate | Scoped exclusion and authenticated sandbox-only Fake counter; mounted Escape dismissal measured `invoice_action` 0→0 | closed |
 | T-241-16 | Information Disclosure | Served evidence/fixtures | medium | mitigate | Test-only fixture seam; bounded provenance/hash/counter manifest without secrets/provider payloads | closed |
+| T-241-17 | Tampering | Admin package CSS spacing | low | mitigate | Approved 4px token is used in both action gaps; package assets test verifies served CSS bytes equal the compiled package asset. Plan 08 records source/built/compiled/package-served identity; host-served identity remains unobserved. | closed |
+| T-241-SC | Tampering | Package supply chain | low | accept | Existing package supply-chain exposure is unchanged by Plan 08; package source and compiled CSS bytes are verified, but this does not establish external provenance or remote CI. Accepted as a bounded dependency risk under Plan 08. | accepted |
 
 Implementation paths above are relative to `accrue_admin/lib/accrue_admin/` and owning tests to `accrue_admin/test/accrue_admin/`. Host counter guards are in `examples/accrue_host/lib/accrue_host_web/router.ex:54` and `controllers/organization_scope_controller.ex:98`. Mounted assertions are in `examples/accrue_host/e2e/phase237-admin-billing.spec.js:306`.
 
 ## Accepted Risks Log
 
-No accepted risks.
+| Threat ID | Risk | Severity | Acceptance | Boundary |
+|---|---|---|---|---|
+| T-241-SC | Package supply-chain provenance beyond locally verified package source/build/compiled bytes | low | Accepted in 241-08-PLAN.md | No claim of external provenance, remote CI, or host-served identity for Plan 08. |
 
 ## Security Audit Trail
 
@@ -53,6 +57,7 @@ No accepted risks.
 | 2026-10-10 | 16 | 13 | 2 | Independent audit found T-241-07/14/15 acceptance gaps; repaired without accepting risk |
 | 2026-10-10 | 16 | 15 | 1 | Recheck found APIError message path bypassing uncertainty guidance |
 | 2026-10-10 | 16 | 16 | 0 | APIError negative regression reproduced then fixed; independent recheck SECURED |
+| 2026-10-10 | 18 | 17 | 0 | Plan 08 audit: T-241-17 mitigated by tokenized package CSS and asset-byte controls; T-241-SC explicitly accepted as low risk. |
 
 ## Executed Evidence and Limits
 

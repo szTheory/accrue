@@ -9,7 +9,7 @@ created: "2026-10-09"
 
 # Phase 241 — Validation Strategy
 
-> Execution audit: every planned task is backed by a focused behavioral owner and the combined phase gates passed. The evidence and limits below distinguish browser viewport simulations from physical zoom/device/provider observations.
+> Execution audit: every planned task across plans 01–08 is backed by a focused behavioral owner and the combined phase gates passed. The evidence and limits below distinguish browser viewport simulations from physical zoom/device/provider observations.
 
 ## Test Infrastructure
 
@@ -53,24 +53,26 @@ All commands assume repository-root cwd and select existing tracked owners. Ever
 | 241-06 T2 | 3 | JRN-04 / T-241-13, T-241-14 | PASS — selected method review and stale-default rejection | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/live/customer_live_test.exs` |
 | 241-07 T1 | 4 | JRN-01..04 / T-241-15 | PASS — Phase191 28/28; Phase199 24 pass, 15 incumbent skips; new text/reflow and review cases pass | `cd accrue_admin && mix accrue_admin.assets.build && cd .. && CI=1 npm --prefix accrue_admin run e2e:phase191 && CI=1 npm --prefix accrue_admin run e2e:phase199` |
 | 241-07 T2 | 4 | JRN-01..04 / T-241-15, T-241-16 | PASS — Admin compile/full suite 642/0; host compile and mounted host 1/1 pass | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test && cd ../examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors && CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop --workers=1` |
+| 241-08 T1 | 5 | JRN-04 / D1, T-241-17 | PASS — mounted invoice/subscription action bands and active dunning row compute to the 4px token; narrow layout has no ordinary overflow; subscription/coarse primary targets are nonempty and 44px | `cd accrue_admin && mix accrue_admin.assets.build && cd .. && CI=1 npm --prefix accrue_admin run e2e:phase199 -- --grep '@phase241 action spacing' --project=chromium-desktop --project=chromium-mobile` |
+| 241-08 T2 | 5 | T-241-17 | PASS — package CSS, JS, and both Geist font routes match their package bytes; CSS source, built CSS, compiled CSS and package-served bytes are identified | `cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/assets_test.exs` |
 
 ## Source and Probe Coverage Audit
 
 | Source | IDs / obligation | Plans | Status |
 |--------|------------------|-------|--------|
-| GOAL | Truthful customer/subscription/invoice/payment/Recovery destinations, bounded returns and reviews | 01–07 | COVERED |
+| GOAL | Truthful customer/subscription/invoice/payment/Recovery destinations, bounded returns and reviews; action spacing and access | 01–08 | COVERED |
 | REQ | JRN-01 | 01, 07 | COVERED |
 | REQ | JRN-02 | 02, 03, 07 | COVERED |
 | REQ | JRN-03 | 04, 07 | COVERED |
-| REQ | JRN-04 | 05, 06, 07 | COVERED |
+| REQ | JRN-04 | 05, 06, 07, 08 | COVERED |
 | CONTEXT | D-01..D-04 | 01 | COVERED |
 | CONTEXT | D-05..D-07 | 02, 03 | COVERED |
 | CONTEXT | D-08..D-09 | 04 | COVERED |
 | CONTEXT | D-10..D-15 | 05, 06 | COVERED |
-| CONTEXT | D-16..D-20 | 01, 02, 07 | COVERED |
-| RESEARCH | Decoder parity, no added dependency, exact-money/fresh safety, current mounted and served provenance | 01–07 | COVERED |
-| UI | 40 explicit E1–E7 criteria from 241-UI-SPEC.md | 01, 02, 03, 04, 05, 07 | COVERED |
-| EDGE | 20 explicit JRN-01..04 criteria from 241-PROBE-COVERAGE.md | 01–07 | COVERED |
+| CONTEXT | D-16..D-20 | 01, 02, 07, 08 | COVERED |
+| RESEARCH | Decoder parity, no added dependency, exact-money/fresh safety, current mounted and served provenance | 01–08 | COVERED |
+| UI | 40 explicit E1–E7 criteria from 241-UI-SPEC.md plus Plan 08 computed spacing/narrow/coarse criteria | 01, 02, 03, 04, 05, 07, 08 | COVERED |
+| EDGE | 20 explicit JRN-01..04 criteria from 241-PROBE-COVERAGE.md plus Plan 08 measured action access | 01–08 | COVERED |
 
 The spec-less prohibition recall/precision pass was applied separately to each requirement. The adversarial question was what each journey could silently become that the operator would reject despite a literal green implementation.
 
@@ -97,7 +99,7 @@ There is no separate Wave 0. Each owning task creates its new assertion before i
 - At Phase 241 completion, the Admin package passed warnings-as-errors compilation and its final full suite passed 646 tests, 0 failures (`/private/tmp/accrue241-final-admin-tests.log`). This is the phase-time result; later regression evidence is recorded below.
 - At Phase 241 completion, Phase191 browser acceptance was 28 passed on the initial run; after the correction batch, the broad run had 26 passed/2 failed and both failed owners passed an isolated 12/12 rerun. Phase199 had 24 passed/15 incumbent skips plus one Chromium launch timeout, which passed 1/1 in isolation. Both newly added Phase241 cases ran and passed. The focused responsive stress case passed across seven consumers; the review matrix passed with ten subscription and two payment-method reviews. Later package-owner regression totals are recorded below.
 - Component and host evidence: AtRiskTable 6 passed; Admin and mounted-host warnings-as-errors compiles passed; the Phase237 mounted-host spec passed 1/1 after CSS rebuild and host recompile. The host run checked Recovery window/owner return and package, compiled-host, HTTP-served, and browser-request asset bytes.
-- JRN-01..04 are covered by task owners 241-01..07 as mapped above. The 40 applicable UI criteria and 20 edge probes in the UI-SPEC and PROBE-COVERAGE have explicit owning evidence; they are criteria inventories, not standalone claims that physical zoom or provider behavior was observed.
+- JRN-01..04 are covered by task owners 241-01..08 as mapped above. Plan 08 adds D1: invoice/subscription action bands and the active dunning row compute to the 4px token; at 320 CSS px there is no ordinary overflow; subscription primary targets and separate coarse-pointer primary targets are measured nonempty and 44px. Invoice primary height measured 44px but has no asserted threshold. The 40 applicable UI criteria and 20 edge probes in the UI-SPEC and PROBE-COVERAGE have explicit owning evidence; they are criteria inventories, not standalone claims that physical zoom or provider behavior was observed.
 - The phase SUMMARY records that automated-UAT artifact generation requires a genuine `241-VERIFICATION.md`; none was fabricated. This does not replace or weaken the executed test evidence above.
 
 ## CI and Evidence Ownership
@@ -117,13 +119,15 @@ The parent verification run re-executed the current owners against the current s
 | Host server integration owners | `cd examples/accrue_host && MIX_ENV=test mix test` (`/private/tmp/accrue242-final-regression.log`) | 223 tests, 0 failures |
 | Mounted host browser | `cd examples/accrue_host && CI=1 npx playwright test e2e/phase237-admin-billing.spec.js --project=chromium-desktop --workers=1` (`/private/tmp/accrue242-host-browser.log`) | 2 passed |
 
-The later package-browser skip counts are incumbent skips; the new Phase241 interactions were exercised by the phase-time focused cases and included in the fresh package-browser runs. The host browser rerun exercised the mounted billing owner. All fourteen PLAN task-level commands and their behavioral assertions remain present in the map above; the fresh full Admin run re-executed those LiveView and query owners together.
+Plan 08's focused mounted desktop/mobile run passed 2/2 with all three selectors at 4px and matching `--ax-space-xs`; its existing asset owner passed 4/4. These results are recorded in `241-08-SUMMARY.md`; the fresh Phase 199 browser run above also re-exercised the recurring package owner. No host-served or production-host identity claim is added by Plan 08.
+
+The later package-browser skip counts are incumbent skips; the new Phase241 interactions were exercised by the phase-time focused cases and included in the fresh package-browser runs. The host browser rerun exercised the mounted billing owner. All sixteen PLAN task-level commands and their behavioral assertions remain present in the map above; the fresh full Admin run re-executed those LiveView and query owners together.
 
 Use existing `release-gate`, Admin guardrails, component and `host-integration` lanes where they already execute the changed owners. Preserve Linux baseline guards, approved masks and pixel thresholds; final reviewed Linux goldens belong to Phase 243. Do not claim remote CI ran during planning.
 
 ## Validation Sign-Off
 
-- [x] Final task map has exact IDs/waves and unique `T-241-NN` references.
+- [x] Final task map has all 16 tasks across plans 01–08 and maps each available threat reference; Plan 08's D1 behavioral contract is explicitly recorded.
 - [x] Every task has a runnable automated command and immediately paired observable failure signal.
 - [x] No three consecutive tasks lack automated feedback; no watch mode or zero-test acceptance.
 - [x] New scenarios and fixture prerequisites are covered with owning implementation and executed owners.
@@ -131,12 +135,14 @@ Use existing `release-gate`, Admin guardrails, component and `host-integration` 
 - [x] Execution timings, current evidence, caveats, and unobserved limits are recorded.
 - [x] Validation audit sets `nyquist_compliant: true` after the evidence gate.
 
-**Audit:** Validated 2026-10-10. Gaps found: 0. Resolved: all 14 planned tasks across JRN-01..04. Escalated: 0. Manual-only: 0. Phase199's incumbent launch timeout passed on isolated rerun; incumbent skips and physical/provider evidence limits are recorded above.
+**Audit:** Validated 2026-10-10 after Plan 08 closure. Gaps found: 0. Resolved: all 16 planned tasks across JRN-01..04 and Plan 08's measured UI/asset evidence. Escalated: 0. Manual-only: 0. Phase199's incumbent launch timeout passed on isolated rerun; incumbent skips and physical/provider evidence limits are recorded above.
 
 ## Validation Audit 2026-10-10
 
 | Metric | Count |
 |---|---|
 | Gaps found | 0 |
-| Resolved | 14 |
+| Resolved | 16 |
 | Escalated | 0 |
+
+Plan 08 was independently reconciled against its two task acceptance blocks and `241-08-SUMMARY.md`: the focused desktop/mobile mounted owner reports 2 passed, 0 failed, with all three action gaps at 4px; the existing package asset owner reports 4 tests, 0 failures. Source/built/compiled/package-served CSS identity is recorded. The task summary explicitly leaves host-served identity unobserved. No tests were rerun during this audit; it reuses the recorded execution evidence and fresh Phase 199 package-browser regression.

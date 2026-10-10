@@ -62,6 +62,7 @@ All findings are **WARNING** level. No source-derived defect found in this audit
 ### Pillar 5: Spacing (2/4)
 
 - **WARNING:** The subscription summary fact-health selector retains `gap: 0` and `padding: 0.03125rem 0.3125rem` (0.5px vertical) ([app.css](../../../accrue_admin/assets/css/app.css:5401)). Distinct health facts can consequently run together in this element. The approved 4px ladder expects 16/24/32px separation for controls/fact groups/sections, reserving 2px for dense data and 1px for structural rules.
+- The latest shared CSS change (`65c4d043`) aligns `.ax-detail-actions-row` and `.ax-detail-action-band .ax-page-actions` gaps to `--ax-space-xs` (4px; [app.css](../../../accrue_admin/assets/css/app.css:6187), [app.css](../../../accrue_admin/assets/css/app.css:6206)). This closes those action-gap source deviations, but does not alter the separate health-fact zero-gap/half-pixel padding above. No rendered geometry was inspected, so the score stays 2/4.
 - The lifecycle summary container itself now uses the approved token gaps and padding (`.ax-detail-health-copy`, [app.css](../../../accrue_admin/assets/css/app.css:5497)); the old zero-gap lifecycle issue was fixed under `b0336989`. This does not resolve the separate summary-fact selector finding. No current screenshot was captured to assess actual wrapping or rendered proximity.
 
 ### Pillar 6: Experience Design (3/4)
