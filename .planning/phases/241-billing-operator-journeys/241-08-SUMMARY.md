@@ -16,12 +16,12 @@ provides:
 affects: [241-verification, 243]
 
 actuals:
-  tokens: 66467
+  tokens: 66528
   tasks: 2
-  commits: 2
-commits: 2
+  commits: 5
+commits: 5
 plan_head_before: 31466e9a2e31d5d101c91549e3de0916afd43fd7
-plan_head_after: 65c4d0436ad1c0be7b583bdb778259946c6a3ed2
+plan_head_after: c526aa2659b6d204571b6dd38560fae3de9a5262
 
 tech-stack:
   added: []
@@ -56,7 +56,7 @@ coverage:
         status: pass
     human_judgment: false
 
-duration: 9min
+duration: 13min
 completed: 2026-10-10
 status: complete
 ---
@@ -77,13 +77,13 @@ status: complete
 
 - Added one recurring Phase 199 browser case measuring the invoice action band, subscription action band, and active subscription dunning action row against a computed `--ax-space-xs` gap.
 - Changed exactly the two named source declarations to `gap: var(--ax-space-xs)` and rebuilt the tracked package CSS.
-- Confirmed desktop and mobile action buttons remain 44 CSS px high at 320 CSS px, with no ordinary page overflow; confirmed a separate touch-enabled context reports a coarse pointer and retains the same action geometry.
+- Confirmed subscription primary actions remain 44 CSS px high at 320 CSS px with explicit nonempty-target and height assertions; confirmed the same in a separate coarse-pointer context. Invoice primary height measured 44 CSS px but is not asserted by this test. All measured 320px pages had no ordinary overflow.
 - Ran the existing package asset owner: CSS, JS, and both self-hosted Geist font routes passed their byte/route assertions.
 
 ## TDD Evidence
 
-- **RED:** Before the CSS correction, the exact mounted measurements were invoice action band `2px`, subscription action band `2px`, active dunning action row `3px`, and computed token `4px`. Primary action heights were `44px`; the 320px document had no horizontal overflow. The focused desktop/mobile batch failed on the planned invoice computed-gap equality assertion (2 failures, 0 skipped). A single-project JUnit capture was accepted by `gsd_run check tdd-red-evidence` as `RED_EVIDENCE_OK` with `target_test_failed`.
-- **GREEN:** After the source correction and explicit package asset rebuild, the designated focused desktop/mobile acceptance batch passed (2 passed, 0 failed). All three mounted gaps were `4px`, each matched the computed token, both primary action groups retained `44px` action buttons, the separate coarse-pointer context passed, and no measured page overflowed. An earlier JUnit-reporter attempt made before the RED report-format correction also ran green in both projects; it is recorded below and was not treated as another acceptance batch.
+- **RED:** Before the CSS correction, mounted measurements were invoice action band `2px`, subscription action band `2px`, active dunning action row `3px`, and computed token `4px`. Measured primary heights were invoice `44px` and subscription `[44px, 44px]`; the 320px document had no horizontal overflow. The selected desktop/mobile run failed on the invoice computed-gap equality assertion (2 failures, 0 skipped). After the corrected CSS was temporarily reverted, a single-project JUnit capture was accepted by `gsd_run check tdd-red-evidence` as `RED_EVIDENCE_OK` with `target_test_failed`.
+- **GREEN:** After the source correction and explicit package asset rebuild, the designated focused desktop/mobile batch passed (2 passed, 0 failed); all three mounted gaps were `4px` and matched the computed token. A separate JUnit-reporter attempt made before the RED-format correction also ran green in both projects (2 passed). After the vacuous-assertion fix below, the same selected desktop/mobile command ran again and passed (2 passed); it confirmed nonempty subscription and coarse-pointer primary hit-target arrays before asserting their `44px` heights. These are three executed post-fix green batches (6 project passes total), with the final batch validating the nonempty guards. No invoice hit-height threshold is claimed.
 - **REFACTOR:** None needed.
 - **Commit sequence:** `c7600753` RED test commit, followed by `65c4d043` GREEN CSS/package build commit.
 
@@ -104,6 +104,7 @@ status: complete
 
 1. **Task 1 RED:** `c7600753` — `test(241-08): assert mounted billing action spacing`
 2. **Task 1 GREEN:** `65c4d043` — `feat(241-08): align billing action gaps to 4px token`
+3. **Task 1 Rule 1 test correction:** `c526aa26` — `test(241-08): require measured primary hit targets`
 
 Task 2 reused Task 1's single confirming browser result and ran the package asset tests; it needed no additional production-code change.
 
@@ -128,14 +129,22 @@ Task 2 reused Task 1's single confirming browser result and ran the package asse
 - **Files modified:** None beyond the planned files.
 - **Verification:** The package build completed and emitted the tracked CSS/JS assets.
 
-**Total deviations:** 1 auto-fixed (Rule 3 - Blocking). The mounted subscription fixture was adjusted to use the seeded recovery subscription so the conditional dunning row was present; this stayed within the planned existing owner and fixture scope.
+**2. [Rule 1 - Bug] Prevent empty hit-target measurements from passing vacuously.**
+- **Found during:** Post-commit execution review
+- **Issue:** `.every(height => height >= 44)` returns true for an empty array, so missing subscription/coarse primary targets could have passed.
+- **Fix:** Added positive measured-target count assertions immediately before both height checks.
+- **Files modified:** `accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js`
+- **Verification:** The same selected desktop/mobile browser command passed (2 passed), with measured subscription heights `[44, 44]` and coarse-pointer geometry.
+- **Committed in:** `c526aa26`.
+
+**Total deviations:** 2 auto-fixed (Rule 1 - Bug; Rule 3 - Blocking). The mounted subscription fixture was adjusted to use the seeded recovery subscription so the conditional dunning row was present; this stayed within the planned existing owner and fixture scope.
 
 ## Issues Encountered
 
 - The initial sandboxed Chromium launch failed before test execution due to macOS MachPort restrictions. The same bounded command was rerun with the authorized elevated execution path; subsequent browser runs reached the assertions.
 - The initial fixture assumption that the normal subscription route rendered `.ax-detail-actions-row` was false. The test now measures that selector on the active seeded recovery subscription and measures the standard action band on both invoice and subscription details.
 - A JUnit-format RED run initially included both projects and produced duplicate target identities; the single-project desktop report resolved uniquely and passed the required classifier. The final GREEN acceptance remained the planned desktop/mobile batch.
-- One JUnit-reporter attempt ran after the CSS correction and passed in both projects before the valid single-project RED capture was produced. The source and built CSS were restored to the verified pre-fix state for that RED capture, then corrected and rebuilt. The extra green reporter run is retained in this execution record and is not counted as an additional acceptance batch.
+- Chronology: the planned RED assertion run occurred against the original CSS; the RED test commit preceded the CSS correction and asset build; the designated desktop/mobile GREEN passed; an additional JUnit-reporter batch then ran green after the correction. For classifier evidence, the corrected source declarations and built CSS were temporarily restored to the pre-fix state, a single-project JUnit RED was captured and classified, then the 4px source was restored and package assets rebuilt. The nonempty-assertion correction was committed afterward and validated in one additional desktop/mobile green batch (2 passed). Thus three post-fix green check batches ran in total: designated GREEN, extra JUnit reporter, and this review validation.
 
 ## Threat Flags
 
@@ -145,7 +154,8 @@ None. No network endpoint, authorization path, file access pattern, or schema bo
 
 - RED evidence classifier: `RED_EVIDENCE_OK`, `target_test_failed`; target test executed and failed on the expected computed-style assertion, not fixture/startup/syntax behavior.
 - RED commit precedes GREEN: `c7600753` → `65c4d043`.
-- GREEN evidence: selected mounted browser owner passed in both desktop and mobile projects.
+- Follow-up test correction: `c526aa26` adds nonempty guards before the subscription and coarse-pointer height assertions.
+- GREEN evidence: the designated browser owner passed in desktop and mobile; one extra JUnit batch and one Rule 1 validation batch also passed in both projects.
 
 ## Next Phase Readiness
 
@@ -158,5 +168,5 @@ Plan 241-08's named source and mounted package gap is closed. The phase verifier
 ## Self-Check: PASSED
 
 - Summary file exists at the required phase path.
-- RED commit `c7600753` and GREEN commit `65c4d043` are ancestors of the current HEAD.
-- Two measured plan commits are present after `plan_head_before`.
+- RED commit `c7600753`, GREEN commit `65c4d043`, and follow-up test correction `c526aa26` are ancestors of the current HEAD.
+- Five measured plan commits are present after `plan_head_before` at summary authoring: three task commits and two metadata commits.
