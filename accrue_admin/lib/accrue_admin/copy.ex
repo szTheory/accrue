@@ -219,6 +219,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscription_action_cancel_now(), to: Subscription
   defdelegate subscription_action_cancel_at_period_end(), to: Subscription
   defdelegate subscription_action_resume(), to: Subscription
+  defdelegate subscription_action_back_to_subscription(), to: Subscription
   defdelegate subscription_action_swap_plan(), to: Subscription
   defdelegate subscription_action_update_quantity(), to: Subscription
   defdelegate subscription_action_add_item(), to: Subscription

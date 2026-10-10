@@ -19,7 +19,8 @@ defmodule AccrueAdmin.Copy.Subscription do
 
   def subscription_action_cancel_now, do: "Cancel immediately"
   def subscription_action_cancel_at_period_end, do: "Cancel renewal"
-  def subscription_action_resume, do: "Resume"
+  def subscription_action_resume, do: "Resume subscription"
+  def subscription_action_back_to_subscription, do: "Back to subscription"
   def subscription_action_swap_plan, do: "Change plan"
   def subscription_action_update_quantity, do: "Update quantity"
   def subscription_action_add_item, do: "Add item"

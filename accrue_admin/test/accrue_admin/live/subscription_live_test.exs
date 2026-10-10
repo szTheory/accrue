@@ -18,7 +18,9 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     @behaviour Accrue.Auth
 
     @impl Accrue.Auth
-    def current_user(%{"admin_token" => "admin"}), do: %{id: "admin_1", role: :admin}
+    def current_user(%{"admin_token" => "admin"}),
+      do: %{id: Application.get_env(:accrue_admin, :test_actor_id, "admin_1"), role: :admin}
+
     def current_user(_session), do: nil
 
     @impl Accrue.Auth
@@ -55,6 +57,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     on_exit(fn ->
       Application.put_env(:accrue, :auth_adapter, prior)
       Application.delete_env(:accrue_admin, :expected_step_up_subject_id)
+      Application.delete_env(:accrue_admin, :test_actor_id)
     end)
 
     %{subscription: subscription} =
@@ -502,6 +505,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       )
 
     assert html =~ "Step-up required"
+    assert has_element?(view, "[data-role='confirm-action']:disabled")
 
     html =
       render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
@@ -902,6 +906,108 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
            )
   end
 
+  test "each eligible subscription action review identifies its target and current evidence", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    item = List.first(subscription.subscription_items)
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    actions = [
+      {"swap_plan", %{"new_price_id" => "price_reviewed", "proration" => "none"}},
+      {"cancel_at_period_end", %{}},
+      {"cancel_now", %{}},
+      {"comp_subscription", %{"new_price_id" => "price_replacement"}},
+      {"pause", %{"pause_behavior" => "keep_as_draft"}},
+      {"update_quantity", %{"new_quantity" => "3"}},
+      {"add_item", %{"new_price_id" => "price_addon", "new_quantity" => "2"}},
+      {"update_item_quantity",
+       %{"item_id" => item.id, "new_quantity" => "4", "proration" => "none"}},
+      {"remove_item", %{"item_id" => item.id, "proration" => "none"}}
+    ]
+
+    for {action_type, fields} <- actions do
+      params = Map.merge(%{"action_type" => action_type}, fields)
+      render_click(view, "open_action_drawer", %{"action_type" => action_type})
+      html = render_submit(view, "prepare_action", params)
+
+      assert html =~ "subscription-action-review-facts"
+      assert html =~ "Subscription ID: #{subscription.id}"
+      assert html =~ "Customer ID: #{subscription.customer_id}"
+      assert html =~ "Current state"
+      assert html =~ "global owner scope"
+      assert html =~ "Current charge amount"
+      assert html =~ "Unavailable; no estimate is shown."
+      assert html =~ action_label_for_test(action_type)
+      assert html =~ "Back to subscription"
+
+      if action_type in ["update_item_quantity", "remove_item"] do
+        assert html =~ "Item ID: #{item.id}"
+      end
+
+      if action_type == "cancel_at_period_end" do
+        assert html =~ "schedules cancellation at period end"
+      end
+
+      if action_type == "cancel_now" do
+        assert html =~ "cancels the subscription immediately"
+      end
+
+      if action_type == "swap_plan" do
+        assert html =~ "Preview upcoming invoice"
+        assert html =~ "price_reviewed"
+      end
+
+      render_click(view, "cancel_pending_action")
+    end
+
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+  end
+
+  test "resume review has an explicit action name and missing money is not estimated", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    subscription
+    |> Subscription.changeset(%{
+      cancel_at_period_end: true,
+      current_period_end: DateTime.add(DateTime.utc_now(), 30 * 86_400, :second)
+    })
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(view, "open_action_drawer", %{"action_type" => "resume"})
+    html = render_submit(view, "prepare_action", %{"action_type" => "resume"})
+
+    assert html =~ "Resume subscription"
+    assert html =~ "This cancels the scheduled end and keeps the subscription active."
+    assert html =~ "Current charge amount"
+    assert html =~ "Unavailable; no estimate is shown."
+    refute html =~ "0 usd"
+    refute html =~ "Estimated"
+  end
+
+  test "back from a staged cancellation dismisses the review without dispatch", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(view, "open_action_drawer", %{"action_type" => "cancel_now"})
+    render_submit(view, "prepare_action", %{"action_type" => "cancel_now"})
+    html = render_click(view, "cancel_pending_action")
+
+    assert html =~ "Subscription actions"
+    refute html =~ "subscription-action-review-facts"
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+  end
+
   test "crafted supported action params are rejected before staging", %{
     conn: conn,
     subscription: subscription
@@ -958,7 +1064,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       "subscription_action_swap_plan" => "Change plan",
       "subscription_action_cancel_at_period_end" => "Cancel renewal",
       "subscription_action_cancel_now" => "Cancel immediately",
-      "subscription_action_resume" => "Resume",
+      "subscription_action_resume" => "Resume subscription",
+      "subscription_action_back_to_subscription" => "Back to subscription",
       "subscription_action_update_quantity" => "Update quantity",
       "subscription_action_add_item" => "Add item",
       "subscription_action_update_item_quantity" => "Update item quantity",
@@ -986,6 +1093,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
         Copy.subscription_action_cancel_at_period_end(),
       "subscription_action_cancel_now" => Copy.subscription_action_cancel_now(),
       "subscription_action_resume" => Copy.subscription_action_resume(),
+      "subscription_action_back_to_subscription" =>
+        Copy.subscription_action_back_to_subscription(),
       "subscription_action_update_quantity" => Copy.subscription_action_update_quantity(),
       "subscription_action_add_item" => Copy.subscription_action_add_item(),
       "subscription_action_update_item_quantity" =>
@@ -1203,6 +1312,89 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
   end
 
+  test "confirmation rejects a changed actor and owner after review", %{conn: conn} do
+    %{subscription: subscription, customer: customer} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "stale-review-org",
+        email: "stale-review@example.com"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "stale-review-org",
+        active_organization_slug: "stale-review-org",
+        admin_organization_ids: ["stale-review-org"]
+      )
+
+    {:ok, actor_view, _html} =
+      live(conn, "/billing/subscriptions/#{subscription.id}?org=stale-review-org")
+
+    render_submit(actor_view, "prepare_action", %{
+      "action_type" => "pause",
+      "pause_behavior" => "keep_as_draft"
+    })
+
+    Application.put_env(:accrue_admin, :test_actor_id, "replacement-admin")
+    actor_html = render_click(actor_view, "confirm_action")
+
+    assert actor_html =~ "Review the action again"
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+
+    Application.delete_env(:accrue_admin, :test_actor_id)
+
+    {:ok, owner_view, _html} =
+      live(conn, "/billing/subscriptions/#{subscription.id}?org=stale-review-org")
+
+    render_submit(owner_view, "prepare_action", %{
+      "action_type" => "pause",
+      "pause_behavior" => "keep_as_draft"
+    })
+
+    customer
+    |> Customer.changeset(%{owner_id: "replacement-owner"})
+    |> TestRepo.update!()
+
+    owner_html = render_click(owner_view, "confirm_action")
+
+    assert owner_html =~ "Review the action again"
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+    refute TestRepo.get_by(Event, type: "subscription.paused", subject_id: subscription.id)
+  end
+
+  test "correcting a staged quantity dispatches only the final reviewed intent", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_submit(view, "prepare_action", %{
+      "action_type" => "update_quantity",
+      "new_quantity" => "2"
+    })
+
+    corrected_html =
+      render_submit(view, "prepare_action", %{
+        "action_type" => "update_quantity",
+        "new_quantity" => "3"
+      })
+
+    assert corrected_html =~ "Requested quantity"
+    assert corrected_html =~ ">3</dd>"
+    refute corrected_html =~ ">2</dd>"
+
+    html = render_click(view, "confirm_action")
+
+    assert html =~ Copy.subscription_action_recorded_info()
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 1
+
+    assert TestRepo.get!(SubscriptionItem, List.first(subscription.subscription_items).id).quantity ==
+             3
+  end
+
   test "unrelated metadata changes preserve a reviewed action through fresh step-up", %{
     conn: conn,
     subscription: subscription
@@ -1402,6 +1594,25 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     |> File.read!()
     |> Jason.decode!()
   end
+
+  defp action_label_for_test("swap_plan"), do: Copy.subscription_action_swap_plan()
+
+  defp action_label_for_test("cancel_at_period_end"),
+    do: Copy.subscription_action_cancel_at_period_end()
+
+  defp action_label_for_test("cancel_now"), do: Copy.subscription_action_cancel_now()
+
+  defp action_label_for_test("comp_subscription"),
+    do: Copy.subscription_action_create_comp_replacement()
+
+  defp action_label_for_test("pause"), do: Copy.subscription_action_pause_collection()
+  defp action_label_for_test("update_quantity"), do: Copy.subscription_action_update_quantity()
+  defp action_label_for_test("add_item"), do: Copy.subscription_action_add_item()
+
+  defp action_label_for_test("update_item_quantity"),
+    do: Copy.subscription_action_update_item_quantity()
+
+  defp action_label_for_test("remove_item"), do: Copy.subscription_action_remove_item()
 
   defp organization_owner_scope(organization_id) do
     %OwnerScope{

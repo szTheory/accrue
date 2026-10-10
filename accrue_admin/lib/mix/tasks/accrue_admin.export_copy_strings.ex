@@ -31,6 +31,7 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     subscription_action_cancel_at_period_end
     subscription_action_cancel_now
     subscription_action_resume
+    subscription_action_back_to_subscription
     subscription_action_update_quantity
     subscription_action_add_item
     subscription_action_update_item_quantity

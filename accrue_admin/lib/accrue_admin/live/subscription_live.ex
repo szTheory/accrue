@@ -522,6 +522,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           open={drawer_open?(@drawer_action_type, @pending_action)}
           title={drawer_title(@drawer_action_type, @pending_action)}
           subtitle="Review the staged billing change before confirming it."
+          close_label={Copy.subscription_action_back_to_subscription()}
           close_event="cancel_pending_action"
         >
           <%= if @pending_action do %>
@@ -529,6 +530,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               pending_action={@pending_action}
               subscription={@subscription}
               customer={@customer}
+              owner_scope={@current_owner_scope}
             />
           <% else %>
             <.action_form
@@ -546,10 +548,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               class="ax-button ax-button-primary"
               data-role="confirm-action"
               data-ax-action-drawer-confirm
+              disabled={@dispatch_state in [:awaiting_step_up, :dispatching, :submitted]}
+              phx-disable-with={"Submitting " <> action_label(@pending_action.type)}
             >
               Confirm <%= action_label(@pending_action.type) %>
             </button>
-            <button phx-click="cancel_pending_action" class="ax-button ax-button-ghost">Cancel</button>
+            <button phx-click="cancel_pending_action" class="ax-button ax-button-ghost">
+              <%= Copy.subscription_action_back_to_subscription() %>
+            </button>
           </:footer>
         </DetailDrawer.detail_drawer>
 
@@ -565,12 +571,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 pending_action={@pending_action}
                 subscription={@subscription}
                 customer={@customer}
+                owner_scope={@current_owner_scope}
               />
               <button
                 phx-click="confirm_action"
                 class="ax-button ax-button-primary"
                 data-role="confirm-action"
                 data-ax-action-drawer-confirm
+                disabled={@dispatch_state in [:awaiting_step_up, :dispatching, :submitted]}
+                phx-disable-with={"Submitting " <> action_label(@pending_action.type)}
               >
                 Confirm <%= action_label(@pending_action.type) %>
               </button>
@@ -606,11 +615,57 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   attr(:pending_action, :map, required: true)
   attr(:subscription, :map, required: true)
   attr(:customer, :map, required: true)
+  attr(:owner_scope, :map, required: true)
 
   defp pending_action_content(assigns) do
     ~H"""
     <section class="ax-stack-md" data-role="confirm-panel">
-      <p class="ax-label">Confirm action</p>
+      <p class="ax-label">Confirm action · <%= action_label(@pending_action.type) %></p>
+      <dl class="ax-detail-field-list" data-role="subscription-action-review-facts">
+        <div>
+          <dt class="ax-label">Subscription</dt>
+          <dd class="ax-body"><%= customer_label(@customer) %></dd>
+          <dd class="ax-body">Subscription ID: <%= @subscription.id %></dd>
+          <dd :if={@subscription.processor_id} class="ax-body">
+            Processor subscription ID: <%= @subscription.processor_id %>
+          </dd>
+        </div>
+        <div>
+          <dt class="ax-label">Customer</dt>
+          <dd class="ax-body"><%= customer_label(@customer) %> · Customer ID: <%= @customer.id %></dd>
+        </div>
+        <div>
+          <dt class="ax-label">Owner and active scope</dt>
+          <dd class="ax-body">
+            Customer owner: <%= @customer.owner_type %> <%= @customer.owner_id %>.
+            Active review scope: <%= owner_scope_copy(@owner_scope) %>.
+          </dd>
+        </div>
+        <div>
+          <dt class="ax-label">Current state</dt>
+          <dd class="ax-body"><%= lifecycle_health_label(@subscription) %></dd>
+        </div>
+        <div>
+          <dt class="ax-label">Current plan / price</dt>
+          <dd class="ax-body"><%= current_price_id(@subscription) || "Price unavailable" %></dd>
+        </div>
+        <div>
+          <dt class="ax-label">Current charge amount</dt>
+          <dd class="ax-body">Unavailable; no estimate is shown.</dd>
+        </div>
+        <div :if={@pending_action[:item_id]}>
+          <dt class="ax-label">Selected subscription item</dt>
+          <dd class="ax-body">Item ID: <%= @pending_action.item_id %></dd>
+        </div>
+        <div :if={@pending_action[:new_quantity]}>
+          <dt class="ax-label">Requested quantity</dt>
+          <dd class="ax-body"><%= @pending_action.new_quantity %></dd>
+        </div>
+        <div :if={@pending_action[:new_price_id]}>
+          <dt class="ax-label">Requested price</dt>
+          <dd class="ax-body"><%= @pending_action.new_price_id %></dd>
+        </div>
+      </dl>
       <p class="ax-body"><%= confirm_copy(@pending_action, @subscription, @customer) %></p>
       <section
         :if={match?(%UpcomingInvoice{}, @pending_action[:preview])}
@@ -629,6 +684,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </li>
         </ul>
       </section>
+      <p
+        :if={@pending_action.type == "swap_plan" and not match?(%UpcomingInvoice{}, @pending_action[:preview])}
+        class="ax-body"
+        data-role="subscription-preview-unavailable"
+      >
+        Invoice amount and currency preview are unavailable; no estimate is shown.
+      </p>
     </section>
     """
   end
