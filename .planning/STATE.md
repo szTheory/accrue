@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 242
 current_phase_name: Investigations and Remaining Admin Surfaces
-current_plan: 4
+current_plan: 5
 status: executing
-stopped_at: Completed 242-03-PLAN.md
-last_updated: "2026-10-10T13:13:59.712Z"
+stopped_at: Completed 242-04-PLAN.md
+last_updated: "2026-10-10T13:23:24.078Z"
 last_activity: 2026-10-10
 last_activity_desc: "Phase 242 planning passed independent review (7 plans, 4 waves, 16 automated tasks); last executed phase: 241; next: $gsd-execute-phase 242"
-state_head: 72aa63c54dc67ac2e8884c4d8a0af5661d93dea5
+state_head: 4b1b6651c9c57bb1a1baa716d206405bda5bed9e
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 20
-  completed_plans: 17
+  completed_plans: 18
   percent: 50
 ---
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 ## Current Position
 
 Phase: 242 (Investigations and Remaining Admin Surfaces) — READY TO EXECUTE
-Current Plan: 4
+Current Plan: 5
 Total Plans in Phase: 7
 Status: Ready to execute
 Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 plans, 4 waves, 16 automated tasks); last executed phase: 241; next: $gsd-execute-phase 242
@@ -170,6 +170,7 @@ Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 pl
 | Phase 242 P05 | 4min | 2 tasks | 4 files |
 | Phase 242 P02 | 8min | 2 tasks | 6 files |
 | Phase 242 P03 | 13m | 3 tasks | 12 files |
+| Phase 242 P04 | 8 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -377,6 +378,9 @@ Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 pl
 - [Phase 242]: Single delivery replay uses validated contextual return and distinguishes accepted enqueue from processing.
 - [Phase 242]: Keep the incumbent global Coupon and PromotionCode schemas; these schemas have no owner fields, so avoid claiming tenant-filtered catalog membership.
 - [Phase 242]: Preserve exact coupon foreign-key identity for promotion-code links, and label nullable catalog limits and unrepresented restriction facts as not recorded.
+- [Phase 242]: Connect account detail returns preserve only validated list context under the current owner scope.
+- [Phase 242]: Stored Stripe observations remain separate from local fee policy and carry no invented report timestamp.
+- [Phase 242]: Fee saves recheck reviewed local account/default state, retain StepUp and optimistic locking, and make identical policy submissions no-ops.
 
 ### Pending Todos
 
@@ -457,8 +461,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T13:12:44.436Z
-Stopped at: Completed 242-03-PLAN.md
+Last session: 2026-10-10T13:23:23.997Z
+Stopped at: Completed 242-04-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

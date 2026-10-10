@@ -142,7 +142,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 242-02-PLAN.md
 - [x] 242-03-PLAN.md
-- [ ] 242-04-PLAN.md
+- [x] 242-04-PLAN.md
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 242-06-PLAN.md
@@ -174,5 +174,5 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | Complete    | 2026-10-10 |
 | 241. Billing Operator Journeys | v1.64 | 7/7 | Complete    | 2026-10-10 |
-| 242. Investigations and Remaining Admin Surfaces | v1.64 | 4/7 | In Progress | - |
+| 242. Investigations and Remaining Admin Surfaces | v1.64 | 5/7 | In Progress | - |
 | 243. Integrated Evidence and Feedback Preview | v1.64 | 0/TBD | Not started | - |
