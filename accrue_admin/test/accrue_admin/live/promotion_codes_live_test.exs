@@ -68,6 +68,40 @@ defmodule AccrueAdmin.PromotionCodesLiveTest do
     refute html =~ "BUNDLEOLD"
   end
 
+  test "filtered promotion code links retain q, activity, parent and all lens context", %{
+    conn: conn
+  } do
+    coupon = TestRepo.get_by!(Coupon, processor_id: "coupon_bundle")
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/promotion-codes?view=all&q=BUNDLE&active=true&coupon_id=#{coupon.id}"
+             )
+
+    assert html =~ "BUNDLE10"
+    refute html =~ "BUNDLEOLD"
+
+    href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "BUNDLE10"))
+      |> Floki.attribute("href")
+      |> hd()
+
+    return_to =
+      href |> URI.parse() |> then(&URI.decode_query(&1.query)) |> Map.fetch!("return_to")
+
+    assert URI.decode_query(URI.parse(return_to).query) == %{
+             "view" => "all",
+             "q" => "BUNDLE",
+             "active" => "true",
+             "coupon_id" => coupon.id
+           }
+  end
+
   test "renders Promotion codes through PageHeader with the Phase 197 LIST chrome", %{
     conn: conn
   } do

@@ -151,7 +151,7 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
-            %{label: Copy.promotion_codes_table_column_code(), render: &promotion_code_link(&1, @admin_mount_path, @current_owner_scope)},
+            %{label: Copy.promotion_codes_table_column_code(), render: &promotion_code_link(&1, @admin_mount_path, @current_owner_scope, @params)},
             %{label: Copy.promotion_codes_table_column_status(), render: &status_summary/1},
             %{label: Copy.promotion_codes_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope)},
             %{label: Copy.promotion_codes_table_column_expires(), render: &expires_summary/1},
@@ -227,9 +227,14 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     }
   end
 
-  defp promotion_code_link(row, mount_path, owner_scope) do
+  defp promotion_code_link(row, mount_path, owner_scope, params) do
     label = row.code || row.processor_id || row.id
-    href = scoped_path(mount_path, "/promotion-codes/#{row.id}", owner_scope)
+    return_to = promotion_code_return_path(mount_path, owner_scope, params)
+
+    href =
+      AccrueAdmin.ScopedPath.build(mount_path, "/promotion-codes/#{row.id}", owner_scope, %{
+        "return_to" => return_to
+      })
 
     processor_line =
       if (row.active == true and row.processor_id) && row.processor_id != label do
@@ -240,6 +245,18 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
 
     Phoenix.HTML.raw(
       ~s(<span class="ax-stack-xs"><a href="#{href}" class="ax-link">#{escape(label)}</a>#{processor_line}</span>)
+    )
+  end
+
+  defp promotion_code_return_path(mount_path, owner_scope, params) do
+    filters = filter_params(params)
+    view = Map.take(params, ["view"])
+
+    AccrueAdmin.ScopedPath.build(
+      mount_path,
+      "/promotion-codes",
+      owner_scope,
+      Map.merge(filters, view)
     )
   end
 

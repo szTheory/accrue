@@ -55,6 +55,23 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
     end
   end
 
+  @impl true
+  def handle_params(params, _uri, socket) do
+    destination =
+      ScopedPath.return_destination(
+        socket.assigns.admin_mount_path,
+        Map.get(params, "return_to"),
+        socket.assigns.current_owner_scope,
+        nil,
+        "/promotion-codes"
+      )
+
+    {:noreply,
+     socket
+     |> assign(:return_path, destination.path)
+     |> assign(:return_label, destination.label)}
+  end
+
   def handle_event("retry_read", _params, socket) do
     case read_promotion_code(socket.assigns.promotion_code_id) do
       {:ok, promotion_code} ->
@@ -127,6 +144,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
             %{label: @promotion_code.code || @promotion_code.processor_id || @promotion_code.id}
           ]}
         />
+        <p :if={@promotion_code} class="ax-body"><a class="ax-link" href={@return_path}><%= @return_label %></a></p>
 
         <Detail.summary_card
           :if={@promotion_code}
@@ -158,8 +176,8 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
               </a>
             </p>
 
-            <p :if={!@promotion_code.coupon} class="ax-body">
-              <%= promotion_code_coupon_empty_body() %>
+        <p :if={!@promotion_code.coupon} class="ax-body">
+          <%= promotion_code_coupon_empty_body() %>
             </p>
           </details>
 
@@ -322,6 +340,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
   defp status_summary(%{active: true}), do: AccrueAdmin.Copy.promotion_codes_status_active()
   defp status_summary(%{active: false}), do: AccrueAdmin.Copy.promotion_codes_status_inactive()
+  defp status_summary(_promotion_code), do: AccrueAdmin.Copy.promotion_codes_status_inactive()
 
   defp redemption_summary(%{times_redeemed: used, max_redemptions: nil}), do: "#{used || 0} used"
 
@@ -350,7 +369,8 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
   defp related_items(promotion_code, mount_path, scope) do
     coupon_items =
-      if promotion_code.coupon_id do
+      if promotion_code.coupon_id &&
+           match?(%{id: id} when id == promotion_code.coupon_id, promotion_code.coupon) do
         value =
           case promotion_code.coupon do
             %{name: name} when is_binary(name) -> name

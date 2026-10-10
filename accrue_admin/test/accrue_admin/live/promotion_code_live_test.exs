@@ -176,6 +176,48 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert html =~ "Referral coupon"
   end
 
+  test "promotion code detail returns to its validated context and never substitutes another parent",
+       %{
+         conn: conn,
+         promotion_code: promotion_code
+       } do
+    other_coupon = insert_coupon(%{name: "Unrelated coupon", processor_id: "coupon_unrelated"})
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/promotion-codes/#{promotion_code.id}?return_to=%2Fbilling%2Fpromotion-codes%3Fview%3Dall%26q%3DREFER%26active%3Dtrue%26coupon_id%3D#{promotion_code.coupon_id}"
+             )
+
+    return_href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "Back to promotion codes"))
+      |> Floki.attribute("href")
+      |> hd()
+
+    assert URI.decode_query(URI.parse(return_href).query) == %{
+             "view" => "all",
+             "q" => "REFER",
+             "active" => "true",
+             "coupon_id" => promotion_code.coupon_id
+           }
+
+    assert html =~ "/billing/coupons/#{promotion_code.coupon_id}"
+    refute html =~ "/billing/coupons/#{other_coupon.id}"
+  end
+
+  test "an unlinked promotion code has no parent coupon link", %{conn: conn} do
+    code = insert_promotion_code(nil, %{code: "ORPHAN", processor_id: "promo_orphan"})
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/promotion-codes/#{code.id}")
+    assert html =~ Copy.promotion_codes_coupon_none_label()
+    refute html =~ ~s(href="/billing/coupons/)
+  end
+
   test "breadcrumbs preserve active organization scope", %{
     conn: conn,
     promotion_code: promotion_code
@@ -257,7 +299,7 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
   defp insert_promotion_code(coupon, attrs) do
     defaults = %{
       processor: "stripe",
-      coupon_id: coupon.id,
+      coupon_id: coupon && coupon.id,
       metadata: %{},
       data: %{},
       lock_version: 1
