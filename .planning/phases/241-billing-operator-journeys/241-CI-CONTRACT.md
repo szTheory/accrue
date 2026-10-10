@@ -6,7 +6,7 @@ Date: 2026-10-10. This is acceptance-record serialization, not a new verificatio
 
 The current Phase 241 verification and generated UAT passed. The existing CI command `node scripts/ci/verify_executable_uat_contract.mjs --all-since 229` then rejected Phase 234's legacy `result: pass` format. A complete diagnostic found missing canonical UAT artifacts for Phases 235–240 and legacy SUMMARY metadata for 239-01, 239-03, 240-03 and 240-06.
 
-- Preserved Phase 234's complete original acceptance and resolved-gap history as `milestones/v1.63-phases/234-admin-customers-subscriptions/234-UAT-LEGACY.md`.
+- Preserved Phase 234's complete original acceptance and resolved-gap history as `.planning/milestones/v1.63-phases/234-admin-customers-subscriptions/234-UAT-LEGACY.md`.
 - Promoted already-recorded completion status to top-level metadata for 239-01, 239-03 and 240-03. Added the existing Performance completion timestamps for 239-01 and 240-06. No coverage verdict changed.
 - Used the existing `generateAutomatedUat` owner to serialize Phases 234–240 from their executable SUMMARY coverage. Its prerequisites require passed verification and `behavior_unverified: 0`; every generated item has passing recorded coverage.
 - Left archived verification verdicts, digests, source evidence and milestone dispositions intact. Historical digests are historical provenance, not a fresh verification claim after serialization.

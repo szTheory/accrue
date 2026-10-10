@@ -43,8 +43,8 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 </details>
 
-- [ ] **Phase 240: Shared System and Real Billing Exemplar** - Deliver invoice list/detail/review and dense subscription examples through shared Admin patterns.
-- [ ] **Phase 241: Billing Operator Journeys** - Make scoped billing destinations, returns, recovery and action reviews truthful.
+- [x] **Phase 240: Shared System and Real Billing Exemplar** - Deliver invoice list/detail/review and dense subscription examples through shared Admin patterns. (completed 2026-10-10)
+- [x] **Phase 241: Billing Operator Journeys** - Make scoped billing destinations, returns, recovery and action reviews truthful. (completed 2026-10-10)
 - [ ] **Phase 242: Investigations and Remaining Admin Surfaces** - Clarify investigations, catalog, Connect, shell and domain language.
 - [ ] **Phase 243: Integrated Evidence and Feedback Preview** - Close selected visual proof and provide a stable Fake-backed preview.
 
@@ -157,7 +157,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | Complete    | 2026-10-09 |
-| 241. Billing Operator Journeys | v1.64 | 7/7 | In Progress | - |
+| 240. Shared System and Real Billing Exemplar | v1.64 | 6/6 | Complete    | 2026-10-10 |
+| 241. Billing Operator Journeys | v1.64 | 7/7 | Complete    | 2026-10-10 |
 | 242. Investigations and Remaining Admin Surfaces | v1.64 | 0/TBD | Not started | - |
 | 243. Integrated Evidence and Feedback Preview | v1.64 | 0/TBD | Not started | - |

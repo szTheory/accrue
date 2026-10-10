@@ -2,48 +2,48 @@
 gsd_state_version: "1.0"
 milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
-current_phase: 241
-current_phase_name: Billing Operator Journeys
-current_plan: 7
-status: verifying
-stopped_at: Completed 241-07-PLAN.md
-last_updated: "2026-10-10T03:10:36.201Z"
-last_activity: 2026-10-09
-last_activity_desc: Phase 241 execution started
-state_head: 5b33e9c24846639397ad2d73710e4ed0889884a1
+current_phase: 242
+current_phase_name: Investigations and Remaining Admin Surfaces
+current_plan: Not started
+status: planning
+stopped_at: "Phase 241 complete (7/7 plans, 29/29 must-haves, 19 automated UAT, 0 human UAT); next: $gsd-discuss-phase 242; see 241-HANDOFF.md"
+last_updated: "2026-10-10T10:36:33.761Z"
+last_activity: 2026-10-10
+last_activity_desc: "Phase 241 verified complete; next: $gsd-discuss-phase 242"
+state_head: eced1e12faf140a7e4866757cd23a11fb66bf833
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 13
   completed_plans: 13
-  percent: 25
+  percent: 50
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-10-09)
+See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 241 — Billing Operator Journeys
-**Progress:** [███░░░░░░░] 25% (1 of 4 milestone phases complete; 6 of 13 planned plans executed)
-**Planned work completed:** Phase 240: 6/6 plans, current Admin 618/0, Node 41/0, package browser 89 passed / 19 incumbent skips, full host gate passed. Phases 241–243 remain. v1.63 is archived and closed.
+**Current focus:** Phase 242 — Investigations and Remaining Admin Surfaces; next: $gsd-discuss-phase 242
+**Progress:** [█████░░░░░] 50% (2 of 4 milestone phases complete; 13 of 13 currently planned plans executed)
+**Planned work completed:** Phases 240 and 241 complete: 6/6 and 7/7 plans; 47/47 and 29/29 must-haves; required human UAT: 0. Current Admin 646/0, Node 41/0, host 223/0, invoice browsers 42 passed / 4 incumbent skips. Phases 242–243 remain; see phases/241-billing-operator-journeys/241-HANDOFF.md. v1.63 remains archived and closed.
 
 ## Current Position
 
-Phase: 241 (Billing Operator Journeys) — EXECUTING
-Current Plan: 7
-Total Plans in Phase: 7
-Status: Phase complete — ready for verification
-Last activity: 2026-10-09 — Phase 241 execution started
+Phase: 242 — Investigations and Remaining Admin Surfaces
+Current Plan: Not started
+Total Plans in Phase: 0
+Status: Ready to plan
+Last activity: 2026-10-10 — Phase 241 verified complete; next: $gsd-discuss-phase 242
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 89
+- Total plans completed: 96
 - Average duration: —
 - Total execution time: —
 
@@ -66,6 +66,7 @@ Last activity: 2026-10-09 — Phase 241 execution started
 | 238 | 5 | - | - |
 | 239 | 5 | - | - |
 | 240 | 6 | - | - |
+| 241 | 7 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -361,6 +362,9 @@ Last activity: 2026-10-09 — Phase 241 execution started
 - [Phase 241]: Build package assets before browsers and retain the byte-identical checked-in CSS/JS outputs.
 - [Phase 241]: Use a 7-day Recovery selection to prove scoped campaign return-window preservation.
 - [Phase 241]: Keep Admin /admin and customer Portal /billing browser evidence separate.
+- [Phase 241]: Validated returns travel as one path and truthful label derived from supported decoded filters under the current owner. — Prevents stale, foreign or malformed origins from redirecting callers or retaining labels for a filter the destination did not consume.
+- [Phase 241]: Action reviews use exact current target and material facts; uncertainty offers a supported investigation path and suppresses blind retries. — Fresh dispatch checks and actual provider callback counters preserve money, scope, step-up and zero-dispatch dismissal guarantees.
+- [Phase 241]: Complete each phase only after canonical automated UAT generation and the existing project-wide CI contract pass. — Phase 241 reconciled legacy serialization without changing verdicts; preserve resolved-gap history and reuse computed-style/text-stress/browser owners instead of required human UAT.
 
 ### Pending Todos
 
@@ -441,8 +445,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T03:10:36.168Z
-Stopped at: Completed 241-07-PLAN.md
+Last session: 2026-10-10T10:36:33.284Z
+Stopped at: Phase 241 complete (7/7 plans, 29/29 must-haves, 19 automated UAT, 0 human UAT); next: $gsd-discuss-phase 242; see 241-HANDOFF.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

@@ -1,6 +1,6 @@
 ---
 phase: 240-shared-system-and-real-billing-exemplar
-verified: 2026-10-09T23:44:55Z
+verified: 2026-10-10T10:33:50Z
 status: passed
 score: 47/47 must-haves verified
 covered_files:
@@ -18,6 +18,7 @@ covered_files:
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-06-PLAN.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-06-SUMMARY.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/240-COVERAGE.md
+  - .planning/phases/240-shared-system-and-real-billing-exemplar/240-UAT.md
   - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/final-gates/exemplar-privacy-copy.xml
   - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/final-gates/package-browser-privacy-copy.xml
   - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/final-gates/results.json
@@ -26,6 +27,9 @@ covered_files:
   - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar/manifest.json
   - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar/recovery.png
   - .planning/phases/240-shared-system-and-real-billing-exemplar/captures/phase237-exemplar/subscription-detail.png
+  - .planning/phases/241-billing-operator-journeys/241-07-SUMMARY.md
+  - .planning/phases/241-billing-operator-journeys/241-EXECUTION-GATES.md
+  - .planning/phases/241-billing-operator-journeys/241-UI-FIX.md
   - accrue_admin/assets/css/app.css
   - accrue_admin/assets/js/hooks/accrue_theme.js
   - accrue_admin/assets/js/hooks/connection_state.js
@@ -42,6 +46,7 @@ covered_files:
   - accrue_admin/lib/accrue_admin/live/invoices_live.ex
   - accrue_admin/lib/accrue_admin/live/subscription_live.ex
   - accrue_admin/lib/accrue_admin/live/subscriptions_live.ex
+  - accrue_admin/lib/accrue_admin/scoped_path.ex
   - accrue_admin/priv/static/accrue_admin.css
   - accrue_admin/priv/static/accrue_admin.js
   - accrue_admin/test/accrue_admin/e2e_fixtures_test.exs
@@ -49,6 +54,7 @@ covered_files:
   - accrue_admin/test/accrue_admin/live/invoices_live_test.exs
   - accrue_admin/test/accrue_admin/live/subscription_live_test.exs
   - accrue_admin/test/accrue_admin/live/subscriptions_live_test.exs
+  - accrue_admin/test/accrue_admin/scoped_path_test.exs
   - accrue_admin/test/js/command_palette_test.mjs
   - accrue_admin/test/js/focus_trap_test.mjs
   - accrue_admin/test/js/visual_baseline_set_test.mjs
@@ -57,8 +63,14 @@ covered_files:
   - examples/accrue_host/e2e/phase237-admin-billing.spec.js
   - examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js
   - scripts/ci/verify_phase240_evidence.mjs
-covered_digest: "v3:sha256:384909b69f301aeea8a38d0ec7347e55dfa82566f6abff38feaa57381c341cb5"
+covered_digest: "v3:sha256:e06c636e01564b9f495bc3b220c3a99d4e4c5f2b1058e207218b707681994f62"
 behavior_unverified: 0
+re_verification:
+  previous_status: passed
+  previous_score: 47/47
+  gaps_closed: []
+  gaps_remaining: []
+  regressions: []
 overrides_applied: 0
 deferred:
   - truth: "Subscription detail's adjacent global invoice-queue panels and their route-specific presentation are not consolidated in this exemplar."
@@ -72,15 +84,15 @@ deferred:
 # Phase 240: Shared System and Real Billing Exemplar Verification Report
 
 **Phase Goal:** Operators can use a coherent, truthful invoice list → detail → action review flow and a dense subscription view through the incumbent Admin system, with shared interaction and evidence patterns ready for other existing routes.
-**Verified:** 2026-10-09T23:44:55Z
+**Verified:** 2026-10-10T10:33:50Z
 **Status:** passed
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — shared-source and consumer changes in Phase 241 required current verification
 
 ## Goal Achievement
 
 ### Observable Truths
 
-The six PLAN files contain 47 observable truths. The five ROADMAP success criteria restate outcomes covered by those truths, so the merged contract contains 47 distinct must-haves. Each plan cohort below was checked against current source, its wired owner tests, and the recorded final gates; all 47 pass.
+The six PLAN files contain 47 observable truths. The five ROADMAP success criteria restate outcomes covered by those truths, so the merged contract contains 47 distinct must-haves. This re-verification was triggered by Phase 241 updates to shared CSS/JS and the invoice/subscription consumers, including the new scoped-return helper. I rechecked all 47 against current source and the latest executable owner evidence; all 47 remain satisfied. The prior phase verification remains historical evidence for unchanged cohorts, while current Admin, Node, host, invoice browser, mounted-host and Phase 241 owner runs cover the changed shared paths.
 
 | # | Roadmap truth | Status | Evidence |
 |---|---|---|---|
@@ -146,10 +158,10 @@ The additional plan-specific details were also verified, including the condition
 
 | Behavior | Command / recorded owner | Result | Status |
 |---|---|---|---|
-| Admin server state and authorization owners | `MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test` | 618 tests, 0 failures | ✓ PASS |
-| Hook, focus and baseline guard behaviors | `node --test test/js/*.mjs` | 41 tests, 0 failures; baseline-set owner contributes 12 controls | ✓ PASS |
+| Current Admin server state and authorization owners | Phase 241 final `cd accrue_admin && MIX_ENV=test mix test` plus warnings-as-errors compile | 646 tests, 0 failures; compile passed | ✓ PASS |
+| Hook, focus and baseline guard behaviors | Phase 241 final `cd accrue_admin && node --test test/js/*.mjs` | 41 tests, 0 failures; baseline-set owner contributes 12 controls | ✓ PASS |
 | Responsive/list/detail and interaction browser owners | Desktop and mobile JUnit privacy copy | 89 passed, 19 incumbent skips, 0 failures/errors | ✓ PASS |
-| Mounted Phase 237 invoice/subscription exemplar and asset provenance | Native privacy-copy JUnit | 1 test, 0 failures; digest mismatch negative then restored match | ✓ PASS |
+| Mounted Phase 237 invoice/subscription exemplar and asset provenance | Current host mounted owner, Phase 241 execution gates and final capture | 1/1 pass; package/compiled/served/browser CSS/JS/font hashes match; action count 0→0 | ✓ PASS |
 | Host verification and existing acceptance paths | `MIX_ENV=test mix verify.full` recorded final result | Exit 0; bounded 64/0, full 223/0, dev boot pass, browser 37 pass/16 incumbent skips, checkout 14/0 | ✓ PASS |
 | Route ledger negative control | `node scripts/ci/verify_phase240_evidence.mjs --self-test .planning/phases/240-shared-system-and-real-billing-exemplar/240-COVERAGE.md` | `valid=1 missing-route-rejected=1`; normal CLI validates 21 routes | ✓ PASS |
 | Complete expected baseline set | `node accrue_admin/e2e/visual-baseline-set.cjs accrue_admin/e2e/__screenshots__/visual-desktop` | 8 expected, 8 present; 12 focused controls pass | ✓ PASS |
@@ -179,11 +191,15 @@ No Phase 240 requirement mapped in `REQUIREMENTS.md` is absent from plan require
 | File | Line | Pattern | Severity | Impact |
 |---|---:|---|---|---|
 
-No unreferenced `TBD`, `FIXME`, or `XXX` debt marker was found in the changed implementation/test owners. The scan matches for `return null`, empty returns and `console.log` are legitimate guard branches, test helpers, or explicit browser evidence output; none is a user-visible stub. The known subscription queue composition finding is handled in Deferred Items, consistent with the locked Phase 241 boundary.
+No unreferenced `TBD`, `FIXME`, or `XXX` debt marker was found in the changed implementation/test owners; Phase 241's standard-depth review covered 30 files with 0 findings. The scan matches for `return null`, empty returns and `console.log` are legitimate guard branches, test helpers, or explicit browser evidence output; none is a user-visible stub. The known subscription queue composition finding is handled in Deferred Items, consistent with the locked Phase 241 boundary.
 
 ## Human Verification Required
 
 None. Phase policy requires zero maintainer UAT; automated mounted appearance, interaction and state owners exist, and subjective owner feedback remains optional. Linux pixel comparison is handled by the Phase 243 owner. Browser zoom was explicitly reported as unavailable rather than treated as verified by viewport or pinch emulation.
+
+## Re-verification Evidence
+
+Phase 241 changed shared Admin styles/JS and the invoice/subscription consumers, so Phase 240's previous digest and pass timestamp were stale. Current regression evidence is recorded in `.planning/phases/241-billing-operator-journeys/241-EXECUTION-GATES.md`, `.planning/phases/241-billing-operator-journeys/241-UI-FIX.md`, and `241-07-SUMMARY.md`. The owner runs report Admin 646/0 with warnings-as-errors compile passing, Node 41/0, host 223/0, invoice list/detail browser 42/0/4 incumbent skips, focused Phase 191 1/1 and Phase 199 2/2, and mounted host 1/1 with current served-asset hashes. The canonical Phase 240 UAT is at a generator fixed point (18/18, 0 issues); the project-wide executable UAT contract reports PASS across 13 phases, 102 summaries and 302 items. These checks preserve the original evidence limits: actual browser zoom and physical-device behavior are not claimed, and selected reviewed Linux goldens remain Phase 243 work.
 
 ## Gaps Summary
 
@@ -191,5 +207,5 @@ No blocking or uncertain must-have remains. The current implementation delivers 
 
 ---
 
-_Verified: 2026-10-09T23:44:55Z_  
+_Verified: 2026-10-10T10:33:50Z_
 _Verifier: the agent (gsd-verifier)_
