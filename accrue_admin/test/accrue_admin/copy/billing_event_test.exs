@@ -20,4 +20,11 @@ defmodule AccrueAdmin.Copy.BillingEventTest do
   test "events filter toolbar CTA" do
     assert Copy.billing_events_apply_filters() == "Apply filters"
   end
+
+  test "billing events remain distinct from webhook deliveries" do
+    assert Copy.events_list_heading() == "Trace billing activity"
+    assert Copy.events_list_result_label_pair() == {"event", "events"}
+    assert Copy.webhooks_list_result_label_pair() == {"webhook delivery", "webhook deliveries"}
+    assert Copy.webhooks_retry_cancel_label() == "Keep deliveries"
+  end
 end

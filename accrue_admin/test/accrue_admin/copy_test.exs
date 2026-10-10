@@ -344,6 +344,44 @@ defmodule AccrueAdmin.CopyTest do
     end
   end
 
+  test "catalog copy distinguishes definitions, codes, empty states and unknown limits" do
+    assert Coupon.coupon_index_headline() == "Coupons"
+    assert PromotionCode.promotion_codes_index_headline() == "Promotion codes"
+    assert Coupon.coupon_kpi_meta_promotion_codes_child() =~ "Separate child-code surface"
+
+    assert Coupon.coupon_kpi_meta_redemptions_cap() == "Limit not recorded"
+    assert Coupon.coupon_unknown_value() == "Not recorded"
+    assert Coupon.coupon_redemptions_unknown() == "Redemption count not recorded"
+    assert PromotionCode.promotion_code_kpi_meta_unlimited_cap() == "Limit not recorded"
+    assert PromotionCode.promotion_code_unknown_value() == "Not recorded"
+    assert PromotionCode.promotion_code_redemptions_unknown() == "Redemption count not recorded"
+
+    assert Coupon.coupons_list_first_run_empty_title() == "No coupons yet."
+    assert Coupon.coupons_list_filtered_empty_title() == "No coupons match these filters."
+
+    assert Coupon.coupon_promotion_code_unavailable("cpn_missing") ==
+             "Coupon record unavailable (cpn_missing)"
+
+    assert PromotionCode.promotion_codes_list_first_run_empty_title() ==
+             "No promotion codes yet."
+
+    assert PromotionCode.promotion_codes_list_filtered_empty_title() ==
+             "No promotion codes match these filters."
+
+    assert PromotionCode.promotion_code_coupon_unavailable("cpn_missing") ==
+             "Coupon record unavailable (cpn_missing)"
+
+    assert PromotionCode.promotion_code_detail_no_coupon_projection() ==
+             "No coupon projection is linked to this promotion code."
+  end
+
+  test "routine collection labels are humanized while unknown values stay unknown" do
+    assert Copy.invoices_collection_method_label(:charge_automatically) == "Automatic"
+    assert Copy.invoices_collection_method_label("send_invoice") == "Send invoice"
+    assert Copy.invoices_collection_method_label(nil) == "Unknown"
+    assert Copy.invoices_collection_method_label("future_provider_enum") == "Unknown"
+  end
+
   test "CPY-01 command-palette no-results copy names the billing search domain" do
     copy = Copy.global_search_no_results_copy("missing-acme")
 

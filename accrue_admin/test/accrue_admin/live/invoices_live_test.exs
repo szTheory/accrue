@@ -67,6 +67,8 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert html =~ "INV-0002"
     assert html =~ "/billing/invoices/#{invoice.id}"
     assert html =~ "Open"
+    assert html =~ "Automatic"
+    refute html =~ "Charge Automatically"
     assert html =~ "$75.00"
     assert html =~ "ax-chip ax-label"
     refute html =~ "ax-text-12"

@@ -140,6 +140,8 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert html =~ "Amount remaining"
     assert html =~ "Amount paid"
     assert html =~ "Collection method"
+    assert html =~ "Automatic"
+    refute html =~ "Charge Automatically"
     assert html =~ "Document state"
     assert html =~ "Tax risk"
     assert html =~ "Line items"

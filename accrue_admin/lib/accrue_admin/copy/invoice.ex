@@ -102,6 +102,15 @@ defmodule AccrueAdmin.Copy.Invoice do
   def invoices_filter_collection_automatic, do: "Automatic"
   def invoices_filter_collection_send_invoice, do: "Send invoice"
 
+  def invoices_collection_method_label(value)
+      when value in [:charge_automatically, "charge_automatically"],
+      do: invoices_filter_collection_automatic()
+
+  def invoices_collection_method_label(value) when value in [:send_invoice, "send_invoice"],
+    do: invoices_filter_collection_send_invoice()
+
+  def invoices_collection_method_label(_value), do: "Unknown"
+
   def invoices_balance_word_due, do: "due"
   def invoices_balance_word_paid, do: "paid"
   def invoices_balance_word_remaining, do: "remaining"

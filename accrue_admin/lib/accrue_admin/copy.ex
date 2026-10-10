@@ -325,6 +325,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoices_filter_status_void(), to: Invoice
   defdelegate invoices_filter_collection_automatic(), to: Invoice
   defdelegate invoices_filter_collection_send_invoice(), to: Invoice
+  defdelegate invoices_collection_method_label(value), to: Invoice
   defdelegate invoices_balance_word_due(), to: Invoice
   defdelegate invoices_balance_word_paid(), to: Invoice
   defdelegate invoices_balance_word_remaining(), to: Invoice

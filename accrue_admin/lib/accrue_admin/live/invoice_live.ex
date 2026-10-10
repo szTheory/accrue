@@ -887,7 +887,10 @@ defmodule AccrueAdmin.Live.InvoiceLive do
       },
       %{label: "Amount paid", value: money_text(invoice.amount_paid_minor, invoice.currency)},
       %{label: "Due / finalized", value: invoice_boundary_summary(invoice)},
-      %{label: "Collection method", value: humanize(invoice.collection_method || "unknown")},
+      %{
+        label: "Collection method",
+        value: Copy.invoices_collection_method_label(invoice.collection_method)
+      },
       %{label: "Document state", value: pdf_summary(invoice)},
       %{label: "Tax risk", value: tax_risk_summary(invoice)},
       %{label: "Line items", value: Integer.to_string(length(invoice.items || []))}
@@ -910,7 +913,10 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp collection_fields(invoice) do
     [
       %{label: "Status", value: humanize(invoice.status)},
-      %{label: "Collection method", value: humanize(invoice.collection_method || "unknown")},
+      %{
+        label: "Collection method",
+        value: Copy.invoices_collection_method_label(invoice.collection_method)
+      },
       %{
         label: "Amount remaining",
         value: money_text(invoice.amount_remaining_minor, invoice.currency)
