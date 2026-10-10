@@ -43,11 +43,9 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Evidence:** The blocking Ubuntu comparison passed in run 38094642350 against source `849f72084a6460ed54ecc06bc261054b15efdde0`. The audit and phase artifacts are preserved under `milestones/v1.64-*`.
 
-## Current Milestone
+## Archived v1.64 Scope and Delivery Contract
 
-None. Start the next cycle with `$gsd-new-milestone`.
-
-### v1.64 delivery contract (archived context)
+**Current status:** Shipped and archived; the next milestone has not been opened. Run `$gsd-new-milestone` to continue.
 
 **Goal:** Make existing Accrue Admin journeys clearer, more consistent, responsive, and easier to operate, with recurring automated acceptance and bounded agent visual inspection.
 
@@ -981,4 +979,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-10 after Phase243 completion; next: `$gsd-complete-milestone v1.64`.*
+*Last updated: 2026-10-10 after v1.64 closeout; next: `$gsd-new-milestone`.*
