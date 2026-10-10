@@ -26,7 +26,9 @@ test("global search completes real scoped database queries and removes stale mat
   const result = dialog.locator('[data-search-group="customers"] a').filter({ hasText: email });
   await expect(result).toBeVisible({ timeout: 10_000 });
   await expect(result).toContainText(`Customer ID: ${customerId}`);
-  await expect(dialog.getByRole("status")).toHaveCount(0);
+  const activeStatus = dialog.locator("[data-active-result-status]");
+  await expect(activeStatus).toContainText(email);
+  await expect(result).toHaveClass(/ax-active/);
 
   const href = await result.getAttribute("href");
   expect(href).toBeTruthy();
@@ -37,10 +39,32 @@ test("global search completes real scoped database queries and removes stale mat
   await input.fill("no-such-customer-234@example.test");
   await expect(result).toHaveCount(0);
   await expect(dialog).toContainText('No billing records match "no-such-customer-234@example.test"');
-
   await input.fill(email);
-  await expect(result).toBeVisible();
-  await result.click();
+  await expect(result).toBeVisible({ timeout: 10_000 });
+  await expect(result).toHaveClass(/ax-active/);
+  await result.hover();
+  await expect(result).toHaveClass(/ax-active/);
+  await expect(activeStatus).toContainText(email);
+  await input.focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(result).toHaveClass(/ax-active/);
+  await page.keyboard.press("Enter");
+  await waitForLiveView(page);
+  await expect(page).toHaveURL(new RegExp(`/admin/customers/${customerId}\\?`));
+
+  await page.goto(`/admin?org=${encodeURIComponent(org)}`);
+  await waitForLiveView(page);
+  await page.locator("[data-command-palette-trigger]").first().click();
+  const reopened = page.getByRole("dialog", { name: /global search/i });
+  const reopenedInput = reopened.locator("#global-search-input");
+  await reopenedInput.fill("no-such-customer-234@example.test");
+  const reopenedResult = reopened.locator('[data-search-group="customers"] a').filter({ hasText: email });
+  await expect(reopenedResult).toHaveCount(0);
+  await expect(reopened).toContainText('No billing records match "no-such-customer-234@example.test"');
+  await reopenedInput.fill(email);
+  await expect(reopenedResult).toBeVisible({ timeout: 10_000 });
+  await expect(reopenedResult).toHaveClass(/ax-active/);
+  await reopenedResult.click();
   await waitForLiveView(page);
   await expect(page).toHaveURL(new RegExp(`/admin/customers/${customerId}\\?`));
   await expect(page.getByRole("heading", { name: email })).toBeVisible();

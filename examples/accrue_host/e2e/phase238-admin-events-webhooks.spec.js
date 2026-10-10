@@ -1,9 +1,60 @@
 // @ts-check
+const crypto = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
 const { test, expect } = require("./support/test.js");
 const { readFixture, login, waitForLiveView } = require("./support/fixture.js");
 const AxeBuilder = require("@axe-core/playwright").default;
 
 const orgQuery = (fixture) => `org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+const repoRoot = path.resolve(__dirname, "../../..");
+
+function sha256(bytes) {
+  return crypto.createHash("sha256").update(bytes).digest("hex");
+}
+
+async function assertCurrentAdminAssets(page, testInfo) {
+  const cssHref = await page.locator('link[rel="stylesheet"][href*="/admin/assets/css-"]').getAttribute("href");
+  const jsHref = await page.locator('script[src*="/admin/assets/js-"]').getAttribute("src");
+  expect(cssHref).toMatch(/\/admin\/assets\/css-[a-f0-9]{32}$/);
+  expect(jsHref).toMatch(/\/admin\/assets\/js-[a-f0-9]{32}$/);
+
+  const rows = [];
+  for (const [href, packagePath] of [
+    [cssHref, "accrue_admin/priv/static/accrue_admin.css"],
+    [jsHref, "accrue_admin/priv/static/accrue_admin.js"],
+  ]) {
+    const packageBytes = fs.readFileSync(path.join(repoRoot, packagePath));
+    const compiledPath = path.join(
+      repoRoot,
+      "examples/accrue_host/_build/test/lib/accrue_admin/priv",
+      packagePath.replace("accrue_admin/priv/", "")
+    );
+    const compiledBytes = fs.readFileSync(compiledPath);
+    const response = await page.request.get(href);
+    expect(response.status(), `served asset status for ${href}`).toBe(200);
+    const servedBytes = await response.body();
+    const servedPath = new URL(href, page.url()).pathname;
+    const browserRequested = await page.evaluate((pathname) =>
+      performance.getEntriesByType("resource").some((entry) => new URL(entry.name).pathname === pathname),
+      servedPath
+    );
+    expect(sha256(packageBytes), `compiled host matches package build: ${packagePath}`).toBe(sha256(compiledBytes));
+    expect(sha256(servedBytes), `HTTP response matches package build: ${packagePath}`).toBe(sha256(packageBytes));
+    expect(browserRequested, `browser used current served asset ${servedPath}`).toBeTruthy();
+    rows.push({
+      path: servedPath,
+      package: { sha256: sha256(packageBytes), bytes: packageBytes.length },
+      hostCompiled: { sha256: sha256(compiledBytes), bytes: compiledBytes.length },
+      httpServed: { sha256: sha256(servedBytes), bytes: servedBytes.length },
+      browserRequestSha256: sha256(servedBytes),
+    });
+  }
+  await testInfo.attach("phase242-served-asset-provenance.json", {
+    body: Buffer.from(JSON.stringify(rows, null, 2)),
+    contentType: "application/json",
+  });
+}
 
 async function openAdmin(page, fixture, sandboxId, path) {
   await login(page, fixture, fixture.admin_email, sandboxId);
@@ -33,6 +84,7 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
   const owner = orgQuery(fixture);
 
   await openAdmin(page, fixture, sandboxId, `/admin/webhooks?status=dead&${owner}`);
+  await assertCurrentAdminAssets(page, testInfo);
   const firstRow = page.locator(`input[data-role="toggle-row"][data-row-id="${fixture.webhook_id}"]:visible`).first();
   const secondRow = page.locator(`input[data-role="toggle-row"][data-row-id="${fixture.second_webhook_id}"]:visible`).first();
   await expect(firstRow).toBeVisible();
@@ -75,6 +127,7 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
   await expect(singular).toContainText("Replay 1 selected delivery?");
   await expect(singular).toContainText("Only deliveries still eligible when confirmed will be queued");
   await expect(singular).toContainText("Queue acceptance does not mean processing is complete");
+  await expect(singular.locator("[data-role='bulk-replay-reviewed-deliveries']")).toContainText(fixture.webhook_id);
   const confirmSelected = singular.locator("[data-role='confirm-retry-selected']");
   await expect(confirmSelected).toBeFocused();
   const keepDeliveries = singular.getByRole("button", { name: "Keep deliveries" });
@@ -90,6 +143,9 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
   await page.keyboard.press("Enter");
   const confirmation = page.locator("[data-role='bulk-replay-confirm']");
   await expect(confirmation).toContainText("Replay 2 selected deliveries?");
+  const reviewedDeliveries = confirmation.locator("[data-role='bulk-replay-reviewed-deliveries']");
+  await expect(reviewedDeliveries).toContainText(fixture.webhook_id);
+  await expect(reviewedDeliveries).toContainText(fixture.second_webhook_id);
   const queueEligible = confirmation.getByRole("button", { name: "Queue eligible deliveries" });
   await queueEligible.focus();
   await page.keyboard.press("Enter");
@@ -137,6 +193,13 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
   await waitForLiveView(page);
   await expect(page.getByRole("heading", { name: "Trace billing activity" })).toBeVisible();
   await expect(page.getByText("invoice.payment_failed", { exact: false }).first()).toBeVisible();
+  const eventLink = page.locator('a[href^="/admin/events/"]').first();
+  await expect(eventLink).toBeVisible();
+  await eventLink.click();
+  await waitForLiveView(page);
+  await expect(
+    page.getByRole("link", { name: new RegExp(`^Source webhook ${fixture.webhook_id}`) })
+  ).toBeVisible();
   await page.goto(`/admin/events?${owner}&q=does-not-match-phase238`);
   await waitForLiveView(page);
   await expect(page.getByText("No event ledger rows match these filters.")).toBeVisible();
