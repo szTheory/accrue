@@ -320,7 +320,16 @@ defmodule AccrueAdmin.EventsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/events?org=#{organization_slug}")
 
-    assert html =~ ~s(href="/billing/events/#{event.id}?org=#{organization_slug}")
+    event_href =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.attribute("a", "href")
+      |> Enum.find(&String.starts_with?(&1, "/billing/events/#{event.id}?"))
+
+    assert event_href
+    assert URI.decode_query(URI.parse(event_href).query)["org"] == organization_slug
+    assert URI.decode_query(URI.parse(event_href).query)["return"] ==
+             "/billing/events?org=#{organization_slug}"
     assert html =~ "invoice.payment_failed.exact_link"
   end
 

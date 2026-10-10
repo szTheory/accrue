@@ -164,6 +164,55 @@ defmodule AccrueAdmin.ScopedPathTest do
            ) == %{path: "/billing/invoices?org=acme", label: "Back to invoices"}
   end
 
+  test "event, webhook, catalog and Connect returns retain only decoder-supported filters" do
+    scope = organization_scope()
+
+    cases = [
+      {"/events", "q=invoice&type=paid&actor_type=admin&subject_type=Invoice&source_webhook_event_id=evt_1&subject_id=ignored", "Back to events"},
+      {"/webhooks", "type=invoice.payment_failed&status=failed,dead&livemode=false&query=ignored", "Back to webhooks"},
+      {"/coupons", "view=all&q=summer&valid=true&status=ignored", "Back to coupons"},
+      {"/promotion-codes", "view=all&q=SUMMER&active=false&coupon_id=coupon_1&status=ignored", "Back to promotion codes"},
+      {"/connect", "view=all&q=acct_1&type=express&charges_enabled=true&payouts_enabled=false&details_submitted=true&deauthorized=false&needs_attention=true&status=ignored", "Back to Connect accounts"}
+    ]
+
+    for {suffix, query, label} <- cases do
+      result =
+        ScopedPath.return_destination(
+          "/admin",
+          "/admin#{suffix}?#{query}&org=foreign&owner_id=caller",
+          scope,
+          nil,
+          suffix
+        )
+
+      assert result.label == label
+      assert String.starts_with?(result.path, "/admin#{suffix}?")
+      assert URI.decode_query(URI.parse(result.path).query)["org"] == "acme"
+      refute result.path =~ "foreign"
+      refute result.path =~ "owner_id"
+      refute result.path =~ "ignored"
+    end
+  end
+
+  test "malformed or invalid consumed return filters fall back to the current family" do
+    scope = organization_scope()
+
+    for origin <- [
+          "/admin/events?type=%ZZ",
+          "/admin/events?type=paid&type=failed",
+          "/admin/webhooks?livemode=maybe",
+          "/admin/coupons?valid=maybe",
+          "/admin/promotion-codes?active=maybe",
+          "/admin/connect?needs_attention=maybe",
+          "/admin/events?source_webhook_event_id=#{String.duplicate("x", 129)}"
+        ] do
+      assert ScopedPath.return_destination("/admin", origin, scope, nil, "/events") == %{
+               path: "/admin/events?org=acme",
+               label: "Back to events"
+             }
+    end
+  end
+
   test "ambiguous, malformed, external, scheme-relative, and cross-mount origins use fallback" do
     scope = organization_scope()
 

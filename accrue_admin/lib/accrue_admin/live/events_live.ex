@@ -153,7 +153,7 @@ defmodule AccrueAdmin.Live.EventsLive do
             %{
               id: :type,
               label: Copy.billing_events_table_column_event(),
-              render: fn row -> event_cell(row, @admin_mount_path, @current_owner_scope) end
+              render: fn row -> event_cell(row, @admin_mount_path, @current_owner_scope, @params) end
             },
             %{
               label: Copy.billing_events_table_column_subject(),
@@ -414,11 +414,18 @@ defmodule AccrueAdmin.Live.EventsLive do
     end
   end
 
-  defp event_cell(row, mount_path, owner_scope) do
+  defp event_cell(row, mount_path, owner_scope, params) do
     label = row.type || Copy.billing_events_when_unknown()
-    href = ScopedPath.build(mount_path, "/events/#{row.id}", owner_scope)
+    list_return = scoped_events_return(mount_path, owner_scope, params)
+    href = ScopedPath.build(mount_path, "/events/#{row.id}", owner_scope, %{"return" => list_return})
     escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
     Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
+  end
+
+  defp scoped_events_return(mount_path, owner_scope, params) do
+    filter = Events.decode_filter(params) |> Events.encode_filter()
+    raw = ScopedPath.build(mount_path, "/events", owner_scope, filter)
+    ScopedPath.return_destination(mount_path, raw, owner_scope, nil, "/events").path
   end
 
   defp subject_href(%{subject_type: "Customer", subject_id: id}, mount_path, scope),
