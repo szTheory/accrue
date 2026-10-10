@@ -33,6 +33,55 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
   end
 
   describe "Dunning Timeline" do
+    test "direct and untrusted origins return through both Recovery links in current scope", %{
+      conn: conn
+    } do
+      customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+      subscription_id = insert_subscription(customer).id
+
+      conn =
+        init_test_session(conn, %{
+          :admin_token => "admin",
+          :active_organization_id => "org_allowed",
+          :active_organization_slug => "allowed-org",
+          :admin_organization_ids => ["org_allowed"],
+          "accrue_admin" => %{"mount_path" => "/billing"}
+        })
+
+      raw_origins = [
+        nil,
+        "",
+        "/billing/analytics/recovery?window=bad",
+        "/billing/customers",
+        "/admin/analytics/recovery?window=7d",
+        "https://evil.example"
+      ]
+
+      Enum.each(raw_origins, fn raw_origin ->
+        query =
+          case raw_origin do
+            nil -> ""
+            value -> "?" <> URI.encode_query(%{"return_to" => value})
+          end
+
+        assert {:ok, _view, html} =
+                 live(
+                   conn,
+                   "/billing/analytics/recovery/subscriptions/#{subscription_id}" <>
+                     query <>
+                     if(query == "", do: "?org=allowed-org", else: "&org=allowed-org")
+                 )
+
+        expected = "/billing/analytics/recovery?org=allowed-org"
+        assert length(Regex.scan(~r|href="#{Regex.escape(expected)}"|, html)) >= 2
+
+        assert html =~
+                 ~r|<a class="ax-link" href="#{Regex.escape(expected)}">Back to Recovery</a>|
+
+        refute html =~ "evil.example"
+      end)
+    end
+
     test "D-20 D-21 renders Campaign as a detail drill-down with summary rows and primary timeline",
          %{conn: conn} do
       subscription_id = insert_subscription().id
@@ -78,6 +127,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       assert html =~ "Invoice count"
       assert html =~ "ax-campaign-timeline"
       assert html =~ "Campaign started"
+      assert html =~ ~r|href="/billing/subscriptions/#{subscription_id}"|
 
       refute html =~ ~s(class="ax-kpi-grid")
       refute html =~ ~s(data-ax-zone="kpi-cluster")

@@ -43,14 +43,40 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    return_path =
-      ScopedPath.return_path(
-        socket.assigns.admin_mount_path,
-        Map.get(params, "return_to"),
-        socket.assigns.current_owner_scope
-      )
+    mount_path = socket.assigns.admin_mount_path
+    owner_scope = socket.assigns.current_owner_scope
 
-    {:noreply, assign(socket, :return_path, return_path)}
+    return_destination =
+      case Map.get(params, "return_to") do
+        raw_return_path when is_binary(raw_return_path) and raw_return_path != "" ->
+          ScopedPath.return_destination(
+            mount_path,
+            raw_return_path,
+            owner_scope,
+            nil,
+            "/analytics/recovery"
+          )
+
+        _missing_or_blank ->
+          recovery_path = ScopedPath.build(mount_path, "/analytics/recovery", owner_scope)
+          %{path: recovery_path, label: "Back to Recovery"}
+      end
+
+    return_destination =
+      if return_destination.label == "Back to Recovery" do
+        return_destination
+      else
+        recovery_path =
+          ScopedPath.build(
+            mount_path,
+            "/analytics/recovery",
+            owner_scope
+          )
+
+        %{path: recovery_path, label: "Back to Recovery"}
+      end
+
+    {:noreply, assign(socket, :return_destination, return_destination)}
   end
 
   @impl true
@@ -68,7 +94,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
       <section class="ax-page" aria-label="Dunning timeline for subscription">
         <Breadcrumbs.breadcrumbs items={[
           %{label: "Analytics"},
-          %{label: "Recovery", href: @return_path},
+          %{label: "Recovery", href: @return_destination.path},
           %{label: "Subscription"}
         ]} />
 
@@ -78,7 +104,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
           </:facts>
         </Detail.summary_card>
 
-        <a class="ax-link" href={@return_path}>Back to results</a>
+        <a class="ax-link" href={@return_destination.path}>{@return_destination.label}</a>
 
         <Detail.summary_list rows={summary_rows(@subscription_id, @arcs, @invoice_map, @admin_mount_path, @current_owner_scope)} />
 
