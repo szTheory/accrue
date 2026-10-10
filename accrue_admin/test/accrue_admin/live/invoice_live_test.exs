@@ -758,6 +758,33 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert html =~ Copy.step_up_title()
   end
 
+  test "dismissing invoice step-up allows the staged action to be confirmed again", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, invoice.id)
+
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    render_click(element(view, "button[role='menuitem']", Copy.Invoice.invoice_action_void()))
+
+    render_submit(
+      element(view, "form[data-action-type='void']"),
+      %{"action_type" => "void"}
+    )
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ Copy.step_up_title()
+
+    render_click(view, "step_up_dismiss", %{})
+
+    refute has_element?(view, "[data-role='step-up-cancel']")
+    refute TestRepo.get!(Invoice, invoice.id).status == :void
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :void_invoice end)
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ Copy.step_up_title()
+  end
+
   test "D-13 collectible invoices prioritize pay and keep danger actions in overflow", %{
     conn: conn,
     invoice: invoice

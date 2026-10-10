@@ -1183,7 +1183,9 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
   defp dismiss_step_up_if_pending(socket) do
     if socket.assigns[:step_up_pending] do
-      StepUp.dismiss_challenge(socket)
+      socket
+      |> StepUp.dismiss_challenge()
+      |> assign(:dispatch_state, :staged)
     else
       socket
     end
