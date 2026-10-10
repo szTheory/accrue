@@ -430,12 +430,42 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await waitForLiveView(page);
   await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
   await waitForLiveView(page);
-  await page.goto(`/admin/subscriptions/${fixture.recovery_subscription_id}?org=${owner}`, { waitUntil: "domcontentloaded" });
+  await page.goto(`/admin/subscriptions/${fixture.subscription_id}?org=${owner}`, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
-  await expect(page.getByRole("heading", { name: "admin-e2e-alpha-customer@example.test" })).toBeVisible();
-  await expect(page.locator("body")).toContainText("admin-e2e-alpha-customer@example.test");
-  await expect(page.locator("body")).toContainText("Price is not confirmed in admin");
+  await expect(page.getByRole("heading", { name: "billing-history@example.test" })).toBeVisible();
+  await expect(page.locator("body")).toContainText("billing-history@example.test");
+  await expect(page.locator("body")).toContainText("price_basic");
   await expect(page.locator("body")).toContainText("Current period is not shown in admin");
+  const recoveryCta = page.getByRole("link", { name: "Open dunning funnel and at-risk analytics", exact: true });
+  await expect(recoveryCta).toHaveCount(1);
+  await expect(recoveryCta).toHaveAttribute("class", "ax-link");
+  await expect(recoveryCta).toHaveAttribute("href", `/admin/analytics/recovery?org=${fixture.admin_org_alpha_slug}`);
+  const subscriptionSummaryStyles = await page.evaluate(() => {
+    const title = document.querySelector(".ax-summary-title");
+    const main = document.querySelector(".ax-summary-main");
+    const facts = document.querySelector(".ax-summary-facts");
+    const fact = document.querySelector(".ax-summary-fact");
+    const actionHeader = document.querySelector("[data-ax-action-band] .ax-page-header");
+    return Object.fromEntries(Object.entries({ title, main, facts, fact, actionHeader }).map(([name, element]) => {
+      const style = getComputedStyle(element);
+      return [name, {
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+        gap: style.gap,
+        rowGap: style.rowGap,
+        columnGap: style.columnGap,
+        color: style.color,
+        backgroundColor: style.backgroundColor
+      }];
+    }));
+  });
+  expect(subscriptionSummaryStyles.title.fontSize).toBe("24px");
+  expect(subscriptionSummaryStyles.title.fontWeight).toBe("600");
+  expect(subscriptionSummaryStyles.main.gap).toBe("4px");
+  expect(subscriptionSummaryStyles.facts.rowGap).toBe("4px");
+  expect(subscriptionSummaryStyles.fact.columnGap).toBe("4px");
+  expect(subscriptionSummaryStyles.actionHeader.gap).toBe("4px");
+  expect(subscriptionSummaryStyles.title).toMatchObject({ fontSize: "24px", fontWeight: "600" });
   const healthPresentation = await page.locator(".ax-detail-health-summary").evaluate((summary) => {
     const summaryStyle = getComputedStyle(summary);
     const copyStyle = getComputedStyle(summary.querySelector(".ax-detail-health-copy"));
@@ -453,8 +483,8 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   expect(healthPresentation.copyGap, "summary copy uses the incumbent spacing ladder").not.toContain("0.5px");
   expect(healthPresentation.copyPadding, "summary copy avoids half-pixel task spacing").not.toContain("0.5px");
   expect(healthPresentation.weights.every((weight) => weight === 400 || weight === 600), "summary uses only approved type weights").toBe(true);
-  const scopedCustomerLink = page.getByRole("link", { name: "admin-e2e-alpha-customer@example.test" }).first();
-  await expect(scopedCustomerLink).toHaveAttribute("href", new RegExp(`/admin/customers/${fixture.admin_denial_customer_id}\\?org=${fixture.admin_org_alpha_slug}`));
+  const scopedCustomerLink = page.getByRole("link", { name: "billing-history@example.test" }).first();
+  await expect(scopedCustomerLink).toHaveAttribute("href", new RegExp(`/admin/customers/.+\\?org=${fixture.admin_org_alpha_slug}`));
   const subscriptionOverflow = page.locator("[data-ax-action-overflow-menu]:visible");
   await expect(subscriptionOverflow).toHaveCount(1);
   const subscriptionAction = subscriptionOverflow.locator("summary");
@@ -531,9 +561,9 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
     await waitForLiveView(mobilePage);
     await mobilePage.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
     await waitForLiveView(mobilePage);
-    await mobilePage.goto(`/admin/subscriptions/${fixture.recovery_subscription_id}?org=${owner}`, { waitUntil: "domcontentloaded" });
+    await mobilePage.goto(`/admin/subscriptions/${fixture.subscription_id}?org=${owner}`, { waitUntil: "domcontentloaded" });
     await waitForLiveView(mobilePage);
-    await expect(mobilePage.getByRole("heading", { name: "admin-e2e-alpha-customer@example.test" })).toBeVisible();
+    await expect(mobilePage.getByRole("heading", { name: "billing-history@example.test" })).toBeVisible();
     const mobileAction = mobilePage.locator("[data-ax-action-overflow-menu] summary");
     await expect(mobileAction).toBeVisible();
     await mobileAction.click();
@@ -562,6 +592,12 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   } finally {
     await mobileContext.close();
   }
+  await page.setViewportSize({ width: 320, height: 900 });
+  await assertNoOverflow(page);
+  const subscriptionNarrowShot = await page.screenshot({ fullPage: true });
+  await testInfo.attach("phase241-subscription-detail-narrow.png", { body: subscriptionNarrowShot, contentType: "image/png" });
+  screenshots["subscription-detail-narrow.png"] = { bytes: subscriptionNarrowShot, route: page.url(), viewport: { width: 320, height: 900 }, theme: "dark" };
+  await page.setViewportSize({ width: 1280, height: 900 });
   const subscriptionShot = await page.screenshot({ fullPage: true });
   await testInfo.attach("phase240-subscription-detail-desktop.png", { body: subscriptionShot, contentType: "image/png" });
   screenshots["subscription-detail.png"] = { bytes: subscriptionShot, route: page.url(), viewport: { width: 1280, height: 900 }, theme: "dark" };
@@ -601,10 +637,16 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
       first_fresh_timing_is_diagnostic_only: true
     },
     subscription_crosscheck: {
-      fixture: "disposable host Ecto sandbox; seeded Admin Alpha past-due subscription",
-      route: `/admin/subscriptions/${fixture.recovery_subscription_id}?org=${owner}`,
+      fixture: "disposable host Ecto sandbox; seeded Admin Alpha active subscription without a dunning campaign",
+      route: `/admin/subscriptions/${fixture.subscription_id}?org=${owner}`,
       layout_stress: "customer identity was extended in-memory at 320px, checked for wrapping, then restored before capture",
-      missing_plan_and_period: "Price not shown in admin; Current period is not shown in admin",
+      missing_period: "Current period is not shown in admin; price_basic is confirmed",
+      recovery_navigation: {
+        exact_label_count: await recoveryCta.count(),
+        class: await recoveryCta.getAttribute("class"),
+        href: await recoveryCta.getAttribute("href")
+      },
+      computed_summary_styles: subscriptionSummaryStyles,
       responsive_geometry: subscriptionResponsiveGeometry,
       long_identity: longIdentityMetrics
     },

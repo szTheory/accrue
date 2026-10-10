@@ -1133,22 +1133,26 @@ test.describe("Phase 199 interaction and overlay contract", () => {
           p { margin-bottom: 2em !important; }
         `;
         document.head.append(style);
-        const elements = [...document.querySelectorAll("body *")];
-        const fontSizes = elements.map((element) => Number.parseFloat(getComputedStyle(element).fontSize));
-        elements.forEach((element, index) => {
-          const fontSize = fontSizes[index];
-          if (Number.isFinite(fontSize) && fontSize > 0) {
-            element.dataset.phase241BaseFontSize = String(fontSize);
-            element.style.setProperty("font-size", `${fontSize * 2}px`, "important");
-          }
-        });
       });
 
       const enlarged = await page.evaluate(() => ({
         headingScale: (() => {
+          const elements = [...document.querySelectorAll("body *")];
+          const fontSizes = elements.map((element) => Number.parseFloat(getComputedStyle(element).fontSize));
+          elements.forEach((element, index) => {
+            const fontSize = fontSizes[index];
+            if (Number.isFinite(fontSize) && fontSize > 0) {
+              element.dataset.phase241BaseFontSize = String(fontSize);
+              element.style.setProperty("font-size", `${fontSize * 2}px`, "important");
+            }
+          });
           const heading = document.querySelector("#main-content, main");
-          return Number.parseFloat(getComputedStyle(heading).fontSize) /
-            Number.parseFloat(heading.dataset.phase241BaseFontSize);
+          const baseFontSize = Number.parseFloat(heading?.dataset.phase241BaseFontSize || "");
+          const enlargedFontSize = Number.parseFloat(getComputedStyle(heading).fontSize);
+          if (!Number.isFinite(baseFontSize) || !Number.isFinite(enlargedFontSize) || baseFontSize <= 0) {
+            throw new Error("Phase 241 200% text instrumentation did not capture a finite main font size");
+          }
+          return enlargedFontSize / baseFontSize;
         })(),
         pageWidth: document.documentElement.scrollWidth,
         viewportWidth: window.innerWidth,

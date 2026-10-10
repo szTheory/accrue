@@ -423,7 +423,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <div class="ax-detail-dunning-summary" aria-label="Dunning funnel state for this subscription">
                   <span><strong>Global dunning funnel</strong><em>No subscription-level campaign here; recovery analytics still shows at-risk accounts and funnel trends.</em></span>
                   <a
-                    class="ax-button ax-button-primary ax-button-sm ax-detail-dunning-action"
+                    class="ax-link"
                     href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                   >
                     Open dunning funnel and at-risk analytics
@@ -434,9 +434,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 </p>
               <% end %>
 
-              <div class="ax-detail-actions-row">
+              <div :if={Subscription.dunning_campaign_active?(@subscription)} class="ax-detail-actions-row">
                 <a
-                  class="ax-button ax-button-primary ax-button-sm ax-detail-recovery-shortcut"
+                  class="ax-link"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
                   Open dunning funnel and at-risk analytics

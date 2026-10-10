@@ -122,6 +122,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute html =~ "subscription-related-billing"
     refute html =~ "Recovery workspace button"
     assert html =~ "Open dunning funnel and at-risk analytics"
+    assert length(Regex.scan(~r/Open dunning funnel and at-risk analytics/, html)) == 1
     assert html =~ "Open Events audit log with subscription filter"
     assert html =~ "Audit event table: Actor / Action / Timestamp"
 
