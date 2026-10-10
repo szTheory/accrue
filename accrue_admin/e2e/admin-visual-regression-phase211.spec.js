@@ -44,42 +44,28 @@ function timestampAnchors(page, name) {
       ];
     case "subscription-detail":
       return [
-        // Timeline event timestamps.
-        page.locator("time.ax-timeline-time"),
-        // Overview summary-list value cells that render absolute datetimes.
-        // GROUNDED CORRECTION: these render in <dd class="ax-summary-list-value">
-        // (Detail.summary_list markup), NOT `.ax-body` as the plan first guessed.
-        // Filter the row by its deterministic <dt> label, then mask the value cell.
-        page
-          .locator(".ax-summary-list-row")
-          .filter({ hasText: /Current period|Renewal/ })
-          .locator(".ax-summary-list-value")
-          .filter({ hasText: TIMESTAMP_RE }),
         // "Activity audit log" section — all three render `subscription.inserted_at`
-        // (seed-time now(), drifts every run). Confirmed leaking on the first CI mint.
-        // (1) summary row Timestamp <em> (subscription_live.ex:483):
+        // (seed-time now(), drifts every run). The selected fixture mounts this
+        // audit summary even when there are no loaded timeline events; detail
+        // overview dates are intentionally static unavailable copy for this record.
         page
           .locator(".ax-audit-summary-row span")
           .filter({ hasText: "Timestamp" })
           .locator("em"),
-        // Audit-list data-row <time> cells, excluding the static "Timestamp"
-        //     header row (lines 505-509):
+        // Audit-list data-row <time> cells, excluding its static header row.
         page
           .locator(".ax-audit-list .ax-audit-row:not(.ax-audit-row-head) time")
           .filter({ hasText: TIMESTAMP_RE })
       ];
     case "invoices":
-      return [
-        page
-          .locator("table")
-          .filter({ has: page.getByRole("columnheader", { name: /Issued|Created|Due date/i }) })
-          .locator("tbody tr td")
-          .filter({ hasText: TIMESTAMP_RE })
-      ];
+      // The selected invoice fixtures have no due/finalized boundary, so the
+      // Due date column renders its static unavailable copy rather than a date.
+      return [];
     case "component-kitchen":
+    case "invoices":
     case "invoice-detail":
-      // The selected invoice fixture has no due/finalized boundary, and this
-      // capture leaves its lazy activity section closed; no volatile value is shown.
+      // Invoice fixtures have no due/finalized boundary, and invoice detail
+      // leaves its lazy activity section closed; no volatile value is shown.
       return [];
     default:
       return [];
@@ -98,7 +84,13 @@ async function maskLocators(page, name) {
     const sourceText = await anchor.evaluateAll((elements) => elements.map((element) => element.textContent));
     const counts = await anchor.evaluateAll((elements) => elements.map((element) => {
       const pattern = /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}(?:\s+\d{1,2}:\d{2}(?:\s+[AP]M)?(?:\s+UTC)?)?|\b\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?(?:Z| UTC)?)?\b/g;
-      if (element.querySelector("[data-ax-visual-timestamp-mask]")) return 0;
+      const existingMasks = element.querySelectorAll("[data-ax-visual-timestamp-mask]");
+      if (existingMasks.length > 0) {
+        return Array.from(existingMasks).filter((mask) => {
+          pattern.lastIndex = 0;
+          return pattern.test(mask.textContent || "");
+        }).length;
+      }
       const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
       const nodes = [];
       while (walker.nextNode()) {
@@ -137,7 +129,7 @@ async function maskLocators(page, name) {
 async function assertMaskExcludesProtectedFacts(name, masks) {
   if (masks.length === 0) {
     expect(name, "surfaces without rendered volatile values have no timestamp anchors").toMatch(
-      /^(component-kitchen|invoice-detail)$/
+      /^(component-kitchen|invoices|invoice-detail)$/
     );
     return;
   }
@@ -220,16 +212,17 @@ test.describe("Phase 211 visual regression", () => {
         await expect(review).toContainText(phase191.phase191_invoice_id);
         await expect(review).toContainText("100,000");
         await expect(review).toContainText("Owner target");
-        await expect(review.getByRole("button", { name: /confirm/i })).toBeVisible();
+        await expect(drawer.locator("[data-ax-action-drawer-confirm]")).toBeVisible();
       }
-      const masks = await maskLocators(page, name);
-      await assertMaskExcludesProtectedFacts(name, masks);
-
       for (const theme of ["light", "dark"]) {
         await page.evaluate(
           (t) => document.documentElement.setAttribute("data-theme", t),
           theme
         );
+        // Assert mounted values separately in both visual compositions. The
+        // second pass recognizes existing wrappers without changing the DOM.
+        const masks = await maskLocators(page, name);
+        await assertMaskExcludesProtectedFacts(name, masks);
         const file = theme === "dark" ? `${name}-dark.png` : `${name}.png`;
         if (name === "invoices") {
           const row = page.locator(`[data-row-id="${phase191.phase191_invoice_id}"]:visible`).first();
