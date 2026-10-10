@@ -187,7 +187,20 @@ Several earlier wrapper attempts stopped before completion because of Hex cache 
 
 ## Next Phase Readiness
 
-Plan 243-03 can use the custody preflight and runtime evidence. Plan 243-02 is complete; the phase remains in progress for Plan 243-03.
+At Plan02 close, Plan03 still needed the custody preflight and runtime evidence. Plan03 later completed; see the post-plan routing remediation below for the config custody defect it discovered and its current resolution.
+
+## Post-plan routing custody remediation
+
+Plan03's first generic Phase238 invocation exposed that `ACCRUE_HOST_PREVIEW_BASE_URL` could redirect arbitrary specs while global setup still prepared the native test database. The preview URL now fails closed in the generic config. The documented `e2e:preview` runner requires the exact Phase243 preservation spec, accepts only its project/worker options, pins Playwright `testMatch` to that spec, and skips generic custody/setup and `webServer` startup.
+
+The warm-recovery owner now asserts the seed-skip banner from its own captured `make up` startup output. A container-log query bounded to the last five minutes missed the valid startup line due to Docker-host timestamps; authoritative before/after preview state remained identical.
+
+- **Fix commit:** `f425645f` (`fix(243-02): fail closed on generic preview routing`).
+- **Controls:** `node scripts/ci/test_accrue_host_preview_custody.mjs` passed 12/12, including URL-only, `REUSE_SERVER=1`, unrelated/all-suite rejection, and exclusive preservation selection.
+- **Dedicated preservation:** `npm --prefix examples/accrue_host run e2e:preview -- e2e/phase243-preview-preservation.spec.js --project chromium-desktop --workers 1` passed 1/1 against `accrue-host-phase243-preview`; its authoritative invoice/audit/webhook/dispatch snapshot matched before and after.
+- **Generic owner:** the existing direct Phase238 command passed 2/2 against isolated native `accrue_host_test` and proof listener port 4101 while the named preview stayed on Compose port 56466. Package, compiled, HTTP, and browser CSS/JS identities matched; the stale CSS response was rejected.
+
+The original Plan02 completion evidence above remains intact. Plan03 later discovered this specific config-custody gap; it is now resolved in source and ledger entry 35. Independent phase review, verification, and ordered UAT closeout remain pending.
 
 ---
 *Phase: 243-integrated-evidence-and-feedback-preview*

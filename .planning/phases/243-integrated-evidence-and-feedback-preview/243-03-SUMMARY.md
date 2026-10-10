@@ -9,7 +9,7 @@ requires:
 provides:
   - Fresh mounted package/compiled/HTTP/browser CSS and JS identity with stale-response negative control
   - Additive Phase 243 evidence in the existing 21-route Phase 240 ledger
-  - Integrated preview handoff with explicit current evidence limits and open custody gap
+  - Integrated preview handoff with explicit evidence limits and resolved generic preview routing
 affects: [EVR-03, EVR-04, preview-operations, admin-evidence]
 actuals:
   tokens: 5290
@@ -71,14 +71,14 @@ human_judgment: false
 - **Started:** 2026-10-10T21:13:20Z
 - **Completed:** 2026-10-10T21:23:30Z
 - **Tasks:** 2
-- **Plan files modified:** 4, including the broken-windows entry for the open custody gap
+- **Plan files modified:** 4, including the broken-windows entry later resolved by the routing remediation
 
 ## Accomplishments
 
 - Extended the incumbent Phase238 host owner to hash the package-built, host-compiled, HTTP-served, and actual browser response bodies for CSS and JS. Added an intercepted altered-CSS negative control, verified that the identity assertion rejects it, and confirmed the original response hash after removing interception.
 - Exercised the corrected invoice action band on the mounted host: computed gap `4px`, with `--ax-space-xs` set to `0.25rem`. The focused desktop Phase238 command passed both tests.
 - Added current Phase243 owners to the existing Phase240 coverage ledger without changing its 21 production route rows or the separate component registry counts of 30 families, 42 variants, and 8 groups. The normal ledger verifier and missing-route negative control both passed.
-- Created a maintainer handoff linked to the existing README preview instructions. It records the Fake preview entry, optional external feedback boundaries, provenance, local/remote and emulated/physical limits, and the pending generic preview URL routing gap.
+- Created a maintainer handoff linked to the existing README preview instructions. It records the Fake preview entry, optional external feedback boundaries, provenance, local/remote and emulated/physical limits, and the generic preview URL routing defect found by the first Plan03 invocation.
 - Inspected the current mounted screenshot. The sidebar displays the Accrue mark and wordmark without a broken-image indicator; the earlier `example.test/logo.svg` observation came from a different disposable package fixture, so no logo code was changed.
 
 ## Task Commits
@@ -91,7 +91,7 @@ human_judgment: false
 - `examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js` — captures browser response bytes, checks package identity and corrected invoice spacing, and rejects/restores altered CSS.
 - `.planning/phases/240-shared-system-and-real-billing-exemplar/240-COVERAGE.md` — additive current Phase243 owners, provenance, route applicability and evidence limits.
 - `.planning/phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md` — preview and integrated evidence handoff.
-- `.planning/WINDOWS.md` — open deviation tracking the generic preview URL routing/custody gap for root remediation.
+- `.planning/WINDOWS.md` — deviation entry 35 tracking the generic preview URL routing/custody gap, now fixed with current evidence.
 
 ## Verification and Provenance
 
@@ -112,13 +112,12 @@ human_judgment: false
 - **Verification:** Final focused run passed both tests and all asset identity assertions.
 - **Commit:** `e4ba82cf`.
 
-**2. [Rule 3 - Custody blocker surfaced] Generic preview URL routing remains open for root remediation.**
+**2. [Rule 3 - Custody blocker surfaced] Generic preview URL routing was open at Plan03 close and was resolved by follow-up remediation.**
 - **Found during:** Task 243-03-01 setup
 - **Issue:** `ACCRUE_HOST_PREVIEW_BASE_URL` globally changes Playwright's base URL and disables its owned server, while global setup may still create/migrate/seed the native test DB. The first generic Phase238 attempt therefore posted its sandbox request to preview and failed before test bodies.
-- **Fix:** The successful proof omitted the preview URL override and used the isolated proof server. The authoritative preview sentinel/audit/webhook/dispatch snapshot immediately after the failed attempt matched its captured baseline. The global config issue is left to the phase orchestrator as directed and recorded as open entry 35 in `.planning/WINDOWS.md`.
-- **Files modified:** Handoff and coverage provenance; open issue recorded against `examples/accrue_host/playwright.config.js`.
-- **Verification:** Immediate and post-success authoritative preview snapshot comparisons passed; the corrected direct-origin Phase238 run passed 2/2.
-- **Impact:** This plan's mounted proof and handoff are complete, but phase acceptance remains pending the root-owned fail-closed routing fix and regression check.
+- **Plan03-time response:** The successful proof omitted the preview URL override and used the isolated proof server. The authoritative preview sentinel/audit/webhook/dispatch snapshot immediately after the failed attempt matched its captured baseline. Entry 35 recorded the unresolved config issue at Plan03 close.
+- **Resolution:** Follow-up commit `f425645f` adds an explicit preservation-only runner, pins preview discovery to the named spec, skips generic setup/server startup, and uses captured warm-start output for the seed-skip assertion. Current evidence is recorded below and entry 35 is now fixed.
+- **Impact:** Plan03's initial routing failure remains in the history; the routing defect is resolved. Independent phase review and verification are still pending.
 
 **3. [Plan command correction] Used the existing evidence verifier's supported self-test argument order.**
 - **Found during:** Task 243-03-02 verification
@@ -149,9 +148,17 @@ None. No endpoint, authentication path, filesystem trust boundary, or schema cha
 - Plan acceptance commands passed: mounted Phase238 2/2; normal Phase240 ledger verifier passed; self-test rejected the missing route as expected.
 - Preview authoritative snapshot comparison passed after the failed misrouted attempt and after the successful direct proof.
 
+## Post-plan routing custody closure
+
+- **Source commit:** `f425645f` — `fix(243-02): fail closed on generic preview routing`.
+- **Focused controls:** `node scripts/ci/test_accrue_host_preview_custody.mjs` passed 12/12. Negative controls reject a preview URL without explicit mode, `ACCRUE_HOST_REUSE_SERVER=1`, generic/unrelated selection, mixed specs, all-suite selection, and unsupported runner arguments before fixture/global setup; the exclusive preservation selection is accepted with generic `globalSetup` and `webServer` disabled.
+- **Dedicated preview acceptance:** the documented `npm --prefix examples/accrue_host run e2e:preview -- e2e/phase243-preview-preservation.spec.js --project chromium-desktop --workers 1` passed 1/1. The actual warm startup output contained `seeds skipped (ACCRUE_HOST_SKIP_SEEDS=1)`, and the authoritative preview invoice/audit/webhook/dispatch snapshot matched before and after.
+- **Generic regression:** the direct Phase238 owner passed 2/2 with `ACCRUE_HOST_PREVIEW_INSTANCE=accrue-host-phase243-preview`, isolated native `accrue_host_test`, listener port 4101, and the existing absolute proof build path. The dedicated preview remained on Compose project `accrue-host-phase243-preview`, volume `accrue-host-phase243-preview_pgdata`, and port 56466. CSS and JS package/compiled/HTTP/browser hashes matched and the stale-response control rejected its altered body.
+- **Warm recovery assertion correction:** `docker compose logs --since=5m` used the Docker host's timestamp window and omitted the current startup record; the preview's own `make up` capture contained the expected skip-seed banner. The spec now checks that command's captured output, and the snapshot comparison still proves state preservation.
+
 ## Next Phase Readiness
 
-The mounted asset gap, additive coverage ledger, and preview handoff are complete. The phase orchestrator must resolve and retest the generic `ACCRUE_HOST_PREVIEW_BASE_URL` routing/custody gap before claiming Phase243 acceptance. Independent phase verification and ordered executable-UAT generation remain with the orchestrator.
+The mounted asset gap, additive coverage ledger, preview handoff, and generic preview routing custody defect are resolved. Phase243 remains pending independent review and phase verification; ordered executable-UAT generation remains with the orchestrator after verification.
 
 ---
 *Phase: 243-integrated-evidence-and-feedback-preview*

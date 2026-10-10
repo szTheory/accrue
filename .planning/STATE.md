@@ -6,11 +6,11 @@ current_phase: 243
 current_phase_name: Integrated Evidence and Feedback Preview
 current_plan: 3
 status: verifying
-stopped_at: Completed 243-03-PLAN.md
-last_updated: "2026-10-10T21:24:31.653Z"
+stopped_at: Resolved 243-02 preview routing custody; phase review and verification pending
+last_updated: "2026-10-10T21:37:10.158Z"
 last_activity: 2026-10-10
-last_activity_desc: Phase 243 Plan02 complete; full verifier and preview custody passed
-state_head: 06f9053edd48daff35699390c20b2780e36ebe3e
+last_activity_desc: Phase 243 plan implementation complete; preview routing custody fix verified
+state_head: f425645f921f4819e745c4e26f2db85d7d39ef43
 progress:
   total_phases: 4
   completed_phases: 3
@@ -29,15 +29,15 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Current focus:** Phase 243 — Integrated Evidence and Feedback Preview
 **Progress:** [████████░░] 75%
-**Planned work completed:** Phase 240 6/6 plans and 47/47 truths, Phase 241 8/8 plans and 32/32 truths, and Phase 242 7/7 plans and 80/80 truths. All three current verification fingerprints pass with zero unverified behavior. Phase 241 has 20 automated UAT items; Phase 242 has 19; required human UAT is zero. EVR-03 and EVR-04 are complete from Phase 243 Plan01/Plan02 evidence; Plan03 remains for final route/evidence reconciliation. v1.63 remains archived and closed.
+**Planned work completed:** Phase 240 6/6 plans and 47/47 truths, Phase 241 8/8 plans and 32/32 truths, and Phase 242 7/7 plans and 80/80 truths. All three current verification fingerprints pass with zero unverified behavior. Phase 241 has 20 automated UAT items; Phase 242 has 19; required human UAT is zero. Phase 243's three plans have executed; EVR-03/EVR-04 evidence is reconciled, and the generic preview routing custody defect is fixed and retested. Independent review, phase verification, and ordered UAT closeout remain pending. v1.63 remains archived and closed.
 
 ## Current Position
 
 Phase: 243 (Integrated Evidence and Feedback Preview) — EXECUTING
 Current Plan: 3
 Total Plans in Phase: 3
-Status: Phase complete — ready for verification
-Last activity: 2026-10-10 — Phase 243 execution started
+Status: Implementation complete — independent review and verification pending
+Last activity: 2026-10-10 — Phase 243 preview routing custody remediation verified
 
 ## Performance Metrics
 
@@ -488,8 +488,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T21:24:31.601Z
-Stopped at: Completed 243-03-PLAN.md
+Last session: 2026-10-10T21:37:10.100Z
+Stopped at: Resolved 243-02 preview routing custody; phase review and verification pending
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -621,9 +621,9 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 - **Last completed phase:** 242 — Investigations and Remaining Admin Surfaces (7/7 plans, independent 80/80 verification, 19 automated UAT items, zero human UAT).
 - **Additional closure completed:** Phase 241 Plan 08 corrected the named spacing gap; current verification is 32/32 with 20 automated UAT items. Original completed plans were not replayed.
-- **Next command:** `$gsd-execute-phase 243` — Integrated Evidence and Feedback Preview. Three plans across two waves passed independent plan checking; required Linux and preview runtime results remain execution obligations. Phases 240–242 all pass current verification; milestone requirements remain 16/18 satisfied.
+- **Next step:** Complete independent review and phase verification for Phase 243. Generate automated UAT and run the project-wide executable-UAT contract only after verification passes. The preview routing custody defect discovered by Plan03 is fixed and has current positive and negative runtime evidence.
 - Context can be cleared. Read `phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-HANDOFF.md`; preserve approved decisions, verification fingerprint, acceptance owners and evidence limits. Do not rerun completed original 240–242 plans or restart milestone/research/Impeccable initialization.
 - Default to automated unit/integration/E2E/smoke/seam acceptance and existing CI when recurring value exists. Required human UAT is zero; subjective feedback stays optional. Preview data must remain separate from disposable mutation/reset fixtures.
-- Phase 243 owns the complete reviewed Linux golden set, stable Fake-backed `/admin` preview and final evidence reconciliation. Actual provider/device/speech/native-zoom and remote CI limits remain explicit; no broad certification is claimed.
+- Phase 243 completed the reviewed Linux golden set, stable Fake-backed `/admin` preview and final evidence reconciliation. Actual provider/device/speech/native-zoom and remote CI limits remain explicit; no broad certification is claimed.
 - Completion returned five summary reference warnings for eleven command strings parsed as file paths. All 24 referenced package/host test owners resolve, including the Node glob; actual checks passed. These are bookkeeping false positives, not missing evidence or new work.
 - All Phase 242 changes are local commits; no push, merge, publication or remote main-CI result is claimed.
