@@ -1,15 +1,15 @@
 ---
 phase: "243"
 slug: "integrated-evidence-and-feedback-preview"
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-10-10"
 ---
 
 # Phase 243 — Validation Strategy
 
-> Mapped to three executable plans and seven tasks. No product acceptance result is claimed during planning.
+> All seven tasks have executed automated owners. Canonical summaries retain exact revisions, failed attempts, and successful runtime evidence.
 
 ## Test Infrastructure
 
@@ -20,7 +20,7 @@ created: "2026-10-10"
 | Quick run command | `cd accrue_admin && node --test test/js/visual_baseline_set_test.mjs` |
 | Linux comparison | `node accrue_admin/e2e/visual-baseline-set.cjs accrue_admin/e2e/__screenshots__/visual-desktop` then `cd accrue_admin && npm run e2e:visual-regression` on the existing Ubuntu owner |
 | Mounted asset owner | `CI=1 npm --prefix examples/accrue_host run e2e -- e2e/phase238-admin-events-webhooks.spec.js --project=chromium-desktop --workers=1`, only after its complete setup path is proven separate from preview custody |
-| Runtime | Unmeasured in planning; record actual timing at execution. Fast Node controls are the immediate feedback lane; browser and full regression lanes retain existing scope. |
+| Runtime | Node controls finish in seconds; Linux full browser suites took about 14 minutes plus runner setup. Host full verification and focused runs are recorded in the canonical summaries. |
 
 ## Sampling Rate
 
@@ -32,15 +32,15 @@ created: "2026-10-10"
 
 ## Per-Task Verification Map
 
-| Task/concern | Planned owner | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
+| Task/concern | Executed owner | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |-------------|---------------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 243-01-01 exact twelve-set and rendered mask controls | Existing visual spec, guard, Node controls; existing Phase191 invoice seed ID needs no fixture edit | EVR-03 | T-243-01 | Positive volatile match and protected fact exclusions; absent/empty/every omitted image fail | Node, browser | `cd accrue_admin && node --test test/js/visual_baseline_set_test.mjs` | Guard exists; expanded browser assertions pending | Pending |
-| 243-01-02 Ubuntu goldens and normal comparison | Existing workflow mint and blocking visual job | EVR-03 | T-243-02 | Deliberate twelve-image Linux mint separate from normal comparison | Ubuntu browser/pixel | `node accrue_admin/e2e/visual-baseline-set.cjs accrue_admin/e2e/__screenshots__/visual-desktop`; `cd accrue_admin && npm run e2e:visual-regression` on existing Ubuntu job | Existing eight; four new PNGs pending | Pending |
-| 243-02-01 wrapper and direct Playwright custody | Existing browser/dev-boot wrappers plus host Playwright config/global setup, new shared preflight and controls | EVR-04 | T-243-03 | Known collision fails before wrapper mutation, direct webServer startup and global setup create/migrate/seed; distinct proof DB/port passes | Node contract | `node scripts/ci/test_accrue_host_preview_custody.mjs` | New control pending | Pending |
-| 243-02-02 fresh and warm preview | Existing Compose/entrypoint, new host preservation spec; direct Playwright preflight from 243-02-01 | EVR-04 | T-243-03, T-243-04, T-243-05 | Preflight precedes global setup mutation; operator auth/Fake/readiness plus authoritative sentinel/audit persistence | Host browser/DB | `CI=1 npm --prefix examples/accrue_host run e2e -- e2e/phase243-preview-preservation.spec.js --project=chromium-desktop --workers=1` | New spec pending | Pending |
-| 243-02-03 complete wrapper separation | Existing `mix verify.full`, guarded browser/dev-boot scripts | EVR-04 | T-243-03 | Positive overlap refusal and post-wrapper preview-state equality | Host full verifier | `cd examples/accrue_host && mix verify.full` only after custody preflight and sentinel capture | Existing wrapper; guard pending | Pending |
-| 243-03-01 corrected CSS served identity | Existing Phase238 mounted asset owner; direct Playwright preflight from 243-02-01 | EVR-03, EVR-04 | T-243-03, T-243-06 | Preflight precedes global setup mutation; package-built, host-compiled, HTTP-served and browser-requested bytes agree | Build, mounted browser | `cd accrue_admin && mix accrue_admin.assets.build`; `CI=1 npm --prefix examples/accrue_host run e2e -- e2e/phase238-admin-events-webhooks.spec.js --project=chromium-desktop --workers=1` after custody preflight | Existing owner | Pending |
-| 243-03-02 current coverage and limits | Existing Phase240 inventory and verifier; new Phase243 handoff | EVR-03, EVR-04 | T-243-07 | Each claim links actual revision/owner/result; omitted route fails | Evidence contract | `node scripts/ci/verify_phase240_evidence.mjs .planning/phases/240-shared-system-and-real-billing-exemplar/240-COVERAGE.md`; `node scripts/ci/verify_phase240_evidence.mjs --self-test` | Existing verifier | Pending |
+| 243-01-01 exact twelve-set and rendered mask controls | Visual spec, guard, Node controls | EVR-03 | T-243-01 | Positive timestamp targets and protected exclusions; absent/empty/every omitted image fail | Node, browser | `cd accrue_admin && node --test test/js/visual_baseline_set_test.mjs` | Yes | Pass: 17/17; Linux masked compositions passed |
+| 243-01-02 Ubuntu goldens and normal comparison | Existing workflow mint and blocking visual job | EVR-03 | T-243-02 | Reviewed twelve-image Linux mint separate from comparison | Ubuntu browser/pixel | `node accrue_admin/e2e/visual-baseline-set.cjs accrue_admin/e2e/__screenshots__/visual-desktop`; existing Ubuntu `e2e:visual-regression` | Twelve PNGs | Pass: run 38083267168 at 0197f4ba |
+| 243-02-01 wrapper and direct Playwright custody | Shared guard, wrappers, config/setup, dedicated routing runner | EVR-04 | T-243-03 | Collision and generic preview routing fail before mutation; exact owned proof PID passes | Node contract | `node scripts/ci/test_accrue_host_preview_custody.mjs` | Yes | Pass: 12/12 |
+| 243-02-02 fresh and warm preview | Compose entrypoint and preservation spec | EVR-04 | T-243-03, T-243-04, T-243-05 | Real operator auth, Fake config, exact sentinel/audit/webhook/dispatch equality; exclusive runner skips generic setup | Host browser/DB | `npm --prefix examples/accrue_host run e2e:preview -- e2e/phase243-preview-preservation.spec.js --project chromium-desktop --workers 1` with documented explicit preview environment | Yes | Pass: 1/1, including post-restart remediation |
+| 243-02-03 complete wrapper separation | `mix verify.full` and guarded wrappers | EVR-04 | T-243-03 | Native test/proof-dev DBs separate from dedicated preview; post-command equality | Host full verifier | `cd examples/accrue_host && mix verify.full` after custody preflight/sentinel capture | Yes | Pass: exit 0, exact preservation; see 243-02-SUMMARY |
+| 243-03-01 corrected CSS served identity | Phase238 mounted owner | EVR-03, EVR-04 | T-243-03, T-243-06 | Package/compiled/HTTP/browser bytes agree; altered response rejected; corrected 4px gap | Build, mounted browser | `cd accrue_admin && mix accrue_admin.assets.build`; focused Phase238 desktop command in 243-03-SUMMARY | Yes | Pass: 2/2, also after routing repair |
+| 243-03-02 current coverage and limits | Phase240 inventory/verifier and Phase243 handoff | EVR-03, EVR-04 | T-243-07 | Exact revision/owner/result; omitted route rejected | Evidence contract | `node scripts/ci/verify_phase240_evidence.mjs <ledger>`; `node scripts/ci/verify_phase240_evidence.mjs --self-test <ledger>` | Yes | Pass: 21 routes, 30/42/8 registry; negative control |
 
 ## Wave 0 Requirements
 
@@ -58,9 +58,17 @@ None required for machine-verifiable acceptance. Optional external subjective fe
 
 - [x] Exact plan/task IDs and focused commands are assigned by the planner.
 - [x] Every task has an automated verify and an observable failing direction, or an explicit dependency creating its owner.
-- [ ] Positive controls establish that absence checks can detect a violation.
-- [ ] Complete command custody is checked before mutable proof/startup.
+- [x] Positive controls establish that absence checks can detect a violation.
+- [x] Complete command custody is checked before mutable proof/startup.
 - [x] No watch flags, fixed sleeps, blanket retries, hidden exclusions, relaxed thresholds or new CI matrix are planned.
 - [x] All planned requirements and D-01 through D-16 are covered.
 
-**Approval:** Independent plan checking passed on 2026-10-10 after one revision. Runtime controls and acceptance remain pending; this document remains a draft execution-validation contract.
+**Validation:** Executed automated owners cover EVR-03 and EVR-04. Root rechecked 17 visual-set controls, 12 custody controls, the twelve-file guard, and ledger negative control on 2026-10-10. An initial root visual-control invocation from the repository root failed to locate its package-relative CLI; the documented package-directory command passed. Independent goal verification and ordered UAT remain pending.
+
+## Validation Audit 2026-10-10
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 7 |
+| Escalated | 0 |
