@@ -149,6 +149,8 @@ defmodule AccrueAdmin.DashboardLiveTest do
     refute html =~ "home.foreign_scope_event"
     assert html =~ ~s(href="/billing/customers?org=home-org")
     assert html =~ ~s(href="/billing/events?org=home-org")
+    assert html =~
+             ~r/href="\/billing\?org=home-org"[^>]*class="ax-sidebar-link ax-sidebar-link-active"/
   end
 
   defp customer_for_org(org_id) do

@@ -184,4 +184,36 @@ defmodule AccrueAdmin.Components.AppShellTest do
 
     assert html =~ ~s(href="/billing/customers?org=acme-corp")
   end
+
+  test "scoped Home keeps mount, owner and active destination aligned" do
+    html =
+      render_component(
+        fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <AppShell.app_shell
+            brand={%{app_name: "Accrue", logo_url: nil}}
+            current_path="/ops/billing?org=acme-corp"
+            mount_path="/ops/billing"
+            page_title="Dashboard"
+            theme="system"
+            current_owner_scope={%{mode: :organization, organization_id: "org-1"}}
+            active_organization_name="Acme Corp"
+          >
+            <nav aria-label="Breadcrumb"><a href="/ops/billing?org=acme-corp">Home</a></nav>
+          </AppShell.app_shell>
+          """
+        end,
+        %{}
+      )
+
+    assert html =~ ~s(data-mount-path="/ops/billing")
+    assert html =~ ~s(href="/ops/billing?org=acme-corp")
+    assert html =~ ~s(href="/ops/billing/customers?org=acme-corp")
+    assert html =~ "Active organization"
+    assert html =~ "Acme Corp"
+    assert html =~
+             ~r/href="\/ops\/billing\?org=acme-corp"[^>]*class="ax-sidebar-link ax-sidebar-link-active"/
+  end
 end

@@ -85,7 +85,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> assign(:assets_css_path, admin["assets_css_path"])
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
-    |> assign(:current_path, admin["mount_path"] || "/billing")
+    |> assign(:current_path, ScopedPath.build(admin["mount_path"] || "/billing", "", socket.assigns[:current_owner_scope]))
   end
 
   defp recent_events(owner_scope, mount_path) do
