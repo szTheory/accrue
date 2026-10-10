@@ -108,7 +108,7 @@ status: complete
 ## Task Commits
 
 1. **Task 1: Compose all eligible subscription reviews at their owner** - `3d52396c` (feat)
-2. **Task 2: Retain subscription confirmation safety and evidence results** - `55833ee6` (test)
+2. **Task 2: Retain subscription confirmation safety and evidence results** - `55833ee6`; staged-navigation acceptance `3ee303c6`.
 
 ## Files Created/Modified
 

@@ -168,6 +168,11 @@ status: complete
 
 **The package and host browser owners now verify customer-scoped invoice navigation, contextual returns, Recovery window preservation, current served assets, and Admin/Portal separation.**
 
+## Task Commits
+
+1. **Task 1: Build assets and close package browser acceptance** — `e93406a1`, `1b902e9f`, `e51f3e31` (tests and narrow acceptance corrections).
+2. **Task 2: Verify the mounted host and authoritative dismissal count** — `5b33e9c2`, `a009148b` (mounted browser and guarded test oracle).
+
 ## Performance
 
 - **Duration:** 66 min

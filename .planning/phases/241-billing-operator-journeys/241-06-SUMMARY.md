@@ -116,8 +116,8 @@ status: complete
 
 ## Task Commits
 
-1. **Task 1: Make refund review exact and preserve its held action** - `d69a5044` (feat)
-2. **Task 2: Make payment-method review identify the selected method** - `3c6fc18c` (feat)
+1. **Task 1: Make refund review exact and preserve its held action** - `d69a5044`; acceptance corrections `e1013955`, `9001df28`.
+2. **Task 2: Make payment-method review identify the selected method** - `3c6fc18c`; APIError regression correction `f44f36dd`.
 
 Post-wave integration correction: `e1013955` (fix) removes two obsolete pattern bindings found by the warnings-as-errors compile.
 
