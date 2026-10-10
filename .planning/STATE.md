@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 242
 current_phase_name: Investigations and Remaining Admin Surfaces
-current_plan: 5
+current_plan: 6
 status: executing
-stopped_at: Completed 242-04-PLAN.md
-last_updated: "2026-10-10T13:23:24.078Z"
+stopped_at: Completed 242-06-PLAN.md
+last_updated: "2026-10-10T13:28:18.392Z"
 last_activity: 2026-10-10
 last_activity_desc: "Phase 242 planning passed independent review (7 plans, 4 waves, 16 automated tasks); last executed phase: 241; next: $gsd-execute-phase 242"
-state_head: 4b1b6651c9c57bb1a1baa716d206405bda5bed9e
+state_head: 7711400e4353d5d971e4f306f2e28aeb5e904289
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 20
-  completed_plans: 18
+  completed_plans: 19
   percent: 50
 ---
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 ## Current Position
 
 Phase: 242 (Investigations and Remaining Admin Surfaces) — READY TO EXECUTE
-Current Plan: 5
+Current Plan: 6
 Total Plans in Phase: 7
 Status: Ready to execute
 Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 plans, 4 waves, 16 automated tasks); last executed phase: 241; next: $gsd-execute-phase 242
@@ -171,6 +171,7 @@ Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 pl
 | Phase 242 P02 | 8min | 2 tasks | 6 files |
 | Phase 242 P03 | 13m | 3 tasks | 12 files |
 | Phase 242 P04 | 8 min | 2 tasks | 6 files |
+| Phase 242 P06 | 5min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -381,6 +382,8 @@ Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 pl
 - [Phase 242]: Connect account detail returns preserve only validated list context under the current owner scope.
 - [Phase 242]: Stored Stripe observations remain separate from local fee policy and carry no invented report timestamp.
 - [Phase 242]: Fee saves recheck reviewed local account/default state, retain StepUp and optimistic locking, and make identical policy submissions no-ops.
+- [Phase 242]: Build Home's current route through ScopedPath and the resolved owner scope so shell navigation matches scoped destinations.
+- [Phase 242]: Render invoice collection methods through shared Copy labels; unknown enum values remain Unknown.
 
 ### Pending Todos
 
@@ -461,8 +464,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T13:23:23.997Z
-Stopped at: Completed 242-04-PLAN.md
+Last session: 2026-10-10T13:28:18.310Z
+Stopped at: Completed 242-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
