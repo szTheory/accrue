@@ -21,8 +21,10 @@ tech-stack:
 key-files:
   created:
     - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-EXECUTION-GATES.md
+    - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-REGRESSION.md
     - .planning/phases/242-investigations-and-remaining-admin-surfaces/242-07-SUMMARY.md
   modified:
+    - .github/workflows/accrue_admin_browser.yml
     - accrue_admin/e2e/admin-page-flow-phase191.spec.js
     - accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js
     - examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js
@@ -37,6 +39,7 @@ patterns-established:
   - "Mounted asset acceptance compares package bytes with host compiled files and actual HTTP/browser resource bytes."
   - "Replay no-dispatch claims pair browser behavior with job, audit and domain-state assertions."
 requirements-completed: [JRN-05, JRN-06, JRN-07, UXC-01]
+human_judgment: false
 coverage:
   - id: D1
     description: "Package catalog and Connect consumers preserve exact relationships, fee review target, validation, correction, dismissal and focus."
