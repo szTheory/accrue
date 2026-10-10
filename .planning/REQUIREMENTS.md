@@ -22,7 +22,7 @@
 - [x] **JRN-04**: Operators can review supported billing actions in self-contained content showing the exact target, material customer/scope, money and consequence, then receive evidence-specific outcomes.
 - [x] **JRN-05**: Operators can trace existing events and webhook deliveries through related evidence and supported replay review without hiding material failures, uncertainty or exact diagnostic detail.
 - [x] **JRN-06**: Operators can inspect existing discounts, promotion-code relationships and Connect facts with supported actions and explicit stored-provider versus local-policy boundaries.
-- [ ] **JRN-07**: Operators can find the correct scoped record using the existing Home, navigation and search, with consistent visible selection across pointer and keyboard input.
+- [x] **JRN-07**: Operators can find the correct scoped record using the existing Home, navigation and search, with consistent visible selection across pointer and keyboard input.
 
 ### Domain language and state communication
 
@@ -87,7 +87,7 @@ Each approved requirement has one primary phase owner in the approved roadmap. S
 | JRN-04 | Phase 241 | Complete |
 | JRN-05 | Phase 242 | Complete |
 | JRN-06 | Phase 242 | Complete |
-| JRN-07 | Phase 242 | Pending |
+| JRN-07 | Phase 242 | Complete |
 | UXC-01 | Phase 242 | Pending |
 | UXC-02 | Phase 240 | Complete |
 | EVR-01 | Phase 240 | Complete |

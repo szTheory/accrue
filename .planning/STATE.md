@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 242
 current_phase_name: Investigations and Remaining Admin Surfaces
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 242-01-PLAN.md
-last_updated: "2026-10-10T12:43:52.397Z"
+stopped_at: Completed 242-05-PLAN.md
+last_updated: "2026-10-10T12:47:43.714Z"
 last_activity: 2026-10-10
 last_activity_desc: "Phase 242 planning passed independent review (7 plans, 4 waves, 16 automated tasks); last executed phase: 241; next: $gsd-execute-phase 242"
-state_head: 58d2b2147625b957e05802eaee1209bdf0637f64
+state_head: 0ca44aa840915676889a0a1866918204cf4f0cca
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 20
-  completed_plans: 14
+  completed_plans: 15
   percent: 50
 ---
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 ## Current Position
 
 Phase: 242 (Investigations and Remaining Admin Surfaces) — READY TO EXECUTE
-Current Plan: 2
+Current Plan: 3
 Total Plans in Phase: 7
 Status: Ready to execute
 Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 plans, 4 waves, 16 automated tasks); last executed phase: 241; next: $gsd-execute-phase 242
@@ -167,6 +167,7 @@ Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 pl
 | Phase 241 P06 | 9min | 2 tasks | 4 files |
 | Phase 241 P07 | 66 min | 2 tasks | 3 files |
 | Phase 242 P01 | 8min | 2 tasks | 7 files |
+| Phase 242 P05 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -368,6 +369,8 @@ Last activity: 2026-10-10 — Phase 242 planning passed independent review (7 pl
 - [Phase 241]: Complete each phase only after canonical automated UAT generation and the existing project-wide CI contract pass. — Phase 241 reconciled legacy serialization without changing verdicts; preserve resolved-gap history and reuse computed-style/text-stress/browser owners instead of required human UAT.
 - [Phase 242]: Each return family validates through its query decoder and encoder before rebuilding under current owner scope.
 - [Phase 242]: Event related links require an owner-scoped exact identity match.
+- [Phase 242]: Global search keeps native result links and describes one active link through an input-associated status node.
+- [Phase 242]: Search selection persists by exact item identity only within the same query and owner context; otherwise it falls back to the first current item or none.
 
 ### Pending Todos
 
@@ -448,8 +451,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T12:43:40.214Z
-Stopped at: Completed 242-01-PLAN.md
+Last session: 2026-10-10T12:47:43.596Z
+Stopped at: Completed 242-05-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
