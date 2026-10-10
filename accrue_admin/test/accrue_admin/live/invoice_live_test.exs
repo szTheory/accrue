@@ -586,7 +586,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     back_href =
       view
-      |> element("a", "Back to results")
+      |> element("a", "Back to invoices")
       |> render()
       |> Floki.parse_document!()
       |> Floki.find("a")
@@ -606,7 +606,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     back_href =
       view
-      |> element("a", "Back to results")
+      |> element("a", "Back to customer payments")
       |> render()
       |> Floki.parse_document!()
       |> Floki.find("a")
@@ -617,6 +617,113 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert back_params["org"] == "invoice-return-org"
     assert back_params["tab"] == "payments"
     refute back_href =~ "foreign-org"
+  end
+
+  test "invoice return restores supported list filters, exact authorized results, and query-free routes",
+       %{
+         conn: conn,
+         invoice: invoice
+       } do
+    customer =
+      TestRepo.get!(Customer, invoice.customer_id)
+      |> Customer.changeset(%{
+        name: "Northwind Billing",
+        owner_type: "Organization",
+        owner_id: "invoice-return-org"
+      })
+      |> TestRepo.update!()
+
+    matching_customer =
+      insert_customer(%{
+        name: "Northwind Services",
+        owner_type: "Organization",
+        owner_id: "invoice-return-org",
+        processor: "fake"
+      })
+
+    matching_invoice =
+      insert_invoice(matching_customer, %{
+        number: "INV-NORTHWIND-MATCH",
+        status: :open,
+        collection_method: "send_invoice"
+      })
+
+    excluded_customer =
+      insert_customer(%{
+        name: "Northwind Excluded",
+        owner_type: "Organization",
+        owner_id: "another-org"
+      })
+
+    excluded_invoice =
+      insert_invoice(excluded_customer, %{
+        number: "INV-NORTHWIND-EXCLUDED",
+        status: :open,
+        collection_method: "send_invoice"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "invoice-return-org",
+        active_organization_slug: "invoice-return-org",
+        admin_organization_ids: ["invoice-return-org"]
+      )
+
+    raw_origin =
+      "/billing/invoices?view=all&q=Northwind&status=open&collection_method=send_invoice&sort=ignored&org=foreign"
+
+    assert {:ok, view, html} =
+             live(
+               conn,
+               "/billing/invoices/#{invoice.id}?org=invoice-return-org&return_to=#{URI.encode_www_form(raw_origin)}"
+             )
+
+    assert html =~ customer.name
+    assert has_element?(view, "a", "Back to invoices")
+
+    href =
+      view
+      |> element("a", "Back to invoices")
+      |> render()
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Floki.attribute("href")
+      |> hd()
+
+    assert URI.parse(href).path == "/billing/invoices"
+    restored_params = href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    assert restored_params["org"] == "invoice-return-org"
+    assert restored_params["q"] == "Northwind"
+    assert restored_params["status"] == "open"
+    assert restored_params["collection_method"] == "send_invoice"
+    assert restored_params["view"] == "all"
+    refute Map.has_key?(restored_params, "sort")
+    refute href =~ "foreign"
+
+    assert {:ok, destination_view, destination_html} = live(conn, href)
+    assert destination_html =~ matching_invoice.number
+    refute destination_html =~ excluded_invoice.number
+    refute destination_html =~ invoice.number
+    assert has_element?(destination_view, ".ax-filter-chip[data-filter='status']", "Open")
+
+    assert {:ok, query_free_view, _query_free_html} =
+             live(
+               conn,
+               "/billing/invoices/#{invoice.id}?org=invoice-return-org&return_to=#{URI.encode_www_form("/billing/invoices")}"
+             )
+
+    assert query_free_view |> element("a", "Back to invoices") |> render() =~
+             "/billing/invoices?org=invoice-return-org"
+
+    assert {:ok, malformed_view, _malformed_html} =
+             live(
+               conn,
+               "/billing/invoices/#{invoice.id}?org=invoice-return-org&return_to=#{URI.encode_www_form("/billing/customers/#{Ecto.UUID.generate()}?tab=payments")}"
+             )
+
+    assert malformed_view |> element("a", "Back to invoices") |> render() =~
+             "/billing/invoices?org=invoice-return-org"
   end
 
   test "D-10 D-11 D-12 D-13 invoice danger actions stay overflow-owned and step-up gated",

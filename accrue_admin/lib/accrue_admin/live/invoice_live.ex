@@ -62,6 +62,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
              socket.assigns.current_owner_scope
            )
          )
+         |> assign(:return_label, "Back to invoices")
          |> assign(:flashes, [])
          |> assign(:pending_action, nil)
          |> assign(:dispatch_state, :idle)
@@ -76,8 +77,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     mount_path = socket.assigns.admin_mount_path
     scope = socket.assigns.current_owner_scope
 
-    return_path =
-      ScopedPath.return_path(
+    destination =
+      ScopedPath.return_destination(
         mount_path,
         Map.get(params, "return_to"),
         scope,
@@ -87,7 +88,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
     {:noreply,
      socket
-     |> assign(:return_path, return_path)
+     |> assign(:return_path, destination.path)
+     |> assign(:return_label, destination.label)
      |> assign(
        :related_items,
        related_items(
@@ -95,7 +97,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
          socket.assigns.customer,
          mount_path,
          scope,
-         return_path
+         destination.path
        )
      )}
   end
@@ -331,7 +333,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
           ]}
         />
         <p class="ax-detail-back-link">
-          <a class="ax-link" href={@return_path}>Back to results</a>
+          <a class="ax-link" href={@return_path}><%= @return_label %></a>
         </p>
 
         <Detail.summary_card eyebrow={Copy.invoice_detail_eyebrow()} title={invoice_label(@invoice)}>
