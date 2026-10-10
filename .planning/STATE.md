@@ -4,18 +4,18 @@ milestone: v1.64
 milestone_name: Admin Operator UI Cleanup
 current_phase: 241
 current_phase_name: Billing Operator Journeys
-current_plan: 6
+current_plan: 7
 status: executing
-stopped_at: Completed 241-05-PLAN.md
-last_updated: "2026-10-10T01:52:06.727Z"
+stopped_at: Completed 241-06-PLAN.md
+last_updated: "2026-10-10T02:05:44.819Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 241 execution started
-state_head: 55833ee6d1f3ccf15642e92ec6485d0743ebb825
+state_head: 7cb5f0603a51fb32f4d159b43593c86b397c126e
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
   percent: 25
 ---
 
@@ -34,7 +34,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-09)
 ## Current Position
 
 Phase: 241 (Billing Operator Journeys) — EXECUTING
-Current Plan: 6
+Current Plan: 7
 Total Plans in Phase: 7
 Status: Ready to execute
 Last activity: 2026-10-09 — Phase 241 execution started
@@ -163,6 +163,7 @@ Last activity: 2026-10-09 — Phase 241 execution started
 | Phase 241 P03 | 5 min | 2 tasks | 6 files |
 | Phase 241 P04 | 5 min | 2 tasks | 4 files |
 | Phase 241 P05 | 8 min | 2 tasks | 6 files |
+| Phase 241 P06 | 9min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -353,6 +354,9 @@ Last activity: 2026-10-09 — Phase 241 execution started
 - [Phase 241]: Recovery window context describes the originating dashboard query; the campaign historical timeline remains unfiltered.
 - [Phase 241]: Subscription reviews show exact target/customer/owner/state and keep unsupported money or preview unavailable.
 - [Phase 241]: Review dismissal uses Back to subscription and remains separate from the subscription action.
+- [Phase 241]: Refund reviews use integer minor units and show the exact reviewed amount, currency, and remaining balance.
+- [Phase 241]: Payment-method confirmation reloads the customer and method under a freshly resolved actor and owner scope.
+- [Phase 241]: Billing-review dismissal is distinct from the domain action and clears staged intent.
 
 ### Pending Todos
 
@@ -433,8 +437,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T01:52:06.666Z
-Stopped at: Completed 241-05-PLAN.md
+Last session: 2026-10-10T02:05:44.770Z
+Stopped at: Completed 241-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
