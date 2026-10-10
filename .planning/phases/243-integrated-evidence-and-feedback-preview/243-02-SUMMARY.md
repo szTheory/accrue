@@ -14,7 +14,7 @@ affects: [243-03, host-verification, preview-operations]
 actuals:
   tokens: 10195
   tasks: 3
-  commits: 5
+  commits: 8
 tech-stack:
   added: []
   patterns: [custody preflight before mutation, authoritative read-only database snapshot, per-run build output isolation]
@@ -25,6 +25,8 @@ key-files:
     - examples/accrue_host/e2e/preview-runner.js
     - scripts/ci/accrue_host_preview_custody.sh
     - scripts/ci/test_accrue_host_preview_custody.mjs
+    - scripts/ci/test_accrue_host_proof_paths.mjs
+    - scripts/ci/accrue_host_preview_custody_test_entry.mjs
   modified:
     - examples/accrue_host/README.md
     - examples/accrue_host/e2e/global-setup.js
@@ -32,6 +34,7 @@ key-files:
     - examples/accrue_host/playwright.config.js
     - examples/accrue_host/package.json
     - examples/accrue_host/e2e/phase234-admin-customers-subscriptions.spec.js
+    - examples/accrue_host/e2e/phase234-search-completion.spec.js
     - examples/accrue_host/e2e/phase237-admin-billing.spec.js
     - examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js
     - accrue_admin/lib/accrue_admin/live/subscription_live.ex
@@ -48,7 +51,7 @@ coverage:
     requirement: EVR-04
     verification:
       - kind: unit
-        ref: scripts/ci/test_accrue_host_preview_custody.mjs (12 controls after routing remediation)
+        ref: scripts/ci/test_accrue_host_preview_custody.mjs (13 controls after review fixes)
         status: pass
     human_judgment: false
   - id: D2
@@ -118,7 +121,7 @@ The native development database data-only dump SHA256 remained `f221026bfbfb92bf
 
 1. **Task 1: Guard whole-command proof custody before mutation** - `5ceab3c5` (feat)
 2. **Task 2: Prove fresh preview and warm preservation** - `9eace18f` (feat)
-3. **Task 3: Prove the complete verifier remains separate** - `de9e4d5d` (isolation), `b93d1540` (direct ownership, return destination and focus), `f425645f` (exclusive preview routing)
+3. **Task 3: Prove the complete verifier remains separate** - `de9e4d5d` (isolation), `b93d1540` (direct ownership, return destination and focus), `f425645f` (exclusive preview routing), `388483ce` (safe proof paths), `12649d27` (live custody without caller fixtures), `3c5fa035` (search regression navigation)
 
 Plan metadata commits: `f1045971` and `f64a06e2` (original status/self-check records); `b93d1540` contains the final acceptance repair. The final canonical summary/state update follows in the metadata commit.
 
@@ -215,3 +218,11 @@ The original Plan02 completion evidence above remains intact. Plan03 later disco
 ## Self-Check: PASSED
 
 The summary and preservation spec exist, and task commits `5ceab3c5`, `9eace18f`, `de9e4d5`, and `b93d1540` plus metadata commits `f1045971` and `f64a06e2` are ancestors of the current branch head.
+
+## Code review corrections
+
+CR-01 (`388483ce`) restricts proof IDs to 1–80 safe characters and contains direct Playwright output/report/build/PID paths before use. CR-02 (`12649d27`) rejects caller fixture environment in production preflight and isolates fixture injection in a test-only entry point. The proof-path negative control passed 1/1 and custody controls passed 13/13, including rejection by direct setup and both wrappers before mutation. Original findings and exact fixes remain in `243-REVIEW.md` and `243-REVIEW-FIX.md`. These local results do not extend the pinned Linux comparison to the later source.
+
+## Final regression correction
+
+The prior-phase dedicated search lane first refused reuse of a build compiled with SQL Sandbox enabled. A separate build for its disabled-Sandbox mode reached assertions, then exposed an old expectation that ArrowDown leaves the customer selected despite an additional matching invoice created by a preceding mounted owner. Commit `3c5fa035` asserts movement to the next match, synchronized active status, ArrowUp back to the exact customer, and Enter navigation; the existing stale-result, reopening, scope, and click assertions remain. The dedicated lane passed 1/1 after that correction. Post-review mounted host regression passed 6/6, and the explicit warm preview preservation owner passed 1/1. Exact preview snapshot equality passed after all runs. See `243-REGRESSION.md` for bounded commands, package/prior tests and historical failed attempts.
