@@ -74,6 +74,29 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     refute html =~ "ax-text-12"
   end
 
+  test "default invoice queue exposes checked status controls for its returned rows", %{
+    conn: conn
+  } do
+    customer = insert_customer(%{name: "Uncollectible Customer"})
+    subscription = insert_subscription(customer)
+
+    uncollectible =
+      insert_invoice(customer, subscription, %{number: "INV-UNCOLLECTIBLE", status: :uncollectible})
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/invoices")
+
+    document = Floki.parse_document!(html)
+    status_controls = Floki.find(document, "input[name='status'][type='checkbox']")
+
+    assert Enum.any?(status_controls, &(Floki.attribute(&1, "value") == ["open"] and Floki.attribute(&1, "checked") == [""]))
+    assert Enum.any?(status_controls, &(Floki.attribute(&1, "value") == ["uncollectible"] and Floki.attribute(&1, "checked") == [""]))
+    assert html =~ "INV-0002"
+    assert html =~ "INV-UNCOLLECTIBLE"
+    refute html =~ "INV-0001"
+    assert uncollectible
+  end
+
   test "organization invoice list excludes invoices owned by another organization", %{conn: conn} do
     organization_id = Ecto.UUID.generate()
     foreign_organization_id = Ecto.UUID.generate()
