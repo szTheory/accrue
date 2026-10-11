@@ -342,12 +342,17 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
                "/billing/connect?view=all&type=express&charges_enabled=true&q=acct_match"
              )
 
-    [account_link] =
+    account_links =
       html
       |> Floki.parse_document!()
       |> Floki.find("a[href*='/billing/connect/#{match.id}']")
 
-    detail_path = account_link |> Floki.attribute("href") |> hd()
+    assert length(account_links) == 2
+
+    [account_link] =
+      account_links |> Enum.map(&(Floki.attribute(&1, "href") |> hd())) |> Enum.uniq()
+
+    detail_path = account_link
 
     detail_conn =
       Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")

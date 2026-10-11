@@ -429,8 +429,23 @@ defmodule AccrueAdmin.EventsLiveTest do
     document = Floki.parse_fragment!(html)
     event_link = Floki.find(document, "a[href^='/billing/events/#{event.id}?']")
 
-    assert Floki.text(event_link) =~ "Customer updated"
-    assert Floki.text(event_link) =~ "customer.updated"
+    assert length(event_link) == 2
+    assert Enum.all?(event_link, &(Floki.text(&1) == "Customer updated"))
+
+    identity_cells =
+      Floki.find(document, ".ax-data-table-identity")
+      |> Enum.filter(&(Floki.text(&1) =~ "customer.updated"))
+
+    assert length(identity_cells) == 2
+
+    assert Enum.all?(identity_cells, fn identity ->
+             length(
+               Floki.find(
+                 identity,
+                 "[data-clipboard-text='customer.updated'][aria-label='Copy event type']"
+               )
+             ) == 1
+           end)
 
     event_params =
       event_link
