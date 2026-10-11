@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 11
+open_count: 12
 waived_count: 6
 fixed_count: 20
-total_count: 37
-last_updated: 2026-10-11T16:56:32.083Z
+total_count: 38
+last_updated: 2026-10-11T21:25:35.951Z
 ---
 
 # Broken Windows Ledger
@@ -52,6 +52,7 @@ last_updated: 2026-10-11T16:56:32.083Z
 | 35 | 243 | deviation | examples/accrue_host/playwright.config.js |  | Generic Playwright preview URL override can route unrelated specs to the feedback preview while global setup prepares the native test database. | fixed | Fixed in f425645f: generic preview URL routing now refuses; the explicit e2e:preview runner accepts only the Phase243 preservation spec and pins test discovery. Custody controls passed 12/12, preservation passed 1/1, generic Phase238 passed 2/2, and authoritative preview state matched before/after. | 2026-10-10T21:23:22.852Z | 2026-10-10T21:35:04.328Z |
 | 36 | 244 | deviation | examples/accrue_host/e2e/phase244-operator-evidence.spec.js |  | Mounted browser read-outage state remained unobserved; focused LiveView tests verify read-retry behavior. | open |  | 2026-10-11T02:32:19.747Z |  |
 | 37 | 246 | deviation | accrue_admin/lib/accrue_admin/live/coupons_live.ex |  | Direct coupon q URLs preserve the default Valid selection. | open |  | 2026-10-11T16:56:32.083Z |  |
+| 38 | 247 | deviation | accrue_admin/assets/js/hooks/time_display.js | 4 | Rejected impossible ISO date/time components before browser formatting to prevent normalized, invented instants. | open |  | 2026-10-11T21:25:35.951Z |  |
 
 ````json
 [
@@ -523,6 +524,19 @@ last_updated: 2026-10-11T16:56:32.083Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-11T16:56:32.083Z",
+    "resolved_at": null,
+    "milestone": "v1.66"
+  },
+  {
+    "id": 38,
+    "kind": "deviation",
+    "phase": "247",
+    "file": "accrue_admin/assets/js/hooks/time_display.js",
+    "line": 4,
+    "description": "Rejected impossible ISO date/time components before browser formatting to prevent normalized, invented instants.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-11T21:25:35.951Z",
     "resolved_at": null,
     "milestone": "v1.66"
   }

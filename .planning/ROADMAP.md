@@ -104,13 +104,13 @@ v1.66 has completed Phases 245–246 and is continuing into Phase 247. The owner
   4. An operator can review existing detail actions and copy metadata while owner scope, confirmation, step-up and accepted-versus-completed outcomes remain accurate.
   5. An operator can compare recovery values by currency, distinguish available/zero/absent data, and tell selected UTC windows from historical coverage and explicitly named help.
 
-**Plans**: 1/8 plans executed
+**Plans**: 2/8 plans executed
 Plans:
 **Wave 1**
 - [x] 247-01-PLAN.md — Mounted exact timestamp tracer
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 247-02-PLAN.md — Shared Local/UTC choice and truthful clipboard feedback
+- [x] 247-02-PLAN.md — Shared Local/UTC choice and truthful clipboard feedback
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 247-03-PLAN.md — Timestamp coverage in existing Admin consumers
@@ -151,5 +151,5 @@ Plans:
 |-------|----------------|--------|-----------|
 | 245. Rendered Baseline and Realistic Preview | 3/3 | Complete    | 2026-10-11 |
 | 246. Collection Controls and Search | 5/5 | Complete    | 2026-10-11 |
-| 247. Evidence-True Details and Analytics | 1/8 | In Progress | - |
+| 247. Evidence-True Details and Analytics | 2/8 | In Progress | - |
 | 248. Reproducible Scenarios and Integrated Proof | 0/TBD | Not started | - |
