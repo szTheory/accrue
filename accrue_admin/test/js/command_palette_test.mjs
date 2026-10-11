@@ -142,9 +142,19 @@ function waitForTimers() {
 
 function item(dataset) {
   const classes = new Set();
+  const attributes = {};
   return {
     dataset,
+    id: dataset.id || "",
     textContent: dataset.label || dataset.path || dataset.action || "",
+    attributes,
+    setAttribute(attribute, value) { attributes[attribute] = String(value); },
+    removeAttribute(attribute) { delete attributes[attribute]; },
+    getAttribute(attribute) { return attributes[attribute] || null; },
+    closest(selector) {
+      if (selector === '[role="listbox"]' && dataset.listboxId) return { id: dataset.listboxId };
+      return null;
+    },
     classList: {
       add(value) { classes.add(value); },
       remove(value) { classes.delete(value); },
@@ -156,7 +166,14 @@ function item(dataset) {
 }
 
 function paletteElement(items, query = "ada", status = { textContent: "" }) {
-  const input = { value: query, focus() {} };
+  const input = {
+    value: query,
+    attributes: {},
+    focus() {},
+    setAttribute(attribute, value) { this.attributes[attribute] = String(value); },
+    removeAttribute(attribute) { delete this.attributes[attribute]; },
+    getAttribute(attribute) { return this.attributes[attribute] || null; }
+  };
   return {
     dataset: { target: "#global-search" },
     addEventListener() {},
@@ -567,6 +584,38 @@ test("pointer and Arrow wrap keep highlight, status and Enter on one scoped link
   hook.moveActive(1);
   assert.equal(hook.activeIndex, 0);
   assert.equal(el.status.textContent, "Ada · Customer ID cus_1");
+
+  withWindow({ liveSocket: { pushHistoryPatch(...args) { patches.push(args); } } }, () => {
+    hook.selectActive({ key: "Enter" });
+  });
+  assert.equal(patches[0][1], "/billing/customers/cus_1?org=acme");
+  assert.deepEqual(pushedEvents, [["#global-search", "close", {}]]);
+});
+
+test("keyboard and pointer keep the painted, announced, ARIA, and Enter target aligned", () => {
+  const first = item({ id: "option-first", listboxId: "customer-options", path: "/billing/customers/cus_1?org=acme", label: "First customer" });
+  const second = item({ id: "option-second", listboxId: "customer-options", path: "/billing/customers/cus_2?org=acme", label: "Second customer" });
+  const el = paletteElement([first, second]);
+  const patches = [];
+  const pushedEvents = [];
+  const hook = {
+    ...CommandPalette,
+    el,
+    pushEventTo(...args) { pushedEvents.push(args); }
+  };
+
+  hook.setupItems();
+  hook.moveActive(1);
+  assert.equal(second.classes.has("ax-active"), true);
+  assert.equal(el.querySelector("input").getAttribute("aria-activedescendant"), "option-second");
+  assert.equal(el.querySelector("input").getAttribute("aria-controls"), "customer-options");
+  assert.equal(second.getAttribute("aria-selected"), "true");
+  assert.equal(first.getAttribute("aria-selected"), "false");
+
+  hook.handlePointerMove({ target: { closest: () => first } });
+  assert.equal(hook.activeIndex, 0);
+  assert.equal(el.querySelector("input").getAttribute("aria-activedescendant"), "option-first");
+  assert.equal(el.status.textContent, "First customer");
 
   withWindow({ liveSocket: { pushHistoryPatch(...args) { patches.push(args); } } }, () => {
     hook.selectActive({ key: "Enter" });
