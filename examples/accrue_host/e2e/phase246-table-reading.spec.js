@@ -116,15 +116,20 @@ heldoutTest("@phase246-heldout table state fixtures retain identity, order, and 
     for (const theme of ["light", "dark"]) {
       await page.goto("/admin/__phase246/states?table=long");
       await waitForLiveView(page);
-      await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
+      await page.getByRole("radio", { name: theme === "dark" ? "Dark" : "Light" }).click();
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       await expect(page.getByTestId("table-state")).toHaveText("long");
-      const identity = page.locator("#phase246-state-table tbody > tr[data-row-id] .ax-data-table-identity").first();
+      const identitySelector = suffix === "wide"
+        ? "#phase246-state-table tbody > tr[data-row-id] .ax-data-table-identity"
+        : "#phase246-state-table .ax-data-table-card-header .ax-data-table-identity";
+      const identity = page.locator(identitySelector).first();
       await expect(identity).toContainText("Zoë 世界");
-      await expect(page.locator("#phase246-state-table tbody > tr[data-row-id] [data-clipboard-text='cus_" + "unbroken".repeat(18) + "']")).toHaveCount(1);
+      await expect(page.locator(identitySelector + " [data-clipboard-text='cus_" + "unbroken".repeat(18) + "']").first()).toBeVisible();
       const geometry = await page.evaluate(() => ({
         viewport: document.documentElement.clientWidth,
         page: document.documentElement.scrollWidth,
-        identity: document.querySelector("#phase246-state-table tbody > tr[data-row-id] .ax-data-table-identity")?.getBoundingClientRect().width,
+        identity: [...document.querySelectorAll("#phase246-state-table .ax-data-table-identity")]
+          .find((element) => element.getClientRects().length > 0)?.getBoundingClientRect().width,
         theme: document.documentElement.dataset.theme
       }));
       expect(geometry.theme).toBe(theme);
