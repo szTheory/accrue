@@ -63,6 +63,52 @@ function seedRelatedWebhookEvent(fixture) {
   return output.split(/\s+/).at(-1);
 }
 
+function seedAdversarialEventRows(fixture) {
+  const rawKey = "customer.updated / 非常に長いイベントキー 🧾" + "x".repeat(96);
+  const longActor = "actor_" + "名".repeat(96) + "_🔐";
+  const longSubject = "external_" + "界".repeat(96) + "_📎";
+  const script = `
+    alias Accrue.Events.Event
+    alias Accrue.Repo
+    [webhook_id, raw_key, actor_id, subject_id] = System.argv()
+    attrs = %{
+      type: raw_key, schema_version: 1, actor_type: "webhook", actor_id: actor_id,
+      subject_type: "WebhookEvent", subject_id: webhook_id,
+      caused_by_webhook_event_id: webhook_id, data: %{},
+      inserted_at: ~U[2026-10-10 23:59:59.123456Z]
+    }
+    first = Repo.insert!(struct(Event, attrs))
+    second = Repo.insert!(struct(Event, attrs))
+    long = Repo.insert!(%Event{
+      type: raw_key, schema_version: 1, actor_type: "external", actor_id: actor_id,
+      subject_type: "External reference", subject_id: subject_id,
+      caused_by_webhook_event_id: webhook_id,
+      data: %{}, inserted_at: ~U[2026-10-10 23:59:59.123457Z]
+    })
+    IO.write(Jason.encode!([first.id, second.id, long.id]))
+  `;
+  const output = execFileSync("mix", ["run", "-e", script, "--", fixture.webhook_id, rawKey, longActor, longSubject], {
+    cwd: path.join(repoRoot, "examples/accrue_host"), encoding: "utf8", env: { ...process.env, MIX_ENV: "test" }
+  });
+  const match = output.match(/\[\d+,\d+,\d+\]/);
+  if (!match) throw new Error(`missing adversarial event IDs in Mix output: ${output.slice(-1000)}`);
+  return { ids: JSON.parse(match[0]).map(String), rawKey, longActor, longSubject };
+}
+
+function setWebhookProcessorEventId(webhookId, value) {
+  const script = `
+    alias Accrue.Repo
+    alias Accrue.Webhook.WebhookEvent
+    [webhook_id, processor_event_id] = System.argv()
+    webhook = Repo.get!(WebhookEvent, webhook_id)
+    webhook |> Ecto.Changeset.change(processor_event_id: processor_event_id) |> Repo.update!()
+    IO.write("updated")
+  `;
+  execFileSync("mix", ["run", "-e", script, "--", webhookId, value], {
+    cwd: path.join(repoRoot, "examples/accrue_host"), encoding: "utf8", env: { ...process.env, MIX_ENV: "test" }
+  });
+}
+
 function readWebhookReplayFacts(webhookId) {
   const script = `
     import Ecto.Query
@@ -373,6 +419,41 @@ test("Phase 244 webhook activity exposes exact related event evidence @phase244-
   await assertRelatedWebhookEvidence(page, readFixture(), sandboxId, testInfo, "keyboard");
 });
 
+test("Phase 244 duplicate event rows retain their own scoped destinations @phase244-desktop", async ({ page, sandboxId }, testInfo) => {
+  const fixture = readFixture();
+  const adversarial = seedAdversarialEventRows(fixture);
+  await login(page, fixture, fixture.admin_email, sandboxId);
+  await page.goto("/app/billing");
+  await waitForLiveView(page);
+  await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
+  await waitForLiveView(page);
+  await page.goto(`/admin/webhooks/${fixture.webhook_id}?${orgQuery(fixture)}`);
+  await waitForLiveView(page);
+  const activity = page.locator("details[data-ax-lazy-activity]").first();
+  await activity.locator("summary").click();
+  const derived = activity.locator("section[aria-label='Derived events']");
+  const rows = [];
+  for (const id of adversarial.ids.slice(0, 2)) {
+    const row = derived.locator(".ax-timeline-item").filter({ hasText: `event #${id}` });
+    await expect(row).toBeVisible();
+    await expect(row.locator(".ax-label")).toHaveText(adversarial.rawKey);
+    const link = row.getByRole("link", { name: "Open event" });
+    const href = await link.getAttribute("href");
+    expect(new URL(href, page.url()).pathname).toBe(`/admin/events/${id}`);
+    expect(new URL(href, page.url()).searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
+    rows.push({ id, href });
+  }
+  const timelineIds = await derived.locator(".ax-timeline-item").allTextContents();
+  expect(timelineIds.join(" ")).toContain(`event #${adversarial.ids[0]}`);
+  expect(timelineIds.join(" ")).toContain(`event #${adversarial.ids[1]}`);
+  await derived.locator(`a[href^='/admin/events/${adversarial.ids[1]}?']`).click();
+  await waitForLiveView(page);
+  await expect(page).toHaveURL(new RegExp(`/admin/events/${adversarial.ids[1]}\\?org=`));
+  const evidence = { checkoutHead: execFileSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).trim(), ownerSpecSha256: sha256(fs.readFileSync(__filename)), fixture: "existing scoped webhook with duplicate Unicode-key events", rows, route: page.url(), viewport: page.viewportSize(), assets: await captureAdminAssets(page) };
+  console.log(`[phase244-duplicate-event-evidence] ${JSON.stringify(evidence)}`);
+  await testInfo.attach("phase244-duplicate-event-evidence.json", { body: Buffer.from(JSON.stringify(evidence, null, 2)), contentType: "application/json" });
+});
+
 test.describe("Phase 244 webhook activity on touch viewport", () => {
   test.use({ viewport: { width: 320, height: 800 }, isMobile: true, hasTouch: true });
 
@@ -433,5 +514,66 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
 
   test("Phase 244 webhook activity disclosure works by touch @phase244-mobile", async ({ page, sandboxId }, testInfo) => {
     await assertRelatedWebhookEvidence(page, readFixture(), sandboxId, testInfo, "touch");
+  });
+
+  test("Phase 244 long Unicode evidence and adjacent actions fit touch viewport @phase244-mobile", async ({ page, sandboxId }, testInfo) => {
+    const fixture = readFixture();
+    const adversarial = seedAdversarialEventRows(fixture);
+    const longDeliveryKey = `evt_長い配信キー_${"界".repeat(80)}_🧾`;
+    const originalFacts = readWebhookReplayFacts(fixture.webhook_id);
+    const oldKeyScript = `
+      alias Accrue.Repo
+      alias Accrue.Webhook.WebhookEvent
+      [webhook_id] = System.argv()
+      IO.write(Repo.get!(WebhookEvent, webhook_id).processor_event_id)
+    `;
+    const oldKeyOutput = execFileSync("mix", ["run", "-e", oldKeyScript, "--", fixture.webhook_id], { cwd: path.join(repoRoot, "examples/accrue_host"), encoding: "utf8", env: { ...process.env, MIX_ENV: "test" } });
+    const originalKey = oldKeyOutput.trim().split(/\s+/).at(-1);
+    try {
+      setWebhookProcessorEventId(fixture.webhook_id, longDeliveryKey);
+      await login(page, fixture, fixture.admin_email, sandboxId);
+      await page.goto("/app/billing");
+      await waitForLiveView(page);
+      await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
+      await waitForLiveView(page);
+      await page.goto(`/admin/webhooks/${fixture.webhook_id}?${orgQuery(fixture)}`);
+      await waitForLiveView(page);
+      const heading = page.getByRole("heading", { name: longDeliveryKey, exact: true });
+      await expect(heading).toBeVisible();
+      const activity = page.locator("details[data-ax-lazy-activity]").first();
+      await activity.locator("summary").tap();
+      const derived = activity.locator("section[aria-label='Derived events']");
+      const row = derived.locator(".ax-timeline-item").filter({ hasText: `event #${adversarial.ids[2]}` });
+      const evidenceDetails = row.locator("details.ax-timeline-details");
+      await evidenceDetails.locator("summary").tap();
+      const evidence = evidenceDetails.locator("pre");
+      await expect(evidence).toContainText(adversarial.rawKey);
+      await expect(evidence).toContainText(adversarial.longActor);
+      await expect(evidence).toContainText(adversarial.longSubject);
+      await evidence.selectText();
+      const selected = await page.evaluate(() => window.getSelection()?.toString() || "");
+      for (const value of [adversarial.rawKey, adversarial.longActor, adversarial.longSubject]) expect(selected).toContain(value);
+      const dimensions = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, document: document.documentElement.scrollWidth, evidence: document.querySelector("[aria-label='Derived events'] .ax-timeline-details pre")?.getBoundingClientRect().width }));
+      expect(dimensions.viewport).toBe(320);
+      expect(dimensions.document).toBeLessThanOrEqual(320);
+      expect(dimensions.evidence).toBeGreaterThan(0);
+      const eventLink = row.getByRole("link", { name: "Open event" });
+      const eventHref = await eventLink.getAttribute("href");
+      expect(new URL(eventHref, page.url()).pathname).toBe(`/admin/events/${adversarial.ids[2]}`);
+      expect(new URL(eventHref, page.url()).searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
+      await eventLink.tap();
+      await waitForLiveView(page);
+      const sourceWebhook = page.getByRole("link", { name: new RegExp(`^Source webhook ${fixture.webhook_id}`) });
+      await expect(sourceWebhook).toBeVisible();
+      await sourceWebhook.tap();
+      await waitForLiveView(page);
+      await expect(page).toHaveURL(new RegExp(`/admin/webhooks/${fixture.webhook_id}\\?org=`));
+      const proof = { checkoutHead: execFileSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).trim(), ownerSpecSha256: sha256(fs.readFileSync(__filename)), fixture: "disposable scoped long-key delivery and Unicode evidence rows", route: page.url(), viewport: page.viewportSize(), dimensions, selectedExactEvidence: [adversarial.rawKey, adversarial.longActor, adversarial.longSubject], assets: await captureAdminAssets(page) };
+      console.log(`[phase244-mobile-adversarial-evidence] ${JSON.stringify(proof)}`);
+      await testInfo.attach("phase244-mobile-adversarial-evidence.json", { body: Buffer.from(JSON.stringify(proof, null, 2)), contentType: "application/json" });
+      expect(readWebhookReplayFacts(fixture.webhook_id)).toEqual(originalFacts);
+    } finally {
+      setWebhookProcessorEventId(fixture.webhook_id, originalKey);
+    }
   });
 });
