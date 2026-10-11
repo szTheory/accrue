@@ -33,7 +33,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest fully shipped milestone: v1.64 — Admin Operator UI Cleanup, shipped and archived 2026-10-10.** All four phases, 24 plans and 18 requirements completed. The audit scored 18/18 requirements, 4/4 phase verifications, 10/10 integration seams and 6/6 end-to-end flows with no blockers; it records two newly acknowledged Phase 240 notices and four acknowledgements carried from earlier closeouts. All four phase verifications are fresh and passed (47/47, 32/32, 80/80 and 3/3), with zero unverified behavior. The current-source twelve-image Linux comparison passed in [run 38094642350](https://github.com/szTheory/accrue/actions/runs/38094642350) at `849f72084a6460ed54ecc06bc261054b15efdde0`; the Fake `/admin` preview and its evidence limits are documented in the [archived Phase 243 handoff](milestones/v1.64-phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md). The active milestone is v1.65, Accrue Admin Language & Consistency; requirements and roadmap are being defined, beginning with Phase 244.
+**Latest fully shipped milestone: v1.64 — Admin Operator UI Cleanup, shipped and archived 2026-10-10.** All four phases, 24 plans and 18 requirements completed. The audit scored 18/18 requirements, 4/4 phase verifications, 10/10 integration seams and 6/6 end-to-end flows with no blockers; it records two newly acknowledged Phase 240 notices and four acknowledgements carried from earlier closeouts. All four phase verifications are fresh and passed (47/47, 32/32, 80/80 and 3/3), with zero unverified behavior. The current-source twelve-image Linux comparison passed in [run 38094642350](https://github.com/szTheory/accrue/actions/runs/38094642350) at `849f72084a6460ed54ecc06bc261054b15efdde0`; the Fake `/admin` preview and its evidence limits are documented in the [archived Phase 243 handoff](milestones/v1.64-phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md). The active milestone is v1.65, Accrue Admin Language & Consistency; Phase 244 is implemented and independently verified; milestone closeout audit is next.
 
 ## Current Milestone: v1.65 Accrue Admin Language & Consistency
 
@@ -711,7 +711,15 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-v1.65 requirements are being defined. All 18 v1.64 requirements remain validated and archived in `milestones/v1.64-REQUIREMENTS.md`.
+No unimplemented v1.65 requirements remain. Milestone audit and archival are pending. All 18 v1.64 requirements remain validated and archived in `milestones/v1.64-REQUIREMENTS.md`.
+
+### Validated v1.65 (Phase 244 complete 2026-10-10)
+
+- ✓ Producer-backed operator labels with neutral unknown states — LANG-01.
+- ✓ Evidence-true replay outcomes and supported read-only recovery — STATE-01.
+- ✓ Exact event keys, identifiers, and full timestamps available in persistent native disclosures — EVID-01.
+- ✓ Shared labels and destination-accurate controls across targeted Admin surfaces — CONS-01.
+- Evidence: independent verification 9/9, Admin suite 693/0, browser batch 6/6 at its recorded revision, and 13 executable UAT items; no new remote delivery claim.
 
 ### Validated v1.64 (Phases 240–243 complete; updated 2026-10-10)
 
@@ -939,6 +947,8 @@ Admin global search — 4/4 satisfied.
 
 ## Key Decisions
 
+Phase 244 decisions: use explicit producer-confirmed labels, keep unknown outcomes neutral, preserve exact evidence and native disclosure intent through patches, and associate bulk outcomes only with already-authorized delivery reads. Reuse existing test owners and bind each result to the revision tested.
+
 | Decision | Outcome |
 | --- | --- |
 | Keep Linux golden generation separate from the blocking comparison and state the accepted source revision. | ✓ Phase243 — reviewed twelve-image mint followed by successful normal Ubuntu comparison at `849f72084a6460ed54ecc06bc261054b15efdde0` (run 38094642350); thresholds unchanged. |
@@ -990,4 +1000,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-10 at v1.65 kickoff; next: define and approve v1.65 requirements, then create the roadmap.*
+*Last updated: 2026-10-10 after Phase 244; next: v1.65 milestone audit.*

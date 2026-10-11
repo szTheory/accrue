@@ -20,7 +20,7 @@
 - ✅ **v1.62 Release Integration & Repository Hygiene** — Phases 229–232 (2026-09-18) — [archive](milestones/v1.62-ROADMAP.md)
 - ✅ **v1.63 Admin and Portal UI refinement** — Phases 233–239 (shipped 2026-10-09) — [archive](milestones/v1.63-ROADMAP.md)
 - ✅ **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (shipped 2026-10-10) — [archive](milestones/v1.64-ROADMAP.md)
-- 🚧 **v1.65 Accrue Admin Language & Consistency** — Phase 244 (planned)
+- 🚧 **v1.65 Accrue Admin Language & Consistency** — Phase 244 (verified; awaiting milestone audit)
 
 ## Planning Doctrine
 
@@ -36,7 +36,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 ## Phases
 
-- [ ] **Phase 244: Operator Language and Evidence** - Make confirmed Admin labels, outcomes, next steps, and repeated controls clear and consistent while preserving investigation details.
+- [x] **Phase 244: Operator Language and Evidence** - Make confirmed Admin labels, outcomes, next steps, and repeated controls clear and consistent while preserving investigation details. (completed 2026-10-10)
 
 ## Phase Details
 
@@ -51,7 +51,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
   3. Where a human-readable event or state label appears, an operator can still find the exact event key and relevant record identifiers and timestamps at the point of investigation. (EVID-01)
   4. Across targeted existing Admin screens, an operator encounters consistent repeated headings and action names, and each link or control accurately describes its destination or effect. (CONS-01)
 
-**Plans**: 4/4 plans executed (3 executed; 1 gap closure pending)
+**Plans**: 4/4 plans complete (3 executed; 1 gap closure pending)
 Plans:
 **Wave 1**
 - [x] 244-01-PLAN.md — Confirm mounted candidates and prove Home-to-event label and evidence path.
@@ -71,10 +71,10 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 244. Operator Language and Evidence | 4/4 | In Progress | - |
+| 244. Operator Language and Evidence | 4/4 | Complete    | 2026-10-10 |
 
 ## Current Position
 
-Phase 244 has three executed plans and one verification gap closure plan pending. All 4/4 approved v1 requirements remain mapped to this phase. The complete v1.64 scope and closeout evidence remain in the [archived roadmap](milestones/v1.64-ROADMAP.md), [milestone audit](milestones/v1.64-MILESTONE-AUDIT.md), and [phase archive](milestones/v1.64-phases/).
+Phase 244 is complete: all four plans, all four requirements, and independent verification passed (9/9 truths, zero unverified behavior). The milestone is ready for its closeout audit. The complete v1.64 scope and closeout evidence remain in the [archived roadmap](milestones/v1.64-ROADMAP.md), [milestone audit](milestones/v1.64-MILESTONE-AUDIT.md), and [phase archive](milestones/v1.64-phases/).
 
-**Next command:** `$gsd-execute-phase 244`.
+**Next command:** `$gsd-audit-milestone`.
