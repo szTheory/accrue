@@ -3,7 +3,7 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
 
   import Ecto.Query
 
-  alias Accrue.Billing.{Charge, Customer, Invoice, Refund, Subscription}
+  alias Accrue.Billing.{Charge, Coupon, Customer, Invoice, PromotionCode, Refund, Subscription}
   alias Accrue.Events.Event
   alias AccrueHost.Repo
 
@@ -55,7 +55,10 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
     assert first.currency == "usd"
     assert first.customer_owner_type == "User"
     assert first.subscription_status == :active
+    assert first.subscription_customer_id == first.customer_id
     assert first.phase191_events == 0
+    assert first.phase191_customers == 0
+    assert first.edge_customers == 0
   end
 
   test "showcase invoices without subscription links use a manual billing reason" do
@@ -68,9 +71,21 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
     assert first == second
     assert map_size(first) == 6
 
+    expected_customers = %{
+      "in_showcase_draft" => {"cus_fake_00001", "Northwind Labs"},
+      "in_showcase_open" => {"cus_fake_00003", "Tidewater Systems"},
+      "in_showcase_paid_usd" => {"cus_fake_00001", "Northwind Labs"},
+      "in_showcase_paid_jpy" => {"cus_fake_00005", "Meridian Group"},
+      "in_showcase_void" => {"cus_fake_00004", "Redwood Studio"},
+      "in_showcase_uncollectible" => {"cus_fake_00003", "Tidewater Systems"}
+    }
+
     for {processor_id, facts} <- first do
       assert facts.customer_exists
       assert facts.subscription_id == nil
+
+      assert {facts.customer_processor_id, facts.customer_name} ==
+               expected_customers[processor_id]
 
       assert facts.billing_reason == "manual",
              "#{processor_id} claims a subscription without a linked subscription"
@@ -83,7 +98,7 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
       end
 
       assert facts.currency in ["usd", "jpy"]
-      assert facts.period_start < facts.period_end
+      assert DateTime.compare(facts.period_start, facts.period_end) == :lt
     end
   end
 
@@ -123,6 +138,22 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
     assert DateTime.compare(paid.finalized_at, paid.paid_at) == :lt
     assert DateTime.compare(paid.paid_at, paid_event.inserted_at) == :eq
 
+    open = Repo.get_by!(Invoice, processor: "fake", processor_id: "in_showcase_open")
+    assert open.status == :open
+    assert open.amount_remaining_minor == open.amount_due_minor
+    assert DateTime.compare(open.finalized_at, open.due_date) == :lt
+
+    void = Repo.get_by!(Invoice, processor: "fake", processor_id: "in_showcase_void")
+    assert void.status == :void
+    assert void.amount_paid_minor == 0
+    assert DateTime.compare(void.finalized_at, void.voided_at) == :lt
+
+    paid_jpy = Repo.get_by!(Invoice, processor: "fake", processor_id: "in_showcase_paid_jpy")
+    assert paid_jpy.currency == "jpy"
+    assert paid_jpy.total_minor == 55_000
+    assert paid_jpy.amount_paid_minor == paid_jpy.total_minor
+    assert DateTime.compare(paid_jpy.finalized_at, paid_jpy.paid_at) == :lt
+
     charge = Repo.get_by!(Charge, processor: "fake", processor_id: "ch_showcase_refunded")
     refund = Repo.get_by!(Refund, stripe_id: "re_showcase_full")
     refund_event = Repo.get_by!(Event, idempotency_key: "seed-showcase-charge-refunded")
@@ -138,6 +169,23 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
            }
 
     assert DateTime.compare(charge.fees_settled_at, refund.fees_settled_at) == :lt
+
+    failed_charge = Repo.get_by!(Charge, processor: "fake", processor_id: "ch_showcase_failed")
+    failed_event = Repo.get_by!(Event, idempotency_key: "seed-showcase-charge-failed")
+    assert failed_charge.status == "failed"
+    assert is_nil(failed_charge.fees_settled_at)
+    assert failed_event.subject_id == failed_charge.id
+    assert failed_event.data["amount_cents"] == failed_charge.amount_cents
+    assert failed_event.data["failure_code"] == "card_declined"
+
+    percent_coupon = Repo.get_by!(Coupon, processor: "fake", processor_id: "coupon_showcase_pct")
+
+    active_code =
+      Repo.get_by!(PromotionCode, processor: "fake", processor_id: "promo_showcase_active")
+
+    assert active_code.coupon_id == percent_coupon.id
+    assert active_code.active
+    assert active_code.times_redeemed == percent_coupon.times_redeemed
   end
 
   defp seed_if_available do
@@ -177,6 +225,7 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
       subscription_id: subscription.id,
       subscription_count: subscription_count,
       subscription_status: subscription.status,
+      subscription_customer_id: subscription.customer_id,
       currency: invoice.currency,
       amounts: %{
         subtotal: invoice.subtotal_minor,
@@ -189,7 +238,14 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
         Repo.aggregate(
           from(e in Event, where: like(e.idempotency_key, "seed-phase191-%")),
           :count
-        )
+        ),
+      phase191_customers:
+        Repo.aggregate(
+          from(c in Customer, where: like(c.processor_id, "cus_phase191_host%")),
+          :count
+        ),
+      edge_customers:
+        Repo.aggregate(from(c in Customer, where: c.processor_id == "cus_e2e_edge_1"), :count)
     }
   end
 
@@ -202,10 +258,14 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
     )
     |> Map.new(fn invoice ->
       customer_exists = not is_nil(Repo.get(Customer, invoice.customer_id))
+      customer = Repo.get!(Customer, invoice.customer_id)
 
       {invoice.processor_id,
        %{
+         customer_id: invoice.customer_id,
          customer_exists: customer_exists,
+         customer_processor_id: customer.processor_id,
+         customer_name: customer.name,
          subscription_id: invoice.subscription_id,
          billing_reason: invoice.billing_reason,
          status: invoice.status,

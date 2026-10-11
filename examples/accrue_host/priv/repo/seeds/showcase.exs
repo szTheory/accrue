@@ -152,7 +152,7 @@ invoice_specs = [
      amount_due_minor: 4900,
      amount_paid_minor: 0,
      amount_remaining_minor: 4900,
-     billing_reason: "subscription_cycle",
+     billing_reason: "manual",
      collection_method: "charge_automatically",
      period_start: days_ago.(2),
      period_end: days_ago.(0)
@@ -170,7 +170,7 @@ invoice_specs = [
      amount_paid_minor: 0,
      amount_remaining_minor: 12_960,
      due_date: days_ago.(-5),
-     billing_reason: "subscription_cycle",
+     billing_reason: "manual",
      collection_method: "send_invoice",
      finalized_at: days_ago.(8),
      period_start: days_ago.(38),
@@ -190,7 +190,7 @@ invoice_specs = [
      amount_remaining_minor: 0,
      paid_at: days_ago.(30),
      finalized_at: days_ago.(33),
-     billing_reason: "subscription_cycle",
+     billing_reason: "manual",
      collection_method: "charge_automatically",
      period_start: days_ago.(63),
      period_end: days_ago.(33)
@@ -209,7 +209,7 @@ invoice_specs = [
      amount_remaining_minor: 0,
      paid_at: days_ago.(20),
      finalized_at: days_ago.(22),
-     billing_reason: "subscription_create",
+     billing_reason: "manual",
      collection_method: "charge_automatically",
      period_start: days_ago.(52),
      period_end: days_ago.(22)
@@ -228,7 +228,7 @@ invoice_specs = [
      amount_remaining_minor: 0,
      voided_at: days_ago.(12),
      finalized_at: days_ago.(15),
-     billing_reason: "subscription_cycle",
+     billing_reason: "manual",
      collection_method: "charge_automatically",
      period_start: days_ago.(45),
      period_end: days_ago.(15)
@@ -246,7 +246,7 @@ invoice_specs = [
      amount_paid_minor: 0,
      amount_remaining_minor: 12_960,
      finalized_at: days_ago.(40),
-     billing_reason: "subscription_cycle",
+     billing_reason: "manual",
      collection_method: "charge_automatically",
      period_start: days_ago.(70),
      period_end: days_ago.(40)
@@ -255,7 +255,20 @@ invoice_specs = [
 
 for {pid, customer, attrs} <- invoice_specs, customer != nil do
   attrs = Map.put(attrs, :customer_id, customer.id)
-  upsert.(Invoice, &Invoice.force_status_changeset/2, pid, attrs)
+  invoice = upsert.(Invoice, &Invoice.force_status_changeset/2, pid, attrs)
+
+  # These standalone showcase invoices have no source-linked subscription.
+  # Correct only their stale billing reason, and only while identity and money
+  # still match this seed's deterministic record. Existing preview rows are
+  # reconciled safely; unrelated edits or relationships are left untouched.
+  if attrs.billing_reason == "manual" and is_nil(invoice.subscription_id) and
+       invoice.billing_reason in ["subscription_cycle", "subscription_create"] and
+       invoice.customer_id == customer.id and invoice.status == attrs.status and
+       invoice.total_minor == attrs.total_minor and invoice.currency == attrs.currency do
+    invoice
+    |> Invoice.force_status_changeset(%{billing_reason: "manual"})
+    |> Repo.update!()
+  end
 end
 
 # ---------------------------------------------------------------------------
