@@ -180,7 +180,7 @@ async function assertDisclosureCueAndKeyboard(page) {
     ["payload", "#webhook-raw-payload"]
   ]) {
     const disclosure = page.locator(selector);
-    const summary = disclosure.locator("summary");
+    const summary = disclosure.locator(":scope > summary");
     await expect(summary).toBeVisible();
     const geometry = await summary.boundingBox();
     expect(geometry.height, `${name} disclosure keeps a 44px target`).toBeGreaterThanOrEqual(44);
