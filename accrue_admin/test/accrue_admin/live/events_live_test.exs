@@ -333,6 +333,39 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert html =~ "invoice.payment_failed.exact_link"
   end
 
+  test "known event rows share the operator label and retain the stored key", %{conn: conn} do
+    organization_id = Ecto.UUID.generate()
+    organization_slug = "event-label-#{System.unique_integer([:positive])}"
+    customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
+
+    {:ok, event} =
+      Events.record(%{
+        type: "customer.updated",
+        subject_type: "Customer",
+        subject_id: customer.id,
+        actor_type: "admin",
+        actor_id: "admin_1"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: organization_id,
+        active_organization_slug: organization_slug,
+        admin_organization_ids: [organization_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing/events?org=#{organization_slug}&type=customer.updated")
+
+    document = Floki.parse_fragment!(html)
+    event_link = Floki.find(document, "a[href^='/billing/events/#{event.id}?']")
+
+    assert Floki.text(event_link) =~ "Customer updated"
+    assert Floki.text(event_link) =~ "customer.updated"
+    assert Floki.attribute(event_link, "href") |> hd() |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query() |> Map.fetch!("org") == organization_slug
+    assert Floki.attribute(event_link, "href") |> hd() |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query() |> Map.fetch!("type") == "customer.updated"
+  end
+
   test "summary read failure is announced as unavailable and can be retried", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, view, _html} = live(conn, "/billing/events")

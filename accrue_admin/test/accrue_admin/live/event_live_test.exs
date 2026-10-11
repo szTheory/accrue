@@ -100,6 +100,7 @@ defmodule AccrueAdmin.EventLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
 
     assert html =~ "2026-04-15T10:12:34.123456Z"
+    assert html =~ "Customer updated"
     assert html =~ "customer.updated"
     assert html =~ "cus_exact_time_test"
   end
