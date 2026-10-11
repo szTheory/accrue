@@ -126,13 +126,16 @@ ordinaryTest("@phase246-current-ordinary current invoices toolbar and payment/co
   await page.goto("/admin/invoices?view=all");
   await assertConnected(page, "invoices");
   await expect(page.locator("[data-ax-view-nav] a[aria-current='page']")).toBeVisible();
-  await page.locator("[data-ax-view-nav]").getByRole("link").first().click();
-  await expect.poll(() => new URL(page.url()).searchParams.get("view")).toBeNull();
+  const paid = page.locator("[data-filter-group='status'] input[value='paid']");
+  await paid.check();
+  await expect.poll(() => new URL(page.url()).searchParams.get("status")).toBe("paid");
   await expect(page.locator("[data-ax-filter-chips] .ax-filter-chip").first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /Remove.*Paid/i })).toBeVisible();
   await expect(page.locator("[data-ax-result-count]")).toContainText(/Showing \d+/);
   await expect.poll(() => page.locator("[data-ax-list='invoices'] tbody tr[data-row-id]").count()).toBeGreaterThan(0);
-  await page.locator("[data-ax-clear-all]").click();
-  await expect.poll(() => new URL(page.url()).searchParams.get("view")).toBeNull();
+  await page.getByRole("link", { name: /Remove.*Paid/i }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("status")).toBeNull();
+  await expect(page.locator("[data-ax-filter-chips] .ax-filter-chip")).toHaveCount(0);
   await expect(page.locator("[data-ax-result-count]")).toBeVisible();
   const assets = {
     css: await fetchAsset(page, 'link[rel="stylesheet"][href*="/admin/assets/css-"]', "accrue_admin/priv/static/accrue_admin.css"),
