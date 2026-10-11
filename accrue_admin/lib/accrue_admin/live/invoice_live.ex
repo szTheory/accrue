@@ -22,7 +22,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     Select,
     StatusBadge,
     StepUpAuthModal,
-    Timeline
+    Timeline,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -375,7 +376,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
           <:facts>
             <span><%= customer_label(@customer) %></span>
             <span><%= @invoice.processor_id || @invoice.id %></span>
-            <span><%= Copy.invoice_detail_due_prefix() %><%= format_datetime(@invoice.due_date) %></span>
+            <span><%= Copy.invoice_detail_due_prefix() %> <%= timestamp_value(@invoice.due_date, "invoice-due-date-card") %></span>
           </:facts>
         </Detail.summary_card>
 
@@ -440,7 +441,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                   <%= Copy.invoice_line_item_qty_prefix() %><%= item.quantity || 1 %>
                   <span :if={item.proration}><%= Copy.invoice_line_item_proration_suffix() %></span>
                   <span :if={item.period_start || item.period_end}>
-                    <%= Copy.invoices_balance_sep() %><%= format_datetime(item.period_start) %><%= Copy.invoice_line_item_period_separator() %><%= format_datetime(item.period_end) %>
+                    <%= Copy.invoices_balance_sep() %><%= timestamp_value(item.period_start, "invoice-line-#{item.id}-period-start") %><%= Copy.invoice_line_item_period_separator() %><%= timestamp_value(item.period_end, "invoice-line-#{item.id}-period-end") %>
                   </span>
                 </p>
               </div>
@@ -920,7 +921,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         value: money_text(invoice.amount_remaining_minor, invoice.currency)
       },
       %{label: "Amount paid", value: money_text(invoice.amount_paid_minor, invoice.currency)},
-      %{label: "Due / finalized", value: invoice_boundary_summary(invoice)},
+      %{label: "Due / finalized", value: invoice_boundary_summary(invoice, :summary)},
       %{
         label: "Collection method",
         value: Copy.invoices_collection_method_label(invoice.collection_method)
@@ -955,7 +956,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         label: "Amount remaining",
         value: money_text(invoice.amount_remaining_minor, invoice.currency)
       },
-      %{label: "Due / finalized", value: invoice_boundary_summary(invoice)}
+      %{label: "Due / finalized", value: invoice_boundary_summary(invoice, :collection)}
     ]
   end
 
@@ -1473,7 +1474,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     Enum.map(events, fn event ->
       %{
         title: event.type,
-        at: format_datetime(event.inserted_at),
+        id: event.id,
+        at: event.inserted_at,
         body: event.subject_type <> " " <> event.subject_id,
         status: event.actor_type,
         tone: tone(event),
@@ -1588,13 +1590,39 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     end
   end
 
-  defp invoice_boundary_summary(invoice) do
+  defp invoice_boundary_summary(invoice, surface) do
     cond do
-      invoice.finalized_at -> "Finalized #{format_datetime(invoice.finalized_at)}"
-      invoice.due_date -> "Due #{format_datetime(invoice.due_date)}"
-      true -> "No due or finalized boundary"
+      invoice.finalized_at ->
+        timestamp_summary("Finalized", invoice.finalized_at, "invoice-finalized-at-#{surface}")
+
+      invoice.due_date ->
+        timestamp_summary("Due", invoice.due_date, "invoice-boundary-due-date-#{surface}")
+
+      true ->
+        "No due or finalized boundary"
     end
   end
+
+  defp timestamp_summary(label, %DateTime{} = value, id) do
+    assigns = %{label: label, value: value, id: id}
+
+    ~H"""
+    <span><%= @label %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
+
+  defp timestamp_summary(label, %Date{} = value, _id), do: "#{label} #{Date.to_iso8601(value)}"
+
+  defp timestamp_value(%DateTime{} = value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
+
+  defp timestamp_value(%Date{} = value, _id), do: Date.to_iso8601(value)
+  defp timestamp_value(_value, _id), do: "Unknown"
 
   defp tax_risk_summary(invoice) do
     if tax_failure_visible?(invoice), do: "Needs tax recovery", else: "No tax blocker"
@@ -1643,9 +1671,6 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     |> String.split()
     |> Enum.map_join(" ", &String.capitalize/1)
   end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

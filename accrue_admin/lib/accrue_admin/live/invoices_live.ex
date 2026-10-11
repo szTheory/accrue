@@ -17,7 +17,8 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     IdBadge,
     MoneyFormatter,
     PageHeader,
-    StatStrip
+    StatStrip,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -149,7 +150,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
             %{label: Copy.invoices_column_invoice(), render: &invoice_identity_cell(&1, @admin_mount_path, @current_owner_scope, :table)},
             %{label: Copy.invoices_column_status(), render: &status_summary/1},
             %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
-            %{label: Copy.invoices_column_due_date(), render: &due_date_summary/1},
+            %{label: Copy.invoices_column_due_date(), render: &due_date_summary(&1, :table)},
             %{
               id: :collection_method,
               label: Copy.invoices_column_collection(),
@@ -161,7 +162,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           card_fields={[
             %{label: Copy.invoices_column_status(), render: &status_summary/1},
             %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
-            %{label: Copy.invoices_column_due_date(), render: &due_date_summary/1},
+            %{label: Copy.invoices_column_due_date(), render: &due_date_summary(&1, :card)},
             %{
               id: :collection_method,
               label: Copy.invoices_column_collection(),
@@ -311,10 +312,18 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     |> Enum.join(" · ")
   end
 
-  defp due_date_summary(%{due_date: %DateTime{} = due_date}),
-    do: Calendar.strftime(due_date, "%b %d, %Y %H:%M UTC")
+  defp due_date_summary(%{due_date: %DateTime{} = due_date} = row, presentation) do
+    assigns = %{value: due_date, id: "invoice-row-due-date-#{presentation}-#{row.id}"}
 
-  defp due_date_summary(_row), do: Copy.invoices_due_date_unavailable()
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
+
+  defp due_date_summary(%{due_date: %Date{} = due_date}, _presentation),
+    do: Date.to_iso8601(due_date)
+
+  defp due_date_summary(_row, _presentation), do: Copy.invoices_due_date_unavailable()
 
   defp invoice_action_cell(row, mount_path, owner_scope) do
     href = scoped_path(mount_path, "/invoices/#{row.id}", owner_scope)

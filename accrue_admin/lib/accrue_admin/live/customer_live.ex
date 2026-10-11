@@ -28,6 +28,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
     Timeline
   }
 
+  alias AccrueAdmin.Components.Timestamp
+
   alias AccrueAdmin.TaxOwnershipRow
 
   @peer_record_sets ~w(subscriptions invoices charges)
@@ -705,7 +707,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
           },
           %{
             label: Copy.entitlements_advisory_observed_at_label(),
-            value: format_advisory_timestamp(advisory.observed_at)
+            value: timestamp_value(advisory.observed_at, "customer-advisory-observed-at")
           },
           %{
             label: Copy.entitlements_advisory_source_label(),
@@ -1356,7 +1358,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
     Enum.map(events, fn event ->
       %{
         title: event.type,
-        at: format_datetime(event.inserted_at),
+        id: event.id,
+        at: event.inserted_at,
         body: event.subject_type <> " " <> event.subject_id,
         status: event.actor_type,
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate)
@@ -1399,8 +1402,15 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   defp humanize(_value), do: "Unknown"
 
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
+  defp timestamp_value(%DateTime{} = value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
+
+  defp timestamp_value(_value, _id), do: Copy.entitlements_advisory_age_unknown_copy()
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

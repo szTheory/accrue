@@ -18,6 +18,8 @@ defmodule AccrueAdmin.Live.CouponsLive do
     StatStrip
   }
 
+  alias AccrueAdmin.Components.Timestamp
+
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Coupons
 
@@ -174,14 +176,14 @@ defmodule AccrueAdmin.Live.CouponsLive do
             %{label: Copy.coupon_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope, @params, :table)},
             %{label: Copy.coupon_table_column_status(), render: &status_summary/1},
             %{label: Copy.coupon_table_column_discount(), render: &discount_summary/1},
-            %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary/1},
+            %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary(&1, :table)},
             %{label: Copy.coupon_table_column_redemptions(), render: &redemption_summary/1}
           ]}
           card_title={&coupon_link(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
             %{label: Copy.coupon_table_column_status(), render: &status_summary/1},
             %{label: Copy.coupon_table_column_discount(), render: &discount_summary/1},
-            %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary/1},
+            %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary(&1, :card)},
             %{label: Copy.coupon_table_column_redemptions(), render: &redemption_summary/1}
           ]}
           filter_fields={coupon_filter_fields()}
@@ -292,8 +294,10 @@ defmodule AccrueAdmin.Live.CouponsLive do
   defp status_summary(%{valid: false}), do: Copy.coupon_status_invalid()
   defp status_summary(_row), do: Copy.Coupon.coupon_unknown_value()
 
-  defp redeem_by_summary(%{redeem_by: %DateTime{} = value}), do: format_datetime(value)
-  defp redeem_by_summary(_row), do: Copy.coupon_redeem_by_no_expiry()
+  defp redeem_by_summary(%{redeem_by: %DateTime{} = value} = row, presentation),
+    do: timestamp_value(value, "coupon-row-redeem-by-#{presentation}-#{row.id}")
+
+  defp redeem_by_summary(_row, _presentation), do: Copy.coupon_redeem_by_no_expiry()
 
   defp coupon_filter_fields do
     [
@@ -437,7 +441,13 @@ defmodule AccrueAdmin.Live.CouponsLive do
     :erlang.float_to_binary(dollars, decimals: 2) <> " " <> code
   end
 
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
+  defp timestamp_value(value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

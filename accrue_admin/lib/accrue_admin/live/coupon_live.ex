@@ -17,6 +17,8 @@ defmodule AccrueAdmin.Live.CouponLive do
     Timeline
   }
 
+  alias AccrueAdmin.Components.Timestamp
+
   alias AccrueAdmin.ScopedPath
 
   @impl true
@@ -347,7 +349,9 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp status_summary(%{valid: false}), do: AccrueAdmin.Copy.coupon_status_invalid()
   defp status_summary(_coupon), do: AccrueAdmin.Copy.Coupon.coupon_unknown_value()
 
-  defp redeem_by_summary(%{redeem_by: %DateTime{} = value}), do: format_datetime(value)
+  defp redeem_by_summary(%{redeem_by: %DateTime{} = value} = coupon),
+    do: timestamp_value(value, "coupon-redeem-by-#{coupon.id}")
+
   defp redeem_by_summary(_coupon), do: AccrueAdmin.Copy.coupon_redeem_by_no_expiry()
 
   defp max_redemptions_summary(%{max_redemptions: nil}),
@@ -371,10 +375,17 @@ defmodule AccrueAdmin.Live.CouponLive do
 
   defp duration_summary(_coupon), do: "--"
 
-  defp promotion_code_status(%{active: true, expires_at: %DateTime{} = expires_at}),
-    do:
-      AccrueAdmin.Copy.coupon_promotion_code_status_active_until_prefix() <>
-        format_datetime(expires_at)
+  defp promotion_code_status(%{active: true, expires_at: %DateTime{} = expires_at} = code) do
+    assigns = %{
+      value: expires_at,
+      id: "coupon-promotion-code-expires-#{code.id}",
+      prefix: AccrueAdmin.Copy.coupon_promotion_code_status_active_until_prefix()
+    }
+
+    ~H"""
+    <span><%= @prefix %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
 
   defp promotion_code_status(%{active: true}),
     do: AccrueAdmin.Copy.coupon_promotion_code_status_active()
@@ -433,7 +444,13 @@ defmodule AccrueAdmin.Live.CouponLive do
 
   defp normalize_currency(_currency), do: {:error, :unknown}
 
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
+  defp timestamp_value(value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
 
   defp related_items(coupon, mount_path, scope) do
     [

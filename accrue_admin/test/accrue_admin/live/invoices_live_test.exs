@@ -408,7 +408,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     unknown_card = Floki.find(doc, ".ax-data-table-card[data-row-id='#{unknown.id}']") |> hd()
 
     assert Floki.text(overdue_card) =~
-             Calendar.strftime(overdue.due_date, "%b %d, %Y %H:%M UTC")
+             Calendar.strftime(overdue.due_date, "%b %d, %Y %H:%M:%S UTC")
 
     assert Floki.text(unknown_card) =~ "Due date unavailable"
     assert Floki.text(overdue_card) =~ "Overdue"
