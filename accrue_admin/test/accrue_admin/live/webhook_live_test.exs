@@ -186,6 +186,51 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "cus_123"
   end
 
+  test "related activity shares event meaning and discloses exact evidence and destination", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    customer = insert_customer(%{processor_id: "cus_related_event"})
+
+    {:ok, event} =
+      Events.record(%{
+        type: "customer.updated",
+        subject_type: "Customer",
+        subject_id: customer.id,
+        actor_type: "webhook",
+        actor_id: webhook.processor_event_id,
+        caused_by_webhook_event_id: webhook.id
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    assert html =~ "Dead"
+
+    html = render_click(element(view, "[data-ax-lazy-activity]"))
+    event_item =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find("[aria-label='Derived events'] .ax-timeline-item")
+      |> Enum.find(&(Floki.text(&1) =~ "event ##{event.id}"))
+
+    assert html =~ "Webhook attempt history"
+    assert html =~ "Derived events"
+    assert Floki.text(event_item) =~ "Customer updated"
+    assert Floki.text(event_item) =~ "Inspect event evidence"
+    assert Floki.text(event_item) =~ "Stored event key: customer.updated"
+    assert Floki.text(event_item) =~ "Event ID: #{event.id}"
+    assert Floki.text(event_item) =~ "Webhook delivery ID: #{webhook.id}"
+
+    event_link =
+      Floki.find(event_item, "a.ax-timeline-link")
+
+    assert Floki.text(event_link) == "Open event"
+    assert Floki.attribute(event_link, "href") == ["/billing/events/#{event.id}"]
+    assert html =~ "Attempt 3/25"
+    assert html =~ "Dead"
+  end
+
   test "WebhookLive Related card renders event links pointing to /events/:id", %{
     conn: conn,
     webhook: webhook
