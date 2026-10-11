@@ -238,3 +238,29 @@ Plan 246-04 is complete. The Phase 246 implementation, all 24 UI-state rows, ord
 ---
 *Phase: 246-collection-controls-and-search*
 *Completed: 2026-10-11*
+
+## Task Commits
+
+Canonical reachable commit references for evaluation-scope bookkeeping (details above and identity-gap summary).
+
+1. **Task 1: Phase 246 implementation or verification** - `cef8290f`
+2. **Task 2: Phase 246 implementation or verification** - `5e05c0b2`
+3. **Task 3: Phase 246 implementation or verification** - `a44004df`
+4. **Task 4: Phase 246 implementation or verification** - `ec8a0d13`
+5. **Task 5: Phase 246 implementation or verification** - `93226fdd`
+6. **Task 6: Phase 246 implementation or verification** - `1fef6257`
+7. **Task 7: Phase 246 implementation or verification** - `2f2ca283`
+8. **Task 8: Phase 246 implementation or verification** - `7a3995a2`
+9. **Task 9: Phase 246 implementation or verification** - `1735286d`
+10. **Task 10: Phase 246 implementation or verification** - `45ab133a`
+11. **Task 11: Phase 246 implementation or verification** - `cbd198e2`
+12. **Task 12: Phase 246 implementation or verification** - `39759079`
+13. **Task 13: Phase 246 implementation or verification** - `0080fd02`
+14. **Task 14: Phase 246 implementation or verification** - `e200f3fc`
+15. **Task 15: Phase 246 implementation or verification** - `ffb7f872`
+16. **Task 16: Phase 246 implementation or verification** - `95f0340a`
+17. **Task 17: Phase 246 implementation or verification** - `eb3c4944`
+18. **Task 18: Phase 246 implementation or verification** - `d1840677`
+
+19. **Task 19: Review seed boundary fix** - `9a508f53`
+20. **Task 20: Review search validation fix** - `d1c467cd`

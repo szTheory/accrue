@@ -129,3 +129,12 @@ None found in files created or modified by this plan.
 - All created browser-spec files and the summary exist on disk.
 - All four task commits are reachable from the plan baseline on the current branch.
 - Task acceptance criteria and plan verification were rerun successfully.
+
+## Task Commits
+
+Canonical reachable commit references for evaluation-scope bookkeeping (details above and identity-gap summary).
+
+1. **Task 1: Phase 246 implementation or verification** - `babf7b06`
+2. **Task 2: Phase 246 implementation or verification** - `e20d12f8`
+3. **Task 3: Phase 246 implementation or verification** - `e0860637`
+4. **Task 4: Phase 246 implementation or verification** - `f3e6ea01`
