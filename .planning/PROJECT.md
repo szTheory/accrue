@@ -37,7 +37,21 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Next Milestone Goals
 
-No new scope is selected. Run `$gsd-new-milestone` to choose the next concrete need under the existing stable-core posture. Continue phase numbering at **245**; do not repeat completed Phase 244.
+## Current Milestone: v1.66 Admin Usability and Visual Consistency
+
+**Goal:** Make existing Admin journeys intentional, understandable and consistent through a complete rendered inventory, feedback-led shared refinements, truthful evidence presentation and realistic evaluation data.
+
+**Target features:**
+- Enumerate and inspect existing Admin lists, details and materially distinct interaction states, including surfaces not yet reviewed by the owner.
+- Consolidate collection controls, table identity/status presentation, timestamp display/copy and destination language at existing shared owners.
+- Refine detail disclosures, webhook investigation/replay, payload controls and recovery metrics without obscuring supported actions or uncertain evidence.
+- Separate realistic feedback-preview scenarios from adversarial fixtures and prove the changed journeys against their actual source revision.
+
+**Authority:** Owner approved this scope and automatic continuation on 2026-10-11. The canonical evidence and decisions are in [owner feedback brief](notes/2026-10-11-admin-owner-feedback.md), committed initially as `f457df86`. This supersedes the unapproved search-only proposal. Existing UI defects and copy/query discrepancies provide a concrete operator failure mode under the stable-core posture.
+
+**Boundaries:** Existing Admin and necessary evaluation-host tooling only. No new billing capabilities, Portal work, new Admin rooms, rebrand, dependency migration, or broad redesign. SEED-004 contributes only established hierarchy/clarity guardrails; its deferred diagnosis/new-room scope remains excluded. SEED-003 informs bounded hygiene. Keep milestone tags local; retain quick tasks without provenance. Start at Phase **245**, preserving completed Phase 244 and its evidence.
+
+**Automation:** The owner's automatic-continuation instruction applies to requirement/roadmap defaults consistent with this scope and discuss→plan→execute work. Preserve concrete human decisions only when a new consequential ambiguity arises; do not repeat approvals for existing scope. Screenshot evidence must identify route/state, theme, viewport, scenario, revision and served assets; missing coverage stays explicit. Bound rendered review to one batched assessment, one correction batch and one confirmation per coherent slice unless a named defect justifies reopening.
 
 <details>
 <summary>Completed v1.65 scope and guardrails</summary>
@@ -721,7 +735,7 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-No active milestone requirements remain. v1.65 requirements are validated and archived in `milestones/v1.65-REQUIREMENTS.md`. All 18 v1.64 requirements remain validated and archived in `milestones/v1.64-REQUIREMENTS.md`.
+v1.66 requirements are defined in [REQUIREMENTS.md](REQUIREMENTS.md): rendered route/state coverage, realistic reproducible preview data, coherent shared filters/search/tables/timestamps, plain destination language, evidence-true states, readable details/recovery metrics and revision-bound acceptance. v1.65 and v1.64 requirements remain validated in their milestone archives.
 
 ### Validated v1.65 (Phase 244 complete 2026-10-10)
 
@@ -1013,4 +1027,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-11 after v1.65 milestone completion; next: `$gsd-new-milestone`.*
+*Last updated: 2026-10-11 at v1.66 milestone opening; owner approved automatic continuation from the committed feedback brief.*

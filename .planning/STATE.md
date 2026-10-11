@@ -1,20 +1,16 @@
 ---
 gsd_state_version: "1.0"
-milestone: v1.65
-milestone_name: Accrue Admin Language & Consistency
-status: Awaiting next milestone
-stopped_at: v1.65 complete and archived — next: $gsd-new-milestone
-last_updated: "2026-10-11T11:30:35.079Z"
+milestone: v1.66
+milestone_name: Admin Usability and Visual Consistency
+status: planning
+last_updated: "2026-10-11T12:37:22.495Z"
 last_activity: 2026-10-11
-last_activity_desc: Milestone v1.65 completed and archived
-state_head: 3e37899252644a52ebd6d2390b63078c3922f76d
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
-  percent: 100
-current_phase: 244
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -31,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 
 ## Current Position
 
-Phase: Milestone v1.65 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-10-11 — Milestone v1.65 completed and archived
+Status: Defining requirements
+Last activity: 2026-10-11 — Milestone v1.66 started
 
 ## Performance Metrics
 
