@@ -60,7 +60,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
       |> Ecto.Changeset.put_change(:status, :dead)
     )
 
-    {:ok, _event} =
+    {:ok, event} =
       Events.record(%{
         type: "customer.updated",
         subject_type: "Customer",
@@ -85,11 +85,12 @@ defmodule AccrueAdmin.DashboardLiveTest do
     |> MeterEvent.failed_changeset(%APIError{message: "x", code: "test", http_status: 400})
     |> TestRepo.update!()
 
-    :ok
+    {:ok, %{event: event}}
   end
 
   test "renders factual recent activity without unsupported health or aggregate claims", %{
-    conn: conn
+    conn: conn,
+    event: event
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
@@ -98,11 +99,11 @@ defmodule AccrueAdmin.DashboardLiveTest do
     # Home presents observable activity and scope-matched destinations only.
     assert html =~ "ax-display"
     assert html =~ "Recent audit activity"
-    assert html =~ "customer.updated"
+    assert html =~ "Customer updated"
     assert html =~ "data-ax-command-palette-trigger"
     assert html =~ Copy.home_customer_search_cta()
     assert html =~ "Open event"
-    assert html =~ "Open event ledger"
+    assert html =~ "View events"
 
     refute html =~ "data-ax-health-verdict"
     refute html =~ "Healthy"
@@ -111,6 +112,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     refute html =~ "At-risk subscriptions"
     assert html =~ ~s(href="/billing/customers")
     assert html =~ ~s(href="/billing/events")
+    assert html =~ ~s(href="/billing/events/#{event.id}")
   end
 
   test "organization Home shows its event and same-scope destinations only", %{conn: conn} do
@@ -118,7 +120,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
     allowed = customer_for_org(org_id)
     foreign = customer_for_org(Ecto.UUID.generate())
 
-    {:ok, _} =
+    {:ok, allowed_event} =
       Events.record(%{
         type: "home.allowed_scope_event",
         subject_type: "Customer",
@@ -145,10 +147,12 @@ defmodule AccrueAdmin.DashboardLiveTest do
       )
 
     assert {:ok, _view, html} = live(conn, "/billing?org=home-org")
-    assert html =~ "home.allowed_scope_event"
+    assert html =~ "Billing event"
     refute html =~ "home.foreign_scope_event"
+    assert html =~ ~s(href="/billing/events/#{allowed_event.id}?org=home-org")
     assert html =~ ~s(href="/billing/customers?org=home-org")
     assert html =~ ~s(href="/billing/events?org=home-org")
+
     assert html =~
              ~r/href="\/billing\?org=home-org"[^>]*class="ax-sidebar-link ax-sidebar-link-active"/
   end

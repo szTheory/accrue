@@ -4,6 +4,9 @@ defmodule AccrueAdmin.Copy.BillingEvent do
   # --- Events index (EventsLive) — prefix billing_events_*
 
   def billing_event_label("customer.updated"), do: "Customer updated"
+  def billing_event_label("customer.local_updated"), do: "Customer record updated locally"
+  def billing_event_label("webhook.received"), do: "Webhook received"
+  def billing_event_label("webhook.replay_requested"), do: "Webhook replay requested"
   def billing_event_label(value) when is_binary(value) and value != "", do: "Billing event"
   def billing_event_label(_value), do: "Event details unavailable"
 
