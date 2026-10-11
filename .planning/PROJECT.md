@@ -51,6 +51,8 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Boundaries:** Existing Admin and necessary evaluation-host tooling only. No new billing capabilities, Portal work, new Admin rooms, rebrand, dependency migration, or broad redesign. SEED-004 contributes only established hierarchy/clarity guardrails; its deferred diagnosis/new-room scope remains excluded. SEED-003 informs bounded hygiene. Keep milestone tags local; retain quick tasks without provenance. Start at Phase **245**, preserving completed Phase 244 and its evidence.
 
+**Phase 245 baseline:** Complete and independently verified 14/14 on 2026-10-11. The isolated ordinary Fake preview has 24 source/asset-bound captures; authenticated browser checks passed 5/5 and focused seed/story checks 11/11. Route/state gaps stay explicit; no production UI refinement is claimed yet. Phase 246 owns collection controls, global search and tables.
+
 **Automation:** The owner's automatic-continuation instruction applies to requirement/roadmap defaults consistent with this scope and discuss→plan→execute work. Preserve concrete human decisions only when a new consequential ambiguity arises; do not repeat approvals for existing scope. Screenshot evidence must identify route/state, theme, viewport, scenario, revision and served assets; missing coverage stays explicit. Bound rendered review to one batched assessment, one correction batch and one confirmation per coherent slice unless a named defect justifies reopening.
 
 <details>
@@ -1027,4 +1029,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-11 at v1.66 milestone opening; owner approved automatic continuation from the committed feedback brief.*
+*Last updated: 2026-10-11 after Phase 245; automatic continuation to Phase 246 remains approved.*

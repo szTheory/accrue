@@ -41,7 +41,7 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
 
 ## Phases
 
-- [ ] **Phase 245: Rendered Baseline and Realistic Preview** - Review every existing Admin route/state against a traceable visual inventory and plausible ordinary data.
+- [x] **Phase 245: Rendered Baseline and Realistic Preview** - Review every existing Admin route/state against a traceable visual inventory and plausible ordinary data. (completed 2026-10-11)
 - [ ] **Phase 246: Collection Controls and Search** - Make collection filtering, table scanning and global search coherent across existing journeys.
 - [ ] **Phase 247: Evidence-True Details and Analytics** - Make timestamps, detail investigation, navigation, statuses and recovery metrics readable without overstating evidence.
 - [ ] **Phase 248: Reproducible Scenarios and Integrated Proof** - Reproduce the agreed evaluation states and trace every accepted finding through executed, revision-bound checks.
@@ -49,6 +49,7 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
 ## Phase Details
 
 ### Phase 245: Rendered Baseline and Realistic Preview
+
 **Goal**: Reviewers can see the actual breadth of existing Admin journeys with plausible ordinary billing data and explicit coverage limits.
 **Depends on**: Nothing (first phase)
 **Requirements**: BASE-01, BASE-02, DEMO-01
@@ -56,19 +57,22 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
   1. A reviewer can find every existing Admin route and materially distinct list, detail and overlay state in a ledger, marked inspected, unavailable or not applicable with a reason.
   2. A reviewer can inspect representative wide/narrow and light/dark captures labeled with route, state, scenario, source revision and served assets; previously unseen pages receive a bounded rendered assessment.
   3. A reviewer can use a plausible ordinary feedback preview whose money, dates, relationships and processing histories agree, while adversarial fixture cases remain available in their test owners.
-**Plans**: 3 plans
+
+**Plans**: 3/3 plans complete
 
 **Wave 1**
-- [ ] 245-01-PLAN.md — Isolated ordinary preview and first mounted capture
+- [x] 245-01-PLAN.md — Isolated ordinary preview and first mounted capture
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 245-02-PLAN.md — Ordinary story integrity and seed protection
+- [x] 245-02-PLAN.md — Ordinary story integrity and seed protection
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 245-03-PLAN.md — Complete route/state inventory and bounded rendered review
+- [x] 245-03-PLAN.md — Complete route/state inventory and bounded rendered review
+
 **UI hint**: yes
 
 ### Phase 246: Collection Controls and Search
+
 **Goal**: Operators can find and scan existing billing records through coherent controls whose visible state matches the results.
 **Depends on**: Phase 245
 **Requirements**: FILTER-01, FILTER-02, FILTER-03, SEARCH-01, TABLE-01
@@ -78,10 +82,12 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
   3. An operator can use general search according to its stated predicates and discover exact relationship constraints under explicitly named controls.
   4. An operator can open global billing search and see one active result across pointer and keyboard use, with truthful loading feedback on narrow and wide screens.
   5. An operator can scan primary identity, significant state, money and dates in responsive tables, then access the exact underlying identifiers when needed.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 247: Evidence-True Details and Analytics
+
 **Goal**: Operators can read, investigate and act on existing details and recovery data with consistent language and exact, appropriately qualified evidence.
 **Depends on**: Phase 246
 **Requirements**: TIME-01, LANG-02, STATE-02, DETAIL-01, DETAIL-02, METRIC-01
@@ -91,10 +97,12 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
   3. An operator can inspect a webhook's identity, observed processing state, replay availability, history and raw payload through clear disclosures and readable controls that preserve exact evidence.
   4. An operator can review existing detail actions and copy metadata while owner scope, confirmation, step-up and accepted-versus-completed outcomes remain accurate.
   5. An operator can compare recovery values by currency, distinguish available/zero/absent data, and tell selected UTC windows from historical coverage and explicitly named help.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 248: Reproducible Scenarios and Integrated Proof
+
 **Goal**: Reviewers can independently reproduce ordinary and exceptional Admin states and verify how each accepted finding was resolved at the tested revision.
 **Depends on**: Phase 247
 **Requirements**: DEMO-02, PROOF-01
@@ -102,6 +110,7 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
   1. A reviewer can select or launch documented ordinary, empty, failure and boundary evaluation states through existing or minimal host-only tooling without an implicit destructive reset of the current preview.
   2. A reviewer can trace every accepted owner finding to its shared or page-specific fix, or a justified disposition, and to executed owning checks.
   3. A reviewer can inspect rendered confirmation of changed surfaces labeled by route/state, theme, viewport, scenario, tested revision and served assets; uncovered states remain explicit.
+
 **Plans**: TBD
 **UI hint**: yes
 
@@ -109,7 +118,7 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 245. Rendered Baseline and Realistic Preview | 0/3 | Ready to execute | - |
+| 245. Rendered Baseline and Realistic Preview | 3/3 | Complete    | 2026-10-11 |
 | 246. Collection Controls and Search | 0/TBD | Not started | - |
 | 247. Evidence-True Details and Analytics | 0/TBD | Not started | - |
 | 248. Reproducible Scenarios and Integrated Proof | 0/TBD | Not started | - |

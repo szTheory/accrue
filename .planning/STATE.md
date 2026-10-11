@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.66
 milestone_name: Admin Usability and Visual Consistency
-current_phase: 245
-current_phase_name: Rendered Baseline and Realistic Preview
-status: executing
-stopped_at: Phase 245 planned and independently verified; automatic execution starts
-last_updated: "2026-10-11T13:00:00.286Z"
+current_phase: 246
+current_phase_name: Collection Controls and Search
+status: planning
+stopped_at: Phase 245 complete, ready to plan Phase 246
+last_updated: "2026-10-11T15:34:26.914Z"
 last_activity: 2026-10-11
-last_activity_desc: Phase 245 execution started
-state_head: 5b404c8480303d1304b3894fb8dd33e0236b32ab
+last_activity_desc: Phase 245 complete, transitioned to Phase 246
+state_head: 945e7f4925caa6b75940665c0a7e0e1f93d5d0da
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_plans: 3
+  percent: 25
 ---
 
 # Project State
@@ -26,22 +26,22 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 245 — Rendered Baseline and Realistic Preview
-**Progress:** [░░░░░░░░░░] 0%
+**Current focus:** Phase 246 — Collection Controls and Search
+**Progress:** [███░░░░░░░] 25%
 **Completed work:** v1.65 is archived under `.planning/milestones/v1.65-*`. Phase 244 has 4/4 plans complete and 4/4 requirements satisfied; verification passed 9/9 with zero unverified behavior. v1.64 is shipped and archived with its closeout evidence retained in `.planning/milestones/`.
 
 ## Current Position
 
-Phase: 245 (Rendered Baseline and Realistic Preview) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 245
-Last activity: 2026-10-11 — Phase 245 execution started
+Phase: 246 — Collection Controls and Search
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-11 — Phase 245 complete, transitioned to Phase 246
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 111
+- Total plans completed: 114
 - Average duration: —
 - Total execution time: —
 
@@ -68,6 +68,7 @@ Last activity: 2026-10-11 — Phase 245 execution started
 | 242 | 7 | - | - |
 | 243 | 3 | - | - |
 | 244 | 4 | - | - |
+| 245 | 3 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -505,7 +506,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-11T12:59:58.586Z
-Stopped at: Phase 245 planned and independently verified; automatic execution starts
+Stopped at: Phase 245 complete, ready to plan Phase 246
 Resume file: .planning/phases/245-rendered-baseline-and-realistic-preview/245-01-PLAN.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
