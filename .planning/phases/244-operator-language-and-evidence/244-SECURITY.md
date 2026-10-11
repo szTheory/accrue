@@ -4,8 +4,8 @@ status: verified
 asvs_level: 1
 block_on: high
 register_authored_at_plan_time: true
-threats_total: 8
-threats_closed: 8
+threats_total: 11
+threats_closed: 11
 threats_open: 0
 verified_source: 332426178e6c6c177efe4b0bd298511fead02256
 ---
@@ -36,3 +36,15 @@ None. No unregistered Summary Threat Flags were reported.
 | Threats found | Closed | Open |
 |---|---|---|
 | 8 | 8 | 0 |
+
+## Gap Closure Security Audit
+
+Incremental independent ASVS1 audit closes T-244-08, T-244-09 and T-244-10; the shared supply-chain row counts once. Final total: 11 distinct threats, 11 closed, 0 open. This was source/test inspection, without additional executed tests. The later WR-02 fix changes pre-dispatch copy only; its focused replay owner ran 16 tests with no failures.
+
+| Threat | Severity | Status | Evidence |
+|---|---|---|---|
+| T-244-08 | high | CLOSED | webhooks_live.ex:186–211 creates href only from already-read owner-scoped detail; :244–255,309–320 retains selected ID separately. webhook_replay_test.exs:383–390,547–585 checks denied/unavailable results have no link or new dispatch. |
+| T-244-09 | medium | CLOSED | webhooks_live.ex:329–420 attaches selected ID and separates pre-read unknown from accepted replay with failed reread; :861–913 retains audit counts/outcomes. webhook_replay_test.exs:437–586 checks mixed outcome identity, state and jobs. |
+| T-244-10 | medium | CLOSED | phase244-operator-evidence.spec.js passes Unicode fixture values as positional execFileSync/System.argv arguments and asserts exact selectable bytes. |
+
+No dependency manifest or lockfile changes across the phase. The final six-case browser proof at 1b62ad78 remains distinct from this source audit. No accepted risks or unregistered threat flags.
