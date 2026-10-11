@@ -51,13 +51,13 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
   3. Where a human-readable event or state label appears, an operator can still find the exact event key and relevant record identifiers and timestamps at the point of investigation. (EVID-01)
   4. Across targeted existing Admin screens, an operator encounters consistent repeated headings and action names, and each link or control accurately describes its destination or effect. (CONS-01)
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 Plans:
 **Wave 1**
 - [x] 244-01-PLAN.md — Confirm mounted candidates and prove Home-to-event label and evidence path.
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 244-02-PLAN.md — Carry shared meaning and exact evidence through event and related activity views.
+- [x] 244-02-PLAN.md — Carry shared meaning and exact evidence through event and related activity views.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 244-03-PLAN.md — Bind outcome and recovery language to durable facts and confirm rendered effects.
@@ -68,7 +68,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 244. Operator Language and Evidence | 1/3 | In Progress | - |
+| 244. Operator Language and Evidence | 2/3 | In Progress | - |
 
 ## Current Position
 

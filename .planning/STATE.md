@@ -5,16 +5,16 @@ milestone_name: Accrue Admin Language & Consistency
 current_phase: 244
 current_phase_name: Operator Language and Evidence
 status: executing
-stopped_at: Completed 244-01-PLAN.md
-last_updated: "2026-10-11T01:06:19.421Z"
+stopped_at: Completed 244-02-PLAN.md
+last_updated: "2026-10-11T01:38:33.886Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 244 execution started
-state_head: 5a0876f939de0bbc57a91f8a09a119e1e2b69891
+state_head: 613f2309023e724d1d70428a2a061b8d073368b2
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 ## Current Position
 
 Phase: 244 (Operator Language and Evidence) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-10-10 — Phase 244 execution started
 
@@ -180,6 +180,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 243 P01 | 144min | 2 tasks | 17 files |
 | Phase 243 P03 | 10min | 2 tasks | 4 files |
 | Phase 244 P01 | 12min | 2 tasks | 11 files |
+| Phase 244 P02 | 29min | 2 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -410,6 +411,9 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 244]: Use explicit labels only for producer-confirmed event keys; keep unknown values neutral and exact evidence in scoped detail.
 - [Phase 244]: Use ISO 8601 for event timestamps so seconds, fractional precision, and UTC offset remain visible.
 - [Phase 244]: Validate served admin assets by comparing their bytes with package and compiled outputs.
+- [Phase 244]: Keep raw event keys and filters exact while using BillingEvent copy for operator-facing labels.
+- [Phase 244]: Keep webhook delivery status, attempt history, and derived ledger events as separate facts.
+- [Phase 244]: Preserve the operator's native disclosure state through LiveView patches using the existing details/summary interaction.
 
 ### Pending Todos
 
@@ -495,8 +499,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T01:06:19.400Z
-Stopped at: Completed 244-01-PLAN.md
+Last session: 2026-10-11T01:38:33.867Z
+Stopped at: Completed 244-02-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
