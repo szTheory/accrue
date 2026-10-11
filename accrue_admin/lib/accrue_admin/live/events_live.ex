@@ -421,14 +421,26 @@ defmodule AccrueAdmin.Live.EventsLive do
   end
 
   defp event_cell(row, mount_path, owner_scope, params) do
-    label = row.type || Copy.billing_events_when_unknown()
+    label = Copy.billing_event_label(row.type)
+    key = row.type
     list_return = scoped_events_return(mount_path, owner_scope, params)
 
     href =
       ScopedPath.build(mount_path, "/events/#{row.id}", owner_scope, %{"return" => list_return})
 
-    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
+    escaped_label = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+
+    key_evidence =
+      if is_binary(key) and key != "" do
+        escaped_key = key |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+        ~s(<small class="ax-muted">#{escaped_key}</small>)
+      else
+        ""
+      end
+
+    Phoenix.HTML.raw(
+      ~s(<a href="#{href}" class="ax-link"><span>#{escaped_label}</span>#{key_evidence}</a>)
+    )
   end
 
   defp scoped_events_return(mount_path, owner_scope, params) do
@@ -467,7 +479,16 @@ defmodule AccrueAdmin.Live.EventsLive do
   defp webhook_source_summary(%{caused_by_webhook_event_id: webhook_id}), do: webhook_id
 
   defp when_summary(row), do: format_datetime(row.inserted_at)
-  defp card_title(row), do: row.type
+
+  defp card_title(row) do
+    label = Copy.billing_event_label(row.type)
+
+    if is_binary(row.type) and row.type != "" do
+      "#{label} (#{row.type})"
+    else
+      label
+    end
+  end
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 

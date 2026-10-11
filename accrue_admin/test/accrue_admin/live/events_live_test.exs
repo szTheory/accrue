@@ -328,8 +328,10 @@ defmodule AccrueAdmin.EventsLiveTest do
 
     assert event_href
     assert URI.decode_query(URI.parse(event_href).query)["org"] == organization_slug
+
     assert URI.decode_query(URI.parse(event_href).query)["return"] ==
              "/billing/events?org=#{organization_slug}"
+
     assert html =~ "invoice.payment_failed.exact_link"
   end
 
@@ -355,15 +357,32 @@ defmodule AccrueAdmin.EventsLiveTest do
         admin_organization_ids: [organization_id]
       )
 
-    assert {:ok, _view, html} = live(conn, "/billing/events?org=#{organization_slug}&type=customer.updated")
+    assert {:ok, _view, html} =
+             live(conn, "/billing/events?org=#{organization_slug}&type=customer.updated")
 
     document = Floki.parse_fragment!(html)
     event_link = Floki.find(document, "a[href^='/billing/events/#{event.id}?']")
 
     assert Floki.text(event_link) =~ "Customer updated"
     assert Floki.text(event_link) =~ "customer.updated"
-    assert Floki.attribute(event_link, "href") |> hd() |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query() |> Map.fetch!("org") == organization_slug
-    assert Floki.attribute(event_link, "href") |> hd() |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query() |> Map.fetch!("type") == "customer.updated"
+
+    event_params =
+      event_link
+      |> Floki.attribute("href")
+      |> hd()
+      |> URI.parse()
+      |> Map.fetch!(:query)
+      |> URI.decode_query()
+
+    return_params =
+      event_params
+      |> Map.fetch!("return")
+      |> URI.parse()
+      |> Map.fetch!(:query)
+      |> URI.decode_query()
+
+    assert event_params["org"] == organization_slug
+    assert return_params["type"] == "customer.updated"
   end
 
   test "summary read failure is announced as unavailable and can be retried", %{conn: conn} do
