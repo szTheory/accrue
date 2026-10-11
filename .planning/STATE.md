@@ -4,17 +4,17 @@ milestone: v1.65
 milestone_name: Accrue Admin Language & Consistency
 current_phase: 244
 current_phase_name: Operator Language and Evidence
-status: executing
-stopped_at: Completed 244-02-PLAN.md
-last_updated: "2026-10-11T01:38:33.886Z"
+status: verifying
+stopped_at: Completed 244-03-PLAN.md
+last_updated: "2026-10-11T02:32:05.981Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 244 execution started
-state_head: 613f2309023e724d1d70428a2a061b8d073368b2
+state_head: 332426178e6c6c177efe4b0bd298511fead02256
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 Phase: 244 (Operator Language and Evidence) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-10 — Phase 244 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -181,6 +181,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 243 P03 | 10min | 2 tasks | 4 files |
 | Phase 244 P01 | 12min | 2 tasks | 11 files |
 | Phase 244 P02 | 29min | 2 tasks | 16 files |
+| Phase 244 P03 | 45min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -414,6 +415,8 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 244]: Keep raw event keys and filters exact while using BillingEvent copy for operator-facing labels.
 - [Phase 244]: Keep webhook delivery status, attempt history, and derived ledger events as separate facts.
 - [Phase 244]: Preserve the operator's native disclosure state through LiveView patches using the existing details/summary interaction.
+- [Phase 244]: Preserved Copy.Locked literals and incumbent mutation, step-up, read, and audit paths; wording now follows observed job and state facts.
+- [Phase 244]: Kept mounted read-outage state explicitly unobserved; focused LiveView tests verify the read-only retry handler.
 
 ### Pending Todos
 
@@ -499,8 +502,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T01:38:33.867Z
-Stopped at: Completed 244-02-PLAN.md
+Last session: 2026-10-11T02:32:05.950Z
+Stopped at: Completed 244-03-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

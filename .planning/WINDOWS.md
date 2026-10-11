@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 9
+open_count: 10
 waived_count: 6
 fixed_count: 20
-total_count: 35
-last_updated: 2026-10-10T21:35:04.328Z
+total_count: 36
+last_updated: 2026-10-11T02:32:19.747Z
 ---
 
 # Broken Windows Ledger
@@ -50,6 +50,7 @@ last_updated: 2026-10-10T21:35:04.328Z
 | 33 | 242 | deviation | accrue_admin/lib/accrue_admin/live/connect_account_live.ex |  | Optimistic-lock races after fee-review reread return stale-review feedback instead of escaping as an error. | fixed |  | 2026-10-10T13:22:18.081Z | 2026-10-10T13:22:22.341Z |
 | 34 | 243 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Ubuntu mint and normal selected visual comparison were unavailable because the committed phase source ref does not exist on origin. | fixed |  | 2026-10-10T18:19:10.468Z | 2026-10-10T20:40:35.186Z |
 | 35 | 243 | deviation | examples/accrue_host/playwright.config.js |  | Generic Playwright preview URL override can route unrelated specs to the feedback preview while global setup prepares the native test database. | fixed | Fixed in f425645f: generic preview URL routing now refuses; the explicit e2e:preview runner accepts only the Phase243 preservation spec and pins test discovery. Custody controls passed 12/12, preservation passed 1/1, generic Phase238 passed 2/2, and authoritative preview state matched before/after. | 2026-10-10T21:23:22.852Z | 2026-10-10T21:35:04.328Z |
+| 36 | 244 | deviation | examples/accrue_host/e2e/phase244-operator-evidence.spec.js |  | Mounted browser read-outage state remained unobserved; focused LiveView tests verify read-retry behavior. | open |  | 2026-10-11T02:32:19.747Z |  |
 
 ````json
 [
@@ -497,6 +498,19 @@ last_updated: 2026-10-10T21:35:04.328Z
     "recorded_at": "2026-10-10T21:23:22.852Z",
     "resolved_at": "2026-10-10T21:35:04.328Z",
     "milestone": "v1.64"
+  },
+  {
+    "id": 36,
+    "kind": "deviation",
+    "phase": "244",
+    "file": "examples/accrue_host/e2e/phase244-operator-evidence.spec.js",
+    "line": null,
+    "description": "Mounted browser read-outage state remained unobserved; focused LiveView tests verify read-retry behavior.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-11T02:32:19.747Z",
+    "resolved_at": null,
+    "milestone": "v1.65"
   }
 ]
 ````
