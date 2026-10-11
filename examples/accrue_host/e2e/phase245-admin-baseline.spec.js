@@ -75,7 +75,8 @@ function routeIdentityMatches(route, requestedURL, finalURL) {
   const requested = new URL(requestedURL, process.env.ACCRUE_HOST_ORDINARY_BASE_URL);
   const final = new URL(finalURL);
   const templatePattern = new RegExp(`^${route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/:[^/]+/g, "[^/]+")}$`);
-  return final.origin === requested.origin && final.search === requested.search && templatePattern.test(final.pathname);
+  return final.origin === requested.origin && final.pathname === requested.pathname &&
+    final.search === requested.search && templatePattern.test(final.pathname);
 }
 
 test("route identity rejects successful redirects, wrong records, and lost query state", () => {
