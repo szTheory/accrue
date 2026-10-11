@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Live.EventsLive do
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
+    IdBadge,
     FilterChipBar,
     PageHeader,
     StatStrip
@@ -437,19 +438,27 @@ defmodule AccrueAdmin.Live.EventsLive do
     href =
       ScopedPath.build(mount_path, "/events/#{row.id}", owner_scope, %{"return" => list_return})
 
-    escaped_label = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    assigns = %{
+      __changed__: %{},
+      href: href,
+      label: label,
+      badge_id: "ax-id-badge-event-type-#{row.id}",
+      event_key: key
+    }
 
-    key_evidence =
-      if is_binary(key) and key != "" do
-        escaped_key = key |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-        ~s(<small class="ax-muted">#{escaped_key}</small>)
-      else
-        ""
-      end
-
-    Phoenix.HTML.raw(
-      ~s(<a href="#{href}" class="ax-link"><span>#{escaped_label}</span>#{key_evidence}</a>)
-    )
+    ~H"""
+    <DataTable.identity_cell>
+      <:primary>
+        <.link href={@href} class="ax-link">
+          <span><%= @label %></span>
+          <small :if={is_binary(@event_key) and @event_key != ""} class="ax-muted"><%= @event_key %></small>
+        </.link>
+      </:primary>
+      <:secondary :if={is_binary(@event_key) and @event_key != ""}>
+        <IdBadge.id_badge id={@badge_id} id_value={@event_key} label="Copy event type" />
+      </:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp scoped_events_return(mount_path, owner_scope, params) do

@@ -11,6 +11,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
+    IdBadge,
     FilterChipBar,
     PageHeader,
     StatStrip
@@ -497,7 +498,20 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
         "return_to" => return_to
       })
 
-    safe_link(href, row.stripe_account_id || row.id)
+    assigns = %{
+      __changed__: %{},
+      href: href,
+      label: row.email || row.stripe_account_id || to_string(row.id),
+      badge_id: "ax-id-badge-connected-account-#{row.id}",
+      id_value: row.stripe_account_id || to_string(row.id)
+    }
+
+    ~H"""
+    <DataTable.identity_cell>
+      <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
+      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy connected account ID" /></:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp stringify_keys(map),
@@ -592,11 +606,6 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       value when is_map(value) -> value
       _ -> %{}
     end
-  end
-
-  defp safe_link(href, label) do
-    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
   end
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")

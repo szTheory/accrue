@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
+    IdBadge,
     FilterChipBar,
     FlashGroup,
     PageHeader,
@@ -916,15 +917,21 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   defp webhook_link(row, mount_path, owner_scope) do
     label = row.processor_event_id || row.id
-    safe_link(scoped_path(mount_path, "/webhooks/#{row.id}", owner_scope), label)
-  end
 
-  defp safe_link(href, label) do
-    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    assigns = %{
+      __changed__: %{},
+      href: scoped_path(mount_path, "/webhooks/#{row.id}", owner_scope),
+      label: humanize(row.type),
+      badge_id: "ax-id-badge-webhook-event-#{row.id}",
+      id_value: to_string(label)
+    }
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-body"><a href="#{href}" class="ax-link">#{escaped}</a></span>)
-    )
+    ~H"""
+    <DataTable.identity_cell>
+      <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
+      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy webhook event ID" /></:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp status_summary(row) do

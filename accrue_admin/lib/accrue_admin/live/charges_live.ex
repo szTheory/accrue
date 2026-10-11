@@ -12,6 +12,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
+    IdBadge,
     FilterChipBar,
     FlashGroup,
     MoneyFormatter,
@@ -263,11 +264,25 @@ defmodule AccrueAdmin.Live.ChargesLive do
   defp payment_identity_cell(row, mount_path, owner_scope) do
     payment_href = scoped_path(mount_path, "/payments/#{row.id}", owner_scope)
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
-    payment_label = row.processor_id || row.id
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{payment_href}" class="ax-link">#{escape(payment_label)}</a><a href="#{customer_href}" class="ax-label ax-muted">#{escape(customer_label(row))}</a></span>)
-    )
+    assigns = %{
+      __changed__: %{},
+      payment_href: payment_href,
+      customer_href: customer_href,
+      customer_label: customer_label(row),
+      badge_id: "ax-id-badge-payment-#{row.id}",
+      payment_id: row.processor_id || to_string(row.id)
+    }
+
+    ~H"""
+    <DataTable.identity_cell>
+      <:primary><.link href={@payment_href} class="ax-link"><%= @customer_label %></.link></:primary>
+      <:secondary>
+        <IdBadge.id_badge id={@badge_id} id_value={@payment_id} label="Copy payment ID" />
+        <.link href={@customer_href} class="ax-label ax-muted">Customer details</.link>
+      </:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
@@ -501,8 +516,6 @@ defmodule AccrueAdmin.Live.ChargesLive do
   defp map_only_scope?(params) do
     params != %{} and Map.keys(params) -- ["org"] == []
   end
-
-  defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

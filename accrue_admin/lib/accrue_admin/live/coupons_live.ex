@@ -11,6 +11,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
+    IdBadge,
     FilterChipBar,
     FlashGroup,
     PageHeader,
@@ -242,16 +243,20 @@ defmodule AccrueAdmin.Live.CouponsLive do
         "return_to" => return_to
       })
 
-    processor_line =
-      if row.processor_id && row.processor_id != label do
-        ~s(<span class="ax-body ax-text-muted ax-type-code-xs">#{escape(row.processor_id)}</span>)
-      else
-        ""
-      end
+    assigns = %{
+      __changed__: %{},
+      href: href,
+      label: label,
+      badge_id: "ax-id-badge-coupon-#{row.id}",
+      id_value: row.processor_id || to_string(row.id)
+    }
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{href}" class="ax-link">#{escape(label)}</a>#{processor_line}</span>)
-    )
+    ~H"""
+    <DataTable.identity_cell>
+      <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
+      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy coupon ID" /></:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp coupon_return_path(mount_path, owner_scope, params) do
@@ -444,8 +449,6 @@ defmodule AccrueAdmin.Live.CouponsLive do
   end
 
   defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
-
-  defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
   defp humanize(value) when is_binary(value) do
     value
