@@ -24,7 +24,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
         })
 
       # Component must render without raising
-      assert html =~ "Open a scoped list"
+      assert html =~ "Choose a customer, invoice, or subscription"
 
       # All four shortcut links should fall back to "#"
       assert html =~ ~s(data-path="#")
@@ -286,9 +286,13 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
 
       # A fresh full query deliberately starts from an empty result map.
       {fresh_results, _} =
-        GlobalSearch.run_group_lookups([:customers], %{customers: [], invoices: [], subscriptions: []}, fn :customers ->
-          {[], nil}
-        end)
+        GlobalSearch.run_group_lookups(
+          [:customers],
+          %{customers: [], invoices: [], subscriptions: []},
+          fn :customers ->
+            {[], nil}
+          end
+        )
 
       assert fresh_results == %{customers: [], invoices: [], subscriptions: []}
     end
@@ -311,6 +315,46 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert html =~ "Up to five results per group"
       refute html =~ "Type customer name, email, or ID"
       refute html =~ "Open invoice queue to $0.00"
+    end
+
+    test "keeps the initial dialog orientation compact and uses the approved billing copy" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ "Choose a customer, invoice, or subscription"
+      refute html =~ "Open a scoped list"
+      refute html =~ "Up to five results per group"
+      assert html =~ "Navigate"
+      assert html =~ "Select"
+      assert html =~ "Close"
+    end
+
+    test "sizes the current loading indicator and makes hidden win in authored CSS" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "ada",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          is_open: true,
+          loading: true
+        })
+
+      css = File.read!("assets/css/app.css")
+
+      assert html =~ ~s(class="ax-spinner ax-spinner-md" hidden={false}) or
+               html =~ ~s(class="ax-spinner ax-spinner-md")
+
+      assert html =~ "Searching billing records"
+      assert css =~ ~r/\.ax-spinner\[hidden\]\s*\{[^}]*display:\s*none/s
+      assert css =~ "@media (prefers-reduced-motion: reduce)"
     end
 
     test "async replies are accepted only for the current query, scope and generation" do
