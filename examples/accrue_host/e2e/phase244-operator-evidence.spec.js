@@ -568,7 +568,10 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
       expect(new URL(eventHref, page.url()).searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
       await eventLink.tap();
       await waitForLiveView(page);
-      const relatedWebhook = page.getByRole("link", { name: new RegExp(`^WebhookEvent ${fixture.webhook_id}`) });
+      const subjectIdField = page
+        .locator("dl.ax-field-list .ax-field")
+        .filter({ has: page.locator("dt.ax-field-label", { hasText: /^Subject ID$/ }) });
+      const relatedWebhook = subjectIdField.getByRole("link", { name: new RegExp(`^WebhookEvent ${fixture.webhook_id}`) });
       await expect(relatedWebhook).toBeVisible();
       await relatedWebhook.tap();
       await waitForLiveView(page);
