@@ -114,13 +114,17 @@ defmodule AccrueAdmin.EventLiveTest do
     assert {:ok, _view, html} =
              live(conn, "/billing/events/#{event.id}?#{origin}")
 
-    assert html =~ "Back to events"
-
     return_href =
       html
       |> Floki.parse_fragment!()
-      |> Floki.attribute("a", "href")
-      |> Enum.find(&String.starts_with?(&1, "/billing/events?"))
+      |> Floki.find("nav[aria-label='Breadcrumb'] a")
+      |> List.first()
+      |> Floki.attribute("href")
+      |> List.first()
+
+    assert html =~ "Events"
+    refute html =~ "Back to events"
+    assert URI.parse(return_href).path == "/billing/events"
 
     assert URI.parse(return_href).query
            |> URI.decode_query()
@@ -410,7 +414,7 @@ defmodule AccrueAdmin.EventLiveTest do
              live(conn, "/billing/events/#{allowed_event.id}?org=allowed-org")
 
     assert allowed_html =~ "invoice.payment_failed.allowed_org"
-    assert allowed_html =~ ~s(href="/billing?org=allowed-org")
+    refute allowed_html =~ ~s(href="/billing?org=allowed-org")
     assert allowed_html =~ ~s(href="/billing/events?org=allowed-org")
 
     assert {:ok, _view, allowed_charge_html} =

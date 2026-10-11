@@ -40,6 +40,28 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ ~s(class="ax-breadcrumbs-current" aria-current="page")
       refute html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
     end
+
+    test "omits parents without a real destination and keeps one scoped parent link" do
+      html =
+        render_component(&Breadcrumbs.breadcrumbs/1, %{
+          items: [
+            %{label: "Unavailable parent", href: nil},
+            %{label: "Invoices", href: "/billing/invoices?org=acme"},
+            %{label: "INV-0001"}
+          ]
+        })
+
+      links =
+        html
+        |> Floki.parse_fragment!()
+        |> Floki.find("nav[aria-label='Breadcrumb'] a")
+
+      assert length(links) == 1
+      assert Floki.attribute(List.first(links), "href") == ["/billing/invoices?org=acme"]
+      assert html =~ ~s(aria-current="page")
+      assert html =~ "INV-0001"
+      refute html =~ "Unavailable parent"
+    end
   end
 
   describe "FlashGroup" do

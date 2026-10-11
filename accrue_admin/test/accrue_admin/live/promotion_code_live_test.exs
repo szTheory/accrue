@@ -262,7 +262,7 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert {:ok, _view, html} =
              live(conn, "/billing/promotion-codes/#{promotion_code.id}?org=allowed-org")
 
-    assert html =~ ~s(href="/billing?org=allowed-org")
+    refute html =~ ~s(href="/billing?org=allowed-org")
     assert html =~ ~s(href="/billing/promotion-codes?org=allowed-org")
   end
 

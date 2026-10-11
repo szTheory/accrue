@@ -100,7 +100,7 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
 
     assert html =~ "this page does not track when Stripe last reported them"
     assert html =~ "Platform fee policy"
-    assert html =~ "Unknown"
+    assert html =~ "Unavailable"
 
     assert has_element?(view, "[data-ax-primary-action]", "Edit platform fee override")
     refute has_element?(view, "form[phx-submit='save_override']")

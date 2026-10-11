@@ -138,7 +138,6 @@ defmodule AccrueAdmin.Live.CouponLive do
         <Breadcrumbs.breadcrumbs
           :if={@coupon}
           items={[
-            %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{
               label: AccrueAdmin.Copy.coupon_breadcrumb_coupons(),
               href: ScopedPath.build(@admin_mount_path, "/coupons", @current_owner_scope)
@@ -313,8 +312,14 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp projection_detail_fields(coupon) do
     [
       %{label: AccrueAdmin.Copy.coupon_detail_label_duration(), value: duration_summary(coupon)},
-      %{label: AccrueAdmin.Copy.coupon_detail_label_currency(), value: coupon.currency || "--"},
-      %{label: AccrueAdmin.Copy.coupon_detail_label_processor(), value: coupon.processor || "--"}
+      %{
+        label: AccrueAdmin.Copy.coupon_detail_label_currency(),
+        value: coupon.currency || "Unavailable"
+      },
+      %{
+        label: AccrueAdmin.Copy.coupon_detail_label_processor(),
+        value: coupon.processor || "Unavailable"
+      }
     ]
   end
 
@@ -373,7 +378,7 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp duration_summary(%{duration: duration}) when is_binary(duration),
     do: String.capitalize(duration)
 
-  defp duration_summary(_coupon), do: "--"
+  defp duration_summary(_coupon), do: "Unavailable"
 
   defp promotion_code_status(%{active: true, expires_at: %DateTime{} = expires_at} = code) do
     assigns = %{

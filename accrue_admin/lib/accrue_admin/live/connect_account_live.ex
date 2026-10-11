@@ -164,11 +164,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         <Breadcrumbs.breadcrumbs
           items={[
             %{
-              label: AccrueAdmin.Copy.dashboard_breadcrumb_home(),
-              href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
-            },
-            %{
-              label: @return_destination.label,
+              label: AccrueAdmin.Copy.connect_account_breadcrumb_connect(),
               href: @return_destination.path
             },
             %{label: @account.stripe_account_id || @account.id}
@@ -177,7 +173,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
 
         <Detail.summary_card
           eyebrow={AccrueAdmin.Copy.connect_account_eyebrow()}
-          title={@account.stripe_account_id}
+          title={@account.stripe_account_id || @account.id}
         >
           <:facts>
             <span><%= @account.type |> humanize() %></span>
@@ -549,7 +545,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
       },
       %{
         label: AccrueAdmin.Copy.connect_account_summary_label_country(),
-        value: account.country || "--"
+        value: account.country || "Unavailable"
       },
       %{
         label: AccrueAdmin.Copy.connect_account_summary_label_charges_enabled(),
@@ -1037,7 +1033,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         AccrueAdmin.Copy.connect_account_readiness_needs_attention()
 
       true ->
-        "Unknown"
+        "Unavailable"
     end
   end
 
@@ -1056,7 +1052,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     case Map.fetch(account.data || %{}, key) do
       {:ok, true} -> AccrueAdmin.Copy.connect_account_enabled_label_true()
       {:ok, false} -> AccrueAdmin.Copy.connect_account_enabled_label_false()
-      _ -> AccrueAdmin.Copy.connect_account_enabled_label_unknown()
+      _ -> "Unavailable"
     end
   end
 
@@ -1080,8 +1076,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     |> Enum.join(" · ")
   end
 
-  defp requirements_summary(_requirements),
-    do: AccrueAdmin.Copy.resource_state_copy(:connect_accounts, :queue_empty).heading
+  defp requirements_summary(_requirements), do: "Unavailable"
 
   defp requirement_list(list) when is_list(list) and list != [],
     do:

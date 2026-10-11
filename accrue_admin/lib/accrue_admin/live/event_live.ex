@@ -137,8 +137,7 @@ defmodule AccrueAdmin.Live.EventLive do
         <Breadcrumbs.breadcrumbs
           :if={@event}
           items={[
-            %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
-            %{label: @return_destination.label, href: @return_destination.path},
+            %{label: "Events", href: @return_destination.path},
             %{label: Copy.billing_event_label(@event.type)}
           ]}
         />

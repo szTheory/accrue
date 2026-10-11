@@ -132,7 +132,6 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
         <Breadcrumbs.breadcrumbs
           :if={@promotion_code}
           items={[
-            %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{
               label: AccrueAdmin.Copy.promotion_codes_breadcrumb_index(),
               href:

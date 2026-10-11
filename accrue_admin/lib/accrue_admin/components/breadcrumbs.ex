@@ -8,6 +8,9 @@ defmodule AccrueAdmin.Components.Breadcrumbs do
   attr(:items, :list, required: true)
 
   def breadcrumbs(assigns) do
+    items = normalize_items(assigns.items)
+    assigns = assign(assigns, :items, items)
+
     ~H"""
     <nav class="ax-breadcrumbs" aria-label="Breadcrumb">
       <ol class="ax-breadcrumbs-list">
@@ -30,4 +33,26 @@ defmodule AccrueAdmin.Components.Breadcrumbs do
     </nav>
     """
   end
+
+  defp normalize_items(items) do
+    labeled_items =
+      Enum.filter(items, fn
+        %{label: label} when is_binary(label) -> String.trim(label) != ""
+        _item -> false
+      end)
+
+    current_item = List.last(labeled_items)
+
+    parents =
+      labeled_items
+      |> Enum.drop(-1)
+      |> Enum.filter(fn item -> valid_href?(item[:href]) end)
+
+    case current_item do
+      nil -> parents
+      item -> parents ++ [Map.delete(item, :href)]
+    end
+  end
+
+  defp valid_href?(href), do: is_binary(href) and String.trim(href) != ""
 end

@@ -239,7 +239,7 @@ defmodule AccrueAdmin.CouponLiveTest do
     assert html =~
              ~s(href="/billing/promotion-codes/#{promotion_code.id}?org=allowed-org&amp;return_to=)
 
-    assert html =~ ~s(href="/billing?org=allowed-org")
+    refute html =~ ~s(href="/billing?org=allowed-org")
     assert html =~ ~s(href="/billing/coupons?org=allowed-org")
   end
 
