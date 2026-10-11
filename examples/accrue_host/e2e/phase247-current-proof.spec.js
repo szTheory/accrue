@@ -46,7 +46,7 @@ const sourceDigests = () => Object.fromEntries(sourceFiles.map((file) => [file, 
 
 async function setTheme(page, theme) {
   const radio = page.getByRole("radio", { name: new RegExp(theme, "i") }).first();
-  if (await radio.count()) await radio.check();
+  if (await radio.count()) await radio.evaluate((button) => button.click());
   else await page.locator("html").evaluate((element, value) => { element.dataset.theme = value; }, theme);
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
 }
@@ -132,7 +132,7 @@ ordinaryTest("@phase247-current-ordinary invoice action review and recovery anal
   if (!password) throw new Error("ordinary proof requires the README-documented local operator credential in process memory");
 
   await page.goto("/users/log-in");
-  const csrf = await page.locator('meta[name="csrf-token"]').getAttribute("content");
+  const csrf = await page.locator("meta[name='csrf-token']").getAttribute("content");
   expect(csrf).toBeTruthy();
   const response = await page.request.post("/users/log-in", { form: {
     _csrf_token: csrf,
