@@ -146,7 +146,7 @@ Each task was committed atomically:
 
 ## Issues Encountered
 
-Earlier capture attempts are preserved under unique `phase246-current-proof-attempt-*` directories and excluded from the canonical 24-image matrix. The final proof directory refuses overwrite and contains only the validated matrix, montage, manifest, and visual review.
+Earlier capture attempts are preserved outside the working tree under `/tmp/accrue-phase246-preserved-capture-attempts/phase246-current-proof-attempt-*` and excluded from the canonical 24-image matrix. The final proof directory refuses overwrite and contains only the validated matrix, montage, manifest, and visual review.
 
 ## Next Phase Readiness
 

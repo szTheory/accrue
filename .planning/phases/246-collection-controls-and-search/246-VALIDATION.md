@@ -2,7 +2,7 @@
 phase: "246"
 slug: "collection-controls-and-search"
 status: validated
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: true
 created: "2026-10-11"
 ---
@@ -88,3 +88,7 @@ Bounded agent inspection of current screenshots establishes visual hierarchy/cra
 | Gaps found | 5 |
 | Resolved | 5 |
 | Escalated | 0 |
+
+## Render Proof Closure
+
+Plan 246-05 closes the current-product render gap with 24 populated mounted captures at 39a52efe, unchanged product sources/assets at 2175cb3f. Ordinary and held-out lanes 2/2 passed; current five owner files 60/0 passed. Validator passed. Agent visual inspection is recorded separately; owner approval is not claimed. Copy feedback is the existing copied state, not a toast.

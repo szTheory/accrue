@@ -46,3 +46,7 @@ No accepted risks.
 ## Sign-Off
 
 All threats have dispositions; mitigations verified; `threats_open: 0`; status verified. Review established source controls at ASVS1, not a new end-to-end security exercise.
+
+## Plan 05 Boundary Recheck
+
+T-246-09 (medium, information disclosure, captured evidence) CLOSED: local Fake fixtures only, login credential remains an unprinted temporary value, traces/storage persistence off; manifest validator rejects secret-bearing keys. T-246-10 (medium, tampering, rendered proof) CLOSED: committed-source hashes checked through git history, current product bytes unchanged, served assets and 24 image digests validated. Repeated T-246-SC remains closed; no dependency changes. Card renderer and 44px CSS delta retains scoped hrefs and escaped exact clipboard values, assigning separate card DOM IDs. Eleven unique authored threats closed; zero blocking threats. Parent source review at 2175cb3f.

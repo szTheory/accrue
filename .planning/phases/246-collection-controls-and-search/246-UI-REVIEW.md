@@ -87,3 +87,7 @@ Code and recorded tests show visible labels/legends, a true checkbox-group legen
 **Registry audit:** skipped; `components.json`/shadcn is not initialized and the approved UI-SPEC lists no third-party registries.
 
 **Recommendation count:** 1 priority evidence follow-up; 1 minor contract-alignment recommendation; 0 blockers.
+
+## Current Render Proof Closure
+
+The previously missing E1 and five late identity consumers now have 24 populated mounted captures in `captures/phase246-current-proof`, from 39a52efe with unchanged final product sources and assets. Two browser lanes passed; manifest validator passed; all 24 full-page images were inspected by the executor. Parent reviewed the montage and source delta. The narrow cards now reuse their identity helper with unique DOM IDs; copy controls meet 44×44 targets. The earlier visual-proof warnings are resolved; original scores and minor contract advisories are retained as historical observations. This does not claim owner acceptance.
