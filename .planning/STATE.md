@@ -5,11 +5,11 @@ milestone_name: Admin Usability and Visual Consistency
 current_phase: 246
 current_phase_name: Collection Controls and Search
 status: planning
-stopped_at: Phase 245 complete, ready to plan Phase 246
-last_updated: "2026-10-11T15:34:26.914Z"
+stopped_at: Phase 246 context gathered; continuing automatically to planning
+last_updated: "2026-10-11T15:36:10.709Z"
 last_activity: 2026-10-11
 last_activity_desc: Phase 245 complete, transitioned to Phase 246
-state_head: 945e7f4925caa6b75940665c0a7e0e1f93d5d0da
+state_head: f858ee0433b8975e257568ca063e88bf664771cb
 progress:
   total_phases: 4
   completed_phases: 1
@@ -505,9 +505,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T12:59:58.586Z
-Stopped at: Phase 245 complete, ready to plan Phase 246
-Resume file: .planning/phases/245-rendered-baseline-and-realistic-preview/245-01-PLAN.md
+Last session: 2026-10-11T15:36:10.675Z
+Stopped at: Phase 246 context gathered; continuing automatically to planning
+Resume file: .planning/phases/246-collection-controls-and-search/246-CONTEXT.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
