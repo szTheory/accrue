@@ -31,7 +31,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 ## Current Position
 
-v1.66 is in planning, starting at Phase 245. The owner-approved scope covers existing Admin routes and necessary evaluation-host tooling. Phase 244 remains archived with v1.65.
+v1.66 has completed Phases 245–246 and is continuing into Phase 247. The owner-approved scope covers existing Admin routes and necessary evaluation-host tooling. Phase 244 remains archived with v1.65.
 
 ## v1.66 — Admin Usability and Visual Consistency
 
@@ -42,7 +42,7 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
 ## Phases
 
 - [x] **Phase 245: Rendered Baseline and Realistic Preview** - Review every existing Admin route/state against a traceable visual inventory and plausible ordinary data. (completed 2026-10-11)
-- [ ] **Phase 246: Collection Controls and Search** - Make collection filtering, table scanning and global search coherent across existing journeys.
+- [x] **Phase 246: Collection Controls and Search** - Make collection filtering, table scanning and global search coherent across existing journeys. (completed 2026-10-11)
 - [ ] **Phase 247: Evidence-True Details and Analytics** - Make timestamps, detail investigation, navigation, statuses and recovery metrics readable without overstating evidence.
 - [ ] **Phase 248: Reproducible Scenarios and Integrated Proof** - Reproduce the agreed evaluation states and trace every accepted finding through executed, revision-bound checks.
 
@@ -83,7 +83,7 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
   4. An operator can open global billing search and see one active result across pointer and keyboard use, with truthful loading feedback on narrow and wide screens.
   5. An operator can scan primary identity, significant state, money and dates in responsive tables, then access the exact underlying identifiers when needed.
 
-**Plans**: TBD
+**Plans**: 5/5 complete (the supplemental identity-gap summary is not an additional plan).
 - [x] 246-05-PLAN.md
 - [x] 246-01-PLAN.md
 - [x] 246-02-PLAN.md
@@ -125,6 +125,6 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 245. Rendered Baseline and Realistic Preview | 3/3 | Complete    | 2026-10-11 |
-| 246. Collection Controls and Search | 5/5 | In Progress | - |
+| 246. Collection Controls and Search | 5/5 | Complete    | 2026-10-11 |
 | 247. Evidence-True Details and Analytics | 0/TBD | Not started | - |
 | 248. Reproducible Scenarios and Integrated Proof | 0/TBD | Not started | - |

@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.66
 milestone_name: Admin Usability and Visual Consistency
-current_phase: 246
-current_phase_name: Collection Controls and Search
-status: verifying
-stopped_at: Completed 246-05-PLAN.md
-last_updated: "2026-10-11T20:25:24.031Z"
+current_phase: 247
+current_phase_name: Evidence-True Details and Analytics
+status: planning
+stopped_at: Phase 246 complete, ready to plan Phase 247
+last_updated: "2026-10-11T20:32:15.500Z"
 last_activity: 2026-10-11
-last_activity_desc: Phase 246 execution started
-state_head: 4a80300f0c0f0636907ad5e47b243a428021c93f
+last_activity_desc: Phase 246 complete, transitioned to Phase 247
+state_head: b341c2133d2037b580de7b941a42b363fe35231c
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
   completed_plans: 8
-  percent: 25
+  percent: 50
 ---
 
 # Project State
@@ -26,22 +26,22 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 246 — Collection Controls and Search
-**Progress:** [███░░░░░░░] 25%
+**Current focus:** Phase 247 — Evidence-True Details and Analytics
+**Progress:** [█████░░░░░] 50%
 **Completed work:** v1.65 is archived under `.planning/milestones/v1.65-*`. Phase 244 has 4/4 plans complete and 4/4 requirements satisfied; verification passed 9/9 with zero unverified behavior. v1.64 is shipped and archived with its closeout evidence retained in `.planning/milestones/`.
 
 ## Current Position
 
-Phase: 246 (Collection Controls and Search) — EXECUTING
-Plan: 4 of 4
-Status: All plans complete — ready for phase verification
-Last activity: 2026-10-11 — Phase 246 execution started
+Phase: 247 — Evidence-True Details and Analytics
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-11 — Phase 246 complete, transitioned to Phase 247
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 114
+- Total plans completed: 120
 - Average duration: —
 - Total execution time: —
 
@@ -69,6 +69,7 @@ Last activity: 2026-10-11 — Phase 246 execution started
 | 243 | 3 | - | - |
 | 244 | 4 | - | - |
 | 245 | 3 | - | - |
+| 246 | 6 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -521,7 +522,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-11T20:25:23.997Z
-Stopped at: Completed 246-05-PLAN.md
+Stopped at: Phase 246 complete, ready to plan Phase 247
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -651,4 +652,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Execute Phase 245 automatically; 3 verified plans cover BASE-01, BASE-02 and DEMO-01. Other milestone requirements are assigned to Phases 246–248.
+- Continue automatically with `$gsd-discuss-phase 247 --auto`, then plan and execute Phase 247. Phases 245–246 are complete; do not repeat them. Phase 246 verification passed 10/10, five actual plans complete, 718 Admin tests green and 24 current-product captures validated. CLI completion counted one supplemental summary as a sixth plan; the roadmap is corrected to 5/5. Its missing-file notices refer to command strings in summary evidence refs, not missing test files.
