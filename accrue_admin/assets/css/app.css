@@ -6883,6 +6883,8 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-2xs);
+  min-inline-size: 44px;
+  min-block-size: 44px;
   max-inline-size: 16ch;
   padding: var(--ax-space-2xs) var(--ax-space-xs);
   border: 1px solid var(--ax-border);

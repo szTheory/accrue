@@ -8,7 +8,10 @@ const { test: heldoutTest } = require("./support/test.js");
 const { login, readFixture, waitForLiveView } = require("./support/fixture.js");
 
 const root = path.resolve(__dirname, "../../..");
-const captureDir = path.join(root, ".planning/phases/246-collection-controls-and-search/captures/phase246-current-proof");
+const defaultCaptureDir = path.join(root, ".planning/phases/246-collection-controls-and-search/captures/phase246-current-proof");
+const captureDir = process.env.PHASE246_CAPTURE_DIR
+  ? path.resolve(root, process.env.PHASE246_CAPTURE_DIR)
+  : defaultCaptureDir;
 const ordinaryBase = "http://accrue-host-phase245-ordinary.localhost/";
 const sources = [
   "accrue_admin/lib/accrue_admin/live/invoices_live.ex",
@@ -73,7 +76,7 @@ async function assertConnected(page, listId) {
 
 async function assertIdentityAndCopy(page, listId) {
   const list = page.locator(`[data-ax-list='${listId}']`);
-  const button = list.locator("[data-clipboard-text]").first();
+  const button = list.locator("[data-clipboard-text]:visible").first();
   await expect(button, `${listId} must have a real identity copy control`).toBeVisible();
   const exactId = await button.getAttribute("data-clipboard-text");
   expect(exactId).toBeTruthy();
@@ -85,12 +88,25 @@ async function assertIdentityAndCopy(page, listId) {
   await button.click();
   await expect(button).toHaveAttribute("data-copied", "true");
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(exactId);
-  const geometry = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
-  expect(geometry.scroll, `${listId} has no horizontal page overflow`).toBeLessThanOrEqual(geometry.width);
-  return { exact_id_visible: true, copied: true, target_height: bbox.height, no_overflow: true };
+  const viewport = page.viewportSize();
+  const targets = {};
+  for (const [width, height, key] of [[1280, 900, "wide"], [320, 820, "narrow"]]) {
+    await page.setViewportSize({ width, height });
+    const responsiveButton = list.locator("[data-clipboard-text]:visible").first();
+    await expect(responsiveButton, `${listId} identity remains visible at ${key} width`).toBeVisible();
+    await expect(responsiveButton.locator("xpath=ancestor::*[contains(@class,'ax-data-table-identity')][1]")).toContainText(exactId);
+    const responsiveBox = await responsiveButton.boundingBox();
+    expect(responsiveBox?.height, `${listId} copy target height at ${key} width`).toBeGreaterThanOrEqual(44);
+    expect(responsiveBox?.width, `${listId} copy target width at ${key} width`).toBeGreaterThanOrEqual(44);
+    targets[key] = { width: responsiveBox.width, height: responsiveBox.height };
+    const geometry = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+    expect(geometry.scroll, `${listId} has no horizontal page overflow at ${key} width`).toBeLessThanOrEqual(geometry.width);
+  }
+  if (viewport) await page.setViewportSize(viewport);
+  return { exact_id_visible: true, copied: true, copied_feedback: "data-copied", targets, no_overflow: true };
 }
 
-async function capture(page, lane, route, scenario, assets) {
+async function capture(page, lane, route, scenario, assets, checks) {
   if (process.env.PHASE246_CAPTURE !== "1") return;
   fs.mkdirSync(captureDir, { recursive: true, mode: 0o700 });
   const file = `${lane}-${scenario}.png`;
@@ -101,7 +117,7 @@ async function capture(page, lane, route, scenario, assets) {
     file, origin_lane: lane, scenario, route, viewport: page.viewportSize(),
     theme: await page.locator("html").getAttribute("data-theme"), source_sha: sourceSha(),
     source_digests: sourceDigests(), browser: { name: "chromium", version: page.context().browser()?.version() },
-    assets, screenshot: { sha256: digest(bytes), bytes: bytes.length }
+    assets, checks, screenshot: { sha256: digest(bytes), bytes: bytes.length }
   };
   const manifestPath = path.join(captureDir, "manifest.json");
   const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, "utf8")) : { phase: "246", captures: [] };
@@ -110,12 +126,12 @@ async function capture(page, lane, route, scenario, assets) {
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, { mode: 0o600, flag: "w" });
 }
 
-async function captureMatrix(page, lane, route, scenario, assets) {
+async function captureMatrix(page, lane, route, scenario, assets, checks = {}) {
   for (const [width, height, size] of [[1280, 900, "wide"], [320, 820, "narrow"]]) {
     await page.setViewportSize({ width, height });
     for (const theme of ["light", "dark"]) {
       await setTheme(page, theme);
-      await capture(page, lane, route, `${scenario}-${size}-${theme}`, assets);
+      await capture(page, lane, route, `${scenario}-${size}-${theme}`, assets, checks);
     }
   }
 }
@@ -141,14 +157,20 @@ ordinaryTest("@phase246-current-ordinary current invoices toolbar and payment/co
     css: await fetchAsset(page, 'link[rel="stylesheet"][href*="/admin/assets/css-"]', "accrue_admin/priv/static/accrue_admin.css"),
     js: await fetchAsset(page, 'script[src*="/admin/assets/js-"]', "accrue_admin/priv/static/accrue_admin.js")
   };
-  await captureMatrix(page, "ordinary", "/admin/invoices", "invoices-toolbar", assets);
+  await captureMatrix(page, "ordinary", "/admin/invoices", "invoices-toolbar", assets, {
+    filter: "paid status selection",
+    url_matches_selection: true,
+    removable_chip: true,
+    result_count_and_rows: true,
+    removed_filter_and_reset: true
+  });
 
   for (const [route, id] of [["/admin/payments", "payments"], ["/admin/coupons", "coupons"], ["/admin/events", "events"]]) {
     await page.goto(route);
     await assertConnected(page, id);
     await expect.poll(() => page.locator(`[data-ax-list='${id}'] [data-clipboard-text]`).count()).toBeGreaterThan(0);
-    await assertIdentityAndCopy(page, id);
-    await captureMatrix(page, "ordinary", route, id, assets);
+    const checks = await assertIdentityAndCopy(page, id);
+    await captureMatrix(page, "ordinary", route, id, assets, checks);
   }
 });
 
@@ -165,11 +187,11 @@ heldoutTest("@phase246-current-heldout current production Connect and webhook id
     await page.goto(route);
     await assertConnected(page, listId);
     await expect.poll(() => page.locator(`[data-ax-list='${listId}'] [data-clipboard-text]`).count()).toBeGreaterThan(0);
-    await assertIdentityAndCopy(page, listId);
+    const checks = await assertIdentityAndCopy(page, listId);
     if (!assets.css) {
       assets.css = await fetchAsset(page, 'link[rel="stylesheet"][href*="/admin/assets/css-"]', "accrue_admin/priv/static/accrue_admin.css");
       assets.js = await fetchAsset(page, 'script[src*="/admin/assets/js-"]', "accrue_admin/priv/static/accrue_admin.js");
     }
-    await captureMatrix(page, "heldout", new URL(route, page.url()).pathname, listId, assets);
+    await captureMatrix(page, "heldout", new URL(route, page.url()).pathname, listId, assets, checks);
   }
 });
