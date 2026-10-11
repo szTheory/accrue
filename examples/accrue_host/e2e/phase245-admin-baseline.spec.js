@@ -386,7 +386,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   console.log("[phase245-capture] supplemental filtered-zero start");
   await page.goto("/admin/customers?q=phase245-no-results-7c92e34a", { timeout: 15_000 });
   await expect(page).toHaveURL(/\/admin\/customers\?q=phase245-no-results-7c92e34a$/);
-  await expect(page.getByRole("heading", { name: "No customers match these filters." })).toBeVisible();
+  await expect(page.getByText("No customers match these filters.", { exact: true })).toBeVisible();
   await expect(page.locator('[data-role="data-table"]')).toHaveAttribute("data-ax-state", "filtered-empty");
   await expect(page.locator("[data-ax-list='customers'] tbody tr")).toHaveCount(0);
   await retainStateCapture({ id: "R02-filtered-zero", route: "/admin/customers", state: "filtered-to-zero", scenario: "ordinary Fake seed; impossible query only; no DB mutation", filename: "22-customers-filtered-zero-wide-light.png", visualAnchor: "Customer collection filtered-zero state and matching query", observation: "A safe impossible q parameter remained in the final URL and rendered the explicit filtered-empty state with zero table rows." });
