@@ -274,10 +274,10 @@ Applicable controls: V2 Authentication and V4 Access Control apply through exist
 |---|-------|---------|---------------|
 | A1 | The Phase 245 ordinary host and browser session will still be available to the executor for mounted testing. | Validation Architecture / Environment Availability | Browser acceptance may need to run through the established CI or host launcher instead of a locally running preview. |
 
-## Open Questions
+## Open Questions — RESOLVED
 
-1. The exact Playwright spec/config that should own the Phase 246 mounted collection/search acceptance is not declared in phase context. Reuse the existing host suite/config that can mount authenticated Admin against the isolated Phase 245 ordinary data; create a narrowly named spec only if no current spec can cover these real interactions.
-2. Counts differ by collection: some queries expose totals, while cursor-backed event paths can carry separate total/current-page/newer counts. Keep labels specific to values actually returned; no new aggregate count query should be added solely for visual symmetry.
+1. **RESOLVED:** `examples/accrue_host/playwright.phase246.config.js` and the four `examples/accrue_host/e2e/phase246-*.spec.js` owners cover authenticated ordinary-preview interactions and write only Phase 246 evidence. The existing `examples/accrue_host/playwright.config.js` plus `e2e/support/fixture.js`/`global-setup.js` supplies the isolated seeded test-host lane for held-out and fault states. Plans 01, 03 and 04 name the commands and distinct roles.
+2. **RESOLVED:** Count labels use only values returned by each page's query owner: matching/filter total when supplied, current visible page separately, and all-results total only when actually available. Cursor-backed Events never turns visible page length into a full total. Plan 01 shared count task and Plan 04 browser assertions enforce this; no aggregate query is added for symmetry.
 
 ## Sources
 
