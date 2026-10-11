@@ -15,9 +15,9 @@
 
 ### Shared collection interactions
 
-- [ ] **FILTER-01**: Operators can distinguish page/view selection from applied constraints through one coherent shared filter region, visible field labels, compact removable chips and a predictable reset action.
-- [ ] **FILTER-02**: Operators can select useful combinations of statuses on existing multi-status journeys, with controls, URL, query and displayed results agreeing, including default invoice and subscription queues.
-- [ ] **FILTER-03**: Operators can use a general search whose stated capabilities match its predicates, with exact relationship filters discoverable and explicitly named instead of duplicate search-like fields.
+- [x] **FILTER-01**: Operators can distinguish page/view selection from applied constraints through one coherent shared filter region, visible field labels, compact removable chips and a predictable reset action.
+- [x] **FILTER-02**: Operators can select useful combinations of statuses on existing multi-status journeys, with controls, URL, query and displayed results agreeing, including default invoice and subscription queues.
+- [x] **FILTER-03**: Operators can use a general search whose stated capabilities match its predicates, with exact relationship filters discoverable and explicitly named instead of duplicate search-like fields.
 - [ ] **SEARCH-01**: Operators can open and use a compact global billing search dialog with one unambiguous active result across mouse and keyboard, truthful loading visibility and usable narrow/wide composition.
 
 ### Shared reading and investigation
@@ -53,9 +53,9 @@ New billing/provider capabilities, Portal work, new Admin rooms, diagnosis produ
 | BASE-01 | Phase 245 | Complete |
 | BASE-02 | Phase 245 | Complete |
 | DEMO-01 | Phase 245 | Complete |
-| FILTER-01 | Phase 246 | Pending |
-| FILTER-02 | Phase 246 | Pending |
-| FILTER-03 | Phase 246 | Pending |
+| FILTER-01 | Phase 246 | Complete |
+| FILTER-02 | Phase 246 | Complete |
+| FILTER-03 | Phase 246 | Complete |
 | SEARCH-01 | Phase 246 | Pending |
 | TABLE-01 | Phase 246 | Pending |
 | TIME-01 | Phase 247 | Pending |

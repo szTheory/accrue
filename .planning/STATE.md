@@ -5,16 +5,16 @@ milestone_name: Admin Usability and Visual Consistency
 current_phase: 246
 current_phase_name: Collection Controls and Search
 status: executing
-stopped_at: Completed 246-01-PLAN.md
-last_updated: "2026-10-11T16:36:35.677Z"
+stopped_at: Completed 246-02-PLAN.md
+last_updated: "2026-10-11T16:56:33.418Z"
 last_activity: 2026-10-11
 last_activity_desc: Phase 246 execution started
-state_head: 1d83fc1db9030ab69e83cb188521ab332d24f278
+state_head: 97fecbbd6587401cc76da982cf8afa510a96691e
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 7
-  completed_plans: 4
+  completed_plans: 5
   percent: 25
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 ## Current Position
 
 Phase: 246 (Collection Controls and Search) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-10-11 — Phase 246 execution started
 
@@ -184,6 +184,7 @@ Last activity: 2026-10-11 — Phase 246 execution started
 | Phase 244 P03 | 45min | 2 tasks | 8 files |
 | Phase 244 P04 | 25m | 2 tasks | 5 files |
 | Phase 246 P01 | 19m | 2 tasks | 10 files |
+| Phase 246 P02 | 18m | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -423,6 +424,9 @@ Last activity: 2026-10-11 — Phase 246 execution started
 - [Phase 244]: Adversarial browser values are positional fixture data and use existing schema-supported text fields.
 - [Phase 246]: Invoice view selection is navigation, while only active constraints render as removable chips.
 - [Phase 246]: Clearing all invoice statuses selects the All view; reset preserves the chosen view and owner scope.
+- [Phase 246]: Keep subscription status OR predicates and normalize selections to a stable bounded URL order.
+- [Phase 246]: Keep exact customer, coupon, and webhook relationships separate from broad q search.
+- [Phase 246]: Preserve custom Connect account types as editable values instead of imposing a fixed enum.
 
 ### Pending Todos
 
@@ -508,8 +512,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T16:36:35.630Z
-Stopped at: Completed 246-01-PLAN.md
+Last session: 2026-10-11T16:56:33.378Z
+Stopped at: Completed 246-02-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

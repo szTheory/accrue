@@ -85,7 +85,7 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
 
 **Plans**: TBD
 - [x] 246-01-PLAN.md
-- [ ] 246-02-PLAN.md
+- [x] 246-02-PLAN.md
 - [ ] 246-03-PLAN.md
 - [ ] 246-04-PLAN.md
 
@@ -124,6 +124,6 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 245. Rendered Baseline and Realistic Preview | 3/3 | Complete    | 2026-10-11 |
-| 246. Collection Controls and Search | 1/4 | In Progress | - |
+| 246. Collection Controls and Search | 2/4 | In Progress | - |
 | 247. Evidence-True Details and Analytics | 0/TBD | Not started | - |
 | 248. Reproducible Scenarios and Integrated Proof | 0/TBD | Not started | - |
