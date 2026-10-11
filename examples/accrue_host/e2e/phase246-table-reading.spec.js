@@ -123,6 +123,7 @@ heldoutTest("@phase246-heldout table state fixtures retain identity, order, and 
         ? "#phase246-state-table tbody > tr[data-row-id] .ax-data-table-identity"
         : "#phase246-state-table .ax-data-table-card-header .ax-data-table-identity";
       const identity = page.locator(identitySelector).first();
+      await expect(page.locator("#phase246-state-table .ax-data-table-cards .ax-data-table-identity")).toHaveCount(1);
       await expect(identity).toContainText("Zoë 世界");
       await expect(page.locator(identitySelector + " [data-clipboard-text='cus_" + "unbroken".repeat(18) + "']").first()).toBeVisible();
       const geometry = await page.evaluate(() => ({
