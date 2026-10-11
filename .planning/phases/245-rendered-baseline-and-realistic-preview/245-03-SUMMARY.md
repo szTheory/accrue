@@ -59,13 +59,13 @@ plan_head_after: 5ed89ad44721daccd1d89d6818b7ba22c13c5830
 
 ## Verification
 
-- `npm --prefix examples/accrue_host run e2e -- --config=playwright.phase245.config.js e2e/phase245-admin-baseline.spec.js --project=chromium-desktop --workers=1` — **4/4 passed in 49.1s** on the final clean-source capture run.
+- `npm --prefix examples/accrue_host run e2e -- --config=playwright.phase245.config.js e2e/phase245-admin-baseline.spec.js --project=chromium-desktop --workers=1` — **5/5 passed in 49.6s** on the final clean-source capture run.
 - `node scripts/ci/verify_phase245_baseline.mjs --coverage .planning/phases/245-rendered-baseline-and-realistic-preview/245-COVERAGE.md --manifest .planning/phases/245-rendered-baseline-and-realistic-preview/captures/manifest.json --findings .planning/phases/245-rendered-baseline-and-realistic-preview/245-FINDINGS.md` — **passed** after reconciliation. `--self-test` and `--routes-only` also passed.
-- The final clean capture manifest revision is `e90e1436`; `source_dirty: false`, with per-capture source digests and 24 PNG hashes. It was captured after the capture-owner source commit and after the ordinary seed custody check passed.
+- The final clean capture manifest revision is `a8d39ea4`; `source_dirty: false`, with per-capture source digests and 24 PNG hashes. It was captured after the capture-owner source commit and after the ordinary seed custody check passed.
 
 ## Commits
 
-The measured plan range contains 25 commits (`plan_head_before` through `plan_head_after`). It includes the initial route/capture ledger, review fixes, capture-owner checks and the fresh baseline. The clean rendered capture was committed at `655cec36`; source digest verification was committed at `e90e1436`; this evidence reconciliation is `5ed89ad4`.
+The measured plan range contains 25 commits (`plan_head_before` through `plan_head_after`). It includes the initial route/capture ledger, review fixes, capture-owner checks and the fresh baseline. The clean rendered capture was committed at `655cec36`; source digest verification was committed at `a8d39ea4`; this evidence reconciliation is `5ed89ad4`.
 
 ## Decisions and limits
 
@@ -79,3 +79,5 @@ All 13 owner feedback sections now retain concrete downstream questions and shar
 - Task commits `c020a84f`, `dd89ff78`, `2902bea6`, and `95061b36` are present in the current branch history.
 - The provenance/finding verifier, `--self-test` (stale digest, wrong route, duplicate owner topic, generic gap negatives), and `--routes-only` passed after the final route/state and owner ledger reconciliation.
 - The 25-commit count was measured from `9aea54bdbdb136c8e76161c6844bfb48e169ad06` to `5ed89ad44721daccd1d89d6818b7ba22c13c5830`.
+
+Final capture safeguard follow-up: source `a8d39ea4` independently checks the Fake processor before bulk capture; positive/negative guard test and authenticated suite passed (5/5, 49.6s). Refreshed evidence is committed in `da24ebf7`.
