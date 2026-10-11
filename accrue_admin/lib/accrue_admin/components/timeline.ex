@@ -31,7 +31,7 @@ defmodule AccrueAdmin.Components.Timeline do
             <p :if={Map.get(item, :body)} class="ax-body"><%= Map.get(item, :body) %></p>
 
             <details :if={Map.get(item, :details)} class="ax-timeline-details" open={Map.get(item, :expanded, false)}>
-              <summary>Inspect details</summary>
+              <summary><%= Map.get(item, :details_label, "Inspect details") %></summary>
               <pre><%= Map.get(item, :details) %></pre>
             </details>
 

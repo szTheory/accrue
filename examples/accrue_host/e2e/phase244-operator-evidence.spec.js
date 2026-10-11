@@ -38,6 +38,31 @@ function seedCustomerUpdatedEvent(fixture) {
   return output.split(/\s+/).at(-1);
 }
 
+function seedRelatedWebhookEvent(fixture) {
+  const script = `
+    alias Accrue.Events.Event
+    alias Accrue.Repo
+    event = Repo.insert!(%Event{
+      type: "customer.updated",
+      schema_version: 1,
+      actor_type: "webhook",
+      actor_id: "phase244-webhook-evidence",
+      subject_type: "Customer",
+      subject_id: "${fixture.admin_denial_customer_id}",
+      caused_by_webhook_event_id: "${fixture.webhook_id}",
+      data: %{},
+      inserted_at: ~U[2026-10-10 23:59:59.123456Z]
+    })
+    IO.write(event.id)
+  `;
+  const output = execFileSync("mix", ["run", "-e", script], {
+    cwd: path.join(repoRoot, "examples/accrue_host"),
+    encoding: "utf8",
+    env: { ...process.env, MIX_ENV: "test" }
+  }).trim();
+  return output.split(/\s+/).at(-1);
+}
+
 async function captureAdminAssets(page) {
   const entries = [
     ["css", 'link[rel="stylesheet"][href*="/admin/assets/css-"]', "accrue_admin/priv/static/accrue_admin.css"],
@@ -103,5 +128,153 @@ test("Phase 244 customer update retains exact scoped event evidence @phase244-de
   await testInfo.attach("phase244-asset-evidence.json", {
     body: Buffer.from(JSON.stringify(evidence, null, 2)),
     contentType: "application/json"
+  });
+});
+
+async function assertRelatedWebhookEvidence(page, fixture, sandboxId, testInfo, activation) {
+  const eventId = seedRelatedWebhookEvent(fixture);
+  expect(eventId).toMatch(/^\d+$/);
+
+  await login(page, fixture, fixture.admin_email, sandboxId);
+  await page.goto("/app/billing");
+  await waitForLiveView(page);
+  await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
+  await waitForLiveView(page);
+  const webhookRoute = `/admin/webhooks/${fixture.webhook_id}?${orgQuery(fixture)}`;
+  await page.goto(webhookRoute, { waitUntil: "domcontentloaded" });
+  await waitForLiveView(page);
+
+  await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();
+  await expect(page.locator("dd.ax-summary-list-value").filter({ hasText: /^Dead$/ })).toBeVisible();
+
+  const activity = page.locator("details[data-ax-lazy-activity]").first();
+  const summary = activity.locator("summary.ax-detail-section-head");
+  await expect(summary).toBeVisible();
+  if (activation === "keyboard") {
+    await summary.focus();
+    await expect(summary).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(summary).toBeFocused();
+  } else {
+    await summary.tap();
+  }
+  await expect(activity).toHaveAttribute("open", "");
+  await expect(activity.locator("section[aria-label='Webhook attempt history']")).toBeVisible();
+  await expect(activity.locator("section[aria-label='Derived events']")).toBeVisible();
+
+  const attempts = activity.locator("section[aria-label='Webhook attempt history']");
+  const derived = activity.locator("section[aria-label='Derived events']");
+  const eventItem = derived.locator(".ax-timeline-item").filter({ hasText: `event #${eventId}` });
+  await expect(eventItem).toBeVisible();
+  await expect(eventItem.locator(".ax-label")).toHaveText("Customer updated");
+  await expect(attempts).toContainText("Discarded");
+  await expect(page.locator("dd.ax-summary-list-value").filter({ hasText: /^Dead$/ })).toBeVisible();
+
+  const evidence = eventItem.locator("details.ax-timeline-details");
+  const evidenceSummary = evidence.locator("summary");
+  await expect(evidenceSummary).toHaveText("Inspect event evidence");
+  if (activation === "keyboard") {
+    await evidenceSummary.focus();
+    await expect(evidenceSummary).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(evidenceSummary).toBeFocused();
+  } else {
+    await evidenceSummary.tap();
+  }
+  await expect(evidence).toHaveAttribute("open", "");
+
+  const evidenceText = evidence.locator("pre");
+  await expect(evidenceText).toContainText("Stored event key: customer.updated");
+  await expect(evidenceText).toContainText(`Event ID: ${eventId}`);
+  await expect(evidenceText).toContainText(`Actor ID: phase244-webhook-evidence`);
+  await expect(evidenceText).toContainText(`Subject: Customer ${fixture.admin_denial_customer_id}`);
+  await expect(evidenceText).toContainText(`Webhook delivery ID: ${fixture.webhook_id}`);
+  await expect(evidenceText).toContainText("Recorded: 2026-10-10T23:59:59.123456Z");
+  await evidenceText.selectText();
+  const selectedText = await page.evaluate(() => window.getSelection()?.toString() || "");
+  expect(selectedText).toContain(fixture.webhook_id);
+  expect(selectedText).toContain("2026-10-10T23:59:59.123456Z");
+
+  const dimensions = await page.evaluate(() => ({
+    viewport: document.documentElement.clientWidth,
+    document: document.documentElement.scrollWidth,
+    evidence: document.querySelector("[aria-label='Derived events'] .ax-timeline-details pre")?.getBoundingClientRect().width
+  }));
+  expect(dimensions.document, `horizontal overflow at ${dimensions.viewport}px`).toBeLessThanOrEqual(dimensions.viewport);
+  expect(dimensions.evidence).toBeGreaterThan(0);
+
+  const themeEvidence = [];
+  for (const theme of ["light", "dark"]) {
+    await page.locator("html").evaluate((element, value) => element.setAttribute("data-theme", value), theme);
+    const computed = await page.locator("html").evaluate((element) => ({
+      theme: element.getAttribute("data-theme"),
+      canvas: getComputedStyle(element).getPropertyValue("--ax-base").trim(),
+      primary: getComputedStyle(element).getPropertyValue("--ax-primary").trim()
+    }));
+    expect(computed.theme).toBe(theme);
+    expect(computed.canvas).toBeTruthy();
+    expect(computed.primary).toBeTruthy();
+    await expect(evidenceText).toContainText(`Webhook delivery ID: ${fixture.webhook_id}`);
+    themeEvidence.push(computed);
+  }
+
+  if (activation === "keyboard") {
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    await expect(summary).toBeFocused();
+  } else {
+    await summary.tap();
+  }
+  await expect(activity).not.toHaveAttribute("open", "");
+  await page.locator("details[data-ax-lazy-json] summary").click();
+  await expect(activity).not.toHaveAttribute("open", "");
+  if (activation === "keyboard") {
+    await summary.focus();
+    await page.keyboard.press("Enter");
+  } else {
+    await summary.tap();
+  }
+  await expect(activity).toHaveAttribute("open", "");
+
+  const assets = await captureAdminAssets(page);
+  const eventLink = eventItem.getByRole("link", { name: "Open event" });
+  const eventHref = await eventLink.getAttribute("href");
+  expect(new URL(eventHref, page.url()).pathname).toBe(`/admin/events/${eventId}`);
+  expect(new URL(eventHref, page.url()).searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
+  await eventLink.click();
+  await waitForLiveView(page);
+  await expect(page).toHaveURL(new RegExp(`/admin/events/${eventId}\\?org=`));
+  await expect(page.getByText("customer.updated", { exact: true }).first()).toBeVisible();
+  const sourceWebhook = page.getByRole("link", { name: new RegExp(`^Source webhook ${fixture.webhook_id}`) });
+  await expect(sourceWebhook).toBeVisible();
+  expect(new URL(await sourceWebhook.getAttribute("href"), page.url()).pathname).toBe(`/admin/webhooks/${fixture.webhook_id}`);
+  expect(new URL(await sourceWebhook.getAttribute("href"), page.url()).searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
+
+  const proof = {
+    checkoutHead: execFileSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).trim(),
+    ownerSpecSha256: sha256(fs.readFileSync(__filename)),
+    fixture: "disposable HOST-BROWSER-VERIFY01 fixture; one customer.updated event linked to the existing scoped webhook; no delivery mutation",
+    webhookRoute: new URL(webhookRoute, page.url()).href,
+    eventRoute: page.url(),
+    viewport: page.viewportSize(),
+    themes: themeEvidence,
+    assets
+  };
+  console.log(`[phase244-webhook-evidence] ${JSON.stringify(proof)}`);
+  await testInfo.attach("phase244-webhook-evidence.json", {
+    body: Buffer.from(JSON.stringify(proof, null, 2)),
+    contentType: "application/json"
+  });
+}
+
+test("Phase 244 webhook activity exposes exact related event evidence @phase244-desktop", async ({ page, sandboxId }, testInfo) => {
+  await assertRelatedWebhookEvidence(page, readFixture(), sandboxId, testInfo, "keyboard");
+});
+
+test.describe("Phase 244 webhook activity on touch viewport", () => {
+  test.use({ viewport: { width: 320, height: 800 }, isMobile: true, hasTouch: true });
+
+  test("Phase 244 webhook activity disclosure works by touch @phase244-mobile", async ({ page, sandboxId }, testInfo) => {
+    await assertRelatedWebhookEvidence(page, readFixture(), sandboxId, testInfo, "touch");
   });
 });

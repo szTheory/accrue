@@ -208,6 +208,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "Dead"
 
     html = render_click(element(view, "[data-ax-lazy-activity]"))
+
     event_item =
       html
       |> Floki.parse_fragment!()
@@ -221,11 +222,12 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert Floki.text(event_item) =~ "Stored event key: customer.updated"
     assert Floki.text(event_item) =~ "Event ID: #{event.id}"
     assert Floki.text(event_item) =~ "Webhook delivery ID: #{webhook.id}"
+    assert Floki.text(event_item) =~ "Recorded: #{DateTime.to_iso8601(event.inserted_at)}"
 
     event_link =
       Floki.find(event_item, "a.ax-timeline-link")
 
-    assert Floki.text(event_link) == "Open event"
+    assert Floki.text(event_link) |> String.trim() == "Open event"
     assert Floki.attribute(event_link, "href") == ["/billing/events/#{event.id}"]
     assert html =~ "Attempt 3/25"
     assert html =~ "Dead"

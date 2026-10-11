@@ -1852,6 +1852,18 @@ a.ax-kpi-card--linked:focus-visible {
   line-height: var(--ax-leading-relaxed);
 }
 
+.ax-timeline-details {
+  min-width: 0;
+}
+
+.ax-timeline-details pre {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .ax-timeline-meta {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: 0.875rem;

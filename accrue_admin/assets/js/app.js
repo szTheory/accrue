@@ -8,6 +8,7 @@ import { CommandPalette } from "./hooks/command_palette";
 import { ConnectionState } from "./hooks/connection_state";
 import { FocusTrap } from "./hooks/focus_trap";
 import { Overlay } from "./hooks/overlay";
+import { PreserveDisclosure } from "./hooks/preserve_disclosure";
 import { initScrollLockReconciler } from "./hooks/scroll_lock";
 import topbar from "../vendor/topbar.js";
 
@@ -47,7 +48,7 @@ ready(() => {
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");
 const liveSocket = new LiveSocket("/live", Socket, {
   params: csrfToken ? { _csrf_token: csrfToken } : {},
-  hooks: { CommandPalette, ConnectionState, FocusTrap, Overlay, Clipboard }
+  hooks: { CommandPalette, ConnectionState, FocusTrap, Overlay, Clipboard, PreserveDisclosure }
 });
 
 liveSocket.connect();

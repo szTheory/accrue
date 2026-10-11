@@ -274,7 +274,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
           <RelatedResources.related_resources items={@related_items} />
         </div>
 
-        <details :if={@webhook} class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+        <details :if={@webhook} id={"webhook-activity-#{@webhook.id}"} class="ax-detail-section" data-ax-lazy-activity phx-hook="PreserveDisclosure" phx-click="load_activity">
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title">Activity</span>
           </summary>
@@ -811,23 +811,33 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp derived_event_timeline(events, mount_path, owner_scope) do
     Enum.map(events, fn event ->
       %{
-        title: event.type,
+        title: Copy.billing_event_label(event.type),
         at: format_datetime(event.inserted_at),
         body: "#{event.subject_type} #{event.subject_id}",
-        status: event.actor_type,
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate),
-        meta:
-          "event ##{event.id} · #{events_path(mount_path, event.caused_by_webhook_event_id, owner_scope)}"
+        details_label: "Inspect event evidence",
+        details: event_evidence(event),
+        meta: "Actor: #{event.actor_type || "Unavailable"} · event ##{event.id}",
+        href: ScopedPath.build(mount_path, "/events/#{event.id}", owner_scope),
+        href_label: "Open event"
       }
     end)
   end
 
-  defp events_path(mount_path, webhook_id, owner_scope) do
-    "linked in " <>
-      scoped_mount_path(mount_path, "/events", owner_scope, %{
-        "source_webhook_event_id" => webhook_id
-      })
+  defp event_evidence(event) do
+    [
+      "Stored event key: #{event.type || "Unavailable"}",
+      "Event ID: #{event.id || "Unavailable"}",
+      "Actor ID: #{event.actor_id || "Unavailable"}",
+      "Subject: #{event.subject_type || "Unavailable"} #{event.subject_id || "Unavailable"}",
+      "Webhook delivery ID: #{event.caused_by_webhook_event_id || "Unavailable"}",
+      "Recorded: #{exact_datetime(event.inserted_at)}"
+    ]
+    |> Enum.join("\n")
   end
+
+  defp exact_datetime(%DateTime{} = value), do: DateTime.to_iso8601(value)
+  defp exact_datetime(_value), do: "Unavailable"
 
   defp scoped_mount_path(
          mount_path,
