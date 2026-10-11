@@ -74,7 +74,14 @@ function assertOrdinaryComposeIdentity() {
 function assertNoSecrets(value, location = "capture") {
   if (!value || typeof value !== "object") return;
   for (const [key, nested] of Object.entries(value)) {
-    expect(key, `${location} must omit credentials and session material`).not.toMatch(/password|secret|token|cookie|authorization|headers?/i);
+    if (location.endsWith(".source_digests")) {
+      expect(key, "source digest keys are repository source paths").toMatch(/^(?:accrue_admin|examples\/accrue_host|scripts\/ci)\//);
+      expect(key.split("/"), "source digest paths stay inside the repository").not.toContain("..");
+      expect(fs.statSync(path.join(repoRoot, key)).isFile(), "source digest path names an existing file").toBe(true);
+      expect(nested, "source digest value is a SHA-256 hash").toMatch(/^[a-f0-9]{64}$/);
+    } else {
+      expect(key, `${location} must omit credentials and session material`).not.toMatch(/password|secret|token|cookie|authorization|headers?/i);
+    }
     assertNoSecrets(nested, `${location}.${key}`);
   }
 }
@@ -93,6 +100,12 @@ test("route identity rejects successful redirects, wrong records, and lost query
   expect(routeIdentityMatches("/admin/invoices/:id", "/admin/invoices/123", `${origin}/admin/invoices/456`)).toBe(false);
   expect(routeIdentityMatches("/admin/invoices", "/admin/invoices?view=all", `${origin}/admin/invoices`)).toBe(false);
   expect(routeIdentityMatches("/admin/invoices", "/admin/invoices", `${origin}/users/log-in`)).toBe(false);
+});
+
+test("manifest guard accepts source filenames and rejects session metadata", () => {
+  expect(() => assertNoSecrets({ captures: [{ source_digests: { "accrue_admin/lib/accrue_admin/components/page_header.ex": "a".repeat(64) } }] })).not.toThrow();
+  expect(() => assertNoSecrets({ captures: [{ headers: { authorization: "redacted" } }] })).toThrow();
+  expect(() => assertNoSecrets({ captures: [{ source_digests: { "examples/accrue_host/../../.env": "a".repeat(64) } }] })).toThrow();
 });
 
 function compiledAssetBytes(assetName) {
