@@ -220,7 +220,7 @@ Coverage records are deterministically sorted by route then state ID. `inspected
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/customers",
       "visual_anchor": "Admin shell plus route-owned collection table",
       "status": "inspected",
-      "evidence": "manifest capture C02; PNG SHA-256 113c0ee1fb96e4272964f1ef787b07d578607373ec55915d4add85a99109fdb1"
+      "evidence": "manifest capture C02; PNG SHA-256 1e41180a6354690f198e8b0515a67358fc36c165535fa78afe911760f4708dc9"
     },
     {
       "id": "R03-populated",
@@ -292,7 +292,7 @@ Coverage records are deterministically sorted by route then state ID. `inspected
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/events/1",
       "visual_anchor": "Admin shell plus record detail and history",
       "status": "inspected",
-      "evidence": "manifest capture C16; PNG SHA-256 b431ca161d88b40bbf6056e20520bfe1d4bbd78a4fca285b540c3e38b83fdf3e"
+      "evidence": "manifest capture C16; PNG SHA-256 2cf65173adeb3092590525a890572397fc47d03e592aff5d0c40b50b1b0edf76"
     },
     {
       "id": "R06-populated",

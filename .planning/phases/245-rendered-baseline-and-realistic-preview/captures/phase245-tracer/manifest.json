@@ -1,8 +1,8 @@
 {
   "phase": "245-rendered-baseline-and-realistic-preview",
   "capture": "authenticated invoice detail rendered from the isolated ordinary Fake preview",
-  "captured_at": "2026-10-11T13:17:21.755Z",
-  "source_revision": "c9184ef6ba9f1240583d79719f3cf1a310ff191f",
+  "captured_at": "2026-10-11T14:12:45.506Z",
+  "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
   "source_digests": {
     "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "4fdf3dd0df97fd73195e38972cbf1e016b696024fa5949081fd0b5db012416f8",
     "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "04df8cd5a622f8c483682198c2a37cb1c21f4c28487081ce04118c872554df92",
@@ -17,7 +17,7 @@
     "examples/accrue_host/priv/repo/seeds/ordinary.exs": "5431bf708b514a967c2e60b6d298c65804b34bd356be88694876141feeaf8684",
     "examples/accrue_host/priv/repo/seeds/hero_accounts.exs": "bbc624bed1d8af5cd00cf54f3f25ff20a62805ae3a0edfa13d5c041134de2b9c",
     "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
-    "examples/accrue_host/priv/repo/seeds/showcase.exs": "de78abfbffa974c6e6883f67949319862e4823ea3023621bdb88c85828308a73"
+    "examples/accrue_host/priv/repo/seeds/showcase.exs": "b62be9d9e82a7e8fd3033a7b06342d4057ac92f883526190112bf506849b1fbf"
   },
   "scenario": "ordinary paid USD invoice linked to the healthy demo customer's active subscription",
   "route": "/admin/invoices/7459e7dd-64dc-415e-bcd0-35cde248dbc9",
@@ -41,6 +41,7 @@
     "css": {
       "path": "/admin/assets/css-6ebaf9c9f37c09482f27a19c7df02b0b",
       "bytes": 129964,
+      "requested_by_document": true,
       "package": "b40ac1dc7bb6a09ac7bccedb10ac1856ea9cbad212d69ce11db054a22807b952",
       "compiled": "b40ac1dc7bb6a09ac7bccedb10ac1856ea9cbad212d69ce11db054a22807b952",
       "served": "b40ac1dc7bb6a09ac7bccedb10ac1856ea9cbad212d69ce11db054a22807b952"
@@ -48,6 +49,7 @@
     "js": {
       "path": "/admin/assets/js-bda4f3f51aa85229e5eae0b9ebef2ea7",
       "bytes": 161648,
+      "requested_by_document": true,
       "package": "e228bac9b978a658b37e96b9aa833fe6e8a87358447d00d93e616f55f5667c26",
       "compiled": "e228bac9b978a658b37e96b9aa833fe6e8a87358447d00d93e616f55f5667c26",
       "served": "e228bac9b978a658b37e96b9aa833fe6e8a87358447d00d93e616f55f5667c26"
