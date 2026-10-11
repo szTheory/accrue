@@ -9,7 +9,7 @@ export const Clipboard = {
       const text = this.el.dataset.clipboardText || "";
 
       if (!navigator.clipboard?.writeText) {
-        this.el.dispatchEvent(new CustomEvent("clipboard:failed", { bubbles: true }));
+        this.el.dispatchEvent(new CustomEvent("clipboard:failed", { bubbles: true, detail: { text } }));
         return;
       }
       try {
@@ -17,7 +17,7 @@ export const Clipboard = {
         this.el.dataset.copied = "true";
         this.el.dispatchEvent(new CustomEvent("clipboard:copied", { bubbles: true }));
       } catch {
-        this.el.dispatchEvent(new CustomEvent("clipboard:failed", { bubbles: true }));
+        this.el.dispatchEvent(new CustomEvent("clipboard:failed", { bubbles: true, detail: { text } }));
       }
     });
   }

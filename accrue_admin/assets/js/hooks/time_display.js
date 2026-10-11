@@ -21,7 +21,12 @@ export const TimeDisplay = {
   mounted() {
     this.renderTimestamp();
     this.onCopied = () => this.setStatus("Timestamp copied.");
-    this.onCopyFailed = () => this.setStatus("Copy unavailable. Select the timestamp to copy it manually.");
+    this.onCopyFailed = (event) => {
+      const text = event.detail?.text;
+      this.setStatus(text
+        ? `Clipboard unavailable. Select and copy: ${text}`
+        : "Clipboard unavailable. Select and copy the timestamp manually.");
+    };
     this.el.addEventListener("clipboard:copied", this.onCopied);
     this.el.addEventListener("clipboard:failed", this.onCopyFailed);
   },

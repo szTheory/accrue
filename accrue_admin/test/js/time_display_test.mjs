@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { formatTimestamp, TimeDisplay } from "../../assets/js/hooks/time_display.js";
+import { Clipboard } from "../../assets/js/hooks/clipboard.js";
 
 test("formats instants in an explicit browser timezone without altering the source ISO", () => {
   const iso = "2026-10-11T15:04:05.123456Z";
@@ -40,12 +41,41 @@ test("hook formats a mounted timestamp and removes status listeners on destroy",
   assert.notEqual(zone.textContent, "UTC");
   listeners.get("clipboard:copied")();
   assert.equal(status.textContent, "Timestamp copied.");
+  listeners.get("clipboard:failed")({ detail: { text: el.dataset.iso } });
+  assert.equal(status.textContent, `Clipboard unavailable. Select and copy: ${el.dataset.iso}`);
   hook.destroyed();
   assert.equal(listeners.size, 0);
 });
 
-test("copy failure provides a manual-copy instruction", () => {
+test("copy failure provides the exact original value for manual copy", () => {
   const status = { textContent: "" };
-  TimeDisplay.setStatus.call({ el: { querySelector: () => status } }, "Copy unavailable. Select the timestamp to copy it manually.");
-  assert.match(status.textContent, /manually/);
+  TimeDisplay.setStatus.call({ el: { querySelector: () => status } }, "Clipboard unavailable. Select and copy: 2026-10-11T15:04:05.123456Z");
+  assert.equal(status.textContent, "Clipboard unavailable. Select and copy: 2026-10-11T15:04:05.123456Z");
+});
+
+test("Clipboard failure event carries the untouched ISO value", async () => {
+  const priorNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+  const listeners = new Map();
+  const events = [];
+  const iso = "2026-10-11T15:04:05.123456Z";
+  const el = {
+    dataset: { clipboardText: iso },
+    addEventListener(type, listener) { listeners.set(type, listener); },
+    dispatchEvent(event) { events.push(event); }
+  };
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: { clipboard: { writeText: async () => { throw new Error("denied"); } } }
+  });
+
+  try {
+    Clipboard.mounted.call({ el });
+    await listeners.get("click")();
+    assert.equal(events.at(-1).type, "clipboard:failed");
+    assert.equal(events.at(-1).detail.text, iso);
+    assert.equal(el.dataset.copied, undefined);
+  } finally {
+    if (priorNavigator) Object.defineProperty(globalThis, "navigator", priorNavigator);
+    else delete globalThis.navigator;
+  }
 });
