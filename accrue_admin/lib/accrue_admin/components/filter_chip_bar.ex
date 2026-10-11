@@ -31,7 +31,7 @@ defmodule AccrueAdmin.Components.FilterChipBar do
         <p class="ax-body"><%= @label %></p>
       </header>
 
-      <div :if={@has_items} class="ax-filter-chip-content">
+      <div :if={@has_items || !is_nil(@result_count)} class="ax-filter-chip-content">
         <div class="ax-filter-chip-list" data-ax-filter-chips>
           <.chip :for={item <- @active_items} item={item} />
         </div>
@@ -52,7 +52,7 @@ defmodule AccrueAdmin.Components.FilterChipBar do
         </div>
       </div>
 
-      <p :if={!@has_items} class="ax-body ax-filter-chip-empty"><%= @empty_label %></p>
+      <p :if={!@has_items && is_nil(@result_count)} class="ax-body ax-filter-chip-empty"><%= @empty_label %></p>
     </section>
     """
   end
@@ -87,7 +87,7 @@ defmodule AccrueAdmin.Components.FilterChipBar do
         data-phase191-focus="filter-chip-clear"
         aria-label={"Remove #{chip_accessible_label(@item)} filter"}
       >
-        Clear
+        ×
       </a>
     </span>
     """

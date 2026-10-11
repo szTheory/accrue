@@ -449,9 +449,17 @@ defmodule AccrueAdmin.InvoicesLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/invoices?status=open,uncollectible")
 
-    # FilterChipBar renders queue chip (cobalt) and All chip (slate)
-    assert html =~ "ax-filter-chip-cobalt"
-    assert html =~ "ax-filter-chip-slate"
+    # The selected queue view is separate from applied-filter chips.
+    assert html =~ ~s(data-ax-view-nav)
+    assert html =~ ~s(aria-current="page")
+
+    assert length(
+             Floki.find(
+               Floki.parse_document!(html),
+               "[data-ax-filter-chips] [data-filter='status_queue']"
+             )
+           ) == 0
+
     assert html =~ "?view=all"
   end
 
@@ -461,9 +469,19 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     # ?view=all must not redirect — the sentinel prevents a push_patch loop
     assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
 
-    # All chip is active (slate) — not the queue chip (cobalt)
-    assert html =~ "ax-filter-chip-slate"
-    refute html =~ "ax-filter-chip-cobalt"
+    # All is selected in the view navigation, not represented as a chip.
+    assert html =~ ~s(data-ax-view-nav)
+
+    assert length(
+             Floki.find(Floki.parse_document!(html), "[data-ax-view-nav] a[aria-current='page']")
+           ) == 1
+
+    assert length(
+             Floki.find(
+               Floki.parse_document!(html),
+               "[data-ax-filter-chips] [data-filter='view_all']"
+             )
+           ) == 0
   end
 
   test "renders Invoices through PageHeader with exactly one h1", %{conn: conn} do
@@ -502,7 +520,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
 
     assert length(Floki.find(document, "[data-ax-result-count]")) == 1
     assert length(Floki.find(document, "[data-role='row-count']")) == 0
-    assert length(Floki.find(document, "[data-ax-clear-all]")) == 1
+    assert length(Floki.find(document, "[data-ax-clear-all]")) == 0
     assert length(Floki.find(document, "[data-role='clear-filters']")) == 0
   end
 
@@ -534,7 +552,8 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert length(Floki.find(document, "[data-role='row-count']")) == 0
   end
 
-  test "invoice view is separate from labeled constraints and remove links retain scope and query", %{conn: conn} do
+  test "invoice view is separate from labeled constraints and remove links retain scope and query",
+       %{conn: conn} do
     conn =
       conn
       |> Phoenix.ConnTest.init_test_session(
@@ -545,11 +564,18 @@ defmodule AccrueAdmin.InvoicesLiveTest do
       )
 
     assert {:ok, _view, html} =
-             live(conn, "/billing/invoices?org=allowed-org&view=all&status=open&q=Atelier+Caf%C3%A9")
+             live(
+               conn,
+               "/billing/invoices?org=allowed-org&view=all&status=open&q=Atelier+Caf%C3%A9"
+             )
 
     document = Floki.parse_document!(html)
 
-    assert length(Floki.find(document, "label[for='invoices-status']")) == 1
+    assert Floki.text(Floki.find(document, "fieldset[data-filter-group='status'] legend")) ==
+             "Status"
+
+    assert length(Floki.find(document, "label[for='invoices-filter-q']")) == 1
+    assert length(Floki.find(document, "details.ax-data-table-filter-disclosure")) == 1
     assert length(Floki.find(document, "[data-ax-view-nav] a[aria-current='page']")) == 1
     refute Floki.find(document, "[data-ax-filter-chips] [data-filter='view_all']") != []
     assert Floki.text(Floki.find(document, "[data-ax-filter-chips]")) =~ "Atelier Café"
@@ -557,7 +583,12 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     remove_links = Floki.find(document, "[data-ax-filter-chips] a[aria-label^='Remove']")
     assert Enum.any?(remove_links, &(Floki.attribute(&1, "href") |> hd() =~ "org=allowed-org"))
     assert Enum.any?(remove_links, &(Floki.attribute(&1, "href") |> hd() =~ "view=all"))
-    assert Enum.any?(remove_links, &(Floki.attribute(&1, "href") |> hd() =~ "q=Atelier+Caf%C3%A9"))
+
+    assert Enum.any?(
+             remove_links,
+             &(Floki.attribute(&1, "href") |> hd() =~ "q=Atelier+Caf%C3%A9")
+           )
+
     assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-clear-all]")) == 1
   end
 
@@ -581,10 +612,15 @@ defmodule AccrueAdmin.InvoicesLiveTest do
              )
 
     assert html =~ ~s(data-ax-clear-all)
-    assert html =~ ~s(href="/billing/invoices?org=allowed-org&amp;view=all")
-    refute html =~ "status=open"
-    refute html =~ "collection_method=send_invoice"
-    refute html =~ "phase197_state=loading-skeleton"
+
+    clear_href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("[data-ax-clear-all]")
+      |> Floki.attribute("href")
+      |> hd()
+
+    assert clear_href == "/billing/invoices?org=allowed-org&status=open%2Cuncollectible"
   end
 
   test "distinguishes invoice populated, first-run-empty, filtered-empty, queue-empty, and loading states",

@@ -187,6 +187,14 @@ defmodule AccrueAdmin.Live.InvoicesLive do
               aria-label="Invoice filters, view, and results"
               data-ax-page-filter-toolbar
             >
+              <nav class="ax-invoice-view-nav" aria-label="Invoice view" data-ax-view-nav>
+                <.link patch={invoice_view_href(@params, @table_path, :queue)} aria-current={if invoice_view(@params) == :queue, do: "page"}>
+                  <%= Copy.invoices_list_default_lens_label() %>
+                </.link>
+                <.link patch={invoice_view_href(@params, @table_path, :all)} aria-current={if invoice_view(@params) == :all, do: "page"}>
+                  <%= Copy.invoices_list_all_lens_label() %>
+                </.link>
+              </nav>
               <DataTable.filter_toolbar
                 id="invoices"
                 filter_fields={invoice_filter_fields()}
@@ -351,13 +359,16 @@ defmodule AccrueAdmin.Live.InvoicesLive do
       },
       %{
         id: :customer_id,
+        secondary: true,
         label: Copy.invoices_filter_customer_id(),
         placeholder: Copy.invoices_filter_customer_id()
       },
       %{
         id: :collection_method,
         label: Copy.invoices_filter_collection(),
-        type: :segmented,
+        type: :select,
+        secondary: true,
+        all_label: "All collection methods",
         options: [
           {"", "All"},
           {"charge_automatically", Copy.invoices_filter_collection_automatic()},
@@ -405,8 +416,6 @@ defmodule AccrueAdmin.Live.InvoicesLive do
 
   defp work_queue_chips(params, table_path) do
     queue_active = Map.get(params, "status") == @default_queue_status
-    all_active = Map.get(params, "view") == "all"
-    clear_href = clear_all_href(params, table_path)
 
     filter_chips =
       params
@@ -419,26 +428,33 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           value: filter_chip_value(key, value),
           tone: :slate,
           active: true,
-          remove_href: AccrueAdmin.DataTableNav.merge_query(table_path, %{key => nil})
+          remove_href: remove_filter_href(params, table_path, key)
         }
       end)
 
-    [
-      %{
-        id: :status_queue,
-        label: Copy.invoices_list_default_lens_label(),
-        tone: :cobalt,
-        active: queue_active,
-        remove_href: if(queue_active, do: clear_href)
-      },
-      %{
-        id: :view_all,
-        label: Copy.invoices_list_all_lens_label(),
-        tone: :slate,
-        active: queue_active or all_active,
-        href: if(queue_active, do: clear_href)
-      }
-    ] ++ filter_chips
+    filter_chips
+  end
+
+  defp invoice_view(params), do: if(Map.get(params, "view") == "all", do: :all, else: :queue)
+
+  defp invoice_view_href(params, table_path, :queue) do
+    params
+    |> Map.put("status", @default_queue_status)
+    |> Map.delete("view")
+    |> then(&AccrueAdmin.DataTableNav.merge_query(table_path, &1))
+  end
+
+  defp invoice_view_href(params, table_path, :all) do
+    params
+    |> Map.put("view", "all")
+    |> Map.delete("status")
+    |> then(&AccrueAdmin.DataTableNav.merge_query(table_path, &1))
+  end
+
+  defp remove_filter_href(params, table_path, key) do
+    params
+    |> Map.put(key, nil)
+    |> then(&AccrueAdmin.DataTableNav.merge_query(table_path, &1))
   end
 
   defp filter_chip_label("q"), do: Copy.invoices_filter_search()
@@ -457,19 +473,42 @@ defmodule AccrueAdmin.Live.InvoicesLive do
 
   defp filter_chip_value(_key, value), do: value
 
-  defp clear_all_href(_params, table_path) do
-    AccrueAdmin.DataTableNav.merge_query(table_path, %{
-      "view" => "all",
-      "q" => nil,
-      "status" => nil,
-      "customer_id" => nil,
-      "collection_method" => nil,
-      "cursor" => nil,
-      "phase197_state" => nil
-    })
+  defp clear_all_href(params, table_path) do
+    base =
+      params
+      |> Map.take(["view"])
+      |> then(fn
+        %{"view" => "all"} = view -> view
+        _ -> %{"status" => @default_queue_status}
+      end)
+
+    AccrueAdmin.DataTableNav.merge_query(
+      table_path,
+      Map.merge(base, %{
+        "q" => nil,
+        "status" => nil,
+        "customer_id" => nil,
+        "collection_method" => nil,
+        "cursor" => nil,
+        "phase197_state" => nil
+      })
+      |> then(fn clean -> Map.merge(clean, base) end)
+    )
   end
 
-  defp filter_active?(params), do: filter_params(params) != %{}
+  defp filter_active?(params) do
+    params
+    |> filter_params()
+    |> Map.delete("view")
+    |> then(fn filters ->
+      if Map.get(filters, "status") == @default_queue_status do
+        Map.delete(filters, "status")
+      else
+        filters
+      end
+    end)
+    |> Kernel.!=(%{})
+  end
 
   defp active_clear_all_href(params, table_path) do
     if filter_active?(params), do: clear_all_href(params, table_path)

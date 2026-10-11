@@ -685,6 +685,34 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ ~s(href="/billing/subscriptions?view=all&amp;org=acme")
   end
 
+  test "keeps secondary categorical filters in an explicit disclosure with visible labels" do
+    html =
+      render_component(&DataTable.filter_toolbar/1, %{
+        id: "invoices",
+        path: "/billing/invoices?org=acme",
+        filter_params: %{"q" => "Atelier Café", "collection_method" => "send_invoice"},
+        filter_fields: [
+          %{id: :q, label: "Search invoices", placeholder: "Search invoices"},
+          %{
+            id: :collection_method,
+            label: "Collection method",
+            type: :select,
+            secondary: true,
+            options: [{"send_invoice", "Email invoice"}]
+          }
+        ]
+      })
+
+    assert html =~ ~s(<label for="invoices-filter-q" class="ax-label">Search invoices</label>)
+    assert html =~ ~s(<details class="ax-data-table-filter-disclosure">)
+    assert html =~ "Filters"
+
+    assert html =~
+             ~s(<select id="invoices-filter-collection_method" name="collection_method" class="ax-select")
+
+    assert html =~ ~s(<option value="send_invoice" selected>)
+  end
+
   test "renders card mode fields and contextual selection controls", %{conn: conn} do
     {:ok, view, html} =
       live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})

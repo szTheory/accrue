@@ -577,6 +577,7 @@ defmodule AccrueAdmin.Components.DataTable do
   attr(:clear_filters_patch, :string, default: nil)
   attr(:clear_visible, :any, default: nil)
   attr(:preserve_params, :map, default: %{})
+  attr(:secondary_label, :string, default: "Filters")
 
   def filter_toolbar(assigns) do
     assigns =
@@ -593,6 +594,14 @@ defmodule AccrueAdmin.Components.DataTable do
           _ -> any_filter_active?(assigns.filter_params)
         end
       )
+      |> assign(
+        :primary_filter_fields,
+        Enum.reject(assigns.filter_fields, &Map.get(&1, :secondary, false))
+      )
+      |> assign(
+        :secondary_filter_fields,
+        Enum.filter(assigns.filter_fields, &Map.get(&1, :secondary, false))
+      )
 
     ~H"""
     <form
@@ -603,13 +612,13 @@ defmodule AccrueAdmin.Components.DataTable do
       data-phase191-focus="filter-form"
     >
       <div
-        :for={field <- @filter_fields}
+        :for={field <- @primary_filter_fields}
         class={["ax-data-table-filter", filter_field_class(field)]}
       >
         <label
           :if={Map.get(field, :type) != :checkbox_group}
           for={field_id(@id, field)}
-          class={if(Map.get(field, :visible_label, false), do: "ax-label", else: "ax-visually-hidden")}
+          class="ax-label"
         ><%= field_label(field) %></label>
         <.filter_input
           id={field_id(@id, field)}
@@ -618,6 +627,15 @@ defmodule AccrueAdmin.Components.DataTable do
           focus_key={field_param(field)}
         />
       </div>
+      <details :if={@secondary_filter_fields != []} class="ax-data-table-filter-disclosure">
+        <summary><%= @secondary_label %></summary>
+        <div class="ax-data-table-filter-secondary">
+          <div :for={field <- @secondary_filter_fields} class={["ax-data-table-filter", filter_field_class(field)]}>
+            <label :if={Map.get(field, :type) != :checkbox_group} for={field_id(@id, field)} class="ax-label"><%= field_label(field) %></label>
+            <.filter_input id={field_id(@id, field)} field={field} value={Map.get(@filter_params, field_param(field))} focus_key={field_param(field)} />
+          </div>
+        </div>
+      </details>
       <div :for={{key, value} <- @filter_params} :if={!field_defined?(@filter_fields, key)}>
         <input type="hidden" name={key} value={value} />
       </div>
