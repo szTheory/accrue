@@ -5,16 +5,16 @@ milestone_name: Admin Usability and Visual Consistency
 current_phase: 247
 current_phase_name: Evidence-True Details and Analytics
 status: executing
-stopped_at: Phase 247 context gathered
-last_updated: "2026-10-11T21:05:47.799Z"
+stopped_at: Completed 247-01-PLAN.md
+last_updated: "2026-10-11T21:19:04.261Z"
 last_activity: 2026-10-11
-last_activity_desc: Phase 246 complete, transitioned to Phase 247
-state_head: 19972a8cf9eaf2a8fd1d259be565593cf3f656e9
+last_activity_desc: Phase 247 execution started
+state_head: 483d5d3cba30836db185239f0dd7eb8b5133863d
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 16
-  completed_plans: 8
+  completed_plans: 9
   percent: 50
 ---
 
@@ -32,10 +32,10 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 
 ## Current Position
 
-Phase: 247 (Evidence-True Details and Analytics) — READY TO EXECUTE
-Plan: Not started
+Phase: 247 (Evidence-True Details and Analytics) — EXECUTING
+Plan: 2 of 8
 Status: Ready to execute
-Last activity: 2026-10-11 — Phase 246 complete, transitioned to Phase 247
+Last activity: 2026-10-11 — Phase 247 execution started
 
 ## Performance Metrics
 
@@ -189,6 +189,7 @@ Last activity: 2026-10-11 — Phase 246 complete, transitioned to Phase 247
 | Phase 246 P03 | 53min | 2 tasks | 15 files |
 | Phase 246 P04 | 56min | 3 tasks | 23 files |
 | Phase 246 P05 | 73min | 2 tasks | 45 files |
+| Phase 247 P01 | 10min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -436,6 +437,8 @@ Last activity: 2026-10-11 — Phase 246 complete, transitioned to Phase 247
 - [Phase 246]: Remove only allowlisted Phase 191 Fake stress fixtures during ordinary preview normalization; preserve ordinary showcase and linked billing data.
 - [Phase 246]: Use shared identity cells with exact copy actions and keep responsive cards from repeating their default title field.
 - [Phase 246]: Keep Phase 247 status, fee, and time semantics unchanged in the remaining shared-table consumers.
+- [Phase 247]: Webhook received_at renders in explicit UTC before browser Intl formatting shows the resolved IANA timezone.
+- [Phase 247]: Timestamp copy preserves the original ISO string independently from the formatted display.
 
 ### Pending Todos
 
@@ -521,9 +524,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T20:37:21.745Z
-Stopped at: Phase 247 context gathered
-Resume file: .planning/phases/247-evidence-true-details-and-analytics/247-CONTEXT.md
+Last session: 2026-10-11T21:19:04.206Z
+Stopped at: Completed 247-01-PLAN.md
+Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
