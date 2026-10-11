@@ -11,7 +11,7 @@ if (baseURL !== expectedBaseURL) {
 
 module.exports = defineConfig({
   testDir: "./e2e",
-  testMatch: ["phase246-invoice-filters.spec.js", "phase246-collection-filters.spec.js", "phase246-global-search.spec.js", "phase246-table-reading.spec.js"],
+  testMatch: ["phase246-invoice-filters.spec.js", "phase246-collection-filters.spec.js", "phase246-global-search.spec.js", "phase246-table-reading.spec.js", "phase246-current-proof.spec.js"],
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
