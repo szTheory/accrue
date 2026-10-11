@@ -170,11 +170,35 @@ ordinaryTest("@phase247-current-ordinary invoice action review and recovery anal
   await waitForLiveView(page);
   await expect(page.locator("[data-ax-recovery-hero], [data-ax-recovery-work-queue]").first()).toBeVisible();
   await expect(page.locator("[data-ax-recovery-supporting-funnel]")).toBeVisible();
+  const recoveryLayout = {};
+  for (const [width, height, key, expectedGroups, expectedCards] of [
+    [1280, 900, "wide", 1, 2],
+    [320, 820, "narrow", 1, 1]
+  ]) {
+    await page.setViewportSize({ width, height });
+    const geometry = await page.evaluate(() => {
+      const groups = document.querySelector("[data-ax-recovery-hero]");
+      const pair = groups?.querySelector("[data-ax-currency-pair]");
+      const tracks = (element) => element ? getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/).filter(Boolean).length : 0;
+      return {
+        groupColumns: tracks(groups),
+        pairColumns: tracks(pair),
+        viewportWidth: document.documentElement.clientWidth,
+        pageWidth: document.documentElement.scrollWidth
+      };
+    });
+    expect(geometry.groupColumns, `${key} recovery currency groups`).toBe(expectedGroups);
+    expect(geometry.pairColumns, `${key} recovery metric pair`).toBe(expectedCards);
+    expect(geometry.pageWidth, `${key} recovery has no horizontal page overflow`).toBeLessThanOrEqual(geometry.viewportWidth);
+    recoveryLayout[key] = geometry;
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
   const assets = await fetchAssets(page);
   await captureMatrix(page, "ordinary", "/admin/analytics/recovery", "payment-recovery", assets, {
     route_connected: true,
     currency_states: await page.locator("[data-ax-currency-pair]").count(),
-    coverage_visible: await page.getByText(/coverage/i).count() > 0
+    coverage_visible: await page.getByText(/coverage/i).count() > 0,
+    recovery_layout: recoveryLayout
   });
 });
 
