@@ -258,7 +258,6 @@ defmodule AccrueAdmin.Live.CustomerLive do
       <section class="ax-page ax-customer-detail-page">
         <Breadcrumbs.breadcrumbs
           items={[
-            %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope)},
             %{
               label: "Customers",
               href: scoped_mount_path(@admin_mount_path, "/customers", @current_owner_scope)
@@ -273,9 +272,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
         <Detail.summary_card eyebrow="Customer detail" title={customer_label(@customer)}>
           <:facts>
             <span><strong>Owner</strong> <%= owner_summary(@customer) %></span>
-            <span><strong>Processor customer ID</strong> <%= @customer.processor_id || "Not shown" %></span>
-            <span>locale <%= @customer.preferred_locale || "--" %></span>
-            <span>timezone <%= @customer.preferred_timezone || "--" %></span>
+            <span><strong>Processor customer ID</strong> <%= @customer.processor_id || "Unavailable" %></span>
+            <span>locale <%= @customer.preferred_locale || "Unavailable" %></span>
+            <span>timezone <%= @customer.preferred_timezone || "Unavailable" %></span>
           </:facts>
         </Detail.summary_card>
 
@@ -536,10 +535,11 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp summary_rows(customer, payment_methods, tax_risk, entitlements_view, counts) do
     [
       %{label: "Owner", value: owner_summary(customer)},
-      %{label: "Processor customer ID", value: customer.processor_id || "-"},
+      %{label: "Processor customer ID", value: customer.processor_id || "Unavailable"},
       %{
         label: "Locale / timezone",
-        value: "#{customer.preferred_locale || "--"} / #{customer.preferred_timezone || "--"}"
+        value:
+          "#{customer.preferred_locale || "Unavailable"} / #{customer.preferred_timezone || "Unavailable"}"
       },
       %{
         label: "Default payment method",

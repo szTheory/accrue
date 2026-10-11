@@ -194,10 +194,6 @@ defmodule AccrueAdmin.Live.ChargeLive do
         <Breadcrumbs.breadcrumbs
           items={[
             %{
-              label: "Dashboard",
-              href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
-            },
-            %{
               label: "Payments",
               href: ScopedPath.build(@admin_mount_path, "/payments", @current_owner_scope)
             },
@@ -849,7 +845,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   defp provider_created_at(%{data: %{"created" => created}}) when is_integer(created),
     do: to_string(created)
 
-  defp provider_created_at(_charge), do: "unknown"
+  defp provider_created_at(_charge), do: "Unavailable"
 
   defp charge_money_signal(charge, breakdown) do
     [
@@ -952,7 +948,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   defp status_badge("processing"), do: :processing
   defp status_badge(_), do: :info
 
-  defp platform_fee_summary(nil, _currency), do: "platform fee unavailable"
+  defp platform_fee_summary(nil, _currency), do: "Platform fee unavailable"
 
   defp platform_fee_summary(amount_minor, currency),
     do: money_text(amount_minor, currency) <> " platform fee"
@@ -1005,7 +1001,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
     MoneyFormatter.format_money(amount_minor, currency)
   end
 
-  defp money_text(_amount_minor, _currency), do: "--"
+  defp money_text(_amount_minor, _currency), do: "Unavailable"
 
   defp refund_copy(action, charge) do
     amount = money_text(action.amount_minor, charge.currency)

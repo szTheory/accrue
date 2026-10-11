@@ -264,12 +264,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         phx-window-keydown="step_up_escape"
         phx-key="escape"
       >
-          <Breadcrumbs.breadcrumbs
+        <Breadcrumbs.breadcrumbs
           items={[
-            %{
-              label: Copy.dashboard_breadcrumb_home(),
-              href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
-            },
             %{
               label: Copy.subscription_breadcrumb_subscriptions(),
               href: ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope)
@@ -959,12 +955,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats ->
         [
           %{
-            label: "Billing setup gaps",
+            label: "Billing evidence",
             value: Enum.join(caveats, ", "),
-            action_label: "Audit",
+            action_label: "View events",
             action_context:
-              Copy.action_hidden_context("Audit",
-                resource: "setup events",
+              Copy.action_hidden_context("View",
+                resource: "events",
                 object: "subscription #{subscription.processor_id || subscription.id}"
               ),
             action_href:
@@ -1146,10 +1142,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp projection_caveats(subscription) do
     [
       unless(match?(%DateTime{}, subscription.current_period_end),
-        do: "Renewal date not shown"
+        do: "Renewal date unavailable"
       ),
-      unless(present?(current_price_id(subscription)), do: "Price not shown"),
-      "Charge amount not shown"
+      unless(present?(current_price_id(subscription)), do: "Price unavailable"),
+      "Charge amount unavailable"
     ]
     |> Enum.reject(&is_nil/1)
   end
@@ -1195,7 +1191,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         if ended_at do
           timestamp_summary("Ended", ended_at, "subscription-ended-at-#{surface}")
         else
-          "End date is not shown in admin"
+          not_projected_copy(:end_date)
         end
 
       Accrue.Billing.Subscription.canceling?(subscription) ->
@@ -1265,19 +1261,19 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp not_projected_copy(:amount),
-    do: "Amount is not confirmed in admin"
+    do: "Unavailable"
 
   defp not_projected_copy(:end_date),
-    do: "End date is not shown in admin"
+    do: "End date unavailable"
 
   defp not_projected_copy(:period),
-    do: "Current period is not shown in admin"
+    do: "Current period unavailable"
 
   defp not_projected_copy(:price),
-    do: "Price is not confirmed in admin"
+    do: "Price unavailable"
 
   defp not_projected_copy(:renewal),
-    do: "Renewal date is not shown in admin"
+    do: "Renewal date unavailable"
 
   defp default_drill_open?(subscription, :billing),
     do: not Subscription.dunning_campaign_active?(subscription)

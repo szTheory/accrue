@@ -263,12 +263,12 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute html =~ "Setup required now"
     assert html =~ "ax-detail-health-summary-moss"
     assert html =~ "ax-detail-health-answer"
-    assert html =~ "Charge amount not shown"
+    assert html =~ "Charge amount unavailable"
 
     refute html =~ "Billing health right now"
     assert html =~ "MRR"
-    assert html =~ "Charge amount not shown"
-    assert html =~ "Billing setup gaps"
+    assert html =~ "Charge amount unavailable"
+    assert html =~ "Billing evidence"
     assert html =~ "Lifecycle state"
     assert html =~ "Open invoices for this customer"
     assert html =~ "Global dunning funnel"
@@ -321,9 +321,9 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Subscription is active"
     assert html =~ long_subscription_id
     assert html =~ long_customer_name
-    assert html =~ "Price is not confirmed in admin"
-    assert html =~ "Current period is not shown in admin"
-    assert html =~ "Amount is not confirmed in admin"
+    assert html =~ "Price unavailable"
+    assert html =~ "Current period unavailable"
+    assert html =~ "Unavailable"
     refute html =~ "$0.00"
     refute html =~ "0.00 USD"
     refute html =~ "Setup incomplete - active billing unverified"
@@ -462,6 +462,47 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert html =~ ~s(aria-label="Change plan for subscription #{subscription_label}")
     assert html =~ ~s(aria-label="Cancel renewal for subscription #{subscription_label}")
+  end
+
+  test "missing subscription evidence stays unavailable in detail and action review", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    TestRepo.delete_all(
+      from(item in SubscriptionItem, where: item.subscription_id == ^subscription.id)
+    )
+
+    subscription
+    |> Subscription.changeset(%{
+      current_period_start: nil,
+      current_period_end: nil,
+      cancel_at_period_end: false
+    })
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    assert html =~ "Price unavailable"
+    assert html =~ "Current period unavailable"
+    assert html =~ "Renewal date unavailable"
+    assert html =~ "Charge amount unavailable"
+    assert html =~ "Billing evidence"
+    assert html =~ "View events"
+    refute html =~ "Billing setup gaps"
+    refute html =~ "Price not shown"
+
+    render_click(view, "open_action_drawer", %{"action_type" => "pause"})
+    review = render_submit(view, "prepare_action", %{"action_type" => "pause"})
+
+    assert review =~ "Subscription ID: #{subscription.id}"
+    assert review =~ "Customer ID: #{subscription.customer_id}"
+    assert review =~ "Current plan / price"
+    assert review =~ "Price unavailable"
+    assert review =~ "Current charge amount"
+    assert review =~ "Unavailable; no estimate is shown."
+    refute review =~ "0 usd"
+    assert Accrue.Processor.Fake.call_count(:pause_subscription) == 0
   end
 
   test "drawer-hosted destructive action preserves step-up and records admin audit linkage", %{

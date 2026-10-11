@@ -358,7 +358,6 @@ defmodule AccrueAdmin.Live.InvoiceLive do
       >
         <Breadcrumbs.breadcrumbs
           items={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.invoice_breadcrumb_invoices(), href: ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)},
             %{
               label: customer_label(@customer),
@@ -1622,7 +1621,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   defp timestamp_value(%Date{} = value, _id), do: Date.to_iso8601(value)
-  defp timestamp_value(_value, _id), do: "Unknown"
+  defp timestamp_value(_value, _id), do: "Unavailable"
 
   defp tax_risk_summary(invoice) do
     if tax_failure_visible?(invoice), do: "Needs tax recovery", else: "No tax blocker"
