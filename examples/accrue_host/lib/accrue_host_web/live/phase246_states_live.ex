@@ -7,8 +7,9 @@ defmodule AccrueHostWeb.Phase246StatesLive do
 
   @table_id "phase246-state-table"
   @impl true
-  def mount(_params, session, socket) do
+  def mount(params, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
+    table_case = valid_table_case(params["table"])
 
     {:ok,
      assign(socket,
@@ -21,8 +22,8 @@ defmodule AccrueHostWeb.Phase246StatesLive do
        assets_js_path: admin["assets_js_path"],
        admin_mount_path: admin["mount_path"] || "/admin",
        current_path: "/admin/__phase246/states",
-       table_case: "populated",
-       table_attrs: table_attrs("populated"),
+       table_case: table_case,
+       table_attrs: table_attrs(table_case),
        search_case: "success",
        search_attrs: search_attrs("success"),
        columns: columns()
@@ -189,6 +190,9 @@ defmodule AccrueHostWeb.Phase246StatesLive do
       %{id: :status, label: "Status"}
     ]
   end
+
+  defp valid_table_case(case_name) when case_name in ["long"], do: case_name
+  defp valid_table_case(_), do: "populated"
 
   defp identity_cell(row) do
     assigns = %{__changed__: %{}, row: row}

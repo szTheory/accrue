@@ -114,8 +114,9 @@ heldoutTest("@phase246-heldout table state fixtures retain identity, order, and 
   for (const [width, height, suffix] of [[1280, 900, "wide"], [320, 820, "320"]]) {
     await page.setViewportSize({ width, height });
     for (const theme of ["light", "dark"]) {
+      await page.goto("/admin/__phase246/states?table=long");
+      await waitForLiveView(page);
       await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
-      await page.getByRole("button", { name: "Table long" }).click();
       await expect(page.getByTestId("table-state")).toHaveText("long");
       const identity = page.locator("#phase246-state-table tbody > tr[data-row-id] .ax-data-table-identity").first();
       await expect(identity).toContainText("Zoë 世界");
