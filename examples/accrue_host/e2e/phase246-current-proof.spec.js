@@ -30,7 +30,8 @@ const sources = [
   "examples/accrue_host/e2e/phase246-current-proof.spec.js",
   "examples/accrue_host/playwright.phase246.config.js",
   "examples/accrue_host/playwright.config.js",
-  "scripts/ci/accrue_host_seed_e2e.exs"
+  "scripts/ci/accrue_host_seed_e2e.exs",
+  "scripts/ci/verify_phase246_render_proof.mjs"
 ];
 const digest = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex");
 const sourceSha = () => execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
