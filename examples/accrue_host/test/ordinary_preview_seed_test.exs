@@ -9,6 +9,16 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
   alias AccrueHost.Accounts.User
   alias AccrueHost.DemoBrand
   alias AccrueHost.Repo
+  alias AccrueHost.OrdinarySeedBoundary
+
+  test "ordinary seed target requires the connected test database to be loopback" do
+    assert OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "postgres", "127.0.0.1", nil)
+    assert OrdinarySeedBoundary.allowed?(:test, "accrue_host_test42", "postgres", "::1", nil)
+    refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "postgres", "198.51.100.8", nil)
+    refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "postgres", nil, nil)
+    refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_dev", "postgres", "127.0.0.1", nil)
+    refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "readonly", "127.0.0.1", nil)
+  end
 
   @ordinary_seed Path.expand("../priv/repo/seeds/ordinary.exs", __DIR__)
   @phase191_seed Path.expand("../priv/repo/seeds/phase191_flow_states.exs", __DIR__)

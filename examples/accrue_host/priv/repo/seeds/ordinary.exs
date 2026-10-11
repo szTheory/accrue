@@ -1,4 +1,5 @@
 alias AccrueHost.Repo
+alias AccrueHost.OrdinarySeedBoundary
 
 # These checks inspect the connection the Repo actually opened. Environment
 # labels alone are not a database boundary: DATABASE_URL/PGHOST can be pointed
@@ -16,12 +17,7 @@ expected_address =
   end
 
 connected_target_allowed? =
-  if Mix.env() == :test do
-    Regex.match?(~r/^accrue_host_test\d*$/, database) and role == "postgres"
-  else
-    database == "accrue_host_dev" and role == "postgres" and
-      not is_nil(expected_address) and server_address == expected_address
-  end
+  OrdinarySeedBoundary.allowed?(Mix.env(), database, role, server_address, expected_address)
 
 unless connected_target_allowed? do
   raise "ordinary preview seed refused: connected Repo is not the isolated ordinary preview database"
