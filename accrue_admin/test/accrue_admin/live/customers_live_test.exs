@@ -324,8 +324,6 @@ defmodule AccrueAdmin.CustomersLiveTest do
     assert_in_order(text, labels)
   end
 
-  defp assert_before(html, left, right), do: assert_in_order(html, [left, right])
-
   defp assert_in_order(text, labels) do
     positions =
       Enum.map(labels, fn label ->
