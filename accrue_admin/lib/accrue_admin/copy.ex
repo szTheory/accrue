@@ -1342,6 +1342,22 @@ defmodule AccrueAdmin.Copy do
     end
   end
 
+  @doc "Status label for one result in a completed bulk replay selection."
+  def webhooks_retry_outcome(:queued), do: "Queue request accepted."
+  def webhooks_retry_outcome(:skipped), do: "Not queued."
+  def webhooks_retry_outcome(:denied), do: "Not queued because access could not be confirmed."
+  def webhooks_retry_outcome(:failed), do: "The queue request failed."
+  def webhooks_retry_outcome(:unknown), do: "Dispatch result could not be confirmed."
+
+  @doc "Safe read-only next step for an unconfirmed bulk replay result."
+  def webhooks_retry_unknown_next_step,
+    do: "Inspect its current status and history before deciding what to do next."
+
+  @doc "Guidance shown when a fresh scoped delivery read cannot authorize a result link."
+  def webhooks_retry_detail_unavailable,
+    do:
+      "Delivery detail is currently unavailable in this scope. Read it again later to check status and history."
+
   defp plural(1, singular, _plural), do: singular
   defp plural(_count, _singular, plural), do: plural
 

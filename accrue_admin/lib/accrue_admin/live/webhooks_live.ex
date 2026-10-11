@@ -49,6 +49,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
      )
      |> assign(:summary, webhook_summary(socket.assigns.current_owner_scope))
      |> assign(:flashes, [])
+     |> assign(:bulk_replay_result, nil)
      |> assign(:pending_bulk_replay, nil)
      |> assign(:step_up_pending, false)
      |> assign(:step_up_action, nil)
@@ -99,7 +100,11 @@ defmodule AccrueAdmin.Live.WebhooksLive do
       {:noreply, push_flash(socket, :warning, Copy.webhooks_retry_no_selection_warning())}
     else
       reviewed = review_bulk_selection(ids, socket)
-      {:noreply, assign(socket, :pending_bulk_replay, reviewed)}
+
+      {:noreply,
+       socket
+       |> assign(:bulk_replay_result, nil)
+       |> assign(:pending_bulk_replay, reviewed)}
     end
   end
 
@@ -174,7 +179,35 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     socket
     |> record_bulk_replay(result)
     |> assign(:summary, webhook_summary(socket.assigns.current_owner_scope))
+    |> assign(:bulk_replay_result, bulk_replay_result_rows(result, socket))
     |> push_flash(:info, Copy.webhooks_retry_result(result))
+  end
+
+  defp bulk_replay_result_rows(result, socket) do
+    Enum.map(result.outcomes, fn outcome ->
+      detail_available? =
+        outcome[:detail_available?] == true and outcome.outcome != :denied and
+          outcome[:reread] != :unknown
+
+      %{
+        selected_id: outcome.selected_id,
+        outcome: Copy.webhooks_retry_outcome(outcome.outcome),
+        href:
+          if detail_available? do
+            scoped_path(
+              socket.assigns.admin_mount_path,
+              "/webhooks/#{outcome.selected_id}",
+              socket.assigns.current_owner_scope
+            )
+          end,
+        next_step:
+          if outcome.outcome == :unknown or outcome[:reread] == :unknown do
+            if detail_available?,
+              do: Copy.webhooks_retry_unknown_next_step(),
+              else: Copy.webhooks_retry_detail_unavailable()
+          end
+      }
+    end)
   end
 
   defp reviewed_selection_matches?(params, ids) do
@@ -214,7 +247,12 @@ defmodule AccrueAdmin.Live.WebhooksLive do
       |> Enum.zip(reviewed_rows)
       |> Enum.map(fn {id, reviewed} ->
         current = selected_replay_row(id, owner_scope)
-        Map.merge(current, %{reviewed_status: reviewed[:status], reviewed_id: reviewed[:id]})
+
+        Map.merge(current, %{
+          selected_id: id,
+          reviewed_status: reviewed[:status],
+          reviewed_id: reviewed[:id]
+        })
       end)
       |> Enum.sort_by(
         fn %{id: id, row: row} ->
@@ -251,7 +289,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   end
 
   defp denied_bulk_result(review) do
-    outcomes = Enum.map(review.ids, &%{id: &1, outcome: :denied, attempted: false})
+    outcomes =
+      Enum.map(review.ids, &%{id: &1, selected_id: &1, outcome: :denied, attempted: false})
 
     %{
       selected: length(review.ids),
@@ -269,11 +308,11 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   defp selected_replay_row(id, owner_scope) do
     case replay_detail(id, owner_scope) do
-      {:ok, row} -> %{id: row.id, row: row, status: row.status}
-      _inaccessible -> %{id: nil, row: nil, status: nil}
+      {:ok, row} -> %{id: row.id, row: row, status: row.status, authorized?: true}
+      _inaccessible -> %{id: nil, row: nil, status: nil, authorized?: false}
     end
   rescue
-    _read_error -> %{id: nil, row: nil, status: nil, read_failed?: true}
+    _read_error -> %{id: nil, row: nil, status: nil, authorized?: false, read_failed?: true}
   end
 
   defp replay_detail(id, owner_scope) do
@@ -287,21 +326,31 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     end
   end
 
-  defp replay_outcome(%{read_failed?: true}, _owner_scope),
+  defp replay_outcome(selection, owner_scope) do
+    selection
+    |> do_replay_outcome(owner_scope)
+    |> Map.put_new(:selected_id, selection.selected_id)
+    |> Map.put_new(:detail_available?, selection[:authorized?])
+  end
+
+  defp do_replay_outcome(%{read_failed?: true}, _owner_scope),
     do: %{id: nil, outcome: :unknown, attempted: false}
 
-  defp replay_outcome(%{id: nil}, _owner_scope),
+  defp do_replay_outcome(%{id: nil}, _owner_scope),
     do: %{id: nil, outcome: :skipped, attempted: false}
 
-  defp replay_outcome(%{id: id, row: %{status: status}}, _owner_scope)
+  defp do_replay_outcome(%{id: id, row: %{status: status}}, _owner_scope)
        when status not in [:failed, :dead],
        do: %{id: id, outcome: :skipped, attempted: false, reread: :not_applicable}
 
-  defp replay_outcome(%{id: id, row: %{status: status}, reviewed_status: reviewed}, _owner_scope)
+  defp do_replay_outcome(
+         %{id: id, row: %{status: status}, reviewed_status: reviewed},
+         _owner_scope
+       )
        when status != reviewed,
        do: %{id: id, outcome: :skipped, attempted: false, reread: :not_applicable}
 
-  defp replay_outcome(%{id: id}, owner_scope) do
+  defp do_replay_outcome(%{id: id} = selection, owner_scope) do
     enqueue_result =
       try do
         requeue_delivery(id, owner_scope)
@@ -313,22 +362,51 @@ defmodule AccrueAdmin.Live.WebhooksLive do
       {:ok, _queued} ->
         %{
           id: id,
+          selected_id: selection.selected_id,
+          detail_available?: selection[:authorized?],
           outcome: :queued,
           attempted: true,
           reread: post_enqueue_status(id, owner_scope)
         }
 
       {:error, :out_of_scope} ->
-        %{id: nil, outcome: :denied, attempted: false, reread: :not_applicable}
+        %{
+          id: nil,
+          selected_id: selection.selected_id,
+          outcome: :denied,
+          attempted: false,
+          reread: :not_applicable
+        }
 
       {:error, reason} when reason in [:already_replayed, :not_dead_lettered, :not_found] ->
-        %{id: id, outcome: :skipped, attempted: false, reread: :not_applicable}
+        %{
+          id: id,
+          selected_id: selection.selected_id,
+          detail_available?: selection[:authorized?],
+          outcome: :skipped,
+          attempted: false,
+          reread: :not_applicable
+        }
 
       {:error, _reason} ->
-        %{id: id, outcome: :failed, attempted: true, reread: :not_applicable}
+        %{
+          id: id,
+          selected_id: selection.selected_id,
+          detail_available?: selection[:authorized?],
+          outcome: :failed,
+          attempted: true,
+          reread: :not_applicable
+        }
 
       _unclassifiable ->
-        %{id: id, outcome: :unknown, attempted: true, reread: :not_applicable}
+        %{
+          id: id,
+          selected_id: selection.selected_id,
+          detail_available?: selection[:authorized?],
+          outcome: :unknown,
+          attempted: true,
+          reread: :not_applicable
+        }
     end
   end
 
@@ -441,6 +519,28 @@ defmodule AccrueAdmin.Live.WebhooksLive do
         </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={@flashes} />
+
+        <section
+          :if={@bulk_replay_result}
+          id="bulk-replay-results"
+          class="ax-card"
+          data-role="bulk-replay-results"
+          aria-label="Bulk replay results"
+        >
+          <h2 class="ax-heading">Delivery results</h2>
+          <ul class="ax-list">
+            <li
+              :for={item <- @bulk_replay_result}
+              class="ax-body"
+              data-delivery-id={item.selected_id}
+            >
+              <code><%= item.selected_id %></code>
+              <span><%= item.outcome %></span>
+              <a :if={item.href} href={item.href} class="ax-link">Open delivery</a>
+              <span :if={item.next_step}><%= item.next_step %></span>
+            </li>
+          </ul>
+        </section>
 
         <p class="ax-body ax-page-copy" data-role="webhooks-retry-helper">
           <%= Copy.webhooks_retry_selected_helper() %>

@@ -379,6 +379,14 @@ defmodule AccrueAdmin.WebhookReplayTest do
     assert event.data["denied"] == 1
     assert event.data["ids"] == []
     assert event.data["outcomes"] == []
+
+    denied_row =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find(~s([data-role="bulk-replay-results"] [data-delivery-id="#{webhook.id}"]))
+      |> hd()
+
+    assert Floki.find(denied_row, "a") == []
     assert TestRepo.get!(WebhookEvent, webhook.id).status == :dead
 
     refute TestRepo.exists?(
@@ -439,10 +447,55 @@ defmodule AccrueAdmin.WebhookReplayTest do
     html = submit_selection(view, [webhook.id])
 
     assert html =~ "0 skipped; 0 denied; 0 failed; 1 unknown."
+    assert html =~ ~s(data-role="bulk-replay-results")
+    assert html =~ ~s(data-delivery-id="#{webhook.id}")
+    assert html =~ "Dispatch result could not be confirmed"
+    assert html =~ "Inspect its current status and history before deciding what to do next."
+
+    result_row =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find(~s([data-role="bulk-replay-results"] [data-delivery-id="#{webhook.id}"]))
+      |> hd()
+
+    assert Floki.attribute(result_row, "a", "href") == ["/billing/webhooks/#{webhook.id}"]
     assert TestRepo.get!(WebhookEvent, webhook.id).status == :dead
     assert dispatch_jobs(webhook.id) == []
     assert outcome_total(bulk_replay_event!().data) == 1
     refute html =~ "processed successfully"
+  end
+
+  test "mixed bulk outcomes stay attached to their selected delivery rows", %{
+    conn: conn,
+    bulk_webhooks: [queued_before, unknown, queued_after]
+  } do
+    queued_before = set_received_at(queued_before, ~U[2026-01-03 12:00:00.000000Z])
+    unknown = set_received_at(unknown, ~U[2026-01-02 12:00:00.000000Z])
+    queued_after = set_received_at(queued_after, ~U[2026-01-01 12:00:00.000000Z])
+
+    Application.put_env(:accrue_admin, :webhook_requeue_fun, fn id, authorize_fun ->
+      if id == unknown.id do
+        raise "dispatch outcome not observable"
+      else
+        DLQ.requeue(id, authorize_fun)
+      end
+    end)
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/webhooks?status=failed,dead")
+    html = submit_selection(view, [queued_after.id, unknown.id, queued_before.id])
+    document = Floki.parse_document!(html)
+
+    results = Floki.find(document, ~s([data-role="bulk-replay-results"] [data-delivery-id]))
+
+    assert Enum.map(results, &Floki.attribute(&1, "data-delivery-id")) ==
+             [[queued_before.id], [unknown.id], [queued_after.id]]
+
+    unknown_row = Enum.at(results, 1)
+    assert Floki.text(unknown_row) =~ "Dispatch result could not be confirmed"
+    assert Floki.attribute(unknown_row, "a", "href") == ["/billing/webhooks/#{unknown.id}"]
+    assert TestRepo.get!(WebhookEvent, unknown.id).status == :dead
+    assert dispatch_jobs(unknown.id) == []
   end
 
   test "accepted enqueue is retained when the scoped reread fails", %{
@@ -473,6 +526,18 @@ defmodule AccrueAdmin.WebhookReplayTest do
     assert result["queued"] == 1
     assert result["reread_unknown"] == 1
     assert outcome_total(result) == result["selected"]
+    assert html =~ ~s(data-delivery-id="#{webhook.id}")
+    assert html =~ "Queue request accepted."
+    assert html =~ "processing status is unknown."
+    assert html =~ "Delivery detail is currently unavailable in this scope."
+
+    result_row =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find(~s([data-role="bulk-replay-results"] [data-delivery-id="#{webhook.id}"]))
+      |> hd()
+
+    assert Floki.find(result_row, "a") == []
     assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
     assert length(dispatch_jobs(webhook.id)) == 1
     assert TestRepo.exists?(from(event in Event, where: event.type == "webhook.replay_requested"))
@@ -502,6 +567,16 @@ defmodule AccrueAdmin.WebhookReplayTest do
     html = submit_selection(view, [webhook.id])
 
     assert html =~ "No deliveries were queued. 0 skipped; 0 denied; 0 failed; 1 unknown."
+    assert html =~ ~s(data-delivery-id="#{webhook.id}")
+    assert html =~ "Delivery detail is currently unavailable in this scope."
+
+    result_row =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find(~s([data-role="bulk-replay-results"] [data-delivery-id="#{webhook.id}"]))
+      |> hd()
+
+    assert Floki.find(result_row, "a") == []
     result = bulk_replay_event!().data
     assert result["attempted"] == 0
     assert outcome_total(result) == result["selected"]
