@@ -5,16 +5,16 @@ milestone_name: Admin Usability and Visual Consistency
 current_phase: 246
 current_phase_name: Collection Controls and Search
 status: executing
-stopped_at: Completed 246-02-PLAN.md
-last_updated: "2026-10-11T16:56:33.418Z"
+stopped_at: Completed 246-03-PLAN.md
+last_updated: "2026-10-11T17:53:53.096Z"
 last_activity: 2026-10-11
 last_activity_desc: Phase 246 execution started
-state_head: 97fecbbd6587401cc76da982cf8afa510a96691e
+state_head: a4c00f5c8485de88206eab2823015a845a53ff28
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
   percent: 25
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 ## Current Position
 
 Phase: 246 (Collection Controls and Search) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-10-11 — Phase 246 execution started
 
@@ -185,6 +185,7 @@ Last activity: 2026-10-11 — Phase 246 execution started
 | Phase 244 P04 | 25m | 2 tasks | 5 files |
 | Phase 246 P01 | 19m | 2 tasks | 10 files |
 | Phase 246 P02 | 18m | 3 tasks | 16 files |
+| Phase 246 P03 | 53min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -427,6 +428,9 @@ Last activity: 2026-10-11 — Phase 246 execution started
 - [Phase 246]: Keep subscription status OR predicates and normalize selections to a stable bounded URL order.
 - [Phase 246]: Keep exact customer, coupon, and webhook relationships separate from broad q search.
 - [Phase 246]: Preserve custom Connect account types as editable values instead of imposing a fixed enum.
+- [Phase 246]: Keep CommandPalette.activeIndex as the single source for pointer highlight, ARIA selection, and Enter navigation.
+- [Phase 246]: Use the existing SQL Sandbox fixture lane for deterministic exceptional states and the guarded ordinary Fake preview for realistic search.
+- [Phase 246]: Remove only allowlisted Phase 191 Fake stress fixtures during ordinary preview normalization; preserve ordinary showcase and linked billing data.
 
 ### Pending Todos
 
@@ -512,8 +516,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T16:56:33.378Z
-Stopped at: Completed 246-02-PLAN.md
+Last session: 2026-10-11T17:53:53.064Z
+Stopped at: Completed 246-03-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
