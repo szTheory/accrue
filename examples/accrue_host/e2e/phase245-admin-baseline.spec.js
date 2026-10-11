@@ -336,7 +336,15 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
     const stem = route.replace(/^\/admin\/?/, "root").replaceAll("/", "-").replaceAll(":", "param");
     const filename = `${String(index + 1).padStart(2, "0")}-${stem}-${narrow ? "narrow" : "wide"}-${dark ? "dark" : "light"}.png`;
     if (!development) {
-      const bytes = await page.screenshot({ path: path.join(phaseCaptureDir, filename), fullPage: true, animations: "disabled" });
+      const screenshotPath = path.join(phaseCaptureDir, filename);
+      let bytes;
+      try {
+        bytes = await page.screenshot({ path: screenshotPath, fullPage: true, animations: "disabled", timeout: 20_000 });
+      } catch (error) {
+        fs.rmSync(screenshotPath, { force: true });
+        rows.push({ id: `R${String(index + 1).padStart(2, "0")}-screenshot-timeout`, route, state: observedState, url: page.url(), visual_anchor: `Visible route heading: ${titleText}`, status: "unavailable", reason: `The page rendered and matched the route, but its full-page screenshot did not finish within 20 seconds: ${error instanceof Error ? error.message : String(error)}.` });
+        return;
+      }
       const routeState = `R${String(index + 1).padStart(2, "0")}-${observedState}`;
       const sha256Png = sha256(bytes);
       captures.push({
