@@ -27,6 +27,8 @@ const sourcePaths = [
   "accrue_admin/priv/static/accrue_admin.css",
   "accrue_admin/priv/static/accrue_admin.js",
   "examples/accrue_host/lib/accrue_host_web/router.ex",
+  "examples/accrue_host/e2e/phase245-admin-baseline.spec.js",
+  "examples/accrue_host/playwright.phase245.config.js",
   "examples/accrue_host/priv/repo/seeds/helpers.exs",
   "examples/accrue_host/priv/repo/seeds/ordinary.exs",
   "examples/accrue_host/priv/repo/seeds/hero_accounts.exs",
@@ -43,6 +45,46 @@ function dockerEval(expression) {
     "exec", "-T", "web", "mix", "run", "--no-start", "-e", expression
   ), { cwd: hostRoot, encoding: "utf8" }).trim();
 }
+
+function assertOrdinaryComposeIdentity() {
+  const webId = execFileSync("docker", compose("ps", "-q", "web"), { cwd: hostRoot, encoding: "utf8" }).trim();
+  const dbId = execFileSync("docker", compose("ps", "-q", "db"), { cwd: hostRoot, encoding: "utf8" }).trim();
+  expect(webId, "ordinary Compose web container is running").toBeTruthy();
+  expect(dbId, "ordinary Compose database container is running").toBeTruthy();
+  const network = `${ordinaryProject}_default`;
+  const webNetworks = execFileSync("docker", ["inspect", "--format", "{{range $name, $network := .NetworkSettings.Networks}}{{printf \"%s \" $name}}{{end}}", webId], { encoding: "utf8" });
+  const dbNetworks = execFileSync("docker", ["inspect", "--format", "{{range $name, $network := .NetworkSettings.Networks}}{{printf \"%s \" $name}}{{end}}", dbId], { encoding: "utf8" });
+  const volume = execFileSync("docker", ["inspect", "--format", '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql/data"}}{{.Name}}{{end}}{{end}}', dbId], { encoding: "utf8" }).trim();
+  expect(webNetworks.split(/\s+/), "web is attached to the ordinary network").toContain(network);
+  expect(dbNetworks.split(/\s+/), "database is attached to the ordinary network").toContain(network);
+  expect(volume, "database uses the ordinary named data volume").toBe(`${ordinaryProject}_pgdata`);
+  const dbIp = execFileSync("docker", ["inspect", "--format", `{{(index .NetworkSettings.Networks "${network}").IPAddress}}`, dbId], { encoding: "utf8" }).trim();
+  const fingerprint = execFileSync("docker", compose("exec", "-T", "db", "psql", "-U", "postgres", "-d", "accrue_host_dev", "-Atc", "SELECT current_database() || '|' || current_user || '|' || inet_server_addr()::text"), { cwd: hostRoot, encoding: "utf8" }).trim();
+  expect(fingerprint, "live database fingerprint matches the inspected ordinary DB container").toBe(`accrue_host_dev|postgres|${dbIp}`);
+}
+
+function assertNoSecrets(value, location = "capture") {
+  if (!value || typeof value !== "object") return;
+  for (const [key, nested] of Object.entries(value)) {
+    expect(key, `${location} must omit credentials and session material`).not.toMatch(/password|secret|token|cookie|authorization|headers?/i);
+    assertNoSecrets(nested, `${location}.${key}`);
+  }
+}
+
+function routeIdentityMatches(route, requestedURL, finalURL) {
+  const requested = new URL(requestedURL, process.env.ACCRUE_HOST_ORDINARY_BASE_URL);
+  const final = new URL(finalURL);
+  const templatePattern = new RegExp(`^${route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/:[^/]+/g, "[^/]+")}$`);
+  return final.origin === requested.origin && final.search === requested.search && templatePattern.test(final.pathname);
+}
+
+test("route identity rejects successful redirects, wrong records, and lost query state", () => {
+  const origin = "http://accrue-host-phase245-ordinary.localhost";
+  expect(routeIdentityMatches("/admin/invoices/:id", "/admin/invoices/123", `${origin}/admin/invoices/123`)).toBe(true);
+  expect(routeIdentityMatches("/admin/invoices/:id", "/admin/invoices/123", `${origin}/admin/invoices/456`)).toBe(false);
+  expect(routeIdentityMatches("/admin/invoices", "/admin/invoices?view=all", `${origin}/admin/invoices`)).toBe(false);
+  expect(routeIdentityMatches("/admin/invoices", "/admin/invoices", `${origin}/users/log-in`)).toBe(false);
+});
 
 function compiledAssetBytes(assetName) {
   const expression = [
@@ -107,6 +149,7 @@ async function assetEvidence(page, selector, assetName, packagePath) {
 test("authenticated ordinary invoice list and detail match current served assets", async ({ page }) => {
   test.skip(!operatorPassword, "set ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD from the local operator credential source");
 
+  assertOrdinaryComposeIdentity();
   const processor = dockerEval("IO.write(inspect(Application.fetch_env!(:accrue, :processor)))");
   expect(processor).toBe("Accrue.Processor.Fake");
 
@@ -164,6 +207,7 @@ test("authenticated ordinary invoice list and detail match current served assets
     assets,
     screenshot: { file: "invoice-detail.png", bytes: screenshot.length, sha256: sha256(screenshot) }
   };
+  assertNoSecrets(manifest);
 
   fs.mkdirSync(captureDir, { recursive: true });
   fs.writeFileSync(path.join(captureDir, "invoice-detail.png"), screenshot, { mode: 0o600 });
@@ -177,6 +221,7 @@ test("authenticated ordinary invoice list and detail match current served assets
 test("capture reachable mounted Admin templates with bounded theme and viewport coverage", async ({ page, browserName }) => {
   test.skip(!operatorPassword, "set ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD from the local operator credential source");
   test.setTimeout(240_000);
+  assertOrdinaryComposeIdentity();
   const phaseCaptureDir = path.join(repoRoot, ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current");
   fs.mkdirSync(phaseCaptureDir, { recursive: true });
   await signIn(page);
@@ -188,7 +233,9 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
     js: await assetEvidence(page, 'script[src*="/admin/assets/js-"]', "accrue_admin.js", "accrue_admin/priv/static/accrue_admin.js")
   };
   const trackedSources = execFileSync("git", ["ls-files", "-z", "accrue_admin/lib/accrue_admin", "accrue_admin/assets/css", "accrue_admin/assets/js", "accrue_admin/priv/static", "examples/accrue_host/lib/accrue_host_web/router.ex", "examples/accrue_host/priv/repo/seeds"], { cwd: repoRoot }).toString().split("\0").filter(Boolean);
-  const sources = Object.fromEntries([...new Set([...sourcePaths, ...trackedSources])].sort().map((relativePath) => [
+  const sourceFiles = [...new Set([...sourcePaths, ...trackedSources])].sort();
+  const dirtySources = execFileSync("git", ["status", "--porcelain", "--", ...sourceFiles], { cwd: repoRoot, encoding: "utf8" }).trim();
+  const sources = Object.fromEntries(sourceFiles.map((relativePath) => [
     relativePath,
     sha256(fs.readFileSync(path.join(repoRoot, relativePath)))
   ]));
@@ -208,7 +255,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   ];
   const devRoutes = ["/admin/dev/clock", "/admin/dev/email-preview", "/admin/dev/webhook-fixtures", "/admin/dev/components", "/admin/dev/fake-inspect"];
   const revision = execFileSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).trim();
-  const dirty = execFileSync("git", ["status", "--porcelain"], { cwd: repoRoot, encoding: "utf8" }).trim().length > 0;
+  const dirty = dirtySources.length > 0;
   const captures = [];
   const rows = [];
 
@@ -222,13 +269,17 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
     await page.setViewportSize(narrow ? { width: 390, height: 844 } : { width: 1280, height: 900 });
     const response = await page.goto(url, { waitUntil: "domcontentloaded" });
     await page.locator("body").waitFor();
-    const finalPath = new URL(page.url()).pathname;
-    if (!response || response.status() >= 400 || finalPath === "/users/log-in") {
+    const finalURL = new URL(page.url());
+    const routeMatches = routeIdentityMatches(route, url, page.url());
+    const pageTitle = page.locator("main h1").first();
+    const titleVisible = await pageTitle.isVisible().catch(() => false);
+    const titleText = titleVisible ? (await pageTitle.innerText()).trim() : "";
+    if (!response || response.status() >= 400 || finalURL.pathname === "/users/log-in" || !routeMatches || !titleVisible || !titleText) {
       if (development) {
         rows.push({ id: `DEV-${String(index - routes.length + 1).padStart(2, "0")}-not-mounted`, route, state: "not-mounted", url, visual_anchor: "Development route activation under the host mount", status: "not-applicable", reason: `Direct navigation returned HTTP ${response?.status() ?? "no response"}; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance.` });
         return;
       }
-      rows.push({ id: `R${String(index + 1).padStart(2, "0")}-populated`, route, state: "populated", url, visual_anchor: "Admin shell and route-owned content", status: "unavailable", reason: `Authenticated navigation returned ${response?.status() ?? "no response"} and ended at ${finalPath}; no screenshot claim made.` });
+      rows.push({ id: `R${String(index + 1).padStart(2, "0")}-populated`, route, state: "populated", url, visual_anchor: "Route-specific main heading", status: "unavailable", reason: `Navigation returned ${response?.status() ?? "no response"} and ended at ${finalURL.pathname}${finalURL.search}; requested route template match=${routeMatches}, visible route heading=${Boolean(titleText)}${titleText ? ` (${titleText})` : ""}; no screenshot claim made.` });
       return;
     }
     const targetTheme = dark ? "dark" : "light";
@@ -262,10 +313,10 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
       captures.push({
         id: `C${String(captures.length + 1).padStart(2, "0")}`, route_state: routeState, route, state: observedState, scenario: "ordinary Fake seed; no mutation", source_revision: revision, source_dirty: dirty, source_digests: sources,
         assets: assetIdentity, viewport: narrow ? { width: 390, height: 844 } : { width: 1280, height: 900 }, theme: dark ? "dark" : "light", browser: { name: browserName, version: page.context().browser().version() },
-        url: page.url(), captured_at: new Date().toISOString(), png: { path: `.planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/${filename}`, bytes: bytes.length, sha256: sha256Png },
+        url: page.url(), rendered_identity: { heading: titleText, selector: "main h1" }, captured_at: new Date().toISOString(), png: { path: `.planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/${filename}`, bytes: bytes.length, sha256: sha256Png },
         observation: route === "/admin/analytics/recovery" ? `Recovery readiness observed: ${JSON.stringify(recoveryReadiness)}.` : isHero ? "Primary route composition captured for direct PNG review." : "Mounted route visited and captured at representative wide/light settings."
       });
-      rows.push({ id: routeState, route, state: observedState, url: page.url(), visual_anchor: route.includes(":id") ? "Admin shell plus record detail and history" : route.includes("analytics") ? "Admin shell plus analytics metric/work queue composition" : route === "/admin" ? "Admin shell plus dashboard metric and recent activity composition" : "Admin shell plus route-owned collection table", status: "inspected", evidence: `manifest capture C${String(captures.length).padStart(2, "0")}; PNG SHA-256 ${sha256Png}` });
+      rows.push({ id: routeState, route, state: observedState, url: page.url(), visual_anchor: `Visible route heading: ${titleText}`, status: "inspected", evidence: `final URL matched requested template; main h1 rendered; manifest capture C${String(captures.length).padStart(2, "0")}; PNG SHA-256 ${sha256Png}` });
       if (route === "/admin/analytics/recovery" && observedState === "loading") rows.push({ id: "R20-populated", route, state: "populated", url: page.url(), visual_anchor: "Recovery metric cards and at-risk subscription work queue", status: "unavailable", reason: `The route remained in ${JSON.stringify(recoveryReadiness)} after the bounded 15-second wait; populated recovery metrics were not rendered in the ordinary instance.` });
     } else {
       rows.push({ id: `DEV-${String(index + 1).padStart(2, "0")}-not-mounted`, route, state: "not-mounted", url: page.url(), visual_anchor: "Development tool route activation", status: "not-applicable", reason: `Direct navigation returned HTTP ${response.status()}; the host mount sets allow_live_reload: false, so package development routes are not activated in this instance.` });
@@ -284,6 +335,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
     scenario: "isolated accrue-host-phase245-ordinary Fake seed; existing database preserved", seed_revision: sources["examples/accrue_host/priv/repo/seeds/ordinary.exs"],
     browser: { name: browserName, user_agent: await page.evaluate(() => navigator.userAgent) }, captures
   };
+  assertNoSecrets(manifest);
   fs.writeFileSync(path.join(repoRoot, ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
   rows.sort((left, right) => left.route.localeCompare(right.route) || left.id.localeCompare(right.id));
   fs.writeFileSync(path.join(repoRoot, ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/coverage-rows.json"), `${JSON.stringify(rows, null, 2)}\n`);

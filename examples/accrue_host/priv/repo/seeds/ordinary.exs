@@ -3,23 +3,28 @@ alias AccrueHost.Repo
 # These checks inspect the connection the Repo actually opened. Environment
 # labels alone are not a database boundary: DATABASE_URL/PGHOST can be pointed
 # at another stack while the Compose project name still looks correct.
-unless Mix.env() == :test do
-  [database, role, server_address] =
-    case Repo.query!("SELECT current_database(), current_user, inet_server_addr()::text") do
-      %{rows: [row]} -> row
-      _ -> raise "ordinary preview seed refused: could not identify connected database"
-    end
-
-  expected_address =
-    case :inet.getaddr(~c"db", :inet) do
-      {:ok, address} -> address |> :inet.ntoa() |> List.to_string()
-      {:error, _} -> raise "ordinary preview seed refused: isolated Compose db host is unavailable"
-    end
-
-  unless database == "accrue_host_dev" and role == "postgres" and
-           server_address == expected_address do
-    raise "ordinary preview seed refused: connected Repo is not the isolated ordinary preview database"
+[database, role, server_address] =
+  case Repo.query!("SELECT current_database(), current_user, inet_server_addr()::text") do
+    %{rows: [row]} -> row
+    _ -> raise "ordinary preview seed refused: could not identify connected database"
   end
+
+expected_address =
+  case :inet.getaddr(~c"db", :inet) do
+    {:ok, address} -> address |> :inet.ntoa() |> List.to_string()
+    {:error, _} -> nil
+  end
+
+connected_target_allowed? =
+  if Mix.env() == :test do
+    Regex.match?(~r/^accrue_host_test\d*$/, database) and role == "postgres"
+  else
+    database == "accrue_host_dev" and role == "postgres" and
+      not is_nil(expected_address) and server_address == expected_address
+  end
+
+unless connected_target_allowed? do
+  raise "ordinary preview seed refused: connected Repo is not the isolated ordinary preview database"
 end
 
 unless System.get_env("COMPOSE_PROJECT_NAME") == "accrue-host-phase245-ordinary" do
