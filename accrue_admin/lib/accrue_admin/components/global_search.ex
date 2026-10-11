@@ -175,8 +175,12 @@ defmodule AccrueAdmin.Components.GlobalSearch do
 
     run_group_lookups(groups, initial_results, fn key ->
       case key do
-        :customers -> Customers.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)
-        :invoices -> Invoices.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)
+        :customers ->
+          Customers.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)
+
+        :invoices ->
+          Invoices.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)
+
         :subscriptions ->
           Subscriptions.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)
       end
@@ -266,7 +270,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   type="text"
                   name="q"
                   value={@query}
-                  placeholder="Search customers, invoices, or subscriptions"
+                  placeholder="Search customers, invoices, and subscriptions"
                   autocomplete="off"
                   spellcheck="false"
                   autofocus
@@ -275,11 +279,10 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   data-focus-trap-initial
                   aria-describedby="global-search-help global-search-active-result"
                 />
-                <span id="search-spinner" class="ax-spinner" hidden={not @loading} aria-hidden="true"></span>
+                <span id="search-spinner" class="ax-spinner ax-spinner-md" hidden={not @loading} aria-hidden="true"></span>
               </div>
               <p id="global-search-help" class="ax-body ax-command-palette-help">
-                Customers: name, email, owner ID, processor ID. Invoices: number, processor ID, customer name or email.
-                Subscriptions: processor ID, customer name or email. Up to five results per group.
+                Search billing records across customers, invoices, and subscriptions.
               </p>
               <span id="global-search-active-result" class="ax-visually-hidden" role="status" data-active-result-status><%= @active_result_status %></span>
             </form>
@@ -287,7 +290,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
             <div class="ax-command-palette-body" aria-live="polite" aria-atomic="false">
               <%= if @query == "" do %>
                 <div class="ax-command-palette-empty">
-                  <p class="ax-eyebrow">Open a scoped list</p>
+                  <p class="ax-body ax-command-palette-orientation">Choose a customer, invoice, or subscription</p>
                   <ul class="ax-command-palette-list">
                     <li class="ax-command-palette-list-item">
                       <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers", @current_owner_scope)}>
@@ -312,9 +315,9 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                 <% end %>
                 <%= if @failures != [] do %>
                   <div class="ax-command-palette-error" role="status">
-                    <p>Some lookups are unavailable. Results from completed groups remain available.</p>
+                    <p>Results couldn't be loaded. Successful groups remain available.</p>
                     <button type="button" class="ax-button ax-button-secondary ax-button-sm" phx-click="retry" phx-target={@myself}>
-                      Retry unavailable lookups
+                      Retry failed groups
                     </button>
                   </div>
                 <% end %>

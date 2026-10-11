@@ -4,6 +4,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
   import Phoenix.LiveViewTest
 
   alias AccrueAdmin.Components.GlobalSearch
+  alias AccrueAdmin.Components.Topbar
   alias AccrueAdmin.OwnerScope
 
   describe "path/2 nil-guard (regression: WR-03 fix)" do
@@ -210,8 +211,8 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
           loading: false
         })
 
-      assert html =~ "Some lookups are unavailable"
-      assert html =~ "Retry unavailable lookups"
+      assert html =~ "Results couldn't be loaded"
+      assert html =~ "Retry failed groups"
       assert html =~ "Ada Lovelace"
       assert html =~ "ada@example.com"
       assert html =~ "Organization org-1"
@@ -297,7 +298,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert fresh_results == %{customers: [], invoices: [], subscriptions: []}
     end
 
-    test "help copy lists only fields the three queries actually match" do
+    test "help copy names the supported record groups without adding more instructions" do
       html =
         render_component(GlobalSearch, %{
           id: "global-search",
@@ -309,10 +310,9 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
           loading: false
         })
 
-      assert html =~ "Customers: name, email, owner ID, processor ID"
-      assert html =~ "Invoices: number, processor ID, customer name or email"
-      assert html =~ "Subscriptions: processor ID, customer name or email"
-      assert html =~ "Up to five results per group"
+      assert html =~ "Search billing records across customers, invoices, and subscriptions"
+      refute html =~ "Customers: name, email, owner ID, processor ID"
+      refute html =~ "Up to five results per group"
       refute html =~ "Type customer name, email, or ID"
       refute html =~ "Open invoice queue to $0.00"
     end
@@ -334,6 +334,16 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert html =~ "Navigate"
       assert html =~ "Select"
       assert html =~ "Close"
+    end
+
+    test "topbar trigger is a single-line billing search with destinations and shortcut" do
+      html = render_component(&Topbar.topbar/1, %{theme: "light", theme_forced: false})
+
+      assert html =~ "Search billing"
+      assert html =~ "customers, invoices, and subscriptions"
+      assert html =~ "⌘K"
+      refute html =~ "Customer billing lookup"
+      refute html =~ "Search customers now"
     end
 
     test "sizes the current loading indicator and makes hidden win in authored CSS" do

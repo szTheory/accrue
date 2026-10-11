@@ -21,15 +21,11 @@ defmodule AccrueAdmin.Components.Topbar do
           id="search-trigger"
           type="button"
           class="ax-search-trigger"
-          aria-label="Find one customer by name, email, or ID. Opens global customer detail search (Command or Control K)"
+          aria-label="Search billing: customers, invoices, and subscriptions (Command or Control K)"
           data-command-palette-trigger="true"
         >
           <Icon.icon name={:search} size="sm" class="ax-search-trigger-icon" />
-          <span class="ax-search-trigger-text">
-            <strong>Customer billing lookup</strong>
-            <em>Customer name, email, or ID</em>
-          </span>
-          <span class="ax-search-trigger-action">Search customers now</span>
+          <span class="ax-search-trigger-text">Search billing</span>
           <kbd class="ax-kbd">⌘K</kbd>
         </button>
 
