@@ -98,12 +98,13 @@ for (const capture of manifest.captures) {
   check(!seen.has(key), `duplicate matrix entry ${key}`); seen.add(key);
   routesByLane[capture.origin_lane].add(route);
   check(capture.file === `${routeKey}-${shape === "1280x900" ? "wide" : "narrow"}-${capture.theme}.png`, `capture filename does not match matrix: ${capture.file}`);
+  check(capture.capture_mode === "full_page", `capture is not full-page evidence: ${capture.file}`);
   const pngPath = path.resolve(captureRoot, capture.file);
   check(pngPath.startsWith(`${captureRoot}${path.sep}`) && fs.existsSync(pngPath), `missing or unsafe PNG ${capture.file}`);
   const bytes = fs.readFileSync(pngPath);
   check(sha(bytes) === capture.screenshot?.sha256 && bytes.length === capture.screenshot?.bytes, `PNG hash/size mismatch: ${capture.file}`);
   check(bytes.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])), `not a PNG: ${capture.file}`);
-  check(bytes.readUInt32BE(16) === capture.viewport.width && bytes.readUInt32BE(20) === capture.viewport.height, `PNG dimensions mismatch: ${capture.file}`);
+  check(bytes.readUInt32BE(16) === capture.viewport.width && bytes.readUInt32BE(20) >= capture.viewport.height, `PNG dimensions are inconsistent with viewport: ${capture.file}`);
   const assets = capture.assets;
   check(assets && assets.css && assets.js, `missing fetched asset digests: ${capture.file}`);
   for (const kind of ["css", "js"]) {
