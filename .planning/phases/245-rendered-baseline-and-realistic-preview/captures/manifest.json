@@ -1,7 +1,7 @@
 {
   "phase": "245-rendered-baseline-and-realistic-preview",
-  "captured_at": "2026-10-11T15:10:22.625Z",
-  "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+  "captured_at": "2026-10-11T15:22:15.257Z",
+  "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
   "source_dirty": false,
   "scenario": "isolated accrue-host-phase245-ordinary Fake seed; existing database preserved",
   "seed_revision": "6a2756f3253aaedb4ffb14ff93e1e4c4f1865aa5a0920ed291b9fbbc8a2c41e7",
@@ -16,7 +16,7 @@
       "route": "/admin",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -151,7 +151,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -196,7 +196,7 @@
         "heading": "Billing operations",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:09:59.163Z",
+      "captured_at": "2026-10-11T15:21:52.009Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/01-root-wide-light.png",
         "bytes": 255309,
@@ -210,7 +210,7 @@
       "route": "/admin/customers",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -345,7 +345,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -390,7 +390,7 @@
         "heading": "Find a customer",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:00.117Z",
+      "captured_at": "2026-10-11T15:21:53.061Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/02-rootcustomers-wide-light.png",
         "bytes": 419595,
@@ -404,7 +404,7 @@
       "route": "/admin/customers/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -539,7 +539,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -584,7 +584,7 @@
         "heading": "Mohr-Donnelly",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:00.901Z",
+      "captured_at": "2026-10-11T15:21:53.979Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/03-rootcustomers-paramid-wide-light.png",
         "bytes": 257752,
@@ -598,7 +598,7 @@
       "route": "/admin/subscriptions",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -733,7 +733,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -778,7 +778,7 @@
         "heading": "Subscriptions",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:01.595Z",
+      "captured_at": "2026-10-11T15:21:55.107Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/04-rootsubscriptions-wide-light.png",
         "bytes": 206326,
@@ -792,7 +792,7 @@
       "route": "/admin/subscriptions/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -927,7 +927,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -972,7 +972,7 @@
         "heading": "Flatley-McDermott",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:02.317Z",
+      "captured_at": "2026-10-11T15:21:55.888Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/05-rootsubscriptions-paramid-wide-light.png",
         "bytes": 414874,
@@ -986,7 +986,7 @@
       "route": "/admin/invoices",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -1121,7 +1121,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -1166,7 +1166,7 @@
         "heading": "Clear open receivables",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:03.336Z",
+      "captured_at": "2026-10-11T15:21:56.970Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/06-rootinvoices-wide-light.png",
         "bytes": 259136,
@@ -1180,7 +1180,7 @@
       "route": "/admin/invoices/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -1315,7 +1315,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -1360,7 +1360,7 @@
         "heading": "DEMO-UNCOLL-0006",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:04.309Z",
+      "captured_at": "2026-10-11T15:21:57.871Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/07-rootinvoices-paramid-wide-dark.png",
         "bytes": 260885,
@@ -1374,7 +1374,7 @@
       "route": "/admin/payments",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -1509,7 +1509,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -1554,7 +1554,7 @@
         "heading": "Recover failed payments",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:05.610Z",
+      "captured_at": "2026-10-11T15:21:58.459Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/08-rootpayments-wide-light.png",
         "bytes": 151962,
@@ -1568,7 +1568,7 @@
       "route": "/admin/payments/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -1703,7 +1703,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -1748,7 +1748,7 @@
         "heading": "ch_showcase_refunded",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:06.642Z",
+      "captured_at": "2026-10-11T15:21:59.155Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/09-rootpayments-paramid-wide-light.png",
         "bytes": 258453,
@@ -1762,7 +1762,7 @@
       "route": "/admin/coupons",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -1897,7 +1897,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -1942,7 +1942,7 @@
         "heading": "Review usable discounts",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:07.631Z",
+      "captured_at": "2026-10-11T15:21:59.890Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/10-rootcoupons-narrow-light.png",
         "bytes": 145483,
@@ -1956,7 +1956,7 @@
       "route": "/admin/coupons/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2091,7 +2091,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -2136,7 +2136,7 @@
         "heading": "$10 Welcome Credit",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:08.697Z",
+      "captured_at": "2026-10-11T15:22:00.744Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/11-rootcoupons-paramid-wide-light.png",
         "bytes": 176524,
@@ -2150,7 +2150,7 @@
       "route": "/admin/promotion-codes",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2285,7 +2285,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -2330,7 +2330,7 @@
         "heading": "Find active codes",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:09.304Z",
+      "captured_at": "2026-10-11T15:22:01.611Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/12-rootpromotion-codes-wide-light.png",
         "bytes": 154033,
@@ -2344,7 +2344,7 @@
       "route": "/admin/promotion-codes/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2479,7 +2479,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -2524,7 +2524,7 @@
         "heading": "WELCOME10",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:10.256Z",
+      "captured_at": "2026-10-11T15:22:02.373Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/13-rootpromotion-codes-paramid-wide-light.png",
         "bytes": 191089,
@@ -2538,7 +2538,7 @@
       "route": "/admin/connect",
       "state": "filtered-to-zero",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2673,7 +2673,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -2718,7 +2718,7 @@
         "heading": "Finish account readiness",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:11.090Z",
+      "captured_at": "2026-10-11T15:22:03.170Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/14-rootconnect-wide-light.png",
         "bytes": 160271,
@@ -2732,7 +2732,7 @@
       "route": "/admin/events",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2867,7 +2867,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -2912,7 +2912,7 @@
         "heading": "Trace billing activity",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:12.292Z",
+      "captured_at": "2026-10-11T15:22:04.006Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/16-rootevents-narrow-dark.png",
         "bytes": 790014,
@@ -2926,7 +2926,7 @@
       "route": "/admin/events/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -3061,7 +3061,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -3106,7 +3106,7 @@
         "heading": "Billing event",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:13.017Z",
+      "captured_at": "2026-10-11T15:22:04.769Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/17-rootevents-paramid-wide-light.png",
         "bytes": 194209,
@@ -3120,7 +3120,7 @@
       "route": "/admin/webhooks",
       "state": "filtered-to-zero",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -3255,7 +3255,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -3300,7 +3300,7 @@
         "heading": "Replay failed deliveries",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:13.649Z",
+      "captured_at": "2026-10-11T15:22:05.471Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/18-rootwebhooks-wide-light.png",
         "bytes": 154459,
@@ -3314,7 +3314,7 @@
       "route": "/admin/analytics/recovery",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -3449,7 +3449,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -3494,11 +3494,11 @@
         "heading": "Revenue Recovery",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:15.119Z",
+      "captured_at": "2026-10-11T15:22:07.523Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/20-rootanalytics-recovery-wide-dark.png",
-        "bytes": 265023,
-        "sha256": "e06757a3afeda6c47e32234a665b0b0b54308a2bab0031578cd90aee81eea30b"
+        "bytes": 264999,
+        "sha256": "d751100ba151067c7221576e1382a843752d57763f5c831054511881938da5a1"
       },
       "observation": "Recovery readiness observed: {\"bounded_wait_ms\":15000,\"at_risk_state\":\"no-pagination\",\"supporting_funnel_state\":\"ready\",\"ready\":true}."
     },
@@ -3508,7 +3508,7 @@
       "route": "/admin/analytics/recovery/subscriptions/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -3643,7 +3643,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -3688,7 +3688,7 @@
         "heading": "Dunning Timeline",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:15.746Z",
+      "captured_at": "2026-10-11T15:22:08.018Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/21-rootanalytics-recovery-subscriptions-paramid-wide-light.png",
         "bytes": 143542,
@@ -3702,7 +3702,7 @@
       "route": "/admin/customers",
       "state": "filtered-to-zero",
       "scenario": "ordinary Fake seed; impossible query only; no DB mutation",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -3837,7 +3837,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -3882,7 +3882,7 @@
         "heading": "Find a customer",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:18.881Z",
+      "captured_at": "2026-10-11T15:22:11.413Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/22-customers-filtered-zero-wide-light.png",
         "bytes": 151200,
@@ -3896,7 +3896,7 @@
       "route": "/admin",
       "state": "global-search-open",
       "scenario": "ordinary Fake seed; keyboard shortcut Control+K; no action executed",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -4031,7 +4031,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -4076,11 +4076,11 @@
         "heading": "Billing operations",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:20.465Z",
+      "captured_at": "2026-10-11T15:22:13.026Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/23-global-search-open-wide-light.png",
-        "bytes": 221720,
-        "sha256": "279965ae1108628914e93388bfa1e74b34b5a5505e2a4287bdd4b05b5127d502"
+        "bytes": 221726,
+        "sha256": "028b55f275d34f7898d72fe54c5e2a4ed4bcc796b84885e327b88e059c79b36d"
       },
       "observation": "Control+K opened the modal dialog, exposed the scoped-list suggestions, and moved focus to its search input."
     },
@@ -4090,7 +4090,7 @@
       "route": "/admin",
       "state": "global-search-keyboard-and-pointer-active",
       "scenario": "ordinary Fake search results for Atelier Café; arrow selection followed by hover on another result",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -4225,7 +4225,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -4270,7 +4270,7 @@
         "heading": "Billing operations",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:20.752Z",
+      "captured_at": "2026-10-11T15:22:13.299Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/24-global-search-pointer-selection-wide-light.png",
         "bytes": 249672,
@@ -4284,7 +4284,7 @@
       "route": "/admin/customers/:id",
       "state": "peer-record-invoices-tab-selected",
       "scenario": "ordinary Unicode customer found through global search; URL tab selected by link",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -4419,7 +4419,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -4464,7 +4464,7 @@
         "heading": "Atelier Café",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:22.517Z",
+      "captured_at": "2026-10-11T15:22:15.147Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/25-customer-invoices-tab-wide-light.png",
         "bytes": 240652,
@@ -4478,7 +4478,7 @@
       "route": "/admin/customers/:id",
       "state": "activity-disclosure-expanded",
       "scenario": "ordinary Unicode customer detail; lazy activity disclosure opened; read-only",
-      "source_revision": "e90e1436a2bde68404de8a053d4af806e34669d4",
+      "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
       "source_dirty": false,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -4613,7 +4613,7 @@
         "accrue_admin/priv/static/fonts/geist-sans-vf.woff2": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "accrue_admin/priv/static/storybook.css": "6bc52ea7b2af9fa59a4b5d9b07368b1d42de655fc55c791c4bcf849fe1d5d8e5",
         "accrue_admin/priv/static/storybook.js": "cf554a2f130b862e809d3835a65d6e4ccb8f80efbb623806d1a2bd544e4c1ac5",
-        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "f8f8265f7182e8683dc84b96ebd9aabae6a8e191bb43a897ef06d5fc8d75c5a5",
+        "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
         "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
         "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
         "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
@@ -4658,11 +4658,11 @@
         "heading": "Atelier Café",
         "selector": "main h1"
       },
-      "captured_at": "2026-10-11T15:10:22.625Z",
+      "captured_at": "2026-10-11T15:22:15.257Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/26-customer-activity-expanded-wide-light.png",
-        "bytes": 249344,
-        "sha256": "ff578a12599f942f77cd6ffd2c419d776f1e72402e71812ea2cd8ea18d904cf2"
+        "bytes": 249343,
+        "sha256": "c9165999e612a7dc138f3112ead72a8aa9c804d7c1c9be58cab2612c3379352f"
       },
       "observation": "Opening the Activity disclosure rendered its available timeline/empty evidence without a record mutation."
     }

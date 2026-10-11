@@ -2,7 +2,7 @@
 status: verifying
 trigger: "Phase 245 authenticated browser sweep stalls after /admin and before /admin/customers completion; latest interrupted stack points to page.setViewportSize."
 created: 2026-10-11T14:30:00Z
-updated: 2026-10-11T15:11:45Z
+updated: 2026-10-11T15:22:27Z
 ---
 
 ## Current Focus
@@ -10,7 +10,7 @@ updated: 2026-10-11T15:11:45Z
 hypothesis: The capture wrapper waits for a nonexistent dashboard data table before screenshotting, consuming the test time budget and making a later interrupted viewport call appear responsible.
 test: Dashboard table count is zero; the exact first-two capture visits pass after using an immediate optional DOM read.
 expecting: A table count above zero or continued first-two stall after the change would refute the hypothesis; neither occurred.
-next_action: Hand findings owner the two stale Connect route-state references (F02, F05), rerun the manifest verifier after they are corrected, and request human verification before archiving this session.
+next_action: Hand the passing guard, clean capture evidence, custody check, and full verifier result to the milestone owner for independent security re-audit; archive only after human confirmation.
 bug_class: Bohrbug (deterministic missing optional selector wait)
 reasoning_checkpoint:
   hypothesis: "Locator.getAttribute on an absent optional dashboard data table waits for Playwright's timeout; repeated optional waits consume the capture budget, and the interrupted setViewportSize stack is downstream."
@@ -84,17 +84,21 @@ started: During clean recapture after prior 19-PNG run whose manifest has source
   checked: Final authenticated Playwright run, manifest files, PNG hashes, protected preview custody and baseline verifier
   found: Four tests passed in 49.1 seconds; manifest has 24 captures, source_dirty=false, source_revision=e90e1436, and every PNG hash/byte count matches. Phase243 assert-preserved passed. Baseline verifier reports only stale F02/F05 references to R14-populated; current C14 has R14-filtered-to-zero with the same PNG hash.
   implication: Browser capture and provenance are complete. Findings/coverage owner must update the two route-state references before whole-phase verifier passes.
+- timestamp: 2026-10-11T15:22:27Z
+  checked: Independent bulk-capture Fake processor guard and fresh capture from source revision a8d39ea4
+  found: Mock guard test accepted Accrue.Processor.Fake and rejected Accrue.Processor.Stripe without database access. The standalone bulk test now invokes the same live dockerEval processor guard before creating output or taking any screenshot. All five authenticated Playwright tests passed in 49.6 seconds; manifest has 24 clean-source captures and all PNG hashes match; full route/manifest/findings verifier and protected Phase243 custody assertion passed.
+  implication: Running only the bulk capture test is now subject to the Fake-processor custody check, and fresh evidence is bound to guarded source.
 
 ## Resolution
 
 root_cause: Optional locator attribute reads wait for nonexistent dashboard data-table until Playwright timeout; catches mask the wait and consume sweep budget.
-fix: Commits 8979f897, 84d14422, 9b07efc2, c7bd7f1e and e90e1436 remove optional locator waits, align supplemental assertions with observed DOM, wait for LiveView hooks, and validate source digest paths separately from secret metadata fields.
+fix: Commits 8979f897, 84d14422, 9b07efc2, c7bd7f1e and e90e1436 remove optional locator waits, align supplemental assertions with observed DOM, wait for LiveView hooks, and validate source digest paths separately from secret metadata fields. Commit a8d39ea4 adds an independent live Fake-processor guard to the bulk capture test.
 verification:
-  target_test: {result: pass, detail: "four authenticated Phase245 Playwright tests passed in 49.1 seconds"}
+  target_test: {result: pass, detail: "five authenticated Phase245 Playwright tests passed in 49.6 seconds, including the focused positive/negative processor guard"}
   mutation_check: {result: skipped, reason: "Stryker is not configured for this CommonJS Playwright capture harness"}
   no_op_deletion: {result: pass, detail: "capture visits, state assertions, secret-field validation and evidence writing remain active"}
-  adjacent_tests: {result: pass, suites_run: ["full Phase245 Playwright suite", "PNG digest and byte-count audit", "Phase243 preview assert-preserved"]}
+  adjacent_tests: {result: pass, suites_run: ["full Phase245 Playwright suite", "PNG digest and byte-count audit", "full route/manifest/findings verifier", "Phase243 preview assert-preserved"]}
   revert_and_reconfirm: {result: not_run, reason: "the original source was observed failing before the fix and the same first-two wrapper passed in 15.4 seconds after, but no literal post-fix revert was run"}
-  manifest_verifier: {result: blocked_by_findings, detail: "F02/F05 route_state R14-populated is stale; manifest C14 is R14-filtered-to-zero with same PNG hash"}
+  manifest_verifier: {result: pass, detail: "PASS: route inventory, capture manifest and findings"}
   guardrail_verdict: pending_literal_revert_check_and_human_verify
 files_changed: [examples/accrue_host/e2e/phase245-admin-baseline.spec.js]

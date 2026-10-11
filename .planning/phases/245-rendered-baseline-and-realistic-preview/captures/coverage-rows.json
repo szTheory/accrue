@@ -15,7 +15,7 @@
     "url": "http://accrue-host-phase245-ordinary.localhost/admin",
     "visual_anchor": "Global search dialog with scoped list suggestions; visible page heading: Billing operations",
     "status": "inspected",
-    "evidence": "manifest capture C21; PNG SHA-256 279965ae1108628914e93388bfa1e74b34b5a5505e2a4287bdd4b05b5127d502; Control+K opened the modal dialog, exposed the scoped-list suggestions, and moved focus to its search input."
+    "evidence": "manifest capture C21; PNG SHA-256 028b55f275d34f7898d72fe54c5e2a4ed4bcc796b84885e327b88e059c79b36d; Control+K opened the modal dialog, exposed the scoped-list suggestions, and moved focus to its search input."
   },
   {
     "id": "R01-search-pointer-active",
@@ -33,7 +33,7 @@
     "url": "http://accrue-host-phase245-ordinary.localhost/admin/analytics/recovery",
     "visual_anchor": "Visible route heading: Revenue Recovery",
     "status": "inspected",
-    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C18; PNG SHA-256 e06757a3afeda6c47e32234a665b0b0b54308a2bab0031578cd90aee81eea30b"
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C18; PNG SHA-256 d751100ba151067c7221576e1382a843752d57763f5c831054511881938da5a1"
   },
   {
     "id": "R21-populated",
@@ -105,7 +105,7 @@
     "url": "http://accrue-host-phase245-ordinary.localhost/admin/customers/83df248a-b961-4f77-9b26-166b4bd03deb?return_to=%2Fadmin%2Fcustomers&tab=invoices",
     "visual_anchor": "Customer detail with expanded Activity disclosure; visible page heading: Atelier Café",
     "status": "inspected",
-    "evidence": "manifest capture C24; PNG SHA-256 ff578a12599f942f77cd6ffd2c419d776f1e72402e71812ea2cd8ea18d904cf2; Opening the Activity disclosure rendered its available timeline/empty evidence without a record mutation."
+    "evidence": "manifest capture C24; PNG SHA-256 c9165999e612a7dc138f3112ead72a8aa9c804d7c1c9be58cab2612c3379352f; Opening the Activity disclosure rendered its available timeline/empty evidence without a record mutation."
   },
   {
     "id": "R03-invoices-tab",
