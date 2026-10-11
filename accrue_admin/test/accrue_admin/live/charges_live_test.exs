@@ -66,6 +66,16 @@ defmodule AccrueAdmin.ChargesLiveTest do
     refute html =~ "ax-text-12"
   end
 
+  test "payment identity exposes the full processor ID through a copy action", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/payments?view=all")
+    document = Floki.parse_document!(html)
+    row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "ch_open"))
+
+    assert row
+    assert length(Floki.find(row, "[data-clipboard-text='ch_open'][aria-label='Copy payment ID']")) == 1
+  end
+
   test "payment search guidance and secondary exact customer criteria match query semantics", %{
     conn: conn
   } do

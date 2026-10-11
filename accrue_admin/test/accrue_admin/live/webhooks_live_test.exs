@@ -75,6 +75,16 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     assert_single_filter_form(html)
   end
 
+  test "webhook identity exposes the full processor event ID through a copy action", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/webhooks?view=all")
+    document = Floki.parse_document!(html)
+    row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "evt_dead"))
+
+    assert row
+    assert length(Floki.find(row, "[data-clipboard-text='evt_dead'][aria-label='Copy webhook event ID']")) == 1
+  end
+
   test "bare webhooks route represents the Needs replay queue", %{conn: conn} do
     contract = ListContracts.fetch!(:webhooks)
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")

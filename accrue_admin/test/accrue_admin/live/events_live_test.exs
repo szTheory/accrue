@@ -93,6 +93,16 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert_single_filter_form(html)
   end
 
+  test "event identity exposes its exact event key through a copy action", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/events?view=all")
+    document = Floki.parse_document!(html)
+    row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "invoice.payment_failed.in_scope"))
+
+    assert row
+    assert length(Floki.find(row, "[data-clipboard-text='invoice.payment_failed.in_scope'][aria-label='Copy event ID']")) == 1
+  end
+
   test "bare events route represents the All ledger lens", %{conn: conn} do
     contract = ListContracts.fetch!(:events)
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")

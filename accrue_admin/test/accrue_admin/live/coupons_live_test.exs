@@ -70,6 +70,16 @@ defmodule AccrueAdmin.CouponsLiveTest do
     refute html =~ "Expired Deal"
   end
 
+  test "coupon identity exposes the full processor ID through a copy action", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/coupons?view=all")
+    document = Floki.parse_document!(html)
+    row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "Spring 25"))
+
+    assert row
+    assert length(Floki.find(row, "[data-clipboard-text='coupon_spring'][aria-label='Copy coupon ID']")) == 1
+  end
+
   test "coupon detail links retain the validated query and validity lens", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 

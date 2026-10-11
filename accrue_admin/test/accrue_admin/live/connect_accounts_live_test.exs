@@ -74,6 +74,16 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     assert_single_filter_form(html)
   end
 
+  test "connected account identity exposes the full Stripe ID through a copy action", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/connect?view=all")
+    document = Floki.parse_document!(html)
+    row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "acct_match"))
+
+    assert row
+    assert length(Floki.find(row, "[data-clipboard-text='acct_match'][aria-label='Copy connected account ID']")) == 1
+  end
+
   test "bare connect route represents the Needs attention queue", %{conn: conn} do
     contract = ListContracts.fetch!(:connect)
 
