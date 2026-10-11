@@ -1,0 +1,1305 @@
+{
+  "phase": "247",
+  "captures": [
+    {
+      "file": "ordinary-invoice-action-review-wide-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "invoice-action-review",
+      "route": "/admin/invoices/e8f9ba69-ee85-4efa-9939-d9a8979429f4",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 1979
+      },
+      "theme": "light",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "action_review_open": true,
+        "confirmation_not_submitted": true
+      },
+      "evidence_at": "2026-10-11T23:10:03.951Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "33e81e94c386048ce6678e9dc31aafb0deaa076ee1c577c4687c3c7dbf81899c",
+        "bytes": 167466
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "ordinary-invoice-action-review-wide-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "invoice-action-review",
+      "route": "/admin/invoices/e8f9ba69-ee85-4efa-9939-d9a8979429f4",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 1979
+      },
+      "theme": "dark",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "action_review_open": true,
+        "confirmation_not_submitted": true
+      },
+      "evidence_at": "2026-10-11T23:10:04.111Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "179d329e84ab13d5eef583e2e38c32e8595f61d86d8c9f07c9cf4bd7b18dcb37",
+        "bytes": 153005
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "ordinary-invoice-action-review-narrow-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "invoice-action-review",
+      "route": "/admin/invoices/e8f9ba69-ee85-4efa-9939-d9a8979429f4",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 2710
+      },
+      "theme": "light",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "action_review_open": true,
+        "confirmation_not_submitted": true
+      },
+      "evidence_at": "2026-10-11T23:10:04.195Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "155cc663703ce29749b47d515b7a33ce14ee4cc9176c416ef0505abdc53600f6",
+        "bytes": 138540
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "ordinary-invoice-action-review-narrow-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "invoice-action-review",
+      "route": "/admin/invoices/e8f9ba69-ee85-4efa-9939-d9a8979429f4",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 2710
+      },
+      "theme": "dark",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "action_review_open": true,
+        "confirmation_not_submitted": true
+      },
+      "evidence_at": "2026-10-11T23:10:04.254Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "4f2f81211789d231a90eb4373ae00fe1980b3d419b5eab329d1564b1a3a968f7",
+        "bytes": 135424
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "ordinary-payment-recovery-wide-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "payment-recovery",
+      "route": "/admin/analytics/recovery",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 1351
+      },
+      "theme": "light",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "route_connected": true,
+        "currency_states": 2,
+        "coverage_visible": true,
+        "recovery_layout": {
+          "wide": {
+            "groupColumns": 1,
+            "pairColumns": 2,
+            "viewportWidth": 1280,
+            "pageWidth": 1280
+          },
+          "narrow": {
+            "groupColumns": 1,
+            "pairColumns": 1,
+            "viewportWidth": 320,
+            "pageWidth": 320
+          }
+        }
+      },
+      "evidence_at": "2026-10-11T23:10:05.757Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "86d252caa7d91d380a202712cfe5ebe946cbbe976907af56be8af69fb5ff95ec",
+        "bytes": 243587
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "ordinary-payment-recovery-wide-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "payment-recovery",
+      "route": "/admin/analytics/recovery",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 1351
+      },
+      "theme": "dark",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "route_connected": true,
+        "currency_states": 2,
+        "coverage_visible": true,
+        "recovery_layout": {
+          "wide": {
+            "groupColumns": 1,
+            "pairColumns": 2,
+            "viewportWidth": 1280,
+            "pageWidth": 1280
+          },
+          "narrow": {
+            "groupColumns": 1,
+            "pairColumns": 1,
+            "viewportWidth": 320,
+            "pageWidth": 320
+          }
+        }
+      },
+      "evidence_at": "2026-10-11T23:10:05.861Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "7a458a828b426ea32fa60e8a329069db26abdcb7d23fbf95fb244a015b53532f",
+        "bytes": 239106
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "ordinary-payment-recovery-narrow-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "payment-recovery",
+      "route": "/admin/analytics/recovery",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 2872
+      },
+      "theme": "light",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "route_connected": true,
+        "currency_states": 2,
+        "coverage_visible": true,
+        "recovery_layout": {
+          "wide": {
+            "groupColumns": 1,
+            "pairColumns": 2,
+            "viewportWidth": 1280,
+            "pageWidth": 1280
+          },
+          "narrow": {
+            "groupColumns": 1,
+            "pairColumns": 1,
+            "viewportWidth": 320,
+            "pageWidth": 320
+          }
+        }
+      },
+      "evidence_at": "2026-10-11T23:10:05.945Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "7794f015676741bd81a91a016032d43222e224040d84331a95993082b9af88ab",
+        "bytes": 232639
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "ordinary-payment-recovery-narrow-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "payment-recovery",
+      "route": "/admin/analytics/recovery",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 2872
+      },
+      "theme": "dark",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "route_connected": true,
+        "currency_states": 2,
+        "coverage_visible": true,
+        "recovery_layout": {
+          "wide": {
+            "groupColumns": 1,
+            "pairColumns": 2,
+            "viewportWidth": 1280,
+            "pageWidth": 1280
+          },
+          "narrow": {
+            "groupColumns": 1,
+            "pairColumns": 1,
+            "viewportWidth": 320,
+            "pageWidth": 320
+          }
+        }
+      },
+      "evidence_at": "2026-10-11T23:10:06.027Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "5fd809d7e69562bc9f17a1a054dd2337e34211c3dc573c4bc79378f1460ca2a4",
+        "bytes": 227320
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "heldout-webhook-populated-detail-wide-light.png",
+      "origin_lane": "heldout",
+      "scenario": "webhook-populated-detail",
+      "route": "/admin/webhooks/5a8f8b90-2932-4168-a178-c99e6bf9959d",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 989
+      },
+      "theme": "light",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "observed_status_visible": true,
+        "exact_secondary_evidence_available": true,
+        "replay_action_available": true
+      },
+      "evidence_at": "2026-10-11T23:11:21.893Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "96397d23e574c35ebe43d2d5e03536f8ffc238821f0d2e8715d9047add2b7913",
+        "bytes": 159217
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "heldout-webhook-populated-detail-wide-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "webhook-populated-detail",
+      "route": "/admin/webhooks/5a8f8b90-2932-4168-a178-c99e6bf9959d",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 989
+      },
+      "theme": "dark",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "observed_status_visible": true,
+        "exact_secondary_evidence_available": true,
+        "replay_action_available": true
+      },
+      "evidence_at": "2026-10-11T23:11:21.956Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "c0368dde93b6e7155039a5a7fbc3e873492873cb3d0100690e803ced3c6e4a5c",
+        "bytes": 157726
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "heldout-webhook-populated-detail-narrow-light.png",
+      "origin_lane": "heldout",
+      "scenario": "webhook-populated-detail",
+      "route": "/admin/webhooks/5a8f8b90-2932-4168-a178-c99e6bf9959d",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 1281
+      },
+      "theme": "light",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "observed_status_visible": true,
+        "exact_secondary_evidence_available": true,
+        "replay_action_available": true
+      },
+      "evidence_at": "2026-10-11T23:11:22.022Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "2c75fa1d18286f6a2e1ce79144b890c64d337af78ae28788dbe6cb2651c82413",
+        "bytes": 120718
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "heldout-webhook-populated-detail-narrow-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "webhook-populated-detail",
+      "route": "/admin/webhooks/5a8f8b90-2932-4168-a178-c99e6bf9959d",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 1281
+      },
+      "theme": "dark",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "observed_status_visible": true,
+        "exact_secondary_evidence_available": true,
+        "replay_action_available": true
+      },
+      "evidence_at": "2026-10-11T23:11:22.087Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "7531af62b5f1ac362b4a17310097f8a25811509b0fe80bc77eba7bcfc6eb5b63",
+        "bytes": 114711
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "heldout-webhook-replay-review-wide-light.png",
+      "origin_lane": "heldout",
+      "scenario": "webhook-replay-review",
+      "route": "/admin/webhooks/5a8f8b90-2932-4168-a178-c99e6bf9959d",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 989
+      },
+      "theme": "light",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "review_open": true,
+        "confirmation_available": true,
+        "replay_submitted": false
+      },
+      "evidence_at": "2026-10-11T23:11:22.339Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "25f1376344dfee7e1fdfef99ab4030778870526ec7707810f50d7dc464233b71",
+        "bytes": 193581
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "heldout-webhook-replay-review-wide-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "webhook-replay-review",
+      "route": "/admin/webhooks/5a8f8b90-2932-4168-a178-c99e6bf9959d",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 989
+      },
+      "theme": "dark",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "review_open": true,
+        "confirmation_available": true,
+        "replay_submitted": false
+      },
+      "evidence_at": "2026-10-11T23:11:22.474Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "8e68d71581748f5bab1cd90bd010973cc2434a84fba4f1b5872b1692164bca94",
+        "bytes": 186941
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "heldout-webhook-replay-review-narrow-light.png",
+      "origin_lane": "heldout",
+      "scenario": "webhook-replay-review",
+      "route": "/admin/webhooks/5a8f8b90-2932-4168-a178-c99e6bf9959d",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 1281
+      },
+      "theme": "light",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "review_open": true,
+        "confirmation_available": true,
+        "replay_submitted": false
+      },
+      "evidence_at": "2026-10-11T23:11:22.541Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "0ca181342f0f85abf36dcfad8dca31baaa68afaad69804f1904b16ab98cd903c",
+        "bytes": 99319
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    },
+    {
+      "file": "heldout-webhook-replay-review-narrow-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "webhook-replay-review",
+      "route": "/admin/webhooks/5a8f8b90-2932-4168-a178-c99e6bf9959d",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 1281
+      },
+      "theme": "dark",
+      "source_sha": "60cbf06331c2bdc25695c9b9d4ebcfaf9b0bc602",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/detail.ex": "5d0ae172d79d55575719b9c1db40bf003d400af71fbd0046bea022b8e7c86b33",
+        "accrue_admin/lib/accrue_admin/components/json_viewer.ex": "3b8d8b730902cc81ecf2a06c9c0a69f0b28bdff557e5b971583bf9006e73f21d",
+        "accrue_admin/lib/accrue_admin/components/kpi_card.ex": "b16cc2bdf5b2a73b17d0f4b5ffe202b00699aef68871748c23bb1f63bc2eb3bb",
+        "accrue_admin/lib/accrue_admin/components/window_selector.ex": "a710b92c1dd7f68d41d3b4a527e9bcf943ad4dc80465a9a30420abe721f7a0ad",
+        "accrue_admin/lib/accrue_admin/copy.ex": "f7a022f66b9c8ee41ea33bfeb30626ece8d192c0092b506541643bdbd0fc88ab",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "31b01ed78fe858a3dc4d54b2ebe3f0c77e81ee1efbf45911765760675a9d4b2b",
+        "accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex": "c77ed1e61296ebb90c4493ba9a6f538ea4f6bdbd7b17272bf4f944e84cdc27bc",
+        "accrue_admin/assets/css/app.css": "a84bedab3e0d56ea593191628589301bfe2a46d06a3f5c0c620b93809d21b169",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/assets/js/hooks/clipboard.js": "117f510ae0f1cdbf984963d6d8d4330eed544a95bf58b75d06e2a6048c0a78b7",
+        "accrue_admin/assets/js/hooks/time_display.js": "b69b76aa8e555f3ae100c9be0c64aa2985788adf29d2988966d3c6275db012b1",
+        "accrue_admin/priv/static/accrue_admin.css": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase247-time-tracer.spec.js": "42cecf6b144db4d17fe4411f691e69322c1af7d99bdb026202e155d8c4e7d9a8",
+        "examples/accrue_host/e2e/phase247-current-proof.spec.js": "5b9f6d7ebd72012450e61ae114f9cb2ae67051ae08ace696fc71bb85c368769c",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "examples/accrue_host/playwright.phase247.config.js": "906387fa005cdb7c248a140341865b2ab45d0d65d3c2ced0a03c80285fc15357",
+        "examples/accrue_host/playwright.phase247-ordinary.config.js": "70573ddcc98bbf409c053ceac63a24149881ac88d25ec4bd5344dacfe648c3f1",
+        "examples/accrue_host/priv/repo/seeds/ordinary.exs": "fbbdcb31672a9a74778074bbecde280e05e66084cd2941285af7c6fc24e2ef93",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase247_render_proof.mjs": "c42ec1072f2d761589eb49a1bac3b0aac19cab7d6b7ae8f2a0e93818134c7ef8"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "full_page",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-3edbe340e4100dd80a78b8f64893f781",
+          "sha256": "709b84488682f0f3e26d3e59707a24526671c170c735c9ff8dd24dc7885ff7f1",
+          "bytes": 133715
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "review_open": true,
+        "confirmation_available": true,
+        "replay_submitted": false
+      },
+      "evidence_at": "2026-10-11T23:11:22.603Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "0f18e92f0ae415d6b09c2773c78704a8667482e7fae86d255ad4c1b36189002a",
+        "bytes": 100966
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-11T23:12:16.913Z"
+    }
+  ]
+}

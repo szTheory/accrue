@@ -111,6 +111,17 @@ Plan 247-08's initial five owners are covered in `subscriptions_live.ex`, `webho
 
 Serialization and non-instant cases remain explicit: `FilterChipBar.present_value/1` serializes date/time filter criteria as ISO query values; webhook event evidence keeps its `Recorded:` value as an exact ISO forensic string inside the expandable evidence block; subscription list date-only or non-DateTime fallback values remain plain text. Analytics window bounds and query parameters remain UTC and unchanged. These are serialization/filter/evidence paths, not localized timestamp presentation controls.
 
+## Plan 247-07 current-revision proof
+
+| Requirement / decision | Executed owner | Evidence | Result |
+|---|---|---|---|
+| TIME-01, LANG-02, STATE-02, DETAIL-01, DETAIL-02, METRIC-01; D-12 | `phase247-current-proof.spec.js`, `verify_phase247_render_proof.mjs` | 16 individually inspected full-page captures, source-bound manifest, ordinary + isolated held-out lanes, wide/narrow and light/dark | pass |
+| Responsive recovery currency pairs | Recovery owner geometry assertions at 1280px and 320px | Actual DOM pair/group geometry plus overflow assertion in the mounted proof | pass |
+| Replay confirmation behavior | Held-out replay review route | Confirmation state captured; no submission performed | pass |
+| Threat T-247-07 | Focused tests, owner-scoped route setup, source/asset validator | Source SHA `60cbf06331c2`; served CSS and JS hashes verified; held-out owner selected through UI | mitigated |
+
+The rendered review is in `captures/phase247-current-proof/VISUAL-REVIEW.md`. The held-out fixture has only two dead webhook deliveries and no separate eligible blocked-detail state; the detail Activity and raw-payload panels are empty for its selected record. This limit is recorded in both the manifest's scenario checks and visual review. Phase 248 retains integrated scenario selection and end-to-end proof.
+
 ## Deferred and excluded
 
 Phase 248 owns scenario selection and integrated milestone proof. No billing/provider feature, Portal, new Admin room, migration, dependency or remote publication belongs here. Protected Phase 243 preview and earlier 245/246 captures are read-only history.
