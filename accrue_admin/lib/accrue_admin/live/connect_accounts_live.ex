@@ -125,7 +125,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
           <:filter_toolbar>
             <DataTable.filter_toolbar
               id="connect-accounts"
-              filter_fields={connect_filter_fields()}
+              filter_fields={connect_filter_fields(@params)}
               filter_params={filter_params(@params)}
               path={@table_path}
               clear_href={clear_all_href(@params, @table_path)}
@@ -167,7 +167,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
             %{label: "Local platform fee override", render: &override_summary(&1, @current_owner_scope)},
             %{label: Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
-          filter_fields={connect_filter_fields()}
+          filter_fields={connect_filter_fields(@params)}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -202,19 +202,18 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     |> assign(:current_path, admin_path(admin, "/connect"))
   end
 
-  defp connect_filter_fields do
+  defp connect_filter_fields(params) do
     [
       %{
         id: :q,
-        label: Copy.connect_accounts_filter_label_search(),
-        placeholder: Copy.connect_accounts_filter_label_search()
+        label: "Search Connect by Stripe account ID, email, or owner ID",
+        placeholder: "Stripe account ID, email, or owner ID"
       },
       %{
         id: :type,
-        label: Copy.connect_accounts_filter_label_type(),
-        type: :segmented,
+        label: "Account type",
+        type: :datalist,
         options: [
-          {"", "All"},
           {"standard", Copy.connect_accounts_filter_option_type_standard()},
           {"express", Copy.connect_accounts_filter_option_type_express()},
           {"custom", Copy.connect_accounts_filter_option_type_custom()}
@@ -222,45 +221,59 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       },
       %{
         id: :charges_enabled,
-        label: Copy.connect_accounts_filter_label_charges(),
-        type: :segmented,
+        label: "Charges enabled",
+        type: :select,
+        all_label: "All charge settings",
         options: [
-          {"", "All"},
           {"true", Copy.connect_accounts_filter_option_charges_enabled()},
           {"false", Copy.connect_accounts_filter_option_charges_disabled()}
         ]
       },
       %{
         id: :payouts_enabled,
-        label: Copy.connect_accounts_filter_label_payouts(),
-        type: :segmented,
+        label: "Payouts enabled",
+        type: :select,
+        all_label: "All payout settings",
         options: [
-          {"", "All"},
           {"true", Copy.connect_accounts_filter_option_payouts_enabled()},
           {"false", Copy.connect_accounts_filter_option_payouts_disabled()}
         ]
       },
       %{
         id: :details_submitted,
-        label: Copy.connect_accounts_filter_label_onboarding(),
-        type: :segmented,
+        label: "Details submitted",
+        type: :select,
+        all_label: "All verification states",
         options: [
-          {"", "All"},
           {"true", Copy.connect_accounts_filter_option_onboarding_submitted()},
           {"false", Copy.connect_accounts_filter_option_onboarding_pending()}
         ]
       },
       %{
         id: :deauthorized,
-        label: Copy.connect_accounts_filter_label_authorization(),
-        type: :segmented,
+        label: "Authorization",
+        type: :select,
+        all_label: "All authorization states",
         options: [
-          {"", "All"},
           {"true", Copy.connect_accounts_filter_option_authorization_deauthorized()},
           {"false", Copy.connect_accounts_filter_option_authorization_active()}
         ]
       }
     ]
+    |> Enum.map(fn
+      %{id: :type, options: options} = field ->
+        current_type = Map.get(params, "type")
+        known_values = Enum.map(options, fn {value, _label} -> value end)
+
+        if is_binary(current_type) and current_type != "" and current_type not in known_values do
+          %{field | options: options ++ [{current_type, "Current type: #{current_type}"}]}
+        else
+          field
+        end
+
+      field ->
+        field
+    end)
   end
 
   defp filter_params(params) do

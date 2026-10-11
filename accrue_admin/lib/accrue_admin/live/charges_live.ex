@@ -309,7 +309,11 @@ defmodule AccrueAdmin.Live.ChargesLive do
 
   defp payment_filter_fields do
     [
-      %{id: :q, label: "Search", placeholder: "Search payments"},
+      %{
+        id: :q,
+        label: "Search payments by processor ID, customer email, or customer name",
+        placeholder: "Search by processor ID, customer email, or customer name"
+      },
       {
         :status,
         [
@@ -324,12 +328,19 @@ defmodule AccrueAdmin.Live.ChargesLive do
           ]
         ]
       },
-      %{id: :customer_id, label: "Customer id", placeholder: "Customer id"},
+      %{
+        id: :customer_id,
+        label: "Customer ID",
+        placeholder: "Customer ID",
+        secondary: true
+      },
       %{
         id: :fees_settled,
-        label: "Fees settled",
-        type: :segmented,
-        options: [{"", "All"}, {"true", "Settled"}, {"false", "Pending"}]
+        label: "Fee settlement",
+        type: :select,
+        all_label: "All fee states",
+        options: [{"true", "Settled"}, {"false", "Pending"}],
+        secondary: true
       }
     ]
     |> Enum.map(fn

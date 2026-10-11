@@ -276,6 +276,28 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     refute html =~ "acct_other"
   end
 
+  test "Connect criteria are labeled native controls and retain host-defined account types", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/connect?view=all&type=partner")
+    parsed = Floki.parse_document!(html)
+    form = Floki.find(parsed, "[data-role='filter-form']") |> hd()
+
+    assert html =~ "Search Connect by Stripe account ID, email, or owner ID"
+    assert html =~ "Charges"
+    assert html =~ "Payouts"
+    assert html =~ "Account type"
+    assert html =~ "Details submitted"
+    assert html =~ "Authorization"
+    assert Floki.find(form, "input#connect-accounts-filter-type[list]") |> length() == 1
+
+    assert Floki.attribute(hd(Floki.find(form, "#connect-accounts-filter-type")), "value") == [
+             "partner"
+           ]
+  end
+
   test "account detail return keeps the exact Connect lens and filters", %{
     conn: conn,
     match: match

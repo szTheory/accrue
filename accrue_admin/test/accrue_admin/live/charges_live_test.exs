@@ -66,6 +66,24 @@ defmodule AccrueAdmin.ChargesLiveTest do
     refute html =~ "ax-text-12"
   end
 
+  test "payment search guidance and secondary exact customer criteria match query semantics", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/payments?view=all")
+    parsed = Floki.parse_document!(html)
+
+    assert html =~ "Search payments by processor ID, customer email, or customer name"
+
+    exact_customer =
+      Floki.find(parsed, "details.ax-data-table-filter-disclosure #payments-filter-customer_id")
+
+    assert length(exact_customer) == 1
+    assert html =~ "Customer ID"
+    assert html =~ "Fee settlement"
+    assert html =~ "All fee states"
+  end
+
   test "renders Copy-backed filtered empty index when search excludes all payments", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
