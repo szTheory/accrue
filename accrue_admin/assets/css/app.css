@@ -4221,7 +4221,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
   min-width: 0;
 }
 
-.ax-recovery-currency-groups {
+.ax-kpi-grid.ax-recovery-currency-groups {
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -4256,7 +4256,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 @media (max-width: 599.98px) {
-  .ax-recovery-currency-groups,
+  .ax-kpi-grid.ax-recovery-currency-groups,
   .ax-recovery-currency-pair {
     grid-template-columns: minmax(0, 1fr);
   }
