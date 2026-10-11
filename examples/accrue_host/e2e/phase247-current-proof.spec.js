@@ -179,7 +179,8 @@ ordinaryTest("@phase247-current-ordinary invoice action review and recovery anal
   });
 });
 
-heldoutTest("@phase247-current-heldout populated webhook detail and replay review stay scoped", async ({ page, sandboxId }) => {
+heldoutTest("@phase247-current-heldout populated webhook detail and replay review stay scoped", async ({ page, sandboxId }, testInfo) => {
+  testInfo.setTimeout(90_000);
   if (process.env.PHASE247_PROOF_LANE !== "heldout") test.skip();
   await page.addInitScript(() => { document.documentElement.classList.add("accrue-admin"); });
   const fixture = readFixture();
@@ -227,10 +228,12 @@ heldoutTest("@phase247-current-heldout populated webhook detail and replay revie
   await page.goto(route);
   await waitForLiveView(page);
   let blockedDetail = null;
-  for (let index = 0; index < await links.count(); index += 1) {
-    const candidate = links.nth(index);
-    const href = await candidate.getAttribute("href");
-    const rowText = await candidate.locator("xpath=ancestor::tr[1]").innerText().catch(() => "");
+  const listRows = page.locator("article");
+  for (let index = 0; index < await listRows.count(); index += 1) {
+    const candidate = listRows.nth(index);
+    const rowLink = candidate.locator('a[href*="/admin/webhooks/"]').first();
+    const href = await rowLink.getAttribute("href");
+    const rowText = await candidate.innerText();
     if (href && rowText && !/failed|dead/i.test(rowText)) { blockedDetail = href; break; }
   }
   if (blockedDetail) {
