@@ -1,9 +1,0 @@
-TAP version 13
-ok 1 - test billing events remain distinct from webhook deliveries
-ok 2 - test events index empty state matches UI-SPEC
-ok 3 - test events KPI labels
-ok 4 - test events filter toolbar CTA
-not ok 5 - test confirmed event keys describe the operation without changing raw keys
-# error: [{:error, %ExUnit.AssertionError{left: "Billing event", right: "Customer record updated locally", message: "Assertion with == failed", expr: {:assert, [line: 33], [{:==, [line: 33], [{{:., [line: 33], [{:__aliases__, [line: 33], [:Copy]}, :billing_event_label]}, [line: 33], ["customer.local_updated"]}, "Customer record updated locally"]}]}, args: :ex_unit_no_meaningful_value, doctest: :ex_unit_no_meaningful_value, context: :==}, [{AccrueAdmin.Copy.BillingEventTest, :"test confirmed event keys describe the operation without changing raw keys", 1, [file: ~c"test/accrue_admin/copy/billing_event_test.exs", line: 33]}]}]
-ok 6 - test unknown and missing event keys stay neutral and honest
-1..6
