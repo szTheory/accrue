@@ -191,7 +191,7 @@ test("authenticated ordinary invoice list and detail match current served assets
   await page.goto(`/admin/invoices/${invoiceId}`);
   await expect(page.getByText(/invoice detail/i).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "PORTAL-LAUNCH-001", exact: true })).toBeVisible();
-  const screenshot = await page.screenshot({ fullPage: true, animations: "disabled" });
+  const screenshot = await page.screenshot({ fullPage: true, animations: "disabled", timeout: 20_000 });
   const sources = Object.fromEntries(sourcePaths.map((relativePath) => [
     relativePath,
     sha256(fs.readFileSync(path.join(repoRoot, relativePath)))
@@ -274,7 +274,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   async function retainStateCapture({ id, route, state, scenario, filename, visualAnchor, observation }) {
     const heading = (await page.locator("main h1").first().innerText()).trim();
     const url = page.url();
-    const bytes = await page.screenshot({ path: path.join(phaseCaptureDir, filename), fullPage: true, animations: "disabled" });
+    const bytes = await page.screenshot({ path: path.join(phaseCaptureDir, filename), fullPage: true, animations: "disabled", timeout: 20_000 });
     const digest = sha256(bytes);
     captures.push({
       id: `C${String(captures.length + 1).padStart(2, "0")}`, route_state: id, route, state, scenario,
@@ -296,8 +296,11 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
     }
     const narrow = url === "/admin/coupons" || route === "/admin/events";
     const dark = route === "/admin/invoices/:id" || route === "/admin/analytics/recovery" || route === "/admin/events";
+    console.log(`[phase245-capture] viewport start ${route}`);
     await page.setViewportSize(narrow ? { width: 390, height: 844 } : { width: 1280, height: 900 });
+    console.log(`[phase245-capture] viewport complete ${route}`);
     const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 15_000 });
+    console.log(`[phase245-capture] navigation complete ${route}`);
     await page.locator("body").waitFor();
     const finalURL = new URL(page.url());
     const routeMatches = routeIdentityMatches(route, url, page.url());
@@ -319,7 +322,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
       await expect(page.locator("html")).toHaveAttribute("data-theme", targetTheme);
     }
     let observedState = "populated";
-    const listState = await page.locator('[data-role="data-table"]').getAttribute("data-ax-state").catch(() => null);
+    const listState = await page.evaluate(() => document.querySelector('[data-role="data-table"]')?.getAttribute("data-ax-state") ?? null);
     if (listState === "first-run-empty") observedState = "truly-empty";
     if (listState === "filtered-empty") observedState = "filtered-to-zero";
     let recoveryReadiness = null;
@@ -330,8 +333,10 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
         atRisk.waitFor({ state: "visible", timeout: 15_000 }),
         funnel.waitFor({ state: "visible", timeout: 15_000 })
       ]);
-      const tableState = await page.locator(".ax-at-risk-table").getAttribute("data-state").catch(() => null);
-      const funnelState = await page.locator("[data-ax-recovery-supporting-funnel]").getAttribute("data-state").catch(() => null);
+      const { tableState, funnelState } = await page.evaluate(() => ({
+        tableState: document.querySelector(".ax-at-risk-table")?.getAttribute("data-state") ?? null,
+        funnelState: document.querySelector("[data-ax-recovery-supporting-funnel]")?.getAttribute("data-state") ?? null
+      }));
       recoveryReadiness = { bounded_wait_ms: 15_000, at_risk_state: tableState, supporting_funnel_state: funnelState,
         ready: readiness.every((result) => result.status === "fulfilled") };
       if (!recoveryReadiness.ready) observedState = "loading";
@@ -343,8 +348,11 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
       const screenshotPath = path.join(phaseCaptureDir, filename);
       let bytes;
       try {
+        console.log(`[phase245-capture] screenshot start ${route}`);
         bytes = await page.screenshot({ path: screenshotPath, fullPage: true, animations: "disabled", timeout: 20_000 });
+        console.log(`[phase245-capture] screenshot complete ${route}`);
       } catch (error) {
+        console.log(`[phase245-capture] screenshot failed ${route}: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
         fs.rmSync(screenshotPath, { force: true });
         rows.push({ id: `R${String(index + 1).padStart(2, "0")}-screenshot-timeout`, route, state: observedState, url: page.url(), visual_anchor: `Visible route heading: ${titleText}`, status: "unavailable", reason: `The page rendered and matched the route, but its full-page screenshot did not finish within 20 seconds: ${error instanceof Error ? error.message : String(error)}.` });
         return;
