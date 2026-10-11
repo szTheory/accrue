@@ -98,6 +98,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
       {:ok, webhook, attempts, events} ->
         {:noreply,
          socket
+         |> assign(:flashes, Enum.reject(socket.assigns.flashes, &(&1.kind == :warning)))
          |> assign(:detail_unavailable?, false)
          |> assign_webhook(webhook, attempts, events)}
 
@@ -219,7 +220,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
         <div :if={@detail_unavailable?} class="ax-card ax-data-table-unavailable" data-role="webhook-unavailable" role="alert">
           <p class="ax-heading">Webhook history unavailable</p>
           <p class="ax-body">This delivery and its local attempt history could not be loaded. Its current status and ownership are unknown.</p>
-          <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-webhook-read">Retry</button>
+          <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-webhook-read">Retry read</button>
         </div>
 
         <Detail.summary_list :if={@webhook} rows={summary_rows(@webhook, @attempt_history, @derived_events)} />
@@ -608,7 +609,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
       |> record_single_replay(replayed)
       |> refresh_webhook_after_replay(replayed.id)
       |> clear_replay_drawer()
-      |> push_flash(:info, replay_success(owner_scope))
+      |> push_replay_outcome(owner_scope)
     else
       :not_found ->
         replay_blocked(socket)
@@ -716,6 +717,22 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp ambiguous_replay_blocked, do: Copy.Locked.ambiguous_replay_blocked()
   defp replay_success(%{mode: :organization}), do: Copy.Locked.replay_success_organization()
   defp replay_success(_owner_scope), do: Copy.Locked.replay_success_global_webhook()
+
+  defp push_replay_outcome(%{assigns: %{detail_unavailable?: true}} = socket, _owner_scope) do
+    push_flash(
+      socket,
+      :warning,
+      "Replay request accepted. Current processing status is unknown because delivery history could not be loaded. Retry read to check current status."
+    )
+  end
+
+  defp push_replay_outcome(socket, owner_scope) do
+    push_flash(
+      socket,
+      :info,
+      "Replay request accepted. Processing has not been confirmed. #{replay_success(owner_scope)}"
+    )
+  end
 
   defp attempt_history(webhook_id) do
     from(job in Oban.Job,

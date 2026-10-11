@@ -130,7 +130,7 @@ defmodule AccrueAdmin.Live.EventLive do
         <div :if={@read_unavailable?} class="ax-card ax-data-table-unavailable" data-role="event-unavailable" role="alert">
           <p class="ax-heading">Event record unavailable</p>
           <p class="ax-body">This event could not be loaded. Its identity and related evidence are unknown until the read succeeds.</p>
-          <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-event-read">Retry</button>
+          <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-event-read">Retry read</button>
         </div>
 
         <Breadcrumbs.breadcrumbs
