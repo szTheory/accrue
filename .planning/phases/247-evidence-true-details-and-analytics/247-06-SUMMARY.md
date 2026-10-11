@@ -27,16 +27,16 @@ decisions:
   - Pair recovered and exhausted values per currency; zero remains a value and missing or unsupported amounts remain unavailable.
   - Describe historical coverage separately from the selected UTC window and name the cutoff-semantics documentation destination.
 metrics:
-  duration: 12min
+  duration: 15min
   completed_date: 2026-10-11
 status: complete
 actuals:
-  tokens: 69780
+  tokens: 71889
   tasks: 2
-  commits: 3
+  commits: 5
 plan_head_before: 61b5f37a7bdc034ff1f63e07b16e74ca4164e303
-plan_head_after: 32064e691c2990ce57790ccfffe5cc66f2a40015
-commits: 3
+plan_head_after: 646d8d2c662e2bcee0e600eb33fde02825bcb91d
+commits: 5
 requirements-completed: []
 ---
 
@@ -56,6 +56,9 @@ requirements-completed: []
 1. **Task 1 RED: recovery presentation cases** — `dac599f6`
 2. **Task 1 GREEN: pair currency recovery metrics** — `166fc96c`
 3. **Task 2: clarify recovery window and coverage** — `32064e69`
+4. **No-new-public-symbol correction** — `646d8d2c`
+
+An earlier documentation closeout commit (`44c72ba9`) is included in the measured commit count and superseded when this summary's final metrics were refreshed.
 
 ## Validation
 
