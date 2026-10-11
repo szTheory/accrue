@@ -1,56 +1,83 @@
 ---
 phase: "244"
 slug: "operator-language-and-evidence"
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-10-10"
+audited: "2026-10-10"
 ---
 
 # Phase 244 — Validation Strategy
 
 ## Test Infrastructure
 
-Existing ExUnit/Phoenix.LiveViewTest in `accrue_admin/mix.exs`, with incumbent Playwright owners in `accrue_admin/playwright.config.js`.
+Existing ExUnit/Phoenix.LiveViewTest owners in `accrue_admin` and the incumbent host Playwright suite in `examples/accrue_host`. No dependency or test framework was added.
 
-Quick command: `cd accrue_admin && mix test test/accrue_admin/copy/billing_event_test.exs test/accrue_admin/live/dashboard_live_test.exs test/accrue_admin/live/events_live_test.exs test/accrue_admin/live/event_live_test.exs test/accrue_admin/live/webhook_live_test.exs test/accrue_admin/live/webhook_replay_test.exs`.
+Focused Admin command:
 
-Full regression: `cd accrue_admin && mix test`. Browser/build/parity commands must be grounded in existing owners during planning. Runtime is unmeasured in this planning session; do not invent a latency estimate or claim a pass.
+```sh
+cd accrue_admin && mix test test/accrue_admin/copy/billing_event_test.exs test/accrue_admin/live/dashboard_live_test.exs test/accrue_admin/live/events_live_test.exs test/accrue_admin/live/event_live_test.exs test/accrue_admin/live/webhook_live_test.exs test/accrue_admin/live/webhook_replay_test.exs
+```
 
-## Sampling Rate
+Focused browser command (desktop and touch tests are separately tagged; touch uses the incumbent `chromium-desktop` project with a 320×800 viewport):
 
-After each task run the affected owner subset of the quick command. After each coherent wave run the combined focused owners. Before final verification run the Admin regression and affected existing build/parity/browser owners. Commands fail on nonzero exit or no executed tests; preserve initial failures. Do not rerun unrelated broad matrices without evidence.
+```sh
+npm --prefix examples/accrue_host run e2e -- e2e/phase244-operator-evidence.spec.js --project chromium-desktop --grep @phase244-desktop --workers 1
+npm --prefix examples/accrue_host run e2e -- e2e/phase244-operator-evidence.spec.js --project chromium-desktop --grep @phase244-mobile --workers 1
+```
+
+## Requirement Coverage
+
+| Requirement | Behavioral evidence | Result |
+|---|---|---|
+| LANG-01 | Copy tests verify source-backed meanings and neutral unknown/missing-key handling; Home, Events, and webhook owner tests assert shared rendered labels. | green |
+| EVID-01 | EventLive test checks seconds, fractional precision, and UTC offset. Desktop and 320px browser checks confirm the exact scoped key/record/time; webhook owner/browser tests check selectable exact evidence. | green |
+| CONS-01 | Home, Events, event detail, webhook, and replay tests assert actual scoped destinations/effects. Desktop and touch browser tests navigate the scoped Home/event/webhook routes and inspect served assets. | green |
+| STATE-01 | Replay owner tests bind requested/queued, blocked, denied, failed, unknown, accepted-with-unavailable-reread, and read-only recovery claims to state, dispatch jobs, and audit events. | green |
 
 ## Per-Task Verification Map
 
-| Task | Requirement | Owning proof | Command (repository root unless `cd` shown) | Fails when | Status |
-|---|---|---|---|---|---|
-| 244-01 T1 | LANG-01, EVID-01, CONS-01 | Rendered EventLive exact time and isolated mounted Home-to-event auto slice, revision/asset identity and preview custody | `cd accrue_admin && mix test test/accrue_admin/live/event_live_test.exs`; `npm --prefix examples/accrue_host run e2e -- e2e/phase244-operator-evidence.spec.js --project chromium-desktop --grep @phase244-desktop --workers 1` | Either nonzero exit, zero EventLive tests, fewer than one selected browser test, missing sub-minute/timezone journey or asset/custody proof | planned |
-| 244-01 T2 | LANG-01, EVID-01 | BillingEvent Copy and Home rendered known/unknown/missing parity | `cd accrue_admin && mix test test/accrue_admin/copy/billing_event_test.exs test/accrue_admin/live/dashboard_live_test.exs` | Nonzero exit, zero tests, changed raw key/filter identity | planned |
-| 244-02 T1 | LANG-01, EVID-01, CONS-01 | Events list/detail semantic parity, exact key and scoped destination, preserving Wave 1 timestamp evidence | `cd accrue_admin && mix test test/accrue_admin/live/events_live_test.exs test/accrue_admin/live/event_live_test.exs` | Nonzero exit, zero tests, regression of exact evidence or wrong scope | planned |
-| 244-02 T2 | LANG-01, EVID-01, CONS-01 | Related activity owner and named desktop/mobile disclosure/navigation tests | `cd accrue_admin && mix test test/accrue_admin/live/webhook_live_test.exs`; `npm --prefix examples/accrue_host run e2e -- e2e/phase244-operator-evidence.spec.js --project chromium-desktop --grep @phase244-desktop --workers 1`; `npm --prefix examples/accrue_host run e2e -- e2e/phase244-operator-evidence.spec.js --project chromium-desktop --grep @phase244-mobile --workers 1` | Any nonzero result, zero owner tests, fewer than one selected test in either browser subset, inaccessible evidence, delivery/event conflation or asset/custody drift | planned |
-| 244-03 T1 | STATE-01, CONS-01 | Rendered outcome plus state/job/dispatch/audit and zero mutation from read retry | `cd accrue_admin && mix test test/accrue_admin/live/webhook_replay_test.exs test/accrue_admin/live/webhook_live_test.exs test/accrue_admin/live/event_live_test.exs` | Nonzero exit, zero tests, unsupported effect/cause or duplicate dispatch | planned |
-| 244-03 T2 | STATE-01, CONS-01, LANG-01, EVID-01 | Final mounted effects/destinations and Admin regression at tested revision | `npm --prefix examples/accrue_host run e2e -- e2e/phase244-operator-evidence.spec.js --project chromium-desktop --grep @phase244-desktop --workers 1`; `npm --prefix examples/accrue_host run e2e -- e2e/phase244-operator-evidence.spec.js --project chromium-desktop --grep @phase244-mobile --workers 1`; `cd accrue_admin && mix test` | Any nonzero result, fewer than one selected test per browser subset, zero Admin tests, mismatched effects, assets or custody | planned |
+| Task | Requirement | Owning proof and actual result | Command / revision | Status |
+|---|---|---|---|---|
+| 244-01 T1 | LANG-01, EVID-01, CONS-01 | EventLive 15 tests, 0 failures; mounted Home-to-event browser proof 1/1 passed with matching served/package/compiled assets. | `cd accrue_admin && mix test test/accrue_admin/live/event_live_test.exs`; `npm --prefix examples/accrue_host run e2e -- e2e/phase244-operator-evidence.spec.js --project chromium-desktop --grep @phase244-desktop --workers 1` at `5a0876f9`. | green |
+| 244-01 T2 | LANG-01, EVID-01 | Copy and Home owners: 8 tests, 0 failures; unknown/malformed key and raw-value behavior are asserted. | `cd accrue_admin && mix test test/accrue_admin/copy/billing_event_test.exs test/accrue_admin/live/dashboard_live_test.exs` at `5a0876f9`. | green |
+| 244-02 T1 | LANG-01, EVID-01, CONS-01 | Events and event detail owners: 29 tests, 0 failures; list/detail label, raw key/filter, and scoped-link assertions include exact timestamp regression. | `cd accrue_admin && mix test test/accrue_admin/live/events_live_test.exs test/accrue_admin/live/event_live_test.exs` at `613f2309`. | green |
+| 244-02 T2 | LANG-01, EVID-01, CONS-01 | Webhook related-activity owner and tagged desktop/touch browser checks passed; the summaries record 52/52 focused tests across changed event/webhook/asset owners and browser revision `613f2309`. | `cd accrue_admin && mix test test/accrue_admin/live/webhook_live_test.exs`; desktop and mobile tagged browser commands above at `613f2309`. | green |
+| 244-03 T1 | STATE-01, CONS-01, LANG-01, EVID-01 | Replay/read/event owners: 49 tests, 0 failures, including accepted enqueue + failed reread and no second dispatch on read retry. | `cd accrue_admin && mix test test/accrue_admin/live/webhook_replay_test.exs test/accrue_admin/live/webhook_live_test.exs test/accrue_admin/live/event_live_test.exs` at `36f69a5a`. | green |
+| 244-03 T2 | STATE-01, CONS-01, LANG-01, EVID-01 | Full Admin regression: 688 tests, 0 failures. Desktop browser subset: 2/2; touch subset: 1/1; browser evidence binds revision `33242617`, fixture state, served CSS/JS hashes, and no replay mutation before step-up. | `cd accrue_admin && mix test`; tagged desktop/mobile browser commands above at `33242617`. | green |
+| Validation additions | LANG-01, EVID-01, CONS-01 | Added Home scoped empty/many assertions, webhook activity empty/many assertions, and a 320px EventLive timestamp/overflow browser assertion. Focused Home+webhook owners: 25 tests, 0 failures. Tagged mobile lane: 2/2 passed at `80086cc2044f9429f8f9830b58ea232678a436c3`; exact timestamp was visible and document/field widths were 320/280px. | `cd accrue_admin && mix test test/accrue_admin/live/dashboard_live_test.exs test/accrue_admin/live/webhook_live_test.exs`; `ACCRUE_HOST_PROOF_RUN_ID=26284-1791685212995 npm --prefix examples/accrue_host run e2e -- e2e/phase244-operator-evidence.spec.js --project chromium-desktop --grep @phase244-mobile --workers 1`. | green |
 
-The host browser spec is a planned new file in the incumbent Playwright suite; commands are grounded by `examples/accrue_host/package.json` and `playwright.config.js`. The existing `chromium-mobile` project selects only `verify01-admin-mobile.spec.js`, so Phase 244's named mobile tests run under `chromium-desktop` with explicit 320×800 viewport, `isMobile: true`, and `hasTouch: true` settings, matching the incumbent Phase 234 test pattern. Each tagged browser subset is run separately and must execute at least one test. No plan command is reported as already run. The spec-less edge fallback has eight defensible predicates in `must_haves.truths` (four explicit, four flat-scalar backstops), plus one visibly flagged unclassified STATE-01 assumption. Three descriptor-less prohibition candidates remain flagged/unverified; no mechanical check is invented.
+The full Admin regression was last run at `33242617`; it was not repeated after the validation-only tests were added. The affected owners were rerun at `80086cc2`. The mobile browser first could not launch Chromium in the sandbox and did not enter either test body; the same command passed after browser-launch access was granted. Custody preflight showed the feedback preview stopped, the proof database separate, and port 4101 unused before the run.
 
-## Wave 0 Requirements
+## UI Probe Audit
 
-Existing infrastructure covers the phase. Extend existing tests for mapping/fallback, precision and affected mounted boundaries; no new framework or CI lane. Mounted candidates remain unobserved: confirm current output before edits, preserving the feedback preview and recording change/adequate/unobserved disposition.
+The UI-SPEC probe contains 35 state considerations: 6 explicit and 29 backstop. All 6 explicit states have owner assertions. Each of the 29 backstops was checked against the changed behavior and owning source; the UI-SPEC consideration table records covered cases and source-grounded not-applicable cases. In particular, Home has no partial/loading/error branch, and webhook Activity has an intentional pre-load instruction followed by synchronous rendering rather than an in-flight state. The four scope-specific one/many cases now have rendered owner assertions; Events already covers empty, populated, and paginated collections. Narrow-width browser evidence covers EventLive timestamp, webhook evidence, and replay step-up controls.
 
-## Rendered Review
+## Requirement and Decision Trace
 
-One batched review, one corrective batch and one confirming round per coherent slice. Record tested revision, route/state/fixture, viewport/theme and served assets. Source-only inspection does not prove rendering. Comprehension judgment accompanies objective checks without inventing a routine owner-approval loop.
+The three completed plans map the four requirements across six auto tasks. D-01–D-03 are exercised by producer-backed Copy and cross-surface label assertions; D-04–D-06 by exact evidence, timestamp, and native disclosure assertions; D-07–D-10 by scoped-link, read-only recovery, and replay step-up/effect assertions; D-11–D-14 by mounted route, fixture, viewport, asset, and preview-custody evidence; D-15 by using existing owners without a dependency or new runtime seam. These results come from executed owner tests and browser assertions, not from taxonomy classification or human UAT.
+
+## Review Flags (not requirement gaps)
+
+- The plan's STATE-01 edge probe remains unclassified. No behavior was invented for it; retain it for independent verifier review.
+- Three descriptor-less prohibitions remain unresolved for review: no completion claim from queue acceptance alone; no generic mutation retry after uncertain observation; no raw/sensitive payload on Home. They are not marked as machine-proved here and are not converted into manual-only requirements.
+- The mounted browser did not induce an event read outage or render the accepted-replay/failed-reread state. Those states are covered by focused LiveView assertions; browser rendering remains explicitly unobserved.
 
 ## Validation Sign-Off
 
-- [ ] Exact task verification map populated by planner
-- [ ] Every task has automated verification or explicit preceding dependency
-- [ ] No three consecutive tasks without automated verification
-- [ ] Missing tests created in existing owners
-- [ ] No watch-mode flags
-- [ ] Latency measured during execution if claimed
-- [ ] Revision-bound focused/full/build/browser evidence recorded
-- [ ] nyquist_compliant set true only after evidence supports it
+- [x] All three plans and summaries read; six task rows mapped to owning proofs.
+- [x] All four phase requirements have executed automated behavioral evidence.
+- [x] No implementation files were changed during validation.
+- [x] Focused owner suites and the changed browser lane ran; no zero-test run is counted as passing.
+- [x] UI probe states were checked against owner assertions or dismissed with a sourced reason.
+- [x] Revision-bound browser evidence records served asset identity and preview custody.
+- [x] `nyquist_compliant` set true based on requirement proofs; verifier review flags above remain visible and unclaimed.
 
-Approval: pending execution; no suites run during planning.
+## Validation Audit 2026-10-11
+
+| Metric | Count |
+|---|---|
+| Gaps found | 3 |
+| Resolved | 3 |
+| Escalated | 0 |
