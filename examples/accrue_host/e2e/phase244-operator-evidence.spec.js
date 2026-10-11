@@ -541,19 +541,8 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
       await waitForLiveView(page);
       await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
       await waitForLiveView(page);
-      await page.goto(`/admin/webhooks?${orgQuery(fixture)}`);
+      await page.goto(`/admin/webhooks/${fixture.webhook_id}?${orgQuery(fixture)}`);
       await waitForLiveView(page);
-      const longLabelLink = page.getByRole("link", { name: longDeliveryKey, exact: true });
-      await expect(longLabelLink).toBeVisible();
-      const deliveryHref = await longLabelLink.getAttribute("href");
-      expect(new URL(deliveryHref, page.url()).pathname).toBe(`/admin/webhooks/${fixture.webhook_id}`);
-      expect(new URL(deliveryHref, page.url()).searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
-      const deliveryActionBox = await longLabelLink.boundingBox();
-      expect(deliveryActionBox?.width).toBeGreaterThan(0);
-      expect(deliveryActionBox?.height).toBeGreaterThan(0);
-      await longLabelLink.tap();
-      await waitForLiveView(page);
-      await expect(page).toHaveURL(new RegExp(`/admin/webhooks/${fixture.webhook_id}\\?org=`));
       const deliveryKeyField = page.locator("dd.ax-summary-list-value").filter({ hasText: longDeliveryKey });
       await expect(deliveryKeyField).toBeVisible();
       const activity = page.locator("details[data-ax-lazy-activity]").first();
@@ -581,10 +570,15 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
       await eventLink.tap();
       await waitForLiveView(page);
       await expect(page).toHaveURL(new RegExp(`/admin/events/${adversarial.ids[0]}\\?org=`));
-      const relatedWebhook = page
-        .getByRole("region", { name: "Related billing" })
-        .getByRole("link", { name: new RegExp(`^Source webhook ${fixture.webhook_id}`) });
+      const relatedBilling = page.getByRole("region", { name: "Related billing" });
+      const relatedWebhook = relatedBilling.getByRole("link", { name: `Actor ${adversarial.longActor}`, exact: true });
       await expect(relatedWebhook).toBeVisible();
+      const relatedHref = await relatedWebhook.getAttribute("href");
+      expect(new URL(relatedHref, page.url()).pathname).toBe(`/admin/webhooks/${fixture.webhook_id}`);
+      expect(new URL(relatedHref, page.url()).searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
+      const actionBox = await relatedWebhook.boundingBox();
+      expect(actionBox?.width).toBeGreaterThan(0);
+      expect(actionBox?.height).toBeGreaterThan(0);
       await relatedWebhook.tap();
       await waitForLiveView(page);
       await expect(page).toHaveURL(new RegExp(`/admin/webhooks/${fixture.webhook_id}\\?org=`));
