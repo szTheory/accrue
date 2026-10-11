@@ -25,7 +25,7 @@ function seedCustomerUpdatedEvent(fixture) {
       actor_id: "phase244-browser",
       subject_type: "Customer",
       subject_id: "${customerId}",
-      data: %{},
+      data: %{"phase244" => "disclosure proof"},
       inserted_at: ~U[2026-10-10 23:59:59.123456Z]
     })
     IO.write(event.id)
