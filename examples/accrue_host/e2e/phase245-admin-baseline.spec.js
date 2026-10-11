@@ -170,7 +170,8 @@ test("authenticated ordinary invoice list and detail match current served assets
   });
   expect(response.ok(), `operator sign in returned ${response.status()}`).toBeTruthy();
 
-  await page.goto("/admin");
+  console.log("[phase245-capture] supplemental search states start");
+  await page.goto("/admin", { timeout: 15_000 });
   await expect(page).toHaveURL(/\/admin$/);
 
   await page.goto("/admin/invoices?view=all");
@@ -195,6 +196,7 @@ test("authenticated ordinary invoice list and detail match current served assets
     relativePath,
     sha256(fs.readFileSync(path.join(repoRoot, relativePath)))
   ]));
+  console.log("[phase245-capture] writing manifest and coverage rows");
   const manifest = {
     phase: "245-rendered-baseline-and-realistic-preview",
     capture: "authenticated invoice detail rendered from the isolated ordinary Fake preview",
@@ -234,7 +236,8 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   const phaseCaptureDir = path.join(repoRoot, ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current");
   fs.mkdirSync(phaseCaptureDir, { recursive: true });
   await signIn(page);
-  await page.goto("/admin");
+  console.log("[phase245-capture] supplemental search states start");
+  await page.goto("/admin", { timeout: 15_000 });
   await expect(page).toHaveURL(/\/admin$/);
 
   const assetIdentity = {
@@ -286,6 +289,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   }
 
   async function visit(route, url, table, index, development = false) {
+    console.log(`[phase245-capture] visit start ${route} url=${url}`);
     if (url.endsWith("/null") || url.endsWith("/undefined")) {
       rows.push({ id: `R${String(index + 1).padStart(2, "0")}-populated`, route, state: "populated", url: null, visual_anchor: "Admin shell and route-owned content", status: "unavailable", reason: `No ordinary Fake record exists in ${table}, so a detail URL was not constructed; protected preview data was left intact.` });
       return;
@@ -293,7 +297,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
     const narrow = url === "/admin/coupons" || route === "/admin/events";
     const dark = route === "/admin/invoices/:id" || route === "/admin/analytics/recovery" || route === "/admin/events";
     await page.setViewportSize(narrow ? { width: 390, height: 844 } : { width: 1280, height: 900 });
-    const response = await page.goto(url, { waitUntil: "domcontentloaded" });
+    const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 15_000 });
     await page.locator("body").waitFor();
     const finalURL = new URL(page.url());
     const routeMatches = routeIdentityMatches(route, url, page.url());
@@ -355,8 +359,10 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
       });
       rows.push({ id: routeState, route, state: observedState, url: page.url(), visual_anchor: `Visible route heading: ${titleText}`, status: "inspected", evidence: `final URL matched requested template; main h1 rendered; manifest capture C${String(captures.length).padStart(2, "0")}; PNG SHA-256 ${sha256Png}` });
       if (route === "/admin/analytics/recovery" && observedState === "loading") rows.push({ id: "R20-populated", route, state: "populated", url: page.url(), visual_anchor: "Recovery metric cards and at-risk subscription work queue", status: "unavailable", reason: `The route remained in ${JSON.stringify(recoveryReadiness)} after the bounded 15-second wait; populated recovery metrics were not rendered in the ordinary instance.` });
+      console.log(`[phase245-capture] visit complete ${route}`);
     } else {
       rows.push({ id: `DEV-${String(index + 1).padStart(2, "0")}-not-mounted`, route, state: "not-mounted", url: page.url(), visual_anchor: "Development tool route activation", status: "not-applicable", reason: `Direct navigation returned HTTP ${response.status()}; the host mount sets allow_live_reload: false, so package development routes are not activated in this instance.` });
+      console.log(`[phase245-capture] visit complete ${route}`);
     }
   }
 
@@ -369,14 +375,16 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   }
 
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/admin/customers?q=phase245-no-results-7c92e34a");
+  console.log("[phase245-capture] supplemental filtered-zero start");
+  await page.goto("/admin/customers?q=phase245-no-results-7c92e34a", { timeout: 15_000 });
   await expect(page).toHaveURL(/\/admin\/customers\?q=phase245-no-results-7c92e34a$/);
   await expect(page.getByRole("heading", { name: "No customers match these filters." })).toBeVisible();
   await expect(page.locator('[data-role="data-table"]')).toHaveAttribute("data-ax-state", "filtered-empty");
   await expect(page.locator("[data-ax-list='customers'] tbody tr")).toHaveCount(0);
   await retainStateCapture({ id: "R02-filtered-zero", route: "/admin/customers", state: "filtered-to-zero", scenario: "ordinary Fake seed; impossible query only; no DB mutation", filename: "22-customers-filtered-zero-wide-light.png", visualAnchor: "Customer collection filtered-zero state and matching query", observation: "A safe impossible q parameter remained in the final URL and rendered the explicit filtered-empty state with zero table rows." });
 
-  await page.goto("/admin");
+  console.log("[phase245-capture] supplemental search states start");
+  await page.goto("/admin", { timeout: 15_000 });
   await expect(page).toHaveURL(/\/admin$/);
   await page.keyboard.press("Control+k");
   const searchDialog = page.getByRole("dialog", { name: "Global search" });
@@ -433,6 +441,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   await expect(page.getByText(/No customer-scoped events yet|Activity/).first()).toBeVisible();
   await retainStateCapture({ id: "R03-activity-disclosure-open", route: "/admin/customers/:id", state: "activity-disclosure-expanded", scenario: "ordinary Unicode customer detail; lazy activity disclosure opened; read-only", filename: "26-customer-activity-expanded-wide-light.png", visualAnchor: "Customer detail with expanded Activity disclosure", observation: "Opening the Activity disclosure rendered its available timeline/empty evidence without a record mutation." });
 
+  console.log("[phase245-capture] writing manifest and coverage rows");
   const manifest = {
     phase: "245-rendered-baseline-and-realistic-preview", captured_at: new Date().toISOString(), source_revision: revision, source_dirty: dirty,
     scenario: "isolated accrue-host-phase245-ordinary Fake seed; existing database preserved", seed_revision: sources["examples/accrue_host/priv/repo/seeds/ordinary.exs"],
