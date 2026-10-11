@@ -15,6 +15,7 @@ defmodule AccrueAdmin.Components.TimestampTest do
     assert html =~ ~s(phx-hook="Clipboard")
     assert html =~ ~s(phx-hook="TimeDisplay")
     assert html =~ "ax-timestamp-copy"
+    assert html =~ ~s(data-time-copy-fallback tabindex="0")
   end
 
   test "missing timestamp renders unavailable text without a copy control" do

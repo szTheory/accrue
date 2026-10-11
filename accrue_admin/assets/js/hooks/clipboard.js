@@ -1,45 +1,77 @@
-// Registered LiveView hook for click-to-copy controls. Unlike initClipboardControls()
-// (a one-shot binder run at first paint), each element with phx-hook="Clipboard" gets
-// its own hook instance — so the binding survives DataTable row re-render on filter
-// push_patch and rows appended on infinite-scroll load-more. LiveView re-mounts the
-// hook on freshly-rendered elements.
+// Registered LiveView hook for click-to-copy controls. Each mounted node owns
+// one handler, so controls added by LiveView patches keep their behavior.
+function announce(button, message) {
+  const parent = button.parentElement;
+  if (!parent || typeof document === "undefined") return;
+  let status = parent.querySelector("[data-clipboard-feedback]");
+  if (!status) {
+    status = document.createElement("span");
+    status.dataset.clipboardFeedback = "true";
+    status.className = "ax-visually-hidden";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    parent.append(status);
+  }
+  status.textContent = message;
+}
+
+function dispatch(button, type, text) {
+  if (type === "clipboard:copied") {
+    button.dataset.copied = "true";
+    announce(button, "Copied to clipboard.");
+    button.dispatchEvent(new CustomEvent(type, { bubbles: true }));
+    return;
+  }
+
+  delete button.dataset.copied;
+  announce(button, `Clipboard unavailable. Select and copy the text manually: ${text}`);
+  button.dispatchEvent(new CustomEvent(type, { bubbles: true, detail: { text } }));
+}
+
 export const Clipboard = {
   mounted() {
-    this.el.addEventListener("click", async () => {
+    if (this.clipboardClickHandler) return;
+    this.clipboardClickHandler = async () => {
       const text = this.el.dataset.clipboardText || "";
-
       if (!navigator.clipboard?.writeText) {
-        this.el.dispatchEvent(new CustomEvent("clipboard:failed", { bubbles: true, detail: { text } }));
+        dispatch(this.el, "clipboard:failed", text);
         return;
       }
       try {
         await navigator.clipboard.writeText(text);
-        this.el.dataset.copied = "true";
-        this.el.dispatchEvent(new CustomEvent("clipboard:copied", { bubbles: true }));
+        dispatch(this.el, "clipboard:copied", text);
       } catch {
-        this.el.dispatchEvent(new CustomEvent("clipboard:failed", { bubbles: true, detail: { text } }));
+        dispatch(this.el, "clipboard:failed", text);
       }
-    });
+    };
+    this.el.addEventListener("click", this.clipboardClickHandler);
+  },
+
+  destroyed() {
+    if (this.clipboardClickHandler) {
+      this.el.removeEventListener("click", this.clipboardClickHandler);
+      this.clipboardClickHandler = null;
+    }
   }
 };
 
 export function initClipboardControls() {
   document.querySelectorAll('[data-clipboard-text]:not([phx-hook="Clipboard"])').forEach((button) => {
-    if (button.dataset.clipboardBound === "true") {
-      return;
-    }
-
+    if (button.dataset.clipboardBound === "true") return;
     button.dataset.clipboardBound = "true";
 
     button.addEventListener("click", async () => {
       const text = button.dataset.clipboardText || "";
-
       if (!navigator.clipboard?.writeText) {
+        dispatch(button, "clipboard:failed", text);
         return;
       }
-
-      await navigator.clipboard.writeText(text);
-      button.dataset.copied = "true";
+      try {
+        await navigator.clipboard.writeText(text);
+        dispatch(button, "clipboard:copied", text);
+      } catch {
+        dispatch(button, "clipboard:failed", text);
+      }
     });
   });
 }

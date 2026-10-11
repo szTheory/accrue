@@ -28,6 +28,7 @@ defmodule AccrueAdmin.Components.Timestamp do
           ><time datetime={@iso}><%= @utc_text %></time></button>
           <span class="ax-timestamp-zone" data-time-zone aria-live="polite">UTC</span>
           <span class="ax-visually-hidden" data-time-copy-status aria-live="polite"></span>
+          <output class="ax-timestamp-copy-fallback" data-time-copy-fallback tabindex="0" hidden></output>
         </span>
         """
 
