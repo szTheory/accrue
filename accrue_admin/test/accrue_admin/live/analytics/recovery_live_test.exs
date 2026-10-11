@@ -80,6 +80,59 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     assert html =~ "$20.00"
   end
 
+  test "renders truthful recurring monthly metric definitions without delta claims", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
+
+    assert html =~ "Monthly recurring revenue observed on recovered subscriptions."
+    assert html =~ "Monthly recurring revenue observed at dunning exhaustion."
+    refute html =~ "Money Saved"
+    refute html =~ "Churned Revenue"
+    refute html =~ "Amount saved by successful Dunning"
+    refute html =~ "Churn"
+    refute html =~ ~s(class="ax-kpi-delta)
+  end
+
+  test "keeps actual zero separate from absent and unsupported currency amounts", %{conn: conn} do
+    {:ok, _} =
+      Events.record(%{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: "sub_zero_eur",
+        data: %{mrr_value_cents: 0, currency: "eur"}
+      })
+
+    {:ok, _} =
+      Events.record(%{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: "sub_missing_usd",
+        data: %{currency: "usd"}
+      })
+
+    {:ok, _} =
+      Events.record(%{
+        type: "dunning.exhausted",
+        subject_type: "Subscription",
+        subject_id: "sub_unsupported",
+        data: %{mrr_value_cents: 9_999, currency: "zzz"}
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
+
+    assert html =~ "Recovered MRR (EUR)"
+    assert html =~ "€0.00"
+    assert html =~ "Exhausted MRR (EUR)"
+    assert html =~ "Amount unavailable"
+    assert html =~ "Recovered MRR (USD)"
+    assert html =~ "Exhausted MRR (UNAVAILABLE)"
+    refute html =~ "$99.99"
+  end
+
   test "D-18 D-19 renders Recovery-specific overview grammar in order", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
