@@ -87,6 +87,13 @@ defmodule AccrueHost.OrdinaryPreviewStoryContractTest do
 
     assert percent.data == %{} and amount.data == %{} and expired.data == %{}
     assert active.data == %{} and inactive.data == %{}
+
+    amount |> Ecto.Changeset.change(times_redeemed: 87) |> Repo.update!()
+    Code.eval_file(@ordinary_seed)
+    reconciled = Repo.get!(Coupon, amount.id)
+    assert reconciled.times_redeemed == 500
+    assert reconciled.processor_id == amount.processor_id
+    assert fake!(PromotionCode, inactive.processor_id).id == inactive.id
   end
 
   test "lifecycle markers coincide with period boundaries without invented prices or events" do

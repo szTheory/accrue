@@ -134,6 +134,14 @@ canceled = customer_for_slug.("canceled-co")
 enterprise = customer_for_slug.("enterprise-co")
 trialing = customer_for_slug.("trialing-co")
 
+# An ordinary international billing identity, retaining the existing processor
+# identifier and organization relationship. Preserve operator-edited names.
+if trialing && trialing.name == "Pilot Works" do
+  trialing
+  |> Customer.changeset(%{name: "Atelier Café"})
+  |> Repo.update!()
+end
+
 # ---------------------------------------------------------------------------
 # INVOICES — one per status, varied amounts & currencies (incl. JPY zero-decimal)
 # ---------------------------------------------------------------------------
@@ -372,9 +380,18 @@ amount_coupon =
     currency: "usd",
     duration: "once",
     max_redemptions: 500,
-    times_redeemed: 87,
+    times_redeemed: 500,
     valid: true
   })
+
+# WELCOME10 has exhausted all 500 redemptions. Its coupon total cannot be
+# smaller than that linked code's count. Reconcile only the original fixture.
+if amount_coupon.times_redeemed == 87 and amount_coupon.amount_off_minor == 1000 and
+     amount_coupon.currency == "usd" and amount_coupon.max_redemptions == 500 do
+  amount_coupon
+  |> Coupon.changeset(%{times_redeemed: 500})
+  |> Repo.update!()
+end
 
 _expired_coupon =
   upsert_coupon.("coupon_showcase_expired", %{
