@@ -974,13 +974,15 @@ defmodule AccrueAdmin.Copy do
     to: Locked,
     as: :single_replay_confirmation
 
-  def recovery_index_heading, do: "Revenue Recovery"
+  def recovery_index_heading, do: "Payment recovery"
 
   def recovery_index_subtitle,
     do:
-      "Track the dunning funnel and customers at risk of churn — how many recover after a failed payment, and which are nearing cancellation."
+      "Review payment recovery activity, the dunning funnel, and subscriptions currently in dunning."
 
-  def recovery_cutoff_link_label, do: "Showing data since 2024-01-01"
+  def recovery_data_coverage, do: "Historical data coverage begins 2024-01-01."
+
+  def recovery_cutoff_link_label, do: "Cutoff-date semantics"
 
   def recovery_recovered_mrr_label(currency),
     do: "Recovered MRR (#{String.upcase(to_string(currency))})"

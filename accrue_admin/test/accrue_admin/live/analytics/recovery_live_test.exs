@@ -152,6 +152,54 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     assert length(Floki.find(eur_pair, ".ax-kpi-card")) == 2
     assert Floki.text(eur_pair) =~ "€0.00"
     assert Floki.text(eur_pair) =~ "Amount unavailable"
+
+    css = File.read!("assets/css/app.css")
+
+    assert css =~
+             ~r/@media \(max-width: 599\.98px\).*?\.ax-recovery-currency-pair\s*\{\s*grid-template-columns: minmax\(0, 1fr\);/s
+
+    assert css =~
+             ~r/\.ax-recovery-currency-pair > \.ax-kpi-card\s*\{\s*min-width: 0;\s*overflow-wrap: anywhere;/s
+  end
+
+  test "names payment recovery and separates the selected UTC window from historical coverage", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live_recovery(conn, "/billing/analytics/recovery?window=7d")
+
+    assert html =~ "<h1 class=\"ax-display\">Payment recovery</h1>"
+
+    breadcrumb =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find("nav[aria-label='Breadcrumb']")
+      |> Floki.text()
+      |> String.trim()
+
+    assert breadcrumb == "Payment recovery"
+
+    [window_nav] =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find("nav[aria-label='Time window (UTC)']")
+
+    assert Floki.text(window_nav) =~ "7 days UTC"
+
+    [coverage] =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find(".ax-recovery-coverage")
+
+    assert Floki.text(coverage) =~ "Historical data coverage begins 2024-01-01."
+    refute Floki.text(window_nav) =~ "Historical data coverage"
+
+    [help_link] = Floki.find(coverage, "a.ax-help-link")
+    assert String.trim(Floki.text(help_link)) == "Cutoff-date semantics"
+    assert [help_href] = Floki.attribute(help_link, "href")
+    assert String.ends_with?(help_href, "#cutoff-semantics")
   end
 
   test "D-18 D-19 renders Recovery-specific overview grammar in order", %{conn: conn} do

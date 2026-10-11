@@ -149,9 +149,13 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     >
       <section class="ax-page" data-ax-overview="recovery">
         <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs items={[%{label: "Analytics"}, %{label: "Recovery"}]} />
+          <Breadcrumbs.breadcrumbs items={[%{label: Copy.recovery_index_heading()}]} />
           <div class="ax-heading-row">
             <h1 class="ax-display"><%= Copy.recovery_index_heading() %></h1>
+          </div>
+          <p class="ax-body ax-page-copy"><%= Copy.recovery_index_subtitle() %></p>
+          <p class="ax-body ax-recovery-coverage">
+            <%= Copy.recovery_data_coverage() %>
             <a
               href="https://hexdocs.pm/accrue/analytics.html#cutoff-semantics"
               target="_blank"
@@ -160,8 +164,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
             >
               <%= Copy.recovery_cutoff_link_label() %>
             </a>
-          </div>
-          <p class="ax-body ax-page-copy"><%= Copy.recovery_index_subtitle() %></p>
+          </p>
           <WindowSelector.window_selector
             current_window={@window}
             base_path={@window_selector_base_path}
@@ -276,7 +279,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     current_path = (admin["mount_path"] || "/billing") <> "/analytics/recovery"
 
     socket
-    |> assign(:page_title, "Recovery Dashboard")
+    |> assign(:page_title, Copy.recovery_index_heading())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])

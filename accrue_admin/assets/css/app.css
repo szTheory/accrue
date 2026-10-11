@@ -4225,6 +4225,20 @@ details[open].ax-dropdown .ax-dropdown-panel {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.ax-recovery-coverage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-xs);
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ax-window-selector {
+  margin-block-start: var(--ax-space-sm);
+}
+
 .ax-recovery-currency-pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
