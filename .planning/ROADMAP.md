@@ -56,7 +56,16 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
   1. A reviewer can find every existing Admin route and materially distinct list, detail and overlay state in a ledger, marked inspected, unavailable or not applicable with a reason.
   2. A reviewer can inspect representative wide/narrow and light/dark captures labeled with route, state, scenario, source revision and served assets; previously unseen pages receive a bounded rendered assessment.
   3. A reviewer can use a plausible ordinary feedback preview whose money, dates, relationships and processing histories agree, while adversarial fixture cases remain available in their test owners.
-**Plans**: TBD
+**Plans**: 3 plans
+
+**Wave 1**
+- [ ] 245-01-PLAN.md — Isolated ordinary preview and first mounted capture
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 245-02-PLAN.md — Ordinary story integrity and seed protection
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 245-03-PLAN.md — Complete route/state inventory and bounded rendered review
 **UI hint**: yes
 
 ### Phase 246: Collection Controls and Search
@@ -100,7 +109,7 @@ v1.66 is in planning, starting at Phase 245. The owner-approved scope covers exi
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 245. Rendered Baseline and Realistic Preview | 0/TBD | Not started | - |
+| 245. Rendered Baseline and Realistic Preview | 0/3 | Ready to execute | - |
 | 246. Collection Controls and Search | 0/TBD | Not started | - |
 | 247. Evidence-True Details and Analytics | 0/TBD | Not started | - |
 | 248. Reproducible Scenarios and Integrated Proof | 0/TBD | Not started | - |
