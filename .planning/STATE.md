@@ -5,16 +5,16 @@ milestone_name: Admin Usability and Visual Consistency
 current_phase: 247
 current_phase_name: Evidence-True Details and Analytics
 status: executing
-stopped_at: Completed 247-03-PLAN.md
-last_updated: "2026-10-11T21:40:26.391Z"
+stopped_at: Completed 247-08-PLAN.md
+last_updated: "2026-10-11T21:46:24.356Z"
 last_activity: 2026-10-11
 last_activity_desc: Phase 247 execution started
-state_head: 0d066da2585e9b249ada5a72fc4611ba7e985b1a
+state_head: 377c46c418500882eee3c5f9a9dcc5e9fc8033db
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 16
-  completed_plans: 11
+  completed_plans: 12
   percent: 50
 ---
 
@@ -192,6 +192,7 @@ Last activity: 2026-10-11 — Phase 247 execution started
 | Phase 247 P01 | 10min | 2 tasks | 12 files |
 | Phase 247 P02 | 5min | 2 tasks | 12 files |
 | Phase 247 P03 | 14min | 3 tasks | 16 files |
+| Phase 247 P08 | 5min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -445,6 +446,8 @@ Last activity: 2026-10-11 — Phase 247 execution started
 - [Phase 247]: Clipboard success follows resolved writes; failed timestamp copies show the exact UTC ISO value in a selectable fallback.
 - [Phase 247]: Use Timestamp.timestamp/1 for visible instants while preserving Date fields and UTC query boundaries.
 - [Phase 247]: Keep audit prose intact and expose exact copy through adjacent timestamp controls.
+- [Phase 247]: Visible DateTime values use the shared Timestamp component while date-only text, filter serialization, and UTC analytics bounds remain unchanged.
+- [Phase 247]: Repeated timestamp controls use distinct IDs across responsive and summary/timeline surfaces.
 
 ### Pending Todos
 
@@ -530,8 +533,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T21:40:26.342Z
-Stopped at: Completed 247-03-PLAN.md
+Last session: 2026-10-11T21:46:24.285Z
+Stopped at: Completed 247-08-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
