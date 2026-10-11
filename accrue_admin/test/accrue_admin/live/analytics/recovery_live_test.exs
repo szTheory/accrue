@@ -115,6 +115,14 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
     {:ok, _} =
       Events.record(%{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: "sub_missing_gbp",
+        data: %{currency: "gbp"}
+      })
+
+    {:ok, _} =
+      Events.record(%{
         type: "dunning.exhausted",
         subject_type: "Subscription",
         subject_id: "sub_unsupported",
@@ -128,9 +136,22 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     assert html =~ "€0.00"
     assert html =~ "Exhausted MRR (EUR)"
     assert html =~ "Amount unavailable"
+    assert html =~ "Recovered MRR (GBP)"
+    assert html =~ "Exhausted MRR (GBP)"
     assert html =~ "Recovered MRR (USD)"
     assert html =~ "Exhausted MRR (UNAVAILABLE)"
     refute html =~ "$99.99"
+    refute html =~ "9,999 ZZZ"
+
+    eur_pair =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find(~s([data-ax-currency-pair][data-currency="eur"]))
+      |> hd()
+
+    assert length(Floki.find(eur_pair, ".ax-kpi-card")) == 2
+    assert Floki.text(eur_pair) =~ "€0.00"
+    assert Floki.text(eur_pair) =~ "Amount unavailable"
   end
 
   test "D-18 D-19 renders Recovery-specific overview grammar in order", %{conn: conn} do

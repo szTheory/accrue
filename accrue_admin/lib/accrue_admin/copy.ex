@@ -985,18 +985,14 @@ defmodule AccrueAdmin.Copy do
   def recovery_recovered_mrr_label(currency),
     do: "Recovered MRR (#{String.upcase(to_string(currency))})"
 
-  def recovery_recovered_mrr_delta, do: "Amount saved by successful Dunning"
-
-  def recovery_recovered_mrr_meta, do: "Money Saved"
+  def recovery_recovered_mrr_meta,
+    do: "Monthly recurring revenue observed on recovered subscriptions."
 
   def recovery_exhausted_mrr_label(currency),
     do: "Exhausted MRR (#{String.upcase(to_string(currency))})"
 
-  def recovery_exhausted_mrr_delta,
-    do:
-      "Annualized MRR snapshot at the exhaustion event — e.g., a $120/yr plan contributes $10/mo to Exhausted MRR."
-
-  def recovery_exhausted_mrr_meta, do: "Churned Revenue"
+  def recovery_exhausted_mrr_meta,
+    do: "Monthly recurring revenue observed at dunning exhaustion."
 
   def subscription_select_action_warning, do: "Select an action before confirming."
 

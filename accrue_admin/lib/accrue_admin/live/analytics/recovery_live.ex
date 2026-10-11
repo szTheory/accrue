@@ -168,27 +168,32 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
           />
         </header>
 
-        <section class="ax-kpi-grid ax-section-gap" data-ax-recovery-hero>
+        <section
+          class="ax-kpi-grid ax-section-gap ax-recovery-currency-groups"
+          data-ax-recovery-hero
+        >
           <%= for kpi <- @kpi_pairs do %>
-            <KpiCard.kpi_card
-              label={Copy.recovery_recovered_mrr_label(kpi.currency)}
-              value={kpi.recovered_str}
-              delta={Copy.recovery_recovered_mrr_delta()}
-              delta_tone="moss"
-              component_group="kpi-chart-table"
+            <div
+              class="ax-recovery-currency-pair"
+              data-ax-currency-pair
+              data-currency={String.downcase(kpi.currency)}
             >
-              <:meta><%= Copy.recovery_recovered_mrr_meta() %></:meta>
-            </KpiCard.kpi_card>
+              <KpiCard.kpi_card
+                label={Copy.recovery_recovered_mrr_label(kpi.currency)}
+                value={kpi.recovered_str}
+                component_group="kpi-chart-table"
+              >
+                <:meta><%= Copy.recovery_recovered_mrr_meta() %></:meta>
+              </KpiCard.kpi_card>
 
-            <KpiCard.kpi_card
-              label={Copy.recovery_exhausted_mrr_label(kpi.currency)}
-              value={kpi.exhausted_str}
-              delta={Copy.recovery_exhausted_mrr_delta()}
-              delta_tone="amber"
-              component_group="kpi-chart-table"
-            >
-              <:meta><%= Copy.recovery_exhausted_mrr_meta() %></:meta>
-            </KpiCard.kpi_card>
+              <KpiCard.kpi_card
+                label={Copy.recovery_exhausted_mrr_label(kpi.currency)}
+                value={kpi.exhausted_str}
+                component_group="kpi-chart-table"
+              >
+                <:meta><%= Copy.recovery_exhausted_mrr_meta() %></:meta>
+              </KpiCard.kpi_card>
+            </div>
           <% end %>
         </section>
 
