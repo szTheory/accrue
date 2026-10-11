@@ -13,6 +13,7 @@ defmodule AccrueAdmin.Queries.Invoices do
   alias AccrueAdmin.Queries.Behaviour
 
   @time_field :inserted_at
+  @valid_invoice_statuses ~w(draft open paid uncollectible void)
 
   @impl true
   def list(opts \\ []) do
@@ -90,7 +91,7 @@ defmodule AccrueAdmin.Queries.Invoices do
   def decode_filter(params) when is_map(params) do
     %{
       q: Behaviour.normalize_string(Map.get(params, "q") || Map.get(params, :q)),
-      status: Behaviour.normalize_string(Map.get(params, "status") || Map.get(params, :status)),
+      status: normalize_status_selection(Map.get(params, "status") || Map.get(params, :status)),
       customer_id:
         Behaviour.normalize_string(
           Map.get(params, "customer_id") || Map.get(params, :customer_id)
@@ -101,6 +102,24 @@ defmodule AccrueAdmin.Queries.Invoices do
         )
     }
     |> Behaviour.compact_filter()
+  end
+
+  @doc "Normalizes selected invoice statuses to the supported, stable URL order."
+  def normalize_status_selection(value) do
+    selected =
+      case value do
+        values when is_list(values) ->
+          Enum.flat_map(values, &String.split(to_string(&1), ",", trim: true))
+
+        nil ->
+          []
+
+        value ->
+          String.split(to_string(value), ",", trim: true)
+      end
+
+    statuses = Enum.filter(@valid_invoice_statuses, &(&1 in selected))
+    if statuses == [], do: nil, else: Enum.join(statuses, ",")
   end
 
   @impl true
@@ -138,8 +157,6 @@ defmodule AccrueAdmin.Queries.Invoices do
   # the URL status param.  Anything outside this list is silently dropped,
   # preventing String.to_existing_atom/1 from accepting arbitrary atoms that
   # happen to exist in the BEAM atom table (e.g. OTP module names).
-  @valid_invoice_statuses ~w(draft open paid uncollectible void)
-
   defp filter_status(query, status) when is_binary(status) do
     values =
       status

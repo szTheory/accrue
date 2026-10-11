@@ -576,6 +576,7 @@ defmodule AccrueAdmin.Components.DataTable do
   attr(:clear_href, :string, default: nil)
   attr(:clear_filters_patch, :string, default: nil)
   attr(:clear_visible, :any, default: nil)
+  attr(:preserve_params, :map, default: %{})
 
   def filter_toolbar(assigns) do
     assigns =
@@ -605,7 +606,11 @@ defmodule AccrueAdmin.Components.DataTable do
         :for={field <- @filter_fields}
         class={["ax-data-table-filter", filter_field_class(field)]}
       >
-        <label for={field_id(@id, field)} class="ax-visually-hidden"><%= field_label(field) %></label>
+        <label
+          :if={Map.get(field, :type) != :checkbox_group}
+          for={field_id(@id, field)}
+          class={if(Map.get(field, :visible_label, false), do: "ax-label", else: "ax-visually-hidden")}
+        ><%= field_label(field) %></label>
         <.filter_input
           id={field_id(@id, field)}
           field={field}
@@ -614,6 +619,9 @@ defmodule AccrueAdmin.Components.DataTable do
         />
       </div>
       <div :for={{key, value} <- @filter_params} :if={!field_defined?(@filter_fields, key)}>
+        <input type="hidden" name={key} value={value} />
+      </div>
+      <div :for={{key, value} <- @preserve_params} :if={!field_defined?(@filter_fields, key)}>
         <input type="hidden" name={key} value={value} />
       </div>
       <%!-- Instant-apply toolbar: phx-change submits on every edit (text debounced
@@ -721,6 +729,32 @@ defmodule AccrueAdmin.Components.DataTable do
       class="ax-checkbox"
       data-phase191-focus={"filter-#{@focus_key}"}
     />
+    """
+  end
+
+  defp filter_input(%{field: %{type: :checkbox_group} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(:options, Map.get(field, :options, []))
+      |> assign(:selected_values, selected_values(assigns.value))
+
+    ~H"""
+    <fieldset class="ax-data-table-checkbox-group" data-filter-group={field_param(@field)}>
+      <legend class="ax-label"><%= field_label(@field) %></legend>
+      <label :for={{option, index} <- Enum.with_index(@options)} class="ax-field-inline">
+        <input
+          id={"#{@id}-#{index}"}
+          type="checkbox"
+          name={"#{field_param(@field)}[]"}
+          value={option_value(option)}
+          checked={to_string(option_value(option)) in @selected_values}
+          class="ax-checkbox"
+          data-phase191-focus={"filter-#{@focus_key}-#{index}"}
+        />
+        <span><%= option_label(option) %></span>
+      </label>
+      <input type="hidden" name={"#{field_param(@field)}[]"} value="" />
+    </fieldset>
     """
   end
 
@@ -1023,6 +1057,11 @@ defmodule AccrueAdmin.Components.DataTable do
   defp option_label(option), do: option
 
   defp option_selected?(value, option), do: to_string(value) == to_string(option_value(option))
+
+  defp selected_values(value) when is_list(value), do: Enum.map(value, &to_string/1)
+  defp selected_values(value) when is_binary(value), do: String.split(value, ",", trim: true)
+  defp selected_values(nil), do: []
+  defp selected_values(value), do: [to_string(value)]
 
   defp option_disabled?(option) when is_map(option), do: Map.get(option, :disabled, false) == true
   defp option_disabled?(_option), do: false

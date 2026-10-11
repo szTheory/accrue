@@ -53,17 +53,24 @@ defmodule AccrueAdmin.Live.InvoicesLive do
 
   @impl true
   def handle_event("data_table_filter", params, socket) do
+    params =
+      params
+      |> Map.drop(["_target", "_csrf_token"])
+      |> Map.update("status", "", fn value -> Invoices.normalize_status_selection(value) || "" end)
+
+    params = if params["status"] == "", do: Map.put(params, "view", "all"), else: params
+
     {:noreply,
      AccrueAdmin.DataTableNav.patch_with_filters(
        socket,
        socket.assigns.table_path,
-       Map.drop(params, ["_target", "_csrf_token"])
+       params
      )}
   end
 
   @impl true
   def handle_params(%{"view" => "all"} = params, _uri, socket) do
-    {:noreply, assign(socket, :params, params)}
+    assign_canonical_params(socket, params)
   end
 
   def handle_params(params, _uri, socket) do
@@ -77,7 +84,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
         {:noreply, assign(socket, :params, default)}
       end
     else
-      {:noreply, assign(socket, :params, params)}
+      assign_canonical_params(socket, params)
     end
   end
 
@@ -185,6 +192,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
                 filter_fields={invoice_filter_fields()}
                 filter_params={filter_params(@params)}
                 path={@table_path}
+                preserve_params={preserved_params(@params)}
                 clear_href={clear_all_href(@params, @table_path)}
                 clear_visible={false}
               />
@@ -331,8 +339,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
         :status,
         [
           label: Copy.invoices_filter_status(),
-          type: :select,
-          all_label: "All statuses",
+          type: :checkbox_group,
           options: [
             {"draft", Copy.invoices_filter_status_draft()},
             {"open", Copy.invoices_filter_status_open()},
@@ -369,6 +376,31 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     |> Invoices.decode_filter()
     |> Invoices.encode_filter()
     |> Map.new(fn {key, value} -> {to_string(key), to_string(value)} end)
+  end
+
+  defp preserved_params(params), do: Map.take(params, ["view"])
+
+  defp assign_canonical_params(socket, params) do
+    canonical =
+      case Map.get(params, "status") do
+        nil ->
+          params
+
+        status ->
+          case Invoices.normalize_status_selection(status) do
+            nil -> Map.delete(params, "status")
+            normalized -> Map.put(params, "status", normalized)
+          end
+      end
+
+    if connected?(socket) and canonical != params do
+      {:noreply,
+       Phoenix.LiveView.push_patch(socket,
+         to: AccrueAdmin.DataTableNav.merge_query(socket.assigns.table_path, canonical)
+       )}
+    else
+      {:noreply, assign(socket, :params, canonical)}
+    end
   end
 
   defp work_queue_chips(params, table_path) do

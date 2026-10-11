@@ -81,20 +81,126 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     subscription = insert_subscription(customer)
 
     uncollectible =
-      insert_invoice(customer, subscription, %{number: "INV-UNCOLLECTIBLE", status: :uncollectible})
+      insert_invoice(customer, subscription, %{
+        number: "INV-UNCOLLECTIBLE",
+        status: :uncollectible
+      })
 
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/invoices")
 
     document = Floki.parse_document!(html)
-    status_controls = Floki.find(document, "input[name='status'][type='checkbox']")
+    status_controls = Floki.find(document, "input[name='status[]'][type='checkbox']")
 
-    assert Enum.any?(status_controls, &(Floki.attribute(&1, "value") == ["open"] and Floki.attribute(&1, "checked") == [""]))
-    assert Enum.any?(status_controls, &(Floki.attribute(&1, "value") == ["uncollectible"] and Floki.attribute(&1, "checked") == [""]))
+    assert Enum.any?(
+             status_controls,
+             &(Floki.attribute(&1, "value") == ["open"] and Floki.attribute(&1, "checked") == [""])
+           )
+
+    assert Enum.any?(
+             status_controls,
+             &(Floki.attribute(&1, "value") == ["uncollectible"] and
+                 Floki.attribute(&1, "checked") == [""])
+           )
+
     assert html =~ "INV-0002"
     assert html =~ "INV-UNCOLLECTIBLE"
     refute html =~ "INV-0001"
     assert uncollectible
+  end
+
+  test "mounted status changes preserve owner and search scope while rows follow the selection",
+       %{
+         conn: conn
+       } do
+    organization_id = Ecto.UUID.generate()
+    foreign_organization_id = Ecto.UUID.generate()
+    owner_customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
+    owner_subscription = insert_subscription(owner_customer)
+
+    insert_invoice(owner_customer, owner_subscription, %{
+      number: "INV-SCOPED-OPEN-OWNER",
+      status: :open
+    })
+
+    owner_paid =
+      insert_invoice(owner_customer, owner_subscription, %{
+        number: "INV-SCOPED-PAID-OWNER",
+        status: :paid
+      })
+
+    foreign_customer =
+      insert_customer(%{owner_type: "Organization", owner_id: foreign_organization_id})
+
+    foreign_subscription = insert_subscription(foreign_customer)
+
+    insert_invoice(foreign_customer, foreign_subscription, %{
+      number: "INV-SCOPED-PAID-FOREIGN",
+      status: :paid
+    })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: organization_id,
+        active_organization_slug: "invoice-owner",
+        admin_organization_ids: [organization_id]
+      )
+
+    assert {:ok, view, html} =
+             live(
+               conn,
+               "/billing/invoices?org=invoice-owner&view=all&status=open,uncollectible&q=INV-SCOPED"
+             )
+
+    assert html =~ "INV-SCOPED-OPEN-OWNER"
+    refute html =~ "INV-SCOPED-PAID-FOREIGN"
+
+    html =
+      view
+      |> element("[data-role='filter-form']")
+      |> render_change(%{"status" => ["paid", ""], "q" => "INV-SCOPED", "view" => "all"})
+
+    assert_patch(view, "/billing/invoices?org=invoice-owner&q=INV-SCOPED&status=paid&view=all")
+    assert html =~ "INV-SCOPED-PAID-OWNER"
+    refute html =~ "INV-SCOPED-OPEN-OWNER"
+    refute html =~ "INV-SCOPED-PAID-FOREIGN"
+    assert owner_paid
+  end
+
+  test "direct multi-status URLs normalize to supported status order and select matching rows", %{
+    conn: conn
+  } do
+    customer = insert_customer(%{name: "Direct Status Customer"})
+    subscription = insert_subscription(customer)
+
+    paid =
+      insert_invoice(customer, subscription, %{number: "INV-DIRECT-PAID", status: :paid})
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, _html} =
+             live(conn, "/billing/invoices?view=all&status=paid,open")
+
+    assert InvoicesQuery.normalize_status_selection("paid,open") == "open,paid"
+    html = render(view)
+    document = Floki.parse_document!(html)
+    status_controls = Floki.find(document, "input[name='status[]'][type='checkbox']")
+
+    assert Enum.any?(
+             status_controls,
+             &(Floki.attribute(&1, "value") == ["open"] and Floki.attribute(&1, "checked") == [""])
+           )
+
+    assert Enum.any?(
+             status_controls,
+             &(Floki.attribute(&1, "value") == ["paid"] and Floki.attribute(&1, "checked") == [""])
+           )
+
+    assert html =~ "INV-0002"
+    assert html =~ "INV-DIRECT-PAID"
+    refute html =~ "INV-0001"
+    assert paid
   end
 
   test "organization invoice list excludes invoices owned by another organization", %{conn: conn} do
