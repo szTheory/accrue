@@ -20,7 +20,8 @@ defmodule AccrueAdmin.Live.WebhookLive do
     JsonViewer,
     RelatedResources,
     StepUpAuthModal,
-    Timeline
+    Timeline,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -211,7 +212,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
           <:facts :if={@webhook}>
             <span><%= @webhook.processor_event_id %></span>
             <span><%= humanize(@webhook.status) %></span>
-            <span>received <%= format_datetime(@webhook.received_at) %></span>
+            <span>received <Timestamp.timestamp value={@webhook.received_at} id="webhook-received-at" /></span>
           </:facts>
         </Detail.summary_card>
 

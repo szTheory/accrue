@@ -9,11 +9,16 @@ export const Clipboard = {
       const text = this.el.dataset.clipboardText || "";
 
       if (!navigator.clipboard?.writeText) {
+        this.el.dispatchEvent(new CustomEvent("clipboard:failed", { bubbles: true }));
         return;
       }
-
-      await navigator.clipboard.writeText(text);
-      this.el.dataset.copied = "true";
+      try {
+        await navigator.clipboard.writeText(text);
+        this.el.dataset.copied = "true";
+        this.el.dispatchEvent(new CustomEvent("clipboard:copied", { bubbles: true }));
+      } catch {
+        this.el.dispatchEvent(new CustomEvent("clipboard:failed", { bubbles: true }));
+      }
     });
   }
 };

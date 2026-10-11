@@ -1992,6 +1992,29 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-muted);
 }
 
+.ax-timestamp-copy {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--ax-space-xs);
+  border: 0;
+  border-radius: var(--ax-radius-sm);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ax-timestamp-copy:focus-visible {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+}
+
+.ax-timestamp-zone {
+  color: var(--ax-muted);
+  font-size: var(--ax-type-sm);
+}
+
 .ax-json-viewer {
   display: grid;
   gap: var(--ax-space-lg);
