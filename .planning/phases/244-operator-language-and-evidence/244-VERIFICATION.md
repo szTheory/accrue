@@ -38,7 +38,7 @@ covered_files:
   - accrue_admin/test/accrue_admin/live/webhook_live_test.exs
   - accrue_admin/test/accrue_admin/live/webhook_replay_test.exs
   - examples/accrue_host/e2e/phase244-operator-evidence.spec.js
-covered_digest: "v3:sha256:8f44558ff6dd786f769f00dc24d652b048444a8f678feeb04112be77c11d64eb"
+covered_digest: "v3:sha256:3c7f01e705b586d232079ef7c7a9a1d79605d0992e840a508ff37ebac4603ac1"
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:

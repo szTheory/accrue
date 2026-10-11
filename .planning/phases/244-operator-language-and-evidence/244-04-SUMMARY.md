@@ -1,6 +1,7 @@
 ---
 phase: 244-operator-language-and-evidence
 plan: "04"
+status: complete
 subsystem: ui
 tags: [phoenix-liveview, replay, playwright, accessibility, scope]
 requires:
