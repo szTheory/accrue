@@ -1,7 +1,7 @@
 ---
 phase: "247"
 slug: "evidence-true-details-and-analytics"
-status: executed
+status: validated
 nyquist_compliant: true
 wave_0_complete: true
 created: "2026-10-11"
@@ -20,7 +20,7 @@ Every implementation task has a focused automated check; each wave runs affected
 ## Per-Task Verification Map
 | Behavior | Requirement | Planned tasks / executable owner | Threat refs | Status |
 |---|---|---|---|
-| Local/UTC, persisted preference, UTC SSR fallback, exact precision, missing timestamp | TIME-01 | 247-01-01/02, 247-02-01, 247-03-01/02/03, 247-08-01/02; timestamp_test.exs, time_display_test.mjs, affected LiveView tests, mounted tracer | T-247-01, T-247-02, T-247-03, T-247-08 | planned |
+| Local/UTC, persisted preference, UTC SSR fallback, exact precision, missing timestamp | TIME-01 | 247-01-01/02, 247-02-01, 247-03-01/02/03, 247-08-01/02; timestamp_test.exs, time_display_test.mjs, affected LiveView tests, mounted tracer | T-247-01, T-247-02, T-247-03, T-247-08 | pass |
 | Clipboard resolved/rejected/unavailable and manual fallback | TIME-01, DETAIL-02 | 247-02-02; clipboard_test.mjs and 247-07 mounted proof | T-247-02, T-247-07 | pass |
 | Matching names/breadcrumbs/scoped destinations | LANG-02 | 247-04-01, 247-05-01/02/03, 247-06-02; scoped_path_test.exs, copy_test.exs and affected LiveView owners | T-247-04, T-247-05, T-247-06, T-247-07 | pass |
 | Evidence-backed unavailable/zero/history/status | STATE-02 | 247-04-01/02, 247-05-01/02/03, 247-06-01; copy, webhook, detail and recovery tests | T-247-04, T-247-05, T-247-06, T-247-07 | pass |
@@ -60,3 +60,14 @@ No owner-blocking UAT: delegated visual judgment is performed by image inspectio
 - [x] nyquist_compliant true after execution audit
 
 **Approval:** execution evidence recorded; phase-level integrated verification remains with Phase 248 and the phase verifier.
+
+## Nyquist Coverage Cross-Check
+All eight plan summaries and the six requirement rows were checked against their owning tests. The final Admin suite covers the ExUnit/LiveView owners (727 passing); a current audit run of `node --test test/js/time_display_test.mjs test/js/clipboard_test.mjs` passed 10/10. Mounted exact-copy tracer and final rendered proof are recorded separately in Plans 01 and 07. No missing automated owner or implementation gap was found. Visual judgment remains scoped to the inspected matrix, not every possible fixture.
+
+## Validation Audit 2026-10-11
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
