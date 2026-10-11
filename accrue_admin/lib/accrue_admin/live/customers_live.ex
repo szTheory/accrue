@@ -147,14 +147,12 @@ defmodule AccrueAdmin.Live.CustomersLive do
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
-            %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope, customer_return_path(@admin_mount_path, @current_owner_scope, @params))},
-            %{label: "Payment method", render: &default_payment_method_label/1},
-            %{label: "ID", render: &id_badge_cell(&1, "table")}
+            %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope, customer_return_path(@admin_mount_path, @current_owner_scope, @params), :table)},
+            %{label: "Payment method", render: &default_payment_method_label/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&customer_link(&1, @admin_mount_path, @current_owner_scope, customer_return_path(@admin_mount_path, @current_owner_scope, @params), :card)}
           card_fields={[
             %{label: "Payment method", render: &default_payment_method_label/1},
-            %{label: "ID", render: &id_badge_cell(&1, "card")}
           ]}
           filter_fields={customer_filter_fields(@owner_type_type, @owner_type_options)}
           empty_title={empty_title(@params, @summary)}
@@ -216,7 +214,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   # Customer cell: primary name/identifier as a link, with email stacked beneath it
   # so the column reads as a find-and-open target (name + contact at a glance).
-  defp customer_link(row, mount_path, owner_scope, return_path) do
+  defp customer_link(row, mount_path, owner_scope, return_path, surface) do
     label = row.name || row.email || row.processor_id || row.id
 
     href =
@@ -224,19 +222,24 @@ defmodule AccrueAdmin.Live.CustomersLive do
         "return_to" => return_path
       })
 
-    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    assigns = %{
+      __changed__: %{},
+      label: label,
+      href: href,
+      email: if(row.email && row.email != label, do: row.email),
+      badge_id: "ax-id-badge-customer-#{surface}-#{row.id}",
+      id_value: row.processor_id || to_string(row.id)
+    }
 
-    email_line =
-      if row.email && row.email != label do
-        escaped_email = row.email |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-        ~s(<span class="ax-body ax-text-muted ax-type-code-xs">#{escaped_email}</span>)
-      else
-        ""
-      end
-
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{href}" class="ax-link">#{escaped}</a>#{email_line}</span>)
-    )
+    ~H"""
+    <DataTable.identity_cell>
+      <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
+      <:secondary>
+        <span :if={@email} class="ax-data-table-identity-email"><%= @email %></span>
+        <IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy customer ID" />
+      </:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp customer_return_path(mount_path, owner_scope, params) do
@@ -246,27 +249,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
     ScopedPath.build(mount_path, "/customers", owner_scope, return_params)
   end
 
-  # Click-to-copy processor (or local) id chip, rendered via the shared IdBadge
-  # component. A unique DOM id per row gives each chip its own Clipboard hook
-  # instance, so copy keeps working on infinite-scroll-appended/filter-re-rendered rows.
-  defp id_badge_cell(row, surface) do
-    id_value = row.processor_id || to_string(row.id)
-
-    assigns = %{
-      __changed__: %{},
-      dom_id: "ax-id-badge-#{surface}-#{row.id}",
-      id_value: id_value
-    }
-
-    ~H"""
-    <IdBadge.id_badge id={@dom_id} id_value={@id_value} />
-    """
-  end
-
   defp default_payment_method_label(%{default_payment_method_id: nil}), do: "Missing"
   defp default_payment_method_label(%{default_payment_method_id: _id}), do: "On file"
-
-  defp card_title(row), do: row.name || row.email || row.processor_id || row.id
 
   defp customer_filter_fields(owner_type_type, owner_type_options) do
     [

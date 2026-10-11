@@ -245,7 +245,7 @@ defmodule AccrueAdmin.CustomersLiveTest do
 
     assert {:ok, _view, html} = live_list(conn, "/billing/customers?view=all")
 
-    assert_table_headings_in_order(html, ["Customer", "Payment method", "ID"])
+    assert_table_headings_in_order(html, ["Customer", "Payment method"])
     assert_before(html, "Captain Customer", "cus_fake_00001")
   end
 
@@ -258,13 +258,14 @@ defmodule AccrueAdmin.CustomersLiveTest do
                "/billing/customers?q=Captain&owner_type=Team&has_default_payment_method=true"
              )
 
-    [href] =
+    [href | _] =
       html
       |> Floki.parse_document!()
       |> Floki.find("a.ax-link")
       |> Enum.map(&Floki.attribute(&1, "href"))
       |> List.flatten()
       |> Enum.filter(&String.contains?(&1, "/billing/customers/"))
+      |> Enum.uniq()
 
     params = href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
     return_path = URI.decode_www_form(params["return_to"])

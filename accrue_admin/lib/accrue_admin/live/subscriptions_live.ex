@@ -14,6 +14,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     DataTable,
     FilterChipBar,
     FlashGroup,
+    IdBadge,
     PageHeader,
     StatStrip
   }
@@ -216,7 +217,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           columns={[
             %{
               label: "Customer details",
-              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope, @params)
+              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope, @params, :table)
             },
             %{label: "State", render: &state_cell/1},
             %{label: "Plan / amount", render: &plan_amount_cell/1},
@@ -226,12 +227,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
             }
           ]}
-          card_title={&customer_label/1}
+          card_title={&identity_cell(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
-            %{
-              label: "Customer details",
-              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope, @params)
-            },
             %{label: "State", render: &state_cell/1},
             %{label: "Plan / amount", render: &plan_amount_cell/1},
             %{label: "Renews / ends", render: &time_cell/1},
@@ -331,7 +328,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   # Primary link resolves to the subscription's own detail page (D-01's literal href
   # mandate) with customer-first TEXT for scannability; secondary link cross-navigates to
   # the customer (mirrors invoices_live.ex's bidirectional identity-cell pattern).
-  defp identity_cell(row, mount_path, owner_scope, params) do
+  defp identity_cell(row, mount_path, owner_scope, params, surface) do
     list_path =
       mount_path
       |> scoped_path("/subscriptions", owner_scope)
@@ -351,9 +348,24 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
     subscription_id = row.processor_id || row.id
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{customer_href}" class="ax-link">#{escape(customer_label(row))}</a><a href="#{subscription_href}" class="ax-label ax-muted">#{escape(subscription_id)}</a></span>)
-    )
+    assigns = %{
+      __changed__: %{},
+      customer_href: customer_href,
+      customer_label: customer_label(row),
+      subscription_href: subscription_href,
+      badge_id: "ax-id-badge-subscription-#{surface}-#{row.id}",
+      subscription_id: subscription_id
+    }
+
+    ~H"""
+    <DataTable.identity_cell>
+      <:primary><.link href={@customer_href} class="ax-link"><%= @customer_label %></.link></:primary>
+      <:secondary>
+        <IdBadge.id_badge id={@badge_id} id_value={to_string(@subscription_id)} label="Copy subscription ID" />
+        <.link href={@subscription_href} class="ax-label ax-muted">Subscription details</.link>
+      </:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id

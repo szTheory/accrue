@@ -14,6 +14,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     DataTable,
     FilterChipBar,
     FlashGroup,
+    IdBadge,
     MoneyFormatter,
     PageHeader,
     StatStrip
@@ -145,10 +146,10 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           show_empty_clear={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
-            %{label: Copy.invoices_column_invoice(), render: &invoice_identity_cell(&1, @admin_mount_path, @current_owner_scope)},
+            %{label: Copy.invoices_column_invoice(), render: &invoice_identity_cell(&1, @admin_mount_path, @current_owner_scope, :table)},
             %{label: Copy.invoices_column_status(), render: &status_summary/1},
-            %{label: Copy.invoices_column_due_date(), render: &due_date_summary/1},
             %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
+            %{label: Copy.invoices_column_due_date(), render: &due_date_summary/1},
             %{
               id: :collection_method,
               label: Copy.invoices_column_collection(),
@@ -156,12 +157,11 @@ defmodule AccrueAdmin.Live.InvoicesLive do
             },
             %{label: Copy.invoices_column_billing_signals(), render: &billing_signals_cell/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&invoice_identity_cell(&1, @admin_mount_path, @current_owner_scope, :card)}
           card_fields={[
-            %{label: Copy.invoices_card_customer(), render: &customer_label/1},
             %{label: Copy.invoices_column_status(), render: &status_summary/1},
-            %{label: Copy.invoices_column_due_date(), render: &due_date_summary/1},
             %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
+            %{label: Copy.invoices_column_due_date(), render: &due_date_summary/1},
             %{
               id: :collection_method,
               label: Copy.invoices_column_collection(),
@@ -271,17 +271,36 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     )
   end
 
-  defp invoice_identity_cell(row, mount_path, owner_scope) do
+  defp invoice_identity_cell(row, mount_path, owner_scope, surface) do
     invoice_href = scoped_path(mount_path, "/invoices/#{row.id}", owner_scope)
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
     invoice_label = row.number || row.processor_id || row.id
+    processor_id = row.processor_id || to_string(row.id)
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{invoice_href}" class="ax-link">#{escape(invoice_label)}</a><a href="#{customer_href}" class="ax-label ax-muted">#{escape(customer_label(row))}</a></span>)
-    )
+    assigns = %{
+      __changed__: %{},
+      invoice_href: invoice_href,
+      invoice_label: invoice_label,
+      customer_href: customer_href,
+      customer_label: customer_label(row),
+      badge_id: "ax-id-badge-invoice-#{surface}-#{row.id}",
+      processor_id: processor_id
+    }
+
+    ~H"""
+    <DataTable.identity_cell>
+      <:primary><.link href={@invoice_href} class="ax-link"><%= @invoice_label %></.link></:primary>
+      <:secondary>
+        <.link href={@customer_href} class="ax-label ax-muted"><%= @customer_label %></.link>
+        <IdBadge.id_badge id={@badge_id} id_value={@processor_id} label="Copy invoice ID" />
+      </:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
+
+  defp card_title(row), do: row.number || row.processor_id || row.id
 
   defp status_summary(row) do
     [
@@ -322,8 +341,6 @@ defmodule AccrueAdmin.Live.InvoicesLive do
 
   defp collection_method_summary(row),
     do: Copy.invoices_collection_method_label(row.collection_method)
-
-  defp card_title(row), do: row.number || row.processor_id || row.id
 
   defp format_money(amount_minor, currency) when is_integer(amount_minor) do
     MoneyFormatter.format_money(amount_minor, currency, Accrue.Config.default_locale())
