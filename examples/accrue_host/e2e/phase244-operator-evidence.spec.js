@@ -80,7 +80,7 @@ function seedAdversarialEventRows(fixture) {
     first = Repo.insert!(struct(Event, attrs))
     second = Repo.insert!(struct(Event, attrs))
     long = Repo.insert!(%Event{
-      type: raw_key, schema_version: 1, actor_type: "external", actor_id: actor_id,
+      type: raw_key, schema_version: 1, actor_type: "webhook", actor_id: actor_id,
       subject_type: "External reference", subject_id: subject_id,
       caused_by_webhook_event_id: webhook_id,
       data: %{}, inserted_at: ~U[2026-10-10 23:59:59.123457Z]
