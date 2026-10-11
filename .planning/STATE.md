@@ -5,16 +5,16 @@ milestone_name: Admin Usability and Visual Consistency
 current_phase: 247
 current_phase_name: Evidence-True Details and Analytics
 status: executing
-stopped_at: Completed 247-02-PLAN.md
-last_updated: "2026-10-11T21:25:25.068Z"
+stopped_at: Completed 247-03-PLAN.md
+last_updated: "2026-10-11T21:40:26.391Z"
 last_activity: 2026-10-11
 last_activity_desc: Phase 247 execution started
-state_head: a72a3e0e9aa89868d24da7f58bebba0731cbf1f1
+state_head: 0d066da2585e9b249ada5a72fc4611ba7e985b1a
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 16
-  completed_plans: 10
+  completed_plans: 11
   percent: 50
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 ## Current Position
 
 Phase: 247 (Evidence-True Details and Analytics) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-10-11 — Phase 247 execution started
 
@@ -191,6 +191,7 @@ Last activity: 2026-10-11 — Phase 247 execution started
 | Phase 246 P05 | 73min | 2 tasks | 45 files |
 | Phase 247 P01 | 10min | 2 tasks | 12 files |
 | Phase 247 P02 | 5min | 2 tasks | 12 files |
+| Phase 247 P03 | 14min | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -442,6 +443,8 @@ Last activity: 2026-10-11 — Phase 247 execution started
 - [Phase 247]: Timestamp copy preserves the original ISO string independently from the formatted display.
 - [Phase 247]: Admin timestamps share a persistent Local/UTC preference with UTC fallback when browser storage cannot be read.
 - [Phase 247]: Clipboard success follows resolved writes; failed timestamp copies show the exact UTC ISO value in a selectable fallback.
+- [Phase 247]: Use Timestamp.timestamp/1 for visible instants while preserving Date fields and UTC query boundaries.
+- [Phase 247]: Keep audit prose intact and expose exact copy through adjacent timestamp controls.
 
 ### Pending Todos
 
@@ -527,8 +530,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T21:25:25.023Z
-Stopped at: Completed 247-02-PLAN.md
+Last session: 2026-10-11T21:40:26.342Z
+Stopped at: Completed 247-03-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
