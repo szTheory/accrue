@@ -75,6 +75,11 @@ defmodule AccrueAdmin.CopyTest do
     refute_vague_copy!(states)
   end
 
+  test "billing ownership and tax use one concise shared column label" do
+    assert Copy.billing_owner_tax_label() == "Ownership and tax"
+    assert Copy.invoices_column_billing_signals() == Copy.billing_owner_tax_label()
+  end
+
   test "CPY-02 destructive and consequential helpers name object, billing effect, and audit consequence" do
     invoice =
       Invoice.invoice_confirm_workflow_message(
@@ -510,13 +515,12 @@ defmodule AccrueAdmin.CopyTest do
         "Copy.resource_state_copy(:payments"
       ],
       "lib/accrue_admin/live/webhook_live.ex" => [
-        "Copy.action_hidden_context(",
-        "Copy.resource_state_copy(:webhooks",
-        "Copy.resource_state_copy(:events"
+        "Copy.Locked.replay_blocked()",
+        "Copy.webhook_replay_unavailable_status(webhook.status)"
       ],
       "lib/accrue_admin/live/connect_account_live.ex" => [
         "Copy.action_hidden_context(",
-        "Copy.resource_state_copy(:connect_accounts"
+        "AccrueAdmin.Copy.Connect.connect_account_provider_snapshot_note()"
       ],
       "lib/accrue_admin/live/subscription_live.ex" => [
         "Copy.action_hidden_context(",

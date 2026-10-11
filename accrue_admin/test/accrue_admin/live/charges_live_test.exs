@@ -269,10 +269,28 @@ defmodule AccrueAdmin.ChargesLiveTest do
       "Status",
       "Amount",
       "Fees",
-      "Billing signals"
+      "Ownership and tax"
     ])
 
     refute html =~ "/billing/charges"
+    assert html =~ "Stripe fee"
+    assert html =~ "Fees settled"
+    assert html =~ "Owner: User"
+    assert html =~ "Tax: Off"
+  end
+
+  test "shows unavailable fee evidence without inferring pending or unsettled state", %{
+    conn: conn,
+    charge: charge
+  } do
+    charge
+    |> Charge.changeset(%{stripe_fee_amount_minor: nil, fees_settled_at: nil})
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/payments?view=all")
+
+    assert html =~ "Stripe fee unavailable · Settlement time unavailable"
   end
 
   test "formats exact payment amounts and leaves unsupported currencies unavailable", %{

@@ -305,6 +305,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoices_column_invoice(), to: Invoice
   defdelegate invoices_column_customer(), to: Invoice
   defdelegate invoices_column_billing_signals(), to: Invoice
+  def billing_owner_tax_label, do: "Ownership and tax"
   defdelegate invoices_column_status(), to: Invoice
   defdelegate invoices_column_due_date(), to: Invoice
   defdelegate invoices_column_balance(), to: Invoice

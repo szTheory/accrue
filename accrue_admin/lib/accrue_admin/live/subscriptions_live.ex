@@ -224,7 +224,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             %{label: "Plan / amount", render: &plan_amount_cell/1},
             %{label: "Renews / ends", render: fn row -> time_cell(row, :table) end},
             %{
-              label: "Signals",
+              label: Copy.billing_owner_tax_label(),
               render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
             }
           ]}
@@ -234,7 +234,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             %{label: "Plan / amount", render: &plan_amount_cell/1},
             %{label: "Renews / ends", render: fn row -> time_cell(row, :card) end},
             %{
-              label: "Signals",
+              label: Copy.billing_owner_tax_label(),
               render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
             }
           ]}
@@ -429,21 +429,20 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       |> Enum.reject(&(&1 in [false, nil, ""]))
       |> Enum.join(" · ")
 
-    setup_gap_cell(plan_context, "Amount not confirmed in admin")
+    evidence_cell(plan_context, "Amount unavailable")
   end
 
   defp plan_amount_cell(%{cancel_at_period_end: true}),
-    do: setup_gap_cell("Renewal ending", "Price not confirmed in admin")
+    do: evidence_cell("Renewal ending", "Price unavailable")
 
   defp plan_amount_cell(_row),
-    do: setup_gap_cell("No renewal data", Copy.subscriptions_list_plan_amount_unavailable())
+    do: evidence_cell("Plan unavailable", "Amount unavailable")
 
-  defp setup_gap_cell(context, issue) do
+  defp evidence_cell(context, detail) do
     Phoenix.HTML.raw("""
-    <span class="ax-subscription-setup-gap">
-      <strong>Setup gap</strong>
-      <span>#{escape(issue)}</span>
-      <em>#{escape(context)}</em>
+    <span class="ax-label">
+      <strong>#{escape(context)}</strong>
+      <span class="ax-muted"> · #{escape(detail)}</span>
     </span>
     """)
   end

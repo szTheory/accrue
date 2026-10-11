@@ -151,14 +151,14 @@ defmodule AccrueAdmin.Live.ChargesLive do
             %{label: "Status", render: &status_summary/1},
             %{label: "Amount", render: &amount_summary/1},
             %{label: "Fees", render: &fee_summary/1},
-            %{label: "Billing signals", render: &billing_signals_cell/1}
+            %{label: Copy.billing_owner_tax_label(), render: &billing_signals_cell/1}
           ]}
           card_title={&payment_identity_cell(&1, @admin_mount_path, @current_owner_scope, :card)}
           card_fields={[
             %{label: "Status", render: &status_summary/1},
             %{label: "Amount", render: &amount_summary/1},
             %{label: "Fees", render: &fee_summary/1},
-            %{label: "Billing signals", render: &billing_signals_cell/1}
+            %{label: Copy.billing_owner_tax_label(), render: &billing_signals_cell/1}
           ]}
           filter_fields={payment_filter_fields()}
           empty_title={empty_title(@params, @summary)}
@@ -256,7 +256,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
     escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
     Phoenix.HTML.raw(
-      ~s(<span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span>)
+      ~s(<span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span>)
     )
   end
 
@@ -295,14 +295,14 @@ defmodule AccrueAdmin.Live.ChargesLive do
     stripe_fee =
       case row.stripe_fee_amount_minor do
         amount when is_integer(amount) ->
-          format_money(amount, row.stripe_fee_currency || row.currency)
+          "#{format_money(amount, row.stripe_fee_currency || row.currency)} Stripe fee"
 
         _ ->
-          "pending"
+          "Stripe fee unavailable"
       end
 
-    settled = if row.fees_settled_at, do: "settled", else: "unsettled"
-    "#{stripe_fee} stripe fee · #{settled}"
+    settled = if row.fees_settled_at, do: "Fees settled", else: "Settlement time unavailable"
+    "#{stripe_fee} · #{settled}"
   end
 
   defp format_money(amount_minor, currency) when is_integer(amount_minor) do

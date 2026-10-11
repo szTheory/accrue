@@ -350,15 +350,15 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Owner: User"
     assert html =~ "Tax: Off"
     refute html =~ "Search customer, open detail"
-    assert html =~ "Setup gap"
-    assert html =~ "Amount not confirmed in admin"
+    refute html =~ "Setup gap"
+    assert html =~ "Amount unavailable"
 
     assert_table_headings_in_order(html, [
       "Customer details",
       "State",
       "Plan / amount",
       "Renews / ends",
-      "Signals"
+      "Ownership and tax"
     ])
 
     assert html =~ "Subscription details"

@@ -76,7 +76,7 @@ defmodule AccrueAdmin.Copy.Invoice do
 
   def invoices_column_invoice, do: "Invoice"
   def invoices_column_customer, do: "Customer"
-  def invoices_column_billing_signals, do: "Billing signals"
+  def invoices_column_billing_signals, do: "Ownership and tax"
   def invoices_column_status, do: "Status"
   def invoices_column_due_date, do: "Due date"
   def invoices_column_balance, do: "Balance"
