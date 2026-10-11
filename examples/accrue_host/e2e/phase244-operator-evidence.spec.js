@@ -548,8 +548,8 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
       const activity = page.locator("details[data-ax-lazy-activity]").first();
       await activity.locator("summary").tap();
       const derived = activity.locator("section[aria-label='Derived events']");
-      const row = derived.locator(".ax-timeline-item").filter({ hasText: `event #${adversarial.ids[2]}` });
-      const evidenceDetails = row.locator("details.ax-timeline-details");
+      const longEvidenceRow = derived.locator(".ax-timeline-item").filter({ hasText: `event #${adversarial.ids[2]}` });
+      const evidenceDetails = longEvidenceRow.locator("details.ax-timeline-details");
       await evidenceDetails.locator("summary").tap();
       const evidence = evidenceDetails.locator("pre");
       await expect(evidence).toContainText(adversarial.rawKey);
@@ -562,12 +562,14 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
       expect(dimensions.viewport).toBe(320);
       expect(dimensions.document).toBeLessThanOrEqual(320);
       expect(dimensions.evidence).toBeGreaterThan(0);
-      const eventLink = row.getByRole("link", { name: "Open event" });
+      const relatedRow = derived.locator(".ax-timeline-item").filter({ hasText: `event #${adversarial.ids[0]}` });
+      const eventLink = relatedRow.getByRole("link", { name: "Open event" });
       const eventHref = await eventLink.getAttribute("href");
       expect(new URL(eventHref, page.url()).pathname).toBe(`/admin/events/${adversarial.ids[2]}`);
       expect(new URL(eventHref, page.url()).searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
       await eventLink.tap();
       await waitForLiveView(page);
+      await expect(page).toHaveURL(new RegExp(`/admin/events/${adversarial.ids[0]}\\?org=`));
       const subjectIdField = page
         .locator("dl.ax-field-list .ax-field")
         .filter({ has: page.locator("dt.ax-field-label", { hasText: /^Subject ID$/ }) });
