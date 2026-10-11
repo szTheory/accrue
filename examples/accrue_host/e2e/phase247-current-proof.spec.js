@@ -131,6 +131,7 @@ async function captureMatrix(page, lane, route, scenario, assets, checks) {
 
 async function assertTimePreference(page, { copy = false } = {}) {
   await page.setViewportSize({ width: 320, height: 820 });
+  await page.evaluate(() => window.scrollTo(0, 0));
   const control = page.locator("#admin-time-preference");
   const label = page.locator("label[for='admin-time-preference']");
   await expect(label).toBeVisible();
@@ -238,6 +239,7 @@ ordinaryTest("@phase247-current-ordinary invoice action review and recovery anal
     await waitForLiveView(page);
     const action = page.locator("[data-ax-primary-action]:visible").first();
     if (await action.count()) {
+      await assertTimePreference(page);
       await action.click();
       const review = page.locator("[data-ax-action-drawer-form]:visible").first();
       await expect(review, "invoice action opens its review form before confirmation").toBeVisible();
@@ -251,7 +253,6 @@ ordinaryTest("@phase247-current-ordinary invoice action review and recovery anal
     }
   }
   expect(actionRoute, "ordinary fixture contains an invoice with a reviewable existing action").toBeTruthy();
-  await assertTimePreference(page, { copy: true });
 
   await page.goto("/admin/analytics/recovery");
   await waitForLiveView(page);
@@ -317,7 +318,7 @@ heldoutTest("@phase247-current-heldout populated webhook detail and replay revie
   await expect(page.locator("[data-ax-action-band]")).toContainText("Replay webhook");
   await expect(page.locator("[data-role='replay-single']")).toBeVisible();
   const detailAssets = await fetchAssets(page);
-  const preferenceGeometry = await assertTimePreference(page);
+  const preferenceGeometry = await assertTimePreference(page, { copy: true });
   await page.setViewportSize({ width: 1280, height: 900 });
   const disclosureEvidence = await assertDisclosureCueAndKeyboard(page);
   await page.mouse.move(0, 0);
