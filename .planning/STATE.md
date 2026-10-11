@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-10-11T12:37:22.495Z"
 last_activity: 2026-10-11
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,16 +21,16 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Planning next milestone; v1.65 complete and archived; next phase number 245
-**Progress:** [██████████] 100%
+**Current focus:** v1.66 Admin Usability and Visual Consistency; Phase 245 is next.
+**Progress:** [░░░░░░░░░░] 0%
 **Completed work:** v1.65 is archived under `.planning/milestones/v1.65-*`. Phase 244 has 4/4 plans complete and 4/4 requirements satisfied; verification passed 9/9 with zero unverified behavior. v1.64 is shipped and archived with its closeout evidence retained in `.planning/milestones/`.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 245 of 248 — Rendered Baseline and Realistic Preview
 Plan: —
-Status: Defining requirements
-Last activity: 2026-10-11 — Milestone v1.66 started
+Status: Roadmap complete; Phase 245 ready for discussion and planning
+Last activity: 2026-10-11 — v1.66 roadmap created with 16/16 requirements mapped
 
 ## Performance Metrics
 
@@ -437,7 +437,7 @@ None. The next workflow action is recorded under Operator Next Steps; completed 
 
 ### Blockers/Concerns
 
-- **Current v1.65:** Phase 244 has no remaining verification blockers; milestone audit passed; archival is pending. Preserve revision-specific evidence and distinguish local acceptance from remote delivery.
+- **Archived v1.65:** Phase 244 has no remaining verification blockers; milestone audit passed and archival is complete. Preserve revision-specific evidence and distinguish local acceptance from remote delivery.
 - **Resolved by v1.62:** the `main`/v1.61 divergence, the stale local `main` ref, the four unpublished audit-closure commits, and the unavailable live-CI monitor. All are reconciled into the integration candidate with committed evidence.
 - **Historical v1.62 candidate:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
 - **Archived v1.62 validation debt:** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
@@ -499,8 +499,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T11:14:08.924985+00:00
-Stopped at: v1.65 complete and archived; next: $gsd-new-milestone
+Last session: 2026-10-11
+Stopped at: v1.66 roadmap created; next: discuss or plan Phase 245
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -630,4 +630,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Start the next milestone with $gsd-new-milestone
+- Discuss or plan Phase 245 of v1.66; use the owner-approved feedback brief and rendered inventory as the phase entry point.

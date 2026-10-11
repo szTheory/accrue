@@ -48,7 +48,26 @@ New billing/provider capabilities, Portal work, new Admin rooms, diagnosis produ
 
 ## Traceability
 
-To be populated by the milestone roadmapper. Every requirement has one owning phase; cross-phase acceptance remains in PROOF-01.
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| BASE-01 | Phase 245 | Pending |
+| BASE-02 | Phase 245 | Pending |
+| DEMO-01 | Phase 245 | Pending |
+| FILTER-01 | Phase 246 | Pending |
+| FILTER-02 | Phase 246 | Pending |
+| FILTER-03 | Phase 246 | Pending |
+| SEARCH-01 | Phase 246 | Pending |
+| TABLE-01 | Phase 246 | Pending |
+| TIME-01 | Phase 247 | Pending |
+| LANG-02 | Phase 247 | Pending |
+| STATE-02 | Phase 247 | Pending |
+| DETAIL-01 | Phase 247 | Pending |
+| DETAIL-02 | Phase 247 | Pending |
+| METRIC-01 | Phase 247 | Pending |
+| DEMO-02 | Phase 248 | Pending |
+| PROOF-01 | Phase 248 | Pending |
+
+All 16 v1.66 requirements have exactly one owning phase. PROOF-01 covers cross-phase acceptance.
 
 ---
-*Last updated: 2026-10-11 at milestone opening.*
+*Last updated: 2026-10-11 at roadmap creation.*
