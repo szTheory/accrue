@@ -11,9 +11,13 @@ findings:
     severity: warning
     disposition: fixed
     title: "The mobile timestamp layout assertion measures the first field"
+  - id: WR-02
+    severity: warning
+    disposition: fixed
+    title: "Pre-dispatch read failures are described as uncertain dispatch results"
 open: 0
-total: 2
-recorded: 2026-10-11T02:54:49.371Z
+total: 3
+recorded: 2026-10-11T03:40:33.884Z
 ---
 
 # Phase 244: Code Review Disposition
@@ -22,6 +26,7 @@ recorded: 2026-10-11T02:54:49.371Z
 |---------|----------|-------------|--------|
 | CR-01 | critical | fixed | 244-REVIEW-FIX.md (not in the current review) |
 | WR-01 | warning | fixed | 244-REVIEW-FIX.md (not in the current review) |
+| WR-02 | warning | fixed | 244-REVIEW-FIX.md (not in the current review) |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.
