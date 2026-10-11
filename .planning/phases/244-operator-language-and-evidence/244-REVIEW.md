@@ -1,6 +1,6 @@
 ---
 phase: 244-operator-language-and-evidence
-reviewed: 2026-10-10T23:00:00Z
+reviewed: 2026-10-11T02:54:16Z
 depth: standard
 files_reviewed: 18
 files_reviewed_list:
@@ -23,44 +23,37 @@ files_reviewed_list:
   - accrue_admin/test/accrue_admin/live/webhook_live_test.exs
   - examples/accrue_host/e2e/phase244-operator-evidence.spec.js
 findings:
-  critical: 1
-  warning: 1
+  critical: 0
+  warning: 0
   info: 0
-  total: 2
-status: issues_found
+  total: 0
+status: clean
 ---
 
 # Phase 244: Code Review Report
 
-**Reviewed:** 2026-10-10T23:00:00Z  
+**Reviewed:** 2026-10-11T02:54:16Z  
 **Depth:** standard  
 **Files Reviewed:** 18  
-**Status:** issues_found
+**Status:** clean
 
 ## Summary
 
-Reviewed the Phase 244 Admin copy, evidence disclosures, LiveView behavior, bundled assets, and browser acceptance spec. The lazily loaded Activity and Raw payload disclosures on Event and Webhook detail do not all preserve the native open state across their LiveView patch; the newly added 320px timestamp check also measures a different field from the timestamp it claims to validate.
+Re-reviewed the two findings against the fixes at `4c0ce625` and `65f5726b`. All reviewed lazy evidence disclosures now attach `PreserveDisclosure` with stable IDs, and the mobile layout proof measures the selected Recorded field. No review findings remain.
 
-## Critical Issues
+The fix report records passing focused LiveView tests, desktop keyboard disclosure checks, touch disclosure checks, and the 320px timestamp measurement. One initial combined desktop run timed out after the Webhook case's Open event request redirected with HTTP 302 to `/`; the exact tagged Webhook case then passed on rerun without a source change. The source cause of that first failure is not established, so it remains a verification limitation rather than a confirmed implementation defect.
 
-### CR-01: Lazy evidence disclosures lose their open state during loading patches
+## Finding Disposition
 
-**File:** `accrue_admin/lib/accrue_admin/live/event_live.ex:177` (also `event_live.ex:195`, `webhook_live.ex:302`)
-**Classification:** BLOCKER
-**Issue:** Opening Event Activity, Event Raw payload, or Webhook Raw payload sends a `phx-click` that patches the same disclosure's contents, but those `<details>` elements do not use `PreserveDisclosure`. The Webhook Activity disclosure needed this hook after the identical lazy-load patch closed it. These remaining disclosures therefore lose the operator's just-opened state when their load patch arrives, hiding the requested evidence until the operator opens them again. The Event disclosure behavior is also missing from the browser coverage.
-**Fix:** Add `phx-hook="PreserveDisclosure"` to each lazy `<details>` element that patches its contents, including Event Activity and both Raw payload sections, then exercise open and close across the loading patch.
+- **CR-01 — RESOLVED:** Event Activity, Event Raw payload, and Webhook Raw payload now use `PreserveDisclosure`; the browser spec covers opening through the load patch and subsequent close behavior. The fix report is [244-REVIEW-FIX.md](244-REVIEW-FIX.md).
+- **WR-01 — RESOLVED:** The 320px evidence assertion now obtains width and overflow measurements from the selected Recorded timestamp element.
 
-## Warnings
+## Narrative Findings (AI reviewer)
 
-### WR-01: The mobile timestamp layout assertion measures the first field
-
-**File:** `examples/accrue_host/e2e/phase244-operator-evidence.spec.js:362`
-**Classification:** WARNING
-**Issue:** The test correctly selects and checks the exact `Recorded` value in `recordedField`, but its width and overflow measurements use `document.querySelector` for the first `.ax-field dd.ax-field-value`. That is typically the Type field, so the reported `valueWidth` and `valueScrollWidth` do not establish that the long fractional timestamp fits at 320px. The document-wide width assertion could pass while the timestamp itself overflows its field.
-**Fix:** Measure the already selected `recordedField` element, for example with `recordedField.evaluate(el => ({ width: el.clientWidth, scrollWidth: el.scrollWidth }))`, and assert its own content width.
+No outstanding findings.
 
 ---
 
-_Reviewed: 2026-10-10T23:00:00Z_  
+_Reviewed: 2026-10-11T02:54:16Z_  
 _Reviewer: the agent (gsd-code-reviewer)_  
 _Depth: standard_

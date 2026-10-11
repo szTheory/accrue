@@ -1,6 +1,6 @@
 ---
 phase: 244
-status: secured
+status: verified
 asvs_level: 1
 block_on: high
 register_authored_at_plan_time: true
