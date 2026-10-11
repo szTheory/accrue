@@ -50,12 +50,16 @@ try {
   const coverage = jsonBlock(coverageText, "coverage");
   if (!Array.isArray(coverage.rows) || coverage.rows.length === 0) fail("coverage rows are empty");
   const ids = new Set();
+  const routeStates = new Set();
   const orderedRows = [...(coverage.rows ?? [])].sort((left, right) => left.route.localeCompare(right.route) || left.id.localeCompare(right.id));
   if (JSON.stringify(orderedRows) !== JSON.stringify(coverage.rows ?? [])) fail("route-state rows are not deterministically sorted by route then ID");
   for (const row of coverage.rows ?? []) {
     if (!row.id || ids.has(row.id)) fail(`missing or duplicate route-state id: ${row.id ?? "<empty>"}`);
     ids.add(row.id);
-    if (!row.route || !row.state || !row.url || !row.visual_anchor) fail(`incomplete route-state row: ${row.id}`);
+    const routeStateKey = `${row.route}\u0000${row.state}`;
+    if (routeStates.has(routeStateKey)) fail(`duplicate route/state row: ${row.route} (${row.state})`);
+    routeStates.add(routeStateKey);
+    if (!row.route || !row.state || (!row.url && row.status === "inspected") || !row.visual_anchor) fail(`incomplete route-state row: ${row.id}`);
     if (!["inspected", "unavailable", "not-applicable"].includes(row.status)) fail(`unknown status in ${row.id}: ${row.status}`);
     if (["unavailable", "not-applicable"].includes(row.status) && !row.reason) fail(`missing reason in ${row.id}`);
     if (row.status === "inspected" && !row.evidence) fail(`inspected row has no evidence in ${row.id}`);
@@ -89,6 +93,8 @@ try {
       if (capture.assets.css?.package !== capture.assets.css?.compiled || capture.assets.css?.package !== capture.assets.css?.served || capture.assets.js?.package !== capture.assets.js?.compiled || capture.assets.js?.package !== capture.assets.js?.served) fail(`package/compiled/served assets differ for ${capture.id}`);
       if (capture.assets.css?.requested_by_document !== true || capture.assets.js?.requested_by_document !== true) fail(`served assets were not observed as document requests for ${capture.id}`);
       combos.add(`${capture.viewport.width}x${capture.viewport.height}:${capture.theme}`);
+      const routeStateRow = (coverage.rows ?? []).find((row) => row.id === capture.route_state);
+      if (!routeStateRow || routeStateRow.route !== capture.route || routeStateRow.state !== capture.state || routeStateRow.status !== "inspected") fail(`capture ${capture.id} has no matching inspected route-state row`);
     }
     for (const combo of ["1280x900:light", "1280x900:dark", "390x844:light", "390x844:dark"]) if (!combos.has(combo)) fail(`required representative viewport/theme missing: ${combo}`);
     if (!coverage.omitted_combinations?.length) fail("omitted state combinations are not enumerated");
@@ -105,6 +111,7 @@ try {
       if (!finding.id || !finding.route_state || !finding.capture_hash || !finding.source || !finding.owner || !finding.severity || !finding.disposition) fail(`incomplete finding ${finding.id ?? "<empty>"}`);
       const capture = (manifest.captures ?? []).find((candidate) => candidate.png?.sha256 === finding.capture_hash);
       if (!capture || capture.route_state !== finding.route_state) fail(`finding ${finding.id} references no matching manifest capture`);
+      if (!finding.source || !finding.owner || !finding.severity || !finding.disposition) fail(`finding ${finding.id} lacks source, owner, severity, or disposition`);
     }
   }
 } catch (error) {

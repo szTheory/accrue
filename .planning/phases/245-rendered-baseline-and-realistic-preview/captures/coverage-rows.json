@@ -39,7 +39,7 @@
     "id": "R15-populated",
     "route": "/admin/connect/:id",
     "state": "populated",
-    "url": "/admin/connect/null",
+    "url": null,
     "visual_anchor": "Admin shell and route-owned content",
     "status": "unavailable",
     "reason": "No ordinary Fake connect accounts row exists, so a detail URL cannot be formed; the collection route was still visited."
@@ -81,49 +81,49 @@
     "evidence": "manifest capture C03; PNG SHA-256 73d0997d644e1da8f28ceaddabdd5a6d55fbed892a184ed3605a51081439651b"
   },
   {
-    "id": "R22-populated",
+    "id": "DEV-01-not-mounted",
     "route": "/admin/dev/clock",
-    "state": "populated",
+    "state": "not-mounted",
     "url": "/admin/dev/clock",
-    "visual_anchor": "Admin shell and route-owned content",
-    "status": "unavailable",
-    "reason": "Authenticated navigation returned 404 and ended at /admin/dev/clock; no screenshot claim made."
+    "visual_anchor": "Development route activation under the host mount",
+    "status": "not-applicable",
+    "reason": "Direct navigation returned HTTP 404; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance."
   },
   {
-    "id": "R25-populated",
+    "id": "DEV-04-not-mounted",
     "route": "/admin/dev/components",
-    "state": "populated",
+    "state": "not-mounted",
     "url": "/admin/dev/components",
-    "visual_anchor": "Admin shell and route-owned content",
-    "status": "unavailable",
-    "reason": "Authenticated navigation returned 404 and ended at /admin/dev/components; no screenshot claim made."
+    "visual_anchor": "Development route activation under the host mount",
+    "status": "not-applicable",
+    "reason": "Direct navigation returned HTTP 404; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance."
   },
   {
-    "id": "R23-populated",
+    "id": "DEV-02-not-mounted",
     "route": "/admin/dev/email-preview",
-    "state": "populated",
+    "state": "not-mounted",
     "url": "/admin/dev/email-preview",
-    "visual_anchor": "Admin shell and route-owned content",
-    "status": "unavailable",
-    "reason": "Authenticated navigation returned 404 and ended at /admin/dev/email-preview; no screenshot claim made."
+    "visual_anchor": "Development route activation under the host mount",
+    "status": "not-applicable",
+    "reason": "Direct navigation returned HTTP 404; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance."
   },
   {
-    "id": "R26-populated",
+    "id": "DEV-05-not-mounted",
     "route": "/admin/dev/fake-inspect",
-    "state": "populated",
+    "state": "not-mounted",
     "url": "/admin/dev/fake-inspect",
-    "visual_anchor": "Admin shell and route-owned content",
-    "status": "unavailable",
-    "reason": "Authenticated navigation returned 404 and ended at /admin/dev/fake-inspect; no screenshot claim made."
+    "visual_anchor": "Development route activation under the host mount",
+    "status": "not-applicable",
+    "reason": "Direct navigation returned HTTP 404; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance."
   },
   {
-    "id": "R24-populated",
+    "id": "DEV-03-not-mounted",
     "route": "/admin/dev/webhook-fixtures",
-    "state": "populated",
+    "state": "not-mounted",
     "url": "/admin/dev/webhook-fixtures",
-    "visual_anchor": "Admin shell and route-owned content",
-    "status": "unavailable",
-    "reason": "Authenticated navigation returned 404 and ended at /admin/dev/webhook-fixtures; no screenshot claim made."
+    "visual_anchor": "Development route activation under the host mount",
+    "status": "not-applicable",
+    "reason": "Direct navigation returned HTTP 404; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance."
   },
   {
     "id": "R16-populated",
@@ -228,7 +228,7 @@
     "id": "R19-populated",
     "route": "/admin/webhooks/:id",
     "state": "populated",
-    "url": "/admin/webhooks/null",
+    "url": null,
     "visual_anchor": "Admin shell and route-owned content",
     "status": "unavailable",
     "reason": "No ordinary Fake webhook events row exists, so a detail URL cannot be formed; the collection route was still visited."

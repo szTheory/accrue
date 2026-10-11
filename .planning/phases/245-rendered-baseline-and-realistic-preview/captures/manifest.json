@@ -1,7 +1,7 @@
 {
   "phase": "245-rendered-baseline-and-realistic-preview",
-  "captured_at": "2026-10-11T14:13:18.350Z",
-  "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+  "captured_at": "2026-10-11T14:15:57.382Z",
+  "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
   "source_dirty": true,
   "scenario": "isolated accrue-host-phase245-ordinary Fake seed; existing database preserved",
   "seed_revision": "5431bf708b514a967c2e60b6d298c65804b34bd356be88694876141feeaf8684",
@@ -16,7 +16,7 @@
       "route": "/admin",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -188,7 +188,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin",
-      "captured_at": "2026-10-11T14:12:55.200Z",
+      "captured_at": "2026-10-11T14:15:35.421Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/01-root-wide-light.png",
         "bytes": 255309,
@@ -202,7 +202,7 @@
       "route": "/admin/customers",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -374,7 +374,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/customers",
-      "captured_at": "2026-10-11T14:12:56.092Z",
+      "captured_at": "2026-10-11T14:15:36.305Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/02-rootcustomers-wide-light.png",
         "bytes": 419236,
@@ -388,7 +388,7 @@
       "route": "/admin/customers/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -560,7 +560,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/customers/028e6898-ca99-47c0-a011-f67f60a655c2",
-      "captured_at": "2026-10-11T14:12:56.944Z",
+      "captured_at": "2026-10-11T14:15:37.145Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/03-rootcustomers-paramid-wide-light.png",
         "bytes": 257752,
@@ -574,7 +574,7 @@
       "route": "/admin/subscriptions",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -746,7 +746,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/subscriptions",
-      "captured_at": "2026-10-11T14:12:57.705Z",
+      "captured_at": "2026-10-11T14:15:38.075Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/04-rootsubscriptions-wide-light.png",
         "bytes": 206326,
@@ -760,7 +760,7 @@
       "route": "/admin/subscriptions/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -932,7 +932,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/subscriptions/00e4fb01-4a12-4910-ba50-de7e03d3e248",
-      "captured_at": "2026-10-11T14:12:59.094Z",
+      "captured_at": "2026-10-11T14:15:39.221Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/05-rootsubscriptions-paramid-wide-light.png",
         "bytes": 414874,
@@ -946,7 +946,7 @@
       "route": "/admin/invoices",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -1118,7 +1118,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/invoices?view=all",
-      "captured_at": "2026-10-11T14:12:59.996Z",
+      "captured_at": "2026-10-11T14:15:40.022Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/06-rootinvoices-wide-light.png",
         "bytes": 259136,
@@ -1132,7 +1132,7 @@
       "route": "/admin/invoices/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -1304,7 +1304,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/invoices/05f639e3-4b31-4ee7-a226-b249e2122a66",
-      "captured_at": "2026-10-11T14:13:01.304Z",
+      "captured_at": "2026-10-11T14:15:41.440Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/07-rootinvoices-paramid-wide-dark.png",
         "bytes": 260885,
@@ -1318,7 +1318,7 @@
       "route": "/admin/payments",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -1490,7 +1490,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/payments",
-      "captured_at": "2026-10-11T14:13:02.399Z",
+      "captured_at": "2026-10-11T14:15:42.448Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/08-rootpayments-wide-light.png",
         "bytes": 151962,
@@ -1504,7 +1504,7 @@
       "route": "/admin/payments/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -1676,7 +1676,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/payments/07fce207-1342-479e-a64b-946f1d937854",
-      "captured_at": "2026-10-11T14:13:03.369Z",
+      "captured_at": "2026-10-11T14:15:43.303Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/09-rootpayments-paramid-wide-light.png",
         "bytes": 258453,
@@ -1690,7 +1690,7 @@
       "route": "/admin/coupons",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -1862,7 +1862,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/coupons",
-      "captured_at": "2026-10-11T14:13:04.396Z",
+      "captured_at": "2026-10-11T14:15:44.440Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/10-rootcoupons-narrow-light.png",
         "bytes": 145084,
@@ -1876,7 +1876,7 @@
       "route": "/admin/coupons/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2048,7 +2048,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/coupons/907119e2-4a62-4b2f-a9c4-7586d3c889d5",
-      "captured_at": "2026-10-11T14:13:05.391Z",
+      "captured_at": "2026-10-11T14:15:45.500Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/11-rootcoupons-paramid-wide-light.png",
         "bytes": 176246,
@@ -2062,7 +2062,7 @@
       "route": "/admin/promotion-codes",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2234,7 +2234,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/promotion-codes",
-      "captured_at": "2026-10-11T14:13:06.465Z",
+      "captured_at": "2026-10-11T14:15:46.531Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/12-rootpromotion-codes-wide-light.png",
         "bytes": 154033,
@@ -2248,7 +2248,7 @@
       "route": "/admin/promotion-codes/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2420,7 +2420,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/promotion-codes/3bb400f1-b8a6-4182-9890-37fcfdd60a4f",
-      "captured_at": "2026-10-11T14:13:07.833Z",
+      "captured_at": "2026-10-11T14:15:47.442Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/13-rootpromotion-codes-paramid-wide-light.png",
         "bytes": 191089,
@@ -2434,7 +2434,7 @@
       "route": "/admin/connect",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2606,7 +2606,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/connect",
-      "captured_at": "2026-10-11T14:13:08.792Z",
+      "captured_at": "2026-10-11T14:15:48.290Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/14-rootconnect-wide-light.png",
         "bytes": 160271,
@@ -2620,7 +2620,7 @@
       "route": "/admin/events",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2792,7 +2792,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/events",
-      "captured_at": "2026-10-11T14:13:09.763Z",
+      "captured_at": "2026-10-11T14:15:49.249Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/16-rootevents-narrow-dark.png",
         "bytes": 790014,
@@ -2806,7 +2806,7 @@
       "route": "/admin/events/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -2978,7 +2978,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/events/1",
-      "captured_at": "2026-10-11T14:13:10.649Z",
+      "captured_at": "2026-10-11T14:15:50.024Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/17-rootevents-paramid-wide-light.png",
         "bytes": 194209,
@@ -2992,7 +2992,7 @@
       "route": "/admin/webhooks",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -3164,7 +3164,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/webhooks",
-      "captured_at": "2026-10-11T14:13:12.123Z",
+      "captured_at": "2026-10-11T14:15:50.814Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/18-rootwebhooks-wide-light.png",
         "bytes": 154459,
@@ -3178,7 +3178,7 @@
       "route": "/admin/analytics/recovery",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -3350,7 +3350,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/analytics/recovery",
-      "captured_at": "2026-10-11T14:13:14.333Z",
+      "captured_at": "2026-10-11T14:15:52.991Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/20-rootanalytics-recovery-wide-dark.png",
         "bytes": 264999,
@@ -3364,7 +3364,7 @@
       "route": "/admin/analytics/recovery/subscriptions/:id",
       "state": "populated",
       "scenario": "ordinary Fake seed; no mutation",
-      "source_revision": "c020a84fa3092efa21cc0ba4c8a86004ebdc592f",
+      "source_revision": "dd89ff782df111663b3e0e7f60430519dca6ab74",
       "source_dirty": true,
       "source_digests": {
         "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
@@ -3536,7 +3536,7 @@
         "version": "147.0.7727.15"
       },
       "url": "http://accrue-host-phase245-ordinary.localhost/admin/analytics/recovery/subscriptions/00e4fb01-4a12-4910-ba50-de7e03d3e248",
-      "captured_at": "2026-10-11T14:13:15.265Z",
+      "captured_at": "2026-10-11T14:15:53.522Z",
       "png": {
         "path": ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/21-rootanalytics-recovery-subscriptions-paramid-wide-light.png",
         "bytes": 143542,

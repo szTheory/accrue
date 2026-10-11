@@ -214,7 +214,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
 
   async function visit(route, url, table, index, development = false) {
     if (url.endsWith("/null") || url.endsWith("/undefined")) {
-      rows.push({ id: `R${String(index + 1).padStart(2, "0")}-populated`, route, state: "populated", url, visual_anchor: "Admin shell and route-owned content", status: "unavailable", reason: `No ordinary Fake record exists in ${table}; protected preview data was left intact.` });
+      rows.push({ id: `R${String(index + 1).padStart(2, "0")}-populated`, route, state: "populated", url: null, visual_anchor: "Admin shell and route-owned content", status: "unavailable", reason: `No ordinary Fake record exists in ${table}, so a detail URL was not constructed; protected preview data was left intact.` });
       return;
     }
     const narrow = url === "/admin/coupons" || route === "/admin/events";
@@ -224,6 +224,10 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
     await page.locator("body").waitFor();
     const finalPath = new URL(page.url()).pathname;
     if (!response || response.status() >= 400 || finalPath === "/users/log-in") {
+      if (development) {
+        rows.push({ id: `DEV-${String(index - routes.length + 1).padStart(2, "0")}-not-mounted`, route, state: "not-mounted", url, visual_anchor: "Development route activation under the host mount", status: "not-applicable", reason: `Direct navigation returned HTTP ${response?.status() ?? "no response"}; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance.` });
+        return;
+      }
       rows.push({ id: `R${String(index + 1).padStart(2, "0")}-populated`, route, state: "populated", url, visual_anchor: "Admin shell and route-owned content", status: "unavailable", reason: `Authenticated navigation returned ${response?.status() ?? "no response"} and ended at ${finalPath}; no screenshot claim made.` });
       return;
     }
