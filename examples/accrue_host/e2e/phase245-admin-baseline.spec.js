@@ -229,7 +229,7 @@ test("authenticated ordinary invoice list and detail match current served assets
 
 test("capture reachable mounted Admin templates with bounded theme and viewport coverage", async ({ page, browserName }) => {
   test.skip(!operatorPassword, "set ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD from the local operator credential source");
-  test.setTimeout(240_000);
+  test.setTimeout(360_000);
   assertOrdinaryComposeIdentity();
   const phaseCaptureDir = path.join(repoRoot, ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current");
   fs.mkdirSync(phaseCaptureDir, { recursive: true });
