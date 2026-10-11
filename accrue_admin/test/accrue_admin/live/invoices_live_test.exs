@@ -74,6 +74,24 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     refute html =~ "ax-text-12"
   end
 
+  test "keeps invoice number, customer, and exact copyable processor ID on separate lines", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
+    document = Floki.parse_document!(html)
+    row = Floki.find(document, ".ax-data-table-grid [data-row-id='#{invoice.id}']") |> hd()
+
+    assert [primary] = Floki.find(row, ".ax-data-table-identity-primary a")
+    assert Floki.text(primary) == "INV-0002"
+    assert Floki.text(row) =~ "Invoice Customer"
+    assert length(Floki.find(row, "[data-clipboard-text='in_0002'][aria-label='Copy invoice ID']")) == 1
+
+    card = Floki.find(document, ".ax-data-table-card[data-row-id='#{invoice.id}']") |> hd()
+    assert length(Floki.find(card, "[data-clipboard-text='in_0002'][aria-label='Copy invoice ID']")) == 1
+  end
+
   test "default invoice queue exposes checked status controls for its returned rows", %{
     conn: conn
   } do
