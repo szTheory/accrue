@@ -70,13 +70,37 @@ ordinaryTest("@phase246-ordinary scoped customer and invoice list journeys remai
   const password = process.env.ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD;
   ordinaryTest.skip(!password, "local preview operator password is required for the ordinary host");
   await page.goto("/users/log-in");
-  await page.getByLabel(/email/i).fill(process.env.ACCRUE_HOST_PREVIEW_OPERATOR_EMAIL || "admin@example.com");
-  await page.getByLabel(/password/i).fill(password);
-  await page.getByRole("button", { name: /log in/i }).click();
-  await expect(page).toHaveURL(/\/$/);
+  const csrfToken = await page.locator("meta[name='csrf-token']").getAttribute("content");
+  expect(csrfToken).toBeTruthy();
+  await Promise.all([
+    page.waitForURL((url) => url.pathname === "/", { waitUntil: "domcontentloaded" }),
+    page.evaluate(({ token, email, operatorPassword }) => {
+      const form = document.createElement("form");
+      form.method = "post";
+      form.action = "/users/log-in";
+      for (const [name, value] of Object.entries({
+        _csrf_token: token,
+        "user[email]": email,
+        "user[password]": operatorPassword
+      })) {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = name;
+        input.value = value;
+        form.append(input);
+      }
+      document.body.append(form);
+      form.submit();
+    }, {
+      token: csrfToken,
+      email: process.env.ACCRUE_HOST_PREVIEW_OPERATOR_EMAIL || "admin@example.com",
+      operatorPassword: password
+    })
+  ]);
+  await page.goto("/admin");
   await page.goto("/admin/customers");
   await waitForLiveView(page);
-  await expect(page.locator("[data-connection-state='connected']")).toBeVisible();
+  await expect(page.locator("#accrue-admin-shell[data-connection-state='connected']")).toBeVisible();
   await expect(page.locator("[data-ax-list='customers']")).toBeVisible();
   await page.goto("/admin/invoices");
   await waitForLiveView(page);
