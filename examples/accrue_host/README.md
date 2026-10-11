@@ -116,6 +116,46 @@ cd examples/accrue_host
 mix verify
 ```
 
+## Isolated ordinary preview
+
+For a Phase 245 rendered baseline, use a separate Compose project and database.
+This starts the named instance with automatic seeds disabled, then applies only
+the ordinary preview stories after the app is ready:
+
+```bash
+cd examples/accrue_host
+make proxy # only when the shared proxy is not running
+ACCRUE_HOST_SKIP_SEEDS=1 make up INSTANCE=accrue-host-phase245-ordinary
+docker compose -p accrue-host-phase245-ordinary exec -T web mix run priv/repo/seeds/ordinary.exs
+```
+
+The explicit seed command is safe to repeat. For warm recovery, run the same
+`ACCRUE_HOST_SKIP_SEEDS=1 make up INSTANCE=accrue-host-phase245-ordinary`
+command; it migrates and starts the isolated app without replaying the default
+stress seeds. Confirm the instance uses `Accrue.Processor.Fake` before browser
+inspection. Sign into `/admin` with the local demo operator account described
+above; never put its password in capture output or manifests. A missing external
+credential makes that inspection unavailable and is never a reason to bypass
+authentication.
+
+Before seeding, record the protected Phase 243 preview state. Afterward, verify
+that it remains unchanged:
+
+```bash
+cd ../..
+ACCRUE_HOST_PREVIEW_INSTANCE=accrue-host-phase243-preview ACCRUE_HOST_PREVIEW_SNAPSHOT=/tmp/accrue245-phase243.snapshot.json node scripts/ci/accrue_host_preview_custody.sh snapshot
+# Seed and inspect accrue-host-phase245-ordinary, then:
+ACCRUE_HOST_PREVIEW_INSTANCE=accrue-host-phase243-preview ACCRUE_HOST_PREVIEW_SNAPSHOT=/tmp/accrue245-phase243.snapshot.json node scripts/ci/accrue_host_preview_custody.sh assert-preserved
+```
+
+Do not reset the protected Phase 243 data or the default seed aggregator. Stop
+only the isolated instance when finished:
+
+```bash
+cd examples/accrue_host
+make down INSTANCE=accrue-host-phase245-ordinary
+```
+
 ## Apple notification ingress
 
 Cadence exposes the production-only Apple V2 endpoint at `POST /webhooks/apple`.

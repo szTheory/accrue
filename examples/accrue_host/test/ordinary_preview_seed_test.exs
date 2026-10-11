@@ -47,32 +47,53 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
     second = invoice_journey()
 
     assert first == second
-    assert first.invoice_number == "DEMO-PAID-0003"
-    assert first.amounts == %{subtotal: 4_900, tax: 392, total: 5_292, paid: 5_292, remaining: 0}
+    assert first.invoice_number == "PORTAL-LAUNCH-001"
+    assert first.invoice_count == 1
+    assert first.customer_count == 1
+    assert first.subscription_count == 1
+    assert first.amounts == %{subtotal: 1_500, tax: 0, total: 1_500, paid: 1_500, remaining: 0}
     assert first.currency == "usd"
-    assert first.customer_name == "Northwind Labs"
+    assert first.customer_owner_type == "User"
     assert first.subscription_status == :active
     assert first.phase191_events == 0
   end
 
   defp seed_if_available do
-    # In the RED phase the behavior assertion below fails until the dedicated
-    # ordinary entrypoint is added. Once present, both runs exercise it.
-    if File.regular?(@ordinary_seed), do: Code.eval_file(@ordinary_seed)
+    Code.eval_file(@ordinary_seed)
   end
 
   defp invoice_journey do
-    invoice = Repo.get_by(Invoice, processor: "fake", processor_id: "in_showcase_paid_usd")
+    invoice =
+      Repo.get_by(Invoice, processor: "fake", processor_id: "in_seed_healthy_portal_launch_paid")
+
     assert not is_nil(invoice), "expected the ordinary paid invoice journey to be seeded"
     customer = Repo.get!(Customer, invoice.customer_id)
     subscription = Repo.get!(Subscription, invoice.subscription_id)
 
+    invoice_count =
+      Repo.aggregate(
+        from(row in Invoice,
+          where:
+            row.processor == "fake" and row.processor_id == "in_seed_healthy_portal_launch_paid"
+        ),
+        :count
+      )
+
+    customer_count =
+      Repo.aggregate(from(row in Customer, where: row.id == ^invoice.customer_id), :count)
+
+    subscription_count =
+      Repo.aggregate(from(row in Subscription, where: row.id == ^invoice.subscription_id), :count)
+
     %{
       invoice_number: invoice.number,
       invoice_id: invoice.id,
+      invoice_count: invoice_count,
       customer_id: customer.id,
-      customer_name: customer.name,
+      customer_count: customer_count,
+      customer_owner_type: customer.owner_type,
       subscription_id: subscription.id,
+      subscription_count: subscription_count,
       subscription_status: subscription.status,
       currency: invoice.currency,
       amounts: %{
