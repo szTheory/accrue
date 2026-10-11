@@ -1,5 +1,6 @@
 // @ts-check
 const crypto = require("node:crypto");
+const { execFileSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 const { test: ordinaryTest, expect } = require("@playwright/test");
@@ -23,6 +24,7 @@ const sourcePaths = [
 ];
 
 const sha256 = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex");
+const sourceRevision = () => execFileSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).trim();
 const sourceDigests = () => Object.fromEntries(sourcePaths.map((file) => [file, sha256(fs.readFileSync(path.join(repoRoot, file)))]));
 
 async function servedAsset(page, selector, sourcePath) {
@@ -56,7 +58,7 @@ async function capture(page, name, assets) {
     browser: { name: "chromium", version: page.context().browser()?.version() },
     viewport: page.viewportSize(),
     theme: await page.locator("html").getAttribute("data-theme"),
-    source_sha: await page.evaluate(() => document.documentElement.dataset.phase246SourceSha || null),
+    source_sha: sourceRevision(),
     source_digests: sourceDigests(),
     assets,
     screenshot: { sha256: sha256(bytes), bytes: bytes.length }
@@ -95,8 +97,6 @@ heldoutTest("@phase246-heldout table state fixtures retain identity, order, and 
 
   const css = await servedAsset(page, 'link[rel="stylesheet"][href*="/admin/assets/css-"]', "accrue_admin/priv/static/accrue_admin.css");
   const js = await servedAsset(page, 'script[src*="/admin/assets/js-"]', "accrue_admin/priv/static/accrue_admin.js");
-  await page.evaluate((sha) => { document.documentElement.dataset.phase246SourceSha = sha; }, sha256(JSON.stringify(sourceDigests())));
-
   await page.getByRole("button", { name: "Table loading" }).click();
   await expect(page.locator('[data-role="loading-skeleton"]')).toBeVisible();
   await page.getByRole("button", { name: "Table initial-error" }).click();
