@@ -19,8 +19,10 @@ defmodule AccrueAdmin.Components.GlobalSearch do
        mount_path: nil,
        current_owner_scope: nil,
        query: "",
+       max_query_length: @max_query_length,
        results: empty_results(),
        failures: [],
+       query_too_long: false,
        is_open: false,
        loading: false,
        generation: 0
@@ -73,6 +75,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
          query: "",
          results: empty_results(),
          failures: [],
+         query_too_long: false,
          loading: false,
          generation: socket.assigns.generation + 1
        )}
@@ -101,7 +104,8 @@ defmodule AccrueAdmin.Components.GlobalSearch do
         {:noreply, clear_query(socket)}
 
       String.length(query) > @max_query_length ->
-        {:noreply, assign(clear_query(socket), query: query)}
+        socket = clear_query(socket)
+        {:noreply, assign(socket, query: query, query_too_long: true)}
 
       true ->
         {:noreply, begin_search(socket, query)}
@@ -136,6 +140,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
         generation: generation,
         results: initial_results,
         failures: [],
+        query_too_long: false,
         loading: true
       )
 
@@ -161,6 +166,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
       query: "",
       results: empty_results(),
       failures: [],
+      query_too_long: false,
       loading: false,
       generation: socket.assigns.generation + 1
     )
@@ -325,7 +331,10 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                     </button>
                   </div>
                 <% end %>
-                <%= if not @loading and @failures == [] and no_results?(@results) do %>
+                <%= if @query_too_long do %>
+                  <p class="ax-command-palette-validation" role="status">Search is limited to <%= @max_query_length %> characters.</p>
+                <% end %>
+                <%= if not @query_too_long and not @loading and @failures == [] and no_results?(@results) do %>
                   <div class="ax-command-palette-no-results">
                     <p><%= Copy.global_search_no_results_html(@query) %></p>
                   </div>

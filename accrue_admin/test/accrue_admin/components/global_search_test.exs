@@ -7,6 +7,46 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
   alias AccrueAdmin.Components.Topbar
   alias AccrueAdmin.OwnerScope
 
+  test "overlong query is reported as validation, not a completed no-results search" do
+    query = String.duplicate("x", 101)
+
+    socket = %Phoenix.LiveView.Socket{
+      assigns: %{
+        __changed__: %{},
+        id: "global-search",
+        query: "previous",
+        current_owner_scope: nil,
+        generation: 3,
+        results: %{customers: [%{id: "stale"}], invoices: [], subscriptions: []},
+        failures: [],
+        loading: true,
+        query_too_long: false
+      }
+    }
+
+    assert {:noreply, updated} = GlobalSearch.handle_event("search", %{"q" => query}, socket)
+    assert updated.assigns.query == query
+    assert updated.assigns.query_too_long
+    refute updated.assigns.loading
+    assert updated.assigns.results == %{customers: [], invoices: [], subscriptions: []}
+    assert updated.assigns.generation == 4
+
+    html =
+      render_component(GlobalSearch, %{
+        id: "global-search",
+        mount_path: "/billing",
+        query: query,
+        query_too_long: true,
+        results: %{customers: [], invoices: [], subscriptions: []},
+        failures: [],
+        is_open: true,
+        loading: false
+      })
+
+    assert html =~ "Search is limited to 100 characters."
+    refute html =~ "No billing records match"
+  end
+
   describe "path/2 nil-guard (regression: WR-03 fix)" do
     test "renders without crashing when mount_path is nil (pre-update/2 state)" do
       # GlobalSearch.mount/1 initialises mount_path to nil.  The template calls
