@@ -116,7 +116,7 @@ async function capture(page, lane, route, scenario, assets, checks) {
   const file = `${lane}-${scenario}.png`;
   const fullPath = path.join(captureDir, file);
   if (fs.existsSync(fullPath)) throw new Error(`Refusing to overwrite current proof capture: ${file}`);
-  const bytes = await page.screenshot({ path: fullPath, fullPage: true, animations: "disabled" });
+  const bytes = await page.screenshot({ path: fullPath, fullPage: false, animations: "disabled" });
   const entry = {
     file, origin_lane: lane, scenario, route, viewport: page.viewportSize(),
     theme: await page.locator("html").getAttribute("data-theme"), source_sha: sourceSha(),
