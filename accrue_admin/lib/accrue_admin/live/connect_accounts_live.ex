@@ -17,6 +17,8 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     StatStrip
   }
 
+  alias AccrueAdmin.Components.Timestamp
+
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.ConnectAccounts
   alias AccrueAdmin.ScopedPath
@@ -579,8 +581,13 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
 
   defp load_scoped_account(id, _owner_scope), do: Repo.get(Account, id)
 
-  defp status_summary(%{deauthorized_at: %DateTime{} = value}),
-    do: Copy.connect_accounts_status_deauthorized_prefix() <> format_datetime(value)
+  defp status_summary(%{deauthorized_at: %DateTime{} = value} = row) do
+    assigns = %{value: value, id: "connect-account-row-deauthorized-#{row.id}"}
+
+    ~H"""
+    <span><%= Copy.connect_accounts_status_deauthorized_prefix() %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
 
   defp status_summary(row) do
     if row.country do
@@ -606,8 +613,6 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       _ -> %{}
     end
   end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

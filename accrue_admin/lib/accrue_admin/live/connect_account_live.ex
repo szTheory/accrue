@@ -19,6 +19,8 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     Timeline
   }
 
+  alias AccrueAdmin.Components.Timestamp
+
   alias AccrueAdmin.Copy
   alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.StepUp
@@ -666,7 +668,8 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     Enum.map(events, fn event ->
       %{
         title: event.type,
-        at: format_datetime(event.inserted_at),
+        id: event.id,
+        at: event.inserted_at,
         body: event.subject_type <> " " <> event.subject_id,
         status: event.actor_type,
         tone: timeline_tone(event),
@@ -1038,8 +1041,13 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     end
   end
 
-  defp account_status(%{deauthorized_at: %DateTime{} = value}),
-    do: AccrueAdmin.Copy.connect_account_status_deauthorized_prefix() <> format_datetime(value)
+  defp account_status(%{deauthorized_at: %DateTime{} = value} = account) do
+    assigns = %{value: value, id: "connect-account-deauthorized-#{account.id}"}
+
+    ~H"""
+    <span><%= AccrueAdmin.Copy.connect_account_status_deauthorized_prefix() %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
 
   defp account_status(_account),
     do: AccrueAdmin.Copy.connect_account_status_active_authorization()
@@ -1088,8 +1096,6 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     |> String.split()
     |> Enum.map_join(" ", &String.capitalize/1)
   end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
 
   defp normalize_string(nil), do: nil
 

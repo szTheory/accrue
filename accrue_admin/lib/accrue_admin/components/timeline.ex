@@ -6,6 +6,7 @@ defmodule AccrueAdmin.Components.Timeline do
   use Phoenix.Component
 
   alias AccrueAdmin.Components.StatusBadge
+  alias AccrueAdmin.Components.Timestamp
 
   attr(:items, :list, required: true)
   attr(:label, :string, default: "Timeline")
@@ -23,7 +24,15 @@ defmodule AccrueAdmin.Components.Timeline do
             <div class="ax-timeline-header">
               <div>
                 <p class="ax-label"><%= Map.get(item, :title, "Event") %></p>
-                <time :if={Map.get(item, :at)} class="ax-timeline-time"><%= Map.get(item, :at) %></time>
+                <Timestamp.timestamp
+                  :if={match?(%DateTime{}, Map.get(item, :at))}
+                  value={Map.get(item, :at)}
+                  id={timestamp_id(item)}
+                />
+                <time
+                  :if={Map.get(item, :at) && not match?(%DateTime{}, Map.get(item, :at))}
+                  class="ax-timeline-time"
+                ><%= Map.get(item, :at) %></time>
               </div>
               <StatusBadge.status_badge :if={Map.get(item, :status)} status={Map.get(item, :status)} tone={tone(item)} />
             </div>
@@ -60,4 +69,6 @@ defmodule AccrueAdmin.Components.Timeline do
       _ -> "ink"
     end
   end
+
+  defp timestamp_id(item), do: "timeline-timestamp-#{Map.get(item, :id, :erlang.phash2(item))}"
 end

@@ -85,7 +85,14 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> assign(:assets_css_path, admin["assets_css_path"])
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
-    |> assign(:current_path, ScopedPath.build(admin["mount_path"] || "/billing", "", socket.assigns[:current_owner_scope]))
+    |> assign(
+      :current_path,
+      ScopedPath.build(
+        admin["mount_path"] || "/billing",
+        "",
+        socket.assigns[:current_owner_scope]
+      )
+    )
   end
 
   defp recent_events(owner_scope, mount_path) do
@@ -94,7 +101,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
     Enum.map(events, fn event ->
       %{
         title: Copy.billing_event_label(event.type),
-        at: format_datetime(event.inserted_at),
+        id: event.id,
+        at: event.inserted_at,
         body: event_subject_summary(event),
         status: event.actor_type,
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate),
@@ -118,12 +126,6 @@ defmodule AccrueAdmin.Live.DashboardLive do
       end
     end)
   end
-
-  defp format_datetime(nil), do: "Time unavailable"
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%Y-%m-%d %H:%M UTC")
-
-  defp format_datetime(%NaiveDateTime{} = value),
-    do: Calendar.strftime(value, "%Y-%m-%d %H:%M UTC")
 
   defp default_brand do
     %{
