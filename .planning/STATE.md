@@ -5,16 +5,16 @@ milestone_name: Admin Usability and Visual Consistency
 current_phase: 247
 current_phase_name: Evidence-True Details and Analytics
 status: executing
-stopped_at: Completed 247-06-PLAN.md
-last_updated: "2026-10-11T22:34:09.679Z"
+stopped_at: Completed 247-07-PLAN.md
+last_updated: "2026-10-11T23:14:45.667Z"
 last_activity: 2026-10-11
 last_activity_desc: Phase 247 execution started
-state_head: 32064e691c2990ce57790ccfffe5cc66f2a40015
+state_head: 3ca1fca94306e67bf1ad82162dda476b35162df8
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 16
-  completed_plans: 15
+  completed_plans: 16
   percent: 50
 ---
 
@@ -196,6 +196,7 @@ Last activity: 2026-10-11 — Phase 247 execution started
 | Phase 247 P04 | 15 min | 2 tasks | 9 files |
 | Phase 247 P05 | 16min | 3 tasks | 22 files |
 | Phase 247 P06 | 12min | 2 tasks | 6 files |
+| Phase 247 P07 | continuation; start unavailable | 2 tasks | 31 files |
 
 ## Accumulated Context
 
@@ -455,6 +456,8 @@ Last activity: 2026-10-11 — Phase 247 execution started
 - [Phase 247]: Preserve Dunning formulas, owner scope, and UTC boundaries while changing recovery presentation.
 - [Phase 247]: Pair recovered and exhausted values per currency; actual zero remains distinct from missing or unsupported amounts.
 - [Phase 247]: Separate historical coverage from the selected UTC window and name the cutoff-semantics help destination.
+- [Phase 247]: Use dedicated Phase247 Playwright configs because the referenced Phase246 config excludes Phase247 tests.
+- [Phase 247]: Keep Phase247 requirements pending cross-plan verification; this plan records owning evidence without declaring the phase complete.
 
 ### Pending Todos
 
@@ -540,8 +543,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T22:34:09.627Z
-Stopped at: Completed 247-06-PLAN.md
+Last session: 2026-10-11T23:14:45.621Z
+Stopped at: Completed 247-07-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
