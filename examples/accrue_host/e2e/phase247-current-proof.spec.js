@@ -175,8 +175,11 @@ async function assertTimePreference(page, { copy = false } = {}) {
 
 async function assertDisclosureCueAndKeyboard(page) {
   const evidence = {};
-  for (const [name, id] of [["activity", "webhook-activity"], ["payload", "webhook-raw-payload"]]) {
-    const disclosure = page.locator(`#${id}`);
+  for (const [name, selector] of [
+    ["activity", "details[data-ax-lazy-activity]"],
+    ["payload", "#webhook-raw-payload"]
+  ]) {
+    const disclosure = page.locator(selector);
     const summary = disclosure.locator("summary");
     await expect(summary).toBeVisible();
     const geometry = await summary.boundingBox();
