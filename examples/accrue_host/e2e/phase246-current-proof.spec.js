@@ -5,7 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { test: ordinaryTest, expect } = require("@playwright/test");
 const { test: heldoutTest } = require("./support/test.js");
-const { login, readFixture, waitForLiveView } = require("./support/fixture.js");
+const { login, readFixture, waitForLiveView, workspaceBillingLink } = require("./support/fixture.js");
 
 const root = path.resolve(__dirname, "../../..");
 const defaultCaptureDir = path.join(root, ".planning/phases/246-collection-controls-and-search/captures/phase246-current-proof");
@@ -188,6 +188,10 @@ heldoutTest("@phase246-current-heldout current production Connect and webhook id
   await page.addInitScript(() => { document.documentElement.classList.add("accrue-admin"); });
   const fixture = readFixture();
   await login(page, fixture, fixture.admin_email, sandboxId);
+  await workspaceBillingLink(page).click();
+  await waitForLiveView(page);
+  await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
+  await waitForLiveView(page);
   const assets = {};
   for (const [route, listId] of [[`/admin/connect?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`, "connect-accounts"], [`/admin/webhooks?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`, "webhooks"]]) {
     await page.goto(route);
