@@ -123,3 +123,8 @@ The isolated ordinary showcase seed is internally consistent for the corrected s
 ---
 *Phase: 245-rendered-baseline-and-realistic-preview*
 *Completed: 2026-10-11*
+
+## Self-Check: PASSED
+
+- Story ledger, RED evidence, host TAP formatter, seed correction and focused contract file are present.
+- Task commits `3d05b2c7`, `70856fde`, and `4e66c751` are ancestors of the plan metadata commit.
