@@ -313,6 +313,7 @@ defmodule AccrueAdmin.EventLiveTest do
 
     assert html =~ ~s(data-role="event-unavailable")
     assert html =~ "Event record unavailable"
+    assert html =~ "Retry read"
     refute html =~ event.type
     refute html =~ "fixture database unavailable"
 

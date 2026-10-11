@@ -376,8 +376,26 @@ defmodule AccrueAdmin.WebhookLiveTest do
     render_click(element(view, "[data-role='confirm-replay']"))
     html = render_submit(view, "step_up_submit", %{"code" => "123456"})
 
-    assert html =~ "Webhook replay requested"
+    assert html =~
+             "Replay request accepted. Current processing status is unknown because delivery history could not be loaded. Retry read to check current status."
+
+    assert html =~
+             "Current processing status is unknown because delivery history could not be loaded"
+
+    assert html =~ "Retry read"
     assert html =~ "Webhook history unavailable"
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
+    assert dispatch_jobs(webhook.id) |> Enum.count(&(&1.state == "available")) == 1
+
+    assert replay_event_types(webhook.id) == [
+             "admin.webhook.replay.completed",
+             "webhook.replay_requested"
+           ]
+
+    html = render_click(element(view, "[data-role='retry-webhook-read']"))
+
+    refute html =~ "Current processing status is unknown"
+    refute html =~ ~s(data-role="webhook-unavailable")
     assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
     assert dispatch_jobs(webhook.id) |> Enum.count(&(&1.state == "available")) == 1
 
@@ -514,6 +532,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
 
     assert html =~ ~s(data-role="webhook-unavailable")
     assert html =~ "Webhook history unavailable"
+    assert html =~ "Retry read"
     refute html =~ webhook.processor_event_id
     refute html =~ "fixture database unavailable"
 
