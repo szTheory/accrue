@@ -27,4 +27,18 @@ defmodule AccrueAdmin.Copy.BillingEventTest do
     assert Copy.webhooks_list_result_label_pair() == {"webhook delivery", "webhook deliveries"}
     assert Copy.webhooks_retry_cancel_label() == "Keep deliveries"
   end
+
+  test "confirmed event keys describe the operation without changing raw keys" do
+    assert Copy.billing_event_label("customer.updated") == "Customer updated"
+    assert Copy.billing_event_label("customer.local_updated") == "Customer record updated locally"
+    assert Copy.billing_event_label("webhook.received") == "Webhook received"
+    assert Copy.billing_event_label("webhook.replay_requested") == "Webhook replay requested"
+  end
+
+  test "unknown and missing event keys stay neutral and honest" do
+    assert Copy.billing_event_label("provider.event_with_unicode_λ") == "Billing event"
+    assert Copy.billing_event_label("") == "Event details unavailable"
+    assert Copy.billing_event_label(nil) == "Event details unavailable"
+    assert Copy.billing_event_label(:malformed) == "Event details unavailable"
+  end
 end
