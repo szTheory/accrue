@@ -24,7 +24,7 @@ export const Clipboard = {
 };
 
 export function initClipboardControls() {
-  document.querySelectorAll("[data-clipboard-text]").forEach((button) => {
+  document.querySelectorAll('[data-clipboard-text]:not([phx-hook="Clipboard"])').forEach((button) => {
     if (button.dataset.clipboardBound === "true") {
       return;
     }
