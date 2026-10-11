@@ -12,7 +12,7 @@
 
 ### Outcomes and Recovery
 
-- [ ] **STATE-01**: For targeted completed, failed, blocked, or unknown outcomes, Admin copy states only what the available evidence confirms, makes clear whether the requested action took effect, and gives a supported next step without inventing a cause.
+- [x] **STATE-01**: For targeted completed, failed, blocked, or unknown outcomes, Admin copy states only what the available evidence confirms, makes clear whether the requested action took effect, and gives a supported next step without inventing a cause.
 
 ### Investigation Evidence
 
@@ -51,7 +51,7 @@ None promoted. Broader Admin information-architecture changes and new diagnosis 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | LANG-01 | Phase 244 | Complete |
-| STATE-01 | Phase 244 | Pending |
+| STATE-01 | Phase 244 | Complete |
 | EVID-01 | Phase 244 | Complete |
 | CONS-01 | Phase 244 | Complete |
 

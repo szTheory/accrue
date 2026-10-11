@@ -81,3 +81,20 @@ The three completed plans map the four requirements across six auto tasks. D-01�
 | Gaps found | 3 |
 | Resolved | 3 |
 | Escalated | 0 |
+
+## 244-04 Executable Gap Closure
+
+| Former verifier backstop | Owning assertion | Executed result |
+|---|---|---|
+| Truth 6: unusual raw event-key bytes remain selectable and exact | Mounted webhook Activity evidence disclosure checks exact stored Unicode key in rendered evidence and selected text. | Passed in the 320×800 touch case. |
+| Truth 7: long/Unicode identifiers remain exact and usable | Long Unicode actor ID, external subject ID, processor event ID, and raw event key are asserted in rendered/selectable evidence with valid event numeric IDs and webhook UUID. | Passed in the 320×800 touch case; `document.scrollWidth=320`, evidence width 221px. |
+| Truth 8: adjacent actions and repeated matching rows preserve association/order | Desktop duplicate rows share the same label/value but retain numeric IDs 3133 then 3134, each has its own exact scoped `Open event` href; touch flow activates the event's scoped Related billing webhook action. | Passed; desktop duplicate case and touch navigation case both executed. |
+| Truth 9: long/Unicode link labels keep scoped destinations and remain operable | Touch Related billing `Actor <long Unicode ID>` link is checked for exact label, expected webhook UUID path, org query, nonzero target bounds, and successful tap navigation. | Passed at 320×800. |
+
+Task 1 owner coverage: `cd accrue_admin && mix test test/accrue_admin/live/webhook_replay_test.exs` — 16 tests, 0 failures at `e608c2f4`.
+
+The final batched browser command was `ACCRUE_HOST_PROOF_RUN_ID=26284-1791685212995 npm --prefix examples/accrue_host run e2e -- e2e/phase244-operator-evidence.spec.js --project chromium-desktop --grep '@phase244-(desktop|mobile)' --workers 1`; 6 tests passed, 0 failed at `1b62ad78a754fcd8c8bbae6aa3b1847ed9e97fa4`. The spec SHA-256 was `33dade95e36208063b6d539646660d297ff3b8be637c3b01409b15351f0698ba`. Served, packaged, and compiled assets matched: CSS `b40ac1dc7bb6a09ac7bccedb10ac1856ea9cbad212d69ce11db054a22807b952` (129,964 bytes), JS `e228bac9b978a658b37e96b9aa833fe6e8a87358447d00d93e616f55f5667c26` (161,648 bytes). Custody preflight confirmed preview stopped, isolated `accrue_host_test`, and port 4101 unoccupied before each start; feedback preview and Docker Up were untouched.
+
+Recorded fixture-only failures during development: invalid test actor type (`external`, rejected by the persisted enum), then selector assumptions that did not match the rendered generic billing label and action regions. They were corrected in the browser spec; no product CSS change was needed. The final six-case confirmation passed on one committed revision.
+
+These rows replace the four former human backstops with executable browser evidence. `human_judgment: false` is recorded in `244-04-SUMMARY.md`; the phase verification report remains owned by the post-execution verifier.

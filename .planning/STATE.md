@@ -4,17 +4,17 @@ milestone: v1.65
 milestone_name: Accrue Admin Language & Consistency
 current_phase: 244
 current_phase_name: Operator Language and Evidence
-status: executing
-stopped_at: Completed 244-03-PLAN.md
-last_updated: "2026-10-11T03:04:32.421Z"
+status: verifying
+stopped_at: Completed 244-04-PLAN.md
+last_updated: "2026-10-11T03:32:31.748Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 244 execution started
-state_head: 952cbaeb6e74d66f1476bed9fddf67a02bcbe98a
+state_head: 1b62ad78a754fcd8c8bbae6aa3b1847ed9e97fa4
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 Phase: 244 (Operator Language and Evidence) — READY TO EXECUTE
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-10 — Phase 244 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -182,6 +182,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 244 P01 | 12min | 2 tasks | 11 files |
 | Phase 244 P02 | 29min | 2 tasks | 16 files |
 | Phase 244 P03 | 45min | 2 tasks | 8 files |
+| Phase 244 P04 | 25m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -417,6 +418,8 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 244]: Preserve the operator's native disclosure state through LiveView patches using the existing details/summary interaction.
 - [Phase 244]: Preserved Copy.Locked literals and incumbent mutation, step-up, read, and audit paths; wording now follows observed job and state facts.
 - [Phase 244]: Kept mounted read-outage state explicitly unobserved; focused LiveView tests verify the read-only retry handler.
+- [Phase 244]: Bulk replay links only to the existing freshly authorized selected-row read; no extra query or retry mutation was added.
+- [Phase 244]: Adversarial browser values are positional fixture data and use existing schema-supported text fields.
 
 ### Pending Todos
 
@@ -502,8 +505,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T02:32:05.950Z
-Stopped at: Completed 244-03-PLAN.md
+Last session: 2026-10-11T03:32:31.725Z
+Stopped at: Completed 244-04-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
