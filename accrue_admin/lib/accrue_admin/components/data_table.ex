@@ -550,7 +550,7 @@ defmodule AccrueAdmin.Components.DataTable do
           </header>
 
           <dl class="ax-data-table-card-fields">
-            <div :for={field <- card_fields(@card_fields, @columns)} class="ax-data-table-card-field">
+            <div :for={field <- card_fields(@card_fields, @columns, @card_title)} class="ax-data-table-card-field">
               <dt class="ax-label"><%= column_label(field) %></dt>
               <dd class="ax-body"><%= cell_value(field, row) %></dd>
             </div>
@@ -1114,8 +1114,9 @@ defmodule AccrueAdmin.Components.DataTable do
 
   defp row_dom_id(table_id, row, row_id), do: "#{table_id}-row-#{row_identity(row, row_id)}"
 
-  defp card_fields([], columns), do: columns
-  defp card_fields(card_fields, _columns), do: card_fields
+  defp card_fields([], [_first_column | rest], nil), do: rest
+  defp card_fields([], columns, _card_title), do: columns
+  defp card_fields(card_fields, _columns, _card_title), do: card_fields
 
   defp card_title(nil, row, [first_column | _rest]), do: cell_value(first_column, row)
   defp card_title(nil, row, _columns), do: row_identity(row, :id)
