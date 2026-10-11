@@ -1349,6 +1349,11 @@ defmodule AccrueAdmin.Copy do
   def webhooks_retry_outcome(:failed), do: "The queue request failed."
   def webhooks_retry_outcome(:unknown), do: "Dispatch result could not be confirmed."
 
+  def webhooks_retry_outcome(:unknown, false),
+    do: "Delivery could not be read; replay was not requested."
+
+  def webhooks_retry_outcome(outcome, _attempted), do: webhooks_retry_outcome(outcome)
+
   @doc "Safe read-only next step for an unconfirmed bulk replay result."
   def webhooks_retry_unknown_next_step,
     do: "Inspect its current status and history before deciding what to do next."

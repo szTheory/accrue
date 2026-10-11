@@ -191,7 +191,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
       %{
         selected_id: outcome.selected_id,
-        outcome: Copy.webhooks_retry_outcome(outcome.outcome),
+        outcome: Copy.webhooks_retry_outcome(outcome.outcome, outcome.attempted),
         href:
           if detail_available? do
             scoped_path(

@@ -576,6 +576,7 @@ defmodule AccrueAdmin.WebhookReplayTest do
       |> Floki.find(~s([data-role="bulk-replay-results"] [data-delivery-id="#{webhook.id}"]))
       |> hd()
 
+    assert Floki.text(result_row) =~ "Delivery could not be read; replay was not requested."
     assert Floki.find(result_row, "a") == []
     result = bulk_replay_event!().data
     assert result["attempted"] == 0
