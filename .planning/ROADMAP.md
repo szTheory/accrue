@@ -51,7 +51,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
   3. Where a human-readable event or state label appears, an operator can still find the exact event key and relevant record identifiers and timestamps at the point of investigation. (EVID-01)
   4. Across targeted existing Admin screens, an operator encounters consistent repeated headings and action names, and each link or control accurately describes its destination or effect. (CONS-01)
 
-**Plans**: 3/3 plans executed
+**Plans**: 4 plans (3 executed; 1 gap closure pending)
 Plans:
 **Wave 1**
 - [x] 244-01-PLAN.md — Confirm mounted candidates and prove Home-to-event label and evidence path.
@@ -62,16 +62,19 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 - [x] 244-03-PLAN.md — Bind outcome and recovery language to durable facts and confirm rendered effects.
 
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 244-04-PLAN.md — Associate unknown bulk replay results with deliveries and automate narrow-browser evidence backstops.
+
 **UI hint**: yes
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 244. Operator Language and Evidence | 3/3 | In Progress | - |
+| 244. Operator Language and Evidence | 3/4 | In Progress | - |
 
 ## Current Position
 
-v1.65 is ready to plan at Phase 244. All 4/4 approved v1 requirements map to this phase. The complete v1.64 scope and closeout evidence remain in the [archived roadmap](milestones/v1.64-ROADMAP.md), [milestone audit](milestones/v1.64-MILESTONE-AUDIT.md), and [phase archive](milestones/v1.64-phases/).
+Phase 244 has three executed plans and one verification gap closure plan pending. All 4/4 approved v1 requirements remain mapped to this phase. The complete v1.64 scope and closeout evidence remain in the [archived roadmap](milestones/v1.64-ROADMAP.md), [milestone audit](milestones/v1.64-MILESTONE-AUDIT.md), and [phase archive](milestones/v1.64-phases/).
 
-**Next command:** `$gsd-plan-phase 244`.
+**Next command:** `$gsd-execute-phase 244`.
