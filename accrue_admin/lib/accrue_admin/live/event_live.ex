@@ -138,11 +138,11 @@ defmodule AccrueAdmin.Live.EventLive do
           items={[
             %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{label: @return_destination.label, href: @return_destination.path},
-            %{label: @event.type}
+            %{label: Copy.billing_event_label(@event.type)}
           ]}
         />
 
-        <Detail.summary_card :if={@event} eyebrow={Copy.event_detail_eyebrow()} title={@event.type}>
+        <Detail.summary_card :if={@event} eyebrow={Copy.event_detail_eyebrow()} title={Copy.billing_event_label(@event.type)}>
           <:facts>
             <dl class="ax-summary-facts-dl">
               <dt class="ax-label">Actor</dt>
@@ -442,8 +442,8 @@ defmodule AccrueAdmin.Live.EventLive do
   defp livemode_label(false), do: "Test"
   defp livemode_label(_value), do: nil
 
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
+  defp format_datetime(%DateTime{} = value), do: DateTime.to_iso8601(value)
+  defp format_datetime(_value), do: "Time unavailable"
 
   defp scoped_events_path(mount_path, %{mode: :organization, organization_slug: slug})
        when is_binary(slug) do

@@ -682,6 +682,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate connect_account_error_field_must_be_integer_minor(field_label), to: Connect
   defdelegate connect_account_not_found(), to: Connect
 
+  defdelegate billing_event_label(value), to: BillingEvent
   defdelegate billing_events_page_title(), to: BillingEvent
   defdelegate billing_events_breadcrumb_events(), to: BillingEvent
   defdelegate events_list_heading(), to: BillingEvent

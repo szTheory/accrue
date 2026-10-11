@@ -5,6 +5,7 @@ defmodule AccrueAdmin.EventLiveTest do
 
   alias Accrue.Billing.{Charge, Customer, Invoice}
   alias Accrue.Events
+  alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
 
@@ -75,6 +76,32 @@ defmodule AccrueAdmin.EventLiveTest do
 
     assert html =~ "invoice.payment_failed"
     assert html =~ "webhook"
+  end
+
+  test "recorded event evidence preserves seconds, fractional precision, and UTC offset", %{
+    conn: conn
+  } do
+    exact_at = ~U[2026-04-15 10:12:34.123456Z]
+
+    event =
+      TestRepo.insert!(%Event{
+        type: "customer.updated",
+        schema_version: 1,
+        actor_type: "admin",
+        actor_id: "admin_1",
+        subject_type: "Customer",
+        subject_id: "cus_exact_time_test",
+        data: %{},
+        inserted_at: exact_at
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
+
+    assert html =~ "2026-04-15T10:12:34.123456Z"
+    assert html =~ "customer.updated"
+    assert html =~ "cus_exact_time_test"
   end
 
   test "event detail returns to the validated filtered event list", %{conn: conn, event: event} do

@@ -3,6 +3,10 @@ defmodule AccrueAdmin.Copy.BillingEvent do
 
   # --- Events index (EventsLive) — prefix billing_events_*
 
+  def billing_event_label("customer.updated"), do: "Customer updated"
+  def billing_event_label(value) when is_binary(value) and value != "", do: "Billing event"
+  def billing_event_label(_value), do: "Event details unavailable"
+
   def billing_events_page_title, do: "Events"
 
   def billing_events_breadcrumb_events, do: "Events"

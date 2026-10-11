@@ -62,7 +62,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
         <section class="ax-home-section" aria-label="Recent audit activity">
           <header class="ax-section-head">
             <h2 class="ax-heading">Recent audit activity</h2>
-            <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}>Open event ledger</a>
+            <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}>View events</a>
           </header>
           <Timeline.timeline
             label="Recent audit activity"
@@ -93,7 +93,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
     Enum.map(events, fn event ->
       %{
-        title: event.type,
+        title: Copy.billing_event_label(event.type),
         at: format_datetime(event.inserted_at),
         body: event_subject_summary(event),
         status: event.actor_type,
