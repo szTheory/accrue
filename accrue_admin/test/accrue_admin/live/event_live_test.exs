@@ -146,6 +146,7 @@ defmodule AccrueAdmin.EventLiveTest do
     assert data_attr_count(html, "data-ax-related-resources") == 1
     assert data_attr_count(html, "data-ax-lazy-activity") == 1
     assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert length(Regex.scan(~r/phx-hook="PreserveDisclosure"/, html)) == 2
     assert data_attr_count(html, "data-ax-action-band") == 0
     assert data_attr_count(html, "data-ax-action-overflow-menu") == 0
 

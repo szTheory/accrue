@@ -133,6 +133,41 @@ async function captureAdminAssets(page) {
   return rows;
 }
 
+async function assertEventDisclosures(page, activation) {
+  const activity = page.locator("details[data-ax-lazy-activity]");
+  const activitySummary = activity.locator("summary");
+  if (activation === "keyboard") {
+    await activitySummary.focus();
+    await expect(activitySummary).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(activitySummary).toBeFocused();
+  } else {
+    await activitySummary.tap();
+  }
+  await expect(activity).toHaveAttribute("open", "");
+  await expect(activity.locator(".ax-timeline")).toBeVisible();
+
+  if (activation === "keyboard") {
+    await page.keyboard.press("Enter");
+  } else {
+    await activitySummary.tap();
+  }
+  await expect(activity).not.toHaveAttribute("open", "");
+
+  const raw = page.locator("details[data-ax-lazy-json]");
+  const rawSummary = raw.locator("summary");
+  if (activation === "keyboard") {
+    await rawSummary.focus();
+    await page.keyboard.press("Enter");
+    await expect(rawSummary).toBeFocused();
+  } else {
+    await rawSummary.tap();
+  }
+  await expect(raw).toHaveAttribute("open", "");
+  await expect(raw.locator("#event-payload")).toBeVisible();
+  await expect(activity).not.toHaveAttribute("open", "");
+}
+
 test("Phase 244 customer update retains exact scoped event evidence @phase244-desktop", async ({ page, sandboxId }, testInfo) => {
   const fixture = readFixture();
   const eventId = seedCustomerUpdatedEvent(fixture);
@@ -165,6 +200,7 @@ test("Phase 244 customer update retains exact scoped event evidence @phase244-de
   await expect(page.getByText("customer.updated", { exact: true }).first()).toBeVisible();
   await expect(page.getByText(fixture.admin_denial_customer_id, { exact: true }).first()).toBeVisible();
   await expect(page.getByText("2026-10-10T23:59:59.123456Z", { exact: true }).first()).toBeVisible();
+  await assertEventDisclosures(page, "keyboard");
 
   const assets = await captureAdminAssets(page);
   const evidence = {
@@ -289,6 +325,9 @@ async function assertRelatedWebhookEvidence(page, fixture, sandboxId, testInfo, 
   }
   await expect(activity).not.toHaveAttribute("open", "");
   await page.locator("details[data-ax-lazy-json] summary").click();
+  await expect(page.locator("details[data-ax-lazy-json]")).toHaveAttribute("open", "");
+  await expect(activity).not.toHaveAttribute("open", "");
+  await expect(page.locator("details[data-ax-lazy-json] #webhook-payload")).toBeVisible();
   await expect(activity).not.toHaveAttribute("open", "");
   if (activation === "keyboard") {
     await summary.focus();
@@ -358,13 +397,15 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
     await expect(recordedField).toHaveText("2026-10-10T23:59:59.123456Z");
     await expect(recordedField).toBeVisible();
 
-    const dimensions = await page.evaluate(() => {
-      const value = document.querySelector("dl.ax-field-list .ax-field dd.ax-field-value");
+    await assertEventDisclosures(page, "touch");
+
+    const dimensions = await recordedField.evaluate((value) => {
+      const field = value;
       return {
         viewport: document.documentElement.clientWidth,
         document: document.documentElement.scrollWidth,
-        valueWidth: value?.clientWidth ?? 0,
-        valueScrollWidth: value?.scrollWidth ?? 0
+        valueWidth: field.clientWidth,
+        valueScrollWidth: field.scrollWidth
       };
     });
     expect(dimensions.viewport).toBe(320);

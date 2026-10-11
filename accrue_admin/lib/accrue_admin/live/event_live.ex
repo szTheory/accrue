@@ -174,7 +174,7 @@ defmodule AccrueAdmin.Live.EventLive do
           </section>
         </div>
 
-        <details :if={@event} class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+        <details :if={@event} id="event-activity" class="ax-detail-section" data-ax-lazy-activity phx-hook="PreserveDisclosure" phx-click="load_activity">
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title"><%= Copy.event_detail_lazy_activity_heading() %></span>
           </summary>
@@ -194,8 +194,10 @@ defmodule AccrueAdmin.Live.EventLive do
 
         <details
           :if={raw_payload_available?(@event)}
+          id="event-raw-payload"
           class="ax-detail-section"
           data-ax-lazy-json
+          phx-hook="PreserveDisclosure"
           phx-click="load_raw_json"
         >
           <summary class="ax-detail-section-head">

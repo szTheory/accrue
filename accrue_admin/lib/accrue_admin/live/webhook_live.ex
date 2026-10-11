@@ -299,7 +299,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
           </p>
         </details>
 
-        <details :if={@webhook} class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
+        <details :if={@webhook} id="webhook-raw-payload" class="ax-detail-section" data-ax-lazy-json phx-hook="PreserveDisclosure" phx-click="load_raw_json">
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title">Raw payload</span>
           </summary>

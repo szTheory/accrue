@@ -107,6 +107,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert data_attr_count(html, "data-ax-related-resources") == 1
     assert data_attr_count(html, "data-ax-lazy-activity") == 1
     assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert length(Regex.scan(~r/phx-hook="PreserveDisclosure"/, html)) == 2
 
     for label <- [
           "Status",
