@@ -77,7 +77,25 @@ defmodule AccrueAdmin.CouponsLiveTest do
     row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "Spring 25"))
 
     assert row
-    assert length(Floki.find(row, "[data-clipboard-text='coupon_spring'][aria-label='Copy coupon ID']")) == 1
+
+    assert length(
+             Floki.find(row, "[data-clipboard-text='coupon_spring'][aria-label='Copy coupon ID']")
+           ) == 1
+
+    card =
+      Floki.find(document, ".ax-data-table-card")
+      |> Enum.find(&(Floki.text(&1) =~ "coupon_spring"))
+
+    assert card
+
+    assert length(
+             Floki.find(
+               card,
+               "[data-clipboard-text='coupon_spring'][aria-label='Copy coupon ID']"
+             )
+           ) == 1
+
+    assert length(Floki.find(card, "[data-clipboard-text]")) == 1
   end
 
   test "coupon detail links retain the validated query and validity lens", %{conn: conn} do

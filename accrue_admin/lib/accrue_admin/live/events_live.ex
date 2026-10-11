@@ -154,7 +154,7 @@ defmodule AccrueAdmin.Live.EventsLive do
             %{
               id: :type,
               label: Copy.billing_events_table_column_event(),
-              render: fn row -> event_cell(row, @admin_mount_path, @current_owner_scope, @params) end
+              render: fn row -> event_cell(row, @admin_mount_path, @current_owner_scope, @params, :table) end
             },
             %{
               label: Copy.billing_events_table_column_subject(),
@@ -164,7 +164,7 @@ defmodule AccrueAdmin.Live.EventsLive do
             %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
             %{label: Copy.billing_events_table_column_when(), render: &when_summary/1}
           ]}
-          card_title={&event_cell(&1, @admin_mount_path, @current_owner_scope, @params)}
+          card_title={&event_cell(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
             %{
               label: Copy.billing_events_table_column_subject(),
@@ -430,7 +430,7 @@ defmodule AccrueAdmin.Live.EventsLive do
     end
   end
 
-  defp event_cell(row, mount_path, owner_scope, params) do
+  defp event_cell(row, mount_path, owner_scope, params, presentation) do
     label = Copy.billing_event_label(row.type)
     key = row.type
     list_return = scoped_events_return(mount_path, owner_scope, params)
@@ -442,7 +442,8 @@ defmodule AccrueAdmin.Live.EventsLive do
       __changed__: %{},
       href: href,
       label: label,
-      badge_id: "ax-id-badge-event-type-#{row.id}",
+      badge_id:
+        "ax-id-badge-event-type-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
       event_key: key
     }
 

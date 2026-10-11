@@ -82,7 +82,27 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "evt_dead"))
 
     assert row
-    assert length(Floki.find(row, "[data-clipboard-text='evt_dead'][aria-label='Copy webhook event ID']")) == 1
+
+    assert length(
+             Floki.find(
+               row,
+               "[data-clipboard-text='evt_dead'][aria-label='Copy webhook event ID']"
+             )
+           ) == 1
+
+    card =
+      Floki.find(document, ".ax-data-table-card") |> Enum.find(&(Floki.text(&1) =~ "evt_dead"))
+
+    assert card
+
+    assert length(
+             Floki.find(
+               card,
+               "[data-clipboard-text='evt_dead'][aria-label='Copy webhook event ID']"
+             )
+           ) == 1
+
+    assert length(Floki.find(card, "[data-clipboard-text]")) == 1
   end
 
   test "bare webhooks route represents the Needs replay queue", %{conn: conn} do

@@ -624,13 +624,13 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           bulk_action_label={Copy.webhooks_retry_selected_label()}
           bulk_action_event="retry_selected"
           columns={[
-            %{label: "Webhook", render: &webhook_link(&1, @admin_mount_path, @current_owner_scope)},
+            %{label: "Webhook", render: &webhook_link(&1, @admin_mount_path, @current_owner_scope, :table)},
             %{id: :type, label: "Type"},
             %{label: "Status", render: &status_summary/1},
             %{label: "Endpoint", render: &endpoint_summary/1},
             %{label: "Received", render: &received_summary/1}
           ]}
-          card_title={&webhook_link(&1, @admin_mount_path, @current_owner_scope)}
+          card_title={&webhook_link(&1, @admin_mount_path, @current_owner_scope, :card)}
           card_fields={[
             %{label: "Status", render: &status_summary/1},
             %{label: "Endpoint", render: &endpoint_summary/1},
@@ -914,14 +914,15 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
   end
 
-  defp webhook_link(row, mount_path, owner_scope) do
+  defp webhook_link(row, mount_path, owner_scope, presentation) do
     label = row.processor_event_id || row.id
 
     assigns = %{
       __changed__: %{},
       href: scoped_path(mount_path, "/webhooks/#{row.id}", owner_scope),
       label: humanize(row.type),
-      badge_id: "ax-id-badge-webhook-event-#{row.id}",
+      badge_id:
+        "ax-id-badge-webhook-event-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
       id_value: to_string(label)
     }
 

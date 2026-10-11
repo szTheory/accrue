@@ -110,6 +110,21 @@ defmodule AccrueAdmin.EventsLiveTest do
                "[data-clipboard-text='invoice.payment_failed.in_scope'][aria-label='Copy event type']"
              )
            ) == 1
+
+    card =
+      Floki.find(document, ".ax-data-table-card")
+      |> Enum.find(&(Floki.text(&1) =~ "invoice.payment_failed.in_scope"))
+
+    assert card
+
+    assert length(
+             Floki.find(
+               card,
+               "[data-clipboard-text='invoice.payment_failed.in_scope'][aria-label='Copy event type']"
+             )
+           ) == 1
+
+    assert length(Floki.find(card, "[data-clipboard-text]")) == 1
   end
 
   test "bare events route represents the All ledger lens", %{conn: conn} do

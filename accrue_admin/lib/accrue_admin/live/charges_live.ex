@@ -147,13 +147,13 @@ defmodule AccrueAdmin.Live.ChargesLive do
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
-            %{label: "Payment", render: &payment_identity_cell(&1, @admin_mount_path, @current_owner_scope)},
+            %{label: "Payment", render: &payment_identity_cell(&1, @admin_mount_path, @current_owner_scope, :table)},
             %{label: "Status", render: &status_summary/1},
             %{label: "Amount", render: &amount_summary/1},
             %{label: "Fees", render: &fee_summary/1},
             %{label: "Billing signals", render: &billing_signals_cell/1}
           ]}
-          card_title={&payment_identity_cell(&1, @admin_mount_path, @current_owner_scope)}
+          card_title={&payment_identity_cell(&1, @admin_mount_path, @current_owner_scope, :card)}
           card_fields={[
             %{label: "Status", render: &status_summary/1},
             %{label: "Amount", render: &amount_summary/1},
@@ -260,7 +260,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
     )
   end
 
-  defp payment_identity_cell(row, mount_path, owner_scope) do
+  defp payment_identity_cell(row, mount_path, owner_scope, presentation) do
     payment_href = scoped_path(mount_path, "/payments/#{row.id}", owner_scope)
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
 
@@ -269,7 +269,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
       payment_href: payment_href,
       customer_href: customer_href,
       customer_label: customer_label(row),
-      badge_id: "ax-id-badge-payment-#{row.id}",
+      badge_id: "ax-id-badge-payment-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
       payment_id: row.processor_id || to_string(row.id)
     }
 

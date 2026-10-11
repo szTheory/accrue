@@ -154,14 +154,14 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
           columns={[
             %{
               label: Copy.connect_accounts_table_column_account(),
-              render: &account_link(&1, @admin_mount_path, @current_owner_scope, @params)
+              render: &account_link(&1, @admin_mount_path, @current_owner_scope, @params, :table)
             },
             %{label: Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
             %{label: "Last stored Stripe snapshot readiness", render: &readiness_summary(&1, @current_owner_scope)},
             %{label: "Local platform fee override", render: &override_summary(&1, @current_owner_scope)},
             %{label: Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
-          card_title={&account_link(&1, @admin_mount_path, @current_owner_scope, @params)}
+          card_title={&account_link(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
             %{label: Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
             %{label: "Last stored Stripe snapshot readiness", render: &readiness_summary(&1, @current_owner_scope)},
@@ -488,7 +488,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
 
   defp scoped_accounts(_owner_scope), do: Account
 
-  defp account_link(row, mount_path, owner_scope, params) do
+  defp account_link(row, mount_path, owner_scope, params, presentation) do
     filters = filter_params(params)
     return_params = Map.take(params, ["view"]) |> Map.merge(stringify_keys(filters))
     return_to = ScopedPath.build(mount_path, "/connect", owner_scope, return_params)
@@ -502,7 +502,8 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       __changed__: %{},
       href: href,
       label: row.email || row.stripe_account_id || to_string(row.id),
-      badge_id: "ax-id-badge-connected-account-#{row.id}",
+      badge_id:
+        "ax-id-badge-connected-account-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
       id_value: row.stripe_account_id || to_string(row.id)
     }
 

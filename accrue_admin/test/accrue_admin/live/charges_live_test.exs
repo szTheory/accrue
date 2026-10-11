@@ -73,7 +73,21 @@ defmodule AccrueAdmin.ChargesLiveTest do
     row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "ch_open"))
 
     assert row
-    assert length(Floki.find(row, "[data-clipboard-text='ch_open'][aria-label='Copy payment ID']")) == 1
+
+    assert length(
+             Floki.find(row, "[data-clipboard-text='ch_open'][aria-label='Copy payment ID']")
+           ) == 1
+
+    card =
+      Floki.find(document, ".ax-data-table-card") |> Enum.find(&(Floki.text(&1) =~ "ch_open"))
+
+    assert card
+
+    assert length(
+             Floki.find(card, "[data-clipboard-text='ch_open'][aria-label='Copy payment ID']")
+           ) == 1
+
+    assert length(Floki.find(card, "[data-clipboard-text]")) == 1
   end
 
   test "payment search guidance and secondary exact customer criteria match query semantics", %{

@@ -171,13 +171,13 @@ defmodule AccrueAdmin.Live.CouponsLive do
           render_filter_toolbar={false}
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
-            %{label: Copy.coupon_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope, @params)},
+            %{label: Copy.coupon_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope, @params, :table)},
             %{label: Copy.coupon_table_column_status(), render: &status_summary/1},
             %{label: Copy.coupon_table_column_discount(), render: &discount_summary/1},
             %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary/1},
             %{label: Copy.coupon_table_column_redemptions(), render: &redemption_summary/1}
           ]}
-          card_title={&coupon_link(&1, @admin_mount_path, @current_owner_scope, @params)}
+          card_title={&coupon_link(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
             %{label: Copy.coupon_table_column_status(), render: &status_summary/1},
             %{label: Copy.coupon_table_column_discount(), render: &discount_summary/1},
@@ -234,7 +234,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
     }
   end
 
-  defp coupon_link(row, mount_path, owner_scope, params) do
+  defp coupon_link(row, mount_path, owner_scope, params, presentation) do
     label = coupon_label(row)
     return_to = coupon_return_path(mount_path, owner_scope, params)
 
@@ -247,7 +247,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
       __changed__: %{},
       href: href,
       label: label,
-      badge_id: "ax-id-badge-coupon-#{row.id}",
+      badge_id: "ax-id-badge-coupon-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
       id_value: row.processor_id || to_string(row.id)
     }
 
