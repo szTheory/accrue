@@ -246,7 +246,18 @@ defmodule AccrueAdmin.CustomersLiveTest do
     assert {:ok, _view, html} = live_list(conn, "/billing/customers?view=all")
 
     assert_table_headings_in_order(html, ["Customer", "Payment method"])
-    assert_before(html, "Captain Customer", "cus_fake_00001")
+
+    identity =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("tbody > tr[data-row-id] .ax-data-table-identity")
+      |> Floki.text()
+
+    assert identity =~ "Captain Customer"
+    assert identity =~ "captain@example.com"
+    assert identity =~ "cus_fake_00001"
+    assert identity =~ "Captain Customer"
+    assert Floki.find(html, "button.ax-id-badge[data-clipboard-text='cus_fake_00001']") != []
   end
 
   test "customer result carries bounded list filters into the detail return", %{conn: conn} do

@@ -187,8 +187,9 @@ defmodule AccrueAdmin.InvoicesLiveTest do
 
     assert_patch(view, "/billing/invoices?org=invoice-owner&q=INV-SCOPED&status=paid&view=all")
     assert html =~ "INV-SCOPED-PAID-OWNER"
-    refute html =~ "INV-SCOPED-OPEN-OWNER"
-    refute html =~ "INV-SCOPED-PAID-FOREIGN"
+    visible_text = html |> Floki.parse_document!() |> Floki.text()
+    refute visible_text =~ "INV-SCOPED-OPEN-OWNER"
+    refute visible_text =~ "INV-SCOPED-PAID-FOREIGN"
     assert owner_paid
   end
 

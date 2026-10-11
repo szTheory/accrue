@@ -363,6 +363,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
       "Signals"
     ])
 
+    assert Floki.find(html, "button.ax-id-badge[data-clipboard-text='sub_fake_00001']") != []
+    assert html =~ "Subscription details"
+
     assert html =~ "ax-data-table-grid"
   end
 
@@ -399,21 +402,34 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
       |> Floki.find("a")
       |> Enum.find(&(Floki.text(&1) == "phase234-journey@example.com"))
 
-    subscription_link =
+    subscription_id_copy =
       parsed
       |> Floki.find("a")
       |> Enum.find(&(Floki.text(&1) == subscription.processor_id))
 
+    subscription_details =
+      parsed
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "Subscription details"))
+
     assert customer_link
-    assert subscription_link
+    assert subscription_id_copy == nil
+    assert subscription_details
+
+    id_copy =
+      parsed
+      |> Floki.find("button.ax-id-badge")
+      |> Enum.find(&(Floki.attribute(&1, "data-clipboard-text") == [subscription.processor_id]))
+
+    assert id_copy
 
     assert Floki.attribute(customer_link, "href") |> hd() =~
              "/customers/#{subscription.customer_id}"
 
-    assert Floki.attribute(subscription_link, "href") |> hd() =~
+    assert Floki.attribute(subscription_details, "href") |> hd() =~
              "/subscriptions/#{subscription.id}"
 
-    detail_path = Floki.attribute(subscription_link, "href") |> hd()
+    detail_path = Floki.attribute(subscription_details, "href") |> hd()
     detail_query = detail_path |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
     assert detail_query["org"] == "journey-org"
     assert detail_query["return_to"] =~ "/billing/subscriptions?"

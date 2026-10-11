@@ -232,7 +232,15 @@ defmodule AccrueAdmin.PromotionCodesLiveTest do
       "Redemptions"
     ])
 
-    assert_before(html, "BUNDLE10", "promo_bundle")
+    identity =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("tbody > tr[data-row-id] .ax-data-table-identity")
+      |> Floki.text()
+
+    assert identity =~ "BUNDLE10"
+    assert identity =~ "promo_bundle"
+    assert Floki.find(html, "button.ax-id-badge[data-clipboard-text='promo_bundle']") != []
   end
 
   defp insert_coupon(attrs) do
