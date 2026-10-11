@@ -182,6 +182,11 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "Attempt 3/25"
     assert html =~ "invoice.payment_failed"
     assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
+    assert length(Floki.find(Floki.parse_document!(html), "[data-time-display]")) >= 3
+
+    activity_html = render_click(element(view, "[data-ax-lazy-activity]"))
+    assert activity_html =~ "Webhook attempt history"
+    assert activity_html =~ "data-time-display"
 
     html = render_click(element(view, "[data-ax-lazy-json]"))
     assert html =~ "cus_123"
@@ -234,7 +239,9 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "Dead"
   end
 
-  test "empty webhook activity keeps attempt and derived-event collections distinct", %{conn: conn} do
+  test "empty webhook activity keeps attempt and derived-event collections distinct", %{
+    conn: conn
+  } do
     webhook =
       insert_webhook(%{
         processor_event_id: "evt_empty_activity",
@@ -244,7 +251,9 @@ defmodule AccrueAdmin.WebhookLiveTest do
 
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
-    assert html =~ "Open Activity to load dispatch attempts and derived ledger rows for this webhook."
+
+    assert html =~
+             "Open Activity to load dispatch attempts and derived ledger rows for this webhook."
 
     html = render_click(element(view, "[data-ax-lazy-activity]"))
 
@@ -300,6 +309,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
       assert row
       assert Floki.text(row) =~ label
       assert Floki.text(row) =~ "Stored event key: #{event.type}"
+
       assert Floki.attribute(Floki.find(row, "a.ax-timeline-link"), "href") ==
                ["/billing/events/#{event.id}"]
     end

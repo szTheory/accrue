@@ -4,7 +4,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
   use Phoenix.LiveView
 
   alias Accrue.Analytics.Dunning
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, CampaignTimeline, Detail}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, CampaignTimeline, Detail, Timestamp}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.ScopedPath
@@ -176,8 +176,22 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
 
   defp latest_boundary(arcs) do
     case latest_event(arcs) do
-      %{type: type, inserted_at: inserted_at} ->
-        "#{event_label(type)} at #{format_datetime(inserted_at)}"
+      %{id: id, type: type, inserted_at: %DateTime{} = inserted_at} ->
+        assigns = %{
+          label: event_label(type),
+          value: inserted_at,
+          id: "campaign-summary-boundary-#{id}"
+        }
+
+        ~H"""
+        <span>{@label} at <Timestamp.timestamp value={@value} id={@id} /></span>
+        """
+        |> Phoenix.HTML.Safe.to_iodata()
+        |> IO.iodata_to_binary()
+        |> Phoenix.HTML.raw()
+
+      %{type: type} ->
+        "#{event_label(type)} at Unknown time"
 
       _event ->
         Copy.resource_state_copy(:dunning, :first_run_empty).body
@@ -226,12 +240,6 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
     |> String.replace("_", " ")
     |> String.capitalize()
   end
-
-  defp format_datetime(%DateTime{} = value) do
-    Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  end
-
-  defp format_datetime(_value), do: "Unknown time"
 
   defp assign_shell(socket, admin, owner_scope) do
     mount_path = admin["mount_path"] || "/billing"

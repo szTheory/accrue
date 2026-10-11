@@ -1370,11 +1370,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp action_label(action_type), do: humanize(action_type)
 
   defp activity_audit_summary([event | _events], _subscription) do
-    "#{event.type} · #{event_actor_summary(event)} · #{format_datetime(event.inserted_at)}"
+    "#{event.type} · #{event_actor_summary(event)}"
   end
 
   defp activity_audit_summary(_events, subscription) do
-    "Subscription status reviewed · Accrue system · #{format_datetime(subscription.inserted_at || subscription.current_period_start)}"
+    "Subscription status reviewed · Accrue system"
   end
 
   defp latest_audit_row(events, subscription) do
@@ -2327,9 +2327,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   # The audit sentence keeps its existing human-readable event text; the exact
   # copyable timestamp is rendered separately in the adjacent audit row.
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Date not shown"
-
   # Read-only dunning-state panel (DUN-07 / SC#2). Tone is conveyed by the
   # status-badge variant only — the panel has no accent fill and no actions.
   # Amber = active dunning in progress; slate = no campaign has ever run.

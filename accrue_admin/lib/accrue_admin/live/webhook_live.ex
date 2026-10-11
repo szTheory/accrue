@@ -508,8 +508,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
       %{label: "Endpoint / type", value: "#{humanize(webhook.endpoint)} / #{webhook.type}"},
       %{
         label: "Received / processed",
-        value:
-          "#{format_datetime(webhook.received_at)} / #{format_datetime(webhook.processed_at)}"
+        value: timestamp_pair(webhook.received_at, webhook.processed_at, webhook.id)
       },
       %{label: "Verification", value: verification_summary(webhook)},
       %{label: "Attempts", value: Integer.to_string(length(attempts))},
@@ -546,7 +545,10 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
     [
       %{label: "Endpoint", value: humanize(webhook.endpoint)},
-      %{label: "Processed", value: format_datetime(webhook.processed_at)},
+      %{
+        label: "Processed",
+        value: timestamp_value(webhook.processed_at, "webhook-processed-#{webhook.id}")
+      },
       %{label: "Attempt count", value: Integer.to_string(length(attempts))},
       %{label: "Last attempt", value: last_attempt_label(last_attempt)}
     ]
@@ -794,8 +796,9 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp attempt_timeline(jobs) do
     Enum.map(jobs, fn job ->
       %{
+        id: "webhook-attempt-#{job.id}",
         title: "Attempt #{job.attempt || 1}/#{job.max_attempts || 25}",
-        at: format_datetime(job.inserted_at),
+        at: job.inserted_at,
         body: humanize(job.state || "available"),
         status: job.state || "available",
         tone: attempt_tone(job.state),
@@ -813,24 +816,26 @@ defmodule AccrueAdmin.Live.WebhookLive do
   end
 
   defp attempt_meta(job) do
-    [
-      job.attempted_at && "attempted #{format_datetime(job.attempted_at)}",
-      job.completed_at && "completed #{format_datetime(job.completed_at)}",
-      job.discarded_at && "discarded #{format_datetime(job.discarded_at)}"
-    ]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.join(" · ")
-    |> case do
-      "" -> nil
-      value -> value
+    if Enum.any?([job.attempted_at, job.completed_at, job.discarded_at], &match?(%DateTime{}, &1)) do
+      assigns = %{job: job}
+
+      ~H"""
+      <span :if={match?(%DateTime{}, @job.attempted_at)}>attempted <Timestamp.timestamp value={@job.attempted_at} id={"webhook-attempted-#{@job.id}"} /></span>
+      <span :if={match?(%DateTime{}, @job.completed_at)}> · completed <Timestamp.timestamp value={@job.completed_at} id={"webhook-completed-#{@job.id}"} /></span>
+      <span :if={match?(%DateTime{}, @job.discarded_at)}> · discarded <Timestamp.timestamp value={@job.discarded_at} id={"webhook-discarded-#{@job.id}"} /></span>
+      """
+      |> Phoenix.HTML.Safe.to_iodata()
+      |> IO.iodata_to_binary()
+      |> Phoenix.HTML.raw()
     end
   end
 
   defp derived_event_timeline(events, mount_path, owner_scope) do
     Enum.map(events, fn event ->
       %{
+        id: "webhook-derived-event-#{event.id}",
         title: Copy.billing_event_label(event.type),
-        at: format_datetime(event.inserted_at),
+        at: event.inserted_at,
         body: "#{event.subject_type} #{event.subject_id}",
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate),
         details_label: "Inspect event evidence",
@@ -856,6 +861,33 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
   defp exact_datetime(%DateTime{} = value), do: DateTime.to_iso8601(value)
   defp exact_datetime(_value), do: "Unavailable"
+
+  defp timestamp_pair(received_at, processed_at, webhook_id) do
+    assigns = %{
+      received_at: received_at,
+      processed_at: processed_at,
+      webhook_id: webhook_id
+    }
+
+    ~H"""
+    <span>Received <Timestamp.timestamp value={@received_at} id={"webhook-summary-received-#{@webhook_id}"} /></span>
+    <span> · Processed <Timestamp.timestamp value={@processed_at} id={"webhook-summary-processed-#{@webhook_id}"} /></span>
+    """
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Phoenix.HTML.raw()
+  end
+
+  defp timestamp_value(value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Phoenix.HTML.raw()
+  end
 
   defp scoped_mount_path(
          mount_path,
@@ -921,9 +953,6 @@ defmodule AccrueAdmin.Live.WebhookLive do
     |> String.split()
     |> Enum.map_join(" ", &String.capitalize/1)
   end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

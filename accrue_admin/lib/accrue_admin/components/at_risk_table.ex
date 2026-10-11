@@ -18,7 +18,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
   | `:currency` | `String.t() | atom() | nil` | optional currency for amount display |
   | `:days_in_campaign` | `non_neg_integer()` | displayed as "N days" |
   | `:current_step` | `non_neg_integer()` | 0 → "Pending"; N → "Step N" |
-  | `:next_step_eta` | `%DateTime{} | nil` | formatted as date-time string; nil → "—" |
+  | `:next_step_eta` | `%DateTime{} | nil` | shared exact timestamp control; nil → "—" |
   | `:failure_reason` | `map() | nil` | most-recent `invoice.payment_failed` data; extracts `failure_code`/`failure_message` keys; nil or missing invoice → "—" |
 
   ## Example
@@ -29,6 +29,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
   use Phoenix.Component
 
+  alias AccrueAdmin.Components.Timestamp
   alias AccrueAdmin.ScopedPath
 
   attr(:rows, :list, required: true)
@@ -110,7 +111,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
               <td class="ax-body">{format_amount(row)}</td>
               <td class="ax-body">{campaign_age(row)}</td>
               <td class="ax-body">{step_label(row)}</td>
-              <td class="ax-body">{format_eta(row.next_step_eta)}</td>
+              <td class="ax-body">{eta_cell(row.next_step_eta, row.subscription_id, :table)}</td>
               <td class="ax-body ax-muted">{format_failure(row.failure_reason)}</td>
             </tr>
           </tbody>
@@ -142,7 +143,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
             </div>
             <div>
               <dt class="ax-label">Next step</dt>
-              <dd class="ax-body">{format_eta(row.next_step_eta)}</dd>
+              <dd class="ax-body">{eta_cell(row.next_step_eta, row.subscription_id, :card)}</dd>
             </div>
             <div>
               <dt class="ax-label">Historical failure reason</dt>
@@ -263,10 +264,17 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
   defp normalize_currency(_currency), do: nil
 
-  defp format_eta(nil), do: "—"
+  defp eta_cell(nil, _subscription_id, _surface), do: "—"
 
-  defp format_eta(%DateTime{} = dt) do
-    Calendar.strftime(dt, "%Y-%m-%d %H:%M UTC")
+  defp eta_cell(%DateTime{} = value, subscription_id, surface) do
+    assigns = %{value: value, id: "at-risk-#{surface}-eta-#{subscription_id}"}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Phoenix.HTML.raw()
   end
 
   defp format_failure(nil), do: "—"

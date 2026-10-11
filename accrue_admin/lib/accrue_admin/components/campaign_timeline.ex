@@ -1,7 +1,7 @@
 defmodule AccrueAdmin.Components.CampaignTimeline do
   use Phoenix.Component
 
-  alias AccrueAdmin.Components.StatusBadge
+  alias AccrueAdmin.Components.{StatusBadge, Timestamp}
 
   attr(:arcs, :list, required: true)
   attr(:invoice_map, :map, required: true)
@@ -55,7 +55,7 @@ defmodule AccrueAdmin.Components.CampaignTimeline do
     <div class="ax-campaign-timeline-anchor">
       <div class="ax-timeline-dot ax-timeline-dot-cobalt"></div>
       <p>Campaign started</p>
-      <p>{format_datetime(@event.inserted_at)}</p>
+      <p><Timestamp.timestamp :if={match?(%DateTime{}, @event.inserted_at)} value={@event.inserted_at} id={"campaign-timeline-started-#{@event.id}"} />{if @event.inserted_at, do: nil, else: "—"}</p>
       <% failure = @event.data["failure_reason"] || @event.data["failure_code"] %>
       <p>{failure || "—"}</p>
     </div>
@@ -69,7 +69,7 @@ defmodule AccrueAdmin.Components.CampaignTimeline do
       <% label = if @event.type == "dunning.recovered", do: "Recovered", else: "Exhausted" %>
       <div class={["ax-timeline-dot", "ax-timeline-dot-#{tone}"]}></div>
       <StatusBadge.status_badge status={@event.type} tone={tone} label={label} />
-      <p>{format_datetime(@event.inserted_at)}</p>
+      <p><Timestamp.timestamp :if={match?(%DateTime{}, @event.inserted_at)} value={@event.inserted_at} id={"campaign-timeline-terminal-#{@event.id}"} />{if @event.inserted_at, do: nil, else: "—"}</p>
       <p>{format_amount(@event.data["mrr_value_cents"])}</p>
     </div>
     """
@@ -81,7 +81,7 @@ defmodule AccrueAdmin.Components.CampaignTimeline do
       <div class="ax-timeline-dot ax-timeline-dot-slate"></div>
       <% invoice_ctx = Map.get(@invoice_map, @event.data["invoice_id"]) %>
       <p>Attempt {@attempt}</p>
-      <p>{format_datetime(@event.inserted_at)}</p>
+      <p><Timestamp.timestamp :if={match?(%DateTime{}, @event.inserted_at)} value={@event.inserted_at} id={"campaign-timeline-step-#{@event.id}"} />{if @event.inserted_at, do: nil, else: "—"}</p>
       <%= if invoice_ctx do %>
         <StatusBadge.status_badge status={invoice_ctx.status} />
         <p>{format_amount(invoice_ctx.amount_due_cents)}</p>
@@ -99,10 +99,4 @@ defmodule AccrueAdmin.Components.CampaignTimeline do
     locale = Accrue.Config.default_locale()
     Accrue.Invoices.Render.format_money(cents, currency, locale)
   end
-
-  defp format_datetime(%DateTime{} = value) do
-    Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  end
-
-  defp format_datetime(_), do: "—"
 end

@@ -129,6 +129,11 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       assert html =~ "Campaign started"
       assert html =~ ~r|href="/billing/subscriptions/#{subscription_id}"|
 
+      timestamps = Floki.parse_document!(html) |> Floki.find("[data-time-display]")
+      assert length(timestamps) >= 3
+      timestamp_ids = Enum.flat_map(timestamps, &Floki.attribute(&1, "id"))
+      assert length(Enum.uniq(timestamp_ids)) == length(timestamp_ids)
+
       refute html =~ ~s(class="ax-kpi-grid")
       refute html =~ ~s(data-ax-zone="kpi-cluster")
     end

@@ -25,7 +25,12 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
       assert html =~ "$320.00"
       assert html =~ "Past due 9 days"
       assert html =~ "Step 2"
-      assert html =~ "2026-04-20 15:30 UTC"
+      document = Floki.parse_document!(html)
+      timestamps = Floki.find(document, "[data-time-display]")
+      assert length(timestamps) == 2
+      assert Enum.all?(timestamps, &(Floki.attribute(&1, "data-iso") == ["2026-04-20T15:30:00Z"]))
+      ids = Enum.flat_map(timestamps, &Floki.attribute(&1, "id"))
+      assert length(Enum.uniq(ids)) == 2
       assert html =~ "card_declined"
 
       assert html =~
