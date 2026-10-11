@@ -23,8 +23,13 @@ db_volumes=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/va
 [[ "$db_volumes" == "$expected_volume" ]] || die "database does not use the named ordinary data volume"
 
 db_ip=$(docker inspect --format "{{(index .NetworkSettings.Networks \"$expected_network\").IPAddress}}" "$db_id")
-fingerprint=$("${compose[@]}" exec -T db psql -U postgres -d accrue_host_dev -Atc \
-  "SELECT current_database() || '|' || current_user || '|' || inet_server_addr()::text")
+fingerprint=$("${compose[@]}" exec -T web mix run --no-start -e '
+  Application.ensure_all_started(:ecto_sql)
+  Logger.configure(level: :emergency)
+  {:ok, _repo} = AccrueHost.Repo.start_link()
+  row = AccrueHost.Repo.query!("SELECT current_database(), current_user, host(inet_server_addr())").rows |> hd()
+  IO.write(Enum.map_join(row, "|", &to_string/1))
+')
 [[ "$fingerprint" == "accrue_host_dev|postgres|$db_ip" ]] || die "database fingerprint does not match the inspected ordinary container"
 
 custody=(env ACCRUE_HOST_PREVIEW_INSTANCE=accrue-host-phase243-preview ACCRUE_HOST_PREVIEW_SNAPSHOT="$snapshot" node scripts/ci/accrue_host_preview_custody.sh)

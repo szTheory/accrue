@@ -29,6 +29,8 @@ const sourcePaths = [
   "examples/accrue_host/lib/accrue_host_web/router.ex",
   "examples/accrue_host/e2e/phase245-admin-baseline.spec.js",
   "examples/accrue_host/playwright.phase245.config.js",
+  "scripts/ci/seed_phase245_ordinary.sh",
+  "scripts/ci/accrue_host_preview_custody.sh",
   "examples/accrue_host/priv/repo/seeds/helpers.exs",
   "examples/accrue_host/priv/repo/seeds/ordinary.exs",
   "examples/accrue_host/priv/repo/seeds/hero_accounts.exs",
@@ -59,7 +61,13 @@ function assertOrdinaryComposeIdentity() {
   expect(dbNetworks.split(/\s+/), "database is attached to the ordinary network").toContain(network);
   expect(volume, "database uses the ordinary named data volume").toBe(`${ordinaryProject}_pgdata`);
   const dbIp = execFileSync("docker", ["inspect", "--format", `{{(index .NetworkSettings.Networks "${network}").IPAddress}}`, dbId], { encoding: "utf8" }).trim();
-  const fingerprint = execFileSync("docker", compose("exec", "-T", "db", "psql", "-U", "postgres", "-d", "accrue_host_dev", "-Atc", "SELECT current_database() || '|' || current_user || '|' || inet_server_addr()::text"), { cwd: hostRoot, encoding: "utf8" }).trim();
+  const fingerprint = dockerEval([
+    "Application.ensure_all_started(:ecto_sql)",
+    "Logger.configure(level: :emergency)",
+    "{:ok, _repo} = AccrueHost.Repo.start_link()",
+    "row = AccrueHost.Repo.query!(\"SELECT current_database(), current_user, host(inet_server_addr())\").rows |> hd()",
+    "IO.write(Enum.map_join(row, \"|\", &to_string/1))"
+  ].join("; "));
   expect(fingerprint, "live database fingerprint matches the inspected ordinary DB container").toBe(`accrue_host_dev|postgres|${dbIp}`);
 }
 
@@ -260,6 +268,23 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   const captures = [];
   const rows = [];
 
+  async function retainStateCapture({ id, route, state, scenario, filename, visualAnchor, observation }) {
+    const heading = (await page.locator("main h1").first().innerText()).trim();
+    const url = page.url();
+    const bytes = await page.screenshot({ path: path.join(phaseCaptureDir, filename), fullPage: true, animations: "disabled" });
+    const digest = sha256(bytes);
+    captures.push({
+      id: `C${String(captures.length + 1).padStart(2, "0")}`, route_state: id, route, state, scenario,
+      source_revision: revision, source_dirty: dirty, source_digests: sources, assets: assetIdentity,
+      viewport: { width: 1280, height: 900 }, theme: "light",
+      browser: { name: browserName, version: page.context().browser().version() }, url,
+      rendered_identity: { heading, selector: "main h1" }, captured_at: new Date().toISOString(),
+      png: { path: `.planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/${filename}`, bytes: bytes.length, sha256: digest },
+      observation
+    });
+    rows.push({ id, route, state, url, visual_anchor: `${visualAnchor}; visible page heading: ${heading}`, status: "inspected", evidence: `manifest capture C${String(captures.length).padStart(2, "0")}; PNG SHA-256 ${digest}; ${observation}` });
+  }
+
   async function visit(route, url, table, index, development = false) {
     if (url.endsWith("/null") || url.endsWith("/undefined")) {
       rows.push({ id: `R${String(index + 1).padStart(2, "0")}-populated`, route, state: "populated", url: null, visual_anchor: "Admin shell and route-owned content", status: "unavailable", reason: `No ordinary Fake record exists in ${table}, so a detail URL was not constructed; protected preview data was left intact.` });
@@ -290,6 +315,9 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
       await expect(page.locator("html")).toHaveAttribute("data-theme", targetTheme);
     }
     let observedState = "populated";
+    const listState = await page.locator('[data-role="data-table"]').getAttribute("data-ax-state").catch(() => null);
+    if (listState === "first-run-empty") observedState = "truly-empty";
+    if (listState === "filtered-empty") observedState = "filtered-to-zero";
     let recoveryReadiness = null;
     if (route === "/admin/analytics/recovery") {
       const atRisk = page.locator('.ax-at-risk-table[data-state="no-pagination"], .ax-at-risk-table[data-state="has-pagination"]');
@@ -331,6 +359,62 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
     const row = rows.find((candidate) => candidate.route === route);
     if (row) row.reason = `No ordinary Fake ${table.replaceAll("_", " ")} row exists, so a detail URL cannot be formed; the collection route was still visited.`;
   }
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/admin/customers?q=phase245-no-results-7c92e34a");
+  await expect(page).toHaveURL(/\/admin\/customers\?q=phase245-no-results-7c92e34a$/);
+  await expect(page.getByRole("heading", { name: "No customers match these filters." })).toBeVisible();
+  await expect(page.locator('[data-role="data-table"]')).toHaveAttribute("data-ax-state", "filtered-empty");
+  await expect(page.locator("[data-ax-list='customers'] tbody tr")).toHaveCount(0);
+  await retainStateCapture({ id: "R02-filtered-zero", route: "/admin/customers", state: "filtered-to-zero", scenario: "ordinary Fake seed; impossible query only; no DB mutation", filename: "22-customers-filtered-zero-wide-light.png", visualAnchor: "Customer collection filtered-zero state and matching query", observation: "A safe impossible q parameter remained in the final URL and rendered the explicit filtered-empty state with zero table rows." });
+
+  await page.goto("/admin");
+  await expect(page).toHaveURL(/\/admin$/);
+  await page.keyboard.press("Control+k");
+  const searchDialog = page.getByRole("dialog", { name: "Global search" });
+  await expect(searchDialog).toBeVisible();
+  const searchInput = page.locator("#global-search-input");
+  await expect(searchInput).toBeFocused();
+  await retainStateCapture({ id: "R01-search-open", route: "/admin", state: "global-search-open", scenario: "ordinary Fake seed; keyboard shortcut Control+K; no action executed", filename: "23-global-search-open-wide-light.png", visualAnchor: "Global search dialog with scoped list suggestions", observation: "Control+K opened the modal dialog, exposed the scoped-list suggestions, and moved focus to its search input." });
+  await searchInput.fill("Atelier Café");
+  const customerResults = searchDialog.locator('[data-search-group="customers"] .ax-command-palette-item[data-path]');
+  await expect(customerResults.first()).toBeVisible();
+  const customerDetailURL = await customerResults.first().getAttribute("href");
+  expect(customerDetailURL).toBeTruthy();
+  const resultItems = searchDialog.locator(".ax-command-palette-item[data-path]");
+  await expect.poll(() => resultItems.count()).toBeGreaterThan(1);
+  await searchInput.press("ArrowDown");
+  const keyboardActive = searchDialog.locator(".ax-command-palette-item.ax-active[data-path]");
+  await expect(keyboardActive).toHaveCount(1);
+  const keyboardPath = await keyboardActive.getAttribute("data-path");
+  const itemCount = await resultItems.count();
+  let pointerItem = null;
+  for (let itemIndex = 0; itemIndex < itemCount; itemIndex += 1) {
+    const candidate = resultItems.nth(itemIndex);
+    if (await candidate.getAttribute("data-path") !== keyboardPath) { pointerItem = candidate; break; }
+  }
+  expect(pointerItem, "search results expose a second selectable record").toBeTruthy();
+  await pointerItem.hover();
+  await expect(searchDialog.locator(".ax-command-palette-item.ax-active[data-path]")).toHaveCount(1);
+  const pointerPath = await searchDialog.locator(".ax-command-palette-item.ax-active[data-path]").getAttribute("data-path");
+  expect(pointerPath).not.toBe(keyboardPath);
+  await retainStateCapture({ id: "R01-search-pointer-active", route: "/admin", state: "global-search-keyboard-and-pointer-active", scenario: "ordinary Fake search results for Atelier Café; arrow selection followed by hover on another result", filename: "24-global-search-pointer-selection-wide-light.png", visualAnchor: "Search result list with one keyboard/pointer active selection", observation: `ArrowDown first selected ${keyboardPath}; pointer hover changed selection to ${pointerPath}; exactly one result had the active class.` });
+  await page.keyboard.press("Escape");
+  await expect(searchDialog).toBeHidden();
+  await page.goto(new URL(customerDetailURL, page.url()).pathname + new URL(customerDetailURL, page.url()).search);
+  await expect(page).toHaveURL(/\/admin\/customers\/[0-9a-f-]+/);
+  const peerTabs = page.getByRole("navigation", { name: "Customer peer record sets" });
+  const invoiceTab = peerTabs.getByRole("link", { name: /Invoices/ });
+  await invoiceTab.click();
+  await expect(page).toHaveURL(/tab=invoices/);
+  await expect(invoiceTab).toHaveAttribute("aria-current", "page");
+  await retainStateCapture({ id: "R03-invoices-tab", route: "/admin/customers/:id", state: "peer-record-invoices-tab-selected", scenario: "ordinary Unicode customer found through global search; URL tab selected by link", filename: "25-customer-invoices-tab-wide-light.png", visualAnchor: "Customer detail with invoice peer-record tab selected", observation: "Clicking the Invoices peer tab updated the URL to tab=invoices and set aria-current=page; the rendered peer-record panel reflects the selected tab." });
+  const activityDetails = page.locator("details[data-ax-lazy-activity]").first();
+  await activityDetails.locator("summary").click();
+  await expect(activityDetails).toHaveAttribute("open", "");
+  await expect(page.getByText(/No customer-scoped events yet|Activity/).first()).toBeVisible();
+  await retainStateCapture({ id: "R03-activity-disclosure-open", route: "/admin/customers/:id", state: "activity-disclosure-expanded", scenario: "ordinary Unicode customer detail; lazy activity disclosure opened; read-only", filename: "26-customer-activity-expanded-wide-light.png", visualAnchor: "Customer detail with expanded Activity disclosure", observation: "Opening the Activity disclosure rendered its available timeline/empty evidence without a record mutation." });
+
   const manifest = {
     phase: "245-rendered-baseline-and-realistic-preview", captured_at: new Date().toISOString(), source_revision: revision, source_dirty: dirty,
     scenario: "isolated accrue-host-phase245-ordinary Fake seed; existing database preserved", seed_revision: sources["examples/accrue_host/priv/repo/seeds/ordinary.exs"],
@@ -348,16 +432,20 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
     { route: "/admin/assets/*", kind: "static-asset-support", reason: "hashed CSS/JS/font assets are verified through served asset identity, not operator routes" }
   ];
   const stateMatrix = [
-    { id: "LST-EMPTY", applies_to: "all collection routes", state: "truly-empty", status: "unavailable", reason: "The ordinary fixture is intentionally populated; emptying protected data is outside the read-only capture scope." },
-    { id: "LST-FILTER-ZERO", applies_to: "all collection routes with filters", state: "filtered-to-zero", status: "unavailable", reason: "A stable guaranteed-zero filter was not available across every collection; no route is marked empty based on source or guesswork." },
+    { id: "LST-CONNECT-TRULY-EMPTY", applies_to: "/admin/connect", state: "truly-empty", status: "inspected", reason: "The current ordinary Connect summary and table report zero accounts; capture route state R14-truly-empty distinguishes this real empty collection from a filtered-zero view." },
+    { id: "LST-CUSTOMERS-FILTER-ZERO", applies_to: "/admin/customers?q=phase245-no-results-7c92e34a", state: "filtered-to-zero", status: "inspected", reason: "The safe impossible query is preserved in the final URL and the rendered table state is filtered-empty with zero rows; see R02-filtered-zero." },
     { id: "LST-PARTIAL", applies_to: "billing lists and details", state: "partial-or-unknown", status: "inspected", reason: "Ordinary Fake records preserve absent provider history and nil relationships; the exact evidence and route captures are listed per route." },
     { id: "LST-ONE-MANY", applies_to: "collection and detail related-record sections", state: "one-and-many", status: "unavailable", reason: "Counts are recorded only where visibly rendered; no extra records were seeded to force cardinality variants." },
     { id: "LST-OVERFLOW", applies_to: "tables and long-text detail fields", state: "overflow-long-text", status: "unavailable", reason: "No ordinary fixture was added for adversarial text; Phase 191 edge_states owns this scenario." },
     { id: "ASYNC-LOADING-ERROR", applies_to: "recovery analytics", state: "loading-or-error", status: "inspected", reason: "Recovery loading state is checked against source-backed ready indicators with a bounded 15-second wait and recorded in R20." },
-    { id: "INTERACTION-KEYBOARD", applies_to: "navigation, filters, disclosures, tabs", state: "keyboard-focus-selection", status: "unavailable", reason: "This batch captures rendered states; it does not infer keyboard/focus behavior from PNGs." },
-    { id: "INTERACTION-POINTER-TOUCH", applies_to: "hover and touch targets", state: "hover-pointer-touch", status: "unavailable", reason: "No pointer-hover or physical touch outcome was exercised; viewport emulation is not touch evidence." },
-    { id: "INTERACTION-URL", applies_to: "query filters, tabs, and selected rows", state: "URL-result-alignment", status: "unavailable", reason: "The test preserves the explicit invoices view=all route but does not claim systematic URL/result alignment for every control." },
-    { id: "DETAIL-DISCLOSURE", applies_to: "record details", state: "disclosure-tabs-and-history", status: "unavailable", reason: "Collapsed disclosure/tab variants were not expanded across every detail route in this bounded visual inventory." }
+    { id: "OVERLAY-GLOBAL-SEARCH", applies_to: "/admin global search dialog", state: "dialog-open-and-results", status: "inspected", reason: "The modal opened via Control+K; the default scoped suggestions and Atelier Café result set were captured. No result was activated." },
+    { id: "INTERACTION-KEYBOARD", applies_to: "global search shortcut and result navigation", state: "keyboard-focus-selection", status: "inspected", reason: "Control+K focused the dialog input; ArrowDown changed the single active result before a pointer moved it to another result, verified in the captured browser state." },
+    { id: "INTERACTION-POINTER", applies_to: "global search result selection", state: "pointer-hover-selection", status: "inspected", reason: "Pointer hover changed the active result and exactly one result retained the active class; no activation occurred." },
+    { id: "INTERACTION-TOUCH", applies_to: "physical touch targets", state: "touch-outcome", status: "unavailable", reason: "No physical touch device was used; viewport emulation is not touch evidence." },
+    { id: "INTERACTION-URL-CUSTOMER-TAB", applies_to: "customer peer-record tabs", state: "URL-result-alignment", status: "inspected", reason: "The Invoices tab click updated `tab=invoices`, set `aria-current=page`, and changed the peer-record panel; this is a representative customer-tab check, not a systematic audit of all filters." },
+    { id: "INTERACTION-URL-OTHER-FILTERS", applies_to: "other collection filters and search", state: "URL-result-alignment", status: "unavailable", reason: "Only the safe customer filtered-zero query is exercised; query/count preservation and reset scope remain unverified across other collection filters." },
+    { id: "DETAIL-CUSTOMER-ACTIVITY", applies_to: "customer detail Activity disclosure", state: "disclosure-expanded", status: "inspected", reason: "The read-only customer Activity disclosure was opened and its rendered timeline/empty evidence captured." },
+    { id: "DETAIL-OTHER-DISCLOSURES", applies_to: "other detail disclosure and tab states", state: "disclosure-tabs-and-history", status: "unavailable", reason: "Only the customer Activity disclosure and peer-record tab were opened in this bounded pass; other record histories/disclosures remain uninspected." }
   ];
   const coverage = {
     prior_route_count: 21,

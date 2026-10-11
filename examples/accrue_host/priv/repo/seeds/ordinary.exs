@@ -4,7 +4,7 @@ alias AccrueHost.Repo
 # labels alone are not a database boundary: DATABASE_URL/PGHOST can be pointed
 # at another stack while the Compose project name still looks correct.
 [database, role, server_address] =
-  case Repo.query!("SELECT current_database(), current_user, inet_server_addr()::text") do
+  case Repo.query!("SELECT current_database(), current_user, host(inet_server_addr())") do
     %{rows: [row]} -> row
     _ -> raise "ordinary preview seed refused: could not identify connected database"
   end
