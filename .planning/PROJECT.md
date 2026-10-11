@@ -33,7 +33,18 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest fully shipped milestone: v1.64 — Admin Operator UI Cleanup, shipped and archived 2026-10-10.** All four phases, 24 plans and 18 requirements completed. The audit scored 18/18 requirements, 4/4 phase verifications, 10/10 integration seams and 6/6 end-to-end flows with no blockers; it records two newly acknowledged Phase 240 notices and four acknowledgements carried from earlier closeouts. All four phase verifications are fresh and passed (47/47, 32/32, 80/80 and 3/3), with zero unverified behavior. The current-source twelve-image Linux comparison passed in [run 38094642350](https://github.com/szTheory/accrue/actions/runs/38094642350) at `849f72084a6460ed54ecc06bc261054b15efdde0`; the Fake `/admin` preview and its evidence limits are documented in the [archived Phase 243 handoff](milestones/v1.64-phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md). The next milestone has not been opened; run `$gsd-new-milestone` to continue.
+**Latest fully shipped milestone: v1.64 — Admin Operator UI Cleanup, shipped and archived 2026-10-10.** All four phases, 24 plans and 18 requirements completed. The audit scored 18/18 requirements, 4/4 phase verifications, 10/10 integration seams and 6/6 end-to-end flows with no blockers; it records two newly acknowledged Phase 240 notices and four acknowledgements carried from earlier closeouts. All four phase verifications are fresh and passed (47/47, 32/32, 80/80 and 3/3), with zero unverified behavior. The current-source twelve-image Linux comparison passed in [run 38094642350](https://github.com/szTheory/accrue/actions/runs/38094642350) at `849f72084a6460ed54ecc06bc261054b15efdde0`; the Fake `/admin` preview and its evidence limits are documented in the [archived Phase 243 handoff](milestones/v1.64-phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md). The active milestone is v1.65, Accrue Admin Language & Consistency; requirements and roadmap are being defined, beginning with Phase 244.
+
+## Current Milestone: v1.65 Accrue Admin Language & Consistency
+
+**Goal:** Make existing Accrue Admin screens clearer to support and billing operators about what happened and what to do next, while keeping exact technical evidence available for investigation.
+
+**Target features:**
+- Correct confirmed Admin copy that obscures current state, consequences, or a supported next action; preserve truthful outcomes and exact technical evidence.
+- Align repeated Admin labels, destinations, and shared patterns where current evidence shows inconsistency.
+- Strengthen existing copy and owning LiveView/browser test contracts so user-facing language and supporting evidence are checked together.
+
+**Boundaries:** No new billing capabilities, Portal work, diagnosis features, new Admin rooms, rebrand, or redesign. Carry Seed 004's content-hierarchy and operator-clarity guardrails as background only; its deferred M2/M3 ideas are not milestone scope.
 
 ## Shipped Milestone: v1.64 Admin Operator UI Cleanup (**shipped & archived 2026-10-10**)
 
@@ -45,7 +56,7 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Archived v1.64 Scope and Delivery Contract
 
-**Current status:** Shipped and archived; the next milestone has not been opened. Run `$gsd-new-milestone` to continue.
+**Current status:** Shipped and archived; v1.65 has since opened from this baseline.
 
 **Goal:** Make existing Accrue Admin journeys clearer, more consistent, responsive, and easier to operate, with recurring automated acceptance and bounded agent visual inspection.
 
@@ -700,7 +711,7 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-None. All 18 v1.64 requirements are validated and archived in `milestones/v1.64-REQUIREMENTS.md`.
+v1.65 requirements are being defined. All 18 v1.64 requirements remain validated and archived in `milestones/v1.64-REQUIREMENTS.md`.
 
 ### Validated v1.64 (Phases 240–243 complete; updated 2026-10-10)
 
@@ -979,4 +990,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-10 after v1.64 closeout; next: `$gsd-new-milestone`.*
+*Last updated: 2026-10-10 at v1.65 kickoff; next: define and approve v1.65 requirements, then create the roadmap.*

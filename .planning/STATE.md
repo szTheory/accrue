@@ -1,20 +1,16 @@
 ---
 gsd_state_version: "1.0"
-milestone: v1.64
-milestone_name: Admin Operator UI Cleanup
-status: Awaiting next milestone
-stopped_at: Phase 243 complete — all phases complete
-last_updated: "2026-10-10T23:50:13.712Z"
+milestone: v1.65
+milestone_name: Accrue Admin Language & Consistency
+status: planning
+last_updated: "2026-10-11T00:09:07.136Z"
 last_activity: 2026-10-10
-last_activity_desc: Milestone v1.64 completed and archived
-state_head: d33cd11e9d5b3dc16f50732f66b477031eb1e8a0
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 24
-  completed_plans: 24
-  percent: 100
-current_phase: 243
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -31,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 ## Current Position
 
-Phase: Milestone v1.64 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-10-10 — Milestone v1.64 completed and archived
+Status: Defining requirements
+Last activity: 2026-10-10 — Milestone v1.65 started
 
 ## Performance Metrics
 
