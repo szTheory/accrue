@@ -20,6 +20,7 @@
 - ✅ **v1.62 Release Integration & Repository Hygiene** — Phases 229–232 (2026-09-18) — [archive](milestones/v1.62-ROADMAP.md)
 - ✅ **v1.63 Admin and Portal UI refinement** — Phases 233–239 (shipped 2026-10-09) — [archive](milestones/v1.63-ROADMAP.md)
 - ✅ **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (shipped 2026-10-10) — [archive](milestones/v1.64-ROADMAP.md)
+- 🚧 **v1.65 Accrue Admin Language & Consistency** — Phase 244 (planned)
 
 ## Planning Doctrine
 
@@ -27,8 +28,39 @@ Accrue remains in **stable-core / demand-driven expansion** posture. New feature
 
 Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICTION-INVENTORY.md). Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work require an explicit future scope decision; Google Play remains backlogged in SEED-007 until Android is scheduled or a second adopter requires it.
 
+## v1.65 — Accrue Admin Language & Consistency
+
+**Goal:** Support and billing operators can understand what happened and what to do next on targeted existing Admin screens, while exact technical evidence remains available for investigation.
+
+**Scope:** Correct copy and repeated patterns only where current rendered Admin output confirms an issue. Home recent activity is an initial candidate, not a preapproved edit. Keep completed, failed, blocked, and unknown outcomes distinct. Use existing `AccrueAdmin.Copy`, LiveView, and browser test owners for recurring proof. No new billing capability, Portal work, diagnosis functions, new Admin rooms, redesign, rebrand, blanket banned-word rule, or new test/CI lane.
+
+## Phases
+
+- [ ] **Phase 244: Operator Language and Evidence** - Make confirmed Admin labels, outcomes, next steps, and repeated controls clear and consistent while preserving investigation details.
+
+## Phase Details
+
+### Phase 244: Operator Language and Evidence
+
+**Goal**: Operators can understand the activity, state, outcome, and supported next action on targeted existing Admin screens without losing exact investigation evidence.
+**Depends on**: Phase 243 (shipped v1.64 Admin baseline)
+**Requirements**: LANG-01, STATE-01, EVID-01, CONS-01
+**Success Criteria** (what must be TRUE):
+  1. On each targeted existing Admin screen, an operator can read the primary activity or state label in operator-facing language that matches the underlying event or state, without decoding an implementation key. (LANG-01)
+  2. For targeted completed, failed, blocked, and unknown outcomes, an operator can tell what the available evidence confirms, whether the requested action took effect, and which supported next step is available, without being shown an invented cause. (STATE-01)
+  3. Where a human-readable event or state label appears, an operator can still find the exact event key and relevant record identifiers and timestamps at the point of investigation. (EVID-01)
+  4. Across targeted existing Admin screens, an operator encounters consistent repeated headings and action names, and each link or control accurately describes its destination or effect. (CONS-01)
+**Plans**: TBD
+**UI hint**: yes
+
+## Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 244. Operator Language and Evidence | 0/TBD | Not started | - |
+
 ## Current Position
 
-No milestone or phase is active. v1.64 completed all four phases, 24 plans, and 18 requirements. Its audit is `tech_debt` with 18/18 requirements, 4/4 phase verifications, 10/10 integration seams, 6/6 end-to-end flows, and zero blockers; two notices were newly acknowledged and four earlier acknowledgements were carried forward. Start the next cycle with `$gsd-new-milestone`.
+v1.65 is ready to plan at Phase 244. All 4/4 approved v1 requirements map to this phase. The complete v1.64 scope and closeout evidence remain in the [archived roadmap](milestones/v1.64-ROADMAP.md), [milestone audit](milestones/v1.64-MILESTONE-AUDIT.md), and [phase archive](milestones/v1.64-phases/).
 
-The complete v1.64 scope, phase details, requirements traceability, and closeout evidence are preserved in the [archived roadmap](milestones/v1.64-ROADMAP.md), [milestone audit](milestones/v1.64-MILESTONE-AUDIT.md), and [phase archive](milestones/v1.64-phases/).
+**Next command:** `$gsd-plan-phase 244`.

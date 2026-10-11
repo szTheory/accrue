@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-10-11T00:09:07.136Z"
 last_activity: 2026-10-10
 progress:
-  total_phases: 0
+  total_phases: 1
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,16 +21,18 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.64 shipped and archived; no active milestone
-**Progress:** [██████████] 100%
-**Planned work completed:** All four v1.64 phases, 24 plans, and 18 requirements are complete. Fresh independent phase verification passed 47/47, 32/32, 80/80, and 3/3 with zero unverified behavior; the project-wide contract passed 15 phases, 113 summaries, and 329 automated UAT cases. Code review findings CR-01/CR-02 are fixed; security has zero open threats. Current-source Linux Browser UAT and Mint baselines passed in run 38094642350 at `849f72084a6460ed54ecc06bc261054b15efdde0`. The audit has zero blockers and records two newly acknowledged notices plus four carried-forward acknowledgements. v1.63 remains archived and closed.
+**Current focus:** v1.65 Phase 244 — Operator Language and Evidence
+**Progress:** [░░░░░░░░░░] 0%
+**Planned work:** One phase, with 4/4 approved requirements mapped; plans are to be defined. v1.64 is shipped and archived with its closeout evidence retained in `.planning/milestones/`.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-10-10 — Milestone v1.65 started
+Phase: 244 of 244 (Operator Language and Evidence)
+Plan: TBD
+Status: Ready to plan
+Last activity: 2026-10-10 — v1.65 roadmap created; all four requirements mapped to Phase 244
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -422,7 +424,7 @@ None. The next workflow action is recorded under Operator Next Steps; completed 
 
 ### Blockers/Concerns
 
-- **Current v1.64:** Phase243 current verification passes with zero unverified behavior and no open review/security finding. Final owner checks classify the older Phase240–242 verification reports as stale after Phase243 shared-source/evidence changes. Their completed plan work is not replayed; regenerate verification through `$gsd-execute-phase 240`, `241` and `242` before milestone archive. Current Phase243 targeted regressions passed and remain separately recorded.
+- **Current v1.65:** Confirm candidate copy and repeated-pattern issues against current rendered Admin output before changing them. Home recent activity is an initial candidate. Keep exact event keys, identifiers, timestamps, and evidence-specific outcome distinctions available in the owning screens and checks.
 - **Resolved by v1.62:** the `main`/v1.61 divergence, the stale local `main` ref, the four unpublished audit-closure commits, and the unavailable live-CI monitor. All are reconciled into the integration candidate with committed evidence.
 - **Historical v1.62 candidate:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
 - **Archived v1.62 validation debt:** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
@@ -484,8 +486,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10T22:31:20.398031Z
-Stopped at: Phase 243 complete — all phases complete
+Last session: 2026-10-10
+Stopped at: v1.65 roadmap created; Phase 244 ready to plan
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -615,8 +617,7 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- **Last completed phase:** 243 — Integrated Evidence and Feedback Preview (3/3 plans; fresh 3/3 verification; seven automated UAT cases; zero unverified behavior).
-- **Milestone closed:** v1.64 Admin Operator UI Cleanup; all four phases, 24 plans, and 18 requirements are complete. Audit status is `tech_debt` with zero blockers; Phase 240's two build/deprecation notices are acknowledged, and four earlier acknowledgements are carried forward.
-- **Current-source Linux evidence:** GitHub Actions run 38094642350 passed Browser UAT and Mint visual baselines at source SHA `849f72084a6460ed54ecc06bc261054b15efdde0` on the authorized `gsd/phase-243-linux-evidence` branch.
-- **Next GSD command:** `$gsd-new-milestone`.
-- Context can be cleared. Phase artifacts and the Phase 243 handoff are archived under `milestones/v1.64-phases/`; the current audit is `milestones/v1.64-MILESTONE-AUDIT.md`. Quick-task folders remain in place by choice.
+- **Current phase:** 244 — Operator Language and Evidence; 0 plans defined, 4/4 v1.65 requirements assigned.
+- **Planning focus:** Confirm each targeted issue in current rendered Admin output, then plan coherent copy and owning LiveView/browser evidence changes within existing screens.
+- **Next GSD command:** `$gsd-plan-phase 244`.
+- **Previous milestone:** v1.64 is shipped and archived; its phase artifacts and audit remain under `.planning/milestones/`.

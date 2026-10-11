@@ -50,16 +50,17 @@ None promoted. Broader Admin information-architecture changes and new diagnosis 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LANG-01 | Pending roadmap | Pending |
-| STATE-01 | Pending roadmap | Pending |
-| EVID-01 | Pending roadmap | Pending |
-| CONS-01 | Pending roadmap | Pending |
+| LANG-01 | Phase 244 | Pending |
+| STATE-01 | Phase 244 | Pending |
+| EVID-01 | Phase 244 | Pending |
+| CONS-01 | Phase 244 | Pending |
 
 **Coverage:**
 - v1 requirements: 4 total
-- Mapped to phases: 0
-- Unmapped: 4 ⚠️
+- Mapped to phases: 4
+- Unmapped: 0
+- Duplicate mappings: 0
 
 ---
 *Requirements defined: 2026-10-10*
-*Last updated: 2026-10-10 after maintainer approval of milestone requirements*
+*Last updated: 2026-10-10 after Phase 244 roadmap mapping*
