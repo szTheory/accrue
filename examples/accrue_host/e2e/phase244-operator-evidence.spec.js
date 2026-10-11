@@ -565,7 +565,7 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
       const relatedRow = derived.locator(".ax-timeline-item").filter({ hasText: `event #${adversarial.ids[0]}` });
       const eventLink = relatedRow.getByRole("link", { name: "Open event" });
       const eventHref = await eventLink.getAttribute("href");
-      expect(new URL(eventHref, page.url()).pathname).toBe(`/admin/events/${adversarial.ids[2]}`);
+      expect(new URL(eventHref, page.url()).pathname).toBe(`/admin/events/${adversarial.ids[0]}`);
       expect(new URL(eventHref, page.url()).searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
       await eventLink.tap();
       await waitForLiveView(page);
