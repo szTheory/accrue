@@ -145,3 +145,7 @@ The plan’s owner and browser coverage is complete with `human_judgment: false`
 
 - Summary file exists at the required phase path.
 - All 11 measured plan commits are reachable from the plan head, including task commits `e608c2f4` and final browser spec commit `1b62ad78`.
+
+## Incremental Review Follow-Up: WR-02
+
+Post-plan review found the pre-dispatch read-failure row used copy that implied an attempted dispatch. Commit `19449fb4` now reports “Delivery could not be read; replay was not requested.” The attempted unknown outcome and accepted-enqueue/reread-failed copy remain unchanged. The focused replay owner suite passed 16/16 after the fix; the existing no-job/no-replay-event assertions remain green.

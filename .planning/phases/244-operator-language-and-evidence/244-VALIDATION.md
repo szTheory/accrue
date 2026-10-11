@@ -98,3 +98,7 @@ The final batched browser command was `ACCRUE_HOST_PROOF_RUN_ID=26284-1791685212
 Recorded fixture-only failures during development: invalid test actor type (`external`, rejected by the persisted enum), then selector assumptions that did not match the rendered generic billing label and action regions. They were corrected in the browser spec; no product CSS change was needed. The final six-case confirmation passed on one committed revision.
 
 These rows replace the four former human backstops with executable browser evidence. `human_judgment: false` is recorded in `244-04-SUMMARY.md`; the phase verification report remains owned by the post-execution verifier.
+
+## Incremental Review Closure — WR-02
+
+The refreshed review found that a pre-dispatch detail read failure was labeled “Dispatch result could not be confirmed,” despite `attempted: false`. `19449fb4` passes the actual attempt flag into copy selection and renders “Delivery could not be read; replay was not requested.” The adjacent read-failed owner test now checks this exact text along with no link, no dispatch job, no replay-request event, and `attempted: 0`. The accepted-enqueue/reread-failed test remains unchanged and verifies the accepted queue plus unknown processing status. Verification: focused `webhook_replay_test.exs` suite, 16 passed / 0 failed; three-file `mix format --check-formatted` and `git diff --check` passed. No browser rerun was needed because no rendered geometry, route, or browser asset changed.
