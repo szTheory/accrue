@@ -48,6 +48,10 @@ function dockerEval(expression) {
   ), { cwd: hostRoot, encoding: "utf8" }).trim();
 }
 
+function assertOrdinaryFakeProcessor(readProcessor = () => dockerEval("IO.write(inspect(Application.fetch_env!(:accrue, :processor)))")) {
+  expect(readProcessor(), "ordinary preview must use the Fake processor").toBe("Accrue.Processor.Fake");
+}
+
 function assertOrdinaryComposeIdentity() {
   const webId = execFileSync("docker", compose("ps", "-q", "web"), { cwd: hostRoot, encoding: "utf8" }).trim();
   const dbId = execFileSync("docker", compose("ps", "-q", "db"), { cwd: hostRoot, encoding: "utf8" }).trim();
@@ -106,6 +110,11 @@ test("manifest guard accepts source filenames and rejects session metadata", () 
   expect(() => assertNoSecrets({ captures: [{ source_digests: { "accrue_admin/lib/accrue_admin/components/page_header.ex": "a".repeat(64) } }] })).not.toThrow();
   expect(() => assertNoSecrets({ captures: [{ headers: { authorization: "redacted" } }] })).toThrow();
   expect(() => assertNoSecrets({ captures: [{ source_digests: { "examples/accrue_host/../../.env": "a".repeat(64) } }] })).toThrow();
+});
+
+test("ordinary capture processor guard accepts Fake and rejects other processors", () => {
+  expect(() => assertOrdinaryFakeProcessor(() => "Accrue.Processor.Fake")).not.toThrow();
+  expect(() => assertOrdinaryFakeProcessor(() => "Accrue.Processor.Stripe")).toThrow();
 });
 
 function compiledAssetBytes(assetName) {
@@ -172,8 +181,7 @@ test("authenticated ordinary invoice list and detail match current served assets
   test.skip(!operatorPassword, "set ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD from the local operator credential source");
 
   assertOrdinaryComposeIdentity();
-  const processor = dockerEval("IO.write(inspect(Application.fetch_env!(:accrue, :processor)))");
-  expect(processor).toBe("Accrue.Processor.Fake");
+  assertOrdinaryFakeProcessor();
 
   await page.goto("/users/log-in");
   const csrfToken = await page.locator("meta[name='csrf-token']").getAttribute("content");
@@ -246,6 +254,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   test.skip(!operatorPassword, "set ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD from the local operator credential source");
   test.setTimeout(360_000);
   assertOrdinaryComposeIdentity();
+  assertOrdinaryFakeProcessor();
   const phaseCaptureDir = path.join(repoRoot, ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current");
   fs.mkdirSync(phaseCaptureDir, { recursive: true });
   await signIn(page);
