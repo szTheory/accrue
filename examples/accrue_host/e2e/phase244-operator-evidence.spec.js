@@ -447,8 +447,10 @@ test("Phase 244 duplicate event rows retain their own scoped destinations @phase
     rows.push({ id, href });
   }
   const timelineIds = await derived.locator(".ax-timeline-item").allTextContents();
-  expect(timelineIds.join(" ")).toContain(`event #${adversarial.ids[0]}`);
-  expect(timelineIds.join(" ")).toContain(`event #${adversarial.ids[1]}`);
+  const firstPosition = timelineIds.findIndex((value) => value.includes(`event #${adversarial.ids[0]}`));
+  const secondPosition = timelineIds.findIndex((value) => value.includes(`event #${adversarial.ids[1]}`));
+  expect(firstPosition).toBeGreaterThanOrEqual(0);
+  expect(secondPosition).toBeGreaterThan(firstPosition);
   await derived.locator(`a[href^='/admin/events/${adversarial.ids[1]}?']`).click();
   await waitForLiveView(page);
   await expect(page).toHaveURL(new RegExp(`/admin/events/${adversarial.ids[1]}\\?org=`));
@@ -566,9 +568,9 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
       expect(new URL(eventHref, page.url()).searchParams.get("org")).toBe(fixture.admin_org_alpha_slug);
       await eventLink.tap();
       await waitForLiveView(page);
-      const sourceWebhook = page.getByRole("link", { name: new RegExp(`^Source webhook ${fixture.webhook_id}`) });
-      await expect(sourceWebhook).toBeVisible();
-      await sourceWebhook.tap();
+      const relatedWebhook = page.getByRole("link", { name: new RegExp(`^WebhookEvent ${fixture.webhook_id}`) });
+      await expect(relatedWebhook).toBeVisible();
+      await relatedWebhook.tap();
       await waitForLiveView(page);
       await expect(page).toHaveURL(new RegExp(`/admin/webhooks/${fixture.webhook_id}\\?org=`));
       const proof = { checkoutHead: execFileSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).trim(), ownerSpecSha256: sha256(fs.readFileSync(__filename)), fixture: "disposable scoped long-key delivery and Unicode evidence rows", route: page.url(), viewport: page.viewportSize(), dimensions, selectedExactEvidence: [adversarial.rawKey, adversarial.longActor, adversarial.longSubject], assets: await captureAdminAssets(page) };
