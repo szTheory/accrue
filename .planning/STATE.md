@@ -2,9 +2,14 @@
 gsd_state_version: "1.0"
 milestone: v1.65
 milestone_name: Accrue Admin Language & Consistency
+current_phase: 244
+current_phase_name: Operator Language and Evidence
 status: planning
-last_updated: "2026-10-11T00:09:07.136Z"
+stopped_at: "Phase 244 context gathered; next: gsd-plan-phase 244"
+last_updated: "2026-10-11T00:24:11.004Z"
 last_activity: 2026-10-10
+last_activity_desc: v1.65 roadmap created; all four requirements mapped to Phase 244
+state_head: bfadd96d04d7a85c15587bb27249a98d912a6f34
 progress:
   total_phases: 1
   completed_phases: 0
@@ -486,9 +491,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-10
-Stopped at: v1.65 roadmap created; Phase 244 ready to plan
-Resume file: None
+Last session: 2026-10-11T00:24:10.988Z
+Stopped at: Phase 244 context gathered; next: gsd-plan-phase 244
+Resume file: .planning/phases/244-operator-language-and-evidence/244-CONTEXT.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
