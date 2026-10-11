@@ -82,6 +82,7 @@ async function assertIdentityAndCopy(page, listId) {
   expect(exactId).toBeTruthy();
   const identity = button.locator("xpath=ancestor::*[contains(@class,'ax-data-table-identity')][1]");
   await expect(identity).toContainText(exactId);
+  await expect(identity.locator("[data-clipboard-text]")).toHaveCount(1);
   const bbox = await button.boundingBox();
   expect(bbox?.height, `${listId} copy target height`).toBeGreaterThanOrEqual(44);
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
@@ -94,7 +95,9 @@ async function assertIdentityAndCopy(page, listId) {
     await page.setViewportSize({ width, height });
     const responsiveButton = list.locator("[data-clipboard-text]:visible").first();
     await expect(responsiveButton, `${listId} identity remains visible at ${key} width`).toBeVisible();
-    await expect(responsiveButton.locator("xpath=ancestor::*[contains(@class,'ax-data-table-identity')][1]")).toContainText(exactId);
+    const responsiveIdentity = responsiveButton.locator("xpath=ancestor::*[contains(@class,'ax-data-table-identity')][1]");
+    await expect(responsiveIdentity).toContainText(exactId);
+    await expect(responsiveIdentity.locator("[data-clipboard-text]")).toHaveCount(1);
     const responsiveBox = await responsiveButton.boundingBox();
     expect(responsiveBox?.height, `${listId} copy target height at ${key} width`).toBeGreaterThanOrEqual(44);
     expect(responsiveBox?.width, `${listId} copy target width at ${key} width`).toBeGreaterThanOrEqual(44);
@@ -127,6 +130,7 @@ async function capture(page, lane, route, scenario, assets, checks) {
 }
 
 async function captureMatrix(page, lane, route, scenario, assets, checks = {}) {
+  const originalViewport = page.viewportSize();
   for (const [width, height, size] of [[1280, 900, "wide"], [320, 820, "narrow"]]) {
     await page.setViewportSize({ width, height });
     for (const theme of ["light", "dark"]) {
@@ -134,6 +138,7 @@ async function captureMatrix(page, lane, route, scenario, assets, checks = {}) {
       await capture(page, lane, route, `${scenario}-${size}-${theme}`, assets, checks);
     }
   }
+  if (originalViewport) await page.setViewportSize(originalViewport);
 }
 
 ordinaryTest("@phase246-current-ordinary current invoices toolbar and payment/coupon/event identities", async ({ page }) => {

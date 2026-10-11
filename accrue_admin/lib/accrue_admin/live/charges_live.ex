@@ -153,9 +153,8 @@ defmodule AccrueAdmin.Live.ChargesLive do
             %{label: "Fees", render: &fee_summary/1},
             %{label: "Billing signals", render: &billing_signals_cell/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&payment_identity_cell(&1, @admin_mount_path, @current_owner_scope)}
           card_fields={[
-            %{label: "Customer", render: &customer_label/1},
             %{label: "Status", render: &status_summary/1},
             %{label: "Amount", render: &amount_summary/1},
             %{label: "Fees", render: &fee_summary/1},
@@ -287,7 +286,6 @@ defmodule AccrueAdmin.Live.ChargesLive do
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
   defp status_summary(row), do: humanize(row.status)
-  defp card_title(row), do: row.processor_id || row.id
 
   defp amount_summary(row) do
     format_money(row.amount_cents, row.currency)

@@ -161,7 +161,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
             %{label: "Local platform fee override", render: &override_summary(&1, @current_owner_scope)},
             %{label: Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&account_link(&1, @admin_mount_path, @current_owner_scope, @params)}
           card_fields={[
             %{label: Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
             %{label: "Last stored Stripe snapshot readiness", render: &readiness_summary(&1, @current_owner_scope)},
@@ -588,8 +588,6 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       row.email || Copy.connect_accounts_status_no_email()
     end
   end
-
-  defp card_title(row), do: row.stripe_account_id || row.id
 
   defp has_override?(account) do
     account

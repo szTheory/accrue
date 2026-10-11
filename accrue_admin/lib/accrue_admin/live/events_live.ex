@@ -164,7 +164,7 @@ defmodule AccrueAdmin.Live.EventsLive do
             %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
             %{label: Copy.billing_events_table_column_when(), render: &when_summary/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&event_cell(&1, @admin_mount_path, @current_owner_scope, @params)}
           card_fields={[
             %{
               label: Copy.billing_events_table_column_subject(),
@@ -451,7 +451,6 @@ defmodule AccrueAdmin.Live.EventsLive do
       <:primary>
         <.link href={@href} class="ax-link">
           <span><%= @label %></span>
-          <small :if={is_binary(@event_key) and @event_key != ""} class="ax-muted"><%= @event_key %></small>
         </.link>
       </:primary>
       <:secondary :if={is_binary(@event_key) and @event_key != ""}>
@@ -497,16 +496,6 @@ defmodule AccrueAdmin.Live.EventsLive do
   defp webhook_source_summary(%{caused_by_webhook_event_id: webhook_id}), do: webhook_id
 
   defp when_summary(row), do: format_datetime(row.inserted_at)
-
-  defp card_title(row) do
-    label = Copy.billing_event_label(row.type)
-
-    if is_binary(row.type) and row.type != "" do
-      "#{label} (#{row.type})"
-    else
-      label
-    end
-  end
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 

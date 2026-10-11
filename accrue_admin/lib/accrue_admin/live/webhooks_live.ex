@@ -630,10 +630,9 @@ defmodule AccrueAdmin.Live.WebhooksLive do
             %{label: "Endpoint", render: &endpoint_summary/1},
             %{label: "Received", render: &received_summary/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&webhook_link(&1, @admin_mount_path, @current_owner_scope)}
           card_fields={[
             %{label: "Status", render: &status_summary/1},
-            %{id: :type, label: "Type"},
             %{label: "Endpoint", render: &endpoint_summary/1},
             %{label: "Received", render: &received_summary/1}
           ]}
@@ -950,8 +949,6 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     escaped = text |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
     Phoenix.HTML.raw(~s(<span class="ax-body">#{escaped}</span>))
   end
-
-  defp card_title(row), do: row.processor_event_id || row.id
 
   defp mode_label(true), do: "live"
   defp mode_label(false), do: "test"

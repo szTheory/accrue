@@ -177,7 +177,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
             %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary/1},
             %{label: Copy.coupon_table_column_redemptions(), render: &redemption_summary/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&coupon_link(&1, @admin_mount_path, @current_owner_scope, @params)}
           card_fields={[
             %{label: Copy.coupon_table_column_status(), render: &status_summary/1},
             %{label: Copy.coupon_table_column_discount(), render: &discount_summary/1},
@@ -294,8 +294,6 @@ defmodule AccrueAdmin.Live.CouponsLive do
 
   defp redeem_by_summary(%{redeem_by: %DateTime{} = value}), do: format_datetime(value)
   defp redeem_by_summary(_row), do: Copy.coupon_redeem_by_no_expiry()
-
-  defp card_title(row), do: coupon_label(row)
 
   defp coupon_filter_fields do
     [
