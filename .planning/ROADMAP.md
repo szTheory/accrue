@@ -50,7 +50,18 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
   2. For targeted completed, failed, blocked, and unknown outcomes, an operator can tell what the available evidence confirms, whether the requested action took effect, and which supported next step is available, without being shown an invented cause. (STATE-01)
   3. Where a human-readable event or state label appears, an operator can still find the exact event key and relevant record identifiers and timestamps at the point of investigation. (EVID-01)
   4. Across targeted existing Admin screens, an operator encounters consistent repeated headings and action names, and each link or control accurately describes its destination or effect. (CONS-01)
-**Plans**: TBD
+
+**Plans**: 3 plans
+Plans:
+**Wave 1**
+- [ ] 244-01-PLAN.md — Confirm mounted candidates and prove Home-to-event label and evidence path.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 244-02-PLAN.md — Carry shared meaning and exact evidence through event and related activity views.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 244-03-PLAN.md — Bind outcome and recovery language to durable facts and confirm rendered effects.
+
 **UI hint**: yes
 
 ## Progress
