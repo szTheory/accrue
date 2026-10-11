@@ -157,6 +157,79 @@ defmodule AccrueAdmin.DashboardLiveTest do
              ~r/href="\/billing\?org=home-org"[^>]*class="ax-sidebar-link ax-sidebar-link-active"/
   end
 
+  test "organization Home keeps the activity empty state distinct from scoped destinations", %{conn: conn} do
+    org_id = Ecto.UUID.generate()
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: org_id,
+        active_organization_slug: "empty-home-org",
+        admin_organization_ids: [org_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing?org=empty-home-org")
+
+    assert html =~ "No recent audit activity in this scope."
+    assert html =~ ~s(href="/billing/events?org=empty-home-org")
+    refute html =~ "Open event"
+    refute html =~ "Customer updated"
+  end
+
+  test "organization Home keeps multiple activity rows attached to their scoped event records", %{
+    conn: conn
+  } do
+    org_id = Ecto.UUID.generate()
+    first_customer = customer_for_org(org_id)
+
+    {:ok, first_event} =
+      Events.record(%{
+        type: "customer.updated",
+        subject_type: "Customer",
+        subject_id: first_customer.id,
+        actor_type: "admin",
+        actor_id: "admin_1"
+      })
+
+    {:ok, second_event} =
+      Events.record(%{
+        type: "customer.local_updated",
+        subject_type: "Customer",
+        subject_id: first_customer.id,
+        actor_type: "admin",
+        actor_id: "admin_1"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: org_id,
+        active_organization_slug: "many-home-org",
+        admin_organization_ids: [org_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing?org=many-home-org")
+
+    rows = html |> Floki.parse_fragment!() |> Floki.find(".ax-timeline-item")
+    assert length(rows) == 2
+
+    assert Enum.any?(rows, fn row ->
+             text = Floki.text(row)
+             href = row |> Floki.find("a.ax-timeline-link") |> Floki.attribute("href")
+
+             text =~ "Customer updated" and text =~ first_customer.id and
+               href == ["/billing/events/#{first_event.id}?org=many-home-org"]
+           end)
+
+    assert Enum.any?(rows, fn row ->
+             text = Floki.text(row)
+             href = row |> Floki.find("a.ax-timeline-link") |> Floki.attribute("href")
+
+             text =~ "Customer record updated locally" and text =~ first_customer.id and
+               href == ["/billing/events/#{second_event.id}?org=many-home-org"]
+           end)
+  end
+
   defp customer_for_org(org_id) do
     %{customer: customer} =
       Factory.customer(%{

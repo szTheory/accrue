@@ -233,6 +233,77 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "Dead"
   end
 
+  test "empty webhook activity keeps attempt and derived-event collections distinct", %{conn: conn} do
+    webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_empty_activity",
+        type: "invoice.payment_failed",
+        status: :dead
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    assert html =~ "Open Activity to load dispatch attempts and derived ledger rows for this webhook."
+
+    html = render_click(element(view, "[data-ax-lazy-activity]"))
+
+    assert html =~ "Webhook attempt history"
+    assert html =~ "No dispatch attempts recorded yet"
+    assert html =~ "Derived events"
+    assert html =~ "No derived event rows linked to this webhook yet"
+    refute html =~ "Inspect event evidence"
+  end
+
+  test "multiple derived activity rows retain each label, evidence, and event destination", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    customer = insert_customer(%{processor_id: "cus_many_related_events"})
+
+    {:ok, first_event} =
+      Events.record(%{
+        type: "customer.updated",
+        subject_type: "Customer",
+        subject_id: customer.id,
+        actor_type: "webhook",
+        actor_id: webhook.processor_event_id,
+        caused_by_webhook_event_id: webhook.id
+      })
+
+    {:ok, second_event} =
+      Events.record(%{
+        type: "customer.local_updated",
+        subject_type: "Customer",
+        subject_id: customer.id,
+        actor_type: "webhook",
+        actor_id: webhook.processor_event_id,
+        caused_by_webhook_event_id: webhook.id
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    html = render_click(element(view, "[data-ax-lazy-activity]"))
+
+    rows =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find("[aria-label='Derived events'] .ax-timeline-item")
+
+    assert length(rows) == 3
+
+    for {event, label} <- [
+          {first_event, "Customer updated"},
+          {second_event, "Customer record updated locally"}
+        ] do
+      row = Enum.find(rows, &(Floki.text(&1) =~ "event ##{event.id}"))
+      assert row
+      assert Floki.text(row) =~ label
+      assert Floki.text(row) =~ "Stored event key: #{event.type}"
+      assert Floki.attribute(Floki.find(row, "a.ax-timeline-link"), "href") ==
+               ["/billing/events/#{event.id}"]
+    end
+  end
+
   test "WebhookLive Related card renders event links pointing to /events/:id", %{
     conn: conn,
     webhook: webhook

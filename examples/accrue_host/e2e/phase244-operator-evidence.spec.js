@@ -337,6 +337,59 @@ test("Phase 244 webhook activity exposes exact related event evidence @phase244-
 test.describe("Phase 244 webhook activity on touch viewport", () => {
   test.use({ viewport: { width: 320, height: 800 }, isMobile: true, hasTouch: true });
 
+  test("Phase 244 event detail keeps exact recorded time readable at 320px @phase244-mobile", async ({ page, sandboxId }, testInfo) => {
+    const fixture = readFixture();
+    const eventId = seedCustomerUpdatedEvent(fixture);
+    expect(eventId).toMatch(/^\d+$/);
+
+    await login(page, fixture, fixture.admin_email, sandboxId);
+    await page.goto("/app/billing");
+    await waitForLiveView(page);
+    await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
+    await waitForLiveView(page);
+    await page.goto(`/admin/events/${eventId}?${orgQuery(fixture)}`, { waitUntil: "domcontentloaded" });
+    await waitForLiveView(page);
+
+    await expect(page.getByText("customer.updated", { exact: true }).first()).toBeVisible();
+    const recordedField = page
+      .locator("dl.ax-field-list .ax-field")
+      .filter({ has: page.locator("dt.ax-field-label", { hasText: /^Recorded$/ }) })
+      .locator("dd.ax-field-value");
+    await expect(recordedField).toHaveText("2026-10-10T23:59:59.123456Z");
+    await expect(recordedField).toBeVisible();
+
+    const dimensions = await page.evaluate(() => {
+      const value = document.querySelector("dl.ax-field-list .ax-field dd.ax-field-value");
+      return {
+        viewport: document.documentElement.clientWidth,
+        document: document.documentElement.scrollWidth,
+        valueWidth: value?.clientWidth ?? 0,
+        valueScrollWidth: value?.scrollWidth ?? 0
+      };
+    });
+    expect(dimensions.viewport).toBe(320);
+    expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport);
+    expect(dimensions.valueWidth).toBeGreaterThan(0);
+    expect(dimensions.valueScrollWidth).toBeLessThanOrEqual(dimensions.valueWidth);
+
+    const assets = await captureAdminAssets(page);
+    const evidence = {
+      checkoutHead: execFileSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).trim(),
+      ownerSpecSha256: sha256(fs.readFileSync(__filename)),
+      fixture: "disposable HOST-BROWSER-VERIFY01 fixture; scoped customer.updated event",
+      route: page.url(),
+      viewport: page.viewportSize(),
+      exactRecordedTime: await recordedField.textContent(),
+      dimensions,
+      assets
+    };
+    console.log(`[phase244-event-mobile-evidence] ${JSON.stringify(evidence)}`);
+    await testInfo.attach("phase244-event-mobile-evidence.json", {
+      body: Buffer.from(JSON.stringify(evidence, null, 2)),
+      contentType: "application/json"
+    });
+  });
+
   test("Phase 244 webhook activity disclosure works by touch @phase244-mobile", async ({ page, sandboxId }, testInfo) => {
     await assertRelatedWebhookEvidence(page, readFixture(), sandboxId, testInfo, "touch");
   });
