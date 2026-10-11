@@ -155,7 +155,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.recovery_index_subtitle() %></p>
           <p class="ax-body ax-recovery-coverage">
-            <%= Copy.recovery_data_coverage() %>
+            Historical data coverage begins 2024-01-01.
             <a
               href="https://hexdocs.pm/accrue/analytics.html#cutoff-semantics"
               target="_blank"

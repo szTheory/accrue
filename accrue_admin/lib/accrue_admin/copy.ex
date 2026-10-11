@@ -980,8 +980,6 @@ defmodule AccrueAdmin.Copy do
     do:
       "Review payment recovery activity, the dunning funnel, and subscriptions currently in dunning."
 
-  def recovery_data_coverage, do: "Historical data coverage begins 2024-01-01."
-
   def recovery_cutoff_link_label, do: "Cutoff-date semantics"
 
   def recovery_recovered_mrr_label(currency),
