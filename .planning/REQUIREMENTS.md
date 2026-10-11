@@ -8,7 +8,7 @@
 
 ### Operator Language
 
-- [ ] **LANG-01**: On targeted existing Admin screens, support and billing operators can understand the primary activity or state label without decoding an implementation key, and the label remains faithful to the underlying event or state.
+- [x] **LANG-01**: On targeted existing Admin screens, support and billing operators can understand the primary activity or state label without decoding an implementation key, and the label remains faithful to the underlying event or state.
 
 ### Outcomes and Recovery
 
@@ -16,11 +16,11 @@
 
 ### Investigation Evidence
 
-- [ ] **EVID-01**: When Admin presents a human-readable event or state label, operators can still access the exact event key and relevant record identifiers and timestamps for investigation.
+- [x] **EVID-01**: When Admin presents a human-readable event or state label, operators can still access the exact event key and relevant record identifiers and timestamps for investigation.
 
 ### Shared Language and Patterns
 
-- [ ] **CONS-01**: Across targeted existing Admin screens, repeated headings and action names use consistent operator-facing language, and each link or control accurately describes its destination or effect.
+- [x] **CONS-01**: Across targeted existing Admin screens, repeated headings and action names use consistent operator-facing language, and each link or control accurately describes its destination or effect.
 
 ## Milestone Guardrails
 
@@ -50,10 +50,10 @@ None promoted. Broader Admin information-architecture changes and new diagnosis 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LANG-01 | Phase 244 | Pending |
+| LANG-01 | Phase 244 | Complete |
 | STATE-01 | Phase 244 | Pending |
-| EVID-01 | Phase 244 | Pending |
-| CONS-01 | Phase 244 | Pending |
+| EVID-01 | Phase 244 | Complete |
+| CONS-01 | Phase 244 | Complete |
 
 **Coverage:**
 - v1 requirements: 4 total
