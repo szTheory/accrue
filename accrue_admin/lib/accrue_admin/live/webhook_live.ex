@@ -13,11 +13,11 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
   alias AccrueAdmin.Components.{
     AppShell,
-    Breadcrumbs,
     Detail,
     DetailDrawer,
     FlashGroup,
     JsonViewer,
+    PageHeader,
     RelatedResources,
     StepUpAuthModal,
     Timeline,
@@ -200,21 +200,18 @@ defmodule AccrueAdmin.Live.WebhookLive do
       active_organization_name={@active_organization_name}
     >
       <section class="ax-page" phx-window-keydown="step_up_escape" phx-key="escape">
-        <Breadcrumbs.breadcrumbs
-          items={[
-            %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope, %{})},
-            %{label: @return_destination.label, href: @return_destination.path},
-            %{label: breadcrumb_label(assigns)}
-          ]}
-        />
-
-        <Detail.summary_card eyebrow="Webhook inspector" title={webhook_heading(assigns)}>
-          <:facts :if={@webhook}>
-            <span><%= @webhook.processor_event_id %></span>
-            <span><%= humanize(@webhook.status) %></span>
-            <span>received <Timestamp.timestamp value={@webhook.received_at} id="webhook-received-at" /></span>
-          </:facts>
-        </Detail.summary_card>
+        <PageHeader.page_header
+          breadcrumbs={webhook_breadcrumbs(assigns)}
+          title={webhook_heading(assigns)}
+          component_group="webhook-detail-header"
+          data-role="webhook-page-header"
+        >
+          <:description :if={@webhook}>
+            <span><%= @webhook.type %></span>
+            <span aria-hidden="true"> · </span>
+            <span data-role="webhook-observed-status"><%= humanize(@webhook.status) %></span>
+          </:description>
+        </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={@flashes} />
 
@@ -224,11 +221,9 @@ defmodule AccrueAdmin.Live.WebhookLive do
           <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-webhook-read">Retry read</button>
         </div>
 
-        <Detail.summary_list :if={@webhook} rows={summary_rows(@webhook, @attempt_history, @derived_events)} />
-
         <section :if={@webhook} class="ax-detail-section" data-ax-action-band>
           <header class="ax-detail-section-head">
-            <h2 class="ax-detail-section-title">Replay delivery</h2>
+            <h2 class="ax-detail-section-title">Replay webhook</h2>
           </header>
 
           <div class="ax-stack">
@@ -241,36 +236,30 @@ defmodule AccrueAdmin.Live.WebhookLive do
               class="ax-button ax-button-primary"
               data-ax-primary-action
               data-role="replay-single"
-              aria-label={Copy.action_hidden_context("Replay", resource: "webhook delivery", object: @webhook.processor_event_id || @webhook.id)}
             >
               Replay webhook
             </button>
-
-            <p :if={!replayable?(@webhook)} class="ax-body" data-role="replay-blocked-copy">
-              <%= Copy.webhook_replay_unavailable_status(@webhook.status) %>
-            </p>
           </div>
         </section>
 
-        <Detail.detail_section :if={match?({:ambiguous, _}, @replay_state)} title={replay_heading(assigns)}>
+        <Detail.detail_section :if={match?({:ambiguous, _}, @replay_state)} title="Replay unavailable">
           <p class="ax-body" data-role="replay-blocked-copy">
             <%= ambiguous_replay_blocked() %>
           </p>
         </Detail.detail_section>
 
-        <section :if={@webhook} class="ax-stack-xl">
-          <Detail.detail_section title="Replay eligibility">
-            <Detail.detail_field_list fields={replay_eligibility_fields(@webhook, @current_owner_scope)} />
-          </Detail.detail_section>
-
-          <Detail.detail_section title="Dispatch / retry lifecycle">
-            <Detail.detail_field_list fields={dispatch_lifecycle_fields(@webhook, @attempt_history)} />
-          </Detail.detail_section>
-
-          <Detail.detail_section title="Derived ledger rows">
-            <Detail.detail_field_list fields={derived_ledger_fields(@derived_events, @admin_mount_path, @current_owner_scope)} />
-          </Detail.detail_section>
-        </section>
+        <Detail.summary_list
+          :if={@webhook}
+          rows={
+            summary_rows(
+              @webhook,
+              @attempt_history,
+              @derived_events,
+              @admin_mount_path,
+              @current_owner_scope
+            )
+          }
+        />
 
         <div :if={@webhook} data-ax-related-resources>
           <RelatedResources.related_resources items={@related_items} />
@@ -281,18 +270,28 @@ defmodule AccrueAdmin.Live.WebhookLive do
             <span class="ax-detail-section-title">Activity</span>
           </summary>
 
-          <section :if={@timeline_events_loaded?} class="ax-grid ax-grid-2">
-            <Timeline.timeline
-              label="Webhook attempt history"
-              empty_label="No dispatch attempts recorded yet"
-              items={attempt_timeline(@attempt_history)}
-            />
+          <section :if={@timeline_events_loaded?}>
+            <p
+              :if={@attempt_history == [] and @derived_events == []}
+              class="ax-body"
+              data-role="webhook-activity-empty"
+            >
+              No dispatch attempts or derived billing events are recorded for this webhook yet.
+            </p>
 
-            <Timeline.timeline
-              label="Derived events"
-              empty_label="No derived event rows linked to this webhook yet"
-              items={derived_event_timeline(@derived_events, @admin_mount_path, @current_owner_scope)}
-            />
+            <div :if={@attempt_history != [] or @derived_events != []} class="ax-grid ax-grid-2">
+              <Timeline.timeline
+                label="Webhook attempt history"
+                empty_label="No dispatch attempts recorded yet"
+                items={attempt_timeline(@attempt_history)}
+              />
+
+              <Timeline.timeline
+                label="Derived events"
+                empty_label="No derived event rows linked to this webhook yet"
+                items={derived_event_timeline(@derived_events, @admin_mount_path, @current_owner_scope)}
+              />
+            </div>
           </section>
 
           <p :if={!@timeline_events_loaded?} class="ax-body">
@@ -323,6 +322,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
           title={Copy.webhook_replay_drawer_title()}
           subtitle="Replay stays scoped to this delivery row and is confirmed with step-up authentication."
           close_event="cancel_replay"
+          close_label="Cancel replay"
         >
           <.replay_drawer_form
             webhook={@webhook}
@@ -472,14 +472,18 @@ defmodule AccrueAdmin.Live.WebhookLive do
     _error in DBConnection.ConnectionError -> :unavailable
   end
 
-  defp webhook_heading(%{webhook: nil}), do: "Webhook replay is unavailable"
-  defp webhook_heading(%{webhook: webhook}), do: webhook.type
+  defp webhook_heading(%{webhook: nil}), do: "Webhook unavailable"
+  defp webhook_heading(%{webhook: webhook}), do: webhook.processor_event_id || webhook.id
 
-  defp breadcrumb_label(%{webhook: nil}), do: "Replay unavailable"
-  defp breadcrumb_label(%{webhook: webhook}), do: webhook.processor_event_id || webhook.id
-
-  defp replay_heading(%{webhook: nil}), do: "Replay is unavailable"
-  defp replay_heading(%{webhook: _webhook}), do: "Replay delivery"
+  defp webhook_breadcrumbs(assigns) do
+    [
+      %{
+        label: "Dashboard",
+        href: scoped_mount_path(assigns.admin_mount_path, "", assigns.current_owner_scope, %{})
+      },
+      %{label: "Webhooks", href: assigns.return_destination.path}
+    ]
+  end
 
   defp replay_copy(%{webhook: nil, replay_state: :unavailable}),
     do: "Replay is unavailable while delivery history cannot be loaded. Retry the read first."
@@ -488,7 +492,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
   defp replay_copy(%{webhook: webhook}) do
     if replayable?(webhook) do
-      "Single replay calls the existing DLQ primitive directly and records an admin audit event for the operator action."
+      "Queues another delivery attempt. Queue acceptance does not confirm processing."
     else
       Copy.webhook_replay_unavailable_status(webhook.status)
     end
@@ -501,21 +505,24 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp replayable?(%WebhookEvent{status: status}), do: status in [:failed, :dead]
   defp replayable?(_webhook), do: false
 
-  defp summary_rows(webhook, attempts, derived_events) do
+  defp summary_rows(webhook, attempts, derived_events, mount_path, owner_scope) do
     [
-      %{label: "Status", value: humanize(webhook.status)},
-      %{label: "Processor event ID", value: webhook.processor_event_id || webhook.id},
-      %{label: "Endpoint / type", value: "#{humanize(webhook.endpoint)} / #{webhook.type}"},
+      %{label: "Endpoint", value: humanize(webhook.endpoint)},
       %{
         label: "Received / processed",
         value: timestamp_pair(webhook.received_at, webhook.processed_at, webhook.id)
       },
       %{label: "Verification", value: verification_summary(webhook)},
       %{label: "Attempts", value: Integer.to_string(length(attempts))},
+      %{
+        label: "Event feed",
+        value: events_href(mount_path, webhook.id, derived_events, owner_scope)
+      },
       %{label: "Livemode", value: mode_label(webhook.livemode)},
       %{label: "Failure", value: failure_summary(attempts)},
       %{label: "Derived event count", value: Integer.to_string(length(derived_events))}
     ]
+    |> Enum.reject(&is_nil(&1.value))
   end
 
   defp failure_summary(attempts) do
@@ -528,47 +535,8 @@ defmodule AccrueAdmin.Live.WebhookLive do
         end
 
       _ ->
-        "No recorded failure detail"
+        nil
     end
-  end
-
-  defp replay_eligibility_fields(webhook, owner_scope) do
-    [
-      %{label: "Replay state", value: replay_state_label(webhook)},
-      %{label: "Allowed statuses", value: "Failed, Dead"},
-      %{label: "Owner scope", value: owner_scope_label(owner_scope)}
-    ]
-  end
-
-  defp dispatch_lifecycle_fields(webhook, attempts) do
-    last_attempt = List.last(attempts)
-
-    [
-      %{label: "Endpoint", value: humanize(webhook.endpoint)},
-      %{
-        label: "Processed",
-        value: timestamp_value(webhook.processed_at, "webhook-processed-#{webhook.id}")
-      },
-      %{label: "Attempt count", value: Integer.to_string(length(attempts))},
-      %{label: "Last attempt", value: last_attempt_label(last_attempt)}
-    ]
-  end
-
-  defp derived_ledger_fields(events, mount_path, owner_scope) do
-    [
-      %{label: "Derived events", value: Integer.to_string(length(events))},
-      %{label: "First derived event", value: first_derived_event_label(events)},
-      %{
-        label: "Activity feed",
-        value: events_href(mount_path, source_webhook_id(events), owner_scope)
-      }
-    ]
-  end
-
-  defp replay_state_label(webhook) do
-    if replayable?(webhook),
-      do: "Replay available",
-      else: Copy.webhook_replay_unavailable_status(webhook.status)
   end
 
   defp owner_scope_label(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
@@ -577,29 +545,26 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp owner_scope_label(%{mode: :organization}), do: "Active organization"
   defp owner_scope_label(_owner_scope), do: "Global admin"
 
-  defp last_attempt_label(nil), do: Copy.resource_state_copy(:webhooks, :queue_empty).heading
+  defp events_href(mount_path, webhook_id, derived_events, owner_scope) do
+    source_id =
+      case derived_events do
+        [event | _events] -> event.caused_by_webhook_event_id || webhook_id
+        [] -> webhook_id
+      end
 
-  defp last_attempt_label(job) do
-    "Attempt #{job.attempt || 1}/#{job.max_attempts || 25} #{humanize(job.state || "available")}"
-  end
+    assigns = %{
+      href:
+        scoped_mount_path(mount_path, "/events", owner_scope, %{
+          "source_webhook_event_id" => source_id
+        })
+    }
 
-  defp first_derived_event_label([]), do: Copy.resource_state_copy(:events, :queue_empty).heading
-
-  defp first_derived_event_label([event | _events]) do
-    "#{event.type} for #{event.subject_type} #{event.subject_id}"
-  end
-
-  defp source_webhook_id([event | _events]), do: event.caused_by_webhook_event_id
-  defp source_webhook_id([]), do: nil
-
-  defp events_href(mount_path, nil, owner_scope) do
-    scoped_mount_path(mount_path, "/events", owner_scope, %{})
-  end
-
-  defp events_href(mount_path, webhook_id, owner_scope) do
-    scoped_mount_path(mount_path, "/events", owner_scope, %{
-      "source_webhook_event_id" => webhook_id
-    })
+    ~H"""
+    <a href={@href}>Open related events</a>
+    """
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Phoenix.HTML.raw()
   end
 
   defp execute_replay(socket, webhook_id) do
@@ -701,7 +666,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
           Confirm replay
         </button>
         <button type="button" phx-click="cancel_replay" class="ax-button ax-button-ghost">
-          Cancel
+          Cancel replay
         </button>
       </div>
     </section>
@@ -872,17 +837,6 @@ defmodule AccrueAdmin.Live.WebhookLive do
     ~H"""
     <span>Received <Timestamp.timestamp value={@received_at} id={"webhook-summary-received-#{@webhook_id}"} /></span>
     <span> · Processed <Timestamp.timestamp value={@processed_at} id={"webhook-summary-processed-#{@webhook_id}"} /></span>
-    """
-    |> Phoenix.HTML.Safe.to_iodata()
-    |> IO.iodata_to_binary()
-    |> Phoenix.HTML.raw()
-  end
-
-  defp timestamp_value(value, id) do
-    assigns = %{value: value, id: id}
-
-    ~H"""
-    <Timestamp.timestamp value={@value} id={@id} />
     """
     |> Phoenix.HTML.Safe.to_iodata()
     |> IO.iodata_to_binary()

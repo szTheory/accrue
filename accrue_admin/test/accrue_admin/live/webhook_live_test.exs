@@ -101,6 +101,14 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
     assert heading_count(html, "h1") == 1
+    assert has_element?(view, "[data-role='webhook-page-header']")
+    assert has_element?(view, "h1", webhook.processor_event_id)
+    assert has_element?(view, "[aria-label='Breadcrumb'] a", "Webhooks")
+    refute html =~ "Webhook inspector"
+    refute html =~ "Processor event ID"
+    refute html =~ "Replay eligibility"
+    refute html =~ "Dispatch / retry lifecycle"
+    refute html =~ "Derived ledger rows"
     assert data_attr_count(html, "data-ax-summary-list") == 1
     assert data_attr_count(html, "data-ax-action-band") == 1
     assert data_attr_count(html, "data-ax-primary-action") == 1
@@ -110,9 +118,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert length(Regex.scan(~r/phx-hook="PreserveDisclosure"/, html)) == 2
 
     for label <- [
-          "Status",
-          "Processor event ID",
-          "Endpoint / type",
+          "Endpoint",
           "Received / processed",
           "Verification",
           "Attempts",
@@ -126,21 +132,18 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "processor timeout"
     refute html =~ "data-role=\"webhook-payload\""
 
-    for heading <- [
-          "Replay eligibility",
-          "Dispatch / retry lifecycle",
-          "Derived ledger rows"
-        ] do
-      assert html =~ heading
-    end
-
     assert has_element?(view, "[data-ax-primary-action]", "Replay webhook")
+
+    assert html =~
+             "Queues another delivery attempt. Queue acceptance does not confirm processing."
+
     refute has_element?(view, "[data-role='replay-confirm']")
 
     html = render_click(element(view, "[data-ax-primary-action]", "Replay webhook"))
 
     assert has_element?(view, "[data-ax-action-drawer-form][data-role='replay-confirm']")
     assert html =~ "Confirm replay"
+    assert html =~ "Cancel replay"
 
     html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm replay"))
     assert html =~ Copy.step_up_title()
@@ -179,14 +182,15 @@ defmodule AccrueAdmin.WebhookLiveTest do
     refute html =~ "ax-kpi-grid"
 
     assert html =~ "Signature verification passed"
-    assert html =~ "Attempt 3/25"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
-    assert length(Floki.find(Floki.parse_document!(html), "[data-time-display]")) >= 3
+    assert length(Floki.find(Floki.parse_document!(html), "[data-time-display]")) >= 1
 
     activity_html = render_click(element(view, "[data-ax-lazy-activity]"))
     assert activity_html =~ "Webhook attempt history"
     assert activity_html =~ "data-time-display"
+    assert length(Floki.find(Floki.parse_document!(activity_html), "[data-time-display]")) >= 2
+    assert activity_html =~ "Attempt 3/25"
+    assert activity_html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
 
     html = render_click(element(view, "[data-ax-lazy-json]"))
     assert html =~ "cus_123"
@@ -239,7 +243,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "Dead"
   end
 
-  test "empty webhook activity keeps attempt and derived-event collections distinct", %{
+  test "empty webhook activity has one truthful empty state", %{
     conn: conn
   } do
     webhook =
@@ -257,10 +261,11 @@ defmodule AccrueAdmin.WebhookLiveTest do
 
     html = render_click(element(view, "[data-ax-lazy-activity]"))
 
-    assert html =~ "Webhook attempt history"
-    assert html =~ "No dispatch attempts recorded yet"
-    assert html =~ "Derived events"
-    assert html =~ "No derived event rows linked to this webhook yet"
+    assert html =~
+             "No dispatch attempts or derived billing events are recorded for this webhook yet."
+
+    refute html =~ "No dispatch attempts recorded yet"
+    refute html =~ "No derived event rows linked to this webhook yet"
     refute html =~ "Inspect event evidence"
   end
 
@@ -370,7 +375,9 @@ defmodule AccrueAdmin.WebhookLiveTest do
     Application.put_env(:accrue_admin, :expected_step_up_subject_id, webhook.id)
 
     html = render_click(element(view, "[data-ax-primary-action]", "Replay webhook"))
-    assert html =~ "requeue the webhook delivery and record an admin audit event"
+
+    assert html =~
+             "This will requeue the webhook delivery and record an admin audit event. Confirm replay."
 
     html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm replay"))
     assert html =~ Copy.step_up_title()
@@ -655,11 +662,11 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
     assert html =~ "data-ax-lazy-activity"
-    assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
 
     html = render_click(element(view, "[data-ax-lazy-activity]"))
     assert html =~ "Webhook attempt history"
     assert html =~ "Derived events"
+    assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
   end
 
   test "webhook loader distinguishes in-scope, out-of-scope, and ambiguous ownership" do
