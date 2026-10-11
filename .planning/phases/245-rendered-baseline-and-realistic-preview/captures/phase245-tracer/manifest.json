@@ -1,8 +1,8 @@
 {
   "phase": "245-rendered-baseline-and-realistic-preview",
   "capture": "authenticated invoice detail rendered from the isolated ordinary Fake preview",
-  "captured_at": "2026-10-11T13:15:40.595Z",
-  "source_revision": "7d6b89a8f50c5710a7489474b2528024b00cf862",
+  "captured_at": "2026-10-11T13:17:21.755Z",
+  "source_revision": "c9184ef6ba9f1240583d79719f3cf1a310ff191f",
   "source_digests": {
     "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "4fdf3dd0df97fd73195e38972cbf1e016b696024fa5949081fd0b5db012416f8",
     "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "04df8cd5a622f8c483682198c2a37cb1c21f4c28487081ce04118c872554df92",
