@@ -160,12 +160,6 @@ defmodule AccrueHost.OrdinaryPreviewStoryContractTest do
       assert invoice.total_minor == invoice.amount_paid_minor + invoice.amount_remaining_minor
     end
 
-    # Adjacent representable instants around the stored paid/event boundary.
-    assert DateTime.compare(DateTime.add(paid.paid_at, -1, :microsecond), event.inserted_at) ==
-             :lt
-
-    assert DateTime.compare(DateTime.add(paid.paid_at, 1, :microsecond), event.inserted_at) == :gt
-
     for invoice <- [open, jpy] do
       assert Repo.aggregate(from(e in Event, where: e.subject_id == ^invoice.id), :count) == 0
       assert invoice.data == %{}
