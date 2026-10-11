@@ -301,8 +301,8 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     [
       %{
         id: :q,
-        label: Copy.promotion_codes_filter_label_search(),
-        placeholder: Copy.promotion_codes_filter_label_search()
+        label: "Search promotion codes",
+        placeholder: "Code, processor ID, or coupon name"
       },
       %{
         id: :active,
@@ -316,8 +316,9 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
       },
       %{
         id: :coupon_id,
-        label: Copy.promotion_codes_filter_label_coupon_id(),
-        placeholder: Copy.promotion_codes_filter_label_coupon_id()
+        label: "Exact associated Coupon ID",
+        placeholder: "Exact associated Coupon ID",
+        secondary: true
       }
     ]
   end

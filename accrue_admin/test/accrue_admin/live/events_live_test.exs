@@ -121,6 +121,38 @@ defmodule AccrueAdmin.EventsLiveTest do
     refute html =~ ">By actor<"
   end
 
+  test "event general search stays distinct from exact source ID and accepts custom keys", %{
+    conn: conn,
+    webhook_id: webhook_id
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, search_html} =
+             live(conn, "/billing/events?q=invoice.payment_failed.in_scope")
+
+    search = Floki.parse_document!(search_html) |> Floki.find("#events-filter-q") |> hd()
+    assert Floki.attribute(search, "placeholder") == ["Event type, subject ID, or actor ID"]
+    assert search_html =~ "invoice.payment_failed.in_scope"
+    refute search_html =~ "invoice.payment_failed.out_of_scope"
+
+    assert {:ok, _view, source_html} =
+             live(conn, "/billing/events?source_webhook_event_id=#{webhook_id}")
+
+    source =
+      Floki.parse_document!(source_html)
+      |> Floki.find("#events-filter-source_webhook_event_id")
+      |> hd()
+
+    assert Floki.attribute(source, "value") == [webhook_id]
+    assert source_html =~ "invoice.payment_failed.in_scope"
+
+    custom_type = "future.event.key"
+    assert {:ok, _view, custom_html} = live(conn, "/billing/events?type=#{custom_type}")
+    type = Floki.parse_document!(custom_html) |> Floki.find("#events-filter-type") |> hd()
+    assert Floki.attribute(type, "value") == [custom_type]
+    assert custom_html =~ Copy.events_list_filtered_empty_title()
+  end
+
   test "events clear-all drops filters and preserves organization scope", %{conn: conn} do
     org_id = Ecto.UUID.generate()
 

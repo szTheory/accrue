@@ -270,7 +270,11 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   defp customer_filter_fields(owner_type_type, owner_type_options) do
     [
-      %{id: :q, label: "Search", placeholder: "Search customers"},
+      %{
+        id: :q,
+        label: "Search customers",
+        placeholder: "Email, name, owner ID, or processor ID"
+      },
       %{
         id: :owner_type,
         label: "Owner type",

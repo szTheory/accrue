@@ -250,13 +250,22 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   defp event_filter_fields do
     [
-      %{id: :q, label: Copy.billing_events_filter_label_search()},
-      %{id: :type, label: Copy.billing_events_filter_label_event_type()},
-      %{id: :actor_type, label: Copy.billing_events_filter_label_actor_type()},
-      %{id: :subject_type, label: Copy.billing_events_filter_label_subject_type()},
+      %{
+        id: :q,
+        label: "Search events",
+        placeholder: "Event type, subject ID, or actor ID"
+      },
+      %{id: :type, label: Copy.billing_events_filter_label_event_type(), secondary: true},
+      %{id: :actor_type, label: Copy.billing_events_filter_label_actor_type(), secondary: true},
+      %{
+        id: :subject_type,
+        label: Copy.billing_events_filter_label_subject_type(),
+        secondary: true
+      },
       %{
         id: :source_webhook_event_id,
-        label: Copy.billing_events_filter_label_source_webhook_id()
+        label: "Source webhook event ID",
+        secondary: true
       }
     ]
   end

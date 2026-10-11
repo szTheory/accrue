@@ -108,6 +108,25 @@ defmodule AccrueAdmin.CustomersLiveTest do
     assert html =~ "/billing/customers/"
   end
 
+  test "customer search guidance matches email, name, owner ID, and processor ID predicates", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live_list(conn, "/billing/customers?q=team_001")
+    parsed = Floki.parse_document!(html)
+    search = Floki.find(parsed, "#customers-filter-q") |> hd()
+
+    assert Floki.attribute(search, "placeholder") ==
+             ["Email, name, owner ID, or processor ID"]
+
+    assert html =~ "Captain Customer"
+    refute html =~ "Other Customer"
+
+    assert {:ok, _view, exact_only_html} = live_list(conn, "/billing/customers?q=pm_team_default")
+    refute exact_only_html =~ "Captain Customer"
+    refute exact_only_html =~ "Other Customer"
+  end
+
   test "renders Copy-backed empty index when search excludes all customers", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
