@@ -50,6 +50,20 @@ defmodule AccrueAdmin.Components.FilterChipBarTest do
     assert html =~ "Clear"
   end
 
+  test "renders a touch-sized X removal link with explicit accessible name" do
+    html =
+      render_component(&FilterChipBar.filter_chip_bar/1,
+        items: [%{id: :status, label: "Status", value: "Open", active: true, remove_href: "/billing/invoices?org=acme&view=all&q=Atelier+Caf%C3%A9"}],
+        label: "Invoice filters"
+      )
+
+    assert html =~ ~s(aria-label="Remove Status Open filter")
+    assert html =~ ~s(class="ax-filter-chip-action")
+    assert html =~ "×"
+    refute html =~ ">Clear</a>"
+    assert html =~ "Caf%C3%A9"
+  end
+
   test "emits Phase 191 focus anchors for active chip apply and clear actions" do
     html =
       render_component(&FilterChipBar.filter_chip_bar/1,

@@ -534,6 +534,33 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert length(Floki.find(document, "[data-role='row-count']")) == 0
   end
 
+  test "invoice view is separate from labeled constraints and remove links retain scope and query", %{conn: conn} do
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: Ecto.UUID.generate(),
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: []
+      )
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/invoices?org=allowed-org&view=all&status=open&q=Atelier+Caf%C3%A9")
+
+    document = Floki.parse_document!(html)
+
+    assert length(Floki.find(document, "label[for='invoices-status']")) == 1
+    assert length(Floki.find(document, "[data-ax-view-nav] a[aria-current='page']")) == 1
+    refute Floki.find(document, "[data-ax-filter-chips] [data-filter='view_all']") != []
+    assert Floki.text(Floki.find(document, "[data-ax-filter-chips]")) =~ "Atelier Café"
+
+    remove_links = Floki.find(document, "[data-ax-filter-chips] a[aria-label^='Remove']")
+    assert Enum.any?(remove_links, &(Floki.attribute(&1, "href") |> hd() =~ "org=allowed-org"))
+    assert Enum.any?(remove_links, &(Floki.attribute(&1, "href") |> hd() =~ "view=all"))
+    assert Enum.any?(remove_links, &(Floki.attribute(&1, "href") |> hd() =~ "q=Atelier+Caf%C3%A9"))
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-clear-all]")) == 1
+  end
+
   test "invoice clear-all drops filters and preserves organization scope", %{conn: conn} do
     org_id = Ecto.UUID.generate()
     customer_filter_id = Ecto.UUID.generate()
