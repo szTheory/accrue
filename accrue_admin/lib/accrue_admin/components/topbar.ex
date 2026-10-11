@@ -17,6 +17,14 @@ defmodule AccrueAdmin.Components.Topbar do
       <a href="#main-content" class="ax-skip-link">Skip to content</a>
 
       <div class="ax-topbar-actions">
+        <div class="ax-time-preference">
+          <label for="admin-time-preference">Time display</label>
+          <select id="admin-time-preference" data-time-preference aria-label="Timestamp display timezone">
+            <option value="local">Local</option>
+            <option value="utc">UTC</option>
+          </select>
+        </div>
+
         <button
           id="search-trigger"
           type="button"

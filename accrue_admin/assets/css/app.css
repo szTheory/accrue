@@ -6924,6 +6924,39 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   border-color: var(--ax-border-strong);
 }
 
+.ax-time-preference {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-xs);
+}
+
+.ax-time-preference label {
+  color: var(--ax-muted);
+  font: var(--ax-type-label-sm-font);
+}
+
+.ax-time-preference select {
+  min-block-size: 44px;
+  padding-inline: var(--ax-space-sm);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-sunken);
+  color: inherit;
+}
+
+.ax-timestamp-copy-fallback {
+  display: block;
+  display: block;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+  user-select: text;
+  font-family: var(--ax-type-code-font);
+}
+
+.ax-timestamp-copy-fallback[hidden] {
+  display: none;
+}
+
 .ax-id-badge-text {
   font: var(--ax-type-code-xs-font);
   min-width: 0;

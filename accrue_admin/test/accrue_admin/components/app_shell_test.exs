@@ -37,6 +37,10 @@ defmodule AccrueAdmin.Components.AppShellTest do
     refute html =~ "ax-topbar-brand-chip"
     refute html =~ ~s(<h1 class="ax-heading">)
     refute html =~ "Internal billing operations"
+    assert html =~ ~s(<label for="admin-time-preference">Time display</label>)
+    assert html =~ ~s(<select id="admin-time-preference" data-time-preference)
+    assert html =~ ~s(value="local">Local</option>)
+    assert html =~ ~s(value="utc">UTC</option>)
   end
 
   test "renders Active organization banner when name assign is present" do
@@ -213,6 +217,7 @@ defmodule AccrueAdmin.Components.AppShellTest do
     assert html =~ ~s(href="/ops/billing/customers?org=acme-corp")
     assert html =~ "Active organization"
     assert html =~ "Acme Corp"
+
     assert html =~
              ~r/href="\/ops\/billing\?org=acme-corp"[^>]*class="ax-sidebar-link ax-sidebar-link-active"/
   end
