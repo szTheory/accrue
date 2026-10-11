@@ -15,7 +15,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     FlashGroup,
     PageHeader,
     StatStrip,
-    StepUpAuthModal
+    StepUpAuthModal,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -628,13 +629,13 @@ defmodule AccrueAdmin.Live.WebhooksLive do
             %{id: :type, label: "Type"},
             %{label: "Status", render: &status_summary/1},
             %{label: "Endpoint", render: &endpoint_summary/1},
-            %{label: "Received", render: &received_summary/1}
+            %{label: "Received", render: fn row -> received_summary(row, :table) end}
           ]}
           card_title={&webhook_link(&1, @admin_mount_path, @current_owner_scope, :card)}
           card_fields={[
             %{label: "Status", render: &status_summary/1},
             %{label: "Endpoint", render: &endpoint_summary/1},
-            %{label: "Received", render: &received_summary/1}
+            %{label: "Received", render: fn row -> received_summary(row, :card) end}
           ]}
           filter_fields={webhook_filter_fields(@current_owner_scope)}
           empty_title={empty_title(@params, @summary)}
@@ -945,11 +946,18 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     Phoenix.HTML.raw(~s(<span class="ax-body">#{escaped}</span>))
   end
 
-  defp received_summary(row) do
-    text = format_datetime(row.received_at)
-    escaped = text |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    Phoenix.HTML.raw(~s(<span class="ax-body">#{escaped}</span>))
+  defp received_summary(%{received_at: %DateTime{} = value} = row, surface) do
+    assigns = %{value: value, id: "webhook-#{surface}-received-#{row.id}"}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Phoenix.HTML.raw()
   end
+
+  defp received_summary(_row, _surface), do: "Unknown"
 
   defp mode_label(true), do: "live"
   defp mode_label(false), do: "test"
@@ -962,9 +970,6 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     |> String.split()
     |> Enum.map_join(" ", &String.capitalize/1)
   end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

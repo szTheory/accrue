@@ -16,7 +16,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     FlashGroup,
     IdBadge,
     PageHeader,
-    StatStrip
+    StatStrip,
+    Timestamp
   }
 
   alias AccrueAdmin.Components.StatusBadge
@@ -221,7 +222,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             },
             %{label: "State", render: &state_cell/1},
             %{label: "Plan / amount", render: &plan_amount_cell/1},
-            %{label: "Renews / ends", render: &time_cell/1},
+            %{label: "Renews / ends", render: fn row -> time_cell(row, :table) end},
             %{
               label: "Signals",
               render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
@@ -231,7 +232,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           card_fields={[
             %{label: "State", render: &state_cell/1},
             %{label: "Plan / amount", render: &plan_amount_cell/1},
-            %{label: "Renews / ends", render: &time_cell/1},
+            %{label: "Renews / ends", render: fn row -> time_cell(row, :card) end},
             %{
               label: "Signals",
               render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
@@ -447,24 +448,39 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     """)
   end
 
-  defp time_cell(%{ended_at: %DateTime{} = ended_at}), do: "Ended #{format_date(ended_at)}"
+  defp time_cell(%{ended_at: %DateTime{} = ended_at} = row, surface),
+    do: timestamp_cell("Ended", ended_at, row.id, surface)
 
-  defp time_cell(%{ended_at: ended_at}) when not is_nil(ended_at),
+  defp time_cell(%{ended_at: ended_at}, _surface) when not is_nil(ended_at),
     do: "Ended #{to_string(ended_at)}"
 
-  defp time_cell(%{cancel_at_period_end: true, current_period_end: %DateTime{} = ends_at}),
-    do: "Ends #{format_date(ends_at)}"
+  defp time_cell(
+         %{cancel_at_period_end: true, current_period_end: %DateTime{} = ends_at} = row,
+         surface
+       ),
+       do: timestamp_cell("Ends", ends_at, row.id, surface)
 
-  defp time_cell(%{cancel_at_period_end: true}),
+  defp time_cell(%{cancel_at_period_end: true}, _surface),
     do: "Cancellation scheduled · end date not shown"
 
-  defp time_cell(%{current_period_end: %DateTime{} = renews_at}),
-    do: "Renews #{format_date(renews_at)}"
+  defp time_cell(%{current_period_end: %DateTime{} = renews_at} = row, surface),
+    do: timestamp_cell("Renews", renews_at, row.id, surface)
 
-  defp time_cell(%{trial_end: %DateTime{} = trial_end}),
-    do: "Trial ends #{format_date(trial_end)}"
+  defp time_cell(%{trial_end: %DateTime{} = trial_end} = row, surface),
+    do: timestamp_cell("Trial ends", trial_end, row.id, surface)
 
-  defp time_cell(_row), do: "Renewal date not shown"
+  defp time_cell(_row, _surface), do: "Renewal date not shown"
+
+  defp timestamp_cell(label, value, row_id, surface) do
+    assigns = %{label: label, value: value, id: "subscription-#{surface}-time-#{row_id}"}
+
+    ~H"""
+    <span><%= @label %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Phoenix.HTML.raw()
+  end
 
   defp count(1, noun), do: "1 #{noun}"
   defp count(n, noun), do: "#{n} #{noun}s"
@@ -712,10 +728,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-
-  # Every caller guards %DateTime{} before calling (see time_cell/1), so a
-  # non-DateTime fallback clause is unreachable — dialyzer flags it (pattern_match_cov).
-  defp format_date(%DateTime{} = value), do: Calendar.strftime(value, "%b %-d, %Y")
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 

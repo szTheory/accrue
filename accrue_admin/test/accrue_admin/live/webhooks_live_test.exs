@@ -102,7 +102,13 @@ defmodule AccrueAdmin.WebhooksLiveTest do
              )
            ) == 1
 
-    assert length(Floki.find(card, "[data-clipboard-text]")) == 1
+    card_timestamp = Floki.find(card, "[data-time-display]")
+    assert length(card_timestamp) == 1
+    assert Floki.attribute(hd(card_timestamp), "data-iso") == ["2026-04-15T10:00:00.000000Z"]
+
+    row_timestamp = Floki.find(row, "[data-time-display]")
+    assert length(row_timestamp) == 1
+    assert Floki.attribute(hd(row_timestamp), "id") != Floki.attribute(hd(card_timestamp), "id")
   end
 
   test "bare webhooks route represents the Needs replay queue", %{conn: conn} do
