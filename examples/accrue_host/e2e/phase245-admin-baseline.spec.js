@@ -438,6 +438,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   await expect(searchDialog).toBeHidden();
   await page.goto(new URL(customerDetailURL, page.url()).pathname + new URL(customerDetailURL, page.url()).search);
   await expect(page).toHaveURL(/\/admin\/customers\/[0-9a-f-]+/);
+  await page.locator("[data-phx-main].phx-connected").waitFor({ timeout: 10_000 });
   const peerTabs = page.getByRole("navigation", { name: "Customer peer record sets" });
   const invoiceTab = peerTabs.getByRole("link", { name: /Invoices/ });
   await invoiceTab.click();
