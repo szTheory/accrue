@@ -41,7 +41,7 @@ key-files:
 key-decisions:
   - "Render webhook received_at in explicit UTC until the browser formats it with Intl and its resolved timezone."
   - "Keep the original UTC ISO string as the copy payload; never derive it from the browser-formatted Date."
-requirements-completed: [TIME-01]
+requirements-completed: []
 coverage:
   - id: D1
     description: "Mounted webhook received time renders UTC on the server, formats in the browser's resolved timezone, and copies the exact UTC ISO value by keyboard."
@@ -149,7 +149,7 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-The mounted timestamp path and its exact-copy contract are ready for the remaining Phase 247 plans. Those plans still own the other Phase 247 requirements; this summary completes only `TIME-01`.
+The mounted timestamp path and its exact-copy contract are ready for the remaining Phase 247 plans. Those plans still own the other Phase 247 requirements; this summary proves the TIME-01 tracer; its shared preference and remaining consumers await Plans 02/03/08 and final verification.
 
 ## Self-Check: PASSED
 
