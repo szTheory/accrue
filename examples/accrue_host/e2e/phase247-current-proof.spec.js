@@ -158,7 +158,6 @@ ordinaryTest("@phase247-current-ordinary invoice action review and recovery anal
       actionRoute = new URL(page.url()).pathname;
       const assets = await fetchAssets(page);
       await captureMatrix(page, "ordinary", actionRoute, "invoice-action-review", assets, {
-        authorization_scope: "ordinary host operator session",
         action_review_open: true,
         confirmation_not_submitted: true
       });
