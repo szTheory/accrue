@@ -436,7 +436,10 @@ test("Phase 244 duplicate event rows retain their own scoped destinations @phase
   for (const id of adversarial.ids.slice(0, 2)) {
     const row = derived.locator(".ax-timeline-item").filter({ hasText: `event #${id}` });
     await expect(row).toBeVisible();
-    await expect(row.locator(".ax-label")).toHaveText(adversarial.rawKey);
+    await expect(row.locator(".ax-label")).toHaveText("Billing event");
+    const evidenceDetails = row.locator("details.ax-timeline-details");
+    await evidenceDetails.locator("summary").click();
+    await expect(evidenceDetails.locator("pre")).toContainText(`Stored event key: ${adversarial.rawKey}`);
     const link = row.getByRole("link", { name: "Open event" });
     const href = await link.getAttribute("href");
     expect(new URL(href, page.url()).pathname).toBe(`/admin/events/${id}`);
@@ -538,8 +541,8 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
       await waitForLiveView(page);
       await page.goto(`/admin/webhooks/${fixture.webhook_id}?${orgQuery(fixture)}`);
       await waitForLiveView(page);
-      const heading = page.getByRole("heading", { name: longDeliveryKey, exact: true });
-      await expect(heading).toBeVisible();
+      const deliveryKeyField = page.locator("dd.ax-summary-list-value").filter({ hasText: longDeliveryKey });
+      await expect(deliveryKeyField).toBeVisible();
       const activity = page.locator("details[data-ax-lazy-activity]").first();
       await activity.locator("summary").tap();
       const derived = activity.locator("section[aria-label='Derived events']");
