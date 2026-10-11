@@ -1,5 +1,7 @@
 defmodule AccrueAdmin.DataTableTest do
   use AccrueAdmin.LiveCase, async: false
+  use Phoenix.Component
+  import Phoenix.LiveViewTest
 
   alias AccrueAdmin.Components.DataTable
   alias AccrueAdmin.Queries.Cursor
@@ -622,6 +624,26 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ ~s(data-role="clear-filters")
     assert html =~ ~s(data-phx-link="patch")
     assert html =~ "Clear filters"
+    assert html =~
+             ~r/class="ax-empty-content"[^>]*>.*No fixtures match these filters.*Adjust the filters above\..*Clear filters.*<\/div>/s
+  end
+
+  test "renders identity as separate primary and secondary lines with an exact copy action" do
+    html =
+      render_component(fn assigns ->
+        assigns = assigns
+
+        ~H"""
+        <DataTable.identity_cell>
+          <:primary><a href="/admin/invoices/in_123">Invoice № 42</a></:primary>
+          <:secondary><button type="button" data-clipboard-text="in_123">Copy invoice ID</button></:secondary>
+        </DataTable.identity_cell>
+        """
+      end)
+
+    assert html =~ ~r/class="ax-data-table-identity-primary"[^>]*>.*Invoice № 42.*<\/span>/s
+    assert html =~ ~r/class="ax-data-table-identity-secondary"[^>]*>.*in_123.*<\/span>/s
+    assert html =~ ~s(data-clipboard-text="in_123")
   end
 
   test "renders loading skeleton as an accessible fixture state", %{conn: conn} do

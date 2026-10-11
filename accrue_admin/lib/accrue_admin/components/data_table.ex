@@ -8,6 +8,18 @@ defmodule AccrueAdmin.Components.DataTable do
   alias AccrueAdmin.Components.Icon
   alias AccrueAdmin.Copy
 
+  slot(:primary, required: true)
+  slot(:secondary)
+
+  def identity_cell(assigns) do
+    ~H"""
+    <span class="ax-data-table-identity" data-role="identity-cell">
+      <span class="ax-data-table-identity-primary"><%= render_slot(@primary) %></span>
+      <span :if={@secondary != []} class="ax-data-table-identity-secondary"><%= render_slot(@secondary) %></span>
+    </span>
+    """
+  end
+
   @default_limit 25
   @default_dom_limit 100
 
@@ -433,17 +445,19 @@ defmodule AccrueAdmin.Components.DataTable do
 
       <div :if={@render_empty_state} class="ax-card ax-empty ax-data-table-empty" data-role="empty-state">
         <Icon.icon name={:inbox} size="lg" class="ax-empty-icon ax-empty-icon-muted" />
-        <p class="ax-empty-title"><%= @resolved_empty_title %></p>
-        <p class="ax-body ax-empty-copy"><%= @resolved_empty_copy %></p>
-        <.link
-          :if={any_filter_active?(@filter_params) and @show_empty_clear}
-          patch={@clear_href}
-          class="ax-button ax-button-secondary"
-          data-role="clear-filters"
-          data-phase191-focus="clear-filters"
-        >
-          <%= Copy.data_table_clear_filters_label() %>
-        </.link>
+        <div class="ax-empty-content">
+          <p class="ax-empty-title"><%= @resolved_empty_title %></p>
+          <p class="ax-body ax-empty-copy"><%= @resolved_empty_copy %></p>
+          <.link
+            :if={any_filter_active?(@filter_params) and @show_empty_clear}
+            patch={@clear_href}
+            class="ax-button ax-button-secondary"
+            data-role="clear-filters"
+            data-phase191-focus="clear-filters"
+          >
+            <%= Copy.data_table_clear_filters_label() %>
+          </.link>
+        </div>
       </div>
 
       <div :if={@render_rows and @selectable} class="ax-data-table-selection" data-role="selection-bar">

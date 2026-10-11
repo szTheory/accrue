@@ -3610,6 +3610,37 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   padding: var(--ax-space-sm);
 }
 
+.ax-data-table-identity {
+  display: grid;
+  gap: var(--ax-space-xs);
+  min-width: 0;
+}
+
+.ax-data-table-identity-primary,
+.ax-data-table-identity-secondary {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.ax-data-table-identity-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  color: var(--ax-muted);
+}
+
+.ax-data-table-identity-secondary .ax-id-badge {
+  max-inline-size: 100%;
+}
+
+.ax-data-table-identity-secondary .ax-id-badge-text {
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
+}
+
 .ax-data-table-card-header {
   display: flex;
   align-items: flex-start;
@@ -3821,7 +3852,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-data-table-grid th,
 .ax-data-table-grid td {
-  padding: 0.75rem var(--ax-space-md);
+  padding: var(--ax-space-sm) var(--ax-space-md);
   border-bottom: 1px solid var(--ax-border);
   text-align: left;
   vertical-align: top;
@@ -5031,6 +5062,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 /* Empty state (home attention zero; reused by slice D) — Phase 189 (CMP-01):
    token-consuming replacement. No cursor:pointer, no :hover rule on .ax-empty. */
 .ax-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--ax-space-md); padding: var(--ax-space-2xl) var(--ax-space-lg); }
+.ax-empty-content { display: grid; justify-items: center; gap: var(--ax-space-sm); min-width: 0; }
 .ax-empty-icon { color: var(--ax-muted); }
 .ax-empty-title { font: var(--ax-type-title-font); color: var(--ax-primary); }
 .ax-empty-copy { font: var(--ax-type-body-sm-font); color: var(--ax-muted); max-width: 28rem; }
