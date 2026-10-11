@@ -126,20 +126,26 @@ the ordinary preview stories after the app is ready:
 cd examples/accrue_host
 make proxy # only when the shared proxy is not running
 ACCRUE_HOST_SKIP_SEEDS=1 make up INSTANCE=accrue-host-phase245-ordinary
-docker compose -p accrue-host-phase245-ordinary exec -T web mix run priv/repo/seeds/ordinary.exs
+cd ../..
+scripts/ci/seed_phase245_ordinary.sh
 ```
 
-The explicit seed command is safe to repeat. For warm recovery, run the same
+The wrapper inspects the actual Compose network, database volume, and Postgres
+fingerprint, snapshots the protected Phase 243 preview, runs the explicit
+ordinary seed, then asserts the protected snapshot is unchanged. It refuses a
+missing ordinary stack or a mismatched target. For warm recovery, run the same
 `ACCRUE_HOST_SKIP_SEEDS=1 make up INSTANCE=accrue-host-phase245-ordinary`
 command; it migrates and starts the isolated app without replaying the default
-stress seeds. Confirm the instance uses `Accrue.Processor.Fake` before browser
-inspection. Sign into `/admin` with the local demo operator account described
+stress seeds. The connected Repo independently checks its actual database name,
+role, and resolved Compose database address before evaluating any seed file.
+Confirm the instance uses `Accrue.Processor.Fake` before browser inspection.
+Sign into `/admin` with the local demo operator account described
 above; never put its password in capture output or manifests. A missing external
 credential makes that inspection unavailable and is never a reason to bypass
 authentication.
 
-Before seeding, record the protected Phase 243 preview state. Afterward, verify
-that it remains unchanged:
+The wrapper writes its temporary protected snapshot under `${TMPDIR:-/tmp}`.
+The explicit manual custody commands remain available for separate audits:
 
 ```bash
 cd ../..
