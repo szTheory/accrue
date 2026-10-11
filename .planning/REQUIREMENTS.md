@@ -22,7 +22,7 @@
 
 ### Shared reading and investigation
 
-- [ ] **TABLE-01**: Operators can scan primary identity, significant state, money and dates without concatenated names/IDs, excessive row height or long-content displacement; shared tables retain full exact identifiers and useful responsive priorities.
+- [x] **TABLE-01**: Operators can scan primary identity, significant state, money and dates without concatenated names/IDs, excessive row height or long-content displacement; shared tables retain full exact identifiers and useful responsive priorities.
 - [ ] **TIME-01**: Operators can read timestamps in a clearly identified local timezone and copy an exact UTC value with keyboard/touch access and truthful success/failure feedback; any display preference is shared rather than repeated per row.
 - [ ] **LANG-02**: Operators encounter consistent concrete destination names, headings, breadcrumb labels and task-specific help, with contextual navigation justified by the record or investigation task.
 - [ ] **STATE-02**: Operators see restrained semantic attention/status presentation tied to actual evidence and useful next steps; missing history, fee fields, plan data or snapshots never imply unsupported success, failure, pending work or misconfiguration.
@@ -57,7 +57,7 @@ New billing/provider capabilities, Portal work, new Admin rooms, diagnosis produ
 | FILTER-02 | Phase 246 | Complete |
 | FILTER-03 | Phase 246 | Complete |
 | SEARCH-01 | Phase 246 | Complete |
-| TABLE-01 | Phase 246 | Pending |
+| TABLE-01 | Phase 246 | Complete |
 | TIME-01 | Phase 247 | Pending |
 | LANG-02 | Phase 247 | Pending |
 | STATE-02 | Phase 247 | Pending |

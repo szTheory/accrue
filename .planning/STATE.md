@@ -4,17 +4,17 @@ milestone: v1.66
 milestone_name: Admin Usability and Visual Consistency
 current_phase: 246
 current_phase_name: Collection Controls and Search
-status: executing
-stopped_at: Completed 246-03-PLAN.md
-last_updated: "2026-10-11T17:53:53.096Z"
+status: verifying
+stopped_at: Completed 246-04-PLAN.md
+last_updated: "2026-10-11T19:11:07.913Z"
 last_activity: 2026-10-11
 last_activity_desc: Phase 246 execution started
-state_head: a4c00f5c8485de88206eab2823015a845a53ff28
+state_head: 95f0340a944f13a95541cccc33c60a060f634bea
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
   percent: 25
 ---
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 
 Phase: 246 (Collection Controls and Search) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: All plans complete — ready for phase verification
 Last activity: 2026-10-11 — Phase 246 execution started
 
 ## Performance Metrics
@@ -186,6 +186,7 @@ Last activity: 2026-10-11 — Phase 246 execution started
 | Phase 246 P01 | 19m | 2 tasks | 10 files |
 | Phase 246 P02 | 18m | 3 tasks | 16 files |
 | Phase 246 P03 | 53min | 2 tasks | 15 files |
+| Phase 246 P04 | 56min | 3 tasks | 23 files |
 
 ## Accumulated Context
 
@@ -431,6 +432,8 @@ Last activity: 2026-10-11 — Phase 246 execution started
 - [Phase 246]: Keep CommandPalette.activeIndex as the single source for pointer highlight, ARIA selection, and Enter navigation.
 - [Phase 246]: Use the existing SQL Sandbox fixture lane for deterministic exceptional states and the guarded ordinary Fake preview for realistic search.
 - [Phase 246]: Remove only allowlisted Phase 191 Fake stress fixtures during ordinary preview normalization; preserve ordinary showcase and linked billing data.
+- [Phase 246]: Use shared identity cells with exact copy actions and keep responsive cards from repeating their default title field.
+- [Phase 246]: Keep Phase 247 status, fee, and time semantics unchanged in the remaining shared-table consumers.
 
 ### Pending Todos
 
@@ -516,8 +519,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T17:53:53.064Z
-Stopped at: Completed 246-03-PLAN.md
+Last session: 2026-10-11T19:11:07.882Z
+Stopped at: Completed 246-04-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
