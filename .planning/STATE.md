@@ -5,16 +5,16 @@ milestone_name: Admin Usability and Visual Consistency
 current_phase: 247
 current_phase_name: Evidence-True Details and Analytics
 status: executing
-stopped_at: Completed 247-05-PLAN.md
-last_updated: "2026-10-11T22:19:28.939Z"
+stopped_at: Completed 247-06-PLAN.md
+last_updated: "2026-10-11T22:34:09.679Z"
 last_activity: 2026-10-11
 last_activity_desc: Phase 247 execution started
-state_head: 215ac9d425ec63a14ed862611ce8704464b52a65
+state_head: 32064e691c2990ce57790ccfffe5cc66f2a40015
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 16
-  completed_plans: 14
+  completed_plans: 15
   percent: 50
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 ## Current Position
 
 Phase: 247 (Evidence-True Details and Analytics) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-10-11 — Phase 247 execution started
 
@@ -195,6 +195,7 @@ Last activity: 2026-10-11 — Phase 247 execution started
 | Phase 247 P08 | 5min | 2 tasks | 12 files |
 | Phase 247 P04 | 15 min | 2 tasks | 9 files |
 | Phase 247 P05 | 16min | 3 tasks | 22 files |
+| Phase 247 P06 | 12min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -451,6 +452,9 @@ Last activity: 2026-10-11 — Phase 247 execution started
 - [Phase 247]: Visible DateTime values use the shared Timestamp component while date-only text, filter serialization, and UTC analytics bounds remain unchanged.
 - [Phase 247]: Repeated timestamp controls use distinct IDs across responsive and summary/timeline surfaces.
 - [Phase 247]: Missing billing plan and fee details stay explicitly unavailable; existing authorization and action flows remain unchanged.
+- [Phase 247]: Preserve Dunning formulas, owner scope, and UTC boundaries while changing recovery presentation.
+- [Phase 247]: Pair recovered and exhausted values per currency; actual zero remains distinct from missing or unsupported amounts.
+- [Phase 247]: Separate historical coverage from the selected UTC window and name the cutoff-semantics help destination.
 
 ### Pending Todos
 
@@ -536,8 +540,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T22:19:28.892Z
-Stopped at: Completed 247-05-PLAN.md
+Last session: 2026-10-11T22:34:09.627Z
+Stopped at: Completed 247-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
