@@ -9,7 +9,8 @@ defmodule AccrueAdmin.Live.EventLive do
     Detail,
     JsonViewer,
     RelatedResources,
-    Timeline
+    Timeline,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -150,7 +151,7 @@ defmodule AccrueAdmin.Live.EventLive do
               <dt class="ax-label">Subject</dt>
               <dd class="ax-body"><%= @event.subject_type %> <%= @event.subject_id %></dd>
               <dt class="ax-label">Recorded</dt>
-              <dd class="ax-body"><%= format_datetime(@event.inserted_at) %></dd>
+              <dd class="ax-body"><Timestamp.timestamp value={@event.inserted_at} id={"event-recorded-header-#{@event.id}"} /></dd>
             </dl>
           </:facts>
         </Detail.summary_card>
@@ -239,7 +240,10 @@ defmodule AccrueAdmin.Live.EventLive do
       %{label: "Actor", value: actor_summary(event)},
       %{label: "Subject", value: subject_summary(event)},
       %{label: "Source webhook", value: source_webhook_summary(event)},
-      %{label: "Recorded time", value: format_datetime(event.inserted_at)}
+      %{
+        label: "Recorded time",
+        value: timestamp_value(event.inserted_at, "event-recorded-summary-#{event.id}")
+      }
     ]
 
     case livemode_summary(event) do
@@ -256,7 +260,10 @@ defmodule AccrueAdmin.Live.EventLive do
       %{label: "Subject type", value: event.subject_type || "--"},
       %{label: "Subject ID", value: event.subject_id || "--"},
       %{label: "Source webhook", value: source_webhook_summary(event)},
-      %{label: "Recorded", value: format_datetime(event.inserted_at)}
+      %{
+        label: "Recorded",
+        value: timestamp_value(event.inserted_at, "event-recorded-detail-#{event.id}")
+      }
     ]
   end
 
@@ -444,8 +451,15 @@ defmodule AccrueAdmin.Live.EventLive do
   defp livemode_label(false), do: "Test"
   defp livemode_label(_value), do: nil
 
-  defp format_datetime(%DateTime{} = value), do: DateTime.to_iso8601(value)
-  defp format_datetime(_value), do: "Time unavailable"
+  defp timestamp_value(%DateTime{} = value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
+
+  defp timestamp_value(_value, _id), do: "Time unavailable"
 
   defp scoped_events_path(mount_path, %{mode: :organization, organization_slug: slug})
        when is_binary(slug) do

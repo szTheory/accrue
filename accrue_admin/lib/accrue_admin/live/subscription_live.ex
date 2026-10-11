@@ -17,7 +17,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     JsonViewer,
     RelatedResources,
     StepUpAuthModal,
-    Timeline
+    Timeline,
+    Timestamp
   }
 
   alias AccrueAdmin.BillingPresentation
@@ -413,7 +414,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <%= if Subscription.dunning_campaign_active?(@subscription) do %>
                 <p class="ax-body">
                   <strong class="ax-label"><%= Copy.dunning_started_label() %></strong>
-                  <%= format_datetime(@subscription.dunning_campaign_started_at) %>
+                  <Timestamp.timestamp value={@subscription.dunning_campaign_started_at} id="subscription-dunning-started-at" />
                 </p>
                 <p class="ax-body">
                   <strong class="ax-label"><%= Copy.dunning_next_action_label() %></strong>
@@ -463,7 +464,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
               <span><strong>Actor</strong><em><%= latest_audit.actor %></em></span>
               <span><strong>Action</strong><em><%= latest_audit.action %></em></span>
-              <span><strong>Timestamp</strong><em><%= latest_audit.at %></em></span>
+              <span><strong>Timestamp</strong><em><Timestamp.timestamp value={latest_audit.at} id="subscription-latest-audit-timestamp" /></em></span>
             </div>
             <p class="ax-body"><%= activity_audit_summary(@timeline_events, @subscription) %></p>
             <div class="ax-activity-actions">
@@ -488,7 +489,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <li :for={row <- audit_rows(@timeline_events, @subscription)} class="ax-audit-row">
                 <strong><%= row.actor %></strong>
                 <span><%= row.action %></span>
-                <time><%= row.at %></time>
+                <Timestamp.timestamp value={row.at} id={"subscription-audit-row-#{row.id}"} />
               </li>
             </ul>
           </div>
@@ -905,7 +906,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             action_event: "open_action_drawer",
             action_value: "swap_plan"
           }),
-          %{label: "Current period", value: current_period_summary(subscription)},
+          %{label: "Current period", value: current_period_summary(subscription, :summary)},
           renews_or_ends_row(subscription),
           %{label: "Amount (MRR)", value: mrr_summary(subscription)}
         ]
@@ -1001,7 +1002,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp renews_or_ends_row(subscription) do
     %{
       label: "Renews / ends",
-      value: renews_or_ends_summary(subscription),
+      value: renews_or_ends_summary(subscription, :summary),
       action_label: renews_or_ends_action_label(subscription),
       action_context:
         Copy.action_hidden_context("Change",
@@ -1031,14 +1032,26 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       else: "cancel_at_period_end"
   end
 
-  defp current_period_summary(%{
-         current_period_start: %DateTime{} = starts_at,
-         current_period_end: %DateTime{} = ends_at
-       }) do
-    "#{format_datetime(starts_at)} - #{format_datetime(ends_at)}"
+  defp current_period_summary(
+         %{
+           current_period_start: %DateTime{} = starts_at,
+           current_period_end: %DateTime{} = ends_at
+         },
+         surface
+       ) do
+    assigns = %{
+      starts_at: starts_at,
+      ends_at: ends_at,
+      start_id: "subscription-period-start-#{surface}",
+      end_id: "subscription-period-end-#{surface}"
+    }
+
+    ~H"""
+    <span><Timestamp.timestamp value={@starts_at} id={@start_id} /> – <Timestamp.timestamp value={@ends_at} id={@end_id} /></span>
+    """
   end
 
-  defp current_period_summary(_subscription), do: not_projected_copy(:period)
+  defp current_period_summary(_subscription, _surface), do: not_projected_copy(:period)
 
   defp summary_health_facts(subscription) do
     [
@@ -1046,26 +1059,30 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         label: "Plan / price",
         value: current_price_id(subscription) || not_projected_copy(:price)
       },
-      %{label: "Current period", value: current_period_summary(subscription)},
-      %{label: "Cancellation", value: cancellation_summary(subscription)},
-      %{label: "Renewal", value: renews_or_ends_summary(subscription)},
+      %{label: "Current period", value: current_period_summary(subscription, :header)},
+      %{label: "Cancellation", value: cancellation_summary(subscription, :header)},
+      %{label: "Renewal", value: renews_or_ends_summary(subscription, :header)},
       %{label: "MRR", value: mrr_summary(subscription)}
     ]
   end
 
-  defp cancellation_summary(%{
-         cancel_at_period_end: true,
-         current_period_end: %DateTime{} = ending
-       }),
-       do: "Scheduled for #{format_datetime(ending)}"
+  defp cancellation_summary(
+         %{
+           cancel_at_period_end: true,
+           current_period_end: %DateTime{} = ending
+         },
+         surface
+       ),
+       do: timestamp_summary("Scheduled for", ending, "subscription-cancel-at-#{surface}")
 
-  defp cancellation_summary(%{cancel_at_period_end: true}),
+  defp cancellation_summary(%{cancel_at_period_end: true}, _surface),
     do: "Scheduled; effective date not shown"
 
-  defp cancellation_summary(%{status: status}) when status in [:canceled, :incomplete_expired],
-    do: "Canceled"
+  defp cancellation_summary(%{status: status}, _surface)
+       when status in [:canceled, :incomplete_expired],
+       do: "Canceled"
 
-  defp cancellation_summary(_subscription), do: "No cancellation scheduled"
+  defp cancellation_summary(_subscription, _surface), do: "No cancellation scheduled"
 
   defp collection_summary(%{pause_collection: pause}) when not is_nil(pause),
     do: "Paused"
@@ -1170,25 +1187,33 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
-  defp renews_or_ends_summary(subscription) do
+  defp renews_or_ends_summary(subscription, surface) do
     cond do
       Accrue.Billing.Subscription.canceled?(subscription) ->
         ended_at = subscription.ended_at || subscription.canceled_at
 
         if ended_at do
-          "Ended #{format_datetime(ended_at)}"
+          timestamp_summary("Ended", ended_at, "subscription-ended-at-#{surface}")
         else
           "End date is not shown in admin"
         end
 
       Accrue.Billing.Subscription.canceling?(subscription) ->
-        "Ends #{format_datetime(subscription.current_period_end)}"
+        timestamp_summary(
+          "Ends",
+          subscription.current_period_end,
+          "subscription-ends-at-#{surface}"
+        )
 
       subscription.cancel_at_period_end ->
         not_projected_copy(:end_date)
 
       match?(%DateTime{}, subscription.current_period_end) ->
-        "Renews #{format_datetime(subscription.current_period_end)}"
+        timestamp_summary(
+          "Renews",
+          subscription.current_period_end,
+          "subscription-renews-at-#{surface}"
+        )
 
       true ->
         not_projected_copy(:renewal)
@@ -1202,8 +1227,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         label: "Plan / price",
         value: current_price_id(subscription) || not_projected_copy(:price)
       },
-      %{label: "Current period", value: current_period_summary(subscription)},
-      %{label: "Renewal", value: renews_or_ends_summary(subscription)},
+      %{label: "Current period", value: current_period_summary(subscription, :billing)},
+      %{label: "Renewal", value: renews_or_ends_summary(subscription, :billing)},
       %{label: "Collection", value: collection_summary(subscription)},
       %{label: "Quantity", value: quantity_summary(subscription)}
     ]
@@ -1367,7 +1392,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           %{
             actor: "Accrue system",
             action: "Subscription status reviewed",
-            at: format_datetime(subscription.inserted_at || subscription.current_period_start)
+            id: "projection",
+            at: subscription.inserted_at || subscription.current_period_start
           }
         ]
 
@@ -1378,7 +1404,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           %{
             actor: event_actor_summary(event),
             action: event.type,
-            at: format_datetime(event.inserted_at)
+            id: event.id,
+            at: event.inserted_at
           }
         end)
     end
@@ -1397,7 +1424,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp timeline_event_item(event, mount_path, scope) do
     %{
       title: event.type,
-      at: format_datetime(event.inserted_at),
+      id: event.id,
+      at: event.inserted_at,
       body: event_subject_summary(event),
       status: event.actor_type,
       tone: tone(event),
@@ -1410,7 +1438,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp subscription_projection_timeline_item(subscription, mount_path, scope) do
     %{
       title: "Subscription status reviewed",
-      at: format_datetime(subscription.inserted_at || subscription.current_period_start),
+      id: "projection",
+      at: subscription.inserted_at || subscription.current_period_start,
       body: "Accrue checked #{lifecycle_health_label(subscription)} for this customer",
       status: "system",
       tone: :cobalt,
@@ -2193,9 +2222,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp review_consequence(%{type: "cancel_now"}, _subscription),
     do: "This cancels the subscription immediately."
 
-  defp review_consequence(%{type: "cancel_at_period_end"}, subscription),
-    do:
-      "This schedules cancellation at period end (#{format_datetime(subscription.current_period_end)})."
+  defp review_consequence(%{type: "cancel_at_period_end"}, _subscription),
+    do: "This schedules cancellation at period end."
 
   defp review_consequence(%{type: "pause", pause_behavior: behavior}, _subscription),
     do: "This pauses collection using #{humanize(behavior)} behavior."
@@ -2287,6 +2315,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     |> Enum.map_join(" ", &String.capitalize/1)
   end
 
+  defp timestamp_summary(label, %DateTime{} = value, id) do
+    assigns = %{label: label, value: value, id: id}
+
+    ~H"""
+    <span><%= @label %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
+
+  defp timestamp_summary(label, _value, _id), do: label
+
+  # The audit sentence keeps its existing human-readable event text; the exact
+  # copyable timestamp is rendered separately in the adjacent audit row.
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
   defp format_datetime(_value), do: "Date not shown"
 

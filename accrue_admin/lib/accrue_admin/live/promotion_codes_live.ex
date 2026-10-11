@@ -15,7 +15,8 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     FlashGroup,
     IdBadge,
     PageHeader,
-    StatStrip
+    StatStrip,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -153,16 +154,16 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
           clear_href={clear_all_href(@params, @table_path)}
           columns={[
             %{label: Copy.promotion_codes_table_column_code(), render: &promotion_code_link(&1, @admin_mount_path, @current_owner_scope, @params, :table)},
-            %{label: Copy.promotion_codes_table_column_status(), render: &status_summary/1},
+            %{label: Copy.promotion_codes_table_column_status(), render: &status_summary(&1, :table)},
             %{label: Copy.promotion_codes_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope)},
-            %{label: Copy.promotion_codes_table_column_expires(), render: &expires_summary/1},
+            %{label: Copy.promotion_codes_table_column_expires(), render: &expires_summary(&1, :table)},
             %{label: Copy.promotion_codes_table_column_redemptions(), render: &redemption_summary/1}
           ]}
           card_title={&promotion_code_link(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
-            %{label: Copy.promotion_codes_table_column_status(), render: &status_summary/1},
+            %{label: Copy.promotion_codes_table_column_status(), render: &status_summary(&1, :card)},
             %{label: Copy.promotion_codes_table_column_coupon(), render: &coupon_label/1},
-            %{label: Copy.promotion_codes_table_column_expires(), render: &expires_summary/1},
+            %{label: Copy.promotion_codes_table_column_expires(), render: &expires_summary(&1, :card)},
             %{label: Copy.promotion_codes_table_column_redemptions(), render: &redemption_summary/1}
           ]}
           filter_fields={promotion_code_filter_fields()}
@@ -281,14 +282,21 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
   defp coupon_label(%{coupon_name: nil, coupon_id: coupon_id}), do: coupon_id
   defp coupon_label(%{coupon_name: coupon_name}), do: coupon_name
 
-  defp status_summary(%{active: true, expires_at: %DateTime{} = expires_at}),
-    do:
-      Copy.promotion_codes_status_active_expires_separator() <>
-        format_datetime(expires_at)
+  defp status_summary(%{active: true, expires_at: %DateTime{} = expires_at} = row, surface) do
+    assigns = %{
+      value: expires_at,
+      id: "promotion-code-row-status-expires-#{surface}-#{row.id}",
+      prefix: Copy.promotion_codes_status_active_expires_separator()
+    }
 
-  defp status_summary(%{active: true}), do: Copy.promotion_codes_status_active()
-  defp status_summary(%{active: false}), do: Copy.promotion_codes_status_inactive()
-  defp status_summary(_row), do: Copy.PromotionCode.promotion_code_status_unknown()
+    ~H"""
+    <span><%= @prefix %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
+
+  defp status_summary(%{active: true}, _surface), do: Copy.promotion_codes_status_active()
+  defp status_summary(%{active: false}, _surface), do: Copy.promotion_codes_status_inactive()
+  defp status_summary(_row, _surface), do: Copy.PromotionCode.promotion_code_status_unknown()
 
   defp redemption_summary(row) do
     case row.times_redeemed do
@@ -297,8 +305,15 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     end
   end
 
-  defp expires_summary(%{expires_at: %DateTime{} = value}), do: format_datetime(value)
-  defp expires_summary(_row), do: Copy.promotion_codes_expires_summary_no_expiry()
+  defp expires_summary(%{expires_at: %DateTime{} = value} = row, surface) do
+    assigns = %{value: value, id: "promotion-code-row-expires-#{surface}-#{row.id}"}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
+
+  defp expires_summary(_row, _surface), do: Copy.promotion_codes_expires_summary_no_expiry()
 
   defp promotion_code_filter_fields do
     [
@@ -466,8 +481,6 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
   defp safe_link(href, label) do
     Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escape(label)}</a>))
   end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

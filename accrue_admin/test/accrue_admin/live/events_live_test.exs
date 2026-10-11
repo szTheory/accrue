@@ -124,7 +124,8 @@ defmodule AccrueAdmin.EventsLiveTest do
              )
            ) == 1
 
-    assert length(Floki.find(card, "[data-clipboard-text]")) == 1
+    assert length(Floki.find(card, "[data-clipboard-text]")) == 2
+    assert length(Floki.find(card, ".ax-timestamp[data-iso]")) == 1
   end
 
   test "bare events route represents the All ledger lens", %{conn: conn} do

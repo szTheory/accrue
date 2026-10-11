@@ -12,7 +12,8 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
     Detail,
     JsonViewer,
     RelatedResources,
-    Timeline
+    Timeline,
+    Timestamp
   }
 
   alias AccrueAdmin.ScopedPath
@@ -152,7 +153,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
           title={@promotion_code.code || @promotion_code.processor_id || @promotion_code.id}
         >
           <:facts>
-            <span><%= status_summary(@promotion_code) %></span>
+            <span><%= status_summary(@promotion_code, :header) %></span>
             <span><%= redemption_summary(@promotion_code) %></span>
           </:facts>
         </Detail.summary_card>
@@ -265,13 +266,13 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
   defp summary_rows(promotion_code, _mount_path) do
     [
-      %{label: "Active state", value: status_summary(promotion_code)},
+      %{label: "Active state", value: status_summary(promotion_code, :summary)},
       %{
         label: "Code",
         value: promotion_code.code || promotion_code.processor_id || promotion_code.id
       },
       %{label: "Parent coupon", value: coupon_label(promotion_code)},
-      %{label: "Expiry", value: expires_summary(promotion_code)},
+      %{label: "Expiry", value: expires_summary(promotion_code, :summary)},
       %{label: "Redemption count", value: redemption_count_summary(promotion_code)},
       %{label: "Redemption limit", value: max_redemptions_summary(promotion_code)},
       %{label: "Customer restriction", value: customer_restriction_summary(promotion_code)}
@@ -306,8 +307,8 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
   defp redemption_boundary_fields(promotion_code) do
     [
-      %{label: "Active state", value: status_summary(promotion_code)},
-      %{label: "Expiry", value: expires_summary(promotion_code)},
+      %{label: "Active state", value: status_summary(promotion_code, :boundary)},
+      %{label: "Expiry", value: expires_summary(promotion_code, :boundary)},
       %{label: "Redemption count", value: redemption_count_summary(promotion_code)},
       %{label: "Redemption limit", value: max_redemptions_summary(promotion_code)}
     ]
@@ -337,15 +338,25 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
   defp coupon_label(%{coupon_id: coupon_id}),
     do: AccrueAdmin.Copy.PromotionCode.promotion_code_coupon_unavailable(coupon_id)
 
-  defp status_summary(%{active: true, expires_at: %DateTime{} = expires_at}),
-    do:
-      AccrueAdmin.Copy.promotion_codes_status_active_expires_separator() <>
-        format_datetime(expires_at)
+  defp status_summary(%{active: true, expires_at: %DateTime{} = expires_at} = row, surface) do
+    assigns = %{
+      value: expires_at,
+      id: "promotion-code-status-expires-#{surface}-#{row.id}",
+      prefix: AccrueAdmin.Copy.promotion_codes_status_active_expires_separator()
+    }
 
-  defp status_summary(%{active: true}), do: AccrueAdmin.Copy.promotion_codes_status_active()
-  defp status_summary(%{active: false}), do: AccrueAdmin.Copy.promotion_codes_status_inactive()
+    ~H"""
+    <span><%= @prefix %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
 
-  defp status_summary(_promotion_code),
+  defp status_summary(%{active: true}, _surface),
+    do: AccrueAdmin.Copy.promotion_codes_status_active()
+
+  defp status_summary(%{active: false}, _surface),
+    do: AccrueAdmin.Copy.promotion_codes_status_inactive()
+
+  defp status_summary(_promotion_code, _surface),
     do: AccrueAdmin.Copy.PromotionCode.promotion_code_status_unknown()
 
   defp redemption_summary(%{times_redeemed: used, max_redemptions: nil}) when is_integer(used),
@@ -377,8 +388,12 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
   defp coupon_identity_summary(%{coupon_id: id}),
     do: AccrueAdmin.Copy.PromotionCode.promotion_code_coupon_unavailable(id)
 
-  defp expires_summary(%{expires_at: %DateTime{} = value}), do: format_datetime(value)
-  defp expires_summary(_promotion_code), do: AccrueAdmin.Copy.promotion_code_redeem_by_no_expiry()
+  defp expires_summary(%{expires_at: %DateTime{} = value} = row, surface) do
+    timestamp_value(value, "promotion-code-expiry-#{surface}-#{row.id}")
+  end
+
+  defp expires_summary(_promotion_code, _surface),
+    do: AccrueAdmin.Copy.promotion_code_redeem_by_no_expiry()
 
   defp customer_restriction_summary(%{data: data}) when is_map(data) do
     case Map.get(data, "customer") || Map.get(data, :customer) || Map.get(data, "customer_id") ||
@@ -391,7 +406,13 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
   defp customer_restriction_summary(_promotion_code),
     do: AccrueAdmin.Copy.PromotionCode.promotion_code_customer_restriction_unknown()
 
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
+  defp timestamp_value(value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
 
   defp related_items(promotion_code, mount_path, scope) do
     coupon_items =

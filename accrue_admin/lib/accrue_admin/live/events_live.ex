@@ -13,7 +13,8 @@ defmodule AccrueAdmin.Live.EventsLive do
     IdBadge,
     FilterChipBar,
     PageHeader,
-    StatStrip
+    StatStrip,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -162,7 +163,7 @@ defmodule AccrueAdmin.Live.EventsLive do
             },
             %{label: Copy.billing_events_table_column_actor(), render: &actor_summary/1},
             %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
-            %{label: Copy.billing_events_table_column_when(), render: &when_summary/1}
+            %{label: Copy.billing_events_table_column_when(), render: &when_summary(&1, :table)}
           ]}
           card_title={&event_cell(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
@@ -172,7 +173,7 @@ defmodule AccrueAdmin.Live.EventsLive do
             },
             %{label: Copy.billing_events_table_column_actor(), render: &actor_summary/1},
             %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
-            %{label: Copy.billing_events_table_column_when(), render: &when_summary/1}
+            %{label: Copy.billing_events_table_column_when(), render: &when_summary(&1, :card)}
           ]}
           filter_fields={event_filter_fields()}
           empty_title={empty_title(@params, @summary)}
@@ -496,7 +497,15 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   defp webhook_source_summary(%{caused_by_webhook_event_id: webhook_id}), do: webhook_id
 
-  defp when_summary(row), do: format_datetime(row.inserted_at)
+  defp when_summary(%{inserted_at: %DateTime{} = value} = row, surface) do
+    assigns = %{value: value, id: "event-row-timestamp-#{surface}-#{row.id}"}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
+
+  defp when_summary(_row, _surface), do: Copy.billing_events_when_unknown()
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 
@@ -506,9 +515,6 @@ defmodule AccrueAdmin.Live.EventsLive do
     |> String.split()
     |> Enum.map_join(" ", &String.capitalize/1)
   end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: Copy.billing_events_when_unknown()
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 
