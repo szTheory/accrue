@@ -3,11 +3,9 @@ defmodule AccrueHostWeb.Phase246StatesLive do
 
   use AccrueHostWeb, :live_view
 
-  alias AccrueAdmin.Components.{AppShell, DataTable, GlobalSearch}
+  alias AccrueAdmin.Components.{AppShell, DataTable, GlobalSearch, IdBadge}
 
   @table_id "phase246-state-table"
-  @columns [%{id: :name, label: "Record"}, %{id: :status, label: "Status"}]
-
   @impl true
   def mount(_params, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
@@ -27,7 +25,7 @@ defmodule AccrueHostWeb.Phase246StatesLive do
        table_attrs: table_attrs("populated"),
        search_case: "success",
        search_attrs: search_attrs("success"),
-       columns: @columns
+       columns: columns()
      )}
   end
 
@@ -185,6 +183,26 @@ defmodule AccrueHostWeb.Phase246StatesLive do
 
   defp row(name, id), do: %{id: id, name: name, status: "Active"}
 
+  defp columns do
+    [
+      %{id: :identity, label: "Record", render: &identity_cell/1},
+      %{id: :status, label: "Status"}
+    ]
+  end
+
+  defp identity_cell(row) do
+    assigns = %{__changed__: %{}, row: row}
+
+    ~H"""
+    <DataTable.identity_cell>
+      <:primary><span class="ax-link">{@row.name}</span></:primary>
+      <:secondary>
+        <IdBadge.id_badge id={"phase246-copy-#{@row.id}"} id_value={@row.id} label="Copy record ID" />
+      </:secondary>
+    </DataTable.identity_cell>
+    """
+  end
+
   defp search_attrs("loading"), do: search_base("loading", [], [], true)
   defp search_attrs("partial"), do: search_base("needle", [customer()], [], false, [:invoices])
   defp search_attrs("zero"), do: search_base("no-match", [], [], false)
@@ -241,7 +259,6 @@ defmodule AccrueHostWeb.Phase246StatesLive do
       processor_id: "in_stripe_phase246"
     }
   end
-
 end
 
 defmodule AccrueHostWeb.Phase246StatesQuery do

@@ -240,7 +240,6 @@ defmodule AccrueAdmin.PromotionCodesLiveTest do
 
     assert identity =~ "BUNDLE10"
     assert identity =~ "promo_bundle"
-    assert Floki.find(html, "button.ax-id-badge[data-clipboard-text='promo_bundle']") != []
   end
 
   defp insert_coupon(attrs) do

@@ -116,12 +116,14 @@ heldoutTest("@phase246-heldout table state fixtures retain identity, order, and 
     for (const theme of ["light", "dark"]) {
       await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
       await page.getByRole("button", { name: "Table long" }).click();
-      await expect(page.locator("#phase246-state-table .ax-data-table-identity")).toContainText("Zoë 世界");
-      await expect(page.locator("#phase246-state-table [data-clipboard-text='cus_" + "unbroken".repeat(18) + "']")).toHaveCount(1);
+      await expect(page.getByTestId("table-state")).toHaveText("long");
+      const identity = page.locator("#phase246-state-table tbody > tr[data-row-id] .ax-data-table-identity").first();
+      await expect(identity).toContainText("Zoë 世界");
+      await expect(page.locator("#phase246-state-table tbody > tr[data-row-id] [data-clipboard-text='cus_" + "unbroken".repeat(18) + "']")).toHaveCount(1);
       const geometry = await page.evaluate(() => ({
         viewport: document.documentElement.clientWidth,
         page: document.documentElement.scrollWidth,
-        identity: document.querySelector("#phase246-state-table .ax-data-table-identity")?.getBoundingClientRect().width,
+        identity: document.querySelector("#phase246-state-table tbody > tr[data-row-id] .ax-data-table-identity")?.getBoundingClientRect().width,
         theme: document.documentElement.dataset.theme
       }));
       expect(geometry.theme).toBe(theme);

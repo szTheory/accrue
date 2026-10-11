@@ -187,9 +187,15 @@ defmodule AccrueAdmin.InvoicesLiveTest do
 
     assert_patch(view, "/billing/invoices?org=invoice-owner&q=INV-SCOPED&status=paid&view=all")
     assert html =~ "INV-SCOPED-PAID-OWNER"
-    visible_text = html |> Floki.parse_document!() |> Floki.text()
-    refute visible_text =~ "INV-SCOPED-OPEN-OWNER"
-    refute visible_text =~ "INV-SCOPED-PAID-FOREIGN"
+
+    visible_row_ids =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("tbody > tr[data-row-id]")
+      |> Enum.map(&Floki.attribute(&1, "data-row-id"))
+      |> List.flatten()
+
+    assert visible_row_ids == [owner_paid.id]
     assert owner_paid
   end
 

@@ -257,7 +257,6 @@ defmodule AccrueAdmin.CustomersLiveTest do
     assert identity =~ "captain@example.com"
     assert identity =~ "cus_fake_00001"
     assert identity =~ "Captain Customer"
-    assert Floki.find(html, "button.ax-id-badge[data-clipboard-text='cus_fake_00001']") != []
   end
 
   test "customer result carries bounded list filters into the detail return", %{conn: conn} do

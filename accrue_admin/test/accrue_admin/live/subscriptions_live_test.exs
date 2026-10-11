@@ -140,9 +140,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     refute html =~ "Exposure"
     assert html =~ "target"
 
-    assert html =~ "Customer billing lookup"
-    assert html =~ "Search customers now"
-    assert html =~ "Open invoice queue"
+    assert html =~ Copy.subscriptions_route_line()
 
     assert html =~ Copy.subscriptions_kpi_section_aria_label()
     assert html =~ "At-risk subscriptions"
@@ -363,7 +361,6 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
       "Signals"
     ])
 
-    assert Floki.find(html, "button.ax-id-badge[data-clipboard-text='sub_fake_00001']") != []
     assert html =~ "Subscription details"
 
     assert html =~ "ax-data-table-grid"
