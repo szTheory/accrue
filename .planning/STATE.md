@@ -4,10 +4,10 @@ milestone: v1.65
 milestone_name: Accrue Admin Language & Consistency
 current_phase: 244
 status: completed
-stopped_at: Phase 244 complete — all phases complete
-last_updated: "2026-10-11T03:44:02.511Z"
-last_activity: 2026-10-10
-last_activity_desc: Phase 244 complete
+stopped_at: v1.65 audit passed — milestone archival next
+last_updated: "2026-10-11T11:14:08.924985+00:00"
+last_activity: 2026-10-11
+last_activity_desc: v1.65 milestone audit passed
 state_head: 9caf95cb828cd23e1640772358706a6210b8b01c
 progress:
   total_phases: 1
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.65 milestone audit — Phase 244 verified complete
+**Current focus:** v1.65 archival — milestone audit passed; Phase 244 verified complete
 **Progress:** [██████████] 100%
 **Completed work:** Phase 244 has 4/4 plans complete and 4/4 requirements satisfied; verification passed 9/9 with zero unverified behavior. v1.64 is shipped and archived with its closeout evidence retained in `.planning/milestones/`.
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 Phase: 244
 Plan: 4 of 4 complete
 Status: All phases complete
-Last activity: 2026-10-10 — Phase 244 complete
+Last activity: 2026-10-11 — v1.65 milestone audit passed
 
 Progress: [██████████] 100%
 
@@ -443,7 +443,7 @@ None. The next workflow action is recorded under Operator Next Steps; completed 
 
 ### Blockers/Concerns
 
-- **Current v1.65:** Phase 244 has no remaining verification blockers; milestone audit and archival are pending. Preserve revision-specific evidence and distinguish local acceptance from remote delivery.
+- **Current v1.65:** Phase 244 has no remaining verification blockers; milestone audit passed; archival is pending. Preserve revision-specific evidence and distinguish local acceptance from remote delivery.
 - **Resolved by v1.62:** the `main`/v1.61 divergence, the stale local `main` ref, the four unpublished audit-closure commits, and the unavailable live-CI monitor. All are reconciled into the integration candidate with committed evidence.
 - **Historical v1.62 candidate:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
 - **Archived v1.62 validation debt:** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
@@ -505,8 +505,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T03:44:35.775102+00:00
-Stopped at: Phase 244 verified complete; next: $gsd-audit-milestone
+Last session: 2026-10-11T11:14:08.924985+00:00
+Stopped at: v1.65 audit passed; next: $gsd-complete-milestone v1.65
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -638,6 +638,6 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 - **Completed phase:** 244 — Operator Language and Evidence; 4/4 plans complete, 4/4 requirements satisfied, verification passed 9/9.
 - **Evidence:** Full Admin suite 693 tests, zero failures; final browser batch 6/6 at `1b62ad78`; 13 automated UAT items, zero required human UAT. Browser evidence remains bound to its tested revision.
-- **Next GSD command:** `$gsd-audit-milestone` — audit v1.65 before archiving. Do not repeat phase execution or verification.
+- **Next GSD command:** `$gsd-complete-milestone v1.65` — audit passed (4/4 requirements, 1/1 phases, 4/4 integration seams, 4/4 flows); archive v1.65. Do not repeat phase execution or verification.
 - **Delivery boundary:** Phase completion does not claim a new remote CI run, merge, or package publication.
 - **Previous milestone:** v1.64 is shipped and archived; its phase artifacts and audit remain under `.planning/milestones/`.

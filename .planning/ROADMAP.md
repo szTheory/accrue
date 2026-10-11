@@ -20,7 +20,7 @@
 - ✅ **v1.62 Release Integration & Repository Hygiene** — Phases 229–232 (2026-09-18) — [archive](milestones/v1.62-ROADMAP.md)
 - ✅ **v1.63 Admin and Portal UI refinement** — Phases 233–239 (shipped 2026-10-09) — [archive](milestones/v1.63-ROADMAP.md)
 - ✅ **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (shipped 2026-10-10) — [archive](milestones/v1.64-ROADMAP.md)
-- 🚧 **v1.65 Accrue Admin Language & Consistency** — Phase 244 (verified; awaiting milestone audit)
+- 🚧 **v1.65 Accrue Admin Language & Consistency** — Phase 244 (verified; audit passed; awaiting archival)
 
 ## Planning Doctrine
 
@@ -51,7 +51,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
   3. Where a human-readable event or state label appears, an operator can still find the exact event key and relevant record identifiers and timestamps at the point of investigation. (EVID-01)
   4. Across targeted existing Admin screens, an operator encounters consistent repeated headings and action names, and each link or control accurately describes its destination or effect. (CONS-01)
 
-**Plans**: 4/4 plans complete (3 executed; 1 gap closure pending)
+**Plans**: 4/4 plans complete (3 initial plans and 1 gap closure)
 Plans:
 **Wave 1**
 - [x] 244-01-PLAN.md — Confirm mounted candidates and prove Home-to-event label and evidence path.
@@ -75,6 +75,6 @@ Plans:
 
 ## Current Position
 
-Phase 244 is complete: all four plans, all four requirements, and independent verification passed (9/9 truths, zero unverified behavior). The milestone is ready for its closeout audit. The complete v1.64 scope and closeout evidence remain in the [archived roadmap](milestones/v1.64-ROADMAP.md), [milestone audit](milestones/v1.64-MILESTONE-AUDIT.md), and [phase archive](milestones/v1.64-phases/).
+Phase 244 is complete: all four plans, all four requirements, and independent verification passed (9/9 truths, zero unverified behavior). The milestone audit passed: 4/4 requirements, 1/1 phases, 4/4 integration seams, and 4/4 flows; no blockers. The milestone is ready for archival. The complete v1.64 scope and closeout evidence remain in the [archived roadmap](milestones/v1.64-ROADMAP.md), [milestone audit](milestones/v1.64-MILESTONE-AUDIT.md), and [phase archive](milestones/v1.64-phases/).
 
-**Next command:** `$gsd-audit-milestone`.
+**Next command:** `$gsd-complete-milestone v1.65`.
