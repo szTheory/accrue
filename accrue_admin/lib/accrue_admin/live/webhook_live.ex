@@ -482,11 +482,8 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
   defp webhook_breadcrumbs(assigns) do
     [
-      %{
-        label: "Dashboard",
-        href: scoped_mount_path(assigns.admin_mount_path, "", assigns.current_owner_scope, %{})
-      },
-      %{label: "Webhooks", href: assigns.return_destination.path}
+      %{label: "Webhooks", href: assigns.return_destination.path},
+      %{label: "Webhook"}
     ]
   end
 

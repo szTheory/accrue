@@ -728,7 +728,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert loading_html =~ contract.states.loading
   end
 
-  test "prioritizes invoice identity, state, money, time, and signals columns", %{conn: conn} do
+  test "prioritizes invoice identity, state, money, due date, collection, and ownership columns", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
@@ -738,7 +738,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
       "Status",
       "Balance",
       "Collection",
-      "Billing signals"
+      "Ownership and tax"
     ])
   end
 

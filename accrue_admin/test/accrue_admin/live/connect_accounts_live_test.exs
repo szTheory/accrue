@@ -358,12 +358,11 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
       Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
 
     assert {:ok, _view, detail_html} = live(detail_conn, detail_path)
-
     [return_link] =
       detail_html
       |> Floki.parse_document!()
-      |> Floki.find("a")
-      |> Enum.filter(&(Floki.text(&1) =~ "Back to Connect accounts"))
+      |> Floki.find("nav[aria-label='Breadcrumb'] a")
+      |> Enum.filter(&(Floki.text(&1) |> String.trim() == "Connect"))
 
     return_href = return_link |> Floki.attribute("href") |> hd()
 

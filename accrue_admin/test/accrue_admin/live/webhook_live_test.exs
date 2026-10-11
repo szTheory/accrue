@@ -104,6 +104,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert has_element?(view, "[data-role='webhook-page-header']")
     assert has_element?(view, "h1", webhook.processor_event_id)
     assert has_element?(view, "[aria-label='Breadcrumb'] a", "Webhooks")
+    assert has_element?(view, "[aria-label='Breadcrumb'] [aria-current='page']", "Webhook")
     refute html =~ "Webhook inspector"
     refute html =~ "Processor event ID"
     refute html =~ "Replay eligibility"
