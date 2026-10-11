@@ -63,6 +63,49 @@ function seedRelatedWebhookEvent(fixture) {
   return output.split(/\s+/).at(-1);
 }
 
+function readWebhookReplayFacts(webhookId) {
+  const script = `
+    import Ecto.Query
+    alias Accrue.Events.Event
+    alias Accrue.Repo
+    alias Accrue.Webhook.WebhookEvent
+    alias Oban.Job
+
+    [webhook_id] = System.argv()
+    webhook = Repo.get!(WebhookEvent, webhook_id)
+    jobs = Repo.all(
+      from job in Job,
+        where:
+          job.worker == "Accrue.Webhook.DispatchWorker" and
+            fragment("?->>'webhook_event_id' = ?", job.args, ^webhook_id),
+        order_by: [asc: job.inserted_at, asc: job.id],
+        select: %{id: job.id, state: job.state}
+    )
+    events = Repo.all(
+      from event in Event,
+        where:
+          event.caused_by_webhook_event_id == ^webhook_id and
+            event.type in ["webhook.replay_requested", "admin.webhook.replay.completed"],
+        order_by: [asc: event.inserted_at, asc: event.id],
+        select: event.type
+    )
+
+    IO.write("[phase244-replay-facts]" <> Jason.encode!(%{
+      webhook_status: Atom.to_string(webhook.status),
+      dispatch_jobs: jobs,
+      replay_and_audit_events: events
+    }))
+  `;
+  const output = execFileSync("mix", ["run", "-e", script, "--", webhookId], {
+    cwd: path.join(repoRoot, "examples/accrue_host"),
+    encoding: "utf8",
+    env: { ...process.env, MIX_ENV: "test" }
+  });
+  const match = output.match(/\[phase244-replay-facts\](\{[^\n]+\})/);
+  if (!match) throw new Error(`missing replay fact record in Mix output: ${output.slice(-1000)}`);
+  return JSON.parse(match[1]);
+}
+
 async function captureAdminAssets(page) {
   const entries = [
     ["css", 'link[rel="stylesheet"][href*="/admin/assets/css-"]', "accrue_admin/priv/static/accrue_admin.css"],
@@ -100,6 +143,14 @@ test("Phase 244 customer update retains exact scoped event evidence @phase244-de
   await waitForLiveView(page);
   await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
   await waitForLiveView(page);
+  await page.goto(`/admin?${orgQuery(fixture)}`, { waitUntil: "domcontentloaded" });
+  await waitForLiveView(page);
+
+  const viewEvents = page.getByRole("link", { name: "View events" });
+  await expect(viewEvents).toHaveAttribute("href", `/admin/events?${orgQuery(fixture)}`);
+  await viewEvents.click();
+  await waitForLiveView(page);
+  await expect(page).toHaveURL(new RegExp(`/admin/events\\?org=${fixture.admin_org_alpha_slug}$`));
   await page.goto(`/admin?${orgQuery(fixture)}`, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
 
@@ -146,6 +197,17 @@ async function assertRelatedWebhookEvidence(page, fixture, sandboxId, testInfo, 
 
   await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();
   await expect(page.locator("dd.ax-summary-list-value").filter({ hasText: /^Dead$/ })).toBeVisible();
+
+  const replayFactsBefore = readWebhookReplayFacts(fixture.webhook_id);
+  await page.getByRole("button", { name: "Replay webhook" }).click();
+  const replayForm = page.locator("[data-ax-action-drawer-form]:visible");
+  await expect(replayForm).toContainText("evt_host_browser_replay");
+  await replayForm.getByRole("button", { name: "Confirm replay" }).click();
+  const stepUp = page.getByRole("dialog", { name: "Step-up required" });
+  await expect(stepUp).toBeVisible();
+  expect(readWebhookReplayFacts(fixture.webhook_id)).toEqual(replayFactsBefore);
+  await stepUp.getByRole("button", { name: "Cancel" }).click();
+  await expect(stepUp).toBeHidden();
 
   const activity = page.locator("details[data-ax-lazy-activity]").first();
   const summary = activity.locator("summary.ax-detail-section-head");
@@ -254,6 +316,7 @@ async function assertRelatedWebhookEvidence(page, fixture, sandboxId, testInfo, 
     checkoutHead: execFileSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).trim(),
     ownerSpecSha256: sha256(fs.readFileSync(__filename)),
     fixture: "disposable HOST-BROWSER-VERIFY01 fixture; one customer.updated event linked to the existing scoped webhook; no delivery mutation",
+    replayConfirmation: { result: "step-up required; no job, status, replay-request, or audit change", facts: replayFactsBefore },
     webhookRoute: new URL(webhookRoute, page.url()).href,
     eventRoute: page.url(),
     viewport: page.viewportSize(),
