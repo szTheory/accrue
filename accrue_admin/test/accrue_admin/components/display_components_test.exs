@@ -408,11 +408,11 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   end
 
   describe "JsonViewer" do
-    test "renders tree, raw, and copy surfaces with escaped structured payloads" do
+    test "renders accessible tree and raw tabs with a separate copy action" do
       html =
         render_component(&JsonViewer.json_viewer/1, %{
           id: "payload",
-          active_tab: "copy",
+          active_tab: "tree",
           payload: %{
             "id" => "evt_123",
             "nested" => [%{"kind" => "charge.succeeded"}],
@@ -423,9 +423,18 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert html =~ "Payload"
       assert html =~ "Tree"
       assert html =~ "Raw"
-      assert html =~ "Copy"
+      assert html =~ ~s(role="tablist")
+      assert html =~ ~s(role="tab")
+      assert html =~ ~s(aria-selected="true")
+      assert html =~ ~s(aria-selected="false")
+      assert html =~ ~s(data-json-tab="tree")
+      assert html =~ ~s(data-json-tab="raw")
+      refute html =~ ~s(data-json-tab="copy")
       assert html =~ "Copy payload"
       assert html =~ ~s(phx-hook="Clipboard")
+      assert html =~ ~s(phx-hook="JsonViewerTabs")
+      raw_panel = Floki.find(Floki.parse_document!(html), "#payload-raw-panel") |> hd()
+      assert Floki.attribute(raw_panel, "hidden") == ["hidden"]
       assert html =~ "&lt;script&gt;alert(1)&lt;/script&gt;"
       refute html =~ "<script>alert(1)</script>"
     end
@@ -441,6 +450,16 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert html =~ "__struct__"
       assert html =~ "Accrue.Money"
       refute html =~ "amount_minor"
+
+      document = Floki.parse_document!(html)
+      raw_tab = Floki.find(document, "#payload-raw-tab") |> hd()
+      assert Floki.attribute(raw_tab, "aria-selected") == ["true"]
+
+      tree_panel = Floki.find(document, "#payload-tree-panel") |> hd()
+      assert Floki.attribute(tree_panel, "hidden") == ["hidden"]
+
+      raw_panel = Floki.find(document, "#payload-raw-panel") |> hd()
+      assert Floki.attribute(raw_panel, "hidden") == []
     end
   end
 

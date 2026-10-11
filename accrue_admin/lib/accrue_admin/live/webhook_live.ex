@@ -266,20 +266,23 @@ defmodule AccrueAdmin.Live.WebhookLive do
         </div>
 
         <details :if={@webhook} id={"webhook-activity-#{@webhook.id}"} class="ax-detail-section" data-ax-lazy-activity phx-hook="PreserveDisclosure" phx-click="load_activity">
-          <summary class="ax-detail-section-head">
+          <summary class="ax-detail-section-head ax-disclosure-summary" aria-controls="webhook-activity-content">
             <span class="ax-detail-section-title">Activity</span>
           </summary>
 
-          <section :if={@timeline_events_loaded?}>
+          <section id="webhook-activity-content">
             <p
-              :if={@attempt_history == [] and @derived_events == []}
+              :if={@timeline_events_loaded? and @attempt_history == [] and @derived_events == []}
               class="ax-body"
               data-role="webhook-activity-empty"
             >
               No dispatch attempts or derived billing events are recorded for this webhook yet.
             </p>
 
-            <div :if={@attempt_history != [] or @derived_events != []} class="ax-grid ax-grid-2">
+            <div
+              :if={@timeline_events_loaded? and (@attempt_history != [] or @derived_events != [])}
+              class="ax-grid ax-grid-2"
+            >
               <Timeline.timeline
                 label="Webhook attempt history"
                 empty_label="No dispatch attempts recorded yet"
@@ -300,20 +303,22 @@ defmodule AccrueAdmin.Live.WebhookLive do
         </details>
 
         <details :if={@webhook} id="webhook-raw-payload" class="ax-detail-section" data-ax-lazy-json phx-hook="PreserveDisclosure" phx-click="load_raw_json">
-          <summary class="ax-detail-section-head">
+          <summary class="ax-detail-section-head ax-disclosure-summary" aria-controls="webhook-payload-content">
             <span class="ax-detail-section-title">Raw payload</span>
           </summary>
 
-          <JsonViewer.json_viewer
-            :if={@raw_json_loaded?}
-            id="webhook-payload"
-            label="Webhook payload"
-            payload={payload_for(@webhook)}
-          />
+          <section id="webhook-payload-content">
+            <JsonViewer.json_viewer
+              :if={@raw_json_loaded?}
+              id="webhook-payload"
+              label="Webhook payload"
+              payload={payload_for(@webhook)}
+            />
 
-          <p :if={!@raw_json_loaded?} class="ax-body">
-            Open Raw payload to inspect the stored processor event body.
-          </p>
+            <p :if={!@raw_json_loaded?} class="ax-body">
+              Open Raw payload to inspect the stored processor event body.
+            </p>
+          </section>
         </details>
 
         <DetailDrawer.detail_drawer

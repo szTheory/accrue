@@ -117,6 +117,10 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert data_attr_count(html, "data-ax-lazy-json") == 1
     assert length(Regex.scan(~r/phx-hook="PreserveDisclosure"/, html)) == 2
 
+    assert length(
+             Floki.find(Floki.parse_document!(html), "details > summary.ax-disclosure-summary")
+           ) == 2
+
     for label <- [
           "Endpoint",
           "Received / processed",
@@ -651,6 +655,23 @@ defmodule AccrueAdmin.WebhookLiveTest do
     html = render_click(element(view, "[data-ax-lazy-json]"))
     assert html =~ "webhook-payload"
     assert html =~ "evt_detail"
+
+    document = Floki.parse_document!(html)
+    tabs = Floki.find(document, "#webhook-payload [role=tab]")
+    assert Enum.map(tabs, &(Floki.text(&1) |> String.trim())) == ["Tree", "Raw"]
+
+    tree_tab = Floki.find(document, "#webhook-payload-tree-tab") |> hd()
+    assert Floki.attribute(tree_tab, "aria-selected") == ["true"]
+
+    raw_panel = Floki.find(document, "#webhook-payload-raw-panel") |> hd()
+    assert Floki.attribute(raw_panel, "hidden") == [""]
+
+    copy_button = Floki.find(document, "#webhook-payload-copy") |> hd()
+    assert Floki.attribute(copy_button, "role") == []
+
+    assert Floki.attribute(copy_button, "data-clipboard-text") == [
+             Jason.encode!(Jason.decode!(webhook.raw_body), pretty: true)
+           ]
   end
 
   test "keeps activity feed path and lazy Activity marker in DETAIL layout", %{

@@ -2021,6 +2021,14 @@ a.ax-kpi-card--linked:focus-visible {
   min-width: 0;
 }
 
+.ax-json-viewer [hidden] {
+  display: none;
+}
+
+.ax-json-viewer-header > .ax-tabs {
+  flex: 1 1 auto;
+}
+
 .ax-json-tree-root,
 .ax-json-children {
   display: grid;
@@ -6279,6 +6287,22 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   gap: var(--ax-space-md);
   min-height: 1.375rem;
   padding-block: 0.03125rem;
+}
+
+.ax-disclosure-summary {
+  min-height: 44px;
+  cursor: pointer;
+  border-radius: var(--ax-radius-sm);
+}
+
+.ax-disclosure-summary::marker {
+  color: var(--ax-accent-readable);
+  font-size: 1.1em;
+}
+
+.ax-disclosure-summary:focus-visible {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
 }
 
 .ax-detail-section-title {
