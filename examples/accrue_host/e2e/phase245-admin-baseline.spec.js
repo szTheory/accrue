@@ -394,6 +394,7 @@ test("capture reachable mounted Admin templates with bounded theme and viewport 
   console.log("[phase245-capture] supplemental search states start");
   await page.goto("/admin", { timeout: 15_000 });
   await expect(page).toHaveURL(/\/admin$/);
+  await page.locator("[data-phx-main].phx-connected").waitFor({ timeout: 10_000 });
   await page.keyboard.press("Control+k");
   const searchDialog = page.getByRole("dialog", { name: "Global search" });
   await expect(searchDialog).toBeVisible();
