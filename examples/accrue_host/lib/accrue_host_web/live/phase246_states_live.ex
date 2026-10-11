@@ -10,6 +10,7 @@ defmodule AccrueHostWeb.Phase246StatesLive do
   def mount(params, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
     table_case = valid_table_case(params["table"])
+    if table_case == "long", do: send(self(), {:apply_table_fixture, table_case})
 
     {:ok,
      assign(socket,
@@ -28,6 +29,13 @@ defmodule AccrueHostWeb.Phase246StatesLive do
        search_attrs: search_attrs("success"),
        columns: columns()
      )}
+  end
+
+  @impl true
+  def handle_info({:apply_table_fixture, test_case}, socket) do
+    attrs = table_attrs(test_case)
+    send_update(DataTable, Keyword.merge([id: @table_id, params: %{}], Map.to_list(attrs)))
+    {:noreply, socket}
   end
 
   @impl true
