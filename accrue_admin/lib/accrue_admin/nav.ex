@@ -51,7 +51,7 @@ defmodule AccrueAdmin.Nav do
         badge: nil
       },
       %{
-        label: "Recovery",
+        label: "Payment recovery",
         href: nav_href(mount_path, "/analytics/recovery", org),
         icon: :recovery,
         group: "Recovery",

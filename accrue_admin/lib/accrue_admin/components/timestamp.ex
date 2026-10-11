@@ -9,12 +9,13 @@ defmodule AccrueAdmin.Components.Timestamp do
   def timestamp(assigns) do
     case assigns.value do
       %DateTime{} = value ->
-        iso = DateTime.to_iso8601(value)
+        utc = DateTime.shift_zone!(value, "Etc/UTC", Calendar.UTCOnlyTimeZoneDatabase)
+        iso = DateTime.to_iso8601(utc)
 
         assigns =
           assigns
           |> assign(:iso, iso)
-          |> assign(:utc_text, Calendar.strftime(value, "%b %d, %Y %H:%M:%S UTC"))
+          |> assign(:utc_text, Calendar.strftime(utc, "%b %d, %Y %H:%M:%S UTC"))
 
         ~H"""
         <span id={@id} class="ax-timestamp" data-time-display data-iso={@iso} phx-hook="TimeDisplay">

@@ -33,6 +33,8 @@ test("shared preference persists Local and UTC and renders the active mode", () 
   const win = { localStorage: { getItem: (key) => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) } };
 
   assert.equal(initTimeDisplayPreference(doc, win), "local");
+  assert.equal(setTimeDisplayPreference("local", doc, win), "local");
+  assert.equal(values.get("accrue_admin_time_display"), "local");
   assert.equal(setTimeDisplayPreference("utc", doc, win), "utc");
   assert.equal(values.get("accrue_admin_time_display"), "utc");
   assert.equal(control.value, "utc");

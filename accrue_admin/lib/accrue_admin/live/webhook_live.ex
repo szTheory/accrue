@@ -328,6 +328,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
           subtitle="Replay stays scoped to this delivery row and is confirmed with step-up authentication."
           close_event="cancel_replay"
           close_label="Cancel replay"
+          show_close_button={false}
         >
           <.replay_drawer_form
             webhook={@webhook}

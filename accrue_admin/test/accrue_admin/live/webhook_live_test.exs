@@ -149,6 +149,15 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert has_element?(view, "[data-ax-action-drawer-form][data-role='replay-confirm']")
     assert html =~ "Confirm replay"
     assert html =~ "Cancel replay"
+    assert length(Regex.scan(~r/Cancel replay/, html)) == 2
+
+    active_drawer =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find("#webhook-replay-drawer-portal")
+      |> hd()
+
+    assert length(Floki.find(active_drawer, "button.ax-button-ghost")) == 1
 
     html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm replay"))
     assert html =~ Copy.step_up_title()

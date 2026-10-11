@@ -13,6 +13,7 @@ defmodule AccrueAdmin.Components.DetailDrawer do
   attr(:subtitle, :string, default: nil)
   attr(:eyebrow, :string, default: "Details")
   attr(:close_label, :string, default: "Close")
+  attr(:show_close_button, :boolean, default: true)
   attr(:close_href, :string, default: nil)
   attr(:close_event, :string, default: nil)
   attr(:class, :string, default: nil)
@@ -34,7 +35,7 @@ defmodule AccrueAdmin.Components.DetailDrawer do
       presentation={:drawer}
       title={@title}
       subtitle={@subtitle}
-      close_label={drawer_close_label(@close_href, @close_label)}
+      close_label={drawer_close_label(@close_href, @close_label, @show_close_button)}
       close_event={@focus_trap_close_event}
       close_target={@focus_trap_close_target}
       component_group="drawer-form"
@@ -56,9 +57,8 @@ defmodule AccrueAdmin.Components.DetailDrawer do
     """
   end
 
-  defp drawer_close_label(nil, close_label), do: close_label
-  defp drawer_close_label("", close_label), do: close_label
-  defp drawer_close_label(_close_href, _close_label), do: ""
+  defp drawer_close_label(_close_href, close_label, true), do: close_label
+  defp drawer_close_label(_close_href, _close_label, false), do: ""
 
   defp focus_trap_close_event(assigns) do
     assigns.close_event || rest_value(assigns.rest, "phx-click")

@@ -978,7 +978,7 @@ defmodule AccrueAdmin.Copy do
 
   def recovery_index_subtitle,
     do:
-      "Review payment recovery activity, the dunning funnel, and subscriptions currently in dunning."
+      "Review recovery from failed payments, automated retry outcomes, and subscriptions still in retry."
 
   def recovery_cutoff_link_label, do: "Cutoff-date semantics"
 

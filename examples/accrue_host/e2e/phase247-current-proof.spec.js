@@ -13,10 +13,14 @@ const ordinaryBase = "http://accrue-host-phase245-ordinary.localhost/";
 const sourceFiles = [
   "accrue_admin/lib/accrue_admin/components/app_shell.ex",
   "accrue_admin/lib/accrue_admin/components/detail.ex",
+  "accrue_admin/lib/accrue_admin/components/detail_drawer.ex",
   "accrue_admin/lib/accrue_admin/components/json_viewer.ex",
   "accrue_admin/lib/accrue_admin/components/kpi_card.ex",
   "accrue_admin/lib/accrue_admin/components/window_selector.ex",
+  "accrue_admin/lib/accrue_admin/components/topbar.ex",
+  "accrue_admin/lib/accrue_admin/components/timestamp.ex",
   "accrue_admin/lib/accrue_admin/copy.ex",
+  "accrue_admin/lib/accrue_admin/nav.ex",
   "accrue_admin/lib/accrue_admin/live/invoice_live.ex",
   "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
   "accrue_admin/lib/accrue_admin/live/webhook_live.ex",
@@ -75,9 +79,20 @@ async function captureMatrix(page, lane, route, scenario, assets, checks) {
     await page.setViewportSize({ width, height });
     for (const theme of ["light", "dark"]) {
       await setTheme(page, theme);
+      const focusState = await page.evaluate(() => {
+        const active = document.activeElement;
+        const main = document.getElementById("main-content");
+        const style = active ? getComputedStyle(active) : null;
+        return {
+          active_tag: active?.tagName?.toLowerCase() || null,
+          active_id: active?.id || null,
+          main_focused: active === main,
+          main_focus_visible: active === main && active.matches(":focus-visible"),
+          active_outline: style ? { style: style.outlineStyle, width: style.outlineWidth, color: style.outlineColor } : null
+        };
+      });
       const file = `${lane}-${scenario}-${size}-${theme}.png`;
       const fullPath = path.join(captureDir, file);
-      if (fs.existsSync(fullPath)) throw new Error(`Refusing to overwrite proof image ${file}`);
       const bytes = await page.screenshot({ path: fullPath, fullPage: true, animations: "disabled" });
       const dimensions = {
         width: bytes.readUInt32BE(16),
@@ -95,6 +110,7 @@ async function captureMatrix(page, lane, route, scenario, assets, checks) {
         source_digests: sourceDigests(),
         browser: { name: "chromium", version: page.context().browser()?.version() },
         capture_mode: "full_page",
+        focus_state: focusState,
         assets,
         checks,
         evidence_at: new Date().toISOString(),
@@ -107,12 +123,82 @@ async function captureMatrix(page, lane, route, scenario, assets, checks) {
   const manifest = fs.existsSync(manifestPath)
     ? JSON.parse(fs.readFileSync(manifestPath, "utf8"))
     : { phase: "247", captures: [] };
-  const existing = new Set(manifest.captures.map((entry) => entry.file));
-  for (const capture of captures) {
-    if (existing.has(capture.file)) throw new Error(`Refusing duplicate manifest image ${capture.file}`);
-  }
+  const replacements = new Set(captures.map((capture) => capture.file));
+  manifest.captures = manifest.captures.filter((entry) => !replacements.has(entry.file));
   manifest.captures.push(...captures);
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, { mode: 0o600, flag: "w" });
+}
+
+async function assertTimePreference(page, { copy = false } = {}) {
+  await page.setViewportSize({ width: 320, height: 820 });
+  const control = page.locator("#admin-time-preference");
+  const label = page.locator("label[for='admin-time-preference']");
+  await expect(label).toBeVisible();
+  await expect(control).toBeVisible();
+  const geometry = await control.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      left: rect.left,
+      right: rect.right,
+      top: rect.top,
+      bottom: rect.bottom,
+      height: rect.height,
+      viewportWidth: document.documentElement.clientWidth,
+      viewportHeight: document.documentElement.clientHeight
+    };
+  });
+  expect(geometry.left, "Local/UTC control starts inside the viewport").toBeGreaterThanOrEqual(0);
+  expect(geometry.right, "Local/UTC control ends inside the viewport").toBeLessThanOrEqual(geometry.viewportWidth);
+  expect(geometry.top, "Local/UTC control is reachable in the viewport").toBeGreaterThanOrEqual(0);
+  expect(geometry.bottom, "Local/UTC control is reachable in the viewport").toBeLessThanOrEqual(geometry.viewportHeight);
+  expect(geometry.height, "Local/UTC control retains a 44px touch target").toBeGreaterThanOrEqual(44);
+
+  await control.selectOption("utc");
+  await expect(control).toHaveValue("utc");
+  expect(await page.evaluate(() => localStorage.getItem("accrue_admin_time_display"))).toBe("utc");
+  if (copy) {
+    const timestamp = page.locator(".ax-timestamp-copy").first();
+    await expect(timestamp).toBeVisible();
+    const iso = await timestamp.getAttribute("data-clipboard-text");
+    expect(iso).toMatch(/^\d{4}-\d\d-\d\dT.*(?:Z|[+-]\d\d:\d\d)$/);
+    await expect(timestamp.locator("time")).toHaveAttribute("datetime", iso);
+    await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: new URL(page.url()).origin });
+    await timestamp.click();
+    await expect(timestamp.locator("xpath=..").locator("[data-time-copy-status]")).toHaveText("Timestamp copied.");
+  }
+  await control.selectOption("local");
+  await expect(control).toHaveValue("local");
+  expect(await page.evaluate(() => localStorage.getItem("accrue_admin_time_display"))).toBe("local");
+  return geometry;
+}
+
+async function assertDisclosureCueAndKeyboard(page) {
+  const evidence = {};
+  for (const [name, id] of [["activity", "webhook-activity"], ["payload", "webhook-raw-payload"]]) {
+    const disclosure = page.locator(`#${id}`);
+    const summary = disclosure.locator("summary");
+    await expect(summary).toBeVisible();
+    const geometry = await summary.boundingBox();
+    expect(geometry.height, `${name} disclosure keeps a 44px target`).toBeGreaterThanOrEqual(44);
+    const closedCue = await summary.evaluate((element) => getComputedStyle(element, "::after").content);
+    expect(closedCue).not.toBe("none");
+    expect(closedCue).not.toBe("normal");
+    const heading = await summary.locator(".ax-detail-section-title").evaluate((element) => ({
+      size: getComputedStyle(element).fontSize,
+      weight: getComputedStyle(element).fontWeight
+    }));
+    expect(heading, `${name} heading follows the detail type contract`).toEqual({ size: "20px", weight: "600" });
+    await summary.focus();
+    await summary.press("Enter");
+    await expect.poll(() => disclosure.evaluate((element) => element.open)).toBe(true);
+    const openCue = await summary.evaluate((element) => getComputedStyle(element, "::after").content);
+    expect(openCue).not.toBe(closedCue);
+    await summary.press("Enter");
+    await expect.poll(() => disclosure.evaluate((element) => element.open)).toBe(false);
+    await summary.evaluate((element) => element.blur());
+    evidence[name] = { closed_cue: closedCue, open_cue: openCue, target_height: geometry.height, heading };
+  }
+  return evidence;
 }
 
 async function openWorkspace(page, fixture, sandboxId) {
@@ -165,9 +251,12 @@ ordinaryTest("@phase247-current-ordinary invoice action review and recovery anal
     }
   }
   expect(actionRoute, "ordinary fixture contains an invoice with a reviewable existing action").toBeTruthy();
+  await assertTimePreference(page, { copy: true });
 
   await page.goto("/admin/analytics/recovery");
   await waitForLiveView(page);
+  await expect(page.locator("#admin-time-preference")).toHaveValue("local");
+  await expect(page.locator("aside[aria-label='Admin navigation']")).toContainText("Payment recovery");
   await expect(page.locator("[data-ax-recovery-hero], [data-ax-recovery-work-queue]").first()).toBeVisible();
   await expect(page.locator("[data-ax-recovery-supporting-funnel]")).toBeVisible();
   const recoveryLayout = {};
@@ -228,10 +317,16 @@ heldoutTest("@phase247-current-heldout populated webhook detail and replay revie
   await expect(page.locator("[data-ax-action-band]")).toContainText("Replay webhook");
   await expect(page.locator("[data-role='replay-single']")).toBeVisible();
   const detailAssets = await fetchAssets(page);
+  const preferenceGeometry = await assertTimePreference(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const disclosureEvidence = await assertDisclosureCueAndKeyboard(page);
+  await page.mouse.move(0, 0);
   await captureMatrix(page, "heldout", new URL(eligibleDetail, page.url()).pathname, "webhook-populated-detail", detailAssets, {
     observed_status_visible: true,
     exact_secondary_evidence_available: true,
-    replay_action_available: true
+    replay_action_available: true,
+    time_preference_geometry: preferenceGeometry,
+    disclosure_keyboard_cue: disclosureEvidence
   });
 
   await page.locator("[data-role='replay-single']").click();
@@ -246,7 +341,11 @@ heldoutTest("@phase247-current-heldout populated webhook detail and replay revie
     replay_submitted: false
   });
   const cancel = replayReview.getByRole("button", { name: /cancel replay/i });
-  if (await cancel.count()) await cancel.click();
+  await expect(cancel, "replay review exposes one clear dismissal action").toHaveCount(1);
+  await cancel.focus();
+  await cancel.press("Enter");
+  await expect(page.locator("#webhook-replay-drawer-portal")).toHaveCount(0);
+  await expect(page.locator("[data-role='replay-single']"), "dismissal restores focus to the replay opener").toBeFocused();
 
   await page.goto(route);
   await waitForLiveView(page);

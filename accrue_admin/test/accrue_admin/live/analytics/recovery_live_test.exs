@@ -73,6 +73,9 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
     assert html =~ Copy.recovery_index_heading()
     assert html =~ Copy.recovery_index_subtitle()
+    assert html =~ "automated retry outcomes"
+    refute html =~ "dunning funnel"
+    assert html =~ "Payment recovery"
     assert html =~ "Recovered MRR (USD)"
     assert html =~ "$50.00"
     assert html =~ "Exhausted MRR (USD)"

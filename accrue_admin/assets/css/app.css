@@ -4891,6 +4891,27 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
+  .ax-topbar-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--ax-space-xs);
+  }
+
+  .ax-time-preference {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    min-width: 0;
+  }
+
+  .ax-topbar-actions > .ax-search-trigger {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    justify-content: center;
+  }
+
   .ax-icon-label {
     position: absolute;
     width: 1px;
@@ -6338,11 +6359,20 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   min-height: 44px;
   cursor: pointer;
   border-radius: var(--ax-radius-sm);
+  list-style: none;
 }
 
-.ax-disclosure-summary::marker {
+.ax-disclosure-summary::after {
+  content: "▾";
+  flex: none;
+  margin-inline-start: auto;
   color: var(--ax-accent-readable);
-  font-size: 1.1em;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.ax-detail-section[open] > .ax-disclosure-summary::after {
+  content: "▴";
 }
 
 .ax-disclosure-summary:focus-visible {
@@ -6354,15 +6384,14 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   color: var(--ax-primary);
-  font-size: var(--ax-type-md);
-  font-weight: 850;
+  font-size: var(--ax-type-lg);
+  font-weight: 600;
 }
 
 .ax-subscription-detail-page .ax-detail-section-title {
   color: var(--ax-primary);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-size: var(--ax-type-md);
-  font-weight: 900;
+  font-size: var(--ax-type-lg);
+  font-weight: 600;
 }
 
 .ax-subscription-detail-page .ax-detail-section-title-audit {
