@@ -59,11 +59,20 @@ defmodule AccrueAdmin.Live.CouponsLive do
 
   @impl true
   def handle_event("data_table_filter", params, socket) do
+    params = Map.drop(params, ["_target", "_csrf_token"])
+
+    params =
+      if Map.get(params, "valid") in [nil, ""] do
+        params |> Map.put("valid", nil) |> Map.put("view", "all")
+      else
+        Map.put(params, "view", nil)
+      end
+
     {:noreply,
      AccrueAdmin.DataTableNav.patch_with_filters(
        socket,
        socket.assigns.table_path,
-       Map.drop(params, ["_target", "_csrf_token"])
+       params
      )}
   end
 
@@ -73,8 +82,9 @@ defmodule AccrueAdmin.Live.CouponsLive do
   end
 
   def handle_params(params, _uri, socket) do
-    if map_size(params) == 0 or map_only_scope?(params) do
+    if not Map.has_key?(params, "valid") and not Map.has_key?(params, "view") do
       default = build_default_params(socket.assigns[:current_owner_scope], @default_valid)
+      default = Map.merge(params, default)
       to = AccrueAdmin.DataTableNav.merge_query(socket.assigns.table_path, default)
 
       if connected?(socket) do
@@ -310,10 +320,6 @@ defmodule AccrueAdmin.Live.CouponsLive do
   end
 
   defp coupon_lens_chips(params, table_path) do
-    valid_active? = default_valid_active?(params)
-    all_active? = Map.get(params, "view") == "all"
-    clear_href = clear_all_href(params, table_path)
-
     filter_chips =
       params
       |> filter_params()
@@ -329,22 +335,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
         }
       end)
 
-    [
-      %{
-        id: :valid_coupons,
-        label: Copy.coupons_list_default_lens_label(),
-        tone: :cobalt,
-        active: valid_active?,
-        remove_href: if(valid_active?, do: clear_href)
-      },
-      %{
-        id: :view_all,
-        label: Copy.coupons_list_all_lens_label(),
-        tone: :slate,
-        active: valid_active? or all_active?,
-        href: if(valid_active?, do: clear_href)
-      }
-    ] ++ filter_chips
+    filter_chips
   end
 
   defp filter_chip_label("q"), do: Copy.coupon_filter_label_search()
@@ -453,10 +444,6 @@ defmodule AccrueAdmin.Live.CouponsLive do
   end
 
   defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
-
-  defp map_only_scope?(params) do
-    params != %{} and Map.keys(params) -- ["org"] == []
-  end
 
   defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 

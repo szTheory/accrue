@@ -108,12 +108,38 @@ defmodule AccrueAdmin.CouponsLiveTest do
     assert {:ok, _view, html} = live(conn, contract.route)
 
     assert html =~ ~s(data-ax-filter-chips)
-    assert html =~ contract.default_lens.label
-    assert html =~ "All coupons"
+
+    assert html
+           |> Floki.parse_document!()
+           |> Floki.find("[role='radiogroup'] input[type='radio'][value='true'][checked]")
+           |> length() == 1
+
     assert html =~ ~s(data-ax-result-count)
     assert html =~ "Showing"
     assert html =~ "coupons"
     assert html =~ ~s(data-ax-clear-all)
+  end
+
+  test "All and Valid coupon lenses each expose one selected state", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, valid_html} = live(conn, "/billing/coupons")
+
+    valid_options =
+      Floki.parse_document!(valid_html) |> Floki.find("[role='radiogroup'] input[type='radio']")
+
+    assert Enum.count(valid_options, &(Floki.attribute(&1, "checked") != [])) == 1
+    valid = Enum.find(valid_options, &(Floki.attribute(&1, "value") == ["true"]))
+    assert Floki.attribute(valid, "checked") != []
+
+    assert {:ok, _view, all_html} = live(conn, "/billing/coupons?view=all")
+
+    all_options =
+      Floki.parse_document!(all_html) |> Floki.find("[role='radiogroup'] input[type='radio']")
+
+    assert Enum.count(all_options, &(Floki.attribute(&1, "checked") != [])) == 1
+    all = Enum.find(all_options, &(Floki.attribute(&1, "value") == [""]))
+    assert Floki.attribute(all, "checked") != []
   end
 
   test "coupon clear-all routes to All while preserving organization scope", %{conn: conn} do

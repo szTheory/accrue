@@ -55,11 +55,18 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   @impl true
   def handle_event("data_table_filter", params, socket) do
+    params =
+      params
+      |> Map.drop(["_target", "_csrf_token"])
+      |> Map.update("status", nil, &Subscriptions.normalize_status_selection/1)
+
+    params = if is_nil(params["status"]), do: Map.put(params, "view", "all"), else: params
+
     {:noreply,
      AccrueAdmin.DataTableNav.patch_with_filters(
        socket,
        socket.assigns.table_path,
-       Map.drop(params, ["_target", "_csrf_token"])
+       params
      )}
   end
 
@@ -84,7 +91,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   @impl true
   def handle_params(%{"view" => "all"} = params, _uri, socket) do
-    {:noreply, assign(socket, :params, params)}
+    assign_canonical_params(socket, params)
   end
 
   def handle_params(params, _uri, socket) do
@@ -98,7 +105,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         {:noreply, assign(socket, :params, default)}
       end
     else
-      {:noreply, assign(socket, :params, params)}
+      assign_canonical_params(socket, params)
     end
   end
 
@@ -458,25 +465,35 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     [
       %{
         id: :q,
-        label: "Filter subscriptions table",
-        placeholder: "Filter by customer email, customer ID, subscription ID, or actor"
+        label: "Search subscriptions",
+        placeholder: "Customer email, name, or subscription ID"
       },
-      %{
-        id: :status,
-        label: "Status",
-        type: :select,
-        all_label: "All statuses",
-        options: [
-          {"active", "Active"},
-          {"trialing", "Trialing"},
-          {"canceling", "Canceling"},
-          {"paused", "Paused"},
-          {"past_due", "Past due"},
-          {"canceled", "Canceled"}
+      {
+        :status,
+        [
+          label: "Status",
+          type: :checkbox_group,
+          options: [
+            {"active", "Active"},
+            {"trialing", "Trialing"},
+            {"canceling", "Canceling"},
+            {"paused", "Paused"},
+            {"past_due", "Past due"},
+            {"canceled", "Canceled"}
+          ]
         ]
       },
-      %{id: :customer_id, label: "Customer id", placeholder: "Customer id"}
+      %{
+        id: :customer_id,
+        label: "Customer ID",
+        placeholder: "Customer ID",
+        secondary: true
+      }
     ]
+    |> Enum.map(fn
+      {id, opts} -> Map.new(opts) |> Map.put(:id, id)
+      field -> field
+    end)
   end
 
   defp filter_params(params) do
@@ -484,6 +501,29 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     |> Subscriptions.decode_filter()
     |> Subscriptions.encode_filter()
     |> Map.new(fn {key, value} -> {to_string(key), to_string(value)} end)
+  end
+
+  defp assign_canonical_params(socket, params) do
+    canonical =
+      case Map.get(params, "status") do
+        nil ->
+          params
+
+        status ->
+          case Subscriptions.normalize_status_selection(status) do
+            nil -> Map.delete(params, "status")
+            normalized -> Map.put(params, "status", normalized)
+          end
+      end
+
+    if connected?(socket) and canonical != params do
+      {:noreply,
+       Phoenix.LiveView.push_patch(socket,
+         to: AccrueAdmin.DataTableNav.merge_query(socket.assigns.table_path, canonical)
+       )}
+    else
+      {:noreply, assign(socket, :params, canonical)}
+    end
   end
 
   defp flash_messages(flash) do

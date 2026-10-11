@@ -80,6 +80,48 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "?view=all"
   end
 
+  test "status controls round-trip the default queue, direct sets, and All rows", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, default_html} = live(conn, "/billing/subscriptions")
+
+    default_controls =
+      Floki.parse_document!(default_html) |> Floki.find("[data-filter-group='status'] input")
+
+    default_selected =
+      Enum.filter(default_controls, &(Floki.attribute(&1, "checked") != []))
+      |> Enum.map(&(Floki.attribute(&1, "value") |> hd()))
+      |> Enum.sort()
+
+    assert default_selected == ["canceling", "past_due"]
+
+    assert {:ok, _view, direct_html} =
+             live(
+               conn,
+               "/billing/subscriptions?view=all&status=paused%2Cactive&q=factory-sub-active"
+             )
+
+    direct_controls =
+      Floki.parse_document!(direct_html) |> Floki.find("[data-filter-group='status'] input")
+
+    selected =
+      Enum.filter(direct_controls, &(Floki.attribute(&1, "checked") != []))
+      |> Enum.map(&(Floki.attribute(&1, "value") |> hd()))
+      |> Enum.sort()
+
+    assert selected == ["active", "paused"]
+    rows = Floki.parse_document!(direct_html) |> Floki.find("tbody > tr[data-row-id]")
+    assert length(rows) == 1
+    assert Floki.text(hd(rows)) =~ "factory-sub-active@example.com"
+
+    assert {:ok, _view, all_html} = live(conn, "/billing/subscriptions?view=all")
+
+    all_controls =
+      Floki.parse_document!(all_html) |> Floki.find("[data-filter-group='status'] input")
+
+    refute Enum.any?(all_controls, &(Floki.attribute(&1, "checked") != []))
+  end
+
   test "renders Subscriptions through PageHeader with exactly one h1", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
