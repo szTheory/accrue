@@ -276,6 +276,10 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   autofocus
                   class="ax-command-palette-input"
                   id="global-search-input"
+                  role="combobox"
+                  aria-haspopup="listbox"
+                  aria-expanded="true"
+                  aria-autocomplete="list"
                   data-focus-trap-initial
                   aria-describedby="global-search-help global-search-active-result"
                 />
@@ -291,19 +295,19 @@ defmodule AccrueAdmin.Components.GlobalSearch do
               <%= if @query == "" do %>
                 <div class="ax-command-palette-empty">
                   <p class="ax-body ax-command-palette-orientation">Choose a customer, invoice, or subscription</p>
-                  <ul class="ax-command-palette-list">
+                  <ul id="global-search-options-shortcuts" class="ax-command-palette-list" role="listbox" aria-label="Billing destinations">
                     <li class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers", @current_owner_scope)}>
+                      <a id="global-search-option-shortcut-customers" role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers", @current_owner_scope)}>
                         <Icon.icon name={:users} size="sm" /> <span>Customers</span>
                       </a>
                     </li>
                     <li class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices", @current_owner_scope)} data-path={scoped_path(@mount_path, "/invoices", @current_owner_scope)}>
+                      <a id="global-search-option-shortcut-invoices" role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices", @current_owner_scope)} data-path={scoped_path(@mount_path, "/invoices", @current_owner_scope)}>
                         <Icon.icon name={:invoices} size="sm" /> <span>Invoices</span>
                       </a>
                     </li>
                     <li class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/subscriptions", @current_owner_scope)} data-path={scoped_path(@mount_path, "/subscriptions", @current_owner_scope)}>
+                      <a id="global-search-option-shortcut-subscriptions" role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/subscriptions", @current_owner_scope)} data-path={scoped_path(@mount_path, "/subscriptions", @current_owner_scope)}>
                         <Icon.icon name={:recovery} size="sm" /> <span>Subscriptions</span>
                       </a>
                     </li>
@@ -329,9 +333,9 @@ defmodule AccrueAdmin.Components.GlobalSearch do
 
                 <%= if @results.customers != [] do %>
                   <p class="ax-eyebrow">Customers</p>
-                  <ul class="ax-command-palette-list" data-search-group="customers">
+                  <ul id="global-search-options-customers" class="ax-command-palette-list" role="listbox" aria-label="Customers" data-search-group="customers">
                     <li :for={customer <- @results.customers} class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)}>
+                      <a id={"global-search-option-customers-#{customer.id}"} role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)}>
                         <span><strong><%= customer.name || customer.email || customer.id %></strong>
                           <small><%= customer.email %><%= if customer.owner_id, do: " · #{customer.owner_type} #{customer.owner_id}" %><%= if customer.processor_id, do: " · #{customer.processor} #{customer.processor_id}" %></small>
                           <code>Customer ID: <%= customer.id %></code>
@@ -343,9 +347,9 @@ defmodule AccrueAdmin.Components.GlobalSearch do
 
                 <%= if @results.invoices != [] do %>
                   <p class="ax-eyebrow">Invoices</p>
-                  <ul class="ax-command-palette-list" data-search-group="invoices">
+                  <ul id="global-search-options-invoices" class="ax-command-palette-list" role="listbox" aria-label="Invoices" data-search-group="invoices">
                     <li :for={invoice <- @results.invoices} class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}>
+                      <a id={"global-search-option-invoices-#{invoice.id}"} role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}>
                         <span><strong><%= invoice.number || invoice.id %></strong>
                           <small><%= invoice.customer_name %><%= if invoice.customer_email, do: " · #{invoice.customer_email}" %><%= if invoice.processor_id, do: " · #{invoice.processor_id}" %></small>
                           <code>Invoice ID: <%= invoice.id %></code>
@@ -357,9 +361,9 @@ defmodule AccrueAdmin.Components.GlobalSearch do
 
                 <%= if @results.subscriptions != [] do %>
                   <p class="ax-eyebrow">Subscriptions</p>
-                  <ul class="ax-command-palette-list" data-search-group="subscriptions">
+                  <ul id="global-search-options-subscriptions" class="ax-command-palette-list" role="listbox" aria-label="Subscriptions" data-search-group="subscriptions">
                     <li :for={sub <- @results.subscriptions} class="ax-command-palette-list-item">
-                      <a class="ax-command-palette-item" href={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)}>
+                      <a id={"global-search-option-subscriptions-#{sub.id}"} role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)}>
                         <span><strong><%= sub.customer_name || sub.customer_email || sub.id %> · <%= sub.status %></strong>
                           <small><%= sub.customer_email %><%= if sub.processor_id, do: " · #{sub.processor_id}" %></small>
                           <code>Subscription ID: <%= sub.id %></code>

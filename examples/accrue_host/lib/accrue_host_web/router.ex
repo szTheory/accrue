@@ -83,10 +83,6 @@ defmodule AccrueHostWeb.Router do
     live_session :require_authenticated_user,
       session: {__MODULE__, :__live_session__, [@host_live_session_keys]},
       on_mount: @live_acceptance_hooks ++ [{AccrueHostWeb.UserAuth, :require_authenticated}] do
-      if Application.compile_env(:accrue_host, :sql_sandbox) do
-        live("/__phase246/states", Phase246StatesLive, :index)
-      end
-
       live("/app/billing", SubscriptionLive, :show)
       live("/app/entitlements/diagnostics", EntitlementDiagnosticsLive, :show)
       live("/users/settings", UserLive.Settings, :edit)
@@ -94,6 +90,25 @@ defmodule AccrueHostWeb.Router do
     end
 
     post("/users/update-password", UserSessionController, :update_password)
+  end
+
+  if Application.compile_env(:accrue_host, :sql_sandbox) do
+    scope "/admin", as: :accrue_admin do
+      pipe_through([:browser, :accrue_admin_browser])
+
+      live_session :phase246_search_fixture,
+        root_layout: {AccrueAdmin.Layouts, :root},
+        session: {AccrueAdmin.Router, :__session__, [[:user_token], "/admin"]},
+        on_mount:
+          @live_acceptance_hooks ++
+            [
+              {AccrueHostWeb.UserAuth, :require_authenticated},
+              {AccrueAdmin.AuthHook, :ensure_admin},
+              {AccrueAdmin.NavBadgeHook, :default}
+            ] do
+        live("/__phase246/states", AccrueHostWeb.Phase246StatesLive, :index)
+      end
+    end
   end
 
   scope "/", AccrueHostWeb do

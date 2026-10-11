@@ -1,0 +1,82 @@
+{
+  "phase": "246",
+  "captures": [
+    {
+      "file": "ordinary-search-results.png",
+      "route": "/admin",
+      "captured_at": "2026-10-11T17:47:39.676Z",
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "system",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/global_search.ex": "11666acd0caca25e9c32220d21bd1b97c38f9bc348172887b49ed60e2d7abecf",
+        "accrue_admin/lib/accrue_admin/components/topbar.ex": "06864bcc7fbf73637bc5a648561d781bac7bba4e01e282e60b77f30a8f08f91a",
+        "accrue_admin/assets/js/hooks/command_palette.js": "088df03f49848adaaf2305c3d2d2abbcd116ba82ca9e1e3395a92d04f00ec8d0",
+        "accrue_admin/assets/css/app.css": "cb2d67f6507dc869a90339a19b96354669c5e28d173626970f16ae4a524c5d49",
+        "accrue_admin/priv/static/accrue_admin.css": "70c198837b30f077936e1a08b89ef1c2e1e58b231fbe6a8ac39ab2bcd776c166",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/lib/accrue_host_web/router.ex": "99340713e47056bc87756e4cf0b7708c955a677f3414beab5d13474111fc6943",
+        "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex": "6e473ca68549b0c4e55ebed993e6097a432e0c8f0a079277000db6fa476183d3",
+        "examples/accrue_host/e2e/phase246-global-search.spec.js": "c62e34b5bcd8a2e726166503c5b9d87a19daab4381b0066eda1f97367b3c9ebf"
+      },
+      "assets": {
+        "css": {
+          "path": "/admin/assets/css-5934ae572301f65468a9814fe8935939",
+          "sha256": "70c198837b30f077936e1a08b89ef1c2e1e58b231fbe6a8ac39ab2bcd776c166",
+          "bytes": 131054
+        },
+        "js": {
+          "path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "screenshot": {
+        "sha256": "bfff1564b61cb73963441cd5066467021f74840c3c1537b2fc04d367cdc312a6",
+        "bytes": 223975
+      }
+    },
+    {
+      "file": "heldout-partial-search-320.png",
+      "route": "/admin/__phase246/states",
+      "captured_at": "2026-10-11T17:51:46.879Z",
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "system",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/global_search.ex": "11666acd0caca25e9c32220d21bd1b97c38f9bc348172887b49ed60e2d7abecf",
+        "accrue_admin/lib/accrue_admin/components/topbar.ex": "06864bcc7fbf73637bc5a648561d781bac7bba4e01e282e60b77f30a8f08f91a",
+        "accrue_admin/assets/js/hooks/command_palette.js": "088df03f49848adaaf2305c3d2d2abbcd116ba82ca9e1e3395a92d04f00ec8d0",
+        "accrue_admin/assets/css/app.css": "cb2d67f6507dc869a90339a19b96354669c5e28d173626970f16ae4a524c5d49",
+        "accrue_admin/priv/static/accrue_admin.css": "70c198837b30f077936e1a08b89ef1c2e1e58b231fbe6a8ac39ab2bcd776c166",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/lib/accrue_host_web/router.ex": "99340713e47056bc87756e4cf0b7708c955a677f3414beab5d13474111fc6943",
+        "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex": "6e473ca68549b0c4e55ebed993e6097a432e0c8f0a079277000db6fa476183d3",
+        "examples/accrue_host/e2e/phase246-global-search.spec.js": "c62e34b5bcd8a2e726166503c5b9d87a19daab4381b0066eda1f97367b3c9ebf"
+      },
+      "assets": {
+        "css": {
+          "path": "/admin/assets/css-5934ae572301f65468a9814fe8935939",
+          "sha256": "70c198837b30f077936e1a08b89ef1c2e1e58b231fbe6a8ac39ab2bcd776c166",
+          "bytes": 131054
+        }
+      },
+      "screenshot": {
+        "sha256": "0327a615853b3a8bef346f16987edf1db2a7d3e8a40c8f8397db30aee5273a84",
+        "bytes": 68437
+      }
+    }
+  ]
+}

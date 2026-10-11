@@ -5,9 +5,13 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
 
   alias Accrue.Billing.{Charge, Coupon, Customer, Invoice, PromotionCode, Refund, Subscription}
   alias Accrue.Events.Event
+  alias AccrueHost.Accounts
+  alias AccrueHost.Accounts.User
+  alias AccrueHost.DemoBrand
   alias AccrueHost.Repo
 
   @ordinary_seed Path.expand("../priv/repo/seeds/ordinary.exs", __DIR__)
+  @phase191_seed Path.expand("../priv/repo/seeds/phase191_flow_states.exs", __DIR__)
 
   setup do
     case Accrue.Processor.Fake.start_link([]) do
@@ -40,6 +44,9 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
   end
 
   test "ordinary seed reruns keep one coherent invoice journey and exclude Phase 191" do
+    Code.eval_file(@phase191_seed)
+    assert Repo.exists?(from(c in Customer, where: like(c.processor_id, "cus_phase191_host%")))
+
     seed_if_available()
     first = invoice_journey()
 
@@ -59,6 +66,39 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
     assert first.phase191_events == 0
     assert first.phase191_customers == 0
     assert first.edge_customers == 0
+
+    assert Repo.aggregate(
+             from(c in Customer, where: like(c.processor_id, "cus_phase191_host%")),
+             :count
+           ) == 0
+
+    assert Repo.aggregate(
+             from(s in Subscription, where: like(s.processor_id, "sub_phase191_host%")),
+             :count
+           ) == 0
+
+    assert Repo.aggregate(
+             from(i in Invoice, where: like(i.processor_id, "in_phase191_host%")),
+             :count
+           ) == 0
+
+    assert Repo.aggregate(
+             from(c in Charge, where: like(c.processor_id, "ch_phase191_host%")),
+             :count
+           ) == 0
+  end
+
+  test "ordinary seed restores the documented password for its demo operator" do
+    seed_if_available()
+    operator = Repo.get_by!(User, email: "admin@example.com")
+
+    {:ok, {_operator, _expired_tokens}} =
+      Accounts.update_user_password(operator, %{password: "stale-preview-password"})
+
+    seed_if_available()
+
+    assert Accounts.get_user_by_email_and_password("admin@example.com", DemoBrand.demo_password())
+    refute Accounts.get_user_by_email_and_password("admin@example.com", "stale-preview-password")
   end
 
   test "showcase invoices without subscription links use a manual billing reason" do

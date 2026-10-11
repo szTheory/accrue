@@ -4251,7 +4251,9 @@ details[open].ax-dropdown .ax-dropdown-panel {
   position: relative;
   display: grid;
   gap: var(--ax-space-md);
-  width: min(42rem, calc(100vw - 2rem));
+  width: min(42rem, 100%);
+  max-width: 100%;
+  box-sizing: border-box;
   max-height: min(42rem, 82vh);
   overflow: hidden;
   border: 1px solid var(--ax-border-strong);

@@ -197,12 +197,28 @@ export const CommandPalette = {
   updateActiveItem() {
     if (!this.items) return;
     
-    this.items.forEach(item => item.classList.remove("ax-active"));
+    this.items.forEach(item => {
+      item.classList.remove("ax-active");
+      item.setAttribute?.("aria-selected", "false");
+    });
     
     const activeItem = this.items[this.activeIndex];
     if (activeItem) {
       activeItem.classList.add("ax-active");
+      activeItem.setAttribute?.("aria-selected", "true");
       activeItem.scrollIntoView({ block: "nearest" });
+    }
+
+    const input = this.el.querySelector?.("input");
+    const listbox = activeItem?.closest?.('[role="listbox"]');
+    if (input) {
+      if (activeItem?.id && listbox?.id) {
+        input.setAttribute?.("aria-activedescendant", activeItem.id);
+        input.setAttribute?.("aria-controls", listbox.id);
+      } else {
+        input.removeAttribute?.("aria-activedescendant");
+        input.removeAttribute?.("aria-controls");
+      }
     }
 
     const status = this.el.querySelector?.("[data-active-result-status]");

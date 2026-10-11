@@ -3,17 +3,26 @@ defmodule AccrueHostWeb.Phase246StatesLive do
 
   use AccrueHostWeb, :live_view
 
-  alias AccrueAdmin.Components.{DataTable, GlobalSearch}
+  alias AccrueAdmin.Components.{AppShell, DataTable, GlobalSearch}
 
   @table_id "phase246-state-table"
-  @search_id "phase246-state-search"
   @columns [%{id: :name, label: "Record"}, %{id: :status, label: "Status"}]
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    admin = Map.get(session, "accrue_admin", %{})
+
     {:ok,
      assign(socket,
        page_title: "Phase 246 Search States",
+       brand: admin["brand"] || %{},
+       theme: admin["theme"] || "system",
+       csp_nonce: admin["csp_nonce"],
+       brand_css_path: admin["brand_css_path"],
+       assets_css_path: admin["assets_css_path"],
+       assets_js_path: admin["assets_js_path"],
+       admin_mount_path: admin["mount_path"] || "/admin",
+       current_path: "/admin/__phase246/states",
        table_case: "populated",
        table_attrs: table_attrs("populated"),
        search_case: "success",
@@ -31,91 +40,88 @@ defmodule AccrueHostWeb.Phase246StatesLive do
 
   def handle_event("show-search-case", %{"case" => test_case}, socket) do
     attrs = search_attrs(test_case)
-    send_update(GlobalSearch, Keyword.merge([id: @search_id], Map.to_list(attrs)))
+    send_update(GlobalSearch, Keyword.merge([id: "global-search"], Map.to_list(attrs)))
     {:noreply, assign(socket, search_case: test_case, search_attrs: attrs)}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <link rel="stylesheet" href={"/admin/assets/css-#{AccrueAdmin.Assets.css_hash()}"} />
-    <main class="phase246-state-fixture" data-testid="phase246-states">
-      <h1>Phase 246 mounted search states</h1>
+    <AppShell.app_shell
+      brand={@brand}
+      current_path={@current_path}
+      mount_path={@admin_mount_path}
+      page_title={@page_title}
+      theme={@theme}
+      current_owner_scope={@current_owner_scope}
+    >
+      <main class="phase246-state-fixture" data-testid="phase246-states">
+        <h1>Phase 246 mounted search states</h1>
 
-      <section aria-labelledby="table-states-heading">
-        <h2 id="table-states-heading">Collection state</h2>
-        <p data-testid="table-state">{@table_case}</p>
-        <div class="phase246-state-controls">
-          <button
-            :for={
-              test_case <- [
-                "loading",
-                "initial-error",
-                "partial-error",
-                "success",
-                "zero",
-                "one",
-                "many",
-                "long"
-              ]
-            }
-            type="button"
-            phx-click="show-table-case"
-            phx-value-case={test_case}
-          >
-            Table {test_case}
-          </button>
-        </div>
-        <.live_component
-          module={DataTable}
-          id={@table_id}
-          query_module={AccrueHostWeb.Phase246StatesQuery}
-          path="/admin/customers"
-          params={%{}}
-          rows={@table_attrs.rows}
-          next_cursor={nil}
-          columns={@columns}
-          list_id="phase246-search-results"
-          list_state={@table_attrs.list_state}
-          empty_reason={nil}
-          filter_params={%{}}
-          filter_fields={[]}
-          render_filter_toolbar={false}
-          loading_fixture={@table_attrs.loading_fixture}
-          read_error={@table_attrs.read_error}
-          enable_polling={false}
-          show_row_count={false}
-          poll_interval_ms={0}
-        />
-      </section>
+        <section aria-labelledby="table-states-heading">
+          <h2 id="table-states-heading">Collection state</h2>
+          <p data-testid="table-state">{@table_case}</p>
+          <div class="phase246-state-controls">
+            <button
+              :for={
+                test_case <- [
+                  "loading",
+                  "initial-error",
+                  "partial-error",
+                  "success",
+                  "zero",
+                  "one",
+                  "many",
+                  "long"
+                ]
+              }
+              type="button"
+              phx-click="show-table-case"
+              phx-value-case={test_case}
+            >
+              Table {test_case}
+            </button>
+          </div>
+          <.live_component
+            module={DataTable}
+            id="phase246-state-table"
+            query_module={AccrueHostWeb.Phase246StatesQuery}
+            current_owner_scope={@current_owner_scope}
+            path="/admin/customers"
+            params={%{}}
+            rows={@table_attrs.rows}
+            next_cursor={nil}
+            columns={@columns}
+            list_id="phase246-search-results"
+            list_state={@table_attrs.list_state}
+            empty_reason={nil}
+            filter_params={%{}}
+            filter_fields={[]}
+            render_filter_toolbar={false}
+            loading_fixture={@table_attrs.loading_fixture}
+            read_error={@table_attrs.read_error}
+            enable_polling={false}
+            show_row_count={false}
+            poll_interval_ms={0}
+          />
+        </section>
 
-      <section aria-labelledby="search-states-heading">
-        <h2 id="search-states-heading">Global search state</h2>
-        <p data-testid="search-state">{@search_case}</p>
-        <div class="phase246-state-controls">
-          <button
-            :for={test_case <- ["loading", "success", "partial", "zero", "one", "many", "long"]}
-            type="button"
-            phx-click="show-search-case"
-            phx-value-case={test_case}
-          >
-            Search {test_case}
-          </button>
-        </div>
-        <.live_component
-          module={GlobalSearch}
-          id={@search_id}
-          mount_path="/admin"
-          current_owner_scope={nil}
-          query={@search_attrs.query}
-          results={@search_attrs.results}
-          failures={@search_attrs.failures}
-          is_open={@search_attrs.is_open}
-          loading={@search_attrs.loading}
-          generation={0}
-        />
-      </section>
-    </main>
+        <section aria-labelledby="search-states-heading">
+          <h2 id="search-states-heading">Global search state</h2>
+          <p data-testid="search-state">{@search_case}</p>
+          <div class="phase246-state-controls">
+            <button
+              :for={test_case <- ["loading", "success", "partial", "zero", "one", "many", "long"]}
+              type="button"
+              phx-click="show-search-case"
+              phx-value-case={test_case}
+            >
+              Search {test_case}
+            </button>
+          </div>
+        </section>
+      </main>
+    </AppShell.app_shell>
     """
   end
 
@@ -202,8 +208,7 @@ defmodule AccrueHostWeb.Phase246StatesLive do
         false
       )
 
-  defp search_attrs(_),
-    do: search_base("needle", [customer()], [invoice()], false, [], [subscription()])
+  defp search_attrs(_), do: search_base("", [], [], false)
 
   defp search_base(query, customers, invoices, loading, failures \\ [], subscriptions \\ []) do
     %{
@@ -237,15 +242,6 @@ defmodule AccrueHostWeb.Phase246StatesLive do
     }
   end
 
-  defp subscription do
-    %{
-      id: "sub_phase246_success",
-      status: "active",
-      customer_name: "Ada Lovelace",
-      customer_email: "ada@example.com",
-      processor_id: "sub_stripe_phase246"
-    }
-  end
 end
 
 defmodule AccrueHostWeb.Phase246StatesQuery do

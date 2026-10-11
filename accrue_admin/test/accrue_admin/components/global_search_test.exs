@@ -137,10 +137,45 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
         })
 
       assert html =~
-               ~s(<a class="ax-command-palette-item" href="/billing/customers" data-path="/billing/customers")
+               ~s(<a id="global-search-option-shortcut-customers" role="option" aria-selected="false" class="ax-command-palette-item" href="/billing/customers" data-path="/billing/customers")
 
       assert html =~
-               ~s(<a class="ax-command-palette-item" href="/billing/invoices" data-path="/billing/invoices")
+               ~s(<a id="global-search-option-shortcut-invoices" role="option" aria-selected="false" class="ax-command-palette-item" href="/billing/invoices" data-path="/billing/invoices")
+    end
+
+    test "exposes grouped results as combobox options with stable active-target ids" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "ada",
+          results: %{
+            customers: [
+              %{
+                id: "cus_accessible",
+                name: "Ada",
+                email: "ada@example.com",
+                owner_type: nil,
+                owner_id: nil,
+                processor: nil,
+                processor_id: nil
+              }
+            ],
+            invoices: [],
+            subscriptions: []
+          },
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ ~s(role="combobox")
+      assert html =~ ~s(aria-haspopup="listbox")
+
+      assert html =~ ~s(id="global-search-options-customers")
+      assert html =~ ~s(role="listbox" aria-label="Customers")
+
+      assert html =~
+               ~s(id="global-search-option-customers-cus_accessible" role="option" aria-selected="false")
     end
 
     test "Phase 199 command palette declares Overlay-backed or overlay-equivalent source markers" do
