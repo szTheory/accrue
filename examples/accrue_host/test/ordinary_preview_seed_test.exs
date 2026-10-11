@@ -3,7 +3,7 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
 
   import Ecto.Query
 
-  alias Accrue.Billing.{Customer, Invoice, Subscription}
+  alias Accrue.Billing.{Charge, Customer, Invoice, Refund, Subscription}
   alias Accrue.Events.Event
   alias AccrueHost.Repo
 
@@ -58,6 +58,88 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
     assert first.phase191_events == 0
   end
 
+  test "showcase invoices without subscription links use a manual billing reason" do
+    seed_if_available()
+    first = showcase_invoice_facts()
+
+    seed_if_available()
+    second = showcase_invoice_facts()
+
+    assert first == second
+    assert map_size(first) == 6
+
+    for {processor_id, facts} <- first do
+      assert facts.customer_exists
+      assert facts.subscription_id == nil
+
+      assert facts.billing_reason == "manual",
+             "#{processor_id} claims a subscription without a linked subscription"
+
+      if facts.status == :void do
+        assert facts.amount_paid_minor == 0
+        assert facts.amount_remaining_minor == 0
+      else
+        assert facts.total_minor == facts.amount_paid_minor + facts.amount_remaining_minor
+      end
+
+      assert facts.currency in ["usd", "jpy"]
+      assert facts.period_start < facts.period_end
+    end
+  end
+
+  test "ordinary seed reconciles a stale billing reason on its existing showcase row" do
+    seed_if_available()
+    invoice = Repo.get_by!(Invoice, processor: "fake", processor_id: "in_showcase_paid_usd")
+
+    invoice
+    |> Ecto.Changeset.change(billing_reason: "subscription_cycle")
+    |> Repo.update!()
+
+    seed_if_available()
+
+    reconciled = Repo.get!(Invoice, invoice.id)
+    assert reconciled.billing_reason == "manual"
+    assert reconciled.subscription_id == nil
+    assert reconciled.total_minor == 5292
+    assert reconciled.currency == "usd"
+  end
+
+  test "showcase paid and refund evidence agrees with stored money and UTC history" do
+    seed_if_available()
+
+    paid = Repo.get_by!(Invoice, processor: "fake", processor_id: "in_showcase_paid_usd")
+    paid_event = Repo.get_by!(Event, idempotency_key: "seed-showcase-invoice-paid-usd")
+    assert paid_event.subject_type == "Invoice"
+    assert paid_event.subject_id == paid.id
+
+    assert paid_event.data == %{
+             "amount_paid_minor" => paid.amount_paid_minor,
+             "currency" => paid.currency
+           }
+
+    assert paid.amount_due_minor == 5292
+    assert paid.amount_paid_minor == paid.total_minor
+    assert paid.amount_remaining_minor == 0
+    assert DateTime.compare(paid.finalized_at, paid.paid_at) == :lt
+    assert DateTime.compare(paid.paid_at, paid_event.inserted_at) == :eq
+
+    charge = Repo.get_by!(Charge, processor: "fake", processor_id: "ch_showcase_refunded")
+    refund = Repo.get_by!(Refund, stripe_id: "re_showcase_full")
+    refund_event = Repo.get_by!(Event, idempotency_key: "seed-showcase-charge-refunded")
+
+    assert refund.charge_id == charge.id
+    assert refund.amount_minor == charge.amount_cents
+    assert refund.currency == charge.currency
+    assert refund_event.subject_id == charge.id
+
+    assert refund_event.data == %{
+             "amount_refunded_minor" => refund.amount_minor,
+             "currency" => refund.currency
+           }
+
+    assert DateTime.compare(charge.fees_settled_at, refund.fees_settled_at) == :lt
+  end
+
   defp seed_if_available do
     Code.eval_file(@ordinary_seed)
   end
@@ -109,5 +191,31 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
           :count
         )
     }
+  end
+
+  defp showcase_invoice_facts do
+    Repo.all(
+      from(invoice in Invoice,
+        where: invoice.processor == "fake" and like(invoice.processor_id, "in_showcase_%"),
+        order_by: invoice.processor_id
+      )
+    )
+    |> Map.new(fn invoice ->
+      customer_exists = not is_nil(Repo.get(Customer, invoice.customer_id))
+
+      {invoice.processor_id,
+       %{
+         customer_exists: customer_exists,
+         subscription_id: invoice.subscription_id,
+         billing_reason: invoice.billing_reason,
+         status: invoice.status,
+         total_minor: invoice.total_minor,
+         amount_paid_minor: invoice.amount_paid_minor,
+         amount_remaining_minor: invoice.amount_remaining_minor,
+         currency: invoice.currency,
+         period_start: invoice.period_start,
+         period_end: invoice.period_end
+       }}
+    end)
   end
 end

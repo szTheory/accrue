@@ -1,0 +1,10 @@
+{
+  "command": "GSD_TAP_REPORT=/tmp/accrue-245-02-red.tap MIX_ENV=test mix test test/ordinary_preview_seed_test.exs --formatter AccrueHost.TapFormatter",
+  "exitCode": 2,
+  "output": "TAP version 13\n1..4\nnot ok 1 - test ordinary seed reconciles a stale billing reason on its existing showcase row\n# ** (ExUnit.AssertionError) \n# \n# Assertion with == failed\n# code:  assert reconciled.billing_reason == \"manual\"\n# left:  \"subscription_cycle\"\n# right: \"manual\"\n# \nok 2 - test ordinary seed reruns keep one coherent invoice journey and exclude Phase 191\nok 3 - test showcase paid and refund evidence agrees with stored money and UTC history\nnot ok 4 - test showcase invoices without subscription links use a manual billing reason\n# ** (ExUnit.AssertionError) \n# \n# in_showcase_draft claims a subscription without a linked subscription\n# \n",
+  "targetTest": "test showcase invoices without subscription links use a manual billing reason",
+  "targetFile": "test/ordinary_preview_seed_test.exs",
+  "expected": "All six showcase invoices without subscription links have billing_reason manual",
+  "actual": "in_showcase_draft has billing_reason subscription_cycle with no subscription_id",
+  "semanticAssessment": "The named target executed and failed on the intended billing_reason assertion. The stale-row reconciliation test also reproduces the same source inconsistency before implementation."
+}
