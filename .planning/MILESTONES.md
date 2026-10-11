@@ -1,5 +1,32 @@
 # Milestones
 
+## v1.65 Accrue Admin Language & Consistency (Shipped: 2026-10-11)
+
+**Phases completed:** 1 phases, 4 plans, 8 tasks
+
+**Key accomplishments:**
+- Home presents a producer-backed customer update label and preserves the exact scoped event key, identity, timestamp, and matching browser assets.
+- Shared event labels now reach Events and webhook activity while exact scoped evidence remains available through patch-safe disclosures at desktop and 320px touch widths.
+- Replay acceptance and read recovery now describe verified effects, while scoped event links and replay step-up are bound to durable evidence.
+
+- Unknown bulk replay outcomes retain each selected delivery identity and supported read-only next steps.
+
+**Delivered:** Clearer existing Admin event language, exact investigation evidence, and truthful replay/read outcomes, without new billing capabilities or dependencies.
+
+**Verification:** Verified closeout; audit passed (4/4 requirements, 1/1 phases, 4/4 integration seams, 4/4 flows). Phase 244 passed 9/9, zero unverified behavior.
+
+**Known verification overrides:** 0 newly acknowledged, 6 carried forward from a prior close (see `STATE.md` Deferred Items).
+
+**Stats:** 55 pre-archive commits, 58 files changed, +4,260/-98 across source and planning; 20 Admin/host files, +1,256/-58 including tests and generated assets. Timeline: 2026-10-10 → 2026-10-11. Git range: `v1.64` → `3e378992` (before archival commits).
+
+**Delivery boundary:** Browser 6/6 at `1b62ad78`; final Admin 693/693; no new remote CI, merge, package publication, or remote tag claimed.
+
+**Archives:** [roadmap](milestones/v1.65-ROADMAP.md), [requirements](milestones/v1.65-REQUIREMENTS.md), [audit](milestones/v1.65-MILESTONE-AUDIT.md), [phase records](milestones/v1.65-phases/).
+
+**Next:** `$gsd-new-milestone`; next phase number 245. Quick-task folders remain in place.
+
+---
+
 ## v1.64 Admin Operator UI Cleanup (Shipped: 2026-10-10)
 
 **Phases completed:** 4 phases, 24 plans, 53 tasks

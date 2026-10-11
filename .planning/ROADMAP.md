@@ -20,7 +20,7 @@
 - ✅ **v1.62 Release Integration & Repository Hygiene** — Phases 229–232 (2026-09-18) — [archive](milestones/v1.62-ROADMAP.md)
 - ✅ **v1.63 Admin and Portal UI refinement** — Phases 233–239 (shipped 2026-10-09) — [archive](milestones/v1.63-ROADMAP.md)
 - ✅ **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (shipped 2026-10-10) — [archive](milestones/v1.64-ROADMAP.md)
-- 🚧 **v1.65 Accrue Admin Language & Consistency** — Phase 244 (verified; audit passed; awaiting archival)
+- ✅ **v1.65 Accrue Admin Language & Consistency** — Phase 244 (completed 2026-10-11) — [archive](milestones/v1.65-ROADMAP.md)
 
 ## Planning Doctrine
 
@@ -28,53 +28,8 @@ Accrue remains in **stable-core / demand-driven expansion** posture. New feature
 
 Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICTION-INVENTORY.md). Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work require an explicit future scope decision; Google Play remains backlogged in SEED-007 until Android is scheduled or a second adopter requires it.
 
-## v1.65 — Accrue Admin Language & Consistency
-
-**Goal:** Support and billing operators can understand what happened and what to do next on targeted existing Admin screens, while exact technical evidence remains available for investigation.
-
-**Scope:** Correct copy and repeated patterns only where current rendered Admin output confirms an issue. Home recent activity is an initial candidate, not a preapproved edit. Keep completed, failed, blocked, and unknown outcomes distinct. Use existing `AccrueAdmin.Copy`, LiveView, and browser test owners for recurring proof. No new billing capability, Portal work, diagnosis functions, new Admin rooms, redesign, rebrand, blanket banned-word rule, or new test/CI lane.
-
-## Phases
-
-- [x] **Phase 244: Operator Language and Evidence** - Make confirmed Admin labels, outcomes, next steps, and repeated controls clear and consistent while preserving investigation details. (completed 2026-10-10)
-
-## Phase Details
-
-### Phase 244: Operator Language and Evidence
-
-**Goal**: Operators can understand the activity, state, outcome, and supported next action on targeted existing Admin screens without losing exact investigation evidence.
-**Depends on**: Phase 243 (shipped v1.64 Admin baseline)
-**Requirements**: LANG-01, STATE-01, EVID-01, CONS-01
-**Success Criteria** (what must be TRUE):
-  1. On each targeted existing Admin screen, an operator can read the primary activity or state label in operator-facing language that matches the underlying event or state, without decoding an implementation key. (LANG-01)
-  2. For targeted completed, failed, blocked, and unknown outcomes, an operator can tell what the available evidence confirms, whether the requested action took effect, and which supported next step is available, without being shown an invented cause. (STATE-01)
-  3. Where a human-readable event or state label appears, an operator can still find the exact event key and relevant record identifiers and timestamps at the point of investigation. (EVID-01)
-  4. Across targeted existing Admin screens, an operator encounters consistent repeated headings and action names, and each link or control accurately describes its destination or effect. (CONS-01)
-
-**Plans**: 4/4 plans complete (3 initial plans and 1 gap closure)
-Plans:
-**Wave 1**
-- [x] 244-01-PLAN.md — Confirm mounted candidates and prove Home-to-event label and evidence path.
-
-**Wave 2** *(blocked on Wave 1 completion)*
-- [x] 244-02-PLAN.md — Carry shared meaning and exact evidence through event and related activity views.
-
-**Wave 3** *(blocked on Wave 2 completion)*
-- [x] 244-03-PLAN.md — Bind outcome and recovery language to durable facts and confirm rendered effects.
-
-**Wave 4** *(blocked on Wave 3 completion)*
-- [x] 244-04-PLAN.md — Associate unknown bulk replay results with deliveries and automate narrow-browser evidence backstops.
-
-**UI hint**: yes
-
-## Progress
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 244. Operator Language and Evidence | 4/4 | Complete    | 2026-10-10 |
-
 ## Current Position
 
-Phase 244 is complete: all four plans, all four requirements, and independent verification passed (9/9 truths, zero unverified behavior). The milestone audit passed: 4/4 requirements, 1/1 phases, 4/4 integration seams, and 4/4 flows; no blockers. The milestone is ready for archival. The complete v1.64 scope and closeout evidence remain in the [archived roadmap](milestones/v1.64-ROADMAP.md), [milestone audit](milestones/v1.64-MILESTONE-AUDIT.md), and [phase archive](milestones/v1.64-phases/).
+v1.65 is complete and archived. Phase 244 delivered all four requirements in four plans; audit passed with no blockers. Next phase number: **245**. No next milestone scope has been selected.
 
-**Next command:** `$gsd-complete-milestone v1.65`.
+**Next command:** `$gsd-new-milestone`.

@@ -33,9 +33,16 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest fully shipped milestone: v1.64 — Admin Operator UI Cleanup, shipped and archived 2026-10-10.** All four phases, 24 plans and 18 requirements completed. The audit scored 18/18 requirements, 4/4 phase verifications, 10/10 integration seams and 6/6 end-to-end flows with no blockers; it records two newly acknowledged Phase 240 notices and four acknowledgements carried from earlier closeouts. All four phase verifications are fresh and passed (47/47, 32/32, 80/80 and 3/3), with zero unverified behavior. The current-source twelve-image Linux comparison passed in [run 38094642350](https://github.com/szTheory/accrue/actions/runs/38094642350) at `849f72084a6460ed54ecc06bc261054b15efdde0`; the Fake `/admin` preview and its evidence limits are documented in the [archived Phase 243 handoff](milestones/v1.64-phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md). The active milestone is v1.65, Accrue Admin Language & Consistency; Phase 244 is implemented and independently verified; milestone audit passed with no blockers; archival is next.
+**Latest completed milestone: v1.65 — Accrue Admin Language & Consistency, archived 2026-10-11.** Phase 244 completed four plans, eight tasks, and all four requirements. Independent verification passed 9/9; the milestone audit passed 4/4 requirements, 1/1 phases, 4/4 integration seams and 4/4 flows, with zero blockers. Final Admin evidence is 693 tests with zero failures; browser evidence is 6/6 at its recorded revision, with 13 automated UAT items and zero required human items. Six earlier acknowledgements remain carried forward; no new debt was acknowledged. See [audit](milestones/v1.65-MILESTONE-AUDIT.md) and [phase records](milestones/v1.65-phases/). Local milestone completion does not claim a merge, remote tag, new CI run, or package publication. The v1.64 feedback preview and Ubuntu evidence remain recorded in its archive.
 
-## Current Milestone: v1.65 Accrue Admin Language & Consistency
+## Next Milestone Goals
+
+No new scope is selected. Run `$gsd-new-milestone` to choose the next concrete need under the existing stable-core posture. Continue phase numbering at **245**; do not repeat completed Phase 244.
+
+<details>
+<summary>Completed v1.65 scope and guardrails</summary>
+
+## Archived v1.65 Scope: v1.65 Accrue Admin Language & Consistency
 
 **Goal:** Make existing Accrue Admin screens clearer to support and billing operators about what happened and what to do next, while keeping exact technical evidence available for investigation.
 
@@ -45,6 +52,9 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 - Strengthen existing copy and owning LiveView/browser test contracts so user-facing language and supporting evidence are checked together.
 
 **Boundaries:** No new billing capabilities, Portal work, diagnosis features, new Admin rooms, rebrand, or redesign. Carry Seed 004's content-hierarchy and operator-clarity guardrails as background only; its deferred M2/M3 ideas are not milestone scope.
+
+
+</details>
 
 ## Shipped Milestone: v1.64 Admin Operator UI Cleanup (**shipped & archived 2026-10-10**)
 
@@ -711,7 +721,7 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-No unimplemented v1.65 requirements remain. Milestone audit and archival are pending. All 18 v1.64 requirements remain validated and archived in `milestones/v1.64-REQUIREMENTS.md`.
+No active milestone requirements remain. v1.65 requirements are validated and archived in `milestones/v1.65-REQUIREMENTS.md`. All 18 v1.64 requirements remain validated and archived in `milestones/v1.64-REQUIREMENTS.md`.
 
 ### Validated v1.65 (Phase 244 complete 2026-10-10)
 
@@ -951,6 +961,9 @@ Phase 244 decisions: use explicit producer-confirmed labels, keep unknown outcom
 
 | Decision | Outcome |
 | --- | --- |
+| Use producer-backed labels while preserving exact evidence and neutral unknown states. | ✓ Good — Phase 244 labels and full timestamps verified in owning rendered tests and revision-bound browser evidence. |
+| Keep read recovery read-only and bulk outcomes associated with selected IDs and already-authorized records. | ✓ Good — replay job/audit boundaries and denied/unknown/mixed outcomes verified; no widened reads. |
+| Preserve native disclosure intent across LiveView patches and bind proof to the revision tested. | ✓ Good — patch, keyboard, touch, 320px and exact Unicode evidence covered; browser limits remain explicit. |
 | Keep Linux golden generation separate from the blocking comparison and state the accepted source revision. | ✓ Phase243 — reviewed twelve-image mint followed by successful normal Ubuntu comparison at `849f72084a6460ed54ecc06bc261054b15efdde0` (run 38094642350); thresholds unchanged. |
 | Prove full command custody before mutation, with real identities, safe proof paths and an exclusive preview runner. | ✓ Phase243 — 13 custody and one proof-path control pass; synthetic caller identities fail closed; authoritative warm preview state preserved. |
 | Hash actual mounted browser response bytes and reconcile changed evidence against the existing inventory. | ✓ Phase243 — package/compiled/HTTP/browser identity and altered-response rejection pass; inventory remains 21 routes and registry 30/42/8. |
@@ -1000,4 +1013,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-10 after Phase 244; next: v1.65 milestone audit.*
+*Last updated: 2026-10-11 after v1.65 milestone completion; next: `$gsd-new-milestone`.*

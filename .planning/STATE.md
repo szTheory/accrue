@@ -2,41 +2,39 @@
 gsd_state_version: "1.0"
 milestone: v1.65
 milestone_name: Accrue Admin Language & Consistency
-current_phase: 244
-status: completed
-stopped_at: v1.65 audit passed — milestone archival next
-last_updated: "2026-10-11T11:14:08.924985+00:00"
+status: Awaiting next milestone
+stopped_at: v1.65 complete and archived — next: $gsd-new-milestone
+last_updated: "2026-10-11T11:30:35.079Z"
 last_activity: 2026-10-11
-last_activity_desc: v1.65 milestone audit passed
-state_head: 9caf95cb828cd23e1640772358706a6210b8b01c
+last_activity_desc: Milestone v1.65 completed and archived
+state_head: 3e37899252644a52ebd6d2390b63078c3922f76d
 progress:
   total_phases: 1
   completed_phases: 1
   total_plans: 4
   completed_plans: 4
   percent: 100
+current_phase: 244
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-10)
+See: .planning/PROJECT.md (updated 2026-10-11)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.65 archival — milestone audit passed; Phase 244 verified complete
+**Current focus:** Planning next milestone; v1.65 complete and archived; next phase number 245
 **Progress:** [██████████] 100%
-**Completed work:** Phase 244 has 4/4 plans complete and 4/4 requirements satisfied; verification passed 9/9 with zero unverified behavior. v1.64 is shipped and archived with its closeout evidence retained in `.planning/milestones/`.
+**Completed work:** v1.65 is archived under `.planning/milestones/v1.65-*`. Phase 244 has 4/4 plans complete and 4/4 requirements satisfied; verification passed 9/9 with zero unverified behavior. v1.64 is shipped and archived with its closeout evidence retained in `.planning/milestones/`.
 
 ## Current Position
 
-Phase: 244
-Plan: 4 of 4 complete
-Status: All phases complete
-Last activity: 2026-10-11 — v1.65 milestone audit passed
-
-Progress: [██████████] 100%
+Phase: Milestone v1.65 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-11 — Milestone v1.65 completed and archived
 
 ## Performance Metrics
 
@@ -506,7 +504,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-11T11:14:08.924985+00:00
-Stopped at: v1.65 audit passed; next: $gsd-complete-milestone v1.65
+Stopped at: v1.65 complete and archived; next: $gsd-new-milestone
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -636,8 +634,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- **Completed phase:** 244 — Operator Language and Evidence; 4/4 plans complete, 4/4 requirements satisfied, verification passed 9/9.
-- **Evidence:** Full Admin suite 693 tests, zero failures; final browser batch 6/6 at `1b62ad78`; 13 automated UAT items, zero required human UAT. Browser evidence remains bound to its tested revision.
-- **Next GSD command:** `$gsd-complete-milestone v1.65` — audit passed (4/4 requirements, 1/1 phases, 4/4 integration seams, 4/4 flows); archive v1.65. Do not repeat phase execution or verification.
-- **Delivery boundary:** Phase completion does not claim a new remote CI run, merge, or package publication.
-- **Previous milestone:** v1.64 is shipped and archived; its phase artifacts and audit remain under `.planning/milestones/`.
+- Start the next milestone with $gsd-new-milestone
