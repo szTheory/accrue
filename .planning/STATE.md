@@ -5,16 +5,16 @@ milestone_name: Admin Usability and Visual Consistency
 current_phase: 246
 current_phase_name: Collection Controls and Search
 status: executing
-stopped_at: Phase 246 context gathered; continuing automatically to planning
-last_updated: "2026-10-11T16:17:34.557Z"
+stopped_at: Completed 246-01-PLAN.md
+last_updated: "2026-10-11T16:36:35.677Z"
 last_activity: 2026-10-11
-last_activity_desc: Phase 245 complete, transitioned to Phase 246
-state_head: e3d34578688330d90af4e9447dd1c564c3fe9d29
+last_activity_desc: Phase 246 execution started
+state_head: 1d83fc1db9030ab69e83cb188521ab332d24f278
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 7
-  completed_plans: 3
+  completed_plans: 4
   percent: 25
 ---
 
@@ -32,10 +32,10 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 
 ## Current Position
 
-Phase: 246 (Collection Controls and Search) — READY TO EXECUTE
-Plan: Not started
+Phase: 246 (Collection Controls and Search) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-10-11 — Phase 245 complete, transitioned to Phase 246
+Last activity: 2026-10-11 — Phase 246 execution started
 
 ## Performance Metrics
 
@@ -183,6 +183,7 @@ Last activity: 2026-10-11 — Phase 245 complete, transitioned to Phase 246
 | Phase 244 P02 | 29min | 2 tasks | 16 files |
 | Phase 244 P03 | 45min | 2 tasks | 8 files |
 | Phase 244 P04 | 25m | 2 tasks | 5 files |
+| Phase 246 P01 | 19m | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -420,6 +421,8 @@ Last activity: 2026-10-11 — Phase 245 complete, transitioned to Phase 246
 - [Phase 244]: Kept mounted read-outage state explicitly unobserved; focused LiveView tests verify the read-only retry handler.
 - [Phase 244]: Bulk replay links only to the existing freshly authorized selected-row read; no extra query or retry mutation was added.
 - [Phase 244]: Adversarial browser values are positional fixture data and use existing schema-supported text fields.
+- [Phase 246]: Invoice view selection is navigation, while only active constraints render as removable chips.
+- [Phase 246]: Clearing all invoice statuses selects the All view; reset preserves the chosen view and owner scope.
 
 ### Pending Todos
 
@@ -505,9 +508,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T15:36:10.675Z
-Stopped at: Phase 246 context gathered; continuing automatically to planning
-Resume file: .planning/phases/246-collection-controls-and-search/246-CONTEXT.md
+Last session: 2026-10-11T16:36:35.630Z
+Stopped at: Completed 246-01-PLAN.md
+Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
