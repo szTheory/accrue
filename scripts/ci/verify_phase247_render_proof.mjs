@@ -110,10 +110,9 @@ for (const capture of manifest.captures) {
 }
 
 check(seenScenarios.size === expected.size, `expected all ${expected.size} scenarios, saw ${seenScenarios.size}`);
-for (const [scenario, definition] of expected) {
-  const laneAndScenario = `${definition.lane}-${scenario}`;
+for (const [scenarioKey, definition] of expected) {
   for (const size of expectedSizes) for (const theme of expectedThemes) {
-    check(seen.has(`${laneAndScenario}:${size}:${theme}`), `missing matrix evidence ${laneAndScenario} ${size} ${theme}`);
+    check(seen.has(`${scenarioKey}:${size}:${theme}`), `missing matrix evidence ${scenarioKey} ${size} ${theme}`);
   }
 }
 check(seen.size >= 12 && seen.size <= 16, `invalid matrix size: ${seen.size}`);
