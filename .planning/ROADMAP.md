@@ -104,7 +104,32 @@ v1.66 has completed Phases 245–246 and is continuing into Phase 247. The owner
   4. An operator can review existing detail actions and copy metadata while owner scope, confirmation, step-up and accepted-versus-completed outcomes remain accurate.
   5. An operator can compare recovery values by currency, distinguish available/zero/absent data, and tell selected UTC windows from historical coverage and explicitly named help.
 
-**Plans**: TBD
+**Plans**: 8 plans
+Plans:
+**Wave 1**
+- [ ] 247-01-PLAN.md — Mounted exact timestamp tracer
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 247-02-PLAN.md — Shared Local/UTC choice and truthful clipboard feedback
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 247-03-PLAN.md — Timestamp coverage in existing Admin consumers
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 247-08-PLAN.md — Remaining list and analytics timeline timestamps
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 247-04-PLAN.md — Webhook investigation, replay and payload hierarchy
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 247-05-PLAN.md — Existing detail actions, metadata and concrete destinations
+
+**Wave 7** *(blocked on Wave 6 completion)*
+- [ ] 247-06-PLAN.md — Currency-true payment recovery presentation
+
+**Wave 8** *(blocked on Wave 7 completion)*
+- [ ] 247-07-PLAN.md — Current-revision mounted proof and final checks
+
 **UI hint**: yes
 
 ### Phase 248: Reproducible Scenarios and Integrated Proof
