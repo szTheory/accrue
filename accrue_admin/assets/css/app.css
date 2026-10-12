@@ -4290,35 +4290,6 @@ details[open].ax-dropdown .ax-dropdown-panel {
   text-underline-offset: 0.15em;
 }
 
-.ax-search-trigger {
-  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ax-space-sm);
-  min-height: 2.25rem;
-  padding: 0 0.625rem;
-  border: 2px solid var(--ax-border);
-  border-radius: var(--ax-radius-pill);
-  background: color-mix(in srgb, var(--ax-accent-subtle) 58%, var(--ax-elevated));
-  color: var(--ax-primary);
-  font-size: var(--ax-type-sm);
-  font-weight: 700;
-  /* Intentional exception: two-token asymmetric transition — not collapsible to a single bundle.
-     Color/border/background use --ax-theme-transition (180ms); transform uses --ax-motion-fast (120ms).
-     Collapsing would lose the enter/exit speed difference. See Phase 174 Gap 3 resolution. */
-  transition:
-    border-color var(--ax-theme-transition),
-    background var(--ax-theme-transition),
-    color var(--ax-theme-transition),
-    transform var(--ax-motion-fast);
-}
-
-.ax-search-trigger:hover,
-.ax-search-trigger:focus-visible {
-  border-color: var(--ax-focus-ring);
-  outline: none;
-}
-
 .ax-search-trigger kbd,
 .ax-shortcut kbd {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
@@ -4814,39 +4785,36 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
    Phase 169 (v1.50 AUI-03) — IA: home start page, nav icons, elevated search
    ========================================================================== */
 
-/* Topbar search rendered as a search-input affordance (not a pill button). */
+/* Shared topbar controls stay neutral until hover or keyboard focus. */
 .ax-search-trigger {
-  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+  display: inline-flex;
+  align-items: center;
   justify-content: flex-start;
+  gap: var(--ax-space-sm);
   width: 15rem;
   max-width: min(15rem, calc(100vw - 7rem));
   min-width: 0;
-  min-height: 2rem;
-  border-color: var(--ax-focus-ring);
-  border-width: 2px;
+  min-height: 44px;
+  padding-inline: var(--ax-space-sm);
+  border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-accent-subtle) 88%, var(--ax-elevated));
+  background: var(--ax-elevated);
   color: var(--ax-primary);
-  font-size: var(--ax-type-sm);
-  font-weight: 900;
+  font: var(--ax-type-label-font);
+  font-weight: 500; /* ax-type-exception: quiet utility control, below primary action weight */
   cursor: pointer;
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 28%, transparent),
-    var(--ax-shadow-sm);
+  transition: var(--ax-transition-colors);
 }
 
 .ax-search-trigger:hover {
-  background: var(--ax-elevated);
-  border-color: var(--ax-focus-ring);
-  transform: translateY(-1px);
+  border-color: var(--ax-border-strong);
 }
 
 .ax-search-trigger-icon {
-  color: var(--ax-accent-readable);
+  color: var(--ax-muted);
 }
 
 .ax-search-trigger-text {
-  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: block;
   flex: 1;
   min-width: 0;
@@ -4854,8 +4822,6 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   text-overflow: ellipsis;
   text-align: left;
   white-space: nowrap;
-  color: var(--ax-primary);
-  font-weight: 750;
 }
 
 .ax-search-trigger-text strong,
@@ -4893,9 +4859,11 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-search-trigger .ax-kbd {
   margin-left: auto;
-  border-color: var(--ax-border);
-  background: var(--ax-sunken);
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--ax-muted);
+  font-weight: 500; /* ax-type-exception: shortcut hint recedes below the control label */
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
@@ -4909,7 +4877,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
   .ax-time-preference {
     grid-column: 1 / -1;
-    justify-content: space-between;
+    justify-content: flex-start;
     min-width: 0;
   }
 
@@ -4938,12 +4906,9 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   .ax-search-trigger {
     width: min(12.5rem, calc(100vw - 12.5rem));
     max-width: min(12.5rem, calc(100vw - 12.5rem));
-    min-height: 1.75rem;
-    gap: 0.1875rem;
-    padding: 0 0.25rem;
-    border-width: 1px;
-    /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-    font-size: var(--ax-type-xs);
+    min-height: 44px;
+    gap: var(--ax-space-xs);
+    padding-inline: var(--ax-space-sm);
   }
 
   .ax-search-trigger-text {
@@ -7033,7 +6998,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-time-preference {
   display: inline-flex;
   align-items: center;
-  gap: var(--ax-space-xs);
+  gap: var(--ax-space-sm);
 }
 
 .ax-time-preference label {
@@ -7041,13 +7006,42 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   font: var(--ax-type-label-sm-font);
 }
 
+.ax-time-preference-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 .ax-time-preference select {
+  appearance: none;
   min-block-size: 44px;
-  padding-inline: var(--ax-space-sm);
+  min-inline-size: 5.5rem;
+  padding-inline: var(--ax-space-sm) var(--ax-space-xl);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
-  background: var(--ax-sunken);
-  color: inherit;
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  font: var(--ax-type-label-font);
+  font-weight: 500; /* ax-type-exception: matches adjacent utility control */
+  cursor: pointer;
+  transition: var(--ax-transition-colors);
+}
+
+.ax-time-preference select:hover {
+  background: var(--ax-interactive-hover);
+  border-color: var(--ax-border-strong);
+}
+
+.ax-time-preference select:focus-visible {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+}
+
+.ax-time-preference-control > .ax-icon {
+  position: absolute;
+  inset-inline-end: var(--ax-space-sm);
+  color: var(--ax-muted);
+  pointer-events: none;
 }
 
 /* Activity and evidence share compact rows, copy controls, and view tabs. */
@@ -7137,13 +7131,6 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-json-leaf { display: flex; flex-wrap: wrap; gap: var(--ax-space-xs) var(--ax-space-md); align-items: baseline; }
 .ax-json-leaf .ax-json-key { min-inline-size: min(11rem, 100%); color: var(--ax-primary); }
 .ax-json-leaf .ax-json-value { color: var(--ax-muted); }
-.ax-time-preference {
-  padding-inline: var(--ax-space-sm) var(--ax-space-2xs);
-  border: 1px solid var(--ax-border);
-  border-radius: var(--ax-radius-md);
-  background: var(--ax-sunken);
-}
-.ax-time-preference select { appearance: auto; border: 0; background: transparent; font: var(--ax-type-label-sm-font); }
 .ax-timestamp-copy:hover { background: var(--ax-interactive-hover); }
 .ax-toast {
   position: fixed;
