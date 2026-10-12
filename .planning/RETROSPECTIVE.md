@@ -1867,6 +1867,34 @@ Test copy against the state, jobs and audit facts it describes. Use actual mount
 
 ---
 
+## Milestone: v1.66 — Admin Usability and Visual Consistency
+
+**Completed locally:**2026-10-12 | **Phases:**4 | **Plans:**18 | **Task entries:**41
+
+### What Was Built
+
+Existing Admin collections/search/tables and exact timestamp/detail/recovery conventions; realistic ordinary preview, guarded four-state host tooling and integrated owner/finding proof.
+
+### What Worked
+
+Shared owners and actual mounted source/served-asset receipts kept changes scoped. Independent integration traced all16requirements with0blockers. Negative fixture lifecycle controls found and closed the persisted held-out leak.
+
+### What Was Inefficient
+
+Wrong credential extraction and login timing required correction; a later host regression exposed teardown leakage. Current proof required bounded screenshot framing and exact Unicode corrections. Initial failed records and visual scores remain preserved.
+
+### Patterns Established
+
+Guard every mutation with real target identity; remove only the exact fixture graph. Label historical receipts separately from representative current captures. Do not rewrite limited coverage into full acceptance.
+
+### Key Lessons
+
+Milestone triads must inspect actual SUMMARY completion lists; phase247used empty lists, so final coverage/accomplishments required manual reconciliation. Archive moves invalidate this runtime's path-bound fingerprints; record passed pre-move verification accurately. CLI task stats undercounted34versus41actual task entries; reconcile before publishing totals.
+
+### Cost Observations
+
+No reliable model-cost or session totals were available. Bounded existing owners were used; no new broad product suite or external CI run was claimed during closeout.
+
 ## Cross-Milestone Trends
 
 ### Process Evolution

@@ -33,9 +33,16 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest completed milestone: v1.65 — Accrue Admin Language & Consistency, archived 2026-10-11.** Phase 244 completed four plans, eight tasks, and all four requirements. Independent verification passed 9/9; the milestone audit passed 4/4 requirements, 1/1 phases, 4/4 integration seams and 4/4 flows, with zero blockers. Final Admin evidence is 693 tests with zero failures; browser evidence is 6/6 at its recorded revision, with 13 automated UAT items and zero required human items. Six earlier acknowledgements remain carried forward; no new debt was acknowledged. See [audit](milestones/v1.65-MILESTONE-AUDIT.md) and [phase records](milestones/v1.65-phases/). Local milestone completion does not claim a merge, remote tag, new CI run, or package publication. The v1.64 feedback preview and Ubuntu evidence remain recorded in its archive.
+**Latest completed milestone: v1.66 — Admin Usability and Visual Consistency, archived locally 2026-10-12.** All16requirements satisfied across Phases245–248,18 actual plans and41 task entries. Canonical phase checks passed14/14,10/10,31/31 and3/3 before archival; independent integration verified7/7handoffs and7/7flows with zero blockers. Audit is tech_debt; five incumbent design notices newly acknowledged and six earlier acknowledgements carried forward. Existing Admin collection controls, search, tables, exact Local/UTC timestamps, detail/navigation/status language and currency-qualified recovery are delivered; host-only scenarios and the13-topic/five-finding ledger make bounded evidence reproducible. See [audit](milestones/v1.66-MILESTONE-AUDIT.md), [integration](milestones/v1.66-INTEGRATION.md) and [phase records](milestones/v1.66-phases/).
+
+**Evidence limits:** Historical receipts retain their recorded revisions and visual scores. Final Phase248 evidence is10inspectedcaptures across4scenarios at112d484d; ordinary1/1 and held-out3/3 are recorded, with fresh23Nodecontracts,13hosttests and4lifecycle controls for the later cleanup correction. This is representative evidence, not all-route or all-interaction subjective acceptance. Archival moves invalidate the runtime's path-bound digest projection; the archive preserves each passed pre-move receipt and does not claim a new post-move phase verification. Local completion does not claim remote CI, merge, publication or tag push.
 
 ## Next Milestone Goals
+
+No new feature milestone is defined. Use `$gsd-new-milestone` to define fresh requirements from a concrete adopter/operator need. Current nonblocking design and evidence limits stay archived and do not automatically reopen product scope.
+
+<details>
+<summary>Completed v1.66 scope and delivery record</summary>
 
 ## Current Milestone: v1.66 Admin Usability and Visual Consistency
 
@@ -60,6 +67,8 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 **Phase 247:** Complete and independently verified 31/31 with zero unverified behavior, eight plans and six requirements. The Admin suite passed 730/0, both ordinary and held-out browser lanes passed, and twenty inspected captures identify source `48a8d7fdde48` and actual served assets. Shared Local/UTC timestamps and truthful copy, detail/replay/payload hierarchy, concrete destinations and currency-qualified payment recovery are delivered. Phase 248 owns reproducible evaluation scenarios and integrated confirmation. Initial failed evidence and bounded review dispositions remain preserved.
 
 **Automation:** The owner's automatic-continuation instruction applies to requirement/roadmap defaults consistent with this scope and discuss→plan→execute work. Preserve concrete human decisions only when a new consequential ambiguity arises; do not repeat approvals for existing scope. Screenshot evidence must identify route/state, theme, viewport, scenario, revision and served assets; missing coverage stays explicit. Bound rendered review to one batched assessment, one correction batch and one confirmation per coherent slice unless a named defect justifies reopening.
+
+</details>
 
 <details>
 <summary>Completed v1.65 scope and guardrails</summary>
@@ -743,7 +752,15 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-v1.66 requirements are defined in [REQUIREMENTS.md](REQUIREMENTS.md): rendered route/state coverage, realistic reproducible preview data, coherent shared filters/search/tables/timestamps, plain destination language, evidence-true states, readable details/recovery metrics and revision-bound acceptance. v1.65 and v1.64 requirements remain validated in their milestone archives.
+No active milestone requirements. The next milestone starts with fresh requirements.
+
+### Validated v1.66 (Phases245–248; archived2026-10-12)
+
+- ✓ BASE-01,BASE-02,DEMO-01 — existing-route inventory, provenance-bound representative baseline and coherent ordinary story data (Phase245).
+- ✓ FILTER-01,FILTER-02,FILTER-03,SEARCH-01,TABLE-01 — coherent collection controls, exact criteria, global search and responsive identity tables (Phase246).
+- ✓ TIME-01,LANG-02,STATE-02,DETAIL-01,DETAIL-02,METRIC-01 — exact timestamps/copy, concrete navigation, evidence-true detail/status/recovery (Phase247).
+- ✓ DEMO-02,PROOF-01 — guarded four-state scenario tooling and executed owner/finding proof ledger with explicit current/historical limits (Phase248).
+- Outcome:16/16satisfied,4/4verified before archive; no requirement dropped or invalidated. [Requirements archive](milestones/v1.66-REQUIREMENTS.md).
 
 ### Validated v1.65 (Phase 244 complete 2026-10-10)
 
@@ -982,6 +999,8 @@ Admin global search — 4/4 satisfied.
 Phase 244 decisions: use explicit producer-confirmed labels, keep unknown outcomes neutral, preserve exact evidence and native disclosure intent through patches, and associate bulk outcomes only with already-authorized delivery reads. Reuse existing test owners and bind each result to the revision tested.
 
 | Decision | Outcome |
+| Keep evaluation scenario tooling host-only and guard cleanup with exact identities, sandbox, lane, database and foreign-child checks. | ✓ v1.66 — ordinary custody retained, fixture leak corrected; negative/lifecycle and host checks passed. |
+| Preserve baseline receipts and original UI scores while distinguishing current scenario proof from uncovered surfaces. | ✓ v1.66 — final ledger accounts for13topics/fivefindings; no broader visual acceptance claim. |
 | --- | --- |
 | Use producer-backed labels while preserving exact evidence and neutral unknown states. | ✓ Good — Phase 244 labels and full timestamps verified in owning rendered tests and revision-bound browser evidence. |
 | Keep read recovery read-only and bulk outcomes associated with selected IDs and already-authorized records. | ✓ Good — replay job/audit boundaries and denied/unknown/mixed outcomes verified; no widened reads. |
@@ -1035,4 +1054,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-12 after Phase 248; authorized milestone audit and archive.*
+*Last updated: 2026-10-12 after v1.66 milestone archive.*

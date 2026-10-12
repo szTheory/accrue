@@ -2,20 +2,19 @@
 gsd_state_version: "1.0"
 milestone: v1.66
 milestone_name: Admin Usability and Visual Consistency
-current_phase: 248
-current_plan: Not started
-status: completed
-stopped_at: Phase 248 complete — all phases complete
-last_updated: "2026-10-12T05:20:08.151Z"
+status: Awaiting next milestone
+stopped_at: v1.66 archived; awaiting next milestone
+last_updated: "2026-10-12T12:53:25.812Z"
 last_activity: 2026-10-12
-last_activity_desc: Phase 248 complete
-state_head: f75e7c9390765218f503decf2b3a5e3add24fedf
+last_activity_desc: Milestone v1.66 completed and archived
+state_head: 2b3d58fdc7474c948c022a9d24f6999417c34272
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 18
   completed_plans: 18
   percent: 100
+current_phase: null
 ---
 
 # Project State
@@ -26,18 +25,16 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.66 milestone audit and archive
+**Current focus:** Planning next milestone
 **Progress:** [██████████] 100%
-**Completed work:** v1.65 is archived under `.planning/milestones/v1.65-*`. Phase 244 has 4/4 plans complete and 4/4 requirements satisfied; verification passed 9/9 with zero unverified behavior. v1.64 is shipped and archived with its closeout evidence retained in `.planning/milestones/`.
+**Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
 
 ## Current Position
 
-Phase: 248
-Current Plan: Not started
-Total Plans in Phase: 2
-Plan: 2 of 2
-Status: All phases complete
-Last activity: 2026-10-12 — Phase 248 complete
+Phase: Milestone v1.66 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-12 — Milestone v1.66 completed and archived
 
 ## Performance Metrics
 
@@ -536,7 +533,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 | verification_gaps | v1.32/099-VERIFICATION.md | gaps_found | 2026-10-09 | v1.63 |
 | deferred_items | 235/deferred-items.md: Deferred Items — Phase 235 Plan 01 — `accrue_admin/lib/accrue_admin/live/subscription_live.ex:172` emits an existing compiler warning because `handle_event/3` clauses are not grouped. This is unrelated to the mounted checkout hook and browser spec. — The host test application emits an existing `ex_money` warning about automatically starting the exchange rate service. This is unrelated to the mounted checkout hook and browser spec. | acknowledged | 2026-10-09 | v1.63 |
 
-
 ### v1.66 closeout acknowledgements
 
 | Category | Item | Date | Milestone |
@@ -569,7 +565,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-12T02:57:08.909Z
-Stopped at: Phase 248 complete; v1.66 audit and archive
+Stopped at: v1.66 archived; awaiting next milestone
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -699,4 +695,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Complete the authorized v1.66 audit and archive; all four phase verifications pass. Preserve recorded render revisions and explicit UI/evidence limits. After archive, use `$gsd-new-milestone` for new scope.
+- `$gsd-new-milestone` — define fresh requirements and next scope. v1.66 is archived; do not repeat completed product work. Milestone tag remains local.

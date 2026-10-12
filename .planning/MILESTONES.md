@@ -1,5 +1,30 @@
 # Milestones
 
+## v1.66 Admin Usability and Visual Consistency (Completed locally:2026-10-12)
+
+**Delivered:** Coherent existing Admin collections/search/tables, exact shared timestamps, evidence-true details/navigation/recovery, and guarded evaluation scenarios with revision-bound proof.
+
+**Phases completed:** 245–248:4phases,18actual plans,41task entries. The archive CLI reports34tasks; direct per-plan `<task>` counts and SUMMARYactuals both total41 (7+12+18+4). Its parser undercount is disclosed, not silently used as actual task count.
+
+**Key accomplishments:**
+- Isolated ordinary preview,21route inventory and24historical baseline captures with plausible stored billing stories.
+- Shared filter/status/search and responsive identity/copy owners propagated through existing journeys.
+- Shared Local/UTC timestamps, concrete destinations, readable webhook/payload/action review and currency-qualified recovery.
+- Four guarded evaluation states and exact five-ID held-out cleanup with partial-seed failure and foreign-child protections.
+- Integrated13-topic/five-finding ledger and10inspectedcurrent captures preserving historical receipts and coverage limits.
+
+**Verification:** Override closeout for acknowledged nonblocking debt; audit tech_debt16/16requirements,4/4phase receipts,7/7handoffs,7/7flows;0blockers. Phase scores14/14,10/10,31/31,3/3 before archive. Nyquist3compliant/1partial; original visual scores remain unchanged.
+
+**Known verification overrides:**5newly acknowledged,6carried forward from a prior close (STATE.md Deferred Items). These are disclosed scopes/debt, not rewritten passing behavior.
+
+**Stats:**197pre-archive commits sincev1.65 through2b3d58fd;353files,+32,227/-1,093 before closeout record commit. Timeline2026-10-11→2026-10-12. Actual source and planning changes included; no broad LOC-only quality claim.
+
+**Delivery boundary:** Local archive/tag only. No remote CI run, merge, remote tag push or publication. Quick tasks retained because provenance is unknown. Archival invalidates path-bound canonical fingerprints; passed pre-move receipts are retained without claiming a new post-move pass.
+
+**Next:** `$gsd-new-milestone` for new scope and fresh requirements.
+
+---
+
 ## v1.65 Accrue Admin Language & Consistency (Shipped: 2026-10-11)
 
 **Phases completed:** 1 phases, 4 plans, 8 tasks
