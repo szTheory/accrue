@@ -120,6 +120,17 @@ Task 1 proof harness and demonstrated corrections:
 
 Task 2 inspected captures and validation evidence: `3ca1fca9`.
 
+Post-review corrective commits and confirmation:
+
+- `306efe92` fix mobile time control, disclosures, naming and exact UTC conversion
+- `9e7ab41b` verify time preference and disclosure interactions
+- `f32feec4` place exact-copy probe on timestamp owner
+- `ceef2047` target the outer payload disclosure
+- `e65fedc6` clarify remaining payment recovery retry language
+- `76cb2867` capture idle main focus state
+- `4b121d69` capture neutral pointer state
+- `a555c507` record post-review confirmation and dispositions
+
 ## Files Created/Modified
 
 - `examples/accrue_host/e2e/phase247-current-proof.spec.js` — ordinary and held-out browser flows, viewport/theme matrix, responsive geometry assertions, and source/asset evidence.
