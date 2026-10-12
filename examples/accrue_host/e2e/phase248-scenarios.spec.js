@@ -40,14 +40,14 @@ async function loginOrdinary(page) {
   const password = process.env.ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD;
   if (!password) throw new Error("ordinary proof requires the README-documented local operator credential in process memory");
   await page.goto("/users/log-in");
-  const csrf = await page.locator("meta[name='csrf-token']").getAttribute("content");
-  expect(csrf).toBeTruthy();
-  const response = await page.request.post("/users/log-in", { form: {
-    _csrf_token: csrf,
-    "user[email]": process.env.ACCRUE_HOST_PREVIEW_OPERATOR_EMAIL || "admin@example.com",
-    "user[password]": password
-  } });
-  expect(response.ok(), `ordinary operator login returned ${response.status()}`).toBeTruthy();
+  const email = process.env.ACCRUE_HOST_PREVIEW_OPERATOR_EMAIL || "admin@example.com";
+  const form = page.locator("form").filter({ hasText: email });
+  await expect(form, "the existing operator login form is present").toHaveCount(1);
+  await form.locator('input[name="user[email]"]').evaluate((input, value) => { input.value = value; }, email);
+  await form.locator('input[name="user[password]"]').evaluate((input, value) => { input.value = value; }, password);
+  await form.getByRole("button", { name: "Enter workspace" }).click();
+  await page.goto("/admin");
+  await expect(page.locator("aside[aria-label='Admin navigation']"), "the configured operator session reaches mounted Admin").toBeVisible();
 }
 
 async function loginHeldout(page, fixture, sandboxId) {
