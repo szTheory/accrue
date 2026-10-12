@@ -21,7 +21,7 @@ defmodule AccrueAdmin.Components.Timeline do
         <li :for={item <- @items} class="ax-timeline-item">
           <span class={["ax-timeline-dot", "ax-timeline-dot-" <> tone(item)]} aria-hidden="true"></span>
 
-          <div class="ax-timeline-card">
+          <div class={["ax-timeline-card", Map.get(item, :subject_id) && "ax-timeline-record"]}>
             <div class="ax-timeline-header">
               <div>
                 <p class="ax-label"><%= Map.get(item, :title, "Event") %></p>
@@ -42,13 +42,14 @@ defmodule AccrueAdmin.Components.Timeline do
               <span class="ax-timeline-subject-label"><%= Map.get(item, :subject_type) || "Record" %> ID</span>
               <IdBadge.id_badge
                 id={"timeline-subject-#{Map.get(item, :id, :erlang.phash2(item))}"}
+                variant="plain"
                 id_value={to_string(Map.get(item, :subject_id))}
                 label={"Copy #{Map.get(item, :subject_type) || "record"} ID #{Map.get(item, :subject_id)}"}
               />
             </div>
-            <p :if={Map.get(item, :actor)} class="ax-timeline-actor">
-              <%= if Map.get(item, :actor) == "system", do: "Recorded automatically", else: "Recorded by #{Map.get(item, :actor)}" %>
-              <IdBadge.id_badge :if={Map.get(item, :actor_id)} id={"timeline-actor-#{Map.get(item, :id, :erlang.phash2(item))}"} id_value={to_string(Map.get(item, :actor_id))} label="Copy actor ID" />
+            <p :if={Map.get(item, :actor) && Map.get(item, :actor) != "system"} class="ax-timeline-actor">
+              Recorded by <%= Map.get(item, :actor) %>
+              <IdBadge.id_badge :if={Map.get(item, :actor_id)} id={"timeline-actor-#{Map.get(item, :id, :erlang.phash2(item))}"} id_value={to_string(Map.get(item, :actor_id))} label="Copy actor ID" variant="plain" />
             </p>
             <p :if={Map.get(item, :body)} class="ax-body"><%= Map.get(item, :body) %></p>
 

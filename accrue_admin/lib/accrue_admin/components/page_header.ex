@@ -32,7 +32,7 @@ defmodule AccrueAdmin.Components.PageHeader do
       {@rest}
     >
       <div class="ax-page-header-main">
-        <Breadcrumbs.breadcrumbs items={@breadcrumbs} />
+        <Breadcrumbs.breadcrumbs :if={@breadcrumbs != []} items={@breadcrumbs} />
         <div class="ax-page-header-title-row">
           <div class="ax-page-header-title-copy">
             <h1 id={@heading_id} class="ax-display" data-ax-page-title><%= @title %></h1>

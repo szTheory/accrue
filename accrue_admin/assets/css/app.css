@@ -2348,7 +2348,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-page .ax-dev-audit-strip span {
   color: var(--ax-muted);
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 600;
+  font-weight: 950;
 }
 
 .ax-dev-audit-strip {
@@ -3755,7 +3755,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-dev-health-snapshot strong {
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 600;
+  font-weight: 950;
 }
 
 .ax-dev-health-snapshot-header {
@@ -3784,7 +3784,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-dev-health-snapshot-header .ax-dev-health-status em {
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 600;
+  font-weight: 950;
 }
 
 .ax-dev-health-snapshot-header strong,
@@ -3795,7 +3795,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-dev-health-snapshot-header a {
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 600;
+  font-weight: 950;
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
@@ -5047,7 +5047,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-primary);
   /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: 1.5rem;
-  font-weight: 950;
+  font-weight: 600;
 }
 
 .ax-home > .ax-page-header .ax-page-copy {
@@ -7072,6 +7072,20 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   margin: 0;
 }
 .ax-timeline-subject .ax-id-badge { max-width: 100%; }
+.ax-timeline-record { grid-template-columns: minmax(0, 1fr) auto; gap: 0 var(--ax-space-md); }
+.ax-timeline-record .ax-timeline-header,
+.ax-timeline-record .ax-timeline-actor { grid-column: 1 / -1; }
+.ax-timeline-record .ax-timeline-header > div { width: 100%; justify-content: space-between; }
+.ax-home .ax-timeline { max-inline-size: 52rem; }
+.ax-timeline-record .ax-timestamp { color: var(--ax-muted); font: var(--ax-type-body-sm-font); }
+.ax-timeline-record .ax-timestamp-copy { padding-inline: 0; }
+.ax-timeline-record .ax-timeline-subject-label { font: var(--ax-type-body-sm-font); }
+.ax-timeline-record .ax-timeline-link { align-self: center; display: flex; align-items: center; min-height: 44px; font: var(--ax-type-body-sm-font); }
+@media (max-width: 639px) {
+  .ax-timeline-record { grid-template-columns: minmax(0, 1fr); }
+  .ax-timeline-record .ax-timeline-link { justify-self: start; }
+  .ax-timeline-record .ax-timeline-header > div { flex-direction: column; align-items: flex-start; }
+}
 .ax-event-page { gap: var(--ax-space-md); }
 .ax-event-header { margin: 0; }
 .ax-event-header h1 { margin: 0; }
@@ -7274,3 +7288,9 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
     min-height: 2.75rem;
   }
 }
+
+/* Plain copyable evidence: text at rest, shared hover/focus and toast feedback. */
+.ax-id-badge.ax-id-badge-plain { max-inline-size: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
+.ax-id-badge-plain:hover { background: var(--ax-interactive-hover); }
+.ax-id-badge-plain:focus-visible { outline: 2px solid var(--ax-focus-ring); outline-offset: 2px; }
+.ax-id-badge-plain .ax-id-badge-text { white-space: normal; overflow-wrap: anywhere; }

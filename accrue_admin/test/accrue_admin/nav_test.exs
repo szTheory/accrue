@@ -7,7 +7,7 @@ defmodule AccrueAdmin.NavTest do
     items = Nav.items("/billing", "/billing")
     labels = Enum.map(items, & &1.label)
 
-    assert hd(labels) == "Home"
+    assert hd(labels) == "Billing activity"
     assert "Payments" in labels
     assert "Payment recovery" in labels
 
@@ -26,8 +26,9 @@ defmodule AccrueAdmin.NavTest do
     assert Map.has_key?(first, :icon)
     assert Map.has_key?(first, :group)
     assert first.href == "/billing"
-    # Home stands alone with no group label.
-    assert first.group == nil
+    # Activity is a billing destination, matching only the mount root.
+    assert first.group == "Billing"
+    assert first.exact == true
   end
 
   test "groups follow the operator's mental model (Phase 169 regroup)" do

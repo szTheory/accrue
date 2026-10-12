@@ -98,7 +98,9 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # Home presents observable activity and scope-matched destinations only.
     assert html =~ "ax-display"
-    assert html =~ "Recent billing activity"
+    assert html =~ "Billing activity"
+    refute html =~ "Recorded automatically"
+    assert html =~ "ax-id-badge-plain"
     assert html =~ "Customer updated"
     refute html =~ "data-ax-command-palette-trigger"
     refute html =~ Copy.home_customer_search_cta()

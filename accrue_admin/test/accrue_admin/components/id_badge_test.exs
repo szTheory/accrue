@@ -31,6 +31,15 @@ defmodule AccrueAdmin.Components.IdBadgeTest do
     assert html =~ "<svg"
   end
 
+  test "plain evidence retains keyboard copy semantics without a chip icon" do
+    html = render_component(&IdBadge.id_badge/1, id_value: "customer-123", variant: "plain")
+    assert html =~ "ax-id-badge-plain"
+    assert html =~ ~s(data-clipboard-text="customer-123")
+    assert html =~ ~s(aria-label="Copy customer-123")
+    assert html =~ ~s(phx-hook="Clipboard")
+    refute html =~ "<svg"
+  end
+
   test "derives a stable DOM id from id_value when none is supplied" do
     html = render_component(&IdBadge.id_badge/1, id_value: "cus_derived")
 

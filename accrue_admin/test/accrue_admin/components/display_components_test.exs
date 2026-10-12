@@ -364,6 +364,34 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   end
 
   describe "Timeline" do
+    test "automatic provenance is quiet while operator attribution remains visible" do
+      html =
+        render_component(&Timeline.timeline/1,
+          items: [
+            %{
+              id: 1,
+              title: "Customer created",
+              subject_type: "Customer",
+              subject_id: "customer-1",
+              actor: "system"
+            },
+            %{
+              id: 2,
+              title: "Customer updated",
+              subject_type: "Customer",
+              subject_id: "customer-1",
+              actor: "admin",
+              actor_id: "admin-1"
+            }
+          ]
+        )
+
+      refute html =~ "Recorded automatically"
+      assert html =~ "Recorded by admin"
+      assert html =~ ~s(data-clipboard-text="admin-1")
+      assert html =~ ~s(data-clipboard-text="customer-1")
+    end
+
     test "renders escaped timeline items with expandable detail blocks" do
       html =
         render_component(&Timeline.timeline/1, %{

@@ -57,3 +57,16 @@ Owner subsequently requested a focused inline gameplan instead of a new mileston
 - Ordinary DB inspection found ten event types, all system-attributed. Checked source producers and existing fixture-story relationships; no invented operator actions or data mutation. Recent creation events are legitimate, but do not constitute a varied scenario showcase. The test verifies bounded stories, not every conceivable real-world history.
 - Follow-up discovered during copy verification: pasting the local customer UUID into global billing search returned no match although the customer exists. Preserve as a separate search-contract finding for later work; this cleanup did not broaden search behavior. The browser-session clipboard read API returned empty, so exact OS clipboard proof uses native paste, not that API.
 - No remote push, merge, package publication, or tag movement. Historical phase screenshots/receipts were not regenerated or relabelled as proof of this inline change.
+
+## Follow-up: quieter billing activity (2026-10-12)
+
+Owner rejected bulky ID chips, repeated automatic attribution, heavy heading typography, and the mismatch between Home navigation and an activity-feed purpose. Implemented an inline refinement, without starting a milestone:
+
+- Rename the default `/admin` destination to Billing activity across navigation, heading, and browser title; group it under Billing. Events remains the searchable history. Exact root matching is now explicit navigation metadata, preserving scoped links without selecting the activity destination on child pages.
+- Remove the redundant single-item breadcrumb on this landing page. The shared page header skips breadcrumbs when callers provide none.
+- Correct the Home-specific heading weight from 950 to the existing shared 600 weight.
+- Add a reusable plain ID-copy variant, used by structured timeline records: no chip border/background or permanent icon. Native button semantics, 44px target, keyboard focus, full exact clipboard value, and shared toast remain.
+- Suppress repeated system attribution in the timeline; retain attribution for operator actions and precise provenance on event details.
+- Bound the landing feed width, align muted timestamps with event titles on desktop, and group record identity with its event link. Narrow layouts stack and wrap full IDs with left-aligned text.
+
+Verification: rebuilt assets; full Admin suite 732 tests, 0 failures; clipboard/time Node suite 11 tests, 0 failures. After the final text-alignment CSS correction, the affected Admin/assets/component/navigation tests passed again (41 tests, 0 failures). An initial asset parity test failed while the asset build and full suite ran concurrently; the sequential rebuilt run passed without relaxing the check. Chrome inspected desktop and 320px layouts; narrow document width equals viewport width (320px); computed heading weight is 600 and plain copy controls have 0px borders/no SVG icons. Keyboard Enter on a connected plain ID control produced `data-copied=true` and the visible Copied to clipboard toast. Preview remains http://accrue-host-phase245-ordinary.localhost/admin, with final stylesheet css-dabf68fccab19ff4364ee21e86bdc666. No preview reseeding, dependency additions, remote publication, or tag updates.
