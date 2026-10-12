@@ -142,7 +142,7 @@ Plans:
   2. A reviewer can trace every accepted owner finding to its shared or page-specific fix, or a justified disposition, and to executed owning checks.
   3. A reviewer can inspect rendered confirmation of changed surfaces labeled by route/state, theme, viewport, scenario, tested revision and served assets; uncovered states remain explicit.
 
-**Plans**: 1/2 plans executed
+**Plans**: 2/2 plans executed
 **UI hint**: yes
 
 Plans:
@@ -150,7 +150,7 @@ Plans:
 - [x] 248-01-PLAN.md — Guarded host-only ordinary, empty, failed-record and boundary scenarios with current rendered proof
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 248-02-PLAN.md — Complete owner finding/check ledger and inspected revision-bound acceptance evidence
+- [x] 248-02-PLAN.md — Complete owner finding/check ledger and inspected revision-bound acceptance evidence
 
 ## Progress
 
@@ -159,4 +159,4 @@ Plans:
 | 245. Rendered Baseline and Realistic Preview | 3/3 | Complete    | 2026-10-11 |
 | 246. Collection Controls and Search | 5/5 | Complete    | 2026-10-11 |
 | 247. Evidence-True Details and Analytics | 8/8 | Complete    | 2026-10-11 |
-| 248. Reproducible Scenarios and Integrated Proof | 1/2 | Ready to execute | - |
+| 248. Reproducible Scenarios and Integrated Proof | 2/2 | Ready to execute | - |

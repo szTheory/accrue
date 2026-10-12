@@ -5,17 +5,17 @@ milestone_name: Admin Usability and Visual Consistency
 current_phase: 248
 current_phase_name: Reproducible Scenarios and Integrated Proof
 current_plan: 2
-status: ready_to_execute
-stopped_at: Completed 248-01-PLAN.md
-last_updated: "2026-10-12T02:48:36.470Z"
-last_activity: 2026-10-11
+status: verifying
+stopped_at: Completed 248-02-PLAN.md
+last_updated: "2026-10-12T02:57:08.961Z"
+last_activity: 2026-10-12
 last_activity_desc: Phase 248 planned in two dependent waves
-state_head: b2817ebcffa44531f8ea726f85693addf87c0835
+state_head: f148da6ab1f0961ec8b9b970c369f9c6dee9ad8e
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 18
-  completed_plans: 17
+  completed_plans: 18
   percent: 75
 ---
 
@@ -37,7 +37,7 @@ Phase: 248 (Reproducible Scenarios and Integrated Proof) — IN PROGRESS
 Current Plan: 2
 Total Plans in Phase: 2
 Plan: 2 of 2
-Status: In progress
+Status: Phase complete — ready for verification
 Last activity: 2026-10-12 — Plan 248-01 completed; Plan 248-02 ready
 
 ## Performance Metrics
@@ -202,6 +202,7 @@ Last activity: 2026-10-12 — Plan 248-01 completed; Plan 248-02 ready
 | Phase 247 P06 | 12min | 2 tasks | 6 files |
 | Phase 247 P07 | continuation; start unavailable | 2 tasks | 31 files |
 | Phase 248 P01 | 45min | 2 tasks | 17 files |
+| Phase 248 P02 | 7min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -465,6 +466,8 @@ Last activity: 2026-10-12 — Plan 248-01 completed; Plan 248-02 ready
 - [Phase 247]: Independent verification passed 31/31 after race, negative-state and populated payload/history checks closed the initial gaps.
 - [Phase 248]: Keep ordinary evidence on the existing Phase 245 host; use the guarded 4102 test database for exceptional scenarios.
 - [Phase 248]: Bind each inspected viewport capture to exact routes, current source files, served CSS/JS bytes, and image digests.
+- [Phase 248]: Owner topic and accepted finding keys and owners come from Phase 245 canonical JSON blocks; shared findings remain represented once and linked to their owning topic.
+- [Phase 248]: Treat each Phase 248 capture as current only for the route and state it directly shows; retain Phase 245-247 receipts as historical at their recorded source revisions.
 
 ### Pending Todos
 
@@ -550,8 +553,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-12T02:48:23.382Z
-Stopped at: Completed 248-01-PLAN.md
+Last session: 2026-10-12T02:57:08.909Z
+Stopped at: Completed 248-02-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

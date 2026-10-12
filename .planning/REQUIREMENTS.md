@@ -35,7 +35,7 @@
 
 ### Integrated acceptance
 
-- [ ] **PROOF-01**: Reviewers can trace every accepted owner finding to its shared/page-specific fix or justified disposition and its executed owning checks, including rendered confirmation of changed surfaces and evidence tied to the tested revision.
+- [x] **PROOF-01**: Reviewers can trace every accepted owner finding to its shared/page-specific fix or justified disposition and its executed owning checks, including rendered confirmation of changed surfaces and evidence tied to the tested revision.
 
 ## Future Requirements
 
@@ -65,7 +65,7 @@ New billing/provider capabilities, Portal work, new Admin rooms, diagnosis produ
 | DETAIL-02 | Phase 247 | Complete |
 | METRIC-01 | Phase 247 | Complete |
 | DEMO-02 | Phase 248 | Complete |
-| PROOF-01 | Phase 248 | Pending |
+| PROOF-01 | Phase 248 | Complete |
 
 All 16 v1.66 requirements have exactly one owning phase. PROOF-01 covers cross-phase acceptance.
 
