@@ -44,11 +44,17 @@ test("visible toast waits for the real write and reports rejection without succe
   const clipboard = { writeText: () => new Promise((resolve) => { finishWrite = resolve; }) };
   withBrowser(t, { clipboard, button: target });
   let toast;
-  document.body = { append(node) { toast = node; } };
+  let creations = 0;
+  document.body = { append(node) { toast = node; creations++; } };
   document.querySelector = () => toast;
   document.createElement = () => ({ dataset: {}, setAttribute() {} });
   const timeout = globalThis.setTimeout;
-  globalThis.setTimeout = () => 0;
+  let hideToast;
+  globalThis.setTimeout = (callback, duration) => {
+    assert.equal(duration, 2500);
+    hideToast = callback;
+    return 0;
+  };
   t.after(() => { globalThis.setTimeout = timeout; });
 
   const hook = { el: target };
@@ -59,10 +65,15 @@ test("visible toast waits for the real write and reports rejection without succe
   await pending;
   assert.equal(toast.textContent, "Copied to clipboard");
   assert.equal(toast.hidden, false);
+  assert.equal(toast.className, "ax-toast");
+  assert.equal(toast.dataset.axToast, "true");
 
   clipboard.writeText = async () => { throw new Error("denied"); };
   await target.listeners.get("click")();
   assert.match(toast.textContent, /Could not copy/);
+  assert.equal(creations, 1);
+  hideToast();
+  assert.equal(toast.hidden, true);
   assert.equal(target.dataset.copied, undefined);
   Clipboard.destroyed.call(hook);
 });

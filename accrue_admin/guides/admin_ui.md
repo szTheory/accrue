@@ -12,6 +12,12 @@ Start with the package quickstart in [`README.md`](../README.md), then return he
 - **Motion:** light CSS transitions on shells, drawers, and modals; honor `prefers-reduced-motion`; reach for LiveView `JS` only when CSS cannot carry the interaction.
 - **Responsive:** keep the mounted shell usable on small viewports first; avoid wide horizontal scroll for primary tables unless unavoidable—prefer column discipline and secondary detail surfaces.
 
+## Feedback placement
+
+Use `assets/js/toast.js` (`showToast`) and `.ax-toast` for short, non-actionable confirmations such as copying an ID or timestamp. All transient confirmations share one bottom-center location, token-based styling, and the toast layer above overlays. The location stays consistent across desktop and mobile, with narrow-screen gutters and a device safe-area inset. Toasts never move focus or require dismissal; a newer message replaces the previous message and restarts the 2.5-second lifetime. The shared live status announces the message politely.
+
+Keep failures that require a decision or recovery action in the existing `FlashGroup` or beside the affected control. A copy failure may use the shared toast as brief feedback, but the exact manual-copy fallback remains at the control. Do not put required instructions or actions solely in a disappearing toast. Do not create per-page toast positions or separate notification implementations.
+
 ## Core operator surface parity (checklist)
 
 **ADM-07:** the canonical matrix of mounted core routes vs `AccrueAdmin.Copy`, `ax-*` / token discipline, and VERIFY-01 posture lives in **[`core-admin-parity.md`](core-admin-parity.md)**. Use it when triaging Tier A copy gaps or planning VERIFY extensions—do not maintain a second matrix in planning-only docs.

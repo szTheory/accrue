@@ -1,20 +1,4 @@
-let toastTimeout;
-
-function showToast(message) {
-  if (typeof document === "undefined" || !document.body) return;
-  let toast = document.querySelector("[data-clipboard-toast]");
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.dataset.clipboardToast = "true";
-    toast.className = "ax-clipboard-toast";
-    toast.setAttribute("role", "status");
-    document.body.append(toast);
-  }
-  clearTimeout(toastTimeout);
-  toast.textContent = message;
-  toast.hidden = false;
-  toastTimeout = setTimeout(() => { toast.hidden = true; }, 2500);
-}
+import { showToast } from "../toast.js";
 
 // Registered LiveView hook for click-to-copy controls. Each mounted node owns
 // one handler, so controls added by LiveView patches keep their behavior.

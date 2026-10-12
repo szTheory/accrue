@@ -7145,10 +7145,10 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 }
 .ax-time-preference select { appearance: auto; border: 0; background: transparent; font: var(--ax-type-label-sm-font); }
 .ax-timestamp-copy:hover { background: var(--ax-interactive-hover); }
-.ax-clipboard-toast {
+.ax-toast {
   position: fixed;
   inset-inline: var(--ax-space-md);
-  bottom: var(--ax-space-lg);
+  bottom: calc(var(--ax-space-lg) + env(safe-area-inset-bottom, 0px));
   width: fit-content;
   max-width: calc(100% - 2 * var(--ax-space-md));
   margin-inline: auto;
@@ -7158,9 +7158,9 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-font);
-  z-index: var(--ax-z-toast, 100);
+  z-index: var(--ax-z-toast);
 }
-.ax-clipboard-toast[hidden] { display: none; }
+.ax-toast[hidden] { display: none; }
 
 .ax-timestamp-copy-fallback {
   display: block;
