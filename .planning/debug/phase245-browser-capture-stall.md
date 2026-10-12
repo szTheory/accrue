@@ -1,8 +1,8 @@
 ---
-status: verifying
+status: resolved
 trigger: "Phase 245 authenticated browser sweep stalls after /admin and before /admin/customers completion; latest interrupted stack points to page.setViewportSize."
 created: 2026-10-11T14:30:00Z
-updated: 2026-10-11T15:22:27Z
+updated: 2026-10-12T12:50:18.077962+00:00
 ---
 
 ## Current Focus
@@ -102,3 +102,7 @@ verification:
   manifest_verifier: {result: pass, detail: "PASS: route inventory, capture manifest and findings"}
   guardrail_verdict: pending_literal_revert_check_and_human_verify
 files_changed: [examples/accrue_host/e2e/phase245-admin-baseline.spec.js]
+
+## Milestone Closeout Resolution — 2026-10-12
+
+The repaired optional-selector read completed the recorded authenticated sweep 5/5 and retained 24 provenance-bound baseline captures; independent 2026-10-12 verification preserves their historical source a8d39ea4 and passes 14/14.

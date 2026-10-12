@@ -42,3 +42,30 @@ No remaining issues in the reviewed scope.
 _Reviewed: 2026-10-11T15:25:16Z_  
 _Reviewer: the agent (gsd-code-reviewer)_  
 _Depth: standard_
+
+## Incremental Closeout Addendum — 2026-10-12
+
+**Scope:** Re-inspected the Phase 245-owned closeout changes in
+`examples/accrue_host/README.md`,
+`examples/accrue_host/priv/repo/seeds/ordinary.exs`, and
+`examples/accrue_host/test/ordinary_preview_seed_test.exs` against base
+`945e7f4925caa6b75940665c0a7e0e1f93d5d0da`. The existing historical review,
+its clean status, and the five fixed finding dispositions above are retained.
+
+**Fresh inspection evidence:** The ordinary seed checks connected database,
+role, and server address before the newly added Phase 191 cleanup; cleanup
+selects the documented Fake customer, subscription, invoice, charge, webhook,
+coupon, promotion, and Connect namespaces. Event trigger re-enablement is in an
+`after` clause. The operator password reconciliation runs only after the
+isolated-target and Fake-processor guards. The test additions exercise loopback
+target acceptance/rejection, Phase 191 fixture removal, and stale demo-password
+reconciliation. The README's Phase 248 ordinary lane documents the isolated
+host and review-only browser flow, while the existing Phase 245 section supplies
+the explicit seed wrapper command and custody checks.
+
+**Incremental findings:** None. No finding IDs were added; CR-01 and WR-01
+through WR-04 remain fixed as recorded above.
+
+_Incremental review: 2026-10-12_
+_Reviewer: the agent (gsd-code-reviewer)_
+_Depth: standard_

@@ -1,8 +1,8 @@
 ---
-status: verifying
+status: resolved
 trigger: "Phase 248 heldout fixture leaves cus_e2e_edge_1 in accrue_host_test; ordinary_preview_seed_test.exs:78 sees edge_customers = 1"
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-12T12:50:18.077962+00:00
 ---
 
 ## Current Focus
@@ -67,3 +67,7 @@ verification:
   revert_and_reconfirm: {result: pass, bug_returned_on_revert: true, fixed_on_reapply: true, details: "Pre-fix original 13-test run failed twice on edge count 1; post-fix run passed 13/13, and lifecycle regression asserts cleanup invocation."}
   guardrail_verdict: accepted
 files_changed: [examples/accrue_host/e2e/phase248-heldout-setup.js, examples/accrue_host/priv/repo/seeds/phase248_cleanup_edge.exs, scripts/ci/phase248_heldout_isolation.test.mjs]
+
+## Milestone Closeout Resolution — 2026-10-12
+
+Guarded five-ID transactional cleanup is committed in c95f89b7/f75e7c93. Fresh host regression passed 13/13, lifecycle contracts 4/4 including partial-seed failure and idempotence; independent verifier checked foreign-child rejection. Mounted browser run predates this correction, as recorded.

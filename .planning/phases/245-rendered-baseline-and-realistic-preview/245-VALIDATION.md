@@ -62,3 +62,11 @@ Run the relevant focused check after each implementation task. At the wave bound
 | 4 | 2 | 0 |
 
 Final capture safeguard follow-up: source `a8d39ea4` independently checks the Fake processor before bulk capture; positive/negative guard test and authenticated suite passed (5/5, 49.6s). Refreshed evidence is committed in `da24ebf7`.
+
+## Validation Audit 2026-10-12
+
+| Metric | Count |
+|---|---|
+| Gaps found | 4 |
+| Resolved | 2 |
+| Escalated | 0 |

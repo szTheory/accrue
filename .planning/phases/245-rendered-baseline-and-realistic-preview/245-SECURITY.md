@@ -56,3 +56,11 @@ Read-only verification: `node scripts/ci/verify_phase245_baseline.mjs --self-tes
 - [x] `status: verified` set in frontmatter.
 
 **Approval:** Verified 2026-10-11.
+
+## Security Audit 2026-10-12
+
+| Metric | Count |
+|---|---|
+| Threats found | 8 |
+| Closed | 8 |
+| Open | 0 |

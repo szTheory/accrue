@@ -1,6 +1,6 @@
 ---
 phase: 245-rendered-baseline-and-realistic-preview
-verified: 2026-10-11T15:29:27Z
+verified: 2026-10-12T12:46:18Z
 status: passed
 score: 14/14 must-haves verified
 covered_files:
@@ -10,51 +10,18 @@ covered_files:
   - .planning/phases/245-rendered-baseline-and-realistic-preview/245-02-SUMMARY.md
   - .planning/phases/245-rendered-baseline-and-realistic-preview/245-03-PLAN.md
   - .planning/phases/245-rendered-baseline-and-realistic-preview/245-03-SUMMARY.md
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/245-COVERAGE.md
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/245-FINDINGS.md
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/245-ORDINARY-STORIES.md
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/manifest.json
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/01-root-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/02-rootcustomers-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/03-rootcustomers-paramid-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/04-rootsubscriptions-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/05-rootsubscriptions-paramid-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/06-rootinvoices-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/07-rootinvoices-paramid-wide-dark.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/08-rootpayments-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/09-rootpayments-paramid-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/10-rootcoupons-narrow-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/11-rootcoupons-paramid-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/12-rootpromotion-codes-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/13-rootpromotion-codes-paramid-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/14-rootconnect-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/16-rootevents-narrow-dark.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/17-rootevents-paramid-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/18-rootwebhooks-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/20-rootanalytics-recovery-wide-dark.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/21-rootanalytics-recovery-subscriptions-paramid-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/22-customers-filtered-zero-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/23-global-search-open-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/24-global-search-pointer-selection-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/25-customer-invoices-tab-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-current/26-customer-activity-expanded-wide-light.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-tracer/invoice-detail.png
-  - .planning/phases/245-rendered-baseline-and-realistic-preview/captures/phase245-tracer/manifest.json
   - examples/accrue_host/README.md
-  - examples/accrue_host/e2e/phase245-admin-baseline.spec.js
-  - examples/accrue_host/playwright.phase245.config.js
-  - examples/accrue_host/priv/repo/seeds.exs
-  - examples/accrue_host/priv/repo/seeds/helpers.exs
   - examples/accrue_host/priv/repo/seeds/ordinary.exs
-  - examples/accrue_host/priv/repo/seeds/showcase.exs
   - examples/accrue_host/test/ordinary_preview_seed_test.exs
-  - examples/accrue_host/test/ordinary_preview_story_contract_test.exs
-  - examples/accrue_host/test/support/tap_formatter.ex
-  - scripts/ci/seed_phase245_ordinary.sh
-  - scripts/ci/verify_phase245_baseline.mjs
-covered_digest: "v3:sha256:3233793f4864a8f606ec30ebf5f218aef81f3642c3b79bc7ada88452544a862d"
+covered_digest: "v3:sha256:f0625f4e0357d2ed3ec1feaad12d7e56e391b3a8e76ea3eb6ab9630e068de66a"
 behavior_unverified: 0
 overrides_applied: 0
+re_verification:
+  previous_status: passed
+  previous_score: 14/14
+  gaps_closed: []
+  gaps_remaining: []
+  regressions: []
 ---
 
 # Phase 245: Rendered Baseline and Realistic Preview Verification Report
@@ -158,3 +125,25 @@ No blocking gaps found. The phase delivers a traceable inventory of the existing
 
 _Verified: 2026-10-11T15:29:27Z_  
 _Verifier: gsd-verifier_
+
+## Re-verification Addendum — 2026-10-12
+
+The original verification above records the Phase 245 baseline and its contemporaneous evidence. This refresh checks the same 14 truths against the current checkout while keeping that baseline's evidence window explicit. Phase 245 remains scoped to BASE-01, BASE-02 and DEMO-01, three of the milestone's 16 canonical requirements; it does not claim the later phases' work as a new Phase 245 baseline.
+
+### Current checks
+
+| Check | Result | Evidence |
+|---|---|---|
+| Ordinary seed and story contracts | ✓ PASS | `MIX_ENV=test mix test test/ordinary_preview_seed_test.exs test/ordinary_preview_story_contract_test.exs test/seeds_idempotency_test.exs` from `examples/accrue_host`: 13 tests, 0 failures. Current assertions cover the connected test database boundary, stable repeat seeding, ordinary relationships and stored billing evidence, and removal of Phase 191 namespaces from the isolated ordinary preview. |
+| Current mounted-route inventory | ✓ PASS | `node scripts/ci/verify_phase245_baseline.mjs --coverage .planning/phases/245-rendered-baseline-and-realistic-preview/245-COVERAGE.md --routes-only`: `PASS: route inventory`. |
+| Verifier negative controls | ✓ PASS | `node scripts/ci/verify_phase245_baseline.mjs --self-test`: refreshed-positive and the stale-digest, mismatched-route, duplicate-owner-topic, and generic-unavailable rejection controls all passed. |
+| Historical capture bytes and provenance | ✓ VERIFIED | Manifest names clean source revision `a8d39ea49089bb682ebbe71be8df21100073fbf9`. A Git-object comparison matched all 144 unique source-file digests at that revision; all 24 retained PNG SHA-256 values and 48 package/compiled/served CSS/JS digest triplets matched. |
+| Full verifier against the current checkout | Historical source drift reported | The ordinary full command reports stale source digests because its source comparison uses today's checkout. Phase 246/247 changed Admin files and later host cleanup changed `ordinary.exs`; these 24 captures remain evidence for the historical `a8d39ea4` baseline only. No manifest revision, screenshot, score, or review claim was rewritten to imply a current render. |
+
+### Preserved evidence limits
+
+The visual assessment remains the original **14/24**, not a fresh subjective acceptance score. It was based on the 24 manifest-bound captures at `a8d39ea4`. The coverage ledger continues to disclose unavailable Connect/webhook detail IDs, true unfiltered-empty/error and role-scope cases, untested query/count and filter-reset behavior, incomplete keyboard activation/focus checks, unloaded activity, and physical touch. Later product changes are outside this Phase 245 capture baseline. The report therefore establishes traceable breadth and disclosed limits, not complete visual, accessibility, or interaction acceptance.
+
+The three Phase 245 requirements remain satisfied: BASE-01 by the route/state ledger plus the current route reconciliation; BASE-02 by the provenance-checked historical representative set and bounded review; DEMO-01 by the current passing seed/story contracts and source-linked unknowns. No later-phase requirement is attributed to Phase 245, and no new subjective acceptance claim is made.
+
+_Re-verified: 2026-10-12T12:46:18Z_

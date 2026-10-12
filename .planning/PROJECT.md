@@ -55,6 +55,8 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Phase 246:** Complete, independently verified 10/10, five plans and five requirements. Final Admin suite passed 718/0; 24 populated route/viewport/theme captures passed source, served-asset and PNG validation. Shared filters, search, identities and responsive copy controls are delivered. Existing copy feedback is a copied state; timestamp/toast conventions and detail/analytics refinements remain Phase 247. Capture attempts are preserved outside the working tree.
 
+**Phase 248:** Complete and independently verified 3/3, two plans and two requirements. Four guarded ordinary/empty/failure/boundary scenarios have recorded mounted runs (ordinary 1/1, held-out 3/3) and ten inspected captures at source `112d484d`. Fresh 23 focused Node contracts and 13 host regressions pass; fixture cleanup is bounded to five IDs and independently checked. The 13-topic/five-finding proof ledger keeps historical receipts and current coverage limits explicit. The original 15/24 UI score is preserved; two visual evidence gaps and WR-01 are closed without claiming broad subjective acceptance. Milestone audit and archive are next.
+
 **Phase 247:** Complete and independently verified 31/31 with zero unverified behavior, eight plans and six requirements. The Admin suite passed 730/0, both ordinary and held-out browser lanes passed, and twenty inspected captures identify source `48a8d7fdde48` and actual served assets. Shared Local/UTC timestamps and truthful copy, detail/replay/payload hierarchy, concrete destinations and currency-qualified payment recovery are delivered. Phase 248 owns reproducible evaluation scenarios and integrated confirmation. Initial failed evidence and bounded review dispositions remain preserved.
 
 **Automation:** The owner's automatic-continuation instruction applies to requirement/roadmap defaults consistent with this scope and discuss→plan→execute work. Preserve concrete human decisions only when a new consequential ambiguity arises; do not repeat approvals for existing scope. Screenshot evidence must identify route/state, theme, viewport, scenario, revision and served assets; missing coverage stays explicit. Bound rendered review to one batched assessment, one correction batch and one confirmation per coherent slice unless a named defect justifies reopening.
@@ -1033,4 +1035,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-11 after Phase 247; automatic continuation to Phase 248 remains approved.*
+*Last updated: 2026-10-12 after Phase 248; authorized milestone audit and archive.*

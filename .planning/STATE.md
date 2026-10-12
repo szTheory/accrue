@@ -22,11 +22,11 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-11)
+See: .planning/PROJECT.md (updated 2026-10-12)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 248 — Reproducible Scenarios and Integrated Proof
+**Current focus:** v1.66 milestone audit and archive
 **Progress:** [██████████] 100%
 **Completed work:** v1.65 is archived under `.planning/milestones/v1.65-*`. Phase 244 has 4/4 plans complete and 4/4 requirements satisfied; verification passed 9/9 with zero unverified behavior. v1.64 is shipped and archived with its closeout evidence retained in `.planning/milestones/`.
 
@@ -207,6 +207,10 @@ Last activity: 2026-10-12 — Phase 248 complete
 ## Accumulated Context
 
 ### Decisions
+
+- [Phase 248]: Keep ordinary preview unchanged; isolate held-out 4102 SQL-sandbox scenarios and guard exact five-ID teardown, including partial-seed failure.
+- [Phase 248]: Treat captures as representative evidence at their recorded revision; preserve original audits and disclose current interaction/surface limits.
+- [Phase 248]: Account for every canonical owner topic and finding through executed owner checks and justified dispositions.
 
 - [Phase 242]: Preserve successful search groups on failed-group retry while retaining current query/generation/owner checks; semantic regressions and all 44 hook controls recur in the existing browser CI job.
 - [Phase 242]: Catalog ownership follows the incumbent global schema; exact parent/child identity and current admin/session context are proved without invented tenant filtering.
@@ -532,6 +536,17 @@ Items acknowledged and deferred at milestone close, most recent first:
 | verification_gaps | v1.32/099-VERIFICATION.md | gaps_found | 2026-10-09 | v1.63 |
 | deferred_items | 235/deferred-items.md: Deferred Items — Phase 235 Plan 01 — `accrue_admin/lib/accrue_admin/live/subscription_live.ex:172` emits an existing compiler warning because `handle_event/3` clauses are not grouped. This is unrelated to the mounted checkout hook and browser spec. — The host test application emits an existing `ex_money` warning about automatically starting the exchange rate service. This is unrelated to the mounted checkout hook and browser spec. | acknowledged | 2026-10-09 | v1.63 |
 
+
+### v1.66 closeout acknowledgements
+
+| Category | Item | Date | Milestone |
+|---|---|---|---|
+| deferred_items | Phase 246/deferred-items.md: `side-tab`: thick left border using warning token — line 3819 — Existing warning-state treatment, outside changed selectors. | 2026-10-12 | v1.66 |
+| deferred_items | Phase 246/deferred-items.md: `side-tab`: thick left border using danger token — line 5032 — Existing danger-state treatment, outside changed selectors. | 2026-10-12 | v1.66 |
+| deferred_items | Phase 246/deferred-items.md: `side-tab`: thick left border using strong border token — line 5252 — Existing card decoration, outside changed selectors. | 2026-10-12 | v1.66 |
+| deferred_items | Phase 246/deferred-items.md: `overused-font`: Geist — line 7 — Existing project-wide typeface; a typography change requires separate design review. | 2026-10-12 | v1.66 |
+| deferred_items | Phase 246/deferred-items.md: `overused-font`: Geist Mono — line 14 — Existing project-wide mono typeface; a typography change requires separate design review. | 2026-10-12 | v1.66 |
+
 ## Post-v1.48 Pause Rule
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
@@ -554,7 +569,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-12T02:57:08.909Z
-Stopped at: Phase 248 complete — all phases complete
+Stopped at: Phase 248 complete; v1.66 audit and archive
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -684,4 +699,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Continue automatically with `$gsd-discuss-phase 248 --auto`, then plan and execute Phase 248. Phases 245–247 are complete; do not repeat them. Phase 247 verification passed 31/31 with zero unverified behavior, eight plans complete, 730 Admin tests and both browser lanes green. Twenty captures are bound to source 48a8d7fdde48 and served assets; prior captures remain historical. Phase 248 owns reproducible evaluation selection and integrated proof.
+- Complete the authorized v1.66 audit and archive; all four phase verifications pass. Preserve recorded render revisions and explicit UI/evidence limits. After archive, use `$gsd-new-milestone` for new scope.

@@ -1,8 +1,8 @@
 ---
-status: verifying
+status: resolved
 trigger: "Phase 248 ordinary mounted tracer fails login: API POST returned 500 without auth cookie; native chooser login also failed before Admin navigation"
 created: 2026-10-12T02:09:49Z
-updated: 2026-10-12T02:31:00Z
+updated: 2026-10-12T12:50:18.077962+00:00
 ---
 
 ## Current Focus
@@ -69,3 +69,7 @@ root_cause: The Phase 248 README command's regex crossed from the documented ope
 fix: Bound the README credential parser to the operator login sentence; use the proven Phase 247 CSRF request-context POST before navigating to mounted Admin.
 verification: Correctly anchored credential gave direct HTTP /admin 200; ordinary Phase 248 Playwright tracer passed 1/1; node --check and parser equality checks passed. Generated captures await visual inspection and source-bound validation after commit.
 files_changed: [examples/accrue_host/README.md, examples/accrue_host/e2e/phase248-scenarios.spec.js, .planning/debug/phase248-ordinary-login.md]
+
+## Milestone Closeout Resolution — 2026-10-12
+
+Anchored credential extraction and awaited CSRF login are committed in929b140b. Ordinary mounted lane passed1/1, final10captures at112d484d inspected and both validatorspassed. Incorrect-password Sigra timestamp exception remains outside scope; this resolved record concerns the harness login.
