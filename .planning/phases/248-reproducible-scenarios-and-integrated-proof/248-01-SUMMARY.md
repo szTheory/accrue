@@ -159,3 +159,7 @@ Plan 01 scenario evidence is complete. Plan 02 still owns the canonical owner-fi
 ## Corrective proof addendum (2026-10-12)
 
 Code-review warning WR-01 was addressed by commits `13729468` and `112d484d`. The mounted boundary assertion now compares the complete seeded Unicode value exactly. Per-viewport empty-state framing now scrolls and checks the heading and explanation after every resize. The final ordinary matrix passed 1/1 and held-out matrix passed 3/3 at harness source `112d484d729e0867a9e04ebc1ad133e2ba91cdcb`. Ten fresh images were individually inspected and recorded at that source. Original eight images and their source-`5548e3fd` manifest remain unchanged under `captures/phase248-initial-proof/`.
+
+## Task Commits (corrective fixture lifecycle regression)
+
+1. **Clean held-out edge fixture after browser setup and on partial seed failure** — `c95f89b7` (fix). The exact 13 host tests passed after cleanup; the held-out lifecycle contract passed 4/4. See `248-REGRESSION.md` for the failure, guarded deletion scope, and test evidence. This harness-only correction follows the ten inspected captures and does not change their recorded source fingerprints.
