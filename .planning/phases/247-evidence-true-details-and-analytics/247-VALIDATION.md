@@ -75,3 +75,6 @@ The preceding proof source `60cbf06331c2` was superseded after the bounded revie
 | Gaps found | 0 |
 | Resolved | 0 |
 | Escalated | 0 |
+
+## Prior-Phase Regression Gate
+The final 728-test Admin suite includes Phase 246 collection, search, identity, and scope owners. The prior Phase 245 seed/story/idempotency contracts were rerun through the GSD 600-second one-shot timeout: `MIX_ENV=test mix test test/ordinary_preview_story_contract_test.exs test/ordinary_preview_seed_test.exs test/seeds_idempotency_test.exs` from `examples/accrue_host`, 13 tests, 0 failures, exit 0 in 4.4 seconds. Existing seed-redefinition/operation-ID/ExMoney startup notices and the unused subscription argument warning remain visible in the run; no timeout or test failure. The current render manifest was independently rerun: all 16 images accepted at source `4b121d6997ef`, served assets match.
