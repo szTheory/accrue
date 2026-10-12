@@ -41,7 +41,8 @@ async function loginOrdinary(page) {
   if (!password) throw new Error("ordinary proof requires the README-documented local operator credential in process memory");
   await page.goto("/users/log-in");
   const email = process.env.ACCRUE_HOST_PREVIEW_OPERATOR_EMAIL || "admin@example.com";
-  const form = page.locator("form").filter({ hasText: email });
+  const emailInput = page.locator(`input[name="user[email]"][value="${email}"]`);
+  const form = page.locator("form").filter({ has: emailInput });
   await expect(form, "the existing operator login form is present").toHaveCount(1);
   await form.locator('input[name="user[email]"]').evaluate((input, value) => { input.value = value; }, email);
   await form.locator('input[name="user[password]"]').evaluate((input, value) => { input.value = value; }, password);
