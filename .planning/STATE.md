@@ -4,17 +4,18 @@ milestone: v1.66
 milestone_name: Admin Usability and Visual Consistency
 current_phase: 248
 current_phase_name: Reproducible Scenarios and Integrated Proof
+current_plan: 2
 status: ready_to_execute
-stopped_at: Phase 248 planned; execution not started
-last_updated: "2026-10-12T01:40:51.405Z"
+stopped_at: Completed 248-01-PLAN.md
+last_updated: "2026-10-12T02:48:36.470Z"
 last_activity: 2026-10-11
 last_activity_desc: Phase 248 planned in two dependent waves
-state_head: c01c6d2934eb3c308f973e9e7f3e77a14853f0b6
+state_head: b2817ebcffa44531f8ea726f85693addf87c0835
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 18
-  completed_plans: 16
+  completed_plans: 17
   percent: 75
 ---
 
@@ -32,10 +33,12 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 
 ## Current Position
 
-Phase: 248 (Reproducible Scenarios and Integrated Proof) — READY TO EXECUTE
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-10-11 — Phase 248 planned in two dependent waves; execution pending
+Phase: 248 (Reproducible Scenarios and Integrated Proof) — IN PROGRESS
+Current Plan: 2
+Total Plans in Phase: 2
+Plan: 2 of 2
+Status: In progress
+Last activity: 2026-10-12 — Plan 248-01 completed; Plan 248-02 ready
 
 ## Performance Metrics
 
@@ -198,6 +201,7 @@ Last activity: 2026-10-11 — Phase 248 planned in two dependent waves; executio
 | Phase 247 P05 | 16min | 3 tasks | 22 files |
 | Phase 247 P06 | 12min | 2 tasks | 6 files |
 | Phase 247 P07 | continuation; start unavailable | 2 tasks | 31 files |
+| Phase 248 P01 | 45min | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -459,6 +463,8 @@ Last activity: 2026-10-11 — Phase 248 planned in two dependent waves; executio
 - [Phase 247]: Separate historical coverage from the selected UTC window and name the cutoff-semantics help destination.
 - [Phase 247]: Use dedicated Phase247 Playwright configs because the referenced Phase246 config excludes Phase247 tests.
 - [Phase 247]: Independent verification passed 31/31 after race, negative-state and populated payload/history checks closed the initial gaps.
+- [Phase 248]: Keep ordinary evidence on the existing Phase 245 host; use the guarded 4102 test database for exceptional scenarios.
+- [Phase 248]: Bind each inspected viewport capture to exact routes, current source files, served CSS/JS bytes, and image digests.
 
 ### Pending Todos
 
@@ -544,8 +550,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-11T23:14:45.621Z
-Stopped at: Phase 247 complete, ready to plan Phase 248
+Last session: 2026-10-12T02:48:23.382Z
+Stopped at: Completed 248-01-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

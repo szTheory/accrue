@@ -11,7 +11,7 @@
 - [x] **BASE-01**: Operators' existing Admin routes and materially distinct list/detail/overlay states are enumerated in a coverage ledger, with every entry inspected or explicitly accounted for.
 - [x] **BASE-02**: Reviewers can inspect representative wide/narrow and light/dark captures with route, state, scenario, revision and served-asset provenance; unseen pages receive bounded Impeccable review before changes are selected.
 - [x] **DEMO-01**: Reviewers can evaluate plausible ordinary billing situations without adversarial phase-number/long-name fixtures dominating the feedback preview; money, dates, relationships and processing history are checked for internal consistency.
-- [ ] **DEMO-02**: Reviewers can reproduce the agreed ordinary, empty, failure and boundary evaluation states through documented existing or minimal host-only tooling without destructive implicit resets of the current preview.
+- [x] **DEMO-02**: Reviewers can reproduce the agreed ordinary, empty, failure and boundary evaluation states through documented existing or minimal host-only tooling without destructive implicit resets of the current preview.
 
 ### Shared collection interactions
 
@@ -64,7 +64,7 @@ New billing/provider capabilities, Portal work, new Admin rooms, diagnosis produ
 | DETAIL-01 | Phase 247 | Complete |
 | DETAIL-02 | Phase 247 | Complete |
 | METRIC-01 | Phase 247 | Complete |
-| DEMO-02 | Phase 248 | Pending |
+| DEMO-02 | Phase 248 | Complete |
 | PROOF-01 | Phase 248 | Pending |
 
 All 16 v1.66 requirements have exactly one owning phase. PROOF-01 covers cross-phase acceptance.
