@@ -79,6 +79,7 @@ async function captureMatrix(page, lane, route, scenario, assets, checks) {
     await page.setViewportSize({ width, height });
     for (const theme of ["light", "dark"]) {
       await setTheme(page, theme);
+      await page.mouse.move(width - 1, height - 1);
       const clearedProgrammaticMainFocus = await page.evaluate(() => {
         const main = document.getElementById("main-content");
         if (main === document.activeElement) {
@@ -97,6 +98,10 @@ async function captureMatrix(page, lane, route, scenario, assets, checks) {
           main_focused: active === main,
           main_focus_visible: active === main && active.matches(":focus-visible"),
           cleared_programmatic_main_focus: false,
+          pointer_target: (() => {
+            const target = document.elementFromPoint(innerWidth - 1, innerHeight - 1);
+            return target ? `${target.tagName.toLowerCase()}${target.id ? `#${target.id}` : ""}` : null;
+          })(),
           active_outline: style ? { style: style.outlineStyle, width: style.outlineWidth, color: style.outlineColor } : null
         };
       });
