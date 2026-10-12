@@ -24,5 +24,9 @@ module.exports = defineConfig({
     trace: "off",
     screenshot: "off",
     ...devices["Desktop Chrome"]
-  }
+  },
+  projects: [{
+    name: "chromium-desktop",
+    use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 }, colorScheme: "light" }
+  }]
 });
