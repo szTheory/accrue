@@ -93,6 +93,12 @@ async function captureState(page, { lane, scenario, route, assets, checks, matri
   for (const { width, height, size, theme, frame = "default" } of matrix) {
     await page.setViewportSize({ width, height });
     await setTheme(page, theme);
+    if (scenario === "empty-subscriptions") {
+      const emptyHero = page.locator(".ax-data-table-empty");
+      await emptyHero.scrollIntoViewIfNeeded();
+      await assertVisibleInViewport(page, emptyHero.locator(".ax-empty-title"), "empty heading");
+      await assertVisibleInViewport(page, emptyHero.locator(".ax-empty-copy"), "empty explanation");
+    }
     await page.mouse.move(width - 1, height - 1);
     const frameSuffix = frame === "default" ? "" : `-${frame}`;
     const file = `${lane}-${scenario}${frameSuffix}-${size}-${theme}.png`;
@@ -218,12 +224,9 @@ heldoutTest("@phase248-heldout @phase248-empty dedicated empty subscriptions sce
   await expect(table).toHaveAttribute("data-ax-state", "first-run-empty");
   await expect(table).toHaveAttribute("data-ax-empty-reason", "first-run");
   await expect(page.locator("body")).not.toContainText(/access denied|unauthorized|internal server error/i);
-  const emptyHero = page.locator(".ax-empty");
+  const emptyHero = page.locator(".ax-data-table-empty");
   await expect(emptyHero.locator(".ax-empty-title")).toBeVisible();
   await expect(emptyHero.locator(".ax-empty-copy")).toBeVisible();
-  await emptyHero.scrollIntoViewIfNeeded();
-  await assertVisibleInViewport(page, emptyHero.locator(".ax-empty-title"), "empty heading");
-  await assertVisibleInViewport(page, emptyHero.locator(".ax-empty-copy"), "empty explanation");
   const zeroRowContext = await table.getAttribute("data-ax-state");
   expect(zeroRowContext).toBe("first-run-empty");
   const assets = await servedAssets(page);
