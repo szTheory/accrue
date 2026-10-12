@@ -91,7 +91,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
     assert html =~ "Monthly recurring revenue observed on recovered subscriptions."
-    assert html =~ "Monthly recurring revenue observed at dunning exhaustion."
+    assert html =~ "Monthly recurring revenue on subscriptions with exhausted payment retries."
     refute html =~ "Money Saved"
     refute html =~ "Churned Revenue"
     refute html =~ "Amount saved by successful Dunning"
@@ -267,8 +267,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
       assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
-      assert html =~ "Recovery Funnel"
-      assert html =~ "currently in dunning"
+      assert html =~ "Payment recovery funnel"
+      assert html =~ "subscriptions in payment retry"
     end
 
     test "Exhausted MRR card carries yearly-plan worked example (ROADMAP SC#5)",
@@ -582,8 +582,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
       assert html =~ "At-Risk Subscriptions"
 
-      assert html =~ "No active dunning campaigns" or
-               html =~ "active dunning campaigns in this window"
+      assert html =~ "No subscriptions currently need payment retry" or
+               html =~ "subscriptions with active payment retries in this window"
     end
 
     test "window change via render_patch re-assigns at-risk list without crash", %{conn: conn} do
@@ -599,7 +599,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
       {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
-      assert html =~ "/analytics/recovery/subscriptions/" or html =~ "No active dunning campaigns"
+      assert html =~ "/analytics/recovery/subscriptions/" or
+               html =~ "No subscriptions currently need payment retry"
     end
 
     test "current subscription state is separate from the historical failure label", %{conn: conn} do
@@ -784,7 +785,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
                live_recovery(conn, "/billing/analytics/recovery?org=empty-org&window=7d")
 
       assert active_window_label(html) =~ "7 days"
-      assert html =~ "No active dunning campaigns"
+      assert html =~ "No subscriptions currently need payment retry"
       refute html =~ "Recovered MRR (USD)"
       refute html =~ "Exhausted MRR (USD)"
     end

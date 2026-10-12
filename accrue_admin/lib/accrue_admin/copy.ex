@@ -992,7 +992,7 @@ defmodule AccrueAdmin.Copy do
     do: "Exhausted MRR (#{String.upcase(to_string(currency))})"
 
   def recovery_exhausted_mrr_meta,
-    do: "Monthly recurring revenue observed at dunning exhaustion."
+    do: "Monthly recurring revenue on subscriptions with exhausted payment retries."
 
   def subscription_select_action_warning, do: "Select an action before confirming."
 

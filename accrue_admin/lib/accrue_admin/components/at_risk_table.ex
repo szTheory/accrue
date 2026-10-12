@@ -50,8 +50,8 @@ defmodule AccrueAdmin.Components.AtRiskTable do
       |> assign(
         :empty_copy,
         normalize_state_copy(assigns[:empty_copy], %{
-          heading: "No active dunning campaigns",
-          body: "All subscriptions in this window have recovered or exhausted their campaign."
+          heading: "No subscriptions currently need payment retry",
+          body: "All subscriptions in this window recovered or exhausted their retry schedule."
         })
       )
 
@@ -64,13 +64,13 @@ defmodule AccrueAdmin.Components.AtRiskTable do
       <header class="ax-at-risk-header">
         <p class="ax-label">At-Risk Subscriptions</p>
         <p :if={@state not in ["loading", "error"]} class="ax-body ax-muted">
-          {length(@rows)} active dunning campaigns in this window
+          {length(@rows)} subscriptions with active payment retries in this window
         </p>
       </header>
 
       <div :if={@state == "loading"} class="ax-at-risk-state" data-state="loading" role="status">
         <p class="ax-heading">Loading at-risk subscriptions</p>
-        <p class="ax-body">Checking active dunning campaigns for this recovery window.</p>
+            <p class="ax-body">Checking payment retry status for this recovery window.</p>
       </div>
 
       <div :if={@state == "error"} class="ax-at-risk-state ax-at-risk-state-error" data-state="error" role="alert">

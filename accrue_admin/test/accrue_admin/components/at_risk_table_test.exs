@@ -74,7 +74,7 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
       loading_html = render_component(&AtRiskTable.at_risk_table/1, rows: [], loading: true)
       assert loading_html =~ ~s(data-state="loading")
       assert loading_html =~ "Loading at-risk subscriptions"
-      refute loading_html =~ "active dunning campaigns in this window"
+      refute loading_html =~ "subscriptions with active payment retries in this window"
 
       error_html =
         render_component(&AtRiskTable.at_risk_table/1,
@@ -84,12 +84,12 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
 
       assert error_html =~ ~s(data-state="error")
       assert error_html =~ "Dunning query timed out"
-      refute error_html =~ "active dunning campaigns in this window"
+      refute error_html =~ "subscriptions with active payment retries in this window"
 
       empty_html = render_component(&AtRiskTable.at_risk_table/1, rows: [])
       assert empty_html =~ ~s(data-state="empty")
-      assert empty_html =~ "No active dunning campaigns"
-      assert empty_html =~ "0 active dunning campaigns in this window"
+      assert empty_html =~ "No subscriptions currently need payment retry"
+      assert empty_html =~ "0 subscriptions with active payment retries in this window"
       refute empty_html =~ ~s(data-role="load-more")
 
       no_pagination_html =

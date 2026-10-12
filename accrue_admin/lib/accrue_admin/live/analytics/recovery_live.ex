@@ -208,7 +208,13 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
             current_window={@window}
             loading={@recovery_loading?}
             error={@recovery_error}
-            empty_copy={Copy.resource_state_copy(:dunning, :queue_empty)}
+            empty_copy={
+              Copy.resource_state_copy(:dunning, :queue_empty)
+              |> Map.merge(%{
+                heading: "No subscriptions currently need payment retry",
+                body: "All subscriptions in this window recovered or exhausted their retry schedule."
+              })
+            }
           />
         </section>
 

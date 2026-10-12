@@ -1,6 +1,6 @@
 defmodule AccrueAdmin.Components.FunnelChart do
   @moduledoc """
-  3-stage dunning funnel: Entered → Recovered / Exhausted, with an "active" chip
+  3-stage payment recovery funnel: Entered → Recovered / Exhausted, with an "active" chip
   for in-flight campaigns.
 
   Renders an inline-SVG horizontal proportional-bar funnel (no JS chart lib).
@@ -44,8 +44,8 @@ defmodule AccrueAdmin.Components.FunnelChart do
     ~H"""
     <article class={["ax-card", "ax-funnel-chart", @class]}>
       <header class="ax-funnel-header">
-        <p class="ax-label">Recovery Funnel</p>
-        <span class="ax-funnel-active-chip"><%= @active %> currently in dunning</span>
+        <p class="ax-label">Payment recovery funnel</p>
+        <span class="ax-funnel-active-chip"><%= @active %> subscriptions in payment retry</span>
       </header>
 
       <svg
@@ -55,7 +55,7 @@ defmodule AccrueAdmin.Components.FunnelChart do
         preserveAspectRatio="none"
         class="ax-funnel-svg"
       >
-        <title id="funnel-title">Dunning recovery funnel</title>
+        <title id="funnel-title">Payment recovery funnel</title>
         <desc id="funnel-desc">
           <%= @entered %> campaigns entered, <%= @recovered %> recovered, <%= @exhausted %> exhausted.
         </desc>
@@ -73,7 +73,7 @@ defmodule AccrueAdmin.Components.FunnelChart do
         <g transform="translate(0,24)" class="ax-funnel-row ax-funnel-row--amber">
           <rect width={@exhausted_pct} height="10" rx="1.5" class="ax-funnel-bar">
             <title>
-              Exhausted: <%= @exhausted %> campaigns (<%= @exhausted_pct %>% of entered). A $120/yr plan that exhausts dunning contributes $10/mo to Exhausted MRR — annualized MRR snapshot at the exhaustion event.
+              Exhausted: <%= @exhausted %> campaigns (<%= @exhausted_pct %>% of entered). A $120/yr plan with exhausted payment retries contributes $10/mo to Exhausted MRR — annualized MRR snapshot at the exhaustion event.
             </title>
           </rect>
         </g>
