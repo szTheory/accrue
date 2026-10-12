@@ -696,7 +696,7 @@ operator password is read from this README into the Playwright process
 environment and is not printed, stored in the capture, or written to a manifest:
 
 ```bash
-ACCRUE_HOST_ORDINARY_BASE_URL=http://accrue-host-phase245-ordinary.localhost/ PHASE248_PROOF_LANE=ordinary ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD="$(python3 -c 'import re; text=open("README.md", encoding="utf-8").read(); print(re.search(r"admin@example.com.*?password `([^`]+)`", text, re.S).group(1))')" npm run e2e -- --config=playwright.phase248-ordinary.config.js e2e/phase248-scenarios.spec.js --project=chromium-desktop --grep @phase248-ordinary --workers=1
+ACCRUE_HOST_ORDINARY_BASE_URL=http://accrue-host-phase245-ordinary.localhost/ PHASE248_PROOF_LANE=ordinary ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD="$(python3 -c 'import re; text=open("README.md", encoding="utf-8").read(); print(re.search(r"logged in as `admin@example.com` \(password\s*`([A-Za-z0-9-]+)`\) to access `/admin`", text).group(1))')" npm run e2e -- --config=playwright.phase248-ordinary.config.js e2e/phase248-scenarios.spec.js --project=chromium-desktop --grep @phase248-ordinary --workers=1
 ```
 
 The expected route is an existing `/admin/invoices/:id` record with its current
