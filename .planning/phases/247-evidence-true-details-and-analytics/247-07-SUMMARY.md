@@ -131,6 +131,12 @@ Post-review corrective commits and confirmation:
 - `4b121d69` capture neutral pointer state
 - `a555c507` record post-review confirmation and dispositions
 
+Initial verification gap-closure commits (additive evidence; the summary above records the original Plan 07 completion):
+
+- `19a82faa` test recovery out-of-order completion and negative state claims; add populated isolated webhook payload/activity proof
+- `dc5e89cd` wrap long raw payload values at narrow viewport widths
+- `48a8d7fd` rebuild checked-in Admin assets for the narrow raw-payload fix
+
 ## Files Created/Modified
 
 - `examples/accrue_host/e2e/phase247-current-proof.spec.js` — ordinary and held-out browser flows, viewport/theme matrix, responsive geometry assertions, and source/asset evidence.
