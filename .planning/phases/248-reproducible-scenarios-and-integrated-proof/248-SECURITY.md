@@ -51,4 +51,8 @@ Correction files: `examples/accrue_host/playwright.phase248-heldout.config.js`, 
 - [x] Initial finding and corrective verification are retained.
 - [x] `threats_open: 0` and `status: verified` confirmed.
 
+## Fixture cleanup guard augmentation (2026-10-11)
+
+The held-out teardown now invokes an exact-ID edge fixture cleanup. Before any deletion, the script requires the held-out lane on port 4102 with SQL sandbox enabled and verifies the connected local `accrue_host_test[digits]` database, `postgres` role, and loopback server through the existing ordinary seed boundary. It rejects unexpected processor/customer identity, parent links, and unrelated children, then deletes only five allowlisted rows in one transaction. A real no-lane invocation failed before mutation. This augments T-248-02's fixture isolation guard; it does not alter the recorded six-threat audit result or claim a new independent security audit.
+
 **Approval:** verified 2026-10-12; phase completion remains pending the separate phase verification workflow.

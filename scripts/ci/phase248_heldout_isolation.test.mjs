@@ -49,9 +49,13 @@ test("held-out setup retains sandbox fixture and teardown for the supported lane
   }, {
     "node:path": path,
     "node:child_process": { execFileSync: (command, args, options) => {
-      operations.push("seed");
       assert.equal(command, "mix");
-      assert.equal(args.join(" "), "run priv/repo/seeds/edge_states.exs");
+      const script = args.join(" ");
+      assert.ok([
+        "run priv/repo/seeds/edge_states.exs",
+        "run priv/repo/seeds/phase248_cleanup_edge.exs"
+      ].includes(script));
+      operations.push(script.includes("cleanup") ? "edge-cleanup" : "seed");
       assert.equal(options.env.MIX_ENV, "test");
       assert.notEqual(options.env.ACCRUE_HOST_E2E_DISABLE_SQL_SANDBOX, "1");
     } },
@@ -62,5 +66,27 @@ test("held-out setup retains sandbox fixture and teardown for the supported lane
   });
   const teardown = await setup();
   await teardown();
-  assert.deepEqual(operations, ["sandbox-setup", "seed", "teardown"]);
+  assert.deepEqual(operations, ["sandbox-setup", "seed", "edge-cleanup", "teardown"]);
+});
+
+test("held-out setup cleans a partially written edge fixture when seeding fails", async () => {
+  const operations = [];
+  const setup = load("examples/accrue_host/e2e/phase248-heldout-setup.js", {
+    PHASE248_PROOF_LANE: "heldout", ACCRUE_HOST_BROWSER_PORT: "4102"
+  }, {
+    "node:path": path,
+    "node:child_process": { execFileSync: (_command, args) => {
+      if (args[1] === "priv/repo/seeds/edge_states.exs") {
+        operations.push("seed-failed");
+        throw new Error("seed failed");
+      }
+      operations.push("edge-cleanup");
+    } },
+    "./global-setup.js": async () => {
+      operations.push("sandbox-setup");
+      return async () => operations.push("teardown");
+    }
+  });
+  await assert.rejects(setup(), /seed failed/);
+  assert.deepEqual(operations, ["sandbox-setup", "seed-failed", "edge-cleanup", "teardown"]);
 });

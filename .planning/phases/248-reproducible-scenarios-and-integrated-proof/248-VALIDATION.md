@@ -81,3 +81,7 @@ Code review WR-01 found that boundary `exact_identity_accessible=true` rests on 
 - Visual inspection: all ten new PNGs were inspected at original resolution. The narrow empty screenshot now shows the complete hero, explanation, and zero-row count; paired invoice overview images expose `EDGE-JPY-001` and `Open` alongside the same-route review drawer evidence.
 - The original eight captures remain under `captures/phase248-initial-proof/` at their actual prior source SHA. No product-source or product-UI change was needed. The initial 15/24 UI score and unchanged gaps UI248-03 through UI248-08 remain recorded; the correction closes only UI248-01/UI248-02 proof requirements plus WR-01.
 - A first final-matrix attempt revealed that responsive resizing reset scroll before the narrow screenshot. That attempt is omitted from the current manifest; the per-viewport framing assertion and final recapture pass at the committed harness revision.
+
+## Fixture lifecycle regression validation (2026-10-11)
+
+The post-browser host regression and its scoped correction are recorded in `248-REGRESSION.md`. The required 13 host tests passed after the cleanup; the held-out lifecycle Node contract passed 4/4; a real edge seed → guarded cleanup → repeated cleanup left zero edge rows in the verified local test database. A no-lane invocation failed before mutation. This is harness-only fixture cleanup and does not change the ten captured source/asset/image fingerprints or claim a new mounted browser pass.

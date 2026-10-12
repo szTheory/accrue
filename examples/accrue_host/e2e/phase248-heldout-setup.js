@@ -14,6 +14,17 @@ module.exports = async () => {
   }
 
   const teardown = await baseSetup();
+  const cleanup = async () => {
+    try {
+      execFileSync("mix", ["run", "priv/repo/seeds/phase248_cleanup_edge.exs"], {
+        cwd: hostRoot,
+        stdio: "inherit",
+        env: { ...process.env, MIX_ENV: "test" }
+      });
+    } finally {
+      if (typeof teardown === "function") await teardown();
+    }
+  };
   try {
     // This is the existing owner-maintained boundary fixture. The isolated
     // E2E seed cleanup removes it first, so seed it after the shared setup.
@@ -23,9 +34,9 @@ module.exports = async () => {
       env: { ...process.env, MIX_ENV: "test" }
     });
   } catch (error) {
-    if (typeof teardown === "function") await teardown();
+    await cleanup();
     throw error;
   }
 
-  return teardown;
+  return cleanup;
 };
