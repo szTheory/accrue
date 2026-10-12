@@ -13,6 +13,7 @@ process.env.ACCRUE_HOST_BROWSER_PORT = "4102";
 const base = require("./playwright.config.js");
 module.exports = defineConfig({
   ...base,
+  globalSetup: require.resolve("./e2e/phase248-heldout-setup.js"),
   testMatch: ["phase248-scenarios.spec.js"],
   timeout: 90_000,
   expect: { timeout: 10_000 },

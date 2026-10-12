@@ -14,6 +14,7 @@ const definitions = new Map([
 ]);
 const harnessOnly = new Set([
   "examples/accrue_host/e2e/phase248-scenarios.spec.js",
+  "examples/accrue_host/e2e/phase248-heldout-setup.js",
   "examples/accrue_host/e2e/support/fixture.js",
   "examples/accrue_host/e2e/support/test.js",
   "examples/accrue_host/playwright.phase248-ordinary.config.js",

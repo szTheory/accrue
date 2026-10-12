@@ -23,6 +23,7 @@ const sourceFiles = [
   "accrue_admin/priv/static/accrue_admin.css",
   "accrue_admin/priv/static/accrue_admin.js",
   "examples/accrue_host/e2e/phase248-scenarios.spec.js",
+  "examples/accrue_host/e2e/phase248-heldout-setup.js",
   "examples/accrue_host/e2e/support/fixture.js",
   "examples/accrue_host/e2e/support/test.js",
   "examples/accrue_host/playwright.phase248-ordinary.config.js",
@@ -130,7 +131,7 @@ async function noPageOverflow(page) {
 }
 
 ordinaryTest("@phase248-ordinary @phase248-heldout ordinary Fake invoice action review is explicitly selected and read-only", async ({ page }) => {
-  if (process.env.PHASE248_PROOF_LANE !== "ordinary") test.skip();
+  if (process.env.PHASE248_PROOF_LANE !== "ordinary") ordinaryTest.skip();
   await loginOrdinary(page);
   await page.goto("/admin/invoices?view=all");
   await waitForLiveView(page);
@@ -178,12 +179,13 @@ heldoutTest("@phase248-heldout @phase248-empty dedicated empty subscriptions sce
       join: customer in Customer, on: customer.id == subscription.customer_id,
       where: customer.owner_type == "Organization" and customer.owner_id == ^organization_id,
       select: count(subscription.id)))
-    IO.write(Integer.to_string(count))
+    IO.puts("__PHASE248_SCOPED_COUNT__=" <> Integer.to_string(count))
   `;
   const rawCount = execFileSync("mix", ["run", "-e", countScript, "--", fixture.admin_org_beta_id], {
     cwd: path.join(root, "examples/accrue_host"), encoding: "utf8", env: { ...process.env, MIX_ENV: "test" }
   }).trim();
-  expect(rawCount).toBe("0");
+  const countMatch = rawCount.match(/__PHASE248_SCOPED_COUNT__=(\d+)/);
+  expect(countMatch?.[1], "the scoped record-count query returned a machine-readable result").toBe("0");
   const route = `/admin/subscriptions?org=${encodeURIComponent(fixture.admin_org_beta_slug)}`;
   await page.goto(route);
   await waitForLiveView(page);
