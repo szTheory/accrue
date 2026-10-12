@@ -55,6 +55,8 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Phase 246:** Complete, independently verified 10/10, five plans and five requirements. Final Admin suite passed 718/0; 24 populated route/viewport/theme captures passed source, served-asset and PNG validation. Shared filters, search, identities and responsive copy controls are delivered. Existing copy feedback is a copied state; timestamp/toast conventions and detail/analytics refinements remain Phase 247. Capture attempts are preserved outside the working tree.
 
+**Phase 247:** Complete and independently verified 31/31 with zero unverified behavior, eight plans and six requirements. The Admin suite passed 730/0, both ordinary and held-out browser lanes passed, and twenty inspected captures identify source `48a8d7fdde48` and actual served assets. Shared Local/UTC timestamps and truthful copy, detail/replay/payload hierarchy, concrete destinations and currency-qualified payment recovery are delivered. Phase 248 owns reproducible evaluation scenarios and integrated confirmation. Initial failed evidence and bounded review dispositions remain preserved.
+
 **Automation:** The owner's automatic-continuation instruction applies to requirement/roadmap defaults consistent with this scope and discuss→plan→execute work. Preserve concrete human decisions only when a new consequential ambiguity arises; do not repeat approvals for existing scope. Screenshot evidence must identify route/state, theme, viewport, scenario, revision and served assets; missing coverage stays explicit. Bound rendered review to one batched assessment, one correction batch and one confirmation per coherent slice unless a named defect justifies reopening.
 
 <details>
@@ -1031,4 +1033,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-11 after Phase 245; automatic continuation to Phase 246 remains approved.*
+*Last updated: 2026-10-11 after Phase 247; automatic continuation to Phase 248 remains approved.*

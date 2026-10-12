@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 247 — Evidence-True Details and Analytics
+**Current focus:** Phase 248 — Reproducible Scenarios and Integrated Proof
 **Progress:** [████████░░] 75%
 **Completed work:** v1.65 is archived under `.planning/milestones/v1.65-*`. Phase 244 has 4/4 plans complete and 4/4 requirements satisfied; verification passed 9/9 with zero unverified behavior. v1.64 is shipped and archived with its closeout evidence retained in `.planning/milestones/`.
 
@@ -458,7 +458,7 @@ Last activity: 2026-10-11 — Phase 247 complete, transitioned to Phase 248
 - [Phase 247]: Pair recovered and exhausted values per currency; actual zero remains distinct from missing or unsupported amounts.
 - [Phase 247]: Separate historical coverage from the selected UTC window and name the cutoff-semantics help destination.
 - [Phase 247]: Use dedicated Phase247 Playwright configs because the referenced Phase246 config excludes Phase247 tests.
-- [Phase 247]: Keep Phase247 requirements pending cross-plan verification; this plan records owning evidence without declaring the phase complete.
+- [Phase 247]: Independent verification passed 31/31 after race, negative-state and populated payload/history checks closed the initial gaps.
 
 ### Pending Todos
 
@@ -675,4 +675,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Continue automatically with `$gsd-discuss-phase 247 --auto`, then plan and execute Phase 247. Phases 245–246 are complete; do not repeat them. Phase 246 verification passed 10/10, five actual plans complete, 718 Admin tests green and 24 current-product captures validated. CLI completion counted one supplemental summary as a sixth plan; the roadmap is corrected to 5/5. Its missing-file notices refer to command strings in summary evidence refs, not missing test files.
+- Continue automatically with `$gsd-discuss-phase 248 --auto`, then plan and execute Phase 248. Phases 245–247 are complete; do not repeat them. Phase 247 verification passed 31/31 with zero unverified behavior, eight plans complete, 730 Admin tests and both browser lanes green. Twenty captures are bound to source 48a8d7fdde48 and served assets; prior captures remain historical. Phase 248 owns reproducible evaluation selection and integrated proof.

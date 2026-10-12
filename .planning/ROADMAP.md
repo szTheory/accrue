@@ -31,7 +31,7 @@ Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICT
 
 ## Current Position
 
-v1.66 has completed Phases 245–246 and is continuing into Phase 247. The owner-approved scope covers existing Admin routes and necessary evaluation-host tooling. Phase 244 remains archived with v1.65.
+v1.66 has completed Phases 245–247 and is continuing into Phase 248. The owner-approved scope covers existing Admin routes and necessary evaluation-host tooling. Phase 244 remains archived with v1.65.
 
 ## v1.66 — Admin Usability and Visual Consistency
 
