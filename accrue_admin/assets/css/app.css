@@ -1901,6 +1901,14 @@ a.ax-kpi-card--linked:focus-visible {
   line-height: var(--ax-leading-relaxed);
 }
 
+.ax-json-raw {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .ax-timeline-details {
   min-width: 0;
 }
