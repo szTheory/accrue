@@ -90,11 +90,12 @@ async function setTheme(page, theme) {
 async function captureState(page, { lane, scenario, route, assets, checks, matrix }) {
   fs.mkdirSync(captureDir, { recursive: true });
   const captures = [];
-  for (const { width, height, size, theme } of matrix) {
+  for (const { width, height, size, theme, frame = "default" } of matrix) {
     await page.setViewportSize({ width, height });
     await setTheme(page, theme);
     await page.mouse.move(width - 1, height - 1);
-    const file = `${lane}-${scenario}-${size}-${theme}.png`;
+    const frameSuffix = frame === "default" ? "" : `-${frame}`;
+    const file = `${lane}-${scenario}${frameSuffix}-${size}-${theme}.png`;
     // Keep the evidence framed to the actual review viewport. Full-page captures
     // extend beyond fixed drawers/bottom sheets and show page content that was
     // not visible beside the active confirmation review.
@@ -102,6 +103,7 @@ async function captureState(page, { lane, scenario, route, assets, checks, matri
     captures.push({
       file, origin_lane: lane, scenario, route,
       state: checks.state,
+      frame,
       viewport: { width, height },
       screenshot_dimensions: { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) },
       theme,
@@ -130,6 +132,16 @@ async function noPageOverflow(page) {
   return dimensions;
 }
 
+async function assertVisibleInViewport(page, locator, description) {
+  const box = await locator.boundingBox();
+  const viewport = page.viewportSize();
+  expect(box, `${description} has rendered bounds`).toBeTruthy();
+  expect(box.x, `${description} is within the left viewport edge`).toBeGreaterThanOrEqual(0);
+  expect(box.y, `${description} is within the top viewport edge`).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width, `${description} is within the right viewport edge`).toBeLessThanOrEqual(viewport.width);
+  expect(box.y + box.height, `${description} is within the bottom viewport edge`).toBeLessThanOrEqual(viewport.height);
+}
+
 ordinaryTest("@phase248-ordinary @phase248-heldout ordinary Fake invoice action review is explicitly selected and read-only", async ({ page }) => {
   if (process.env.PHASE248_PROOF_LANE !== "ordinary") ordinaryTest.skip();
   await loginOrdinary(page);
@@ -147,18 +159,30 @@ ordinaryTest("@phase248-ordinary @phase248-heldout ordinary Fake invoice action 
     if (await identity.count() && await action.count()) {
       const visibleIdentity = (await identity.innerText()).trim();
       expect(visibleIdentity.length).toBeGreaterThan(0);
+      const visibleStatus = page.locator(".ax-summary-card .ax-status-badge").first();
+      await expect(visibleStatus, "invoice status is visible in the unobscured overview").toBeVisible();
+      const routeBeforeReview = new URL(page.url());
+      const routeValue = `${routeBeforeReview.pathname}${routeBeforeReview.search}`;
+      const assets = await servedAssets(page);
+      await captureState(page, {
+        lane: "ordinary", scenario: "ordinary-invoice-review", route: routeValue, assets,
+        checks: { state: "invoice-overview", record_identity_visible: true, record_status_visible: true, invoice_identity: visibleIdentity, invoice_status: (await visibleStatus.innerText()).trim() },
+        matrix: [
+          { width: 1280, height: 900, size: "wide", theme: "light", frame: "overview" },
+          { width: 320, height: 820, size: "narrow", theme: "dark", frame: "overview" }
+        ]
+      });
       await action.click();
       const review = page.locator("[data-ax-action-drawer-form]:visible").first();
       await expect(review, "review is visible before confirmation and no action is submitted").toBeVisible();
       const currentUrl = new URL(page.url());
       route = `${currentUrl.pathname}${currentUrl.search}`;
-      const assets = await servedAssets(page);
       await captureState(page, {
         lane: "ordinary", scenario: "ordinary-invoice-review", route, assets,
-        checks: { state: "action-review-open", record_identity_visible: true, confirmation_not_submitted: true },
+        checks: { state: "action-review-open", record_identity_visible: true, record_status_visible: true, invoice_identity: visibleIdentity, invoice_status: (await visibleStatus.innerText()).trim(), confirmation_not_submitted: true },
         matrix: [
-          { width: 1280, height: 900, size: "wide", theme: "light" },
-          { width: 320, height: 820, size: "narrow", theme: "dark" }
+          { width: 1280, height: 900, size: "wide", theme: "light", frame: "action-review" },
+          { width: 320, height: 820, size: "narrow", theme: "dark", frame: "action-review" }
         ]
       });
       break;
@@ -194,10 +218,18 @@ heldoutTest("@phase248-heldout @phase248-empty dedicated empty subscriptions sce
   await expect(table).toHaveAttribute("data-ax-state", "first-run-empty");
   await expect(table).toHaveAttribute("data-ax-empty-reason", "first-run");
   await expect(page.locator("body")).not.toContainText(/access denied|unauthorized|internal server error/i);
+  const emptyHero = page.locator(".ax-empty");
+  await expect(emptyHero.locator(".ax-empty-title")).toBeVisible();
+  await expect(emptyHero.locator(".ax-empty-copy")).toBeVisible();
+  await emptyHero.scrollIntoViewIfNeeded();
+  await assertVisibleInViewport(page, emptyHero.locator(".ax-empty-title"), "empty heading");
+  await assertVisibleInViewport(page, emptyHero.locator(".ax-empty-copy"), "empty explanation");
+  const zeroRowContext = await table.getAttribute("data-ax-state");
+  expect(zeroRowContext).toBe("first-run-empty");
   const assets = await servedAssets(page);
   await captureState(page, {
     lane: "heldout", scenario: "empty-subscriptions", route: `${new URL(route, page.url()).pathname}${new URL(route, page.url()).search}`,
-    assets, checks: { state: "genuinely-empty", underlying_scoped_record_count: 0, unfiltered: new URL(page.url()).searchParams.get("view") === "all", owner_scope: fixture.admin_org_beta_slug },
+    assets, checks: { state: "genuinely-empty", underlying_scoped_record_count: 0, unfiltered: new URL(page.url()).searchParams.get("view") === "all", owner_scope: fixture.admin_org_beta_slug, empty_heading_visible: true, empty_explanation_visible: true, zero_row_context: zeroRowContext },
     matrix: [
       { width: 1280, height: 900, size: "wide", theme: "light" },
       { width: 320, height: 820, size: "narrow", theme: "dark" }
@@ -235,6 +267,7 @@ heldoutTest("@phase248-heldout @phase248-boundary existing long-name Unicode cus
   const fixture = readFixture();
   await loginHeldout(page, fixture, sandboxId);
   const target = "edge-longname@example.test";
+  const expectedName = `E2E Edge LongName — ${"A".repeat(90)}`;
   await page.goto("/admin/customers?view=all");
   await waitForLiveView(page);
   const row = page.locator("article, tr").filter({ hasText: target }).first();
@@ -244,14 +277,14 @@ heldoutTest("@phase248-heldout @phase248-boundary existing long-name Unicode cus
   expect(new URL(href, page.url()).pathname).toMatch(/^\/admin\/customers\/[0-9a-f-]+$/i);
   await page.goto(href);
   await waitForLiveView(page);
-  const longName = page.getByText(/E2E Edge LongName/).first();
-  await expect(longName).toBeVisible();
+  const longName = page.getByText(expectedName, { exact: true }).first();
+  await expect(longName, "the complete test-owned Unicode customer identity is rendered exactly").toBeVisible();
   await page.setViewportSize({ width: 320, height: 820 });
   const narrow = await noPageOverflow(page);
   const assets = await servedAssets(page);
   await captureState(page, {
     lane: "heldout", scenario: "long-name-boundary", route: `${new URL(page.url()).pathname}${new URL(page.url()).search}`,
-    assets, checks: { state: "long-name-unicode-boundary", exact_identity_accessible: true, narrow_page_dimensions: narrow },
+    assets, checks: { state: "long-name-unicode-boundary", expected_identity: expectedName, exact_identity_accessible: (await longName.innerText()).trim() === expectedName, narrow_page_dimensions: narrow },
     matrix: [
       { width: 1280, height: 900, size: "wide", theme: "dark" },
       { width: 320, height: 820, size: "narrow", theme: "light" }

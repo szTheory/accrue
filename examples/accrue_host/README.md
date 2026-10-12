@@ -692,16 +692,26 @@ ACCRUE_HOST=accrue-host-phase245-ordinary.localhost ACCRUE_HOST_SKIP_SEEDS=1 mak
 ```
 
 After the ordinary host is ready, run this from `examples/accrue_host`. The
-operator password is read from this README into the Playwright process
-environment and is not printed, stored in the capture, or written to a manifest:
+operator password is read into a mode-0600 temporary file, loaded into the test
+process environment without printing, then removed. The CSRF token is read from
+the login page and submitted through Playwright's request helper; credentials
+and tokens are never added to a capture or manifest:
 
 ```bash
-ACCRUE_HOST_ORDINARY_BASE_URL=http://accrue-host-phase245-ordinary.localhost/ PHASE248_PROOF_LANE=ordinary ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD="$(python3 -c 'import re; text=open("README.md", encoding="utf-8").read(); print(re.search(r"logged in as `admin@example.com` \(password\s*`([A-Za-z0-9-]+)`\) to access `/admin`", text).group(1))')" npm run e2e -- --config=playwright.phase248-ordinary.config.js e2e/phase248-scenarios.spec.js --project=chromium-desktop --grep @phase248-ordinary --workers=1
+credential_file=$(mktemp)
+chmod 600 "$credential_file"
+trap 'rm -f "$credential_file"' EXIT
+python3 -c 'import re,sys; text=open("README.md", encoding="utf-8").read(); match=re.search(r"logged in as `admin@example.com` \(password\s*`([A-Za-z0-9-]+)`\) to access `/admin`", text); sys.exit("documented operator credential not found") if not match else print(match.group(1))' > "$credential_file"
+export ACCRUE_HOST_ORDINARY_BASE_URL=http://accrue-host-phase245-ordinary.localhost/
+export PHASE248_PROOF_LANE=ordinary
+export ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD="$(<"$credential_file")"
+npm run e2e -- --config=playwright.phase248-ordinary.config.js e2e/phase248-scenarios.spec.js --project=chromium-desktop --grep @phase248-ordinary --workers=1
 ```
 
 The expected route is an existing `/admin/invoices/:id` record with its current
-eligible action in review. The proof captures 1280×900 light and 320×820 dark
-states. Stop the review by closing the drawer or browser; do not submit it. The
+identity and status visible in an overview frame paired with the open action
+review at 1280×900 light and 320×820 dark. Stop the review by closing the drawer
+or browser; do not submit it. The
 ordinary host and protected Phase 243 host are durable previews: scenario
 selection never resets either one.
 
@@ -718,9 +728,11 @@ PHASE248_PROOF_LANE=heldout npm run e2e -- --config=playwright.phase248-heldout.
 The expected routes are `/admin/subscriptions?org=<held-out-owner>`,
 `/admin/webhooks/:id?org=<held-out-owner>`, and the long-name customer detail.
 The empty case checks the scoped database count is zero before rendering the
-unfiltered first-run empty state. Failure proof records an observed discarded
-status and available replay review without submitting it. Boundary proof checks
-exact identity access and page width at 320px. No production selector is added.
+unfiltered first-run empty state, and frames the heading, full explanation and
+zero-row context within both viewports. Failure proof records an observed discarded
+status and available replay review without submitting it. Boundary proof compares
+the exact seeded Unicode identity and checks page width at 320px. No production
+selector is added.
 
 The current receipts live in
 `.planning/phases/248-reproducible-scenarios-and-integrated-proof/captures/phase248-current-proof/`.

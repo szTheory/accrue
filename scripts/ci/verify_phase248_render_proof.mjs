@@ -7,10 +7,10 @@ import { fileURLToPath } from "node:url";
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const definitions = new Map([
-  ["ordinary-invoice-review", { lane: "ordinary", route: /^\/admin\/invoices\/[0-9a-f-]+$/i, query: {}, sizes: ["1280x900:light", "320x820:dark"] }],
-  ["empty-subscriptions", { lane: "heldout", route: "/admin/subscriptions", query: { org: "accrue-e2e-beta", view: "all" }, sizes: ["1280x900:light", "320x820:dark"] }],
-  ["failed-webhook", { lane: "heldout", route: /^\/admin\/webhooks\/[0-9a-f-]+$/i, query: { org: "accrue-e2e-alpha" }, sizes: ["1280x900:dark", "320x820:light"] }],
-  ["long-name-boundary", { lane: "heldout", route: /^\/admin\/customers\/[0-9a-f-]+$/i, query: { return_to: "/admin/customers" }, sizes: ["1280x900:dark", "320x820:light"] }]
+  ["ordinary-invoice-review", { lane: "ordinary", route: /^\/admin\/invoices\/[0-9a-f-]+$/i, query: {}, frames: ["overview", "action-review"], sizes: ["1280x900:light", "320x820:dark"] }],
+  ["empty-subscriptions", { lane: "heldout", route: "/admin/subscriptions", query: { org: "accrue-e2e-beta", view: "all" }, frames: ["default"], sizes: ["1280x900:light", "320x820:dark"] }],
+  ["failed-webhook", { lane: "heldout", route: /^\/admin\/webhooks\/[0-9a-f-]+$/i, query: { org: "accrue-e2e-alpha" }, frames: ["default"], sizes: ["1280x900:dark", "320x820:light"] }],
+  ["long-name-boundary", { lane: "heldout", route: /^\/admin\/customers\/[0-9a-f-]+$/i, query: { return_to: "/admin/customers" }, frames: ["default"], sizes: ["1280x900:dark", "320x820:light"] }]
 ]);
 const harnessOnly = new Set([
   "examples/accrue_host/e2e/phase248-scenarios.spec.js",
@@ -93,19 +93,24 @@ for (const capture of captures) {
   const viewportKey = `${viewport?.width}x${viewport?.height}`;
   const matrixKey = `${viewportKey}:${capture.theme}`;
   check(definition.sizes.includes(matrixKey), `unexpected viewport/theme for ${scenario}: ${matrixKey}`);
-  const rowKey = `${scenario}:${matrixKey}`;
+  const frame = capture.frame || "default";
+  check(definition.frames.includes(frame), `unexpected frame for ${scenario}: ${frame}`);
+  const rowKey = `${scenario}:${frame}:${matrixKey}`;
   check(!seen.has(rowKey), `duplicate matrix row: ${rowKey}`);
   seen.add(rowKey);
   seenScenarios.add(scenario);
-  check(capture.file === `${capture.origin_lane}-${scenario}-${viewport.width === 1280 ? "wide" : "narrow"}-${capture.theme}.png`, `capture filename does not match its matrix row: ${capture.file}`);
+  const frameSuffix = frame === "default" ? "" : `-${frame}`;
+  check(capture.file === `${capture.origin_lane}-${scenario}${frameSuffix}-${viewport.width === 1280 ? "wide" : "narrow"}-${capture.theme}.png`, `capture filename does not match its matrix row: ${capture.file}`);
   check(capture.capture_mode === "viewport", `capture is not framed to its actual viewport: ${capture.file}`);
   check(capture.inspection_status === "inspected" && capture.inspection_by === "Impeccable visual inspection" && capture.inspected_at && capture.inspection_notes, `capture lacks documented full-size visual inspection: ${capture.file}`);
   check(capture.state === capture.checks?.state && capture.evidence_at && Object.keys(capture.checks).length > 0, `capture lacks state checks: ${capture.file}`);
   if (scenario === "empty-subscriptions") {
     check(actualRoute.pathname === "/admin/subscriptions" && capture.checks.underlying_scoped_record_count === 0 && capture.checks.unfiltered === true && capture.checks.owner_scope === definition.query.org, "empty state is not proved as a genuine unfiltered zero-record collection in the selected owner scope");
+    check(capture.checks.empty_heading_visible === true && capture.checks.empty_explanation_visible === true && capture.checks.zero_row_context === "first-run-empty", "empty capture does not assert visible heading, explanation and zero-row context");
   }
+  if (scenario === "ordinary-invoice-review") check(capture.checks.record_identity_visible === true && capture.checks.record_status_visible === true && typeof capture.checks.invoice_identity === "string" && capture.checks.invoice_identity.length > 0 && typeof capture.checks.invoice_status === "string" && capture.checks.invoice_status.length > 0, "invoice capture lacks asserted identity and status");
   if (scenario === "failed-webhook") check(/dead|discarded|failed/i.test(capture.checks.observed_status || "") && capture.checks.action_submitted === false && typeof capture.checks.owner_scope === "string" && capture.checks.owner_scope.length > 0, "failure capture lacks owner scope, overstates, or submits the observed failure action");
-  if (scenario === "long-name-boundary") check(capture.checks.exact_identity_accessible === true && capture.checks.narrow_page_dimensions?.scroll <= 320, "long-name boundary is missing its exact-identity or overflow assertion");
+  if (scenario === "long-name-boundary") check(capture.checks.exact_identity_accessible === true && capture.checks.expected_identity === `E2E Edge LongName — ${"A".repeat(90)}` && capture.checks.narrow_page_dimensions?.scroll <= 320, "long-name boundary is missing its exact-identity or overflow assertion");
 
   const screenshot = repoFile(path.relative(repo, path.resolve(captureRoot, capture.file)));
   check(screenshot.startsWith(`${captureRoot}${path.sep}`) && fs.existsSync(screenshot) && !fs.lstatSync(screenshot).isSymbolicLink(), `missing, unsafe, or symlink image: ${capture.file}`);
@@ -127,9 +132,12 @@ for (const capture of captures) {
 const requiredScenarios = scenarioFilter ? ["ordinary-invoice-review"] : [...definitions.keys()];
 for (const scenario of requiredScenarios) {
   check(seenScenarios.has(scenario), `missing required scenario: ${scenario}`);
-  for (const matrixKey of definitions.get(scenario).sizes) check(seen.has(`${scenario}:${matrixKey}`), `missing matrix row ${scenario} ${matrixKey}`);
+  for (const frame of definitions.get(scenario).frames) {
+    for (const matrixKey of definitions.get(scenario).sizes) check(seen.has(`${scenario}:${frame}:${matrixKey}`), `missing matrix row ${scenario}/${frame} ${matrixKey}`);
+  }
 }
-check(captures.length === requiredScenarios.length * 2, `unexpected selected capture count: ${captures.length}`);
+const expectedCaptureCount = requiredScenarios.reduce((sum, scenario) => sum + definitions.get(scenario).frames.length * definitions.get(scenario).sizes.length, 0);
+check(captures.length === expectedCaptureCount, `unexpected selected capture count: ${captures.length}`);
 const pngFiles = fs.readdirSync(captureRoot).filter((name) => name.endsWith(".png"));
 check(pngFiles.length === manifest.captures.length, `capture folder has ${pngFiles.length} PNGs for ${manifest.captures.length} manifest rows`);
 console.log(`Validated ${captures.length} inspected Phase 248 render captures across ${requiredScenarios.length} scenario(s), source ${sourceSha.slice(0, 12)}, served CSS/JS and image digests match.`);
