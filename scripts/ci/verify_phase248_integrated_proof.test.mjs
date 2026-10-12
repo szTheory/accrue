@@ -12,7 +12,7 @@ const proof = fs.readFileSync(path.join(root, proofPath), 'utf8');
 const valid = () => validateIntegratedProof({ root, proofPath, manifestPath });
 
 test('accepts all canonical owner topics and accepted findings with current asset provenance', () => {
-  assert.deepEqual(valid(), { topicCount: 13, findingCount: 5, currentCaptureCount: 8 });
+  assert.deepEqual(valid(), { topicCount: 13, findingCount: 5, currentCaptureCount: 10 });
 });
 
 test('rejects an omitted canonical owner topic', () => {
@@ -27,7 +27,8 @@ test('rejects a duplicate accepted finding key', () => {
 });
 
 test('rejects stale source SHA', () => {
-  const modified = proof.replace('5548e3fd60d31f256c6bfd5322883066855cc872', '0000000000000000000000000000000000000000');
+  const testedSha = proof.match(/^Tested source revision: `([a-f0-9]{40})`$/m)[1];
+  const modified = proof.replace(testedSha, '0000000000000000000000000000000000000000');
   assert.throws(() => validateIntegratedProof({ root, proofPath, manifestPath, proofText: modified }), /tested source SHA/);
 });
 

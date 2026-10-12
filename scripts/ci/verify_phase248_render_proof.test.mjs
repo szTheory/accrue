@@ -38,8 +38,9 @@ function runValidator(t, mutate, expectedError) {
 }
 
 test('rejects a manifest capture whose PNG file is missing', (t) => {
-  runValidator(t, (_manifest, captureRoot) => {
-    fs.unlinkSync(path.join(captureRoot, 'ordinary-ordinary-invoice-review-wide-light.png'));
+  runValidator(t, (manifest, captureRoot) => {
+    const capture = manifest.captures.find((row) => row.scenario === 'ordinary-invoice-review' && row.frame === 'overview' && row.viewport.width === 1280);
+    fs.unlinkSync(path.join(captureRoot, capture.file));
   }, /missing, unsafe, or symlink image/);
 });
 
@@ -57,19 +58,38 @@ test('rejects a scenario routed to another scenario owner path', (t) => {
 
 test('rejects a held-out scenario assigned to the ordinary lane', (t) => {
   runValidator(t, (manifest) => {
-    manifest.captures[0].origin_lane = 'ordinary';
+    manifest.captures.find((row) => row.scenario === 'empty-subscriptions').origin_lane = 'ordinary';
   }, /unknown scenario\/lane/);
 });
 
 test('rejects a genuine-empty claim with a nonzero underlying record count', (t) => {
   runValidator(t, (manifest) => {
-    manifest.captures[0].checks.underlying_scoped_record_count = 1;
+    manifest.captures.find((row) => row.scenario === 'empty-subscriptions').checks.underlying_scoped_record_count = 1;
   }, /not proved as a genuine unfiltered zero-record collection/);
 });
 
+test('rejects an empty-state capture without visible explanation framing', (t) => {
+  runValidator(t, (manifest) => {
+    manifest.captures.find((row) => row.scenario === 'empty-subscriptions' && row.viewport.width === 320).checks.empty_explanation_visible = false;
+  }, /does not assert visible heading, explanation and zero-row context/);
+});
+
+test('rejects a boundary capture without the full seeded Unicode identity', (t) => {
+  runValidator(t, (manifest) => {
+    manifest.captures.find((row) => row.scenario === 'long-name-boundary').checks.expected_identity = 'E2E Edge LongName';
+  }, /missing its exact-identity or overflow assertion/);
+});
+
+test('rejects invoice drawer captures that do not assert visible record context', (t) => {
+  runValidator(t, (manifest) => {
+    manifest.captures.find((row) => row.scenario === 'ordinary-invoice-review' && row.frame === 'action-review').checks.record_status_visible = false;
+  }, /invoice capture lacks asserted identity and status/);
+});
+
 test('rejects an image whose bytes differ from the recorded digest', (t) => {
-  runValidator(t, (_manifest, captureRoot) => {
-    fs.appendFileSync(path.join(captureRoot, 'ordinary-ordinary-invoice-review-wide-light.png'), Buffer.from([0]));
+  runValidator(t, (manifest, captureRoot) => {
+    const capture = manifest.captures.find((row) => row.scenario === 'ordinary-invoice-review' && row.frame === 'overview' && row.viewport.width === 1280);
+    fs.appendFileSync(path.join(captureRoot, capture.file), Buffer.from([0]));
   }, /image hash\/size mismatch/);
 });
 

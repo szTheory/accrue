@@ -155,3 +155,7 @@ Plan 01 scenario evidence is complete. Plan 02 still owns the canonical owner-fi
 ---
 *Phase: 248*
 *Completed: 2026-10-11*
+
+## Corrective proof addendum (2026-10-12)
+
+Code-review warning WR-01 was addressed by commits `13729468` and `112d484d`. The mounted boundary assertion now compares the complete seeded Unicode value exactly. Per-viewport empty-state framing now scrolls and checks the heading and explanation after every resize. The final ordinary matrix passed 1/1 and held-out matrix passed 3/3 at harness source `112d484d729e0867a9e04ebc1ad133e2ba91cdcb`. Ten fresh images were individually inspected and recorded at that source. Original eight images and their source-`5548e3fd` manifest remain unchanged under `captures/phase248-initial-proof/`.

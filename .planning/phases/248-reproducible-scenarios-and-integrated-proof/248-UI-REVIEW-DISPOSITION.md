@@ -12,3 +12,14 @@ The 15/24 audit and all UI248 findings remain preserved. This is an evidence-onl
 | UI248-08 | Explicit representative coverage limit | Absent owner surfaces remain listed in COVERAGE/PROOF; historical 246/247 receipts are not current visual acceptance. |
 
 UI248-01 and UI248-02 require bounded new proof, not broader production UI edits. Existing eight images remain source `5548e3fd60d31f256c6bfd5322883066855cc872`; this disposition does not relabel or silently refresh them. Phase completion is pending.
+
+## Corrective execution (2026-10-12)
+
+The initial eight-image review and 15/24 score above remain unchanged. UI248-01 and UI248-02 are closed as evidence gaps by ten newly inspected captures at proof-harness source `112d484d729e0867a9e04ebc1ad133e2ba91cdcb`:
+
+| Finding | Corrective evidence | Result |
+|---|---|---|
+| UI248-01 | Empty subscriptions wide/light and narrow/dark images show the heading, full explanation, and zero-row context. Per-viewport scroll and viewport-bounds assertions run after each resize. | Closed — both images inspected at original resolution. |
+| UI248-02 | Same-route invoice overview and action-review frames are paired at wide/light and narrow/dark. Overview visibly shows `EDGE-JPY-001` and `Open`; the drawer remains unsubmitted. | Closed — all four images inspected at original resolution. |
+
+The first capture attempt exposed that resizing reset the narrow empty page scroll; those images were not carried into the final manifest. The original eight captures remain archived at their original source and are not relabeled. UI248-03/05/06, UI248-04, UI248-07, and UI248-08 retain their prior product-observation, interaction, and representative-coverage dispositions.

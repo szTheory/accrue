@@ -152,3 +152,7 @@ The Plan 02 proof and coverage artifacts are complete. Phase-level verification 
 ---
 *Phase: 248-reproducible-scenarios-and-integrated-proof*
 *Completed: 2026-10-12*
+
+## Corrective proof addendum (2026-10-12)
+
+Commits `13729468` and `112d484d` correct the three audited evidence gaps without product UI changes. The render matrix now contains ten current inspected captures at source `112d484d729e0867a9e04ebc1ad133e2ba91cdcb`, including same-route invoice overview/action-review pairs and complete empty-state copy at wide and narrow sizes. WR-01, UI248-01, and UI248-02 are dispositioned as closed evidence gaps; their original audit reports and 15/24 UI score remain preserved. The original eight images and manifest remain historical under `captures/phase248-initial-proof/`.
