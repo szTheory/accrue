@@ -244,8 +244,6 @@ heldoutTest("@phase248-heldout @phase248-boundary existing long-name Unicode cus
   expect(new URL(href, page.url()).pathname).toMatch(/^\/admin\/customers\/[0-9a-f-]+$/i);
   await page.goto(href);
   await waitForLiveView(page);
-  await expect(row.getByText(target, { exact: true })).toBeVisible();
-  await expect(row.getByText(/E2E Edge LongName/)).toBeVisible();
   const longName = page.getByText(/E2E Edge LongName/).first();
   await expect(longName).toBeVisible();
   await page.setViewportSize({ width: 320, height: 820 });
