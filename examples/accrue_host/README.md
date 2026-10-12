@@ -678,6 +678,66 @@ gh run download RUN_ID --repo szTheory/accrue -n accrue-host-phase15-screenshots
 For a human screen-recording checklist (OBS / QuickTime), see
 [`docs/evaluator-walkthrough-script.md`](docs/evaluator-walkthrough-script.md).
 
+## Phase 248 reproducible Admin scenarios
+
+Phase 248 adds host-only scenario selection and current-revision render receipts.
+The ordinary scenario reads the existing Phase 245 Fake preview and stops at the
+invoice action review drawer; it never confirms an action. Start or recover that
+instance with automatic seeds disabled, then apply the explicit ordinary seed
+only if the reviewer chooses to seed it:
+
+```bash
+cd examples/accrue_host
+ACCRUE_HOST=accrue-host-phase245-ordinary.localhost ACCRUE_HOST_SKIP_SEEDS=1 make up INSTANCE=accrue-host-phase245-ordinary
+```
+
+After the ordinary host is ready, run this from `examples/accrue_host`. The
+operator password is read from this README into the Playwright process
+environment and is not printed, stored in the capture, or written to a manifest:
+
+```bash
+ACCRUE_HOST_ORDINARY_BASE_URL=http://accrue-host-phase245-ordinary.localhost/ PHASE248_PROOF_LANE=ordinary ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD="$(python3 -c 'import re; text=open("README.md", encoding="utf-8").read(); print(re.search(r"admin@example.com.*?password `([^`]+)`", text, re.S).group(1))')" npm run e2e -- --config=playwright.phase248-ordinary.config.js e2e/phase248-scenarios.spec.js --project=chromium-desktop --grep @phase248-ordinary --workers=1
+```
+
+The expected route is an existing `/admin/invoices/:id` record with its current
+eligible action in review. The proof captures 1280×900 light and 320×820 dark
+states. Stop the review by closing the drawer or browser; do not submit it. The
+ordinary host and protected Phase 243 host are durable previews: scenario
+selection never resets either one.
+
+The isolated held-out lane runs only on port 4102 and owns its SQL sandbox
+transaction. Its named cases cover a genuine zero-subscription organization, a
+discarded webhook with its observed next step, and the existing long-name
+Unicode customer. The sandbox is checked out per browser test and rolled back
+when the test ends. Run all three with:
+
+```bash
+PHASE248_PROOF_LANE=heldout npm run e2e -- --config=playwright.phase248-heldout.config.js e2e/phase248-scenarios.spec.js --project=chromium-desktop --grep @phase248-heldout --workers=1
+```
+
+The expected routes are `/admin/subscriptions?org=<held-out-owner>`,
+`/admin/webhooks/:id?org=<held-out-owner>`, and the long-name customer detail.
+The empty case checks the scoped database count is zero before rendering the
+unfiltered first-run empty state. Failure proof records an observed discarded
+status and available replay review without submitting it. Boundary proof checks
+exact identity access and page width at 320px. No production selector is added.
+
+The current receipts live in
+`.planning/phases/248-reproducible-scenarios-and-integrated-proof/captures/phase248-current-proof/`.
+Open every PNG at full size, inspect composition and clipping, then set that
+manifest row to `inspection_status: "inspected"` with `inspection_by:
+"Impeccable visual inspection"`, an ISO `inspected_at`, and concise
+`inspection_notes`. Validate with:
+
+```bash
+node scripts/ci/verify_phase248_render_proof.mjs --manifest .planning/phases/248-reproducible-scenarios-and-integrated-proof/captures/phase248-current-proof/manifest.json --scenario ordinary
+node scripts/ci/verify_phase248_render_proof.mjs --manifest .planning/phases/248-reproducible-scenarios-and-integrated-proof/captures/phase248-current-proof/manifest.json
+```
+
+The first command validates the ordinary tracer slice. The second requires all
+four scenario states, source and served asset digests, image hashes, viewport
+metadata and visual inspection records.
+
 ## What this app proves
 
 - Host-owned auth and session state gate the mounted admin UI at `/billing`.
