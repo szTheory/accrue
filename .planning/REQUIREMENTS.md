@@ -23,15 +23,15 @@
 ### Shared reading and investigation
 
 - [x] **TABLE-01**: Operators can scan primary identity, significant state, money and dates without concatenated names/IDs, excessive row height or long-content displacement; shared tables retain full exact identifiers and useful responsive priorities.
-- [ ] **TIME-01**: Operators can read timestamps in a clearly identified local timezone and copy an exact UTC value with keyboard/touch access and truthful success/failure feedback; any display preference is shared rather than repeated per row.
-- [ ] **LANG-02**: Operators encounter consistent concrete destination names, headings, breadcrumb labels and task-specific help, with contextual navigation justified by the record or investigation task.
-- [ ] **STATE-02**: Operators see restrained semantic attention/status presentation tied to actual evidence and useful next steps; missing history, fee fields, plan data or snapshots never imply unsupported success, failure, pending work or misconfiguration.
+- [x] **TIME-01**: Operators can read timestamps in a clearly identified local timezone and copy an exact UTC value with keyboard/touch access and truthful success/failure feedback; any display preference is shared rather than repeated per row.
+- [x] **LANG-02**: Operators encounter consistent concrete destination names, headings, breadcrumb labels and task-specific help, with contextual navigation justified by the record or investigation task.
+- [x] **STATE-02**: Operators see restrained semantic attention/status presentation tied to actual evidence and useful next steps; missing history, fee fields, plan data or snapshots never imply unsupported success, failure, pending work or misconfiguration.
 
 ### Details and analytics
 
-- [ ] **DETAIL-01**: Operators can understand webhook identity, observed processing state and replay availability in a deliberate hierarchy, with explicit disclosures, coherent empty histories and readable payload controls preserving exact evidence.
-- [ ] **DETAIL-02**: Operators can investigate existing detail pages and action reviews with shared readable metadata/copy conventions while authorization, ownership, confirmation, step-up and accepted-versus-completed boundaries remain intact.
-- [ ] **METRIC-01**: Operators can compare recovery metrics by currency without prose masquerading as deltas, duplicated definitions or misleading cash/churn claims; coverage dates and UTC windows are distinct from explicitly labeled help.
+- [x] **DETAIL-01**: Operators can understand webhook identity, observed processing state and replay availability in a deliberate hierarchy, with explicit disclosures, coherent empty histories and readable payload controls preserving exact evidence.
+- [x] **DETAIL-02**: Operators can investigate existing detail pages and action reviews with shared readable metadata/copy conventions while authorization, ownership, confirmation, step-up and accepted-versus-completed boundaries remain intact.
+- [x] **METRIC-01**: Operators can compare recovery metrics by currency without prose masquerading as deltas, duplicated definitions or misleading cash/churn claims; coverage dates and UTC windows are distinct from explicitly labeled help.
 
 ### Integrated acceptance
 
@@ -58,12 +58,12 @@ New billing/provider capabilities, Portal work, new Admin rooms, diagnosis produ
 | FILTER-03 | Phase 246 | Complete |
 | SEARCH-01 | Phase 246 | Complete |
 | TABLE-01 | Phase 246 | Complete |
-| TIME-01 | Phase 247 | Pending |
-| LANG-02 | Phase 247 | Pending |
-| STATE-02 | Phase 247 | Pending |
-| DETAIL-01 | Phase 247 | Pending |
-| DETAIL-02 | Phase 247 | Pending |
-| METRIC-01 | Phase 247 | Pending |
+| TIME-01 | Phase 247 | Complete |
+| LANG-02 | Phase 247 | Complete |
+| STATE-02 | Phase 247 | Complete |
+| DETAIL-01 | Phase 247 | Complete |
+| DETAIL-02 | Phase 247 | Complete |
+| METRIC-01 | Phase 247 | Complete |
 | DEMO-02 | Phase 248 | Pending |
 | PROOF-01 | Phase 248 | Pending |
 
