@@ -10,7 +10,8 @@ const expected = new Map([
   ["ordinary-invoice-action-review", { lane: "ordinary", route: /^\/admin\/invoices\/[^/]+$/ }],
   ["ordinary-payment-recovery", { lane: "ordinary", route: "/admin/analytics/recovery" }],
   ["heldout-webhook-populated-detail", { lane: "heldout", route: /^\/admin\/webhooks\/[^/]+$/ }],
-  ["heldout-webhook-replay-review", { lane: "heldout", route: /^\/admin\/webhooks\/[^/]+$/ }]
+  ["heldout-webhook-replay-review", { lane: "heldout", route: /^\/admin\/webhooks\/[^/]+$/ }],
+  ["heldout-webhook-populated-evidence", { lane: "heldout", route: /^\/admin\/webhooks\/[^/]+$/ }]
 ]);
 const harnessOnly = new Set([
   "examples/accrue_host/e2e/phase247-current-proof.spec.js",
@@ -43,7 +44,7 @@ const captureRoot = path.dirname(manifestPath);
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 noSecrets(manifest);
 check(manifest.phase === "247" && Array.isArray(manifest.captures), "unexpected manifest shape");
-check(manifest.captures.length >= 12 && manifest.captures.length <= 16, `expected 12–16 captures, found ${manifest.captures.length}`);
+check(manifest.captures.length === 20, `expected 20 captures across five complete scenarios, found ${manifest.captures.length}`);
 
 const sourceSha = manifest.captures[0]?.source_sha;
 check(/^[a-f0-9]{40}$/.test(sourceSha || ""), "invalid captured source SHA");
@@ -115,7 +116,7 @@ for (const [scenarioKey, definition] of expected) {
     check(seen.has(`${scenarioKey}:${size}:${theme}`), `missing matrix evidence ${scenarioKey} ${size} ${theme}`);
   }
 }
-check(seen.size >= 12 && seen.size <= 16, `invalid matrix size: ${seen.size}`);
+check(seen.size === 20, `invalid matrix size: ${seen.size}`);
 const pngFiles = fs.readdirSync(captureRoot).filter((name) => name.endsWith(".png")).sort();
 check(pngFiles.length === seen.size, `capture directory contains ${pngFiles.length} PNGs for ${seen.size} manifest rows`);
-console.log(`Validated ${seen.size} inspected Phase 247 images across ordinary and held-out detail/recovery states; source ${sourceSha.slice(0, 12)}; served CSS/JS match the captured build.`);
+console.log(`Validated ${seen.size} inspected Phase 247 images across ordinary and held-out detail, replay, expanded Activity/raw payload, and recovery states; source ${sourceSha.slice(0, 12)}; served CSS/JS match the captured build.`);

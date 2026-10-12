@@ -239,6 +239,21 @@ defmodule AccrueAdmin.ChargeLiveTest do
     assert html =~ "fee refunded"
   end
 
+  test "missing fee evidence is unavailable rather than an inferred zero", %{
+    conn: conn,
+    charge: charge
+  } do
+    charge
+    |> Charge.changeset(%{stripe_fee_amount_minor: nil, data: %{}})
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/payments/#{charge.id}")
+
+    assert html =~ "Platform fee unavailable"
+    refute html =~ "Platform fee $0.00"
+  end
+
   test "refund initiation requires step-up and records admin refund audit linkage", %{
     conn: conn,
     charge: charge,

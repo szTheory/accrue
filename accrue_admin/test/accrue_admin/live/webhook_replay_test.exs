@@ -95,6 +95,8 @@ defmodule AccrueAdmin.WebhookReplayTest do
     assert challenge =~ "Step-up required"
     html = render_submit(view, "step_up_submit", %{"code" => "123456"})
     assert html =~ "Webhook replay requested."
+    refute html =~ "Webhook processing completed."
+    refute html =~ "Delivery processed successfully."
 
     updated = TestRepo.get!(WebhookEvent, webhook.id)
     assert updated.status == :received

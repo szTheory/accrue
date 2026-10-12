@@ -38,7 +38,11 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
     prior = Application.get_env(:accrue, :auth_adapter)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
-    on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
+
+    on_exit(fn ->
+      Application.put_env(:accrue, :auth_adapter, prior)
+      Application.delete_env(:accrue_admin, :recovery_query_fun)
+    end)
 
     # Seed some events with MRR
     {:ok, _} =
@@ -143,6 +147,10 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     assert html =~ "Exhausted MRR (GBP)"
     assert html =~ "Recovered MRR (USD)"
     assert html =~ "Exhausted MRR (UNAVAILABLE)"
+    refute html =~ "Money Saved"
+    refute html =~ "Cash saved"
+    refute html =~ "Churned Revenue"
+    refute html =~ "Confirmed churn"
     refute html =~ "$99.99"
     refute html =~ "9,999 ZZZ"
 
@@ -437,6 +445,53 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       assert active_window_label(html_7d) =~ "7 days"
       assert html_7d =~ "$50.00"
       refute html_7d =~ "$150.00"
+    end
+
+    test "overlapping window reads keep the latest result and loading state", %{conn: conn} do
+      parent = self()
+
+      Application.put_env(:accrue_admin, :recovery_query_fun, fn _owner, since, _until ->
+        window = if DateTime.diff(Accrue.Clock.utc_now(), since, :day) <= 7, do: "7d", else: "30d"
+        send(parent, {:recovery_read_started, window, self()})
+        Process.flag(:trap_exit, true)
+
+        receive do
+          {:resolve_recovery_read, ^window} ->
+            %{
+              stats: %{
+                recovered: [%{currency: "usd", cents: if(window == "7d", do: 700, else: 3_000)}],
+                lost: []
+              },
+              funnel: %{entered: 0, recovered: 0, exhausted: 0, active: 0},
+              at_risk: []
+            }
+        end
+      end)
+
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      {:ok, view, loading_30d} = live(conn, "/billing/analytics/recovery?window=30d")
+      assert loading_30d =~ ~s(data-state="loading")
+      assert_receive {:recovery_read_started, "30d", read_30d}
+
+      loading_7d = render_patch(view, "/billing/analytics/recovery?window=7d")
+      assert loading_7d =~ ~s(data-state="loading")
+      assert active_window_label(loading_7d) =~ "7 days"
+      assert_receive {:recovery_read_started, "7d", read_7d}
+
+      send(read_7d, {:resolve_recovery_read, "7d"})
+      html_7d = render_async(view)
+      assert active_window_label(html_7d) =~ "7 days"
+      assert html_7d =~ "$7.00"
+      refute html_7d =~ "$30.00"
+      refute html_7d =~ ~s(data-state="loading")
+
+      send(read_30d, {:resolve_recovery_read, "30d"})
+      _ = render_async(view)
+      final_html = render(view)
+      assert active_window_label(final_html) =~ "7 days"
+      assert final_html =~ "$7.00"
+      refute final_html =~ "$30.00"
+      refute final_html =~ ~s(data-state="loading")
     end
 
     test "window links preserve unrelated query params on the live route", %{conn: conn} do

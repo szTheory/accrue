@@ -48,6 +48,125 @@ const digest = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex"
 const sourceSha = () => execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
 const sourceDigests = () => Object.fromEntries(sourceFiles.map((file) => [file, digest(fs.readFileSync(path.join(root, file)))]));
 
+function seedHeldoutWebhookEvidence(webhookId) {
+  const processorEventId = "evt_host_browser_replay_second";
+  const rawBody = JSON.stringify({
+    id: processorEventId,
+    type: "invoice.payment_failed",
+    data: { object: {
+      id: "in_host_browser_replay",
+      object: "invoice",
+      customer: "cus_host_browser_replay_owner",
+      subscription: "sub_host_browser_replay",
+      attempt_count: 3,
+      amount_due: 12500,
+      currency: "usd"
+    } }
+  });
+  const script = `
+    import Ecto.Query
+    alias Accrue.Events
+    alias Accrue.Billing.Customer
+    alias Accrue.Repo
+    alias Accrue.Webhook.WebhookEvent
+    [webhook_id, processor_event_id, raw_body] = System.argv()
+    webhook = Repo.get!(WebhookEvent, webhook_id)
+    customer = Repo.get_by!(Customer, processor_id: "cus_host_browser_replay_owner")
+    now = DateTime.utc_now()
+    webhook
+    |> Ecto.Changeset.change(%{
+      type: "invoice.payment_failed",
+      raw_body: raw_body,
+      data: Jason.decode!(raw_body),
+      received_at: now
+    })
+    |> Repo.update!()
+    {:ok, _event} = Events.record(%{
+      type: "customer.updated",
+      subject_type: "Customer",
+      subject_id: customer.id,
+      actor_type: "webhook",
+      actor_id: processor_event_id,
+      caused_by_webhook_event_id: webhook.id,
+      idempotency_key: "phase247-populated-proof:" <> webhook.id,
+      data: %{"source" => "heldout Phase247 render fixture"},
+      inserted_at: now
+    })
+    args = %{"webhook_event_id" => webhook.id}
+    existing_job_id = Repo.one(from job in Oban.Job,
+      where: job.worker == "Accrue.Webhook.DispatchWorker" and
+        job.args == ^args and job.state == "discarded",
+      select: job.id,
+      limit: 1)
+    if is_nil(existing_job_id) do
+      Repo.insert!(%Oban.Job{
+        state: "discarded",
+        queue: "accrue_webhooks",
+        worker: "Accrue.Webhook.DispatchWorker",
+        args: %{"webhook_event_id" => webhook.id},
+        errors: [%{"attempt" => 3, "error" => "processor timeout"}],
+        attempt: 3,
+        max_attempts: 25,
+        inserted_at: now,
+        attempted_at: now,
+        discarded_at: now
+      })
+    end
+    IO.write("phase247-heldout-evidence-ready")
+  `;
+  const output = execFileSync("mix", ["run", "-e", script, "--", webhookId, processorEventId, rawBody], {
+    cwd: path.join(root, "examples/accrue_host"),
+    encoding: "utf8",
+    env: { ...process.env, MIX_ENV: "test" }
+  });
+  if (!output.includes("phase247-heldout-evidence-ready")) {
+    throw new Error("held-out webhook fixture did not report its isolated setup marker");
+  }
+  return rawBody;
+}
+
+async function assertExpandedWebhookEvidence(page, rawBody) {
+  const activity = page.locator("details[data-ax-lazy-activity]");
+  const activitySummary = activity.locator(":scope > summary");
+  await activitySummary.focus();
+  await activitySummary.press("Enter");
+  await expect(activity).toHaveJSProperty("open", true);
+  await expect(activity).toContainText("Attempt 3/25");
+  await expect(activity).toContainText("customer.updated");
+
+  const payload = page.locator("#webhook-raw-payload");
+  const payloadSummary = payload.locator(":scope > summary");
+  await payloadSummary.focus();
+  await payloadSummary.press("Enter");
+  await expect(payload).toHaveJSProperty("open", true);
+  const tabs = payload.getByRole("tab");
+  await expect(tabs).toHaveCount(2);
+  const treeTab = tabs.filter({ hasText: "Tree" });
+  const rawTab = tabs.filter({ hasText: "Raw" });
+  await treeTab.focus();
+  await expect(treeTab).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(rawTab).toBeFocused();
+  await page.keyboard.press("Enter");
+  const rawView = payload.locator("[role='tabpanel']:visible");
+  await expect(rawView).toContainText('"attempt_count": 3');
+  await expect(rawView).toContainText('"customer": "cus_host_browser_replay_owner"');
+  const displayedRaw = (await rawView.textContent()).trim();
+  expect(JSON.parse(displayedRaw)).toEqual(JSON.parse(rawBody));
+
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: new URL(page.url()).origin });
+  const copyButton = payload.getByRole("button", { name: /copy/i });
+  await copyButton.focus();
+  await copyButton.press("Enter");
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(displayedRaw);
+  return {
+    activity_attempt: "3/25",
+    derived_event: "customer.updated",
+    raw_tab_keyboard_selected: true,
+    exact_raw_copy: true
+  };
+}
+
 async function setTheme(page, theme) {
   const radio = page.getByRole("radio", { name: new RegExp(theme, "i") }).first();
   if (await radio.count()) await radio.evaluate((button) => button.click());
@@ -318,20 +437,14 @@ heldoutTest("@phase247-current-heldout populated webhook detail and replay revie
   if (process.env.PHASE247_PROOF_LANE !== "heldout") test.skip();
   await page.addInitScript(() => { document.documentElement.classList.add("accrue-admin"); });
   const fixture = readFixture();
+  const expectedPayload = seedHeldoutWebhookEvidence(fixture.second_webhook_id);
   await openWorkspace(page, fixture, sandboxId);
 
   const route = `/admin/webhooks?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
   await page.goto(route);
   await waitForLiveView(page);
-  const links = page.locator('a[href*="/admin/webhooks/"]');
-  let eligibleDetail = null;
-  for (let index = 0; index < await links.count(); index += 1) {
-    const candidate = links.nth(index);
-    const href = await candidate.getAttribute("href");
-    const rowText = await candidate.locator("xpath=ancestor::tr[1]").innerText().catch(() => candidate.locator("xpath=ancestor::*[self::article or self::li][1]").innerText().catch(() => ""));
-    if (href && /failed|dead/i.test(rowText)) { eligibleDetail = href; break; }
-  }
-  expect(eligibleDetail, "held-out owner has an observed failed/dead webhook for replay review").toBeTruthy();
+  const eligibleDetail = `/admin/webhooks/${fixture.second_webhook_id}?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+  await expect(page.locator(`a[href^="/admin/webhooks/${fixture.second_webhook_id}"]`).first(), "isolated held-out evidence fixture is owner-scoped and eligible for replay review").toBeVisible();
 
   await page.goto(eligibleDetail);
   await waitForLiveView(page);
@@ -349,6 +462,14 @@ heldoutTest("@phase247-current-heldout populated webhook detail and replay revie
     replay_action_available: true,
     time_preference_geometry: preferenceGeometry,
     disclosure_keyboard_cue: disclosureEvidence
+  });
+
+  const populatedEvidenceChecks = await assertExpandedWebhookEvidence(page, expectedPayload);
+  await captureMatrix(page, "heldout", new URL(eligibleDetail, page.url()).pathname, "webhook-populated-evidence", detailAssets, {
+    activity_expanded: true,
+    raw_payload_expanded: true,
+    exact_deep_payload_values: true,
+    ...populatedEvidenceChecks
   });
 
   await page.locator("[data-role='replay-single']").click();

@@ -40,12 +40,22 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
      |> assign(:recovery_loading?, true)
      |> assign(:recovery_error, nil)
      |> start_async(:recovery_query, fn ->
-       %{
-         stats: Dunning.recovered_vs_lost_mrr(owner_scope, since: since, until: until),
-         funnel: Dunning.funnel(owner_scope, since: since, until: until),
-         at_risk: Dunning.at_risk_subscriptions(owner_scope, since: since, until: until)
-       }
+       recovery_query(owner_scope, since, until)
      end)}
+  end
+
+  defp recovery_query(owner_scope, since, until) do
+    case Application.get_env(:accrue_admin, :recovery_query_fun) do
+      query when is_function(query, 3) ->
+        query.(owner_scope, since, until)
+
+      _ ->
+        %{
+          stats: Dunning.recovered_vs_lost_mrr(owner_scope, since: since, until: until),
+          funnel: Dunning.funnel(owner_scope, since: since, until: until),
+          at_risk: Dunning.at_risk_subscriptions(owner_scope, since: since, until: until)
+        }
+    end
   end
 
   @impl true
