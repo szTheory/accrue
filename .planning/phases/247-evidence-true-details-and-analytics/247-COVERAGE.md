@@ -113,6 +113,10 @@ Serialization and non-instant cases remain explicit: `FilterChipBar.present_valu
 
 ## Plan 247-07 current-revision proof
 
+### Post-review acceptance coverage
+
+The bounded review corrections have direct evidence: browser checks measure Local/UTC visibility and 44px geometry at 320px and verify persisted selection; disclosure checks observe visible chevron changes and keyboard toggling; detail heading checks enforce 20px/600; recovery copy and nav alignment have owner assertions; replay review asserts one cancel control, dismissal/focus return, and no submission. Timestamp source tests use an explicitly constructed +05:00 DateTime, assert normalized UTC ISO and retained microseconds without TZDB. Final Admin suite is 728/728; focused browser owners 44/44; Node time tests 7/7. Final two browser lanes and the 16-image proof validator pass. WR-01 is closed in `247-REVIEW-DISPOSITION.md`; UI findings are addressed additively in `247-UI-REVIEW-DISPOSITION.md`.
+
 | Requirement / decision | Executed owner | Evidence | Result |
 |---|---|---|---|
 | TIME-01, LANG-02, STATE-02, DETAIL-01, DETAIL-02, METRIC-01; D-12 | `phase247-current-proof.spec.js`, `verify_phase247_render_proof.mjs` | 16 individually inspected full-page captures, source-bound manifest, ordinary + isolated held-out lanes, wide/narrow and light/dark | pass |

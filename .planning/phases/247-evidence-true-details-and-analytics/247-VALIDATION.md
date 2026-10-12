@@ -66,6 +66,10 @@ All eight plan summaries and the six requirement rows were checked against their
 
 ## Validation Audit 2026-10-11
 
+### Post-review correction verification
+
+The preceding proof source `60cbf06331c2` was superseded after the bounded review corrections; source `4b121d6997ef5cde1a8a13aaf8b913aaaac87ea9` is the final capture harness. Final product assets were built after product changes and remained byte-identical through later harness-only changes (CSS SHA `63a5381be4cc47673e24b4c295e20381b57da06029680819625aff45f2f32b0c`, JS SHA `d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32`). Final verification: owner tests 44/44; time display 7/7; full Admin 728/728; ordinary browser 1/1; held-out browser 1/1; 16-image manifest validator passed. Captures were individually inspected at original size. See `247-UI-REVIEW-DISPOSITION.md` for precise UI dispositions and focus-capture explanation.
+
 | Metric | Count |
 |---|---|
 | Gaps found | 0 |

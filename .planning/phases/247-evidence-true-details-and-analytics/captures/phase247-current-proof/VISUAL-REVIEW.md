@@ -11,3 +11,7 @@ The populated held-out webhook detail keeps owner context, long event identity, 
 The isolated fixture contains only two dead webhook deliveries, so it does not provide a separate blocked-but-otherwise-eligible delivery detail. The captured populated detail reports that fixture limitation truthfully. Activity and raw-payload sections are empty for the selected held-out record. These are data limitations, not inferred product states.
 
 No remaining visual defect was found in this bounded matrix. Screenshots are full-page images; their image dimensions are recorded separately from the requested 1280×900 and 320×820 browser viewport dimensions.
+
+## Post-review Corrections and Current Proof
+
+The earlier source `60cbf06331c2bdc25695b9c9d4b9eaf9b0bc602` was preserved outside the capture directory at `/private/tmp/phase247-pre-correction-proof/`. The final source is `4b121d6997ef5cde1a8a13aaf8b913aaaac87ea9`. The final 16 captures were individually inspected at original size. The browser proof now verifies 320px Local/UTC geometry and persistence, visible disclosure cue changes and keyboard operation, heading typography, and replay dismissal/focus return without submission. Both ordinary and isolated held-out lanes passed. The validator accepted all captures and confirmed served assets match the final product build. See `247-UI-REVIEW-DISPOSITION.md` for finding-by-finding disposition and the focus artifact explanation.

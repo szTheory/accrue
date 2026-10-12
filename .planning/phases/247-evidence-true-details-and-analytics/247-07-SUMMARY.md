@@ -194,3 +194,7 @@ Current-revision evidence is ready for Phase248 integrated scenario selection an
 - All 11 plan commits are ancestors of the current HEAD.
 - Captured source SHA and served CSS/JS digests passed the manifest validator.
 - Phase progress remains **In Progress** pending the phase verifier; no requirement IDs were marked complete here.
+
+## Post-review Corrections
+
+Applied bounded UI and UTC timestamp fixes in `306efe92`; proof assertions were tightened in `9e7ab41b`, `f32feec4`, `ceef2047`, `76cb2867`, and `4b121d69`; page-specific retry copy was corrected in `e65fedc6`. After the final product edit, focused owners passed 44/44, the Node time-display suite passed 7/7, and the full Admin suite passed 728/728. Assets were built once after product changes (CSS `63a5381be4cc47673e24b4c295e20381b57da06029680819625aff45f2f32b0c`; JS `d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32`). Harness-only edits did not change those assets. Final ordinary and held-out browser lanes each passed 1/1; all 16 final captures were individually inspected and the render-proof validator passed with source `4b121d6997ef5cde1a8a13aaf8b913aaaac87ea9`. Review dispositions are additive in `247-REVIEW-DISPOSITION.md` and `247-UI-REVIEW-DISPOSITION.md`. Phase 247 remains pending the phase verifier.
