@@ -79,6 +79,14 @@ async function captureMatrix(page, lane, route, scenario, assets, checks) {
     await page.setViewportSize({ width, height });
     for (const theme of ["light", "dark"]) {
       await setTheme(page, theme);
+      const clearedProgrammaticMainFocus = await page.evaluate(() => {
+        const main = document.getElementById("main-content");
+        if (main === document.activeElement) {
+          main.blur();
+          return true;
+        }
+        return false;
+      });
       const focusState = await page.evaluate(() => {
         const active = document.activeElement;
         const main = document.getElementById("main-content");
@@ -88,9 +96,14 @@ async function captureMatrix(page, lane, route, scenario, assets, checks) {
           active_id: active?.id || null,
           main_focused: active === main,
           main_focus_visible: active === main && active.matches(":focus-visible"),
+          cleared_programmatic_main_focus: false,
           active_outline: style ? { style: style.outlineStyle, width: style.outlineWidth, color: style.outlineColor } : null
         };
       });
+      focusState.cleared_programmatic_main_focus = clearedProgrammaticMainFocus;
+      if (focusState.main_focused || focusState.main_focus_visible) {
+        throw new Error("capture must not retain programmatic main focus from route navigation");
+      }
       const file = `${lane}-${scenario}-${size}-${theme}.png`;
       const fullPath = path.join(captureDir, file);
       const bytes = await page.screenshot({ path: fullPath, fullPage: true, animations: "disabled" });
