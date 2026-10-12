@@ -100,7 +100,7 @@ for (const capture of captures) {
   if (scenario === "empty-subscriptions") {
     check(capture.route === "/admin/subscriptions" && capture.checks.underlying_scoped_record_count === 0 && capture.checks.unfiltered === true, "empty state is not proved as a genuine unfiltered zero-record collection");
   }
-  if (scenario === "failed-webhook") check(/dead|discarded|failed/i.test(capture.checks.observed_status || "") && capture.checks.action_submitted === false, "failure capture overstates or submits the observed failure action");
+  if (scenario === "failed-webhook") check(/dead|discarded|failed/i.test(capture.checks.observed_status || "") && capture.checks.action_submitted === false && typeof capture.checks.owner_scope === "string" && capture.checks.owner_scope.length > 0, "failure capture lacks owner scope, overstates, or submits the observed failure action");
   if (scenario === "long-name-boundary") check(capture.checks.exact_identity_accessible === true && capture.checks.narrow_page_dimensions?.scroll <= 320, "long-name boundary is missing its exact-identity or overflow assertion");
 
   const screenshot = repoFile(path.relative(repo, path.resolve(captureRoot, capture.file)));

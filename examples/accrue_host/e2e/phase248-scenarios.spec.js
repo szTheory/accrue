@@ -53,12 +53,12 @@ async function loginOrdinary(page) {
   await expect(page.locator("aside[aria-label='Admin navigation']"), "the configured operator session reaches mounted Admin").toBeVisible();
 }
 
-async function loginHeldout(page, fixture, sandboxId) {
+async function loginHeldout(page, fixture, sandboxId, organizationSlug = fixture.admin_org_alpha_slug) {
   await page.addInitScript(() => { document.documentElement.classList.add("accrue-admin"); });
   await login(page, fixture, fixture.admin_email, sandboxId);
   await workspaceBillingLink(page).click();
   await waitForLiveView(page);
-  const workspace = page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`);
+  const workspace = page.locator(`button[data-organization-slug="${organizationSlug}"]`);
   await expect(workspace, "the selected admin owner is available to this authenticated fixture").toBeVisible();
   await workspace.click();
   await waitForLiveView(page);
@@ -169,7 +169,7 @@ ordinaryTest("@phase248-ordinary @phase248-heldout ordinary Fake invoice action 
 heldoutTest("@phase248-heldout @phase248-empty dedicated empty subscriptions scenario is genuinely zero-record and owner-scoped", async ({ page, sandboxId }) => {
   if (process.env.PHASE248_PROOF_LANE !== "heldout") heldoutTest.skip();
   const fixture = readFixture();
-  await loginHeldout(page, fixture, sandboxId);
+  await loginHeldout(page, fixture, sandboxId, fixture.admin_org_beta_slug);
   const countScript = `
     import Ecto.Query
     alias Accrue.Billing.{Customer, Subscription}
@@ -184,8 +184,8 @@ heldoutTest("@phase248-heldout @phase248-empty dedicated empty subscriptions sce
   const rawCount = execFileSync("mix", ["run", "-e", countScript, "--", fixture.admin_org_beta_id], {
     cwd: path.join(root, "examples/accrue_host"), encoding: "utf8", env: { ...process.env, MIX_ENV: "test" }
   }).trim();
-  const countMatch = rawCount.match(/__PHASE248_SCOPED_COUNT__=(\d+)/);
-  expect(countMatch?.[1], "the scoped record-count query returned a machine-readable result").toBe("0");
+  const countMatches = [...rawCount.matchAll(/__PHASE248_SCOPED_COUNT__=(\d+)/g)].map((match) => match[1]);
+  expect(countMatches, "the scoped record-count query returned one unambiguous machine-readable result").toEqual(["0"]);
   const route = `/admin/subscriptions?org=${encodeURIComponent(fixture.admin_org_beta_slug)}`;
   await page.goto(route);
   await waitForLiveView(page);
@@ -221,7 +221,7 @@ heldoutTest("@phase248-heldout @phase248-failure scoped discarded webhook render
   const actualStatus = (await status.innerText()).trim();
   await captureState(page, {
     lane: "heldout", scenario: "failed-webhook", route: new URL(page.url()).pathname,
-    assets, checks: { state: "observed-webhook-failure", observed_status: actualStatus, supported_next_step_visible: true, action_submitted: false },
+    assets, checks: { state: "observed-webhook-failure", observed_status: actualStatus, owner_scope: fixture.admin_org_alpha_slug, supported_next_step_visible: true, action_submitted: false },
     matrix: [
       { width: 1280, height: 900, size: "wide", theme: "dark" },
       { width: 320, height: 820, size: "narrow", theme: "light" }
@@ -240,7 +240,7 @@ heldoutTest("@phase248-heldout @phase248-boundary existing long-name Unicode cus
   await expect(row, "the test-owned long-name boundary customer is present").toBeVisible();
   const link = row.locator('a[href^="/admin/customers/"]').first();
   const href = await link.getAttribute("href");
-  expect(href).toMatch(/^\/admin\/customers\/[0-9a-f-]+$/i);
+  expect(new URL(href, page.url()).pathname).toMatch(/^\/admin\/customers\/[0-9a-f-]+$/i);
   await page.goto(href);
   await waitForLiveView(page);
   await expect(page.getByText(target, { exact: true })).toBeVisible();
