@@ -10,7 +10,7 @@ const OWNER_RE = /<!-- owner-items-json:start -->\s*([\s\S]*?)\s*<!-- owner-item
 const FINDING_RE = /<!-- findings-json:start -->\s*([\s\S]*?)\s*<!-- findings-json:end -->/;
 
 function fail(message) { throw new Error(message); }
-function safeFile(root, relative) {
+export function resolveEvidenceFile(root, relative) {
   if (!relative || path.isAbsolute(relative) || relative.includes('\\')) fail(`unsafe path: ${relative}`);
   const resolved = path.resolve(root, relative);
   if (resolved !== root && !resolved.startsWith(`${root}${path.sep}`)) fail(`path escapes repository: ${relative}`);
@@ -19,11 +19,26 @@ function safeFile(root, relative) {
     cursor = path.join(cursor, part);
     if (fs.existsSync(cursor) && fs.lstatSync(cursor).isSymbolicLink()) fail(`symlink path is not allowed: ${relative}`);
   }
-  if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) fail(`missing evidence path: ${relative}`);
+  if (!fs.existsSync(resolved)) {
+    const phasePath = relative.match(/^\.planning\/phases\/([0-9]+-[^/]+)\/(.+)$/);
+    if (phasePath && !relative.split('/').some((part) => part === '..' || part === '.')) {
+      const archiveRoot = path.join(root, '.planning/milestones');
+      if (fs.existsSync(archiveRoot)) {
+        if (fs.lstatSync(archiveRoot).isSymbolicLink()) fail(`symlink path is not allowed: ${relative}`);
+        const candidates = fs.readdirSync(archiveRoot).filter((entry) => /^v[0-9]+(?:\.[0-9]+)*-phases$/.test(entry))
+          .map((entry) => `.planning/milestones/${entry}/${phasePath[1]}/${phasePath[2]}`)
+          .filter((candidate) => fs.existsSync(path.join(root, candidate)));
+        if (candidates.length > 1) fail(`ambiguous archived evidence path: ${relative}`);
+        if (candidates.length === 1) return resolveEvidenceFile(root, candidates[0]);
+      }
+    }
+    fail(`missing evidence path: ${relative}`);
+  }
+  if (!fs.statSync(resolved).isFile()) fail(`missing evidence path: ${relative}`);
   return resolved;
 }
 function sourceKeys(root) {
-  const source = fs.readFileSync(safeFile(root, OWNER_SOURCE), 'utf8');
+  const source = fs.readFileSync(resolveEvidenceFile(root, OWNER_SOURCE), 'utf8');
   const ownerBlock = source.match(OWNER_RE)?.[1];
   const findingBlock = source.match(FINDING_RE)?.[1];
   if (!ownerBlock || !findingBlock) fail('canonical topic/finding JSON blocks are missing');
@@ -42,7 +57,7 @@ function tableRows(markdown, heading) {
 function checkRow(row, root, captures) {
   const [key, owner, scope, disposition, command, result, evidence, captureRefs] = row;
   if (!key || !owner || !scope || !disposition || !command || !result || !evidence || !captureRefs) fail(`incomplete row: ${key || '(unknown)'}`);
-  safeFile(root, evidence.split('#')[0].replaceAll('`', ''));
+  resolveEvidenceFile(root, evidence.split('#')[0].replaceAll('`', ''));
   if (disposition === 'PASS' && (!/\b(?:0 failures|\d+ passed|\d+ tests?\s*\/\s*0 failures|validated \d+ inspected captures|pass(?:ed)?)\b/i.test(result) || /pending|not run|unverified/i.test(result))) {
     fail(`${key} claims PASS without a concrete executed result`);
   }
@@ -56,8 +71,8 @@ function checkRow(row, root, captures) {
 }
 
 export function validateIntegratedProof({ root = ROOT, proofPath, manifestPath, proofText }) {
-  const proofFile = safeFile(root, proofPath);
-  const manifestFile = safeFile(root, manifestPath);
+  const proofFile = resolveEvidenceFile(root, proofPath);
+  const manifestFile = resolveEvidenceFile(root, manifestPath);
   const markdown = proofText ?? fs.readFileSync(proofFile, 'utf8');
   const manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
   if (!['248', 248].includes(manifest.phase) || !Array.isArray(manifest.captures)) fail('invalid Phase 248 capture manifest');
@@ -70,7 +85,7 @@ export function validateIntegratedProof({ root = ROOT, proofPath, manifestPath, 
   for (const kind of ['css', 'js']) {
     const asset = manifest.captures[0]?.assets?.[kind];
     if (!asset || !/^[a-f0-9]{64}$/.test(asset.sha256 || '') || !Number.isInteger(asset.bytes)) fail(`manifest missing served ${kind} digest/byte count`);
-    const bytes = fs.readFileSync(safeFile(root, asset.path));
+    const bytes = fs.readFileSync(resolveEvidenceFile(root, asset.path));
     if (bytes.length !== asset.bytes || crypto.createHash('sha256').update(bytes).digest('hex') !== asset.sha256) fail(`served ${kind} digest or byte count differs from manifest`);
     if (!markdown.includes(`Served ${kind.toUpperCase()}: \`${asset.sha256}\` (${asset.bytes} bytes)`)) fail(`proof served ${kind} digest/bytes do not match manifest`);
   }

@@ -25,6 +25,8 @@
 
 ---
 
+**Post-archive tooling:** Canonical archive lookup now keeps recorded proof commands usable. Fresh 27 Node controls and both validators pass; this is tooling evidence, not a new phase-level verification verdict. See [archive compatibility](milestones/v1.66-ARCHIVE-COMPATIBILITY.md).
+
 ## v1.65 Accrue Admin Language & Consistency (Shipped: 2026-10-11)
 
 **Phases completed:** 1 phases, 4 plans, 8 tasks

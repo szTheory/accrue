@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { resolveEvidenceFile } from "./verify_phase248_integrated_proof.mjs";
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const definitions = new Map([
@@ -31,6 +32,7 @@ function repoFile(relative) {
   check(typeof relative === "string" && !path.isAbsolute(relative) && !relative.split(/[\\/]/).includes(".."), `unsafe repository path: ${relative}`);
   const absolute = path.resolve(repo, relative);
   check(absolute.startsWith(`${repo}${path.sep}`), `path escapes repository: ${relative}`);
+  if (relative.startsWith(".planning/phases/") && !fs.existsSync(absolute)) return resolveEvidenceFile(repo, relative);
   return absolute;
 }
 

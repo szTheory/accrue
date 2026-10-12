@@ -5,10 +5,11 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { resolveEvidenceFile } from './verify_phase248_integrated_proof.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const manifestRelative = '.planning/phases/248-reproducible-scenarios-and-integrated-proof/captures/phase248-current-proof/manifest.json';
-const canonicalManifest = path.join(repo, manifestRelative);
+const canonicalManifest = resolveEvidenceFile(repo, manifestRelative);
 const canonicalRoot = path.dirname(canonicalManifest);
 const validator = path.join(repo, 'scripts/ci/verify_phase248_render_proof.mjs');
 

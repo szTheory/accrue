@@ -37,6 +37,8 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Evidence limits:** Historical receipts retain their recorded revisions and visual scores. Final Phase248 evidence is10inspectedcaptures across4scenarios at112d484d; ordinary1/1 and held-out3/3 are recorded, with fresh23Nodecontracts,13hosttests and4lifecycle controls for the later cleanup correction. This is representative evidence, not all-route or all-interaction subjective acceptance. Archival moves invalidate the runtime's path-bound digest projection; the archive preserves each passed pre-move receipt and does not claim a new post-move phase verification. Local completion does not claim remote CI, merge, publication or tag push.
 
+**Post-archive tooling:** Canonical archive lookup now keeps recorded proof commands usable. Fresh 27 Node controls and both validators pass; this is tooling evidence, not a new phase-level verification verdict. See [archive compatibility](milestones/v1.66-ARCHIVE-COMPATIBILITY.md).
+
 ## Next Milestone Goals
 
 No new feature milestone is defined. Use `$gsd-new-milestone` to define fresh requirements from a concrete adopter/operator need. Current nonblocking design and evidence limits stay archived and do not automatically reopen product scope.
