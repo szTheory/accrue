@@ -6,6 +6,9 @@ if (process.env.PHASE248_PROOF_LANE !== "heldout") {
 }
 const port = process.env.ACCRUE_HOST_BROWSER_PORT || "4102";
 if (port !== "4102") throw new Error("Phase 248 held-out scenarios must use port 4102");
+if (process.env.ACCRUE_HOST_E2E_DISABLE_SQL_SANDBOX === "1") {
+  throw new Error("Phase 248 held-out scenarios require SQL sandbox isolation");
+}
 
 // Set the port before loading the shared isolated-host lifecycle config. That
 // config owns the test database, SQL sandbox fixture, custody guard and server.
