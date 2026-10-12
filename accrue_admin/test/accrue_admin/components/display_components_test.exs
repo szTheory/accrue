@@ -19,6 +19,31 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   alias AccrueAdmin.Components.{MoneyFormatter, RelatedResources, Timeline}
   alias AccrueAdmin.Components.StepUpAuthModal
 
+  test "payload copy preserves JSON null and boolean types, including nested values" do
+    payload = %{
+      "missing" => nil,
+      "enabled" => true,
+      "disabled" => false,
+      "nested" => [nil, true, false]
+    }
+
+    html =
+      render_component(&JsonViewer.json_viewer/1, %{
+        id: "typed-payload",
+        payload: payload,
+        show_heading: false
+      })
+
+    document = Floki.parse_document!(html)
+    [copied] = Floki.attribute(document, "#typed-payload-copy", "data-clipboard-text")
+    assert Jason.decode!(copied) == payload
+
+    assert Floki.text(Floki.find(document, "#typed-payload-raw-panel")) |> Jason.decode!() ==
+             payload
+
+    assert Floki.attribute(document, "#typed-payload-title", "class") == ["ax-visually-hidden"]
+  end
+
   describe "FilterChipBar" do
     test "renders active server-driven filter chips and clear links" do
       html =

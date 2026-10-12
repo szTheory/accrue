@@ -33,9 +33,39 @@ function button(text) {
     listeners,
     events,
     addEventListener(type, listener) { listeners.set(type, listener); },
+    removeEventListener(type) { listeners.delete(type); },
     dispatchEvent(event) { events.push(event); }
   };
 }
+
+test("visible toast waits for the real write and reports rejection without success", async (t) => {
+  const target = button("record-123");
+  let finishWrite;
+  const clipboard = { writeText: () => new Promise((resolve) => { finishWrite = resolve; }) };
+  withBrowser(t, { clipboard, button: target });
+  let toast;
+  document.body = { append(node) { toast = node; } };
+  document.querySelector = () => toast;
+  document.createElement = () => ({ dataset: {}, setAttribute() {} });
+  const timeout = globalThis.setTimeout;
+  globalThis.setTimeout = () => 0;
+  t.after(() => { globalThis.setTimeout = timeout; });
+
+  const hook = { el: target };
+  Clipboard.mounted.call(hook);
+  const pending = target.listeners.get("click")();
+  assert.equal(toast, undefined);
+  finishWrite();
+  await pending;
+  assert.equal(toast.textContent, "Copied to clipboard");
+  assert.equal(toast.hidden, false);
+
+  clipboard.writeText = async () => { throw new Error("denied"); };
+  await target.listeners.get("click")();
+  assert.match(toast.textContent, /Could not copy/);
+  assert.equal(target.dataset.copied, undefined);
+  Clipboard.destroyed.call(hook);
+});
 
 test("first-paint controls report success only after a clipboard write resolves", async (t) => {
   const target = button("cus_123");

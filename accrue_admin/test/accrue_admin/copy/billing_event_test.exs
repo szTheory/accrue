@@ -29,6 +29,8 @@ defmodule AccrueAdmin.Copy.BillingEventTest do
   end
 
   test "confirmed event keys describe the operation without changing raw keys" do
+    assert Copy.billing_event_label("customer.created") == "Customer created"
+    assert Copy.billing_event_label("subscription.created") == "Subscription created"
     assert Copy.billing_event_label("customer.updated") == "Customer updated"
     assert Copy.billing_event_label("customer.local_updated") == "Customer record updated locally"
     assert Copy.billing_event_label("webhook.received") == "Webhook received"

@@ -1,3 +1,21 @@
+let toastTimeout;
+
+function showToast(message) {
+  if (typeof document === "undefined" || !document.body) return;
+  let toast = document.querySelector("[data-clipboard-toast]");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.dataset.clipboardToast = "true";
+    toast.className = "ax-clipboard-toast";
+    toast.setAttribute("role", "status");
+    document.body.append(toast);
+  }
+  clearTimeout(toastTimeout);
+  toast.textContent = message;
+  toast.hidden = false;
+  toastTimeout = setTimeout(() => { toast.hidden = true; }, 2500);
+}
+
 // Registered LiveView hook for click-to-copy controls. Each mounted node owns
 // one handler, so controls added by LiveView patches keep their behavior.
 function announce(button, message) {
@@ -19,11 +37,13 @@ function dispatch(button, type, text) {
   if (type === "clipboard:copied") {
     button.dataset.copied = "true";
     announce(button, "Copied to clipboard.");
+    showToast("Copied to clipboard");
     button.dispatchEvent(new CustomEvent(type, { bubbles: true }));
     return;
   }
 
   delete button.dataset.copied;
+  showToast("Could not copy. Select the text to copy it manually.");
   announce(button, `Clipboard unavailable. Select and copy the text manually: ${text}`);
   button.dispatchEvent(new CustomEvent(type, { bubbles: true, detail: { text } }));
 }

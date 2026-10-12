@@ -43,7 +43,12 @@ function renderTimestampElement(element) {
   if (!time || !result) return;
   time.textContent = result.text;
   const zone = element.querySelector("[data-time-zone]");
-  if (zone) zone.textContent = result.timeZone;
+  if (zone) {
+    zone.textContent = result.timeZone;
+    zone.classList?.add("ax-visually-hidden");
+  }
+  const button = element.querySelector("button[data-clipboard-text]");
+  if (button?.setAttribute) button.setAttribute("title", `${result.timeZone}. Click to copy the exact UTC timestamp.`);
 }
 
 function syncPreferenceControls(documentRef) {

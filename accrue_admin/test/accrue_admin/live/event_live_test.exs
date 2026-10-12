@@ -148,69 +148,56 @@ defmodule AccrueAdmin.EventLiveTest do
     assert heading_count(html, "h1") == 1
     assert data_attr_count(html, "data-ax-summary-list") == 1
     assert data_attr_count(html, "data-ax-related-resources") == 1
-    assert data_attr_count(html, "data-ax-lazy-activity") == 1
-    assert data_attr_count(html, "data-ax-lazy-json") == 1
-    assert length(Regex.scan(~r/phx-hook="PreserveDisclosure"/, html)) == 2
+    assert data_attr_count(html, "data-ax-lazy-activity") == 0
+    assert data_attr_count(html, "data-ax-event-payload") == 1
+    assert length(Regex.scan(~r/phx-hook="PreserveDisclosure"/, html)) == 1
     assert data_attr_count(html, "data-ax-action-band") == 0
     assert data_attr_count(html, "data-ax-action-overflow-menu") == 0
 
-    assert html =~ "Type"
-    assert html =~ "Actor"
-    assert html =~ "Subject"
+    assert html =~ "Event type"
+    assert html =~ "Recorded by"
+    assert html =~ "Invoice ID"
     assert html =~ "Source webhook"
     assert html =~ "Recorded time"
     assert html =~ "Livemode"
     assert html =~ "/billing/webhooks/#{webhook.id}"
     assert html =~ "/billing/invoices/#{invoice.id}"
-    assert html =~ "Open this section to load"
+    assert html =~ "ax-event-payload-chevron"
 
     refute html =~ ~s(class="ax-kpi-grid")
-    refute html =~ "failure_code"
-    refute html =~ "card_declined"
+    assert html =~ "failure_code"
+    assert html =~ "card_declined"
 
     assert major_band_order(html) == [
-             :summary_card,
              :summary_list,
-             :drill_section,
              :related_resources,
-             :lazy_activity,
+             :drill_section,
              :lazy_json
            ]
   end
 
-  test "keeps activity collapsed until the operator opens the marker", %{
+  test "does not suggest an event has missing activity when there is no activity producer", %{
     conn: conn,
     event: event
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-
-    assert {:ok, view, html} = live(conn, "/billing/events/#{event.id}")
-
-    assert html =~ "Open this section to load activity."
-    refute html =~ "This record has no recorded activity yet."
-
-    html = render_click(view, "load_activity", %{})
-
-    assert html =~ "This record has no recorded activity yet."
-    assert html =~ "Core details remain available above."
+    assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
+    refute html =~ "data-ax-lazy-activity"
+    refute html =~ "No activity"
+    refute html =~ "append-only ledger"
+    assert html =~ ~s(data-clipboard-text="#{event.subject_id}")
   end
 
-  test "keeps raw event payload collapsed until the operator opens the marker", %{
-    conn: conn,
-    event: event
-  } do
+  test "payload is a native closed disclosure with already-authorized data, not an extra server request",
+       %{conn: conn, event: event} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-
-    assert {:ok, view, html} = live(conn, "/billing/events/#{event.id}")
-
-    assert html =~ "Event payload"
-    refute html =~ "failure_code"
-    refute html =~ "card_declined"
-
-    html = render_click(view, "load_raw_json", %{})
-
+    assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
+    document = Floki.parse_document!(html)
+    assert Floki.attribute(document, "#event-raw-payload", "open") == []
+    assert Floki.attribute(document, "#event-raw-payload", "phx-click") == []
     assert html =~ "failure_code"
     assert html =~ "card_declined"
+    assert html =~ "ax-event-payload-chevron"
   end
 
   test "omits the lazy raw marker when the event has no payload", %{conn: conn} do
@@ -226,8 +213,8 @@ defmodule AccrueAdmin.EventLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
 
-    assert data_attr_count(html, "data-ax-lazy-activity") == 1
-    assert data_attr_count(html, "data-ax-lazy-json") == 0
+    assert data_attr_count(html, "data-ax-lazy-activity") == 0
+    assert data_attr_count(html, "data-ax-event-payload") == 0
   end
 
   test "D-15 event detail keeps one related-resources wrapper with quiet empty state when no links exist",
@@ -246,7 +233,7 @@ defmodule AccrueAdmin.EventLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
 
     assert data_attr_count(html, "data-ax-related-resources") == 1
-    assert html =~ "No related resources"
+    assert html =~ "No linked billing records are available."
   end
 
   test "EventLive Related card links to source webhook when caused_by_webhook_event_id present",
@@ -329,35 +316,18 @@ defmodule AccrueAdmin.EventLiveTest do
     refute html =~ ~s(data-role="event-unavailable")
   end
 
-  test "renders semantic dl/dt/dd facts inside summary_card", %{conn: conn, event: event} do
+  test "renders one factual summary with copyable exact identities", %{conn: conn, event: event} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-
     assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
-
-    # Summary card facts slot must use dl/dt/dd — not bare <span>Actor: ...
-    assert html =~ ~s(class="ax-label")
-    assert html =~ ~s(class="ax-body")
-    # The dl wrapper must be present inside the facts slot
+    assert data_attr_count(html, "data-ax-summary-list") == 1
     assert html =~ "<dl"
-  end
-
-  test "renders a detail_section body with event type, actor, subject, recorded fields", %{
-    conn: conn,
-    event: event
-  } do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-
-    assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
-
-    # Detail.detail_section renders ax-detail-section class
-    assert html =~ "ax-detail-section"
-    # Field list should be rendered with ax-field-list
-    assert html =~ "ax-field-list"
-    # Known field labels and values from the event fixture
-    assert html =~ "Type"
-    assert html =~ "Actor type"
-    assert html =~ "Subject type"
-    assert html =~ "Recorded"
+    assert html =~ "Recorded by"
+    assert html =~ "Event ID"
+    assert html =~ ~s(data-clipboard-text="#{event.id}")
+    assert html =~ ~s(data-clipboard-text="#{event.actor_id}")
+    assert length(Floki.find(Floki.parse_document!(html), "[data-time-display]")) == 1
+    refute html =~ "ax-summary-card"
+    refute html =~ "No webhook deliveries need replay"
   end
 
   test "out-of-scope event route redirects with denial flash before rendering detail", %{
@@ -547,7 +517,7 @@ defmodule AccrueAdmin.EventLiveTest do
       drill_section: ~s(class="ax-detail-section"),
       related_resources: "data-ax-related-resources",
       lazy_activity: "data-ax-lazy-activity",
-      lazy_json: "data-ax-lazy-json",
+      lazy_json: "data-ax-event-payload",
       kpi_grid: ~s(class="ax-kpi-grid")
     ]
     |> Enum.flat_map(fn {band, marker} ->

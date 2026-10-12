@@ -536,8 +536,8 @@ defmodule AccrueAdmin.CopyTest do
         "AccrueAdmin.Copy.resource_state_copy(:coupons"
       ],
       "lib/accrue_admin/live/event_live.ex" => [
-        "Copy.resource_state_copy(:events",
-        "Copy.resource_state_copy(:webhooks"
+        "Copy.event_detail_related_resources_empty()",
+        "Copy.BillingEvent.event_detail_no_linked_webhook()"
       ],
       "lib/accrue_admin/live/analytics/campaign_live.ex" => [
         "Copy.resource_state_copy(:dunning",

@@ -8,8 +8,9 @@ defmodule AccrueAdmin.Live.EventLive do
     Breadcrumbs,
     Detail,
     JsonViewer,
+    Icon,
     RelatedResources,
-    Timeline,
+    IdBadge,
     Timestamp
   }
 
@@ -29,8 +30,6 @@ defmodule AccrueAdmin.Live.EventLive do
          |> assign_shell(admin, event_id)
          |> assign(:event, nil)
          |> assign(:related_items, [])
-         |> assign(:activity_loaded?, false)
-         |> assign(:raw_json_loaded?, false)
          |> assign(:read_unavailable?, true)}
 
       :not_found ->
@@ -51,12 +50,11 @@ defmodule AccrueAdmin.Live.EventLive do
            :related_items,
            related_items(event, mount_path, owner_scope)
          )
-         |> assign(:activity_loaded?, false)
-         |> assign(:raw_json_loaded?, false)
          |> assign(:read_unavailable?, false)}
     end
   end
 
+  @impl true
   def handle_event("retry_read", _params, socket) do
     case read_event(socket.assigns.event_id, socket.assigns.current_owner_scope) do
       {:ok, event} ->
@@ -78,8 +76,6 @@ defmodule AccrueAdmin.Live.EventLive do
          socket
          |> assign(:event, nil)
          |> assign(:related_items, [])
-         |> assign(:activity_loaded?, false)
-         |> assign(:raw_json_loaded?, false)
          |> assign(:read_unavailable?, true)}
 
       :not_found ->
@@ -90,15 +86,6 @@ defmodule AccrueAdmin.Live.EventLive do
          |> put_flash(:error, AccrueAdmin.Copy.Locked.owner_access_denied())
          |> redirect(to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/events"))}
     end
-  end
-
-  @impl true
-  def handle_event("load_activity", _params, socket) do
-    {:noreply, assign(socket, :activity_loaded?, true)}
-  end
-
-  def handle_event("load_raw_json", _params, socket) do
-    {:noreply, assign(socket, :raw_json_loaded?, true)}
   end
 
   @impl true
@@ -127,7 +114,7 @@ defmodule AccrueAdmin.Live.EventLive do
       current_owner_scope={assigns[:current_owner_scope]}
       active_organization_name={@active_organization_name}
     >
-      <section class="ax-page">
+      <section class="ax-page ax-event-page">
         <div :if={@read_unavailable?} class="ax-card ax-data-table-unavailable" data-role="event-unavailable" role="alert">
           <p class="ax-heading">Event record unavailable</p>
           <p class="ax-body">This event could not be loaded. Its identity and related evidence are unknown until the read succeeds.</p>
@@ -142,27 +129,10 @@ defmodule AccrueAdmin.Live.EventLive do
           ]}
         />
 
-        <Detail.summary_card :if={@event} eyebrow={Copy.event_detail_eyebrow()} title={Copy.billing_event_label(@event.type)}>
-          <:facts>
-            <dl class="ax-summary-facts-dl">
-              <dt class="ax-label">Actor</dt>
-              <dd class="ax-body"><%= @event.actor_type %> <%= @event.actor_id || "" %></dd>
-              <dt class="ax-label">Subject</dt>
-              <dd class="ax-body"><%= @event.subject_type %> <%= @event.subject_id %></dd>
-              <dt class="ax-label">Recorded</dt>
-              <dd class="ax-body"><Timestamp.timestamp value={@event.inserted_at} id={"event-recorded-header-#{@event.id}"} /></dd>
-            </dl>
-          </:facts>
-        </Detail.summary_card>
-
-        <Detail.summary_list :if={@event} rows={summary_rows(@event, @admin_mount_path)} />
-
-        <details :if={@event} class="ax-detail-section" data-ax-drill-section="event-details" open>
-          <summary class="ax-detail-section-head">
-            <span class="ax-detail-section-title"><%= Copy.event_detail_section_heading() %></span>
-          </summary>
-          <Detail.detail_field_list fields={event_detail_fields(@event)} />
-        </details>
+        <header :if={@event} class="ax-event-header">
+          <h1 class="ax-display"><%= Copy.billing_event_label(@event.type) %></h1>
+        </header>
+        <Detail.summary_list :if={@event} rows={summary_rows(@event, @admin_mount_path)} class="ax-event-facts" />
 
         <div :if={@event} data-ax-related-resources>
           <RelatedResources.related_resources items={@related_items} />
@@ -174,44 +144,23 @@ defmodule AccrueAdmin.Live.EventLive do
           </section>
         </div>
 
-        <details :if={@event} id="event-activity" class="ax-detail-section" data-ax-lazy-activity phx-hook="PreserveDisclosure" phx-click="load_activity">
-          <summary class="ax-detail-section-head">
-            <span class="ax-detail-section-title"><%= Copy.event_detail_lazy_activity_heading() %></span>
-          </summary>
-          <%= if @activity_loaded? do %>
-            <Timeline.timeline
-              label={Copy.event_detail_lazy_activity_label()}
-              empty_label={Copy.event_detail_lazy_activity_empty_label()}
-              items={activity_items(@event)}
-            />
-            <p :if={activity_items(@event) == []} class="ax-body">
-              <%= event_activity_empty_body() %>
-            </p>
-          <% else %>
-            <p class="ax-body"><%= Copy.event_detail_lazy_activity_prompt() %></p>
-          <% end %>
-        </details>
-
         <details
           :if={raw_payload_available?(@event)}
           id="event-raw-payload"
           class="ax-detail-section"
-          data-ax-lazy-json
+          data-ax-event-payload
           phx-hook="PreserveDisclosure"
-          phx-click="load_raw_json"
         >
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title"><%= Copy.event_detail_json_payload_label() %></span>
+            <Icon.icon name={:chevron_down} size="sm" class="ax-event-payload-chevron" />
           </summary>
-          <%= if @raw_json_loaded? do %>
-            <JsonViewer.json_viewer
-              id="event-payload"
-              label={Copy.event_detail_json_payload_label()}
-              payload={raw_payload(@event)}
-            />
-          <% else %>
-            <p class="ax-body"><%= Copy.event_detail_lazy_raw_data_prompt() %></p>
-          <% end %>
+          <JsonViewer.json_viewer
+            id="event-payload"
+            label={Copy.event_detail_json_payload_label()}
+            payload={raw_payload(@event)}
+            show_heading={false}
+          />
         </details>
       </section>
     </AppShell.app_shell>
@@ -235,9 +184,14 @@ defmodule AccrueAdmin.Live.EventLive do
 
   defp summary_rows(event, _mount_path) do
     rows = [
-      %{label: "Type", value: event.type},
-      %{label: "Actor", value: actor_summary(event)},
-      %{label: "Subject", value: subject_summary(event)},
+      %{label: "Event type", value: event.type},
+      %{label: "Event ID", value: copy_id(event.id, "event-id-#{event.id}", "event")},
+      %{label: "Recorded by", value: actor_summary(event)},
+      %{
+        label: "#{event.subject_type || "Record"} ID",
+        value:
+          copy_id(event.subject_id, "event-subject-#{event.id}", event.subject_type || "record")
+      },
       %{label: "Source webhook", value: source_webhook_summary(event)},
       %{
         label: "Recorded time",
@@ -251,38 +205,7 @@ defmodule AccrueAdmin.Live.EventLive do
     end
   end
 
-  defp event_detail_fields(event) do
-    [
-      %{label: "Type", value: event.type},
-      %{label: "Actor type", value: event.actor_type || "--"},
-      %{label: "Actor ID", value: event.actor_id || "--"},
-      %{label: "Subject type", value: event.subject_type || "--"},
-      %{label: "Subject ID", value: event.subject_id || "--"},
-      %{label: "Source webhook", value: source_webhook_summary(event)},
-      %{
-        label: "Recorded",
-        value: timestamp_value(event.inserted_at, "event-recorded-detail-#{event.id}")
-      }
-    ]
-  end
-
-  defp activity_items(_event), do: []
-
-  defp event_related_resources_empty_body do
-    [
-      Copy.resource_state_copy(:events, :queue_empty).body,
-      Copy.event_detail_related_resources_empty()
-    ]
-    |> Enum.join(" ")
-  end
-
-  defp event_activity_empty_body do
-    [
-      Copy.resource_state_copy(:events, :queue_empty).body,
-      Copy.event_detail_lazy_activity_empty_body()
-    ]
-    |> Enum.join(" ")
-  end
+  defp event_related_resources_empty_body, do: Copy.event_detail_related_resources_empty()
 
   defp raw_payload(%{data: data} = event) do
     %{
@@ -424,21 +347,25 @@ defmodule AccrueAdmin.Live.EventLive do
   defp actor_icon(_actor_type), do: :users
 
   defp actor_summary(%{actor_type: nil, actor_id: nil}), do: "--"
+  defp actor_summary(%{actor_type: "system", actor_id: nil}), do: "System (automatic)"
   defp actor_summary(%{actor_type: type, actor_id: nil}), do: type || "--"
-  defp actor_summary(%{actor_type: nil, actor_id: id}), do: id || "--"
-  defp actor_summary(%{actor_type: type, actor_id: id}), do: "#{type} #{id}"
 
-  defp subject_summary(%{subject_type: nil, subject_id: nil}), do: "--"
-  defp subject_summary(%{subject_type: type, subject_id: nil}), do: type || "--"
-  defp subject_summary(%{subject_type: nil, subject_id: id}), do: id || "--"
-  defp subject_summary(%{subject_type: type, subject_id: id}), do: "#{type} #{id}"
+  defp actor_summary(%{actor_type: type, actor_id: id, id: event_id}) do
+    assigns = %{type: type || "Actor", value: to_string(id), id: "event-actor-#{event_id}"}
+
+    ~H"""
+    <span class="ax-timeline-subject">
+      <span><%= @type %></span>
+      <IdBadge.id_badge id={@id} id_value={@value} label={"Copy actor ID " <> @value} />
+    </span>
+    """
+  end
 
   defp source_webhook_summary(%{caused_by_webhook_event_id: nil}),
-    do:
-      Copy.billing_events_webhook_source_direct() <>
-        " - " <> Copy.resource_state_copy(:webhooks, :queue_empty).heading
+    do: Copy.BillingEvent.event_detail_no_linked_webhook()
 
-  defp source_webhook_summary(%{caused_by_webhook_event_id: id}), do: id
+  defp source_webhook_summary(%{caused_by_webhook_event_id: id, id: event_id}),
+    do: copy_id(id, "event-webhook-#{event_id}", "webhook")
 
   defp livemode_summary(%{data: %{"payload" => %{"livemode" => value}}}),
     do: livemode_label(value)
@@ -449,6 +376,16 @@ defmodule AccrueAdmin.Live.EventLive do
   defp livemode_label(true), do: "Live"
   defp livemode_label(false), do: "Test"
   defp livemode_label(_value), do: nil
+
+  defp copy_id(nil, _id, _kind), do: "Unavailable"
+
+  defp copy_id(value, id, kind) do
+    assigns = %{value: to_string(value), id: id, label: "Copy #{kind} ID #{value}"}
+
+    ~H"""
+    <IdBadge.id_badge id={@id} id_value={@value} label={@label} />
+    """
+  end
 
   defp timestamp_value(%DateTime{} = value, id) do
     assigns = %{value: value, id: id}

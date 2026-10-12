@@ -3,7 +3,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   use Phoenix.LiveView
 
-  alias AccrueAdmin.Components.{AppShell, FlashGroup, Icon, PageHeader, Timeline}
+  alias AccrueAdmin.Components.{AppShell, FlashGroup, PageHeader, Timeline}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Events
   alias AccrueAdmin.ScopedPath
@@ -36,37 +36,19 @@ defmodule AccrueAdmin.Live.DashboardLive do
           title={Copy.home_intro_headline()}
         >
           <:description>
-            <p class="ax-body">Review recent audit activity or open a scoped billing record.</p>
+            <p class="ax-body">See what changed in customer billing, and open an event for details.</p>
           </:description>
-          <:actions>
-            <a class="ax-button ax-button-primary ax-button-sm" href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}>
-              Customers <Icon.icon name={:arrow_right} size="sm" />
-            </a>
-            <button
-              type="button"
-              class="ax-button ax-button-secondary ax-button-sm"
-              data-command-palette-trigger="true"
-              data-ax-command-palette-trigger="true"
-            >
-              <%= Copy.home_customer_search_cta() %>
-              <Icon.icon name={:search} size="sm" />
-            </button>
-            <a class="ax-button ax-button-secondary ax-button-sm" href={ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope)}>
-              Subscriptions <Icon.icon name={:arrow_right} size="sm" />
-            </a>
-          </:actions>
         </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
-        <section class="ax-home-section" aria-label="Recent audit activity">
+        <section class="ax-home-section" aria-label="Recent billing activity">
           <header class="ax-section-head">
-            <h2 class="ax-heading">Recent audit activity</h2>
             <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}>View events</a>
           </header>
           <Timeline.timeline
-            label="Recent audit activity"
-            empty_label="No recent audit activity in this scope."
+            label="Recent billing activity"
+            empty_label="No recent billing activity in this scope."
             items={@recent_events}
           />
         </section>
@@ -103,19 +85,15 @@ defmodule AccrueAdmin.Live.DashboardLive do
         title: Copy.billing_event_label(event.type),
         id: event.id,
         at: event.inserted_at,
-        body: event_subject_summary(event),
-        status: event.actor_type,
+        subject_type: event.subject_type,
+        subject_id: event.subject_id,
+        actor: event.actor_type,
+        actor_id: event.actor_id,
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate),
-        meta: "Audit event",
         href: ScopedPath.build(mount_path, "/events/#{event.id}", owner_scope),
         href_label: "Open event"
       }
     end)
-  end
-
-  defp event_subject_summary(%{subject_type: subject_type, subject_id: subject_id}) do
-    subject = if subject_type, do: to_string(subject_type), else: "Record"
-    if subject_id, do: "#{subject} · #{subject_id}", else: "#{subject} without linked record"
   end
 
   defp flash_messages(flash) do

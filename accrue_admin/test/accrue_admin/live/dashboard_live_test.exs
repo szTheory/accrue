@@ -98,10 +98,13 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # Home presents observable activity and scope-matched destinations only.
     assert html =~ "ax-display"
-    assert html =~ "Recent audit activity"
+    assert html =~ "Recent billing activity"
     assert html =~ "Customer updated"
-    assert html =~ "data-ax-command-palette-trigger"
-    assert html =~ Copy.home_customer_search_cta()
+    refute html =~ "data-ax-command-palette-trigger"
+    refute html =~ Copy.home_customer_search_cta()
+    refute html =~ "Audit event"
+    assert html =~ "Customer ID"
+    assert html =~ "data-clipboard-text"
     assert html =~ "Open event"
     assert html =~ "View events"
 
@@ -157,7 +160,9 @@ defmodule AccrueAdmin.DashboardLiveTest do
              ~r/href="\/billing\?org=home-org"[^>]*class="ax-sidebar-link ax-sidebar-link-active"/
   end
 
-  test "organization Home keeps the activity empty state distinct from scoped destinations", %{conn: conn} do
+  test "organization Home keeps the activity empty state distinct from scoped destinations", %{
+    conn: conn
+  } do
     org_id = Ecto.UUID.generate()
 
     conn =
@@ -170,7 +175,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing?org=empty-home-org")
 
-    assert html =~ "No recent audit activity in this scope."
+    assert html =~ "No recent billing activity in this scope."
     assert html =~ ~s(href="/billing/events?org=empty-home-org")
     refute html =~ "Open event"
     refute html =~ "Customer updated"

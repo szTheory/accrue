@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Components.JsonViewer do
   attr(:payload, :any, required: true)
   attr(:active_tab, :string, default: "tree")
   attr(:label, :string, default: "Payload")
+  attr(:show_heading, :boolean, default: true)
   attr(:max_depth, :integer, default: 8)
 
   def json_viewer(assigns) do
@@ -30,7 +31,7 @@ defmodule AccrueAdmin.Components.JsonViewer do
     >
       <header class="ax-json-viewer-header">
         <div>
-          <h3 id={@id <> "-title"} class="ax-heading"><%= @label %></h3>
+          <h3 id={@id <> "-title"} class={if(@show_heading, do: "ax-heading", else: "ax-visually-hidden")}><%= @label %></h3>
         </div>
 
         <nav class="ax-tabs" role="tablist" aria-label="Payload views" data-json-tabs>
@@ -183,6 +184,7 @@ defmodule AccrueAdmin.Components.JsonViewer do
   end
 
   defp normalize_payload(value) when is_list(value), do: Enum.map(value, &normalize_payload/1)
+  defp normalize_payload(value) when value in [nil, true, false], do: value
   defp normalize_payload(value) when is_atom(value), do: Atom.to_string(value)
   defp normalize_payload(value), do: value
 end
