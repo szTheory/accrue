@@ -150,7 +150,8 @@ ordinaryTest("@phase248-ordinary @phase248-heldout ordinary Fake invoice action 
       await action.click();
       const review = page.locator("[data-ax-action-drawer-form]:visible").first();
       await expect(review, "review is visible before confirmation and no action is submitted").toBeVisible();
-      route = new URL(page.url()).pathname;
+      const currentUrl = new URL(page.url());
+      route = `${currentUrl.pathname}${currentUrl.search}`;
       const assets = await servedAssets(page);
       await captureState(page, {
         lane: "ordinary", scenario: "ordinary-invoice-review", route, assets,
@@ -186,7 +187,7 @@ heldoutTest("@phase248-heldout @phase248-empty dedicated empty subscriptions sce
   }).trim();
   const countMatches = [...rawCount.matchAll(/__PHASE248_SCOPED_COUNT__=(\d+)/g)].map((match) => match[1]);
   expect(countMatches, "the scoped record-count query returned one unambiguous machine-readable result").toEqual(["0"]);
-  const route = `/admin/subscriptions?org=${encodeURIComponent(fixture.admin_org_beta_slug)}`;
+  const route = `/admin/subscriptions?org=${encodeURIComponent(fixture.admin_org_beta_slug)}&view=all`;
   await page.goto(route);
   await waitForLiveView(page);
   const table = page.locator('[data-role="data-table"]');
@@ -195,8 +196,8 @@ heldoutTest("@phase248-heldout @phase248-empty dedicated empty subscriptions sce
   await expect(page.locator("body")).not.toContainText(/access denied|unauthorized|internal server error/i);
   const assets = await servedAssets(page);
   await captureState(page, {
-    lane: "heldout", scenario: "empty-subscriptions", route: new URL(route, page.url()).pathname,
-    assets, checks: { state: "genuinely-empty", underlying_scoped_record_count: 0, unfiltered: true, owner_scope: fixture.admin_org_beta_slug },
+    lane: "heldout", scenario: "empty-subscriptions", route: `${new URL(route, page.url()).pathname}${new URL(route, page.url()).search}`,
+    assets, checks: { state: "genuinely-empty", underlying_scoped_record_count: 0, unfiltered: new URL(page.url()).searchParams.get("view") === "all", owner_scope: fixture.admin_org_beta_slug },
     matrix: [
       { width: 1280, height: 900, size: "wide", theme: "light" },
       { width: 320, height: 820, size: "narrow", theme: "dark" }
@@ -220,7 +221,7 @@ heldoutTest("@phase248-heldout @phase248-failure scoped discarded webhook render
   const assets = await servedAssets(page);
   const actualStatus = (await status.innerText()).trim();
   await captureState(page, {
-    lane: "heldout", scenario: "failed-webhook", route: new URL(page.url()).pathname,
+    lane: "heldout", scenario: "failed-webhook", route: `${new URL(page.url()).pathname}${new URL(page.url()).search}`,
     assets, checks: { state: "observed-webhook-failure", observed_status: actualStatus, owner_scope: fixture.admin_org_alpha_slug, supported_next_step_visible: true, action_submitted: false },
     matrix: [
       { width: 1280, height: 900, size: "wide", theme: "dark" },
@@ -243,14 +244,15 @@ heldoutTest("@phase248-heldout @phase248-boundary existing long-name Unicode cus
   expect(new URL(href, page.url()).pathname).toMatch(/^\/admin\/customers\/[0-9a-f-]+$/i);
   await page.goto(href);
   await waitForLiveView(page);
-  await expect(page.getByText(target, { exact: true })).toBeVisible();
+  await expect(row.getByText(target, { exact: true })).toBeVisible();
+  await expect(row.getByText(/E2E Edge LongName/)).toBeVisible();
   const longName = page.getByText(/E2E Edge LongName/).first();
   await expect(longName).toBeVisible();
   await page.setViewportSize({ width: 320, height: 820 });
   const narrow = await noPageOverflow(page);
   const assets = await servedAssets(page);
   await captureState(page, {
-    lane: "heldout", scenario: "long-name-boundary", route: new URL(page.url()).pathname,
+    lane: "heldout", scenario: "long-name-boundary", route: `${new URL(page.url()).pathname}${new URL(page.url()).search}`,
     assets, checks: { state: "long-name-unicode-boundary", exact_identity_accessible: true, narrow_page_dimensions: narrow },
     matrix: [
       { width: 1280, height: 900, size: "wide", theme: "dark" },

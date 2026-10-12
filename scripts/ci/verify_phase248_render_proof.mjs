@@ -7,10 +7,10 @@ import { fileURLToPath } from "node:url";
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const definitions = new Map([
-  ["ordinary-invoice-review", { lane: "ordinary", route: /^\/admin\/invoices\/[0-9a-f-]+$/i, sizes: ["1280x900:light", "320x820:dark"] }],
-  ["empty-subscriptions", { lane: "heldout", route: "/admin/subscriptions", sizes: ["1280x900:light", "320x820:dark"] }],
-  ["failed-webhook", { lane: "heldout", route: /^\/admin\/webhooks\/[0-9a-f-]+$/i, sizes: ["1280x900:dark", "320x820:light"] }],
-  ["long-name-boundary", { lane: "heldout", route: /^\/admin\/customers\/[0-9a-f-]+$/i, sizes: ["1280x900:dark", "320x820:light"] }]
+  ["ordinary-invoice-review", { lane: "ordinary", route: /^\/admin\/invoices\/[0-9a-f-]+$/i, query: {}, sizes: ["1280x900:light", "320x820:dark"] }],
+  ["empty-subscriptions", { lane: "heldout", route: "/admin/subscriptions", query: { org: "accrue-e2e-beta", view: "all" }, sizes: ["1280x900:light", "320x820:dark"] }],
+  ["failed-webhook", { lane: "heldout", route: /^\/admin\/webhooks\/[0-9a-f-]+$/i, query: { org: "accrue-e2e-alpha" }, sizes: ["1280x900:dark", "320x820:light"] }],
+  ["long-name-boundary", { lane: "heldout", route: /^\/admin\/customers\/[0-9a-f-]+$/i, query: { return_to: "/admin/customers" }, sizes: ["1280x900:dark", "320x820:light"] }]
 ]);
 const harnessOnly = new Set([
   "examples/accrue_host/e2e/phase248-scenarios.spec.js",
@@ -84,7 +84,11 @@ for (const capture of captures) {
   const scenario = capture.scenario;
   const definition = definitions.get(scenario);
   check(definition && definition.lane === capture.origin_lane, `unknown scenario/lane: ${capture.origin_lane}/${scenario}`);
-  check(typeof definition.route === "string" ? capture.route === definition.route : definition.route.test(capture.route), `route does not match scenario ${scenario}: ${capture.route}`);
+  const actualRoute = new URL(capture.route, "http://phase248.invalid");
+  check(typeof definition.route === "string" ? actualRoute.pathname === definition.route : definition.route.test(actualRoute.pathname), `route does not match scenario ${scenario}: ${capture.route}`);
+  const actualQuery = [...actualRoute.searchParams.entries()].sort(([left], [right]) => left.localeCompare(right));
+  const expectedQuery = Object.entries(definition.query).sort(([left], [right]) => left.localeCompare(right));
+  check(JSON.stringify(actualQuery) === JSON.stringify(expectedQuery), `route query does not match scenario ${scenario}: ${capture.route}`);
   const viewport = capture.viewport;
   const viewportKey = `${viewport?.width}x${viewport?.height}`;
   const matrixKey = `${viewportKey}:${capture.theme}`;
@@ -98,7 +102,7 @@ for (const capture of captures) {
   check(capture.inspection_status === "inspected" && capture.inspection_by === "Impeccable visual inspection" && capture.inspected_at && capture.inspection_notes, `capture lacks documented full-size visual inspection: ${capture.file}`);
   check(capture.state === capture.checks?.state && capture.evidence_at && Object.keys(capture.checks).length > 0, `capture lacks state checks: ${capture.file}`);
   if (scenario === "empty-subscriptions") {
-    check(capture.route === "/admin/subscriptions" && capture.checks.underlying_scoped_record_count === 0 && capture.checks.unfiltered === true, "empty state is not proved as a genuine unfiltered zero-record collection");
+    check(actualRoute.pathname === "/admin/subscriptions" && capture.checks.underlying_scoped_record_count === 0 && capture.checks.unfiltered === true && capture.checks.owner_scope === definition.query.org, "empty state is not proved as a genuine unfiltered zero-record collection in the selected owner scope");
   }
   if (scenario === "failed-webhook") check(/dead|discarded|failed/i.test(capture.checks.observed_status || "") && capture.checks.action_submitted === false && typeof capture.checks.owner_scope === "string" && capture.checks.owner_scope.length > 0, "failure capture lacks owner scope, overstates, or submits the observed failure action");
   if (scenario === "long-name-boundary") check(capture.checks.exact_identity_accessible === true && capture.checks.narrow_page_dimensions?.scroll <= 320, "long-name boundary is missing its exact-identity or overflow assertion");
