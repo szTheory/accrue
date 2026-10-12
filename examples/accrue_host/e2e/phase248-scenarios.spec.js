@@ -94,7 +94,10 @@ async function captureState(page, { lane, scenario, route, assets, checks, matri
     await setTheme(page, theme);
     await page.mouse.move(width - 1, height - 1);
     const file = `${lane}-${scenario}-${size}-${theme}.png`;
-    const bytes = await page.screenshot({ path: path.join(captureDir, file), fullPage: true, animations: "disabled" });
+    // Keep the evidence framed to the actual review viewport. Full-page captures
+    // extend beyond fixed drawers/bottom sheets and show page content that was
+    // not visible beside the active confirmation review.
+    const bytes = await page.screenshot({ path: path.join(captureDir, file), fullPage: false, animations: "disabled" });
     captures.push({
       file, origin_lane: lane, scenario, route,
       state: checks.state,
@@ -104,7 +107,7 @@ async function captureState(page, { lane, scenario, route, assets, checks, matri
       source_sha: sourceSha(),
       source_digests: sourceDigests(),
       browser: { name: "chromium", version: page.context().browser()?.version() },
-      capture_mode: "full_page",
+      capture_mode: "viewport",
       assets,
       checks,
       evidence_at: new Date().toISOString(),

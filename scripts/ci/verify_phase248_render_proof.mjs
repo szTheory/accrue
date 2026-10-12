@@ -93,7 +93,7 @@ for (const capture of captures) {
   seen.add(rowKey);
   seenScenarios.add(scenario);
   check(capture.file === `${capture.origin_lane}-${scenario}-${viewport.width === 1280 ? "wide" : "narrow"}-${capture.theme}.png`, `capture filename does not match its matrix row: ${capture.file}`);
-  check(capture.capture_mode === "full_page", `capture is not full-page: ${capture.file}`);
+  check(capture.capture_mode === "viewport", `capture is not framed to its actual viewport: ${capture.file}`);
   check(capture.inspection_status === "inspected" && capture.inspection_by === "Impeccable visual inspection" && capture.inspected_at && capture.inspection_notes, `capture lacks documented full-size visual inspection: ${capture.file}`);
   check(capture.state === capture.checks?.state && capture.evidence_at && Object.keys(capture.checks).length > 0, `capture lacks state checks: ${capture.file}`);
   if (scenario === "empty-subscriptions") {
@@ -108,7 +108,7 @@ for (const capture of captures) {
   check(hash(bytes) === capture.screenshot?.sha256 && bytes.length === capture.screenshot?.bytes, `image hash/size mismatch: ${capture.file}`);
   check(bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])), `image is not PNG: ${capture.file}`);
   check(bytes.readUInt32BE(16) === viewport.width && capture.screenshot_dimensions?.width === viewport.width, `PNG viewport width mismatch: ${capture.file}`);
-  check(bytes.readUInt32BE(20) === capture.screenshot_dimensions?.height && capture.screenshot_dimensions.height >= viewport.height, `PNG full-page height mismatch: ${capture.file}`);
+  check(bytes.readUInt32BE(20) === capture.screenshot_dimensions?.height && capture.screenshot_dimensions.height === viewport.height, `PNG viewport height mismatch: ${capture.file}`);
   for (const kind of ["css", "js"]) {
     const asset = capture.assets?.[kind];
     check(asset && /^[a-f0-9]{64}$/.test(asset.sha256 || "") && Number.isInteger(asset.bytes) && asset.bytes > 0, `missing or invalid served ${kind} evidence`);
