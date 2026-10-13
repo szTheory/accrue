@@ -13,8 +13,8 @@ defmodule AccrueAdmin.Copy.BillingEventTest do
   end
 
   test "events KPI labels" do
-    assert Copy.billing_events_kpi_label_ledger_rows() == "Ledger rows"
-    assert Copy.billing_events_kpi_label_webhook_sourced() == "Webhook sourced"
+    assert Copy.billing_events_kpi_label_ledger_rows() == "Events"
+    assert Copy.billing_events_kpi_label_webhook_sourced() == "Linked webhooks"
   end
 
   test "events filter toolbar CTA" do
@@ -22,7 +22,7 @@ defmodule AccrueAdmin.Copy.BillingEventTest do
   end
 
   test "billing events remain distinct from webhook deliveries" do
-    assert Copy.events_list_heading() == "Trace billing activity"
+    assert Copy.events_list_heading() == "Billing events"
     assert Copy.events_list_result_label_pair() == {"event", "events"}
     assert Copy.webhooks_list_result_label_pair() == {"webhook delivery", "webhook deliveries"}
     assert Copy.webhooks_retry_cancel_label() == "Keep deliveries"

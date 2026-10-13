@@ -112,7 +112,6 @@ defmodule AccrueAdmin.Live.ChargesLive do
               <:stat
                 label="Fees settled"
                 value={Integer.to_string(@summary.fees_settled_count)}
-                tone="cobalt"
               />
               <:stat label="Refunded" value={Integer.to_string(@summary.refunded_count)} />
             </StatStrip.stat_strip>
@@ -124,7 +123,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
               filter_fields={payment_filter_fields()}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
+              clear_href={@table_path}
               clear_visible={filter_active?(@params)}
             />
           </:filter_toolbar>
@@ -134,6 +133,8 @@ defmodule AccrueAdmin.Live.ChargesLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.payments_list_result_label_pair()}
+          show_row_count={false}
           id="payments"
           query_module={Charges}
           current_owner_scope={@current_owner_scope}
@@ -145,7 +146,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
             %{label: "Payment", render: &payment_identity_cell(&1, @admin_mount_path, @current_owner_scope, :table)},
             %{label: "Status", render: &status_summary/1},
@@ -161,6 +162,8 @@ defmodule AccrueAdmin.Live.ChargesLive do
             %{label: Copy.billing_owner_tax_label(), render: &billing_signals_cell/1}
           ]}
           filter_fields={payment_filter_fields()}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.payments_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -168,11 +171,11 @@ defmodule AccrueAdmin.Live.ChargesLive do
         >
           <:list_status :let={status}>
             <FilterChipBar.filter_chip_bar
+              compact={true}
               items={work_queue_chips(@params, @table_path)}
               label="Payment view"
               result_count={status.visible_count}
               result_label={Copy.payments_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -265,7 +268,6 @@ defmodule AccrueAdmin.Live.ChargesLive do
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
 
     assigns = %{
-      __changed__: %{},
       payment_href: payment_href,
       customer_href: customer_href,
       customer_label: customer_label(row),
@@ -277,7 +279,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
     <DataTable.identity_cell>
       <:primary><.link href={@payment_href} class="ax-link"><%= @customer_label %></.link></:primary>
       <:secondary>
-        <IdBadge.id_badge id={@badge_id} id_value={@payment_id} label="Copy payment ID" />
+        <IdBadge.id_badge id={@badge_id} id_value={@payment_id} label="Copy payment ID" copy_label="payment ID" variant="plain" />
         <.link href={@customer_href} class="ax-label ax-muted">Customer details</.link>
       </:secondary>
     </DataTable.identity_cell>
@@ -431,10 +433,6 @@ defmodule AccrueAdmin.Live.ChargesLive do
   end
 
   defp filter_active?(params), do: filter_params(params) != %{}
-
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
 
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil

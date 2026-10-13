@@ -98,6 +98,23 @@ defmodule AccrueAdmin.CouponsLiveTest do
     assert length(Floki.find(card, "[data-clipboard-text]")) == 1
   end
 
+  test "filter patches keep the coupon name, ID, and detail link in agreement", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/coupons?view=all")
+    html = render_patch(view, "/billing/coupons?q=Spring&valid=true")
+    document = Floki.parse_document!(html)
+    [row] = Floki.find(document, "tr[data-row-id]")
+    [record_id] = Floki.attribute(row, "data-row-id")
+    assert row |> Floki.find(".ax-data-table-identity-primary") |> Floki.text() == "Spring 25"
+
+    assert row |> Floki.find("[data-clipboard-text]") |> Floki.attribute("data-clipboard-text") ==
+             ["coupon_spring"]
+
+    [href] = row |> Floki.find(".ax-data-table-identity-primary a") |> Floki.attribute("href")
+    assert href =~ "/coupons/#{record_id}?"
+    assert href =~ URI.encode_www_form("/billing/coupons?q=Spring&valid=true")
+  end
+
   test "coupon detail links retain the validated query and validity lens", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
@@ -170,7 +187,7 @@ defmodule AccrueAdmin.CouponsLiveTest do
     assert Floki.attribute(all, "checked") != []
   end
 
-  test "coupon clear-all routes to All while preserving organization scope", %{conn: conn} do
+  test "coupon reset restores its default view while preserving organization scope", %{conn: conn} do
     org_id = Ecto.UUID.generate()
 
     conn =
@@ -186,7 +203,12 @@ defmodule AccrueAdmin.CouponsLiveTest do
              live(conn, "/billing/coupons?org=allowed-org&valid=true&q=Spring")
 
     assert html =~ ~s(data-ax-clear-all)
-    assert html =~ ~s(href="/billing/coupons?org=allowed-org&amp;view=all")
+    document = Floki.parse_document!(html)
+
+    assert Floki.attribute(Floki.find(document, "[data-ax-clear-all]"), "href") == [
+             "/billing/coupons?org=allowed-org"
+           ]
+
     refute html =~ "valid=true"
     refute html =~ "q=Spring"
   end

@@ -178,18 +178,18 @@ defmodule AccrueAdmin.ListContracts do
       owner: AccrueAdmin.EventsLiveTest,
       live_view: AccrueAdmin.EventsLive,
       list_id: "events",
-      default_lens: %{label: "All ledger", params: %{"view" => "all"}},
+      default_lens: %{label: "All events", params: %{"view" => "all"}},
       all_target: %{"view" => "all"},
-      quick_lenses: [%{label: "Admin changes", params: %{"actor_type" => "admin"}}],
+      quick_lenses: [%{label: "Admin actions", params: %{"actor_type" => "admin"}}],
       result_label: {"event", "events"},
       page_header: %{
-        title: "Trace billing activity",
+        title: "Billing events",
         description_key: :billing_events_copy_global
       },
       states: %{
         first_run_empty: "No billing events yet.",
         queue_empty: nil,
-        filtered_empty: "No ledger rows match these filters.",
+        filtered_empty: "No events match these filters.",
         loading: "Loading billing events."
       },
       clear_all_on_default?: false

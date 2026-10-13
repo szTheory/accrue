@@ -65,7 +65,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
         })
 
       # Component must render without raising
-      assert html =~ "Choose a customer, invoice, or subscription"
+      assert html =~ "Browse billing records"
 
       # All four shortcut links should fall back to "#"
       assert html =~ ~s(data-path="#")
@@ -385,7 +385,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
           loading: false
         })
 
-      assert html =~ "Search billing records across customers, invoices, and subscriptions"
+      assert html =~ "Search by name, email, invoice number, or ID."
       refute html =~ "Customers: name, email, owner ID, processor ID"
       refute html =~ "Up to five results per group"
       refute html =~ "Type customer name, email, or ID"
@@ -403,7 +403,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
           loading: false
         })
 
-      assert html =~ "Choose a customer, invoice, or subscription"
+      assert html =~ "Browse billing records"
       refute html =~ "Open a scoped list"
       refute html =~ "Up to five results per group"
       assert html =~ "Navigate"

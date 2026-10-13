@@ -114,12 +114,10 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
               <:stat
                 label={Copy.promotion_codes_kpi_label_active()}
                 value={Integer.to_string(@summary.active_count)}
-                tone="amber"
               />
               <:stat
                 label={Copy.promotion_codes_kpi_label_expiring()}
                 value={Integer.to_string(@summary.expiring_count)}
-                tone="cobalt"
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -130,7 +128,7 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
               filter_fields={promotion_code_filter_fields()}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
+              clear_href={@table_path}
               clear_visible={filter_active?(@params)}
             />
           </:filter_toolbar>
@@ -140,6 +138,8 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.promotion_codes_list_result_label_pair()}
+          show_row_count={false}
           id="promotion-codes"
           query_module={PromotionCodes}
           current_owner_scope={@current_owner_scope}
@@ -151,7 +151,7 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
             %{label: Copy.promotion_codes_table_column_code(), render: &promotion_code_link(&1, @admin_mount_path, @current_owner_scope, @params, :table)},
             %{label: Copy.promotion_codes_table_column_status(), render: &status_summary(&1, :table)},
@@ -167,6 +167,8 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
             %{label: Copy.promotion_codes_table_column_redemptions(), render: &redemption_summary/1}
           ]}
           filter_fields={promotion_code_filter_fields()}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.promotion_codes_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -174,11 +176,11 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
         >
           <:list_status :let={status}>
             <FilterChipBar.filter_chip_bar
+              compact={true}
               items={promotion_code_lens_chips(@params, @table_path)}
               label="Promotion code view"
               result_count={status.visible_count}
               result_label={Copy.promotion_codes_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -239,7 +241,6 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
       })
 
     assigns = %{
-      __changed__: %{},
       href: href,
       label: label,
       badge_id: "ax-id-badge-promotion-code-#{surface}-#{row.id}",
@@ -249,7 +250,7 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     ~H"""
     <DataTable.identity_cell>
       <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
-      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy promotion code ID" /></:secondary>
+      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy promotion code ID" copy_label="promotion code ID" variant="plain" /></:secondary>
     </DataTable.identity_cell>
     """
   end
@@ -281,18 +282,6 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
 
   defp coupon_label(%{coupon_name: nil, coupon_id: coupon_id}), do: coupon_id
   defp coupon_label(%{coupon_name: coupon_name}), do: coupon_name
-
-  defp status_summary(%{active: true, expires_at: %DateTime{} = expires_at} = row, surface) do
-    assigns = %{
-      value: expires_at,
-      id: "promotion-code-row-status-expires-#{surface}-#{row.id}",
-      prefix: Copy.promotion_codes_status_active_expires_separator()
-    }
-
-    ~H"""
-    <span><%= @prefix %> <Timestamp.timestamp value={@value} id={@id} /></span>
-    """
-  end
 
   defp status_summary(%{active: true}, _surface), do: Copy.promotion_codes_status_active()
   defp status_summary(%{active: false}, _surface), do: Copy.promotion_codes_status_inactive()
@@ -407,10 +396,6 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
   end
 
   defp filter_active?(params), do: filter_params(params) != %{}
-
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
 
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil

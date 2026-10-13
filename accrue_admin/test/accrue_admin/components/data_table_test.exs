@@ -170,6 +170,7 @@ defmodule AccrueAdmin.DataTableTest do
        )
        |> Phoenix.Component.assign(:poll_interval_ms, Map.get(session, "poll_interval_ms", 5_000))
        |> Phoenix.Component.assign(:table_caption, Map.get(session, "table_caption"))
+       |> Phoenix.Component.assign(:dom_limit, Map.get(session, "dom_limit", 4))
        |> Phoenix.Component.assign(:test_pid, Map.get(session, "test_pid"))}
     end
 
@@ -189,7 +190,7 @@ defmodule AccrueAdmin.DataTableTest do
         clear_filters_patch={@clear_filters_patch}
         render_filter_toolbar={@render_filter_toolbar}
         limit={2}
-        dom_limit={4}
+        dom_limit={@dom_limit}
         poll_interval_ms={@poll_interval_ms}
         selectable={true}
         bulk_action_label="Retry selected"
@@ -624,6 +625,7 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ ~s(data-role="clear-filters")
     assert html =~ ~s(data-phx-link="patch")
     assert html =~ "Clear filters"
+
     assert html =~
              ~r/class="ax-empty-content"[^>]*>.*No fixtures match these filters.*Adjust the filters above\..*Clear filters.*<\/div>/s
   end
@@ -746,7 +748,7 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ "alpha"
     refute html =~ "do-not-render"
     assert html =~ ~s(aria-label="Select Newest open")
-    assert html =~ "Clear filters"
+    assert html =~ "Reset filters"
     assert html =~ ~s(aria-label="Select visible fixture rows")
 
     html = render_click(element(view, "[data-role='toggle-all']"))
@@ -852,7 +854,7 @@ defmodule AccrueAdmin.DataTableTest do
       assert html =~ ~s(data-phx-link="patch")
     end
 
-    test "renders a viewport-bottom sentinel only while a next cursor exists under dom_limit", %{
+    test "renders an observable boundary only while a next cursor exists under dom_limit", %{
       conn: conn
     } do
       # 5 rows, limit 2, dom_limit 4 → next_cursor present and rows (2) < dom_limit.
@@ -860,7 +862,10 @@ defmodule AccrueAdmin.DataTableTest do
         live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
 
       assert html =~ ~s(data-role="viewport-sentinel")
-      assert html =~ "phx-viewport-bottom"
+      assert html =~ ~s(phx-hook="Pagination")
+      assert html =~ ~s(id="fixtures-scroll-container")
+      assert html =~ "data-pagination-target"
+
       # Load more button remains for a11y / no-JS / past-cap loading.
       assert html =~ ~s(data-role="load-more")
 
@@ -889,6 +894,20 @@ defmodule AccrueAdmin.DataTableTest do
       # Parent-targeted: the event lands on TableLive's handle_event, not the component.
       assert_receive {:data_table_filter_received, %{"q" => "closed", "status" => "closed"}}
     end
+  end
+
+  test "an explicitly unbounded history keeps every loaded row beyond the default cap", %{
+    conn: conn
+  } do
+    {:ok, view, _html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{}, "dom_limit" => :infinity})
+
+    render_click(element(view, "[data-role='load-more']"))
+    html = render_click(element(view, "[data-role='load-more']"))
+    rows = Floki.find(Floki.parse_fragment!(html), "tr[data-row-id]")
+    assert length(rows) == 5
+    assert length(Enum.uniq(Floki.attribute(rows, "data-row-id"))) == 5
+    refute html =~ ~s(data-role="load-more")
   end
 
   # ─── Nyquist structural guards (Phase 176-06) ───────────────────────────────

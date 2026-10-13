@@ -286,8 +286,8 @@ defmodule AccrueAdmin.CopyTest do
       %{
         heading: Copy.events_list_heading(),
         subtitle: Copy.events_list_subtitle(),
-        expected_heading: "Trace billing activity",
-        expected_subtitle: "Read the append-only billing event ledger.",
+        expected_heading: "Billing events",
+        expected_subtitle: "Find what changed, when it happened, and how it was recorded.",
         states: [
           Copy.events_list_first_run_empty_title(),
           Copy.events_list_filtered_empty_title(),

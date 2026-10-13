@@ -36,6 +36,7 @@ defmodule AccrueAdmin.DisplayComponentsTest do
 
     document = Floki.parse_document!(html)
     [copied] = Floki.attribute(document, "#typed-payload-copy", "data-clipboard-text")
+    assert Floki.attribute(document, "#typed-payload-copy", "data-clipboard-label") == ["payload"]
     assert Jason.decode!(copied) == payload
 
     assert Floki.text(Floki.find(document, "#typed-payload-raw-panel")) |> Jason.decode!() ==
@@ -402,6 +403,8 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert document |> Floki.find(".ax-timeline-link") == []
       assert html =~ "Copy Subscription ID sub_42"
       assert html =~ ~s(data-clipboard-text="sub_42")
+      assert html =~ ~s(data-clipboard-label="subscription ID")
+      assert html =~ ~s(data-clipboard-label="customer ID")
     end
 
     test "event-family icons replace dots while generic timelines keep their existing markers" do

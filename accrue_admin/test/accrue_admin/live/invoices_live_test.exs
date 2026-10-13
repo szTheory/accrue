@@ -577,7 +577,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
 
     assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-clear-all]")) == 1
 
-    assert length(Floki.find(document, "[data-role='clear-filters']")) == 0
+    assert length(Floki.find(document, "[data-role='clear-filters']")) == 1
 
     assert length(Floki.find(document, "[data-ax-result-count]")) == 1
     assert length(Floki.find(document, "[data-role='row-count']")) == 0
@@ -651,7 +651,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
       |> Floki.attribute("href")
       |> hd()
 
-    assert clear_href == "/billing/invoices?org=allowed-org&status=open%2Cuncollectible"
+    assert clear_href == "/billing/invoices?org=allowed-org"
   end
 
   test "distinguishes invoice populated, first-run-empty, filtered-empty, queue-empty, and loading states",
@@ -728,7 +728,8 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert loading_html =~ contract.states.loading
   end
 
-  test "prioritizes invoice identity, state, money, due date, collection, and ownership columns", %{conn: conn} do
+  test "prioritizes invoice identity, state, money, due date, collection, and ownership columns",
+       %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")

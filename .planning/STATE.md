@@ -4,9 +4,9 @@ milestone: v1.66
 milestone_name: Admin Usability and Visual Consistency
 status: Awaiting next milestone
 stopped_at: v1.66 archived; awaiting next milestone
-last_updated: "2026-10-12T12:53:25.812Z"
-last_activity: 2026-10-12
-last_activity_desc: Milestone v1.66 completed and archived
+last_updated: "2026-10-13T15:49:06Z"
+last_activity: 2026-10-13
+last_activity_desc: Inline admin owner feedback implemented and verified; v1.66 remains archived
 state_head: 2b3d58fdc7474c948c022a9d24f6999417c34272
 progress:
   total_phases: 4
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Planning next milestone
+**Current focus:** Inline owner-feedback refinements verified; awaiting next milestone
 **Progress:** [██████████] 100%
 **Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 Phase: Milestone v1.66 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-10-12 — Milestone v1.66 completed and archived
+Last activity: 2026-10-13 — Inline admin owner feedback implemented and verified. Receipt: `.planning/notes/2026-10-13-admin-owner-feedback.md`. No new milestone or phase initialized; v1.66 remains archived.
 
 ## Performance Metrics
 

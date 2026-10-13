@@ -952,7 +952,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 
 .ax-topbar-actions {
   align-items: center;
-  gap: 0.375rem;
+  gap: var(--ax-space-sm);
 }
 
 .ax-icon-button {
@@ -969,6 +969,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
    subtle Cobalt accent ring. Icon + label per segment; labels collapse to
    icon-only on narrow viewports (the accessible name survives via aria-label). */
 .ax-theme-picker {
+  box-sizing: border-box;
+  min-block-size: 44px;
   display: inline-flex;
   align-items: center;
   gap: 2px; /* ax-spacing-exception: segmented-control internal thumb gap — sub-token precision spacing for the raised-thumb segmented UI */
@@ -979,6 +981,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 }
 
 .ax-theme-picker-option {
+  box-sizing: border-box;
+  min-block-size: 36px;
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-xs);
@@ -987,6 +991,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
   border-radius: calc(var(--ax-radius-md) - 3px);
   background: transparent;
   color: var(--ax-muted);
+  font: var(--ax-type-label-font);
+  font-weight: 500; /* ax-type-exception: shared header utility weight */
   cursor: pointer;
   transition: var(--ax-transition-colors);
 }
@@ -1305,7 +1311,7 @@ a.ax-kpi-card--linked:focus-visible {
   min-block-size: 2.75rem;
   margin: -0.5rem -0.5rem -0.5rem 0;
   border-radius: 999px;
-  text-decoration: underline;
+  text-decoration: none;
   text-underline-offset: 0.15em;
 }
 
@@ -1321,7 +1327,11 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-accent-readable);
   font: var(--ax-type-label-font);
   cursor: pointer;
+  gap: var(--ax-space-sm);
 }
+
+.ax-data-table-filter-disclosure[open] .ax-filter-disclosure-chevron { transform: rotate(180deg); }
+.ax-data-table-scroll-boundary { display: block; min-block-size: 1px; min-inline-size: 1px; }
 
 .ax-data-table-filter-secondary {
   display: flex;
@@ -1460,9 +1470,8 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-stat-value {
   /* ax-type-exception: component-local metric-value type, documented until migrated to a composed role utility in markup. */
   margin: 0;
-  font-size: var(--ax-type-md);
+  font: var(--ax-type-label-font);
   font-weight: 600;
-  line-height: var(--ax-leading-tight);
   color: var(--ax-primary);
   font-variant-numeric: tabular-nums;
 }
@@ -3543,6 +3552,19 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   gap: var(--ax-space-xs);
 }
 
+.ax-data-table-filter {
+  display: grid;
+  gap: var(--ax-space-xs);
+  align-content: start;
+}
+
+.ax-data-table-filter > .ax-label { margin: 0; }
+
+.ax-data-table-filter .ax-segmented {
+  box-sizing: border-box;
+  min-block-size: 44px;
+}
+
 .ax-data-table-filter-grow {
   flex: 0 1 auto;
   min-width: 12rem;
@@ -3651,7 +3673,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   .ax-data-table-filters {
     flex-direction: row;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-end;
     gap: var(--ax-space-md);
   }
 
@@ -3920,6 +3942,8 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   text-align: left;
   vertical-align: top;
 }
+
+.ax-data-table-grid tbody tr:last-child td { border-bottom: 0; }
 
 .ax-page-header-compact .ax-data-table-filters {
   gap: var(--ax-space-sm);
@@ -4429,11 +4453,12 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 .ax-command-palette-input {
+  min-width: 0;
   min-height: 2.75rem;
   border: 0;
   background: transparent;
   color: var(--ax-primary);
-  font: inherit;
+  font: var(--ax-type-body-font);
   outline: none;
 }
 
@@ -4444,6 +4469,15 @@ details[open].ax-dropdown .ax-dropdown-panel {
   overscroll-behavior: contain;
   padding: 0 var(--ax-space-md) var(--ax-space-md);
 }
+
+.ax-command-palette-help {
+  margin: 0;
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  font: var(--ax-type-body-sm-font);
+  color: var(--ax-muted);
+}
+
+.ax-command-palette-orientation { margin: 0; font: var(--ax-type-body-sm-font); }
 
 .ax-command-palette-empty,
 .ax-command-palette-results,
@@ -4461,8 +4495,12 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 .ax-command-palette-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  box-sizing: border-box;
   min-height: 2.75rem;
-  padding: 0.75rem 0.875rem;
+  padding: var(--ax-space-sm) var(--ax-space-md);
   border: 1px solid transparent;
   border-radius: var(--ax-radius-md);
   color: var(--ax-primary);
@@ -5158,8 +5196,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--ax-space-md); padding: var(--ax-space-2xl) var(--ax-space-lg); }
 .ax-empty-content { display: grid; justify-items: center; gap: var(--ax-space-sm); min-width: 0; }
 .ax-empty-icon { color: var(--ax-muted); }
-.ax-empty-title { font: var(--ax-type-title-font); color: var(--ax-primary); }
-.ax-empty-copy { font: var(--ax-type-body-sm-font); color: var(--ax-muted); max-width: 28rem; }
+.ax-empty-title { margin: 0; font: var(--ax-type-title-font); color: var(--ax-primary); }
+.ax-empty-copy { margin: 0; font: var(--ax-type-body-sm-font); color: var(--ax-muted); max-width: 28rem; }
 .ax-empty-actions { margin-top: var(--ax-space-sm); }
 
 /* SPEC-OVERVIEW (Phase 194): elevated healthy "all clear" hero — NON-INTERACTIVE.

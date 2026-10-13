@@ -357,7 +357,7 @@ defmodule AccrueAdmin.Live.EventLive do
     ~H"""
     <span class="ax-timeline-subject">
       <span><%= @type %></span>
-      <IdBadge.id_badge id={@id} id_value={@value} label={"Copy actor ID " <> @value} />
+      <IdBadge.id_badge id={@id} id_value={@value} label={"Copy actor ID " <> @value} copy_label="actor ID" />
     </span>
     """
   end
@@ -381,10 +381,15 @@ defmodule AccrueAdmin.Live.EventLive do
   defp copy_id(nil, _id, _kind), do: "Unavailable"
 
   defp copy_id(value, id, kind) do
-    assigns = %{value: to_string(value), id: id, label: "Copy #{kind} ID #{value}"}
+    assigns = %{
+      value: to_string(value),
+      id: id,
+      label: "Copy #{kind} ID #{value}",
+      copy_label: String.downcase(kind) <> " ID"
+    }
 
     ~H"""
-    <IdBadge.id_badge id={@id} id_value={@value} label={@label} />
+    <IdBadge.id_badge id={@id} id_value={@value} label={@label} copy_label={@copy_label} />
     """
   end
 

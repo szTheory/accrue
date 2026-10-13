@@ -124,7 +124,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
               filter_fields={customer_filter_fields(@owner_type_type, @owner_type_options)}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
+              clear_href={@table_path}
               clear_visible={filter_active?(@params)}
             />
           </:filter_toolbar>
@@ -134,6 +134,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.customers_list_result_label_pair()}
+          show_row_count={false}
           id="customers"
           query_module={Customers}
           current_owner_scope={@current_owner_scope}
@@ -145,7 +147,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
             %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope, customer_return_path(@admin_mount_path, @current_owner_scope, @params), :table)},
             %{label: "Payment method", render: &default_payment_method_label/1}
@@ -155,6 +157,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
             %{label: "Payment method", render: &default_payment_method_label/1},
           ]}
           filter_fields={customer_filter_fields(@owner_type_type, @owner_type_options)}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.customers_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -163,11 +167,11 @@ defmodule AccrueAdmin.Live.CustomersLive do
         >
           <:list_status :let={status}>
             <FilterChipBar.filter_chip_bar
+              compact={true}
               items={customer_lens_chips(@params, @table_path)}
               label="Customer view"
               result_count={status.visible_count}
               result_label={Copy.customers_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -223,7 +227,6 @@ defmodule AccrueAdmin.Live.CustomersLive do
       })
 
     assigns = %{
-      __changed__: %{},
       label: label,
       href: href,
       email: if(row.email && row.email != label, do: row.email),
@@ -236,7 +239,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
       <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
       <:secondary>
         <span :if={@email} class="ax-data-table-identity-email"><%= @email %></span>
-        <IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy customer ID" />
+        <IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy customer ID" copy_label="customer ID" variant="plain" />
       </:secondary>
     </DataTable.identity_cell>
     """
@@ -359,10 +362,6 @@ defmodule AccrueAdmin.Live.CustomersLive do
   end
 
   defp filter_active?(params), do: filter_params(params) != %{}
-
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
 
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil

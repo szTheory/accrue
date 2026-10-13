@@ -9,37 +9,37 @@ defmodule AccrueAdmin.Copy.BillingEvent do
 
   def billing_events_breadcrumb_events, do: "Events"
 
-  def events_list_heading, do: "Trace billing activity"
+  def events_list_heading, do: "Billing events"
 
-  def events_list_subtitle, do: "Read the append-only billing event ledger."
+  def events_list_subtitle, do: "Find what changed, when it happened, and how it was recorded."
 
   def events_list_first_run_empty_title, do: "No billing events yet."
 
   def events_list_first_run_empty_body,
     do: "Events appear when billing state changes are recorded."
 
-  def events_list_filtered_empty_title, do: "No ledger rows match these filters."
+  def events_list_filtered_empty_title, do: "No events match these filters."
 
   def events_list_filtered_empty_body,
-    do: "Clear filters or adjust actor and source filters to see ledger rows."
+    do: "Reset filters or adjust your search to see events."
 
   def events_list_loading_label, do: "Loading billing events."
 
-  def events_list_default_lens_label, do: "All ledger"
+  def events_list_default_lens_label, do: "All events"
 
-  def events_list_all_lens_label, do: "All ledger"
+  def events_list_all_lens_label, do: "All events"
 
-  def events_list_admin_changes_label, do: "Admin changes"
+  def events_list_admin_changes_label, do: "Admin actions"
 
   def events_list_result_label_pair, do: {"event", "events"}
 
   def billing_events_kpi_section_aria_label, do: "Event summary"
 
-  def billing_events_kpi_label_ledger_rows, do: "Ledger rows"
+  def billing_events_kpi_label_ledger_rows, do: "Events"
 
   def billing_events_kpi_meta_total_append_only, do: "Total append-only events recorded locally"
 
-  def billing_events_kpi_label_webhook_sourced, do: "Webhook sourced"
+  def billing_events_kpi_label_webhook_sourced, do: "Linked webhooks"
 
   def billing_events_kpi_delta_admin_suffix, do: " admin"
 
@@ -53,11 +53,11 @@ defmodule AccrueAdmin.Copy.BillingEvent do
 
   def billing_events_table_column_event, do: "Event"
 
-  def billing_events_table_column_subject, do: "Subject"
+  def billing_events_table_column_subject, do: "Record"
 
-  def billing_events_table_column_actor, do: "Actor"
+  def billing_events_table_column_actor, do: "Recorded by"
 
-  def billing_events_table_column_webhook_source, do: "Webhook source"
+  def billing_events_table_column_webhook_source, do: "Linked webhook"
 
   def billing_events_table_column_when, do: "When"
 
@@ -65,9 +65,9 @@ defmodule AccrueAdmin.Copy.BillingEvent do
 
   def billing_events_filter_label_event_type, do: "Event type"
 
-  def billing_events_filter_label_actor_type, do: "Actor type"
+  def billing_events_filter_label_actor_type, do: "Recorded by"
 
-  def billing_events_filter_label_subject_type, do: "Subject type"
+  def billing_events_filter_label_subject_type, do: "Record type"
 
   def billing_events_filter_label_source_webhook_id, do: "Source webhook id"
 
@@ -94,7 +94,7 @@ defmodule AccrueAdmin.Copy.BillingEvent do
     do:
       "An append-only record of every billing and admin action across all organizations. Filter by actor or subject to trace who did what, and when."
 
-  def billing_events_webhook_source_direct, do: "Direct"
+  def billing_events_webhook_source_direct, do: "No linked webhook"
 
   def billing_events_when_unknown, do: "Unknown"
 

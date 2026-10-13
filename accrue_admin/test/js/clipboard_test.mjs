@@ -40,6 +40,7 @@ function button(text) {
 
 test("visible toast waits for the real write and reports rejection without success", async (t) => {
   const target = button("record-123");
+  target.dataset.clipboardLabel = "customer ID";
   let finishWrite;
   const clipboard = { writeText: () => new Promise((resolve) => { finishWrite = resolve; }) };
   withBrowser(t, { clipboard, button: target });
@@ -63,7 +64,7 @@ test("visible toast waits for the real write and reports rejection without succe
   assert.equal(toast, undefined);
   finishWrite();
   await pending;
-  assert.equal(toast.textContent, "Copied to clipboard");
+  assert.equal(toast.textContent, "Copied customer ID to clipboard");
   assert.equal(toast.hidden, false);
   assert.equal(toast.className, "ax-toast");
   assert.equal(toast.dataset.axToast, "true");
@@ -76,6 +77,40 @@ test("visible toast waits for the real write and reports rejection without succe
   assert.equal(toast.hidden, true);
   assert.equal(target.dataset.copied, undefined);
   Clipboard.destroyed.call(hook);
+});
+
+test("shared hook and first-paint controls name the copied value without including its contents", async (t) => {
+  const target = button("2026-10-11T15:04:05.123456Z");
+  const written = [];
+  withBrowser(t, { clipboard: { writeText: async (text) => written.push(text) }, button: target });
+  let toast;
+  let status;
+  document.body = { append(node) { toast = node; } };
+  document.querySelector = () => toast;
+  document.createElement = () => ({ dataset: {}, setAttribute() {} });
+  target.parentElement = { querySelector: () => status, append(node) { status = node; } };
+  const timeout = globalThis.setTimeout;
+  globalThis.setTimeout = () => 0;
+  t.after(() => { globalThis.setTimeout = timeout; });
+
+  const hook = { el: target };
+  Clipboard.mounted.call(hook);
+  for (const label of ["timestamp", "subscription ID", "event payload"]) {
+    target.dataset.clipboardLabel = label;
+    await target.listeners.get("click")();
+    assert.equal(toast.textContent, `Copied ${label} to clipboard`);
+    assert.equal(status.textContent, toast.textContent);
+    assert.equal(written.at(-1), target.dataset.clipboardText);
+  }
+  Clipboard.destroyed.call(hook);
+
+  initClipboardControls();
+  target.dataset.clipboardLabel = "invoice ID";
+  await target.listeners.get("click")();
+  assert.equal(toast.textContent, "Copied invoice ID to clipboard");
+  delete target.dataset.clipboardLabel;
+  await target.listeners.get("click")();
+  assert.equal(toast.textContent, "Copied text to clipboard");
 });
 
 test("first-paint controls report success only after a clipboard write resolves", async (t) => {

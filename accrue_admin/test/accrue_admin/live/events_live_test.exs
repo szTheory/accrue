@@ -124,11 +124,11 @@ defmodule AccrueAdmin.EventsLiveTest do
              )
            ) == 1
 
-    assert length(Floki.find(card, "[data-clipboard-text]")) == 2
+    assert length(Floki.find(card, "[data-clipboard-text]")) == 3
     assert length(Floki.find(card, ".ax-timestamp[data-iso]")) == 1
   end
 
-  test "bare events route represents the All ledger lens", %{conn: conn} do
+  test "bare events route represents the All events view", %{conn: conn} do
     contract = ListContracts.fetch!(:events)
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
@@ -136,10 +136,53 @@ defmodule AccrueAdmin.EventsLiveTest do
 
     assert html =~ ~s(data-ax-filter-chips)
     assert html =~ contract.default_lens.label
-    assert html =~ "Admin changes"
+    assert html =~ "Admin actions"
     assert html =~ ~s(data-ax-result-count)
     assert html =~ "Showing"
     assert html =~ "events"
+  end
+
+  test "filter patches keep each event label and destination attached to its record", %{
+    conn: conn
+  } do
+    customer = insert_customer(%{})
+
+    {:ok, created} =
+      Events.record(%{
+        type: "customer.created",
+        subject_type: "Customer",
+        subject_id: customer.id
+      })
+
+    {:ok, _other} =
+      Events.record(%{
+        type: "subscription.created",
+        subject_type: "Subscription",
+        subject_id: Ecto.UUID.generate()
+      })
+
+    {:ok, updated} =
+      Events.record(%{
+        type: "customer.updated_locally",
+        subject_type: "Customer",
+        subject_id: customer.id
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/events?view=all")
+    html = render_patch(view, "/billing/events?q=#{customer.id}")
+    document = Floki.parse_document!(html)
+
+    for event <- [created, updated] do
+      row = Floki.find(document, "#events-row-#{event.id}")
+
+      assert Floki.find(row, ".ax-event-link") |> Floki.text() |> String.trim() ==
+               Copy.billing_event_label(event.type)
+
+      [href] = row |> Floki.find(".ax-event-link") |> Floki.attribute("href")
+      assert href =~ "/events/#{event.id}?"
+      assert href =~ URI.encode_www_form("/billing/events?q=#{customer.id}")
+    end
   end
 
   test "events Admin changes lens maps to actor_type=admin", %{conn: conn} do
@@ -166,7 +209,7 @@ defmodule AccrueAdmin.EventsLiveTest do
              live(conn, "/billing/events?q=invoice.payment_failed.in_scope")
 
     search = Floki.parse_document!(search_html) |> Floki.find("#events-filter-q") |> hd()
-    assert Floki.attribute(search, "placeholder") == ["Event type, subject ID, or actor ID"]
+    assert Floki.attribute(search, "placeholder") == ["Event type, record ID, or person ID"]
     assert search_html =~ "invoice.payment_failed.in_scope"
     refute search_html =~ "invoice.payment_failed.out_of_scope"
 
@@ -206,7 +249,7 @@ defmodule AccrueAdmin.EventsLiveTest do
                "/billing/events?org=allowed-org&actor_type=admin&type=invoice.payment_failed.in_scope&q=invoice&phase197_state=loading-skeleton"
              )
 
-    assert html =~ ~s(data-ax-clear-all)
+    assert html =~ ~s(data-role="clear-filters")
     assert html =~ ~s(href="/billing/events?org=allowed-org&amp;view=all")
     refute html =~ "actor_type=admin"
     refute html =~ "type=invoice.payment_failed"
@@ -249,7 +292,7 @@ defmodule AccrueAdmin.EventsLiveTest do
 
     assert_list_state(filtered_html, contract, "filtered-empty")
     assert filtered_html =~ contract.states.filtered_empty
-    assert filtered_html =~ ~s(data-ax-clear-all)
+    assert filtered_html =~ ~s(data-role="clear-filters")
 
     loading_conn =
       Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
@@ -284,7 +327,7 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert html =~ Copy.events_list_admin_changes_label()
     assert html =~ "ax-filter-chip-cobalt"
     # should have Clear remove_href
-    assert html =~ "Clear"
+    assert html =~ "Reset filters"
   end
 
   # --- end Plan 175-06 tests ---
@@ -402,7 +445,7 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert html =~ "invoice.payment_failed.exact_link"
   end
 
-  test "known event rows share the operator label and retain the stored key", %{conn: conn} do
+  test "known event rows show one label and keep the exact key on event details", %{conn: conn} do
     organization_id = Ecto.UUID.generate()
     organization_slug = "event-label-#{System.unique_integer([:positive])}"
     customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
@@ -433,20 +476,8 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert length(event_link) == 2
     assert Enum.all?(event_link, &(Floki.text(&1) == "Customer updated"))
 
-    identity_cells =
-      Floki.find(document, ".ax-data-table-identity")
-      |> Enum.filter(&(Floki.text(&1) =~ "customer.updated"))
-
-    assert length(identity_cells) == 2
-
-    assert Enum.all?(identity_cells, fn identity ->
-             length(
-               Floki.find(
-                 identity,
-                 "[data-clipboard-text='customer.updated'][aria-label='Copy event type']"
-               )
-             ) == 1
-           end)
+    assert Floki.find(document, "[data-clipboard-text='customer.updated']") == []
+    assert length(Floki.find(document, "[data-clipboard-text='#{customer.id}']")) == 2
 
     event_params =
       event_link

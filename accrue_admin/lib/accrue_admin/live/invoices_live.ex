@@ -121,7 +121,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
               <:stat
                 label={Copy.invoices_kpi_uncollectible_label()}
                 value={Integer.to_string(@summary.uncollectible_count)}
-                tone="amber"
+                tone={if @summary.uncollectible_count > 0, do: "amber"}
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -132,6 +132,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.invoices_list_result_label_pair()}
           id="invoices"
           query_module={Invoices}
           current_owner_scope={@current_owner_scope}
@@ -145,7 +146,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           render_filter_toolbar={false}
           show_row_count={false}
           show_empty_clear={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
             %{label: Copy.invoices_column_invoice(), render: &invoice_identity_cell(&1, @admin_mount_path, @current_owner_scope, :table)},
             %{label: Copy.invoices_column_status(), render: &status_summary/1},
@@ -176,6 +177,8 @@ defmodule AccrueAdmin.Live.InvoicesLive do
             }
           ]}
           filter_fields={invoice_filter_fields()}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.invoices_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -202,16 +205,15 @@ defmodule AccrueAdmin.Live.InvoicesLive do
                 filter_params={filter_params(@params)}
                 path={@table_path}
                 preserve_params={preserved_params(@params)}
-                clear_href={clear_all_href(@params, @table_path)}
-                clear_visible={false}
+                clear_href={@table_path}
+                clear_visible={filter_active?(@params)}
               />
             <FilterChipBar.filter_chip_bar
+              compact={true}
               items={work_queue_chips(@params, @table_path)}
               label="Invoice view"
-              compact
               result_count={status.visible_count}
               result_label={Copy.invoices_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
             </div>
@@ -279,7 +281,6 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     processor_id = row.processor_id || to_string(row.id)
 
     assigns = %{
-      __changed__: %{},
       invoice_href: invoice_href,
       invoice_label: invoice_label,
       customer_href: customer_href,
@@ -293,7 +294,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
       <:primary><.link href={@invoice_href} class="ax-link"><%= @invoice_label %></.link></:primary>
       <:secondary>
         <.link href={@customer_href} class="ax-label ax-muted"><%= @customer_label %></.link>
-        <IdBadge.id_badge id={@badge_id} id_value={@processor_id} label="Copy invoice ID" />
+        <IdBadge.id_badge id={@badge_id} id_value={@processor_id} label="Copy invoice ID" copy_label="invoice ID" variant="plain" />
       </:secondary>
     </DataTable.identity_cell>
     """
@@ -534,10 +535,6 @@ defmodule AccrueAdmin.Live.InvoicesLive do
       end
     end)
     |> Kernel.!=(%{})
-  end
-
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
   end
 
   defp list_state(params) do

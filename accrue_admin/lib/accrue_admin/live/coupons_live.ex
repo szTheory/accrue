@@ -134,12 +134,10 @@ defmodule AccrueAdmin.Live.CouponsLive do
               <:stat
                 label={Copy.coupon_kpi_label_valid()}
                 value={Integer.to_string(@summary.valid_count)}
-                tone="amber"
               />
               <:stat
                 label={Copy.coupon_kpi_label_promotion_codes()}
                 value={Integer.to_string(@summary.promotion_code_count)}
-                tone="cobalt"
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -150,7 +148,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
               filter_fields={coupon_filter_fields()}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
+              clear_href={@table_path}
               clear_visible={filter_active?(@params)}
             />
           </:filter_toolbar>
@@ -160,6 +158,8 @@ defmodule AccrueAdmin.Live.CouponsLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.coupons_list_result_label_pair()}
+          show_row_count={false}
           id="coupons"
           query_module={Coupons}
           current_owner_scope={@current_owner_scope}
@@ -171,7 +171,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
             %{label: Copy.coupon_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope, @params, :table)},
             %{label: Copy.coupon_table_column_status(), render: &status_summary/1},
@@ -187,6 +187,8 @@ defmodule AccrueAdmin.Live.CouponsLive do
             %{label: Copy.coupon_table_column_redemptions(), render: &redemption_summary/1}
           ]}
           filter_fields={coupon_filter_fields()}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.coupons_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -194,11 +196,11 @@ defmodule AccrueAdmin.Live.CouponsLive do
         >
           <:list_status :let={status}>
             <FilterChipBar.filter_chip_bar
+              compact={true}
               items={coupon_lens_chips(@params, @table_path)}
               label="Coupon view"
               result_count={status.visible_count}
               result_label={Copy.coupons_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -246,7 +248,6 @@ defmodule AccrueAdmin.Live.CouponsLive do
       })
 
     assigns = %{
-      __changed__: %{},
       href: href,
       label: label,
       badge_id: "ax-id-badge-coupon-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
@@ -256,7 +257,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
     ~H"""
     <DataTable.identity_cell>
       <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
-      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy coupon ID" /></:secondary>
+      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy coupon ID" copy_label="coupon ID" variant="plain" /></:secondary>
     </DataTable.identity_cell>
     """
   end
@@ -364,10 +365,6 @@ defmodule AccrueAdmin.Live.CouponsLive do
   end
 
   defp filter_active?(params), do: filter_params(params) != %{}
-
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
 
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil

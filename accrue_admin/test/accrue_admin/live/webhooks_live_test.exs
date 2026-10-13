@@ -125,7 +125,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     assert html =~ "webhook deliveries"
   end
 
-  test "webhook clear-all drops filters and preserves organization scope", %{conn: conn} do
+  test "webhook reset restores the default view and preserves organization scope", %{conn: conn} do
     org_id = Ecto.UUID.generate()
 
     conn =
@@ -143,11 +143,11 @@ defmodule AccrueAdmin.WebhooksLiveTest do
                "/billing/webhooks?org=allowed-org&status=failed,dead&type=invoice.payment_failed&livemode=true&phase197_state=loading-skeleton"
              )
 
-    assert html =~ ~s(data-ax-clear-all)
-    assert html =~ ~s(href="/billing/webhooks?org=allowed-org&amp;view=all")
-    refute html =~ "status=failed"
-    refute html =~ "type=invoice.payment_failed"
-    refute html =~ "phase197_state=loading-skeleton"
+    document = Floki.parse_document!(html)
+    [reset] = Floki.find(document, "[data-role='filter-form'] [data-role='clear-filters']")
+    assert Floki.attribute(reset, "href") == ["/billing/webhooks?org=allowed-org"]
+    assert Floki.text(reset) |> String.trim() == "Reset filters"
+    assert length(Floki.find(document, "[data-ax-clear-all]")) == 1
   end
 
   test "distinguishes webhook populated, first-run-empty, filtered-empty, queue-empty, and loading states",
@@ -176,7 +176,8 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     assert_list_state(first_run_html, contract, "first-run-empty")
     assert first_run_html =~ contract.states.first_run_empty
-    refute first_run_html =~ ~s(data-ax-clear-all)
+    assert length(Floki.find(Floki.parse_fragment!(first_run_html), "[data-ax-clear-all]")) == 1
+    assert first_run_html =~ "Reset filters"
 
     filtered_conn =
       Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")

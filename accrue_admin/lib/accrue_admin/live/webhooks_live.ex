@@ -498,12 +498,11 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               <:stat
                 label="Blocked"
                 value={Integer.to_string(@summary.blocked_count)}
-                tone="amber"
+                tone={if @summary.blocked_count > 0, do: "amber"}
               />
               <:stat
                 label="Replayed"
                 value={Integer.to_string(@summary.replayed_count)}
-                tone="cobalt"
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -514,8 +513,9 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               filter_fields={webhook_filter_fields(@current_owner_scope)}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
-              clear_visible={filter_active?(@params)}
+              clear_href={reset_href(@table_path)}
+              clear_visible={!default_view?(@params, @current_owner_scope)}
+              clear_label="Reset filters"
             />
           </:filter_toolbar>
         </PageHeader.page_header>
@@ -619,7 +619,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={reset_href(@table_path)}
+          empty_action_href={if queue_active?(@params), do: clear_all_href(@params, @table_path), else: reset_href(@table_path)}
+          empty_action_label={if queue_active?(@params), do: "View all deliveries", else: "Reset filters"}
+          show_row_count={false}
           selectable={true}
           row_label={{"delivery", "deliveries"}}
           bulk_action_label={Copy.webhooks_retry_selected_label()}
@@ -648,9 +651,9 @@ defmodule AccrueAdmin.Live.WebhooksLive do
             <FilterChipBar.filter_chip_bar
               items={work_queue_chips(@params, @table_path)}
               label="Webhook view"
+              compact={true}
               result_count={status.visible_count}
               result_label={Copy.webhooks_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -796,9 +799,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   defp filter_active?(params), do: filter_params(params) != %{}
 
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
+  defp reset_href(table_path), do: table_path
+
+  defp default_view?(params, scope),
+    do: params == build_default_params(scope, @default_queue_status)
 
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil
@@ -919,7 +923,6 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     label = row.processor_event_id || row.id
 
     assigns = %{
-      __changed__: %{},
       href: scoped_path(mount_path, "/webhooks/#{row.id}", owner_scope),
       label: humanize(row.type),
       badge_id:
@@ -930,7 +933,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     ~H"""
     <DataTable.identity_cell>
       <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
-      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy webhook event ID" /></:secondary>
+      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy webhook event ID" copy_label="webhook event ID" /></:secondary>
     </DataTable.identity_cell>
     """
   end

@@ -19,9 +19,11 @@ function announce(button, message) {
 
 function dispatch(button, type, text) {
   if (type === "clipboard:copied") {
+    const label = button.dataset.clipboardLabel || "text";
+    const message = `Copied ${label} to clipboard`;
     button.dataset.copied = "true";
-    announce(button, "Copied to clipboard.");
-    showToast("Copied to clipboard");
+    announce(button, message);
+    showToast(message);
     button.dispatchEvent(new CustomEvent(type, { bubbles: true }));
     return;
   }

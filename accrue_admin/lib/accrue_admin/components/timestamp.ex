@@ -25,6 +25,7 @@ defmodule AccrueAdmin.Components.Timestamp do
             class="ax-timestamp-copy"
             phx-hook="Clipboard"
             data-clipboard-text={@iso}
+            data-clipboard-label="timestamp"
             title="UTC. Click to copy the exact UTC timestamp."
             aria-label={"Copy timestamp " <> @iso}
           ><time datetime={@iso}><%= @utc_text %></time></button>

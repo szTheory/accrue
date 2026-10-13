@@ -9,7 +9,8 @@ defmodule AccrueAdmin.Components.IdBadgeTest do
     html =
       render_component(&IdBadge.id_badge/1,
         id: "ax-id-badge-cus_1",
-        id_value: "cus_phase191_host_1"
+        id_value: "cus_phase191_host_1",
+        copy_label: "customer ID"
       )
 
     # Registered LiveView hook (survives infinite-scroll/filter re-render) + a unique DOM id.
@@ -18,6 +19,7 @@ defmodule AccrueAdmin.Components.IdBadgeTest do
 
     # The clipboard payload + the visible/monospace id + full-text title.
     assert html =~ ~s(data-clipboard-text="cus_phase191_host_1")
+    assert html =~ ~s(data-clipboard-label="customer ID")
     assert html =~ ~s(title="cus_phase191_host_1")
     assert html =~ "ax-id-badge-text"
     assert html =~ "cus_phase191_host_1"
@@ -34,6 +36,7 @@ defmodule AccrueAdmin.Components.IdBadgeTest do
   test "plain evidence retains keyboard copy semantics without a chip icon" do
     html = render_component(&IdBadge.id_badge/1, id_value: "customer-123", variant: "plain")
     assert html =~ "ax-id-badge-plain"
+    assert html =~ ~s(data-clipboard-label="ID")
     assert html =~ ~s(data-clipboard-text="customer-123")
     assert html =~ ~s(aria-label="Copy customer-123")
     assert html =~ ~s(phx-hook="Clipboard")

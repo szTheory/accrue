@@ -56,6 +56,7 @@ defmodule AccrueAdmin.Components.JsonViewer do
           class="ax-button ax-button-secondary"
           phx-hook="Clipboard"
           data-clipboard-text={@raw_json}
+          data-clipboard-label={String.downcase(@label)}
           aria-label={"Copy " <> String.downcase(@label)}
         >
           Copy payload

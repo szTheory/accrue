@@ -69,6 +69,8 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:row_label, fn -> {"result", "results"} end)
       |> assign_new(:show_row_count, fn -> true end)
       |> assign_new(:show_empty_clear, fn -> true end)
+      |> assign_new(:empty_action_href, fn -> nil end)
+      |> assign_new(:empty_action_label, fn -> Copy.data_table_clear_filters_label() end)
       |> assign_new(:enable_polling, fn -> true end)
       |> assign_new(:poll_interval_ms, fn -> 5_000 end)
       |> assign_new(:newer_count, fn -> 0 end)
@@ -89,7 +91,7 @@ defmodule AccrueAdmin.Components.DataTable do
       )
       |> assign(
         :dom_limit,
-        normalize_positive(
+        normalize_dom_limit(
           Map.get(assigns, :dom_limit, previous[:dom_limit] || @default_dom_limit),
           @default_dom_limit
         )
@@ -221,7 +223,7 @@ defmodule AccrueAdmin.Components.DataTable do
           merged_rows =
             socket.assigns.rows
             |> Kernel.++(rows)
-            |> Enum.take(socket.assigns.dom_limit)
+            |> retain_rows(socket.assigns.dom_limit)
 
           {:noreply,
            socket
@@ -257,7 +259,7 @@ defmodule AccrueAdmin.Components.DataTable do
         merged_rows =
           socket.assigns.rows
           |> Kernel.++(rows)
-          |> Enum.take(socket.assigns.dom_limit)
+          |> retain_rows(socket.assigns.dom_limit)
 
         {:noreply,
          socket
@@ -450,12 +452,12 @@ defmodule AccrueAdmin.Components.DataTable do
           <p class="ax-body ax-empty-copy"><%= @resolved_empty_copy %></p>
           <.link
             :if={any_filter_active?(@filter_params) and @show_empty_clear}
-            patch={@clear_href}
+            patch={@empty_action_href || @clear_href}
             class="ax-button ax-button-secondary"
             data-role="clear-filters"
             data-phase191-focus="clear-filters"
           >
-            <%= Copy.data_table_clear_filters_label() %>
+            <%= @empty_action_label %>
           </.link>
         </div>
       </div>
@@ -531,7 +533,6 @@ defmodule AccrueAdmin.Components.DataTable do
         <article :for={row <- @rows} class="ax-card ax-data-table-card" data-row-id={row_identity(row, @row_id)}>
           <header class="ax-data-table-card-header">
             <div>
-              <p class="ax-eyebrow">Row</p>
               <p class="ax-heading"><%= card_title(@card_title, row, @columns) %></p>
             </div>
             <input
@@ -572,8 +573,11 @@ defmodule AccrueAdmin.Components.DataTable do
           Load more
         </button>
         <div
-          :if={@next_cursor && length(@rows) < @dom_limit}
-          phx-viewport-bottom={Phoenix.LiveView.JS.push("load-more", target: @myself)}
+          id={@id <> "-scroll-container"}
+          :if={@next_cursor && (@dom_limit == :infinity || length(@rows) < @dom_limit) && !@read_error}
+          phx-hook="Pagination"
+          data-pagination-target={@myself}
+          class="ax-data-table-scroll-boundary"
           data-role="viewport-sentinel"
           aria-hidden="true"
         />
@@ -590,6 +594,7 @@ defmodule AccrueAdmin.Components.DataTable do
   attr(:clear_href, :string, default: nil)
   attr(:clear_filters_patch, :string, default: nil)
   attr(:clear_visible, :any, default: nil)
+  attr(:clear_label, :string, default: nil)
   attr(:preserve_params, :map, default: %{})
   attr(:secondary_label, :string, default: "Filters")
 
@@ -642,7 +647,7 @@ defmodule AccrueAdmin.Components.DataTable do
         />
       </div>
       <details :if={@secondary_filter_fields != []} class="ax-data-table-filter-disclosure">
-        <summary><%= @secondary_label %></summary>
+        <summary><%= @secondary_label %><Icon.icon name={:chevron_down} size="sm" class="ax-filter-disclosure-chevron" /></summary>
         <div class="ax-data-table-filter-secondary">
           <div :for={field <- @secondary_filter_fields} class={["ax-data-table-filter", filter_field_class(field)]}>
             <label :if={Map.get(field, :type) != :checkbox_group} for={field_id(@id, field)} class="ax-label"><%= field_label(field) %></label>
@@ -671,10 +676,11 @@ defmodule AccrueAdmin.Components.DataTable do
         :if={@clear_visible}
         patch={@clear_href}
         class="ax-button ax-button-ghost ax-data-table-filter-clear"
+        data-ax-clear-all
         data-role="clear-filters"
         data-phase191-focus="clear-filters"
       >
-        <%= Copy.data_table_clear_filters_label() %>
+        <%= @clear_label || "Reset filters" %>
       </.link>
     </form>
     """
@@ -1036,6 +1042,11 @@ defmodule AccrueAdmin.Components.DataTable do
 
   defp normalize_positive(value, _fallback) when is_integer(value) and value > 0, do: value
   defp normalize_positive(_value, fallback), do: fallback
+
+  defp normalize_dom_limit(:infinity, _fallback), do: :infinity
+  defp normalize_dom_limit(value, fallback), do: normalize_positive(value, fallback)
+  defp retain_rows(rows, :infinity), do: rows
+  defp retain_rows(rows, limit), do: Enum.take(rows, limit)
 
   defp query_opts(filter, cursor, limit, nil) do
     [filter: filter, cursor: cursor, limit: limit]

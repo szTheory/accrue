@@ -173,13 +173,12 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               <:stat
                 label="Open invoices"
                 value={count(@summary.open_invoice_count, "invoice")}
-                tone="cobalt"
                 href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
               />
               <:stat
                 label="At-risk subscriptions"
                 value={count(@summary.past_due_count, "subscription")}
-                tone="amber"
+                tone={if is_integer(@summary.past_due_count) and @summary.past_due_count > 0, do: "amber"}
                 href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
               />
             </StatStrip.stat_strip>
@@ -190,7 +189,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               filter_fields={subscription_filter_fields()}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
+              clear_href={@table_path}
               clear_visible={filter_active?(@params)}
             />
           </:filter_toolbar>
@@ -200,6 +199,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.subscriptions_list_result_label_pair()}
+          show_row_count={false}
           id="subscriptions"
           query_module={Subscriptions}
           current_owner_scope={@current_owner_scope}
@@ -211,7 +212,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           loading_fixture={phase196_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
             %{
               label: "Customer details",
@@ -236,6 +237,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             }
           ]}
           filter_fields={subscription_filter_fields()}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.subscriptions_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -244,10 +247,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           <:list_status :let={status}>
             <FilterChipBar.filter_chip_bar
               items={work_queue_chips(@params, @table_path, @summary)}
-              label="Work queue"
+              label="Work queue" compact={true}
               result_count={status.visible_count}
-              result_label={{"subscription row", "subscription rows"}}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
+              result_label={Copy.subscriptions_list_result_label_pair()}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -347,7 +349,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     subscription_id = row.processor_id || row.id
 
     assigns = %{
-      __changed__: %{},
       customer_href: customer_href,
       customer_label: customer_label(row),
       subscription_href: subscription_href,
@@ -359,7 +360,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     <DataTable.identity_cell>
       <:primary><.link href={@customer_href} class="ax-link"><%= @customer_label %></.link></:primary>
       <:secondary>
-        <IdBadge.id_badge id={@badge_id} id_value={to_string(@subscription_id)} label="Copy subscription ID" />
+        <IdBadge.id_badge id={@badge_id} id_value={to_string(@subscription_id)} label="Copy subscription ID" copy_label="subscription ID" variant="plain" />
         <.link href={@subscription_href} class="ax-label ax-muted">Subscription details</.link>
       </:secondary>
     </DataTable.identity_cell>
@@ -626,10 +627,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp filter_active?(params), do: filter_params(params) != %{}
-
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
 
   defp list_state(params, _summary) do
     if phase196_loading_fixture?(params), do: "loading-skeleton", else: nil

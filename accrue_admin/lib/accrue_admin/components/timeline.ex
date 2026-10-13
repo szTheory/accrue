@@ -56,12 +56,13 @@ defmodule AccrueAdmin.Components.Timeline do
                 id={"timeline-subject-#{Map.get(item, :id, :erlang.phash2(item))}"}
                 variant="plain"
                 id_value={to_string(Map.get(item, :subject_id))}
+                copy_label={String.downcase(Map.get(item, :subject_type) || "record") <> " ID"}
                 label={"Copy #{Map.get(item, :subject_type) || "record"} ID #{Map.get(item, :subject_id)}"}
               />
             </div>
             <p :if={Map.get(item, :actor) && Map.get(item, :actor) != "system"} class="ax-timeline-actor">
               Recorded by <%= Map.get(item, :actor) %>
-              <IdBadge.id_badge :if={Map.get(item, :actor_id)} id={"timeline-actor-#{Map.get(item, :id, :erlang.phash2(item))}"} id_value={to_string(Map.get(item, :actor_id))} label="Copy actor ID" variant="plain" />
+              <IdBadge.id_badge :if={Map.get(item, :actor_id)} id={"timeline-actor-#{Map.get(item, :id, :erlang.phash2(item))}"} id_value={to_string(Map.get(item, :actor_id))} label="Copy actor ID" copy_label="actor ID" variant="plain" />
             </p>
             <p :if={Map.get(item, :body)} class="ax-body"><%= Map.get(item, :body) %></p>
 

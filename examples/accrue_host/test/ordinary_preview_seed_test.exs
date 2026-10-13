@@ -14,7 +14,15 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
   test "ordinary seed target requires the connected test database to be loopback" do
     assert OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "postgres", "127.0.0.1", nil)
     assert OrdinarySeedBoundary.allowed?(:test, "accrue_host_test42", "postgres", "::1", nil)
-    refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "postgres", "198.51.100.8", nil)
+
+    refute OrdinarySeedBoundary.allowed?(
+             :test,
+             "accrue_host_test",
+             "postgres",
+             "198.51.100.8",
+             nil
+           )
+
     refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "postgres", nil, nil)
     refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_dev", "postgres", "127.0.0.1", nil)
     refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "readonly", "127.0.0.1", nil)
@@ -236,6 +244,45 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
     assert active_code.coupon_id == percent_coupon.id
     assert active_code.active
     assert active_code.times_redeemed == percent_coupon.times_redeemed
+  end
+
+  test "ordinary activity has real admin attribution and coherent webhook history without duplicate receipts" do
+    seed_if_available()
+    seed_if_available()
+    operator = Repo.get_by!(User, email: "admin@example.com")
+
+    admin_events =
+      Repo.all(
+        from(event in Event,
+          where:
+            fragment("?->>'operation_id'", event.data) == "ordinary-preview-contact-review-v1"
+        )
+      )
+
+    assert [admin_event] = admin_events
+    assert admin_event.type == "customer.local_updated"
+    assert admin_event.actor_type == "admin"
+    assert admin_event.actor_id == operator.id
+    assert admin_event.data["changed_fields"] == ["metadata"]
+    customer = Repo.get!(Customer, admin_event.subject_id)
+    assert customer.metadata["contact_review"] == "Billing contact checked"
+
+    webhook =
+      Repo.get_by!(Accrue.Webhook.WebhookEvent,
+        processor: "fake",
+        processor_event_id: "evt_ordinary_customer_contact_updated"
+      )
+
+    receipt = Repo.get_by!(Event, idempotency_key: "seed-ordinary-activity-webhook-received-v1")
+    assert receipt.type == "webhook.received"
+    assert receipt.subject_id == webhook.id
+    assert receipt.actor_type == "webhook"
+    assert receipt.inserted_at == webhook.received_at
+    assert webhook.status == :succeeded
+    assert DateTime.diff(webhook.processed_at, webhook.received_at, :second) == 1
+    assert Jason.decode!(webhook.raw_body) == webhook.data
+    assert webhook.data["data"]["object"]["id"] == customer.processor_id
+    assert webhook.data["data"]["object"]["email"] == customer.email
   end
 
   defp seed_if_available do

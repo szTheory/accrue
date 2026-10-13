@@ -11,6 +11,7 @@ defmodule AccrueAdmin.Components.TimestampTest do
 
     assert html =~ "Oct 11, 2026 15:04:05 UTC"
     assert html =~ ~s(data-clipboard-text="2026-10-11T15:04:05.123456Z")
+    assert html =~ ~s(data-clipboard-label="timestamp")
     assert html =~ ~s(<time datetime="2026-10-11T15:04:05.123456Z")
     assert html =~ ~s(phx-hook="Clipboard")
     assert html =~ ~s(phx-hook="TimeDisplay")

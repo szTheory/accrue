@@ -21,6 +21,7 @@ defmodule AccrueAdmin.Components.IdBadge do
   attr(:id, :string, default: nil)
   attr(:id_value, :string, required: true)
   attr(:label, :string, default: nil)
+  attr(:copy_label, :string, default: "ID")
   attr(:variant, :string, values: ["default", "plain"], default: "default")
   attr(:class, :any, default: nil)
   attr(:rest, :global)
@@ -38,6 +39,7 @@ defmodule AccrueAdmin.Components.IdBadge do
       class={["ax-id-badge", "ax-id-badge-" <> @variant, @class]}
       phx-hook="Clipboard"
       data-clipboard-text={@id_value}
+      data-clipboard-label={@copy_label}
       title={@id_value}
       aria-label={@aria_label}
       {@rest}

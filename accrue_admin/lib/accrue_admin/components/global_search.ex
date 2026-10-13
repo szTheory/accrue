@@ -292,7 +292,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                 <span id="search-spinner" class="ax-spinner ax-spinner-md" hidden={not @loading} aria-hidden="true"></span>
               </div>
               <p id="global-search-help" class="ax-body ax-command-palette-help">
-                Search billing records across customers, invoices, and subscriptions.
+                Search by name, email, invoice number, or ID.
               </p>
               <span id="global-search-active-result" class="ax-visually-hidden" role="status" data-active-result-status><%= @active_result_status %></span>
             </form>
@@ -300,7 +300,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
             <div class="ax-command-palette-body" aria-live="polite" aria-atomic="false">
               <%= if @query == "" do %>
                 <div class="ax-command-palette-empty">
-                  <p class="ax-body ax-command-palette-orientation">Choose a customer, invoice, or subscription</p>
+                  <p class="ax-body ax-command-palette-orientation">Browse billing records</p>
                   <ul id="global-search-options-shortcuts" class="ax-command-palette-list" role="listbox" aria-label="Billing destinations">
                     <li class="ax-command-palette-list-item">
                       <a id="global-search-option-shortcut-customers" role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers", @current_owner_scope)}>

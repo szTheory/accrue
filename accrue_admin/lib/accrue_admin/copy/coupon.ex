@@ -38,7 +38,7 @@ defmodule AccrueAdmin.Copy.Coupon do
 
   def coupons_list_result_label_pair, do: {"coupon", "coupons"}
 
-  def coupon_index_body_link_prefix, do: "Promotion codes have their own list and detail surface:"
+  def coupon_index_body_link_prefix, do: "To review customer-facing codes,"
 
   def coupon_index_promotion_codes_link_text, do: "open promotion codes"
 

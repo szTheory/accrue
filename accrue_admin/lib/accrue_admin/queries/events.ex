@@ -194,7 +194,12 @@ defmodule AccrueAdmin.Queries.Events do
         where(query, [event], event.subject_type == ^subject_type)
 
       {:source_webhook_event_id, webhook_event_id}, query ->
-        where(query, [event], event.caused_by_webhook_event_id == ^webhook_event_id)
+        where(
+          query,
+          [event],
+          event.caused_by_webhook_event_id == ^webhook_event_id or
+            (event.subject_type == "WebhookEvent" and event.subject_id == ^webhook_event_id)
+        )
 
       {_unknown, _value}, query ->
         query

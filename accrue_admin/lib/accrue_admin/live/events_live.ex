@@ -104,12 +104,10 @@ defmodule AccrueAdmin.Live.EventsLive do
               <:stat
                 label={Copy.billing_events_kpi_label_webhook_sourced()}
                 value={summary_value(@summary, :webhook_linked_count)}
-                tone="cobalt"
               />
               <:stat
                 label={Copy.billing_events_kpi_label_last_24h()}
                 value={summary_value(@summary, :last_day_count)}
-                tone="moss"
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -122,6 +120,7 @@ defmodule AccrueAdmin.Live.EventsLive do
               path={@table_path}
               clear_href={clear_all_href(@params, @table_path)}
               clear_visible={filter_active?(@params)}
+              clear_label="Reset filters"
             />
           </:filter_toolbar>
         </PageHeader.page_header>
@@ -147,6 +146,9 @@ defmodule AccrueAdmin.Live.EventsLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
+          dom_limit={:infinity}
+          show_row_count={false}
+          empty_action_label="Reset filters"
           clear_href={clear_all_href(@params, @table_path)}
           row_label={Copy.events_list_result_label_pair()}
           filter_submit_label={Copy.billing_events_apply_filters()}
@@ -160,21 +162,21 @@ defmodule AccrueAdmin.Live.EventsLive do
             },
             %{
               label: Copy.billing_events_table_column_subject(),
-              render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope) end
+              render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope, :table) end
             },
+            %{label: Copy.billing_events_table_column_when(), render: &when_summary(&1, :table)},
             %{label: Copy.billing_events_table_column_actor(), render: &actor_summary/1},
-            %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
-            %{label: Copy.billing_events_table_column_when(), render: &when_summary(&1, :table)}
+            %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary(&1, @admin_mount_path, @current_owner_scope)}
           ]}
           card_title={&event_cell(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
             %{
               label: Copy.billing_events_table_column_subject(),
-              render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope) end
+              render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope, :card) end
             },
+            %{label: Copy.billing_events_table_column_when(), render: &when_summary(&1, :card)},
             %{label: Copy.billing_events_table_column_actor(), render: &actor_summary/1},
-            %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
-            %{label: Copy.billing_events_table_column_when(), render: &when_summary(&1, :card)}
+            %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary(&1, @admin_mount_path, @current_owner_scope)}
           ]}
           filter_fields={event_filter_fields()}
           empty_title={empty_title(@params, @summary)}
@@ -186,9 +188,9 @@ defmodule AccrueAdmin.Live.EventsLive do
             <FilterChipBar.filter_chip_bar
               items={event_lens_chips(@params, @table_path)}
               label="Event view"
+              compact={true}
               result_count={status.visible_count}
               result_label={Copy.events_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -221,7 +223,10 @@ defmodule AccrueAdmin.Live.EventsLive do
         total_count: Repo.aggregate(base_query, :count, :id),
         webhook_linked_count:
           base_query
-          |> where([event], not is_nil(event.caused_by_webhook_event_id))
+          |> where(
+            [event],
+            not is_nil(event.caused_by_webhook_event_id) or event.subject_type == "WebhookEvent"
+          )
           |> Repo.aggregate(:count, :id),
         admin_count:
           base_query
@@ -256,18 +261,33 @@ defmodule AccrueAdmin.Live.EventsLive do
       %{
         id: :q,
         label: "Search events",
-        placeholder: "Event type, subject ID, or actor ID"
+        placeholder: "Event type, record ID, or person ID"
       },
       %{id: :type, label: Copy.billing_events_filter_label_event_type(), secondary: true},
-      %{id: :actor_type, label: Copy.billing_events_filter_label_actor_type(), secondary: true},
+      %{
+        id: :actor_type,
+        label: Copy.billing_events_filter_label_actor_type(),
+        type: :select,
+        all_label: "Anyone",
+        options: [
+          {"system", "App"},
+          {"oban", "Background job"},
+          {"admin", "Admin"},
+          {"webhook", "Webhook"},
+          {"user", "User"}
+        ],
+        secondary: true
+      },
       %{
         id: :subject_type,
         label: Copy.billing_events_filter_label_subject_type(),
+        type: :datalist,
+        options: ["Customer", "Subscription", "Invoice", "Charge", "WebhookEvent"],
         secondary: true
       },
       %{
         id: :source_webhook_event_id,
-        label: "Source webhook event ID",
+        label: "Linked webhook ID",
         secondary: true
       }
     ]
@@ -366,10 +386,6 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   defp filter_active?(params), do: filter_params(params) != %{}
 
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
-
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil
   end
@@ -419,17 +435,32 @@ defmodule AccrueAdmin.Live.EventsLive do
       Map.get(params, "phase197_state") == "loading-skeleton"
   end
 
-  defp subject_cell(row, mount_path, owner_scope) do
-    label = "#{row.subject_type} #{row.subject_id}"
+  defp subject_cell(row, mount_path, owner_scope, surface) do
+    label =
+      case row.subject_type do
+        "Charge" -> "Payment"
+        "WebhookEvent" -> "Webhook"
+        other -> other || "Record"
+      end
 
-    case subject_href(row, mount_path, owner_scope) do
-      nil ->
-        label
+    assigns = %{
+      label: label,
+      value: row.subject_id,
+      href: subject_href(row, mount_path, owner_scope),
+      id: "event-record-#{surface}-#{row.id}"
+    }
 
-      href ->
-        escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-        Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
-    end
+    ~H"""
+    <DataTable.identity_cell>
+      <:primary>
+        <a :if={@href} href={@href} class="ax-link"><%= @label %></a>
+        <span :if={!@href}><%= @label %></span>
+      </:primary>
+      <:secondary :if={@value}>
+        <IdBadge.id_badge id={@id} id_value={@value} label={"Copy #{String.downcase(@label)} ID"} copy_label={String.downcase(@label) <> " ID"} variant="plain" />
+      </:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp event_cell(row, mount_path, owner_scope, params, presentation) do
@@ -441,7 +472,6 @@ defmodule AccrueAdmin.Live.EventsLive do
       ScopedPath.build(mount_path, "/events/#{row.id}", owner_scope, %{"return" => list_return})
 
     assigns = %{
-      __changed__: %{},
       href: href,
       label: label,
       badge_id:
@@ -457,8 +487,8 @@ defmodule AccrueAdmin.Live.EventsLive do
           <span><%= @label %></span>
         </.link>
       </:primary>
-      <:secondary :if={is_binary(@event_key) and @event_key != ""}>
-        <IdBadge.id_badge id={@badge_id} id_value={@event_key} label="Copy event type" />
+      <:secondary :if={@label in ["Billing event", "Event details unavailable"] and is_binary(@event_key) and @event_key != ""}>
+        <IdBadge.id_badge id={@badge_id} id_value={@event_key} label="Copy event type" copy_label="event type" variant="plain" />
       </:secondary>
     </DataTable.identity_cell>
     """
@@ -488,16 +518,49 @@ defmodule AccrueAdmin.Live.EventsLive do
   defp subject_href(_row, _mount_path, _scope), do: nil
 
   defp actor_summary(row) do
-    case row.actor_id do
-      nil -> humanize(row.actor_type)
-      actor_id -> "#{humanize(row.actor_type)} #{actor_id}"
-    end
+    label =
+      case row.actor_type do
+        "system" -> "App"
+        "oban" -> "Background job"
+        "admin" -> "Admin"
+        "webhook" -> "Webhook"
+        nil -> "Unavailable"
+        other -> humanize(other)
+      end
+
+    assigns = %{label: label, value: row.actor_id}
+
+    ~H"""
+    <span title={@value}><%= @label %></span>
+    """
   end
 
-  defp webhook_source_summary(%{caused_by_webhook_event_id: nil}),
-    do: Copy.billing_events_webhook_source_direct()
+  defp webhook_source_summary(
+         %{subject_type: "WebhookEvent", subject_id: id, caused_by_webhook_event_id: nil},
+         mount_path,
+         scope
+       ) do
+    webhook_source_summary(%{caused_by_webhook_event_id: id}, mount_path, scope)
+  end
 
-  defp webhook_source_summary(%{caused_by_webhook_event_id: webhook_id}), do: webhook_id
+  defp webhook_source_summary(%{caused_by_webhook_event_id: nil}, _mount_path, _scope) do
+    assigns = %{}
+
+    ~H"""
+    <span title="No linked webhook" aria-label="No linked webhook">—</span>
+    """
+  end
+
+  defp webhook_source_summary(%{caused_by_webhook_event_id: webhook_id}, mount_path, scope) do
+    assigns = %{
+      href: ScopedPath.build(mount_path, "/webhooks/#{webhook_id}", scope),
+      value: webhook_id
+    }
+
+    ~H"""
+    <a href={@href} title={@value} class="ax-link">View webhook</a>
+    """
+  end
 
   defp when_summary(%{inserted_at: %DateTime{} = value} = row, surface) do
     assigns = %{value: value, id: "event-row-timestamp-#{surface}-#{row.id}"}
