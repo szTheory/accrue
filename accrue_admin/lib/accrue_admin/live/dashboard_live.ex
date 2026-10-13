@@ -32,7 +32,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
     >
       <section class="ax-page ax-home">
         <PageHeader.page_header
-          breadcrumbs={[]}
+          breadcrumb_group="Billing"
+          breadcrumbs={[%{label: Copy.home_intro_headline()}]}
           title={Copy.home_intro_headline()}
         >
           <:description>
@@ -83,13 +84,14 @@ defmodule AccrueAdmin.Live.DashboardLive do
     Enum.map(events, fn event ->
       %{
         title: Copy.billing_event_label(event.type),
+        event_type: event.type,
         id: event.id,
         at: event.inserted_at,
         subject_type: event.subject_type,
         subject_id: event.subject_id,
         actor: event.actor_type,
         actor_id: event.actor_id,
-        tone: if(event.actor_type == "admin", do: :cobalt, else: :slate),
+        tone: AccrueAdmin.EventPresentation.for(event.type).tone,
         href: ScopedPath.build(mount_path, "/events/#{event.id}", owner_scope),
         href_label: "Open event"
       }

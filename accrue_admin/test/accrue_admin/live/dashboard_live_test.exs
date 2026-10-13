@@ -98,7 +98,9 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     # Home presents observable activity and scope-matched destinations only.
     assert html =~ "ax-display"
-    assert html =~ "Billing activity"
+    assert html =~ "Recent activity"
+    assert html =~ ~s(class="ax-breadcrumbs-group">)
+    assert html =~ "data-event-family=\"customer\""
     refute html =~ "Recorded automatically"
     assert html =~ "ax-id-badge-plain"
     assert html =~ "Customer updated"
@@ -235,6 +237,29 @@ defmodule AccrueAdmin.DashboardLiveTest do
              text =~ "Customer record updated locally" and text =~ first_customer.id and
                href == ["/billing/events/#{second_event.id}?org=many-home-org"]
            end)
+  end
+
+  test "Billing destinations are peers under a non-linked navigation group", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    for path <- [
+          "/billing",
+          "/billing/customers",
+          "/billing/subscriptions",
+          "/billing/invoices",
+          "/billing/payments"
+        ] do
+      assert {:ok, _view, html} = live(conn, path)
+      document = Floki.parse_fragment!(html)
+      crumbs = Floki.find(document, "nav[aria-label='Breadcrumb']")
+
+      assert crumbs |> Floki.find(".ax-breadcrumbs-group") |> Floki.text() |> String.trim() ==
+               "Billing"
+
+      assert Floki.find(crumbs, "a") == []
+      refute Floki.text(crumbs) =~ "Dashboard"
+      assert length(Floki.find(crumbs, "[aria-current='page']")) == 1
+    end
   end
 
   defp customer_for_org(org_id) do

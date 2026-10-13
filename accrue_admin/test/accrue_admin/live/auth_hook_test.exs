@@ -33,7 +33,7 @@ defmodule AccrueAdmin.AuthHookTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing")
-    assert html =~ "<title>Billing activity</title>"
+    assert html =~ "<title>Recent activity</title>"
   end
 
   test "non-admin sessions are redirected before render", %{conn: conn} do

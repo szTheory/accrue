@@ -159,7 +159,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     >
       <section class="ax-page" data-ax-overview="recovery">
         <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs items={[%{label: Copy.recovery_index_heading()}]} />
+          <Breadcrumbs.breadcrumbs group="Recovery" items={[%{label: Copy.recovery_index_heading()}]} />
           <div class="ax-heading-row">
             <h1 class="ax-display"><%= Copy.recovery_index_heading() %></h1>
           </div>

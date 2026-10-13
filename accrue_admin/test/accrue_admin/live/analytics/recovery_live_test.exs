@@ -186,7 +186,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     breadcrumb =
       html
       |> Floki.parse_fragment!()
-      |> Floki.find("nav[aria-label='Breadcrumb']")
+      |> Floki.find("nav[aria-label='Breadcrumb'] [aria-current='page']")
       |> Floki.text()
       |> String.trim()
 

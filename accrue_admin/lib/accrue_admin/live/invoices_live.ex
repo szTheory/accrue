@@ -104,8 +104,8 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Billing"
           breadcrumbs={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.invoices_index_breadcrumb_invoices()}
           ]}
           title={Copy.invoices_list_heading()}

@@ -162,6 +162,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     >
       <section class="ax-page" phx-window-keydown="step_up_escape" phx-key="escape">
         <Breadcrumbs.breadcrumbs
+          group="Connect"
           items={[
             %{
               label: AccrueAdmin.Copy.connect_account_breadcrumb_connect(),

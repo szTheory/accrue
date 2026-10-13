@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Live.EventsLive do
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
+    EventIcon,
     IdBadge,
     FilterChipBar,
     PageHeader,
@@ -84,8 +85,8 @@ defmodule AccrueAdmin.Live.EventsLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Audit"
           breadcrumbs={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.billing_events_breadcrumb_events()}
           ]}
           title={Copy.events_list_heading()}
@@ -451,7 +452,8 @@ defmodule AccrueAdmin.Live.EventsLive do
     ~H"""
     <DataTable.identity_cell>
       <:primary>
-        <.link href={@href} class="ax-link">
+        <.link href={@href} class="ax-link ax-event-link">
+          <EventIcon.event_icon type={@event_key} />
           <span><%= @label %></span>
         </.link>
       </:primary>

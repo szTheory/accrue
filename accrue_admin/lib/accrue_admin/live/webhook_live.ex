@@ -201,6 +201,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
     >
       <section class="ax-page" phx-window-keydown="step_up_escape" phx-key="escape">
         <PageHeader.page_header
+          breadcrumb_group="Developer"
           breadcrumbs={webhook_breadcrumbs(assigns)}
           title={webhook_heading(assigns)}
           component_group="webhook-detail-header"

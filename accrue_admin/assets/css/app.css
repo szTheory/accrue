@@ -1970,6 +1970,28 @@ a.ax-kpi-card--linked:focus-visible {
   z-index: 1; /* ax-z-micro-stack: node above the rail inside the isolated timeline row */
 }
 
+/* Billing event families use the existing icon vocabulary in place of a dot. */
+.ax-timeline-item-with-icon {
+  grid-template-columns: var(--ax-icon-lg) minmax(0, 1fr);
+}
+.ax-timeline-item-with-icon:not(:last-child)::before {
+  left: calc(var(--ax-icon-lg) / 2);
+  top: calc((44px + var(--ax-icon-lg)) / 2);
+  height: calc(100% - var(--ax-icon-lg) + var(--ax-space-lg));
+}
+.ax-timeline-marker {
+  position: relative;
+  z-index: 1; /* ax-z-micro-stack: family glyph interrupts its row's rail */
+  height: var(--ax-icon-lg);
+  margin-top: calc((44px - var(--ax-icon-lg)) / 2);
+  background: var(--ax-base);
+}
+.ax-event-icon { flex-shrink: 0; color: var(--ax-muted); }
+.ax-event-icon-moss { color: var(--ax-status-success-text); }
+.ax-event-icon-amber { color: var(--ax-status-warning-text); }
+.ax-event-link { display: inline-flex; align-items: baseline; gap: var(--ax-space-xs); }
+.ax-event-link > .ax-icon { align-self: center; }
+
 /* (c) ENTRY — borderless, transparent threaded-feed row with a quiet hover surface.
    Overrides the shared .ax-kpi-card/.ax-timeline-card group (border/background/padding/radius). */
 .ax-timeline-card {
@@ -2155,6 +2177,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-breadcrumbs-link,
+.ax-breadcrumbs-group,
 .ax-breadcrumbs-current,
 .ax-breadcrumbs-separator {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
@@ -2165,6 +2188,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-breadcrumbs-link,
+.ax-breadcrumbs-group,
 .ax-breadcrumbs-separator {
   color: var(--ax-muted);
 }

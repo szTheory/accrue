@@ -357,6 +357,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         phx-key="escape"
       >
         <Breadcrumbs.breadcrumbs
+          group="Billing"
           items={[
             %{label: Copy.invoice_breadcrumb_invoices(), href: ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)},
             %{

@@ -16,7 +16,7 @@ defmodule AccrueAdmin.Nav do
     # link lists — no collapse toggles.
     [
       %{
-        label: "Billing activity",
+        label: "Recent activity",
         href: nav_href(mount_path, "", org),
         icon: :events,
         group: "Billing",

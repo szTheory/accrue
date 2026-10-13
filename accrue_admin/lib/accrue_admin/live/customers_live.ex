@@ -98,8 +98,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Billing"
           breadcrumbs={[
-            %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.customers_index_heading()}
           ]}
           title={Copy.customers_list_heading()}

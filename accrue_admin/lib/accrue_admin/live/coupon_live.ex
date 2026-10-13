@@ -136,6 +136,7 @@ defmodule AccrueAdmin.Live.CouponLive do
           <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-coupon-read">Retry</button>
         </div>
         <Breadcrumbs.breadcrumbs
+          group="Catalog"
           :if={@coupon}
           items={[
             %{

@@ -96,8 +96,8 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Connect"
           breadcrumbs={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.connect_accounts_breadcrumb_connect()}
           ]}
           title={Copy.connect_accounts_list_heading()}

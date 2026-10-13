@@ -257,6 +257,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
     >
       <section class="ax-page ax-customer-detail-page">
         <Breadcrumbs.breadcrumbs
+          group="Billing"
           items={[
             %{
               label: "Customers",

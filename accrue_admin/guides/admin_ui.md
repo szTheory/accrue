@@ -187,3 +187,11 @@ Those pages are hidden entirely from prod builds and also refuse to expose tooli
 - runtime: even in `:dev` and `:test`, the pages render only when `Application.get_env(:accrue, :processor)` is `Accrue.Processor.Fake`
 
 Use `MIX_ENV=prod mix compile` in `accrue_admin/` as the smoke check that the package ships without any dev-only admin tooling in production builds.
+
+## Navigation groups and activity cues
+
+The default Admin destination is **Recent activity**, under **Billing**, with the same name in navigation, the page heading, and browser title. Breadcrumbs begin with the corresponding sidebar group as plain text: `Billing / Recent activity`, `Billing / Customers`, `Audit / Events`, and so on. Groups have no destination. Record-detail breadcrumbs retain the actual scoped list link, such as `Billing / Customers / customer name`. Use `PageHeader.breadcrumb_group` or `Breadcrumbs.group`; do not link a peer page as though it were a parent.
+
+`AccrueAdmin.EventPresentation` owns the shared event label, family icon, and outcome tone used by Recent activity and Events. Its catalogue covers registered lifecycle events and additional confirmed producers, but is not an exhaustive ledger enum. Customer, subscription, invoice, payment/refund, recovery, payment-method, webhook, and connected-account families reuse the existing icon set. Icons are decorative supplements to readable text, never the sole meaning. Routine events and unknown types remain neutral; selected recorded outcomes use semantic success/warning tokens. An admin result event's name alone does not establish success. Exact event keys remain available in Events and event details.
+
+The historical `subscription.trial_ended` key is also produced for a trial-will-end webhook, so the UI uses “Subscription trial status recorded” rather than asserting an already-ended trial. Improving that producer's event contract is separate work.

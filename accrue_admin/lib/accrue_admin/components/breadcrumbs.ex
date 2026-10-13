@@ -6,9 +6,11 @@ defmodule AccrueAdmin.Components.Breadcrumbs do
   use Phoenix.Component
 
   attr(:items, :list, required: true)
+  attr(:group, :string, default: nil)
 
   def breadcrumbs(assigns) do
     items = normalize_items(assigns.items)
+    items = if assigns.group && items != [], do: [%{label: assigns.group} | items], else: items
     assigns = assign(assigns, :items, items)
 
     ~H"""
@@ -20,7 +22,7 @@ defmodule AccrueAdmin.Components.Breadcrumbs do
           </a>
           <span
             :if={!item[:href]}
-            class="ax-breadcrumbs-current"
+            class={if(index == length(@items) - 1, do: "ax-breadcrumbs-current", else: "ax-breadcrumbs-group")}
             aria-current={if(index == length(@items) - 1, do: "page", else: nil)}
           >
             <%= item[:label] %>

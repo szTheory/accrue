@@ -95,8 +95,8 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Catalog"
           breadcrumbs={[
-            %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.promotion_codes_breadcrumb_index()}
           ]}
           title={Copy.promotion_codes_list_heading()}

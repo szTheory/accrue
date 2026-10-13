@@ -92,9 +92,8 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
       active_organization_name={@active_organization_name}
     >
       <section class="ax-page" aria-label="Dunning timeline for subscription">
-        <Breadcrumbs.breadcrumbs items={[
-          %{label: "Analytics"},
-          %{label: "Recovery", href: @return_destination.path},
+        <Breadcrumbs.breadcrumbs group="Recovery" items={[
+          %{label: Copy.recovery_index_heading(), href: @return_destination.path},
           %{label: "Subscription"}
         ]} />
 

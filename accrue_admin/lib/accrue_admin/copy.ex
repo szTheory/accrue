@@ -1383,7 +1383,7 @@ defmodule AccrueAdmin.Copy do
 
   # --- Operator dashboard (DashboardLive) — Phase 35, OPS-05
 
-  def dashboard_breadcrumb_home, do: "Billing activity"
+  def dashboard_breadcrumb_home, do: "Recent activity"
 
   def dashboard_chrome_eyebrow, do: "Command center"
 
@@ -1472,7 +1472,7 @@ defmodule AccrueAdmin.Copy do
   # --- Home start page (DashboardLive IA — Phase 169 / v1.50 AUI-03)
   # Task-launcher home: attention rail → JTBD launchers → demoted KPIs → activity.
 
-  def home_intro_headline, do: "Billing activity"
+  def home_intro_headline, do: "Recent activity"
 
   def home_intro_copy,
     do:

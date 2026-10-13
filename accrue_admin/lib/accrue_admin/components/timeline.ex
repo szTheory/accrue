@@ -5,6 +5,7 @@ defmodule AccrueAdmin.Components.Timeline do
 
   use Phoenix.Component
 
+  alias AccrueAdmin.Components.EventIcon
   alias AccrueAdmin.Components.IdBadge
   alias AccrueAdmin.Components.StatusBadge
   alias AccrueAdmin.Components.Timestamp
@@ -18,8 +19,11 @@ defmodule AccrueAdmin.Components.Timeline do
     ~H"""
     <section class={["ax-timeline", @class]} aria-label={@label}>
       <ol :if={@items != []} class="ax-timeline-list">
-        <li :for={item <- @items} class="ax-timeline-item">
-          <span class={["ax-timeline-dot", "ax-timeline-dot-" <> tone(item)]} aria-hidden="true"></span>
+        <li :for={item <- @items} class={["ax-timeline-item", Map.has_key?(item, :event_type) && "ax-timeline-item-with-icon"]}>
+          <span :if={Map.has_key?(item, :event_type)} class="ax-timeline-marker" aria-hidden="true">
+            <EventIcon.event_icon type={item.event_type} size="lg" />
+          </span>
+          <span :if={!Map.has_key?(item, :event_type)} class={["ax-timeline-dot", "ax-timeline-dot-" <> tone(item)]} aria-hidden="true"></span>
 
           <div class={["ax-timeline-card", Map.get(item, :subject_id) && "ax-timeline-record"]}>
             <div class="ax-timeline-header">

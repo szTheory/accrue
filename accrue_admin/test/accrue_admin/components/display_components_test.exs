@@ -364,6 +364,31 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   end
 
   describe "Timeline" do
+    test "event-family icons replace dots while generic timelines keep their existing markers" do
+      html =
+        render_component(&Timeline.timeline/1,
+          items: [
+            %{title: "Customer created", event_type: "customer.created"},
+            %{title: "Subscription created", event_type: "subscription.created"},
+            %{title: "Payment failed", event_type: "charge.failed"},
+            %{title: "Provider event", event_type: "provider.unknown"},
+            %{title: "Attempt queued", status: :queued}
+          ]
+        )
+
+      document = Floki.parse_fragment!(html)
+
+      assert document |> Floki.find("[data-event-family]") |> Floki.attribute("data-event-family") ==
+               ["customer", "subscription", "payment", "other"]
+
+      assert length(Floki.find(document, ".ax-timeline-dot")) == 1
+      assert length(Floki.find(document, ".ax-event-icon-amber")) == 1
+
+      assert Enum.all?(Floki.find(document, ".ax-event-icon"), fn icon ->
+               Floki.attribute(icon, "aria-hidden") == ["true"]
+             end)
+    end
+
     test "automatic provenance is quiet while operator attribution remains visible" do
       html =
         render_component(&Timeline.timeline/1,

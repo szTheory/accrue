@@ -7,7 +7,7 @@ defmodule AccrueAdmin.NavTest do
     items = Nav.items("/billing", "/billing")
     labels = Enum.map(items, & &1.label)
 
-    assert hd(labels) == "Billing activity"
+    assert hd(labels) == "Recent activity"
     assert "Payments" in labels
     assert "Payment recovery" in labels
 

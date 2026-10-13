@@ -482,8 +482,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Developer"
           breadcrumbs={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.webhooks_index_heading()}
           ]}
           title={Copy.webhooks_list_heading()}

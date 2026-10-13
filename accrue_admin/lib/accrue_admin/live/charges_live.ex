@@ -96,8 +96,8 @@ defmodule AccrueAdmin.Live.ChargesLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Billing"
           breadcrumbs={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.charges_index_heading()}
           ]}
           title={Copy.payments_list_heading()}

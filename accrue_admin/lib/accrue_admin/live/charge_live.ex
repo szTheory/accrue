@@ -192,6 +192,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
         phx-key="escape"
       >
         <Breadcrumbs.breadcrumbs
+          group="Billing"
           items={[
             %{
               label: "Payments",

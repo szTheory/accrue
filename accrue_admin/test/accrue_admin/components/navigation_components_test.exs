@@ -9,6 +9,29 @@ defmodule AccrueAdmin.NavigationComponentsTest do
   alias AccrueAdmin.Components.{DropdownMenu, Input, Select, Sidebar, Tabs, WindowSelector}
 
   describe "Breadcrumbs" do
+    test "a navigation group is plain text while real list parents remain links" do
+      html =
+        render_component(&Breadcrumbs.breadcrumbs/1, %{
+          group: "Billing",
+          items: [
+            %{label: "Customers", href: "/billing/customers?org=acme"},
+            %{label: "Northwind"}
+          ]
+        })
+
+      document = Floki.parse_fragment!(html)
+
+      assert document |> Floki.find(".ax-breadcrumbs-group") |> Floki.text() |> String.trim() ==
+               "Billing"
+
+      assert document |> Floki.find("a") |> Floki.attribute("href") == [
+               "/billing/customers?org=acme"
+             ]
+
+      assert document |> Floki.find("[aria-current='page']") |> Floki.text() |> String.trim() ==
+               "Northwind"
+    end
+
     test "renders linked ancestors and current page" do
       html =
         render_component(&Breadcrumbs.breadcrumbs/1, %{

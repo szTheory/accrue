@@ -3,22 +3,7 @@ defmodule AccrueAdmin.Copy.BillingEvent do
 
   # --- Events index (EventsLive) — prefix billing_events_*
 
-  def billing_event_label("customer.created"), do: "Customer created"
-  def billing_event_label("subscription.created"), do: "Subscription created"
-  def billing_event_label("customer.updated"), do: "Customer updated"
-  def billing_event_label("customer.local_updated"), do: "Customer record updated locally"
-  def billing_event_label("webhook.received"), do: "Webhook received"
-  def billing_event_label("webhook.replay_requested"), do: "Webhook replay requested"
-  def billing_event_label("invoice.paid"), do: "Invoice paid"
-  def billing_event_label("charge.succeeded"), do: "Payment succeeded"
-  def billing_event_label("charge.failed"), do: "Payment failed"
-  def billing_event_label("charge.refunded"), do: "Payment refunded"
-  def billing_event_label("dunning.campaign_started"), do: "Payment recovery started"
-  def billing_event_label("dunning.step_sent"), do: "Payment reminder sent"
-  def billing_event_label("dunning.recovered"), do: "Payment recovered"
-  def billing_event_label("dunning.exhausted"), do: "Payment recovery ended"
-  def billing_event_label(value) when is_binary(value) and value != "", do: "Billing event"
-  def billing_event_label(_value), do: "Event details unavailable"
+  def billing_event_label(value), do: AccrueAdmin.EventPresentation.for(value).label
 
   def billing_events_page_title, do: "Events"
 

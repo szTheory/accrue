@@ -122,6 +122,7 @@ defmodule AccrueAdmin.Live.EventLive do
         </div>
 
         <Breadcrumbs.breadcrumbs
+          group="Audit"
           :if={@event}
           items={[
             %{label: "Events", href: @return_destination.path},

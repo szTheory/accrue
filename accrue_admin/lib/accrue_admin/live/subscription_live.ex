@@ -265,6 +265,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         phx-key="escape"
       >
         <Breadcrumbs.breadcrumbs
+          group="Billing"
           items={[
             %{
               label: Copy.subscription_breadcrumb_subscriptions(),

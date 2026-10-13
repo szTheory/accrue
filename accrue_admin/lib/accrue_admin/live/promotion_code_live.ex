@@ -130,6 +130,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
           <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-promotion-code-read">Retry</button>
         </div>
         <Breadcrumbs.breadcrumbs
+          group="Catalog"
           :if={@promotion_code}
           items={[
             %{
