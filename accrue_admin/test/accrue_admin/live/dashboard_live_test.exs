@@ -99,7 +99,13 @@ defmodule AccrueAdmin.DashboardLiveTest do
     # Home presents observable activity and scope-matched destinations only.
     assert html =~ "ax-display"
     assert html =~ "Recent activity"
-    assert html =~ ~s(class="ax-breadcrumbs-group">)
+
+    assert html
+           |> Floki.parse_document!()
+           |> Floki.find(".ax-breadcrumbs-group")
+           |> Floki.text()
+           |> String.trim() == "Billing"
+
     assert html =~ "data-event-family=\"customer\""
     refute html =~ "Recorded automatically"
     assert html =~ "ax-id-badge-plain"

@@ -665,6 +665,9 @@ button {
 .ax-active-org-name {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-weight: 600;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
 }
 
 .ax-connection-state {
@@ -1093,15 +1096,6 @@ html.accrue-admin[data-theme="dark"] .ax-theme-picker-option-active {
   outline: none;
 }
 
-.ax-shell-content:has(> .ax-subscription-detail-page),
-.ax-shell-content:has(> .ax-home) {
-  padding-top: 0;
-}
-
-.ax-shell-content:has(> .ax-home) {
-  padding-bottom: 0.5rem;
-}
-
 .ax-breadcrumbs-list,
 .ax-flash-group {
   display: flex;
@@ -1123,6 +1117,20 @@ html.accrue-admin[data-theme="dark"] .ax-theme-picker-option-active {
   align-items: center;
   gap: var(--ax-space-sm);
   min-width: 0;
+  max-inline-size: 100%;
+}
+
+.ax-breadcrumbs-link,
+.ax-breadcrumbs-current {
+  min-inline-size: 0;
+  max-inline-size: min(var(--ax-record-label-measure), 100%);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-breadcrumbs-separator {
+  flex: none;
 }
 
 .ax-filter-chip-bar,
@@ -3702,6 +3710,34 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   min-width: 0;
 }
 
+.ax-data-table-identity-stacked {
+  max-inline-size: min(var(--ax-record-label-measure), 100%);
+}
+
+/* Elide compact display labels in CSS, preserving full DOM text and destinations.
+   Detail headings and exact copyable evidence wrap instead. */
+.ax-record-label,
+.ax-data-table-identity-stacked .ax-data-table-identity-primary > a,
+.ax-data-table-identity-stacked .ax-data-table-identity-primary > span,
+.ax-data-table-identity-email {
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: min(var(--ax-record-label-measure), 100%);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-data-table-identity-stacked .ax-data-table-identity-primary > .ax-event-link {
+  display: flex;
+}
+
+.ax-data-table-identity-primary > .ax-event-link > span {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .ax-data-table-identity-primary,
 .ax-data-table-identity-secondary {
   min-width: 0;
@@ -3712,7 +3748,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 .ax-data-table-identity-secondary {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: baseline;
   color: var(--ax-muted);
   font: var(--ax-type-body-sm-font);
   gap: 0 var(--ax-space-sm);
@@ -4405,6 +4441,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 .ax-command-palette {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ax-space-md);
   width: min(42rem, 100%);
   max-width: 100%;
@@ -4484,6 +4521,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 .ax-command-palette-body {
+  min-inline-size: 0;
   min-height: 10rem;
   max-height: min(28rem, calc(82vh - 8rem));
   overflow: auto;
@@ -4509,6 +4547,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 
 .ax-command-palette-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ax-space-xs);
   margin: 0;
   padding: 0;
@@ -4517,6 +4556,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 
 .ax-command-palette-item {
   display: flex;
+  min-inline-size: 0;
   align-items: center;
   gap: var(--ax-space-sm);
   box-sizing: border-box;
@@ -4527,6 +4567,23 @@ details[open].ax-dropdown .ax-dropdown-panel {
   color: var(--ax-primary);
   cursor: pointer;
   text-decoration: none;
+}
+
+.ax-command-palette-item > span {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.ax-command-palette-list-item {
+  min-inline-size: 0;
+}
+
+.ax-command-palette-item strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ax-command-palette-item:hover {
@@ -5101,25 +5158,6 @@ html.accrue-admin[data-theme="dark"] .ax-card.ax-data-table-shell {
   gap: var(--ax-space-md);
 }
 
-.ax-home > .ax-page-header {
-  gap: 0;
-  padding-block: 0;
-}
-
-.ax-home > .ax-page-header .ax-display {
-  color: var(--ax-primary);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.ax-home > .ax-page-header .ax-page-copy {
-  color: var(--ax-primary);
-  font: var(--ax-type-label-sm-font);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  line-height: var(--ax-leading-tight);
-}
-
 .ax-home .ax-home-section {
   margin-block-start: 0;
 }
@@ -5306,13 +5344,6 @@ html.accrue-admin[data-theme="dark"] .ax-card.ax-data-table-shell {
 
 .ax-activity-footer {
   margin-top: var(--ax-space-sm);
-}
-
-@media (min-width: 1024px) { /* --ax-bp-lg ↑ */
-  .ax-shell-content:has(> .ax-subscription-detail-page),
-  .ax-shell-content:has(> .ax-home) {
-    padding-top: 0;
-  }
 }
 
 /* Demoted KPI strip on home: explicit responsive 4-up */

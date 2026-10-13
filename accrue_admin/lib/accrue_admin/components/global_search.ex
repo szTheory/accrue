@@ -345,7 +345,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   <ul id="global-search-options-customers" class="ax-command-palette-list" role="listbox" aria-label="Customers" data-search-group="customers">
                     <li :for={customer <- @results.customers} class="ax-command-palette-list-item">
                       <a id={"global-search-option-customers-#{customer.id}"} role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)}>
-                        <span><strong><%= customer.name || customer.email || customer.id %></strong>
+                        <span><strong title={customer.name || customer.email || customer.id}><%= customer.name || customer.email || customer.id %></strong>
                           <small><%= customer.email %><%= if customer.owner_id, do: " · #{customer.owner_type} #{customer.owner_id}" %><%= if customer.processor_id, do: " · #{customer.processor} #{customer.processor_id}" %></small>
                           <code>Customer ID: <%= customer.id %></code>
                         </span>
@@ -359,8 +359,8 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   <ul id="global-search-options-invoices" class="ax-command-palette-list" role="listbox" aria-label="Invoices" data-search-group="invoices">
                     <li :for={invoice <- @results.invoices} class="ax-command-palette-list-item">
                       <a id={"global-search-option-invoices-#{invoice.id}"} role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}>
-                        <span><strong><%= invoice.number || invoice.id %></strong>
-                          <small><%= invoice.customer_name %><%= if invoice.customer_email, do: " · #{invoice.customer_email}" %><%= if invoice.processor_id, do: " · #{invoice.processor_id}" %></small>
+                        <span><strong title={invoice.number || invoice.id}><%= invoice.number || invoice.id %></strong>
+                          <small><span class="ax-record-label" title={invoice.customer_name}><%= invoice.customer_name %></span><%= if invoice.customer_email, do: " · #{invoice.customer_email}" %><%= if invoice.processor_id, do: " · #{invoice.processor_id}" %></small>
                           <code>Invoice ID: <%= invoice.id %></code>
                         </span>
                       </a>
@@ -373,8 +373,8 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   <ul id="global-search-options-subscriptions" class="ax-command-palette-list" role="listbox" aria-label="Subscriptions" data-search-group="subscriptions">
                     <li :for={sub <- @results.subscriptions} class="ax-command-palette-list-item">
                       <a id={"global-search-option-subscriptions-#{sub.id}"} role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/subscriptions/#{sub.id}", @current_owner_scope)}>
-                        <span><strong><%= sub.customer_name || sub.customer_email || sub.id %> · <%= sub.status %></strong>
-                          <small><%= sub.customer_email %><%= if sub.processor_id, do: " · #{sub.processor_id}" %></small>
+                        <span><strong title={sub.customer_name || sub.customer_email || sub.id}><%= sub.customer_name || sub.customer_email || sub.id %></strong>
+                          <small><%= sub.status %><%= if sub.customer_email, do: " · #{sub.customer_email}" %><%= if sub.processor_id, do: " · #{sub.processor_id}" %></small>
                           <code>Subscription ID: <%= sub.id %></code>
                         </span>
                       </a>

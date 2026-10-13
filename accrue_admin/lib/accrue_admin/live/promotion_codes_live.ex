@@ -248,7 +248,7 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     }
 
     ~H"""
-    <DataTable.identity_cell>
+    <DataTable.identity_cell label={@label}>
       <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
       <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy promotion code ID" copy_label="promotion code ID" variant="plain" /></:secondary>
     </DataTable.identity_cell>
@@ -464,7 +464,9 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
   end
 
   defp safe_link(href, label) do
-    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escape(label)}</a>))
+    Phoenix.HTML.raw(
+      ~s(<a href="#{href}" class="ax-link ax-record-label" title="#{escape(label)}">#{escape(label)}</a>)
+    )
   end
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix

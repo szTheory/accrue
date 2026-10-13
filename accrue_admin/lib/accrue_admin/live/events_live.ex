@@ -480,7 +480,7 @@ defmodule AccrueAdmin.Live.EventsLive do
     }
 
     ~H"""
-    <DataTable.identity_cell>
+    <DataTable.identity_cell label={@label}>
       <:primary>
         <.link href={@href} class="ax-link ax-event-link">
           <EventIcon.event_icon type={@event_key} />

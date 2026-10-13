@@ -102,7 +102,8 @@ defmodule AccrueAdmin.Components.AtRiskTable do
               <td>
                 <a
                   href={subscription_href(@base_path, row, @owner_scope, @current_window)}
-                  class="ax-link"
+                  class="ax-link ax-record-label"
+                  title={row.customer_label}
                 >
                   {row.customer_label || "—"}
                 </a>
@@ -123,7 +124,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
           <header class="ax-at-risk-card-header">
             <div class="ax-at-risk-card-identity">
               <p class="ax-eyebrow">Subscription</p>
-              <h3 class="ax-heading">{row.customer_label || "—"}</h3>
+              <h3 class="ax-heading ax-record-label" title={row.customer_label}>{row.customer_label || "—"}</h3>
             </div>
             <span class="ax-at-risk-card-status">{step_label(row)}</span>
           </header>

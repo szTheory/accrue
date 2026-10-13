@@ -17,13 +17,14 @@ defmodule AccrueAdmin.Components.Breadcrumbs do
     <nav class="ax-breadcrumbs" aria-label="Breadcrumb">
       <ol class="ax-breadcrumbs-list">
         <li :for={{item, index} <- Enum.with_index(@items)} class="ax-breadcrumbs-item">
-          <a :if={item[:href]} href={item[:href]} class="ax-breadcrumbs-link">
+          <a :if={item[:href]} href={item[:href]} class="ax-breadcrumbs-link" title={item[:label]}>
             <%= item[:label] %>
           </a>
           <span
             :if={!item[:href]}
             class={if(index == length(@items) - 1, do: "ax-breadcrumbs-current", else: "ax-breadcrumbs-group")}
             aria-current={if(index == length(@items) - 1, do: "page", else: nil)}
+            title={item[:label]}
           >
             <%= item[:label] %>
           </span>

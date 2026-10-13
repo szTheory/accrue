@@ -9,13 +9,14 @@ defmodule AccrueAdmin.Components.DataTable do
   alias AccrueAdmin.Copy
 
   attr(:layout, :string, values: ["stacked", "inline"], default: "stacked")
+  attr(:label, :string, default: nil)
   slot(:primary, required: true)
   slot(:secondary)
 
   def identity_cell(assigns) do
     ~H"""
     <span class={["ax-data-table-identity", "ax-data-table-identity-" <> @layout]} data-role="identity-cell">
-      <span class="ax-data-table-identity-primary"><%= render_slot(@primary) %></span>
+      <span class="ax-data-table-identity-primary" title={@label}><%= render_slot(@primary) %></span>
       <span :if={@secondary != []} class="ax-data-table-identity-secondary"><%= render_slot(@secondary) %></span>
     </span>
     """

@@ -506,7 +506,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     }
 
     ~H"""
-    <DataTable.identity_cell>
+    <DataTable.identity_cell label={@label}>
       <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
       <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy connected account ID" copy_label="connected account ID" variant="plain" /></:secondary>
     </DataTable.identity_cell>

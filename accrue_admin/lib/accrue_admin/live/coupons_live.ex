@@ -255,7 +255,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
     }
 
     ~H"""
-    <DataTable.identity_cell>
+    <DataTable.identity_cell label={@label}>
       <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
       <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy coupon ID" copy_label="coupon ID" variant="plain" /></:secondary>
     </DataTable.identity_cell>

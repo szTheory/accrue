@@ -235,10 +235,10 @@ defmodule AccrueAdmin.Live.CustomersLive do
     }
 
     ~H"""
-    <DataTable.identity_cell>
+    <DataTable.identity_cell label={@label}>
       <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
       <:secondary>
-        <span :if={@email} class="ax-data-table-identity-email"><%= @email %></span>
+        <span :if={@email} class="ax-data-table-identity-email" title={@email}><%= @email %></span>
         <IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy customer ID" copy_label="customer ID" variant="plain" />
       </:secondary>
     </DataTable.identity_cell>

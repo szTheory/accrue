@@ -276,7 +276,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
     }
 
     ~H"""
-    <DataTable.identity_cell>
+    <DataTable.identity_cell label={@customer_label}>
       <:primary><.link href={@payment_href} class="ax-link"><%= @customer_label %></.link></:primary>
       <:secondary>
         <IdBadge.id_badge id={@badge_id} id_value={@payment_id} label="Copy payment ID" copy_label="payment ID" variant="plain" />

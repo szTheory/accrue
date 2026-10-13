@@ -290,10 +290,10 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     }
 
     ~H"""
-    <DataTable.identity_cell>
+    <DataTable.identity_cell label={@invoice_label}>
       <:primary><.link href={@invoice_href} class="ax-link"><%= @invoice_label %></.link></:primary>
       <:secondary>
-        <.link href={@customer_href} class="ax-label ax-muted"><%= @customer_label %></.link>
+        <.link href={@customer_href} class="ax-record-label ax-muted" title={@customer_label}><%= @customer_label %></.link>
         <IdBadge.id_badge id={@badge_id} id_value={@processor_id} label="Copy invoice ID" copy_label="invoice ID" variant="plain" />
       </:secondary>
     </DataTable.identity_cell>
