@@ -364,6 +364,46 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   end
 
   describe "Timeline" do
+    test "an explicit heading carries the detail link and a short visible ID label" do
+      html =
+        render_component(&Timeline.timeline/1,
+          items: [
+            %{
+              id: 42,
+              title: "Subscription created",
+              event_type: "subscription.created",
+              subject_type: "Subscription",
+              subject_id: "sub_42",
+              href: "/billing/events/42?org=acme"
+            },
+            %{
+              id: 43,
+              title: "Billing event",
+              event_type: "provider.unknown",
+              subject_type: "Customer",
+              subject_id: "cus_43",
+              href: "/billing/events/43?org=acme"
+            }
+          ]
+        )
+
+      document = Floki.parse_fragment!(html)
+
+      labels =
+        document
+        |> Floki.find(".ax-timeline-subject-label")
+        |> Enum.map(&(Floki.text(&1) |> String.trim()))
+
+      assert labels == ["ID", "Customer ID"]
+
+      assert document |> Floki.find(".ax-timeline-title-link") |> Floki.attribute("href") ==
+               ["/billing/events/42?org=acme", "/billing/events/43?org=acme"]
+
+      assert document |> Floki.find(".ax-timeline-link") == []
+      assert html =~ "Copy Subscription ID sub_42"
+      assert html =~ ~s(data-clipboard-text="sub_42")
+    end
+
     test "event-family icons replace dots while generic timelines keep their existing markers" do
       html =
         render_component(&Timeline.timeline/1,

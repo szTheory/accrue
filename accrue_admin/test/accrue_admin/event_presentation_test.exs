@@ -15,6 +15,8 @@ defmodule AccrueAdmin.EventPresentationTest do
     customer = EventPresentation.for("customer.created")
     subscription = EventPresentation.for("subscription.created")
     refute customer.icon == subscription.icon
+    assert subscription.icon == :document_plus
+    refute subscription.icon == EventPresentation.for("subscription.resumed").icon
     assert customer.tone == :slate
     assert subscription.tone == :slate
     assert EventPresentation.for("dunning.campaign_started").icon == :recovery

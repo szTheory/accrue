@@ -28,7 +28,15 @@ defmodule AccrueAdmin.Components.Timeline do
           <div class={["ax-timeline-card", Map.get(item, :subject_id) && "ax-timeline-record"]}>
             <div class="ax-timeline-header">
               <div>
-                <p class="ax-label"><%= Map.get(item, :title, "Event") %></p>
+                <p class="ax-label">
+                  <a
+                    :if={title_link?(item)}
+                    class="ax-link ax-timeline-title-link"
+                    href={item.href}
+                    aria-label={"Open #{Map.get(item, :title, "billing")} event #{Map.get(item, :id, "")}"}
+                  ><%= Map.get(item, :title, "Event") %></a>
+                  <span :if={!title_link?(item)}><%= Map.get(item, :title, "Event") %></span>
+                </p>
                 <Timestamp.timestamp
                   :if={match?(%DateTime{}, Map.get(item, :at))}
                   value={Map.get(item, :at)}
@@ -43,7 +51,7 @@ defmodule AccrueAdmin.Components.Timeline do
             </div>
 
             <div :if={Map.get(item, :subject_id)} class="ax-timeline-subject">
-              <span class="ax-timeline-subject-label"><%= Map.get(item, :subject_type) || "Record" %> ID</span>
+              <span class="ax-timeline-subject-label"><%= subject_label(item) %></span>
               <IdBadge.id_badge
                 id={"timeline-subject-#{Map.get(item, :id, :erlang.phash2(item))}"}
                 variant="plain"
@@ -64,7 +72,7 @@ defmodule AccrueAdmin.Components.Timeline do
 
             <div :if={Map.get(item, :meta)} class="ax-timeline-meta"><%= Map.get(item, :meta) %></div>
 
-            <a :if={Map.get(item, :href)} class="ax-timeline-link" href={Map.get(item, :href)}>
+            <a :if={Map.get(item, :href) && !title_link?(item)} class="ax-timeline-link" href={Map.get(item, :href)}>
               <%= Map.get(item, :href_label, "Open details") %>
             </a>
           </div>
@@ -74,6 +82,16 @@ defmodule AccrueAdmin.Components.Timeline do
       <p :if={@items == []} class="ax-body ax-timeline-empty"><%= @empty_label %></p>
     </section>
     """
+  end
+
+  defp title_link?(item), do: Map.has_key?(item, :event_type) && is_binary(Map.get(item, :href))
+
+  # Shorten only when the rendered heading itself names this exact record type.
+  # An ambiguous/unknown event still needs "Subscription ID", "Customer ID", etc.
+  defp subject_label(item) do
+    subject_type = Map.get(item, :subject_type) || "Record"
+    title = Map.get(item, :title) || ""
+    if String.starts_with?(title, subject_type <> " "), do: "ID", else: subject_type <> " ID"
   end
 
   defp tone(item) do

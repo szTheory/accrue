@@ -82,10 +82,18 @@ defmodule AccrueAdmin.EventPresentation do
     connect: :connect
   }
 
+  # Creation has a distinct cue from recurring arrows, which suggest renewal/sync.
+  @event_icons %{"subscription.created" => :document_plus}
+
   def for(type) do
     case Map.get(@events, type) do
       {label, family, tone} ->
-        %{label: label, family: family, icon: Map.fetch!(@icons, family), tone: tone}
+        %{
+          label: label,
+          family: family,
+          icon: Map.get(@event_icons, type, Map.fetch!(@icons, family)),
+          tone: tone
+        }
 
       nil ->
         label =

@@ -107,9 +107,11 @@ defmodule AccrueAdmin.DashboardLiveTest do
     refute html =~ "data-ax-command-palette-trigger"
     refute html =~ Copy.home_customer_search_cta()
     refute html =~ "Audit event"
-    assert html =~ "Customer ID"
+    assert html =~ "Copy Customer ID"
+    assert html =~ ~s(class="ax-timeline-subject-label">ID</span>)
     assert html =~ "data-clipboard-text"
-    assert html =~ "Open event"
+    refute html =~ ">Open event<"
+    assert html =~ "ax-timeline-title-link"
     assert html =~ "View events"
 
     refute html =~ "data-ax-health-verdict"
@@ -224,7 +226,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     assert Enum.any?(rows, fn row ->
              text = Floki.text(row)
-             href = row |> Floki.find("a.ax-timeline-link") |> Floki.attribute("href")
+             href = row |> Floki.find("a.ax-timeline-title-link") |> Floki.attribute("href")
 
              text =~ "Customer updated" and text =~ first_customer.id and
                href == ["/billing/events/#{first_event.id}?org=many-home-org"]
@@ -232,7 +234,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     assert Enum.any?(rows, fn row ->
              text = Floki.text(row)
-             href = row |> Floki.find("a.ax-timeline-link") |> Floki.attribute("href")
+             href = row |> Floki.find("a.ax-timeline-title-link") |> Floki.attribute("href")
 
              text =~ "Customer record updated locally" and text =~ first_customer.id and
                href == ["/billing/events/#{second_event.id}?org=many-home-org"]
