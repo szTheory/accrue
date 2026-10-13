@@ -451,7 +451,7 @@ defmodule AccrueAdmin.Live.EventsLive do
     }
 
     ~H"""
-    <DataTable.identity_cell>
+    <DataTable.identity_cell layout="inline">
       <:primary>
         <a :if={@href} href={@href} class="ax-link"><%= @label %></a>
         <span :if={!@href}><%= @label %></span>

@@ -2034,13 +2034,14 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-timestamp-copy {
   min-width: 44px;
   min-height: 44px;
-  padding: 0 var(--ax-space-xs);
+  padding: 0;
   border: 0;
   border-radius: var(--ax-radius-sm);
   background: transparent;
   color: inherit;
   text-align: left;
-  font: inherit;
+  font: var(--ax-type-body-sm-font);
+  font-variant-numeric: tabular-nums;
   cursor: pointer;
 }
 
@@ -3713,6 +3714,16 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   flex-wrap: wrap;
   align-items: flex-start;
   color: var(--ax-muted);
+  font: var(--ax-type-body-sm-font);
+  gap: 0 var(--ax-space-sm);
+}
+
+/* Record references have no display name: keep their type and exact ID together.
+   Named records retain the conventional name + secondary evidence hierarchy. */
+.ax-data-table-identity-inline {
+  grid-template-columns: fit-content(40%) minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: var(--ax-space-sm);
 }
 
 .ax-data-table-identity-secondary .ax-id-badge {
@@ -3747,6 +3758,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-data-table-card dd {
   margin: 0;
+  font: var(--ax-type-body-sm-font);
 }
 
 .ax-data-table-card .ax-stack-sm {
@@ -3940,7 +3952,16 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   padding: var(--ax-space-sm) var(--ax-space-md);
   border-bottom: 1px solid var(--ax-border);
   text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
+}
+
+.ax-data-table-grid th {
+  font: var(--ax-type-label-font);
+}
+
+.ax-data-table-grid td,
+.ax-data-table-card {
+  font: var(--ax-type-body-sm-font);
 }
 
 .ax-data-table-grid tbody tr:last-child td { border-bottom: 0; }
@@ -4560,8 +4581,31 @@ details[open].ax-dropdown .ax-dropdown-panel {
 .ax-button-spinner { display: inline-block; inline-size: 1em; block-size: 1em; flex: none; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: ax-spin var(--ax-dur-3) linear infinite; }
 @media (prefers-reduced-motion: reduce) { .ax-button-spinner { animation-duration: 0ms; } }
 
-.ax-data-table-shell .ax-link {
-  color: var(--ax-accent-readable);
+.ax-data-table-grid .ax-link,
+.ax-data-table-card .ax-link {
+  color: var(--ax-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.ax-data-table-identity-secondary a:not(.ax-button) {
+  color: var(--ax-muted);
+  font: var(--ax-type-body-sm-font);
+  text-decoration: none;
+}
+
+.ax-data-table-grid .ax-link:hover,
+.ax-data-table-grid .ax-link:focus-visible,
+.ax-data-table-card .ax-link:hover,
+.ax-data-table-card .ax-link:focus-visible {
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+}
+
+.ax-data-table-identity-secondary a:not(.ax-button):hover,
+.ax-data-table-identity-secondary a:not(.ax-button):focus-visible {
+  text-decoration: underline;
+  text-decoration-color: currentColor;
 }
 
 /* At intermediate touch widths the desktop table remains the active layout.
@@ -4587,17 +4631,9 @@ html.accrue-admin[data-theme="dark"] .ax-card.ax-data-table-shell {
   background-color: var(--ax-elevated) !important;
 }
 
-html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
-  color: var(--ax-primary) !important;
-}
-
 @media (prefers-color-scheme: dark) {
   html.accrue-admin[data-theme="system"] .ax-card.ax-data-table-shell {
     background-color: var(--ax-elevated) !important;
-  }
-
-  html.accrue-admin[data-theme="system"] .ax-data-table-shell .ax-link {
-    color: var(--ax-primary) !important;
   }
 }
 
@@ -7052,9 +7088,9 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   transition: var(--ax-transition-colors);
 }
 
-.ax-id-badge:hover {
-  background: var(--ax-interactive-hover);
-  border-color: var(--ax-border-strong);
+.ax-id-badge:hover .ax-id-badge-text {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
 }
 
 .ax-time-preference {
@@ -7206,7 +7242,10 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-json-leaf { display: flex; flex-wrap: wrap; gap: var(--ax-space-xs) var(--ax-space-md); align-items: baseline; }
 .ax-json-leaf .ax-json-key { min-inline-size: min(11rem, 100%); color: var(--ax-primary); }
 .ax-json-leaf .ax-json-value { color: var(--ax-muted); }
-.ax-timestamp-copy:hover { background: var(--ax-interactive-hover); }
+.ax-timestamp-copy:hover time {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
 .ax-toast {
   position: fixed;
   inset-inline: var(--ax-space-md);
@@ -7353,6 +7392,5 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 
 /* Plain copyable evidence: text at rest, shared hover/focus and toast feedback. */
 .ax-id-badge.ax-id-badge-plain { max-inline-size: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
-.ax-id-badge-plain:hover { background: var(--ax-interactive-hover); }
 .ax-id-badge-plain:focus-visible { outline: 2px solid var(--ax-focus-ring); outline-offset: 2px; }
 .ax-id-badge-plain .ax-id-badge-text { white-space: normal; overflow-wrap: anywhere; }
