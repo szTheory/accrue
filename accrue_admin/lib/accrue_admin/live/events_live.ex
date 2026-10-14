@@ -146,8 +146,6 @@ defmodule AccrueAdmin.Live.EventsLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          dom_limit={:infinity}
-          show_row_count={false}
           empty_action_label="Reset filters"
           clear_href={clear_all_href(@params, @table_path)}
           row_label={Copy.events_list_result_label_pair()}

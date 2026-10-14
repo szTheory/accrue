@@ -868,7 +868,7 @@ defmodule AccrueAdmin.Copy do
 
   def customers_list_all_lens_label, do: "All customers"
 
-  def customers_list_missing_payment_method_label, do: "Missing payment method"
+  def customers_list_missing_payment_method_label, do: "Missing default method"
 
   def customers_list_result_label_pair, do: {"customer", "customers"}
   def subscriptions_list_result_label_pair, do: {"subscription", "subscriptions"}

@@ -144,7 +144,6 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          show_row_count={false}
           show_empty_clear={false}
           clear_href={@table_path}
           columns={[

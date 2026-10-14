@@ -134,7 +134,6 @@ defmodule AccrueAdmin.Live.ChargesLive do
         <.live_component
           module={DataTable}
           row_label={Copy.payments_list_result_label_pair()}
-          show_row_count={false}
           id="payments"
           query_module={Charges}
           current_owner_scope={@current_owner_scope}

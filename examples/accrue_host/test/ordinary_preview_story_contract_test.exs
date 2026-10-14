@@ -1,9 +1,20 @@
 defmodule AccrueHost.OrdinaryPreviewStoryContractTest do
   use AccrueHost.DataCase, async: false
 
-  alias Accrue.Billing.{Charge, Coupon, Customer, Invoice, PromotionCode, Refund, Subscription}
+  alias Accrue.Billing.{
+    Charge,
+    Coupon,
+    Customer,
+    Invoice,
+    PaymentMethod,
+    PromotionCode,
+    Refund,
+    Subscription
+  }
+
   alias Accrue.Events.Event
   @ordinary_seed Path.expand("../priv/repo/seeds/ordinary.exs", __DIR__)
+  @payment_methods_seed Path.expand("../priv/repo/seeds/ordinary_payment_methods.exs", __DIR__)
 
   setup do
     case Accrue.Processor.Fake.start_link([]) do
@@ -50,6 +61,58 @@ defmodule AccrueHost.OrdinaryPreviewStoryContractTest do
 
     assert Repo.aggregate(from(c in Customer, where: c.processor_id == "cus_fake_00006"), :count) ==
              1
+  end
+
+  test "background customers have a repeatable mix of default methods and missing-method cases" do
+    background =
+      Repo.all(from(c in Customer, where: like(c.processor_id, "cus_%")))
+      |> Enum.filter(&(&1.processor_id == "cus_" <> &1.id))
+
+    assert length(background) > 0
+    assert Enum.any?(background, &is_nil(&1.default_payment_method_id))
+    assert Enum.any?(background, &(!is_nil(&1.default_payment_method_id)))
+
+    for customer <- background do
+      if :erlang.phash2(customer.id, 10) < 8 do
+        method = Repo.get!(PaymentMethod, customer.default_payment_method_id)
+        assert method.customer_id == customer.id
+        assert method.processor == "fake"
+        assert method.is_default
+        assert method.card_brand in ["visa", "mastercard"]
+        assert method.card_last4 in ["4242", "4444"]
+      else
+        assert is_nil(customer.default_payment_method_id)
+      end
+    end
+
+    before = Enum.map(background, &{&1.id, &1.default_payment_method_id}) |> Enum.sort()
+
+    counts =
+      {Repo.aggregate(PaymentMethod, :count), Repo.aggregate(Event, :count),
+       Repo.aggregate(Customer, :count)}
+
+    Code.eval_file(@payment_methods_seed)
+
+    after_rows =
+      Enum.map(background, fn customer ->
+        current = Repo.get!(Customer, customer.id)
+        {current.id, current.default_payment_method_id}
+      end)
+      |> Enum.sort()
+
+    assert before == after_rows
+
+    assert counts ==
+             {Repo.aggregate(PaymentMethod, :count), Repo.aggregate(Event, :count),
+              Repo.aggregate(Customer, :count)}
+  end
+
+  test "payment-method additions refuse a different preview" do
+    System.put_env("COMPOSE_PROJECT_NAME", "another-preview")
+
+    assert_raise RuntimeError, ~r/payment-method seed refused/, fn ->
+      Code.eval_file(@payment_methods_seed)
+    end
   end
 
   test "promotion redemption totals and eligibility fields agree with their linked coupons" do

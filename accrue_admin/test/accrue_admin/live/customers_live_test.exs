@@ -85,7 +85,7 @@ defmodule AccrueAdmin.CustomersLiveTest do
     assert html =~ "Captain Customer"
 
     # Payment-method column relabelled and softened (no raw pm id leaked into the list).
-    assert html =~ "Payment method"
+    assert html =~ "Default payment method"
     assert html =~ "On file"
     refute html =~ "pm_team_default"
 
@@ -106,6 +106,39 @@ defmodule AccrueAdmin.CustomersLiveTest do
 
     refute html =~ "Other Customer"
     assert html =~ "/billing/customers/"
+  end
+
+  test "default-method warnings are distinct from ordinary values and progress names customers",
+       %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, html} = live(conn, "/billing/customers?q=Captain")
+    document = Floki.parse_fragment!(html)
+    assert Floki.text(Floki.find(document, "thead")) =~ "Default payment method"
+    assert Floki.find(document, "tbody .ax-status-badge-amber") == []
+    assert Floki.text(Floki.find(document, "tbody")) =~ "On file"
+    assert has_element?(view, "[data-role='pagination-progress']", "1 customer loaded")
+    assert has_element?(view, "[data-role='end-of-list']", "End of list")
+
+    html =
+      render_patch(
+        view,
+        "/billing/customers?q=other@example.com&has_default_payment_method=false"
+      )
+
+    warnings = Floki.find(Floki.parse_fragment!(html), "tbody .ax-status-badge-amber")
+    assert length(warnings) == 1
+    assert Floki.text(warnings) == "Missing"
+    assert has_element?(view, "[data-role='pagination-progress']", "1 customer loaded")
+    refute has_element?(view, "[data-role='pagination-progress']", "of")
+
+    total = TestRepo.aggregate(Customer, :count, :id)
+    render_patch(view, "/billing/customers")
+
+    assert has_element?(
+             view,
+             "[data-role='pagination-progress']",
+             "#{min(total, 25)} of #{total} customers loaded"
+           )
   end
 
   test "customer search guidance matches email, name, owner ID, and processor ID predicates", %{
@@ -159,7 +192,7 @@ defmodule AccrueAdmin.CustomersLiveTest do
 
     assert html =~ ~s(data-ax-filter-chips)
     assert html =~ contract.default_lens.label
-    assert html =~ "Missing payment method"
+    assert html =~ "Missing default method"
     assert html =~ ~s(data-ax-result-count)
     assert html =~ "Showing"
     assert html =~ "customers"
@@ -245,7 +278,7 @@ defmodule AccrueAdmin.CustomersLiveTest do
 
     assert {:ok, _view, html} = live_list(conn, "/billing/customers?view=all")
 
-    assert_table_headings_in_order(html, ["Customer", "Payment method"])
+    assert_table_headings_in_order(html, ["Customer", "Default payment method"])
 
     identity =
       html

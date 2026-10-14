@@ -137,7 +137,6 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
 
         <.live_component
           module={DataTable}
-          show_row_count={false}
           id="connect-accounts"
           query_module={ConnectAccounts}
           current_owner_scope={@current_owner_scope}

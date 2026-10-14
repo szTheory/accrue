@@ -170,7 +170,8 @@ defmodule AccrueAdmin.DataTableTest do
        )
        |> Phoenix.Component.assign(:poll_interval_ms, Map.get(session, "poll_interval_ms", 5_000))
        |> Phoenix.Component.assign(:table_caption, Map.get(session, "table_caption"))
-       |> Phoenix.Component.assign(:dom_limit, Map.get(session, "dom_limit", 4))
+       |> Phoenix.Component.assign(:limit, Map.get(session, "limit", 2))
+       |> Phoenix.Component.assign(:total_count, Map.get(session, "total_count"))
        |> Phoenix.Component.assign(:test_pid, Map.get(session, "test_pid"))}
     end
 
@@ -189,8 +190,8 @@ defmodule AccrueAdmin.DataTableTest do
         loading_state?={@loading_state?}
         clear_filters_patch={@clear_filters_patch}
         render_filter_toolbar={@render_filter_toolbar}
-        limit={2}
-        dom_limit={@dom_limit}
+        limit={@limit}
+        total_count={@total_count}
         poll_interval_ms={@poll_interval_ms}
         selectable={true}
         bulk_action_label="Retry selected"
@@ -227,8 +228,13 @@ defmodule AccrueAdmin.DataTableTest do
       {:noreply, socket}
     end
 
-    def handle_event("change_query", _params, socket) do
-      {:noreply, Phoenix.Component.assign(socket, :table_params, %{"status" => "closed"})}
+    def handle_event("change_query", params, socket) do
+      params = if params == %{}, do: %{"status" => "closed"}, else: params
+
+      {:noreply,
+       socket
+       |> Phoenix.Component.assign(:table_params, params)
+       |> Phoenix.Component.assign(:total_count, nil)}
     end
 
     @impl true
@@ -264,7 +270,6 @@ defmodule AccrueAdmin.DataTableTest do
         path={@path}
         params={@table_params}
         limit={2}
-        dom_limit={4}
         poll_interval_ms={5_000}
         columns={[%{id: :label, label: "Label"}]}
         card_title={& &1.label}
@@ -525,7 +530,7 @@ defmodule AccrueAdmin.DataTableTest do
     {:ok, _view, html} =
       live_isolated(conn, TableLive, session: %{"params" => %{"status" => "closed"}})
 
-    assert html =~ ~s(data-role="row-count">Showing 2 results<)
+    assert html =~ ~s(data-role="pagination-progress">2 results loaded<)
     refute html =~ ~s(data-role="load-more")
   end
 
@@ -854,10 +859,10 @@ defmodule AccrueAdmin.DataTableTest do
       assert html =~ ~s(data-phx-link="patch")
     end
 
-    test "renders an observable boundary only while a next cursor exists under dom_limit", %{
+    test "renders an observable boundary only while more rows can be loaded", %{
       conn: conn
     } do
-      # 5 rows, limit 2, dom_limit 4 → next_cursor present and rows (2) < dom_limit.
+      # More matches remain after the initial two rows.
       {:ok, view, html} =
         live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
 
@@ -866,7 +871,7 @@ defmodule AccrueAdmin.DataTableTest do
       assert html =~ ~s(id="fixtures-scroll-container")
       assert html =~ "data-pagination-target"
 
-      # Load more button remains for a11y / no-JS / past-cap loading.
+      # Load more remains as the progressive keyboard/manual fallback.
       assert html =~ ~s(data-role="load-more")
 
       # A view with no further pages must not render the sentinel.
@@ -896,18 +901,49 @@ defmodule AccrueAdmin.DataTableTest do
     end
   end
 
-  test "an explicitly unbounded history keeps every loaded row beyond the default cap", %{
+  test "all lists keep every requested page beyond 100 rows and identify the final page", %{
     conn: conn
   } do
-    {:ok, view, _html} =
-      live_isolated(conn, TableLive, session: %{"params" => %{}, "dom_limit" => :infinity})
+    FixtureStore.put_rows(
+      Enum.map(125..1//-1, fn index ->
+        %{
+          id: "row-#{index}",
+          label: "Customer #{index}",
+          status: "open",
+          category: "alpha",
+          inserted_at: DateTime.add(~U[2026-04-15 17:00:00Z], index, :second)
+        }
+      end)
+    )
 
-    render_click(element(view, "[data-role='load-more']"))
-    html = render_click(element(view, "[data-role='load-more']"))
-    rows = Floki.find(Floki.parse_fragment!(html), "tr[data-row-id]")
-    assert length(rows) == 5
-    assert length(Enum.uniq(Floki.attribute(rows, "data-row-id"))) == 5
+    {:ok, view, html} =
+      live_isolated(conn, TableLive,
+        session: %{"params" => %{}, "limit" => 25, "total_count" => 125}
+      )
+
+    assert html =~ "25 of 125 results loaded"
+
+    for expected <- [50, 75, 100, 125] do
+      html = render_click(element(view, "[data-role='load-more']"))
+      rows = Floki.find(Floki.parse_fragment!(html), "tr[data-row-id]")
+      assert length(rows) == expected
+      assert length(Enum.uniq(Floki.attribute(rows, "data-row-id"))) == expected
+      assert html =~ "Customer 125"
+      assert html =~ "#{expected} of 125 results loaded"
+      assert has_element?(view, "[data-role='viewport-sentinel']") == expected < 125
+    end
+
+    html = render(view)
     refute html =~ ~s(data-role="load-more")
+    assert has_element?(view, "[data-role='end-of-list']", "End of list")
+
+    Phoenix.LiveView.send_update(view.pid, DataTable, id: "fixtures", action: :poll)
+    assert render(view) =~ "125 of 125 results loaded"
+
+    html = render_click(view, "change_query", %{"q" => "Customer 125"})
+    assert html =~ "1 result loaded"
+    refute html =~ "Customer 124"
+    refute html =~ "of 125"
   end
 
   # ─── Nyquist structural guards (Phase 176-06) ───────────────────────────────

@@ -3552,6 +3552,50 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   min-width: 0;
 }
 
+.ax-data-table-footer {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-sm) var(--ax-space-md);
+  padding-block: var(--ax-space-md);
+}
+
+.ax-data-table-pagination-status {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ax-space-xs) var(--ax-space-md);
+  margin: 0;
+  color: var(--ax-muted);
+  font: var(--ax-type-body-sm-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.ax-data-table-pagination-loading,
+.ax-data-table-scroll-hint { display: none; }
+
+.ax-data-table-footer[data-pagination-auto="true"] .ax-data-table-scroll-hint,
+.ax-data-table-footer[data-pagination-loading="true"] .ax-data-table-pagination-loading { display: inline; }
+
+.ax-data-table-footer[data-pagination-loading="true"] .ax-data-table-scroll-hint { display: none; }
+
+/* Automatic scrolling is the pointer path; Tab reveals its native fallback.
+   Browsers without observation keep the control visible in the normal flow. */
+.ax-data-table-footer[data-pagination-auto="true"] .ax-data-table-manual-load:not(:focus-visible) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Filter toolbar: mobile-first single column that fans out to a wrapping flex
    row at md+. Search grows; categorical controls stay intrinsic; Clear pushes
    to the row end. Spacing tokens only. */

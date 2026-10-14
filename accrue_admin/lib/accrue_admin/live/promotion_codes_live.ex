@@ -139,7 +139,6 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
         <.live_component
           module={DataTable}
           row_label={Copy.promotion_codes_list_result_label_pair()}
-          show_row_count={false}
           id="promotion-codes"
           query_module={PromotionCodes}
           current_owner_scope={@current_owner_scope}

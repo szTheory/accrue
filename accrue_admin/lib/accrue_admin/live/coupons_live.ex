@@ -159,7 +159,6 @@ defmodule AccrueAdmin.Live.CouponsLive do
         <.live_component
           module={DataTable}
           row_label={Copy.coupons_list_result_label_pair()}
-          show_row_count={false}
           id="coupons"
           query_module={Coupons}
           current_owner_scope={@current_owner_scope}

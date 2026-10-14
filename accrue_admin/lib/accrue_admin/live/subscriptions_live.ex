@@ -200,7 +200,6 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <.live_component
           module={DataTable}
           row_label={Copy.subscriptions_list_result_label_pair()}
-          show_row_count={false}
           id="subscriptions"
           query_module={Subscriptions}
           current_owner_scope={@current_owner_scope}

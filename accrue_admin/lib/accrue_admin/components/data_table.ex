@@ -23,7 +23,6 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   @default_limit 25
-  @default_dom_limit 100
 
   @impl true
   def update(assigns, socket) do
@@ -69,7 +68,7 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:bulk_action_label, fn -> nil end)
       |> assign_new(:bulk_action_event, fn -> nil end)
       |> assign_new(:row_label, fn -> {"result", "results"} end)
-      |> assign_new(:show_row_count, fn -> true end)
+      |> assign(:total_count, Map.get(assigns, :total_count, previous[:total_count]))
       |> assign_new(:show_empty_clear, fn -> true end)
       |> assign_new(:empty_action_href, fn -> nil end)
       |> assign_new(:empty_action_label, fn -> Copy.data_table_clear_filters_label() end)
@@ -89,13 +88,6 @@ defmodule AccrueAdmin.Components.DataTable do
         normalize_positive(
           Map.get(assigns, :limit, previous[:limit] || @default_limit),
           @default_limit
-        )
-      )
-      |> assign(
-        :dom_limit,
-        normalize_dom_limit(
-          Map.get(assigns, :dom_limit, previous[:dom_limit] || @default_dom_limit),
-          @default_dom_limit
         )
       )
 
@@ -222,10 +214,7 @@ defmodule AccrueAdmin.Components.DataTable do
 
       case read_page(socket.assigns.query_module, query_opts) do
         {:ok, {rows, next_cursor}} ->
-          merged_rows =
-            socket.assigns.rows
-            |> Kernel.++(rows)
-            |> retain_rows(socket.assigns.dom_limit)
+          merged_rows = socket.assigns.rows ++ rows
 
           {:noreply,
            socket
@@ -258,10 +247,7 @@ defmodule AccrueAdmin.Components.DataTable do
 
     case read_page(socket.assigns.query_module, opts) do
       {:ok, {rows, next_cursor}} ->
-        merged_rows =
-          socket.assigns.rows
-          |> Kernel.++(rows)
-          |> retain_rows(socket.assigns.dom_limit)
+        merged_rows = socket.assigns.rows ++ rows
 
         {:noreply,
          socket
@@ -561,24 +547,35 @@ defmodule AccrueAdmin.Components.DataTable do
         </article>
       </div>
 
-      <footer :if={@render_rows} class="ax-data-table-footer">
-        <p :if={@show_row_count} class="ax-body" data-role="row-count"><%= Copy.data_table_row_count(length(@rows), @row_label) %></p>
+      <footer
+        :if={@render_rows}
+        id={@id <> "-scroll-container"}
+        class="ax-data-table-footer"
+        phx-hook="Pagination"
+        data-pagination-target={@myself}
+        data-pagination-cursor={@next_cursor}
+        data-pagination-error={if @read_error, do: "true", else: "false"}
+      >
+        <p class="ax-data-table-pagination-status" data-role="pagination-status" role="status" aria-live="polite" aria-atomic="true">
+          <span data-role="pagination-progress"><%= pagination_progress(length(@rows), @row_label, @total_count) %></span>
+          <span :if={!@next_cursor} data-role="end-of-list">End of list</span>
+          <span :if={@next_cursor && !@read_error} class="ax-data-table-scroll-hint">Scroll for more</span>
+          <span class="ax-data-table-pagination-loading">Loading more <%= elem(@row_label, 1) %>…</span>
+        </p>
         <button
-          :if={@next_cursor}
+          :if={@next_cursor && !@read_error}
           type="button"
           phx-click="load-more"
           phx-target={@myself}
-          class="ax-button ax-button-secondary"
+          phx-disable-with={"Loading more #{elem(@row_label, 1)}…"}
+          class="ax-button ax-button-secondary ax-data-table-manual-load"
           data-role="load-more"
           data-phase191-focus="load-more"
         >
           Load more
         </button>
         <div
-          id={@id <> "-scroll-container"}
-          :if={@next_cursor && (@dom_limit == :infinity || length(@rows) < @dom_limit) && !@read_error}
-          phx-hook="Pagination"
-          data-pagination-target={@myself}
+          :if={@next_cursor && !@read_error}
           class="ax-data-table-scroll-boundary"
           data-role="viewport-sentinel"
           aria-hidden="true"
@@ -1045,10 +1042,14 @@ defmodule AccrueAdmin.Components.DataTable do
   defp normalize_positive(value, _fallback) when is_integer(value) and value > 0, do: value
   defp normalize_positive(_value, fallback), do: fallback
 
-  defp normalize_dom_limit(:infinity, _fallback), do: :infinity
-  defp normalize_dom_limit(value, fallback), do: normalize_positive(value, fallback)
-  defp retain_rows(rows, :infinity), do: rows
-  defp retain_rows(rows, limit), do: Enum.take(rows, limit)
+  defp pagination_progress(count, {_singular, plural}, total)
+       when is_integer(total) and total >= count do
+    "#{count} of #{total} #{plural} loaded"
+  end
+
+  defp pagination_progress(count, {singular, plural}, _total) do
+    "#{count} #{if count == 1, do: singular, else: plural} loaded"
+  end
 
   defp query_opts(filter, cursor, limit, nil) do
     [filter: filter, cursor: cursor, limit: limit]

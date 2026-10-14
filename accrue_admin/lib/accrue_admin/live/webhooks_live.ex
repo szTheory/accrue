@@ -622,7 +622,6 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           clear_href={reset_href(@table_path)}
           empty_action_href={if queue_active?(@params), do: clear_all_href(@params, @table_path), else: reset_href(@table_path)}
           empty_action_label={if queue_active?(@params), do: "View all deliveries", else: "Reset filters"}
-          show_row_count={false}
           selectable={true}
           row_label={{"delivery", "deliveries"}}
           bulk_action_label={Copy.webhooks_retry_selected_label()}

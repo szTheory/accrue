@@ -232,4 +232,5 @@ unless background_already_seeded? do
 end
 
 Code.eval_file("showcase.exs", __DIR__)
+Code.eval_file("ordinary_payment_methods.exs", __DIR__)
 Code.eval_file("ordinary_activity.exs", __DIR__)

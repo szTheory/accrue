@@ -144,6 +144,14 @@ above; never put its password in capture output or manifests. A missing external
 credential makes that inspection unavailable and is never a reason to bypass
 authentication.
 
+The ordinary seed includes `ordinary_payment_methods.exs`: roughly 80% of the
+background customer personas have a default test card, with the rest preserving
+the missing-default scenario. The split is stable per customer; cards are Fake
+fixtures, not real payment outcomes. This additive file can be applied alone to
+an existing named ordinary preview without rerunning the aggregate seed. It
+checks the connected database, role/address, instance, skip-seeds guard, and Fake
+processor, and preserves existing methods, exceptional personas, and event history.
+
 The wrapper writes its temporary protected snapshot under `${TMPDIR:-/tmp}`.
 The explicit manual custody commands remain available for separate audits:
 

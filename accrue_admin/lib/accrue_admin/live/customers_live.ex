@@ -15,7 +15,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
     FlashGroup,
     IdBadge,
     PageHeader,
-    StatStrip
+    StatStrip,
+    StatusBadge
   }
 
   alias AccrueAdmin.Copy
@@ -112,7 +113,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
             <StatStrip.stat_strip label="Customer summary">
               <:stat label="Customers" value={Integer.to_string(@summary.customer_count)} />
               <:stat
-                label="With payment method"
+                label="With default method"
                 value={Integer.to_string(@summary.with_default_payment_method_count)}
               />
             </StatStrip.stat_strip>
@@ -135,7 +136,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
         <.live_component
           module={DataTable}
           row_label={Copy.customers_list_result_label_pair()}
-          show_row_count={false}
+          total_count={if !filter_active?(@params) && !@params["cursor"], do: @summary.customer_count}
           id="customers"
           query_module={Customers}
           current_owner_scope={@current_owner_scope}
@@ -150,11 +151,11 @@ defmodule AccrueAdmin.Live.CustomersLive do
           clear_href={@table_path}
           columns={[
             %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope, customer_return_path(@admin_mount_path, @current_owner_scope, @params), :table)},
-            %{label: "Payment method", render: &default_payment_method_label/1}
+            %{label: "Default payment method", render: &default_payment_method_label/1}
           ]}
           card_title={&customer_link(&1, @admin_mount_path, @current_owner_scope, customer_return_path(@admin_mount_path, @current_owner_scope, @params), :card)}
           card_fields={[
-            %{label: "Payment method", render: &default_payment_method_label/1},
+            %{label: "Default payment method", render: &default_payment_method_label/1},
           ]}
           filter_fields={customer_filter_fields(@owner_type_type, @owner_type_options)}
           empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
@@ -252,7 +253,16 @@ defmodule AccrueAdmin.Live.CustomersLive do
     ScopedPath.build(mount_path, "/customers", owner_scope, return_params)
   end
 
-  defp default_payment_method_label(%{default_payment_method_id: nil}), do: "Missing"
+  defp default_payment_method_label(%{default_payment_method_id: nil}) do
+    assigns = %{}
+
+    ~H"""
+    <span title="No default payment method is set. Other saved methods may still be available.">
+      <StatusBadge.status_badge status={:warning} label="Missing" />
+    </span>
+    """
+  end
+
   defp default_payment_method_label(%{default_payment_method_id: _id}), do: "On file"
 
   defp customer_filter_fields(owner_type_type, owner_type_options) do
@@ -271,7 +281,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
       },
       %{
         id: :has_default_payment_method,
-        label: "Payment method",
+        label: "Default payment method",
         type: :segmented,
         options: [{"", "All"}, {"true", "On file"}, {"false", "Missing"}]
       }
@@ -343,7 +353,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   defp filter_chip_label("q"), do: "Search"
   defp filter_chip_label("owner_type"), do: "Owner type"
-  defp filter_chip_label("has_default_payment_method"), do: "Payment method"
+  defp filter_chip_label("has_default_payment_method"), do: "Default payment method"
   defp filter_chip_label(key), do: humanize(key)
 
   defp filter_chip_value("has_default_payment_method", "true"), do: "On file"
