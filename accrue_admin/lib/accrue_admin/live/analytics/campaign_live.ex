@@ -91,13 +91,13 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
       current_owner_scope={assigns[:current_owner_scope]}
       active_organization_name={@active_organization_name}
     >
-      <section class="ax-page" aria-label="Dunning timeline for subscription">
+      <section class="ax-page" aria-label="Payment retry history">
         <Breadcrumbs.breadcrumbs group="Recovery" items={[
           %{label: Copy.recovery_index_heading(), href: @return_destination.path},
           %{label: "Subscription"}
         ]} />
 
-        <Detail.summary_card eyebrow="Campaign history" title="Dunning Timeline">
+        <Detail.summary_card title="Payment retry history">
           <:facts>
             <span>{@subscription_id}</span>
           </:facts>
@@ -107,6 +107,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
 
         <Detail.summary_list rows={summary_rows(@subscription_id, @arcs, @invoice_map, @admin_mount_path, @current_owner_scope)} />
 
+        <p class="ax-body ax-measure">Recorded retry attempts and outcomes are shown below. Open subscription details for its current status.</p>
         <CampaignTimeline.campaign_timeline arcs={@arcs} invoice_map={@invoice_map} />
       </section>
     </AppShell.app_shell>
@@ -125,7 +126,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
     (campaign_fact_rows(subscription_id, arcs) ++
        [
          %{label: "Invoice count", value: invoice_count_label(invoice_map)},
-         %{label: "Last boundary", value: latest_boundary(arcs)}
+         %{label: "Latest recorded event", value: latest_boundary(arcs)}
        ])
     |> add_subscription_action(subscription_id, mount_path, owner_scope)
   end
@@ -133,7 +134,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
   defp campaign_fact_rows(subscription_id, arcs) do
     [
       %{label: "Subscription", value: subscription_id},
-      %{label: "Campaign state", value: campaign_state(arcs)},
+      %{label: "Latest recorded outcome", value: campaign_state(arcs)},
       %{label: "Timeline events", value: event_count_label(arcs)}
     ]
   end
@@ -143,9 +144,9 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
 
     [
       %{label: "Subscription", value: subscription_id},
-      %{label: "Campaign state", value: copy.heading},
+      %{label: "Latest recorded outcome", value: copy.heading},
       %{label: "Timeline events", value: "0 events"},
-      %{label: "Last boundary", value: copy.body}
+      %{label: "Latest recorded event", value: copy.body}
     ]
   end
 
@@ -244,7 +245,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
     mount_path = admin["mount_path"] || "/billing"
 
     socket
-    |> assign(:page_title, "Dunning Timeline")
+    |> assign(:page_title, "Payment retry history")
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])

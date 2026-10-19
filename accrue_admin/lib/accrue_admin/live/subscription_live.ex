@@ -17,6 +17,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     JsonViewer,
     RelatedResources,
     StepUpAuthModal,
+    IdBadge,
+    StatusBadge,
     Timeline,
     Timestamp
   }
@@ -283,35 +285,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         </p>
 
         <Detail.summary_card
-          eyebrow={Copy.subscription_detail_eyebrow()}
           title={subscription_title(@subscription, @customer)}
         >
+          <:status>
+            <StatusBadge.status_badge status={@subscription.status} label={lifecycle_health_label(@subscription)} tone={lifecycle_tone(@subscription.status)} />
+          </:status>
           <:facts>
-            <span class="ax-summary-fact">
-              <strong>Subscription</strong>
-              <%= @subscription.processor_id || @subscription.id %>
-            </span>
-            <span class="ax-summary-fact">
-              <strong>Customer</strong>
-              <%= customer_label(@customer) %>
-            </span>
-            <span :for={fact <- summary_health_facts(@subscription)} class="ax-summary-fact">
-              <strong><%= fact.label %></strong>
-              <%= fact.value %>
-            </span>
+            <IdBadge.id_badge id="subscription-summary-id" id_value={@subscription.processor_id || @subscription.id} label="Copy subscription ID" copy_label="subscription ID" variant="plain" />
           </:facts>
         </Detail.summary_card>
-
-        <% health = detail_health_summary(@subscription) %>
-        <section class={["ax-detail-health-summary", "ax-detail-health-summary-" <> health.tone]} aria-label="Subscription lifecycle summary">
-          <div class="ax-detail-health-copy" role="status">
-            <span class="ax-detail-health-label">Lifecycle</span>
-            <strong class="ax-detail-health-answer"><%= health.answer %></strong>
-            <strong class="ax-detail-health-verdict"><%= health.headline %></strong>
-            <span class="ax-detail-health-body"><%= health.body %></span>
-          </div>
-          <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
-        </section>
 
         <Detail.summary_list
           rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)}
@@ -335,7 +317,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <section class="ax-card ax-detail-action-band" data-ax-action-band>
           <header class="ax-page-header">
             <div>
-              <p class="ax-eyebrow">Actions</p>
               <h2 class="ax-heading">Subscription actions</h2>
             </div>
             <div class="ax-page-actions">
@@ -868,10 +849,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     base_rows =
       [
         %{
-          label: "Billing health verdict",
-          value: detail_health_summary(subscription).answer
-        },
-        %{
           label: "Lifecycle state",
           value: lifecycle_health_label(subscription)
         }
@@ -904,6 +881,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             action_value: "swap_plan"
           }),
           %{label: "Current period", value: current_period_summary(subscription, :summary)},
+          %{label: "Cancellation", value: cancellation_summary(subscription)},
           renews_or_ends_row(subscription),
           %{label: "Amount (MRR)", value: mrr_summary(subscription)}
         ]
@@ -1050,36 +1028,19 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp current_period_summary(_subscription, _surface), do: not_projected_copy(:period)
 
-  defp summary_health_facts(subscription) do
-    [
-      %{
-        label: "Plan / price",
-        value: current_price_id(subscription) || not_projected_copy(:price)
-      },
-      %{label: "Current period", value: current_period_summary(subscription, :header)},
-      %{label: "Cancellation", value: cancellation_summary(subscription, :header)},
-      %{label: "Renewal", value: renews_or_ends_summary(subscription, :header)},
-      %{label: "MRR", value: mrr_summary(subscription)}
-    ]
-  end
+  defp cancellation_summary(%{
+         cancel_at_period_end: true,
+         current_period_end: %DateTime{} = ending
+       }),
+       do: timestamp_summary("Scheduled for", ending, "subscription-cancellation-summary")
 
-  defp cancellation_summary(
-         %{
-           cancel_at_period_end: true,
-           current_period_end: %DateTime{} = ending
-         },
-         surface
-       ),
-       do: timestamp_summary("Scheduled for", ending, "subscription-cancel-at-#{surface}")
-
-  defp cancellation_summary(%{cancel_at_period_end: true}, _surface),
+  defp cancellation_summary(%{cancel_at_period_end: true}),
     do: "Scheduled; effective date not shown"
 
-  defp cancellation_summary(%{status: status}, _surface)
-       when status in [:canceled, :incomplete_expired],
-       do: "Canceled"
+  defp cancellation_summary(%{status: status}) when status in [:canceled, :incomplete_expired],
+    do: "Canceled"
 
-  defp cancellation_summary(_subscription, _surface), do: "No cancellation scheduled"
+  defp cancellation_summary(_), do: "No cancellation scheduled"
 
   defp collection_summary(%{pause_collection: pause}) when not is_nil(pause),
     do: "Paused"
@@ -1087,58 +1048,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp collection_summary(%{status: :paused}), do: "Paused"
   defp collection_summary(_subscription), do: "Not paused"
 
-  defp detail_health_summary(subscription) do
-    cond do
-      subscription.status == :incomplete_expired ->
-        %{tone: "slate", answer: "Incomplete expired", headline: "Setup window expired", body: ""}
-
-      Subscription.canceled?(subscription) ->
-        %{
-          tone: "slate",
-          answer: "Canceled",
-          headline: "Subscription has ended",
-          body: "Host access policy is not represented by this billing status."
-        }
-
-      subscription.status == :unpaid ->
-        %{tone: "danger", answer: "Unpaid", headline: "Subscription is unpaid", body: ""}
-
-      Accrue.Billing.Subscription.past_due?(subscription) ->
-        %{
-          tone: "amber",
-          answer: "Past due",
-          headline: "Payment is past due",
-          body: "The subscription lifecycle is past due or unpaid."
-        }
-
-      subscription.status == :incomplete ->
-        %{tone: "amber", answer: "Incomplete", headline: "Setup is incomplete", body: ""}
-
-      Subscription.trialing?(subscription) ->
-        %{tone: "moss", answer: "Trialing", headline: "Subscription is trialing", body: ""}
-
-      subscription.status == :paused ->
-        %{tone: "slate", answer: "Paused", headline: "Subscription is paused", body: ""}
-
-      Accrue.Billing.Subscription.active?(subscription) ->
-        %{
-          tone: "moss",
-          answer: "Active",
-          headline: "Subscription is active",
-          body: "Price and period dates are shown separately when available."
-        }
-
-      true ->
-        %{
-          tone: "slate",
-          answer: humanize(subscription.status),
-          headline: "Subscription lifecycle",
-          body: ""
-        }
-    end
-  end
-
-  defp detail_health_metric(_health), do: "Observed from persisted subscription state"
+  defp lifecycle_tone(status) when status in [:past_due, :unpaid, :incomplete], do: "amber"
+  defp lifecycle_tone(:active), do: "moss"
+  defp lifecycle_tone(:trialing), do: "cobalt"
+  defp lifecycle_tone(_), do: "slate"
 
   defp projection_caveats(subscription) do
     [

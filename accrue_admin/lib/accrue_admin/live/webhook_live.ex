@@ -257,7 +257,8 @@ defmodule AccrueAdmin.Live.WebhookLive do
               @attempt_history,
               @derived_events,
               @admin_mount_path,
-              @current_owner_scope
+              @current_owner_scope,
+              @timeline_events_loaded?
             )
           }
         />
@@ -299,7 +300,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
           </section>
 
           <p :if={!@timeline_events_loaded?} class="ax-body">
-            Open Activity to load dispatch attempts and derived ledger rows for this webhook.
+            Open Activity to review processing attempts and linked billing events.
           </p>
         </details>
 
@@ -313,6 +314,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
               :if={@raw_json_loaded?}
               id="webhook-payload"
               label="Webhook payload"
+              show_heading={false}
               payload={payload_for(@webhook)}
             />
 
@@ -509,22 +511,24 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp replayable?(%WebhookEvent{status: status}), do: status in [:failed, :dead]
   defp replayable?(_webhook), do: false
 
-  defp summary_rows(webhook, attempts, derived_events, mount_path, owner_scope) do
+  defp summary_rows(webhook, attempts, derived_events, mount_path, owner_scope, loaded?) do
     [
       %{label: "Endpoint", value: humanize(webhook.endpoint)},
       %{
         label: "Received / processed",
         value: timestamp_pair(webhook.received_at, webhook.processed_at, webhook.id)
       },
-      %{label: "Verification", value: verification_summary(webhook)},
-      %{label: "Attempts", value: Integer.to_string(length(attempts))},
+      %{label: "Attempts", value: if(loaded?, do: Integer.to_string(length(attempts)))},
       %{
         label: "Event feed",
         value: events_href(mount_path, webhook.id, derived_events, owner_scope)
       },
       %{label: "Livemode", value: mode_label(webhook.livemode)},
       %{label: "Failure", value: failure_summary(attempts)},
-      %{label: "Derived event count", value: Integer.to_string(length(derived_events))}
+      %{
+        label: "Derived event count",
+        value: if(loaded?, do: Integer.to_string(length(derived_events)))
+      }
     ]
     |> Enum.reject(&is_nil(&1.value))
   end
@@ -888,8 +892,6 @@ defmodule AccrueAdmin.Live.WebhookLive do
       ArgumentError -> :error
     end
   end
-
-  defp verification_summary(_webhook), do: "Signature verification passed"
 
   defp attempt_tone(state) when state in ["completed"], do: :moss
   defp attempt_tone(state) when state in ["executing", "available", "scheduled"], do: :cobalt

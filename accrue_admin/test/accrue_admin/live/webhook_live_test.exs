@@ -125,11 +125,8 @@ defmodule AccrueAdmin.WebhookLiveTest do
     for label <- [
           "Endpoint",
           "Received / processed",
-          "Verification",
-          "Attempts",
           "Livemode",
-          "Failure",
-          "Derived event count"
+          "Failure"
         ] do
       assert html =~ label
     end
@@ -195,12 +192,16 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "data-ax-summary-list"
     refute html =~ "ax-kpi-grid"
 
-    assert html =~ "Signature verification passed"
+    refute html =~ "Signature verification passed"
+    refute html =~ ">Attempts<"
+    refute html =~ ">Derived event count<"
     assert html =~ "invoice.payment_failed"
     assert length(Floki.find(Floki.parse_document!(html), "[data-time-display]")) >= 1
 
     activity_html = render_click(element(view, "[data-ax-lazy-activity]"))
     assert activity_html =~ "Webhook attempt history"
+    assert activity_html =~ "Derived event count"
+    assert activity_html =~ "Attempts"
     assert activity_html =~ "data-time-display"
     assert length(Floki.find(Floki.parse_document!(activity_html), "[data-time-display]")) >= 2
     assert activity_html =~ "Attempt 3/25"
@@ -271,7 +272,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
     assert html =~
-             "Open Activity to load dispatch attempts and derived ledger rows for this webhook."
+             "Open Activity to review processing attempts and linked billing events."
 
     html = render_click(element(view, "[data-ax-lazy-activity]"))
 

@@ -62,7 +62,7 @@ defmodule AccrueAdmin.ChargesLiveTest do
     assert html =~ Copy.payments_list_subtitle()
     assert html =~ "Succeeded"
     assert html =~ "/billing/payments/"
-    assert html =~ "ax-chip ax-label"
+    refute html =~ "Automatic tax off"
     refute html =~ "ax-text-12"
   end
 
@@ -97,7 +97,7 @@ defmodule AccrueAdmin.ChargesLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/payments?view=all")
     parsed = Floki.parse_document!(html)
 
-    assert html =~ "Search payments by processor ID, customer email, or customer name"
+    assert html =~ "Search payments"
 
     exact_customer =
       Floki.find(parsed, "details.ax-data-table-filter-disclosure #payments-filter-customer_id")
@@ -124,8 +124,8 @@ defmodule AccrueAdmin.ChargesLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/payments?status=failed")
 
     # FilterChipBar renders queue chip (cobalt) and All chip (slate)
-    assert html =~ "ax-filter-chip-cobalt"
-    assert html =~ "ax-filter-chip-slate"
+    assert html =~ "Failed payments"
+    assert html =~ "All payments"
     assert html =~ "?view=all"
   end
 
@@ -137,7 +137,7 @@ defmodule AccrueAdmin.ChargesLiveTest do
 
     assert_page_header_contract(html, contract)
     assert html =~ contract.page_header.title
-    assert html =~ "Inspect charges that need follow-up."
+    assert html =~ "Review payments, investigate failures, and check recorded fees."
     refute html =~ ">Charges<"
     assert_single_filter_form(html)
   end
@@ -178,9 +178,7 @@ defmodule AccrueAdmin.ChargesLiveTest do
              )
 
     assert html =~ ~s(data-ax-clear-all)
-    assert html =~ ~s(href="/billing/payments?org=allowed-org&amp;view=all")
-    refute html =~ "status=failed"
-    refute html =~ "fees_settled=false"
+    assert html =~ ~s(href="/billing/payments?org=allowed-org")
     refute html =~ "phase197_state=loading-skeleton"
   end
 
@@ -268,15 +266,15 @@ defmodule AccrueAdmin.ChargesLiveTest do
       "Payment",
       "Status",
       "Amount",
-      "Fees",
-      "Ownership and tax"
+      "Stripe fee",
+      "Account type"
     ])
 
     refute html =~ "/billing/charges"
     assert html =~ "Stripe fee"
     assert html =~ "Fees settled"
-    assert html =~ "Owner: User"
-    assert html =~ "Tax: Off"
+    assert html =~ "User"
+    refute html =~ "Automatic tax off"
   end
 
   test "shows unavailable fee evidence without inferring pending or unsettled state", %{
@@ -290,7 +288,9 @@ defmodule AccrueAdmin.ChargesLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/payments?view=all")
 
-    assert html =~ "Stripe fee unavailable · Settlement time unavailable"
+    assert html =~ "Not recorded"
+    refute html =~ "pending stripe fee"
+    refute html =~ "unsettled"
   end
 
   test "formats exact payment amounts and leaves unsupported currencies unavailable", %{

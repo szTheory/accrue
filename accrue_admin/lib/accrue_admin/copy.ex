@@ -905,9 +905,10 @@ defmodule AccrueAdmin.Copy do
     do:
       "Every charge and refund for this organization. Filter by status, or open a charge to see its fees, payment method, and any failure."
 
-  def payments_list_heading, do: "Recover failed payments"
+  def payments_list_heading, do: "Payments"
 
-  def payments_list_subtitle, do: "Inspect charges that need follow-up."
+  def payments_list_subtitle,
+    do: "Review payments, investigate failures, and check recorded fees."
 
   def payments_list_first_run_empty_title, do: "No payments yet."
 
@@ -990,7 +991,7 @@ defmodule AccrueAdmin.Copy do
     do: "Monthly recurring revenue observed on recovered subscriptions."
 
   def recovery_exhausted_mrr_label(currency),
-    do: "Exhausted MRR (#{String.upcase(to_string(currency))})"
+    do: "Unrecovered MRR (#{String.upcase(to_string(currency))})"
 
   def recovery_exhausted_mrr_meta,
     do: "Monthly recurring revenue on subscriptions with exhausted payment retries."

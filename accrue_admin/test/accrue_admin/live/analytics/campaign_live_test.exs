@@ -122,7 +122,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
 
       assert html =~ "Subscription"
       assert html =~ subscription_id
-      assert html =~ "Campaign state"
+      assert html =~ "Latest recorded outcome"
       assert html =~ "Timeline events"
       assert html =~ "Invoice count"
       assert html =~ "ax-campaign-timeline"
@@ -237,7 +237,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
         })
         |> live("/billing/analytics/recovery/subscriptions/#{subscription_id}")
 
-      assert html =~ "Campaign History" || html =~ "Dunning Timeline"
+      assert html =~ "Payment retry history"
       assert html =~ "Campaign started"
     end
 
@@ -285,7 +285,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       # and ax-eyebrow — these satisfy dims ② (visual hierarchy) and ⑧ (brand expression)
       assert html =~ "ax-summary-card"
       assert html =~ "ax-summary-title"
-      assert html =~ "ax-eyebrow"
+      refute html =~ "Campaign history"
     end
 
     test "renders semantic aria-label on the timeline section (dim ⑦)", %{conn: conn} do

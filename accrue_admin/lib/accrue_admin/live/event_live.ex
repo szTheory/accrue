@@ -148,6 +148,7 @@ defmodule AccrueAdmin.Live.EventLive do
         <details
           :if={raw_payload_available?(@event)}
           id="event-raw-payload"
+          open
           class="ax-detail-section"
           data-ax-event-payload
           phx-hook="PreserveDisclosure"
@@ -348,7 +349,7 @@ defmodule AccrueAdmin.Live.EventLive do
   defp actor_icon(_actor_type), do: :users
 
   defp actor_summary(%{actor_type: nil, actor_id: nil}), do: "--"
-  defp actor_summary(%{actor_type: "system", actor_id: nil}), do: "System (automatic)"
+  defp actor_summary(%{actor_type: "system", actor_id: nil}), do: "App"
   defp actor_summary(%{actor_type: type, actor_id: nil}), do: type || "--"
 
   defp actor_summary(%{actor_type: type, actor_id: id, id: event_id}) do
@@ -357,7 +358,7 @@ defmodule AccrueAdmin.Live.EventLive do
     ~H"""
     <span class="ax-timeline-subject">
       <span><%= @type %></span>
-      <IdBadge.id_badge id={@id} id_value={@value} label={"Copy actor ID " <> @value} copy_label="actor ID" />
+      <IdBadge.id_badge id={@id} id_value={@value} label={"Copy actor ID " <> @value} copy_label="actor ID" variant="plain" />
     </span>
     """
   end
@@ -389,7 +390,7 @@ defmodule AccrueAdmin.Live.EventLive do
     }
 
     ~H"""
-    <IdBadge.id_badge id={@id} id_value={@value} label={@label} copy_label={@copy_label} />
+    <IdBadge.id_badge id={@id} id_value={@value} label={@label} copy_label={@copy_label} variant="plain" />
     """
   end
 

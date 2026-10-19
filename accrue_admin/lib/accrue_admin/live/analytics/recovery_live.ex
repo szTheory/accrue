@@ -165,15 +165,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
           </div>
           <p class="ax-body ax-page-copy"><%= Copy.recovery_index_subtitle() %></p>
           <p class="ax-body ax-recovery-coverage">
-            Historical data coverage begins 2024-01-01.
-            <a
-              href="https://hexdocs.pm/accrue/analytics.html#cutoff-semantics"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="ax-help-link"
-            >
-              <%= Copy.recovery_cutoff_link_label() %>
-            </a>
+            Data since January 1, 2024. Reporting windows use UTC.
           </p>
           <WindowSelector.window_selector
             current_window={@window}
@@ -194,6 +186,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
               <KpiCard.kpi_card
                 label={Copy.recovery_recovered_mrr_label(kpi.currency)}
                 value={kpi.recovered_str}
+                unavailable={kpi.recovered_str == "Amount unavailable"}
                 component_group="kpi-chart-table"
               >
                 <:meta><%= Copy.recovery_recovered_mrr_meta() %></:meta>
@@ -202,6 +195,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
               <KpiCard.kpi_card
                 label={Copy.recovery_exhausted_mrr_label(kpi.currency)}
                 value={kpi.exhausted_str}
+                unavailable={kpi.exhausted_str == "Amount unavailable"}
                 component_group="kpi-chart-table"
               >
                 <:meta><%= Copy.recovery_exhausted_mrr_meta() %></:meta>
@@ -209,6 +203,12 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
             </div>
           <% end %>
         </section>
+
+        <p class="ax-body ax-recovery-definition">
+          MRR is monthly recurring revenue at the time retries recovered or ended.
+          An annual plan contributes one twelfth of its yearly amount.
+          Unavailable amounts are not counted as zero.
+        </p>
 
         <section data-ax-recovery-work-queue>
           <AtRiskTable.at_risk_table
@@ -234,6 +234,9 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         >
           <p :if={@recovery_loading?} class="ax-body" role="status">
             Loading recovery observations for this owner and UTC window.
+          </p>
+          <p :if={!@recovery_loading? && is_nil(@recovery_error)} class="ax-body ax-muted ax-measure">
+            Recorded outcomes cover campaigns with events in this window. The queue shows subscriptions currently in retry.
           </p>
           <FunnelChart.funnel_chart
             :if={!@recovery_loading? && is_nil(@recovery_error)}

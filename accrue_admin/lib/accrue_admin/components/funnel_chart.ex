@@ -45,7 +45,7 @@ defmodule AccrueAdmin.Components.FunnelChart do
     <article class={["ax-card", "ax-funnel-chart", @class]}>
       <header class="ax-funnel-header">
         <p class="ax-label">Payment recovery funnel</p>
-        <span class="ax-funnel-active-chip"><%= @active %> subscriptions in payment retry</span>
+        <span class="ax-body ax-muted"><%= @active %> recorded campaigns still in progress</span>
       </header>
 
       <svg

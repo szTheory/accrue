@@ -5,6 +5,7 @@ defmodule AccrueAdmin.Components.Timestamp do
 
   attr(:value, :any, default: nil)
   attr(:id, :string, required: true)
+  attr(:format, :atom, default: :datetime, values: [:datetime, :date])
 
   def timestamp(assigns) do
     case assigns.value do
@@ -15,10 +16,16 @@ defmodule AccrueAdmin.Components.Timestamp do
         assigns =
           assigns
           |> assign(:iso, iso)
-          |> assign(:utc_text, Calendar.strftime(utc, "%b %d, %Y %H:%M:%S UTC"))
+          |> assign(
+            :utc_text,
+            Calendar.strftime(
+              utc,
+              if(assigns.format == :date, do: "%b %d, %Y", else: "%b %d, %Y %H:%M:%S UTC")
+            )
+          )
 
         ~H"""
-        <span id={@id} class="ax-timestamp" data-time-display data-iso={@iso} phx-hook="TimeDisplay">
+        <span id={@id} class="ax-timestamp" data-time-display data-iso={@iso} data-time-format={@format} phx-hook="TimeDisplay">
           <button
             id={@id <> "-copy"}
             type="button"

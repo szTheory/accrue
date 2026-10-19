@@ -62,7 +62,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
       data-state={@state}
     >
       <header class="ax-at-risk-header">
-        <p class="ax-label">At-Risk Subscriptions</p>
+        <p class="ax-label">Subscriptions in retry</p>
         <p :if={@state not in ["loading", "error"]} class="ax-body ax-muted">
           {length(@rows)} subscriptions with active payment retries in this window
         </p>
@@ -89,12 +89,12 @@ defmodule AccrueAdmin.Components.AtRiskTable do
           <thead>
             <tr>
               <th scope="col" class="ax-label">Customer</th>
-              <th scope="col" class="ax-label">Current subscription status</th>
+              <th scope="col" class="ax-label">Subscription status</th>
               <th scope="col" class="ax-label">Amount</th>
-              <th scope="col" class="ax-label">Campaign Age</th>
-              <th scope="col" class="ax-label">Current Step</th>
-              <th scope="col" class="ax-label">Next-Step ETA</th>
-              <th scope="col" class="ax-label">Last Failure Reason</th>
+              <th scope="col" class="ax-label">Time in retry</th>
+              <th scope="col" class="ax-label">Retry step</th>
+              <th scope="col" class="ax-label">Next retry</th>
+              <th scope="col" class="ax-label">Last failure</th>
             </tr>
           </thead>
           <tbody>
@@ -123,7 +123,6 @@ defmodule AccrueAdmin.Components.AtRiskTable do
         <article :for={row <- @rows} class="ax-at-risk-card">
           <header class="ax-at-risk-card-header">
             <div class="ax-at-risk-card-identity">
-              <p class="ax-eyebrow">Subscription</p>
               <h3 class="ax-heading ax-record-label" title={row.customer_label}>{row.customer_label || "—"}</h3>
             </div>
             <span class="ax-at-risk-card-status">{step_label(row)}</span>
@@ -131,7 +130,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
           <dl class="ax-at-risk-card-facts">
             <div>
-              <dt class="ax-label">Current subscription status</dt>
+              <dt class="ax-label">Subscription status</dt>
               <dd class="ax-body">{current_status(row)}</dd>
             </div>
             <div>
@@ -167,12 +166,12 @@ defmodule AccrueAdmin.Components.AtRiskTable do
         <p class="ax-body"><%= @empty_copy.body %></p>
       </div>
 
-      <footer :if={@state in ["no-pagination", "has-pagination"]} class="ax-at-risk-footer">
+      <footer :if={@state == "has-pagination"} class="ax-at-risk-footer">
         <p class="ax-body" data-role="pagination-state">
           <%= if @next_cursor do %>
             More at-risk subscriptions are available.
           <% else %>
-            No pagination control is shown for this recovery window.
+            All subscriptions in this view are shown.
           <% end %>
         </p>
         <a
@@ -214,8 +213,12 @@ defmodule AccrueAdmin.Components.AtRiskTable do
     )
   end
 
-  defp current_status(%{current_status: status}) when is_atom(status), do: Atom.to_string(status)
-  defp current_status(%{current_status: status}) when is_binary(status), do: status
+  defp current_status(%{current_status: status}) when is_atom(status),
+    do: current_status(%{current_status: Atom.to_string(status)})
+
+  defp current_status(%{current_status: status}) when is_binary(status),
+    do: status |> String.replace("_", " ") |> String.capitalize()
+
   defp current_status(_row), do: "Unavailable"
 
   defp load_more_href(_base_path, _next_cursor, href, _owner_scope)

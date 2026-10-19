@@ -70,7 +70,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert html =~ "Automatic"
     refute html =~ "Charge Automatically"
     assert html =~ "$75.00"
-    assert html =~ "ax-chip ax-label"
+    assert html =~ "Automatic tax off"
     refute html =~ "ax-text-12"
   end
 
@@ -408,7 +408,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     unknown_card = Floki.find(doc, ".ax-data-table-card[data-row-id='#{unknown.id}']") |> hd()
 
     assert Floki.text(overdue_card) =~
-             Calendar.strftime(overdue.due_date, "%b %d, %Y %H:%M:%S UTC")
+             Calendar.strftime(overdue.due_date, "%b %d, %Y")
 
     assert Floki.text(unknown_card) =~ "Due date unavailable"
     assert Floki.text(overdue_card) =~ "Overdue"
@@ -460,9 +460,9 @@ defmodule AccrueAdmin.InvoicesLiveTest do
 
     assert row_text.(fixtures.zero_decimal) =~ "1,234"
     assert row_text.(fixtures.three_decimal) =~ "1.234"
-    assert row_text.(fixtures.unsupported) =~ "-- due"
-    assert row_text.(fixtures.missing_currency) =~ "-- due"
-    assert row_text.(fixtures.missing_amount) =~ "-- due"
+    assert row_text.(fixtures.unsupported) =~ "--"
+    assert row_text.(fixtures.missing_currency) =~ "--"
+    assert row_text.(fixtures.missing_amount) =~ "--"
   end
 
   test "renders Copy-backed filtered empty list when search excludes all invoices", %{conn: conn} do
@@ -523,7 +523,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
 
     assert_page_header_contract(html, contract)
     assert html =~ contract.page_header.title
-    assert html =~ "Work invoices that need collection."
+    assert html =~ "Review outstanding balances and invoice history."
     assert_single_filter_form(html)
   end
 

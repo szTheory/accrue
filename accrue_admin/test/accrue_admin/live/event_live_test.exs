@@ -188,12 +188,12 @@ defmodule AccrueAdmin.EventLiveTest do
     assert html =~ ~s(data-clipboard-text="#{event.subject_id}")
   end
 
-  test "payload is a native closed disclosure with already-authorized data, not an extra server request",
+  test "payload is a native open disclosure with already-authorized data, not an extra server request",
        %{conn: conn, event: event} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
     document = Floki.parse_document!(html)
-    assert Floki.attribute(document, "#event-raw-payload", "open") == []
+    assert Floki.attribute(document, "#event-raw-payload", "open") != []
     assert Floki.attribute(document, "#event-raw-payload", "phx-click") == []
     assert html =~ "failure_code"
     assert html =~ "card_declined"

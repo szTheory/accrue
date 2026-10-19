@@ -108,10 +108,10 @@ defmodule AccrueAdmin.Copy.Subscription do
   def subscriptions_health_verdict_action_required, do: "Action required"
 
   def subscriptions_route_line,
-    do: "Collect open invoices first, then review at-risk subscriptions and failed webhooks."
+    do: "Review subscription status, plans, and scheduled changes."
 
   def subscriptions_kpi_section_aria_label,
-    do: "Open invoices, exposure, at-risk subscriptions, and failed webhooks summary"
+    do: "Subscription summary"
 
   defp subscription_action_label("cancel_now"), do: "Cancel immediately"
   defp subscription_action_label("cancel_at_period_end"), do: "Cancel renewal"

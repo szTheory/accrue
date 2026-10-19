@@ -477,9 +477,9 @@ defmodule AccrueAdmin.NavigationComponentsTest do
           base_path: "/billing/analytics/recovery"
         })
 
-      assert html =~ "7 days UTC"
-      assert html =~ "30 days UTC"
-      assert html =~ "90 days UTC"
+      assert html =~ "7 days"
+      assert html =~ "30 days"
+      assert html =~ "90 days"
     end
 
     test "marks active window with aria-current and ax-tab-active" do

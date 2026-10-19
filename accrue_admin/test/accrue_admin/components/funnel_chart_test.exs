@@ -19,7 +19,7 @@ defmodule AccrueAdmin.Components.FunnelChartTest do
       assert html =~ "10"
       assert html =~ "4"
       assert html =~ "3"
-      assert html =~ "3 subscriptions in payment retry"
+      assert html =~ "3 recorded campaigns still in progress"
     end
 
     test "renders proportional percentages" do

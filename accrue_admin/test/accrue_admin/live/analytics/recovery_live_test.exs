@@ -82,7 +82,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     assert html =~ "Payment recovery"
     assert html =~ "Recovered MRR (USD)"
     assert html =~ "$50.00"
-    assert html =~ "Exhausted MRR (USD)"
+    assert html =~ "Unrecovered MRR (USD)"
     refute html =~ "Lost MRR"
     assert html =~ "$20.00"
   end
@@ -141,12 +141,12 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
     assert html =~ "Recovered MRR (EUR)"
     assert html =~ "€0.00"
-    assert html =~ "Exhausted MRR (EUR)"
+    assert html =~ "Unrecovered MRR (EUR)"
     assert html =~ "Amount unavailable"
     assert html =~ "Recovered MRR (GBP)"
-    assert html =~ "Exhausted MRR (GBP)"
+    assert html =~ "Unrecovered MRR (GBP)"
     assert html =~ "Recovered MRR (USD)"
-    assert html =~ "Exhausted MRR (UNAVAILABLE)"
+    assert html =~ "Unrecovered MRR (UNAVAILABLE)"
     refute html =~ "Money Saved"
     refute html =~ "Cash saved"
     refute html =~ "Churned Revenue"
@@ -197,20 +197,18 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       |> Floki.parse_fragment!()
       |> Floki.find("nav[aria-label='Time window (UTC)']")
 
-    assert Floki.text(window_nav) =~ "7 days UTC"
+    assert Floki.text(window_nav) =~ "7 days"
 
     [coverage] =
       html
       |> Floki.parse_fragment!()
       |> Floki.find(".ax-recovery-coverage")
 
-    assert Floki.text(coverage) =~ "Historical data coverage begins 2024-01-01."
+    assert Floki.text(coverage) =~ "Data since January 1, 2024. Reporting windows use UTC."
     refute Floki.text(window_nav) =~ "Historical data coverage"
 
-    [help_link] = Floki.find(coverage, "a.ax-help-link")
-    assert String.trim(Floki.text(help_link)) == "Cutoff-date semantics"
-    assert [help_href] = Floki.attribute(help_link, "href")
-    assert String.ends_with?(help_href, "#cutoff-semantics")
+    assert Floki.find(coverage, "a") == []
+    assert html =~ "Unavailable amounts are not counted as zero."
   end
 
   test "D-18 D-19 renders Recovery-specific overview grammar in order", %{conn: conn} do
@@ -276,7 +274,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
       assert html =~ "Payment recovery funnel"
-      assert html =~ "subscriptions in payment retry"
+      assert html =~ "recorded campaigns still in progress"
     end
 
     test "Exhausted MRR card carries yearly-plan worked example (ROADMAP SC#5)",
@@ -630,12 +628,12 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   end
 
   describe "at-risk table (DAN-11)" do
-    test "renders At-Risk Subscriptions section on recovery dashboard", %{conn: conn} do
+    test "renders Subscriptions in retry section on recovery dashboard", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
       assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
-      assert html =~ "At-Risk Subscriptions"
+      assert html =~ "Subscriptions in retry"
 
       assert html =~ "No subscriptions currently need payment retry" or
                html =~ "subscriptions with active payment retries in this window"
@@ -647,7 +645,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       {:ok, view, _html} = live_recovery(conn, "/billing/analytics/recovery")
       html = render_patch(view, "/billing/analytics/recovery?window=7d")
 
-      assert html =~ "At-Risk Subscriptions"
+      assert html =~ "Subscriptions in retry"
     end
 
     test "at-risk table row links to per-subscription drill-down route", %{conn: conn} do
@@ -671,9 +669,9 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
       assert {:ok, _view, html} = live_recovery(conn, fixture.return_path)
 
-      assert html =~ "Current subscription status"
-      assert html =~ "past_due"
-      assert html =~ "Last Failure Reason"
+      assert html =~ "Subscription status"
+      assert html =~ "Past due"
+      assert html =~ "Last failure"
     end
 
     test "detail links preserve current owner and selected UTC window", %{conn: conn} do
@@ -842,7 +840,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       assert active_window_label(html) =~ "7 days"
       assert html =~ "No subscriptions currently need payment retry"
       refute html =~ "Recovered MRR (USD)"
-      refute html =~ "Exhausted MRR (USD)"
+      refute html =~ "Unrecovered MRR (USD)"
     end
 
     test "unsupported currency stays unavailable while supported currency remains exact", %{

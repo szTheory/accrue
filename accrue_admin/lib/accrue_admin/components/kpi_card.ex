@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Components.KpiCard do
 
   attr(:label, :string, required: true)
   attr(:value, :string, required: true)
+  attr(:unavailable, :boolean, default: false)
   attr(:delta, :string, default: nil)
   attr(:delta_tone, :string, default: "slate")
   attr(:trend, :string, default: nil)
@@ -46,7 +47,7 @@ defmodule AccrueAdmin.Components.KpiCard do
       <p :if={@trend} class="ax-body ax-kpi-trend"><%= @trend %></p>
     </header>
 
-    <p class="ax-kpi-value"><%= @value %></p>
+    <p class={["ax-kpi-value", @unavailable && "ax-kpi-value-unavailable"]}><%= @value %></p>
 
     <div class="ax-kpi-card-footer">
       <span :if={@delta} class={["ax-kpi-delta", "ax-kpi-delta-" <> normalize_tone(@delta_tone)]}>

@@ -17,7 +17,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
     RelatedResources,
     StatusBadge,
     StepUpAuthModal,
-    Timeline
+    Timeline,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -205,13 +206,11 @@ defmodule AccrueAdmin.Live.ChargeLive do
           <a class="ax-link" href={@return_path}><%= @return_label %></a>
         </p>
 
-        <Detail.summary_card eyebrow="Charge detail" title={@charge.processor_id || @charge.id}>
-          <:status><StatusBadge.status_badge status={status_badge(@charge.status)} /></:status>
+        <Detail.summary_card title={@charge.processor_id || @charge.id}>
+          <:status><StatusBadge.status_badge status={status_badge(@charge.status)} label={humanize(@charge.status)} /></:status>
           <:facts>
             <span><%= money_text(@charge.amount_cents, @charge.currency) %></span>
             <span><%= customer_label(@customer) %></span>
-            <span>Payment status <%= humanize(@charge.status) %></span>
-            <span>Inserted <%= format_datetime(@charge.inserted_at) %></span>
           </:facts>
         </Detail.summary_card>
 
@@ -219,13 +218,12 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <section class="ax-card ax-detail-action-band" data-ax-action-band>
+        <section :if={refund_eligible?(@charge, @refunds)} class="ax-card ax-detail-action-band" data-ax-action-band>
           <header class="ax-page-header">
             <div>
-              <p class="ax-eyebrow">Admin actions</p>
-              <h2 class="ax-heading">Charge workflow controls</h2>
+              <h2 class="ax-heading">Refund payment</h2>
               <p class="ax-body ax-measure">
-                Refunds run through the existing billing facade and record admin audit rows.
+                Review the refundable amount before submitting a refund.
               </p>
             </div>
             <div class="ax-page-actions">
@@ -257,9 +255,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
             </summary>
 
             <div class="ax-stack-md">
-              <p class="ax-body ax-measure">
-                Leave the drawer amount blank to refund the full charge. Existing fee fields surface after
-                the refund is created.
+              <p :if={refund_eligible?(@charge, @refunds)} class="ax-body ax-measure">
+                Leave the amount blank to refund the remaining refundable balance.
               </p>
               <div :if={@charge.processor == "braintree"} class="ax-stack-sm">
                 <p class="ax-body ax-measure"><%= Copy.charge_refund_braintree_eligibility_info() %></p>
@@ -515,7 +512,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Charge")
+    |> assign(:page_title, "Payment")
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -813,15 +810,18 @@ defmodule AccrueAdmin.Live.ChargeLive do
     end
   end
 
-  defp summary_rows(charge, customer, breakdown) do
+  defp summary_rows(charge, customer, _breakdown) do
     [
       %{label: "Status", value: humanize(charge.status)},
       %{label: "Customer", value: customer_label(customer)},
       %{label: "Amount", value: money_text(charge.amount_cents, charge.currency)},
       %{label: "Processor", value: humanize(charge.processor)},
-      %{label: "Created / inserted", value: charge_boundary_summary(charge)},
-      %{label: "Net / fees / refunds", value: charge_money_signal(charge, breakdown)}
-    ]
+      %{label: "Recorded", value: recorded_timestamp(charge.inserted_at)}
+    ] ++
+      if(charge.data && charge.data["created"],
+        do: [%{label: "Created at processor", value: processor_created(charge.data["created"])}],
+        else: []
+      )
   end
 
   defp fee_breakdown_fields(charge, customer, breakdown) do
@@ -833,39 +833,40 @@ defmodule AccrueAdmin.Live.ChargeLive do
         value: platform_fee_summary(breakdown.platform_fee_minor, charge.currency)
       },
       %{label: "Net", value: money_text(breakdown.net_amount_minor, charge.currency)},
-      %{label: "Tax & ownership", value: charge_owner_summary(customer)}
+      %{label: "Account type", value: charge_owner_summary(customer)}
     ]
   end
 
-  defp charge_boundary_summary(charge) do
-    "created #{provider_created_at(charge)} · inserted #{format_datetime(charge.inserted_at)}"
+  defp processor_created(value) when is_integer(value) do
+    case DateTime.from_unix(value) do
+      {:ok, instant} -> timestamp_field(instant, "payment-processor-created-at")
+      _ -> to_string(value)
+    end
   end
 
-  defp provider_created_at(%{data: %{"created" => created}}) when is_binary(created), do: created
-
-  defp provider_created_at(%{data: %{"created" => created}}) when is_integer(created),
-    do: to_string(created)
-
-  defp provider_created_at(_charge), do: "Unavailable"
-
-  defp charge_money_signal(charge, breakdown) do
-    [
-      money_text(breakdown.net_amount_minor, charge.currency) <> " net",
-      money_text(breakdown.stripe_fee_minor, charge.currency) <> " Stripe fee",
-      platform_fee_summary(breakdown.platform_fee_minor, charge.currency),
-      refund_count_summary(charge.refunds || [])
-    ]
-    |> Enum.join(" · ")
+  defp processor_created(value) when is_binary(value) do
+    case DateTime.from_iso8601(value) do
+      {:ok, instant, _} -> timestamp_field(instant, "payment-processor-created-at")
+      _ -> value
+    end
   end
 
-  defp refund_count_summary(refunds), do: "#{length(refunds)} refunds"
+  defp processor_created(value), do: inspect(value)
+
+  defp recorded_timestamp(value), do: timestamp_field(value, "payment-recorded-at")
+
+  defp timestamp_field(value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
 
   defp charge_owner_summary(nil), do: "Unknown"
 
   defp charge_owner_summary(customer) do
-    owner = customer.owner_type || "User"
-    tax = if(customer.data && customer.data["tax"], do: "tax data present", else: "tax off")
-    "#{owner} · #{tax}"
+    customer.owner_type || "Unavailable"
   end
 
   defp refund_drawer_open?(open?, pending_refund), do: open? || not is_nil(pending_refund)
@@ -945,7 +946,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   end
 
   defp status_badge("succeeded"), do: :paid
-  defp status_badge("failed"), do: :error
+  defp status_badge("failed"), do: :warning
   defp status_badge("processing"), do: :processing
   defp status_badge(_), do: :info
 

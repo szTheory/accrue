@@ -261,8 +261,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Lifecycle"
     assert html =~ "Active"
     refute html =~ "Setup required now"
-    assert html =~ "ax-detail-health-summary-moss"
-    assert html =~ "ax-detail-health-answer"
+    assert html =~ "ax-status-badge-moss"
+    refute html =~ "ax-detail-health-answer"
     assert html =~ "Charge amount unavailable"
 
     refute html =~ "Billing health right now"
@@ -318,7 +318,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
     assert html =~ "Lifecycle"
-    assert html =~ "Subscription is active"
+    assert html =~ "Active"
     assert html =~ long_subscription_id
     assert html =~ long_customer_name
     assert html =~ "Price unavailable"
@@ -406,7 +406,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
     {identity, _} = :binary.match(html, "detail-header-metadata-actions")
-    {lifecycle, _} = :binary.match(html, "Subscription lifecycle summary")
+    {lifecycle, _} = :binary.match(html, "Lifecycle state")
     {action, _} = :binary.match(html, "data-ax-action-band")
     {related, _} = :binary.match(html, "data-ax-related-resources")
     {billing, _} = :binary.match(html, "data-ax-drill-section=\"billing-items\"")

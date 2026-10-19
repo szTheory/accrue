@@ -172,6 +172,8 @@ defmodule AccrueAdmin.Components.GlobalSearch do
     )
   end
 
+  defp search_metadata(values), do: values |> Enum.reject(&(&1 in [nil, ""])) |> Enum.join(" · ")
+
   defp empty_results, do: %{customers: [], invoices: [], subscriptions: []}
 
   defp close(socket), do: socket |> clear_query() |> assign(is_open: false)
@@ -346,7 +348,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                     <li :for={customer <- @results.customers} class="ax-command-palette-list-item">
                       <a id={"global-search-option-customers-#{customer.id}"} role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/customers/#{customer.id}", @current_owner_scope)}>
                         <span><strong title={customer.name || customer.email || customer.id}><%= customer.name || customer.email || customer.id %></strong>
-                          <small><%= customer.email %><%= if customer.owner_id, do: " · #{customer.owner_type} #{customer.owner_id}" %><%= if customer.processor_id, do: " · #{customer.processor} #{customer.processor_id}" %></small>
+                          <small><%= search_metadata([customer.email, if(customer.owner_id, do: "#{customer.owner_type} #{customer.owner_id}"), if(customer.processor_id, do: "#{customer.processor} #{customer.processor_id}")]) %></small>
                           <code>Customer ID: <%= customer.id %></code>
                         </span>
                       </a>
@@ -360,7 +362,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                     <li :for={invoice <- @results.invoices} class="ax-command-palette-list-item">
                       <a id={"global-search-option-invoices-#{invoice.id}"} role="option" aria-selected="false" class="ax-command-palette-item" href={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)} data-path={scoped_path(@mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}>
                         <span><strong title={invoice.number || invoice.id}><%= invoice.number || invoice.id %></strong>
-                          <small><span class="ax-record-label" title={invoice.customer_name}><%= invoice.customer_name %></span><%= if invoice.customer_email, do: " · #{invoice.customer_email}" %><%= if invoice.processor_id, do: " · #{invoice.processor_id}" %></small>
+                          <small><%= search_metadata([invoice.customer_name, invoice.customer_email, invoice.processor_id]) %></small>
                           <code>Invoice ID: <%= invoice.id %></code>
                         </span>
                       </a>

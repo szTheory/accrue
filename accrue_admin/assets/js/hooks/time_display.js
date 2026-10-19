@@ -2,7 +2,7 @@ export const TIME_DISPLAY_KEY = "accrue_admin_time_display";
 let activePreference = null;
 let initializedDocument = null;
 
-export function formatTimestamp(iso, { locale, timeZone, mode } = {}) {
+export function formatTimestamp(iso, { locale, timeZone, mode, dateOnly = false } = {}) {
   if (typeof iso !== "string") return null;
   const parts = iso.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|[+-]\d{2}:\d{2})$/);
   if (!parts) return null;
@@ -20,8 +20,8 @@ export function formatTimestamp(iso, { locale, timeZone, mode } = {}) {
     const zone = timeZone || (mode === "utc" ? "UTC" : null) || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
     const text = new Intl.DateTimeFormat(locale, {
       year: "numeric", month: "short", day: "2-digit",
-      hour: "2-digit", minute: "2-digit", second: "2-digit",
-      timeZone: zone, timeZoneName: "short"
+      ...(dateOnly ? {} : { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZoneName: "short" }),
+      timeZone: zone
     }).format(date);
     return { text, timeZone: zone };
   } catch {
@@ -39,7 +39,7 @@ function renderAllTimestamps(documentRef) {
 
 function renderTimestampElement(element) {
   const time = element.querySelector("time");
-  const result = formatTimestamp(element.dataset.iso, { mode: selectedMode() });
+  const result = formatTimestamp(element.dataset.iso, { mode: selectedMode(), dateOnly: element.dataset.timeFormat === "date" });
   if (!time || !result) return;
   time.textContent = result.text;
   const zone = element.querySelector("[data-time-zone]");

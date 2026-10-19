@@ -12,6 +12,15 @@ test("formats instants in an explicit browser timezone without altering the sour
   assert.equal(iso, "2026-10-11T15:04:05.123456Z");
 });
 
+test("date-only table display follows Local or UTC without changing the copied instant", () => {
+  const iso = "2026-10-19T00:30:00.123456Z";
+  const local = formatTimestamp(iso, { locale: "en-US", timeZone: "America/New_York", dateOnly: true });
+  const utc = formatTimestamp(iso, { locale: "en-US", mode: "utc", dateOnly: true });
+  assert.equal(local.text, "Oct 18, 2026");
+  assert.equal(utc.text, "Oct 19, 2026");
+  assert.equal(iso, "2026-10-19T00:30:00.123456Z");
+});
+
 test("invalid values and date-only strings are excluded", () => {
   assert.equal(formatTimestamp("not a date"), null);
   assert.equal(formatTimestamp("2026-02-30T12:00:00Z"), null);

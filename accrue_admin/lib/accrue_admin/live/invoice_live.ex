@@ -371,7 +371,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
           <a class="ax-link" href={@return_path}><%= @return_label %></a>
         </p>
 
-        <Detail.summary_card eyebrow={Copy.invoice_detail_eyebrow()} title={invoice_label(@invoice)}>
+        <Detail.summary_card title={invoice_label(@invoice)}>
           <:status><StatusBadge.status_badge status={@invoice.status} /></:status>
           <:facts>
             <span><%= customer_label(@customer) %></span>

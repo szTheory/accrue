@@ -47,8 +47,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?status=canceling")
 
-    assert html =~ "Action required" or
-             html =~ "Healthy"
+    refute html =~ "Action required"
+    refute html =~ "Healthy"
 
     refute html =~ "Exposure"
     assert html =~ "target"
@@ -56,7 +56,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Active"
     assert html =~ "Ends"
     assert html =~ "/billing/subscriptions/"
-    assert html =~ "ax-chip ax-label"
+    assert html =~ "Automatic tax off"
   end
 
   test "renders filtered-empty copy when search excludes all subscriptions", %{conn: conn} do
@@ -75,8 +75,8 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?status=past_due,canceling")
 
     # FilterChipBar renders queue chip (cobalt) and All chip (slate)
-    assert html =~ "ax-filter-chip-cobalt"
-    assert html =~ "ax-filter-chip-slate"
+    assert html =~ "Past due or ending"
+    assert html =~ "All subscriptions"
     assert html =~ "?view=all"
   end
 
@@ -131,11 +131,11 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-title)
     assert html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
     assert html =~ ~s(data-ax-page-filter-toolbar)
-    assert html =~ ~s(data-ax-page-actions)
+    refute html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Action required" or
-             html =~ "Healthy"
+    refute html =~ "Action required"
+    refute html =~ "Healthy"
 
     refute html =~ "Exposure"
     assert html =~ "target"
@@ -143,10 +143,10 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ Copy.subscriptions_route_line()
 
     assert html =~ Copy.subscriptions_kpi_section_aria_label()
-    assert html =~ "At-risk subscriptions"
-    assert html =~ "Open invoices"
-    assert html =~ "Webhooks: debug failed deliveries"
-    assert html =~ "Events audit log"
+    assert html =~ "Past due"
+    refute html =~ "Open invoices"
+    refute html =~ "Webhooks: debug failed deliveries"
+    refute html =~ "Events audit log"
     assert html =~ "ax-status-badge"
     refute html =~ "Failed webhooks"
     refute html =~ "Bulk invoice actions"
@@ -170,9 +170,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions")
 
     assert html =~ ~s(data-ax-filter-chips)
-    assert html =~ "At risk"
+    assert html =~ "Past due or ending"
     assert html =~ "All"
-    assert html =~ "Open invoice queue workspace"
+    refute html =~ "Open invoice queue workspace"
     assert html =~ "Billing"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
@@ -193,9 +193,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} =
              live(conn, "/billing/subscriptions?org=allowed-org&status=past_due,canceling")
 
-    assert html =~ ~s(data-ax-clear-all)
+    refute html =~ ~s(data-ax-clear-all)
     assert html =~ ~s(href="/billing/subscriptions?org=allowed-org&amp;view=all")
-    assert html =~ "At risk"
+    assert html =~ "Past due or ending"
     assert html =~ "All"
   end
 
@@ -344,24 +344,24 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "target"
     refute html =~ "ax-health-verdict"
 
-    assert html =~ "Action required" or
-             html =~ "Healthy"
+    refute html =~ "Action required"
+    refute html =~ "Healthy"
 
-    assert html =~ "Owner: User"
-    assert html =~ "Tax: Off"
+    assert html =~ "User"
+    assert html =~ "Automatic tax off"
     refute html =~ "Search customer, open detail"
     refute html =~ "Setup gap"
     assert html =~ "Amount unavailable"
 
     assert_table_headings_in_order(html, [
-      "Customer details",
-      "State",
-      "Plan / amount",
+      "Subscription",
+      "Status",
+      "Plan",
       "Renews / ends",
       "Ownership and tax"
     ])
 
-    assert html =~ "Subscription details"
+    assert html =~ "Customer details"
 
     assert html =~ "ax-data-table-grid"
   end
@@ -397,7 +397,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     customer_link =
       parsed
       |> Floki.find("a")
-      |> Enum.find(&(Floki.text(&1) == "phase234-journey@example.com"))
+      |> Enum.find(&(Floki.text(&1) == "Customer details"))
 
     subscription_id_copy =
       parsed
@@ -407,7 +407,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     subscription_details =
       parsed
       |> Floki.find("a")
-      |> Enum.find(&(Floki.text(&1) == "Subscription details"))
+      |> Enum.find(&(Floki.text(&1) == "phase234-journey@example.com"))
 
     assert customer_link
     assert subscription_id_copy == nil

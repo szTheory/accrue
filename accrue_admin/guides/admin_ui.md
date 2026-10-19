@@ -20,6 +20,20 @@ Copy controls supply `data-clipboard-label` (or `IdBadge.copy_label`) to name th
 
 Keep failures that require a decision or recovery action in the existing `FlashGroup` or beside the affected control. A copy failure may use the shared toast as brief feedback, but the exact manual-copy fallback remains at the control. Do not put required instructions or actions solely in a disappearing toast. Do not create per-page toast positions or separate notification implementations.
 
+## Billing list and detail hierarchy
+
+Use `DataTable.view_nav` for named destinations such as “Failed payments” and “All payments”; use filter chips only for applied constraints. Switching views retains search and exact customer scope; Reset returns to the default view. Invoice and subscription statuses use the shared multiple-selection disclosure with a readable selection summary. It stays open while selections update, closes on outside pointer interaction or Escape, and restores focus to the summary on Escape. The existing disclosure hook keeps ordinary detail disclosures unchanged.
+
+`DataTable.value_cell` separates a primary amount or fact from its supporting observation. Invoice balances lead with the remaining amount; Stripe fee amounts and settlement observations occupy separate lines. Missing fee evidence is “Not recorded”, not an inferred pending or unsettled state. `BillingContext` preserves the host's account type and explicitly labels automatic tax. Routine values are plain; tax issues use the established warning badge. If a query supplies no tax observation (as on Payments), show the account type alone rather than inferring tax is off.
+
+Billing tables can supply supported percentage `width` values on columns. The shared table applies fixed proportions through stylesheet rules and `data-width`, respecting the mounted host's CSP. Readable labels elide within their column; exact IDs stay available and copyable. Do not rely on inline style attributes for column geometry.
+
+Use `Timestamp.timestamp format={:date}` for date-oriented table cells. Local/UTC selection still determines the displayed date, and clicking copies the original exact UTC ISO timestamp with the shared named toast. Event-history timestamps retain their time precision.
+
+Keep detail headers to identity and actual status, with supporting facts in their field list. Avoid global health verdicts or navigation presented as an unrelated primary action. Payment and invoice action descriptions explain the operator's task; eligibility, review, step-up and dispatch remain at their existing owners. Webhook attempt/derived-event counts appear after history loads; this schema has no independent signature-verification evidence field, so the UI must not manufacture a verification result.
+
+Recovery metrics distinguish unavailable amounts from zero and monthly recurring revenue from cash or confirmed churn. The date selector is compact and its UTC reporting convention is explained once. Recorded campaign outcomes and the current retry queue have different sources; name that distinction instead of presenting an event-history count as the current queue size.
+
 ## Core operator surface parity (checklist)
 
 **ADM-07:** the canonical matrix of mounted core routes vs `AccrueAdmin.Copy`, `ax-*` / token discipline, and VERIFY-01 posture lives in **[`core-admin-parity.md`](core-admin-parity.md)**. Use it when triaging Tier A copy gaps or planning VERIFY extensions—do not maintain a second matrix in planning-only docs.

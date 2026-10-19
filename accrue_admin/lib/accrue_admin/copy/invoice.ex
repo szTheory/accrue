@@ -31,9 +31,9 @@ defmodule AccrueAdmin.Copy.Invoice do
     do:
       "Open and uncollectible invoices first — your collections queue. Switch status or search by customer to widen the view."
 
-  def invoices_list_heading, do: "Clear open receivables"
+  def invoices_list_heading, do: "Invoices"
 
-  def invoices_list_subtitle, do: "Work invoices that need collection."
+  def invoices_list_subtitle, do: "Review outstanding balances and invoice history."
 
   def invoices_list_first_run_empty_title, do: "No invoices yet."
 

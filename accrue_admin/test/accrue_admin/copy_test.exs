@@ -201,8 +201,8 @@ defmodule AccrueAdmin.CopyTest do
       %{
         heading: Copy.invoices_list_heading(),
         subtitle: Copy.invoices_list_subtitle(),
-        expected_heading: "Clear open receivables",
-        expected_subtitle: "Work invoices that need collection.",
+        expected_heading: "Invoices",
+        expected_subtitle: "Review outstanding balances and invoice history.",
         states: [
           Copy.invoices_list_first_run_empty_title(),
           Copy.invoices_list_queue_empty_title(),
@@ -218,8 +218,8 @@ defmodule AccrueAdmin.CopyTest do
       %{
         heading: Copy.payments_list_heading(),
         subtitle: Copy.payments_list_subtitle(),
-        expected_heading: "Recover failed payments",
-        expected_subtitle: "Inspect charges that need follow-up.",
+        expected_heading: "Payments",
+        expected_subtitle: "Review payments, investigate failures, and check recorded fees.",
         states: [
           Copy.payments_list_first_run_empty_title(),
           Copy.payments_list_queue_empty_title(),

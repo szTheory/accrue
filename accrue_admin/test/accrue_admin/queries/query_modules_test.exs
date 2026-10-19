@@ -134,6 +134,31 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     {:ok, customer_new: customer_new, invoice_new: invoice_new, coupon_new: coupon_new}
   end
 
+  test "record UUID search works across billing lists without escaping owner scope", %{
+    customer_new: customer
+  } do
+    for module <- [Customers, Subscriptions, Invoices, Charges] do
+      {rows, _} = module.list(filter: %{q: customer.id})
+      assert rows != [], "#{inspect(module)} must find the customer's records by UUID"
+      assert Enum.all?(rows, &(Map.get(&1, :customer_id, &1.id) == customer.id))
+
+      for row <- rows do
+        {found, _} = module.list(filter: %{q: String.upcase(row.id)})
+        assert Enum.any?(found, &(&1.id == row.id))
+      end
+
+      scope = %OwnerScope{
+        mode: :organization,
+        organization_id: "another-org",
+        current_admin: %{id: "admin", role: :admin},
+        platform_admin?: false,
+        admin_org_ids: ["another-org"]
+      }
+
+      assert {[], nil} = module.list(filter: %{q: customer.id}, owner_scope: scope)
+    end
+  end
+
   test "customer queries filter, paginate, and fail closed on invalid cursors", %{
     customer_new: customer_new
   } do

@@ -20,8 +20,8 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
       assert html =~ ~s(class="ax-at-risk-cards")
 
       assert html =~ "Northwind Finance"
-      assert html =~ "Current subscription status"
-      assert html =~ "past_due"
+      assert html =~ "Subscription status"
+      assert html =~ "Past due"
       assert html =~ "$320.00"
       assert html =~ "Past due 9 days"
       assert html =~ "Step 2"

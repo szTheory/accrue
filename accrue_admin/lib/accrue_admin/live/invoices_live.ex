@@ -7,7 +7,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
 
   alias Accrue.Billing.{Customer, Invoice}
   alias Accrue.Repo
-  alias AccrueAdmin.BillingPresentation
+  alias AccrueAdmin.Components.BillingContext
 
   alias AccrueAdmin.Components.{
     AppShell,
@@ -147,16 +147,16 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           show_empty_clear={false}
           clear_href={@table_path}
           columns={[
-            %{label: Copy.invoices_column_invoice(), render: &invoice_identity_cell(&1, @admin_mount_path, @current_owner_scope, :table)},
-            %{label: Copy.invoices_column_status(), render: &status_summary/1},
-            %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
-            %{label: Copy.invoices_column_due_date(), render: &due_date_summary(&1, :table)},
-            %{
+            %{width: 27, label: Copy.invoices_column_invoice(), render: &invoice_identity_cell(&1, @admin_mount_path, @current_owner_scope, :table)},
+            %{width: 14, label: Copy.invoices_column_status(), render: &status_summary/1},
+            %{width: 18, label: Copy.invoices_column_balance(), render: &balance_summary/1},
+            %{width: 14, label: Copy.invoices_column_due_date(), render: &due_date_summary(&1, :table)},
+            %{width: 13,
               id: :collection_method,
               label: Copy.invoices_column_collection(),
               render: &collection_method_summary/1
             },
-            %{label: Copy.invoices_column_billing_signals(), render: &billing_signals_cell/1}
+            %{width: 14, label: Copy.invoices_column_billing_signals(), render: &billing_signals_cell/1}
           ]}
           card_title={&invoice_identity_cell(&1, @admin_mount_path, @current_owner_scope, :card)}
           card_fields={[
@@ -190,14 +190,10 @@ defmodule AccrueAdmin.Live.InvoicesLive do
               aria-label="Invoice filters, view, and results"
               data-ax-page-filter-toolbar
             >
-              <nav class="ax-invoice-view-nav" aria-label="Invoice view" data-ax-view-nav>
-                <.link patch={invoice_view_href(@params, @table_path, :queue)} aria-current={if invoice_view(@params) == :queue, do: "page"}>
-                  <%= Copy.invoices_list_default_lens_label() %>
-                </.link>
-                <.link patch={invoice_view_href(@params, @table_path, :all)} aria-current={if invoice_view(@params) == :all, do: "page"}>
-                  <%= Copy.invoices_list_all_lens_label() %>
-                </.link>
-              </nav>
+              <DataTable.view_nav label="Invoice view" items={[
+                %{label: Copy.invoices_list_default_lens_label(), current: invoice_view(@params) == :queue, href: invoice_view_href(@params, @table_path, :queue)},
+                %{label: Copy.invoices_list_all_lens_label(), current: invoice_view(@params) == :all, href: invoice_view_href(@params, @table_path, :all)}
+              ]} />
               <DataTable.filter_toolbar
                 id="invoices"
                 filter_fields={invoice_filter_fields()}
@@ -263,14 +259,11 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     do: query |> where([invoice], invoice.status == ^status) |> Repo.aggregate(:count, :id)
 
   defp billing_signals_cell(row) do
-    ownership = BillingPresentation.ownership_label(row)
-    tax = BillingPresentation.tax_health_label(BillingPresentation.tax_health(row))
-    escaped_o = ownership |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    assigns = %{row: row}
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span>)
-    )
+    ~H"""
+    <BillingContext.billing_context row={@row} />
+    """
   end
 
   defp invoice_identity_cell(row, mount_path, owner_scope, surface) do
@@ -304,19 +297,26 @@ defmodule AccrueAdmin.Live.InvoicesLive do
   defp card_title(row), do: row.number || row.processor_id || row.id
 
   defp status_summary(row) do
-    [
-      humanize(row.status),
-      overdue?(row) && Copy.invoices_overdue_signal()
-    ]
-    |> Enum.reject(&(&1 in [nil, false]))
-    |> Enum.join(" · ")
+    assigns = %{
+      label: humanize(row.status),
+      overdue: overdue?(row),
+      uncollectible: row.status == :uncollectible
+    }
+
+    ~H"""
+    <span class="ax-data-table-value">
+      <span :if={!@uncollectible}><%= @label %></span>
+      <AccrueAdmin.Components.StatusBadge.status_badge :if={@uncollectible} status={:warning} label={@label} tone="amber" />
+      <AccrueAdmin.Components.StatusBadge.status_badge :if={@overdue} status={:warning} label="Overdue" tone="amber" />
+    </span>
+    """
   end
 
   defp due_date_summary(%{due_date: %DateTime{} = due_date} = row, presentation) do
     assigns = %{value: due_date, id: "invoice-row-due-date-#{presentation}-#{row.id}"}
 
     ~H"""
-    <Timestamp.timestamp value={@value} id={@id} />
+    <Timestamp.timestamp value={@value} id={@id} format={:date} />
     """
   end
 
@@ -342,10 +342,15 @@ defmodule AccrueAdmin.Live.InvoicesLive do
   defp overdue?(_row), do: false
 
   defp balance_summary(row) do
-    due = format_money(row.amount_due_minor, row.currency)
-    paid = format_money(row.amount_paid_minor, row.currency)
-    remaining = format_money(row.amount_remaining_minor, row.currency)
-    Copy.invoices_balance_summary(due, paid, remaining)
+    assigns = %{
+      value: format_money(row.amount_remaining_minor, row.currency),
+      detail:
+        "#{format_money(row.amount_paid_minor, row.currency)} paid of #{format_money(row.amount_due_minor, row.currency)}"
+    }
+
+    ~H"""
+    <DataTable.value_cell value={@value} detail={@detail} />
+    """
   end
 
   defp collection_method_summary(row),
@@ -368,7 +373,11 @@ defmodule AccrueAdmin.Live.InvoicesLive do
 
   defp invoice_filter_fields do
     [
-      %{id: :q, label: Copy.invoices_filter_search(), placeholder: Copy.invoices_filter_search()},
+      %{
+        id: :q,
+        label: "Search invoices",
+        placeholder: "Invoice number, customer name, email, or ID"
+      },
       {
         :status,
         [
@@ -396,7 +405,6 @@ defmodule AccrueAdmin.Live.InvoicesLive do
         secondary: true,
         all_label: "All collection methods",
         options: [
-          {"", "All"},
           {"charge_automatically", Copy.invoices_filter_collection_automatic()},
           {"send_invoice", Copy.invoices_filter_collection_send_invoice()}
         ]

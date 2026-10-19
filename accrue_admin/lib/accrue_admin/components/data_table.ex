@@ -394,7 +394,11 @@ defmodule AccrueAdmin.Components.DataTable do
         <p class="ax-visually-hidden" role="status"><%= @loading_label %></p>
 
         <div class="ax-card ax-data-table-shell ax-data-table-skeleton-shell" aria-hidden="true">
-          <table class="ax-data-table-grid">
+          <table class={["ax-data-table-grid", Enum.any?(@columns, &Map.has_key?(&1, :width)) && "ax-data-table-grid-fixed"]}>
+          <colgroup :if={Enum.any?(@columns, &Map.has_key?(&1, :width))}>
+            <col :if={@selectable} class="ax-data-table-select-column" />
+            <col :for={column <- @columns} data-width={column[:width]} />
+          </colgroup>
             <caption :if={@table_caption} class="ax-visually-hidden"><%= @table_caption %></caption>
             <thead>
               <tr>
@@ -487,7 +491,11 @@ defmodule AccrueAdmin.Components.DataTable do
         :if={@render_rows}
         class="ax-card ax-data-table-shell"
       >
-        <table class="ax-data-table-grid">
+        <table class={["ax-data-table-grid", Enum.any?(@columns, &Map.has_key?(&1, :width)) && "ax-data-table-grid-fixed"]}>
+          <colgroup :if={Enum.any?(@columns, &Map.has_key?(&1, :width))}>
+            <col :if={@selectable} class="ax-data-table-select-column" />
+            <col :for={column <- @columns} data-width={column[:width]} />
+          </colgroup>
           <caption :if={@table_caption} class="ax-visually-hidden"><%= @table_caption %></caption>
           <thead>
             <tr>
@@ -582,6 +590,31 @@ defmodule AccrueAdmin.Components.DataTable do
         />
       </footer>
     </section>
+    """
+  end
+
+  attr(:label, :string, required: true)
+  attr(:items, :list, required: true)
+
+  def view_nav(assigns) do
+    ~H"""
+    <nav class="ax-list-view-nav ax-invoice-view-nav" aria-label={@label} data-ax-view-nav>
+      <.link :for={item <- @items} patch={item.href} aria-current={if item.current, do: "page"}>
+        <%= item.label %>
+      </.link>
+    </nav>
+    """
+  end
+
+  attr(:value, :string, required: true)
+  attr(:detail, :string, default: nil)
+
+  def value_cell(assigns) do
+    ~H"""
+    <span class="ax-data-table-value">
+      <span><%= @value %></span>
+      <span :if={@detail} class="ax-data-table-value-detail"><%= @detail %></span>
+    </span>
     """
   end
 
@@ -775,23 +808,44 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign(:options, Map.get(field, :options, []))
       |> assign(:selected_values, selected_values(assigns.value))
 
+    assigns =
+      assign(
+        assigns,
+        :selection_label,
+        case Enum.filter(
+               assigns.options,
+               &(to_string(option_value(&1)) in assigns.selected_values)
+             ) do
+          [] -> "All statuses"
+          selected when length(selected) <= 2 -> Enum.map_join(selected, ", ", &option_label/1)
+          selected -> "#{length(selected)} selected"
+        end
+      )
+
     ~H"""
-    <fieldset class="ax-data-table-checkbox-group" data-filter-group={field_param(@field)}>
-      <legend class="ax-label"><%= field_label(@field) %></legend>
-      <label :for={{option, index} <- Enum.with_index(@options)} class="ax-field-inline">
-        <input
-          id={"#{@id}-#{index}"}
-          type="checkbox"
-          name={"#{field_param(@field)}[]"}
-          value={option_value(option)}
-          checked={to_string(option_value(option)) in @selected_values}
-          class="ax-checkbox"
-          data-phase191-focus={"filter-#{@focus_key}-#{index}"}
-        />
-        <span><%= option_label(option) %></span>
-      </label>
-      <input type="hidden" name={"#{field_param(@field)}[]"} value="" />
-    </fieldset>
+    <span id={@id <> "-label"} class="ax-label"><%= field_label(@field) %></span>
+    <details id={@id <> "-picker"} class="ax-multi-select" data-disclosure-dismiss phx-hook="PreserveDisclosure">
+      <summary aria-labelledby={@id <> "-label " <> @id <> "-selection"}>
+        <span id={@id <> "-selection"}><%= @selection_label %></span>
+        <Icon.icon name={:chevron_down} size="sm" />
+      </summary>
+      <fieldset class="ax-data-table-checkbox-group" data-filter-group={field_param(@field)}>
+        <legend class="ax-visually-hidden"><%= field_label(@field) %></legend>
+        <label :for={{option, index} <- Enum.with_index(@options)} class="ax-field-inline">
+          <input
+            id={"#{@id}-#{index}"}
+            type="checkbox"
+            name={"#{field_param(@field)}[]"}
+            value={option_value(option)}
+            checked={to_string(option_value(option)) in @selected_values}
+            class="ax-checkbox"
+            data-phase191-focus={"filter-#{@focus_key}-#{index}"}
+          />
+          <span><%= option_label(option) %></span>
+        </label>
+        <input type="hidden" name={"#{field_param(@field)}[]"} value="" />
+      </fieldset>
+    </details>
     """
   end
 

@@ -168,13 +168,27 @@ defmodule AccrueAdmin.Queries.Subscriptions do
       {:q, term}, query ->
         pattern = "%#{term}%"
 
-        where(
-          query,
-          [subscription, customer],
-          ilike(customer.email, ^pattern) or
-            ilike(customer.name, ^pattern) or
-            ilike(subscription.processor_id, ^pattern)
-        )
+        text_match =
+          dynamic(
+            [subscription, customer],
+            ilike(customer.email, ^pattern) or
+              ilike(customer.name, ^pattern) or
+              ilike(subscription.processor_id, ^pattern)
+          )
+
+        match =
+          case Ecto.UUID.cast(term) do
+            {:ok, uuid} ->
+              dynamic(
+                [subscription, customer],
+                ^text_match or subscription.id == ^uuid or customer.id == ^uuid
+              )
+
+            :error ->
+              text_match
+          end
+
+        where(query, ^match)
 
       {:status, status}, query ->
         filter_status(query, status)

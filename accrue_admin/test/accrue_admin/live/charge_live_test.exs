@@ -102,8 +102,8 @@ defmodule AccrueAdmin.ChargeLiveTest do
     assert data_attr_count(html, "data-ax-lazy-json") == 1
 
     assert has_element?(view, "[data-ax-primary-action]", "Refund charge")
-    assert html =~ "Created / inserted"
-    assert html =~ "Net / fees / refunds"
+    assert html =~ "Recorded"
+    assert html =~ "Fee breakdown"
 
     refute has_element?(view, "[data-role='refund-form']")
     refute has_element?(view, "[data-role='confirm-panel']")
@@ -233,7 +233,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
     # UX-02: single ax-page on charge detail
     assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
 
-    assert html =~ "Tax &amp; ownership"
+    assert html =~ "Account type"
     assert html =~ "Platform fee"
     assert html =~ "merchant loss"
     assert html =~ "fee refunded"
