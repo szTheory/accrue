@@ -5,10 +5,13 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { validateIntegratedProof, resolveEvidenceFile } from './verify_phase248_integrated_proof.mjs';
+import { resolvePhaseEvidencePath } from './phase_evidence_path.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const proofPath = '.planning/phases/248-reproducible-scenarios-and-integrated-proof/248-PROOF.md';
-const manifestPath = '.planning/phases/248-reproducible-scenarios-and-integrated-proof/captures/phase248-current-proof/manifest.json';
+const PHASE248 = '248-reproducible-scenarios-and-integrated-proof';
+const repoRelative = (absolute) => path.relative(root, absolute).split(path.sep).join('/');
+const proofPath = repoRelative(resolvePhaseEvidencePath(PHASE248, '248-PROOF.md', { root }));
+const manifestPath = repoRelative(resolvePhaseEvidencePath(PHASE248, 'captures/phase248-current-proof/manifest.json', { root }));
 const proof = fs.readFileSync(resolveEvidenceFile(root, proofPath), 'utf8');
 const valid = () => validateIntegratedProof({ root, proofPath, manifestPath });
 
@@ -49,7 +52,7 @@ test('rejects a PASS row without an executed result', () => {
 });
 
 test('rejects evidence paths that traverse outside the repository', () => {
-  const modified = proof.replace('.planning/phases/246-collection-controls-and-search/246-VALIDATION.md', '../../etc/passwd');
+  const modified = proof.replace('.planning/phases/246-collection-controls-and-search/246-VALIDATION.md', '../../etc/passwd'); // archive-sweep-exempt: text substituted inside the proof markdown, not a filesystem read
   assert.throws(() => validateIntegratedProof({ root, proofPath, manifestPath, proofText: modified }), /path escapes repository/);
 });
 
@@ -61,7 +64,7 @@ test('rejects a finding linked to an unknown owner topic', () => {
 function archiveFixture(t) {
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'phase248-archive-'));
   t.after(() => fs.rmSync(scratch, { recursive: true, force: true }));
-  const relative = '.planning/phases/245-baseline/evidence.md';
+  const relative = '.planning/phases/245-baseline/evidence.md'; // archive-sweep-exempt: synthetic fixture slug under an mkdtemp root, never a live repository read
   const archived = '.planning/milestones/v1.66-phases/245-baseline/evidence.md';
   const target = path.join(scratch, archived);
   fs.mkdirSync(path.dirname(target), { recursive: true });
@@ -93,5 +96,5 @@ test('does not apply archive fallback to traversal or absolute evidence paths', 
   const { scratch } = archiveFixture(t);
   assert.throws(() => resolveEvidenceFile(scratch, '../../etc/passwd'), /path escapes repository/);
   assert.throws(() => resolveEvidenceFile(scratch, '/etc/passwd'), /unsafe path/);
-  assert.throws(() => resolveEvidenceFile(scratch, '.planning/phases/245-baseline/../evidence.md'), /missing evidence path/);
+  assert.throws(() => resolveEvidenceFile(scratch, '.planning/phases/245-baseline/../evidence.md'), /missing evidence path/); // archive-sweep-exempt: synthetic fixture slug under an mkdtemp root, never a live repository read
 });

@@ -5,11 +5,11 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { resolveEvidenceFile } from './verify_phase248_integrated_proof.mjs';
+import { resolvePhaseEvidencePath } from './phase_evidence_path.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const manifestRelative = '.planning/phases/248-reproducible-scenarios-and-integrated-proof/captures/phase248-current-proof/manifest.json';
-const canonicalManifest = resolveEvidenceFile(repo, manifestRelative);
+const PHASE248 = '248-reproducible-scenarios-and-integrated-proof';
+const canonicalManifest = resolvePhaseEvidencePath(PHASE248, 'captures/phase248-current-proof/manifest.json', { root: repo });
 const canonicalRoot = path.dirname(canonicalManifest);
 const validator = path.join(repo, 'scripts/ci/verify_phase248_render_proof.mjs');
 
@@ -32,7 +32,9 @@ function runValidator(t, mutate, expectedError) {
   const manifestPath = fixture(t, mutate);
   const result = spawnSync(process.execPath, [validator, '--manifest', manifestPath], {
     cwd: repo,
-    encoding: 'utf8'
+    encoding: 'utf8',
+    // The validator transitively imports phase_evidence_path.mjs -> main_module.mjs, which registers node:test cases when NODE_TEST_CONTEXT is set; clear it so the child is a plain process.
+    env: { ...process.env, NODE_TEST_CONTEXT: '' }
   });
   assert.notEqual(result.status, 0, `validator unexpectedly accepted the mutated manifest\n${result.stdout}`);
   assert.match(`${result.stdout}\n${result.stderr}`, expectedError);

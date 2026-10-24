@@ -3,9 +3,10 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolvePhaseEvidencePath } from './phase_evidence_path.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const OWNER_SOURCE = '.planning/phases/245-rendered-baseline-and-realistic-preview/245-FINDINGS.md';
+const PHASE245_SLUG = '245-rendered-baseline-and-realistic-preview';
 const OWNER_RE = /<!-- owner-items-json:start -->\s*([\s\S]*?)\s*<!-- owner-items-json:end -->/;
 const FINDING_RE = /<!-- findings-json:start -->\s*([\s\S]*?)\s*<!-- findings-json:end -->/;
 
@@ -38,7 +39,8 @@ export function resolveEvidenceFile(root, relative) {
   return resolved;
 }
 function sourceKeys(root) {
-  const source = fs.readFileSync(resolveEvidenceFile(root, OWNER_SOURCE), 'utf8');
+  const ownerSource = path.relative(root, resolvePhaseEvidencePath(PHASE245_SLUG, '245-FINDINGS.md', { root })).split(path.sep).join('/');
+  const source = fs.readFileSync(resolveEvidenceFile(root, ownerSource), 'utf8');
   const ownerBlock = source.match(OWNER_RE)?.[1];
   const findingBlock = source.match(FINDING_RE)?.[1];
   if (!ownerBlock || !findingBlock) fail('canonical topic/finding JSON blocks are missing');
