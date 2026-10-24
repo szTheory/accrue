@@ -59,24 +59,24 @@ Deferred to a later milestone (tracked, not in this roadmap):
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GREEN-01 | — | Pending |
-| GREEN-02 | — | Pending |
-| GREEN-03 | — | Pending |
-| GREEN-04 | — | Pending |
-| GREEN-05 | — | Pending |
-| TRUTH-01 | — | Pending |
-| TRUTH-02 | — | Pending |
-| LAND-01 | — | Pending |
-| LAND-02 | — | Pending |
-| LAND-03 | — | Pending |
-| RLS-01 | — | Pending |
-| RLS-02 | — | Pending |
+| GREEN-01 | Phase 249 | Pending |
+| GREEN-02 | Phase 249 | Pending |
+| GREEN-03 | Phase 249 | Pending |
+| GREEN-04 | Phase 249 | Pending |
+| GREEN-05 | Phase 249 | Pending |
+| TRUTH-01 | Phase 249 | Pending |
+| TRUTH-02 | Phase 249 | Pending |
+| LAND-01 | Phase 250 | Pending |
+| LAND-02 | Phase 250 | Pending |
+| LAND-03 | Phase 250 | Pending |
+| RLS-01 | Phase 251 | Pending |
+| RLS-02 | Phase 251 | Pending |
 
 **Coverage:**
 - v1.67 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-10-24*
-*Last updated: 2026-10-24 after initial definition*
+*Last updated: 2026-10-24 after v1.67 roadmap creation (Phases 249–251)*

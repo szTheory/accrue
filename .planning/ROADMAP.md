@@ -22,17 +22,71 @@
 - ✅ **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (shipped 2026-10-10) — [archive](milestones/v1.64-ROADMAP.md)
 - ✅ **v1.65 Accrue Admin Language & Consistency** — Phase 244 (completed 2026-10-11) — [archive](milestones/v1.65-ROADMAP.md)
 - ✅ **v1.66 Admin Usability and Visual Consistency** — Phases 245–248 (completed 2026-10-12) — [archive](milestones/v1.66-ROADMAP.md)
+- 🚧 **v1.67 Integration & CI Green** — Phases 249–251 (in progress)
 
 ## Planning Doctrine
 
 Accrue remains in **stable-core / demand-driven expansion** posture. New feature milestones require a concrete adopter failure mode, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change recorded in `PROJECT.md` or `STRATEGY.md`.
 
-Historical friction anchors remain in the [v1.17 inventory](research/v1.17-FRICTION-INVENTORY.md). Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work require an explicit future scope decision; Google Play remains backlogged in SEED-007 until Android is scheduled or a second adopter requires it.
+Historical friction-backlog anchors remain canonical in the [v1.17 inventory](research/v1.17-FRICTION-INVENTORY.md): [INT-10 / Phase 63](research/v1.17-FRICTION-INVENTORY.md#backlog--int-10-phase-63), [BIL-03 / Phase 64](research/v1.17-FRICTION-INVENTORY.md#backlog--bil-03-phase-64), and [ADM-12 / Phase 65](research/v1.17-FRICTION-INVENTORY.md#backlog--adm-12-phase-65).
+
+Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be explicitly re-scoped by a future milestone before execution. Google Play remains backlogged in SEED-007 until Android is scheduled or a second adopter requires it.
 
 ## Current Position
 
-v1.66 is complete and archived locally. All 16 requirements were satisfied across four phases and 18 actual plans. Audit status is tech_debt with no blockers; representative coverage and acknowledged design limits remain explicit in the archive.
+v1.67 Integration & CI Green is in progress. Requirements are defined (12 total) and mapped to Phases 249–251; Phase 249 has not started. v1.66 is complete and archived locally; the v1.63–v1.66 line (≈853 commits ahead of `origin/main` 7971753a) has never been CI-validated. This milestone lands it green at an exact head SHA and makes 1.7.0 release-ready. No new product behavior.
+
+Pushing to the public remote (Phase 250) and publishing to Hex (Phase 251) each require an explicit maintainer yes. Those are irreversible external-operation decisions, not UAT. Every other acceptance item is decided by a command or a CI conclusion (Executable Acceptance Policy).
+
+## Phases
+
+- [ ] **Phase 249: Local Gate Parity & Planning Truth** - Every locally runnable merge-blocking `ci.yml` check passes on the integration head, and the planning state is honest
+- [ ] **Phase 250: Remote Integration** - The integration head lands on `main` through one exact-SHA green PR with a merge commit
+- [ ] **Phase 251: 1.7.0 Release Alignment** - The release-please 1.7.0 PR is aligned and green; Hex publication waits for an explicit maintainer yes
+
+## Phase Details
+
+### Phase 249: Local Gate Parity & Planning Truth
+**Goal**: The integration head passes every merge-blocking check that can run locally. Each red is fixed at its source, never by weakening a gate. Planning state tells the truth about v1.67 and the out-of-band owner-feedback work.
+**Depends on**: Nothing (first phase of v1.67)
+**Requirements**: GREEN-01, GREEN-02, GREEN-03, GREEN-04, GREEN-05, TRUTH-01, TRUTH-02
+**Success Criteria** (what must be TRUE):
+  1. Every planning-doc contract step of the `docs-contracts-shift-left` job, run locally with its `ci.yml` command, exits 0 on the integration head. That covers completion evidence, PR claims, artifact fixed point, v1.17 friction / roadmap hygiene, executable UAT and committed window dispositions. No gate script loses an assertion, and no sha256-pinned archived evidence script has its recorded receipt falsified.
+  2. `mix compile --warnings-as-errors` succeeds in `accrue_admin`. The admin group-contract, hardening and Phase 200 commands, the DSY-01 breakpoint-annotation check and the D-32 module-boundary check all exit 0.
+  3. The Phase 190 automation contract and the Phase 190/192 browser probes pass on desktop and mobile. Each previously failing probe has a committed classification, either a source fix for a real regression or a contract update for a change made stale on purpose, with the rationale recorded.
+  4. The `accrue`, `accrue_admin` and `accrue_portal` test suites, the host-integration gate and the Playwright E2E lane all pass locally on the integration head. `copy_strings.json` and visual baselines are regenerated only where an intentional change requires it.
+  5. `.planning/HANDOFF.json` is gone and STATE.md reflects v1.67. Resolved debug sessions are filed. MILESTONES.md and STATE.md record commits `3d7d949d..b4a7eeac` as work done outside GSD, cite `.planning/notes/2026-10-1*-admin-owner-feedback.md` as receipts, and claim no backdated plans or phase verification.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 250: Remote Integration
+**Goal**: The v1.63–v1.66 work reaches `origin/main` through one PR that CI proves green at its exact head SHA. History and SHA-bound evidence stay intact.
+**Depends on**: Phase 249
+**Requirements**: LAND-01, LAND-02, LAND-03
+**Success Criteria** (what must be TRUE):
+  1. After an explicit maintainer yes, `integration/v1.63-v1.66` exists on origin. A pre-push publication-hygiene check (secrets, home paths, PII, large binaries) passed across the full pushed history, and `git ls-remote --tags origin` shows no v1.63–v1.66 milestone tags.
+  2. `gh` reports every PR-required job in `ci.yml` and `accrue_admin_browser.yml` as `success`, not `skipped`, on the 40-hex head SHA recorded in the PR body. The committed PR-body file matches the live PR body byte for byte.
+  3. The PR is merged with a merge commit (two parents, no squash or rebase). Every pre-merge commit SHA is reachable from `main`, and the first post-merge push run on `main` concludes `success` for all jobs.
+**Plans**: TBD
+
+### Phase 251: 1.7.0 Release Alignment
+**Goal**: The release-please PR can ship 1.7.0 of `accrue`, `accrue_admin` and `accrue_portal` with adopter-readable notes. Publication happens only with an explicit maintainer yes.
+**Depends on**: Phase 250
+**Requirements**: RLS-01, RLS-02
+**Success Criteria** (what must be TRUE):
+  1. The release-please 1.7.0 PR branch carries README version pins at 1.7.0, companion notes and a curated adopter-readable CHANGELOG for all three packages. A grep of the release CHANGELOGs finds no raw phase-scoped `feat(2xx-yy)` lines.
+  2. Every required check on the release PR's exact head SHA concludes `success`, not `skipped`.
+  3. Hex publication of 1.7.0 happens only after a recorded explicit maintainer yes. Without one, the aligned release PR stays open and green, and the decision is recorded in STATE.md.
+**Plans**: TBD
+
+## Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 249. Local Gate Parity & Planning Truth | 0/TBD | Not started | - |
+| 250. Remote Integration | 0/TBD | Not started | - |
+| 251. 1.7.0 Release Alignment | 0/TBD | Not started | - |
 
 ## Next
 
-`$gsd-new-milestone` — define any new scope and fresh requirements under the stable-core posture. No next feature scope is pre-approved.
+`$gsd-plan-phase 249`. Discuss first with `$gsd-discuss-phase 249` if any red's classification (regression vs stale contract) needs a decision before planning.

@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-10-24T22:58:44.686Z"
 last_activity: 2026-10-24
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,16 +21,16 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Inline owner-feedback refinements verified; awaiting next milestone
-**Progress:** [██████████] 100%
+**Current focus:** v1.67 Integration & CI Green — Phase 249 Local Gate Parity & Planning Truth (not started)
+**Progress:** [░░░░░░░░░░] 0% (0/3 phases)
 **Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 249 of 251 (Local Gate Parity & Planning Truth) — not started; no phase directory yet
 Plan: —
-Status: Defining requirements
-Last activity: 2026-10-24 — Milestone v1.67 started
+Status: Ready to plan
+Last activity: 2026-10-24 — v1.67 roadmap created (Phases 249–251, 12/12 requirements mapped)
 
 ## Performance Metrics
 
@@ -562,7 +562,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-12T02:57:08.909Z
-Stopped at: v1.66 archived; awaiting next milestone
+Stopped at: v1.67 roadmap created; Phase 249 ready to plan
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -692,4 +692,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- `$gsd-new-milestone` — define fresh requirements and next scope. v1.66 is archived; do not repeat completed product work. Milestone tag remains local.
+- `$gsd-plan-phase 249` — plan Local Gate Parity & Planning Truth for v1.67 Integration & CI Green (Phases 249–251). Pushing to origin (Phase 250) and Hex publication (Phase 251) each require an explicit maintainer yes. Milestone tags remain local.
