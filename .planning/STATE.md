@@ -1,19 +1,19 @@
 ---
 gsd_state_version: "1.0"
 milestone: v1.66
-milestone_name: Admin Usability and Visual Consistency
 status: Awaiting next milestone
 stopped_at: v1.66 archived; awaiting next milestone
-last_updated: "2026-10-13T15:49:06Z"
+last_updated: "2026-10-24T22:31:24.023Z"
 last_activity: 2026-10-13
 last_activity_desc: Inline admin owner feedback implemented and verified; v1.66 remains archived
-state_head: 2b3d58fdc7474c948c022a9d24f6999417c34272
+state_head: 193a8a8e4db2aa453e69ed0db0a29a67235656f9
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 18
   completed_plans: 18
   percent: 100
+milestone_name: Admin Usability and Visual Consistency
 current_phase: null
 ---
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 Phase: Milestone v1.66 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-10-13 — Inline admin owner feedback implemented and verified. Receipt: `.planning/notes/2026-10-13-admin-owner-feedback.md`. No new milestone or phase initialized; v1.66 remains archived.
+Last activity: 2026-10-24 - Completed quick task 261024-pla: Route archive-unaware phase 245/248 verifier literals through phase_evidence_path so the archive sweep passes
 
 ## Performance Metrics
 
@@ -514,6 +514,7 @@ None. The next workflow action is recorded under Operator Next Steps; completed 
 | 261008-cjc | Repair Playwright CI: automate the existing test-only step-up code in the webhook replay journey and make Phase 234 saved post-layout evidence read-only by default | 2026-10-08 | 519ef895 | Verified | [261008-cjc-repair-playwright-ci-automate-the-existi](./quick/261008-cjc-repair-playwright-ci-automate-the-existi/) |
 | 261008-ffy | Repair Phase 235 regression gaps; isolate Braintree tests, restore processor-neutral facade docs, and add focused CI proof | 2026-10-08 | 42c28c17 | Verified | [261008-ffy-repair-phase-235-regression-gaps-by-isol](./quick/261008-ffy-repair-phase-235-regression-gaps-by-isol/) |
 | 261008-lbv | Repair Phase 236 Hosted Fields security gaps: retry stale asynchronous setup after LiveView updates and guarantee readable malformed-token styles with automated browser coverage | 2026-10-08 | adcdbbfa | complete | [261008-lbv-fix-phase-236-security-audit-gaps-retry-](./quick/261008-lbv-fix-phase-236-security-audit-gaps-retry-/) |
+| 261024-pla | Route archive-unaware phase 245/248 verifier literals through phase_evidence_path so the archive sweep passes | 2026-10-24 | 193a8a8e | — | [261024-pla-route-archive-unaware-phase-245-248-veri](./quick/261024-pla-route-archive-unaware-phase-245-248-veri/) |
 
 ## Deferred Items
 
