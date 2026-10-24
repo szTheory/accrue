@@ -1,20 +1,16 @@
 ---
 gsd_state_version: "1.0"
-milestone: v1.66
-status: Awaiting next milestone
-stopped_at: v1.66 archived; awaiting next milestone
-last_updated: "2026-10-24T22:31:24.023Z"
-last_activity: 2026-10-13
-last_activity_desc: Inline admin owner feedback implemented and verified; v1.66 remains archived
-state_head: 193a8a8e4db2aa453e69ed0db0a29a67235656f9
+milestone: v1.67
+milestone_name: Integration & CI Green
+status: planning
+last_updated: "2026-10-24T22:58:44.686Z"
+last_activity: 2026-10-24
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 18
-  completed_plans: 18
-  percent: 100
-milestone_name: Admin Usability and Visual Consistency
-current_phase: null
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -31,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 
 ## Current Position
 
-Phase: Milestone v1.66 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-10-24 - Completed quick task 261024-pla: Route archive-unaware phase 245/248 verifier literals through phase_evidence_path so the archive sweep passes
+Status: Defining requirements
+Last activity: 2026-10-24 — Milestone v1.67 started
 
 ## Performance Metrics
 

@@ -41,7 +41,21 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Next Milestone Goals
 
-No new feature milestone is defined. Use `$gsd-new-milestone` to define fresh requirements from a concrete adopter/operator need. Current nonblocking design and evidence limits stay archived and do not automatically reopen product scope.
+v1.67 below is integration and release readiness, not new product scope. Deferred admin polish and dependency hygiene are queued for a later milestone and do not reopen product scope by themselves.
+
+## Current Milestone: v1.67 Integration & CI Green
+
+**Goal:** Land the never-CI-validated v1.63–v1.66 work (≈853 local commits ahead of `origin/main` 7971753a) on `origin/main`, green at an exact head SHA, and make 1.7.0 release-ready.
+
+**Target features:**
+- Local gate parity: every merge-blocking `ci.yml` check that can run locally passes on the integration head — planning-doc contracts restored after milestone archival, admin compiles under `--warnings-as-errors`, CSS/module-boundary contracts satisfied, Phase 190 browser probe failures triaged as regression vs stale contract, and all three packages' test suites green.
+- Honest planning truth: stale `HANDOFF.json` removed, STATE refreshed, and the out-of-band 2026-10-11..19 owner-feedback commits (`3d7d949d..b4a7eeac`) recorded as outside GSD with their notes as receipts — no backdated plans or claimed verification.
+- Remote integration: one PR from an accurately named integration branch; every required job `success` (not `skipped`) on the exact 40-hex head; visual baselines and `copy_strings.json` regenerated where intentional changes require it; merged with a merge commit (no squash/rebase) so SHA-bound evidence and the changelog survive.
+- 1.7.0 release alignment: release-please PR aligned on its branch (README pins, curated CHANGELOG instead of raw `feat(2xx-yy)` lines, companion notes).
+
+**Authority:** Maintainer approved this shape on 2026-10-24 after a read-only fan-out (integration strategy, full-history publication hygiene, planning-state audit, backlog inventory) and a local replay of `ci.yml` found ~14 blocking reds. The scheduled nightly CI on `main` skips nearly every job, so it is not evidence; the last full push-CI on `main` was green on 2026-09-18.
+
+**Boundaries:** Fix reds at their source; no new product behavior. Pushing to the public remote and publishing to Hex each require an explicit maintainer yes. Keep GSD milestone tags local (owner note 2026-10-11). Deferred to a later milestone: webhook list multi-status filter and raw event-type duplication, recovery demo fixture integrity, LiveView 1.1.32 lock alignment, ExMoney deprecation, Storybook asset notice, Sigra wrong-password datetime triage, dead phase-190 `ci.yml:881` path alternation, mailglass 1.x cap documentation. Process lesson adopted: push an integration branch / draft PR at every milestone close so CI actually runs. Start at Phase **249**.
 
 <details>
 <summary>Completed v1.66 scope and delivery record</summary>
@@ -1056,4 +1070,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-12 after v1.66 milestone archive.*
+*Last updated: 2026-10-24 after starting v1.67 Integration & CI Green.*
