@@ -5,6 +5,7 @@ import crypto from "node:crypto";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const args = process.argv.slice(2);
@@ -12,9 +13,25 @@ const opts = {};
 for (let index = 0; index < args.length; index += 1) {
   if (args[index].startsWith("--")) opts[args[index].slice(2)] = args[index + 1] && !args[index + 1].startsWith("--") ? args[++index] : true;
 }
-const coveragePath = path.resolve(root, opts.coverage ?? ".planning/phases/245-rendered-baseline-and-realistic-preview/245-COVERAGE.md");
-const manifestPath = path.resolve(root, opts.manifest ?? ".planning/phases/245-rendered-baseline-and-realistic-preview/captures/manifest.json");
-const findingsPath = path.resolve(root, opts.findings ?? ".planning/phases/245-rendered-baseline-and-realistic-preview/245-FINDINGS.md");
+const PHASE245 = "245-rendered-baseline-and-realistic-preview";
+// Recorded commands pass `.planning/phases/<slug>/<rest>`; after milestone archival the
+// directory lives under `.planning/milestones/*-phases/`, so resolve through the canonical resolver.
+function resolveEvidenceInput(input) {
+  const match = typeof input === "string" ? input.match(/^\.planning\/phases\/(\d+-[a-z0-9]+(?:-[a-z0-9]+)*)\/(.+)$/) : null;
+  if (match && !fs.existsSync(path.resolve(root, input))) return resolvePhaseEvidencePath(match[1], match[2], { root });
+  return path.resolve(root, input);
+}
+let coveragePath;
+let manifestPath;
+let findingsPath;
+try {
+  coveragePath = opts.coverage ? resolveEvidenceInput(opts.coverage) : resolvePhaseEvidencePath(PHASE245, "245-COVERAGE.md", { root });
+  manifestPath = opts.manifest ? resolveEvidenceInput(opts.manifest) : resolvePhaseEvidencePath(PHASE245, "captures/manifest.json", { root });
+  findingsPath = opts.findings ? resolveEvidenceInput(opts.findings) : resolvePhaseEvidencePath(PHASE245, "245-FINDINGS.md", { root });
+} catch (error) {
+  console.error(`FAIL: ${error.message}`);
+  process.exit(1);
+}
 if (args.includes("--self-test")) {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "phase245-verifier-"));
   let sourceCoverage = fs.readFileSync(coveragePath, "utf8");
@@ -195,9 +212,17 @@ try {
         const actualDigest = crypto.createHash("sha256").update(fs.readFileSync(absoluteSource)).digest("hex");
         if (actualDigest !== expectedDigest) fail(`capture ${capture.id} source digest is stale for ${sourcePath}`);
       }
-      const screenshotPath = path.resolve(root, capture.png?.path ?? "");
-      if (!screenshotPath.startsWith(path.join(root, ".planning/phases/245-rendered-baseline-and-realistic-preview/captures") + path.sep)) fail(`PNG escapes phase capture directory: ${capture.id}`);
-      if (!fs.existsSync(screenshotPath)) fail(`missing PNG ${capture.png?.path}`);
+      const recordedPng = capture.png?.path ?? "";
+      let screenshotPath = null;
+      if (!recordedPng.startsWith(`.planning/phases/${PHASE245}/captures/`) || recordedPng.split("/").includes("..")) fail(`PNG escapes phase capture directory: ${capture.id}`);
+      else {
+        try {
+          screenshotPath = resolvePhaseEvidencePath(PHASE245, recordedPng.slice(`.planning/phases/${PHASE245}/`.length), { root });
+          const capturesDir = resolvePhaseEvidencePath(PHASE245, "captures", { root });
+          if (!screenshotPath.startsWith(capturesDir + path.sep)) { fail(`PNG escapes phase capture directory: ${capture.id}`); screenshotPath = null; }
+        } catch { screenshotPath = null; }
+      }
+      if (!screenshotPath || !fs.existsSync(screenshotPath)) fail(`missing PNG ${capture.png?.path}`);
       else {
         const digest = crypto.createHash("sha256").update(fs.readFileSync(screenshotPath)).digest("hex");
         if (digest !== capture.png.sha256) fail(`PNG hash mismatch ${capture.png.path}`);
