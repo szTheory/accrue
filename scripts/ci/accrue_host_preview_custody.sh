@@ -70,6 +70,45 @@ function previewIdentity() {
   };
 }
 
+function ciAbsentMode() {
+  const flag = process.env.ACCRUE_HOST_CUSTODY_CI_ABSENT;
+  if (flag === undefined) return false;
+  if (flag !== "1") fail("ACCRUE_HOST_CUSTODY_CI_ABSENT must be unset or 1");
+  return true;
+}
+
+// Proves that no preview instance exists. Anything short of proof refuses.
+function previewAbsence(project, absence) {
+  let volumes;
+  let containers;
+  if (absence) {
+    if (absence.docker === "missing") return "docker binary not found";
+    if (absence.docker === "daemon-error") fail("cannot prove preview absence: docker query failed");
+    volumes = absence.volumes || [];
+    containers = absence.containers || [];
+  } else {
+    const query = (args) => {
+      const result = spawnSync("docker", args, { encoding: "utf8" });
+      if (result.error && result.error.code === "ENOENT") return null;
+      if (result.error || result.status !== 0) fail("cannot prove preview absence: docker query failed");
+      return result.stdout.trim().split(/\s+/).filter(Boolean);
+    };
+    const label = `label=com.docker.compose.project=${project}`;
+    volumes = query(["volume", "ls", "--filter", label, "--format", "{{.Name}}"]);
+    if (volumes === null) return "docker binary not found";
+    containers = query(["ps", "-a", "-q", "--filter", label]);
+    if (containers === null) return "docker binary not found";
+  }
+  if (volumes.length || containers.length) {
+    fail(`CI absent-mode found a ${project} preview instance (${volumes.length} volumes, ${containers.length} containers)`);
+  }
+  return `no ${project} preview instance exists (zero labelled volumes and containers)`;
+}
+
+function previewProject() {
+  return process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host";
+}
+
 function portOwner(port) {
   const result = spawnSync("lsof", ["-nP", "-t", `-iTCP:${port}`, "-sTCP:LISTEN"], { encoding: "utf8" });
   if (result.error || result.status > 1) return "unavailable";
@@ -135,6 +174,10 @@ function assertDistinct(preview, target, mode) {
     if (String(left).toLowerCase() === String(right).toLowerCase()) fail(`${mode} proof aliases preview ${name}`);
   }
   console.log(`[preview-custody] preview databaseHost=${preview.databaseHost} database=${preview.database} connection=${preview.connection} databaseInstance=${preview.databaseInstance} compose=${preview.composeProject} volume=${preview.volume} port=${preview.port} process=${preview.process} databaseProcess=${preview.databaseProcess} buildPath=${preview.buildPath}`);
+  assertTarget(target, mode);
+}
+
+function assertTarget(target, mode) {
   if (target.process !== "unoccupied" && !target.process.startsWith("proof-server:")) {
     fail(`${mode} proof listener port is occupied by process ${target.process}`);
   }
@@ -164,9 +207,25 @@ function authoritativeSnapshot() {
   return output;
 }
 
-function snapshot(command) {
+function absentSnapshot(command, file, options) {
+  const project = previewProject();
+  const fixtures = fixtureTargets(options.fixturePath);
+  const reason = previewAbsence(project, fixtures ? fixtures.absence : undefined);
+  const value = `absent:${project}:${reason}`;
+  if (command === "snapshot") {
+    fs.writeFileSync(file, value + "\n", { mode: 0o600 });
+    console.log(`[preview-custody] CI absent-mode: ${reason}`);
+    return;
+  }
+  if (!fs.existsSync(file)) fail(`preview snapshot is missing at ${file}`);
+  if (fs.readFileSync(file, "utf8").trim() !== value) fail(`CI absent-mode preview absence changed for ${project}`);
+  console.log("[preview-custody] CI absent-mode: preview still absent");
+}
+
+function snapshot(command, options = {}) {
   const file = process.env.ACCRUE_HOST_PREVIEW_SNAPSHOT;
   if (!file) fail("ACCRUE_HOST_PREVIEW_SNAPSHOT path is required");
+  if (ciAbsentMode()) return absentSnapshot(command, file, options);
   const value = authoritativeSnapshot();
   if (command === "snapshot") {
     fs.writeFileSync(file, value + "\n", { mode: 0o600 });
@@ -181,12 +240,21 @@ function snapshot(command) {
 
 function run(options = {}) {
   const [command, mode] = process.argv.slice(2);
-  if (command === "snapshot" || command === "assert-preserved") return snapshot(command);
+  if (command === "snapshot" || command === "assert-preserved") return snapshot(command, options);
   if (command !== "preflight" || !["browser", "dev"].includes(mode)) fail("usage: accrue_host_preview_custody.sh preflight <browser|dev> | snapshot | assert-preserved");
   if (process.env.ACCRUE_HOST_CUSTODY_TEST_MODE !== undefined || process.env.ACCRUE_HOST_CUSTODY_TEST_FIXTURE !== undefined) {
     fail("caller-supplied test fixture environment is forbidden; use the test-only custody entry point");
   }
+  const absentMode = ciAbsentMode();
   const fixtures = fixtureTargets(options.fixturePath);
+  if (absentMode) {
+    const reason = previewAbsence(previewProject(), fixtures ? fixtures.absence : undefined);
+    console.log(`[preview-custody] CI absent-mode: ${reason}`);
+    const target = fixtures ? fixtures.target : targetIdentity(mode);
+    requireIdentity(target, `${mode} proof`);
+    assertTarget(target, mode);
+    return;
+  }
   const preview = fixtures ? fixtures.preview : previewIdentity();
   const target = fixtures ? fixtures.target : targetIdentity(mode);
   assertDistinct(preview, target, mode);

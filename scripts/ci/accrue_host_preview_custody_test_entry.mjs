@@ -16,12 +16,15 @@ function main() {
   const custodyPath = path.join(path.dirname(thisFile), "accrue_host_preview_custody.sh");
   const fixturePath = process.argv[2];
   const mode = process.argv[3];
-  if (!fixturePath || !["browser", "dev"].includes(mode)) {
-    console.error("usage: accrue_host_preview_custody_test_entry.mjs <fixture.json> <browser|dev>");
+  const snapshotCommands = ["snapshot", "assert-preserved"];
+  if (!fixturePath || !["browser", "dev", ...snapshotCommands].includes(mode)) {
+    console.error("usage: accrue_host_preview_custody_test_entry.mjs <fixture.json> <browser|dev|snapshot|assert-preserved>");
     process.exit(2);
   }
   fs.accessSync(fixturePath, fs.constants.R_OK);
-  process.argv = [process.argv[0], custodyPath, "preflight", mode];
+  process.argv = snapshotCommands.includes(mode)
+    ? [process.argv[0], custodyPath, mode]
+    : [process.argv[0], custodyPath, "preflight", mode];
   require(custodyPath).run({ fixturePath });
 }
 
