@@ -53,4 +53,16 @@ Verdict (helper, `--visual-pending-ok`): RED (rc 1). 13 jobs `success`. Browser 
 | Playwright E2E shards | skipped | none | needs host-integration | downstream | none |
 | Annotation sweep | failure | Sweep release-facing annotations | downstream (host-integration and the sigra annotation) | downstream | none |
 
+## Iteration 4 - pushed `533d2ded4208d32c982d2e4bb78c8f6dff150eb8`
+
+Runs: ci.yml `40226070833`, accrue_admin_browser.yml `40226070837`. Guard PASS, SL-F PASS.
+
+Verdict (helper, `--visual-pending-ok`): RED (rc 1). 15 jobs `success`, including Host integration (required deterministic gate) for the first time (Playwright lane green, Hex smoke green), all four Release gate cells (the iteration-3 advisory-cell runner loss did not recur), Admin drift and docs, Host Docker boot smoke. Browser UAT visual-pending only.
+
+| Job | Conclusion | Failing step | Evidence | Classification | Fix |
+|-----|-----------|--------------|----------|----------------|-----|
+| Playwright E2E shard 1/3, 2/3, 3/3 | failure | Run Playwright shard | jobs 121272413476 / 121272412975 / 121272412902: `[WebServer]` output compiles Faker, Oban and the rest of the dependency tree, then `Error: Timed out waiting 120000ms from config.webServer.` No test ran. | workflow env: `playwright.config.js` forces `MIX_BUILD_PATH` into `examples/accrue_host/tmp/accrue-host-proof-<id>` for its server; the job's compile/seed steps filled the default `_build`, so the server cold-compiled everything inside the 120 s timeout. First time this job ever ran (it needs host-integration). | `fix(250-03): share one proof build path across the Playwright shard job` (job env `ACCRUE_HOST_PROOF_RUN_ID` + `MIX_BUILD_PATH`). Local mirror of the whole job: shard 1 incl. dark-theme 238, real-DB search, Braintree ExUnit/lane and the three Phase 236 steps all `0`; shards 2 and 3 incl. Braintree `0`. The timeout itself could not be reproduced locally (a faster machine cold-compiles inside 120 s); the CI log is the evidence and the next run is the proof. |
+| Annotation sweep | failure | Sweep release-facing annotations | downstream of the shard failures | downstream | none |
+| Browser UAT | failure | Phase 211 visual regression gate | only the pixel gate | visual-pending, 250-04 | none here |
+
 <!-- gsd:ledger-continue -->
