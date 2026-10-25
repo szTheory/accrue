@@ -58,3 +58,31 @@ Positive control: first replay failed step 13 (`Run Phase 192 admin hardening gu
 
 Job `admin-hardening-guardrails` replayed with `249-replay-ci-job.py --run --env GITHUB_EVENT_NAME=workflow_dispatch --env BASE_SHA= --env BEFORE_SHA=`: all steps PASS (7 PASS, 2 SKIP).
 Skips: `Install Hex`, `Install Chromium` (already present on host).
+
+## Plan 249-08: admin-phase200-guardrails
+
+Positive control: first replay failed step 12 (`Run Phase 200 deterministic guardrails`, which runs `verify_phase200_admin_guardrails.sh`) in the `e2e:phase199` sub-step: 9 failing tests (desktop plus mobile) before any edit. Steps after phase199 (reduced-motion, scorecard, sign-off) were unreached until phase199 was green, then passed in the in-job order.
+
+| Probe (spec line, title, project) | Failing assertion | Current source | Causing commit | Receipt | Classification | Fix |
+|---|---|---|---|---|---|---|
+| phase199:965 floating panels (Command palette panel); chromium-desktop | `.ax-command-palette` not visible after trigger click | topbar trigger `topbar.ex:36` intact; same test passed on isolated re-run and on both later full replays | none found | n/a | not reproducible (timing flake; click raced LiveView connect after theme reload) | No edit. Passed in the isolated npm run and in both subsequent full job replays; recorded as an observed flake, not a fix |
+| phase199:1037 route flows, Webhook drill link; chromium-desktop | link `/evt_e2e_phase199_dead/i` not found | `webhooks_live.ex` `webhook_link`: link text is `humanize(row.type)` ("Invoice.payment Failed"); event id is a copy badge | ec8a0d13 (246-04 separated identity across admin tables) | commit message | stale-contract | Link matcher `/Invoice\.payment Failed/i` |
+| phase199:1037 route flows, Connect drill link (revealed after webhook fix); chromium-desktop | link `/acct_e2e_phase199_attention/i` not found | connect list link text is the account email; account id is a copy badge | ec8a0d13 | commit message | stale-contract | Link matcher `/phase199-connect@example\.com/i` |
+| phase199:1057 open-invoice destination; chromium-desktop and chromium-mobile | `main a[href^='/billing/invoices/']` count 2, received 3 | one invoice renders hidden-table number link, card heading link, and `View invoice` action link; `resultIds` still dedupes to the single JPY invoice | 39759079/ec8a0d13 (identity separated, no repeated identity in cards) | commit messages | stale-contract | Count 3 with comment; the single-invoice identity assertion is unchanged |
+| phase199:1318 mounted CSS stress, webhook delivery light 320px; chromium-desktop and chromium-mobile | `scrollWidth` 361 > 321 | `webhook_live.ex` page-header description `invoice.payment_failed` in `.ax-page-copy` without wrapping | e6f39cef (247-04 moved type into the header description) | WCAG 1.4.10 reflow, the contract's own intent | regression | Source fix: description wrapped in `<p class="ax-body">` (`overflow-wrap:anywhere`), same pattern as `dashboard_live.ex` (commit 50e814b4) |
+| phase199:1318 same test, Home hit-target block (mobile only, revealed after fix) | `.ax-home .ax-page-header-actions > .ax-button` expected 3 | Home header shortcuts removed; shell search trigger remains | 3d7d949d (clarify home activity; removed `data-command-palette-trigger` shortcut from home) | owner-feedback note 2026-10-12 | stale-contract | Hit-target check retargeted to the topbar `[data-command-palette-trigger]` (1 mounted, height >= 44) |
+| phase199:1401 repeated action labels, Webhook replay; chromium-desktop | button aria/text lacked `evt_e2e_phase199_dead` | `webhook_live.ex` Replay button under "Replay webhook" section; object id in page h1 `webhook_heading` | e6f39cef (removed per-button aria-label) | note l.10/22 as in the 249-07 receipt | stale-contract | Button context asserts `Replay webhook`; added `pageHeading` assertion that the h1 contains the event id |
+| phase199:1495 auto-minted ratchet guards (focus-ring) rows f-68d2bf118467b34a and f-9e6f3e53a835a6d5; desktop and mobile | `.ax-home [data-command-palette-trigger]` must exist | trigger lives in the topbar, not `.ax-home` | 3d7d949d | as above | stale-contract | Selector `[data-command-palette-trigger]`; focus-ring outline assertion unchanged |
+
+Final results: `npm run e2e:phase199` 29 passed (15 skipped by design: desktop-only projects); full job replay green.
+
+### Lanes (249-08)
+
+Both replays used `--run --skip 'Install Chromium' --skip 'Install Hex' --env GITHUB_EVENT_NAME=workflow_dispatch --env BASE_SHA= --env BEFORE_SHA=`.
+
+| Job | Result | Notes |
+|---|---|---|
+| `admin-hardening-guardrails` | PASS (7 PASS, 2 SKIP) | replayed again after the source fix |
+| `admin-phase200-guardrails` | PASS (6 PASS, 2 SKIP) | scorecard and sign-off passed in their in-job order |
+
+Phase 200 output: the scripts write to the hard-coded `.planning/phases/200-idempotent-verification-sign-off`; after every run it was moved to `$GSD_SCRATCH/phase200-output-<epoch>/` and its absence asserted, so no generated evidence entered the tree. The path was not changed (out of scope).
