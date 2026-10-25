@@ -21,10 +21,9 @@ const LIST_CONTRACTS = Object.freeze([
     route: "/billing/customers",
     listId: "customers",
     resourceLabel: "customers",
-    activeChip: "All customers",
-    quickChip: "Missing payment method",
+    chips: ["All customers", "Missing default method"],
     defaultParams: {},
-    clearAllOnDefault: false,
+    resetOnDefault: false,
     loadingText: "Loading customers.",
   },
   {
@@ -32,10 +31,9 @@ const LIST_CONTRACTS = Object.freeze([
     route: "/billing/invoices",
     listId: "invoices",
     resourceLabel: "invoices",
-    activeChip: "Needs collection",
-    allChip: "All invoices",
+    viewNav: ["Needs collection", "All invoices"],
     defaultParams: { status: "open,uncollectible" },
-    clearAllOnDefault: true,
+    resetOnDefault: false,
     loadingText: "Loading invoices.",
   },
   {
@@ -43,14 +41,13 @@ const LIST_CONTRACTS = Object.freeze([
     route: "/billing/payments",
     listId: "payments",
     resourceLabel: "payments",
-    activeChip: "Failed payments",
-    allChip: "All payments",
+    viewNav: ["Failed payments", "All payments"],
     defaultParams: { status: "failed" },
     rowParams: { view: "all" },
     mobileParams: { view: "all" },
     allowQueueEmpty: true,
     queueEmptyText: "No failed payments.",
-    clearAllOnDefault: true,
+    resetOnDefault: false,
     loadingText: "Loading payments.",
   },
   {
@@ -58,10 +55,9 @@ const LIST_CONTRACTS = Object.freeze([
     route: "/billing/coupons",
     listId: "coupons",
     resourceLabel: "coupons",
-    activeChip: "Valid coupons",
-    allChip: "All coupons",
+    // The default validity is carried by the toolbar's segmented control, not a chip.
     defaultParams: { valid: "true" },
-    clearAllOnDefault: true,
+    resetOnDefault: true,
     loadingText: "Loading coupons.",
   },
   {
@@ -69,10 +65,9 @@ const LIST_CONTRACTS = Object.freeze([
     route: "/billing/promotion-codes",
     listId: "promotion-codes",
     resourceLabel: "promotion codes",
-    activeChip: "Active codes",
-    allChip: "All promotion codes",
+    chips: ["Active codes", "All promotion codes"],
     defaultParams: { active: "true" },
-    clearAllOnDefault: true,
+    resetOnDefault: true,
     loadingText: "Loading promotion codes.",
   },
   {
@@ -80,10 +75,9 @@ const LIST_CONTRACTS = Object.freeze([
     route: "/billing/webhooks",
     listId: "webhooks",
     resourceLabel: "webhook deliveries",
-    activeChip: "Needs replay",
-    allChip: "All deliveries",
+    chips: ["Needs replay", "All deliveries"],
     defaultParams: { status: "failed,dead" },
-    clearAllOnDefault: true,
+    resetOnDefault: false,
     loadingText: "Loading webhook deliveries.",
   },
   {
@@ -92,10 +86,9 @@ const LIST_CONTRACTS = Object.freeze([
     listId: "events",
     resourceLabel: "events",
     resultLabelPattern: /Showing \d+ (billing\s+)?events?/,
-    activeChip: "All ledger",
-    quickChip: "Admin changes",
+    chips: ["All events", "Admin actions"],
     defaultParams: {},
-    clearAllOnDefault: false,
+    resetOnDefault: false,
     loadingText: "Loading billing events.",
   },
   {
@@ -103,14 +96,13 @@ const LIST_CONTRACTS = Object.freeze([
     route: "/billing/connect",
     listId: "connect-accounts",
     resourceLabel: "connected accounts",
-    activeChip: "Needs attention",
-    allChip: "All accounts",
+    chips: ["Needs attention", "All accounts"],
     defaultParams: { needs_attention: "true" },
     rowParams: { view: "all" },
     mobileParams: { view: "all" },
     allowQueueEmpty: true,
     queueEmptyText: "No connected accounts need attention.",
-    clearAllOnDefault: true,
+    resetOnDefault: true,
     loadingText: "Loading connected accounts.",
   },
 ]);
@@ -189,16 +181,26 @@ async function assertListChrome(page, contract, label) {
     await expect(list, `${label}: queue empty copy`).toContainText(contract.queueEmptyText);
   }
 
-  const chips = page.locator("[data-ax-filter-chips]").first();
-  await expect(chips, `${label}: filter chip row`).toBeVisible();
-  await expect(chips, `${label}: active chip`).toContainText(contract.activeChip);
-
-  if (contract.quickChip) {
-    await expect(chips, `${label}: quick chip`).toContainText(contract.quickChip);
+  // 66d5b3ce/b4a7eeac: list views are either a "view" nav (invoices, payments) or
+  // the shared chip row (applied filters plus an All escape hatch).
+  if (contract.viewNav) {
+    const viewNav = page.locator("[data-ax-view-nav]").first();
+    await expect(viewNav, `${label}: view nav`).toBeVisible();
+    await expect(viewNav.locator("a").first(), `${label}: default view is current`).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    for (const view of contract.viewNav) {
+      await expect(viewNav, `${label}: view ${view}`).toContainText(view);
+    }
   }
 
-  if (contract.allChip) {
-    await expect(chips, `${label}: All escape hatch`).toContainText(contract.allChip);
+  if (contract.chips) {
+    const chips = page.locator("[data-ax-filter-chips]").first();
+    await expect(chips, `${label}: filter chip row`).toBeVisible();
+    for (const chip of contract.chips) {
+      await expect(chips, `${label}: chip ${chip}`).toContainText(chip);
+    }
   }
 
   const resultLabelPattern =
@@ -206,12 +208,17 @@ async function assertListChrome(page, contract, label) {
     new RegExp(`Showing \\d+ ${contract.resourceLabel.replace(/\s+/g, "\\s+")}?`);
   await expect(page.locator("[data-ax-result-count]"), `${label}: result count`).toContainText(resultLabelPattern);
 
-  const clearAll = page.locator("[data-ax-clear-all]").first();
-  if (contract.clearAllOnDefault) {
-    await expect(clearAll, `${label}: clear-all`).toBeVisible();
-    await expect(clearAll, `${label}: view=all escape hatch`).toHaveAttribute("href", /view=all/);
+  // One toolbar "Reset filters" restores the page default (it does not target view=all);
+  // pages whose default is already unfiltered or hides a no-op reset render none.
+  const reset = page.locator("[data-ax-clear-all]").first();
+  if (contract.resetOnDefault) {
+    await expect(reset, `${label}: reset filters`).toBeVisible();
+    await expect(reset, `${label}: reset returns to the page default`).toHaveAttribute(
+      "href",
+      new RegExp(`${contract.route}$`)
+    );
   } else {
-    await expect(clearAll, `${label}: no default clear-all`).toHaveCount(0);
+    await expect(reset, `${label}: no default reset`).toHaveCount(0);
   }
 
   return listState;
@@ -301,7 +308,7 @@ test.describe("Phase 197 propagated LIST contract", () => {
     await login(page, "/billing/customers");
 
     await expect(page.locator("[data-ax-filter-chips]")).toContainText("All customers");
-    await expect(page.locator("[data-ax-filter-chips] a")).toContainText("Missing payment method");
+    await expect(page.locator("[data-ax-filter-chips] a")).toContainText("Missing default method");
     await expect(page.locator("[data-ax-clear-all]")).toHaveCount(0);
     await expect(listLocator(page, LIST_CONTRACTS[0])).toContainText("E2E Dashboard Customer");
   });
@@ -316,12 +323,9 @@ test.describe("Phase 197 propagated LIST contract", () => {
     await login(page, invoices.route);
 
     await assertDefaultParams(page, invoices, "Invoices queue");
-    await expect(page.locator("[data-ax-filter-chips]")).toContainText("Needs collection");
-    await expect(page.locator("[data-ax-filter-chips] a[aria-label='Apply All invoices filter']")).toHaveAttribute(
-      "href",
-      /\/billing\/invoices\?view=all$/
-    );
-    await expect(page.locator("[data-ax-clear-all]").first()).toHaveAttribute(
+    const viewNav = page.locator("[data-ax-view-nav]").first();
+    await expect(viewNav.getByRole("link", { name: "Needs collection" })).toHaveAttribute("aria-current", "page");
+    await expect(viewNav.getByRole("link", { name: "All invoices" })).toHaveAttribute(
       "href",
       /\/billing\/invoices\?view=all$/
     );
@@ -358,9 +362,9 @@ test.describe("Phase 197 propagated LIST contract", () => {
     await seedScenario(request, "dashboard");
     await login(page, events.route);
 
-    await expect(page.locator("[data-ax-filter-chips]")).toContainText("All ledger");
-    await expect(page.locator("[data-ax-filter-chips] a")).toContainText("Admin changes");
-    await expect(listLocator(page, events)).toContainText("customer.updated");
+    await expect(page.locator("[data-ax-filter-chips]")).toContainText("All events");
+    await expect(page.locator("[data-ax-filter-chips] a")).toContainText("Admin actions");
+    await expect(listLocator(page, events)).toContainText("Customer updated"); // 66d5b3ce: known event keys render as labels
   });
 
   test("connect needs_attention lens matches any readiness blocker", async ({ page, request }, testInfo) => {
