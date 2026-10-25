@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 12
+open_count: 6
 waived_count: 6
-fixed_count: 20
+fixed_count: 26
 total_count: 38
-last_updated: 2026-10-11T21:25:35.951Z
+last_updated: 2026-10-25T01:38:42.306Z
 ---
 
 # Broken Windows Ledger
@@ -34,7 +34,7 @@ last_updated: 2026-10-11T21:25:35.951Z
 | 17 | 234 | deviation | accrue_admin/test/accrue_admin/live/subscription_live_test.exs |  | Task 2 delayed review assertions were committed after the overlapping fresh-dispatch implementation, so Task 2 has no separate RED commit. | open |  | 2026-10-08T01:31:43.711Z |  |
 | 18 | 234 | deviation | .planning/ROADMAP.md |  | roadmap.update-plan-progress 234 returned missing_phase_details, so the aggregate Phase 234 roadmap entry could not be updated. | open |  | 2026-10-08T01:32:40.174Z |  |
 | 19 | 235 | deviation | examples/accrue_host/e2e/phase233-braintree-checkout.spec.js |  | Mock SDK proves the nonce-bearing server denial; live Braintree provider acceptance was not verified because the configured gateway returned HTTP 500. | open |  | 2026-10-08T04:49:19.603Z |  |
-| 20 | 235 | deviation |  |  | Added test-only Portal origin and organization shared-billing route after deterministic browser verification exposed the missing runtime context. | open |  | 2026-10-08T12:01:21.609Z |  |
+| 20 | 235 | deviation |  |  | Added test-only Portal origin and organization shared-billing route after deterministic browser verification exposed the missing runtime context. | fixed |  | 2026-10-08T12:01:21.609Z | 2026-10-25T01:38:41.852Z |
 | 21 | 236 | deviation | .planning/ROADMAP.md |  | The roadmap.update-plan-progress SDK writer could not target the active milestone table, so the Phase 236 6/6 In Progress row was reconciled directly. | fixed |  | 2026-10-08T19:16:35.467Z | 2026-10-08T19:16:48.715Z |
 | 22 | 238 | deviation | accrue_admin/lib/accrue_admin/live/webhook_live.ex |  | Axe heading-order violation in the webhook replay detail was fixed by correcting the section heading level. | fixed |  | 2026-10-09T04:19:27.287Z | 2026-10-09T04:19:38.013Z |
 | 23 | 238 | deviation | accrue_admin/lib/accrue_admin/components/overlay.ex |  | Axe found an invalid article element with dialog role on the step-up modal; the modal panel now uses a div. | fixed |  | 2026-10-09T04:19:34.737Z | 2026-10-09T04:19:39.526Z |
@@ -42,17 +42,17 @@ last_updated: 2026-10-11T21:25:35.951Z
 | 25 | 239 | deviation | .planning/phases/239-integrated-quality-handoff/239-COVERAGE.md |  | Phase 239 route ledger duplicate stylesheet row was corrected and deterministic ordering is now enforced by ExUnit. | fixed |  | 2026-10-09T06:55:22.555Z | 2026-10-09T06:55:27.423Z |
 | 26 | 239 | deviation | .planning/ROADMAP.md |  | The roadmap progress SDK missed its existing Phase 239 checklist and row; the current plan checkbox and 1/4 In Progress row were reconciled directly. | fixed |  | 2026-10-09T06:56:00.230Z | 2026-10-09T06:56:00.293Z |
 | 27 | 240 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Linux Phase 211 visual comparison was not run on macOS; the baseline set is Linux-specific. | fixed |  | 2026-10-09T19:50:49.478Z | 2026-10-10T20:40:35.310Z |
-| 28 | 241 | deviation | accrue_admin/lib/accrue_admin/live/charge_live.ex | 80 | Renamed the validated return destination value and corrected two related-resource arguments after a focused compile error. | open |  | 2026-10-10T01:36:59.322Z |  |
-| 29 | 241 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex |  | Confirmation controls expose disabled/loading state while step-up or dispatch is pending. | open |  | 2026-10-10T01:52:12.988Z |  |
-| 30 | 241 | deviation | examples/accrue_host/e2e/generated/copy_strings.json |  | Generated browser copy strings are regenerated to match the updated subscription action labels. | open |  | 2026-10-10T01:52:13.282Z |  |
+| 28 | 241 | deviation | accrue_admin/lib/accrue_admin/live/charge_live.ex | 80 | Renamed the validated return destination value and corrected two related-resource arguments after a focused compile error. | fixed |  | 2026-10-10T01:36:59.322Z | 2026-10-25T01:38:41.939Z |
+| 29 | 241 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex |  | Confirmation controls expose disabled/loading state while step-up or dispatch is pending. | fixed |  | 2026-10-10T01:52:12.988Z | 2026-10-25T01:38:42.030Z |
+| 30 | 241 | deviation | examples/accrue_host/e2e/generated/copy_strings.json |  | Generated browser copy strings are regenerated to match the updated subscription action labels. | fixed |  | 2026-10-10T01:52:13.282Z | 2026-10-25T01:38:42.121Z |
 | 31 | 241 | unrun-verify | .planning/phases/241-billing-operator-journeys/241-07-PLAN.md |  | A separate 200% text-spacing and supported 400% zoom simulation was not run in Plan 241-07; direct narrow-width and long-text evidence ran. | fixed |  | 2026-10-10T03:10:50.370Z | 2026-10-10T03:54:19.174Z |
 | 32 | 241 | unrun-verify | accrue_admin/e2e/admin-page-flow-phase191.spec.js |  | Per-variant browser review interactions were not established; the complete Admin suite covers subscription and payment-method review variants at the route owners. | fixed |  | 2026-10-10T03:27:48.492Z | 2026-10-10T06:34:44.612Z |
 | 33 | 242 | deviation | accrue_admin/lib/accrue_admin/live/connect_account_live.ex |  | Optimistic-lock races after fee-review reread return stale-review feedback instead of escaping as an error. | fixed |  | 2026-10-10T13:22:18.081Z | 2026-10-10T13:22:22.341Z |
 | 34 | 243 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Ubuntu mint and normal selected visual comparison were unavailable because the committed phase source ref does not exist on origin. | fixed |  | 2026-10-10T18:19:10.468Z | 2026-10-10T20:40:35.186Z |
 | 35 | 243 | deviation | examples/accrue_host/playwright.config.js |  | Generic Playwright preview URL override can route unrelated specs to the feedback preview while global setup prepares the native test database. | fixed | Fixed in f425645f: generic preview URL routing now refuses; the explicit e2e:preview runner accepts only the Phase243 preservation spec and pins test discovery. Custody controls passed 12/12, preservation passed 1/1, generic Phase238 passed 2/2, and authoritative preview state matched before/after. | 2026-10-10T21:23:22.852Z | 2026-10-10T21:35:04.328Z |
 | 36 | 244 | deviation | examples/accrue_host/e2e/phase244-operator-evidence.spec.js |  | Mounted browser read-outage state remained unobserved; focused LiveView tests verify read-retry behavior. | open |  | 2026-10-11T02:32:19.747Z |  |
-| 37 | 246 | deviation | accrue_admin/lib/accrue_admin/live/coupons_live.ex |  | Direct coupon q URLs preserve the default Valid selection. | open |  | 2026-10-11T16:56:32.083Z |  |
-| 38 | 247 | deviation | accrue_admin/assets/js/hooks/time_display.js | 4 | Rejected impossible ISO date/time components before browser formatting to prevent normalized, invented instants. | open |  | 2026-10-11T21:25:35.951Z |  |
+| 37 | 246 | deviation | accrue_admin/lib/accrue_admin/live/coupons_live.ex |  | Direct coupon q URLs preserve the default Valid selection. | fixed |  | 2026-10-11T16:56:32.083Z | 2026-10-25T01:38:42.214Z |
+| 38 | 247 | deviation | accrue_admin/assets/js/hooks/time_display.js | 4 | Rejected impossible ISO date/time components before browser formatting to prevent normalized, invented instants. | fixed |  | 2026-10-11T21:25:35.951Z | 2026-10-25T01:38:42.306Z |
 
 ````json
 [
@@ -300,10 +300,10 @@ last_updated: 2026-10-11T21:25:35.951Z
     "file": "",
     "line": null,
     "description": "Added test-only Portal origin and organization shared-billing route after deterministic browser verification exposed the missing runtime context.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-08T12:01:21.609Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-25T01:38:41.852Z",
     "milestone": "v1.63"
   },
   {
@@ -404,10 +404,10 @@ last_updated: 2026-10-11T21:25:35.951Z
     "file": "accrue_admin/lib/accrue_admin/live/charge_live.ex",
     "line": 80,
     "description": "Renamed the validated return destination value and corrected two related-resource arguments after a focused compile error.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-10T01:36:59.322Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-25T01:38:41.939Z",
     "milestone": "v1.64"
   },
   {
@@ -417,10 +417,10 @@ last_updated: 2026-10-11T21:25:35.951Z
     "file": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
     "line": null,
     "description": "Confirmation controls expose disabled/loading state while step-up or dispatch is pending.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-10T01:52:12.988Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-25T01:38:42.030Z",
     "milestone": "v1.64"
   },
   {
@@ -430,10 +430,10 @@ last_updated: 2026-10-11T21:25:35.951Z
     "file": "examples/accrue_host/e2e/generated/copy_strings.json",
     "line": null,
     "description": "Generated browser copy strings are regenerated to match the updated subscription action labels.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-10T01:52:13.282Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-25T01:38:42.121Z",
     "milestone": "v1.64"
   },
   {
@@ -521,10 +521,10 @@ last_updated: 2026-10-11T21:25:35.951Z
     "file": "accrue_admin/lib/accrue_admin/live/coupons_live.ex",
     "line": null,
     "description": "Direct coupon q URLs preserve the default Valid selection.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-11T16:56:32.083Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-25T01:38:42.214Z",
     "milestone": "v1.66"
   },
   {
@@ -534,10 +534,10 @@ last_updated: 2026-10-11T21:25:35.951Z
     "file": "accrue_admin/assets/js/hooks/time_display.js",
     "line": 4,
     "description": "Rejected impossible ISO date/time components before browser formatting to prevent normalized, invented instants.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-11T21:25:35.951Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-25T01:38:42.306Z",
     "milestone": "v1.66"
   }
 ]
