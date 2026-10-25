@@ -182,3 +182,19 @@ Each job: `249-replay-ci-job.py --job <job> --run --skip 'Install Chromium' --sk
 | admin-ui-ratchet-guardrails (parked, advisory) | ADVISORY-PASS=2 ADVISORY-FAIL=2 (`Verify frozen ratchet evidence`, `Verify UI ratchet sign-off`; continue-on-error in CI, WINDOWS row 11; same verdict as 249-09, recorded as is) |
 
 Phase 200 output produced by admin-phase200-guardrails was moved to the session scratch dir; `.planning/phases/200-*` asserted absent afterwards.
+
+## Plan 249-13: accrue_admin_browser.yml browser-uat re-replayed at final in-tree HEAD 859e3518
+
+`249-replay-ci-job.py --workflow .github/workflows/accrue_admin_browser.yml --job browser-uat --run --skip 'Install Chromium' --skip 'Install Hex' --skip 'Phase 211 visual regression gate' --env GITHUB_EVENT_NAME=workflow_dispatch --env BASE_SHA= --env BEFORE_SHA=`: PASS=6 SKIP=3, first run, no retries.
+
+| # | Step | Result |
+|---|------|--------|
+| 05 | Install Elixir deps | PASS |
+| 06 | Compile admin package | PASS |
+| 07 | Install browser deps | PASS |
+| 09 | Run browser UAT | PASS (463.9s) |
+| 10 | Test Admin hooks and visual baseline set guard | PASS |
+| 11 | Require complete committed visual baseline set | PASS |
+| 12 | Phase 211 visual regression gate | SKIP (Linux pixel-diff; routed to Phase 250, no baselines touched) |
+
+Phase 200 output was moved to the session scratch dir; `.planning/phases/200-*` is absent. `git status --porcelain` shows only the pre-existing untracked `.planning/milestone.lock`.
