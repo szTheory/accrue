@@ -208,9 +208,11 @@ defmodule AccrueAdmin.Live.WebhookLive do
           data-role="webhook-page-header"
         >
           <:description :if={@webhook}>
-            <span><%= @webhook.type %></span>
-            <span aria-hidden="true"> · </span>
-            <span data-role="webhook-observed-status"><%= humanize(@webhook.status) %></span>
+            <p class="ax-body">
+              <span><%= @webhook.type %></span>
+              <span aria-hidden="true"> · </span>
+              <span data-role="webhook-observed-status"><%= humanize(@webhook.status) %></span>
+            </p>
           </:description>
         </PageHeader.page_header>
 
