@@ -26,6 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 249 — Local Gate Parity & Planning Truth
+**Phase 250 hand-off:** SL-G and executable-UAT read the current phase. Phase 250 must flip `current_phase: 250` and mint its own tracked VERIFICATION (covered_files + covered_digest) and generated UAT in the same step, then re-run SL-G and exec-UAT before pushing. Phase 249 routes to Phase 250: host-integration dev-boot/browser/assert-preserved and Hex smoke, playwright-e2e shards 1-3, host-docker-smoke, Linux visual-regression baselines.
 **Progress:** [░░░░░░░░░░] 0% (0/3 phases)
 **Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
 
