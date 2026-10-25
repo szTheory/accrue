@@ -50,7 +50,7 @@ defmodule AccrueHostWeb.RecoveryAnalyticsTest do
 
     # Assert KPI cards render the multi-currency data from seeds
     assert html =~ "Recovered MRR (USD)"
-    assert html =~ "Exhausted MRR (JPY)"
+    assert html =~ AccrueAdmin.Copy.recovery_exhausted_mrr_label("jpy")
 
     # 12000 cents in USD
     assert html =~ "$120.00"
@@ -58,9 +58,9 @@ defmodule AccrueHostWeb.RecoveryAnalyticsTest do
     assert html =~ "¥30,000"
 
     # Assert funnel chart
-    assert html =~ "Recovery Funnel"
+    assert html =~ "Payment recovery funnel"
 
     # Assert At-Risk table
-    assert html =~ "At-Risk Subscriptions"
+    assert html =~ "Subscriptions in retry"
   end
 end

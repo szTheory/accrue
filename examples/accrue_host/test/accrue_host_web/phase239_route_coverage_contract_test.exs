@@ -8,6 +8,11 @@ defmodule AccrueHostWeb.Phase239RouteCoverageContractTest do
             __DIR__
           )
 
+  # Host-owned acceptance fixtures mounted under a package path (router.ex, compiled only
+  # when :sql_sandbox is on). They are not package routes, so the archived v1.63 package
+  # ledger intentionally has no row for them (introduced by Phase 246, after the ledger froze).
+  @host_fixture_paths MapSet.new(["/admin/__phase246/states"])
+
   test "every compiled Admin and Portal package route has an exact ledger disposition" do
     routes = Router.__routes__()
     ledger = File.read!(@ledger)
@@ -48,6 +53,7 @@ defmodule AccrueHostWeb.Phase239RouteCoverageContractTest do
         |> Enum.filter(&(&1.path == mount or String.starts_with?(&1.path, mount <> "/")))
         |> Enum.map(& &1.path)
         |> MapSet.new()
+        |> MapSet.difference(@host_fixture_paths)
 
       ledger_paths =
         ledger_routes
