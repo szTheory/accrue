@@ -54,3 +54,9 @@ Get PR #49 (`integration/v1.63-v1.66` → `main`, https://github.com/szTheory/ac
 
 ---
 *Phase: 250-remote-integration · Context gathered: 2026-10-25*
+
+### Resolved research decisions (orchestrator, 2026-10-25, under maintainer's "follow your plan" authority)
+- **D1 LAND-02 scope:** "every job with a `pull_request` run path concludes `success`, excluding the parked `admin-ui-ratchet-guardrails [parked]` lane (continue-on-error by design)". Dispatch-only (`Mint visual baselines`) and push/schedule-only jobs (Stripe provider-proof trio, live-stripe) are excluded from the PR bar. LAND-03 post-merge: the first push run on `main` must meet the bar of the last green main push run (2026-09-18, run 35374333981). Compare job by job, and record any job that cannot run (e.g. a missing secret) honestly instead of claiming it.
+- **D2 `accrue_events.inserted_at` session-timezone dependence:** a real correctness risk for adopters running non-UTC Postgres, but the fix needs a migration. DEFER to v1.68 as a HIGH-priority item, recorded in REQUIREMENTS Future + STATE Deferred. In this phase, only fix the test (clock-shift margin) and pin `accrue_admin` test PG `timezone: "UTC"` for CI parity, with the negative control from research.
+- **D3 PR body:** add a committed `.planning/phases/250-remote-integration/250-INTEGRATION-PR.md` with the `<!-- pr: https://github.com/szTheory/accrue/pull/49 -->` marker, kept byte-identical via `gh pr edit 49 --body-file`. SL-F only; do not extend SL-A or REL-04.
+- **D4 visual baselines:** classify every changed surface from the CI diff PNGs. A change traceable to an owner-feedback commit (3d7d949d..b4a7eeac, see `.planning/notes/2026-10-1*-admin-owner-feedback.md`), a v1.63–v1.66 phase commit, or the 249-01/249-09 CSS fixes = intentional → re-mint. Anything else = regression → fix in source. Record a per-surface classification ledger with the commit receipt and the diff PNG reference, so the maintainer can audit it.
