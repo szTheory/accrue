@@ -4,9 +4,11 @@ verified: 2026-10-25T17:00:00Z
 status: passed
 score: "completed-plan claims verified: 250-01, 250-02; phase success criteria claimed: 0/3 (phase in progress)"
 covered_files:
+  - ".github/workflows/ci.yml"
   - ".planning/phases/250-remote-integration/250-01-PLAN.md"
   - ".planning/phases/250-remote-integration/250-01-SUMMARY.md"
   - ".planning/phases/250-remote-integration/250-02-PLAN.md"
+  - ".planning/phases/250-remote-integration/250-02-SUMMARY.md"
   - ".planning/phases/250-remote-integration/250-03-PLAN.md"
   - ".planning/phases/250-remote-integration/250-04-PLAN.md"
   - ".planning/phases/250-remote-integration/250-05-PLAN.md"
@@ -16,7 +18,10 @@ covered_files:
   - ".planning/phases/250-remote-integration/250-RESEARCH.md"
   - ".planning/phases/250-remote-integration/250-UAT.md"
   - ".planning/phases/250-remote-integration/250-mint-close-artifacts.mjs"
-covered_digest: "v1:sha256:da17461cdaffaa41812913153f29f834b679c3f7d2eb03be0eca2ab4bea4b7a9"
+  - "accrue_admin/config/test.exs"
+  - "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs"
+  - "accrue_admin/test/js/time_display_test.mjs"
+covered_digest: "v1:sha256:8ac8076fe71dbaa62eaf2fe6029b4a30cfa592ad390d1ac54cee86c94bb3c695"
 behavior_unverified: 0
 overrides_applied: 0
 ---
