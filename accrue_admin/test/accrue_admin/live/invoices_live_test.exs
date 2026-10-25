@@ -484,12 +484,10 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert html =~ ~s(data-ax-view-nav)
     assert html =~ ~s(aria-current="page")
 
-    assert length(
-             Floki.find(
-               Floki.parse_document!(html),
-               "[data-ax-filter-chips] [data-filter='status_queue']"
-             )
-           ) == 0
+    assert Floki.find(
+             Floki.parse_document!(html),
+             "[data-ax-filter-chips] [data-filter='status_queue']"
+           ) == []
 
     assert html =~ "?view=all"
   end
@@ -507,12 +505,10 @@ defmodule AccrueAdmin.InvoicesLiveTest do
              Floki.find(Floki.parse_document!(html), "[data-ax-view-nav] a[aria-current='page']")
            ) == 1
 
-    assert length(
-             Floki.find(
-               Floki.parse_document!(html),
-               "[data-ax-filter-chips] [data-filter='view_all']"
-             )
-           ) == 0
+    assert Floki.find(
+             Floki.parse_document!(html),
+             "[data-ax-filter-chips] [data-filter='view_all']"
+           ) == []
   end
 
   test "renders Invoices through PageHeader with exactly one h1", %{conn: conn} do
@@ -550,9 +546,9 @@ defmodule AccrueAdmin.InvoicesLiveTest do
              1
 
     assert length(Floki.find(document, "[data-ax-result-count]")) == 1
-    assert length(Floki.find(document, "[data-role='row-count']")) == 0
-    assert length(Floki.find(document, "[data-ax-clear-all]")) == 0
-    assert length(Floki.find(document, "[data-role='clear-filters']")) == 0
+    assert Floki.find(document, "[data-role='row-count']") == []
+    assert Floki.find(document, "[data-ax-clear-all]") == []
+    assert Floki.find(document, "[data-role='clear-filters']") == []
   end
 
   test "invoice filters, lens, active constraints, count, and clear share one hierarchy", %{
@@ -580,7 +576,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert length(Floki.find(document, "[data-role='clear-filters']")) == 1
 
     assert length(Floki.find(document, "[data-ax-result-count]")) == 1
-    assert length(Floki.find(document, "[data-role='row-count']")) == 0
+    assert Floki.find(document, "[data-role='row-count']") == []
   end
 
   test "invoice view is separate from labeled constraints and remove links retain scope and query",

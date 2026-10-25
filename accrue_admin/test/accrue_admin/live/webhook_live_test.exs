@@ -196,7 +196,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
     refute html =~ ">Attempts<"
     refute html =~ ">Derived event count<"
     assert html =~ "invoice.payment_failed"
-    assert length(Floki.find(Floki.parse_document!(html), "[data-time-display]")) >= 1
+    assert [_ | _] = Floki.find(Floki.parse_document!(html), "[data-time-display]")
 
     activity_html = render_click(element(view, "[data-ax-lazy-activity]"))
     assert activity_html =~ "Webhook attempt history"
