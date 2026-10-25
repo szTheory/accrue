@@ -14,12 +14,12 @@ key-files:
   modified:
     - .planning/STATE.md
     - .planning/REQUIREMENTS.md
-commits: COMMITS_PLACEHOLDER
+commits: 2
 plan_head_before: 6898c27f4e5c151a66939b713c5531a66bd5a9d3
-plan_head_after: HEAD_AFTER_PLACEHOLDER
+plan_head_after: feea1e81de50b5a74647f08476ed1f834d980ea7
 actuals:
   tasks: 2
-  commits: COMMITS_PLACEHOLDER
+  commits: 2
 coverage:
   - id: R1
     description: GREEN-01 every planning-doc contract step of docs-contracts-shift-left passes locally with its ci.yml command
@@ -125,6 +125,20 @@ SL-G and executable-UAT always read the current phase. When Phase 250 starts it 
 ## Deviations from Plan
 
 - The plan's verify requires `git status --porcelain` to be empty, but the maintainer-instructed untracked `.planning/milestone.lock` must stay. Cleanliness is checked with `--untracked-files=no`; the lock is the only untracked path.
-- NEGATIVE_CONTROLS_PLACEHOLDER
+Negative controls ran in a `git clone --no-local` scratch clone (removed afterwards), never in the live tree. Each real gate failed as required:
+  - (a) VERIFICATION `status: gaps_found`: `completion evidence: FAIL: GREEN-01 is marked Complete but the verification in .planning/phases/249-local-gate-parity-planning-truth carries status "gaps_found" rather than passed` (rc 1).
+  - (b) one byte appended to covered `scripts/ci/verify_window_dispositions.mjs`: `artifact fixed point: FAIL: ...249-VERIFICATION.md: covered_digest mismatch over 102 covered files -- committed "v1:sha256:e26871fa...", recomputed "v1:sha256:71f16b2f..."` (rc 1).
+  - (c) 249-18-SUMMARY coverage C1 set to `human_judgment: true`: `executable UAT contract: FAIL: 249-18-SUMMARY.md coverage C1: human_judgment must be false` (rc 1, `--all-since 229`).
+- Pre-close SL-E text: requirements were held In Progress, so the pre-close failure text was "zero Complete requirements parsed ..." rather than the plan's table text; this was expected and is not a gate change.
+- The final-replay SL-F step and `verify_package_docs.sh` report UNRESOLVED (need `GITHUB_TOKEN` / `RELEASE_PLEASE_PR`, unavailable locally, as already recorded in 249-18 C4). SL-F is moved to Phase 250. Replay rc 0.
+- `commits: 2` counts the two task commits (mint, requirements). This SUMMARY finalization and the STATE/ROADMAP metadata commits follow and are not counted in the measured range.
 
-## Self-Check: PENDING
+## Final replay
+
+- `node scripts/ci/verify_completion_evidence.mjs --repo . --require-completion-evidence --require-table-agreement`: PASS (12 parsed, 7 complete, 7 evidenced)
+- `verify_executable_uat_contract.mjs --self-test`, `--all-opted-in` (75 tests), `--all-since 229` (411 tests): PASS
+- `verify_artifact_fixed_point.mjs --repo . --require-acyclic --require-fixed-point --require-digest-match`: PASS (phase 249, 1 digest checked)
+- `249-replay-ci-job.py --job docs-contracts-shift-left --run --skip SL-F --skip` three tokens steps: PASS=44 SKIP=4, rc 0
+- Routing line present in 249-REPLAY-HOST.md and 249-REPLAY-E2E.md.
+
+## Self-Check: PASSED
