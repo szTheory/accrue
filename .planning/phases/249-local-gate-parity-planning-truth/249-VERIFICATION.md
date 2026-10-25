@@ -106,7 +106,7 @@ covered_files:
   - "scripts/ci/verify_phase245_baseline.mjs"
   - "scripts/ci/verify_phase248_integrated_proof.mjs"
   - "scripts/ci/verify_window_dispositions.mjs"
-covered_digest: "v1:sha256:0117374db8446bdd153e3b1ad75088e99fb700109ac8476bb0919180b2fbae47"
+covered_digest: "v1:sha256:f44bb137e2b3079818cb7e24e5f988f267120fb551f1d248e8c98a8174d50667"
 behavior_unverified: 0
 overrides_applied: 0
 ---

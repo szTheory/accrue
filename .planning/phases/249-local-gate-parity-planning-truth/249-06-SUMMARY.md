@@ -15,7 +15,7 @@ key-files:
   moved:
     - .planning/debug/resolved/phase245-browser-capture-stall.md
     - .planning/debug/resolved/phase248-edge-fixture-lifecycle.md
-    - .planning/debug/resolved/phase248-ordinary-login.md
+    - .planning/debug/phase248-ordinary-login.md
 key-decisions:
   - "Out-of-band commits 3d7d949d..b4a7eeac recorded with note receipts and an explicit no-verdict statement; no backdated artifacts"
 commits: 2
@@ -31,7 +31,7 @@ coverage:
     requirement: TRUTH-01
     verification:
       - kind: command
-        ref: "test ! -e .planning/HANDOFF.json && test -f .planning/debug/resolved/phase248-ordinary-login.md && test -z \"$(git grep -n -e HANDOFF.json -- scripts .github)\""
+        ref: "test ! -e .planning/HANDOFF.json && test -f .planning/debug/resolved/phase245-browser-capture-stall.md && test -f .planning/debug/resolved/phase248-edge-fixture-lifecycle.md && test -f .planning/debug/phase248-ordinary-login.md && test -z \"$(git grep -n -e HANDOFF.json -- scripts .github)\""
         status: pass
       - kind: command
         ref: "node scripts/ci/verify_phase230_archive_invariants.mjs --repo ."
