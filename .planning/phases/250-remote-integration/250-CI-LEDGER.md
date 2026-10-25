@@ -40,4 +40,17 @@ The host Playwright lane had never run in CI after the 2026-10-12..19 owner-feed
 
 Post-fix local mirror of the host browser lane: `50 passed, 31 skipped, 0 failed`; Braintree checkout lane `14 passed`; admin group-contracts 16 passed, phase199 29 passed (15 by-design skips), storybook a11y 3 passed, page-flow 7 passed, storybook/theme mix tests 19/0. Lanes not reproducible locally: the post-gate step `Run host Hex smoke` and the CI-only runner environment; their proof is the next run.
 
+## Iteration 3 - pushed `ead4f497c124d4e1bbca2ff313dff76f310231e2`
+
+Runs: ci.yml `40221570264`, accrue_admin_browser.yml `40221570185`. Guard PASS, SL-F PASS.
+
+Verdict (helper, `--visual-pending-ok`): RED (rc 1). 13 jobs `success`. Browser UAT visual-pending only.
+
+| Job | Conclusion | Failing step | Evidence | Classification | Fix |
+|-----|-----------|--------------|----------|----------------|-----|
+| Host integration | failure | Run host integration gate, phase `browser_playwright` | job 121255538386 log: `64 tests, 0 failures`, `238 tests, 0 failures`, dev boot passed, Playwright `1 failed, 31 skipped, 49 passed` (was 24 failed): only `phase247-time-tracer.spec.js:5`, `expect(time.textContent()).not.toContain("UTC")` received `Oct 25, 2026, 06:47:01 PM UTC` | workflow env: the spec asserts a non-UTC local display but inherited the UTC runner's zone (same class as time_display_test.mjs in 250-02). It passed locally only because the maintainer machine is not UTC; my local mirror ran in the same America/New_York zone and could not see it. | `fix(250-03): pin the phase247 time tracer browser timezone` (`test.use({ timezoneId })`). Negative control reproduces the CI string under `TZ=UTC` with the pin absent; pinned passes under TZ=UTC, Asia/Tokyo and the default zone. |
+| Release gate (Primary ... sigra=on ...) [advisory] | failure | steps after setup show no result; job ran 46 minutes | check-run annotation on job 121254067760: "The hosted runner lost communication with the server." Log blob is `BlobNotFound`. The same cell was `success` in iteration 2 and the three non-advisory cells were `success` in this run. | transient (runner infrastructure) | none; no `gh run rerun` spent because the next iteration pushes a new head that re-runs the cell. If it recurs on the next head it is re-examined. |
+| Playwright E2E shards | skipped | none | needs host-integration | downstream | none |
+| Annotation sweep | failure | Sweep release-facing annotations | downstream (host-integration and the sigra annotation) | downstream | none |
+
 <!-- gsd:ledger-continue -->
