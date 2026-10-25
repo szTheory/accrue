@@ -167,3 +167,18 @@ All test runs used random seeds; nothing was pinned or retried.
 
 Note: accrue_admin and accrue_portal test configs still do not read `PGPORT`; they ran on the shared server and passed.
 
+
+## Plan 249-13: admin ci.yml jobs re-replayed at final in-tree HEAD 4daf8a81
+
+Each job: `249-replay-ci-job.py --job <job> --run --skip 'Install Chromium' --skip 'Install Hex' --env GITHUB_EVENT_NAME=workflow_dispatch --env BASE_SHA= --env BEFORE_SHA=`. Random seeds, no retries; every job passed on its first run at this HEAD, so no fixes or classification rows were needed.
+
+| Job | Result |
+|---|---|
+| admin-drift-docs | PASS=4 SKIP=1 |
+| admin-group-contracts | PASS=6 SKIP=2 |
+| admin-hardening-guardrails | PASS=7 SKIP=2 |
+| admin-phase200-guardrails | PASS=6 SKIP=2 |
+| admin-ui-ratchet-selftests | PASS=5 |
+| admin-ui-ratchet-guardrails (parked, advisory) | ADVISORY-PASS=2 ADVISORY-FAIL=2 (`Verify frozen ratchet evidence`, `Verify UI ratchet sign-off`; continue-on-error in CI, WINDOWS row 11; same verdict as 249-09, recorded as is) |
+
+Phase 200 output produced by admin-phase200-guardrails was moved to the session scratch dir; `.planning/phases/200-*` asserted absent afterwards.
