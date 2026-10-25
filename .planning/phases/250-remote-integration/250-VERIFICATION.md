@@ -12,6 +12,7 @@ covered_files:
   - ".planning/phases/250-remote-integration/250-03-PLAN.md"
   - ".planning/phases/250-remote-integration/250-03-SUMMARY.md"
   - ".planning/phases/250-remote-integration/250-04-PLAN.md"
+  - ".planning/phases/250-remote-integration/250-04-SUMMARY.md"
   - ".planning/phases/250-remote-integration/250-05-PLAN.md"
   - ".planning/phases/250-remote-integration/250-06-PLAN.md"
   - ".planning/phases/250-remote-integration/250-07-PLAN.md"
@@ -61,7 +62,7 @@ covered_files:
   - "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex"
   - "examples/accrue_host/priv/repo/seeds/ordinary.exs"
   - "examples/accrue_host/test/ordinary_preview_seed_test.exs"
-covered_digest: "v1:sha256:59f1e792a5d5f10acfe6f6f250db6043d8fb6fbcec6ee1d563faab7b8c38b3e0"
+covered_digest: "v1:sha256:495f50d43d028722aaba1a05a4d8bc4a8b5ec417065266e79cd4cec51b840604"
 behavior_unverified: 0
 overrides_applied: 0
 ---

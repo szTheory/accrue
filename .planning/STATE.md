@@ -5,16 +5,16 @@ milestone_name: Integration & CI Green
 current_phase: 250
 current_phase_name: Remote Integration
 status: executing
-stopped_at: Completed 250-03-PLAN.md
-last_updated: "2026-10-25T20:39:44.148Z"
+stopped_at: Completed 250-04-PLAN.md
+last_updated: "2026-10-25T22:25:11.606Z"
 last_activity: 2026-10-25
 last_activity_desc: Phase 250 execution started
-state_head: 3d0a828cd4b01158a872d8a0e60d9f82e3dad5fa
+state_head: 3f7fe22e4e97fcda4d01b3a4b08d8d1e622bbf1c
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 25
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # Project State
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 ## Current Position
 
 Phase: 250 (Remote Integration) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-10-25 — Phase 250 execution started
 
@@ -209,6 +209,7 @@ Last activity: 2026-10-25 — Phase 250 execution started
 | Phase 249 P13 | 40m | 2 tasks | 1 files |
 | Phase 249 P17 | 30min | 2 tasks | 6 files |
 | Phase 250 P03 | 5h | 2 tasks | 40 files |
+| Phase 250 P04 | ~2h | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -480,6 +481,7 @@ Last activity: 2026-10-25 — Phase 250 execution started
 - [Phase 248]: Owner topic and accepted finding keys and owners come from Phase 245 canonical JSON blocks; shared findings remain represented once and linked to their owning topic.
 - [Phase 248]: Treat each Phase 248 capture as current only for the route and state it directly shows; retain Phase 245-247 receipts as historical at their recorded source revisions.
 - [Phase 250]: 250-03: PR 49 head b9c98b20 green except the Phase 211 pixel gate (to 250-04); 8 root-cause fixes, 5 of 6 pushes
+- [Phase 250]: 250-04: Phase 211 baselines re-minted only from Linux dispatch run 40232864961 after D4 classification (10 intentional owner-feedback receipts, 2 unchanged, 0 regressions); PR #49 GREEN at 5ad01dee
 
 ### Pending Todos
 
@@ -577,8 +579,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-25T20:39:43.798Z
-Stopped at: Completed 250-03-PLAN.md
+Last session: 2026-10-25T22:25:11.273Z
+Stopped at: Completed 250-04-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
