@@ -21,8 +21,10 @@ covered_files:
   - ".planning/phases/250-remote-integration/250-ci-head-status.mjs"
   - ".planning/phases/250-remote-integration/250-mint-close-artifacts.mjs"
   - ".planning/phases/250-remote-integration/250-prepush-guard.sh"
+  - ".planning/phases/250-remote-integration/250-visual-ledger-check.mjs"
   - "accrue_admin/assets/css/app.css"
   - "accrue_admin/config/test.exs"
+  - "accrue_admin/e2e/admin-visual-regression-phase211.spec.js"
   - "accrue_admin/priv/static/accrue_admin.css"
   - "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs"
   - "accrue_admin/test/js/time_display_test.mjs"
@@ -47,7 +49,7 @@ covered_files:
   - "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex"
   - "examples/accrue_host/priv/repo/seeds/ordinary.exs"
   - "examples/accrue_host/test/ordinary_preview_seed_test.exs"
-covered_digest: "v1:sha256:f972adffdc0656b25a80dcf3acce23946e712548633a49b3c1492c1c137eb197"
+covered_digest: "v1:sha256:f3ab7c012720f73e0fb25b6efe02a2eb4c7d1a191a7734b951000576ab8d57a9"
 behavior_unverified: 0
 overrides_applied: 0
 ---
