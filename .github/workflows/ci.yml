@@ -100,7 +100,9 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: brandbook/tokens/harness/package-lock.json
+          cache-dependency-path: |
+            brandbook/tokens/harness/package-lock.json
+            examples/accrue_host/package-lock.json
 
       # Quick task 260917-l7v (SL-E): a requirement marked Complete must carry
       # evidence checkable at branch tip -- a phase VERIFICATION.md with
@@ -444,6 +446,11 @@ jobs:
       # logic against synthetic inputs; the --repo . invocation below runs
       # it against the real cohort, closing the exact D-16 class of
       # "documented but never executed" verification.
+      # The two host cohort files require() examples/accrue_host/playwright.config.js,
+      # which requires @playwright/test. `npm ci` is lockfile-pinned and downloads no browsers.
+      - name: Install host Playwright config dependencies (D-32 cohort)
+        run: cd examples/accrue_host && npm ci
+
       - name: CI script contract (D-32)
         run: >-
           node --test --test-reporter=tap scripts/ci/verify_ci_script_contract.mjs &&
