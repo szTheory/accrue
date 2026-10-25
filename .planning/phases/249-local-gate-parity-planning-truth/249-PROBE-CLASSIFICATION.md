@@ -29,4 +29,18 @@ replay action and guidance) is still present and asserted.
 
 Final result: `npm run e2e:group-contracts` 16 passed (chromium-desktop and chromium-mobile).
 
-<!-- lanes-section-below -->
+## Lanes
+
+Job `admin-group-contracts` replayed with `249-replay-ci-job.py --run` at HEAD 285c01bd (spec fix commit).
+
+| Step | Result |
+|---|---|
+| 02 Detect Phase 190 browser-relevant changes | PASS (replayed with `--env GITHUB_EVENT_NAME=workflow_dispatch --env BASE_SHA= --env BEFORE_SHA=`; `github.event.*` is unresolvable locally, a first run without it reported FAIL on those unresolved vars only) |
+| 03 Phase 190 automation contract | PASS |
+| 08 Install admin deps | PASS |
+| 09 Compile admin package | PASS |
+| 10 Install browser deps | PASS |
+| 12 Run Phase 190 group-contract browser gate | PASS |
+
+Skips: `Install Hex` (global hex already installed on the host), `Install Chromium` (apt-backed; Playwright Chromium already cached).
+Also `bash scripts/ci/verify_phase190_automation_contract.sh` -> ok.
