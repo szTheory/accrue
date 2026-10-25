@@ -92,12 +92,12 @@ Plans:
   2. One PR to `main` shows every `ci.yml` and `accrue_admin_browser.yml` job that has a `pull_request` run path concluding `success`, not `skipped`, on the exact 40-hex evidence head SHA recorded in the PR body, and the committed PR-body file matches the live body byte for byte. Two kinds of job are outside the PR bar: the parked `Admin UI ratchet guardrails [parked]` lane (`continue-on-error` by design, WINDOWS.md waiver row 11) and dispatch-only or push/schedule-only jobs (`Mint visual baselines`, `Stripe provider-proof trigger classifier`, `Stripe provider-proof incident reconciliation`, `Stripe test-mode parity (mandatory periodic)`). The PR head may differ from the evidence head by exactly one commit that changes nothing but the committed PR-body file, and that head's runs must meet the same bar. This explicitly includes the lanes Phase 249 routed here: host-integration (dev-boot, browser, assert-preserved and Hex smoke, under the custody CI absent-mode), all playwright-e2e shards, host-docker-smoke, and the Linux visual-regression baseline gate (CI diff first; re-mint via `workflow_dispatch` only for an intentional change).
   3. The PR is merged with a merge commit (two parents, no squash or rebase). Every pre-merge commit SHA is reachable from `main`, and the first post-merge push run on `main` concludes `success` for all jobs. The first post-merge push run on `main` meets, job by job, the bar of the last green `main` push run (run 35374333981). Any job that cannot run there, for example one missing a secret, is recorded as such and not claimed.
 
-**Plans**: 7 plans
+**Plans**: 3/7 plans executed
 
 Plans:
-- [ ] 250-01-PLAN.md — Bootstrap: first commit flips current_phase to 250 with a scoped, contract-accepted pre-close VERIFICATION/UAT so SL-G checks Phase 250's own digest (wave 1)
-- [ ] 250-02-PLAN.md — Researched source fixes with negative controls (RecoveryLiveTest + admin PG UTC pin, D-32 npm ci, time_display TZ pin); D1 wording, D2 deferral, D3 PR-body file (wave 2)
-- [ ] 250-03-PLAN.md — Exact-SHA CI verdict helper + pre-push guard (close gates, hygiene, secret/PII scans); bounded push/measure/fix loop (wave 3)
+- [x] 250-01-PLAN.md — Bootstrap: first commit flips current_phase to 250 with a scoped, contract-accepted pre-close VERIFICATION/UAT so SL-G checks Phase 250's own digest (wave 1)
+- [x] 250-02-PLAN.md — Researched source fixes with negative controls (RecoveryLiveTest + admin PG UTC pin, D-32 npm ci, time_display TZ pin); D1 wording, D2 deferral, D3 PR-body file (wave 2)
+- [x] 250-03-PLAN.md — Exact-SHA CI verdict helper + pre-push guard (close gates, hygiene, secret/PII scans); bounded push/measure/fix loop (wave 3)
 - [ ] 250-04-PLAN.md — D4 visual baselines: mechanical ledger checker, per-surface classification, regression fixes, CI-dispatch re-mint of intentional surfaces only (wave 4)
 - [ ] 250-05-PLAN.md — Pre-merge close commit E (re-mint, LAND-01 Complete), green at E, body-only H records E (wave 5)
 - [ ] 250-06-PLAN.md — LAND-03: maintainer merge decision, `gh pr merge 49 --merge --match-head-commit`, reachability, post-merge main run vs 35374333981, local main ff reconcile (wave 6)
@@ -120,7 +120,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 249. Local Gate Parity & Planning Truth | 18/18 | Complete    | 2026-10-25 |
-| 250. Remote Integration | 0/7 | Planned | - |
+| 250. Remote Integration | 3/7 | In Progress | - |
 | 251. 1.7.0 Release Alignment | 0/TBD | Not started | - |
 
 ## Next
