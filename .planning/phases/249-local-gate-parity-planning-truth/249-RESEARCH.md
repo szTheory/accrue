@@ -376,11 +376,14 @@ import { scanArtifact, computeDigest } from "./scripts/ci/verify_artifact_fixed_
 | A5 | Unique 1000px annotation name `--ax-bp-1000 ↑` and `content ↓` for 639px | R4 | Naming bikeshed only; any `--ax-bp-*` token satisfies the guard |
 | A6 | Phase 250/251 will need their own VERIFICATION/UAT before `current_phase` flips | R3 | Gate red on flip if not planned |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Are all 190/192/200 admin browser steps green after R8-R10?** What we know: only `e2e:group-contracts` was run (6 failed/10 passed, all classified). What's unclear: `e2e:phase191`, `e2e:a11y`, `phase199`, page-flow 200, storybook coverage, reduced-motion. Recommendation: plan a dedicated wave that runs both guardrail scripts end to end and iterates on stale-copy findings.
+   RESOLVED: planned as 249-08 (Phase 192 and Phase 200 guardrail jobs run end to end, each finding classified), after 249-07 (Phase 190 group contracts); re-measured on the final head in 249-13.
 2. **Do the Linux visual baselines still match?** Baselines last committed `0197f4ba` 2026-10-10 (Phase 243-01); 157 admin lib/asset commits landed since `origin/main`, including 11 UI-changing owner-feedback commits after 2026-10-10. Mint is Linux-only (`accrue_admin_browser.yml` job "Mint visual baselines", artifact `phase211-visual-baselines`, via `workflow_dispatch`). Options: Docker Linux Playwright container locally (Docker daemon is running here) or remote mint in Phase 250. Recommendation: decide in planning; GREEN-05 says baselines regenerate "only where an intentional change requires it", so first measure the diff on Linux, do not blindly re-mint.
+   RESOLVED: CONTEXT locked decision. The Linux-only pixel-diff gate is measured remotely in Phase 250 (CI diff first; re-mint through `workflow_dispatch` only for an intentional change). Phase 249 neither runs nor re-mints it on macOS.
 3. **Which of host-integration/playwright-e2e pass?** Not run. See table below.
+   RESOLVED: planned as 249-14 (host-integration + tokens regenerate), 249-15 (playwright-e2e shards 1-3) and 249-16 (release-gate Floor/OTel/Sigra cells), all in scratch clones; host-docker-smoke is routed to Phase 250 by orchestrator decision.
 
 ## Environment Availability
 
