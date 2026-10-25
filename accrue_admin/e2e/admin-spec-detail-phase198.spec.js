@@ -56,6 +56,9 @@ const DETAIL_TARGETS = Object.freeze([
     name: "Event",
     route: ({ phase191 }) => `/billing/events/${phase191.source_event_id}`,
     readOnly: true,
+    // 3d7d949d: an event is itself the activity record, so it has no lazy Activity
+    // section; its payload is a disclosure that is open on load.
+    inlinePayload: true,
   },
 ]);
 
@@ -139,6 +142,12 @@ async function assertNoHorizontalClipping(page, label) {
   await assertNoHorizontalClip(page, "#main-content, main, .ax-page", label);
 }
 
+async function assertInlinePayloadBottom(page, label) {
+  await expect(page.locator("[data-ax-lazy-activity]"), `${label}: no lazy Activity`).toHaveCount(0);
+  await expect(page.locator("[data-ax-lazy-json]"), `${label}: no lazy Raw data`).toHaveCount(0);
+  await expect(page.locator("[data-ax-event-payload]"), `${label}: payload disclosure`).toHaveCount(1);
+}
+
 async function assertLazyBottom(page, label) {
   await expect(page.locator("[data-ax-lazy-activity]"), `${label}: lazy Activity marker`).toHaveCount(1);
   await expect(page.locator("[data-ax-lazy-json]"), `${label}: lazy Raw data marker`).toHaveCount(1);
@@ -158,7 +167,11 @@ async function assertInitialDetailInvariants(page, target) {
   await expect(page.locator("h1"), `${label}: exactly one h1`).toHaveCount(1);
   await expect(page.locator("[data-ax-summary-list]"), `${label}: summary list`).toHaveCount(1);
   await expect(page.locator("[data-ax-related-resources]"), `${label}: one related strip`).toHaveCount(1);
-  await assertLazyBottom(page, label);
+  if (target.inlinePayload) {
+    await assertInlinePayloadBottom(page, label);
+  } else {
+    await assertLazyBottom(page, label);
+  }
 
   const actionBand = page.locator("[data-ax-action-band]");
   await expect(actionBand.locator("form:visible"), `${label}: no visible action-band forms`).toHaveCount(0);
