@@ -29,12 +29,14 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   end
 
   setup do
-    # Recovery windows use Accrue.Clock; align the fixed fake clock with the
-    # database's wall-clock inserted_at timestamps for these integration tests.
-    :ok =
-      Accrue.Processor.Fake.advance(
-        DateTime.diff(DateTime.utc_now(), Accrue.Clock.utc_now(), :second)
-      )
+    # Recovery windows use Accrue.Clock. Align the fixed fake clock with the
+    # database wall clock by ceiling plus a 2-second margin, not floor:
+    # accrue_events.inserted_at comes from the database now() default in the
+    # Postgres session TimeZone, so a floored clock excludes same-second events
+    # on a UTC server. Restore the clock for neighboring tests.
+    clock_shift = DateTime.diff(DateTime.utc_now(), Accrue.Clock.utc_now(), :second) + 2
+    :ok = Accrue.Processor.Fake.advance(clock_shift)
+    on_exit(fn -> Accrue.Processor.Fake.advance(-clock_shift) end)
 
     prior = Application.get_env(:accrue, :auth_adapter)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
