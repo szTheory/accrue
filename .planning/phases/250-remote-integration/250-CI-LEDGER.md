@@ -79,6 +79,32 @@ Every PR-path job is `success` (all four Release gate cells, Docs and bash contr
 
 Bound: 5 of 6 push iterations used. Hand-off: 250-04 owns the visual baselines for P.
 
+## Iteration 6 (plan 250-04) - pushed `133fafc2b0c4487522eaa40801985518e4d986ec`
+
+Runs: ci.yml `40232857493`, accrue_admin_browser.yml `40232857489`; mint dispatch `40232864961` (headSha equal, `Mint visual baselines` success). Guard PASS, SL-F PASS.
+
+Carried the D4 checker and the Phase 211 anchor fix. At P (`b9c98b20`) the gate had failed before any pixel comparison (`dashboard: rendered timestamp anchor`, 0 found), because 247-03 moved timeline instants into the shared `Timestamp` control.
+
+| Job | Conclusion | Failing step | Evidence | Classification | Fix |
+|-----|-----------|--------------|----------|----------------|-----|
+| Browser UAT | failure | Phase 211 visual regression gate | now a real pixel comparison: `toHaveScreenshot(dashboard.png)` 71723 px (0.07) different. The anchor and mask assertions pass in CI | visual: baselines from `0197f4ba` predate v1.63-v1.66 and the owner-feedback series | classified per D4 in `250-VISUAL-CLASSIFICATION.md` (10 intentional, 2 unchanged, 0 regressions); intentional PNGs copied from mint run `40232864961` |
+| Admin UI ratchet guardrails [parked] | failure | Verify frozen ratchet evidence | by design, D1 | parked | none |
+
+All other PR-path jobs were `success`, or still running when superseded.
+
+## Iteration 7 (plan 250-04) - pushed `74cdd43a48a57ee2ee047293d387093c138da5d8`
+
+Runs: ci.yml `40234321143`, accrue_admin_browser.yml `40234321194`. Guard PASS, SL-F PASS. Carried the 10 re-minted baselines; `250-visual-ledger-check.mjs --base 133fafc2...` PASS.
+
+Verdict: RED (rc 1), 17 jobs `success`. **Browser UAT `success`**: the Phase 211 pixel gate passes on the re-minted baselines.
+
+| Job | Conclusion | Failing step | Evidence | Classification | Fix |
+|-----|-----------|--------------|----------|----------------|-----|
+| Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off) | failure | Accrue portal test | job 121292519931: `111 tests, 1 failure`, `AddPaymentMethodLiveTest:73` setup `GenServer.call(AccruePortal.BraintreeMox, ...)` `no process`. Same portal code passed at `b9c98b20` | source bug (test support, timing-dependent): `BraintreeMox.ensure_started/0` linked the named Agent to the first test that reset it. ExUnit (`runner.ex` `receive_test_reply`) does not await a finished test's `exit(:shutdown)`, so the next setup can see the dying Agent | `fix(250-04): start the portal Braintree client-token stub unlinked`. Mechanism model: linked 964/2000 next-caller crashes, unlinked 0/2000. accrue_portal 111/0 under seeds 0-4 |
+| Admin drift and docs | skipped | none ran | `needs: [release-gate]` | downstream | none |
+| Annotation sweep | failure | Sweep release-facing annotations | both annotations are the portal failure above | downstream | none |
+| Admin UI ratchet guardrails [parked] | failure | Verify frozen ratchet evidence | by design, D1 | parked | none |
+
 ## Pushed SHA record
 
 | Iteration | SHA | ci.yml run | browser run | Verdict |
@@ -88,3 +114,5 @@ Bound: 5 of 6 push iterations used. Hand-off: 250-04 owns the visual baselines f
 | 3 | `ead4f497c124d4e1bbca2ff313dff76f310231e2` | 40221570264 | 40221570185 | RED |
 | 4 | `533d2ded4208d32c982d2e4bb78c8f6dff150eb8` | 40226070833 | 40226070837 | RED |
 | 5 (P) | `b9c98b20081841e976586339db47554e40da7179` | 40229480564 | 40229480489 | GREEN (visual-pending) |
+| 6 (250-04) | `133fafc2b0c4487522eaa40801985518e4d986ec` | 40232857493 | 40232857489 | RED (visual, classified) |
+| 7 (250-04) | `74cdd43a48a57ee2ee047293d387093c138da5d8` | 40234321143 | 40234321194 | RED (portal flake; Browser UAT success) |
