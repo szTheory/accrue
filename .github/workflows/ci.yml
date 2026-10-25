@@ -1362,6 +1362,9 @@ jobs:
           --health-retries 5
 
     env:
+      # Hosted runners have no maintainer preview, so the custody check must prove absence
+      # rather than identify a preview (maintainer decision 2026-10-25); any preview found still refuses.
+      ACCRUE_HOST_CUSTODY_CI_ABSENT: "1"
       MIX_ENV: test
       PGUSER: postgres
       PGPASSWORD: postgres
@@ -1518,6 +1521,9 @@ jobs:
         shard: [1, 2, 3]
 
     env:
+      # Hosted runners have no maintainer preview, so the custody check must prove absence
+      # rather than identify a preview (maintainer decision 2026-10-25); any preview found still refuses.
+      ACCRUE_HOST_CUSTODY_CI_ABSENT: "1"
       MIX_ENV: test
       PGUSER: postgres
       PGPASSWORD: postgres
