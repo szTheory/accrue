@@ -3,6 +3,10 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { isMainModule } from './main_module.mjs';
 import { resolvePhaseEvidencePath } from './phase_evidence_path.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -137,7 +141,7 @@ function args(argv) {
   return values;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+function main() {
   try {
     const options = args(process.argv.slice(2));
     const result = validateIntegratedProof({ proofPath: options.proof, manifestPath: options.manifest });
@@ -146,4 +150,26 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.error(`FAIL integrated proof: ${error.message}`);
     process.exitCode = 1;
   }
+}
+
+let entry = false;
+try {
+  entry = isMainModule(import.meta.url);
+} catch {
+  entry = false;
+}
+if (entry && process.env.NODE_TEST_CONTEXT) {
+  test('usage is rejected when --proof and --manifest are missing', () => {
+    const env = { ...process.env };
+    delete env.NODE_TEST_CONTEXT;
+    const result = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], { encoding: 'utf8', shell: false, env });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /usage: verify_phase248_integrated_proof\.mjs/);
+  });
+  test('resolveEvidenceFile rejects unsafe and escaping paths', () => {
+    assert.throws(() => resolveEvidenceFile(ROOT, '/etc/passwd'), /unsafe path/);
+    assert.throws(() => resolveEvidenceFile(ROOT, '../outside'), /escapes repository/);
+  });
+} else if (entry) {
+  main();
 }

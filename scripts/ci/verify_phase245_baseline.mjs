@@ -5,9 +5,27 @@ import crypto from "node:crypto";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import test from "node:test";
+import assert from "node:assert/strict";
+import { isMainModule } from "./main_module.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+
+function registerTests() {
+  // Hermetic: the built-in self-test refreshes capture source digests into a temp fixture,
+  // proves the refreshed fixture passes, and proves a stale digest is rejected.
+  test("self-test passes refreshed-digest fixture and rejects a stale source digest", () => {
+    const env = { ...process.env };
+    delete env.NODE_TEST_CONTEXT;
+    const result = spawnSync(process.execPath, [fileURLToPath(import.meta.url), "--self-test"], { encoding: "utf8", shell: false, env });
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stdout, /refreshed-positive=1/);
+    assert.match(result.stdout, /stale-source-digest-rejected=1/);
+  });
+}
+
+function main() {
 const args = process.argv.slice(2);
 const opts = {};
 for (let index = 0; index < args.length; index += 1) {
@@ -275,4 +293,18 @@ if (errors.length) {
   process.exitCode = 1;
 } else {
   console.log(`PASS: ${opts["routes-only"] ? "route inventory" : "route inventory, capture manifest and findings"}`);
+}
+}
+
+let entry = false;
+try {
+  entry = isMainModule(import.meta.url);
+} catch {
+  entry = false;
+}
+
+if (entry && process.env.NODE_TEST_CONTEXT) {
+  registerTests();
+} else if (entry) {
+  main();
 }

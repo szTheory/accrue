@@ -4,11 +4,13 @@ import { spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import test from "node:test";
+import assert from "node:assert/strict";
+import { isMainModule } from "./main_module.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const routeAuthority = path.join(root, ".planning/milestones/v1.63-phases/239-integrated-quality-handoff/239-COVERAGE.md");
 const requiredRequirements = ["DSN-01", "DSN-02", "DSN-03", "DSN-04", "DSN-05", "UXC-02", "EVR-01", "EVR-02"];
-const ledgerArg = process.argv.at(-1);
 
 function fail(message) {
   console.error(`Phase 240 evidence invalid: ${message}`);
@@ -110,6 +112,46 @@ function readableRepoPath(relative) {
   catch { return false; }
 }
 
+
+function runCli(args) {
+  const env = { ...process.env };
+  delete env.NODE_TEST_CONTEXT;
+  return spawnSync(process.execPath, [fileURLToPath(import.meta.url), ...args], { encoding: "utf8", shell: false, env });
+}
+
+function registerTests() {
+  test("rejects a ledger missing required sections", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "phase240-fixture-"));
+    try {
+      const ledger = path.join(dir, "ledger.md");
+      writeFileSync(ledger, "# empty ledger\n");
+      const result = runCli([ledger]);
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, /missing required field\/section/);
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+
+  test("rejects a ledger that omits a required route row", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "phase240-fixture-"));
+    try {
+      const routes = expectedRoutes();
+      assert.equal(routes.length, 21);
+      const rows = routes.slice(1).map((route) => `| \`${route}\` | family | states | \`owner\` | exercised |`);
+      const ledger = path.join(dir, "ledger.md");
+      writeFileSync(ledger, [
+        "## Route and owner inventory", "", ...rows, "", "### State applicability",
+        "## Requirement to recurring owner map", "## Mounted Phase 237 exemplar record",
+        "## Current changed-owner acceptance results", ""
+      ].join("\n"));
+      const result = runCli([ledger]);
+      assert.notEqual(result.status, 0);
+      assert.ok(result.stderr.includes(`omitted required route: ${routes[0]}`), result.stderr);
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+}
+
+function main() {
+  const ledgerArg = process.argv.at(-1);
 if (process.argv.includes("--self-test")) {
   const real = process.argv.at(-1);
   if (!validate(path.resolve(root, real))) process.exit(1);
@@ -134,3 +176,17 @@ if (process.argv.includes("--self-test")) {
 
 if (!ledgerArg || !validate(path.resolve(root, ledgerArg))) process.exit(1);
 console.log(`Phase 240 evidence valid: ${expectedRoutes().length} routes; 8 requirements; registry 30/42/8; 43 source component modules.`);
+}
+
+let entry = false;
+try {
+  entry = isMainModule(import.meta.url);
+} catch {
+  entry = false;
+}
+
+if (entry && process.env.NODE_TEST_CONTEXT) {
+  registerTests();
+} else if (entry) {
+  main();
+}
