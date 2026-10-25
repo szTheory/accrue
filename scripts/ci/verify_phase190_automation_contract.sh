@@ -67,7 +67,8 @@ require_absent_regex "$uat_file" 'awaiting: user response|result: pending|status
 pass_count="$(grep -Ec '^result: pass$' "$uat_file")"
 [ "$pass_count" -ge 2 ] || fail "expected at least two passed UAT checks, found $pass_count"
 
-require_regex "$verification_file" '^status: complete$'
+# 2219292b normalized every archived VERIFICATION to the canonical `status: passed`.
+require_regex "$verification_file" '^status: passed$'
 require_fixed "$verification_file" 'score: "5/5 must-haves verified"'
 require_fixed "$verification_file" "Automated Verification Closure"
 require_fixed "$verification_file" "npm run e2e:group-contracts"
