@@ -92,7 +92,15 @@ Plans:
   2. `gh` reports every PR-required job in `ci.yml` and `accrue_admin_browser.yml` as `success`, not `skipped`, on the 40-hex head SHA recorded in the PR body. That explicitly includes the lanes Phase 249 routed here: host-integration (dev-boot, browser, assert-preserved and Hex smoke, under the custody CI absent-mode), all playwright-e2e shards, host-docker-smoke, and the Linux visual-regression baseline gate (CI diff first; re-mint via `workflow_dispatch` only for an intentional change). The committed PR-body file matches the live PR body byte for byte.
   3. The PR is merged with a merge commit (two parents, no squash or rebase). Every pre-merge commit SHA is reachable from `main`, and the first post-merge push run on `main` concludes `success` for all jobs.
 
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 250-01-PLAN.md — Researched source fixes with negative controls (RecoveryLiveTest + admin PG UTC pin, D-32 npm ci, time_display TZ pin); D1 wording, D2 deferral, D3 PR-body file (wave 1)
+- [ ] 250-02-PLAN.md — Exact-SHA CI verdict helper + pre-push guard; bounded push/measure/fix loop over the newly exposed lanes (wave 2)
+- [ ] 250-03-PLAN.md — D4 visual baselines: per-surface classification ledger, regression fixes, CI-dispatch re-mint of intentional surfaces only (wave 3)
+- [ ] 250-04-PLAN.md — Close commit E (current_phase 250 + SUMMARYs + minted VERIFICATION/UAT + LAND-01), green at E, body-only H records E (wave 4)
+- [ ] 250-05-PLAN.md — LAND-03: maintainer merge decision, `gh pr merge 49 --merge --match-head-commit`, reachability, post-merge main run vs 35374333981, local main ff reconcile (wave 5)
+- [ ] 250-06-PLAN.md — Post-merge close: LAND-02/03 Complete, VERIFICATION 3/3 re-mint, close commit parked per decision (wave 6)
 
 ### Phase 251: 1.7.0 Release Alignment
 
@@ -111,7 +119,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 249. Local Gate Parity & Planning Truth | 18/18 | Complete    | 2026-10-25 |
-| 250. Remote Integration | 0/TBD | Not started | - |
+| 250. Remote Integration | 0/6 | Planned | - |
 | 251. 1.7.0 Release Alignment | 0/TBD | Not started | - |
 
 ## Next
