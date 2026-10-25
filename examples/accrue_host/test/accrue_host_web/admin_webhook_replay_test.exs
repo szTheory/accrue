@@ -135,7 +135,7 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
 
     assert events_html =~ AccrueAdmin.Copy.events_list_heading()
     assert events_html =~ AccrueAdmin.Copy.events_list_subtitle()
-    assert events_html =~ "invoice.payment_failed"
+    assert events_html =~ AccrueAdmin.Copy.billing_event_label("invoice.payment_failed")
     assert events_html =~ AccrueAdmin.Copy.billing_events_table_column_webhook_source()
   end
 
