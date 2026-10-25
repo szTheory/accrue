@@ -96,3 +96,35 @@ Replays used `--run --env GITHUB_EVENT_NAME=workflow_dispatch --env BASE_SHA= --
 | `admin-drift-docs` | PASS (4 PASS, 1 SKIP) | `Install Hex` skipped (already present). Rebuilt assets produced no diff: the committed admin bundle is fresh |
 | `admin-ui-ratchet-selftests` | PASS (5 PASS) | ledger self-tests, sign-off self-test, Phase 208 CI contract, parked-lane expiry |
 | `admin-ui-ratchet-guardrails` | ADVISORY (2 ADVISORY-PASS, 2 ADVISORY-FAIL), exit 0 | Steps `Verify frozen ratchet evidence` and `Verify UI ratchet sign-off` fail, but both are `continue-on-error` in ci.yml. Recorded exactly as CI treats it: the job is parked per WINDOWS row 11. Not reclassified, not fixed, no edits |
+
+## Plan 249-09: browser-uat (non-visual)
+
+Positive control: the first replay failed step 9 (`Run browser UAT`, `npm run e2e`) with 34 failures (17 distinct tests, desktop plus mobile) before any edit; steps 10 and 11 passed.
+
+| Probe (spec, title) | Failing assertion | Current source | Causing commit | Receipt | Classification | Fix |
+|---|---|---|---|---|---|---|
+| admin-spec-list-phase196 Subscriptions LIST (chips, At risk queue, empty states, mobile cards) | `[data-ax-filter-chips]` hidden; columns `Customer details/State/Plan / amount/Signals`; `clear-all` on queue empty; card labels | `data_table.ex` `view_nav` ("Subscription view"), columns `Subscription/Status/Plan/Renews / ends/Ownership and tax`, queue-empty "View all subscriptions" link | b4a7eeac, 215ac9d4 | commit diffs, `.planning/notes/2026-10-13-admin-owner-feedback.md` items 6, 8, 9 | stale-contract | Asserts view nav, new column and card labels, empty-state escape link; every list-state, marker and no-clip assertion kept |
+| admin-spec-list-phase197 (8 desktop smokes + customers, invoices, webhooks, events tests) | chip row hidden, `view=all` clear-all, "Missing payment method", "All ledger", "Admin changes", `customer.updated` | invoices and payments use a view nav; chip row lists applied constraints only; toolbar "Reset filters" restores the page default (absent when no-op); known event keys render as labels | f3e6ea01, 66d5b3ce, f23f8e75 | owner-feedback note items 4, 6, 8; commit diffs | stale-contract | Contract table now declares `viewNav`/`chips`/`resetOnDefault` per page; all route, count, default-param and bulk-retry assertions kept |
+| admin-spec-overview-phase194 Dashboard (3 tests) | `[data-ax-command-palette-trigger]` and section label "Recent audit activity" not found | topbar owns `data-command-palette-trigger`; Home section is "Recent billing activity" | 3d7d949d, b493c50e | commit messages | stale-contract | Selector and label retargeted; order and no-action-controls assertions kept |
+| admin-spec-detail-phase198 Event | `[data-ax-lazy-activity]` count 1 expected | `event_live.ex` has no lazy Activity or Raw data sections; payload is an open `data-ax-event-payload` disclosure | 3d7d949d (removed `load_activity`/`load_raw_json`) | commit diff | stale-contract | Event target asserts no lazy markers plus exactly one payload disclosure; other targets unchanged |
+| phase7-uat dashboard | heading "Billing operations", text "Dashboard", heading "Recent audit activity" | h1 and breadcrumb leaf are "Recent activity"; no section heading | 3d7d949d, 7e77a01f | commit diffs | stale-contract | h1 `Recent activity`, breadcrumb nav contains it, section locator kept; dropped the stale `copy_dashboard.js` mirror import (the mirror itself is a host-lane concern) |
+| phase7-uat webhook replay | heading "invoice.payment_failed" | page title is the event id; type is the header description | e6f39cef | as 249-08 | stale-contract | h1 `evt_e2e_single`, header contains the type |
+| admin-spec-list-phase196 Phase 240 invoice list, 200% CSS font-size at 320px | `documentOverflow` 32 | `.ax-topbar-actions` mobile grid (`auto auto` columns) plus 228px theme picker and `Time display` control exceeded 280px content width | 7885a23a / 3b9d2c01 (247-01 time display) | WCAG 1.4.10 reflow, the contract's own intent; element probe showed `.ax-time-preference` and `.ax-theme-picker` right edge 352 > 320 | regression | Source fix in `assets/css/app.css` (theme picker spans its own row, time display wraps); committed bundle rebuilt with `mix accrue_admin.assets.build` (8b9dc258) |
+| phase197 webhooks bulk retry; phase7-uat refund drawer (single runs) | `bulk-action` / `Confirm refund` not found | no source change; both pass on repeat and in the final full replay | none found | n/a | not reproducible (click raced LiveView connect on a cold server) | No edit; recorded as observed flakes, not fixes |
+
+Final results: each touched spec passes on desktop and mobile in isolation; the full job replay is green.
+
+### Lanes (249-09)
+
+All replays used `--run --env GITHUB_EVENT_NAME=workflow_dispatch --env BASE_SHA= --env BEFORE_SHA=`.
+
+| Job | Result | Notes |
+|---|---|---|
+| `admin-drift-docs` | PASS (4 PASS, 1 SKIP) | replayed again after the CSS bundle rebuild; fresh |
+| `admin-ui-ratchet-selftests` | PASS (5 PASS) | |
+| `admin-ui-ratchet-guardrails` | ADVISORY, exit 0 | `continue-on-error` steps, parked per WINDOWS row 11; not reclassified |
+| `accrue_admin_browser.yml` `browser-uat` | PASS (6 PASS, 3 SKIP) | `npm run e2e` 100% green on both projects; hooks tests and baseline-set guard pass |
+
+Skips: `Install Hex`, `Install Chromium` (already present). `Phase 211 visual regression gate` is skipped: baselines are Linux-specific (WINDOWS row 27) and are measured remotely in Phase 250. `accrue_admin/e2e/__screenshots__/` is unchanged (`git diff --quiet`). Phase 200 generated output was moved to `$GSD_SCRATCH` and its absence asserted.
+
+Out-of-scope finding: `examples/accrue_host/e2e/support/copy_dashboard.js` still mirrors `DASHBOARD_BREADCRUMB_HOME: "Dashboard"` while `copy.ex` says "Recent activity"; host e2e lanes must reconcile it.
