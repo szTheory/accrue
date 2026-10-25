@@ -333,3 +333,112 @@ registerTest("both wrappers reject a collision before invoking any Mix mutation"
   assert.equal(fs.existsSync(markerPath), false, "Mix was invoked before collision refusal");
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+// ---- CI absent-mode (249-18): explicit opt-in, refuses unless absence is proven ----
+const ABSENT = { ACCRUE_HOST_CUSTODY_CI_ABSENT: "1" };
+
+function absentFixture(absence) {
+  const data = fixture();
+  delete data.preview;
+  data.absence = absence;
+  return data;
+}
+
+function runCommand(command, data, extraEnv = {}) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-absent-"));
+  const fixturePath = path.join(dir, "targets.json");
+  fs.writeFileSync(fixturePath, JSON.stringify(data));
+  const result = spawnSync("node", [custodyTestEntry, fixturePath, command], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    env: { ...process.env, ...extraEnv }
+  });
+  fs.rmSync(dir, { recursive: true, force: true });
+  return result;
+}
+
+registerTest("absent-mode refuses when a labelled preview volume exists", () => {
+  const result = run("browser", absentFixture({ volumes: ["accrue-host_pgdata"], containers: [] }), ABSENT);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /REFUSED/);
+  assert.match(result.stderr, /CI absent-mode found a accrue-host preview instance \(1 volumes, 0 containers\)/);
+});
+
+registerTest("absent-mode refuses when a labelled preview container exists", () => {
+  const result = run("browser", absentFixture({ volumes: [], containers: ["abc"] }), ABSENT);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /CI absent-mode found a accrue-host preview instance \(0 volumes, 1 containers\)/);
+});
+
+registerTest("without the flag an absent preview still refuses with today's message", () => {
+  const data = fixture();
+  delete data.preview.volume;
+  const result = run("browser", data);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /preview identity is unavailable \(volume\)/);
+  const absentOnly = absentFixture({ volumes: [], containers: [] });
+  const noFlag = run("browser", absentOnly);
+  assert.notEqual(noFlag.status, 0, "absence fixture must not pass without the flag");
+});
+
+registerTest("absent-mode passes on zero labelled volumes and containers and logs the reason", () => {
+  const result = run("browser", absentFixture({ volumes: [], containers: [] }), ABSENT);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /\[preview-custody\] CI absent-mode: no accrue-host preview instance exists \(zero labelled volumes and containers\)/);
+  assert.match(result.stdout, /mode=browser target /);
+});
+
+registerTest("absent-mode passes when the docker binary is missing and says so", () => {
+  const result = run("browser", absentFixture({ docker: "missing" }), ABSENT);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /CI absent-mode:.*docker binary not found/);
+});
+
+registerTest("absent-mode refuses on a docker daemon error because absence is not proven", () => {
+  const result = run("browser", absentFixture({ docker: "daemon-error" }), ABSENT);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /cannot prove preview absence: docker query failed/);
+});
+
+registerTest("absent-mode opts in only on the exact value 1", () => {
+  for (const value of ["yes", "true", "0", "", " 1"]) {
+    const result = run("browser", absentFixture({ volumes: [], containers: [] }), { ACCRUE_HOST_CUSTODY_CI_ABSENT: value });
+    assert.equal(result.status, 2, `flag value ${JSON.stringify(value)} was accepted`);
+    assert.match(result.stderr, /ACCRUE_HOST_CUSTODY_CI_ABSENT must be unset or 1/);
+  }
+});
+
+registerTest("absent-mode still refuses a foreign process on the proof listener port", () => {
+  const data = absentFixture({ volumes: [], containers: [] });
+  data.target.process = "pid:4321";
+  const result = run("browser", data, ABSENT);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /proof listener port is occupied by process pid:4321/);
+});
+
+registerTest("absent-mode snapshot and assert-preserved pass when absent and refuse once a preview appears", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-absent-snap-"));
+  const snap = path.join(dir, "snapshot.txt");
+  const env = { ...ABSENT, ACCRUE_HOST_PREVIEW_SNAPSHOT: snap };
+  const absent = absentFixture({ volumes: [], containers: [] });
+  const taken = runCommand("snapshot", absent, env);
+  assert.equal(taken.status, 0, taken.stderr || taken.stdout);
+  assert.match(taken.stdout, /CI absent-mode:/);
+  const kept = runCommand("assert-preserved", absent, env);
+  assert.equal(kept.status, 0, kept.stderr || kept.stdout);
+  assert.match(kept.stdout, /CI absent-mode: preview still absent/);
+  const appeared = runCommand("assert-preserved", absentFixture({ volumes: ["accrue-host_pgdata"], containers: [] }), env);
+  assert.equal(appeared.status, 2);
+  assert.match(appeared.stderr, /CI absent-mode found a accrue-host preview instance/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+registerTest("the real entry still refuses caller-supplied fixture environment even with the flag", () => {
+  const result = spawnSync("node", [custody, "preflight", "browser"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    env: { ...process.env, ...ABSENT, ACCRUE_HOST_CUSTODY_TEST_FIXTURE: "/nonexistent" }
+  });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /caller-supplied test fixture environment is forbidden/);
+});
