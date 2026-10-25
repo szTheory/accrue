@@ -4,6 +4,10 @@ import test from "node:test";
 import { formatTimestamp, initTimeDisplayPreference, setTimeDisplayPreference, TimeDisplay } from "../../assets/js/hooks/time_display.js";
 import { Clipboard } from "../../assets/js/hooks/clipboard.js";
 
+// The hook's default mode reads the host timezone, so the test pins it.
+// node:test runs each file in its own process, so this does not leak.
+process.env.TZ = "America/Los_Angeles";
+
 test("formats instants in an explicit browser timezone without altering the source ISO", () => {
   const iso = "2026-10-11T15:04:05.123456Z";
   const formatted = formatTimestamp(iso, { locale: "en-US", timeZone: "America/Los_Angeles" });
