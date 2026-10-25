@@ -107,11 +107,16 @@ test("Phase 234 post-layout served Admin details evidence", async ({ page, sandb
   const subscriptionOverflow = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, document: document.documentElement.scrollWidth }));
   expect(subscriptionOverflow.document <= subscriptionOverflow.viewport).toBeTruthy();
   await expect(page.locator(".ax-subscription-detail-page .ax-summary-card")).toBeVisible();
-  await expect(page.getByText("Subscription is active", { exact: true })).toBeVisible();
+  // The header carries the lifecycle status badge (the earlier "Subscription is active" sentence was
+  // replaced by the badge and the "Lifecycle state" row in the 2026-10 owner-feedback series).
+  await expect(page.locator(".ax-summary-card").getByText("Active", { exact: true })).toBeVisible();
+  await expect(page.getByText("Lifecycle state", { exact: true }).first()).toBeVisible();
   // This seeded record has a persisted price identity, but no confirmed amount.
   // Keep those independent facts truthful instead of demanding a missing-price state.
-  await expect(page.locator(".ax-summary-facts")).toContainText("price_basic");
-  await expect(page.getByText("Amount is not confirmed in admin", { exact: true }).first()).toBeVisible();
+  const planRow = page.locator(".ax-subscription-detail-page").getByText("Plan / price", { exact: true }).first().locator("xpath=ancestor::*[self::div or self::li or self::tr][1]");
+  await expect(planRow).toContainText("price_basic");
+  const amountRow = page.locator(".ax-subscription-detail-page").getByText("Amount (MRR)", { exact: true }).first().locator("xpath=ancestor::*[self::div or self::li or self::tr][1]");
+  await expect(amountRow).toContainText("Unavailable");
   await expect(page.locator(".ax-subscription-detail-page [data-ax-action-band] .ax-button:visible").first()).toBeVisible();
   expect(await page.locator(".ax-subscription-detail-page [data-ax-action-band] .ax-button:visible").first().evaluate((button) => button.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
 

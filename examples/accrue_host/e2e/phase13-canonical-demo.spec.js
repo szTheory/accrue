@@ -4,10 +4,10 @@ const path = require("node:path");
 const { test, expect } = require("./support/test.js");
 const { readFixture, reseedFixture, login, workspaceBillingLink, waitForLiveView } = require("./support/fixture.js");
 const { expectNoHorizontalOverflow, expectVisibleInViewport } = require("./support/overflow.js");
-// The reigned admin Home (210) uses "Billing operations" as the always-present
-// h1; the old "What needs attention now" is now only the *empty*-rail heading
-// (populated rails show "Priority exceptions"), so it's not a stable dashboard signal.
-const HOME_INTRO_HEADLINE = "Billing operations";
+// The admin Home h1 is "Recent activity" (it was "Billing operations" before the 2026-10-12
+// owner-feedback series, 3d7d949d..b4a7eeac); it is the always-present Home heading, unlike the
+// old "What needs attention now", which only shows for an empty attention rail.
+const HOME_INTRO_HEADLINE = "Recent activity";
 
 const copyStrings = JSON.parse(
   fs.readFileSync(path.join(__dirname, "generated", "copy_strings.json"), "utf8")
@@ -73,15 +73,19 @@ async function postSignedWebhook(page, fixture) {
   expect(JSON.parse(response.body)).toEqual({ ok: true });
 }
 
-/** Desktop events table uses `<td>` cells; mobile card rows surface the type as body copy. */
+/**
+ * Desktop events table uses `<td>` cells; mobile card rows surface the event as body copy. The
+ * events index shows the presentation label for `admin.webhook.replay.completed`
+ * (AccrueAdmin.EventPresentation), not the raw type.
+ */
 function replayAuditEventLocator(page, testInfo) {
   if (testInfo.project.name === "chromium-mobile") {
-    return page.locator("article").filter({ hasText: "admin.webhook.replay.completed" });
+    return page.locator("article").filter({ hasText: "Webhook replay result recorded" });
   }
 
-  // exact: true so we don't also match the row-select cell, whose accessible name is
-  // "Select admin.webhook.replay.completed" (bulk-select column added in v1.53).
-  return page.getByRole("cell", { name: "admin.webhook.replay.completed", exact: true });
+  // Anchored so we don't also match the row-select cell, whose accessible name starts with
+  // "Select" (bulk-select column added in v1.53).
+  return page.getByRole("cell", { name: /^Webhook replay result recorded/ });
 }
 
 test("@phase15-trust canonical first-run and admin replay walkthrough stays release-blocking", async ({
@@ -181,14 +185,14 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
     page,
     "/admin/webhooks/:id detail",
     () => page.goto(`/admin/webhooks/${fixture.webhook_id}`),
-    page.getByRole("heading", { name: "invoice.payment_failed" })
+    page.locator('[data-role="webhook-page-header"]').getByText("invoice.payment_failed", { exact: true })
   );
 
   expect(webhookElapsedMs).toBeGreaterThanOrEqual(0);
   await expect(page).toHaveURL(new RegExp(`/admin/webhooks/${fixture.webhook_id}$`));
   await assertResponsiveState(page, "webhook replay detail", [
     {
-      locator: page.getByRole("heading", { name: "invoice.payment_failed" }),
+      locator: page.locator('[data-role="webhook-page-header"]').getByText("invoice.payment_failed", { exact: true }),
       label: "webhook detail heading"
     },
     {

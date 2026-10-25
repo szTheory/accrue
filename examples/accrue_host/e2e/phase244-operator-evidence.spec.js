@@ -180,38 +180,29 @@ async function captureAdminAssets(page) {
 }
 
 async function assertEventDisclosures(page, activation) {
-  const activity = page.locator("details[data-ax-lazy-activity]");
-  const activitySummary = activity.locator("summary");
-  if (activation === "keyboard") {
-    await activitySummary.focus();
-    await expect(activitySummary).toBeFocused();
-    await page.keyboard.press("Enter");
-    await expect(activitySummary).toBeFocused();
-  } else {
-    await activitySummary.tap();
-  }
-  await expect(activity).toHaveAttribute("open", "");
-  await expect(activity.locator(".ax-timeline")).toBeVisible();
+  // The event detail page carries one disclosure, the exact payload. It is open by default and must
+  // collapse and reopen by keyboard (Enter) or by touch (tap) without losing focus or content.
+  const payload = page.locator("details[data-ax-event-payload]");
+  const summary = payload.locator("summary.ax-detail-section-head");
+  await expect(payload).toHaveAttribute("open", "");
+  await expect(payload.locator("#event-payload")).toBeVisible();
 
-  if (activation === "keyboard") {
-    await page.keyboard.press("Enter");
-  } else {
-    await activitySummary.tap();
-  }
-  await expect(activity).not.toHaveAttribute("open", "");
+  const toggle = async () => {
+    if (activation === "keyboard") {
+      await summary.focus();
+      await expect(summary).toBeFocused();
+      await page.keyboard.press("Enter");
+      await expect(summary).toBeFocused();
+    } else {
+      await summary.tap();
+    }
+  };
 
-  const raw = page.locator("details[data-ax-lazy-json]");
-  const rawSummary = raw.locator("summary");
-  if (activation === "keyboard") {
-    await rawSummary.focus();
-    await page.keyboard.press("Enter");
-    await expect(rawSummary).toBeFocused();
-  } else {
-    await rawSummary.tap();
-  }
-  await expect(raw).toHaveAttribute("open", "");
-  await expect(raw.locator("#event-payload")).toBeVisible();
-  await expect(activity).not.toHaveAttribute("open", "");
+  await toggle();
+  await expect(payload).not.toHaveAttribute("open", "");
+  await toggle();
+  await expect(payload).toHaveAttribute("open", "");
+  await expect(payload.locator("#event-payload")).toBeVisible();
 }
 
 test("Phase 244 customer update retains exact scoped event evidence @phase244-desktop", async ({ page, sandboxId }, testInfo) => {
@@ -238,14 +229,17 @@ test("Phase 244 customer update retains exact scoped event evidence @phase244-de
   const eventRow = page.locator(".ax-timeline-item").filter({ hasText: "Customer updated" });
   await expect(eventRow).toBeVisible();
   await expect(eventRow).toContainText(fixture.admin_denial_customer_id);
-  const eventLink = eventRow.getByRole("link", { name: "Open event" });
+  const eventLink = eventRow.getByRole("link", { name: /^Open Customer updated event \d+$/ });
   await expect(eventLink).toHaveAttribute("href", new RegExp(`/admin/events/${eventId}\\?org=`));
   await eventLink.click();
   await waitForLiveView(page);
   await expect(page).toHaveURL(new RegExp(`/admin/events/${eventId}\\?org=`));
   await expect(page.getByText("customer.updated", { exact: true }).first()).toBeVisible();
   await expect(page.getByText(fixture.admin_denial_customer_id, { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("2026-10-10T23:59:59.123456Z", { exact: true }).first()).toBeVisible();
+  // The exact recorded instant is the <time datetime> and the copy control's accessible name; the
+  // visible text is the formatted local time (the TimeDisplay hook).
+  await expect(page.locator('time[datetime="2026-10-10T23:59:59.123456Z"]').first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy timestamp 2026-10-10T23:59:59.123456Z" }).first()).toBeVisible();
   await assertEventDisclosures(page, "keyboard");
 
   const assets = await captureAdminAssets(page);
@@ -277,8 +271,8 @@ async function assertRelatedWebhookEvidence(page, fixture, sandboxId, testInfo, 
   await page.goto(webhookRoute, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
 
-  await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();
-  await expect(page.locator("dd.ax-summary-list-value").filter({ hasText: /^Dead$/ })).toBeVisible();
+  await expect(page.locator('[data-role="webhook-page-header"]').getByText("invoice.payment_failed", { exact: true })).toBeVisible();
+  await expect(page.locator('[data-role="webhook-observed-status"]').filter({ hasText: /^Dead$/ })).toBeVisible();
 
   const replayFactsBefore = readWebhookReplayFacts(fixture.webhook_id);
   await page.getByRole("button", { name: "Replay webhook" }).click();
@@ -312,7 +306,7 @@ async function assertRelatedWebhookEvidence(page, fixture, sandboxId, testInfo, 
   await expect(eventItem).toBeVisible();
   await expect(eventItem.locator(".ax-label")).toHaveText("Customer updated");
   await expect(attempts).toContainText("Discarded");
-  await expect(page.locator("dd.ax-summary-list-value").filter({ hasText: /^Dead$/ })).toBeVisible();
+  await expect(page.locator('[data-role="webhook-observed-status"]').filter({ hasText: /^Dead$/ })).toBeVisible();
 
   const evidence = eventItem.locator("details.ax-timeline-details");
   const evidenceSummary = evidence.locator("summary");
@@ -476,11 +470,10 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
     await waitForLiveView(page);
 
     await expect(page.getByText("customer.updated", { exact: true }).first()).toBeVisible();
-    const recordedField = page
-      .locator("dl.ax-field-list .ax-field")
-      .filter({ has: page.locator("dt.ax-field-label", { hasText: /^Recorded$/ }) })
-      .locator("dd.ax-field-value");
-    await expect(recordedField).toHaveText("2026-10-10T23:59:59.123456Z");
+    // The exact recorded instant is carried by the timestamp copy control (data-clipboard-text and
+    // accessible name); the visible text is the formatted local time.
+    const recordedField = page.getByRole("button", { name: "Copy timestamp 2026-10-10T23:59:59.123456Z" }).first();
+    await expect(recordedField).toHaveAttribute("data-clipboard-text", "2026-10-10T23:59:59.123456Z");
     await expect(recordedField).toBeVisible();
 
     await assertEventDisclosures(page, "touch");
@@ -506,7 +499,7 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
       fixture: "disposable HOST-BROWSER-VERIFY01 fixture; scoped customer.updated event",
       route: page.url(),
       viewport: page.viewportSize(),
-      exactRecordedTime: await recordedField.textContent(),
+      exactRecordedTime: await recordedField.getAttribute("data-clipboard-text"),
       dimensions,
       assets
     };
@@ -543,7 +536,7 @@ test.describe("Phase 244 webhook activity on touch viewport", () => {
       await waitForLiveView(page);
       await page.goto(`/admin/webhooks/${fixture.webhook_id}?${orgQuery(fixture)}`);
       await waitForLiveView(page);
-      const deliveryKeyField = page.locator("dd.ax-summary-list-value").filter({ hasText: longDeliveryKey });
+      const deliveryKeyField = page.getByRole("heading", { level: 1 }).filter({ hasText: longDeliveryKey });
       await expect(deliveryKeyField).toBeVisible();
       const activity = page.locator("details[data-ax-lazy-activity]").first();
       await activity.locator("summary").tap();

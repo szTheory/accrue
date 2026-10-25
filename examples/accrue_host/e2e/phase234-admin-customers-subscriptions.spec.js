@@ -116,7 +116,7 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
   await page.goto(`/admin?org=${owner}`, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
   await expect(page.locator("html.accrue-admin")).toHaveCount(1);
-  await expect(page.getByRole("heading", { name: /billing operations/i }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /recent activity/i }).first()).toBeVisible();
   await capture(page, "home.png", screenshots, testInfo);
   await servedStylesheet(page);
 
@@ -128,7 +128,7 @@ test("Phase 234 served Admin journeys preserve scope, focus, reflow, theme and a
   const searchInput = page.locator("#global-search-input");
   await expect(searchInput).toBeFocused();
   await page.keyboard.press("Shift+Tab");
-  await expect(searchDialog).toContainText(/Customers: name, email/i);
+  await expect(searchDialog).toContainText(/Search by name, email, invoice number, or ID/i);
   await expect(searchInput).not.toBeFocused();
   await page.keyboard.press("Tab");
   await expect(searchInput).toBeFocused();

@@ -78,7 +78,7 @@ test("current served Admin and Portal controls retain semantic contrast, focus, 
   await waitForLiveView(page);
   await expect(page.locator("html.accrue-admin")).toHaveCount(1);
   await assertServedAsset(page, 'link[rel="stylesheet"][href*="/admin/assets/css-"]', "accrue_admin/priv/static/accrue_admin.css");
-  await expect(page.getByRole("heading", { name: "Billing operations" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Recent activity" })).toBeVisible();
   await expect(page.getByRole("link", { name: /customers/i }).first()).toBeVisible();
   await page.keyboard.press("Tab");
   const adminFocus = await page.evaluate(() => {

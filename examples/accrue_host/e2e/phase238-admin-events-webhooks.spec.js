@@ -161,16 +161,16 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
   const secondRow = page.locator(`input[data-role="toggle-row"][data-row-id="${fixture.second_webhook_id}"]:visible`).first();
   await expect(firstRow).toBeVisible();
   await expect(secondRow).toBeVisible();
-  await expect(page.locator(`a[href^="/admin/webhooks/${fixture.webhook_id}"]`)).toBeVisible();
+  await expect(page.locator(`a[href^="/admin/webhooks/${fixture.webhook_id}"]:visible`).first()).toBeVisible();
 
   await page.goto(`/admin/webhooks?status=dead&type=does-not-match&${owner}`);
   await waitForLiveView(page);
   await expect(page.getByText(/No webhook deliveries match these filters/)).toBeVisible();
-  await expect(page.getByRole("link", { name: /clear filters/i }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /reset filters/i }).first()).toBeVisible();
 
   await page.goto(`/admin/webhooks/${fixture.webhook_id}?${owner}`);
   await waitForLiveView(page);
-  await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();
+  await expect(page.locator('[data-role="webhook-page-header"]').getByText("invoice.payment_failed", { exact: true })).toBeVisible();
   const payloadDisclosure = page.locator("details").filter({ hasText: /payload/i }).first();
   await expect(payloadDisclosure).toBeVisible();
   await payloadDisclosure.locator("summary").focus();
@@ -263,8 +263,8 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
 
   await page.goto(`/admin/events?${owner}&q=invoice.payment_failed`);
   await waitForLiveView(page);
-  await expect(page.getByRole("heading", { name: "Trace billing activity" })).toBeVisible();
-  await expect(page.getByText("invoice.payment_failed", { exact: false }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Billing events" })).toBeVisible();
+  await expect(page.getByText("Invoice payment failed", { exact: false }).first()).toBeVisible();
   const eventLink = page.locator('a[href^="/admin/events/"]').first();
   await expect(eventLink).toBeVisible();
   await eventLink.click();
@@ -274,7 +274,7 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
   ).toBeVisible();
   await page.goto(`/admin/events?${owner}&q=does-not-match-phase238`);
   await waitForLiveView(page);
-  await expect(page.getByText("No ledger rows match these filters.", { exact: true })).toBeVisible();
+  await expect(page.getByText("No events match these filters.", { exact: true })).toBeVisible();
 
   await page.goto(`/admin/coupons?${owner}`);
   await waitForLiveView(page);
@@ -301,10 +301,16 @@ test("Phase 238 seeded evidence and billing projections stay scoped and inspecti
   await waitForLiveView(page);
   const accountLink = page.locator(`a[href^="/admin/connect/${fixture.connect_no_snapshot_id}"]`).first();
   await expect(accountLink).toBeVisible();
-  await expect(accountLink).toContainText("acct_host_browser_no_snapshot");
+  // The account link carries the owner's email; the Stripe account id is the row's secondary line.
+  await expect(
+    page
+      .locator("tr, article")
+      .filter({ has: page.locator(`a[href^="/admin/connect/${fixture.connect_no_snapshot_id}"]`) })
+      .first()
+  ).toContainText("acct_host_browser_no_snapshot");
   await accountLink.click();
   await waitForLiveView(page);
-  await expect(page.getByText("Unknown", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Unavailable", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Local platform fee override", { exact: true }).first()).toBeVisible();
 
   const editOverride = page.getByRole("button", {

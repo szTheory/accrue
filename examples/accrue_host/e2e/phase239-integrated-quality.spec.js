@@ -32,7 +32,7 @@ test("Phase 239 current Admin, customer Portal, and host entry render in the iso
   expect(adminResponse && adminResponse.status()).toBe(200);
   await waitForLiveView(page);
   await expect(page.getByRole("main")).toBeVisible();
-  await expect(page.getByRole("heading", { level: 1, name: "Billing operations" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Recent activity" })).toBeVisible();
   await expectNarrowLayouts(page, "Admin /admin");
   await capture(testInfo, "phase239-admin-current-render.png", page);
 

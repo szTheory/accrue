@@ -153,16 +153,35 @@ async function assertLongRecoveryContentWraps(page) {
   try {
     await identity.evaluate((element, value) => { element.textContent = value; }, longIdentity);
     await reason.evaluate((element, value) => { element.textContent = value; }, longReason);
-    for (const locator of [identity, reason]) {
-      const metrics = await locator.evaluate((element) => ({
-        client: element.clientWidth,
-        scroll: element.scrollWidth,
-        height: element.getBoundingClientRect().height,
-        lineHeight: Number.parseFloat(getComputedStyle(element).lineHeight)
-      }));
-      expect(metrics.scroll).toBeLessThanOrEqual(metrics.client);
-      expect(metrics.height).toBeGreaterThan(metrics.lineHeight);
-    }
+    // Compact record labels are elided in CSS (full text stays in the DOM): the identity must stay
+    // inside its card and truncate with an ellipsis instead of widening the card.
+    const identityMetrics = await identity.evaluate((element) => {
+      const card = element.closest(".ax-at-risk-card");
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      return {
+        textOverflow: style.textOverflow,
+        whiteSpace: style.whiteSpace,
+        rightEdge: rect.right,
+        cardRightEdge: cardRect.right,
+        cardScroll: card.scrollWidth,
+        cardClient: card.clientWidth
+      };
+    });
+    expect(identityMetrics.textOverflow).toBe("ellipsis");
+    expect(identityMetrics.whiteSpace).toBe("nowrap");
+    expect(identityMetrics.rightEdge).toBeLessThanOrEqual(identityMetrics.cardRightEdge + 1);
+    expect(identityMetrics.cardScroll).toBeLessThanOrEqual(identityMetrics.cardClient);
+    // Exact evidence text wraps rather than truncating.
+    const reasonMetrics = await reason.evaluate((element) => ({
+      client: element.clientWidth,
+      scroll: element.scrollWidth,
+      height: element.getBoundingClientRect().height,
+      lineHeight: Number.parseFloat(getComputedStyle(element).lineHeight)
+    }));
+    expect(reasonMetrics.scroll).toBeLessThanOrEqual(reasonMetrics.client);
+    expect(reasonMetrics.height).toBeGreaterThan(reasonMetrics.lineHeight);
   } finally {
     await identity.evaluate((element, value) => { element.textContent = value || "—"; }, original[0]);
     await reason.evaluate((element, value) => { element.textContent = value || "—"; }, original[1]);
@@ -203,7 +222,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await waitForLiveView(page);
   const firstInvoiceRouteLiveViewReadyMs = Number(process.hrtime.bigint() - invoiceRouteStarted) / 1_000_000;
   await expect(page.locator("html.accrue-admin")).toHaveCount(1);
-  await expect(page.getByRole("heading", { name: /open receivables/i }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^invoices$/i }).first()).toBeVisible();
   const invoiceLink = page.locator(`a[href^="/admin/invoices/${fixture.invoice_id}"]`).first();
   await expect(invoiceLink).toBeVisible();
   await expect(invoiceLink).toContainText("HOST-BROWSER-VERIFY01");
@@ -256,7 +275,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await page.goto(page.url(), { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
   const warmInvoiceRouteLiveViewReadyMs = Number(process.hrtime.bigint() - warmRouteStarted) / 1_000_000;
-  await expect(page.getByRole("heading", { name: /open receivables/i }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^invoices$/i }).first()).toBeVisible();
   const warmInvoiceRouteTaskReadyMs = Number(process.hrtime.bigint() - warmRouteStarted) / 1_000_000;
   const assets = await assertCurrentAssets(page);
   const jsHref = await page.locator('script[src*="/admin/assets/js-"]').getAttribute("src");
@@ -366,7 +385,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await waitForLiveView(page);
   await expect(page.getByRole("heading", { name: /recovery/i }).first()).toBeVisible();
   const windowSelector = page.getByRole("navigation", { name: "Time window (UTC)" });
-  for (const label of ["7 days UTC", "30 days UTC", "90 days UTC"]) {
+  for (const label of ["7 days", "30 days", "90 days"]) {
     const windowLink = windowSelector.getByRole("link", { name: label, exact: true });
     await expect(windowLink).toBeVisible();
     const bounds = await windowLink.boundingBox();
@@ -435,7 +454,7 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
   await expect(page.getByRole("heading", { name: "billing-history@example.test" })).toBeVisible();
   await expect(page.locator("body")).toContainText("billing-history@example.test");
   await expect(page.locator("body")).toContainText("price_basic");
-  await expect(page.locator("body")).toContainText("Current period is not shown in admin");
+  await expect(page.locator("body")).toContainText("Current period unavailable");
   const recoveryCta = page.getByRole("link", { name: "Open dunning funnel and at-risk analytics", exact: true });
   await expect(recoveryCta).toHaveCount(1);
   await expect(recoveryCta).toHaveAttribute("class", "ax-link");
@@ -444,9 +463,8 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
     const title = document.querySelector(".ax-summary-title");
     const main = document.querySelector(".ax-summary-main");
     const facts = document.querySelector(".ax-summary-facts");
-    const fact = document.querySelector(".ax-summary-fact");
     const actionHeader = document.querySelector("[data-ax-action-band] .ax-page-header");
-    return Object.fromEntries(Object.entries({ title, main, facts, fact, actionHeader }).map(([name, element]) => {
+    return Object.fromEntries(Object.entries({ title, main, facts, actionHeader }).map(([name, element]) => {
       const style = getComputedStyle(element);
       return [name, {
         fontSize: style.fontSize,
@@ -459,30 +477,22 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
       }];
     }));
   });
-  expect(subscriptionSummaryStyles.title.fontSize).toBe("24px");
-  expect(subscriptionSummaryStyles.title.fontWeight).toBe("600");
-  expect(subscriptionSummaryStyles.main.gap).toBe("4px");
-  expect(subscriptionSummaryStyles.facts.rowGap).toBe("4px");
-  expect(subscriptionSummaryStyles.fact.columnGap).toBe("4px");
+  // Header scale after the 2026-10 subscription-detail redesign: 28px / 600 title, 8px stack gaps.
+  expect(subscriptionSummaryStyles.title).toMatchObject({ fontSize: "28px", fontWeight: "600" });
+  expect(subscriptionSummaryStyles.main.gap).toBe("8px");
+  expect(subscriptionSummaryStyles.facts.rowGap).toBe("8px");
   expect(subscriptionSummaryStyles.actionHeader.gap).toBe("4px");
-  expect(subscriptionSummaryStyles.title).toMatchObject({ fontSize: "24px", fontWeight: "600" });
-  const healthPresentation = await page.locator(".ax-detail-health-summary").evaluate((summary) => {
-    const summaryStyle = getComputedStyle(summary);
-    const copyStyle = getComputedStyle(summary.querySelector(".ax-detail-health-copy"));
-    const weights = Array.from(summary.querySelectorAll(".ax-detail-health-label, .ax-detail-health-answer, .ax-detail-health-verdict, .ax-detail-health-metric"))
-      .map((element) => Number.parseInt(getComputedStyle(element).fontWeight, 10));
-    return {
-      summaryGap: summaryStyle.rowGap,
-      summaryPadding: summaryStyle.padding,
-      copyGap: copyStyle.gap,
-      copyPadding: copyStyle.padding,
-      weights
-    };
+  // The former lifecycle health block was folded into the summary card; keep its type-weight and
+  // spacing-ladder guarantees on the card that replaced it.
+  const summaryPresentation = await page.locator(".ax-summary-card").evaluate((card) => {
+    const cardStyle = getComputedStyle(card);
+    const main = getComputedStyle(card.querySelector(".ax-summary-main"));
+    const weights = Array.from(card.querySelectorAll("*")).map((element) => Number.parseInt(getComputedStyle(element).fontWeight, 10));
+    return { cardGap: cardStyle.rowGap, mainGap: main.gap, mainPadding: main.padding, weights };
   });
-  expect(healthPresentation.summaryGap, "lifecycle summary separates its task facts").not.toBe("0px");
-  expect(healthPresentation.copyGap, "summary copy uses the incumbent spacing ladder").not.toContain("0.5px");
-  expect(healthPresentation.copyPadding, "summary copy avoids half-pixel task spacing").not.toContain("0.5px");
-  expect(healthPresentation.weights.every((weight) => weight === 400 || weight === 600), "summary uses only approved type weights").toBe(true);
+  expect(summaryPresentation.mainGap, "summary copy uses the spacing ladder").not.toContain("0.5px");
+  expect(summaryPresentation.mainPadding, "summary copy avoids half-pixel task spacing").not.toContain("0.5px");
+  expect(summaryPresentation.weights.every((weight) => weight === 400 || weight === 600), "summary uses only approved type weights").toBe(true);
   const scopedCustomerLink = page.getByRole("link", { name: "billing-history@example.test" }).first();
   await expect(scopedCustomerLink).toHaveAttribute("href", new RegExp(`/admin/customers/.+\\?org=${fixture.admin_org_alpha_slug}`));
   const subscriptionOverflow = page.locator("[data-ax-action-overflow-menu]:visible");
@@ -502,29 +512,22 @@ test("Phase 237 served invoice and recovery journeys stay scoped and read-only",
     await expect(commandPalette).toBeHidden();
   }
 
-  const subscriptionIdentity = page.locator(".ax-summary-fact").nth(1);
-  const originalIdentity = await subscriptionIdentity.evaluate((element) => ({
-    label: element.querySelector("strong")?.textContent?.trim() || "Customer",
-    value: element.textContent.replace(element.querySelector("strong")?.textContent || "", "").trim()
-  }));
+  // The customer identity is the summary card title (detail headings wrap; they are not elided).
+  const subscriptionIdentity = page.locator(".ax-summary-title");
+  const originalIdentity = await subscriptionIdentity.evaluate((element) => element.textContent);
   const longIdentity = `customer-${"C".repeat(120)}@example.test`;
   await page.setViewportSize({ width: 320, height: 800 });
-  await subscriptionIdentity.evaluate((element, text) => {
-    const label = element.querySelector("strong");
-    element.replaceChildren(label, document.createTextNode(text));
-  }, longIdentity);
+  await subscriptionIdentity.evaluate((element, text) => { element.textContent = text; }, longIdentity);
   const longIdentityMetrics = await subscriptionIdentity.evaluate((element) => ({
     clientWidth: element.clientWidth,
     scrollWidth: element.scrollWidth,
     height: element.getBoundingClientRect().height,
-    lineHeight: Number.parseFloat(getComputedStyle(element).lineHeight)
+    // line-height is `normal` on the title, so compare against its font size
+    lineHeight: Number.parseFloat(getComputedStyle(element).fontSize)
   }));
   expect(longIdentityMetrics.scrollWidth).toBeLessThanOrEqual(longIdentityMetrics.clientWidth);
   expect(longIdentityMetrics.height).toBeGreaterThan(longIdentityMetrics.lineHeight);
-  await subscriptionIdentity.evaluate((element, original) => {
-    const label = element.querySelector("strong");
-    element.replaceChildren(label, document.createTextNode(original.value));
-  }, originalIdentity);
+  await subscriptionIdentity.evaluate((element, original) => { element.textContent = original; }, originalIdentity);
 
   const subscriptionResponsiveGeometry = [];
   for (const width of [320, 768, 1280]) {

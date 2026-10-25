@@ -21,7 +21,7 @@ test("@phase247 mounted webhook received time formats locally and copies the ori
   await page.goto(detailPath);
   await expect(page.locator("[data-phx-main].phx-connected")).toBeVisible();
 
-  const container = page.locator("#webhook-received-at");
+  const container = page.locator('[id^="webhook-summary-received-"]');
   const time = container.locator("time");
   await expect(time).toBeVisible();
   const iso = await time.getAttribute("datetime");
