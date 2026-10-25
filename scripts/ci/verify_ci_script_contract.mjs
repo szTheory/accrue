@@ -7,6 +7,7 @@
 // absent from a short or empty glob -- this file closes both gaps.
 
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -19,11 +20,11 @@ const fail = (message) => { throw new Error(`ci script contract: FAIL: ${message
 // D-32 assertion (3): the cohort floor is a live-measured, committed,
 // non-zero integer -- re-measured via `git ls-files 'scripts/ci/*.mjs' |
 // wc -l` on 2026-09-17 during quick task 260917-l7v (result: 55; was 41 when
-// re-measured 2026-09-16). Every
+// re-measured 2026-09-16; 67 re-measured 2026-10-24 during phase 249-05). Every
 // future audit MUST re-measure this live value rather than trusting the
 // constant below (D-00/D-15): the constant only stops a SHORT OR EMPTY glob
 // from being silently reported as a pass, it is not a ceiling.
-const COMMITTED_COHORT_FLOOR = 55;
+const COMMITTED_COHORT_FLOOR = 67;
 
 // D-32 assertion (2), third exemption: a library module with no CLI
 // entrypoint is exempt from importing isMainModule. Every entry below MUST
@@ -37,6 +38,51 @@ const LIBRARY_MODULE_ALLOWLIST = new Map([
   // delete the only coverage proving the throw happens at all.
   ["scripts/ci/main_module.mjs", "defines the shared guard; its own tests must call it unwrapped to assert the throw"]
 ]);
+
+// Archived-evidence verifier exemptions. DISTINCT from the library-module
+// allowlist above: these are CLI verifiers whose exact bytes are recorded in an
+// archived capture manifest's source_digests receipt. Editing them (to add the
+// guard and tests) would make that receipt untrue, so they are frozen instead.
+// Each entry pins the file's current sha256: the exemption dies the moment the
+// file is edited, leaves the cohort, or starts importing the guard. Only
+// manifest-named verifiers are eligible. Tracked as the REQUIREMENTS Future item
+// "Re-capture or formally retire drifted phase 245/248 evidence verifiers".
+const ARCHIVED_EVIDENCE_VERIFIER_EXEMPTIONS = new Map([
+  ["scripts/ci/verify_phase246_render_proof.mjs", {
+    reason: "bytes named in the 246 captures/phase246-current-proof manifest source_digests receipt; already drifted from the receipt, frozen to avoid drifting further",
+    sha256: "a0867d852a153bb40f9a3e98a5ff752a252d71a03071a5184e2bee201dbf59b6"
+  }],
+  ["scripts/ci/verify_phase247_render_proof.mjs", {
+    reason: "bytes named in the 247 phase247-current-proof and phase247-initial-verification manifest source_digests receipts; currently matches the receipt",
+    sha256: "43b507954d2ddf6b939168e712977e07abb6371213f1735ba1ecd64d79ef0029"
+  }],
+  ["scripts/ci/verify_phase248_render_proof.mjs", {
+    reason: "bytes named in the 248 phase248-current-proof and phase248-initial-proof manifest source_digests receipts",
+    sha256: "f794edc39a93c2058b19e475964c2d0d5d64bea931d2b4cd1487657a8fc2d351"
+  }]
+]);
+
+// Validates the exemption map against the cohort and returns the Set of exempt
+// relative paths. Fails on an empty reason, a sha mismatch, a path absent from
+// the cohort (stale), or a listed file that now imports the guard (stale).
+export function assertArchivedExemptions(files, exemptions = ARCHIVED_EVIDENCE_VERIFIER_EXEMPTIONS) {
+  const byPath = new Map(files.map((file) => [file.relativePath, file]));
+  for (const [relativePath, entry] of exemptions) {
+    if (!entry || typeof entry.reason !== "string" || entry.reason.trim() === "") {
+      fail(`archived-evidence exemption ${relativePath} has an empty reason`);
+    }
+    const file = byPath.get(relativePath);
+    if (!file) fail(`stale archived-evidence exemption: ${relativePath} is not in the cohort`);
+    const source = fs.readFileSync(file.absolutePath);
+    const actual = crypto.createHash("sha256").update(source).digest("hex");
+    if (actual !== entry.sha256) fail(`archived-evidence exemption ${relativePath} sha256 mismatch (file edited since pin)`);
+    const text = source.toString("utf8");
+    if (/from\s+["']\.\/main_module\.mjs["']/.test(text) && /\bisMainModule\b/.test(text)) {
+      fail(`stale archived-evidence exemption: ${relativePath} now imports the guard; remove it from the map`);
+    }
+  }
+  return new Set(exemptions.keys());
+}
 
 function git(repo, args) {
   const result = spawnSync("git", ["-C", repo, ...args], { encoding: "utf8", shell: false, timeout: 20000, maxBuffer: 5_000_000 });
@@ -65,12 +111,14 @@ export function assertCohortFloor(cohort, floor = COMMITTED_COHORT_FLOOR) {
 // D-32 assertion (2): every cohort file must import isMainModule from the
 // shared helper, be a *.test.mjs file, or carry an explicit, reasoned
 // allowlist entry (the "library module, no CLI entrypoint" exemption).
-export function assertGuardCoverage(files) {
+export function assertGuardCoverage(files, exemptions = ARCHIVED_EVIDENCE_VERIFIER_EXEMPTIONS) {
   if (!Array.isArray(files) || files.length === 0) fail("guard coverage was asked to inspect zero files");
+  const exempt = assertArchivedExemptions(files, exemptions);
   const offenders = [];
   const bareGuards = [];
   for (const file of files) {
     if (file.relativePath.endsWith(".test.mjs")) continue;
+    if (exempt.has(file.relativePath)) continue;
     if (LIBRARY_MODULE_ALLOWLIST.has(file.relativePath)) continue;
     const source = fs.readFileSync(file.absolutePath, "utf8");
     const importsGuard = /from\s+["']\.\/main_module\.mjs["']/.test(source) && /\bisMainModule\b/.test(source);
@@ -124,10 +172,12 @@ export function assertGuardCoverage(files) {
 // file with zero real `test()` registrations cannot produce (node:test
 // treats a guard-less or test-less direct invocation as one implicit test
 // named after the file itself).
-export function assertNonVacuity(files) {
+export function assertNonVacuity(files, exemptions = ARCHIVED_EVIDENCE_VERIFIER_EXEMPTIONS) {
   if (!Array.isArray(files) || files.length === 0) fail("non-vacuity was asked to inspect zero files");
+  const exempt = assertArchivedExemptions(files, exemptions);
   const offenders = [];
   for (const file of files) {
+    if (exempt.has(file.relativePath)) continue;
     // NODE_TEST_CONTEXT must NOT propagate to the spawned child: this
     // verifier itself may be running under `node --test` (e.g. its own
     // self-test), and node:test's recursion guard treats the mere PRESENCE
@@ -169,6 +219,7 @@ function cohortFiles(repo, cohort) {
 }
 
 export function verifyFixtures() {
+  const NO_EXEMPT = new Map();
   function withScratch(fn) {
     const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "gsd-ci-script-contract-"));
     try { return fn(dir); } finally { fs.rmSync(dir, { recursive: true, force: true }); }
@@ -203,8 +254,8 @@ export function verifyFixtures() {
       "}",
       ""
     ].join("\n"));
-    assert.doesNotThrow(() => assertGuardCoverage([conforming]), "a conforming file passes guard coverage");
-    assert.doesNotThrow(() => assertNonVacuity([conforming]), "a conforming file passes non-vacuity");
+    assert.doesNotThrow(() => assertGuardCoverage([conforming], NO_EXEMPT), "a conforming file passes guard coverage");
+    assert.doesNotThrow(() => assertNonVacuity([conforming], NO_EXEMPT), "a conforming file passes non-vacuity");
   });
 
   // Scenario 2: a synthetic file whose only test name equals its own path
@@ -220,15 +271,15 @@ export function verifyFixtures() {
       'if (entry) { console.log("hi"); }',
       ""
     ].join("\n"));
-    assert.doesNotThrow(() => assertGuardCoverage([vacuous]), "a guard-importing file still passes guard coverage");
-    assert.throws(() => assertNonVacuity([vacuous]), /vacuous\.mjs.*vacuity/s);
+    assert.doesNotThrow(() => assertGuardCoverage([vacuous], NO_EXEMPT), "a guard-importing file still passes guard coverage");
+    assert.throws(() => assertNonVacuity([vacuous], NO_EXEMPT), /vacuous\.mjs.*vacuity/s);
   });
 
   // Scenario 3: a synthetic CLI file with no isMainModule import and no
   // *.test.mjs suffix fails --require-guard-coverage, naming the file.
   withScratch((dir) => {
     const guardless = write(dir, "guardless.mjs", 'console.log("hi");\n');
-    assert.throws(() => assertGuardCoverage([guardless]), /guardless\.mjs/);
+    assert.throws(() => assertGuardCoverage([guardless], NO_EXEMPT), /guardless\.mjs/);
   });
 
   // Scenario 3b: a synthetic file that DOES import the shared guard but calls
@@ -244,8 +295,8 @@ export function verifyFixtures() {
       'if (isMainModule(import.meta.url)) { console.log("hi"); }',
       ""
     ].join("\n"));
-    assert.throws(() => assertGuardCoverage([bare]), /bare_guard\.mjs/);
-    assert.throws(() => assertGuardCoverage([bare]), /outside try\/catch/);
+    assert.throws(() => assertGuardCoverage([bare], NO_EXEMPT), /bare_guard\.mjs/);
+    assert.throws(() => assertGuardCoverage([bare], NO_EXEMPT), /outside try\/catch/);
   });
 
   // Scenario 4: a synthetic file that registers a real named test but the
@@ -265,8 +316,8 @@ export function verifyFixtures() {
       "}",
       ""
     ].join("\n"));
-    assert.doesNotThrow(() => assertGuardCoverage([failing]), "a guard-importing file still passes guard coverage");
-    assert.throws(() => assertNonVacuity([failing]), /failing\.mjs \(exit \d+\)/);
+    assert.doesNotThrow(() => assertGuardCoverage([failing], NO_EXEMPT), "a guard-importing file still passes guard coverage");
+    assert.throws(() => assertNonVacuity([failing], NO_EXEMPT), /failing\.mjs \(exit \d+\)/);
   });
 
   // Scenario 5: a cohort whose live file count is below the committed floor
@@ -275,6 +326,46 @@ export function verifyFixtures() {
   assert.throws(() => assertCohortFloor([], 1), /empty/);
   assert.throws(() => assertCohortFloor(["a"], 0), /positive integer/);
   assert.doesNotThrow(() => assertCohortFloor(["a", "b", "c"], 3));
+
+  // Scenarios 6-11: archived-evidence exemption map negative controls.
+  const sha = (text) => crypto.createHash("sha256").update(text).digest("hex");
+  const FROZEN = 'console.log("frozen cli");\n';
+  withScratch((dir) => {
+    const frozen = write(dir, "frozen.mjs", FROZEN);
+    const map = new Map([["frozen.mjs", { reason: "receipt-pinned fixture", sha256: sha(FROZEN) }]]);
+    // 6: a pinned exempt file passes both checks (it would otherwise fail both).
+    assert.throws(() => assertGuardCoverage([frozen], NO_EXEMPT), /frozen\.mjs/);
+    assert.doesNotThrow(() => assertGuardCoverage([frozen], map), "pinned exemption skips guard coverage");
+    assert.doesNotThrow(() => assertNonVacuity([frozen], map), "pinned exemption skips non-vacuity");
+    // 7: an edited file fails the sha pin.
+    fs.writeFileSync(frozen.absolutePath, FROZEN + "// edited\n");
+    assert.throws(() => assertGuardCoverage([frozen], map), /frozen\.mjs.*sha256 mismatch/);
+    assert.throws(() => assertNonVacuity([frozen], map), /sha256 mismatch/);
+    // 10: an unlisted CLI file still fails while another is exempt.
+    fs.writeFileSync(frozen.absolutePath, FROZEN);
+    const other = write(dir, "other.mjs", 'console.log("x");\n');
+    assert.throws(() => assertGuardCoverage([frozen, other], map), /other\.mjs/);
+    // 8: a listed path absent from the cohort is stale.
+    assert.throws(() => assertGuardCoverage([other], map), /stale.*frozen\.mjs/);
+    // 11: an empty or whitespace reason fails at load.
+    for (const reason of ["", "   "]) {
+      const bad = new Map([["frozen.mjs", { reason, sha256: sha(FROZEN) }]]);
+      assert.throws(() => assertGuardCoverage([frozen], bad), /empty reason/);
+    }
+  });
+  withScratch((dir) => {
+    write(dir, "main_module.mjs", MAIN_MODULE_STUB);
+    const SRC = [
+      'import { isMainModule } from "./main_module.mjs";',
+      "let entry = false;",
+      "try { entry = isMainModule(import.meta.url); } catch { entry = false; }",
+      ""
+    ].join("\n");
+    const conforming = write(dir, "conforming.mjs", SRC);
+    const map = new Map([["conforming.mjs", { reason: "was frozen", sha256: sha(SRC) }]]);
+    // 9: a listed file that now imports the guard is stale.
+    assert.throws(() => assertGuardCoverage([conforming], map), /stale.*imports the guard/);
+  });
 }
 
 const BOOLEAN_FLAGS = new Set(["fixtures", "require-guard-coverage", "require-non-vacuity", "require-cohort-floor"]);
