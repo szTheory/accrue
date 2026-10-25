@@ -2,6 +2,10 @@
 const { test, expect } = require("./support/test.js");
 const { readFixture, login, waitForLiveView, workspaceBillingLink } = require("./support/fixture.js");
 
+// The tracer proves a non-UTC local display, so the browser zone is pinned instead of inheriting the
+// host's (a UTC CI runner would render "UTC" and fail the local-time assertion).
+test.use({ timezoneId: "America/New_York" });
+
 test("@phase247 mounted webhook received time formats locally and copies the original ISO", async ({ page, sandboxId }) => {
   const fixture = readFixture();
   await login(page, fixture, fixture.admin_email, sandboxId);
