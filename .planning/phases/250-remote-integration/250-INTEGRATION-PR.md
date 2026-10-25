@@ -6,6 +6,8 @@
   - `RecoveryLiveTest` failed 8 of 33 tests on a UTC database server. Fix: `fix(250-02): ceil RecoveryLiveTest clock and pin admin test PG timezone to UTC`.
   - `docs-contracts-shift-left` failed the D-32 cohort because `@playwright/test` was not installed. Fix: `ci(250-02): install host Playwright deps before the D-32 cohort`.
   - `time_display_test.mjs` failed under `TZ=UTC` because it read the host zone. Fix: `test(250-02): pin time_display test timezone`.
+- The first run that reached `Host integration` (CI run 40213687124 at `bde9ae6c`) exposed a fourth cause: the ordinary seed boundary refused the CI Postgres service container (13 host tests). Fix: `fix(250-03): accept the GitHub Actions Docker-bridge Postgres in the ordinary seed boundary`.
+- Still open: the `Browser UAT` pixel-diff gate (`Phase 211 visual regression gate`), whose baselines predate the v1.63-v1.66 admin changes. It is re-minted from a workflow artifact only after each changed surface is classified.
 - One product risk is found and deliberately not fixed here: `accrue_events.inserted_at` follows the Postgres session timezone. It is recorded as a HIGH-priority v1.68 item in `.planning/REQUIREMENTS.md` (Future Requirements).
 - The parked `Admin UI ratchet guardrails [parked]` lane stays `continue-on-error` by design (`.planning/WINDOWS.md` row 11). It is outside the PR bar.
 

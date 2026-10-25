@@ -170,7 +170,9 @@ export function judge({ sha, event, collected, baseline = null, changedPaths = [
     for (const name of required) {
       const job = byName.get(name);
       if (!job) {
-        red.push(`${label}: missing required job: ${name}`);
+        // Jobs blocked on `needs` are not listed until their dependency finishes, so a
+        // missing job in a run that is still running is pending, not red.
+        (data.run.status !== "completed" ? pending : red).push(`${label}: missing required job: ${name}`);
       } else if (isPending(job)) {
         pending.push(`${label}: ${describe(job)}`);
       } else if (job.conclusion === "success") {
@@ -202,7 +204,7 @@ export function judge({ sha, event, collected, baseline = null, changedPaths = [
       const byName = new Map(data.jobs.map((j) => [j.name, j]));
       for (const name of baselineOk) {
         const job = byName.get(name);
-        if (!job) red.push(`ci.yml: baseline success job absent at ${sha}: ${name}`);
+        if (!job) (data.run.status !== "completed" ? pending : red).push(`ci.yml: baseline success job absent at ${sha}: ${name}`);
         else if (isPending(job)) pending.push(`ci.yml: ${describe(job)}`);
         else if (job.conclusion === "success") passed.push(name);
         else red.push(`ci.yml: baseline success job regressed: ${describe(job)}`);
@@ -289,10 +291,10 @@ function selfTest() {
 
   // Fake `gh api`: honours only what the real API does, so attempt selection and the
   // head_sha filter are exercised by the real collection code.
-  const makeGh = ({ ci = baseCi(), browser = baseBrowser(), ciAttempts = null, browserRun = true, ciRunSha = SHA, browserRunSha = SHA, event = "pull_request", baselineJobs = null, ciAttempt = 1 }) => (apiPath) => {
+  const makeGh = ({ ci = baseCi(), browser = baseBrowser(), ciAttempts = null, browserRun = true, ciRunSha = SHA, browserRunSha = SHA, event = "pull_request", baselineJobs = null, ciAttempt = 1, ciRunStatus = "completed" }) => (apiPath) => {
     if (apiPath.includes("/actions/runs?head_sha=")) {
       const runs = [
-        { id: 100, path: CI_PATH, head_sha: ciRunSha, event, status: "completed", conclusion: "success", run_attempt: ciAttempt, created_at: "2026-01-01T00:00:00Z" }
+        { id: 100, path: CI_PATH, head_sha: ciRunSha, event, status: ciRunStatus, conclusion: "success", run_attempt: ciAttempt, created_at: "2026-01-01T00:00:00Z" }
       ];
       if (browserRun) runs.push({ id: 200, path: BROWSER_PATH, head_sha: browserRunSha, event, status: "completed", conclusion: "success", run_attempt: 1, created_at: "2026-01-01T00:00:00Z" });
       return { workflow_runs: runs };
@@ -338,6 +340,7 @@ function selfTest() {
   expect("required job failure", run({ ci: swap(baseCi(), REL, job(REL, "failure", { steps: [{ name: "Accrue admin test", conclusion: "failure" }] })) }), 1, REL, "Accrue admin test");
   expect("required job skipped", run({ ci: swap(baseCi(), "Host Docker boot smoke", job("Host Docker boot smoke", "skipped")) }), 1, "Host Docker boot smoke", "skipped");
   expect("required job cancelled", run({ ci: swap(baseCi(), "Annotation sweep", job("Annotation sweep", "cancelled")) }), 1, "Annotation sweep");
+  expect("missing job while the run is still in progress is pending", run({ ci: without(baseCi(), "Playwright E2E shard 2/3"), ciRunStatus: "in_progress" }), 2, "Playwright E2E shard 2/3");
   expect("missing Playwright shard 2/3", run({ ci: without(baseCi(), "Playwright E2E shard 2/3") }), 1, "Playwright E2E shard 2/3");
   expect("whole browser workflow run absent", run({ browserRun: false }), 1, "accrue_admin_browser.yml", "no pull_request run");
   expect("ci run head_sha differs from --sha", run({ ciRunSha: OTHER }), 1, "run 100", OTHER);
