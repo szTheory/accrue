@@ -2,18 +2,18 @@
 gsd_state_version: "1.0"
 milestone: v1.67
 milestone_name: Integration & CI Green
-current_phase: 249
-current_phase_name: Local Gate Parity & Planning Truth
-status: verifying
+current_phase: 250
+current_phase_name: Remote Integration
+status: executing
 stopped_at: Completed 249-17-PLAN.md (phase 249 close)
-last_updated: "2026-10-25T14:50:25.494Z"
-last_activity: 2026-10-24
-last_activity_desc: Phase 249 execution started
-state_head: 69a8fe086a7364487bd8788b034a64381af42201
+last_updated: "2026-10-25T16:24:27.135Z"
+last_activity: 2026-10-25
+last_activity_desc: Phase 250 execution started
+state_head: 32f5326b9c0ad71eb5dcfd86230afb5397c4e7ce
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 18
+  total_plans: 25
   completed_plans: 18
 ---
 
@@ -25,17 +25,17 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 249 — Local Gate Parity & Planning Truth
+**Current focus:** Phase 250 — Remote Integration
 **Phase 250 hand-off:** SL-G and executable-UAT read the current phase. Phase 250 must flip `current_phase: 250` and mint its own tracked VERIFICATION (covered_files + covered_digest) and generated UAT in the same step, then re-run SL-G and exec-UAT before pushing. Phase 249 routes to Phase 250: host-integration dev-boot/browser/assert-preserved and Hex smoke, playwright-e2e shards 1-3, host-docker-smoke, Linux visual-regression baselines.
 **Progress:** [░░░░░░░░░░] 0% (0/3 phases)
 **Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
 
 ## Current Position
 
-Phase: 249 (Local Gate Parity & Planning Truth) — EXECUTING
-Plan: 17 of 17
-Status: Phase complete — ready for verification
-Last activity: 2026-10-24 — Phase 249 execution started
+Phase: 250 (Remote Integration) — EXECUTING
+Plan: 1 of 7
+Status: Executing Phase 250
+Last activity: 2026-10-25 — Phase 250 execution started
 
 ## Performance Metrics
 
