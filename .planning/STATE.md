@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 
 Phase: 249 (Local Gate Parity & Planning Truth) — EXECUTING
 Plan: 3 of 17
-Status: Ready to execute
+Status: Executing
 Last activity: 2026-10-24 — Phase 249 execution started
 
 ## Performance Metrics
@@ -205,6 +205,7 @@ Last activity: 2026-10-24 — Phase 249 execution started
 
 ### Decisions
 
+- [Work done outside GSD]: Commits 3d7d949d..b4a7eeac (11 commits, 2026-10-12 to 2026-10-19) were owner-feedback work done outside any GSD phase. Receipts are the five `admin-owner-feedback` notes in `.planning/notes/` (2026-10-11, -12, -13, -14, -18). No plan, summary, verification or phase verdict is claimed. Recorded in MILESTONES.md.
 - [Phase 248]: Keep ordinary preview unchanged; isolate held-out 4102 SQL-sandbox scenarios and guard exact five-ID teardown, including partial-seed failure.
 - [Phase 248]: Treat captures as representative evidence at their recorded revision; preserve original audits and disclose current interaction/surface limits.
 - [Phase 248]: Account for every canonical owner topic and finding through executed owner checks and justified dispositions.

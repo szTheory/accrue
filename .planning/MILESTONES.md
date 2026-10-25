@@ -27,6 +27,8 @@
 
 **Post-archive tooling:** Canonical archive lookup now keeps recorded proof commands usable. Fresh 27 Node controls and both validators pass; this is tooling evidence, not a new phase-level verification verdict. See [archive compatibility](milestones/v1.66-ARCHIVE-COMPATIBILITY.md).
 
+**Out-of-band owner feedback (outside GSD):** 11 commits 3d7d949d..b4a7eeac landed 2026-10-12 to 2026-10-19 directly from owner review sessions, not through any GSD phase. Receipts: `.planning/notes/2026-10-11-admin-owner-feedback.md`, `.planning/notes/2026-10-12-admin-owner-feedback.md`, `.planning/notes/2026-10-13-admin-owner-feedback.md`, `.planning/notes/2026-10-14-admin-owner-feedback.md` and `.planning/notes/2026-10-18-admin-owner-feedback.md`. No plan, summary, verification or phase verdict is claimed for them; their regression coverage is exercised by the Phase 249 GREEN-05 suites. The three resolved debug sessions were filed under `.planning/debug/resolved/` in Phase 249; the archived 248-01-SUMMARY.md key-files entry still names the pre-move path by design.
+
 ## v1.65 Accrue Admin Language & Consistency (Shipped: 2026-10-11)
 
 **Phases completed:** 1 phases, 4 plans, 8 tasks
