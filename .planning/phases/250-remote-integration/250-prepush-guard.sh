@@ -128,7 +128,7 @@ synthetic_diff() {
     "k=A""KIA$(printf 'D%.0s' {1..16})" \
     "-----BEGIN RSA PRIVATE ""KEY-----" \
     "t=gh""p_$(printf 'e%.0s' {1..36})" \
-    "mail someone@real-company.io" \
+    "mail someone""@real-company.io" \
     "p=/Users/${u}/projects"
 }
 
@@ -143,8 +143,8 @@ controls_secret_scan() {
   # redaction: no hit line may carry more than 4 characters of a match
   if grep -qE "\\*\\*\\*.*[A-Za-z0-9]{12}" "$out"; then echo "hit output is not redacted" >&2; return 1; fi
   # negative controls: allowlisted identities and reserved domains must not fire
-  if printf '%s\n' 'diff --git a/y b/y' '--- /dev/null' '+++ b/y' '@@ -0,0 +1,3 @@' \
-      '+Co-Authored-By: Claude <noreply@anthropic.com>' '+a@example.com b@users.noreply.github.com' '+git@github.com:o/r.git' \
+  if { printf '%s\n' 'diff --git a/y b/y' '--- /dev/null' '+++ b/y' '@@ -0,0 +1,3 @@'
+       printf '+%s\n' 'Co-Authored-By: Claude <noreply@anthropic.com>' 'a@example.com b@users.noreply.github.com' 'git@github.com:o/r.git'; } \
       | scan_diff >"$WORK/neg.out" 2>&1; then :; else echo "allowlisted identities fired:" >&2; cat "$WORK/neg.out" >&2; return 1; fi
   return 0
 }
