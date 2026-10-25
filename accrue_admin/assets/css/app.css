@@ -6798,6 +6798,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-theme-picker-option:focus-visible,
 .ax-icon-button:focus-visible,
 .ax-link:focus-visible,
+.ax-link-quiet:focus-visible,
 .ax-dropdown-item:focus-visible,
 .ax-tab-more-item:focus-visible,
 .ax-input:focus-visible,
