@@ -9,16 +9,16 @@ Milestone v1.67 Integration & CI Green. Lands the never-CI-validated v1.63–v1.
 
 ### Local gate parity
 
-- [ ] **GREEN-01**: Maintainer can run every planning-doc contract step of the `docs-contracts-shift-left` job locally and see it pass — completion evidence (REQUIREMENTS.md present), PR claims (`WINDOWS.md` measured claim), artifact fixed point (resolvable `current_phase`, digests match), v1.17 friction / roadmap hygiene anchors (ROADMAP Planning Doctrine restored verbatim from `origin/main`), executable UAT contract (245-02 summary), and committed window dispositions (no undisposed ship-window rows) — each fixed at its source, never by weakening the gate.
-- [ ] **GREEN-02**: `accrue_admin` compiles with `--warnings-as-errors` (unused `subscription` binding at `subscription_live.ex:1286` removed) so the admin group-contract, hardening and Phase 200 jobs reach their real assertions.
-- [ ] **GREEN-03**: Admin CSS and CI-script contracts pass: every breakpoint `@media` in `accrue_admin/assets/css/app.css` carries its `--ax-bp-*` annotation (DSY-01), and every `scripts/ci/*.mjs` module added since v1.62 carries the shared module-boundary guard (D-32) — without editing sha256-pinned archived evidence scripts in a way that falsifies their recorded receipts.
-- [ ] **GREEN-04**: The Phase 190 automation contract and Phase 190/192 browser probes pass; each failing probe (3 tests × desktop/mobile) is classified with evidence as a real UI regression (fixed in source) or a contract made stale by intentional v1.63–v1.66 changes (contract updated with the rationale recorded).
-- [ ] **GREEN-05**: The `accrue`, `accrue_admin` and `accrue_portal` test suites and the host mix test phases pass locally on the integration head. The host dev-boot/browser and Playwright E2E lanes pass in remote CI on the integration head (Phase 250), because they require a preview-free environment (maintainer host preview-custody decision, 2026-10-25). `copy_strings.json` and visual baselines are regenerated only where intentional changes require it.
+- [x] **GREEN-01**: Maintainer can run every planning-doc contract step of the `docs-contracts-shift-left` job locally and see it pass — completion evidence (REQUIREMENTS.md present), PR claims (`WINDOWS.md` measured claim), artifact fixed point (resolvable `current_phase`, digests match), v1.17 friction / roadmap hygiene anchors (ROADMAP Planning Doctrine restored verbatim from `origin/main`), executable UAT contract (245-02 summary), and committed window dispositions (no undisposed ship-window rows) — each fixed at its source, never by weakening the gate.
+- [x] **GREEN-02**: `accrue_admin` compiles with `--warnings-as-errors` (unused `subscription` binding at `subscription_live.ex:1286` removed) so the admin group-contract, hardening and Phase 200 jobs reach their real assertions.
+- [x] **GREEN-03**: Admin CSS and CI-script contracts pass: every breakpoint `@media` in `accrue_admin/assets/css/app.css` carries its `--ax-bp-*` annotation (DSY-01), and every `scripts/ci/*.mjs` module added since v1.62 carries the shared module-boundary guard (D-32) — without editing sha256-pinned archived evidence scripts in a way that falsifies their recorded receipts.
+- [x] **GREEN-04**: The Phase 190 automation contract and Phase 190/192 browser probes pass; each failing probe (3 tests × desktop/mobile) is classified with evidence as a real UI regression (fixed in source) or a contract made stale by intentional v1.63–v1.66 changes (contract updated with the rationale recorded).
+- [x] **GREEN-05**: The `accrue`, `accrue_admin` and `accrue_portal` test suites and the host mix test phases pass locally on the integration head. The host dev-boot/browser and Playwright E2E lanes pass in remote CI on the integration head (Phase 250), because they require a preview-free environment (maintainer host preview-custody decision, 2026-10-25). `copy_strings.json` and visual baselines are regenerated only where intentional changes require it.
 
 ### Planning truth
 
-- [ ] **TRUTH-01**: Planning state is current and honest: stale `.planning/HANDOFF.json` removed, STATE.md reflects v1.67, and resolved debug sessions are filed.
-- [ ] **TRUTH-02**: The out-of-band 2026-10-11..19 owner-feedback commits (`3d7d949d..b4a7eeac`) are recorded in MILESTONES.md and STATE.md as work done outside GSD, citing `.planning/notes/2026-10-1*-admin-owner-feedback.md` as receipts, with no backdated plans or claimed phase verification; their regression coverage is exercised by the GREEN-05 suites.
+- [x] **TRUTH-01**: Planning state is current and honest: stale `.planning/HANDOFF.json` removed, STATE.md reflects v1.67, and resolved debug sessions are filed.
+- [x] **TRUTH-02**: The out-of-band 2026-10-11..19 owner-feedback commits (`3d7d949d..b4a7eeac`) are recorded in MILESTONES.md and STATE.md as work done outside GSD, citing `.planning/notes/2026-10-1*-admin-owner-feedback.md` as receipts, with no backdated plans or claimed phase verification; their regression coverage is exercised by the GREEN-05 suites.
 
 ### Remote integration
 
@@ -59,13 +59,13 @@ Deferred to a later milestone (tracked, not in this roadmap):
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GREEN-01 | Phase 249 | In Progress |
-| GREEN-02 | Phase 249 | In Progress |
-| GREEN-03 | Phase 249 | In Progress |
-| GREEN-04 | Phase 249 | In Progress |
-| GREEN-05 | Phase 249 | In Progress |
-| TRUTH-01 | Phase 249 | In Progress |
-| TRUTH-02 | Phase 249 | In Progress |
+| GREEN-01 | Phase 249 | Complete |
+| GREEN-02 | Phase 249 | Complete |
+| GREEN-03 | Phase 249 | Complete |
+| GREEN-04 | Phase 249 | Complete |
+| GREEN-05 | Phase 249 | Complete |
+| TRUTH-01 | Phase 249 | Complete |
+| TRUTH-02 | Phase 249 | Complete |
 | LAND-01 | Phase 250 | Pending |
 | LAND-02 | Phase 250 | Pending |
 | LAND-03 | Phase 250 | Pending |
@@ -79,4 +79,4 @@ Deferred to a later milestone (tracked, not in this roadmap):
 
 ---
 *Requirements defined: 2026-10-24*
-*Last updated: 2026-10-25 (GREEN-05 re-scoped per host preview-custody decision); previously 2026-10-24 after v1.67 roadmap creation (Phases 249–251)*
+*Last updated: 2026-10-25 (Phase 249 close: GREEN-01..05 and TRUTH-01..02 Complete after 249-VERIFICATION passed); previously 2026-10-24 after v1.67 roadmap creation (Phases 249–251)*
