@@ -13,7 +13,7 @@ Milestone v1.67 Integration & CI Green. Lands the never-CI-validated v1.63–v1.
 - [ ] **GREEN-02**: `accrue_admin` compiles with `--warnings-as-errors` (unused `subscription` binding at `subscription_live.ex:1286` removed) so the admin group-contract, hardening and Phase 200 jobs reach their real assertions.
 - [ ] **GREEN-03**: Admin CSS and CI-script contracts pass: every breakpoint `@media` in `accrue_admin/assets/css/app.css` carries its `--ax-bp-*` annotation (DSY-01), and every `scripts/ci/*.mjs` module added since v1.62 carries the shared module-boundary guard (D-32) — without editing sha256-pinned archived evidence scripts in a way that falsifies their recorded receipts.
 - [ ] **GREEN-04**: The Phase 190 automation contract and Phase 190/192 browser probes pass; each failing probe (3 tests × desktop/mobile) is classified with evidence as a real UI regression (fixed in source) or a contract made stale by intentional v1.63–v1.66 changes (contract updated with the rationale recorded).
-- [ ] **GREEN-05**: The `accrue`, `accrue_admin` and `accrue_portal` test suites, the host-integration gate and the Playwright E2E lane pass locally on the integration head, with `copy_strings.json` and visual baselines regenerated only where intentional changes require it.
+- [ ] **GREEN-05**: The `accrue`, `accrue_admin` and `accrue_portal` test suites and the host mix test phases pass locally on the integration head. The host dev-boot/browser and Playwright E2E lanes pass in remote CI on the integration head (Phase 250), because they require a preview-free environment (maintainer host preview-custody decision, 2026-10-25). `copy_strings.json` and visual baselines are regenerated only where intentional changes require it.
 
 ### Planning truth
 
@@ -79,4 +79,4 @@ Deferred to a later milestone (tracked, not in this roadmap):
 
 ---
 *Requirements defined: 2026-10-24*
-*Last updated: 2026-10-24 after v1.67 roadmap creation (Phases 249–251)*
+*Last updated: 2026-10-25 (GREEN-05 re-scoped per host preview-custody decision); previously 2026-10-24 after v1.67 roadmap creation (Phases 249–251)*

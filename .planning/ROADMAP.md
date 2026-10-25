@@ -55,10 +55,10 @@ Pushing to the public remote (Phase 250) and publishing to Hex (Phase 251) each 
   1. Every planning-doc contract step of the `docs-contracts-shift-left` job, run locally with its `ci.yml` command, exits 0 on the integration head. That covers completion evidence, PR claims, artifact fixed point, v1.17 friction / roadmap hygiene, executable UAT and committed window dispositions. No gate script loses an assertion, and no sha256-pinned archived evidence script has its recorded receipt falsified.
   2. `mix compile --warnings-as-errors` succeeds in `accrue_admin`. The admin group-contract, hardening and Phase 200 commands, the DSY-01 breakpoint-annotation check and the D-32 module-boundary check all exit 0.
   3. The Phase 190 automation contract and the Phase 190/192 browser probes pass on desktop and mobile. Each previously failing probe has a committed classification, either a source fix for a real regression or a contract update for a change made stale on purpose, with the rationale recorded.
-  4. The `accrue`, `accrue_admin` and `accrue_portal` test suites, the host-integration gate and the Playwright E2E lane all pass locally on the integration head. `copy_strings.json` and visual baselines are regenerated only where an intentional change requires it.
+  4. The `accrue`, `accrue_admin` and `accrue_portal` test suites and the host mix test phases (bounded and full) pass locally on the integration head. The host dev-boot/browser lanes and the Playwright E2E lane need a preview-free environment, so they are proven in remote CI in Phase 250 (maintainer host preview-custody decision, 2026-10-25). The custody check gains an explicit, negatively-controlled CI absent-mode for that run. `copy_strings.json` and visual baselines are regenerated only where an intentional change requires it.
   5. `.planning/HANDOFF.json` is gone and STATE.md reflects v1.67. Resolved debug sessions are filed. MILESTONES.md and STATE.md record commits `3d7d949d..b4a7eeac` as work done outside GSD, cite `.planning/notes/2026-10-1*-admin-owner-feedback.md` as receipts, and claim no backdated plans or phase verification.
 
-**Plans**: 13/17 plans executed
+**Plans**: 13/18 plans executed
 
 Plans:
 - [x] 249-01-PLAN.md — Admin compile warning, formatter drift, DSY-01 breakpoint annotations, PdfTest flake measurement (wave 1)
@@ -74,10 +74,11 @@ Plans:
 - [x] 249-11-PLAN.md — In-tree replay: docs-contracts with exact pending-close texts, small jobs (wave 7)
 - [x] 249-12-PLAN.md — In-tree replay: release-gate primary cell for all three packages (wave 8)
 - [x] 249-13-PLAN.md — In-tree replay: every admin lane at the final head (wave 9)
-- [ ] 249-14-PLAN.md — Scratch clones: tokens regenerate and host-integration; docker smoke routed to Phase 250 (wave 10)
-- [ ] 249-15-PLAN.md — Scratch clone: playwright-e2e shards 1-3 (wave 11)
-- [ ] 249-16-PLAN.md — Scratch clones: release-gate Floor, OpenTelemetry and Sigra cells (wave 12)
-- [ ] 249-17-PLAN.md — Phase close: VERIFICATION, generated UAT, digest, requirements Complete, final replay (wave 13)
+- [ ] 249-14-PLAN.md — Scratch clones: tokens regenerate and host mix phases; custody-bound host lanes and docker smoke routed to Phase 250 (wave 10)
+- [ ] 249-18-PLAN.md — Gap closure: explicit opt-in CI absent-mode for the host preview-custody check, wired into host-integration and playwright-e2e (wave 11)
+- [ ] 249-15-PLAN.md — playwright-e2e shards routed to Phase 250; local non-vacuous shard inventory and custody refusal control (wave 12)
+- [ ] 249-16-PLAN.md — Scratch clones: release-gate Floor, OpenTelemetry and Sigra cells (wave 13)
+- [ ] 249-17-PLAN.md — Phase close: VERIFICATION, generated UAT, digest, requirements Complete, final replay (wave 14)
 
 **UI hint**: yes
 
@@ -88,7 +89,7 @@ Plans:
 **Requirements**: LAND-01, LAND-02, LAND-03
 **Success Criteria** (what must be TRUE):
   1. After an explicit maintainer yes, `integration/v1.63-v1.66` exists on origin. A pre-push publication-hygiene check (secrets, home paths, PII, large binaries) passed across the full pushed history, and `git ls-remote --tags origin` shows no v1.63–v1.66 milestone tags.
-  2. `gh` reports every PR-required job in `ci.yml` and `accrue_admin_browser.yml` as `success`, not `skipped`, on the 40-hex head SHA recorded in the PR body. The committed PR-body file matches the live PR body byte for byte.
+  2. `gh` reports every PR-required job in `ci.yml` and `accrue_admin_browser.yml` as `success`, not `skipped`, on the 40-hex head SHA recorded in the PR body. That explicitly includes the lanes Phase 249 routed here: host-integration (dev-boot, browser, assert-preserved and Hex smoke, under the custody CI absent-mode), all playwright-e2e shards, host-docker-smoke, and the Linux visual-regression baseline gate (CI diff first; re-mint via `workflow_dispatch` only for an intentional change). The committed PR-body file matches the live PR body byte for byte.
   3. The PR is merged with a merge commit (two parents, no squash or rebase). Every pre-merge commit SHA is reachable from `main`, and the first post-merge push run on `main` concludes `success` for all jobs.
 
 **Plans**: TBD
@@ -109,7 +110,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 249. Local Gate Parity & Planning Truth | 13/17 | In Progress | - |
+| 249. Local Gate Parity & Planning Truth | 13/18 | In Progress | - |
 | 250. Remote Integration | 0/TBD | Not started | - |
 | 251. 1.7.0 Release Alignment | 0/TBD | Not started | - |
 
