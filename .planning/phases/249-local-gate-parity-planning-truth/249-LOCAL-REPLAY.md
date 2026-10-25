@@ -116,3 +116,54 @@ turn it green.
 | 02 | Verify iOS offline client package boundary | PASS | 4.1 |
 
 No reds were found, so no source fixes were needed in this slice.
+
+## Job: release-gate primary cell (Elixir 1.19.5 / OTP 28, sigra off, opentelemetry off) -- plan 249-12
+
+Env: `MIX_ENV=test PGUSER/PGPASSWORD=postgres PGHOST=localhost PGPORT=5439 ACCRUE_CI_SIGRA= ACCRUE_CI_OPENTELEMETRY= ACCRUE_OTEL_MATRIX=without_opentelemetry`.
+`PGPORT=5439` points the accrue suite at a private scratch Postgres (max_connections=300) because the shared local
+server was at its connection limit; CI uses an isolated service container, so this restores parity rather than varying it.
+All test runs used random seeds; nothing was pinned or retried.
+
+### Final green run (accrue + accrue_admin, PASS=19 SKIP=6)
+
+| # | Step | Result | Seconds |
+|---|------|--------|---------|
+| 05 | Install accrue deps | PASS | 1.6 |
+| 06 | Accrue format | PASS | 0.7 |
+| 07 | Accrue compile (warnings-as-errors) | PASS | 0.6 |
+| 08 | Accrue test (warnings-as-errors) | PASS (2081 tests, 70 properties) | 78.2 |
+| 09 | Accrue credo --strict | PASS | 1.4 |
+| 11 | Create accrue PLTs | PASS | 0.9 |
+| 13 | Accrue dialyzer | PASS | 11.1 |
+| 14 | Accrue docs (warnings-as-errors) | PASS | 4.5 |
+| 15 | Verify ExDoc @doc since: badges | PASS | 0.0 |
+| 16 | Accrue retired package audit | PASS | 1.6 |
+| 18 | Install accrue_admin deps | PASS | 1.9 |
+| 19 | Accrue admin format | PASS | 0.6 |
+| 20 | Accrue admin compile | PASS | 7.2 |
+| 21 | Accrue admin test | PASS | 24.4 |
+| 22 | Accrue admin credo | PASS | 11.4 |
+| 24 | Create accrue_admin PLTs | PASS | 6.7 |
+| 26 | Accrue admin dialyzer | PASS | 17.4 |
+| 27 | Accrue admin docs | PASS | 3.5 |
+| 28 | Accrue admin retired package audit | PASS | 2.4 |
+
+### Portal half (PASS=5)
+
+| # | Step | Result | Seconds |
+|---|------|--------|---------|
+| 30 | Install accrue_portal deps | PASS | 2.2 |
+| 31 | Accrue portal format | PASS | 0.7 |
+| 32 | Accrue portal compile | PASS | 2.5 |
+| 33 | Accrue portal test | PASS | 5.3 |
+| 34 | Accrue portal retired package audit | PASS | 2.5 |
+
+### Reds found and fixed at source
+
+| Red | Cause | Fix commit |
+|-----|-------|------------|
+| Accrue admin dialyzer: `{:error, :unknown_warning, :exact_compare}` crash in dialyxir 1.4.7 | Real OTP 28 `exact_compare` finding: `customers_live.ex` compared `empty_reason/2` (only `"first-run"`, `"filter"`, `nil`) to `"queue"`, an unreachable branch. dialyxir cannot format the warning, so `--format github` threw. | c3a9cad4 removed the dead branch; dialyzer now reports 0 errors |
+| Accrue test: `LiveProofFormatterTest` real tagged-only Mix selection (and `ChimewayTest` ECOS-06 once) failed with `too_many_connections` | The shared local Postgres held ~76 of 100 connections from unrelated dev servers; the nested `mix test` needs ~20 more. Test repo config ignored `PGPORT`, so the suite could not be pointed at an isolated server. | c359ed82 made the test repos honor `PGPORT` (default 5432, CI unchanged) |
+
+Note: accrue_admin and accrue_portal test configs still do not read `PGPORT`; they ran on the shared server and passed.
+
