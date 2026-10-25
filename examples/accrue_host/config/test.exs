@@ -33,6 +33,7 @@ config :accrue_host, AccrueHost.Repo,
   username: System.get_env("PGUSER", "postgres"),
   password: System.get_env("PGPASSWORD", "postgres"),
   hostname: System.get_env("PGHOST", "localhost"),
+  port: String.to_integer(System.get_env("PGPORT", "5432")),
   database: "accrue_host_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool_size: String.to_integer(System.get_env("ACCRUE_HOST_TEST_POOL_SIZE", "10"))
 
