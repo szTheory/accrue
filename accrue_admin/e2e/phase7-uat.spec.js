@@ -1,7 +1,4 @@
 const { test, expect } = require("@playwright/test");
-const {
-  DASHBOARD_BREADCRUMB_HOME,
-} = require("../../examples/accrue_host/e2e/support/copy_dashboard.js");
 
 async function reset(request) {
   const response = await request.post("/__e2e__/reset");
@@ -31,12 +28,12 @@ test.describe("Phase 7 browser UAT", () => {
     await seed(request, "dashboard");
     await login(page);
 
-    // The dashboard h1 is the "Billing operations" home intro headline; "Dashboard"
-    // is now only a breadcrumb crumb, not a heading (redesign IA).
-    await expect(page.getByRole("heading", { name: "Billing operations" })).toBeVisible();
-    await expect(page.getByText(DASHBOARD_BREADCRUMB_HOME).first()).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Recent audit activity" })).toBeVisible();
-    await expect(page.locator('.ax-home-section[aria-label="Recent audit activity"]')).toBeVisible();
+    // The dashboard h1 is the "Recent activity" home intro headline (3d7d949d);
+    // "Dashboard" is only a breadcrumb crumb, not a heading (redesign IA).
+    await expect(page.getByRole("heading", { name: "Recent activity", level: 1 })).toBeVisible();
+    // The breadcrumb leaf follows the same copy as the h1 (Copy.dashboard_breadcrumb_home).
+    await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Recent activity");
+    await expect(page.locator('.ax-home-section[aria-label="Recent billing activity"]')).toBeVisible();
 
     if (isMobile) {
       await page.evaluate(() => {
@@ -69,7 +66,9 @@ test.describe("Phase 7 browser UAT", () => {
     const data = await seed(request, "operator-flows");
 
     await login(page, `/billing/webhooks/${data.single_webhook_id}`);
-    await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();
+    // e6f39cef: the page title is the delivery's event id; the type is the header description.
+    await expect(page.getByRole("heading", { name: "evt_e2e_single", level: 1 })).toBeVisible();
+    await expect(page.locator("[data-role='webhook-page-header']")).toContainText("invoice.payment_failed");
     await page.getByRole("button", { name: "Replay webhook" }).click();
     const replayDialog = page.getByRole("dialog", { name: "Confirm webhook replay" });
     await expect(replayDialog).toBeVisible({ timeout: 15_000 });
