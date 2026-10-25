@@ -28,25 +28,33 @@ coverage:
     description: Admin forced compile is warning-free
     requirement: GREEN-02
     verification:
-      - {kind: command, ref: "cd accrue_admin && MIX_ENV=test mix compile --force --warnings-as-errors", status: pass}
+      - kind: command
+        ref: "cd accrue_admin && MIX_ENV=test mix compile --force --warnings-as-errors"
+        status: pass
     human_judgment: false
   - id: C2
     description: All four Mix projects pass format check
     requirement: GREEN-05
     verification:
-      - {kind: command, ref: "mix format --check-formatted in accrue, accrue_admin, accrue_portal, examples/accrue_host", status: pass}
+      - kind: command
+        ref: "mix format --check-formatted in accrue, accrue_admin, accrue_portal, examples/accrue_host"
+        status: pass
     human_judgment: false
   - id: C3
     description: Package docs verifier (DSY-01, FND-02, FND-01, RES-04 CSS guards) passes with guard script unchanged
     requirement: GREEN-03
     verification:
-      - {kind: command, ref: "bash scripts/ci/verify_package_docs.sh", status: pass}
+      - kind: command
+        ref: "bash scripts/ci/verify_package_docs.sh"
+        status: pass
     human_judgment: false
   - id: C4
     description: Accrue suite green on random seeds
     requirement: GREEN-05
     verification:
-      - {kind: command, ref: "cd accrue && mix test --warnings-as-errors (seeds 576061, 807522, 956638)", status: pass}
+      - kind: command
+        ref: "cd accrue && mix test --warnings-as-errors (seeds 576061, 807522, 956638)"
+        status: pass
     human_judgment: false
 ---
 
