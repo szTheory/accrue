@@ -13,6 +13,7 @@
 - The `Browser UAT` pixel-diff gate (`Phase 211 visual regression gate`, run 40229480489 at `b9c98b20`) failed before any pixel comparison: 247-03 moved timeline instants into the shared `Timestamp` control, so the spec's dashboard timestamp anchor no longer rendered. Fix: `test(250-04): retarget the Phase 211 dashboard timestamp anchor to the 247-03 Timestamp control` (no mask, threshold or surface added).
 - Its baselines (`0197f4ba`, 2026-10-10) predated the v1.63-v1.66 admin changes. Every one of the 12 surfaces is classified in `.planning/phases/250-remote-integration/250-VISUAL-CLASSIFICATION.md`: 10 intentional with owner-feedback receipts, 2 unchanged, 0 regressions. Only the intentional PNGs are copied from the Linux `phase211-visual-baselines` artifact of `workflow_dispatch` run 40232864961. `250-visual-ledger-check.mjs` enforces the receipts and that the changed PNG set equals the intentional rows.
 - The run with the re-minted baselines (CI run 40234321143 at `74cdd43a`) had `Browser UAT` green and one timing-dependent portal failure: `AccruePortal.BraintreeMox` linked its shared Agent to the first test that reset it, and ExUnit does not wait for a finished test process to exit. Fix: `fix(250-04): start the portal Braintree client-token stub unlinked`.
+- The first close commit (CI run 40241001658 at `7b1b5862`) had one Release gate cell red: `verify_release_contract.sh` piped a 7551-byte section into `grep -q` under `pipefail`, so `grep` exiting on its first match could EPIPE the `printf` and turn a present needle into "missing". Fix: `fix(250-05): feed the v1.59 runbook greps from here-strings, not a pipe`. The same pattern remains in 6 other `scripts/ci` scripts; that sweep is recorded as a follow-up, not done here.
 - One product risk is found and deliberately not fixed here: `accrue_events.inserted_at` follows the Postgres session timezone. It is recorded as a HIGH-priority v1.68 item in `.planning/REQUIREMENTS.md` (Future Requirements).
 - The parked `Admin UI ratchet guardrails [parked]` lane stays `continue-on-error` by design (`.planning/WINDOWS.md` row 11). It is outside the PR bar.
 
@@ -20,7 +21,7 @@
 
 - **Head branch:** `integration/v1.63-v1.66`.
 - **Evidence head:** recorded here by the commit that follows the pre-merge close. A commit cannot contain its own SHA, so the close commit is named by the next commit, which changes only this file.
-- The last measured head before the close is `5ad01dee2c70087aa89fafdfb154f6e9d8068277`: `250-ci-head-status.mjs --event pull_request` GREEN, 20 jobs `success` (ci.yml run 40236926623, accrue_admin_browser.yml run 40236926603).
+- The last green head before the close is `5ad01dee2c70087aa89fafdfb154f6e9d8068277`: `250-ci-head-status.mjs --event pull_request` GREEN, 20 jobs `success` (ci.yml run 40236926623, accrue_admin_browser.yml run 40236926603). The first close commit `7b1b5862` was red and is superseded.
 - The PR head may differ from the evidence head by exactly one commit that changes only this file.
 
 ## What changed, and how to check it

@@ -483,7 +483,7 @@ Last activity: 2026-10-25 — 250-05 pre-merge close: commit E (LAND-01 Complete
 - [Phase 248]: Treat each Phase 248 capture as current only for the route and state it directly shows; retain Phase 245-247 receipts as historical at their recorded source revisions.
 - [Phase 250]: 250-03: PR 49 head b9c98b20 green except the Phase 211 pixel gate (to 250-04); 8 root-cause fixes, 5 of 6 pushes
 - [Phase 250]: 250-04: Phase 211 baselines re-minted only from Linux dispatch run 40232864961 after D4 classification (10 intentional owner-feedback receipts, 2 unchanged, 0 regressions); PR #49 GREEN at 5ad01dee
-- [Phase 250]: 250-05: commit E is the Phase 250 pre-merge close (SUMMARY 05, VERIFICATION 2/3 with SC1 and SC2, LAND-01 Complete; LAND-02/03 Pending until 250-07). The body-only commit H names E as the PR #49 evidence head; the merge waits on an explicit maintainer yes (250-06)
+- [Phase 250]: 250-05: commit E is the Phase 250 pre-merge close (SUMMARY 05, VERIFICATION 2/3 with SC1 and SC2, LAND-01 Complete; LAND-02/03 Pending until 250-07). The first close 7b1b5862 was red on a SIGPIPE race in verify_release_contract.sh, fixed at source in 5561a9a9; the 30-site pipe-to-grep-q sweep and the SL-D printf/echo exemption are deferred. The body-only commit H names E as the PR #49 evidence head; the merge waits on an explicit maintainer yes (250-06)
 
 ### Pending Todos
 

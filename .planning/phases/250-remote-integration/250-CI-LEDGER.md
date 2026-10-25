@@ -115,6 +115,18 @@ Every PR-path job is `success`: Browser UAT, including the `Phase 211 visual reg
 
 Bound: 3 of 3 plan-250-04 pushes used.
 
+## Iteration 9 (plan 250-05) - pushed `7b1b58624fed4c1cbbd96f45f0d568d86f1bad5f` (first close commit, superseded)
+
+Runs: ci.yml `40241001658`, accrue_admin_browser.yml `40241001662`. Guard `--close` PASS, SL-F PASS. Browser UAT run `success`.
+
+| Job | Conclusion | Failing step | Evidence | Classification | Fix |
+|-----|-----------|--------------|----------|----------------|-----|
+| Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=on) | failure | accrue suite | job 121312543518: `2081 tests, 1 failure`, `Accrue.Docs.V159ReleaseContractTest` "rejects backend-first wording" (`v159_release_contract_test.exs:49`): `verify_release_contract.sh: line 188: printf: write error: Broken pipe`, then the wrong failure "missing job/next-action structure". The same code passed at `5ad01dee` | source bug (CI script, timing-dependent): `printf "$v159_section" \| grep -Fq` under `pipefail`; `grep -q` exits on its first match, and a printf still writing the 7551-byte section gets EPIPE, so a present needle reads as missing | `fix(250-05): feed the v1.59 runbook greps from here-strings, not a pipe` (`5561a9a9`). Controls in `250-05-SUMMARY.md` F5: mechanism 20/20 vs 0/20; 30 rounds of the test file 6/0; each of the three checks still fails on a bad fixture |
+| Admin drift and docs | skipped | none ran | `needs: [release-gate]` | downstream | none |
+| Admin UI ratchet guardrails [parked] | failure | Verify frozen ratchet evidence | by design, D1 | parked | none |
+
+No `gh run rerun` was used. The close was re-made as a new E on top of the fix; `7b1b5862` is not the evidence head.
+
 ## Pushed SHA record
 
 | Iteration | SHA | ci.yml run | browser run | Verdict |
@@ -127,3 +139,6 @@ Bound: 3 of 3 plan-250-04 pushes used.
 | 6 (250-04) | `133fafc2b0c4487522eaa40801985518e4d986ec` | 40232857493 | 40232857489 | RED (visual, classified) |
 | 7 (250-04) | `74cdd43a48a57ee2ee047293d387093c138da5d8` | 40234321143 | 40234321194 | RED (portal flake; Browser UAT success) |
 | 8 (250-04, P) | `5ad01dee2c70087aa89fafdfb154f6e9d8068277` | 40236926623 | 40236926603 | GREEN |
+| 9 (250-05, first close) | `7b1b58624fed4c1cbbd96f45f0d568d86f1bad5f` | 40241001658 | 40241001662 | RED (SIGPIPE race in verify_release_contract.sh; fixed in 5561a9a9) |
+
+The evidence head E and the body-only head H are recorded in `250-INTEGRATION-PR.md` Provenance; this ledger cannot hold E's own runs without moving E.
