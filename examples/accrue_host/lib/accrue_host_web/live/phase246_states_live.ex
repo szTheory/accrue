@@ -203,7 +203,9 @@ defmodule AccrueHostWeb.Phase246StatesLive do
   defp valid_table_case(_), do: "populated"
 
   defp identity_cell(row) do
-    assigns = %{__changed__: %{}, row: row}
+    # `__changed__: nil` renders every dynamic part. An empty changed map told LiveView that nothing
+    # changed, so a later send_update with a different row kept the first row's cell content.
+    assigns = %{__changed__: nil, row: row}
 
     ~H"""
     <DataTable.identity_cell>
