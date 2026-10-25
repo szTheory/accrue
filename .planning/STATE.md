@@ -531,6 +531,7 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 | Category | Item | Status | Deferred At | Milestone |
 |---|---|---|---|---|
+| requirement | `accrue_events.inserted_at` session-timezone dependence (`timestamp without time zone` DEFAULT now(); non-UTC adopter DB mislabels local time as UTC) — needs migration or app-side timestamps; found by Phase 250 research, deferred per D2 | deferred (HIGH, v1.68) | 2026-10-25 | v1.67 |
 | deferred_items | 240/deferred-items.md: Admin asset build reports unavailable development Storybook CSS/JS asset paths while completing the package build successfully | acknowledged | 2026-10-10 | v1.64 |
 | deferred_items | 240/deferred-items.md: ExMoney reports deprecated automatic exchange-rate service startup during the Admin ExUnit suite | acknowledged | 2026-10-10 | v1.64 |
 | requirement | HOST-01..03 | Deferred at v1.60 override closeout | — | v1.60 |
