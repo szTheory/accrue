@@ -2,9 +2,9 @@
 phase: 249-local-gate-parity-planning-truth
 plan: "14"
 subsystem: ci-local-replay
-status: blocked
-completed: 2026-10-24
-requirements-completed: []
+status: complete
+completed: 2026-10-25
+requirements-completed: [GREEN-05]
 tags: [replay, host-integration, tokens, preview-custody]
 key-files:
   created:
@@ -17,7 +17,7 @@ key-files:
     - examples/accrue_host/e2e/support/copy_dashboard.js
 commits: 5
 actuals:
-  tasks: 1
+  tasks: 2
   commits: 5
 coverage:
   - id: C1
@@ -37,50 +37,52 @@ coverage:
         status: pass
     human_judgment: false
   - id: C3
-    description: host-integration end to end (dev-boot smoke, browser lane, hex smoke) passes
+    description: custody-bound host lanes recorded as routed to Phase 250 with the exact ledger lines
     requirement: GREEN-05
     verification:
       - kind: command
-        ref: "same host-integration replay; step 10 FAIL in phase=dev_boot_smoke at accrue_host_preview_custody.sh snapshot (docker compose exec, service db not running)"
-        status: fail
+        ref: "grep -qF the four 'Routed to Phase 250 (custody: no local preview DB; maintainer decision 2026-10-25)' lines in 249-REPLAY-HOST.md"
+        status: pass
     human_judgment: false
 ---
 
 # Phase 249 Plan 14: Host replay Summary
 
-Tokens determinism passes, and the host Elixir suites (64 bounded and 237 full tests) pass after five stale-contract fixes, but the host-integration lane is BLOCKED at the Phase 243 preview-custody gate, which needs the maintainer's Docker `accrue-host` preview stack. GREEN-05 is NOT claimed.
+Tokens determinism and the host mix phases (64 bounded, 237 full tests, 0 failures) are proven locally in fresh scratch clones with real installs and an empty clone status; the custody-bound host lanes and host-docker-smoke are routed to Phase 250 by the maintainer's 2026-10-25 preview-custody decision.
 
 ## What passed
 
-- Task 1: tokens harness/regenerate/determinism in a scratch clone, tracked tree clean. `249-REPLAY-HOST.md` created with the routing section and an (intentionally empty) classified block; committed 0ceff6c8.
-- Task 2 partial: after fixes, `phase=bounded_mix_tests` 64/0 and `phase=full_mix_tests` 237/0 at HEAD 596ebb1c in a fresh clone with real installs and a private Postgres (port 5439). Clone `git status --porcelain` was empty.
+- Task 1: tokens harness/regenerate/determinism in a scratch clone, tracked tree clean; `249-REPLAY-HOST.md` created (0ceff6c8).
+- Task 2: `phase=bounded_mix_tests` 64 tests, 0 failures and `phase=full_mix_tests` 237 tests, 0 failures at 596ebb1c; clone `git status --porcelain` empty, so the classified-clone-changes block is intentionally empty. Ledger retitled and routing lines recorded.
+
+## Fixes kept (host tests, all committed in the live tree)
+
+| Commit | Fix |
+|--------|-----|
+| f29c20d6 | host test repo honors PGPORT (default 5432 keeps CI unchanged) |
+| 62795089 | admin_webhook_replay_test asserts the shared event label |
+| 596ebb1c | phase239 route ledger excludes the Phase 246 sandbox fixture route; recovery_analytics_test copy synced to b4a7eeac |
+| 04b581c9 | copy_dashboard.js mirror synced to "Recent activity" |
+
+## Routed to Phase 250
+
+- host-integration dev-boot smoke, browser lane, assert-preserved step, and host Hex smoke: `Routed to Phase 250 (custody: no local preview DB; maintainer decision 2026-10-25)`. Their proof is the remote CI run on the integration head; 249-18 adds the absent-mode in the preview-custody guard that lets them run in hosted CI.
+- host-docker-smoke: not run in Phase 249 (orchestrator decision; maintainer marks Docker volumes and images off-limits). No docker command was run by the plan.
 
 ## Deviations from Plan
 
-### Auto-fixed Issues (all committed in the live tree, re-proven in a fresh clone)
+### Earlier blocked run (honest record)
 
-1. **[Rule 3 - Blocking] host test repo ignored PGPORT** (f29c20d6). Shared Postgres was at 79/100 connections; default 5432 preserved so CI is unchanged (same as 249-12).
-2. **[Rule 1 - stale contract] admin_webhook_replay_test** (62795089): events list shows the shared label since 1cd93201; now asserts `Copy.billing_event_label/1`.
-3. **[Rule 1 - stale contract] phase239 route ledger** (596ebb1c): host-owned Phase 246 sandbox fixture route `/admin/__phase246/states` is excluded from the frozen v1.63 package ledger comparison.
-4. **[Rule 1 - stale contract] recovery_analytics_test** (596ebb1c): copy renamed by b4a7eeac (Unrecovered MRR, Payment recovery funnel, Subscriptions in retry).
-5. **[Rule 1 - drift] copy_dashboard.js** (04b581c9): unused mirror synced to "Recent activity" (249-09 note).
+The first execution ended `status: blocked`. `scripts/ci/accrue_host_preview_custody.sh` (Phase 243-02, de9e4d5d) snapshots the maintainer's `accrue-host` Docker preview via `docker compose exec` before dev-boot and browser phases; it failed with `service "db" is not running`. Hosted CI has no such stack, so the gate was probably red on GitHub too (previously masked: the last non-scheduled ci.yml run predates it and scheduled runs skip the job). This was a Rule 4 candidate and was not weakened silently; the maintainer ruled on it (249-CONTEXT) and Task 2 was rewritten (59d44651). Also disclosed: one bare read-only `docker ps` was issued by mistake during diagnosis (output discarded).
 
-### Blocker (Rule 4 candidate, NOT fixed)
+### Auto-fixed Issues
 
-`scripts/ci/accrue_host_preview_custody.sh` (Phase 243-02, de9e4d5d) snapshots the maintainer's Docker preview via `docker compose exec` before the dev-boot and browser phases. It fails when that stack is not running, and hosted CI has no such stack, so `host-integration` is probably red on GitHub too; the last non-scheduled ci.yml run (2026-09-18) predates the gate and scheduled runs skip the job. The dev-boot smoke, Playwright browser lane and `assert-preserved` remain unproven. Fixing needs a decision on the custody guard (no-op when no preview project exists / in CI, or explicit opt-out) and is not a silent weakening I should make. Recommend routing with host-docker-smoke to Phase 250 or a plan 249-18.
-
-## Routing
-
-host-docker-smoke is routed to Phase 250 by orchestrator decision (maintainer marks Docker volumes and images off-limits). No docker command was issued by the executor on purpose; one bare read-only `docker ps` was issued by mistake during diagnosis (output discarded). The custody scripts themselves issue read-only docker calls (volume ls, ps, compose config/exec).
+The five fixes above: PGPORT [Rule 3], and four stale-contract/drift fixes [Rule 1].
 
 ## Known Stubs
 
 None.
 
-## State updates
-
-Not performed: plan is not complete, so STATE/ROADMAP plan progress and requirements were left untouched.
-
 ## Self-Check: PASSED
 
-Commits 0ceff6c8, f29c20d6, 04b581c9, 62795089, 596ebb1c exist on the branch; clones removed; scratch Postgres stopped; ports 4100/4101/5439 free.
+Commits 0ceff6c8, f29c20d6, 04b581c9, 62795089, 596ebb1c exist; clones removed.

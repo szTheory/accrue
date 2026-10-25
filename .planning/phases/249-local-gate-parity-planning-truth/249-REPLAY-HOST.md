@@ -23,7 +23,7 @@ Every line of `git -C <clone> status --porcelain` after host-integration must ap
 <!-- classified-clone-changes:begin -->
 <!-- classified-clone-changes:end -->
 
-## Job: host-integration (BLOCKED at preview custody; 249-14 Task 2 not satisfied)
+## Job: host-integration (host mix phases proven locally; custody-bound lanes routed to Phase 250)
 
 Final replay at HEAD `596ebb1c48f62944436495ca06e8ac7495a7c11d` in a fresh `--no-local` clone, real `mix deps.get` / `npm ci`, private scratch Postgres on port 5439 (shared 5432 was at 79/100 connections), ports 4100/4101 verified free.
 Command: `python3 249-replay-ci-job.py --job host-integration --run --skip 'Install Hex' --skip 'Install Chromium' --env RUNNER_TEMP=<dir> --env PGPORT=5439 --env ACCRUE_HOST_BROWSER_LOG=<clone>/accrue-server.log --expr 'github.event_name=pull_request' --expr 'github.head_ref=integration/v1.63-v1.66'`
@@ -49,7 +49,7 @@ Command: `python3 249-replay-ci-job.py --job host-integration --run --skip 'Inst
 | `copy_dashboard.js` mirror `DASHBOARD_BREADCRUMB_HOME: "Dashboard"` (unused, drift noted in 249-09) | copy.ex says "Recent activity" | 249-09 note | 04b581c9 |
 | host test repo ignored `PGPORT` | needed to avoid the saturated shared Postgres; default 5432 keeps CI unchanged | same as c359ed82 (249-12) | f29c20d6 |
 
-### Remaining red: preview custody requires the maintainer's Docker preview stack (NOT fixed)
+### Custody-bound lanes: preview custody requires the maintainer's Docker preview stack (routed, not fixed here)
 
 `mix verify.full` runs `accrue_host_verify_dev_boot.sh` and `accrue_host_verify_browser.sh`, which first call `scripts/ci/accrue_host_preview_custody.sh` (`preflight`, then `snapshot`). Since Phase 243-02 (`de9e4d5d`, 2026-10-10) `snapshot` runs `docker compose -p accrue-host ... exec -T db psql` against the maintainer's `accrue-host` preview and refuses to continue if it cannot read it. Observed: `preflight dev` found the `accrue-host_pgdata` volume, then `snapshot` failed with `service "db" is not running`.
 
@@ -62,6 +62,15 @@ Consequences:
 Clone status classification: `git status --porcelain` in the final clone was empty (the installer was idempotent: "skipped exists: 17"), so the block above is intentionally empty. Clone removed; scratch Postgres stopped.
 
 Disclosure: during diagnosis one bare `docker ps` was issued by the executor by mistake (output discarded, read-only). No other executor-issued docker command; the other docker calls above were made by the committed gate scripts.
+
+### Routed lanes (maintainer host preview-custody decision, 2026-10-25, see 249-CONTEXT)
+
+Proven locally: `phase=bounded_mix_tests` 64 tests, 0 failures; `phase=full_mix_tests` 237 tests, 0 failures. The remaining lanes are proven by remote CI on the integration head, enabled by the absent-mode added in 249-18.
+
+- host-integration dev-boot smoke: Routed to Phase 250 (custody: no local preview DB; maintainer decision 2026-10-25)
+- host-integration browser lane: Routed to Phase 250 (custody: no local preview DB; maintainer decision 2026-10-25)
+- host-integration assert-preserved: Routed to Phase 250 (custody: no local preview DB; maintainer decision 2026-10-25)
+- host Hex smoke: Routed to Phase 250 (custody: no local preview DB; maintainer decision 2026-10-25)
 
 ## Routed to Phase 250
 
