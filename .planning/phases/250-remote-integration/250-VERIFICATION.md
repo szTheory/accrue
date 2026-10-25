@@ -23,7 +23,7 @@ covered_files:
   - "accrue_admin/config/test.exs"
   - "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs"
   - "accrue_admin/test/js/time_display_test.mjs"
-covered_digest: "v1:sha256:b87dd468852a81f96df312787fe0c5d96d4e1794d4c6dac495c2f53fab883646"
+covered_digest: "v1:sha256:cf418e1e83141564d97b06ea9f2e44b1715457eec297e7aade8e1ebabdcb5f98"
 behavior_unverified: 0
 overrides_applied: 0
 ---
