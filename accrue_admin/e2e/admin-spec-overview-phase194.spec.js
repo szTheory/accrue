@@ -7,7 +7,7 @@
  *
  * Covers:
  *   - SC1: one h1 per page
- *   - SC2: ⌘K trigger visible + focusable (data-ax-command-palette-trigger)
+ *   - SC2: ⌘K trigger visible + focusable (data-command-palette-trigger)
  *   - D-05: Current Home header precedes its recent-activity section
  *   - D-06: Empty recent activity state has no action controls
  *   - D-01: Recovery hero metric pair < work queue < supporting funnel
@@ -64,19 +64,19 @@ test.describe("Phase 194 SPEC-OVERVIEW invariants", () => {
     // SC1 — one h1 per page
     await expect(page.locator("h1")).toHaveCount(1);
 
-    // SC2 — ⌘K trigger visible + focusable (data-ax-command-palette-trigger marker)
-    const kbd = page.locator("[data-ax-command-palette-trigger]");
+    // SC2 — ⌘K trigger visible + focusable (3d7d949d: the shell topbar owns the trigger)
+    const kbd = page.locator("[data-command-palette-trigger]");
     await expect(kbd).toBeVisible();
     await kbd.focus();
     await assertFocusWithin(page, kbd, "command palette trigger");
 
     const homeHeader = page.locator(".ax-home > .ax-page-header");
-    const activity = page.locator('.ax-home-section[aria-label="Recent audit activity"]');
+    const activity = page.locator('.ax-home-section[aria-label="Recent billing activity"]');
     await expect(homeHeader).toBeVisible();
     await expect(activity).toBeVisible();
     const order = await page.evaluate(() => {
       const header = document.querySelector(".ax-home > .ax-page-header");
-      const activity = document.querySelector('.ax-home-section[aria-label="Recent audit activity"]');
+      const activity = document.querySelector('.ax-home-section[aria-label="Recent billing activity"]');
       return Boolean(header && activity && (header.compareDocumentPosition(activity) & Node.DOCUMENT_POSITION_FOLLOWING));
     });
     expect(order, "Home header precedes recent activity").toBe(true);
@@ -91,7 +91,7 @@ test.describe("Phase 194 SPEC-OVERVIEW invariants", () => {
     await reset(request);
     await login(page, "/billing");
 
-    const activity = page.locator('.ax-home-section[aria-label="Recent audit activity"]');
+    const activity = page.locator('.ax-home-section[aria-label="Recent billing activity"]');
     const empty = activity.locator(".ax-timeline-empty");
     await expect(empty).toBeVisible();
     await expect(empty.locator("a, button, [role='button']")).toHaveCount(0);
@@ -107,7 +107,7 @@ test.describe("Phase 194 SPEC-OVERVIEW invariants", () => {
 
       const order = await page.evaluate(() => {
         const header = document.querySelector(".ax-home > .ax-page-header");
-        const activity = document.querySelector('.ax-home-section[aria-label="Recent audit activity"]');
+        const activity = document.querySelector('.ax-home-section[aria-label="Recent billing activity"]');
         return Boolean(header && activity && (header.compareDocumentPosition(activity) & Node.DOCUMENT_POSITION_FOLLOWING));
       });
       expect(order, `[${theme}] Home header precedes activity`).toBe(true);
