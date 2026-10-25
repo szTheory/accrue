@@ -353,7 +353,7 @@ async function openWorkspace(page, fixture, sandboxId) {
 }
 
 ordinaryTest("@phase247-current-ordinary invoice action review and recovery analytics render on the ordinary host", async ({ page }) => {
-  if (process.env.PHASE247_PROOF_LANE !== "ordinary") test.skip();
+  if (process.env.PHASE247_PROOF_LANE !== "ordinary") ordinaryTest.skip();
   if (process.env.ACCRUE_HOST_ORDINARY_BASE_URL !== ordinaryBase) throw new Error("ordinary base URL did not match the guarded Phase 245 host");
   const password = process.env.ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD;
   if (!password) throw new Error("ordinary proof requires the README-documented local operator credential in process memory");
@@ -434,7 +434,7 @@ ordinaryTest("@phase247-current-ordinary invoice action review and recovery anal
 
 heldoutTest("@phase247-current-heldout populated webhook detail and replay review stay scoped", async ({ page, sandboxId }, testInfo) => {
   testInfo.setTimeout(90_000);
-  if (process.env.PHASE247_PROOF_LANE !== "heldout") test.skip();
+  if (process.env.PHASE247_PROOF_LANE !== "heldout") heldoutTest.skip();
   await page.addInitScript(() => { document.documentElement.classList.add("accrue-admin"); });
   const fixture = readFixture();
   const expectedPayload = seedHeldoutWebhookEvidence(fixture.second_webhook_id);

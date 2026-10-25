@@ -26,6 +26,7 @@ async function waitForList(page, listId) {
 }
 
 test("mounted subscription status sets keep controls, URL, rows, and history aligned", async ({ page }) => {
+  test.skip(!operatorPassword, "set the local Phase 245 preview operator password in the test environment");
   await signIn(page);
   await page.goto("/admin/subscriptions", { timeout: 15_000 });
   await waitForList(page, "subscriptions");
@@ -58,6 +59,7 @@ test("mounted subscription status sets keep controls, URL, rows, and history ali
 });
 
 test("mounted coupon All and Valid choices are singular and preserve the search query", async ({ page }) => {
+  test.skip(!operatorPassword, "set the local Phase 245 preview operator password in the test environment");
   await signIn(page);
   await page.goto("/admin/coupons?q=Launch", { timeout: 15_000 });
   await waitForList(page, "coupons");

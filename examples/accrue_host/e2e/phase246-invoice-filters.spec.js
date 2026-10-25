@@ -26,6 +26,7 @@ async function waitForInvoiceView(page) {
 }
 
 test("mounted invoice controls keep URL, selection, rows, Unicode search, and browser history aligned", async ({ page }) => {
+  test.skip(!operatorPassword, "set the local Phase 245 preview operator password in the test environment");
   await signIn(page);
   await page.goto("/admin/invoices", { timeout: 15_000 });
   await waitForInvoiceView(page);

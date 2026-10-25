@@ -182,6 +182,9 @@ ordinaryTest("@phase246-current-ordinary current invoices toolbar and payment/co
 });
 
 function testOrdinaryGuard() {
+  // The ordinary lane selects itself through its own config (ACCRUE_HOST_ORDINARY_BASE_URL); the
+  // default isolated-host lane does not have it, exactly like the other lane-specific proofs.
+  ordinaryTest.skip(process.env.ACCRUE_HOST_ORDINARY_BASE_URL === undefined, "ordinary lane only");
   if (process.env.ACCRUE_HOST_ORDINARY_BASE_URL !== ordinaryBase) throw new Error("ordinary host URL did not match guarded Phase 245 instance");
 }
 

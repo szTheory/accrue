@@ -91,7 +91,7 @@ function assertNoSecrets(value, location = "capture") {
 }
 
 function routeIdentityMatches(route, requestedURL, finalURL) {
-  const requested = new URL(requestedURL, process.env.ACCRUE_HOST_ORDINARY_BASE_URL);
+  const requested = new URL(requestedURL, process.env.ACCRUE_HOST_ORDINARY_BASE_URL || "http://accrue-host-phase245-ordinary.localhost/");
   const final = new URL(finalURL);
   const templatePattern = new RegExp(`^${route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/:[^/]+/g, "[^/]+")}$`);
   return final.origin === requested.origin && final.pathname === requested.pathname &&
