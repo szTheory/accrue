@@ -5,7 +5,7 @@ const {
   login,
   hideCaptureOnlyChrome
 } = require("./support/admin-visual-helpers");
-const TIMESTAMP_RE = /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}(?:\s+\d{1,2}:\d{2}(?:\s+[AP]M)?(?:\s+UTC)?)?|\b\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?(Z| UTC)?)?\b/;
+const TIMESTAMP_RE = /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}(?:,?\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s+[AP]M)?(?:\s+UTC)?)?|\b\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?(Z| UTC)?)?\b/;
 
 // Phase 211 deterministic visual-regression gate.
 //
@@ -30,8 +30,10 @@ function timestampAnchors(page, name) {
   switch (name) {
     case "dashboard":
       // The selected dashboard fixture seeds an audit event, so the current Home
-      // timeline must render a volatile timestamp for this capture.
-      return [page.locator("time.ax-timeline-time").filter({ hasText: TIMESTAMP_RE })];
+      // timeline must render a volatile timestamp for this capture. Since 247-03
+      // timeline instants render through the shared Timestamp control, whose
+      // TimeDisplay hook writes the browser-zone text into its <time>.
+      return [page.locator(".ax-timeline [data-time-display] time").filter({ hasText: TIMESTAMP_RE })];
     case "subscriptions":
       // The time value is only volatile under the table explicitly labelled
       // "Renews / ends"; other cells carry identity, money and state.
@@ -83,7 +85,7 @@ async function maskLocators(page, name) {
     renderedAnchors += anchorCount;
     const sourceText = await anchor.evaluateAll((elements) => elements.map((element) => element.textContent));
     const counts = await anchor.evaluateAll((elements) => elements.map((element) => {
-      const pattern = /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}(?:\s+\d{1,2}:\d{2}(?:\s+[AP]M)?(?:\s+UTC)?)?|\b\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?(?:Z| UTC)?)?\b/g;
+      const pattern = /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}(?:,?\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s+[AP]M)?(?:\s+UTC)?)?|\b\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?(?:Z| UTC)?)?\b/g;
       const existingMasks = element.querySelectorAll("[data-ax-visual-timestamp-mask]");
       if (existingMasks.length > 0) {
         return Array.from(existingMasks).filter((mask) => {
