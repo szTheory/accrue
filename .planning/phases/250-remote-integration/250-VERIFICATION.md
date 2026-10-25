@@ -17,11 +17,13 @@ covered_files:
   - ".planning/phases/250-remote-integration/250-CONTEXT.md"
   - ".planning/phases/250-remote-integration/250-RESEARCH.md"
   - ".planning/phases/250-remote-integration/250-UAT.md"
+  - ".planning/phases/250-remote-integration/250-ci-head-status.mjs"
   - ".planning/phases/250-remote-integration/250-mint-close-artifacts.mjs"
+  - ".planning/phases/250-remote-integration/250-prepush-guard.sh"
   - "accrue_admin/config/test.exs"
   - "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs"
   - "accrue_admin/test/js/time_display_test.mjs"
-covered_digest: "v1:sha256:8ac8076fe71dbaa62eaf2fe6029b4a30cfa592ad390d1ac54cee86c94bb3c695"
+covered_digest: "v1:sha256:b87dd468852a81f96df312787fe0c5d96d4e1794d4c6dac495c2f53fab883646"
 behavior_unverified: 0
 overrides_applied: 0
 ---
