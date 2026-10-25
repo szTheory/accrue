@@ -120,10 +120,7 @@ defmodule AccruePortal.ContextContractTest do
       render_errors: [formats: [html: &Phoenix.Controller.status_message_from_template/1]]
     )
 
-    case CustomEndpoint.start_link() do
-      {:ok, _endpoint_pid} -> :ok
-      {:error, {:already_started, _endpoint_pid}} -> :ok
-    end
+    start_supervised!(CustomEndpoint)
 
     on_exit(fn -> Application.put_env(:accrue, :auth_adapter, previous_auth) end)
     :ok
