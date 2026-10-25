@@ -51,6 +51,11 @@ Not yet replayed: release-gate (mix test matrix), host-integration, playwright-e
 - **host-integration:** `verify.install` runs `accrue.install --yes`, which may rewrite tracked files. Run it in a scratch clone with real installs (never symlinked deps), or on a committed tree whose `git status` is checked afterwards.
 - **SL-F (PR-body currency):** This needs a live PR and token, so it moves to Phase 250. It is not a Phase 249 red.
 
+### Host preview-custody decision (maintainer, 2026-10-25)
+- **Finding (249-14):** `scripts/ci/accrue_host_preview_custody.sh` (added in Phase 243-02, `de9e4d5d`) fails closed unless it can identify the maintainer's Docker `accrue-host` preview. Hosted CI has no preview, so the host-integration dev-boot/browser lanes and playwright-e2e would REFUSE in CI. This was masked because no full CI run has happened since 2026-09-18.
+- **Decision:** Add an explicit opt-in CI mode to the custody check. `ci.yml` sets a dedicated env flag, and the check then *proves* that no preview instance exists: either no Docker binary, or zero volumes and zero containers carrying the preview's compose-project label. Any preview it finds → REFUSE. Without the flag, behavior is unchanged. Fixtures and negative controls are required: flag set + preview present → refuse; flag unset + no preview → refuse as today; flag set + absent → pass, and say so explicitly in the log.
+- **Proof location:** the maintainer chose to prove the host dev-boot, browser and playwright-e2e lanes in remote CI (Phase 250, exact head SHA). The host mix test phases (bounded + full) are already proven locally (64/0 and 237/0). No Docker on the maintainer's machine. GREEN-05's wording and the Phase 249/250 success criteria are updated to match, with this reason recorded.
+
 ### Claude's Discretion
 - Plan/wave decomposition, ordering, and the specific technical fix for each red, provided the gate-integrity rules above hold.
 - Whether a red is better fixed in the verifier (archive-awareness) or in the artifact, decided by which one is actually wrong.
@@ -86,3 +91,7 @@ These go to a later milestone (see REQUIREMENTS.md "Future Requirements"): webho
 
 *Phase: 249-local-gate-parity-planning-truth*
 *Context gathered: 2026-10-24*
+
+### Orchestrator rulings on the gap closure (2026-10-25)
+- **249-18 editing the custody script is allowed.** Its digest appears only in the v1.66 Phase 245 capture manifests' `source_digests`, which are source *inputs* that already went stale: the 245 verifier reports "source digest is stale", and 249-01 already edited `app.css` from the same manifest. That is not a pinned receipt verifier, so the locked "never falsify pinned evidence" rule is not violated. Record the 245 receipt as historical under the deferred re-capture/retire item.
+- **249-15 local listing:** if `playwright test --list` is refused by the custody preflight on the maintainer's machine (expected, because a preview volume exists), that refusal is the recorded positive control, not a blocker. The per-shard non-zero test count then moves to Phase 250 with the full shards. Do not bypass or flag around the preflight locally.
