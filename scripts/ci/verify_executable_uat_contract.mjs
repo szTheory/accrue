@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -197,24 +198,136 @@ export function generateAutomatedUat(phaseDir) {
   return destination;
 }
 
-export function validatePhaseDirectory(phaseDir) {
+// -- recorded historical deviations (A3) --------------------------------------
+//
+// v1.66 phases (245-248) predate adoption of the executable-UAT contract and
+// were archived with honest human-judgment / coverage-less / UAT-less evidence.
+// Editing those archived files would falsify their covered_digest fingerprints,
+// so each measured deviation is recorded here instead. An entry names exactly one
+// artifact and pins its sha256: byte drift, a stale entry (no longer observed),
+// an active-phase path, or an unlisted offender all fail. No ranges, no globs.
+export const DEVIATION_KINDS = Object.freeze([
+  "human_judgment_true",
+  "coverage_missing",
+  "summary_frontmatter_missing",
+  "uat_missing"
+]);
+
+function deviationKey(kind, relPath, id) {
+  return `${kind}\u0000${relPath}\u0000${id ?? ""}`;
+}
+
+function loadDeviations(list) {
+  const seen = new Set();
+  for (const entry of list) {
+    if (!DEVIATION_KINDS.includes(entry.kind)) fail(`recorded deviation: unknown kind ${JSON.stringify(entry.kind)}`);
+    if (typeof entry.path !== "string" || !entry.path.startsWith(".planning/milestones/") || entry.path.split("/").includes("..")) {
+      fail(`recorded deviation ${entry.path}: only archived paths under .planning/milestones/ are admitted`);
+    }
+    if (!/^[0-9a-f]{64}$/.test(entry.sha256 ?? "")) fail(`recorded deviation ${entry.path}: sha256 pin is required`);
+    if (typeof entry.reason !== "string" || entry.reason.trim() === "") fail(`recorded deviation ${entry.path}: a reason is required`);
+    if (entry.kind === "human_judgment_true" && !entry.id) fail(`recorded deviation ${entry.path}: human_judgment_true needs an entry id`);
+    const key = deviationKey(entry.kind, entry.path, entry.id);
+    if (seen.has(key)) fail(`recorded deviation ${entry.path}: duplicate entry`);
+    seen.add(key);
+  }
+  return list;
+}
+
+const OWNER_CAUSE =
+  "owner: Accrue maintainer; cause: v1.66 phases predate adoption of the executable-UAT contract and editing the archived file would falsify the archived v3 covered_digest; release impact: none, acceptance is recorded in the sha-pinned VERIFICATION";
+
+export const RECORDED_DEVIATIONS = Object.freeze(loadDeviations([
+  { kind: "human_judgment_true", path: ".planning/milestones/v1.66-phases/245-rendered-baseline-and-realistic-preview/245-02-SUMMARY.md", id: "D2", sha256: "dddb49a4a0577aa1145db1cd249029ce9cfbd05194f79f2be29a9aa880efc961", reason: OWNER_CAUSE },
+  { kind: "uat_missing", path: ".planning/milestones/v1.66-phases/245-rendered-baseline-and-realistic-preview/245-VERIFICATION.md", sha256: "3b7300392f21c98cca582c3528d76962d28e9b46619e622932db982e59207ba8", reason: OWNER_CAUSE },
+  { kind: "human_judgment_true", path: ".planning/milestones/v1.66-phases/246-collection-controls-and-search/246-04-SUMMARY.md", id: "D3", sha256: "734794940a0ef51524889825c275c2b2fc2264e9d97e6e5b986113c2652c5cee", reason: OWNER_CAUSE },
+  { kind: "human_judgment_true", path: ".planning/milestones/v1.66-phases/246-collection-controls-and-search/246-05-SUMMARY.md", id: "D2", sha256: "47cdb63e93113532fa892b091be8d23abc8847d529c28774ff99f37b836b1972", reason: OWNER_CAUSE },
+  { kind: "summary_frontmatter_missing", path: ".planning/milestones/v1.66-phases/246-collection-controls-and-search/246-IDENTITY-GAP-SUMMARY.md", sha256: "6339556b227a392b1a30e2a1f9d4ec69d05319c9eec506c89c481baa221240d0", reason: OWNER_CAUSE },
+  { kind: "uat_missing", path: ".planning/milestones/v1.66-phases/246-collection-controls-and-search/246-VERIFICATION.md", sha256: "17429373516100dee91cc7b0957a8b084da28268ae386286b12b6cb977b8e46a", reason: OWNER_CAUSE },
+  { kind: "coverage_missing", path: ".planning/milestones/v1.66-phases/247-evidence-true-details-and-analytics/247-02-SUMMARY.md", sha256: "c30821ddaeed103ab3906a0bcc366d55a98afd91c0479e14ab03e9051bb0e7e9", reason: OWNER_CAUSE },
+  { kind: "human_judgment_true", path: ".planning/milestones/v1.66-phases/247-evidence-true-details-and-analytics/247-03-SUMMARY.md", id: "D1", sha256: "bf483b29ec91dde4d6e7b20ffbd8e68b287a51fe277e82353f2829169ae9c948", reason: OWNER_CAUSE },
+  { kind: "human_judgment_true", path: ".planning/milestones/v1.66-phases/247-evidence-true-details-and-analytics/247-03-SUMMARY.md", id: "D2", sha256: "bf483b29ec91dde4d6e7b20ffbd8e68b287a51fe277e82353f2829169ae9c948", reason: OWNER_CAUSE },
+  { kind: "human_judgment_true", path: ".planning/milestones/v1.66-phases/247-evidence-true-details-and-analytics/247-03-SUMMARY.md", id: "D3", sha256: "bf483b29ec91dde4d6e7b20ffbd8e68b287a51fe277e82353f2829169ae9c948", reason: OWNER_CAUSE },
+  { kind: "human_judgment_true", path: ".planning/milestones/v1.66-phases/247-evidence-true-details-and-analytics/247-04-SUMMARY.md", id: "D1", sha256: "86bc14f3a3b3e9cfce9bf3374e032e45c607a72d04bf805912c7be30f69e471b", reason: OWNER_CAUSE },
+  { kind: "human_judgment_true", path: ".planning/milestones/v1.66-phases/247-evidence-true-details-and-analytics/247-04-SUMMARY.md", id: "D2", sha256: "86bc14f3a3b3e9cfce9bf3374e032e45c607a72d04bf805912c7be30f69e471b", reason: OWNER_CAUSE },
+  { kind: "coverage_missing", path: ".planning/milestones/v1.66-phases/247-evidence-true-details-and-analytics/247-05-SUMMARY.md", sha256: "ca10904c319cfb650e24f15c033f7a687100d50815cf51c4515cfdbf66cffe5a", reason: OWNER_CAUSE },
+  { kind: "coverage_missing", path: ".planning/milestones/v1.66-phases/247-evidence-true-details-and-analytics/247-06-SUMMARY.md", sha256: "9b52e1bc918fa2ee61b020316c82bfa088d0fcb02fe945ae3e820533c7fe8f17", reason: OWNER_CAUSE },
+  { kind: "uat_missing", path: ".planning/milestones/v1.66-phases/247-evidence-true-details-and-analytics/247-VERIFICATION.md", sha256: "f926cfc5ead1e9782bbe1f2935c46f88b2d94596a0b4df49dedd358529416de7", reason: OWNER_CAUSE },
+  { kind: "human_judgment_true", path: ".planning/milestones/v1.66-phases/248-reproducible-scenarios-and-integrated-proof/248-01-SUMMARY.md", id: "D2", sha256: "0862ddfe59dfabac316028cf2e5aa0fe840815f5b33007bf35313bd61ffcd10b", reason: OWNER_CAUSE },
+  { kind: "human_judgment_true", path: ".planning/milestones/v1.66-phases/248-reproducible-scenarios-and-integrated-proof/248-02-SUMMARY.md", id: "D2", sha256: "1b5762ba1f9f90b786ef886141b33e0a64e4cfe96d70fec6dcf6d522c4beaaf2", reason: OWNER_CAUSE },
+  { kind: "uat_missing", path: ".planning/milestones/v1.66-phases/248-reproducible-scenarios-and-integrated-proof/248-VERIFICATION.md", sha256: "9c6132b2b7c67fe36d41dcb0194c83705b4fa1bfb99aa05f404bddf80723c3de", reason: OWNER_CAUSE }
+]));
+
+function repoRootOf(phaseDir) {
+  const marker = `${path.sep}.planning${path.sep}`;
+  const index = phaseDir.indexOf(marker);
+  return index === -1 ? undefined : phaseDir.slice(0, index);
+}
+
+function makeWaiver(phaseDir, deviations) {
+  const root = repoRootOf(phaseDir);
+  const observed = new Set();
+  const byKey = new Map(deviations.map((entry) => [deviationKey(entry.kind, entry.path, entry.id), entry]));
+  function waive(kind, absPath, id) {
+    if (!root) return false;
+    const rel = path.relative(root, absPath).split(path.sep).join("/");
+    const entry = byKey.get(deviationKey(kind, rel, id));
+    if (!entry) return false;
+    const actual = crypto.createHash("sha256").update(fs.readFileSync(absPath)).digest("hex");
+    if (actual !== entry.sha256) fail(`${rel}: recorded deviation sha256 mismatch (pinned ${entry.sha256}, found ${actual})`);
+    observed.add(deviationKey(kind, rel, id));
+    return true;
+  }
+  function assertNoStale() {
+    if (!root) return;
+    const prefix = phaseDir + path.sep;
+    for (const entry of deviations) {
+      if (!path.resolve(root, entry.path).startsWith(prefix)) continue;
+      if (!observed.has(deviationKey(entry.kind, entry.path, entry.id))) {
+        fail(`${entry.path}: stale recorded deviation ${entry.kind}${entry.id ? ` ${entry.id}` : ""} is no longer observed; remove it`);
+      }
+    }
+  }
+  return { waive, assertNoStale };
+}
+
+export function validatePhaseDirectory(phaseDir, deviations = RECORDED_DEVIATIONS) {
+  loadDeviations(deviations);
+  const { waive, assertNoStale } = makeWaiver(phaseDir, deviations);
   const files = fs.readdirSync(phaseDir).sort();
   const summaries = files.filter((file) => /-SUMMARY\.md$/.test(file));
   if (summaries.length === 0) fail(`${phaseDir}: no SUMMARY files found`);
 
   for (const file of summaries) {
-    const source = fs.readFileSync(path.join(phaseDir, file), "utf8");
-    const metadata = frontmatter(source, file);
+    const summaryPath = path.join(phaseDir, file);
+    const source = fs.readFileSync(summaryPath, "utf8");
+    let metadata;
+    try {
+      metadata = frontmatter(source, file);
+    } catch (error) {
+      if (waive("summary_frontmatter_missing", summaryPath)) continue;
+      throw error;
+    }
     if (scalar(metadata, "status") !== "complete") continue;
 
-    const coverage = coverageBlock(metadata, file);
-    const entries = coverage.split(/\n(?=  - id:)/).filter((entry) => /- id:/.test(entry));
-    if (entries.length === 0) fail(`${file}: coverage has no executable entries`);
+    let entries = [];
+    let coverage;
+    try {
+      coverage = coverageBlock(metadata, file);
+      entries = coverage.split(/\n(?=  - id:)/).filter((entry) => /- id:/.test(entry));
+    } catch (error) {
+      if (waive("coverage_missing", summaryPath)) continue;
+      throw error;
+    }
+    if (entries.length === 0) {
+      if (waive("coverage_missing", summaryPath)) continue;
+      fail(`${file}: coverage has no executable entries`);
+    }
 
     for (const entry of entries) {
       const id = entry.match(/- id:\s*([^\n]+)/)?.[1]?.trim() || "unknown";
       if (!/\n\s+human_judgment:\s*false\s*(?:\n|$)/.test(`\n${entry}`)) {
-        fail(`${file} coverage ${id}: human_judgment must be false`);
+        if (!waive("human_judgment_true", summaryPath, id)) fail(`${file} coverage ${id}: human_judgment must be false`);
       }
       if (!/\n\s+ref:\s*["']?\S/.test(`\n${entry}`)) {
         fail(`${file} coverage ${id}: missing verification ref`);
@@ -226,30 +339,37 @@ export function validatePhaseDirectory(phaseDir) {
     }
   }
 
-  const uatFile = files.find((file) => /-UAT\.md$/.test(file));
-  if (!uatFile) fail(`${phaseDir}: missing automated UAT artifact`);
-  const uat = fs.readFileSync(path.join(phaseDir, uatFile), "utf8");
-  const uatMetadata = frontmatter(uat, uatFile);
-  if (scalar(uatMetadata, "status") !== "complete") fail(`${uatFile}: status must be complete`);
-  if (/result:\s*\[(pending|blocked|skipped|issue)\]/i.test(uat)) {
-    fail(`${uatFile}: unresolved UAT result`);
-  }
-
-  const tests = uat.split(/\n(?=### \d+\.)/).slice(1);
-  if (tests.length === 0) fail(`${uatFile}: no UAT tests found`);
-  for (const test of tests) {
-    const name = test.match(/^###\s+([^\n]+)/)?.[1] || "unknown";
-    if (!/^source:\s*automated\s*$/m.test(test)) fail(`${uatFile} ${name}: source must be automated`);
-    if (!/^result:\s*\[pass\]\s*$/m.test(test)) fail(`${uatFile} ${name}: result must be [pass]`);
-    if (!/^verification:\s*\S.+$/m.test(test)) fail(`${uatFile} ${name}: verification evidence is required`);
-  }
-
-  const expectedUat = renderAutomatedUat(phaseDir);
-  if (uat !== expectedUat) {
-    fail(`${uatFile}: content does not exactly match executable SUMMARY coverage; regenerate with --write`);
-  }
-
   const verificationFile = files.find((file) => /-VERIFICATION\.md$/.test(file));
+  const uatFile = files.find((file) => /-UAT\.md$/.test(file));
+  let uatTests = 0;
+  if (!uatFile) {
+    // Only a recorded, sha-pinned deviation pinned to this phase's VERIFICATION may waive the UAT.
+    const waived = verificationFile && waive("uat_missing", path.join(phaseDir, verificationFile));
+    if (!waived) fail(`${phaseDir}: missing automated UAT artifact`);
+  } else {
+    const uat = fs.readFileSync(path.join(phaseDir, uatFile), "utf8");
+    const uatMetadata = frontmatter(uat, uatFile);
+    if (scalar(uatMetadata, "status") !== "complete") fail(`${uatFile}: status must be complete`);
+    if (/result:\s*\[(pending|blocked|skipped|issue)\]/i.test(uat)) {
+      fail(`${uatFile}: unresolved UAT result`);
+    }
+
+    const tests = uat.split(/\n(?=### \d+\.)/).slice(1);
+    if (tests.length === 0) fail(`${uatFile}: no UAT tests found`);
+    for (const test of tests) {
+      const name = test.match(/^###\s+([^\n]+)/)?.[1] || "unknown";
+      if (!/^source:\s*automated\s*$/m.test(test)) fail(`${uatFile} ${name}: source must be automated`);
+      if (!/^result:\s*\[pass\]\s*$/m.test(test)) fail(`${uatFile} ${name}: result must be [pass]`);
+      if (!/^verification:\s*\S.+$/m.test(test)) fail(`${uatFile} ${name}: verification evidence is required`);
+    }
+
+    const expectedUat = renderAutomatedUat(phaseDir);
+    if (uat !== expectedUat) {
+      fail(`${uatFile}: content does not exactly match executable SUMMARY coverage; regenerate with --write`);
+    }
+    uatTests = tests.length;
+  }
+
   if (!verificationFile) fail(`${phaseDir}: missing VERIFICATION artifact`);
   const verification = fs.readFileSync(path.join(phaseDir, verificationFile), "utf8");
   const verificationMetadata = frontmatter(verification, verificationFile);
@@ -263,7 +383,8 @@ export function validatePhaseDirectory(phaseDir) {
     fail(`${verificationFile}: human verification language remains`);
   }
 
-  return { summaries: summaries.length, uatTests: tests.length };
+  assertNoStale();
+  return { summaries: summaries.length, uatTests };
 }
 
 function phaseAutomationState(phaseDir) {
@@ -491,6 +612,70 @@ function selfTest() {
     fs.mkdirSync(archivedPhase, { recursive: true });
     fs.writeFileSync(path.join(archivedPhase, "228-01-SUMMARY.md"), summary);
     assert.equal(resolvePhaseDir(temp, "228"), archivedPhase, "an empty active placeholder must not hide archived phase evidence");
+
+    // A3: recorded, sha256-pinned deviations for archived phases.
+    const sha = (file) => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
+    const devRoot = path.join(temp, "dev");
+    const devPhase = path.join(devRoot, ".planning", "milestones", "v9.99-phases", "250-dev");
+    const devRel = (name) => `.planning/milestones/v9.99-phases/250-dev/${name}`;
+    const judged = summary.replace("human_judgment: false", "human_judgment: true");
+    const writeDev = (summaryText, withUat) => {
+      fs.rmSync(devPhase, { recursive: true, force: true });
+      fs.mkdirSync(devPhase, { recursive: true });
+      fs.writeFileSync(path.join(devPhase, "250-01-SUMMARY.md"), summaryText);
+      fs.writeFileSync(path.join(devPhase, "250-VERIFICATION.md"), verification);
+      if (withUat) generateAutomatedUat(devPhase);
+    };
+    const entry = (kind, name, extra = {}) => ({ kind, path: devRel(name), sha256: sha(path.join(devPhase, name)), reason: "owner: test; cause: fixture; release impact: none", ...extra });
+    const expectFail = (label, pattern, run) => {
+      let message = "";
+      try { run(); } catch (error) { message = error.message; }
+      if (!pattern.test(message)) fail(`self-test: ${label} was not rejected (got: ${message || "no error"})`);
+    };
+
+    writeDev(judged, true);
+    const listedJudged = [entry("human_judgment_true", "250-01-SUMMARY.md", { id: "D1" })];
+    expectFail("unlisted human_judgment: true", /human_judgment must be false/, () => validatePhaseDirectory(devPhase, []));
+    // positive control: the exact listed deviation is honored
+    assert.doesNotThrow(() => validatePhaseDirectory(devPhase, listedJudged));
+    // a different entry id is not covered by the D1 entry
+    expectFail("wrong entry id", /human_judgment must be false/, () => validatePhaseDirectory(devPhase, [entry("human_judgment_true", "250-01-SUMMARY.md", { id: "D9" })]));
+
+    // uat_missing listed: honored, VERIFICATION checks still run
+    writeDev(summary, false);
+    const listedUat = [entry("uat_missing", "250-VERIFICATION.md")];
+    expectFail("unlisted uat_missing", /missing automated UAT artifact/, () => validatePhaseDirectory(devPhase, []));
+    assert.deepEqual(validatePhaseDirectory(devPhase, listedUat), { summaries: 1, uatTests: 0 });
+    // sha mismatch (byte drift) fails
+    fs.writeFileSync(path.join(devPhase, "250-VERIFICATION.md"), `${verification}\n<!-- drift -->\n`);
+    expectFail("sha256 byte drift", /sha256 mismatch/, () => validatePhaseDirectory(devPhase, listedUat));
+    // waiver does not skip the VERIFICATION checks
+    const humanNeeded = verification.replace("status: passed", "status: human_needed");
+    fs.writeFileSync(path.join(devPhase, "250-VERIFICATION.md"), humanNeeded);
+    expectFail("uat_missing waiver hiding a human_needed VERIFICATION", /status must be passed/, () => validatePhaseDirectory(devPhase, [entry("uat_missing", "250-VERIFICATION.md")]));
+    // stale: a UAT now exists, so the uat_missing entry is no longer observed
+    writeDev(summary, true);
+    expectFail("stale uat_missing entry", /stale recorded deviation/, () => validatePhaseDirectory(devPhase, [entry("uat_missing", "250-VERIFICATION.md")]));
+    // stale: flipped to false
+    writeDev(summary, true);
+    expectFail("stale human_judgment_true entry", /stale recorded deviation/, () => validatePhaseDirectory(devPhase, [entry("human_judgment_true", "250-01-SUMMARY.md", { id: "D1" })]));
+    // coverage_missing / summary_frontmatter_missing are honored only when listed
+    writeDev("---\nstatus: complete\ncompleted: 2026-08-03\n---\n", false);
+    expectFail("unlisted coverage_missing", /missing coverage/, () => validatePhaseDirectory(devPhase, []));
+    writeDev("no frontmatter here\n", false);
+    expectFail("unlisted summary_frontmatter_missing", /missing YAML frontmatter/, () => validatePhaseDirectory(devPhase, []));
+
+    // load-time rejections
+    const base = { kind: "uat_missing", path: devRel("250-VERIFICATION.md"), sha256: "a".repeat(64), reason: "r" };
+    expectFail("active-phase path", /only archived paths/, () => loadDeviations([{ ...base, path: ".planning/phases/250-dev/250-VERIFICATION.md" }]));
+    expectFail("path traversal", /only archived paths/, () => loadDeviations([{ ...base, path: ".planning/milestones/../phases/x" }]));
+    expectFail("empty reason", /a reason is required/, () => loadDeviations([{ ...base, reason: " " }]));
+    expectFail("unknown kind", /unknown kind/, () => loadDeviations([{ ...base, kind: "everything" }]));
+    expectFail("missing sha256 pin", /sha256 pin is required/, () => loadDeviations([{ ...base, sha256: "" }]));
+    expectFail("human_judgment_true without id", /needs an entry id/, () => loadDeviations([{ ...base, kind: "human_judgment_true" }]));
+    expectFail("duplicate entry", /duplicate entry/, () => loadDeviations([base, base]));
+    // the committed list is itself valid and fully archived
+    assert.ok(RECORDED_DEVIATIONS.length > 0 && RECORDED_DEVIATIONS.every((e) => e.path.startsWith(".planning/milestones/")));
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }
