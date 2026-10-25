@@ -86,7 +86,7 @@ const GROUP_FINDABILITY = {
   ],
   "tabs-subviews": [
     /Webhook delivery attempts/i,
-    /30 days UTC/i,
+    /30 days/i,
     /Overview/i,
   ],
 };
@@ -266,7 +266,9 @@ async function assertNamedActiveStates(page) {
   await expect(currentSubview).toBeVisible();
   await expect(currentSubview).toContainText("Webhook delivery attempts");
   await expect(currentWindow).toBeVisible();
-  await expect(currentWindow).toContainText("30 days UTC");
+  await expect(currentWindow).toContainText("30 days");
+  // UTC is stated once on the nav accessible name (b4a7eeac), not on each visible label.
+  await expect(tabsRoot.locator('nav[aria-label*="UTC"]').first()).toBeVisible();
 }
 
 async function assertNoOffscreenActions(page, width) {
@@ -467,7 +469,7 @@ async function assertRepresentativeRoute(page, route) {
   if (route.category === "list-table") {
     await expect(groupLocator(page, "table-empty-loading-error-pagination").first()).toBeVisible();
     await expect(page.locator('[data-role="filter-form"]').first()).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Clear open receivables/i }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Invoices", exact: true }).first()).toBeVisible();
     return;
   }
 
@@ -496,9 +498,11 @@ async function assertRepresentativeRoute(page, route) {
   }
 
   if (route.category === "overlay-path") {
-    await expect(groupLocator(page, "detail-header-metadata-actions").first()).toBeVisible();
+    // Webhook detail moved to the shared PageHeader with its own group id (e6f39cef, 247-04).
+    await expect(groupLocator(page, "webhook-detail-header").first()).toBeVisible();
+    await expect(page.locator('[data-role="webhook-observed-status"]').first()).toBeVisible();
     await expect(page.locator('[data-role="replay-single"]').first()).toBeVisible();
-    await expect(page.getByText(/Single replay calls the existing DLQ primitive|Replay is unavailable/i).first()).toBeVisible();
+    await expect(page.getByText(/Queues another delivery attempt\. Queue acceptance does not confirm processing\.|Replay is unavailable/i).first()).toBeVisible();
     return;
   }
 
