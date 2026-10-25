@@ -10,10 +10,10 @@ Milestone v1.67 Integration & CI Green. Lands the never-CI-validated v1.63–v1.
 ### Local gate parity
 
 - [ ] **GREEN-01**: Maintainer can run every planning-doc contract step of the `docs-contracts-shift-left` job locally and see it pass — completion evidence (REQUIREMENTS.md present), PR claims (`WINDOWS.md` measured claim), artifact fixed point (resolvable `current_phase`, digests match), v1.17 friction / roadmap hygiene anchors (ROADMAP Planning Doctrine restored verbatim from `origin/main`), executable UAT contract (245-02 summary), and committed window dispositions (no undisposed ship-window rows) — each fixed at its source, never by weakening the gate.
-- [ ] **GREEN-02**: `accrue_admin` compiles with `--warnings-as-errors` (unused `subscription` binding at `subscription_live.ex:1286` removed) so the admin group-contract, hardening and Phase 200 jobs reach their real assertions.
-- [ ] **GREEN-03**: Admin CSS and CI-script contracts pass: every breakpoint `@media` in `accrue_admin/assets/css/app.css` carries its `--ax-bp-*` annotation (DSY-01), and every `scripts/ci/*.mjs` module added since v1.62 carries the shared module-boundary guard (D-32) — without editing sha256-pinned archived evidence scripts in a way that falsifies their recorded receipts.
+- [x] **GREEN-02**: `accrue_admin` compiles with `--warnings-as-errors` (unused `subscription` binding at `subscription_live.ex:1286` removed) so the admin group-contract, hardening and Phase 200 jobs reach their real assertions.
+- [x] **GREEN-03**: Admin CSS and CI-script contracts pass: every breakpoint `@media` in `accrue_admin/assets/css/app.css` carries its `--ax-bp-*` annotation (DSY-01), and every `scripts/ci/*.mjs` module added since v1.62 carries the shared module-boundary guard (D-32) — without editing sha256-pinned archived evidence scripts in a way that falsifies their recorded receipts.
 - [ ] **GREEN-04**: The Phase 190 automation contract and Phase 190/192 browser probes pass; each failing probe (3 tests × desktop/mobile) is classified with evidence as a real UI regression (fixed in source) or a contract made stale by intentional v1.63–v1.66 changes (contract updated with the rationale recorded).
-- [ ] **GREEN-05**: The `accrue`, `accrue_admin` and `accrue_portal` test suites, the host-integration gate and the Playwright E2E lane pass locally on the integration head, with `copy_strings.json` and visual baselines regenerated only where intentional changes require it.
+- [x] **GREEN-05**: The `accrue`, `accrue_admin` and `accrue_portal` test suites, the host-integration gate and the Playwright E2E lane pass locally on the integration head, with `copy_strings.json` and visual baselines regenerated only where intentional changes require it.
 
 ### Planning truth
 
@@ -60,10 +60,10 @@ Deferred to a later milestone (tracked, not in this roadmap):
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | GREEN-01 | Phase 249 | Pending |
-| GREEN-02 | Phase 249 | Pending |
-| GREEN-03 | Phase 249 | Pending |
+| GREEN-02 | Phase 249 | Complete |
+| GREEN-03 | Phase 249 | Complete |
 | GREEN-04 | Phase 249 | Pending |
-| GREEN-05 | Phase 249 | Pending |
+| GREEN-05 | Phase 249 | Complete |
 | TRUTH-01 | Phase 249 | Pending |
 | TRUTH-02 | Phase 249 | Pending |
 | LAND-01 | Phase 250 | Pending |

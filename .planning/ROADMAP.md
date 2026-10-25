@@ -47,6 +47,7 @@ Pushing to the public remote (Phase 250) and publishing to Hex (Phase 251) each 
 ## Phase Details
 
 ### Phase 249: Local Gate Parity & Planning Truth
+
 **Goal**: The integration head passes every merge-blocking check that can run locally. Each red is fixed at its source, never by weakening a gate. Planning state tells the truth about v1.67 and the out-of-band owner-feedback work.
 **Depends on**: Nothing (first phase of v1.67)
 **Requirements**: GREEN-01, GREEN-02, GREEN-03, GREEN-04, GREEN-05, TRUTH-01, TRUTH-02
@@ -56,10 +57,11 @@ Pushing to the public remote (Phase 250) and publishing to Hex (Phase 251) each 
   3. The Phase 190 automation contract and the Phase 190/192 browser probes pass on desktop and mobile. Each previously failing probe has a committed classification, either a source fix for a real regression or a contract update for a change made stale on purpose, with the rationale recorded.
   4. The `accrue`, `accrue_admin` and `accrue_portal` test suites, the host-integration gate and the Playwright E2E lane all pass locally on the integration head. `copy_strings.json` and visual baselines are regenerated only where an intentional change requires it.
   5. `.planning/HANDOFF.json` is gone and STATE.md reflects v1.67. Resolved debug sessions are filed. MILESTONES.md and STATE.md record commits `3d7d949d..b4a7eeac` as work done outside GSD, cite `.planning/notes/2026-10-1*-admin-owner-feedback.md` as receipts, and claim no backdated plans or phase verification.
-**Plans**: 17 plans
+
+**Plans**: 1/17 plans executed
 
 Plans:
-- [ ] 249-01-PLAN.md — Admin compile warning, formatter drift, DSY-01 breakpoint annotations, PdfTest flake measurement (wave 1)
+- [x] 249-01-PLAN.md — Admin compile warning, formatter drift, DSY-01 breakpoint annotations, PdfTest flake measurement (wave 1)
 - [ ] 249-02-PLAN.md — Admin credo --strict cleanup and portal endpoint test isolation (wave 2)
 - [ ] 249-03-PLAN.md — SL-G archived-digest scope, Phase 190 status vocabulary, executable-UAT recorded deviations (wave 1)
 - [ ] 249-04-PLAN.md — D-16 scoped ledger join wired in ci.yml, plus the local ci.yml replay tool (wave 1)
@@ -76,9 +78,11 @@ Plans:
 - [ ] 249-15-PLAN.md — Scratch clone: playwright-e2e shards 1-3 (wave 11)
 - [ ] 249-16-PLAN.md — Scratch clones: release-gate Floor, OpenTelemetry and Sigra cells (wave 12)
 - [ ] 249-17-PLAN.md — Phase close: VERIFICATION, generated UAT, digest, requirements Complete, final replay (wave 13)
+
 **UI hint**: yes
 
 ### Phase 250: Remote Integration
+
 **Goal**: The v1.63–v1.66 work reaches `origin/main` through one PR that CI proves green at its exact head SHA. History and SHA-bound evidence stay intact.
 **Depends on**: Phase 249
 **Requirements**: LAND-01, LAND-02, LAND-03
@@ -86,9 +90,11 @@ Plans:
   1. After an explicit maintainer yes, `integration/v1.63-v1.66` exists on origin. A pre-push publication-hygiene check (secrets, home paths, PII, large binaries) passed across the full pushed history, and `git ls-remote --tags origin` shows no v1.63–v1.66 milestone tags.
   2. `gh` reports every PR-required job in `ci.yml` and `accrue_admin_browser.yml` as `success`, not `skipped`, on the 40-hex head SHA recorded in the PR body. The committed PR-body file matches the live PR body byte for byte.
   3. The PR is merged with a merge commit (two parents, no squash or rebase). Every pre-merge commit SHA is reachable from `main`, and the first post-merge push run on `main` concludes `success` for all jobs.
+
 **Plans**: TBD
 
 ### Phase 251: 1.7.0 Release Alignment
+
 **Goal**: The release-please PR can ship 1.7.0 of `accrue`, `accrue_admin` and `accrue_portal` with adopter-readable notes. Publication happens only with an explicit maintainer yes.
 **Depends on**: Phase 250
 **Requirements**: RLS-01, RLS-02
@@ -96,13 +102,14 @@ Plans:
   1. The release-please 1.7.0 PR branch carries README version pins at 1.7.0, companion notes and a curated adopter-readable CHANGELOG for all three packages. A grep of the release CHANGELOGs finds no raw phase-scoped `feat(2xx-yy)` lines.
   2. Every required check on the release PR's exact head SHA concludes `success`, not `skipped`.
   3. Hex publication of 1.7.0 happens only after a recorded explicit maintainer yes. Without one, the aligned release PR stays open and green, and the decision is recorded in STATE.md.
+
 **Plans**: TBD
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 249. Local Gate Parity & Planning Truth | 0/17 | Planned | - |
+| 249. Local Gate Parity & Planning Truth | 1/17 | In Progress | - |
 | 250. Remote Integration | 0/TBD | Not started | - |
 | 251. 1.7.0 Release Alignment | 0/TBD | Not started | - |
 
