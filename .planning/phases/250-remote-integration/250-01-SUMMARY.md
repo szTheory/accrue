@@ -50,4 +50,12 @@ Any commit that changes a 250-covered file, or adds a 250 SUMMARY, is followed b
 
 None - plan executed as written.
 
-<!-- gsd:controls-continue -->
+## Bootstrap controls (scratch clone of B, removed afterwards)
+
+| Control | Setup | Output | rc |
+|---------|-------|--------|----|
+| (a) negative | B~1 (plans-only 250 dir), `current_phase: 250` | `artifact fixed point: FAIL: phase 250: zero artifacts discovered -- refusing to report a pass over zero inspected artifacts` | 1 |
+| (b) positive | B | SL-G `PASS (... phase 250, artifacts: 2, edges: 12, regenerations compared: 1, digests checked: 1)`; SL-E `PASS (12 parsed, 7 complete, 7 evidenced)`; exec-UAT `--self-test` PASS, `--all-opted-in` PASS (75 automated UAT tests), `--all-since 229` PASS (412 automated UAT tests) | 0 each |
+| (c) negative | B + one byte appended to covered `250-02-PLAN.md` | `artifact fixed point: FAIL: .../250-VERIFICATION.md: covered_digest mismatch over 12 covered files` | 1 |
+
+Controls (a) and (c) failed as required and (b) passed, so the gates demonstrably detect both an empty phase directory and digest drift.

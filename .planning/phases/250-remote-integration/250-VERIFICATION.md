@@ -16,7 +16,7 @@ covered_files:
   - ".planning/phases/250-remote-integration/250-RESEARCH.md"
   - ".planning/phases/250-remote-integration/250-UAT.md"
   - ".planning/phases/250-remote-integration/250-mint-close-artifacts.mjs"
-covered_digest: "v1:sha256:7abad07b70b3ba10a9e759400448a169dab19affdd8eb98071cf2159da5894e1"
+covered_digest: "v1:sha256:da17461cdaffaa41812913153f29f834b679c3f7d2eb03be0eca2ab4bea4b7a9"
 behavior_unverified: 0
 overrides_applied: 0
 ---
