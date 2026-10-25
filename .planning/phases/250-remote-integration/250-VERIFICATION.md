@@ -39,6 +39,7 @@ covered_files:
   - "accrue_admin/priv/static/accrue_admin.css"
   - "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs"
   - "accrue_admin/test/js/time_display_test.mjs"
+  - "accrue_portal/test/support/braintree_mox.ex"
   - "examples/accrue_host/e2e/phase13-canonical-demo.spec.js"
   - "examples/accrue_host/e2e/phase233-semantic.spec.js"
   - "examples/accrue_host/e2e/phase234-admin-customers-subscriptions.spec.js"
@@ -60,7 +61,7 @@ covered_files:
   - "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex"
   - "examples/accrue_host/priv/repo/seeds/ordinary.exs"
   - "examples/accrue_host/test/ordinary_preview_seed_test.exs"
-covered_digest: "v1:sha256:e823154b65bd5a57a1633780e6848b9eb9cbe5d3bebdd0b27033342a0450df6d"
+covered_digest: "v1:sha256:59f1e792a5d5f10acfe6f6f250db6043d8fb6fbcec6ee1d563faab7b8c38b3e0"
 behavior_unverified: 0
 overrides_applied: 0
 ---
