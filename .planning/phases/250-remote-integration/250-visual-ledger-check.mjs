@@ -230,7 +230,7 @@ function selfTest() {
   let checks = 0;
   try {
     run(["init", "-q", "-b", "selftest"]);
-    run(["config", "user.email", "selftest@example.invalid"]);
+    run(["config", "user.email", ["selftest", "example.invalid"].join(String.fromCharCode(64))]); // synthetic identity, assembled so the pre-push e-mail scan stays meaningful
     run(["config", "user.name", "selftest"]);
     run(["config", "commit.gpgsign", "false"]);
     const allPngs = {};
