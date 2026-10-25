@@ -1283,7 +1283,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     "#{event.type} · #{event_actor_summary(event)}"
   end
 
-  defp activity_audit_summary(_events, subscription) do
+  defp activity_audit_summary(_events, _subscription) do
     "Subscription status reviewed · Accrue system"
   end
 
