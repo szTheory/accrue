@@ -17,8 +17,8 @@ Milestone v1.67 Integration & CI Green. Lands the never-CI-validated v1.63–v1.
 
 ### Planning truth
 
-- [ ] **TRUTH-01**: Planning state is current and honest: stale `.planning/HANDOFF.json` removed, STATE.md reflects v1.67, and resolved debug sessions are filed.
-- [ ] **TRUTH-02**: The out-of-band 2026-10-11..19 owner-feedback commits (`3d7d949d..b4a7eeac`) are recorded in MILESTONES.md and STATE.md as work done outside GSD, citing `.planning/notes/2026-10-1*-admin-owner-feedback.md` as receipts, with no backdated plans or claimed phase verification; their regression coverage is exercised by the GREEN-05 suites.
+- [x] **TRUTH-01**: Planning state is current and honest: stale `.planning/HANDOFF.json` removed, STATE.md reflects v1.67, and resolved debug sessions are filed.
+- [x] **TRUTH-02**: The out-of-band 2026-10-11..19 owner-feedback commits (`3d7d949d..b4a7eeac`) are recorded in MILESTONES.md and STATE.md as work done outside GSD, citing `.planning/notes/2026-10-1*-admin-owner-feedback.md` as receipts, with no backdated plans or claimed phase verification; their regression coverage is exercised by the GREEN-05 suites.
 
 ### Remote integration
 
@@ -64,8 +64,8 @@ Deferred to a later milestone (tracked, not in this roadmap):
 | GREEN-03 | Phase 249 | Complete |
 | GREEN-04 | Phase 249 | Complete |
 | GREEN-05 | Phase 249 | Complete |
-| TRUTH-01 | Phase 249 | Pending |
-| TRUTH-02 | Phase 249 | Pending |
+| TRUTH-01 | Phase 249 | Complete |
+| TRUTH-02 | Phase 249 | Complete |
 | LAND-01 | Phase 250 | Pending |
 | LAND-02 | Phase 250 | Pending |
 | LAND-03 | Phase 250 | Pending |
