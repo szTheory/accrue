@@ -183,11 +183,13 @@ v159_reject_regex "accrue/guides/multi-rail-offline-release.md" '(raw transactio
 # this is scoped below the v1.59 heading so explanatory prohibition text stays valid.
 runbooks_file=$(v159_file "accrue/guides/operator-runbooks.md")
 v159_section=$(awk '/^## v1\.59 multi-rail and offline runbooks/{found=1} found{print}' "$runbooks_file")
-printf '%s\n' "$v159_section" | grep -Fq "bounded diagnostic" ||
+grep -Fq "bounded diagnostic" <<<"$v159_section" ||
   v159_fail "accrue/guides/operator-runbooks.md is missing job-oriented bounded diagnostic entry point"
-printf '%s\n' "$v159_section" | grep -Fq "literal next action" ||
+grep -Fq "literal next action" <<<"$v159_section" ||
   v159_fail "accrue/guides/operator-runbooks.md is missing job/next-action structure"
-if printf '%s\n' "$v159_section" | grep -Eqi '(inspect|check|run) (the )?(worker|provider|database|queue)' ; then
+# Here-strings, not `printf | grep -q`: under pipefail, grep -q closing the pipe early can
+# EPIPE the printf and flip a present needle to "missing" (or hide a match in the `if`).
+if grep -Eqi '(inspect|check|run) (the )?(worker|provider|database|queue)' <<<"$v159_section"; then
   v159_fail "accrue/guides/operator-runbooks.md has backend-first procedure wording"
 fi
 
