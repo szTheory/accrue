@@ -58,7 +58,7 @@ Pushing to the public remote (Phase 250) and publishing to Hex (Phase 251) each 
   4. The `accrue`, `accrue_admin` and `accrue_portal` test suites, the host-integration gate and the Playwright E2E lane all pass locally on the integration head. `copy_strings.json` and visual baselines are regenerated only where an intentional change requires it.
   5. `.planning/HANDOFF.json` is gone and STATE.md reflects v1.67. Resolved debug sessions are filed. MILESTONES.md and STATE.md record commits `3d7d949d..b4a7eeac` as work done outside GSD, cite `.planning/notes/2026-10-1*-admin-owner-feedback.md` as receipts, and claim no backdated plans or phase verification.
 
-**Plans**: 11/17 plans executed
+**Plans**: 12/17 plans executed
 
 Plans:
 - [x] 249-01-PLAN.md — Admin compile warning, formatter drift, DSY-01 breakpoint annotations, PdfTest flake measurement (wave 1)
@@ -72,7 +72,7 @@ Plans:
 - [x] 249-09-PLAN.md — Admin drift-docs, ratchet and non-visual browser-UAT lanes (wave 5)
 - [x] 249-10-PLAN.md — Ship-window ledger dispositions; SL-A and D-16 green (wave 6)
 - [x] 249-11-PLAN.md — In-tree replay: docs-contracts with exact pending-close texts, small jobs (wave 7)
-- [ ] 249-12-PLAN.md — In-tree replay: release-gate primary cell for all three packages (wave 8)
+- [x] 249-12-PLAN.md — In-tree replay: release-gate primary cell for all three packages (wave 8)
 - [ ] 249-13-PLAN.md — In-tree replay: every admin lane at the final head (wave 9)
 - [ ] 249-14-PLAN.md — Scratch clones: tokens regenerate and host-integration; docker smoke routed to Phase 250 (wave 10)
 - [ ] 249-15-PLAN.md — Scratch clone: playwright-e2e shards 1-3 (wave 11)
@@ -109,7 +109,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 249. Local Gate Parity & Planning Truth | 11/17 | In Progress | - |
+| 249. Local Gate Parity & Planning Truth | 12/17 | In Progress | - |
 | 250. Remote Integration | 0/TBD | Not started | - |
 | 251. 1.7.0 Release Alignment | 0/TBD | Not started | - |
 
