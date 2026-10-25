@@ -23,7 +23,10 @@ covered_files:
   - "accrue_admin/config/test.exs"
   - "accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs"
   - "accrue_admin/test/js/time_display_test.mjs"
-covered_digest: "v1:sha256:cf418e1e83141564d97b06ea9f2e44b1715457eec297e7aade8e1ebabdcb5f98"
+  - "examples/accrue_host/lib/accrue_host/ordinary_seed_boundary.ex"
+  - "examples/accrue_host/priv/repo/seeds/ordinary.exs"
+  - "examples/accrue_host/test/ordinary_preview_seed_test.exs"
+covered_digest: "v1:sha256:e98fdba2af3bc9707b5d4bf2b7da4c87401c00fb6a670467cefc8f39b124025e"
 behavior_unverified: 0
 overrides_applied: 0
 ---
