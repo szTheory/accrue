@@ -158,8 +158,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
             %{label: "Default payment method", render: &default_payment_method_label/1},
           ]}
           filter_fields={customer_filter_fields(@owner_type_type, @owner_type_options)}
-          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
-          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.customers_list_result_label_pair(), 1), else: "Reset filters"}
+          empty_action_href={@table_path}
+          empty_action_label="Reset filters"
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
