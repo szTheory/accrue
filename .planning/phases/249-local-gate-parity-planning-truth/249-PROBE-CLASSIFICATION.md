@@ -44,3 +44,17 @@ Job `admin-group-contracts` replayed with `249-replay-ci-job.py --run` at HEAD 2
 
 Skips: `Install Hex` (global hex already installed on the host), `Install Chromium` (apt-backed; Playwright Chromium already cached).
 Also `bash scripts/ci/verify_phase190_automation_contract.sh` -> ok.
+
+## Plan 249-08: admin-hardening-guardrails
+
+Positive control: first replay failed step 13 (`Run Phase 192 admin hardening guardrails`) on 2 of the phase191 page-flow tests, before any edit.
+
+| Probe (spec line, title, project) | Failing assertion | Current source | Causing commit | Receipt | Classification | Fix |
+|---|---|---|---|---|---|---|
+| admin-page-flow-phase191.spec.js:555 (was 469 test) disposable phase 240 subscription action stays busy through a single held dispatch; chromium-desktop | `getByText('Subscription has ended', {exact:true})` not found after cancel completes | `copy.ex:1001` `subscription_action_recorded_info` = `"Subscription action recorded."`; lifecycle `Canceled` still rendered (screenshot + a11y snapshot) | b4a7eeac (fix(admin): clarify billing views and recorded evidence) removed the `headline: "Subscription has ended"` status-card copy | `.planning/notes/2026-10-18-admin-owner-feedback.md` (clarified billing views); commit b4a7eeac diff | stale-contract | Asserts `Subscription action recorded.` visible and a `Canceled` label visible; all dispatch/audit/event assertions unchanged |
+| same; chromium-mobile | same | same | b4a7eeac | same | stale-contract | same |
+
+### Lanes (249-08 Task 1)
+
+Job `admin-hardening-guardrails` replayed with `249-replay-ci-job.py --run --env GITHUB_EVENT_NAME=workflow_dispatch --env BASE_SHA= --env BEFORE_SHA=`: all steps PASS (7 PASS, 2 SKIP).
+Skips: `Install Hex`, `Install Chromium` (already present on host).

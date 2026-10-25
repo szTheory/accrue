@@ -552,7 +552,8 @@ test.describe("Phase 191 page-flow regression harness", () => {
         expect(completed.ok()).toBeTruthy();
         return (await completed.json()).status;
       }).toBe("canceled");
-      await expect(page.getByText("Subscription has ended", { exact: true })).toBeVisible();
+      await expect(page.getByText("Subscription action recorded.", { exact: true })).toBeVisible();
+      await expect(page.getByText("Canceled", { exact: true }).first()).toBeVisible();
       await expect(stepUp).toBeHidden();
       await expect(page.locator(".ax-button-spinner")).toHaveCount(0);
 
