@@ -65,4 +65,26 @@ Verdict (helper, `--visual-pending-ok`): RED (rc 1). 15 jobs `success`, includin
 | Annotation sweep | failure | Sweep release-facing annotations | downstream of the shard failures | downstream | none |
 | Browser UAT | failure | Phase 211 visual regression gate | only the pixel gate | visual-pending, 250-04 | none here |
 
-<!-- gsd:ledger-continue -->
+## Iteration 5 - pushed `b9c98b20081841e976586339db47554e40da7179` (P)
+
+Runs: ci.yml `40229480564`, accrue_admin_browser.yml `40229480489`. Guard PASS, SL-F PASS.
+
+Verdict: `250-ci-head-status.mjs --repo szTheory/accrue --sha b9c98b20081841e976586339db47554e40da7179 --event pull_request --visual-pending-ok` prints `GREEN (visual-pending)`, rc 0, 19 jobs `success`. Without `--visual-pending-ok` it is rc 1 with exactly one red, `Browser UAT` at `Phase 211 visual regression gate`.
+
+Every PR-path job is `success` (all four Release gate cells, Docs and bash contracts, Release manifest SSOT, iOS offline client, Phase 18 Stripe Tax gate, Admin drift and docs, Admin group/hardening/phase200 guardrails, ratchet self-tests, Host integration, Playwright E2E shards 1/3 2/3 3/3, Host Docker boot smoke, Annotation sweep). The parked lane `Admin UI ratchet guardrails [parked]` is `failure` by design (D1). The Stripe trio and `Mint visual baselines` are `skipped` as required.
+
+| Job | Conclusion | Failing step | Classification | Fix |
+|-----|-----------|--------------|----------------|-----|
+| Browser UAT | failure | Phase 211 visual regression gate (every earlier step `success`) | visual-pending, handed to 250-04 | none in 250-03; baselines are minted only after each changed surface is classified (D4) |
+
+Bound: 5 of 6 push iterations used. Hand-off: 250-04 owns the visual baselines for P.
+
+## Pushed SHA record
+
+| Iteration | SHA | ci.yml run | browser run | Verdict |
+|-----------|-----|-----------|-------------|---------|
+| 1 | `bde9ae6cb64734c144706895641e46dbf5cedcb2` | 40213687124 | 40213687112 | RED |
+| 2 | `11ede7ffab5ee4fbd0862982575b1dcbd52b6206` | 40216216053 | 40216216059 | RED |
+| 3 | `ead4f497c124d4e1bbca2ff313dff76f310231e2` | 40221570264 | 40221570185 | RED |
+| 4 | `533d2ded4208d32c982d2e4bb78c8f6dff150eb8` | 40226070833 | 40226070837 | RED |
+| 5 (P) | `b9c98b20081841e976586339db47554e40da7179` | 40229480564 | 40229480489 | GREEN (visual-pending) |
