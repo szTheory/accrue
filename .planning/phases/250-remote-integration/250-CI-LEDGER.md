@@ -105,6 +105,16 @@ Verdict: RED (rc 1), 17 jobs `success`. **Browser UAT `success`**: the Phase 211
 | Annotation sweep | failure | Sweep release-facing annotations | both annotations are the portal failure above | downstream | none |
 | Admin UI ratchet guardrails [parked] | failure | Verify frozen ratchet evidence | by design, D1 | parked | none |
 
+## Iteration 8 (plan 250-04) - pushed `5ad01dee2c70087aa89fafdfb154f6e9d8068277` (P)
+
+Runs: ci.yml `40236926623`, accrue_admin_browser.yml `40236926603`. Guard PASS, SL-F PASS.
+
+Verdict: `250-ci-head-status.mjs --repo szTheory/accrue --sha 5ad01dee2c70087aa89fafdfb154f6e9d8068277 --event pull_request` (no `--visual-pending-ok`) prints `GREEN`, rc 0, 20 jobs `success`.
+
+Every PR-path job is `success`: Browser UAT, including the `Phase 211 visual regression gate`; all four Release gate cells, including the portal suite; Docs and bash contracts; Release manifest SSOT; iOS offline client; Phase 18 Stripe Tax gate; Admin drift and docs; Admin group, hardening and Phase 200 guardrails; ratchet self-tests; Host integration; Playwright E2E shards 1/3, 2/3 and 3/3; Host Docker boot smoke; Annotation sweep. The parked lane `Admin UI ratchet guardrails [parked]` is `failure` by design (D1). The Stripe trio and `Mint visual baselines` are `skipped` as required. No `gh run rerun` was used.
+
+Bound: 3 of 3 plan-250-04 pushes used.
+
 ## Pushed SHA record
 
 | Iteration | SHA | ci.yml run | browser run | Verdict |
@@ -116,3 +126,4 @@ Verdict: RED (rc 1), 17 jobs `success`. **Browser UAT `success`**: the Phase 211
 | 5 (P) | `b9c98b20081841e976586339db47554e40da7179` | 40229480564 | 40229480489 | GREEN (visual-pending) |
 | 6 (250-04) | `133fafc2b0c4487522eaa40801985518e4d986ec` | 40232857493 | 40232857489 | RED (visual, classified) |
 | 7 (250-04) | `74cdd43a48a57ee2ee047293d387093c138da5d8` | 40234321143 | 40234321194 | RED (portal flake; Browser UAT success) |
+| 8 (250-04, P) | `5ad01dee2c70087aa89fafdfb154f6e9d8068277` | 40236926623 | 40236926603 | GREEN |
