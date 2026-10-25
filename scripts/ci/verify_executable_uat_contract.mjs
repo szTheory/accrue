@@ -667,7 +667,7 @@ function selfTest() {
 
     // load-time rejections
     const base = { kind: "uat_missing", path: devRel("250-VERIFICATION.md"), sha256: "a".repeat(64), reason: "r" };
-    expectFail("active-phase path", /only archived paths/, () => loadDeviations([{ ...base, path: ".planning/phases/250-dev/250-VERIFICATION.md" }]));
+    expectFail("active-phase path", /only archived paths/, () => loadDeviations([{ ...base, path: ".planning/phases/250-dev/250-VERIFICATION.md" }])); // archive-sweep-exempt: synthetic negative-control path, not a live read
     expectFail("path traversal", /only archived paths/, () => loadDeviations([{ ...base, path: ".planning/milestones/../phases/x" }]));
     expectFail("empty reason", /a reason is required/, () => loadDeviations([{ ...base, reason: " " }]));
     expectFail("unknown kind", /unknown kind/, () => loadDeviations([{ ...base, kind: "everything" }]));
