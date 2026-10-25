@@ -1539,6 +1539,12 @@ jobs:
       ACCRUE_HOST_TEST_POOL_SIZE: 8
       ACCRUE_HOST_PLAYWRIGHT_WORKERS: 1
       ACCRUE_HOST_E2E_FIXTURE: /tmp/accrue-host-e2e-fixture-${{ matrix.shard }}.json
+      # playwright.config.js runs `mix phx.server` with MIX_BUILD_PATH forced inside the proof-run
+      # directory (examples/accrue_host/tmp/accrue-host-proof-<id>). Without a fixed id and path here,
+      # every compile step below fills the default _build and the server cold-compiles all deps inside
+      # Playwright's 120s webServer timeout. Sharing one proof path makes the compile steps warm it.
+      ACCRUE_HOST_PROOF_RUN_ID: playwright-shard-${{ matrix.shard }}
+      MIX_BUILD_PATH: ${{ github.workspace }}/examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test
 
     steps:
       - uses: actions/checkout@v6
