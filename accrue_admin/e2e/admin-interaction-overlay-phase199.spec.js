@@ -65,7 +65,7 @@ const PHASE199_ROUTE_FLOWS = Object.freeze([
     name: "Webhook list to event drill to replay step-up and back",
     route: () => "/billing/webhooks?view=all",
     steps: [
-      { link: /evt_e2e_phase199_dead/i, expectedAfterClick: /\/billing\/webhooks\/19900000-/ },
+      { link: /Invoice\.payment Failed/i, expectedAfterClick: /\/billing\/webhooks\/19900000-/ },
       { assertText: /Raw payload|Derived ledger rows/i },
       { link: /Event charge\.succeeded/i, expectedAfterClick: /\/billing\/events\/\d+/ },
       { assertText: /Source webhook|Charge 19900000-/i },
@@ -94,7 +94,7 @@ const PHASE199_ROUTE_FLOWS = Object.freeze([
     name: "Connect list to account detail to platform-fee step-up and back",
     route: () => "/billing/connect?view=all",
     steps: [
-      { link: /acct_e2e_phase199_attention/i, expectedAfterClick: /\/billing\/connect\/19900000-/ },
+      { link: /phase199-connect@example\.com/i, expectedAfterClick: /\/billing\/connect\/19900000-/ },
       { assertText: /Needs attention|currently due: external_account/i },
       { drawerStepUp: /Edit platform fee override|Change platform fee override/i },
       { back: /\/billing\/connect/ },
@@ -250,7 +250,8 @@ const COPY_ACTION_CONTEXT_TARGETS = Object.freeze([
     actions: [
       {
         visible: /Replay webhook|Replay delivery/i,
-        context: /evt_e2e_phase199_dead/i,
+        context: /Replay webhook|Replay delivery/i,
+        pageHeading: /evt_e2e_phase199_dead/i,
       },
     ],
   },
@@ -593,6 +594,12 @@ async function assertActionHasObjectContext(page, action, label = "action") {
 
   expect(match, `${label}: visible action ${action.visible} exists`).toBeTruthy();
   expect(`${match.aria} ${match.fullText}`, `${label}: object/action context`).toMatch(action.context);
+  if (action.pageHeading) {
+    // 247-04 (e6f39cef) moved object identity from a per-button aria-label to the page h1.
+    await expect(page.getByRole("heading", { level: 1 }), `${label}: page heading names the object`).toContainText(
+      action.pageHeading
+    );
+  }
 }
 
 async function bodyScrollTop(page) {
@@ -1078,7 +1085,9 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     await expect(page).toHaveURL(/\/billing\/invoices\?/);
     await expect(page.locator("main")).toContainText("Showing 1 invoice");
     const invoiceLinks = page.locator("main a[href^='/billing/invoices/']");
-    await expect(invoiceLinks).toHaveCount(2);
+    // One invoice renders three links: the hidden table-row number, the card heading number,
+    // and the "View invoice" action (separated identity, 246-04); resultIds below dedupes to one.
+    await expect(invoiceLinks).toHaveCount(3);
     const resultIds = await invoiceLinks.evaluateAll((links) =>
       [...new Set(links.map((link) => new URL(link.href).pathname.split("/").pop()))]
     );
@@ -1385,12 +1394,13 @@ test.describe("Phase 199 interaction and overlay contract", () => {
       await page.setViewportSize({ width: 768, height: 1024 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(769);
       if (surface === "Home and shell" && coarsePointer) {
+        // 3d7d949d removed the Home header shortcut buttons; the shell search trigger is the remaining entry.
         const shortcutHeights = await page
-          .locator(".ax-home .ax-page-header-actions > .ax-button")
+          .locator("[data-command-palette-trigger]")
           .evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().height));
-        expect(shortcutHeights, "Home customer, search and subscription shortcuts are mounted").toHaveLength(3);
+        expect(shortcutHeights, "shell search trigger is mounted").toHaveLength(1);
         for (const height of shortcutHeights) {
-          expect(height, "intermediate-width coarse-pointer shortcut hit target is at least 44 CSS px").toBeGreaterThanOrEqual(44);
+          expect(height, "intermediate-width coarse-pointer search trigger hit target is at least 44 CSS px").toBeGreaterThanOrEqual(44);
         }
       }
       await page.setViewportSize({ width: 1280, height: 900 });
@@ -1467,12 +1477,12 @@ const RATCHET_AUTO_GUARDS = [
   {"finding_id":"f-4f474e99919ee505","kind":"focus-ring","selector":".ax-topbar"}, // @ratchet:f-4f474e99919ee505
   {"finding_id":"f-5b4fde509c9846f7","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-5b4fde509c9846f7
   {"finding_id":"f-66ff3aa97d803c81","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-66ff3aa97d803c81
-  {"finding_id":"f-68d2bf118467b34a","kind":"focus-ring","selector":".ax-home [data-command-palette-trigger]","route":"/billing"}, // @ratchet:f-68d2bf118467b34a
+  {"finding_id":"f-68d2bf118467b34a","kind":"focus-ring","selector":"[data-command-palette-trigger]","route":"/billing"}, // @ratchet:f-68d2bf118467b34a
   {"finding_id":"f-8b82f34db2fd2d70","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-8b82f34db2fd2d70
   {"finding_id":"f-8d4e761ccec068a7","kind":"focus-ring","selector":".ax-primary-nav:visible, [data-sidebar-toggle='true']:visible"}, // @ratchet:f-8d4e761ccec068a7
   {"finding_id":"f-90ff4aae38ba2085","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-90ff4aae38ba2085
   {"finding_id":"f-988d2a9808195b53","kind":"focus-ring","selector":".ax-detail"}, // @ratchet:f-988d2a9808195b53
-  {"finding_id":"f-9e6f3e53a835a6d5","kind":"focus-ring","selector":".ax-home [data-command-palette-trigger]","route":"/billing"}, // @ratchet:f-9e6f3e53a835a6d5
+  {"finding_id":"f-9e6f3e53a835a6d5","kind":"focus-ring","selector":"[data-command-palette-trigger]","route":"/billing"}, // @ratchet:f-9e6f3e53a835a6d5
   {"finding_id":"f-9f433603cde72097","kind":"focus-ring","selector":".ax-kpi-card"}, // @ratchet:f-9f433603cde72097
   {"finding_id":"f-a276757f4dcd510c","kind":"focus-ring","selector":".ax-related-resources"}, // @ratchet:f-a276757f4dcd510c
   {"finding_id":"f-a3421a7901c75b6b","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-a3421a7901c75b6b
