@@ -87,17 +87,18 @@ test.describe("Phase 196 Subscriptions LIST contract", () => {
       await expect(list, `${theme}: subscriptions list marker`).toBeVisible();
       await expect(list, `${theme}: populated state`).toHaveAttribute("data-ax-state", "populated");
 
-      await expect(page.locator("[data-ax-filter-chips]"), `${theme}: chip row`).toBeVisible();
+      // b4a7eeac: views are a "Subscription view" nav; chips list only applied constraints.
+      await expect(page.locator("[data-ax-view-nav]"), `${theme}: view nav`).toBeVisible();
       await expect(page.locator("[data-ax-result-count]"), `${theme}: result count`).toContainText(
         /Showing \d+ subscriptions?/
       );
 
       await assertColumnOrder(page, [
-        "Customer details",
-        "State",
-        "Plan / amount",
+        "Subscription",
+        "Status",
+        "Plan",
         "Renews / ends",
-        "Signals",
+        "Ownership and tax",
       ]);
 
       await assertTextOrder(page, "E2E Dashboard Customer", "sub_e2e_dashboard");
@@ -115,16 +116,17 @@ test.describe("Phase 196 Subscriptions LIST contract", () => {
     );
 
     await expect(page.locator("form[phx-change='data_table_filter'][phx-submit='data_table_filter']")).toBeVisible();
-    await expect(page.locator("[data-ax-filter-chips]")).toContainText("At risk");
+    // b4a7eeac: the default queue and its All escape hatch are the "Subscription view" nav.
+    const viewNav = page.locator("[data-ax-view-nav]").first();
+    await expect(viewNav).toBeVisible();
+    await expect(viewNav.getByRole("link", { name: "Past due or ending" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
 
-    const allChip = page.locator("[data-ax-filter-chips] a[aria-label='Apply All filter']").first();
-    await expect(allChip, "All chip/link should be one action away").toBeVisible();
-    await expect(allChip).toContainText("All");
-    await expect(allChip).toHaveAttribute("href", /\/billing\/subscriptions\?view=all$/);
-
-    const clearAll = page.locator("[data-ax-clear-all]").first();
-    await expect(clearAll, "clear-all should target the view=all escape hatch").toBeVisible();
-    await expect(clearAll).toHaveAttribute("href", /\/billing\/subscriptions\?view=all$/);
+    const allView = viewNav.getByRole("link", { name: "All subscriptions" });
+    await expect(allView, "All view should be one action away").toBeVisible();
+    await expect(allView).toHaveAttribute("href", /\/billing\/subscriptions\?view=all$/);
   });
 
   test("empty and loading states expose exact markers, reasons, copy, and skeleton accessibility", async ({
@@ -160,7 +162,8 @@ test.describe("Phase 196 Subscriptions LIST contract", () => {
         reason: "queue",
         title: "Nothing at risk.",
         body: "View All to see every subscription.",
-        clearAll: true,
+        clearAll: false,
+        escapeLink: "View all subscriptions",
       },
     ];
 
@@ -179,6 +182,13 @@ test.describe("Phase 196 Subscriptions LIST contract", () => {
         await expect(page.locator("[data-ax-clear-all]"), `${contract.name}: clear-all`).toBeVisible();
       } else {
         await expect(page.locator("[data-ax-clear-all]"), `${contract.name}: no clear-all`).toHaveCount(0);
+      }
+
+      if (contract.escapeLink) {
+        await expect(list.getByRole("link", { name: contract.escapeLink }), `${contract.name}: escape link`).toHaveAttribute(
+          "href",
+          /\/billing\/subscriptions\?view=all$/
+        );
       }
     }
 
@@ -212,9 +222,9 @@ test.describe("Phase 196 Subscriptions LIST contract", () => {
       await expect(firstCard, `${theme}: customer identity`).toContainText("E2E Dashboard Customer");
       await expect(firstCard, `${theme}: subscription identity`).toContainText("sub_e2e_dashboard");
       await expect(firstCard, `${theme}: state label`).toContainText(/Active|Trialing|At risk/);
-      await expect(firstCard, `${theme}: plan amount label`).toContainText("Plan / amount");
+      await expect(firstCard, `${theme}: plan amount label`).toContainText("Plan");
       await expect(firstCard, `${theme}: renews label`).toContainText("Renews / ends");
-      await expect(firstCard, `${theme}: signals label`).toContainText("Signals");
+      await expect(firstCard, `${theme}: ownership label`).toContainText("Ownership and tax");
 
       await assertNoHorizontalClip(page, "#main-content, main, [data-role='card-list']", `${theme} mobile`);
     }

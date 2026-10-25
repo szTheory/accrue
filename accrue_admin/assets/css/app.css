@@ -5079,14 +5079,21 @@ html.accrue-admin[data-theme="dark"] .ax-card.ax-data-table-shell {
   .ax-topbar-actions {
     width: 100%;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: var(--ax-space-xs);
+  }
+
+  .ax-topbar-actions > .ax-theme-picker {
+    grid-column: 1 / -1; /* WCAG 1.4.10 reflow: own row so the three segments never push past 320px at 200% root font */
+    justify-self: start;
+    max-width: 100%;
   }
 
   .ax-time-preference {
     grid-column: 1 / -1;
     justify-content: flex-start;
+    flex-wrap: wrap; /* WCAG 1.4.10 reflow: label and select wrap at 200% root font on 320px */
     min-width: 0;
   }
 
