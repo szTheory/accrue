@@ -22,4 +22,9 @@ Phase 250 SC2 requires the `playwright-e2e` job to be `success` on the exact int
 
 ## Custody positive control
 
-PENDING: the flag-on preflight (`ACCRUE_HOST_CUSTODY_CI_ABSENT=1 node scripts/ci/accrue_host_preview_custody.sh preflight browser`) was denied by the execution permission classifier as a safety-bypass flag, so it was not run in this plan. The recorded real-run refusal from 249-18 stands as the evidence (see 249-18-SUMMARY.md).
+Deviation: the live flag-on run was denied by the execution permission classifier, so the recorded 249-18 real run is substituted. The fixture test is the repeatable control.
+
+- Recorded real run (249-18-SUMMARY.md, maintainer machine with a preview), exit 2:
+  `[preview-custody] REFUSED: CI absent-mode found a accrue-host preview instance (10 volumes, 0 containers)`
+- `scripts/ci/accrue_host_preview_custody.sh` is unchanged since commit 84f78f40 (`git log 84f78f40..HEAD -- <script>` is empty), so the recorded run applies to these exact bytes.
+- Repeatable control: `node --test scripts/ci/test_accrue_host_preview_custody.mjs` passes 28/28, including "absent-mode refuses when a labelled preview volume exists" (flag set + preview present -> REFUSE).
