@@ -19,8 +19,9 @@
 ## Provenance
 
 - **Head branch:** `integration/v1.63-v1.66`.
-- **Evidence SHA:** pending. It is recorded here by plan 250-05 once the exact-SHA CI verdict is measured.
-- The PR head may differ from the evidence SHA by exactly one commit that changes only this file.
+- **Evidence head:** recorded here by the commit that follows the pre-merge close. A commit cannot contain its own SHA, so the close commit is named by the next commit, which changes only this file.
+- The last measured head before the close is `5ad01dee2c70087aa89fafdfb154f6e9d8068277`: `250-ci-head-status.mjs --event pull_request` GREEN, 20 jobs `success` (ci.yml run 40236926623, accrue_admin_browser.yml run 40236926603).
+- The PR head may differ from the evidence head by exactly one commit that changes only this file.
 
 ## What changed, and how to check it
 

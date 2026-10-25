@@ -22,7 +22,7 @@ Milestone v1.67 Integration & CI Green. Lands the never-CI-validated v1.63–v1.
 
 ### Remote integration
 
-- [ ] **LAND-01**: After an explicit maintainer yes, the integration head is pushed to an accurately named branch (`integration/v1.63-v1.66`) with a pre-push publication-hygiene check (secrets, home paths, PII, large binaries) passing across the full pushed history; milestone tags stay local.
+- [x] **LAND-01**: After an explicit maintainer yes, the integration head is pushed to an accurately named branch (`integration/v1.63-v1.66`) with a pre-push publication-hygiene check (secrets, home paths, PII, large binaries) passing across the full pushed history; milestone tags stay local.
 - [ ] **LAND-02**: One PR to `main` shows every `ci.yml` and `accrue_admin_browser.yml` job that has a `pull_request` run path concluding `success`, not `skipped`. That is checked on the exact 40-hex evidence head SHA recorded in the PR body, and the committed PR-body file matches the live body. Two kinds of job are outside the PR bar: the parked `Admin UI ratchet guardrails [parked]` lane, which is `continue-on-error` by design (WINDOWS.md waiver row 11), and dispatch-only or push/schedule-only jobs (`Mint visual baselines`, `Stripe provider-proof trigger classifier`, `Stripe provider-proof incident reconciliation`, `Stripe test-mode parity (mandatory periodic)`). A commit cannot contain its own SHA. So the PR head may differ from the recorded evidence head by exactly one commit that changes nothing but the committed PR-body file, and that head's runs must meet the same bar.
 - [ ] **LAND-03**: The PR is merged with a merge commit (no squash, no rebase), so pre-merge commit SHAs and conventional-commit history remain reachable from `main`, and the first post-merge push run on `main` is fully green. The first post-merge push run on `main` meets, job by job, the bar of the last green `main` push run (run 35374333981). Any job that cannot run there, for example one missing a secret, is recorded as such and not claimed.
 
@@ -67,7 +67,7 @@ Deferred to a later milestone (tracked, not in this roadmap):
 | GREEN-05 | Phase 249 | Complete |
 | TRUTH-01 | Phase 249 | Complete |
 | TRUTH-02 | Phase 249 | Complete |
-| LAND-01 | Phase 250 | Pending |
+| LAND-01 | Phase 250 | Complete |
 | LAND-02 | Phase 250 | Pending |
 | LAND-03 | Phase 250 | Pending |
 | RLS-01 | Phase 251 | Pending |

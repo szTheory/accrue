@@ -99,7 +99,7 @@ Plans:
 - [x] 250-02-PLAN.md — Researched source fixes with negative controls (RecoveryLiveTest + admin PG UTC pin, D-32 npm ci, time_display TZ pin); D1 wording, D2 deferral, D3 PR-body file (wave 2)
 - [x] 250-03-PLAN.md — Exact-SHA CI verdict helper + pre-push guard (close gates, hygiene, secret/PII scans); bounded push/measure/fix loop (wave 3)
 - [x] 250-04-PLAN.md — D4 visual baselines: mechanical ledger checker, per-surface classification, regression fixes, CI-dispatch re-mint of intentional surfaces only (wave 4)
-- [ ] 250-05-PLAN.md — Pre-merge close commit E (re-mint, LAND-01 Complete), green at E, body-only H records E (wave 5)
+- [x] 250-05-PLAN.md — Pre-merge close commit E (re-mint, LAND-01 Complete), green at E, body-only H records E (wave 5)
 - [ ] 250-06-PLAN.md — LAND-03: maintainer merge decision, `gh pr merge 49 --merge --match-head-commit`, reachability, post-merge main run vs 35374333981, local main ff reconcile (wave 6)
 - [ ] 250-07-PLAN.md — Post-merge close: LAND-02/03 Complete, VERIFICATION 3/3 re-mint, close commit parked per decision (wave 7)
 
@@ -120,7 +120,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 249. Local Gate Parity & Planning Truth | 18/18 | Complete    | 2026-10-25 |
-| 250. Remote Integration | 4/7 | In Progress | - |
+| 250. Remote Integration | 5/7 | In Progress | - |
 | 251. 1.7.0 Release Alignment | 0/TBD | Not started | - |
 
 ## Next

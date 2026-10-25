@@ -1,8 +1,8 @@
 ---
 phase: 250-remote-integration
-verified: 2026-10-25T17:00:00Z
+verified: 2026-10-25T22:45:00Z
 status: passed
-score: "completed-plan claims verified: 250-01, 250-02; phase success criteria claimed: 0/3 (phase in progress)"
+score: "2/3 success criteria verified (SC3 is LAND-03, claimed after the merge by 250-07)"
 covered_files:
   - ".github/workflows/ci.yml"
   - ".planning/phases/250-remote-integration/250-01-PLAN.md"
@@ -14,6 +14,7 @@ covered_files:
   - ".planning/phases/250-remote-integration/250-04-PLAN.md"
   - ".planning/phases/250-remote-integration/250-04-SUMMARY.md"
   - ".planning/phases/250-remote-integration/250-05-PLAN.md"
+  - ".planning/phases/250-remote-integration/250-05-SUMMARY.md"
   - ".planning/phases/250-remote-integration/250-06-PLAN.md"
   - ".planning/phases/250-remote-integration/250-07-PLAN.md"
   - ".planning/phases/250-remote-integration/250-CONTEXT.md"
@@ -62,32 +63,35 @@ covered_files:
   - "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex"
   - "examples/accrue_host/priv/repo/seeds/ordinary.exs"
   - "examples/accrue_host/test/ordinary_preview_seed_test.exs"
-covered_digest: "v1:sha256:495f50d43d028722aaba1a05a4d8bc4a8b5ec417065266e79cd4cec51b840604"
+covered_digest: "v1:sha256:09fc6ccea8f404a00c7e85bd64c960cb206b8de057ef0b20ee7d825020570efb"
 behavior_unverified: 0
 overrides_applied: 0
 ---
 
-# Phase 250: Remote Integration Verification Report (in progress)
+# Phase 250: Remote Integration Verification Report (pre-merge close)
 
-**Scope:** `status: passed` and `behavior_unverified: 0` apply to the completed-plan claims below only. Phase success criteria SC1-SC3 are not yet claimed. No requirement is marked Complete.
+**Scope:** `status: passed` and `behavior_unverified: 0` cover the five pre-merge plans (250-01..05) and success criteria SC1 and SC2. SC3 (LAND-03, the merge and the first post-merge `main` run) is not yet claimed; 250-07 claims it after the merge. Only LAND-01 is marked Complete. LAND-02 is verified here at the measured head and is marked Complete by 250-07 together with LAND-03.
 
 ## Observable Truths
 
 | # | Claim | Evidence | Status |
 |---|-------|----------|--------|
-| B1 | Phase 250 owns SL-G, SL-E and executable-UAT from its first commit | `250-01-SUMMARY.md` coverage B1; SL-G, SL-E, exec-UAT `--all-since 229` and `--phase 250` exit 0 | VERIFIED |
+| B1 | Phase 250 owns SL-G, SL-E and executable-UAT from its first commit | `250-01-SUMMARY.md` coverage B1 | VERIFIED |
 | F1 | RecoveryLiveTest ceil+2 clock and admin UTC pin (pin-only control: 8 failures; fixed: 33/0, full suite 746/0) | `250-02-SUMMARY.md` coverage F1 | VERIFIED |
 | F2 | docs job `npm ci` before D-32 (clean-clone control FAIL then PASS) | `250-02-SUMMARY.md` coverage F2 | VERIFIED |
 | F3 | time_display TZ pin (unpinned UTC control: 1 failure; pinned: 3 zones pass) | `250-02-SUMMARY.md` coverage F3 | VERIFIED |
 | D1 | LAND-02/03 wording, D2 deferral, PR 49 body file | `250-02-SUMMARY.md` coverage D1 | VERIFIED |
-| SC1 | Roadmap success criterion 1 | not yet claimed (in progress) | NOT CLAIMED |
-| SC2 | Roadmap success criterion 2 | not yet claimed (in progress) | NOT CLAIMED |
-| SC3 | Roadmap success criterion 3 | not yet claimed (in progress) | NOT CLAIMED |
+| H1/G1 | Exact-SHA verdict helper (34 fixture checks, live rc 1 control at `23bee494`) and pre-push guard with runtime-built positive controls | `250-03-SUMMARY.md` coverage H1, G1 | VERIFIED |
+| F4 | Host-integration and Playwright shard fixes, each with a negative control or an exact local reproduction | `250-03-SUMMARY.md` coverage F4; `250-CI-LEDGER.md` iterations 1-5 | VERIFIED |
+| V1-V4 | D4 checker, Phase 211 anchor retarget, per-surface classification (10 intentional, 2 unchanged, 0 regressions), portal stub race | `250-04-SUMMARY.md` coverage V1-V4; `250-VISUAL-CLASSIFICATION.md`; `250-CI-LEDGER.md` iterations 6-8 | VERIFIED |
+| SC1 | LAND-01: the integration head is on `integration/v1.63-v1.66` with publication hygiene passing across the full pushed history; milestone tags stay local | Re-runnable: `bash .planning/phases/250-remote-integration/250-prepush-guard.sh --hygiene-only --range 23bee4949045b7ac9361d954b24497bb749e771b..<E>`, where `<E>` is the evidence head named in `250-INTEGRATION-PR.md` Provenance. Before E it passed over `23bee494..6fe35302` (48 commits; `250-05-SUMMARY.md` coverage SC1). History before `23bee494`: the 850-commit full-history scan and the 91-commit `b4a7eeac..23bee494` scan in `250-CONTEXT.md` (Already done). The guard passed before every push (250-03 G1, ledger iterations 1-8) | VERIFIED |
+| SC2 | LAND-02: every `ci.yml` and `accrue_admin_browser.yml` job with a `pull_request` run path concludes `success` on the exact head, with the D1 exclusions only | `node .planning/phases/250-remote-integration/250-ci-head-status.mjs --repo szTheory/accrue --sha 5ad01dee2c70087aa89fafdfb154f6e9d8068277 --event pull_request` (no `--visual-pending-ok`): GREEN, rc 0, 20 jobs `success`; ci.yml run 40236926623, accrue_admin_browser.yml run 40236926603; `250-CI-LEDGER.md` iteration 8. The same helper is re-run at E and at the body-only H (`250-INTEGRATION-PR.md` Provenance); SL-F keeps the committed body byte-identical to the live body | VERIFIED |
+| SC3 | LAND-03: merge commit, pre-merge SHAs reachable from `main`, first post-merge `main` push run meets run 35374333981 job by job | not yet claimed (post-merge, 250-07) | NOT CLAIMED |
 
 ## Excluded from covered_files
 
-`.planning/STATE.md`, `.planning/ROADMAP.md` and `.planning/REQUIREMENTS.md` are live trackers. This file is excluded from its own list. `250-INTEGRATION-PR.md` and `250-CI-LEDGER.md` record the CI result of heads they cannot be part of; covering them would form a digest cycle.
+`.planning/STATE.md`, `.planning/ROADMAP.md` and `.planning/REQUIREMENTS.md` are live trackers. This file is excluded from its own list. `250-INTEGRATION-PR.md` and `250-CI-LEDGER.md` record the CI result of heads they cannot be part of; covering them would form a digest cycle. Control (d) in `250-05-SUMMARY.md` shows that a byte appended to either leaves SL-G passing, and control (b) shows that a byte appended to a covered file does not.
 
 ## Gaps
 
-SC1-SC3 remain open until later Phase 250 plans claim them.
+SC3 (LAND-03) remains open until the maintainer approves the merge (250-06) and 250-07 claims it.
