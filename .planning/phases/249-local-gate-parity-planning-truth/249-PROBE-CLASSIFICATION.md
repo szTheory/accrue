@@ -86,3 +86,13 @@ Both replays used `--run --skip 'Install Chromium' --skip 'Install Hex' --env GI
 | `admin-phase200-guardrails` | PASS (6 PASS, 2 SKIP) | scorecard and sign-off passed in their in-job order |
 
 Phase 200 output: the scripts write to the hard-coded `.planning/phases/200-idempotent-verification-sign-off`; after every run it was moved to `$GSD_SCRATCH/phase200-output-<epoch>/` and its absence asserted, so no generated evidence entered the tree. The path was not changed (out of scope).
+
+## Plan 249-09: admin-drift-docs and ratchet jobs
+
+Replays used `--run --env GITHUB_EVENT_NAME=workflow_dispatch --env BASE_SHA= --env BEFORE_SHA=` (drift-docs also `--skip 'Install Hex'`).
+
+| Job | Result | Notes |
+|---|---|---|
+| `admin-drift-docs` | PASS (4 PASS, 1 SKIP) | `Install Hex` skipped (already present). Rebuilt assets produced no diff: the committed admin bundle is fresh |
+| `admin-ui-ratchet-selftests` | PASS (5 PASS) | ledger self-tests, sign-off self-test, Phase 208 CI contract, parked-lane expiry |
+| `admin-ui-ratchet-guardrails` | ADVISORY (2 ADVISORY-PASS, 2 ADVISORY-FAIL), exit 0 | Steps `Verify frozen ratchet evidence` and `Verify UI ratchet sign-off` fail, but both are `continue-on-error` in ci.yml. Recorded exactly as CI treats it: the job is parked per WINDOWS row 11. Not reclassified, not fixed, no edits |
