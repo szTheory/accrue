@@ -46,7 +46,7 @@ covered_files:
   - "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex"
   - "examples/accrue_host/priv/repo/seeds/ordinary.exs"
   - "examples/accrue_host/test/ordinary_preview_seed_test.exs"
-covered_digest: "v1:sha256:fdca2ce1515d8e2a78220b1bd0b148a8395839e8b289f428bca21b70344fb1cc"
+covered_digest: "v1:sha256:7604a6a7dc9e05b4748add55ed36599565bc2e2fd70ef2a6c47d3396637243a8"
 behavior_unverified: 0
 overrides_applied: 0
 ---
