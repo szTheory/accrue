@@ -2,7 +2,7 @@
 phase: 250-remote-integration
 verified: 2026-10-25T17:00:00Z
 status: passed
-score: "completed-plan claims verified: 250-01; phase success criteria claimed: 0/3 (phase in progress)"
+score: "completed-plan claims verified: 250-01, 250-02; phase success criteria claimed: 0/3 (phase in progress)"
 covered_files:
   - ".planning/phases/250-remote-integration/250-01-PLAN.md"
   - ".planning/phases/250-remote-integration/250-01-SUMMARY.md"
@@ -30,6 +30,10 @@ overrides_applied: 0
 | # | Claim | Evidence | Status |
 |---|-------|----------|--------|
 | B1 | Phase 250 owns SL-G, SL-E and executable-UAT from its first commit | `250-01-SUMMARY.md` coverage B1; SL-G, SL-E, exec-UAT `--all-since 229` and `--phase 250` exit 0 | VERIFIED |
+| F1 | RecoveryLiveTest ceil+2 clock and admin UTC pin (pin-only control: 8 failures; fixed: 33/0, full suite 746/0) | `250-02-SUMMARY.md` coverage F1 | VERIFIED |
+| F2 | docs job `npm ci` before D-32 (clean-clone control FAIL then PASS) | `250-02-SUMMARY.md` coverage F2 | VERIFIED |
+| F3 | time_display TZ pin (unpinned UTC control: 1 failure; pinned: 3 zones pass) | `250-02-SUMMARY.md` coverage F3 | VERIFIED |
+| D1 | LAND-02/03 wording, D2 deferral, PR 49 body file | `250-02-SUMMARY.md` coverage D1 | VERIFIED |
 | SC1 | Roadmap success criterion 1 | not yet claimed (in progress) | NOT CLAIMED |
 | SC2 | Roadmap success criterion 2 | not yet claimed (in progress) | NOT CLAIMED |
 | SC3 | Roadmap success criterion 3 | not yet claimed (in progress) | NOT CLAIMED |
