@@ -15,14 +15,14 @@
 - The run with the re-minted baselines (CI run 40234321143 at `74cdd43a`) had `Browser UAT` green and one timing-dependent portal failure: `AccruePortal.BraintreeMox` linked its shared Agent to the first test that reset it, and ExUnit does not wait for a finished test process to exit. Fix: `fix(250-04): start the portal Braintree client-token stub unlinked`.
 - The first close commit (CI run 40241001658 at `7b1b5862`) had one Release gate cell red: `verify_release_contract.sh` piped a 7551-byte section into `grep -q` under `pipefail`, so `grep` exiting on its first match could EPIPE the `printf` and turn a present needle into "missing". Fix: `fix(250-05): feed the v1.59 runbook greps from here-strings, not a pipe`. The same pattern remains in 6 other `scripts/ci` scripts; that sweep is recorded as a follow-up, not done here.
 - One product risk is found and deliberately not fixed here: `accrue_events.inserted_at` follows the Postgres session timezone. It is recorded as a HIGH-priority v1.68 item in `.planning/REQUIREMENTS.md` (Future Requirements).
-- The parked `Admin UI ratchet guardrails [parked]` lane stays `continue-on-error` by design (`.planning/WINDOWS.md` row 11). It is outside the PR bar.
+- Outside the PR bar (D1): the parked `Admin UI ratchet guardrails [parked]` lane stays `continue-on-error` by design (`.planning/WINDOWS.md` row 11) and fails at every head; the dispatch-only `Mint visual baselines` job and the push/schedule-only `Stripe provider-proof trigger classifier`, `Stripe provider-proof incident reconciliation` and `Stripe test-mode parity (mandatory periodic)` jobs are `skipped` on `pull_request` runs. They are not claimed here.
 
 ## Provenance
 
 - **Head branch:** `integration/v1.63-v1.66`.
-- **Evidence head:** recorded here by the commit that follows the pre-merge close. A commit cannot contain its own SHA, so the close commit is named by the next commit, which changes only this file.
+- **Evidence head:** `ece41e51eb0e6ab4f030d33501cd811188542686`, the Phase 250 pre-merge close. `250-ci-head-status.mjs --repo szTheory/accrue --sha ece41e51eb0e6ab4f030d33501cd811188542686 --event pull_request` (no `--visual-pending-ok`) prints GREEN, 20 jobs `success` (ci.yml run 40243045805, accrue_admin_browser.yml run 40243045812). Publication hygiene passes over every pushed commit: `bash .planning/phases/250-remote-integration/250-prepush-guard.sh --hygiene-only --range 23bee4949045b7ac9361d954b24497bb749e771b..ece41e51eb0e6ab4f030d33501cd811188542686`.
+- The PR head is the evidence head plus one commit that changes only this file, because a commit cannot contain its own SHA. Falsify: `git diff --name-only ece41e51eb0e6ab4f030d33501cd811188542686 origin/integration/v1.63-v1.66` prints exactly `.planning/phases/250-remote-integration/250-INTEGRATION-PR.md`.
 - The last green head before the close is `5ad01dee2c70087aa89fafdfb154f6e9d8068277`: `250-ci-head-status.mjs --event pull_request` GREEN, 20 jobs `success` (ci.yml run 40236926623, accrue_admin_browser.yml run 40236926603). The first close commit `7b1b5862` was red and is superseded.
-- The PR head may differ from the evidence head by exactly one commit that changes only this file.
 
 ## What changed, and how to check it
 
