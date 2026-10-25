@@ -27,14 +27,14 @@ defmodule AccruePortal.BraintreeMox do
     end
   end
 
+  # Started unlinked so the stub outlives the test that first touched it. A
+  # linked start ties the Agent to that test process; ExUnit does not wait for
+  # a finished test process to exit, so the next test's setup could see the
+  # dying Agent and fail in Agent.update/2 with :noproc.
   defp ensure_started do
-    case Process.whereis(__MODULE__) do
-      nil ->
-        {:ok, _pid} = start_link([])
-        :ok
-
-      _pid ->
-        :ok
+    case Agent.start(fn -> %{client_token: "portal-client-token"} end, name: __MODULE__) do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
     end
   end
 end
