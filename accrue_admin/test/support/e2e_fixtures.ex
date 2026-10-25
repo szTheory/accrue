@@ -103,12 +103,18 @@ defmodule AccrueAdmin.E2E.Fixtures do
             current = :persistent_term.get(@phase240_hold_key, nil)
 
             if current && processor_id == current.processor_id do
-              active = %{current | provider_pid: self(), dispatch_count: current.dispatch_count + 1}
+              active = %{
+                current
+                | provider_pid: self(),
+                  dispatch_count: current.dispatch_count + 1
+              }
+
               :persistent_term.put(@phase240_hold_key, active)
               send(active.owner_pid, {:phase240_action_entered, active.token, active.operation})
 
               receive do
-                {:phase240_release_action, token} when token == active.token -> {:ok, active.response}
+                {:phase240_release_action, token} when token == active.token ->
+                  {:ok, active.response}
               end
             else
               {:error, :not_found}
@@ -131,7 +137,8 @@ defmodule AccrueAdmin.E2E.Fixtures do
         canceled_events =
           TestRepo.aggregate(
             from(event in Event,
-              where: event.type == "subscription.canceled" and event.subject_id == ^subscription.id
+              where:
+                event.type == "subscription.canceled" and event.subject_id == ^subscription.id
             ),
             :count,
             :id
@@ -153,7 +160,8 @@ defmodule AccrueAdmin.E2E.Fixtures do
           operation: Atom.to_string(hold.operation),
           dispatch_count: hold.dispatch_count,
           held: is_pid(hold.provider_pid) and not hold.released,
-          provider_calls: if(hold.released, do: Accrue.Processor.Fake.call_count(hold.operation), else: nil),
+          provider_calls:
+            if(hold.released, do: Accrue.Processor.Fake.call_count(hold.operation), else: nil),
           status: Atom.to_string(subscription.status),
           canceled_event_count: canceled_events,
           admin_audit_count: admin_audit_events

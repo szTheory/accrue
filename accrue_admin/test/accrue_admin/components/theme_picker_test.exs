@@ -71,7 +71,10 @@ defmodule AccrueAdmin.Components.ThemePickerTest do
     source = theme_hook_source()
 
     assert source =~ "new MutationObserver(() => {"
-    assert source =~ "observer.observe(document.documentElement, { childList: true, subtree: true })"
+
+    assert source =~
+             "observer.observe(document.documentElement, { childList: true, subtree: true })"
+
     assert source =~ "syncThemeButtonActiveState(sanitizeTheme(activeTheme))"
   end
 

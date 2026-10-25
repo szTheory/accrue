@@ -404,6 +404,7 @@ defmodule AccrueAdmin.E2EFixturesTest do
       end)
 
     assert_receive {:phase240_action_entered, ^token, :cancel_subscription}
+
     assert %{dispatch_count: 1, held: true, provider_calls: nil} =
              Fixtures.phase240_action_status(token)
 
