@@ -16,4 +16,28 @@ Verdict: RED (rc 1). 14 jobs `success`, including all four Release gate cells (R
 | Browser UAT (browser workflow) | failure | Phase 211 visual regression gate | `Test Admin hooks and visual baseline set guard` is now success (time_display TZ pin confirmed); only the pixel gate fails. Artifacts downloaded to `$GSD_SCRATCH/ci/40213687112/artifacts/` | visual-pending, owned by 250-04 | none here (no re-mint in 250-03) |
 | Admin UI ratchet guardrails [parked] | failure | Verify frozen ratchet evidence | by design, D1 | parked, any conclusion allowed | none |
 
+## Iteration 2 - pushed `11ede7ffab5ee4fbd0862982575b1dcbd52b6206`
+
+Runs: ci.yml `40216216053`, accrue_admin_browser.yml `40216216059`. Guard PASS, SL-F PASS.
+
+Verdict (helper, `--visual-pending-ok`): RED (rc 1). 14 jobs `success` (all four Release gate cells, Docs and bash contracts, Admin drift and docs, Admin group/hardening/phase200 guardrails, ratchet self-tests, Host Docker boot smoke, Phase 18, REL-02, iOS). Browser UAT is visual-pending only (`Phase 211 visual regression gate`; `Test Admin hooks and visual baseline set guard` and `npm run e2e` are success).
+
+| Job | Conclusion | Failing step | Evidence | Classification | Fix |
+|-----|-----------|--------------|----------|----------------|-----|
+| Host integration | failure | Run host integration gate, phase `browser_playwright` | job 121238966067 log: `64 tests, 0 failures`, `238 tests, 0 failures` (iteration-1 fix confirmed), dev-boot smoke passed, then Playwright `24 failed, 25 skipped, 32 passed` | stale contract (21 specs), source bug (focus ring, 1 spec), test-lane bug (5 specs; two groups overlap in the 24) | see below |
+| Playwright E2E shards | skipped | none | needs host-integration | downstream | none |
+| Annotation sweep | failure | Sweep release-facing annotations | downstream of host-integration annotations | downstream | none |
+| Browser UAT | failure | Phase 211 visual regression gate | only the pixel gate | visual-pending, 250-04 | none here |
+
+The host Playwright lane had never run in CI after the 2026-10-12..19 owner-feedback series, so 24 specs were measured at once. The lane was reproduced locally (private Postgres on 5439, no docker binary on PATH so custody ran in CI-absent mode, no `npm ci` / `playwright install`) and matched CI exactly (`24 failed, 25 skipped, 32 passed`). Each failure was classified from the local DOM:
+
+| Spec(s) | Cause | Class | Fix commit |
+|---------|-------|-------|-----------|
+| phase233-semantic (focus) | first Tab stop on Home is `.ax-link-quiet` (View events) with `outline: none` and no ring, a keyboard-focus indicator regression | source bug | `fix(250-03): give quiet admin links the shared keyboard focus ring` (app.css + rebuilt bundle; phase199 29 passed, group-contracts 16 passed locally) |
+| phase13, 233, 234-admin, 234-post-layout, 237, 238, 239, 244 (x5), 247-time-tracer, verify01-a11y, -mounted, -mobile | assertions on superseded admin UI (Home h1 Recent activity, webhook title, event labels, Reset filters, Invoices h1, window labels, 28px header, elided labels, single event-payload disclosure, ISO in copy control, column and nav labels, webhook-summary-received id) | stale contract | `fix(250-03): host Playwright specs follow the 2026-10 admin redesign` |
+| phase245 (route identity), phase246 collection/invoice/current-proof ordinary, phase247-current-proof | specs owned by dedicated preview/held-out configs threw in the default lane (missing preview password / ordinary base URL, env-dependent pure test, `test.skip()` ReferenceError) | test-lane bug | `fix(250-03): preview/held-out lane specs skip outside their own lane` |
+| phase246-global-search held-out | fixture `identity_cell/1` used `__changed__: %{}`, so `send_update` kept the first row | source bug (fixture) | `fix(250-03): phase246 state fixture renders every dynamic part on update` |
+
+Post-fix local mirror of the host browser lane: `50 passed, 31 skipped, 0 failed`; Braintree checkout lane `14 passed`; admin group-contracts 16 passed, phase199 29 passed (15 by-design skips), storybook a11y 3 passed, page-flow 7 passed, storybook/theme mix tests 19/0. Lanes not reproducible locally: the post-gate step `Run host Hex smoke` and the CI-only runner environment; their proof is the next run.
+
 <!-- gsd:ledger-continue -->
