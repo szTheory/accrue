@@ -45,14 +45,29 @@ function assertSameMap(authorityName, authority, candidateName, candidate) {
 // (fixed/waived), so a single assertSameMap call yields missing (id only in
 // the ledger), extra (id only in the record), and changed (id on both sides
 // but status/disposition disagree) in one pass (D-26, D-30).
-function assertRowJoin(ledgerRows, dispositionRows) {
+function assertRowJoin(ledgerRows, dispositionRows, throughId) {
+  // The open-row check is ALWAYS global over the whole ledger (never scoped).
   const openIds = ledgerRows.filter((row) => row.status === "open").map((row) => row.id).sort((a, b) => a - b);
   if (openIds.length) fail(`ship-window ledger still has ${openIds.length} open row(s) with no disposition partner: ids=[${openIds.join(", ")}]`);
 
-  const nonOpenLedgerRows = ledgerRows.filter((row) => row.status !== "open");
+  // Phase 249 (A2): the frozen record is a point-in-time artifact. With an
+  // explicit bound, only the join between the record and ledger ids <= bound
+  // is exact; a record id beyond the bound is itself a failure.
+  if (throughId !== undefined) {
+    for (const row of dispositionRows) {
+      if (row.id > throughId) fail(`record row ${row.id} lies beyond --ledger-through-id ${throughId}`);
+    }
+  }
+  const nonOpenLedgerRows = ledgerRows.filter((row) => row.status !== "open" && (throughId === undefined || row.id <= throughId));
   const authority = exactMap(nonOpenLedgerRows, "WINDOWS.md non-open rows", (row) => row.id, (row) => row.status);
   const candidate = exactMap(dispositionRows, "231-WINDOW-DISPOSITIONS rows", (row) => row.id, (row) => row.disposition);
   assertSameMap("WINDOWS.md non-open rows", authority, "231-WINDOW-DISPOSITIONS rows", candidate);
+}
+
+export function parseLedgerThroughId(value) {
+  if (value === undefined) return undefined;
+  if (!/^[1-9][0-9]*$/.test(String(value)) || !Number.isSafeInteger(Number(value))) fail(`--ledger-through-id must be a positive integer, got ${JSON.stringify(value)}`);
+  return Number(value);
 }
 
 // D-23: "current evidence" means re-derived at the candidate SHA, never the
@@ -108,7 +123,7 @@ function assertDeterminism(record, renderedContents) {
 }
 
 const BOOLEAN_FLAGS = new Set(["fixtures", "require-row-join", "require-evidence-freshness", "require-waiver-completeness", "require-determinism"]);
-const VALUE_OPTIONS = new Set(["repo", "records", "rendered", "expected-repository", "candidate"]);
+const VALUE_OPTIONS = new Set(["repo", "records", "rendered", "expected-repository", "candidate", "ledger-through-id"]);
 
 function options(argv) {
   const flags = new Set(); const values = {};
@@ -136,7 +151,7 @@ function readDispositionFile(recordsPath) {
 function applyStrictFlags(repo, record, renderedContents, parsed) {
   if (parsed.flags.has("require-row-join") || parsed.flags.has("require-evidence-freshness")) {
     const ledgerRows = readShipWindowRows(repo);
-    if (parsed.flags.has("require-row-join")) assertRowJoin(ledgerRows, record.rows);
+    if (parsed.flags.has("require-row-join")) assertRowJoin(ledgerRows, record.rows, parseLedgerThroughId(parsed.values["ledger-through-id"]));
     if (parsed.flags.has("require-evidence-freshness")) assertEvidenceFreshness(ledgerRows, record.rows);
   }
   if (parsed.flags.has("require-waiver-completeness")) { assertWaiverCompleteness(record.rows); assertFixedRowsProved(record.rows); }
@@ -291,6 +306,36 @@ export function verifyFixtures() {
   assert.deepEqual([...ROW_DISPOSITIONS].sort(), ["fixed", "waived"]);
   assert.throws(() => validateWindowRow({ id: 1, phase: "x", kind: "mystery", disposition: "fixed", state: "proved", exit_code: 0, current_evidence: "e" }, "row"), /closed row-kind enumeration/);
 
+  // 14 (Phase 249 A2): --ledger-through-id scopes ONLY the record join; the
+  // open-row check stays global over the whole ledger.
+  {
+    const many = (ids, status = "fixed") => ids.map((id) => ledgerRow({ id, status, description: `row ${id}` }));
+    const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+    const recFor = (ids) => ids.map((id) => dispositionRow({ id }));
+    // 14a: bound 14, later non-open rows ignored, record 1-14 -> pass.
+    withLedger(many(range(1, 38)), (scratch) => {
+      assertRowJoin(readShipWindowRows(scratch), recFor(range(1, 14)), 14);
+      // 14e: unbounded run with later rows still fails strictly.
+      assert.throws(() => assertRowJoin(readShipWindowRows(scratch), recFor(range(1, 14))), /missing=\[15,/);
+      // 14c: missing in-scope partner (row 7) fails.
+      assert.throws(() => assertRowJoin(readShipWindowRows(scratch), recFor(range(1, 14).filter((id) => id !== 7)), 14), /missing=\[7\]/);
+    });
+    // 14b: a later OPEN row still fails under the bound.
+    withLedger([...many(range(1, 14)), ...many([20], "open")], (scratch) => {
+      assert.throws(() => assertRowJoin(readShipWindowRows(scratch), recFor(range(1, 14)), 14), /still has 1 open row\(s\).*ids=\[20\]/);
+    });
+    // 14d: a record id beyond the bound fails.
+    withLedger(many(range(1, 14)), (scratch) => {
+      assert.throws(() => assertRowJoin(readShipWindowRows(scratch), recFor(range(1, 14)), 13), /record row 14 lies beyond --ledger-through-id 13/);
+    });
+    // 14f: invalid bounds are rejected.
+    for (const bad of ["0", "-3", "abc", "14.5", "", "1e2"]) {
+      assert.throws(() => parseLedgerThroughId(bad), /--ledger-through-id must be a positive integer/, `bound ${JSON.stringify(bad)}`);
+    }
+    assert.equal(parseLedgerThroughId("14"), 14);
+    assert.equal(parseLedgerThroughId(undefined), undefined);
+  }
+
 }
 
 // D-14: the pair space this probe row minimally satisfies -- exit_code when
@@ -346,9 +391,10 @@ async function main() {
 
   applyStrictFlags(repo, record, renderedContents, parsed);
 
+  const bound = parseLedgerThroughId(parsed.values["ledger-through-id"]);
   const requestedStrictFlags = [...BOOLEAN_FLAGS].filter((flag) => flag !== "fixtures" && parsed.flags.has(flag)).sort();
   const verificationSuffix = requestedStrictFlags.length
-    ? ` (verified: ${requestedStrictFlags.join(", ")})`
+    ? ` (verified: ${requestedStrictFlags.join(", ")}${bound !== undefined && parsed.flags.has("require-row-join") ? `; scoped to ledger ids <= ${bound}` : ""})`
     : " (schema-only: no strict flags supplied, no row-join or determinism check ran)";
   console.log(`window dispositions verification: PASS${verificationSuffix}`);
 }
