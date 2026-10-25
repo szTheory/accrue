@@ -5,6 +5,16 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { isMainModule } from "./main_module.mjs";
+
+let entry = false;
+try {
+  entry = isMainModule(import.meta.url);
+} catch {
+  entry = false;
+}
+// Register tests only when this file is the invoked entrypoint, so a bare import is side-effect free.
+const registerTest = entry ? test : () => {};
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const custody = path.join(repoRoot, "scripts/ci/accrue_host_preview_custody.sh");
@@ -60,20 +70,20 @@ function run(mode, data, extraEnv = {}) {
   return result;
 }
 
-test("accepts a fully identified disposable browser target", () => {
+registerTest("accepts a fully identified disposable browser target", () => {
   const result = run("browser", fixture());
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(result.stdout, /database=accrue_host_test/);
 });
 
-test("accepts the dedicated dev-boot database and rejects the historical preview DB", () => {
+registerTest("accepts the dedicated dev-boot database and rejects the historical preview DB", () => {
   assert.equal(run("dev", fixture()).status, 0);
   const collision = fixture();
   collision.target.database = "accrue_host_dev";
   assert.notEqual(run("dev", collision).status, 0);
 });
 
-test("rejects every preview identity alias, including the connection and build path", () => {
+registerTest("rejects every preview identity alias, including the connection and build path", () => {
   const preview = fixture().preview;
   for (const key of Object.keys(preview)) {
     const result = run("browser", fixture({ target: { ...fixture().target, [key]: preview[key] } }));
@@ -81,7 +91,7 @@ test("rejects every preview identity alias, including the connection and build p
   }
 });
 
-test("rejects unknown target identity and occupied listener before mutation", () => {
+registerTest("rejects unknown target identity and occupied listener before mutation", () => {
   const unknown = fixture();
   delete unknown.target.connection;
   assert.notEqual(run("browser", unknown).status, 0);
@@ -91,7 +101,7 @@ test("rejects unknown target identity and occupied listener before mutation", ()
   assert.notEqual(run("browser", occupied).status, 0);
 });
 
-test("direct Playwright preflight permits only its exact listener PID and rejects foreign owners", () => {
+registerTest("direct Playwright preflight permits only its exact listener PID and rejects foreign owners", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-direct-owner-"));
   const binDir = path.join(dir, "bin");
   const fixturePath = path.join(dir, "targets.json");
@@ -155,7 +165,7 @@ test("direct Playwright preflight permits only its exact listener PID and reject
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test("rejects loopback host aliases and does not report DATABASE_URL credentials", () => {
+registerTest("rejects loopback host aliases and does not report DATABASE_URL credentials", () => {
   const data = fixture();
   data.preview.databaseHost = "localhost";
   data.preview.connection = "loopback:5432/accrue_host_dev";
@@ -165,7 +175,7 @@ test("rejects loopback host aliases and does not report DATABASE_URL credentials
   assert.doesNotMatch(`${result.stdout}\n${result.stderr}`, /private-user|private-password|example\.invalid/);
 });
 
-test("both wrappers invoke custody before database mutation and dev uses its isolated database", () => {
+registerTest("both wrappers invoke custody before database mutation and dev uses its isolated database", () => {
   for (const wrapper of [browserWrapper, devWrapper]) {
     const source = fs.readFileSync(wrapper, "utf8");
     const guard = source.indexOf("accrue_host_preview_custody.sh");
@@ -176,7 +186,7 @@ test("both wrappers invoke custody before database mutation and dev uses its iso
   assert.match(dev, /ACCRUE_HOST_DEV_BOOT_DATABASE/);
 });
 
-test("both verifier wrappers snapshot the preview before work and assert preservation during cleanup", () => {
+registerTest("both verifier wrappers snapshot the preview before work and assert preservation during cleanup", () => {
   for (const wrapper of [browserWrapper, devWrapper]) {
     const source = fs.readFileSync(wrapper, "utf8");
     const preflight = source.indexOf('node "$custody_tool" preflight');
@@ -192,7 +202,7 @@ test("both verifier wrappers snapshot the preview before work and assert preserv
   assert.match(custodySource, /assert-preserved/);
 });
 
-test("direct Playwright config and setup both preflight before server or fixture work", () => {
+registerTest("direct Playwright config and setup both preflight before server or fixture work", () => {
   const config = fs.readFileSync(path.join(repoRoot, "examples/accrue_host/playwright.config.js"), "utf8");
   const setup = fs.readFileSync(path.join(repoRoot, "examples/accrue_host/e2e/global-setup.js"), "utf8");
   assert.match(config, /accrue_host_preview_custody\.sh/);
@@ -201,7 +211,7 @@ test("direct Playwright config and setup both preflight before server or fixture
   assert.ok(setup.indexOf("accrue_host_preview_custody.sh") < setup.indexOf("fs.mkdirSync"));
 });
 
-test("direct Playwright config and setup execute the same failing collision preflight", () => {
+registerTest("direct Playwright config and setup execute the same failing collision preflight", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-direct-"));
   const fixturePath = path.join(dir, "collision.json");
   const collision = fixture();
@@ -227,7 +237,7 @@ test("direct Playwright config and setup execute the same failing collision pref
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test("production custody refuses fixture environment while test-only entry retains fixture coverage", () => {
+registerTest("production custody refuses fixture environment while test-only entry retains fixture coverage", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-production-entry-"));
   const fixturePath = path.join(dir, "targets.json");
   fs.writeFileSync(fixturePath, JSON.stringify(fixture()));
@@ -243,7 +253,7 @@ test("production custody refuses fixture environment while test-only entry retai
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test("preview URL fails closed unless the exclusive preservation spec is explicitly selected", () => {
+registerTest("preview URL fails closed unless the exclusive preservation spec is explicitly selected", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-preview-routing-"));
   const markerPath = path.join(dir, "mutable-setup-ran");
   const configPath = path.join(repoRoot, "examples/accrue_host/playwright.config.js");
@@ -299,7 +309,7 @@ test("preview URL fails closed unless the exclusive preservation spec is explici
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test("both wrappers reject a collision before invoking any Mix mutation", () => {
+registerTest("both wrappers reject a collision before invoking any Mix mutation", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-wrapper-"));
   const fixturePath = path.join(dir, "collision.json");
   const markerPath = path.join(dir, "mix-was-invoked");
