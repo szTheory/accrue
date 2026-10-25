@@ -28,6 +28,45 @@ defmodule AccrueHost.OrdinaryPreviewSeedTest do
     refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "readonly", "127.0.0.1", nil)
   end
 
+  test "ordinary seed target accepts the Docker bridge range only on a GitHub Actions runner" do
+    previous = System.get_env("GITHUB_ACTIONS")
+
+    on_exit(fn ->
+      if previous,
+        do: System.put_env("GITHUB_ACTIONS", previous),
+        else: System.delete_env("GITHUB_ACTIONS")
+    end)
+
+    System.delete_env("GITHUB_ACTIONS")
+    refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "postgres", "172.18.0.2", nil)
+
+    System.put_env("GITHUB_ACTIONS", "true")
+    assert OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "postgres", "172.18.0.2", nil)
+
+    assert OrdinarySeedBoundary.allowed?(
+             :test,
+             "accrue_host_test3",
+             "postgres",
+             "172.31.0.9",
+             nil
+           )
+
+    refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "postgres", "172.32.0.2", nil)
+
+    refute OrdinarySeedBoundary.allowed?(
+             :test,
+             "accrue_host_test",
+             "postgres",
+             "198.51.100.8",
+             nil
+           )
+
+    refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "postgres", "10.0.0.5", nil)
+    refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_dev", "postgres", "172.18.0.2", nil)
+    refute OrdinarySeedBoundary.allowed?(:test, "accrue_host_test", "readonly", "172.18.0.2", nil)
+    refute OrdinarySeedBoundary.allowed?(:dev, "accrue_host_dev", "postgres", "172.18.0.2", nil)
+  end
+
   @ordinary_seed Path.expand("../priv/repo/seeds/ordinary.exs", __DIR__)
   @phase191_seed Path.expand("../priv/repo/seeds/phase191_flow_states.exs", __DIR__)
 

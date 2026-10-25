@@ -20,7 +20,8 @@ connected_target_allowed? =
   OrdinarySeedBoundary.allowed?(Mix.env(), database, role, server_address, expected_address)
 
 unless connected_target_allowed? do
-  raise "ordinary preview seed refused: connected Repo is not the isolated ordinary preview database"
+  raise "ordinary preview seed refused: connected Repo is not the isolated ordinary preview database " <>
+          "(database=#{database} role=#{role} server_address=#{server_address})"
 end
 
 unless System.get_env("COMPOSE_PROJECT_NAME") == "accrue-host-phase245-ordinary" do
