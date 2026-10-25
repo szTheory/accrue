@@ -11,8 +11,8 @@ defmodule AccrueAdmin.Live.EventsLive do
     AppShell,
     DataTable,
     EventIcon,
-    IdBadge,
     FilterChipBar,
+    IdBadge,
     PageHeader,
     StatStrip,
     Timestamp

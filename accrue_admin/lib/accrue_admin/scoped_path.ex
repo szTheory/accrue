@@ -230,7 +230,9 @@ defmodule AccrueAdmin.ScopedPath do
         true -> {nil, []}
       end
 
-    if not is_nil(module) do
+    if is_nil(module) do
+      params
+    else
       filters = Map.drop(params, extra_keys)
       decoded = apply(module, :decode_filter, [filters])
 
@@ -250,8 +252,6 @@ defmodule AccrueAdmin.ScopedPath do
       else
         :error
       end
-    else
-      params
     end
   end
 

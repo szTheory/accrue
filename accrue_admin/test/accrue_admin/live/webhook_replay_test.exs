@@ -5,8 +5,8 @@ defmodule AccrueAdmin.WebhookReplayTest do
 
   alias Accrue.Billing.{Customer, Invoice}
   alias Accrue.Events.Event
-  alias Accrue.Webhooks.DLQ
   alias Accrue.Webhook.WebhookEvent
+  alias Accrue.Webhooks.DLQ
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do

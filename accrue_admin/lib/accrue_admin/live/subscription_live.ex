@@ -14,11 +14,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     DetailDrawer,
     DropdownMenu,
     FlashGroup,
+    IdBadge,
     JsonViewer,
     RelatedResources,
-    StepUpAuthModal,
-    IdBadge,
     StatusBadge,
+    StepUpAuthModal,
     Timeline,
     Timestamp
   }

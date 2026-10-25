@@ -11,8 +11,8 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
-    IdBadge,
     FilterChipBar,
+    IdBadge,
     PageHeader,
     StatStrip
   }

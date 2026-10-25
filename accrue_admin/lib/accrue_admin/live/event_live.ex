@@ -7,10 +7,10 @@ defmodule AccrueAdmin.Live.EventLive do
     AppShell,
     Breadcrumbs,
     Detail,
-    JsonViewer,
     Icon,
-    RelatedResources,
     IdBadge,
+    JsonViewer,
+    RelatedResources,
     Timestamp
   }
 

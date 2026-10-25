@@ -11,8 +11,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
   alias AccrueAdmin.Copy
-  alias AccrueAdmin.Queries.Customers
   alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Customers
   alias AccrueAdmin.ScopedPath
 
   alias AccrueAdmin.Components.{

@@ -8,8 +8,8 @@ defmodule AccrueAdmin.E2E.Fixtures do
     Coupon,
     Customer,
     Invoice,
-    PromotionCode,
     PaymentMethod,
+    PromotionCode,
     Refund,
     Subscription,
     SubscriptionItem

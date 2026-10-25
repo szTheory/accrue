@@ -2,8 +2,8 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
   alias Accrue.Connect.Account
-  alias Accrue.Money
   alias Accrue.Events.Event
+  alias Accrue.Money
   alias AccrueAdmin.TestRepo
 
   import Ecto.Query

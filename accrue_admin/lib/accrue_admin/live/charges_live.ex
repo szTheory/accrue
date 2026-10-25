@@ -12,9 +12,9 @@ defmodule AccrueAdmin.Live.ChargesLive do
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
-    IdBadge,
     FilterChipBar,
     FlashGroup,
+    IdBadge,
     MoneyFormatter,
     PageHeader,
     StatStrip

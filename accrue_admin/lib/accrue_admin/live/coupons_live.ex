@@ -11,9 +11,9 @@ defmodule AccrueAdmin.Live.CouponsLive do
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
-    IdBadge,
     FilterChipBar,
     FlashGroup,
+    IdBadge,
     PageHeader,
     StatStrip
   }
