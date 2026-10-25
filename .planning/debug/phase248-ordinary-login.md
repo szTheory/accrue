@@ -73,3 +73,5 @@ files_changed: [examples/accrue_host/README.md, examples/accrue_host/e2e/phase24
 ## Milestone Closeout Resolution — 2026-10-12
 
 Anchored credential extraction and awaited CSRF login are committed in929b140b. Ordinary mounted lane passed1/1, final10captures at112d484d inspected and both validatorspassed. Incorrect-password Sigra timestamp exception remains outside scope; this resolved record concerns the harness login.
+
+> Filing note (2026-10-24, quick fix during Phase 249): this resolved session stays at its original path because archived v1.66 records (`248-01-SUMMARY.md`, `248-SECURITY.md`) cite it there and archived files are not edited.
