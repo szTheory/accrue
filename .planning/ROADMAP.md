@@ -64,7 +64,7 @@ Plans:
 - [x] 249-01-PLAN.md — Admin compile warning, formatter drift, DSY-01 breakpoint annotations, PdfTest flake measurement (wave 1)
 - [ ] 249-02-PLAN.md — Admin credo --strict cleanup and portal endpoint test isolation (wave 2)
 - [x] 249-03-PLAN.md — SL-G archived-digest scope, Phase 190 status vocabulary, executable-UAT recorded deviations (wave 1)
-- [ ] 249-04-PLAN.md — D-16 scoped ledger join wired in ci.yml, plus the local ci.yml replay tool (wave 1)
+- [x] 249-04-PLAN.md — D-16 scoped ledger join wired in ci.yml, plus the local ci.yml replay tool (wave 1)
 - [ ] 249-05-PLAN.md — D-32 hash-pinned archived-evidence exemptions and guarded, self-testing scripts (wave 2)
 - [ ] 249-06-PLAN.md — Planning truth: handoff removal, debug filing, out-of-band owner-feedback record, current phase (wave 1)
 - [ ] 249-07-PLAN.md — Phase 190 group-contract probes classified and green; admin-group-contracts job (wave 3)
