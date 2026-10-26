@@ -294,7 +294,7 @@ build_git_fixture() {
   work="$dir/seed"
   git clone -q "$dir/origin.git" "$work" 2>/dev/null
   git -C "$work" config user.name "fixture"
-  git -C "$work" config user.email "fixture@example.invalid"
+  git -C "$work" config user.email "fixture@example.test"
   git -C "$work" config commit.gpgsign false
   git -C "$work" checkout -q -b main
   while IFS= read -r f; do
@@ -324,7 +324,7 @@ run_algorithm() {
   local dir=$1 repair=$2 ci="$1/ci-$2" script
   git clone -q "$dir/origin.git" "$ci" 2>/dev/null
   git -C "$ci" config user.name "fixture"
-  git -C "$ci" config user.email "fixture@example.invalid"
+  git -C "$ci" config user.email "fixture@example.test"
   if [ "$repair" = "legacy" ]; then script="$(legacy_block)"; else script="$(fixed_block)"; fi
   (
     cd "$ci"
