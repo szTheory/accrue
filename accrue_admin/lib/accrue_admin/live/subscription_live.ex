@@ -249,6 +249,87 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
+  attr(:subscription, :any, required: true)
+  attr(:customer, :any, required: true)
+  attr(:admin_mount_path, :string, required: true)
+  attr(:current_owner_scope, :any, default: nil)
+  attr(:flashes, :list, default: [])
+  attr(:action_result, :any, default: nil)
+  slot(:between_facts_and_actions)
+
+  def subscription_area(assigns) do
+    ~H"""
+      <Detail.summary_card title={subscription_title(@subscription, @customer)}>
+        <:status>
+          <StatusBadge.status_badge
+            status={@subscription.status}
+            label={lifecycle_health_label(@subscription)}
+            tone={lifecycle_tone(@subscription.status)}
+          />
+        </:status>
+        <:facts>
+          <IdBadge.id_badge
+            id="subscription-summary-id"
+            id_value={@subscription.processor_id || @subscription.id}
+            label="Copy subscription ID"
+            copy_label="subscription ID"
+            variant="plain"
+          />
+        </:facts>
+      </Detail.summary_card>
+
+      <Detail.summary_list
+        rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)}
+        class="ax-summary-list-compact"
+      />
+
+      <%= render_slot(@between_facts_and_actions) %>
+
+      <section class="ax-card ax-detail-action-band" data-ax-action-band>
+        <header class="ax-page-header">
+          <div>
+            <h2 class="ax-heading">Subscription actions</h2>
+          </div>
+          <div class="ax-page-actions">
+            <button
+              :if={action_available?(@subscription, "swap_plan")}
+              type="button"
+              class="ax-button ax-button-primary"
+              phx-click="open_action_drawer"
+              phx-value-action_type="swap_plan"
+              data-ax-primary-action
+              aria-label={action_aria_label("swap_plan", @subscription)}
+            >
+              <%= action_label("swap_plan") %>
+            </button>
+            <button
+              :if={action_available?(@subscription, "cancel_at_period_end")}
+              type="button"
+              class="ax-button ax-button-secondary"
+              phx-click="open_action_drawer"
+              phx-value-action_type="cancel_at_period_end"
+              data-ax-primary-action
+              aria-label={action_aria_label("cancel_at_period_end", @subscription)}
+            >
+              <%= action_label("cancel_at_period_end") %>
+            </button>
+            <DropdownMenu.action_menu
+              label="More actions"
+              groups={action_menu_groups(@subscription)}
+              id="subscription-action-menu"
+            />
+          </div>
+        </header>
+
+        <div :if={braintree_processor?(@subscription)} class="ax-stack-sm">
+          <p class="ax-body"><%= provider_action_guidance(@subscription) %></p>
+          <p class="ax-body"><%= Copy.subscription_action_braintree_swap_setup_guidance() %></p>
+          <p class="ax-body"><%= Copy.subscription_action_braintree_quantity_item_guidance() %></p>
+        </div>
+      </section>
+    """
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -284,78 +365,30 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <a class="ax-link" href={@return_path}><%= @return_label %></a>
         </p>
 
-        <Detail.summary_card
-          title={subscription_title(@subscription, @customer)}
+        <.subscription_area
+          subscription={@subscription}
+          customer={@customer}
+          admin_mount_path={@admin_mount_path}
+          current_owner_scope={assigns[:current_owner_scope]}
+          flashes={@flashes}
+          action_result={@action_result}
         >
-          <:status>
-            <StatusBadge.status_badge status={@subscription.status} label={lifecycle_health_label(@subscription)} tone={lifecycle_tone(@subscription.status)} />
-          </:status>
-          <:facts>
-            <IdBadge.id_badge id="subscription-summary-id" id_value={@subscription.processor_id || @subscription.id} label="Copy subscription ID" copy_label="subscription ID" variant="plain" />
-          </:facts>
-        </Detail.summary_card>
-
-        <Detail.summary_list
-          rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)}
-          class="ax-summary-list-compact"
-        />
-
-        <FlashGroup.flash_group flashes={@flashes} />
-        <section
-          :if={@action_result}
-          class="ax-card"
-          data-role="subscription-action-result"
-          role="status"
-          aria-live="polite"
-        >
-          <p class="ax-body"><%= @action_result.message %></p>
-          <a :if={@action_result.href} class="ax-link" href={@action_result.href}>
-            <%= @action_result.link_label %>
-          </a>
-        </section>
-
-        <section class="ax-card ax-detail-action-band" data-ax-action-band>
-          <header class="ax-page-header">
-            <div>
-              <h2 class="ax-heading">Subscription actions</h2>
-            </div>
-            <div class="ax-page-actions">
-              <button
-                :if={action_available?(@subscription, "swap_plan")}
-                type="button"
-                class="ax-button ax-button-primary"
-                phx-click="open_action_drawer"
-                phx-value-action_type="swap_plan"
-                data-ax-primary-action
-                aria-label={action_aria_label("swap_plan", @subscription)}
-              >
-                <%= action_label("swap_plan") %>
-              </button>
-              <button
-                :if={action_available?(@subscription, "cancel_at_period_end")}
-                type="button"
-                class="ax-button ax-button-secondary"
-                phx-click="open_action_drawer"
-                phx-value-action_type="cancel_at_period_end"
-                data-ax-primary-action
-                aria-label={action_aria_label("cancel_at_period_end", @subscription)}
-              >
-                <%= action_label("cancel_at_period_end") %>
-              </button>
-              <DropdownMenu.action_menu
-                label="More actions"
-                groups={action_menu_groups(@subscription)}
-                id="subscription-action-menu"
-              />
-            </div>
-          </header>
-
-          <div :if={braintree_processor?(@subscription)} class="ax-stack-sm">
-            <p class="ax-body"><%= provider_action_guidance(@subscription) %></p>
-            <p class="ax-body"><%= Copy.subscription_action_braintree_swap_setup_guidance() %></p>
-            <p class="ax-body"><%= Copy.subscription_action_braintree_quantity_item_guidance() %></p>
-          </div>
-        </section>
+          <:between_facts_and_actions>
+            <FlashGroup.flash_group flashes={@flashes} />
+            <section
+              :if={@action_result}
+              class="ax-card"
+              data-role="subscription-action-result"
+              role="status"
+              aria-live="polite"
+            >
+              <p class="ax-body"><%= @action_result.message %></p>
+              <a :if={@action_result.href} class="ax-link" href={@action_result.href}>
+                <%= @action_result.link_label %>
+              </a>
+            </section>
+          </:between_facts_and_actions>
+        </.subscription_area>
 
         <div data-ax-related-resources>
           <RelatedResources.related_resources items={@related_items} />
