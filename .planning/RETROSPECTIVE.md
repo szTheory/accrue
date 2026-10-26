@@ -1895,7 +1895,38 @@ Milestone triads must inspect actual SUMMARY completion lists; phase247used empt
 
 No reliable model-cost or session totals were available. Bounded existing owners were used; no new broad product suite or external CI run was claimed during closeout.
 
-## Cross-Milestone Trends
+## Milestone: v1.67 — Integration & CI Green
+
+**Shipped:** 2026-10-26 (released 1.7.0)
+**Phases:** 3 (249–251) | **Plans:** 32
+
+### What Was Built
+- Local gate parity for the never-CI'd v1.63–v1.66 line, then remote integration through one exact-head-green merge-commit PR (#49, 993 commits).
+- CI efficiency: a PR run went from about 38m to about 20m (`_build` cache, concurrency, docs dedupe, timeouts, SHA pins, pipefail race fixes).
+- A release-please workflow repair plus a wedge detector, then 1.7.0 shipped to Hex through a curated release PR and a fail-closed merge gate.
+
+### What Worked
+- Push-measure-fix loops with a hard exit condition (all jobs `success` on the exact head), run by a single verdict helper (`250-ci-head-status.mjs`).
+- Every new gate shipped with positive and negative controls. That caught real issues: a vacuous `grep -P` check, a SIGPIPE race, and a `--`-prefixed grep needle.
+- Plan-checker rounds before irreversible steps. They made the publish gate fail closed and moved the wedge detector off the publish dependency chain.
+
+### What Was Inefficient
+- Months of local-only milestones (v1.63–v1.66) piled up about 14 hidden reds that only CI revealed. Scheduled nightly CI skipped almost every job and read as green.
+- Timeouts tuned from a single run's p50 turned main red once (#53). Size from a multi-run max instead.
+- Archival changes generated UAT text (archive-aware refs) and broke phase-scoped minters that hard-code `.planning/phases/`.
+
+### Patterns Established
+- Release early and often, with standing maintainer authorization at release-worthy points.
+- Merge an integration PR with a merge commit; squash ordinary PRs.
+- Freeze main between the release relabel and the release merge.
+- Treat a path-classifier skip as "recorded, not claimed", never as green.
+
+### Key Lessons
+- Push a branch or PR at every milestone close so CI actually runs.
+- `printf | grep -q` under pipefail is a real race for large inputs; use here-strings.
+- Minters and generators must resolve phase paths archive-aware.
+
+
 
 ### Process Evolution
 

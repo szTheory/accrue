@@ -2,19 +2,19 @@
 gsd_state_version: "1.0"
 milestone: v1.67
 milestone_name: Integration & CI Green
-current_phase: 251
-current_phase_name: 1.7.0 Release Alignment
-status: complete
+status: Awaiting next milestone
 stopped_at: Completed 251-07-PLAN.md
-last_updated: "2026-10-26T17:18:03.510Z"
+last_updated: "2026-10-26T18:11:25.197Z"
 last_activity: 2026-10-26
-last_activity_desc: Phase 251 complete; 1.7.0 released
-state_head: db838ffd6c441af9f81316e539b04aa61e56ae8c
+last_activity_desc: Milestone v1.67 completed and archived
+state_head: dbd509e0f4d8d2e84a189ea6167fdcaade3c8ab6
 progress:
   total_phases: 3
   completed_phases: 3
   total_plans: 32
   completed_plans: 32
+current_phase: 251
+current_phase_name: 1.7.0 Release Alignment
 ---
 
 # Project State
@@ -25,21 +25,16 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.67 milestone completion (all three phases complete; 1.7.0 released)
-**Phase 250 hand-off:** SL-G and executable-UAT read the current phase. Phase 250 must flip `current_phase: 250` and mint its own tracked VERIFICATION (covered_files + covered_digest) and generated UAT in the same step, then re-run SL-G and exec-UAT before pushing. Phase 249 routes to Phase 250: host-integration dev-boot/browser/assert-preserved and Hex smoke, playwright-e2e shards 1-3, host-docker-smoke, Linux visual-regression baselines.
+**Current focus:** No active milestone. v1.67 is shipped and archived (1.7.0 released 2026-10-26); `current_phase: 251` is kept so archive-aware SL-G keeps checking the last phase. Next is `/gsd-new-milestone`, opened only on a concrete trigger.
 **Progress:** [██████████] 100% (3/3 phases)
 **Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
 
 ## Current Position
 
-Phase: 251 (1.7.0 Release Alignment) — COMPLETE
-Plan: 7 of 7
-Status: Phase complete; v1.67 milestone completion is next (separate step)
-Last activity: 2026-10-26 — Phase 251 closed on `docs/251-close`: RLS-01/02 Complete, VERIFICATION 3/3 (`behavior_unverified: 0`)
-
-**1.7.0 release:** release PR #55 aligned at head A `2d3a4c62` (exact-head GREEN, ci.yml run 40353699704) and merged as merge commit M `20a3982c2b0fe834773efcd7be803d19981a2b26`. Tags `accrue-v1.7.0`, `accrue_admin-v1.7.0` and `accrue_portal-v1.7.0` point at M. Release Please run 40361348296 succeeded in all six jobs, and hex.pm serves 1.7.0 with docs for all three packages.
-**Release policy (standing, 2026-10-26):** "follow ur recs. i authorize release we want to release early and often at any natural stopping point that is release worthy" — release at every release-worthy stopping point, from an aligned release PR that is exact-head green with `main` green.
-**Carried deferral:** D2 HIGH, v1.68 — `accrue_events.inserted_at` session-timezone dependence (shipped as a 1.7.0 Known issues note with the UTC-session workaround).
+Phase: Milestone v1.67 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-26 — Milestone v1.67 completed and archived
 
 ## Performance Metrics
 
@@ -738,4 +733,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- `/gsd-complete-milestone 1.67` — v1.67 Integration & CI Green milestone completion, run as a separate step after Phase 251. Keep the milestone tag local (never push GSD milestone tags), and run `node scripts/ci/verify_phase230_archive_invariants.mjs --repo .` immediately after the archive, before any push. Phase 251 is complete: 1.7.0 is published (M `20a3982c`, tags at M, Release Please run 40361348296), and the close bookkeeping lands on `main` via the squash-merged `docs/251-close` PR. Post-merge verdicts at the squash commit (ci.yml push and Release Please wedge-check silence) go into the milestone step's STATE update.
+- Start the next milestone with /gsd-new-milestone
