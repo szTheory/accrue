@@ -46,11 +46,16 @@ end
 ExUnit.start(formatters: [AccrueAdmin.SubscriptionScenariosTapFormatter])
 
 repo_root = Path.expand("../../../../", __DIR__)
-Code.require_file(Path.join(repo_root, "dev_support/ui_scenarios/cadence_subscriptions.exs"))
 
-Code.require_file(
-  Path.join(repo_root, "accrue_admin/storybook/_support/subscription_scenarios.ex")
-)
+unless Code.ensure_loaded?(CadenceSubscriptionFacts) do
+  Code.require_file(Path.join(repo_root, "dev_support/ui_scenarios/cadence_subscriptions.exs"))
+end
+
+unless Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionScenarios) do
+  Code.require_file(
+    Path.join(repo_root, "accrue_admin/storybook/_support/subscription_scenarios.ex")
+  )
+end
 
 defmodule AccrueAdmin.SubscriptionScenariosTest do
   use ExUnit.Case, async: false
