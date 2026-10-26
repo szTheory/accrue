@@ -1,8 +1,8 @@
 ---
 phase: 250-remote-integration
-verified: 2026-10-25T22:45:00Z
+verified: 2026-10-26T01:30:00Z
 status: passed
-score: "2/3 success criteria verified (SC3 is LAND-03, claimed after the merge by 250-07)"
+score: "3/3 success criteria verified"
 covered_files:
   - ".github/workflows/ci.yml"
   - ".planning/phases/250-remote-integration/250-01-PLAN.md"
@@ -16,7 +16,9 @@ covered_files:
   - ".planning/phases/250-remote-integration/250-05-PLAN.md"
   - ".planning/phases/250-remote-integration/250-05-SUMMARY.md"
   - ".planning/phases/250-remote-integration/250-06-PLAN.md"
+  - ".planning/phases/250-remote-integration/250-06-SUMMARY.md"
   - ".planning/phases/250-remote-integration/250-07-PLAN.md"
+  - ".planning/phases/250-remote-integration/250-07-SUMMARY.md"
   - ".planning/phases/250-remote-integration/250-CONTEXT.md"
   - ".planning/phases/250-remote-integration/250-RESEARCH.md"
   - ".planning/phases/250-remote-integration/250-UAT.md"
@@ -64,14 +66,14 @@ covered_files:
   - "examples/accrue_host/priv/repo/seeds/ordinary.exs"
   - "examples/accrue_host/test/ordinary_preview_seed_test.exs"
   - "scripts/ci/verify_release_contract.sh"
-covered_digest: "v1:sha256:fe09500617b73621e421229dd77eb0f2fcb9f8aa74ec95fb43e4a28f80a57017"
+covered_digest: "v1:sha256:2397b30a75145eec430897c126a6d8201bd1eca8290d8c91464af23ebfb92b0e"
 behavior_unverified: 0
 overrides_applied: 0
 ---
 
-# Phase 250: Remote Integration Verification Report (pre-merge close)
+# Phase 250: Remote Integration Verification Report
 
-**Scope:** `status: passed` and `behavior_unverified: 0` cover the five pre-merge plans (250-01..05) and success criteria SC1 and SC2. SC3 (LAND-03, the merge and the first post-merge `main` run) is not yet claimed; 250-07 claims it after the merge. Only LAND-01 is marked Complete. LAND-02 is verified here at the measured head and is marked Complete by 250-07 together with LAND-03.
+**Scope:** `status: passed` and `behavior_unverified: 0` cover all seven plans (250-01..07) and success criteria SC1, SC2 and SC3. LAND-01 was marked Complete at the pre-merge close E; LAND-02 and LAND-03 are marked Complete by 250-07, after the merge evidence (250-06) exists.
 
 ## Observable Truths
 
@@ -86,8 +88,8 @@ overrides_applied: 0
 | F4 | Host-integration and Playwright shard fixes, each with a negative control or an exact local reproduction | `250-03-SUMMARY.md` coverage F4; `250-CI-LEDGER.md` iterations 1-5 | VERIFIED |
 | V1-V4 | D4 checker, Phase 211 anchor retarget, per-surface classification (10 intentional, 2 unchanged, 0 regressions), portal stub race | `250-04-SUMMARY.md` coverage V1-V4; `250-VISUAL-CLASSIFICATION.md`; `250-CI-LEDGER.md` iterations 6-8 | VERIFIED |
 | SC1 | LAND-01: the integration head is on `integration/v1.63-v1.66` with publication hygiene passing across the full pushed history; milestone tags stay local | Re-runnable: `bash .planning/phases/250-remote-integration/250-prepush-guard.sh --hygiene-only --range 23bee4949045b7ac9361d954b24497bb749e771b..<E>`, where `<E>` is the evidence head named in `250-INTEGRATION-PR.md` Provenance. Before E it passed over `23bee494..6fe35302` (48 commits; `250-05-SUMMARY.md` coverage SC1). History before `23bee494`: the 850-commit full-history scan and the 91-commit `b4a7eeac..23bee494` scan in `250-CONTEXT.md` (Already done). The guard passed before every push (250-03 G1, ledger iterations 1-8) | VERIFIED |
-| SC2 | LAND-02: every `ci.yml` and `accrue_admin_browser.yml` job with a `pull_request` run path concludes `success` on the exact head, with the D1 exclusions only | `node .planning/phases/250-remote-integration/250-ci-head-status.mjs --repo szTheory/accrue --sha 5ad01dee2c70087aa89fafdfb154f6e9d8068277 --event pull_request` (no `--visual-pending-ok`): GREEN, rc 0, 20 jobs `success`; ci.yml run 40236926623, accrue_admin_browser.yml run 40236926603; `250-CI-LEDGER.md` iteration 8. The first close commit `7b1b5862` was red on one Release gate cell (ledger iteration 9, a SIGPIPE race in `verify_release_contract.sh`), fixed at source in `5561a9a9` with controls (`250-05-SUMMARY.md` F5). The same helper is re-run at E and at the body-only H (`250-INTEGRATION-PR.md` Provenance); SL-F keeps the committed body byte-identical to the live body | VERIFIED |
-| SC3 | LAND-03: merge commit, pre-merge SHAs reachable from `main`, first post-merge `main` push run meets run 35374333981 job by job | not yet claimed (post-merge, 250-07) | NOT CLAIMED |
+| SC2 | LAND-02: every `ci.yml` and `accrue_admin_browser.yml` job with a `pull_request` run path concludes `success` on the exact head, with the D1 exclusions only | `node .planning/phases/250-remote-integration/250-ci-head-status.mjs --repo szTheory/accrue --sha 5ad01dee2c70087aa89fafdfb154f6e9d8068277 --event pull_request` (no `--visual-pending-ok`): GREEN, rc 0, 20 jobs `success`; ci.yml run 40236926623, accrue_admin_browser.yml run 40236926603; `250-CI-LEDGER.md` iteration 8. The first close commit `7b1b5862` was red on one Release gate cell (ledger iteration 9, a SIGPIPE race in `verify_release_contract.sh`), fixed at source in `5561a9a9` with controls (`250-05-SUMMARY.md` F5). The same helper at the evidence head E `ece41e51eb0e6ab4f030d33501cd811188542686`: GREEN, rc 0, 20 jobs `success` (ci.yml run 40243045805, accrue_admin_browser.yml run 40243045812); at the body-only PR head H `17a608ccdbc1512a31475e0804d46811d2059c4b`: GREEN, rc 0, 20 jobs `success` (ci.yml run 40245573325, accrue_admin_browser.yml run 40245573321); `git diff --name-only E H` lists only `250-INTEGRATION-PR.md` (`250-CI-LEDGER.md` iterations 10 and 11). SL-F keeps the committed body byte-identical to the live body | VERIFIED |
+| SC3 | LAND-03: merge commit, pre-merge SHAs reachable from `main`, first post-merge `main` push run meets run 35374333981 job by job | `gh pr merge 49 --merge --match-head-commit 17a608ccdbc1512a31475e0804d46811d2059c4b` gave M `3dd5f8746b34497d345cd4d03c44f3756a159bab`. Parent count: `git rev-list --parents -n 1 3dd5f874` prints 3 SHAs (M, `7971753a` old origin/main, `17a608cc` H). Reachability: `git rev-list 3dd5f874 \| grep -c -x -F -f .planning/250-premerge.local` = 993 = the list length, 0 missing. Baseline: `node .planning/phases/250-remote-integration/250-ci-head-status.mjs --repo szTheory/accrue --sha 3dd5f8746b34497d345cd4d03c44f3756a159bab --event push --baseline-run 35374333981`: GREEN, rc 0, 21 jobs `success` (ci.yml run 40247684345, accrue_admin_browser.yml run 40247684340). Recorded, not claimed: `Stripe provider-proof incident reconciliation` and `Stripe test-mode parity (mandatory periodic)` (baseline skipped), `Admin UI ratchet guardrails [parked]` (baseline failure, D1). `250-06-SUMMARY.md` coverage SC3; `250-CI-LEDGER.md` post-merge row | VERIFIED |
 
 ## Excluded from covered_files
 
@@ -95,4 +97,4 @@ overrides_applied: 0
 
 ## Gaps
 
-SC3 (LAND-03) remains open until the maintainer approves the merge (250-06) and 250-07 claims it.
+None.

@@ -41,7 +41,7 @@ Pushing to the public remote (Phase 250) and publishing to Hex (Phase 251) each 
 ## Phases
 
 - [x] **Phase 249: Local Gate Parity & Planning Truth** - Every locally runnable merge-blocking `ci.yml` check passes on the integration head, and the planning state is honest (completed 2026-10-25)
-- [ ] **Phase 250: Remote Integration** - The integration head lands on `main` through one exact-SHA green PR with a merge commit
+- [x] **Phase 250: Remote Integration** - The integration head lands on `main` through one exact-SHA green PR with a merge commit (completed 2026-10-25)
 - [ ] **Phase 251: 1.7.0 Release Alignment** - The release-please 1.7.0 PR is aligned and green; Hex publication waits for an explicit maintainer yes
 
 ## Phase Details
@@ -100,8 +100,8 @@ Plans:
 - [x] 250-03-PLAN.md — Exact-SHA CI verdict helper + pre-push guard (close gates, hygiene, secret/PII scans); bounded push/measure/fix loop (wave 3)
 - [x] 250-04-PLAN.md — D4 visual baselines: mechanical ledger checker, per-surface classification, regression fixes, CI-dispatch re-mint of intentional surfaces only (wave 4)
 - [x] 250-05-PLAN.md — Pre-merge close commit E (re-mint, LAND-01 Complete), green at E, body-only H records E (wave 5)
-- [ ] 250-06-PLAN.md — LAND-03: maintainer merge decision, `gh pr merge 49 --merge --match-head-commit`, reachability, post-merge main run vs 35374333981, local main ff reconcile (wave 6)
-- [ ] 250-07-PLAN.md — Post-merge close: LAND-02/03 Complete, VERIFICATION 3/3 re-mint, close commit parked per decision (wave 7)
+- [x] 250-06-PLAN.md — LAND-03: maintainer merge decision, `gh pr merge 49 --merge --match-head-commit`, reachability, post-merge main run vs 35374333981, local main ff reconcile (wave 6)
+- [x] 250-07-PLAN.md — Post-merge close: LAND-02/03 Complete, VERIFICATION 3/3 re-mint, close commit parked per decision (wave 7)
 
 ### Phase 251: 1.7.0 Release Alignment
 
@@ -120,9 +120,9 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 249. Local Gate Parity & Planning Truth | 18/18 | Complete    | 2026-10-25 |
-| 250. Remote Integration | 5/7 | In Progress | - |
+| 250. Remote Integration | 7/7 | Complete | 2026-10-25 |
 | 251. 1.7.0 Release Alignment | 0/TBD | Not started | - |
 
 ## Next
 
-`$gsd-plan-phase 249`. Discuss first with `$gsd-discuss-phase 249` if any red's classification (regression vs stale contract) needs a decision before planning.
+`$gsd-discuss-phase 251` or `$gsd-plan-phase 251` (1.7.0 Release Alignment). Hex publication waits for an explicit maintainer yes.

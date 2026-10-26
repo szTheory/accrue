@@ -4,17 +4,17 @@ milestone: v1.67
 milestone_name: Integration & CI Green
 current_phase: 250
 current_phase_name: Remote Integration
-status: executing
-stopped_at: Completed 250-05-PLAN.md
-last_updated: "2026-10-25T22:45:00.000Z"
+status: complete
+stopped_at: Completed 250-07-PLAN.md (phase 250 close)
+last_updated: "2026-10-26T01:30:00.000Z"
 last_activity: 2026-10-25
-last_activity_desc: Phase 250 pre-merge close (commit E) and body-only evidence-head commit H
-state_head: 6fe35302df0fcc309e28a4985a0fb5371a06f50d
+last_activity_desc: Phase 250 closed after the PR #49 merge (M 3dd5f874); close evidence on docs/250-close
+state_head: 3dd5f8746b34497d345cd4d03c44f3756a159bab
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 25
-  completed_plans: 23
+  completed_plans: 25
 ---
 
 # Project State
@@ -25,17 +25,17 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 250 — Remote Integration
+**Current focus:** Phase 250 — Remote Integration (complete); next is Phase 251 — 1.7.0 Release Alignment
 **Phase 250 hand-off:** SL-G and executable-UAT read the current phase. Phase 250 must flip `current_phase: 250` and mint its own tracked VERIFICATION (covered_files + covered_digest) and generated UAT in the same step, then re-run SL-G and exec-UAT before pushing. Phase 249 routes to Phase 250: host-integration dev-boot/browser/assert-preserved and Hex smoke, playwright-e2e shards 1-3, host-docker-smoke, Linux visual-regression baselines.
-**Progress:** [░░░░░░░░░░] 0% (0/3 phases)
+**Progress:** [███████░░░] 67% (2/3 phases)
 **Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
 
 ## Current Position
 
-Phase: 250 (Remote Integration) — EXECUTING
-Plan: 6 of 7
-Status: Awaiting maintainer merge decision (250-06)
-Last activity: 2026-10-25 — 250-05 pre-merge close: commit E (LAND-01 Complete, VERIFICATION 2/3) and body-only commit H recording E as the PR #49 evidence head
+Phase: 250 (Remote Integration) — COMPLETE
+Plan: 7 of 7
+Status: Phase complete — VERIFICATION 3/3 passed, LAND-01..03 Complete
+Last activity: 2026-10-25 — PR #49 merged as merge commit M `3dd5f8746b34497d345cd4d03c44f3756a159bab` (parents `7971753a` + `17a608cc`, 993/993 pre-merge SHAs reachable); first main push run GREEN vs baseline 35374333981 (ci.yml 40247684345, browser 40247684340). Local main backed up to `refs/backup/main-pre-250-merge` (`1cc8322e`) and fast-forwarded. Checkpoint option: merge-close-pr; the 250-06/07 close commits land through a squash-merged PR from `docs/250-close`
 
 ## Performance Metrics
 
@@ -211,6 +211,8 @@ Last activity: 2026-10-25 — 250-05 pre-merge close: commit E (LAND-01 Complete
 | Phase 250 P03 | 5h | 2 tasks | 40 files |
 | Phase 250 P04 | ~2h | 2 tasks | 17 files |
 | Phase 250 P05 | ~1h | 2 tasks | 7 files |
+| Phase 250 P06 | inline | 3 tasks | 1 files |
+| Phase 250 P07 | ~1h | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -484,6 +486,8 @@ Last activity: 2026-10-25 — 250-05 pre-merge close: commit E (LAND-01 Complete
 - [Phase 250]: 250-03: PR 49 head b9c98b20 green except the Phase 211 pixel gate (to 250-04); 8 root-cause fixes, 5 of 6 pushes
 - [Phase 250]: 250-04: Phase 211 baselines re-minted only from Linux dispatch run 40232864961 after D4 classification (10 intentional owner-feedback receipts, 2 unchanged, 0 regressions); PR #49 GREEN at 5ad01dee
 - [Phase 250]: 250-05: commit E is the Phase 250 pre-merge close (SUMMARY 05, VERIFICATION 2/3 with SC1 and SC2, LAND-01 Complete; LAND-02/03 Pending until 250-07). The first close 7b1b5862 was red on a SIGPIPE race in verify_release_contract.sh, fixed at source in 5561a9a9; the 30-site pipe-to-grep-q sweep and the SL-D printf/echo exemption are deferred. The body-only commit H names E as the PR #49 evidence head; the merge waits on an explicit maintainer yes (250-06)
+- [Phase 250]: 250-06: maintainer chose merge-close-pr ("i like squash merge but whatever works i authorize u", then "yes"). PR #49 merged with --merge --match-head-commit 17a608cc as M 3dd5f874 (two parents, 993/993 pre-merge SHAs reachable); first main push run GREEN vs 35374333981 with the Stripe parity/reconciliation pair and the parked ratchet lane recorded, not claimed. Local main backup ref refs/backup/main-pre-250-merge = 1cc8322e
+- [Phase 250]: 250-07: LAND-02/03 Complete only after the merge evidence; VERIFICATION 3/3 re-minted over seven SUMMARYs; close commits squash-merged to main from docs/250-close (maintainer prefers squash for follow-up PRs; PR #49 itself stayed a merge commit for LAND-03). D2 HIGH v1.68 deferral (accrue_events.inserted_at session-timezone dependence) carried forward
 
 ### Pending Todos
 
@@ -581,8 +585,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-25T22:45:00.000Z
-Stopped at: Completed 250-05-PLAN.md
+Last session: 2026-10-26T01:30:00.000Z
+Stopped at: Completed 250-07-PLAN.md (phase 250 close)
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -712,4 +716,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- `$gsd-plan-phase 249` — plan Local Gate Parity & Planning Truth for v1.67 Integration & CI Green (Phases 249–251). Pushing to origin (Phase 250) and Hex publication (Phase 251) each require an explicit maintainer yes. Milestone tags remain local.
+- `$gsd-discuss-phase 251` or `$gsd-plan-phase 251` — 1.7.0 Release Alignment (align the release-please 1.7.0 PR and get it green). Hex publication requires an explicit maintainer yes. Milestone tags remain local. Phase 250 is complete: main is at the PR #49 merge commit `3dd5f874` plus the squash-merged close PR; the pre-merge local main is kept at `refs/backup/main-pre-250-merge`.
