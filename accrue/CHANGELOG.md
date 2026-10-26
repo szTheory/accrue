@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+## [1.7.0](https://github.com/szTheory/accrue/compare/accrue-v1.6.0...accrue-v1.7.0) (2026-10-26)
+
+
+### Features
+
+* **233-05:** add host shared billing context adapter ([e4e9752](https://github.com/szTheory/accrue/commit/e4e975269b3d16689f1892151e2a6fe50017da83))
+* **235-03:** guard POST checkout submission outcomes ([c280b01](https://github.com/szTheory/accrue/commit/c280b01489afced21e975c7f3b7d49d4ae2892ee))
+* **235-04:** reconcile hosted checkout returns authoritatively ([cb58331](https://github.com/szTheory/accrue/commit/cb583311bf69cf06163b29c75c5b66a89f00f9c6))
+* **235-06:** resolve scoped Braintree checkout returns ([19b0dac](https://github.com/szTheory/accrue/commit/19b0dac657404b2a7d1a276ab3c41262575e24a3))
+* **236-02:** gate payment method actions ([ae9e26c](https://github.com/szTheory/accrue/commit/ae9e26c1fbd6b1a343a5857f80b6b65bff90c639))
+* **236-03:** align subscription actions and lifecycle ([73d6ad0](https://github.com/szTheory/accrue/commit/73d6ad0ac2f0f6883c7799e118259a53b62f2358))
+* **237-07:** preserve recovery scope and return navigation ([82ee204](https://github.com/szTheory/accrue/commit/82ee2045b628b1c2a69203cd7ac90206d55e2811))
+* **phase-238:** automate admin verification and complete phase ([907909a](https://github.com/szTheory/accrue/commit/907909a7b8766a7eded5a649a7152ff8e6ecb815))
+
+
+### Bug Fixes
+
+* **233-06:** align Portal status and accent semantics ([879e23a](https://github.com/szTheory/accrue/commit/879e23a46f66d677ef61aff98a233ba0aeaa8210))
+* **235-02:** make selected checkout retries stable ([f4c2c13](https://github.com/szTheory/accrue/commit/f4c2c135a81e636c9dc7a0cd03a9347205d5111e))
+* **235-03:** unify checkout eligibility and promotions ([d92fc6b](https://github.com/szTheory/accrue/commit/d92fc6bee24f826f2b95cf95ad4be32ce106305e))
+* **236-04:** preserve checkout decline outcomes ([44f4346](https://github.com/szTheory/accrue/commit/44f4346f972c7ffec96cf0a61aedaa6e1facf93f))
+* **237-07:** keep recovery amounts evidence-based ([f995d6e](https://github.com/szTheory/accrue/commit/f995d6ea18c21fa85eee0f1c1ed7b7fa0e34d6c4))
+* **238:** CR-01 atomically claim webhook replay ([8e11fca](https://github.com/szTheory/accrue/commit/8e11fcaa73679fb662115582af3bafd460235f22))
+* **238:** CR-01 atomically revalidate owner scope for bulk replay ([16aab2e](https://github.com/szTheory/accrue/commit/16aab2eb092c7dc8697bddf8c564a725989402ad))
+* **240:** align verification fixtures with phase archive ([5bfa1be](https://github.com/szTheory/accrue/commit/5bfa1be729162e55dfed60bbbf2ddfa9ee2870ec))
+* **240:** validate manual invoice items at dispatch ([060734e](https://github.com/szTheory/accrue/commit/060734e00aaef8a0742140fc4d8881476c66b28f))
+* **regression:** align semantic queue type and currency expectations ([b24092f](https://github.com/szTheory/accrue/commit/b24092fa487ddb702e6f99c581d377ed739af349))
+
 ## [1.6.0](https://github.com/szTheory/accrue/compare/accrue-v1.5.1...accrue-v1.6.0) (2026-09-18)
 
 
