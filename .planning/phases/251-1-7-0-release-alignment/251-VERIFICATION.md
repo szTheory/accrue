@@ -1,8 +1,8 @@
 ---
 phase: 251-1-7-0-release-alignment
-verified: 2026-10-26T16:28:26Z
+verified: 2026-10-26T17:13:45Z
 status: passed
-score: "completed-plan claims verified: 251-01, 251-02, 251-03, 251-04, 251-05; phase success criteria claimed: 1/3 (phase in progress)"
+score: "completed-plan claims verified: 251-01, 251-02, 251-03, 251-04, 251-05, 251-06; phase success criteria claimed: 3/3"
 covered_files:
   - ".github/workflows/ci.yml"
   - ".github/workflows/release-please.yml"
@@ -17,6 +17,7 @@ covered_files:
   - ".planning/phases/251-1-7-0-release-alignment/251-05-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-05-SUMMARY.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-06-PLAN.md"
+  - ".planning/phases/251-1-7-0-release-alignment/251-06-SUMMARY.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-07-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-CHANGELOG-DRAFTS.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-CONTEXT.md"
@@ -29,14 +30,14 @@ covered_files:
   - "scripts/ci/verify_release_branch_repair_safety.sh"
   - "scripts/ci/verify_release_changelog_curated.sh"
   - "scripts/ci/verify_release_contract.sh"
-covered_digest: "v1:sha256:86714dbcddab5a014c9c1f8d1b6c5a5a3e8a9f5a5088dabed1e32e630a1bffd4"
+covered_digest: "v1:sha256:6a27ee810c0dce4449a1dd9cd5935af61c49a27b4777344df8052f1d50d1ee48"
 behavior_unverified: 0
 overrides_applied: 0
 ---
 
-# Phase 251: 1.7.0 Release Alignment Verification Report (in progress)
+# Phase 251: 1.7.0 Release Alignment Verification Report
 
-**Scope:** `status: passed` and `behavior_unverified: 0` apply to the completed-plan claims below only. SC1 is claimed at release head A; SC2 and SC3 are not yet claimed. No requirement is marked Complete.
+**Scope:** `status: passed` and `behavior_unverified: 0` apply to the completed-plan claims below (251-01 through 251-06). SC1, SC2 and SC3 are claimed. Plan 251-07 (phase close) is still to run.
 
 ## Observable Truths
 
@@ -56,8 +57,13 @@ overrides_applied: 0
 | A3 | Pins at 1.7.0 at all four README/first_hour sites, no `~> 1.6.0` left, and `### 1.7.0` stories under `## accrue` and `## accrue_admin` | `251-05-SUMMARY.md` coverage A3; `git show 2d3a4c62` reads | VERIFIED |
 | A4 | Alignment reached the release branch as a plain fast-forward after asserting branch == RAW and main == FREEZE_SHA; PR 55 head = A, title and body unchanged; scope gate passes; A is GREEN by the exact-head helper | `251-05-SUMMARY.md` coverage A4; `git ls-remote`; `verify_release_pr_scope.sh --pr 55 --version 1.7.0` exit 0; `250-ci-head-status.mjs --sha 2d3a4c62... --event pull_request --pr-base origin/main` GREEN | VERIFIED |
 | SC1 | Release PR branch carries 1.7.0 README pins, companion notes and curated CHANGELOGs with no raw phase-scoped lines | claimed at release head A `2d3a4c62` by A1-A3 (251-05); the G1 gate passes on A in CI | VERIFIED |
-| SC2 | Every required check on the release PR's exact head SHA concludes `success` | not yet claimed (in progress) | NOT CLAIMED |
-| SC3 | Hex publication of 1.7.0 happens only after a recorded explicit maintainer yes | not yet claimed (in progress) | NOT CLAIMED |
+| P1 | The merge gate decided the merge of PR 55: pre-merge run rc 0 with hooks off (10 PASS); RAW head, moved main, saved #50 dry run, empty, missing and failing-command controls each fail the targeted check | `251-06-SUMMARY.md` coverage P1; `251-release-merge-gate.sh` with real arguments exit 0, negatives exit 1 | VERIFIED |
+| P2 | PR 55 merged with `--merge --match-head-commit 2d3a4c62` into two-parent merge commit M `20a3982c` (parents FREEZE_SHA, A) | `251-06-SUMMARY.md` coverage P2; `git rev-list --parents -n 1 20a3982c...` | VERIFIED |
+| P3 | Release Please push run 40361348296 at M: all six jobs success; exactly three `*-v1.7.0` tags at M; three non-draft, non-prerelease releases | `251-06-SUMMARY.md` coverage P3; `gh run view`, `git ls-remote --tags`, `gh release view` | VERIFIED |
+| P4 | hex.pm 1.7.0 with `has_docs: true` and hexdocs 1.7.0 readme 200 for accrue, accrue_admin, accrue_portal | `251-06-SUMMARY.md` coverage P4; hex.pm API and hexdocs curl | VERIFIED |
+| P5 | Main green at M: ci.yml 40361348589 and browser 40361348536 success (21 success jobs); the two live Stripe jobs are recorded, not claimed (path-classifier skip, trigger_class=irrelevant; same jobs success at FREEZE_SHA run 40344886087) | `251-06-SUMMARY.md` coverage P5; `250-ci-head-status.mjs --sha 20a3982c... --event push`; classifier replay `should_run=false` | VERIFIED |
+| SC2 | Every required check on the release PR's exact head SHA concludes `success` | claimed at A `2d3a4c62` by A4 (251-05) and gate check 3 in the pre-merge run (P1); main at M green by P5 | VERIFIED |
+| SC3 | Hex publication of 1.7.0 happens only after a recorded explicit maintainer yes | the verbatim 2026-10-26 authorization below precedes the merge (P1, P2); publication proven by P3 and P4 | VERIFIED |
 
 ## Excluded from covered_files
 
@@ -65,8 +71,8 @@ overrides_applied: 0
 
 ## Publication authorization
 
-On 2026-10-26 the maintainer said, verbatim: "follow ur recs. i authorize release we want to release early and often at any natural stopping point that is release worthy". This is the recorded explicit yes for publishing 1.7.0 (RLS-02) and the standing policy to release at every release-worthy stopping point. It is recorded here and in `.planning/STATE.md` (Decisions). SC3 is claimed only after publication evidence exists.
+On 2026-10-26 the maintainer said, verbatim: "follow ur recs. i authorize release we want to release early and often at any natural stopping point that is release worthy". This is the recorded explicit yes for publishing 1.7.0 (RLS-02) and the standing policy to release at every release-worthy stopping point. It is recorded here and in `.planning/STATE.md` (Decisions). SC3 is claimed on the 251-06 publication evidence (P3, P4), all of which postdates this authorization.
 
 ## Gaps
 
-SC2 and SC3 remain open until later Phase 251 plans claim them.
+None for SC1-SC3. Deferred to v1.68: teach `250-ci-head-status.mjs` push mode to read the provider-proof classifier's `should_run=false`, so a classifier skip like P5's is recognized automatically.
