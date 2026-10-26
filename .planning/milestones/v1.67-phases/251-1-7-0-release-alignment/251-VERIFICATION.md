@@ -7,6 +7,8 @@ covered_files:
   - ".github/workflows/ci.yml"
   - ".github/workflows/release-please.yml"
   - ".planning/MILESTONES.md"
+  - ".planning/PROJECT.md"
+  - ".planning/RETROSPECTIVE.md"
   - ".planning/milestones/v1.67-REQUIREMENTS.md"
   - ".planning/milestones/v1.67-ROADMAP.md"
   - ".planning/milestones/v1.67-phases/249-local-gate-parity-planning-truth/249-01-PLAN.md"
@@ -117,7 +119,7 @@ covered_files:
   - "scripts/ci/verify_release_branch_repair_safety.sh"
   - "scripts/ci/verify_release_changelog_curated.sh"
   - "scripts/ci/verify_release_contract.sh"
-covered_digest: "v1:sha256:9ec5fb177ed64332b863ae8131c1e57107e3ffcb2bccd0770e993eefb08173c6"
+covered_digest: "v1:sha256:a29794b8cccd6d5a83c1ba463b41e6b7554f10cada89c6714b2306d1ebb638ef"
 behavior_unverified: 0
 overrides_applied: 0
 ---
