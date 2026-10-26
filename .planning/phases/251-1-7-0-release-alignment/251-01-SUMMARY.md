@@ -57,4 +57,18 @@ Any commit that changes a 251-covered file, or adds a 251 SUMMARY, is followed b
 
 ## Deviations from Plan
 
-None - plan executed as written.
+None - plan executed as written. One addition beyond the plan: STATE.md "Operator Next Steps" was updated so it no longer says Hex publication still awaits a maintainer yes (it now points at `$gsd-execute-phase 251` and the recorded authorization).
+
+## Bootstrap controls (scratch clone of B = `194a6d07`, removed afterwards)
+
+SL-G below is `node scripts/ci/verify_artifact_fixed_point.mjs --repo . --require-acyclic --require-fixed-point --require-digest-match`.
+
+| Control | Setup | Output | rc |
+|---------|-------|--------|----|
+| (a) negative | B~1 (plans-only 251 dir), `current_phase: 251` set in STATE.md; SL-G | `artifact fixed point: FAIL: phase 251: zero artifacts discovered -- refusing to report a pass over zero inspected artifacts` | 1 |
+| (b) positive | B; SL-G, SL-E (`verify_completion_evidence.mjs --repo . --require-completion-evidence --require-table-agreement`), exec-UAT modes | SL-G `PASS (... phase 251, artifacts: 2, edges: 13, regenerations compared: 1, digests checked: 1)`; SL-E `PASS (12 parsed, 10 complete, 10 evidenced, 0 skipped as future)`; exec-UAT `--self-test` PASS, `--all-opted-in` PASS (103 automated UAT tests), `--all-since 229` PASS (440 automated UAT tests), `--phase 251` PASS (1 summaries, 1 automated UAT tests) | 0 each |
+| (c) negative | B + one byte appended to covered `251-01-PLAN.md`; SL-G | `artifact fixed point: FAIL: .../251-VERIFICATION.md: covered_digest mismatch over 13 covered files` (committed `556673df...`, recomputed `3d853bab...`); after `git -C <clone> checkout -- 251-01-PLAN.md` SL-G rc 0 | 1 |
+| (d) exclusion | B + `251-RELEASE-LEDGER.md` (one line); mint helper; `scanArtifact` of 251-VERIFICATION.md via `node --input-type=module -e`; one byte appended to the ledger; SL-G | mint `13 covered files, v1:sha256:556673df...` (unchanged); `coveredFiles length=13 includes ledger=false includes 251-01-PLAN.md=true`; SL-G after the append `PASS (... phase 251, artifacts: 2, edges: 13 ...)` | 0 |
+| (d') sensitivity of (d) | same clone, the ledger line deleted from the helper's EXCLUDED set, mint re-run, same `coveredFiles` assertion | `includes ledger=true`; assertion exit | 1 |
+
+Controls (a) and (c) failed as required, (b) passed, and (d) showed `251-RELEASE-LEDGER.md` absent from covered_files (with the positive half, 251-01-PLAN.md, present) and SL-G passing after a ledger append. (d') shows the (d) assertion fails when the exclusion is removed, so (d) is not vacuous. The raw control output is kept locally at `.planning/251-evidence.local/251-01-bootstrap-controls.out` (untracked, excluded).
