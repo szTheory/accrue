@@ -69,6 +69,7 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
 
     previous_env = Application.get_env(:accrue, :env, :unset)
     Application.put_env(:accrue, :env, :test)
+    {:ok, _started} = Application.ensure_all_started(:localize)
     :ok = Fake.reset()
     :ok = Fake.advance(DateTime.diff(@fixed_now, Fake.current_time(), :second))
 
@@ -169,6 +170,9 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
   test "unsupported provider capability and cross-record provider controls are rejected" do
     unsupported = put_in(CadenceSubscriptionFacts.fetch!(:active), [:provider], "unsupported")
 
+    unsupported_capability =
+      put_in(CadenceSubscriptionFacts.fetch!(:braintree_pruned), [:capability], :update_quantity)
+
     mismatched_item =
       put_in(
         CadenceSubscriptionFacts.fetch!(:active),
@@ -177,6 +181,11 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
       )
 
     assert_raise ArgumentError, fn -> SubscriptionScenarios.assigns!(unsupported) end
+
+    assert_raise ArgumentError, fn ->
+      SubscriptionScenarios.assigns!(unsupported_capability)
+    end
+
     assert_raise ArgumentError, fn -> SubscriptionScenarios.assigns!(mismatched_item) end
   end
 
@@ -210,6 +219,8 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
       put_in(facts, [:subscription, :current_period_end], facts.subscription.current_period_start)
 
     assert_raise ArgumentError, fn -> SubscriptionScenarios.assigns!(reversed) end
+    empty = put_in(facts, [:subscription, :items], [])
+    assert_raise ArgumentError, fn -> SubscriptionScenarios.assigns!(empty) end
     assert SubscriptionScenarios.validate!(CadenceSubscriptionFacts.fetch!(:incomplete_evidence))
   end
 
