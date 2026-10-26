@@ -4,6 +4,8 @@ verified: 2026-10-26T14:05:30Z
 status: passed
 score: "completed-plan claims verified: 251-01; phase success criteria claimed: 0/3 (phase in progress)"
 covered_files:
+  - ".github/workflows/ci.yml"
+  - ".github/workflows/release-please.yml"
   - ".planning/phases/251-1-7-0-release-alignment/251-01-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-01-SUMMARY.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-02-PLAN.md"
@@ -18,7 +20,8 @@ covered_files:
   - ".planning/phases/251-1-7-0-release-alignment/251-UAT.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-mint-close-artifacts.mjs"
   - "scripts/ci/verify_release_branch_repair_safety.sh"
-covered_digest: "v1:sha256:b0b56a396195a6262a20a279036ab2823b475ce8e49ab5260419d0fbf8b15827"
+  - "scripts/ci/verify_release_contract.sh"
+covered_digest: "v1:sha256:62edc9cc205243e8fddb40e0243542cd21b24125e622dfd11c69449ef0384cb5"
 behavior_unverified: 0
 overrides_applied: 0
 ---
