@@ -19,7 +19,16 @@ defmodule AccrueAdmin.E2E.Plug do
         %{nonce: nonce} when is_binary(nonce) ->
           Map.merge(
             %{ok: true},
-            Map.take(identity, [:nonce, :database, :role, :address, :port, :partition, :pid])
+            Map.take(identity, [
+              :nonce,
+              :database,
+              :role,
+              :address,
+              :port,
+              :partition,
+              :pid,
+              :ready
+            ])
           )
 
         _ ->

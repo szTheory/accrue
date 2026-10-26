@@ -8,6 +8,7 @@ import {
   acquireNamespaceLock,
   buildLaunchConfig,
   matchesHealthIdentity,
+  matchesStartingHealthIdentity,
   ownsProcess,
   prepareLaunch,
 } from "./phase252_lab.mjs";
@@ -131,6 +132,7 @@ test("health identity must match the owned database, loopback endpoint, partitio
   const identity = { nonce: "phase252-nonce", address: config.host };
   const health = {
     ok: true,
+    ready: true,
     nonce: "phase252-nonce",
     database: config.database,
     role: config.role,
@@ -141,7 +143,12 @@ test("health identity must match the owned database, loopback endpoint, partitio
   };
 
   assert.equal(matchesHealthIdentity(config, identity, health, 1520), true);
+  assert.equal(
+    matchesStartingHealthIdentity(config, identity, { ...health, ready: false }, 1520),
+    true,
+  );
   for (const mismatch of [
+    { ready: false },
     { nonce: "other" },
     { database: "accrue_admin_test925210038" },
     { role: "other" },

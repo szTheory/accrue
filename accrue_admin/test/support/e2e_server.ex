@@ -21,13 +21,25 @@ defmodule AccrueAdmin.E2E.Server do
       identity ->
         verify_runner_configuration!(identity)
         verify_database_identity!(identity)
-        Application.put_env(:accrue_admin, :phase252_e2e_identity, identity)
+
+        Application.put_env(
+          :accrue_admin,
+          :phase252_e2e_identity,
+          health_identity(identity, false)
+        )
+
         start_endpoint!(identity)
         verify_endpoint_identity!(identity)
         migrate!()
         start_repo!(identity)
         start_oban!()
         start_fake_processor!()
+
+        Application.put_env(
+          :accrue_admin,
+          :phase252_e2e_identity,
+          health_identity(identity, true)
+        )
     end
 
     port = endpoint_port()
@@ -201,6 +213,13 @@ defmodule AccrueAdmin.E2E.Server do
     end
   end
 
+  defp health_identity(identity, ready?) do
+    identity
+    |> Map.take([:nonce, :database, :role, :address, :port, :partition])
+    |> Map.put(:pid, String.to_integer(System.pid()))
+    |> Map.put(:ready, ready?)
+  end
+
   defp loopback_address?(address) when is_binary(address) do
     case :inet.parse_address(String.to_charlist(address)) do
       {:ok, {127, _, _, _}} -> true
@@ -275,7 +294,8 @@ defmodule AccrueAdmin.E2E.Server do
         "address" => identity.address,
         "port" => identity.port,
         "partition" => Integer.to_string(identity.partition),
-        "pid" => String.to_integer(System.pid())
+        "pid" => String.to_integer(System.pid()),
+        "ready" => false
       }
 
       unless Enum.all?(expected, fn {key, value} -> Map.get(health, key) == value end) do

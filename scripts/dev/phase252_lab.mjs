@@ -107,6 +107,22 @@ export function matchesHealthIdentity(config, identity, health, pid) {
   return Boolean(
     health &&
     health.ok === true &&
+    health.ready === true &&
+    health.nonce === identity.nonce &&
+    health.database === config.database &&
+    health.role === config.role &&
+    health.address === identity.address &&
+    Number(health.port) === config.port &&
+    String(health.partition) === config.partition &&
+    Number(health.pid) === Number(pid),
+  );
+}
+
+export function matchesStartingHealthIdentity(config, identity, health, pid) {
+  return Boolean(
+    health &&
+    health.ok === true &&
+    health.ready === false &&
     health.nonce === identity.nonce &&
     health.database === config.database &&
     health.role === config.role &&
@@ -374,8 +390,10 @@ async function waitForHealth(config, child, identity, timeoutMs = 120_000, inter
     const health = await readHealth(config.port);
     if (health) {
       const valid = matchesHealthIdentity(config, identity, health, child.pid);
-      if (!valid) fail("health identity mismatch on the owned loopback endpoint; refusing browser attachment");
-      return health;
+      if (valid) return health;
+      if (!matchesStartingHealthIdentity(config, identity, health, child.pid)) {
+        fail("health identity mismatch on the owned loopback endpoint; refusing browser attachment");
+      }
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
