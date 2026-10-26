@@ -36,7 +36,7 @@ jobs:
   browser-uat:
     name: Browser UAT
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 45
 
     services:
       postgres:
@@ -130,7 +130,7 @@ jobs:
     name: Mint visual baselines
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 45
 
     services:
       postgres:

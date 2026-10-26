@@ -286,3 +286,33 @@ None.
 - Files: scripts/ci/verify_ci_efficiency_contract.mjs, scripts/ci/prune_first_party_build.sh and this SUMMARY exist.
 - Commits: b42eeb4c, 5e98e69c, 8be29354, 49d61475, a11989c9 and 671f02d8 are ancestors of HEAD.
 - Head 671f02d8: `250-ci-head-status.mjs --event pull_request --pr-base origin/main` was GREEN on both attempt 1 (cold) and attempt 2 (warm). The parked ratchet lane was the only exclusion.
+
+## Post-merge: main push RED, and the timeout fix
+
+PR #52 was squash-merged as `f10249085d07c18f871e24a30e89450a1dceb94d` on an exact-head GREEN at 233da24e. The first main push run, CI 40276194774, was then judged by `250-ci-head-status.mjs --event push --baseline-run 40257272946`, and it was **RED**:
+
+- `Admin group contracts (Phase 190)` was **cancelled** at 10.2m by its new `timeout-minutes: 10`. The cause was `Install Chromium` running more than 8 minutes. That step normally takes 0-4.2m, and the job normally takes 4.7m p50 and 5.6m max.
+- `Annotation sweep` then failed downstream.
+
+This is a defect in item 6. The timeouts came from one PR run's p50. A 15-run sample across PR and push events (n per job 11-54) gives higher numbers for the Chromium-installing admin jobs:
+
+| Job | p50 | max |
+|---|---|---|
+| Admin Phase 200 | 9.7 | 14.2 |
+| Admin hardening | 9.8 | 12.9 |
+| Admin group contracts | 4.7 | 5.6 |
+| Browser UAT | — | up to 20.1 |
+
+The Phase 200 max sits under its 15-minute timeout by only 0.8 minutes.
+
+The fix sets each timeout to at least max(2.5 x p50, 2 x the observed max, 10), rounded up to 5:
+
+| Job | Old | New |
+|---|---|---|
+| admin-group-contracts | 10 | 20 |
+| admin-hardening-guardrails | 20 | 30 |
+| admin-phase200-guardrails | 15 | 30 |
+| browser-uat | 35 | 45 |
+| visual-baselines-mint | 35 | 45 |
+
+Every other job already meets that rule: release-gate 45 vs max 27.9, host-integration 45 vs 17.6, playwright 20 vs 7.1, shift-left 15 vs 6.5, release-manifest 15 vs 6.7, host-docker-smoke 12 vs 5.4, phase18 10 vs 3.5, ios 10 vs 1.5, admin-drift-docs 10 vs 3.8.

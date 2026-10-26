@@ -997,7 +997,7 @@ jobs:
     name: Admin group contracts (Phase 190)
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -1127,7 +1127,7 @@ jobs:
     name: Admin hardening guardrails (Phase 192)
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     services:
       postgres:
@@ -1235,7 +1235,7 @@ jobs:
     name: Admin Phase 200 deterministic guardrails
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     services:
       postgres:
