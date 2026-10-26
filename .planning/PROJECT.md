@@ -33,7 +33,17 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Current State
 
-**Latest completed milestone: v1.66 — Admin Usability and Visual Consistency, archived locally 2026-10-12.** All16requirements satisfied across Phases245–248,18 actual plans and41 task entries. Canonical phase checks passed14/14,10/10,31/31 and3/3 before archival; independent integration verified7/7handoffs and7/7flows with zero blockers. Audit is tech_debt; five incumbent design notices newly acknowledged and six earlier acknowledgements carried forward. Existing Admin collection controls, search, tables, exact Local/UTC timestamps, detail/navigation/status language and currency-qualified recovery are delivered; host-only scenarios and the13-topic/five-finding ledger make bounded evidence reproducible. See [audit](milestones/v1.66-MILESTONE-AUDIT.md), [integration](milestones/v1.66-INTEGRATION.md) and [phase records](milestones/v1.66-phases/).
+**Latest completed milestone: v1.67 — Integration & CI Green, shipped 2026-10-26, released as 1.7.0.** All 12 requirements are Complete across Phases 249–251 (32 plans). What it delivered:
+- The never-CI'd v1.63–v1.66 line (993 commits) landed on `main` through PR #49, a merge commit, green on its exact head. Every red was fixed at its source.
+- CI is roughly twice as fast. A PR run went from about 38m to about 20m via a third-party `_build` cache, PR-only concurrency, docs dedupe and timeouts, and setup-beam is now SHA-pinned (#52, #53).
+- The release-please workflow no longer empties the release PR when `main` moves, and a wedge check now catches a merged PR still labelled `autorelease: pending` (#54).
+- 1.7.0 of `accrue`, `accrue_admin` and `accrue_portal` is on Hex with docs, published from the curated, exact-head-green release PR #55. The release notes are adopter-readable and include a known-issue note for the `accrue_events.inserted_at` session timezone.
+
+**Release policy (maintainer, 2026-10-26):** "release early and often at any natural stopping point that is release worthy". Publishing is gated by an aligned, exact-head-green release PR and a fail-closed pre-merge gate.
+
+**Evidence limits:** Two live-Stripe jobs are skipped by the provider-proof path classifier on doc-only pushes. They are recorded, not claimed. No milestone audit was run for v1.67; requirement evidence comes from the per-phase VERIFICATION files, all `passed`. Milestone tags stay local. See [roadmap archive](milestones/v1.67-ROADMAP.md), [requirements](milestones/v1.67-REQUIREMENTS.md) and [phase records](milestones/v1.67-phases/).
+
+**Previous milestone: v1.66 — Admin Usability and Visual Consistency, archived locally 2026-10-12.** All16requirements satisfied across Phases245–248,18 actual plans and41 task entries. Canonical phase checks passed14/14,10/10,31/31 and3/3 before archival; independent integration verified7/7handoffs and7/7flows with zero blockers. Audit is tech_debt; five incumbent design notices newly acknowledged and six earlier acknowledgements carried forward. Existing Admin collection controls, search, tables, exact Local/UTC timestamps, detail/navigation/status language and currency-qualified recovery are delivered; host-only scenarios and the13-topic/five-finding ledger make bounded evidence reproducible. See [audit](milestones/v1.66-MILESTONE-AUDIT.md), [integration](milestones/v1.66-INTEGRATION.md) and [phase records](milestones/v1.66-phases/).
 
 **Evidence limits:** Historical receipts retain their recorded revisions and visual scores. Final Phase248 evidence is10inspectedcaptures across4scenarios at112d484d; ordinary1/1 and held-out3/3 are recorded, with fresh23Nodecontracts,13hosttests and4lifecycle controls for the later cleanup correction. This is representative evidence, not all-route or all-interaction subjective acceptance. Archival moves invalidate the runtime's path-bound digest projection; the archive preserves each passed pre-move receipt and does not claim a new post-move phase verification. Local completion does not claim remote CI, merge, publication or tag push.
 
@@ -41,9 +51,15 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 ## Next Milestone Goals
 
-v1.67 below is integration and release readiness, not new product scope. Deferred admin polish and dependency hygiene are queued for a later milestone and do not reopen product scope by themselves.
+No milestone is open. The candidates for v1.68 are in `milestones/v1.67-REQUIREMENTS.md`, Future Requirements:
+- **HIGH:** the `accrue_events.inserted_at` session-timezone fix (needs a migration or app-side timestamps).
+- Extend the `_build` cache to host-integration, browser-uat and the admin jobs.
+- The 250 CI helper should read the provider-proof classifier's `should_run` output.
+- The smaller items deferred from v1.66.
 
-## Current Milestone: v1.67 Integration & CI Green
+Open a milestone only on a concrete trigger (Planning Doctrine).
+
+## Shipped Milestone: v1.67 Integration & CI Green (**shipped 2026-10-26, released 1.7.0**)
 
 **Goal:** Land the never-CI-validated v1.63–v1.66 work (≈853 local commits ahead of `origin/main` 7971753a) on `origin/main`, green at an exact head SHA, and make 1.7.0 release-ready.
 
@@ -1070,4 +1086,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-24 after starting v1.67 Integration & CI Green.*
+*Last updated: 2026-10-26 after the v1.67 milestone (1.7.0 released).*

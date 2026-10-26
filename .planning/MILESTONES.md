@@ -2,10 +2,17 @@
 
 ## v1.67 Integration & CI Green (Shipped: 2026-10-26)
 
-**Phases completed:** 3 phases, 32 plans, 1 tasks
+**Phases completed:** 3 phases (249–251), 32 plans
+**Closeout:** override_closeout. No milestone audit was run. Phases 249 and 250 report a `stale` digest projection after later phases edited files they cover; this is by design, because archived fingerprints are frozen. All three VERIFICATION files are `passed`.
 
 **Key accomplishments:**
-- (none recorded)
+- Local gate parity (249): every locally runnable merge-blocking check was fixed at its source. That includes planning-doc contracts, compiler warnings, CSS and module-boundary contracts, stale browser contracts, and two real 320px reflow regressions.
+- Remote integration (250): 993 never-CI'd v1.63–v1.66 commits landed on `main` through PR #49, a merge commit, green on its exact head. Along the way it fixed a CI-only seed-boundary refusal, a missing focus ring, stale host specs and a portal test race.
+- CI efficiency (quick task 261025-vdn, #52/#53): a PR run went from about 38m to about 20m. This came from the `_build` cache, PR-only concurrency, docs dedupe and timeouts. setup-beam is SHA-pinned in all 7 workflows, and 30 pipefail SIGPIPE-race sites were removed.
+- Release-please repair (251, #54): the stale-base reset that emptied release PRs is gone, and a separate wedge-check job catches a merged PR still labelled `autorelease: pending`.
+- 1.7.0 released (251, #55): curated adopter-facing CHANGELOGs, with every claim checked against code and a D2 known-issue note. It was published through a fail-closed pre-merge gate, and all three packages are on Hex with docs.
+
+**Known deferred:** the `accrue_events.inserted_at` session-timezone fix (HIGH, v1.68); helper awareness of the provider-proof classifier; `_build` cache for the remaining jobs.
 
 ---
 
