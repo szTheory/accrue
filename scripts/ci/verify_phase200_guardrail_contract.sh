@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# grep reads captured text from here-strings (<<<), never from a builtin-producer
+# pipe: under pipefail that race flips a present needle to missing (commit 5561a9a9, SL-D).
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 package_file="$root_dir/accrue_admin/package.json"
@@ -45,7 +47,7 @@ require_absent_regex() {
   local source="$2"
   local pattern="$3"
 
-  if printf '%s\n' "$source" | grep -Eiq "$pattern"; then
+  if grep -Eiq "$pattern" <<<"$source"; then
     fail "forbidden /${pattern}/ found in ${label}"
   fi
 }
@@ -108,26 +110,26 @@ scorecard_script="$(package_script_value "phase200:scorecard")"
 signoff_script="$(package_script_value "phase200:signoff")"
 guardrails_script="$(package_script_value "phase200:guardrails")"
 
-printf '%s\n' "$storybook_script" | grep -Fq "test/accrue_admin/dev/storybook_coverage_test.exs" ||
+grep -Fq "test/accrue_admin/dev/storybook_coverage_test.exs" <<<"$storybook_script" ||
   fail "phase200:storybook must run storybook_coverage_test.exs"
-printf '%s\n' "$storybook_script" | grep -Fq "test/accrue_admin/dev/storybook_asset_test.exs" ||
+grep -Fq "test/accrue_admin/dev/storybook_asset_test.exs" <<<"$storybook_script" ||
   fail "phase200:storybook must run storybook_asset_test.exs"
-printf '%s\n' "$storybook_script" | grep -Fq "test/accrue_admin/theme_test.exs" ||
+grep -Fq "test/accrue_admin/theme_test.exs" <<<"$storybook_script" ||
   fail "phase200:storybook must run theme_test.exs"
-printf '%s\n' "$storybook_script" | grep -Fq "e2e/admin-storybook-a11y-phase200.spec.js" ||
+grep -Fq "e2e/admin-storybook-a11y-phase200.spec.js" <<<"$storybook_script" ||
   fail "phase200:storybook must run rendered Storybook Phase 200 Playwright spec"
 
-printf '%s\n' "$scorecard_script" | grep -Fq "node e2e/phase200-scorecard.mjs" ||
+grep -Fq "node e2e/phase200-scorecard.mjs" <<<"$scorecard_script" ||
   fail "phase200:scorecard must regenerate final scorecard artifacts"
-printf '%s\n' "$scorecard_script" | grep -Fq "node ../scripts/ci/verify_phase200_scorecard.mjs" ||
+grep -Fq "node ../scripts/ci/verify_phase200_scorecard.mjs" <<<"$scorecard_script" ||
   fail "phase200:scorecard must run the full scorecard verifier"
 
-printf '%s\n' "$signoff_script" | grep -Fq "node ../scripts/ci/verify_phase200_signoff.mjs --require-accept" ||
+grep -Fq "node ../scripts/ci/verify_phase200_signoff.mjs --require-accept" <<<"$signoff_script" ||
   fail "phase200:signoff must require ACCEPT in CI/final guardrails"
-printf '%s\n' "$signoff_script" | grep -Fq "node ../scripts/ci/generate_phase200_closeout_reports.mjs --record-final-statuses" ||
+grep -Fq "node ../scripts/ci/generate_phase200_closeout_reports.mjs --record-final-statuses" <<<"$signoff_script" ||
   fail "phase200:signoff must regenerate closeout command statuses before final ACCEPT verification"
 
-printf '%s\n' "$guardrails_script" | grep -Fq "bash ../scripts/ci/verify_phase200_admin_guardrails.sh" ||
+grep -Fq "bash ../scripts/ci/verify_phase200_admin_guardrails.sh" <<<"$guardrails_script" ||
   fail "phase200:guardrails must point at ../scripts/ci/verify_phase200_admin_guardrails.sh"
 
 require_fixed "$package_file" '"phase200:storybook"'

@@ -29,20 +29,31 @@
 // DETECTION. Enumerate `git ls-files 'scripts/ci/*.sh'`. For each file
 // containing a non-comment `set -...pipefail` line, scan for a pipeline
 // whose consumer is `grep` carrying `-q` or `-v` in its short-option
-// cluster. Classify by PRODUCER:
-//   - shell builtin `printf` or `echo` -> EXEMPT (a single sub-pipe-buffer
-//     write, cannot lose the race).
-//   - anything else (external command or shell function) -> OFFENDER.
-// A pipeline captured inside a command substitution ending `|| true` is also
-// EXEMPT: pipefail's promoted exit status is absorbed by the trailing
-// `|| true` and never propagates.
+// cluster. EVERY producer is an OFFENDER -- external command, shell
+// function, and (since quick task 261025-vdn) the shell builtins `printf`
+// and `echo` too. The one exemption: a pipeline captured inside a command
+// substitution ending `|| true`, where pipefail's promoted exit status is
+// absorbed by the trailing `|| true` and never propagates.
+//
+// WHY BUILTIN PRODUCERS ARE NO LONGER EXEMPT. This file originally exempted
+// `printf`/`echo` on the theory that a single sub-pipe-buffer write cannot
+// lose the race. That theory was falsified in CI: in job 121312543518 a
+// 7551-byte `printf` feeding `grep -Fq` in verify_release_contract.sh lost
+// the SIGPIPE race (grep matched, exited, closed the pipe while printf was
+// still writing), the pipeline reported failure, and a PRESENT needle read
+// as missing. Commit 5561a9a9 fixed that site by having grep read the
+// variable from a here-string (`grep -Fq needle <<<"$var"`), which has no
+// producer process at all. Builtin-producer offenders are told to do the
+// same.
 //
 // ALLOWLIST. IDIOM_ALLOWLIST below follows LIBRARY_MODULE_ALLOWLIST's shape
 // in verify_ci_script_contract.mjs: every entry carries a one-line committed
 // reason; an empty reason FAILS. Prefer FIXING to allowlisting -- the
-// measured live offender set (3) was converted to capture-then-filter in
-// accrue_host_verify_dev_boot.sh and accrue_host_verify_browser.sh rather
-// than allowlisted. Empty today.
+// original 3 external-producer offenders were converted to
+// capture-then-filter (accrue_host_verify_dev_boot.sh,
+// accrue_host_verify_browser.sh), and the 30 builtin-producer sites the
+// narrowing exposed in six scripts were converted to here-strings (quick
+// task 261025-vdn). Empty today.
 //
 // FOLLOW-UP SEED (not implemented here; recorded in this task's SUMMARY
 // deferred list): 53 shell guards under scripts/ci are entirely unlinted,
@@ -142,7 +153,10 @@ function findBoundaryEnd(line, beforeIndex) {
   return best;
 }
 
-const LEADING_KEYWORD_PATTERN = /^\s*(?:if|elif|while|until|then|do)\s+!?\s*/;
+// Also strips a bare leading `!` (pipeline negation with no keyword):
+// `! printf ... | grep -Fq x || fail` is the same race with an inverted
+// status, and was invisible to the producer extraction before 261025-vdn.
+const LEADING_KEYWORD_PATTERN = /^\s*(?:(?:if|elif|while|until|then|do)\s+)?!?\s*/;
 
 // Extracts the producer's command/function name immediately preceding the
 // pipe at `pipeIndex` -- the first word of the nearest preceding simple
@@ -159,7 +173,7 @@ const GREP_CONSUMER_PATTERN = /\|\s*grep\b([^\n]*)/g;
 
 // Scans one file's source and returns every `producer | grep` pipeline found
 // (for inspected-count reporting) plus the subset that are OFFENDERS: a
-// non-builtin, non-exempted producer feeding a `-q`/`-v` grep consumer under
+// non-exempted producer (builtin or not) feeding a `-q`/`-v` grep consumer under
 // `set -...pipefail`. Files without pipefail are not scanned at all (a
 // script without `set -o pipefail` passes, unconditionally).
 export function scanFile(relativePath, source) {
@@ -183,7 +197,6 @@ export function scanFile(relativePath, source) {
       pipelines.push(pipeline);
       if (!isQOrV) continue;
       if (isWithinExemptSpan(pipeIndex, exemptSpans)) continue;
-      if (BUILTIN_PRODUCERS.has(producer)) continue;
       offenders.push(pipeline);
     }
   }
@@ -250,9 +263,13 @@ export function verifyIdiomBan(repo) {
     const named = remaining
       .map((offender) => `${offender.file}:${offender.line} (producer "${offender.producer}")`)
       .join("; ");
+    const hasBuiltin = remaining.some((offender) => BUILTIN_PRODUCERS.has(offender.producer));
+    const hasExternal = remaining.some((offender) => !BUILTIN_PRODUCERS.has(offender.producer));
+    const hints = [];
+    if (hasBuiltin) hints.push("for a printf/echo producer, use a here-string so grep has no producer to race: grep -Fq needle <<<\"$var\" (commit 5561a9a9)");
+    if (hasExternal) hints.push("for an external/function producer, remediate with capture-then-filter: out=$(producer); case \"$out\" in ... esac");
     fail(
-      `non-builtin-producer '| grep -${remaining[0].flagChars}' pipeline(s) under pipefail: ${named} -- ` +
-      "remediate with capture-then-filter: out=$(producer); case \"$out\" in ... esac"
+      `${remaining.length} '| grep -q/-v' pipeline(s) under pipefail: ${named} -- ${hints.join("; ")}`
     );
   }
   return { files: cohort.length, pipelines: pipelineCount, offenders: offenders.length };
@@ -349,10 +366,58 @@ const SCENARIOS = [
     }
   ],
   [
-    "a builtin printf producer passes",
+    "a builtin printf producer feeding grep -Fq under set -euo pipefail fails, naming the here-string remediation",
     () => {
-      const source = 'set -euo pipefail\nif printf \'%s\\n\' "$var" | grep -Fq needle; then echo hi; fi\n';
-      const { offenders } = scanFile("scripts/ci/ok-printf.sh", source);
+      withScratchRepo((dir) => {
+        seedShFile(dir, "bad-printf.sh", 'set -euo pipefail\nif printf \'%s\\n\' "$var" | grep -Fq needle; then echo hi; fi\n');
+        assert.throws(
+          () => verifyIdiomBan(dir),
+          /scripts\/ci\/bad-printf\.sh:2 \(producer "printf"\).*here-string.*<<<"\$var"/s
+        );
+      });
+    }
+  ],
+  [
+    "a builtin echo producer feeding grep -q under pipefail fails",
+    () => {
+      const source = 'set -euo pipefail\nif echo "$var" | grep -q needle; then echo hi; fi\n';
+      const { offenders } = scanFile("scripts/ci/bad-echo.sh", source);
+      assert.equal(offenders.length, 1);
+      assert.equal(offenders[0].producer, "echo");
+    }
+  ],
+  [
+    "a bare `! printf ... | grep -Fq` negated pipeline under pipefail fails",
+    () => {
+      const source = 'set -euo pipefail\n    ! printf \'%s\\n\' "$out" | grep -Fq "$secret" || fail "leaked"\n';
+      const { offenders } = scanFile("scripts/ci/bad-negated.sh", source);
+      assert.equal(offenders.length, 1);
+      assert.equal(offenders[0].producer, "printf");
+    }
+  ],
+  [
+    "grep reading the variable from a <<< here-string passes",
+    () => {
+      const source = 'set -euo pipefail\nif grep -Fq needle <<<"$var"; then echo hi; fi\ngrep -Eq \'a|b\' <<<"$var" || fail "missing"\n';
+      const { offenders, pipelines } = scanFile("scripts/ci/ok-herestring.sh", source);
+      assert.equal(offenders.length, 0);
+      assert.equal(pipelines.length, 0);
+    }
+  ],
+  [
+    "a printf producer feeding grep -v inside a $( ... ) capture ending || true passes",
+    () => {
+      const source = 'set -euo pipefail\nrest=$(printf \'%s\\n\' "$lines" | grep -v \'^#\' || true)\n';
+      const { offenders, pipelines } = scanFile("scripts/ci/ok-printf-absorbed.sh", source);
+      assert.equal(pipelines.length, 1, "the pipeline must be seen (non-vacuous) and then exempted");
+      assert.equal(offenders.length, 0);
+    }
+  ],
+  [
+    "a printf producer feeding grep -q in a file WITHOUT pipefail passes",
+    () => {
+      const source = 'set -eu\nif printf \'%s\\n\' "$var" | grep -q needle; then echo hi; fi\n';
+      const { offenders } = scanFile("scripts/ci/ok-printf-no-pipefail.sh", source);
       assert.equal(offenders.length, 0);
     }
   ],

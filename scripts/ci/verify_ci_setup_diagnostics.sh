@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+# grep reads captured text from here-strings (<<<), never from a builtin-producer
+# pipe: under pipefail that race flips a present needle to missing (commit 5561a9a9, SL-D).
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 diagnostic="$root_dir/scripts/ci/ci_setup_diagnostic.sh"
@@ -152,7 +154,7 @@ EOF
   [ ! -s "$mix_calls" ] || fail "initial readiness fixture must not invoke mix verify.full"
   for sensitive_value in db.internal.example 6543 billing_user private-password billing_database; do
     ! grep -Fq "$sensitive_value" "$facts" || fail "initial readiness facts must not contain database values"
-    ! printf '%s\n' "$output" | grep -Fq "$sensitive_value" || fail "initial readiness output must not contain database values"
+    ! grep -Fq "$sensitive_value" <<<"$output" || fail "initial readiness output must not contain database values"
   done
 
   for mode in inner_failure aggregate_failure success; do
@@ -195,10 +197,10 @@ assert_workflow_setup_contract() {
   local workflow host_region
   workflow="$(cat "$root_dir/.github/workflows/ci.yml")"
   host_region="$(printf '%s\n' "$workflow" | sed -n '/^  host-integration:/,/^  playwright-e2e:/p')"
-  printf '%s\n' "$host_region" | grep -Fq 'id: host_setup_summary' || fail "host setup summary step id missing"
-  printf '%s\n' "$host_region" | grep -Fq 'id: host_setup_artifact' || fail "host setup artifact step id missing"
-  printf '%s\n' "$host_region" | grep -Fq 'ACCRUE_CI_SETUP_FACTS=$RUNNER_TEMP/' || fail "setup facts must be rooted under runner temp"
-  printf '%s\n' "$host_region" | grep -Fq 'accrue-host-ci-setup-facts' || fail "setup artifact name drifted"
+  grep -Fq 'id: host_setup_summary' <<<"$host_region" || fail "host setup summary step id missing"
+  grep -Fq 'id: host_setup_artifact' <<<"$host_region" || fail "host setup artifact step id missing"
+  grep -Fq 'ACCRUE_CI_SETUP_FACTS=$RUNNER_TEMP/' <<<"$host_region" || fail "setup facts must be rooted under runner temp"
+  grep -Fq 'accrue-host-ci-setup-facts' <<<"$host_region" || fail "setup artifact name drifted"
 }
 
 assert_registry_contract

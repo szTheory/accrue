@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# grep reads captured text from here-strings (<<<), never from a builtin-producer
+# pipe: under pipefail that race flips a present needle to missing (commit 5561a9a9, SL-D).
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 package_file="$root_dir/accrue_admin/package.json"
@@ -39,7 +41,7 @@ require_absent_regex() {
   local source="$2"
   local pattern="$3"
 
-  if printf '%s\n' "$source" | grep -Eiq "$pattern"; then
+  if grep -Eiq "$pattern" <<<"$source"; then
     fail "forbidden /${pattern}/ found in ${label}"
   fi
 }
@@ -81,14 +83,14 @@ require_fixed "$runner_file" "cd accrue_admin && npm run phase192:component-lab"
 guardrails_script="$(package_script_value "phase192:guardrails")"
 component_lab_script="$(package_script_value "phase192:component-lab")"
 
-printf '%s\n' "$guardrails_script" | grep -Fq "bash ../scripts/ci/verify_phase192_admin_guardrails.sh" ||
+grep -Fq "bash ../scripts/ci/verify_phase192_admin_guardrails.sh" <<<"$guardrails_script" ||
   fail "phase192:guardrails must point at ../scripts/ci/verify_phase192_admin_guardrails.sh"
 
-printf '%s\n' "$component_lab_script" | grep -Fq "mix test" ||
+grep -Fq "mix test" <<<"$component_lab_script" ||
   fail "phase192:component-lab must run mix test"
-printf '%s\n' "$component_lab_script" | grep -Fq "test/accrue_admin/dev/component_registry_test.exs" ||
+grep -Fq "test/accrue_admin/dev/component_registry_test.exs" <<<"$component_lab_script" ||
   fail "phase192:component-lab must include component_registry_test.exs"
-printf '%s\n' "$component_lab_script" | grep -Fq "test/accrue_admin/dev/component_group_registry_test.exs" ||
+grep -Fq "test/accrue_admin/dev/component_group_registry_test.exs" <<<"$component_lab_script" ||
   fail "phase192:component-lab must include component_group_registry_test.exs"
 
 require_fixed "$package_file" '"phase192:guardrails"'
