@@ -26,7 +26,7 @@ covered_files:
   - "scripts/ci/verify_release_branch_repair_safety.sh"
   - "scripts/ci/verify_release_changelog_curated.sh"
   - "scripts/ci/verify_release_contract.sh"
-covered_digest: "v1:sha256:587f52b773031bc2617aaff6b0ce8887e8a2a6fa81f07a590a1dde873e6a334b"
+covered_digest: "v1:sha256:1e5d9350487c40e7e2a23b40cb447b0b5c7d3905d1cfa9b89c2da5db24ac17da"
 behavior_unverified: 0
 overrides_applied: 0
 ---

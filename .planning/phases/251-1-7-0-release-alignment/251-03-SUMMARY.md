@@ -163,7 +163,7 @@ The final post-SUMMARY replay is recorded in `251-03-replay.out`.
 
 **4. [Rule 1 - Bug, gate replay] The 250 pre-push hygiene scan was red on the fix-PR range**
 - **Found during:** Task 2 replay
-- **Issue:** `FAIL: no secret/e-mail/username in added lines`, which flagged `scripts/ci/verify_release_branch_repair_safety.sh:297` and `:327` (the 251-02 fixture identity `fixture@example.invalid`). The guard's e-mail allowlist covers example.com/org/test/net, not `.invalid`. Plan 04 would have hit this before its push.
+- **Issue:** `FAIL: no secret/e-mail/username in added lines`, which flagged `scripts/ci/verify_release_branch_repair_safety.sh:297` and `:327` (the 251-02 fixture identity, an address at the `.invalid` reserved domain). The guard's e-mail allowlist covers example.com/org/test/net, not `.invalid`. Plan 04 would have hit this before its push.
 - **Fix:** at source, `fixture@example.test`. The guard is unchanged. Both repair-safety modes still PASS. The pre-fix guard run (`251-03-prepush-pre.out`, rc 1) is the positive control showing that the scan finds such lines.
 - **Commit:** c7320139
 
