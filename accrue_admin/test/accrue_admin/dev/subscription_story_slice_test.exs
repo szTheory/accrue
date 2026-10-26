@@ -59,7 +59,42 @@ defmodule AccrueAdmin.SubscriptionStorySliceTest do
 
   alias AccrueAdmin.Live.SubscriptionLive
   alias AccrueAdmin.Storybook.Components.SubscriptionDetail
+  alias Accrue.Processor.Fake
   alias PhoenixStorybook.Stories.Variation
+
+  @fixed_now ~U[2026-10-25 12:00:00Z]
+
+  setup do
+    previous_env = Application.get_env(:accrue, :env, :unset)
+    previous_locale = Application.get_env(:localize, :default_locale, :unset)
+    Application.put_env(:accrue, :env, :test)
+    Application.put_env(:localize, :default_locale, :en)
+    {:ok, _started} = Application.ensure_all_started(:localize)
+
+    case Fake.start_link([]) do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+    end
+
+    :ok = Fake.reset()
+    :ok = Fake.advance(DateTime.diff(@fixed_now, Fake.current_time(), :second))
+
+    on_exit(fn ->
+      :ok = Fake.reset()
+
+      case previous_env do
+        :unset -> Application.delete_env(:accrue, :env)
+        value -> Application.put_env(:accrue, :env, value)
+      end
+
+      case previous_locale do
+        :unset -> Application.delete_env(:localize, :default_locale)
+        value -> Application.put_env(:localize, :default_locale, value)
+      end
+    end)
+
+    :ok
+  end
 
   test "the declared active variation renders the production area from real facts without Repo" do
     assert Process.whereis(AccrueAdmin.TestRepo) == nil
@@ -135,5 +170,18 @@ defmodule AccrueAdmin.SubscriptionStorySliceTest do
         subscription: %{status: nil}
       })
     end
+  end
+
+  test "canonical lifecycle variation IDs sit beside preserved compatibility IDs" do
+    ids = Enum.map(SubscriptionDetail.variations(), & &1.id)
+
+    assert ids == [
+             :active,
+             :scheduled_cancellation,
+             :incomplete_evidence,
+             :populated,
+             :braintree_pruned,
+             :dunning_active
+           ]
   end
 end

@@ -1,0 +1,10 @@
+{
+  "command": "cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_story_slice_test.exs",
+  "exitCode": 2,
+  "targetTest": "test canonical lifecycle variation IDs sit beside preserved compatibility IDs",
+  "targetFile": "subscription_story_slice_test.exs",
+  "expected": "The story declares scheduled_cancellation and incomplete_evidence beside active while preserving existing compatibility IDs.",
+  "actual": "The target assertion observed only active, populated, braintree_pruned, and dunning_active.",
+  "output": "TAP version 13\nok 1 - test absent, malformed, or unrecognized story input is rejected\nnot ok 2 - test canonical lifecycle variation IDs sit beside preserved compatibility IDs\n# {:error, %ExUnit.AssertionError{left: [:active, :populated, :braintree_pruned, :dunning_active], right: [:active, :scheduled_cancellation, :incomplete_evidence, :populated, :braintree_pruned, :dunning_active], message: \"Assertion with == failed\", expr: {:assert, [line: 178], [{:==, [line: 178], [{:ids, [line: 178], nil}, [:active, :scheduled_cancellation, :incomplete_evidence, :populated, :braintree_pruned, :dunning_active]]}]}, args: :ex_unit_no_meaningful_value, doctest: :ex_unit_no_meaningful_value, context: :==}, [{AccrueAdmin.SubscriptionStorySliceTest, :\"test canonical lifecycle variation IDs sit beside preserved compatibility IDs\", 1, [file: ~c\"accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs\", line: 178]}]}\nok 3 - test the declared active variation renders the production area from real facts without Repo\n1..3",
+  "semanticAssessment": "Accepted as RED: the named target executed and failed its direct variation-ID equality assertion. The existing DB-free active-story test passed; there were no fixture, compile, or setup failures."
+}
