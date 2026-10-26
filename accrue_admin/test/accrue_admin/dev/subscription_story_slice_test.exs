@@ -184,4 +184,20 @@ defmodule AccrueAdmin.SubscriptionStorySliceTest do
              :dunning_active
            ]
   end
+
+  test "all canonical lifecycle variations delegate to the shared production area" do
+    for id <- [:active, :scheduled_cancellation, :incomplete_evidence] do
+      variation = Enum.find(SubscriptionDetail.variations(), &(&1.id == id))
+
+      assert %Variation{} = variation
+      assert variation.attributes.scenario == id
+
+      assigns = AccrueAdmin.Storybook.SubscriptionScenarios.assigns!(variation.attributes)
+      story_html = render_component(SubscriptionDetail.function(), variation.attributes)
+      production_html = render_component(&SubscriptionLive.subscription_area/1, assigns)
+
+      assert story_html == production_html
+      assert Process.whereis(AccrueAdmin.TestRepo) == nil
+    end
+  end
 end

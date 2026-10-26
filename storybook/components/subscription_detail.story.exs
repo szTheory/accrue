@@ -17,6 +17,16 @@ defmodule AccrueAdmin.Storybook.Components.SubscriptionDetail do
   def variations do
     [
       variation(:active, :active, "Active Cadence subscription"),
+      variation(
+        :scheduled_cancellation,
+        :scheduled_cancellation,
+        "Scheduled cancellation with a supported resume action"
+      ),
+      variation(
+        :incomplete_evidence,
+        :incomplete_evidence,
+        "Active subscription with incomplete billing projections"
+      ),
       variation(:populated, :populated, "Populated compatibility ID"),
       variation(:braintree_pruned, :braintree_pruned, "Braintree action-pruned compatibility ID"),
       variation(:dunning_active, :dunning_active, "Dunning-active compatibility ID")
