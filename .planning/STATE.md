@@ -5,16 +5,16 @@ milestone_name: Integration & CI Green
 current_phase: 251
 current_phase_name: 1.7.0 Release Alignment
 status: executing
-stopped_at: "Completed 251-05-PLAN.md (release PR #55 aligned at 2d3a4c62, GREEN; main frozen at 6e285bff)"
-last_updated: "2026-10-26T16:29:31.416Z"
+stopped_at: Completed 251-06-PLAN.md
+last_updated: "2026-10-26T17:14:06.631Z"
 last_activity: 2026-10-26
 last_activity_desc: Phase 251 execution started
-state_head: a27dc3db34561b36965c697a785afdfd2ff06ac7
+state_head: d406f3c53b7b0e8ade55cf9c04915461841156c0
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 32
-  completed_plans: 30
+  completed_plans: 31
 ---
 
 # Project State
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 ## Current Position
 
 Phase: 251 (1.7.0 Release Alignment) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-10-26 — Phase 251 execution started on branch `ci/release-please-repair` (from main `db1b6d85`)
 
@@ -217,6 +217,7 @@ Last activity: 2026-10-26 — Phase 251 execution started on branch `ci/release-
 | Phase 251 P03 | 25min | 2 tasks | 7 files |
 | Phase 251 P04 | ~70min | 3 tasks | 4 files |
 | Phase 251 P05 | ~65min | 3 tasks | 11 files |
+| Phase 251 P06 | 50min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -501,6 +502,8 @@ Last activity: 2026-10-26 — Phase 251 execution started on branch `ci/release-
 - [Phase 251]: SC1 is decided by verify_release_changelog_curated.sh, scoped to each package's ## [manifest version] section; versions below 1.7.0 are grandfathered; hyphen-suffixed phase scopes and raw commit links count as raw lines
 - [Phase 251]: 251-04: PR #50 stale autorelease: pending label removed (not relabelled tagged) after dry-run proof; main frozen at FREEZE_SHA 6e285bff until release PR #55 merges
 - [Phase 251]: 251-05: release PR #55 aligned to head A 2d3a4c62 by fast-forward push (curated 1.7.0 CHANGELOGs, release-notes stories, 1.7.0 pins); A is GREEN by the exact-head helper; D2 Known issues bullet ships with the UTC-session workaround, verified against the column default
+- [Phase 251]: 1.7.0 merged via fail-closed gate (merge commit 20a3982c) and published to Hex for all three packages; classifier-skipped live Stripe jobs at M recorded, not claimed
+- [Phase 251]: v1.68 follow-up: 250-ci-head-status push mode should read the provider-proof classifier should_run=false
 
 ### Pending Todos
 
@@ -599,8 +602,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-26T16:29:31.083Z
-Stopped at: Completed 251-05-PLAN.md (release PR #55 aligned at 2d3a4c62, GREEN; main frozen at 6e285bff)
+Last session: 2026-10-26T17:14:06.277Z
+Stopped at: Completed 251-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

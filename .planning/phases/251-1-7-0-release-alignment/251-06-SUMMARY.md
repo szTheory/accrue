@@ -4,7 +4,7 @@ plan: "06"
 subsystem: release-automation
 status: complete
 completed: 2026-10-26
-requirements-completed: [RLS-01, RLS-02]
+requirements-completed: []
 tags: [release-please, merge-gate, hex-publish, hexdocs, rls-01, rls-02]
 requires: [251-05]
 provides:
