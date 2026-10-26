@@ -113,13 +113,13 @@ Plans:
   2. Every required check on the release PR's exact head SHA concludes `success`, not `skipped`.
   3. Hex publication of 1.7.0 happens only after a recorded explicit maintainer yes. Without one, the aligned release PR stays open and green, and the decision is recorded in STATE.md.
 
-**Plans**: 3/7 plans executed
+**Plans**: 4/7 plans executed
 
 Plans:
 - [x] 251-01-PLAN.md — Bootstrap: current_phase 251 + scoped VERIFICATION/UAT minted in one commit; authorization recorded verbatim (wave 1)
 - [x] 251-02-PLAN.md — Workflow fix: delete the stale-base reset, add the merged-but-pending wedge detector, repair-safety verifier with legacy negative controls (wave 2)
 - [x] 251-03-PLAN.md — SC1 gate: section-scoped curated-CHANGELOG verifier proven on the raw candidate; fix-PR gate replay (wave 3)
-- [ ] 251-04-PLAN.md — Land the fix PR (squash, exact-head green), remove #50's stale label, dispatch Release Please, verify the fresh 1.7.0 PR (wave 4)
+- [x] 251-04-PLAN.md — Land the fix PR (squash, exact-head green), remove #50's stale label, dispatch Release Please, verify the fresh 1.7.0 PR (wave 4)
 - [ ] 251-05-PLAN.md — Align the release branch: curated, evidence-backed CHANGELOGs, release-notes stories, 1.7.0 pins; fast-forward push (wave 5)
 - [ ] 251-06-PLAN.md — Hard automated merge gate, merge commit, Hex publish and read-only verification; stop and report on partial publish (wave 6)
 - [ ] 251-07-PLAN.md — Close: RLS-01/02 Complete, full re-mint, docs/251-close PR squash-merged (wave 7)
@@ -130,7 +130,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 249. Local Gate Parity & Planning Truth | 18/18 | Complete    | 2026-10-25 |
 | 250. Remote Integration | 7/7 | Complete | 2026-10-25 |
-| 251. 1.7.0 Release Alignment | 3/7 | In Progress | - |
+| 251. 1.7.0 Release Alignment | 4/7 | In Progress | - |
 
 ## Next
 

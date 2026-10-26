@@ -5,16 +5,16 @@ milestone_name: Integration & CI Green
 current_phase: 251
 current_phase_name: 1.7.0 Release Alignment
 status: executing
-stopped_at: Completed 251-03-PLAN.md
-last_updated: "2026-10-26T14:29:48.493Z"
+stopped_at: "Completed 251-04-PLAN.md (release PR #55 open, main frozen at 6e285bff)"
+last_updated: "2026-10-26T15:37:39.418Z"
 last_activity: 2026-10-26
 last_activity_desc: Phase 251 execution started
-state_head: 90c3c966350a7eecd3a7b04de3eb78fe4d8c9286
+state_head: e44c0698e337c241276d2a72d488e55948c8b85c
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 32
-  completed_plans: 28
+  completed_plans: 29
 ---
 
 # Project State
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 ## Current Position
 
 Phase: 251 (1.7.0 Release Alignment) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-10-26 — Phase 251 execution started on branch `ci/release-please-repair` (from main `db1b6d85`)
 
@@ -215,6 +215,7 @@ Last activity: 2026-10-26 — Phase 251 execution started on branch `ci/release-
 | Phase 250 P07 | ~1h | 2 tasks | 8 files |
 | Phase 251 P02 | 15min | 3 tasks | 7 files |
 | Phase 251 P03 | 25min | 2 tasks | 7 files |
+| Phase 251 P04 | ~70min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -497,6 +498,7 @@ Last activity: 2026-10-26 — Phase 251 execution started on branch `ci/release-
 - [Phase 251]: Release Please automation never force-writes the release branch; stale/empty release PR remedy is close + delete remote branch + dispatch (251-02)
 - [Phase 251]: Release PR wedge check is its own job (needs release, !cancelled()) that no publish/proof job needs; it is red until merged PR #50's autorelease: pending label is removed (251-02)
 - [Phase 251]: SC1 is decided by verify_release_changelog_curated.sh, scoped to each package's ## [manifest version] section; versions below 1.7.0 are grandfathered; hyphen-suffixed phase scopes and raw commit links count as raw lines
+- [Phase 251]: 251-04: PR #50 stale autorelease: pending label removed (not relabelled tagged) after dry-run proof; main frozen at FREEZE_SHA 6e285bff until release PR #55 merges
 
 ### Pending Todos
 
@@ -595,8 +597,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-26T14:29:48.119Z
-Stopped at: Completed 251-03-PLAN.md
+Last session: 2026-10-26T15:37:31.810Z
+Stopped at: Completed 251-04-PLAN.md (release PR #55 open, main frozen at 6e285bff)
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
