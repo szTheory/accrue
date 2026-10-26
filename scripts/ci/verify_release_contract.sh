@@ -66,6 +66,8 @@ require_fixed "$releasing" 'ACCRUE_PORTAL_HEX_RELEASE=1'
 require_fixed "$releasing" 'choose `accrue`, `accrue_admin`, or `accrue_portal`'
 require_fixed "$releasing" 'Publish `accrue_portal`.'
 require_fixed "$releasing" 'repair_linked_release_pr.sh'
+require_fixed "$releasing" 'remove the label before the next release PR merges'
+reject_fixed "$releasing" 'back to `main`, rerun Release Please'
 
 require_fixed "$release_workflow" 'accrue_portal_release_created'
 require_fixed "$release_workflow" 'publish-accrue-portal:'
@@ -89,6 +91,7 @@ require_fixed "$recovery_workflow" 'cd accrue_portal && mix hex.publish --dry-ru
 require_fixed "$recovery_workflow" 'cd accrue_portal && mix hex.publish --yes'
 
 require_fixed "$ROOT_DIR/scripts/ci/README.md" 'repair_linked_release_pr.sh'
+reject_fixed "$ROOT_DIR/scripts/ci/README.md" 'force-sync'
 
 echo "OK: linked release contract aligned for accrue/accrue_admin/accrue_portal"
 

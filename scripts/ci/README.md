@@ -533,8 +533,15 @@ Stderr lines from `verify_package_docs.sh` are prefixed with `[verify_package_do
 - `verify_release_pr_scope:` failures mean the live Release Please PR does not satisfy the locked three-package contract. The PR must update `.release-please-manifest.json`, all three package `mix.exs` files, and all three package `CHANGELOG.md` files before merge.
 - Use `bash scripts/ci/verify_release_pr_scope.sh --pr <number-or-url> [--version <x.y.z>]` before merge. A passing result is the REL-01 pre-merge gate.
 - Record the passing identifier pair in `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` as `PR_NUMBER:` and `TARGET_VERSION:` and stop using “latest release PR” shortcuts after that.
-- If the Release Please branch is stale relative to `main`, force-sync `release-please--branches--main` back to `main`, rerun Release Please, and only then apply the portal repair on the regenerated branch.
+- If the Release Please PR is stale or empty (no release commit, or no changed files), close it, delete the remote `release-please--branches--main` branch, and dispatch Release Please; with no open release PR it creates a fresh one from `main`. Only then apply the portal repair on the regenerated branch. Automation never rewrites the release branch.
+- If a merged release PR that tagged nothing is still labelled `autorelease: pending`, release-please will not open a new release PR: remove the label before the next release PR merges. Do not run `github-release` to clear it; that would tag the wrong commit.
 - If Release Please leaves `accrue_portal` behind while `accrue` and `accrue_admin` advance together, run `bash scripts/ci/repair_linked_release_pr.sh --version <x.y.z>` on the checked-out release branch and push the repaired branch before merge.
+
+### Triage: verify_release_branch_repair_safety.sh
+
+- Guards `.github/workflows/release-please.yml` (Phase 251, PR #50): no forced `git push` (`--force`, `--force-with-lease`, `-f`, `+refspec`), no `git checkout -B "$release_branch" "$expected_base"` reset, the `release-pr-wedge-check` job's `--state merged --label 'autorelease: pending'` query with `exit 1` in its own job that no `needs:` names, and the `verify_release_pr_scope.sh --pr` canary. Comment lines are ignored.
+- `--self-test` controls: control A (the verbatim db1b6d85 stale-base block fails), control B (a hermetic bare-origin git fixture where the legacy algorithm leaves `main...release` with 0 changed files, reproducing PR #50), the positive fixed algorithm (all 7 release files kept), and missing-detector, comment, placement (detector in a `needs:` list or inside the `release` job), missing-canary and forced-push-shape fixtures.
+- Wired merge-blocking in the `release-manifest-ssot` job of `ci.yml` as `--self-test` then `--repo .`.
 
 ### Triage: capture_linked_release_proof.sh
 
