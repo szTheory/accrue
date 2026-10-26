@@ -18,6 +18,7 @@ key-files:
     - .planning/phases/250-remote-integration/250-06-SUMMARY.md
     - .planning/phases/250-remote-integration/250-07-SUMMARY.md
   modified:
+    - .planning/phases/250-remote-integration/250-ci-head-status.mjs
     - .planning/phases/250-remote-integration/250-VERIFICATION.md
     - .planning/phases/250-remote-integration/250-UAT.md
     - .planning/phases/250-remote-integration/250-CI-LEDGER.md
@@ -32,7 +33,7 @@ plan_head_before: 3dd5f8746b34497d345cd4d03c44f3756a159bab
 actuals:
   tokens: 12000
   tasks: 2
-  commits: 4
+  commits: 5
 coverage:
   - id: L2
     description: LAND-02 every PR-path job of ci.yml and accrue_admin_browser.yml is success on the exact evidence head E and on the body-only PR head H, with the D1 exclusions only
@@ -76,6 +77,20 @@ coverage:
         ref: "bash .planning/phases/250-remote-integration/250-prepush-guard.sh --close --remote-ref refs/heads/docs/250-close passes before the push of docs/250-close"
         status: pass
     human_judgment: false
+  - id: F6
+    description: The verdict helper's pull_request mode judges accrue_admin_browser.yml by its paths filter when --pr-base is given, as push mode already does; without --pr-base it still requires the browser run
+    requirement: LAND-02
+    verification:
+      - kind: command
+        ref: "node .planning/phases/250-remote-integration/250-ci-head-status.mjs --self-test prints PASS (41 checks), including: planning-only PR diff with no browser run rc 0 (not triggered (paths)); diff touching accrue_admin with no run rc 1; empty diff rc 1 (fails closed); existing browser run on a non-matching diff still judged (red Browser UAT rc 1); no --pr-base still rc 1; the workflow's pull_request and push path lists equal the pinned list"
+        status: pass
+      - kind: command
+        ref: "negative controls in a scratch copy: browserRequired forced to true -> self-test FAIL (1 of 41) on the planning-only case; first pull_request path narrowed to accrue_admin/lib/** -> FAIL paths drifted; accrue/** removed from push -> FAIL paths drifted"
+        status: pass
+      - kind: command
+        ref: "live: --sha 02682685b4f1ffbd5d87dceb1ad2e238d53acdc2 --event pull_request --pr-base origin/main prints GREEN, 19 success, 8 PR paths checked, 0 match; the same SHA without --pr-base still prints RED: no pull_request run exists; --sha 17a608cc --event pull_request --pr-base 7971753a prints GREEN with the browser run judged"
+        status: pass
+    human_judgment: false
   - id: C2
     description: SL-E table agreement fails when LAND-03's checkbox disagrees with its Complete traceability row
     requirement: LAND-03
@@ -101,7 +116,13 @@ Phase 250 is closed: LAND-02 and LAND-03 are Complete on the strength of the E/H
 
 ## Commit count
 
-`actuals.commits: 4` is `git rev-list --count 3dd5f874..<close head>` on `docs/250-close`: the 250-06 SUMMARY commit, the 250-07 close commit, the control-record re-mint and the commit that sets this count (it counts itself, by construction).
+`actuals.commits: 5` is `git rev-list --count 3dd5f874..<close head>` on `docs/250-close`: the 250-06 SUMMARY commit, the 250-07 close commit, the control-record re-mint, the commit-count re-mint and the helper fix (which counts itself, by construction).
+
+## Helper fix (found at the first close-PR head)
+
+At the first close-PR head `02682685` (PR #51, ci.yml run 40251522630) every ci.yml job was `success` except the parked lane, and the Stripe trio was skipped as required. The helper still printed `RED: accrue_admin_browser.yml: no pull_request run exists`. That workflow's `pull_request.paths` (`accrue/**`, `accrue_admin/**`, its own file) match none of the 8 planning-only paths, so GitHub never creates the run; positive control: the same matcher counts 1 on `accrue_admin/x.ex`. The pull_request mode required that run unconditionally, a gap push mode does not have.
+
+Fix at source in `250-ci-head-status.mjs`: an opt-in `--pr-base <ref>` computes the PR diff from `merge-base(<ref>, sha)` and lets the browser run be absent only when that diff is non-empty and matches none of the paths. A run that exists is judged in full. Without the flag the behaviour is unchanged. A self-test check reads the workflow file, so the pinned path list cannot drift silently. Controls: coverage F6.
 
 ## Close location
 
@@ -110,6 +131,7 @@ Checkpoint option **merge-close-pr**. The close commits are on `docs/250-close` 
 ## Deviations from Plan
 
 - **Branch instead of local main.** The plan has the close commit made on local `main` and pushed as `main:refs/heads/docs/250-close`. Per the orchestrator, it was committed on `docs/250-close` created from `main`; local `main` stays equal to `origin/main` until the PR merges. Same pushed content, no local-ahead `main`.
+- **[Rule 1 - Bug] Verdict helper ignored the browser workflow's paths filter in pull_request mode.** Found at the first close-PR head; fixed at source with self-test and negative controls (coverage F6). The close PR head moved to carry the fix, and the helper is re-run there with `--pr-base origin/main`.
 - **Close PR merged.** The plan put merging the close PR out of scope pending another yes; the maintainer gave that yes up front (squash, exact head, every PR-path job success except the parked lane).
 
 ## Known Stubs
