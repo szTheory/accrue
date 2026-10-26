@@ -140,5 +140,30 @@ No `gh run rerun` was used. The close was re-made as a new E on top of the fix; 
 | 7 (250-04) | `74cdd43a48a57ee2ee047293d387093c138da5d8` | 40234321143 | 40234321194 | RED (portal flake; Browser UAT success) |
 | 8 (250-04, P) | `5ad01dee2c70087aa89fafdfb154f6e9d8068277` | 40236926623 | 40236926603 | GREEN |
 | 9 (250-05, first close) | `7b1b58624fed4c1cbbd96f45f0d568d86f1bad5f` | 40241001658 | 40241001662 | RED (SIGPIPE race in verify_release_contract.sh; fixed in 5561a9a9) |
+| 10 (250-05, E) | `ece41e51eb0e6ab4f030d33501cd811188542686` | 40243045805 | 40243045812 | GREEN |
+| 11 (250-05, H) | `17a608ccdbc1512a31475e0804d46811d2059c4b` | 40245573325 | 40245573321 | GREEN |
+| main push (250-06, M) | `3dd5f8746b34497d345cd4d03c44f3756a159bab` | 40247684345 | 40247684340 | GREEN vs baseline 35374333981 |
 
 The evidence head E and the body-only head H are recorded in `250-INTEGRATION-PR.md` Provenance; this ledger cannot hold E's own runs without moving E.
+
+## Iteration 10 (plan 250-05) - evidence head E `ece41e51eb0e6ab4f030d33501cd811188542686`
+
+Runs: ci.yml `40243045805` (19 success, 3 skipped, 1 failure), accrue_admin_browser.yml `40243045812` (success). Verdict: `250-ci-head-status.mjs --repo szTheory/accrue --sha ece41e51eb0e6ab4f030d33501cd811188542686 --event pull_request` prints `GREEN`, rc 0, 20 jobs `success`. The one failure is the parked lane `Admin UI ratchet guardrails [parked]` (job 121321049329, `Verify frozen ratchet evidence`), allowed by D1. The skipped jobs are the Stripe trio, as required. The `5561a9a9` here-string fix held: all four Release gate cells `success`.
+
+## Iteration 11 (plan 250-05) - body-only PR head H `17a608ccdbc1512a31475e0804d46811d2059c4b`
+
+Runs: ci.yml `40245573325` (19 success, 3 skipped, 1 failure), accrue_admin_browser.yml `40245573321` (success). Verdict: helper `--event pull_request` at H prints `GREEN`, rc 0, 20 jobs `success`; the one failure is the parked lane (job 121328560720), allowed by D1. `git diff --name-only E H` lists only `250-INTEGRATION-PR.md`.
+
+## Post-merge main push (plan 250-06) - merge commit M `3dd5f8746b34497d345cd4d03c44f3756a159bab`
+
+`gh pr merge 49 --merge --match-head-commit 17a608cc...`; M has parents `7971753a` (old origin/main) and `17a608cc` (H); 993 of 993 pre-merge SHAs reachable from M. Push runs on M: ci.yml `40247684345`, accrue_admin_browser.yml `40247684340` (success), Release Please `40247684348` (success).
+
+Verdict: `250-ci-head-status.mjs --repo szTheory/accrue --sha 3dd5f8746b34497d345cd4d03c44f3756a159bab --event push --baseline-run 35374333981` prints `GREEN`, rc 0, 21 jobs `success`.
+
+| Job | Baseline 35374333981 | M | Verdict |
+|-----|----------------------|---|---------|
+| Every job that was `success` in the baseline (Docs and bash contracts, four Release gate cells, REL-02, iOS, Phase 18 Tax, Stripe provider-proof trigger classifier, Admin group/hardening/Phase 200 guardrails, ratchet self-tests, Host integration, Host Docker boot smoke, Playwright shards 1/3 2/3 3/3, Admin drift and docs, Annotation sweep) | success | success | success |
+| Browser UAT (accrue_admin_browser.yml) | - | success | success |
+| Stripe provider-proof incident reconciliation | skipped | success | recorded, not claimed (baseline skipped) |
+| Stripe test-mode parity (mandatory periodic) | skipped | success | recorded, not claimed (baseline skipped) |
+| Admin UI ratchet guardrails [parked] | failure | failure | recorded, not claimed (parked, D1) |

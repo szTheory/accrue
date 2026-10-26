@@ -12,13 +12,21 @@
 //
 // Usage:
 //   node 250-ci-head-status.mjs --repo OWNER/REPO --sha <40hex> --event pull_request|push
-//        [--visual-pending-ok] [--baseline-run <id>] [--wait-minutes <n>] [--json]
+//        [--visual-pending-ok] [--baseline-run <id>] [--pr-base <ref>] [--wait-minutes <n>] [--json]
+//
+// --pr-base (pull_request only): judge the browser workflow by its paths filter, as push
+// mode already does. Without it a pull_request browser run is always required. With it, an
+// absent browser run is allowed only when the PR diff (merge-base(<ref>, sha)..sha) is
+// non-empty and touches none of the workflow's pull_request paths; a run that exists is
+// judged in full either way.
 //   node 250-ci-head-status.mjs --self-test
 
 import { spawnSync } from "node:child_process";
 
 const CI_PATH = ".github/workflows/ci.yml";
 const BROWSER_PATH = ".github/workflows/accrue_admin_browser.yml";
+// accrue_admin_browser.yml declares the same three paths under pull_request and push;
+// the self-test reads the workflow file and fails if either list drifts from this one.
 const BROWSER_PUSH_PATHS = ["accrue/", "accrue_admin/", BROWSER_PATH];
 const VISUAL_STEP = "Phase 211 visual regression gate";
 
@@ -131,7 +139,7 @@ export function pathsTriggerBrowser(paths) {
 
 // Pure verdict over collected data. `collected` = { ci, browser } from collectWorkflow,
 // `baseline` = { jobs } (push mode), `changedPaths` = paths changed by the pushed commit.
-export function judge({ sha, event, collected, baseline = null, changedPaths = [], visualPendingOk = false, absentIsPending = false }) {
+export function judge({ sha, event, collected, baseline = null, changedPaths = [], prChangedPaths = null, visualPendingOk = false, absentIsPending = false }) {
   const red = [];
   const pending = [];
   const notes = [];
@@ -189,7 +197,10 @@ export function judge({ sha, event, collected, baseline = null, changedPaths = [
 
   if (event === "pull_request") {
     considerRun("ci.yml", collected.ci, { requireRun: true, required: CI_REQUIRED, mustSkip: CI_PR_MUST_SKIP, parked: CI_PARKED });
-    considerRun("accrue_admin_browser.yml", collected.browser, { requireRun: true, required: BROWSER_REQUIRED, mustSkip: BROWSER_PR_MUST_SKIP, parked: [] });
+    // Fail closed: no --pr-base, an empty diff, or any matching path all require the run.
+    const browserRequired = prChangedPaths === null || prChangedPaths.length === 0 || pathsTriggerBrowser(prChangedPaths).length > 0;
+    if (prChangedPaths !== null) notes.push(`accrue_admin_browser.yml: ${prChangedPaths.length} PR path(s) checked against its pull_request paths, ${pathsTriggerBrowser(prChangedPaths).length} match`);
+    considerRun("accrue_admin_browser.yml", collected.browser, { requireRun: browserRequired, required: BROWSER_REQUIRED, mustSkip: BROWSER_PR_MUST_SKIP, parked: [] });
   } else if (event === "push") {
     if (!baseline) throw new Error("--event push requires --baseline-run <id>");
     const baselineOk = new Set(baseline.jobs.filter((j) => j.conclusion === "success").map((j) => j.name));
@@ -267,7 +278,7 @@ function render(result) {
 
 // ---------------------------------------------------------------- self-test
 
-function selfTest() {
+async function selfTest() {
   const SHA = "a".repeat(40);
   const OTHER = "b".repeat(40);
   const repo = "o/r";
@@ -380,6 +391,51 @@ function selfTest() {
   expect("push: browser paths touched, Browser UAT failure", pushRun(pushBase(), { browser: visualFail([gate]) }, [BROWSER_PATH]), 1, "Browser UAT");
   expect("push: Mint ran on push", pushRun(pushBase(), { browser: swap(baseBrowser(), "Mint visual baselines", job("Mint visual baselines")) }, ["accrue/mix.exs"]), 1, "dispatch-only job ran on push");
 
+  // pull_request with --pr-base: the browser workflow is judged by its paths filter.
+  const prRun = (opts, prChangedPaths) => run(opts, { prChangedPaths });
+  expect("pr --pr-base: planning-only diff, browser run absent", prRun({ browserRun: false }, [".planning/STATE.md"]), 0, "not triggered (paths)", "1 PR path(s) checked", "0 match");
+  expect("pr --pr-base: diff touches accrue_admin, browser run absent", prRun({ browserRun: false }, [".planning/STATE.md", "accrue_admin/lib/x.ex"]), 1, "no pull_request run", "1 match");
+  expect("pr --pr-base: empty diff fails closed", prRun({ browserRun: false }, []), 1, "no pull_request run");
+  expect("pr --pr-base: run exists on a non-matching diff and is still judged", prRun({ browser: visualFail([gate]) }, ["README.md"]), 1, "Browser UAT");
+  expect("pr --pr-base: run exists and is green", prRun({}, ["README.md"]), 0);
+  expect("pr without --pr-base still requires the browser run", run({ browserRun: false }, { prChangedPaths: null }), 1, "no pull_request run");
+
+  checks += 1;
+  try {
+    const fs = await import("node:fs");
+    const url = await import("node:url");
+    const pathMod = await import("node:path");
+    const here = pathMod.dirname(url.fileURLToPath(import.meta.url));
+    const wf = fs.readFileSync(pathMod.join(here, "..", "..", "..", BROWSER_PATH), "utf8");
+    const onBlock = wf.slice(wf.indexOf("\non:"), wf.indexOf("\njobs:"));
+    const listFor = (key) => {
+      const start = onBlock.indexOf(`\n  ${key}:`);
+      if (start === -1) return null;
+      const rest = onBlock.slice(start + 1).split("\n").slice(1);
+      const end = rest.findIndex((line) => /^  \S/.test(line));
+      const body = rest.slice(0, end === -1 ? rest.length : end);
+      const p0 = body.findIndex((line) => /^\s+paths:\s*$/.test(line));
+      if (p0 === -1) return null;
+      const out = [];
+      for (const line of body.slice(p0 + 1)) {
+        const m = line.match(/^\s+-\s+"?([^"]+?)"?\s*$/);
+        if (!m) break;
+        out.push(m[1]);
+      }
+      return out;
+    };
+    const want = BROWSER_PUSH_PATHS.map((p) => (p.endsWith("/") ? `${p}**` : p)).sort();
+    const pr = listFor("pull_request");
+    const push = listFor("push");
+    if (JSON.stringify((pr || []).slice().sort()) !== JSON.stringify(want) || JSON.stringify((push || []).slice().sort()) !== JSON.stringify(want)) {
+      failures += 1;
+      console.error(`SELF-TEST FAIL: ${BROWSER_PATH} paths drifted: pull_request ${JSON.stringify(pr)}, push ${JSON.stringify(push)}, want ${JSON.stringify(want)}`);
+    } else console.log("ok - browser workflow pull_request and push paths equal the pinned list");
+  } catch (error) {
+    failures += 1;
+    console.error(`SELF-TEST FAIL: could not read ${BROWSER_PATH}: ${error.message}`);
+  }
+
   checks += 1;
   const sorted = pathsTriggerBrowser(["accrue_admin/a", "accrue/b", ".github/workflows/accrue_admin_browser.yml", "accrue_host/c", "README.md", "accrue-docs/d"]);
   if (sorted.length !== 3) { failures += 1; console.error(`SELF-TEST FAIL: pathsTriggerBrowser matched ${JSON.stringify(sorted)}`); } else console.log("ok - pathsTriggerBrowser prefix boundaries");
@@ -407,6 +463,7 @@ function parseArgs(argv) {
     else if (arg === "--sha") opts.sha = next();
     else if (arg === "--event") opts.event = next();
     else if (arg === "--baseline-run") opts.baselineRun = next();
+    else if (arg === "--pr-base") opts.prBase = next();
     else if (arg === "--wait-minutes") opts.wait = Number(next());
     else if (arg === "--visual-pending-ok") opts.visualPendingOk = true;
     else if (arg === "--json") opts.json = true;
@@ -414,6 +471,14 @@ function parseArgs(argv) {
     else throw new Error(`unknown argument ${arg}`);
   }
   return opts;
+}
+
+function prChangedPathsFor(base, sha) {
+  const mb = spawnSync("git", ["merge-base", base, sha], { encoding: "utf8" });
+  if (mb.status !== 0) throw new Error(`git merge-base ${base} ${sha} failed (is the commit fetched?): ${mb.stderr.trim()}`);
+  const result = spawnSync("git", ["diff", "--name-only", mb.stdout.trim(), sha], { encoding: "utf8", maxBuffer: 100_000_000 });
+  if (result.status !== 0) throw new Error(`git diff ${mb.stdout.trim()} ${sha} failed: ${result.stderr.trim()}`);
+  return result.stdout.split("\n").filter(Boolean);
 }
 
 function changedPathsFor(sha) {
@@ -428,6 +493,7 @@ async function main() {
   if (!opts.repo || !/^[0-9a-f]{40}$/.test(opts.sha || "")) throw new Error("--repo OWNER/REPO and a 40-hex --sha are required");
   if (!["pull_request", "push"].includes(opts.event)) throw new Error("--event must be pull_request or push");
   if (opts.event === "push" && !opts.baselineRun) throw new Error("--event push requires --baseline-run <id>");
+  if (opts.prBase && opts.event !== "pull_request") throw new Error("--pr-base applies to --event pull_request only");
 
   let baseline = null;
   if (opts.event === "push") {
@@ -436,6 +502,7 @@ async function main() {
     baseline = { jobs: ghApi(`repos/${opts.repo}/actions/runs/${opts.baselineRun}/attempts/${attempt}/jobs?per_page=100`).jobs.map(normalizeJob) };
   }
   const changedPaths = opts.event === "push" ? changedPathsFor(opts.sha) : [];
+  const prChangedPaths = opts.prBase ? prChangedPathsFor(opts.prBase, opts.sha) : null;
   const deadline = Date.now() + opts.wait * 60_000;
   const graceEnd = Date.now() + Math.min(opts.wait, 5) * 60_000;
 
@@ -445,7 +512,7 @@ async function main() {
       browser: collectWorkflow({ repo: opts.repo, sha: opts.sha, event: opts.event, workflowPath: BROWSER_PATH, gh: ghApi })
     };
     const result = judge({
-      sha: opts.sha, event: opts.event, collected, baseline, changedPaths,
+      sha: opts.sha, event: opts.event, collected, baseline, changedPaths, prChangedPaths,
       visualPendingOk: opts.visualPendingOk, absentIsPending: opts.wait > 0 && Date.now() < graceEnd
     });
     if (result.code !== 2 || Date.now() >= deadline) {
