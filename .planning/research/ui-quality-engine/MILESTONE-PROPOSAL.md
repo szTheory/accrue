@@ -1,6 +1,6 @@
 # Proposed v1.68: UI Storybook Stress Testing
 
-**Date:** 2026-10-26. **Status:** reviewed planning proposal; canonical milestone not opened.
+**Date:** 2026-10-26. **Status:** reviewed scope approved by the owner (“what do u rec? do that”); formal activation recorded in PROJECT/STATE and derived REQUIREMENTS/ROADMAP. This file preserves the proposal and rolling direction, not implementation evidence.
 **Starting phase if selected:** 252, continuing from v1.67's Phase 251.
 **Direction:** [owner brief](../../notes/2026-10-26-ui-storybook-quality-direction.md).
 **Decision rationale:** [recommendations](RECOMMENDATIONS.md), [adversarial review](ADVERSARIAL-REVIEW.md).
@@ -80,6 +80,6 @@ Stop research now unless a finding changes scope, order, safety or acceptance. S
 - **Doc drift:** PRODUCT.md's old statement that mixed-account Portal support is only proposed conflicts with the recorded Phase233 shipped decision. Reconcile against actual code in an authorized Portal/docs slice; do not duplicate implementation based on stale prose.
 - **Research carry-forward:** opening this milestone should reuse these findings rather than repeat fan-out. Resolve any later missing requirement narrowly. Preserve canonical historical evidence and local milestone-tag policy.
 
-## Remaining owner decision
+## Owner disposition
 
-Recommend selecting **v1.68 UI Storybook Stress Testing, proposed Phases 252–254**, with the rolling horizons above. Confirm this concrete scope through the new-milestone summary gate before PROJECT/STATE/REQUIREMENTS/ROADMAP writes. No additional brand, architecture, dependency or fixture-style decision needs to be pushed back to the owner at this stage.
+The owner approved the recommendation on 2026-10-26: “what do u rec? do that”. Select **v1.68 UI Storybook Stress Testing, Phases 252–254**, with the rolling horizons above. The milestone-summary gate is satisfied; derive atomic requirements and the formal roadmap without reopening settled scope. No additional brand, architecture, dependency or fixture-style decision needs to be pushed back to the owner at this stage. The earlier candidate-phase and proposed-outcome wording is retained as the proposal record; canonical REQUIREMENTS/ROADMAP govern execution once written.

@@ -47,3 +47,7 @@ The supplied methodology says this session ends at a reviewed plan and explicitl
 This direction is an explicit strategy proposal for quality of existing surfaces, not authorization for new billing capabilities, a rebrand, new Admin rooms, or revival of the parked paid evaluator. Preserve other known correctness work, especially the event session-timezone issue, as a separate high-priority candidate rather than silently absorbing or dropping it.
 
 Research and the reviewed proposal live in [`../research/ui-quality-engine/`](../research/ui-quality-engine/). Formal milestone activation requires reconciling that proposal through the new-milestone workflow; future horizons remain directional until selected.
+
+## Subsequent activation approval — 2026-10-26
+
+After receiving the concrete three-phase v1.68 proposal and rolling roadmap, the owner replied: “what do u rec? do that”. The recommendation is v1.68 UI Storybook Stress Testing, Phases 252–254, with the subscription job first and broader Admin/Portal work remaining directional. This authorizes formal activation and derived requirements/roadmap within the reviewed scope, superseding the earlier plan-only session boundary for that next step. It does not authorize new billing scope or start product implementation by itself. Preserve this approval rather than repeating confirmation questions about the same recommendation.

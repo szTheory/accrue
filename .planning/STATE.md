@@ -1,40 +1,36 @@
 ---
 gsd_state_version: "1.0"
-milestone: v1.67
-milestone_name: Integration & CI Green
-status: Awaiting next milestone
-stopped_at: Completed 251-07-PLAN.md
-last_updated: "2026-10-26T18:11:25.197Z"
+milestone: v1.68
+milestone_name: UI Storybook Stress Testing
+status: planning
+last_updated: "2026-10-26T20:19:11.777Z"
 last_activity: 2026-10-26
-last_activity_desc: Milestone v1.67 completed and archived
-state_head: dbd509e0f4d8d2e84a189ea6167fdcaade3c8ab6
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 32
-  completed_plans: 32
-current_phase: 251
-current_phase_name: 1.7.0 Release Alignment
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-12)
+See: .planning/PROJECT.md (updated 2026-10-26)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** No active milestone. v1.67 is shipped and archived (1.7.0 released 2026-10-26); `current_phase: 251` is kept so archive-aware SL-G keeps checking the last phase. Next is `/gsd-new-milestone`, opened only on a concrete trigger.
-**Progress:** [██████████] 100% (3/3 phases)
+**Current focus:** v1.68 UI Storybook Stress Testing — defining the approved subscription-first requirements and Phases 252–254 from the reviewed research. No implementation has started.
+**Progress:** 0% — new milestone, roadmap being initialized.
 **Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
 
 ## Current Position
 
-Phase: Milestone v1.67 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-10-26 — Milestone v1.67 completed and archived
+Status: Defining requirements
+Last activity: 2026-10-26 — Milestone v1.68 started
 
 ## Performance Metrics
 

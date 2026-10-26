@@ -1,6 +1,6 @@
 # UI quality engine: recommendations
 
-**Date:** 2026-10-26. **Status:** Research-backed proposal, awaiting owner scope confirmation; not an activated milestone or UI verification report.
+**Date:** 2026-10-26. **Status:** Research-backed recommendation approved by the owner for v1.68 activation; not a UI verification report. Canonical REQUIREMENTS/ROADMAP carry the derived execution scope.
 **Source baseline:** `891ed451b16905ea4a71d6b3653310202bb10b5e`.
 **Owner intent:** [durable direction](../../notes/2026-10-26-ui-storybook-quality-direction.md).
 **Navigation:** [inventory](INVENTORY.md), [composition](ARCHITECTURE.md), [scenarios](SCENARIOS.md), [design and verification](DESIGN-AND-VERIFICATION.md), [milestone and rolling roadmap](MILESTONE-PROPOSAL.md), [adversarial review](ADVERSARIAL-REVIEW.md).
