@@ -23,7 +23,7 @@
 - ✅ **v1.65 Accrue Admin Language & Consistency** — Phase 244 (completed 2026-10-11) — [archive](milestones/v1.65-ROADMAP.md)
 - ✅ **v1.66 Admin Usability and Visual Consistency** — Phases 245–248 (completed 2026-10-12) — [archive](milestones/v1.66-ROADMAP.md)
 - ✅ **v1.67 Integration & CI Green** — Phases 249–251 (shipped 2026-10-26, released 1.7.0) — [archive](milestones/v1.67-ROADMAP.md)
-- 🚧 **v1.68 UI Storybook Stress Testing** — Phases 252–254 (approved 2026-10-26; ready for planning)
+- 🚧 **v1.68 UI Storybook Stress Testing** — Phases 252–254 (approved 2026-10-26; in progress)
 
 ## Planning Doctrine
 
@@ -35,7 +35,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 ## Current Position
 
-v1.68 UI Storybook Stress Testing is active: 22 requirements across Phases 252–254. Phase 252 is executing: 8 independently checked plans, 17 automated tasks, 5 waves. Plan 252-01 completed the production-owned active subscription story slice; seven plans remain. The owner approved the [reviewed subscription-first proposal](research/ui-quality-engine/MILESTONE-PROPOSAL.md) with “what do u rec? do that”; this explicit strategy decision satisfies the Planning Doctrine without reopening approval of the same scope.
+v1.68 UI Storybook Stress Testing is active: 22 requirements across Phases 252–254. Phase 252 is executing: 8 independently checked plans, 17 automated tasks, 5 waves. Plans 252-01 and 252-02 completed the production-owned active and lifecycle subscription story slices; six plans remain. The owner approved the [reviewed subscription-first proposal](research/ui-quality-engine/MILESTONE-PROPOSAL.md) with “what do u rec? do that”; this explicit strategy decision satisfies the Planning Doctrine without reopening approval of the same scope.
 
 v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements). The v1.63–v1.66 line landed on `main` through PR #49, and 1.7.0 of `accrue`, `accrue_admin` and `accrue_portal` is published to Hex with docs. Release policy (maintainer, 2026-10-26): release early and often at any natural, release-worthy stopping point.
 
@@ -78,7 +78,7 @@ v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements).
   4. A reviewer can launch the documented lab on an explicit disposable database/namespace and distinct loopback port with known process identity, see unexpected-server reuse refused, and observe a negative control proving a normal test reset cannot alter review data. Ordinary and labelled held-out data remain separate and privacy-safe, guarded cleanup refuses unrelated children, and production compile/package/route checks exclude fixture payloads and dev tooling while preserving the kitchen and canonical mounts; DB-free rendering is distinguished from DB-backed startup. (SCEN-04, LAB-01, LAB-02)
   5. A maintainer can observe changes confined to each consumed story, shared scenario, component, registry, generated manifest, token or runner root invoke its named required CI owner, through representative positive path/classifier controls and an unrelated-path negative control; in-job selection alone cannot satisfy workflow admission. (CIQ-01)
 
-**Plans**: 1/8 plans executed
+**Plans**: 2/8 plans executed
 **UI hint**: yes
 
 Plans:
@@ -86,7 +86,7 @@ Plans:
 - [x] 252-01-PLAN.md — One active scenario through the production-owned summary/facts/action area
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 252-02-PLAN.md — Valid launch/team facts and complete retained lifecycle situations
+- [x] 252-02-PLAN.md — Valid launch/team facts and complete retained lifecycle situations
 - [ ] 252-03-PLAN.md — Disposable lab ownership and real reset-isolation proof
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -132,11 +132,11 @@ Plans:
 
 ## Progress
 
-**Execution order:** 252 → 253 → 254. All 22 requirements are mapped exactly once; SBK-02, SBK-03, and SCEN-01 are complete, with 19 requirements remaining. Phase 252 has 8 plans; Phase 253/254 plan counts will be determined during their planning.
+**Execution order:** 252 → 253 → 254. All 22 requirements are mapped exactly once; SBK-02, SBK-03, SCEN-01, and SCEN-02 are complete, with 18 requirements remaining. Phase 252 has 8 plans; Phase 253/254 plan counts will be determined during their planning.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 252. Production-backed Subscription Stories | 1/8 | In Progress | - |
+| 252. Production-backed Subscription Stories | 2/8 | In Progress | - |
 | 253. Real Groups and a Whole Subscription Job | 0/TBD | Not started | - |
 | 254. Recurring Quality, Reviewed Fixes and Curation | 0/TBD | Not started | - |
 
@@ -148,4 +148,4 @@ The [rolling roadmap](research/ui-quality-engine/MILESTONE-PROPOSAL.md#rolling-r
 
 ## Next
 
-Continue Phase 252 with the remaining 7 plans using the refreshed research and approved UI contract. Independent plan checking passed and all 10 phase requirements are assigned. Plan 252-01 is complete; remaining implementation and automated acceptance evidence are pending.
+Continue Phase 252 with the remaining 6 plans using the refreshed research and approved UI contract. Independent plan checking passed and all 10 phase requirements are assigned. Plans 252-01 and 252-02 are complete; remaining implementation and automated acceptance evidence are pending.

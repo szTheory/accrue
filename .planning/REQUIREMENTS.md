@@ -4,7 +4,7 @@
 **Milestone:** v1.68 UI Storybook Stress Testing
 **Core Value:** A Phoenix developer can install Accrue and its companion interfaces and launch a real SaaS with understandable, production-grade subscription billing on day one.
 
-The owner approved the [reviewed subscription-first proposal](research/ui-quality-engine/MILESTONE-PROPOSAL.md) with “what do u rec? do that”. These atomic requirements derive from that scope; routine wording and implementation choices do not reopen its approval. [Owner direction](notes/2026-10-26-ui-storybook-quality-direction.md) and [recommendations](research/ui-quality-engine/RECOMMENDATIONS.md) carry the rationale and evidence limits. No v1.68 implementation is complete yet. Prior requirements are preserved in [v1.67's archive](milestones/v1.67-REQUIREMENTS.md).
+The owner approved the [reviewed subscription-first proposal](research/ui-quality-engine/MILESTONE-PROPOSAL.md) with “what do u rec? do that”. These atomic requirements derive from that scope; routine wording and implementation choices do not reopen its approval. [Owner direction](notes/2026-10-26-ui-storybook-quality-direction.md) and [recommendations](research/ui-quality-engine/RECOMMENDATIONS.md) carry the rationale and evidence limits. v1.68 implementation is underway; SBK-02, SBK-03, SCEN-01, and SCEN-02 have implementation evidence. Prior requirements are preserved in [v1.67's archive](milestones/v1.67-REQUIREMENTS.md).
 
 ## v1.68 Requirements
 
@@ -20,7 +20,7 @@ The owner approved the [reviewed subscription-first proposal](research/ui-qualit
 ### Realistic shared scenario facts
 
 - [x] **SCEN-01**: Maintainer can select deterministic launch/new-account and growing-team situations in the existing Cadence world from one DB-free fact source, with explicit actor, billed entity, supported provider, lifecycle, fixed clock and stable identities, consumed through narrow story/test/seed adapters rather than a cross-package fixture framework.
-- [ ] **SCEN-02**: Maintainer can reject impossible realistic fixtures before rendering using real domain helpers and cross-record invariants for enums, relationships, provider compatibility, money and chronology; deliberately invalid enum, orphan, provider, amount and timestamp controls demonstrate rejection without duplicating billing rules.
+- [x] **SCEN-02**: Maintainer can reject impossible realistic fixtures before rendering using real domain helpers and cross-record invariants for enums, relationships, provider compatibility, money and chronology; deliberately invalid enum, orphan, provider, amount and timestamp controls demonstrate rejection without duplicating billing rules.
 - [ ] **SCEN-03**: Maintainer can persist representative shared scenarios through a narrow disposable Repo adapter and prove actual database constraints and resulting record relationships match the source facts; DB-free validation alone is never reported as persisted conformance.
 - [ ] **SCEN-04**: Reviewer can use plausible ordinary data and separately labelled held-out stress data without cross-lane contamination, real personal data or secrets; existing guarded writes and exact cleanup authority remain proved, including refusal to remove unrelated children.
 
@@ -85,7 +85,7 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 | SBK-05 | Phase 253 | Pending |
 | SBK-06 | Phase 253 | Pending |
 | SCEN-01 | Phase 252 | Complete |
-| SCEN-02 | Phase 252 | Pending |
+| SCEN-02 | Phase 252 | Complete |
 | SCEN-03 | Phase 252 | Pending |
 | SCEN-04 | Phase 252 | Pending |
 | LAB-01 | Phase 252 | Pending |
@@ -106,7 +106,7 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 - Mapped to phases: 22/22 (Phase 252: 10; Phase 253: 5; Phase 254: 7)
 - Unmapped: 0
 - Duplicate mappings: 0
-- Implementation status: 22 Pending
+- Implementation status: 4 Complete, 18 Pending
 
 ---
 *Requirements defined: 2026-10-26 from the owner-approved reviewed proposal.*

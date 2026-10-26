@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 0
+open_count: 1
 waived_count: 12
 fixed_count: 28
-total_count: 40
-last_updated: 2026-10-26T23:05:57.006Z
+total_count: 41
+last_updated: 2026-10-26T23:26:11.679Z
 ---
 
 # Broken Windows Ledger
@@ -55,6 +55,7 @@ last_updated: 2026-10-26T23:05:57.006Z
 | 38 | 247 | deviation | accrue_admin/assets/js/hooks/time_display.js | 4 | Rejected impossible ISO date/time components before browser formatting to prevent normalized, invented instants. | fixed |  | 2026-10-11T21:25:35.951Z | 2026-10-25T01:38:42.306Z |
 | 39 | 252 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex |  | Replaced unsupported HEEx fragment syntax with valid sibling roots, preserving the current page layout and DOM order. | fixed |  | 2026-10-26T23:05:45.518Z | 2026-10-26T23:05:56.929Z |
 | 40 | 252 | deviation | accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs |  | Added a local TAP formatter to the self-starting DB-free ExUnit script so RED evidence could be classified without global test configuration changes. | fixed |  | 2026-10-26T23:05:45.601Z | 2026-10-26T23:05:57.006Z |
+| 41 | 252 | deviation | accrue_admin/test/accrue_admin/dev/subscription_scenarios_test.exs |  | Standalone DB-free tests start the installed Localize application and restore the Fake clock so Money.new/2 can run without Repo bootstrap. | open |  | 2026-10-26T23:26:11.679Z |  |
 
 ````json
 [
@@ -566,6 +567,19 @@ last_updated: 2026-10-26T23:05:57.006Z
     "reason": "",
     "recorded_at": "2026-10-26T23:05:45.601Z",
     "resolved_at": "2026-10-26T23:05:57.006Z",
+    "milestone": "v1.68"
+  },
+  {
+    "id": 41,
+    "kind": "deviation",
+    "phase": "252",
+    "file": "accrue_admin/test/accrue_admin/dev/subscription_scenarios_test.exs",
+    "line": null,
+    "description": "Standalone DB-free tests start the installed Localize application and restore the Fake clock so Money.new/2 can run without Repo bootstrap.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-26T23:26:11.679Z",
+    "resolved_at": null,
     "milestone": "v1.68"
   }
 ]
