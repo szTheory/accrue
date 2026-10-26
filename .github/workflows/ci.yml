@@ -183,10 +183,12 @@ jobs:
       # Quick task 261025-vdn: the CI efficiency changes (concurrency gated to
       # pull_request with run_id-unique non-PR groups, the deps compile
       # partition count, per-job timeouts, SHA-pinned third-party actions in
-      # every workflow file, the release-gate docs keep-set) are shape-pinned so a later edit cannot turn an
+      # every workflow file, the release-gate docs keep-set, the pruned
+      # third-party _build caches) are shape-pinned so a later edit cannot turn an
       # efficiency setting into a weakened gate.
       - name: CI efficiency shape contract
         run: >-
+          bash scripts/ci/prune_first_party_build.sh --self-test &&
           node --test --test-reporter=tap scripts/ci/verify_ci_efficiency_contract.mjs &&
           node scripts/ci/verify_ci_efficiency_contract.mjs --fixtures &&
           node scripts/ci/verify_ci_efficiency_contract.mjs --repo .
@@ -655,6 +657,37 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-deps-
 
+      # Quick task 261025-vdn (item 1): cache the third-party part of
+      # _build/test (~9 min of deps compile per cell). The prune step right
+      # after the restore deletes the first-party app dirs, and the save
+      # excludes them, so accrue/accrue_admin/accrue_portal always compile
+      # fresh and --warnings-as-errors still fires on a warm runner (proved by
+      # the warm-vs-cold compile-rc matrix in the 261025-vdn SUMMARY). The
+      # key carries the config hash before the lock hash, and the prefix
+      # restore-key stops after the config hash: a fallback restore can only
+      # cross a mix.lock change (which Mix detects per dep), never a config
+      # change. The save runs right after compile, before tests, so a later
+      # test failure still saves. verify_ci_efficiency_contract.mjs pins all
+      # of this.
+      - name: Restore accrue _build cache
+        id: accrue_build_cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            accrue/_build/test
+            !accrue/_build/test/lib/accrue
+            !accrue/_build/test/lib/accrue_admin
+            !accrue/_build/test/lib/accrue_portal
+            !accrue/_build/test/lib/accrue_host
+            !accrue/_build/test/lib/sigra
+            !accrue/_build/test/**/*.plt*
+          key: ${{ runner.os }}-release-gate-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-sigra-${{ matrix.sigra }}-otel-${{ matrix.opentelemetry }}-accrue-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('accrue/config/**/*.exs') }}-lock${{ hashFiles('accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-release-gate-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-sigra-${{ matrix.sigra }}-otel-${{ matrix.opentelemetry }}-accrue-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('accrue/config/**/*.exs') }}-lock
+
+      - name: Prune first-party apps from the restored accrue _build
+        run: bash scripts/ci/prune_first_party_build.sh accrue/_build/test
+
       - name: Install accrue deps
         run: cd accrue && mix deps.get
 
@@ -663,6 +696,20 @@ jobs:
 
       - name: Accrue compile
         run: cd accrue && mix compile --warnings-as-errors
+
+      - name: Save accrue _build cache
+        if: steps.accrue_build_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            accrue/_build/test
+            !accrue/_build/test/lib/accrue
+            !accrue/_build/test/lib/accrue_admin
+            !accrue/_build/test/lib/accrue_portal
+            !accrue/_build/test/lib/accrue_host
+            !accrue/_build/test/lib/sigra
+            !accrue/_build/test/**/*.plt*
+          key: ${{ steps.accrue_build_cache.outputs.cache-primary-key }}
 
       - name: Accrue test
         run: cd accrue && mix test --warnings-as-errors
@@ -722,6 +769,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-deps-
 
+      - name: Restore accrue_admin _build cache
+        id: accrue_admin_build_cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            accrue_admin/_build/test
+            !accrue_admin/_build/test/lib/accrue
+            !accrue_admin/_build/test/lib/accrue_admin
+            !accrue_admin/_build/test/lib/accrue_portal
+            !accrue_admin/_build/test/lib/accrue_host
+            !accrue_admin/_build/test/lib/sigra
+            !accrue_admin/_build/test/**/*.plt*
+          key: ${{ runner.os }}-release-gate-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-sigra-${{ matrix.sigra }}-otel-${{ matrix.opentelemetry }}-accrue-admin-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('accrue_admin/config/**/*.exs') }}-lock${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-release-gate-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-sigra-${{ matrix.sigra }}-otel-${{ matrix.opentelemetry }}-accrue-admin-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('accrue_admin/config/**/*.exs') }}-lock
+
+      - name: Prune first-party apps from the restored accrue_admin _build
+        run: bash scripts/ci/prune_first_party_build.sh accrue_admin/_build/test
+
       - name: Install accrue_admin deps
         run: cd accrue_admin && mix deps.get
 
@@ -730,6 +796,20 @@ jobs:
 
       - name: Accrue admin compile
         run: cd accrue_admin && mix compile --warnings-as-errors
+
+      - name: Save accrue_admin _build cache
+        if: steps.accrue_admin_build_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            accrue_admin/_build/test
+            !accrue_admin/_build/test/lib/accrue
+            !accrue_admin/_build/test/lib/accrue_admin
+            !accrue_admin/_build/test/lib/accrue_portal
+            !accrue_admin/_build/test/lib/accrue_host
+            !accrue_admin/_build/test/lib/sigra
+            !accrue_admin/_build/test/**/*.plt*
+          key: ${{ steps.accrue_admin_build_cache.outputs.cache-primary-key }}
 
       - name: Accrue admin test
         run: cd accrue_admin && mix test --warnings-as-errors
@@ -779,6 +859,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-portal-deps-
 
+      - name: Restore accrue_portal _build cache
+        id: accrue_portal_build_cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            accrue_portal/_build/test
+            !accrue_portal/_build/test/lib/accrue
+            !accrue_portal/_build/test/lib/accrue_admin
+            !accrue_portal/_build/test/lib/accrue_portal
+            !accrue_portal/_build/test/lib/accrue_host
+            !accrue_portal/_build/test/lib/sigra
+            !accrue_portal/_build/test/**/*.plt*
+          key: ${{ runner.os }}-release-gate-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-sigra-${{ matrix.sigra }}-otel-${{ matrix.opentelemetry }}-accrue-portal-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('accrue_portal/config/**/*.exs') }}-lock${{ hashFiles('accrue_portal/mix.lock', 'accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-release-gate-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-sigra-${{ matrix.sigra }}-otel-${{ matrix.opentelemetry }}-accrue-portal-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('accrue_portal/config/**/*.exs') }}-lock
+
+      - name: Prune first-party apps from the restored accrue_portal _build
+        run: bash scripts/ci/prune_first_party_build.sh accrue_portal/_build/test
+
       - name: Install accrue_portal deps
         run: cd accrue_portal && mix deps.get
 
@@ -787,6 +886,20 @@ jobs:
 
       - name: Accrue portal compile
         run: cd accrue_portal && mix compile --warnings-as-errors
+
+      - name: Save accrue_portal _build cache
+        if: steps.accrue_portal_build_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            accrue_portal/_build/test
+            !accrue_portal/_build/test/lib/accrue
+            !accrue_portal/_build/test/lib/accrue_admin
+            !accrue_portal/_build/test/lib/accrue_portal
+            !accrue_portal/_build/test/lib/accrue_host
+            !accrue_portal/_build/test/lib/sigra
+            !accrue_portal/_build/test/**/*.plt*
+          key: ${{ steps.accrue_portal_build_cache.outputs.cache-primary-key }}
 
       - name: Accrue portal test
         run: cd accrue_portal && mix test --warnings-as-errors
@@ -1626,6 +1739,28 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-otp28-elixir119-accrue-host-playwright-deps-
 
+      # Quick task 261025-vdn (item 1): cache the third-party part of this
+      # shard's fixed MIX_BUILD_PATH tree; the prune and save exclusions keep
+      # accrue_host and its path deps compiling fresh (see release-gate).
+      - name: Restore host _build cache
+        id: host_build_cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/lib/accrue
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/lib/accrue_admin
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/lib/accrue_portal
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/lib/accrue_host
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/lib/sigra
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/**/*.plt*
+          key: ${{ runner.os }}-playwright-e2e-shard-${{ matrix.shard }}-otp28.0-elixir1.19.5-accrue-host-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('examples/accrue_host/config/**/*.exs') }}-lock${{ hashFiles('examples/accrue_host/mix.lock', 'accrue/mix.lock', 'accrue_admin/mix.lock', 'accrue_portal/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-e2e-shard-${{ matrix.shard }}-otp28.0-elixir1.19.5-accrue-host-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('examples/accrue_host/config/**/*.exs') }}-lock
+
+      - name: Prune first-party apps from the restored host _build
+        run: bash scripts/ci/prune_first_party_build.sh examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test
+
       - name: Install host deps
         run: cd examples/accrue_host && mix deps.get
 
@@ -1636,6 +1771,20 @@ jobs:
 
       - name: Compile host
         run: cd examples/accrue_host && mix compile --warnings-as-errors
+
+      - name: Save host _build cache
+        if: steps.host_build_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/lib/accrue
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/lib/accrue_admin
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/lib/accrue_portal
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/lib/accrue_host
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/lib/sigra
+            !examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test/**/*.plt*
+          key: ${{ steps.host_build_cache.outputs.cache-primary-key }}
 
       - name: Build host assets
         run: cd examples/accrue_host && mix assets.build

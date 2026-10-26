@@ -31,9 +31,23 @@
 //     tree hash, and the CI docs logs of all four cells differed only in the
 //     echoed env and a compile-timing line.
 //
+//   - third-party `_build` cache (item 1): release-gate caches
+//     accrue/_build/test, accrue_admin/_build/test and accrue_portal/_build/test,
+//     and each playwright-e2e shard caches its fixed MIX_BUILD_PATH tree.
+//     Every restore is split from its save (actions/cache/restore +
+//     actions/cache/save, never the combined action); the step right after a
+//     restore prunes the first-party app dirs from the same env dir; the save
+//     comes directly after a `mix compile --warnings-as-errors` step, is
+//     skipped on an exact hit, reuses the restore's primary key, and carries
+//     the restore's exact path list (the cache version is derived from it)
+//     including `!` exclusions for the five first-party lib dirs and PLTs.
+//     The key names runner.os, the job's OTP and Elixir versions, MIX_ENV, a
+//     mix.lock hashFiles and a config/**/*.exs hashFiles (plus the
+//     sigra/otel matrix in release-gate and the shard in playwright-e2e).
+//
 // Scope: .github/workflows/ci.yml and .github/workflows/accrue_admin_browser.yml
-// for concurrency, partition count and timeouts; ci.yml for the docs keep-set;
-// all workflow files for pins.
+// for concurrency, partition count and timeouts; ci.yml for the docs keep-set
+// and the `_build` cache; all workflow files for pins.
 // The YAML is parsed line-based by indentation (no YAML dependency); the
 // parser only needs the fixed two-space GitHub Actions layout this repository
 // uses, and a file it cannot read as that layout FAILS rather than passing.
@@ -240,6 +254,73 @@ export function checkDocsKeepSet(file, workflow) {
   return docSteps.length;
 }
 
+export const FIRST_PARTY_APPS = ["accrue", "accrue_admin", "accrue_portal", "accrue_host", "sigra"];
+export const BUILD_CACHE_EXPECTATIONS = [
+  { job: "release-gate", envDirs: ["accrue/_build/test", "accrue_admin/_build/test", "accrue_portal/_build/test"], matrixKeys: ["matrix.sigra", "matrix.opentelemetry"] },
+  { job: "playwright-e2e", envDirs: ["examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test"], matrixKeys: ["matrix.shard"] }
+];
+const BUILD_ENV_DIR = /(?:\/_build\/test|\/tmp\/accrue-host-proof-[^/]+\/test)$/;
+const CACHE_ACTION = /^actions\/cache(?:\/(restore|save))?@/;
+
+const pathLines = (step) => (step.with.get("path") || "").split("\n").map((line) => line.trim()).filter(Boolean);
+
+// Returns the number of `_build` restore steps verified in `jobId`.
+export function checkBuildCache(file, workflow, { job: jobId, envDirs, matrixKeys }) {
+  const steps = jobSteps(workflow, jobId);
+  const at = (step) => `${file}:${step.line + 1}`;
+  const beam = steps.find((step) => /^erlef\/setup-beam@/.test(step.uses || ""));
+  if (!beam) fail(`${file}: job \`${jobId}\` has no setup-beam step to bind the cache key to`);
+  const otp = beam.with.get("otp-version"); const elixir = beam.with.get("elixir-version");
+  const seen = new Set();
+  steps.forEach((step, index) => {
+    const action = CACHE_ACTION.exec(step.uses || "");
+    if (!action) return;
+    const paths = pathLines(step);
+    const envDir = paths[0];
+    if (!envDir || !BUILD_ENV_DIR.test(envDir)) return;
+    if (!action[1]) fail(`${at(step)}: \`_build\` cache for ${envDir} uses the combined actions/cache; split it into actions/cache/restore + actions/cache/save`);
+    if (action[1] === "save") return; // validated from its restore below
+    if (!envDirs.includes(envDir)) fail(`${at(step)}: unexpected \`_build\` cache path ${envDir} in \`${jobId}\``);
+    seen.add(envDir);
+    // Key.
+    const key = step.with.get("key") || "";
+    const required = [
+      ["runner.os", "${{ runner.os }}"],
+      ["the job's OTP version", `otp${otp}`],
+      ["the job's Elixir version", `elixir${elixir}`],
+      ["MIX_ENV", "${{ env.MIX_ENV }}"],
+      ...matrixKeys.map((matrixKey) => [matrixKey, `\${{ ${matrixKey} }}`])
+    ];
+    for (const [label, needle] of required) if (!key.includes(needle)) fail(`${at(step)}: \`_build\` cache key for ${envDir} is missing ${label} (\`${needle}\`)`);
+    if (!/hashFiles\([^)]*mix\.lock[^)]*\)/.test(key)) fail(`${at(step)}: \`_build\` cache key for ${envDir} is missing a mix.lock hashFiles`);
+    if (!/hashFiles\([^)]*config\/\*\*\/\*\.exs[^)]*\)/.test(key)) fail(`${at(step)}: \`_build\` cache key for ${envDir} is missing a config/**/*.exs hashFiles`);
+    if (!step.id) fail(`${at(step)}: \`_build\` restore for ${envDir} has no id: for its save step to reference`);
+    // Path exclusions (restore and save must carry the identical list).
+    const required_exclusions = [...FIRST_PARTY_APPS.map((app) => `!${envDir}/lib/${app}`), `!${envDir}/**/*.plt*`];
+    for (const exclusion of required_exclusions) if (!paths.includes(exclusion)) fail(`${at(step)}: \`_build\` cache path for ${envDir} lacks the \`${exclusion}\` exclusion`);
+    // Prune immediately after the restore.
+    const next = steps[index + 1];
+    if (!next || (next.run || "").trim() !== `bash scripts/ci/prune_first_party_build.sh ${envDir}`) {
+      fail(`${at(step)}: the step right after the \`_build\` restore for ${envDir} must be \`bash scripts/ci/prune_first_party_build.sh ${envDir}\` (found ${next ? `\`${next.name || next.run || next.uses}\`` : "nothing"})`);
+    }
+    // Exactly one matching save, directly after a warnings-as-errors compile.
+    const saves = steps.filter((candidate) => /^actions\/cache\/save@/.test(candidate.uses || "") && pathLines(candidate)[0] === envDir);
+    if (saves.length !== 1) fail(`${at(step)}: expected exactly one actions/cache/save for ${envDir}, found ${saves.length}`);
+    const save = saves[0];
+    const saveIndex = steps.indexOf(save);
+    if (saveIndex < index) fail(`${at(save)}: the \`_build\` save for ${envDir} precedes its restore`);
+    const previous = steps[saveIndex - 1];
+    if (!/\bmix compile --warnings-as-errors\b/.test(previous?.run || "")) {
+      fail(`${at(save)}: the \`_build\` save for ${envDir} must come directly after a \`mix compile --warnings-as-errors\` step (found \`${previous?.name || previous?.run || "nothing"}\`)`);
+    }
+    if (save.if !== `steps.${step.id}.outputs.cache-hit != 'true'`) fail(`${at(save)}: the \`_build\` save for ${envDir} must carry \`if: steps.${step.id}.outputs.cache-hit != 'true'\``);
+    if (save.with.get("key") !== `\${{ steps.${step.id}.outputs.cache-primary-key }}`) fail(`${at(save)}: the \`_build\` save for ${envDir} must use key \`\${{ steps.${step.id}.outputs.cache-primary-key }}\``);
+    if (JSON.stringify(pathLines(save)) !== JSON.stringify(paths)) fail(`${at(save)}: the \`_build\` save path list for ${envDir} differs from its restore's (the cache version is derived from it)`);
+  });
+  for (const envDir of envDirs) if (!seen.has(envDir)) fail(`${file}: job \`${jobId}\` has no \`_build\` restore for ${envDir}`);
+  return seen.size;
+}
+
 export function allWorkflowFiles(repo) {
   const dir = path.join(repo, ".github", "workflows");
   return fs.readdirSync(dir).filter((name) => /\.ya?ml$/.test(name)).sort().map((name) => `.github/workflows/${name}`);
@@ -264,6 +345,7 @@ export function verifyRepo(repo) {
   }
   const ciWorkflow = parseWorkflow(fs.readFileSync(path.join(repo, ".github/workflows/ci.yml"), "utf8"));
   results.docsSteps = checkDocsKeepSet(".github/workflows/ci.yml", ciWorkflow);
+  results.buildCaches = BUILD_CACHE_EXPECTATIONS.reduce((sum, expectation) => sum + checkBuildCache(".github/workflows/ci.yml", ciWorkflow, expectation), 0);
   let pins = 0;
   const workflowFiles = allWorkflowFiles(repo);
   for (const file of workflowFiles) pins += checkThirdPartyPins(file, fs.readFileSync(path.join(repo, file), "utf8"));
@@ -351,6 +433,64 @@ jobs:
 
 const docsKeepSet = (source) => checkDocsKeepSet("fixture.yml", parseWorkflow(source));
 
+const BUILD_KEY = "${{ runner.os }}-release-gate-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-sigra-${{ matrix.sigra }}-otel-${{ matrix.opentelemetry }}-accrue-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('accrue/config/**/*.exs') }}-lock${{ hashFiles('accrue/mix.lock') }}";
+const BUILD_PATH = `          path: |
+            accrue/_build/test
+            !accrue/_build/test/lib/accrue
+            !accrue/_build/test/lib/accrue_admin
+            !accrue/_build/test/lib/accrue_portal
+            !accrue/_build/test/lib/accrue_host
+            !accrue/_build/test/lib/sigra
+            !accrue/_build/test/**/*.plt*
+`;
+const BUILD_CACHE = `name: Fixture
+jobs:
+  release-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      MIX_ENV: test
+    steps:
+      - name: Set up BEAM
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
+        with:
+          otp-version: \${{ matrix.otp }}
+          elixir-version: \${{ matrix.elixir }}
+
+      - name: Restore accrue _build cache
+        id: accrue_build_cache
+        uses: actions/cache/restore@v5
+        with:
+${BUILD_PATH}          key: ${BUILD_KEY}
+          restore-keys: |
+            prefix-
+
+      - name: Prune first-party apps from the restored accrue _build
+        run: bash scripts/ci/prune_first_party_build.sh accrue/_build/test
+
+      - name: Install accrue deps
+        run: cd accrue && mix deps.get
+
+      - name: Accrue compile
+        run: cd accrue && mix compile --warnings-as-errors
+
+      - name: Save accrue _build cache
+        if: steps.accrue_build_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+${BUILD_PATH}          key: \${{ steps.accrue_build_cache.outputs.cache-primary-key }}
+
+      - name: Accrue test
+        run: cd accrue && mix test --warnings-as-errors
+`;
+const ONE_DIR = { job: "release-gate", envDirs: ["accrue/_build/test"], matrixKeys: ["matrix.sigra", "matrix.opentelemetry"] };
+const buildCache = (source) => checkBuildCache("fixture.yml", parseWorkflow(source), ONE_DIR);
+function mutateBuild(from, to, count = 1) {
+  const parts = BUILD_CACHE.split(from);
+  if (parts.length - 1 < count) throw new Error(`build-cache fixture anchor not found: ${from}`);
+  return BUILD_CACHE.replace(from, to);
+}
+
 function mutate(from, to) {
   if (!PASSING.includes(from)) throw new Error(`fixture mutation anchor not found: ${from}`);
   return PASSING.replace(from, to);
@@ -426,11 +566,71 @@ const SCENARIOS = [
   ["a matrix that keeps fewer than two off/off cells fails", () => {
     assert.throws(() => docsKeepSet(RELEASE_GATE.replace("          - elixir: '1.19.0'\n            sigra: 'off'", "          - elixir: '1.19.0'\n            sigra: 'on'")), /at least the Floor and Primary/);
   }],
+  ["a _build cache fixture with restore, prune and save in place passes", () => {
+    assert.equal(buildCache(BUILD_CACHE), 1);
+  }],
+  ["a _build restore not followed by the prune step fails", () => {
+    const source = mutateBuild("      - name: Prune first-party apps from the restored accrue _build\n        run: bash scripts/ci/prune_first_party_build.sh accrue/_build/test\n\n", "");
+    assert.throws(() => buildCache(source), /right after the `_build` restore for accrue\/_build\/test must be `bash scripts\/ci\/prune_first_party_build\.sh/);
+  }],
+  ["a prune of a different dir fails", () => {
+    assert.throws(() => buildCache(mutateBuild("prune_first_party_build.sh accrue/_build/test", "prune_first_party_build.sh accrue/_build/dev")), /must be `bash scripts\/ci\/prune_first_party_build\.sh accrue\/_build\/test`/);
+  }],
+  ["a save not directly after a mix compile --warnings-as-errors step fails", () => {
+    const source = mutateBuild("      - name: Accrue compile\n        run: cd accrue && mix compile --warnings-as-errors\n", "      - name: Accrue compile\n        run: cd accrue && mix compile\n");
+    assert.throws(() => buildCache(source), /directly after a `mix compile --warnings-as-errors` step/);
+  }],
+  ["a save without the cache-hit guard or with its own key fails", () => {
+    assert.throws(() => buildCache(mutateBuild("        if: steps.accrue_build_cache.outputs.cache-hit != 'true'\n", "")), /must carry `if: steps\.accrue_build_cache\.outputs\.cache-hit != 'true'`/);
+    assert.throws(() => buildCache(mutateBuild("key: ${{ steps.accrue_build_cache.outputs.cache-primary-key }}", "key: some-other-key")), /must use key/);
+  }],
+  ["a combined actions/cache on a _build path fails", () => {
+    assert.throws(() => buildCache(mutateBuild("uses: actions/cache/restore@v5", "uses: actions/cache@v5")), /combined actions\/cache/);
+  }],
+  ["a _build key missing any required component fails", () => {
+    for (const [from, to, message] of [
+      ["${{ runner.os }}-", "linux-", /missing runner\.os/],
+      ["-otp${{ matrix.otp }}", "", /missing the job's OTP version/],
+      ["-elixir${{ matrix.elixir }}", "", /missing the job's Elixir version/],
+      ["-${{ env.MIX_ENV }}", "-test", /missing MIX_ENV/],
+      ["-lock${{ hashFiles('accrue/mix.lock') }}", "", /missing a mix\.lock hashFiles/],
+      ["-cfg${{ hashFiles('accrue/config/**/*.exs') }}", "", /missing a config\/\*\*\/\*\.exs hashFiles/]
+    ]) {
+      assert.throws(() => buildCache(mutateBuild(from, to)), message, `${from} removal must fail`);
+    }
+  }],
+  ["a release-gate _build key missing matrix.sigra or matrix.opentelemetry fails", () => {
+    assert.throws(() => buildCache(mutateBuild("-sigra-${{ matrix.sigra }}", "")), /missing matrix\.sigra/);
+    assert.throws(() => buildCache(mutateBuild("-otel-${{ matrix.opentelemetry }}", "")), /missing matrix\.opentelemetry/);
+  }],
+  ["a _build path without the first-party or PLT ! exclusions fails", () => {
+    for (const exclusion of ["!accrue/_build/test/lib/accrue\n", "!accrue/_build/test/lib/sigra\n", "!accrue/_build/test/**/*.plt*\n"]) {
+      const source = BUILD_CACHE.split(`            ${exclusion}`).join("");
+      assert.notEqual(source, BUILD_CACHE);
+      assert.throws(() => buildCache(source), /lacks the `!accrue\/_build\/test\//);
+    }
+  }],
+  ["a save whose path list differs from its restore's fails", () => {
+    const at = BUILD_CACHE.lastIndexOf("            !accrue/_build/test/lib/sigra\n");
+    const source = BUILD_CACHE.slice(0, at) + BUILD_CACHE.slice(at + "            !accrue/_build/test/lib/sigra\n".length);
+    assert.throws(() => buildCache(source), /save path list for accrue\/_build\/test differs/);
+  }],
+  ["a playwright-shard _build key missing matrix.shard fails", () => {
+    const shardDir = "examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test";
+    const shard = BUILD_CACHE.split("accrue/_build/test").join(shardDir).replace("-sigra-${{ matrix.sigra }}-otel-${{ matrix.opentelemetry }}", "-shard-${{ matrix.shard }}");
+    const expectation = { job: "release-gate", envDirs: [shardDir], matrixKeys: ["matrix.shard"] };
+    assert.equal(checkBuildCache("fixture.yml", parseWorkflow(shard), expectation), 1);
+    assert.throws(() => checkBuildCache("fixture.yml", parseWorkflow(shard.replace("-shard-${{ matrix.shard }}-accrue-build", "-accrue-build")), expectation), /missing matrix\.shard/);
+  }],
+  ["a job missing an expected _build restore fails", () => {
+    assert.throws(() => checkBuildCache("fixture.yml", parseWorkflow(BUILD_CACHE), { ...ONE_DIR, envDirs: ["accrue/_build/test", "accrue_admin/_build/test"] }), /no `_build` restore for accrue_admin\/_build\/test/);
+  }],
   ["the live scoped workflows pass", () => {
     const results = verifyRepo(process.cwd());
     assert.equal(results.length, SCOPED_WORKFLOWS.length);
     assert.ok(results.pins > 0, "the live pin scan must inspect at least one third-party action");
     assert.ok(results.docsSteps >= 3, "the live release-gate must expose its docs steps to the keep-set check");
+    assert.equal(results.buildCaches, 4, "release-gate (3 projects) and playwright-e2e (1 shard tree) must each carry a pruned _build cache");
     for (const result of results) assert.ok(result.jobs > 0, `${result.file} must declare jobs`);
   }]
 ];
@@ -462,7 +662,7 @@ function main() {
     return;
   }
   const results = verifyRepo(parsed.values.repo || process.cwd());
-  console.log(`ci efficiency contract: PASS (verified: ${results.map((r) => `${r.file} ${r.jobs} jobs`).join(", ")}; ${results.docsSteps} release-gate docs steps on the keep-set; ${results.pins} third-party uses pinned across ${results.workflowFiles} workflow files)`);
+  console.log(`ci efficiency contract: PASS (verified: ${results.map((r) => `${r.file} ${r.jobs} jobs`).join(", ")}; ${results.docsSteps} release-gate docs steps on the keep-set; ${results.buildCaches} pruned _build caches; ${results.pins} third-party uses pinned across ${results.workflowFiles} workflow files)`);
 }
 
 let invokedAsEntrypoint = false;
