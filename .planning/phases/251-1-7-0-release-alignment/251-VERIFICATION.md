@@ -2,13 +2,14 @@
 phase: 251-1-7-0-release-alignment
 verified: 2026-10-26T14:05:30Z
 status: passed
-score: "completed-plan claims verified: 251-01; phase success criteria claimed: 0/3 (phase in progress)"
+score: "completed-plan claims verified: 251-01, 251-02; phase success criteria claimed: 0/3 (phase in progress)"
 covered_files:
   - ".github/workflows/ci.yml"
   - ".github/workflows/release-please.yml"
   - ".planning/phases/251-1-7-0-release-alignment/251-01-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-01-SUMMARY.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-02-PLAN.md"
+  - ".planning/phases/251-1-7-0-release-alignment/251-02-SUMMARY.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-03-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-04-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-05-PLAN.md"
@@ -19,9 +20,11 @@ covered_files:
   - ".planning/phases/251-1-7-0-release-alignment/251-RESEARCH.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-UAT.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-mint-close-artifacts.mjs"
+  - "RELEASING.md"
+  - "scripts/ci/README.md"
   - "scripts/ci/verify_release_branch_repair_safety.sh"
   - "scripts/ci/verify_release_contract.sh"
-covered_digest: "v1:sha256:62edc9cc205243e8fddb40e0243542cd21b24125e622dfd11c69449ef0384cb5"
+covered_digest: "v1:sha256:c2561e920ab6809cfc2996b9bd86b8f29de48813be220c92e57b675fd48e4a92"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -35,6 +38,9 @@ overrides_applied: 0
 | # | Claim | Evidence | Status |
 |---|-------|----------|--------|
 | B1 | Phase 251 owns SL-G, SL-E and executable-UAT from its first commit | `251-01-SUMMARY.md` coverage B1; SL-G, SL-E, exec-UAT `--all-since 229` and `--phase 251` exit 0 | VERIFIED |
+| W1 | release-please.yml never force-resets the release branch; the legacy algorithm is shown to empty a release PR | `251-02-SUMMARY.md` coverage W1; `verify_release_branch_repair_safety.sh --self-test` (controls A, B, placement) and `--repo .` exit 0; live pre-fix run failed naming lines 183/184 | VERIFIED |
+| W2 | A merged release PR still labelled `autorelease: pending` turns Release Please red via a job no publish job needs | `251-02-SUMMARY.md` coverage W2; `verify_release_contract.sh` (N1-N3 single-violation controls) exit 0 | VERIFIED |
+| W3 | RELEASING.md and scripts/ci/README.md give the corrected remedies; legacy reset remedy rejected | `251-02-SUMMARY.md` coverage W3; `verify_release_contract.sh` (N4-N6 single-violation controls) exit 0 | VERIFIED |
 | SC1 | Release PR branch carries 1.7.0 README pins, companion notes and curated CHANGELOGs with no raw phase-scoped lines | not yet claimed (in progress) | NOT CLAIMED |
 | SC2 | Every required check on the release PR's exact head SHA concludes `success` | not yet claimed (in progress) | NOT CLAIMED |
 | SC3 | Hex publication of 1.7.0 happens only after a recorded explicit maintainer yes | not yet claimed (in progress) | NOT CLAIMED |
