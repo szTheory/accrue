@@ -17,7 +17,8 @@ covered_files:
   - ".planning/phases/251-1-7-0-release-alignment/251-RESEARCH.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-UAT.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-mint-close-artifacts.mjs"
-covered_digest: "v1:sha256:979b36b64957096464f1b74d9ff9e021a17934b0bde1abbe7b05c6b3087ca5c1"
+  - "scripts/ci/verify_release_branch_repair_safety.sh"
+covered_digest: "v1:sha256:b0b56a396195a6262a20a279036ab2823b475ce8e49ab5260419d0fbf8b15827"
 behavior_unverified: 0
 overrides_applied: 0
 ---
