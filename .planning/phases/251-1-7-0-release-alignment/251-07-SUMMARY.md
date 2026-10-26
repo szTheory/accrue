@@ -80,10 +80,17 @@ Run in `git clone --no-local` of `docs/251-close` at the close commit `e03ee865`
 
 The digests in (b) refer to the close commit's covered set. This SUMMARY is itself covered, so recording the controls re-mints the committed digest.
 
+## Landing the close (Task 2)
+
+The close PR from `docs/251-close` is pushed after the pre-push hygiene subset passes over `M..HEAD`. It is squash-merged with `--match-head-commit` once its exact head is GREEN by `250-ci-head-status.mjs --event pull_request --pr-base origin/main`, and only while origin/main still equals M. The PR number, its head, the squash commit, and the post-merge ci.yml and Release Please verdicts are post-merge facts. They cannot be committed into the head they judge. They are logged in `.planning/251-remote-writes.local` and in the plan's final report, and they go into the v1.67 milestone step's STATE update.
+
 ## Deviations from Plan
 
-None in Task 1 beyond those recorded above.
+1. **Attribution on the merge commit.** I amended the fresh, unpushed `--no-ff` merge commit only to add the co-author trailer, giving `db838ffd` (parents `56ba9ead`, M `20a3982c`). Its tree is unchanged.
+2. **Transient 502 on SC2.** The first `250-ci-head-status.mjs` run at A exited 3 on a GitHub `HTTP 502`. A plain retry exited 0. Nothing was changed.
 
-## Self-Check
+## Self-Check: PASSED
 
-Pending the controls commit.
+- FOUND: `251-07-SUMMARY.md`, `251-VERIFICATION.md` (`score: "3/3 success criteria verified"`, `status: passed`, `behavior_unverified: 0`), `251-UAT.md` (20 automated tests).
+- FOUND commits on `docs/251-close`: `db838ffd` (merge of M), `e03ee865` (close), `86f1e102` (controls).
+- Task 1 automated verify exit 0; `$GSD_SCRATCH/251-close-controls` removed.
