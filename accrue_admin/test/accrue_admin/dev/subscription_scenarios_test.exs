@@ -117,6 +117,23 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
     assert Process.whereis(AccrueAdmin.TestRepo) == nil
   end
 
+  test "the shared fact source stays plain, DB-free, and outside Admin runtime sources" do
+    repo_root = Path.expand("../../../../", __DIR__)
+    source_path = Path.expand("dev_support/ui_scenarios/cadence_subscriptions.exs", repo_root)
+    package_source = Path.expand("accrue_admin/lib", repo_root)
+    source = File.read!(source_path)
+
+    assert Path.relative_to(source_path, repo_root) ==
+             "dev_support/ui_scenarios/cadence_subscriptions.exs"
+
+    refute source_path == package_source
+    refute String.starts_with?(source_path, package_source <> "/")
+    refute source =~ "AccrueAdmin"
+    refute source =~ "Storybook"
+    refute Regex.match?(~r/\bRepo\b/, source)
+    assert Process.whereis(AccrueAdmin.TestRepo) == nil
+  end
+
   test "all canonical lifecycle facts validate while missing projections remain valid" do
     for scenario <- [:active, :scheduled_cancellation, :incomplete_evidence] do
       facts = CadenceSubscriptionFacts.fetch!(scenario)
