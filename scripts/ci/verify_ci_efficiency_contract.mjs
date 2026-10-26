@@ -15,8 +15,15 @@
 //   - MIX_OS_DEPS_COMPILE_PARTITION_COUNT (item 3): set to 4 workflow-wide
 //     (ubuntu-24.04 runners have 4 vCPU) and never overridden.
 //   - timeout-minutes (item 6): every job carries one, within [10, 60].
+//   - third-party action pins (item 7): every `uses:` outside `actions/*`
+//     and local `./` paths is a full 40-hex commit SHA followed by a
+//     `# vX.Y.Z` comment. A mutable tag lets upstream change the code that
+//     runs with this job's token; publish-hex.yml and release-please.yml hold
+//     HEX_API_KEY and RELEASE_PLEASE_TOKEN, so this check covers EVERY file
+//     under .github/workflows, not just the two scoped files.
 //
-// Scope: .github/workflows/ci.yml and .github/workflows/accrue_admin_browser.yml.
+// Scope: .github/workflows/ci.yml and .github/workflows/accrue_admin_browser.yml
+// for concurrency, partition count and timeouts; all workflow files for pins.
 // The YAML is parsed line-based by indentation (no YAML dependency); the
 // parser only needs the fixed two-space GitHub Actions layout this repository
 // uses, and a file it cannot read as that layout FAILS rather than passing.
@@ -131,10 +138,42 @@ export function checkTimeouts(file, workflow) {
 
 export const SCOPED_CHECKS = [checkConcurrency, checkPartitionCount, checkTimeouts];
 
+const FIRST_PARTY_ACTION = /^(?:actions\/|\.\/|docker:\/\/)/;
+const PINNED_TARGET = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_./-]+@[0-9a-f]{40}$/;
+const VERSION_COMMENT = /^\s+# v\d+\.\d+\.\d+\s*$/;
+
+// Returns the number of third-party `uses:` lines inspected; fails on the
+// first one that is not SHA-pinned with a version comment.
+export function checkThirdPartyPins(file, source) {
+  let inspected = 0;
+  source.split("\n").forEach((line, index) => {
+    if (line.trim().startsWith("#")) return;
+    const match = /^\s*(?:-\s+)?uses:\s*(\S+)(.*)$/.exec(line);
+    if (!match || FIRST_PARTY_ACTION.test(match[1])) return;
+    inspected += 1;
+    if (!PINNED_TARGET.test(match[1])) {
+      fail(`${file}:${index + 1}: third-party action \`${match[1]}\` is not pinned to a full 40-hex commit SHA`);
+    }
+    if (!VERSION_COMMENT.test(match[2])) {
+      fail(`${file}:${index + 1}: pinned action \`${match[1]}\` lacks a trailing \`# vX.Y.Z\` version comment`);
+    }
+  });
+  return inspected;
+}
+
+export function allWorkflowFiles(repo) {
+  const dir = path.join(repo, ".github", "workflows");
+  return fs.readdirSync(dir).filter((name) => /\.ya?ml$/.test(name)).sort().map((name) => `.github/workflows/${name}`);
+}
+
 export function verifyWorkflowSource(file, source) {
   const workflow = parseWorkflow(source);
   for (const check of SCOPED_CHECKS) check(file, workflow);
   return { jobs: workflow.jobs.length };
+}
+
+export function verifyWorkflowSourceWithPins(file, source) {
+  return { ...verifyWorkflowSource(file, source), pins: checkThirdPartyPins(file, source) };
 }
 
 export function verifyRepo(repo) {
@@ -144,6 +183,14 @@ export function verifyRepo(repo) {
     if (!fs.existsSync(absolute)) fail(`${file} is missing`);
     results.push({ file, ...verifyWorkflowSource(file, fs.readFileSync(absolute, "utf8")) });
   }
+  let pins = 0;
+  const workflowFiles = allWorkflowFiles(repo);
+  for (const file of workflowFiles) pins += checkThirdPartyPins(file, fs.readFileSync(path.join(repo, file), "utf8"));
+  // Non-vacuity: erlef/setup-beam is used across the workflows, so a pin
+  // scan that inspected zero third-party actions measured nothing.
+  if (pins === 0) fail(`third-party pin scan inspected zero uses across ${workflowFiles.length} workflow files`);
+  results.pins = pins;
+  results.workflowFiles = workflowFiles.length;
   return results;
 }
 
@@ -170,6 +217,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
+      - name: Set up BEAM
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
   slow:
     name: Slow
     runs-on: ubuntu-24.04
@@ -188,7 +237,20 @@ function mutate(from, to) {
 
 const SCENARIOS = [
   ["the passing fixture passes every scoped check", () => {
-    assert.deepEqual(verifyWorkflowSource("fixture.yml", PASSING), { jobs: 2 });
+    assert.deepEqual(verifyWorkflowSourceWithPins("fixture.yml", PASSING), { jobs: 2, pins: 1 });
+  }],
+  ["a third-party action on a mutable tag fails", () => {
+    assert.throws(() => verifyWorkflowSourceWithPins("fixture.yml", mutate("erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1", "erlef/setup-beam@v1")), /`erlef\/setup-beam@v1` is not pinned/);
+  }],
+  ["a third-party action pinned to a 39-hex SHA fails", () => {
+    assert.throws(() => verifyWorkflowSourceWithPins("fixture.yml", mutate("54075bcc5e249e4758d363f27d099f55d843f124 #", "54075bcc5e249e4758d363f27d099f55d843f12 #")), /not pinned to a full 40-hex/);
+  }],
+  ["a SHA-pinned third-party action without a # v comment fails", () => {
+    assert.throws(() => verifyWorkflowSourceWithPins("fixture.yml", mutate(" # v1.24.1", "")), /lacks a trailing `# vX.Y.Z`/);
+    assert.throws(() => verifyWorkflowSourceWithPins("fixture.yml", mutate(" # v1.24.1", " # latest")), /lacks a trailing/);
+  }],
+  ["first-party actions/* and local ./ actions are not pin-checked", () => {
+    assert.equal(checkThirdPartyPins("fixture.yml", "      - uses: actions/checkout@v6\n      - uses: ./.github/actions/local\n"), 0);
   }],
   ["a job without timeout-minutes fails", () => {
     assert.throws(() => verifyWorkflowSource("fixture.yml", mutate("    timeout-minutes: 45\n", "")), /job `slow` has no timeout-minutes/);
@@ -222,6 +284,7 @@ const SCENARIOS = [
   ["the live scoped workflows pass", () => {
     const results = verifyRepo(process.cwd());
     assert.equal(results.length, SCOPED_WORKFLOWS.length);
+    assert.ok(results.pins > 0, "the live pin scan must inspect at least one third-party action");
     for (const result of results) assert.ok(result.jobs > 0, `${result.file} must declare jobs`);
   }]
 ];
@@ -253,7 +316,7 @@ function main() {
     return;
   }
   const results = verifyRepo(parsed.values.repo || process.cwd());
-  console.log(`ci efficiency contract: PASS (verified: ${results.map((r) => `${r.file} ${r.jobs} jobs`).join(", ")})`);
+  console.log(`ci efficiency contract: PASS (verified: ${results.map((r) => `${r.file} ${r.jobs} jobs`).join(", ")}; ${results.pins} third-party uses pinned across ${results.workflowFiles} workflow files)`);
 }
 
 let invokedAsEntrypoint = false;

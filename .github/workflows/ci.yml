@@ -182,8 +182,9 @@ jobs:
 
       # Quick task 261025-vdn: the CI efficiency changes (concurrency gated to
       # pull_request with run_id-unique non-PR groups, the deps compile
-      # partition count, per-job timeouts) are shape-pinned so a later edit
-      # cannot turn an efficiency setting into a weakened gate.
+      # partition count, per-job timeouts, SHA-pinned third-party actions in
+      # every workflow file) are shape-pinned so a later edit cannot turn an
+      # efficiency setting into a weakened gate.
       - name: CI efficiency shape contract
         run: >-
           node --test --test-reporter=tap scripts/ci/verify_ci_efficiency_contract.mjs &&
@@ -234,7 +235,7 @@ jobs:
           node scripts/ci/verify_sensitive_token_census.mjs --repo . --census .planning/hygiene/sensitive-token-census.json --require-scope-lock --require-ratchet --require-no-cleartext
 
       - name: Set up BEAM for reference-scenario verification
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
@@ -528,7 +529,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Set up BEAM for reference-scenario verification
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
@@ -638,7 +639,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Set up BEAM
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
@@ -816,7 +817,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Set up BEAM
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
@@ -849,7 +850,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Set up BEAM
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
@@ -939,7 +940,7 @@ jobs:
 
       - name: Set up BEAM
         if: steps.phase190_changes.outputs.relevant == 'true'
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
@@ -1036,7 +1037,7 @@ jobs:
         run: bash scripts/ci/verify_phase192_ci_contract.sh
 
       - name: Set up BEAM
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
@@ -1141,7 +1142,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Set up BEAM
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
@@ -1428,7 +1429,7 @@ jobs:
         run: echo "ACCRUE_CI_SETUP_FACTS=$RUNNER_TEMP/accrue-host-ci-setup-facts.ndjson" >> "$GITHUB_ENV"
 
       - name: Set up BEAM
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
@@ -1590,7 +1591,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Set up BEAM
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
@@ -1911,7 +1912,7 @@ jobs:
         run: echo "ACCRUE_PROVIDER_PROOF_RECORD=$RUNNER_TEMP/accrue-provider-proof.json" >> "$GITHUB_ENV"
 
       - name: Set up BEAM
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28.0'
           elixir-version: '1.19.5'
