@@ -23,12 +23,13 @@ covered_files:
   - ".planning/phases/251-1-7-0-release-alignment/251-RESEARCH.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-UAT.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-mint-close-artifacts.mjs"
+  - ".planning/phases/251-1-7-0-release-alignment/251-release-merge-gate.sh"
   - "RELEASING.md"
   - "scripts/ci/README.md"
   - "scripts/ci/verify_release_branch_repair_safety.sh"
   - "scripts/ci/verify_release_changelog_curated.sh"
   - "scripts/ci/verify_release_contract.sh"
-covered_digest: "v1:sha256:dd911ac11f9f32ddd0d8252106423425c820ebb9209e1be3e30a40ce458f58b8"
+covered_digest: "v1:sha256:86714dbcddab5a014c9c1f8d1b6c5a5a3e8a9f5a5088dabed1e32e630a1bffd4"
 behavior_unverified: 0
 overrides_applied: 0
 ---
