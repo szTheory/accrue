@@ -12,7 +12,21 @@ defmodule AccrueAdmin.E2E.Plug do
   plug(:dispatch)
 
   get "/health" do
-    json(conn, 200, %{ok: true})
+    identity = Application.get_env(:accrue_admin, :phase252_e2e_identity)
+
+    payload =
+      case identity do
+        %{nonce: nonce} when is_binary(nonce) ->
+          Map.merge(
+            %{ok: true},
+            Map.take(identity, [:nonce, :database, :role, :address, :port, :partition, :pid])
+          )
+
+        _ ->
+          %{ok: true}
+      end
+
+    json(conn, 200, payload)
   end
 
   get "/login" do
