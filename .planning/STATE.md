@@ -2,18 +2,18 @@
 gsd_state_version: "1.0"
 milestone: v1.67
 milestone_name: Integration & CI Green
-current_phase: 250
-current_phase_name: Remote Integration
-status: complete
+current_phase: 251
+current_phase_name: 1.7.0 Release Alignment
+status: executing
 stopped_at: Completed 250-07-PLAN.md (phase 250 close)
-last_updated: "2026-10-26T01:30:00.000Z"
-last_activity: 2026-10-25
-last_activity_desc: Phase 250 closed after the PR #49 merge (M 3dd5f874); close evidence on docs/250-close
-state_head: 3dd5f8746b34497d345cd4d03c44f3756a159bab
+last_updated: "2026-10-26T14:05:30.000Z"
+last_activity: 2026-10-26
+last_activity_desc: Phase 251 execution started
+state_head: 2fafdc1474efb38b5766f014db3f0f0d12229e84
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 25
+  total_plans: 32
   completed_plans: 25
 ---
 
@@ -25,17 +25,17 @@ See: .planning/PROJECT.md (updated 2026-10-12)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 250 — Remote Integration (complete); next is Phase 251 — 1.7.0 Release Alignment
+**Current focus:** Phase 251 — 1.7.0 Release Alignment
 **Phase 250 hand-off:** SL-G and executable-UAT read the current phase. Phase 250 must flip `current_phase: 250` and mint its own tracked VERIFICATION (covered_files + covered_digest) and generated UAT in the same step, then re-run SL-G and exec-UAT before pushing. Phase 249 routes to Phase 250: host-integration dev-boot/browser/assert-preserved and Hex smoke, playwright-e2e shards 1-3, host-docker-smoke, Linux visual-regression baselines.
 **Progress:** [███████░░░] 67% (2/3 phases)
 **Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
 
 ## Current Position
 
-Phase: 250 (Remote Integration) — COMPLETE
-Plan: 7 of 7
-Status: Phase complete — VERIFICATION 3/3 passed, LAND-01..03 Complete
-Last activity: 2026-10-25 — PR #49 merged as merge commit M `3dd5f8746b34497d345cd4d03c44f3756a159bab` (parents `7971753a` + `17a608cc`, 993/993 pre-merge SHAs reachable); first main push run GREEN vs baseline 35374333981 (ci.yml 40247684345, browser 40247684340). Local main backed up to `refs/backup/main-pre-250-merge` (`1cc8322e`) and fast-forwarded. Checkpoint option: merge-close-pr; the 250-06/07 close commits land through a squash-merged PR from `docs/250-close`
+Phase: 251 (1.7.0 Release Alignment) — EXECUTING
+Plan: 1 of 7
+Status: Executing Phase 251
+Last activity: 2026-10-26 — Phase 251 execution started on branch `ci/release-please-repair` (from main `db1b6d85`)
 
 ## Performance Metrics
 
@@ -488,6 +488,10 @@ Last activity: 2026-10-25 — PR #49 merged as merge commit M `3dd5f8746b34497d3
 - [Phase 250]: 250-05: commit E is the Phase 250 pre-merge close (SUMMARY 05, VERIFICATION 2/3 with SC1 and SC2, LAND-01 Complete; LAND-02/03 Pending until 250-07). The first close 7b1b5862 was red on a SIGPIPE race in verify_release_contract.sh, fixed at source in 5561a9a9; the 30-site pipe-to-grep-q sweep and the SL-D printf/echo exemption are deferred. The body-only commit H names E as the PR #49 evidence head; the merge waits on an explicit maintainer yes (250-06)
 - [Phase 250]: 250-06: maintainer chose merge-close-pr ("i like squash merge but whatever works i authorize u", then "yes"). PR #49 merged with --merge --match-head-commit 17a608cc as M 3dd5f874 (two parents, 993/993 pre-merge SHAs reachable); first main push run GREEN vs 35374333981 with the Stripe parity/reconciliation pair and the parked ratchet lane recorded, not claimed. Local main backup ref refs/backup/main-pre-250-merge = 1cc8322e
 - [Phase 250]: 250-07: LAND-02/03 Complete only after the merge evidence; VERIFICATION 3/3 re-minted over seven SUMMARYs; close commits squash-merged to main from docs/250-close (maintainer prefers squash for follow-up PRs; PR #49 itself stayed a merge commit for LAND-03). D2 HIGH v1.68 deferral (accrue_events.inserted_at session-timezone dependence) carried forward
+- [Phase 251]: RLS-02 publication authorized 2026-10-26: "follow ur recs. i authorize release we want to release early and often at any natural stopping point that is release worthy"
+- [Phase 251]: Standing policy (from the same 2026-10-26 authorization): release at every release-worthy stopping point. Publish only from an aligned release PR whose exact head is green, with `main` green; never weaken a release gate to get there
+- [Phase 251]: Main freeze (A6): from the removal of the stale `autorelease: pending` label on merged PR #50 until the 1.7.0 release PR merges, no other merge to `main`
+- [Phase 251]: Partial publish: if any publish step fails partway (for example one package published and another not), stop and report; do not improvise a yank or retire
 
 ### Pending Todos
 
@@ -717,4 +721,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- `$gsd-discuss-phase 251` or `$gsd-plan-phase 251` — 1.7.0 Release Alignment (align the release-please 1.7.0 PR and get it green). Hex publication requires an explicit maintainer yes. Milestone tags remain local. Phase 250 is complete: main is at the PR #49 merge commit `3dd5f874` plus the squash-merged close PR; the pre-merge local main is kept at `refs/backup/main-pre-250-merge`.
+- `$gsd-execute-phase 251` — 1.7.0 Release Alignment (executing; plan 251-01 bootstrap first, then the workflow-fix PR). The explicit maintainer yes for Hex publication was given 2026-10-26 and is recorded under Decisions `[Phase 251]`. Milestone tags remain local. Phase 250 is complete: main is at the PR #49 merge commit `3dd5f874` plus the squash-merged close PR; the pre-merge local main is kept at `refs/backup/main-pre-250-merge`.
