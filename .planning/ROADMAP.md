@@ -22,7 +22,7 @@
 - ✅ **v1.64 Admin Operator UI Cleanup** — Phases 240–243 (shipped 2026-10-10) — [archive](milestones/v1.64-ROADMAP.md)
 - ✅ **v1.65 Accrue Admin Language & Consistency** — Phase 244 (completed 2026-10-11) — [archive](milestones/v1.65-ROADMAP.md)
 - ✅ **v1.66 Admin Usability and Visual Consistency** — Phases 245–248 (completed 2026-10-12) — [archive](milestones/v1.66-ROADMAP.md)
-- 🚧 **v1.67 Integration & CI Green** — Phases 249–251 (in progress)
+- 🚧 **v1.67 Integration & CI Green** — Phases 249–251 (all phases complete; milestone completion pending)
 
 ## Planning Doctrine
 
@@ -34,7 +34,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 ## Current Position
 
-v1.67 Integration & CI Green is in progress. Requirements are defined (12 total) and mapped to Phases 249–251; Phase 249 has not started. v1.66 is complete and archived locally; the v1.63–v1.66 line (≈853 commits ahead of `origin/main` 7971753a) has never been CI-validated. This milestone lands it green at an exact head SHA and makes 1.7.0 release-ready. No new product behavior.
+v1.67 Integration & CI Green has all three phases complete (249–251), with 12/12 requirements Complete. The v1.63–v1.66 line landed on `main` green through PR #49 (merge commit 3dd5f874), and 1.7.0 of `accrue`, `accrue_admin` and `accrue_portal` shipped from release PR #55 (merge commit 20a3982c) to Hex with docs. Milestone completion is the remaining step. No new product behavior.
 
 Pushing to the public remote (Phase 250) and publishing to Hex (Phase 251) each require an explicit maintainer yes. Those are irreversible external-operation decisions, not UAT. Every other acceptance item is decided by a command or a CI conclusion (Executable Acceptance Policy).
 
@@ -42,7 +42,7 @@ Pushing to the public remote (Phase 250) and publishing to Hex (Phase 251) each 
 
 - [x] **Phase 249: Local Gate Parity & Planning Truth** - Every locally runnable merge-blocking `ci.yml` check passes on the integration head, and the planning state is honest (completed 2026-10-25)
 - [x] **Phase 250: Remote Integration** - The integration head lands on `main` through one exact-SHA green PR with a merge commit (completed 2026-10-25)
-- [ ] **Phase 251: 1.7.0 Release Alignment** - The release-please 1.7.0 PR is aligned and green; Hex publication waits for an explicit maintainer yes
+- [x] **Phase 251: 1.7.0 Release Alignment** - The release-please 1.7.0 PR is aligned and green; Hex publication waits for an explicit maintainer yes (completed 2026-10-26)
 
 ## Phase Details
 
@@ -113,16 +113,16 @@ Plans:
   2. Every required check on the release PR's exact head SHA concludes `success`, not `skipped`.
   3. Hex publication of 1.7.0 happens only after a recorded explicit maintainer yes. Without one, the aligned release PR stays open and green, and the decision is recorded in STATE.md.
 
-**Plans**: 3/7 plans executed
+**Plans**: 7/7 plans executed
 
 Plans:
 - [x] 251-01-PLAN.md — Bootstrap: current_phase 251 + scoped VERIFICATION/UAT minted in one commit; authorization recorded verbatim (wave 1)
 - [x] 251-02-PLAN.md — Workflow fix: delete the stale-base reset, add the merged-but-pending wedge detector, repair-safety verifier with legacy negative controls (wave 2)
 - [x] 251-03-PLAN.md — SC1 gate: section-scoped curated-CHANGELOG verifier proven on the raw candidate; fix-PR gate replay (wave 3)
-- [ ] 251-04-PLAN.md — Land the fix PR (squash, exact-head green), remove #50's stale label, dispatch Release Please, verify the fresh 1.7.0 PR (wave 4)
-- [ ] 251-05-PLAN.md — Align the release branch: curated, evidence-backed CHANGELOGs, release-notes stories, 1.7.0 pins; fast-forward push (wave 5)
-- [ ] 251-06-PLAN.md — Hard automated merge gate, merge commit, Hex publish and read-only verification; stop and report on partial publish (wave 6)
-- [ ] 251-07-PLAN.md — Close: RLS-01/02 Complete, full re-mint, docs/251-close PR squash-merged (wave 7)
+- [x] 251-04-PLAN.md — Land the fix PR (squash, exact-head green), remove #50's stale label, dispatch Release Please, verify the fresh 1.7.0 PR (wave 4)
+- [x] 251-05-PLAN.md — Align the release branch: curated, evidence-backed CHANGELOGs, release-notes stories, 1.7.0 pins; fast-forward push (wave 5)
+- [x] 251-06-PLAN.md — Hard automated merge gate, merge commit, Hex publish and read-only verification; stop and report on partial publish (wave 6)
+- [x] 251-07-PLAN.md — Close: RLS-01/02 Complete, full re-mint, docs/251-close PR squash-merged (wave 7)
 
 ## Progress
 
@@ -130,8 +130,8 @@ Plans:
 |-------|----------------|--------|-----------|
 | 249. Local Gate Parity & Planning Truth | 18/18 | Complete    | 2026-10-25 |
 | 250. Remote Integration | 7/7 | Complete | 2026-10-25 |
-| 251. 1.7.0 Release Alignment | 3/7 | In Progress | - |
+| 251. 1.7.0 Release Alignment | 7/7 | Complete | 2026-10-26 |
 
 ## Next
 
-`$gsd-discuss-phase 251` or `$gsd-plan-phase 251` (1.7.0 Release Alignment). Hex publication waits for an explicit maintainer yes.
+All three v1.67 phases are complete, and 1.7.0 is published for `accrue`, `accrue_admin` and `accrue_portal`. Next: v1.67 milestone completion via `/gsd-complete-milestone`, as a separate step. Keep the milestone tag local, and run `node scripts/ci/verify_phase230_archive_invariants.mjs --repo .` immediately after the archive.
