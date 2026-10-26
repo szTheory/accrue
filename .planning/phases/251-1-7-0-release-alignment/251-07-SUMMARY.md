@@ -67,7 +67,18 @@ Phase 251 is closed on the evidence. `docs/251-close` took main's release merge 
 
 (The first SC2 run hit a transient GitHub `HTTP 502` from `gh api` and exited 3. A retry seconds later exited 0. The helper was unchanged.)
 
-<!-- gsd:controls -->
+## Close controls (scratch clone)
+
+Run in `git clone --no-local` of `docs/251-close` at the close commit `e03ee865`, under `$GSD_SCRATCH/251-close-controls`. Each mutation was reverted inside the clone before the next one, and the clone was removed afterward. The unmutated clone passes SL-G, SL-E and `--all-since 229` (rc 0) first, as the baseline.
+
+| Control | Mutation | Command | rc | Key line |
+|---------|----------|---------|----|----------|
+| (a) negative | `251-VERIFICATION.md` `status: passed` -> `status: gaps_found` | `node scripts/ci/verify_completion_evidence.mjs --repo . --require-completion-evidence --require-table-agreement` | 1 | `FAIL: RLS-01 is marked Complete but the verification in .planning/phases/251-1-7-0-release-alignment carries status "gaps_found" rather than passed` |
+| (b) negative | one byte appended to the covered `accrue/CHANGELOG.md` | `node scripts/ci/verify_artifact_fixed_point.mjs --repo . --require-acyclic --require-fixed-point --require-digest-match` | 1 | `251-VERIFICATION.md: covered_digest mismatch over 38 covered files -- committed "v1:sha256:787abaaf…", recomputed "v1:sha256:fa6161fa…"` |
+| (c) negative | first 251 coverage entry (`251-07` C1) set to `human_judgment: true` | `node scripts/ci/verify_executable_uat_contract.mjs --all-since 229` | 1 | `FAIL: 251-07-SUMMARY.md coverage C1: human_judgment must be false` |
+| (d) positive | one byte appended to the excluded `251-RELEASE-LEDGER.md` | `node scripts/ci/verify_artifact_fixed_point.mjs --repo . --require-acyclic --require-fixed-point --require-digest-match` | 0 | `artifact fixed point: PASS (… edges: 38 … digests checked: 1)` |
+
+The digests in (b) refer to the close commit's covered set. This SUMMARY is itself covered, so recording the controls re-mints the committed digest.
 
 ## Deviations from Plan
 
