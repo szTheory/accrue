@@ -1,0 +1,11 @@
+{
+  "command": "cd accrue_admin && mix format test/accrue_admin/components/subscription_area_test.exs && MIX_ENV=test mix run --no-start test/accrue_admin/components/subscription_area_test.exs > /private/tmp/phase252-01-02-red.tap 2> /private/tmp/phase252-01-02-red.stderr; run_code=$?; cat /private/tmp/phase252-01-02-red.tap; cat /private/tmp/phase252-01-02-red.stderr >&2; exit \"$run_code\"",
+  "exitCode": 2,
+  "output": "TAP version 13\nok 1 - test a generic summary action without context keeps its visible accessible name\nnot ok 2 - test summary action links and buttons expose the complete context exactly once\n# {:error, %ExUnit.AssertionError{left: [], right: [\"Change plan for subscription sub_plan_example\"], message: \"Assertion with == failed\", expr: {:assert, [line: 95], [{:==, [line: 95], [{{:., [line: 95], [{:__aliases__, [line: 95], [:Floki]}, :attribute]}, [line: 95], [{:link, [line: 95], nil}, \"aria-label\"]}, [{:plan_context, [line: 95], nil}]]}]}, args: :ex_unit_no_meaningful_value, doctest: :ex_unit_no_meaningful_value, context: :==}, [{AccrueAdmin.SubscriptionAreaTest, :\"test summary action links and buttons expose the complete context exactly once\", 1, [file: ~c\"test/accrue_admin/components/subscription_area_test.exs\", line: 95]}]}\nok 3 - test the production area retains the semantic hierarchy and full copied ID\n1..3\n",
+  "targetTest": "test summary action links and buttons expose the complete context exactly once",
+  "targetFile": "accrue_admin/test/accrue_admin/components/subscription_area_test.exs",
+  "expected": "The plan action link has aria-label equal to the complete Copy.action_hidden_context phrase, Change plan for subscription sub_plan_example.",
+  "actual": "The target assertion received no aria-label attribute; the existing visible label and hidden context concatenate without an explicit full phrase.",
+  "semanticAssessment": "Valid RED: the intended action-name behavior test ran and failed on the missing aria-label assertion. Generic no-context and production semantic/copy tests passed; no compile, collection, fixture, or Repo startup failure occurred.",
+  "stderr": ""
+}
