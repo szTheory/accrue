@@ -543,6 +543,14 @@ Stderr lines from `verify_package_docs.sh` are prefixed with `[verify_package_do
 - `--self-test` controls: control A (the verbatim db1b6d85 stale-base block fails), control B (a hermetic bare-origin git fixture where the legacy algorithm leaves `main...release` with 0 changed files, reproducing PR #50), the positive fixed algorithm (all 7 release files kept), and missing-detector, comment, placement (detector in a `needs:` list or inside the `release` job), missing-canary and forced-push-shape fixtures.
 - Wired merge-blocking in the `release-manifest-ssot` job of `ci.yml` as `--self-test` then `--repo .`.
 
+### Triage: verify_release_changelog_curated.sh
+
+- Phase 251 SC1: the `## [<V>]` section of `accrue`, `accrue_admin` and `accrue_portal` `CHANGELOG.md` (V = `.release-please-manifest.json` `accrue`, or `--version`) must be curated, adopter-readable notes. Only that section is read, up to the next `## [` heading. It fails when the section is missing or empty, or when any line is a raw Release Please form: a phase-scoped bullet (`* **233-05:**`, `* **quick-261008-lbv:**`, `* **247-post-review:**`), a `feat(233` / `fix(233` subject, or a raw `([abc1234](https://github.com/<owner>/<repo>/commit/<sha>))` link. It prints `<pkg>: <n> raw line(s)` per package.
+- Versions below `CURATED_FROM=1.7.0` print `grandfathered (released before the curated-notes rule)` and exit 0: released sections are history and are never rewritten.
+- Remedy on a release PR: replace the generated bullets in each package's new section with curated `### Release highlights` / `### Notes` prose (no phase scopes, no commit links) on the release branch.
+- `--self-test` controls (mktemp fixtures): raw bullet, suffixed scopes, conventional line, hash-link-only bullet, missing section and empty section FAIL; a curated section and a curated 1.7.0 above a raw 1.6.0 PASS; manifest 1.7.0 is enforced; a raw 1.6.0 under 1.6.0 is grandfathered. Real-data positive control: the uncurated 963ad2cd candidate fails all three packages (18, 168 and 41 raw lines).
+- Wired merge-blocking in the `docs-contracts-shift-left` job of `ci.yml` as `--self-test` then the live run, directly after `Release notes freshness contract`.
+
 ### Triage: capture_linked_release_proof.sh
 
 - `capture_linked_release_proof:` failures mean the shipped linked release is not publicly proven yet. The script requires one exact PR number, one exact `TARGET_VERSION`, and one exact Release Please `RUN_ID`.

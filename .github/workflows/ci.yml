@@ -297,6 +297,9 @@ jobs:
       - name: Release notes freshness contract
         run: bash scripts/ci/verify_release_notes_contract.sh
 
+      - name: Release CHANGELOG sections are curated (Phase 251 SC1)
+        run: bash scripts/ci/verify_release_changelog_curated.sh --self-test && bash scripts/ci/verify_release_changelog_curated.sh
+
       - name: Executable UAT contract self-test
         run: >-
           node scripts/ci/verify_executable_uat_contract.mjs --self-test &&
