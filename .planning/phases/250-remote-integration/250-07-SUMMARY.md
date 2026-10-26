@@ -32,7 +32,7 @@ plan_head_before: 3dd5f8746b34497d345cd4d03c44f3756a159bab
 actuals:
   tokens: 12000
   tasks: 2
-  commits: 2
+  commits: 4
 coverage:
   - id: L2
     description: LAND-02 every PR-path job of ci.yml and accrue_admin_browser.yml is success on the exact evidence head E and on the body-only PR head H, with the D1 exclusions only
@@ -98,6 +98,10 @@ Phase 250 is closed: LAND-02 and LAND-03 are Complete on the strength of the E/H
 4. **Trackers**: REQUIREMENTS LAND-02 and LAND-03 `[x]` and `Complete`; ROADMAP ticks 250-06/07, Phase 250 `7/7 | Complete`; STATE records M, the backup ref, the checkpoint option, the carried D2 HIGH v1.68 deferral and the next step (Phase 251).
 5. **Mint** twice (fixed point), the local close gates, the SL-E negative control, the pre-push guard.
 6. **Close PR** from `docs/250-close`; squash-merged after every PR-path job was success on its exact head.
+
+## Commit count
+
+`actuals.commits: 4` is `git rev-list --count 3dd5f874..<close head>` on `docs/250-close`: the 250-06 SUMMARY commit, the 250-07 close commit, the control-record re-mint and the commit that sets this count (it counts itself, by construction).
 
 ## Close location
 
