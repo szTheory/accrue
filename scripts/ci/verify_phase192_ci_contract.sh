@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# grep reads captured text from here-strings (<<<), never from a builtin-producer
+# pipe: under pipefail that race flips a present needle to missing (commit 5561a9a9, SL-D).
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ci_file="$root_dir/.github/workflows/ci.yml"
@@ -27,7 +29,7 @@ require_source_fixed() {
   local source="$2"
   local needle="$3"
 
-  printf '%s\n' "$source" | grep -Fq "$needle" ||
+  grep -Fq "$needle" <<<"$source" ||
     fail "missing '${needle}' in ${label}"
 }
 
@@ -36,7 +38,7 @@ require_source_regex() {
   local source="$2"
   local pattern="$3"
 
-  printf '%s\n' "$source" | grep -Eq "$pattern" ||
+  grep -Eq "$pattern" <<<"$source" ||
     fail "missing /${pattern}/ in ${label}"
 }
 
@@ -45,7 +47,7 @@ require_source_absent_regex() {
   local source="$2"
   local pattern="$3"
 
-  if printf '%s\n' "$source" | grep -Eiq "$pattern"; then
+  if grep -Eiq "$pattern" <<<"$source"; then
     fail "forbidden /${pattern}/ found in ${label}"
   fi
 }
@@ -95,7 +97,6 @@ for needle in \
   "PGHOST: localhost" \
   "ACCRUE_ADMIN_E2E_PORT: 4018" \
   "uses: actions/checkout@v6" \
-  "uses: erlef/setup-beam@v1" \
   "otp-version: '28.0'" \
   "elixir-version: '1.19.5'" \
   "mix local.hex 2.4.2 --force" \
@@ -123,6 +124,11 @@ for needle in \
 do
   require_source_fixed "admin-hardening-guardrails job" "$phase192_job" "$needle"
 done
+
+# Quick task 261025-vdn (item 7): setup-beam is pinned to a full 40-hex commit
+# SHA with its release tag as a comment; a mutable tag or a truncated SHA fails.
+require_source_regex "admin-hardening-guardrails job" "$phase192_job" 'uses: erlef/setup-beam@[0-9a-f]{40} # v1\.[0-9]+\.[0-9]+$'
+require_source_absent_regex "admin-hardening-guardrails job" "$phase192_job" 'erlef/setup-beam@v[0-9]'
 
 require_source_fixed "Phase 192 generated-evidence step" "$generated_evidence_step" "if: always()"
 require_source_fixed "Phase 192 generated-evidence step" "$generated_evidence_step" "if-no-files-found: error"

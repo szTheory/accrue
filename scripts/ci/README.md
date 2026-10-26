@@ -578,3 +578,10 @@ the string being scrubbed, in a file that ships. So:
 
 Adding a placeholder to the allowlist is a one-line edit to `ALLOWED_USERS`;
 prefer that over weakening the pattern.
+
+## CI efficiency contract (quick task 261025-vdn)
+
+| Script | What it answers | Command |
+| --- | --- | --- |
+| `verify_ci_efficiency_contract.mjs` | Whether `ci.yml` and `accrue_admin_browser.yml` keep the efficiency shape without weakening a gate: workflow concurrency cancels only `pull_request` runs and gives every other event a `run_id`-unique group, `MIX_OS_DEPS_COMPILE_PARTITION_COUNT: 4` is set workflow-wide and never overridden, every job has `timeout-minutes` in [10, 60], and every third-party `uses:` in every `.github/workflows/*.yml` file is pinned to a 40-hex commit SHA with a `# vX.Y.Z` comment, and release-gate `mix docs` plus every doc/-consuming step runs only in the `sigra=off`/`opentelemetry=off` cells (Floor and Primary), and every third-party `_build` cache (release-gate x3 projects, playwright-e2e shard trees) is split restore/save, pruned right after restore, saved right after a `--warnings-as-errors` compile, and keyed on runner.os, OTP, Elixir, MIX_ENV, mix.lock and config | `node --test --test-reporter=tap scripts/ci/verify_ci_efficiency_contract.mjs && node scripts/ci/verify_ci_efficiency_contract.mjs --fixtures && node scripts/ci/verify_ci_efficiency_contract.mjs --repo .` |
+| `prune_first_party_build.sh` | Deletes the first-party app dirs (`accrue`, `accrue_admin`, `accrue_portal`, `accrue_host`, `sigra`) from a restored `_build/<env>` so they always compile fresh; a cache miss is a no-op | `bash scripts/ci/prune_first_party_build.sh --self-test` (positive case, missing-dir case, and a negative control that empties the prune list) |

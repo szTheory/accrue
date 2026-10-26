@@ -534,6 +534,7 @@ None. The next workflow action is recorded under Operator Next Steps; completed 
 | 261008-ffy | Repair Phase 235 regression gaps; isolate Braintree tests, restore processor-neutral facade docs, and add focused CI proof | 2026-10-08 | 42c28c17 | Verified | [261008-ffy-repair-phase-235-regression-gaps-by-isol](./quick/261008-ffy-repair-phase-235-regression-gaps-by-isol/) |
 | 261008-lbv | Repair Phase 236 Hosted Fields security gaps: retry stale asynchronous setup after LiveView updates and guarantee readable malformed-token styles with automated browser coverage | 2026-10-08 | adcdbbfa | complete | [261008-lbv-fix-phase-236-security-audit-gaps-retry-](./quick/261008-lbv-fix-phase-236-security-audit-gaps-retry-/) |
 | 261024-pla | Route archive-unaware phase 245/248 verifier literals through phase_evidence_path so the archive sweep passes | 2026-10-24 | 193a8a8e | — | [261024-pla-route-archive-unaware-phase-245-248-veri](./quick/261024-pla-route-archive-unaware-phase-245-248-veri/) |
+| 261025-vdn | CI/CD efficiency PR #52: pruned third-party `_build` cache, PR-only cancellation, deps partition count, per-job timeouts, SHA-pinned setup-beam, release-gate docs dedupe, SL-D builtin-producer ban (CI 37.9m/151 runner-min -> 21.1m/88 warm) | 2026-10-26 | 671f02d8 | — | [261025-vdn-ci-cd-efficiency-pr](./quick/261025-vdn-ci-cd-efficiency-pr/) |
 
 ## Deferred Items
 
