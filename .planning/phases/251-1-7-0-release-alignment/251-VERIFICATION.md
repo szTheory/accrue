@@ -2,7 +2,7 @@
 phase: 251-1-7-0-release-alignment
 verified: 2026-10-26T14:05:30Z
 status: passed
-score: "completed-plan claims verified: 251-01, 251-02; phase success criteria claimed: 0/3 (phase in progress)"
+score: "completed-plan claims verified: 251-01, 251-02, 251-03; phase success criteria claimed: 0/3 (phase in progress)"
 covered_files:
   - ".github/workflows/ci.yml"
   - ".github/workflows/release-please.yml"
@@ -11,6 +11,7 @@ covered_files:
   - ".planning/phases/251-1-7-0-release-alignment/251-02-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-02-SUMMARY.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-03-PLAN.md"
+  - ".planning/phases/251-1-7-0-release-alignment/251-03-SUMMARY.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-04-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-05-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-06-PLAN.md"
@@ -25,7 +26,7 @@ covered_files:
   - "scripts/ci/verify_release_branch_repair_safety.sh"
   - "scripts/ci/verify_release_changelog_curated.sh"
   - "scripts/ci/verify_release_contract.sh"
-covered_digest: "v1:sha256:7713d75a1f33910c9cda8d474343208bbb7ded3b89a1bcfd242338955688778e"
+covered_digest: "v1:sha256:587f52b773031bc2617aaff6b0ce8887e8a2a6fa81f07a590a1dde873e6a334b"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -42,7 +43,8 @@ overrides_applied: 0
 | W1 | release-please.yml never force-resets the release branch; the legacy algorithm is shown to empty a release PR | `251-02-SUMMARY.md` coverage W1; `verify_release_branch_repair_safety.sh --self-test` (controls A, B, placement) and `--repo .` exit 0; live pre-fix run failed naming lines 183/184 | VERIFIED |
 | W2 | A merged release PR still labelled `autorelease: pending` turns Release Please red via a job no publish job needs | `251-02-SUMMARY.md` coverage W2; `verify_release_contract.sh` (N1-N3 single-violation controls) exit 0 | VERIFIED |
 | W3 | RELEASING.md and scripts/ci/README.md give the corrected remedies; legacy reset remedy rejected | `251-02-SUMMARY.md` coverage W3; `verify_release_contract.sh` (N4-N6 single-violation controls) exit 0 | VERIFIED |
-| SC1 | Release PR branch carries 1.7.0 README pins, companion notes and curated CHANGELOGs with no raw phase-scoped lines | not yet claimed (in progress) | NOT CLAIMED |
+| G1 | The SC1 curated-CHANGELOG gate is committed and merge-blocking, and it fails the real uncurated 963ad2cd candidate for all three packages | `251-03-SUMMARY.md` coverage G1; `verify_release_changelog_curated.sh --self-test` (10 fixtures, FAIL and PASS controls) and the live run exit 0 (grandfathered at 1.6.0); 963ad2cd `--version 1.7.0` exits 1 with 18/168/41 raw lines | VERIFIED |
+| SC1 | Release PR branch carries 1.7.0 README pins, companion notes and curated CHANGELOGs with no raw phase-scoped lines | not yet claimed (in progress); decided by the G1 gate on the release PR head | NOT CLAIMED |
 | SC2 | Every required check on the release PR's exact head SHA concludes `success` | not yet claimed (in progress) | NOT CLAIMED |
 | SC3 | Hex publication of 1.7.0 happens only after a recorded explicit maintainer yes | not yet claimed (in progress) | NOT CLAIMED |
 
