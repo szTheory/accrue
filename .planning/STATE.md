@@ -3,10 +3,12 @@ gsd_state_version: "1.0"
 milestone: v1.68
 milestone_name: UI Storybook Stress Testing
 status: planning
-last_updated: "2026-10-26T20:19:11.777Z"
+current_phase: 252
+current_phase_name: Production-backed Subscription Stories
+last_updated: "2026-10-26T20:25:31.000Z"
 last_activity: 2026-10-26
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,16 +23,19 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.68 UI Storybook Stress Testing — defining the approved subscription-first requirements and Phases 252–254 from the reviewed research. No implementation has started.
-**Progress:** 0% — new milestone, roadmap being initialized.
-**Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
+**Current focus:** v1.68 UI Storybook Stress Testing — Phase 252 Production-backed Subscription Stories is ready for planning. Approved Phases 252–254 map all 22 pending requirements; no implementation has started.
+**Progress:** [░░░░░░░░░░] 0% — 0/3 phases and 0 plans complete; plan counts TBD.
+**Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-10-26 — Milestone v1.68 started
+Phase: 252 (Production-backed Subscription Stories; 1 of 3 in v1.68)
+Plan: Not started (TBD in current phase)
+Status: Ready to plan
+Last activity: 2026-10-26 — Approved v1.68 roadmap created; all 22 requirements mapped to Phases 252–254
+
+Progress: [░░░░░░░░░░] 0%
+Current milestone planning blockers: None known. Historical concerns and deferred correctness work below remain preserved with their original scope.
 
 ## Performance Metrics
 
@@ -598,8 +603,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-26T17:18:03.044Z
-Stopped at: Completed 251-07-PLAN.md
+Last session: 2026-10-26
+Stopped at: v1.68 roadmap and requirement traceability created; Phase 252 ready for planning
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -729,4 +734,6 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Plan Phase 252 Production-backed Subscription Stories with `$gsd-plan-phase 252`; use `$gsd-ui-phase 252` for its UI contract during planning.
+- Carry Phase 252's actual narrow/light/dark render checks, reset-isolation negative control, production package boundaries and required CI path admission into acceptance. The [approved research](research/ui-quality-engine/RECOMMENDATIONS.md) is authoritative; broader horizons remain outside v1.68.
+- Measure first-slice cold/warm costs before freezing budgets. Keep the independent HIGH event-session-timezone correctness candidate visible; fixed story clocks do not resolve it.

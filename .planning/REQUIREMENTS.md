@@ -74,15 +74,39 @@ Directional, not committed to this milestone. See the [rolling roadmap](research
 
 ## Traceability
 
-Roadmap creation assigns each requirement to exactly one of Phases 252–254.
+Each requirement is assigned to exactly one of the approved Phases 252–254. All remain Pending; mapping is not implementation evidence.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| SBK-01 | Phase 252 | Pending |
+| SBK-02 | Phase 252 | Pending |
+| SBK-03 | Phase 252 | Pending |
+| SBK-04 | Phase 253 | Pending |
+| SBK-05 | Phase 253 | Pending |
+| SBK-06 | Phase 253 | Pending |
+| SCEN-01 | Phase 252 | Pending |
+| SCEN-02 | Phase 252 | Pending |
+| SCEN-03 | Phase 252 | Pending |
+| SCEN-04 | Phase 252 | Pending |
+| LAB-01 | Phase 252 | Pending |
+| LAB-02 | Phase 252 | Pending |
+| CIQ-01 | Phase 252 | Pending |
+| CIQ-02 | Phase 254 | Pending |
+| CIQ-03 | Phase 254 | Pending |
+| CIQ-04 | Phase 254 | Pending |
+| UXQ-01 | Phase 253 | Pending |
+| UXQ-02 | Phase 254 | Pending |
+| UXQ-03 | Phase 253 | Pending |
+| UXQ-04 | Phase 254 | Pending |
+| CURATE-01 | Phase 254 | Pending |
+| CURATE-02 | Phase 254 | Pending |
 
 **Coverage:**
 - v1.68 requirements: 22 total
-- Mapped to phases: 0 (roadmap creation pending)
-- Unmapped: 22 (roadmap creation pending)
+- Mapped to phases: 22/22 (Phase 252: 10; Phase 253: 5; Phase 254: 7)
+- Unmapped: 0
+- Duplicate mappings: 0
+- Implementation status: 22 Pending
 
 ---
 *Requirements defined: 2026-10-26 from the owner-approved reviewed proposal.*
