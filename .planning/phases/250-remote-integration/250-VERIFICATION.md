@@ -66,7 +66,7 @@ covered_files:
   - "examples/accrue_host/priv/repo/seeds/ordinary.exs"
   - "examples/accrue_host/test/ordinary_preview_seed_test.exs"
   - "scripts/ci/verify_release_contract.sh"
-covered_digest: "v1:sha256:7e4302ceaf3405496d90da9ceb5aac54de7d7666d208315522d130992861bf96"
+covered_digest: "v1:sha256:a997fb79bd2b47f406bea80d5b235c0964106df96eae5bbf3897b2cde9ef7ff1"
 behavior_unverified: 0
 overrides_applied: 0
 ---

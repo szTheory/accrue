@@ -183,7 +183,7 @@ jobs:
       # Quick task 261025-vdn: the CI efficiency changes (concurrency gated to
       # pull_request with run_id-unique non-PR groups, the deps compile
       # partition count, per-job timeouts, SHA-pinned third-party actions in
-      # every workflow file) are shape-pinned so a later edit cannot turn an
+      # every workflow file, the release-gate docs keep-set) are shape-pinned so a later edit cannot turn an
       # efficiency setting into a weakened gate.
       - name: CI efficiency shape contract
         run: >-
@@ -698,10 +698,17 @@ jobs:
       - name: Accrue dialyzer
         run: cd accrue && mix dialyzer --format github
 
+      # Quick task 261025-vdn (item 4): docs run only in the sigra=off /
+      # opentelemetry=off cells (Floor and Primary). The sigra=on and otel=on
+      # cells produced the same doc/ tree (modulo ExDoc's per-run random ids)
+      # and identical docs-step warnings, so building docs there again proved
+      # nothing; the efficiency contract pins this keep-set.
       - name: Accrue docs
+        if: matrix.sigra == 'off' && matrix.opentelemetry == 'off'
         run: cd accrue && MIX_ENV=dev mix docs --warnings-as-errors
 
       - name: "Verify ExDoc @doc since: badges"
+        if: matrix.sigra == 'off' && matrix.opentelemetry == 'off'
         run: bash scripts/ci/verify_exdoc_since_badges.sh
 
       - name: Accrue retired package audit
@@ -758,6 +765,7 @@ jobs:
         run: cd accrue_admin && mix dialyzer --format github
 
       - name: Accrue admin docs
+        if: matrix.sigra == 'off' && matrix.opentelemetry == 'off'
         run: cd accrue_admin && MIX_ENV=dev mix docs --warnings-as-errors
 
       - name: Accrue admin retired package audit

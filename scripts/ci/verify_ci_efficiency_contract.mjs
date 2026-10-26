@@ -22,8 +22,18 @@
 //     HEX_API_KEY and RELEASE_PLEASE_TOKEN, so this check covers EVERY file
 //     under .github/workflows, not just the two scoped files.
 //
+//   - docs keep-set (item 4): in ci.yml's release-gate matrix, `mix docs`
+//     and every step that reads its doc/ output run only in the
+//     sigra=off/opentelemetry=off cells (Floor and Primary). The sigra=on and
+//     otel=on cells were dropped on byte-identical evidence: none of
+//     accrue/mix.exs, accrue_admin/mix.exs or their config reads the matrix
+//     env flags, a local `mix docs` under each flag set produced the same doc/
+//     tree hash, and the CI docs logs of all four cells differed only in the
+//     echoed env and a compile-timing line.
+//
 // Scope: .github/workflows/ci.yml and .github/workflows/accrue_admin_browser.yml
-// for concurrency, partition count and timeouts; all workflow files for pins.
+// for concurrency, partition count and timeouts; ci.yml for the docs keep-set;
+// all workflow files for pins.
 // The YAML is parsed line-based by indentation (no YAML dependency); the
 // parser only needs the fixed two-space GitHub Actions layout this repository
 // uses, and a file it cannot read as that layout FAILS rather than passing.
@@ -93,7 +103,55 @@ export function parseWorkflow(source) {
     if (match) jobs.push({ id: match[1], line: index, props: childMap(lines, index, 4) });
   }
   if (jobs.length === 0) fail("workflow declares zero jobs -- refusing to report a pass over nothing");
+  jobs.forEach((job, index) => { job.end = index + 1 < jobs.length ? jobs[index + 1].line : lines.length; });
   return { lines, topLevel, jobs };
+}
+
+// Splits one job's `steps:` list into steps. Each step exposes its scalar
+// keys (`name`, `id`, `uses`, `if`, `run`) and its `with:` children; a block
+// scalar (`run: >-` / `run: |`) is joined from its indented body lines.
+export function jobSteps(workflow, jobId) {
+  const job = workflow.jobs.find((candidate) => candidate.id === jobId);
+  if (!job) fail(`job \`${jobId}\` not found`);
+  const { lines } = workflow;
+  const stepsLine = lines.findIndex((line, index) => index > job.line && index < job.end && /^    steps:\s*$/.test(line));
+  if (stepsLine === -1) fail(`job \`${jobId}\` has no steps: list`);
+  const starts = [];
+  for (let index = stepsLine + 1; index < job.end; index += 1) if (/^      - /.test(lines[index])) starts.push(index);
+  return starts.map((start, position) => {
+    const stop = position + 1 < starts.length ? starts[position + 1] : job.end;
+    const body = lines.slice(start, stop).map((line, offset) => (offset === 0 ? line.replace(/^      - /, "        ") : line));
+    const step = { line: start, with: new Map() };
+    for (let index = 0; index < body.length; index += 1) {
+      const match = /^        ([A-Za-z0-9_-]+):\s?(.*)$/.exec(body[index]);
+      if (!match) continue;
+      const [, key, raw] = match;
+      if (key === "with" || key === "env") {
+        const children = new Map();
+        for (let child = index + 1; child < body.length && (isBlank(body[child]) || indentOf(body[child]) > 8); child += 1) {
+          const childMatch = /^          ([A-Za-z0-9_-]+):\s?(.*)$/.exec(body[child]);
+          if (!childMatch) continue;
+          let value = childMatch[2].trim();
+          if (value === "|" || value === ">-" || value === "|-" || value === ">") {
+            const block = [];
+            for (let line = child + 1; line < body.length && (isBlank(body[line]) || indentOf(body[line]) > 10); line += 1) block.push(body[line].trim());
+            value = block.filter(Boolean).join("\n");
+          }
+          children.set(childMatch[1], stripValue(value));
+        }
+        if (key === "with") step.with = children; else step.env = children;
+        continue;
+      }
+      let value = raw.trim();
+      if (value === "|" || value === ">-" || value === "|-" || value === ">") {
+        const block = [];
+        for (let line = index + 1; line < body.length && (isBlank(body[line]) || indentOf(body[line]) > 8); line += 1) block.push(body[line].trim());
+        value = block.filter(Boolean).join(value.startsWith(">") ? " " : "\n");
+      }
+      step[key] = stripValue(value);
+    }
+    return step;
+  });
 }
 
 // -- checks --------------------------------------------------------------------
@@ -161,6 +219,27 @@ export function checkThirdPartyPins(file, source) {
   return inspected;
 }
 
+export const DOCS_KEEP_SET_IF = "matrix.sigra == 'off' && matrix.opentelemetry == 'off'";
+const DOCS_STEP = /\bmix docs\b|verify_exdoc_since_badges\.sh|(?:^|[\s/])doc\//;
+
+export function checkDocsKeepSet(file, workflow) {
+  const steps = jobSteps(workflow, "release-gate");
+  const docSteps = steps.filter((step) => typeof step.run === "string" && DOCS_STEP.test(step.run));
+  if (!docSteps.some((step) => /\bmix docs\b/.test(step.run))) {
+    fail(`${file}: release-gate has no \`mix docs\` step -- the docs keep-set rule would be vacuous`);
+  }
+  for (const step of docSteps) {
+    if (step.if !== DOCS_KEEP_SET_IF) {
+      fail(`${file}:${step.line + 1}: release-gate docs step \`${step.name ?? step.run}\` must carry \`if: ${DOCS_KEEP_SET_IF}\` (found ${step.if ? `\`${step.if}\`` : "no if:"})`);
+    }
+  }
+  const job = workflow.jobs.find((candidate) => candidate.id === "release-gate");
+  const jobText = workflow.lines.slice(job.line, job.end).join("\n");
+  const keepCells = (jobText.match(/sigra: 'off'\n\s+opentelemetry: 'off'/g) || []).length;
+  if (keepCells < 2) fail(`${file}: release-gate must keep docs in at least the Floor and Primary sigra=off/opentelemetry=off cells (found ${keepCells})`);
+  return docSteps.length;
+}
+
 export function allWorkflowFiles(repo) {
   const dir = path.join(repo, ".github", "workflows");
   return fs.readdirSync(dir).filter((name) => /\.ya?ml$/.test(name)).sort().map((name) => `.github/workflows/${name}`);
@@ -183,6 +262,8 @@ export function verifyRepo(repo) {
     if (!fs.existsSync(absolute)) fail(`${file} is missing`);
     results.push({ file, ...verifyWorkflowSource(file, fs.readFileSync(absolute, "utf8")) });
   }
+  const ciWorkflow = parseWorkflow(fs.readFileSync(path.join(repo, ".github/workflows/ci.yml"), "utf8"));
+  results.docsSteps = checkDocsKeepSet(".github/workflows/ci.yml", ciWorkflow);
   let pins = 0;
   const workflowFiles = allWorkflowFiles(repo);
   for (const file of workflowFiles) pins += checkThirdPartyPins(file, fs.readFileSync(path.join(repo, file), "utf8"));
@@ -229,6 +310,46 @@ jobs:
       - name: Compile
         run: mix compile --warnings-as-errors
 `;
+
+const RELEASE_GATE = `name: Fixture
+jobs:
+  release-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        include:
+          - elixir: '1.19.0'
+            sigra: 'off'
+            opentelemetry: 'off'
+          - elixir: '1.19.5'
+            sigra: 'off'
+            opentelemetry: 'off'
+          - elixir: '1.19.5'
+            sigra: 'on'
+            opentelemetry: 'off'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Accrue compile
+        run: cd accrue && mix compile --warnings-as-errors
+
+      - name: Accrue docs
+        if: ${DOCS_KEEP_SET_IF}
+        run: cd accrue && MIX_ENV=dev mix docs --warnings-as-errors
+
+      - name: "Verify ExDoc @doc since: badges"
+        if: ${DOCS_KEEP_SET_IF}
+        run: bash scripts/ci/verify_exdoc_since_badges.sh
+
+      - name: Accrue admin docs
+        if: ${DOCS_KEEP_SET_IF}
+        run: >-
+          cd accrue_admin &&
+          MIX_ENV=dev mix docs --warnings-as-errors
+`;
+
+const docsKeepSet = (source) => checkDocsKeepSet("fixture.yml", parseWorkflow(source));
 
 function mutate(from, to) {
   if (!PASSING.includes(from)) throw new Error(`fixture mutation anchor not found: ${from}`);
@@ -281,10 +402,35 @@ const SCENARIOS = [
   ["a workflow with zero jobs fails rather than passing over nothing", () => {
     assert.throws(() => parseWorkflow("name: x\njobs:\n"), /zero jobs/);
   }],
+  ["a release-gate fixture with every docs step on the keep-set passes", () => {
+    assert.equal(docsKeepSet(RELEASE_GATE), 3);
+  }],
+  ["a release-gate mix docs step without the keep-set if: fails", () => {
+    const source = RELEASE_GATE.replace(`        if: ${DOCS_KEEP_SET_IF}\n        run: cd accrue && MIX_ENV=dev`, "        run: cd accrue && MIX_ENV=dev");
+    assert.notEqual(source, RELEASE_GATE);
+    assert.throws(() => docsKeepSet(source), /`Accrue docs` must carry `if: matrix.sigra == 'off'/);
+  }],
+  ["a doc/-consuming step (exdoc badges) without the keep-set if: fails", () => {
+    const source = RELEASE_GATE.replace(`        if: ${DOCS_KEEP_SET_IF}\n        run: bash scripts/ci/verify_exdoc`, "        run: bash scripts/ci/verify_exdoc");
+    assert.notEqual(source, RELEASE_GATE);
+    assert.throws(() => docsKeepSet(source), /Verify ExDoc @doc since: badges` must carry/);
+  }],
+  ["a folded-block mix docs step with a weaker if: fails", () => {
+    const source = RELEASE_GATE.replace(`        if: ${DOCS_KEEP_SET_IF}\n        run: >-`, "        if: matrix.sigra == 'off'\n        run: >-");
+    assert.notEqual(source, RELEASE_GATE);
+    assert.throws(() => docsKeepSet(source), /`Accrue admin docs` must carry.*found `matrix.sigra == 'off'`/);
+  }],
+  ["a release-gate with no mix docs step fails as vacuous", () => {
+    assert.throws(() => docsKeepSet(RELEASE_GATE.replace(/mix docs/g, "mix help")), /no `mix docs` step/);
+  }],
+  ["a matrix that keeps fewer than two off/off cells fails", () => {
+    assert.throws(() => docsKeepSet(RELEASE_GATE.replace("          - elixir: '1.19.0'\n            sigra: 'off'", "          - elixir: '1.19.0'\n            sigra: 'on'")), /at least the Floor and Primary/);
+  }],
   ["the live scoped workflows pass", () => {
     const results = verifyRepo(process.cwd());
     assert.equal(results.length, SCOPED_WORKFLOWS.length);
     assert.ok(results.pins > 0, "the live pin scan must inspect at least one third-party action");
+    assert.ok(results.docsSteps >= 3, "the live release-gate must expose its docs steps to the keep-set check");
     for (const result of results) assert.ok(result.jobs > 0, `${result.file} must declare jobs`);
   }]
 ];
@@ -316,7 +462,7 @@ function main() {
     return;
   }
   const results = verifyRepo(parsed.values.repo || process.cwd());
-  console.log(`ci efficiency contract: PASS (verified: ${results.map((r) => `${r.file} ${r.jobs} jobs`).join(", ")}; ${results.pins} third-party uses pinned across ${results.workflowFiles} workflow files)`);
+  console.log(`ci efficiency contract: PASS (verified: ${results.map((r) => `${r.file} ${r.jobs} jobs`).join(", ")}; ${results.docsSteps} release-gate docs steps on the keep-set; ${results.pins} third-party uses pinned across ${results.workflowFiles} workflow files)`);
 }
 
 let invokedAsEntrypoint = false;
