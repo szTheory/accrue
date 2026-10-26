@@ -81,7 +81,7 @@ coverage:
     requirement: LAND-03
     verification:
       - kind: command
-        ref: "negative control in a git clone --no-local scratch clone: baseline verify_completion_evidence.mjs --repo . --require-completion-evidence --require-table-agreement rc 0; LAND-03 checkbox reverted to [ ] with the traceability row left Complete -> rc 1, naming LAND-03; clone removed afterwards"
+        ref: "negative control in a git clone --no-local scratch clone: baseline verify_completion_evidence.mjs --repo . --require-completion-evidence --require-table-agreement rc 0; baseline PASS (12 parsed, 10 complete, 10 evidenced); LAND-03 checkbox reverted to [ ] with the traceability row left Complete -> FAIL: disagreement for LAND-03: bullet on line 27 is \"- [ ]\" but traceability row on line 72 says \"Complete\", rc 1; clone removed afterwards"
         status: pass
     human_judgment: false
 ---
