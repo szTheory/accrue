@@ -8,6 +8,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
   alias Accrue.Test.Factory
   alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Invoices
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.TestRepo
 
@@ -17,7 +18,9 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     @behaviour Accrue.Auth
 
     @impl Accrue.Auth
-    def current_user(%{"admin_token" => "admin"}), do: %{id: "admin_1", role: :admin}
+    def current_user(%{"admin_token" => "admin"}),
+      do: %{id: Application.get_env(:accrue_admin, :test_actor_id, "admin_1"), role: :admin}
+
     def current_user(_session), do: nil
 
     @impl Accrue.Auth
@@ -54,6 +57,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     on_exit(fn ->
       Application.put_env(:accrue, :auth_adapter, prior)
       Application.delete_env(:accrue_admin, :expected_step_up_subject_id)
+      Application.delete_env(:accrue_admin, :test_actor_id)
     end)
 
     %{subscription: subscription} =
@@ -98,30 +102,148 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert data_attr_count(html, "data-ax-drill-section") >= 3
 
     refute has_element?(view, "[data-ax-action-band] form")
-    refute has_element?(view, "[data-role='subscription-related-billing']")
+    assert has_element?(view, "[data-ax-related-resources] [aria-label='Related billing']")
     refute has_element?(view, "[data-role='subscription-dunning-state']")
     refute has_element?(view, "[data-role='confirm-panel']")
     refute html =~ ~s(class="ax-kpi-grid")
     refute html =~ Copy.subscription_kpi_canonical_predicates_label()
 
     assert html =~ "/billing/customers/#{subscription.customer_id}"
-    assert html =~ "subscription_id=#{subscription.id}"
     assert html =~ "subject_type=Subscription"
     assert html =~ "subject_id=#{subscription.id}"
     assert html =~ "Subscription events"
-    assert html =~ "Open local invoice context"
-
-    assert html =~ "Global invoice queue workspace"
-    assert html =~ "Work all open invoice records"
-    assert html =~ "Webhook debugger after invoice queue"
-    assert html =~ "Open local invoice context"
-    assert html =~ "Work global invoice queue"
+    assert html =~ "Open invoices for this customer"
+    assert html =~ "All open invoices in global scope"
+    assert html =~ "Customer-wide results; open status"
+    refute html =~ "subscription_id=#{subscription.id}"
+    refute html =~ "Filter this subscription&#39;s invoices"
+    refute html =~ "Global invoice queue workspace"
+    refute html =~ "Global open-invoice queue rows"
+    refute html =~ "subscription-related-billing"
     refute html =~ "Recovery workspace button"
     assert html =~ "Open dunning funnel and at-risk analytics"
+    assert length(Regex.scan(~r/Open dunning funnel and at-risk analytics/, html)) == 1
     assert html =~ "Open Events audit log with subscription filter"
     assert html =~ "Audit event table: Actor / Action / Timestamp"
-    assert html =~ "Global open-invoice queue rows"
-    assert html =~ "Work all invoices in queue"
+
+    customer_invoice_href = link_href(view, "Open invoices for this customer")
+
+    customer_invoice_query =
+      customer_invoice_href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(customer_invoice_href).path == "/billing/invoices"
+    assert customer_invoice_query["status"] == "open"
+    assert customer_invoice_query["customer_id"] == subscription.customer_id
+
+    scope_invoice_href = link_href(view, "All open invoices in global scope")
+
+    scope_invoice_query =
+      scope_invoice_href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(scope_invoice_href).path == "/billing/invoices"
+    assert scope_invoice_query["status"] == "open"
+    refute Map.has_key?(scope_invoice_query, "customer_id")
+    refute Map.has_key?(scope_invoice_query, "subscription_id")
+  end
+
+  test "subscription detail returns to the validated originating list in the current organization scope",
+       %{
+         conn: conn
+       } do
+    %{subscription: subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "journey-org",
+        email: "phase234-return@example.com"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "journey-org",
+        active_organization_slug: "journey-org",
+        admin_organization_ids: ["journey-org"]
+      )
+
+    return_to =
+      URI.encode(
+        "/billing/subscriptions?org=foreign-org&view=all&status=active&q=phase234",
+        &URI.char_unreserved?/1
+      )
+
+    assert {:ok, view, html} =
+             live(
+               conn,
+               "/billing/subscriptions/#{subscription.id}?org=journey-org&return_to=#{return_to}"
+             )
+
+    assert html =~ "Back to subscriptions"
+    assert html =~ "All open invoices for journey-org"
+
+    scoped_invoice_href = link_href(view, "All open invoices for journey-org")
+
+    scoped_invoice_query =
+      scoped_invoice_href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(scoped_invoice_href).path == "/billing/invoices"
+    assert scoped_invoice_query["org"] == "journey-org"
+    assert scoped_invoice_query["status"] == "open"
+
+    back_path =
+      view
+      |> element("a", "Back to subscriptions")
+      |> render()
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Floki.attribute("href")
+      |> hd()
+
+    back_query = back_path |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    assert URI.parse(back_path).path == "/billing/subscriptions"
+    assert back_query["org"] == "journey-org"
+    assert back_query["view"] == "all"
+    assert back_query["status"] == "active"
+    assert back_query["q"] == "phase234"
+    refute html =~ "foreign-org"
+
+    assert {:ok, returned_view, returned_html} = live(conn, back_path)
+    assert has_element?(returned_view, "[name='q'][value='phase234']")
+    assert returned_html =~ subscription.processor_id
+  end
+
+  test "subscription detail returns to the matching customer's query-free subscriptions tab", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    origin = "/billing/customers/#{subscription.customer_id}?tab=subscriptions"
+
+    assert {:ok, detail_view, _html} =
+             live(
+               conn,
+               "/billing/subscriptions/#{subscription.id}?return_to=#{URI.encode_www_form(origin)}"
+             )
+
+    back_path = link_href(detail_view, "Back to customer subscriptions")
+    assert URI.parse(back_path).path == "/billing/customers/#{subscription.customer_id}"
+    assert URI.decode_query(URI.parse(back_path).query)["tab"] == "subscriptions"
+
+    assert {:ok, customer_view, customer_html} = live(conn, back_path)
+
+    assert has_element?(
+             customer_view,
+             "[aria-label='Customer peer record sets'] .ax-tab-active",
+             "Subscriptions"
+           )
+
+    assert customer_html =~ subscription.processor_id
+
+    detail_path = link_href(customer_view, subscription.processor_id)
+    assert URI.decode_query(URI.parse(detail_path).query)["return_to"] == back_path
+
+    assert {:ok, repeated_detail_view, _html} = live(conn, detail_path)
+    assert has_element?(repeated_detail_view, "a", "Back to customer subscriptions")
   end
 
   test "summary and drill bands replace page-level KPI and predicate noise", %{
@@ -136,26 +258,22 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Dunning &amp; recovery"
     assert html =~ "Tax &amp; compliance"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "Billing status"
-    assert html =~ "No - billing is not active"
-    assert html =~ "Setup required now"
-    assert html =~ "ax-detail-health-summary-danger"
-    assert html =~ "ax-detail-health-answer"
-    assert html =~ "Charge amount not shown"
-
-    assert html =~
-             "Billing is not active until setup fields are fixed; finish setup before trusting revenue, renewal, or recovery numbers."
+    assert html =~ "Lifecycle"
+    assert html =~ "Active"
+    refute html =~ "Setup required now"
+    assert html =~ "ax-status-badge-moss"
+    refute html =~ "ax-detail-health-answer"
+    assert html =~ "Charge amount unavailable"
 
     refute html =~ "Billing health right now"
     assert html =~ "MRR"
-    assert html =~ "Charge amount not shown"
-    assert html =~ "Billing setup gaps"
-    assert html =~ "Setup incomplete - active billing unverified"
-    assert html =~ "Fix customer setup"
-    assert html =~ "Open local invoice context"
+    assert html =~ "Charge amount unavailable"
+    assert html =~ "Billing evidence"
+    assert html =~ "Lifecycle state"
+    assert html =~ "Open invoices for this customer"
     assert html =~ "Global dunning funnel"
     assert html =~ "recovery analytics still shows at-risk accounts and funnel trends."
-    assert html =~ "Work global invoice queue"
+    assert html =~ "All open invoices in global scope"
     assert html =~ "Audit event table: Actor / Action / Timestamp"
     assert html =~ "Latest audit event summary"
     assert html =~ "Actor"
@@ -171,6 +289,138 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     refute html =~
              "Update the customer tax location in the host app, then retry recurring tax on this subscription."
+  end
+
+  test "active lifecycle remains active when price and period observations are unavailable", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    long_subscription_id = "sub_" <> String.duplicate("long-identifier-", 12)
+    long_customer_name = String.duplicate("Northstar billing account ", 8)
+
+    subscription
+    |> Subscription.changeset(%{
+      processor_id: long_subscription_id,
+      current_period_start: nil,
+      current_period_end: nil
+    })
+    |> TestRepo.update!()
+
+    TestRepo.get!(Customer, subscription.customer_id)
+    |> Customer.changeset(%{name: long_customer_name})
+    |> TestRepo.update!()
+
+    TestRepo.delete_all(
+      from(item in SubscriptionItem, where: item.subscription_id == ^subscription.id)
+    )
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    assert html =~ "Lifecycle"
+    assert html =~ "Active"
+    assert html =~ long_subscription_id
+    assert html =~ long_customer_name
+    assert html =~ "Price unavailable"
+    assert html =~ "Current period unavailable"
+    assert html =~ "Unavailable"
+    refute html =~ "$0.00"
+    refute html =~ "0.00 USD"
+    refute html =~ "Setup incomplete - active billing unverified"
+    refute html =~ "Billing is not active"
+    refute html =~ "Due now"
+
+    assert has_element?(view, "[data-ax-action-band]")
+    assert has_element?(view, "[data-ax-related-resources]")
+    refute html =~ "0 open invoices"
+
+    {invoice_rows, _cursor} =
+      Invoices.list(
+        filter:
+          Invoices.decode_filter(%{
+            "customer_id" => subscription.customer_id,
+            "status" => "open"
+          }),
+        limit: 20
+      )
+
+    assert invoice_rows == []
+
+    invoice_href = link_href(view, "Open invoices for this customer")
+    invoice_query = invoice_href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    assert invoice_query["customer_id"] == subscription.customer_id
+    assert invoice_query["status"] == "open"
+  end
+
+  test "lifecycle states stay distinct from scheduled cancellation and collection pause", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    scheduled_end = DateTime.add(DateTime.utc_now(), 86_400, :second)
+
+    cases = [
+      {:trialing, %{}, "Trialing"},
+      {:incomplete, %{}, "Incomplete"},
+      {:incomplete_expired, %{}, "Incomplete expired"},
+      {:past_due, %{}, "Past due"},
+      {:unpaid, %{}, "Unpaid"},
+      {:canceled, %{}, "Canceled"},
+      {:active, %{cancel_at_period_end: true, current_period_end: scheduled_end}, "Active"},
+      {:active, %{pause_collection: %{"behavior" => "void"}}, "Active"}
+    ]
+
+    for {status, fields, lifecycle} <- cases do
+      TestRepo.get!(Subscription, subscription.id)
+      |> Subscription.force_status_changeset(Map.merge(fields, %{status: status}))
+      |> TestRepo.update!()
+
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+      assert html =~ lifecycle
+
+      case fields do
+        %{cancel_at_period_end: true} ->
+          assert html =~ "Scheduled for"
+
+        %{pause_collection: _pause} ->
+          assert html =~ "Collection"
+          assert html =~ "Paused"
+
+        _ ->
+          :ok
+      end
+    end
+  end
+
+  test "subscription identity and lifecycle precede actions and raw disclosure", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    subscription
+    |> Subscription.changeset(%{
+      data: Map.put(subscription.data || %{}, "payment_method_token", "secret_token_value")
+    })
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    {identity, _} = :binary.match(html, "detail-header-metadata-actions")
+    {lifecycle, _} = :binary.match(html, "Lifecycle state")
+    {action, _} = :binary.match(html, "data-ax-action-band")
+    {related, _} = :binary.match(html, "data-ax-related-resources")
+    {billing, _} = :binary.match(html, "data-ax-drill-section=\"billing-items\"")
+    {raw, _} = :binary.match(html, "data-ax-lazy-json")
+    assert identity < lifecycle
+    assert lifecycle < action
+    assert action < related
+    assert related < billing
+    assert billing < raw
+
+    html = render_click(view, "load_raw_json", %{})
+    refute html =~ "payment_method_token"
+    refute html =~ "secret_token_value"
+    assert html =~ "Cancellation"
   end
 
   test "renders default action hierarchy with two primary actions and grouped overflow",
@@ -205,7 +455,6 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       AccrueAdmin.Copy.Subscription.subscription_action_remove_item(),
       "Collection",
       AccrueAdmin.Copy.Subscription.subscription_action_pause_collection(),
-      AccrueAdmin.Copy.Subscription.subscription_action_resume(),
       "Danger zone",
       "Cancel immediately",
       "Comp this subscription"
@@ -213,6 +462,47 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert html =~ ~s(aria-label="Change plan for subscription #{subscription_label}")
     assert html =~ ~s(aria-label="Cancel renewal for subscription #{subscription_label}")
+  end
+
+  test "missing subscription evidence stays unavailable in detail and action review", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    TestRepo.delete_all(
+      from(item in SubscriptionItem, where: item.subscription_id == ^subscription.id)
+    )
+
+    subscription
+    |> Subscription.changeset(%{
+      current_period_start: nil,
+      current_period_end: nil,
+      cancel_at_period_end: false
+    })
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    assert html =~ "Price unavailable"
+    assert html =~ "Current period unavailable"
+    assert html =~ "Renewal date unavailable"
+    assert html =~ "Charge amount unavailable"
+    assert html =~ "Billing evidence"
+    assert html =~ "View events"
+    refute html =~ "Billing setup gaps"
+    refute html =~ "Price not shown"
+
+    render_click(view, "open_action_drawer", %{"action_type" => "pause"})
+    review = render_submit(view, "prepare_action", %{"action_type" => "pause"})
+
+    assert review =~ "Subscription ID: #{subscription.id}"
+    assert review =~ "Customer ID: #{subscription.customer_id}"
+    assert review =~ "Current plan / price"
+    assert review =~ "Price unavailable"
+    assert review =~ "Current charge amount"
+    assert review =~ "Unavailable; no estimate is shown."
+    refute review =~ "0 usd"
+    assert Accrue.Processor.Fake.call_count(:pause_subscription) == 0
   end
 
   test "drawer-hosted destructive action preserves step-up and records admin audit linkage", %{
@@ -257,6 +547,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       )
 
     assert html =~ "Step-up required"
+    assert has_element?(view, "[data-role='confirm-action']:disabled")
 
     html =
       render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
@@ -276,6 +567,266 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     canceled = TestRepo.get!(Subscription, subscription.id)
     assert Accrue.Billing.Subscription.canceled?(canceled)
+  end
+
+  test "repeated confirmation and delayed step-up submission dispatch one cancellation", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ "Step-up required"
+    assert render_click(view, "confirm_action") =~ "Step-up required"
+
+    assert render_submit(view, "step_up_submit", %{"code" => "123456"}) =~
+             "Subscription action recorded"
+
+    render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 1
+
+    assert length(
+             TestRepo.all(from(event in Event, where: event.type == "subscription.canceled"))
+           ) == 1
+  end
+
+  test "reloading a pending confirmation does not replay the mutation", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    path = "/billing/subscriptions/#{subscription.id}"
+    {:ok, first_view, _html} = live(conn, path)
+    render_click(element(first_view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        first_view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    assert render_click(element(first_view, "[data-role='confirm-action']")) =~ "Step-up required"
+
+    {:ok, reconnected_view, html} = live(conn, path)
+
+    refute html =~ "Step-up required"
+    refute has_element?(reconnected_view, "[data-role='confirm-action']")
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+  end
+
+  test "staged subscription confirmation stays inert across detail, return, and reopen navigation",
+       %{
+         conn: conn,
+         subscription: subscription
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    path = "/billing/subscriptions/#{subscription.id}"
+    {:ok, first_view, _html} = live(conn, path)
+
+    render_click(element(first_view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        first_view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    assert has_element?(first_view, "[data-role='confirm-action']")
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+
+    {:ok, _list_view, _html} = live(conn, "/billing/subscriptions")
+    {:ok, returned_view, _html} = live(conn, path)
+    refute has_element?(returned_view, "[data-role='confirm-action']")
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+
+    render_click(element(returned_view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        returned_view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    assert has_element?(returned_view, "[data-role='confirm-action']")
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+
+    render_click(returned_view, "cancel_pending_action", %{})
+    render_click(first_view, "confirm_action", %{})
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+
+    {:ok, _reopened_view, _html} = live(conn, path)
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+  end
+
+  test "changing the staged action while step-up is open discards the old continuation", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ "Step-up required"
+
+    render_click(view, "prepare_action", %{"action_type" => "cancel_at_period_end"})
+    render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+  end
+
+  test "possibly submitted timeout stays uncertain and offers only scoped evidence", %{
+    conn: conn
+  } do
+    %{subscription: scoped_subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "uncertain-org",
+        email: "uncertain@example.com"
+      })
+
+    Accrue.Processor.Fake.scripted_response(:cancel_subscription, {:error, :timeout})
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "uncertain-org",
+        active_organization_slug: "uncertain-org",
+        admin_organization_ids: ["uncertain-org"]
+      )
+
+    {:ok, view, _html} =
+      live(conn, "/billing/subscriptions/#{scoped_subscription.id}?org=uncertain-org")
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    render_click(element(view, "[data-role='confirm-action']"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Outcome not confirmed"
+    assert html =~ "Open scoped subscription activity"
+    assert html =~ "org=uncertain-org"
+    refute has_element?(view, "[data-role='confirm-action']")
+    refute html =~ ":timeout"
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 1
+
+    blocked = render_click(view, "open_action_drawer", %{"action_type" => "cancel_now"})
+    assert blocked =~ "Check scoped subscription activity before starting another action"
+    refute has_element?(view, "[data-role='confirm-action']")
+
+    html = render_click(view, "cancel_pending_action")
+    assert html =~ "Outcome not confirmed"
+  end
+
+  test "definitive provider rejection is distinct from an ambiguous timeout", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    Accrue.Processor.Fake.scripted_response(
+      :cancel_subscription,
+      {:error,
+       %Accrue.APIError{message: "invalid request", code: "invalid_request", http_status: 422}}
+    )
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    render_click(element(view, "[data-role='confirm-action']"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "The provider rejected the action. No change was accepted."
+    assert html =~ "Open scoped subscription activity"
+    refute html =~ "Outcome not confirmed"
+    refute has_element?(view, "[data-role='confirm-action']")
+    refute html =~ "invalid request"
+  end
+
+  test "compensation result links only to the scoped replacement and keeps the original", %{
+    conn: conn
+  } do
+    %{subscription: subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "compensation-org",
+        email: "compensation@example.com"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "compensation-org",
+        active_organization_slug: "compensation-org",
+        admin_organization_ids: ["compensation-org"]
+      )
+
+    {:ok, view, _html} =
+      live(conn, "/billing/subscriptions/#{subscription.id}?org=compensation-org")
+
+    render_click(element(view, "button[role='menuitem']", "Comp this subscription"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "comp_subscription", "new_price_id" => "price_basic"}
+    )
+
+    render_click(element(view, "[data-role='confirm-action']"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Compensation created a replacement subscription"
+    assert html =~ "Open replacement subscription"
+    assert html =~ "org=compensation-org"
+    assert html =~ subscription.id
+    refute html =~ "foreign-org"
   end
 
   test "drawer-hosted item removal requires step-up before deleting the item", %{
@@ -389,12 +940,17 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert {:error,
             {:redirect, %{to: "/billing/subscriptions?org=allowed-org", flash: flash_token}}} =
              redirect =
-             live(conn, "/billing/subscriptions/#{denied_subscription.id}?org=allowed-org")
+             live(
+               conn,
+               "/billing/subscriptions/#{denied_subscription.id}?org=allowed-org&return_to=https%3A%2F%2Fforeign.example%2Fadmin%2Fsubscriptions%3Forg%3Dorg_denied%26view%3Dall"
+             )
 
     assert %{"error" => denied} =
              Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
 
     assert denied == Copy.Locked.owner_access_denied()
+    refute denied =~ denied_subscription.processor_id
+    refute denied =~ "org_denied"
 
     assert redirect
   end
@@ -438,6 +994,129 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
              view,
              "[data-ax-overlay-panel][data-presentation='drawer'] [data-role='confirm-action']"
            )
+  end
+
+  test "each eligible subscription action review identifies its target and current evidence", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    item = List.first(subscription.subscription_items)
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    actions = [
+      {"swap_plan", %{"new_price_id" => "price_reviewed", "proration" => "none"}},
+      {"cancel_at_period_end", %{}},
+      {"cancel_now", %{}},
+      {"comp_subscription", %{"new_price_id" => "price_replacement"}},
+      {"pause", %{"pause_behavior" => "keep_as_draft"}},
+      {"update_quantity", %{"new_quantity" => "3"}},
+      {"add_item", %{"new_price_id" => "price_addon", "new_quantity" => "2"}},
+      {"update_item_quantity",
+       %{"item_id" => item.id, "new_quantity" => "4", "proration" => "none"}},
+      {"remove_item", %{"item_id" => item.id, "proration" => "none"}}
+    ]
+
+    for {action_type, fields} <- actions do
+      params = Map.merge(%{"action_type" => action_type}, fields)
+      render_click(view, "open_action_drawer", %{"action_type" => action_type})
+      html = render_submit(view, "prepare_action", params)
+
+      assert html =~ "subscription-action-review-facts"
+      assert html =~ "Subscription ID: #{subscription.id}"
+      assert html =~ "Customer ID: #{subscription.customer_id}"
+      assert html =~ "Current state"
+      assert html =~ "global owner scope"
+      assert html =~ "Current charge amount"
+      assert html =~ "Unavailable; no estimate is shown."
+      assert html =~ action_label_for_test(action_type)
+      assert html =~ "Back to subscription"
+
+      if action_type in ["update_item_quantity", "remove_item"] do
+        assert html =~ "Item ID: #{item.id}"
+      end
+
+      if action_type == "cancel_at_period_end" do
+        assert html =~ "schedules cancellation at period end"
+      end
+
+      if action_type == "cancel_now" do
+        assert html =~ "cancels the subscription immediately"
+      end
+
+      if action_type == "swap_plan" do
+        assert html =~ "Preview upcoming invoice"
+        assert html =~ "price_reviewed"
+      end
+
+      render_click(view, "cancel_pending_action")
+    end
+
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+  end
+
+  test "resume review has an explicit action name and missing money is not estimated", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    subscription
+    |> Subscription.changeset(%{
+      cancel_at_period_end: true,
+      current_period_end: DateTime.add(DateTime.utc_now(), 30 * 86_400, :second)
+    })
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(view, "open_action_drawer", %{"action_type" => "resume"})
+    html = render_submit(view, "prepare_action", %{"action_type" => "resume"})
+
+    assert html =~ "Resume subscription"
+    assert html =~ "This cancels the scheduled end and keeps the subscription active."
+    assert html =~ "Current charge amount"
+    assert html =~ "Unavailable; no estimate is shown."
+    refute html =~ "0 usd"
+    refute html =~ "Estimated"
+  end
+
+  test "back from a staged cancellation dismisses the review without dispatch", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(view, "open_action_drawer", %{"action_type" => "cancel_now"})
+    render_submit(view, "prepare_action", %{"action_type" => "cancel_now"})
+
+    html = render_click(view, "cancel_pending_action")
+
+    assert html =~ "Subscription actions"
+    refute html =~ "subscription-action-review-facts"
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+  end
+
+  test "repeated non-destructive confirmation after completion does not dispatch twice", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_submit(view, "prepare_action", %{
+      "action_type" => "update_quantity",
+      "new_quantity" => "2"
+    })
+
+    first = render_click(view, "confirm_action")
+    repeated = render_click(view, "confirm_action")
+
+    assert first =~ Copy.subscription_action_recorded_info()
+    assert repeated =~ Copy.subscription_action_recorded_info()
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 1
   end
 
   test "crafted supported action params are rejected before staging", %{
@@ -496,7 +1175,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
       "subscription_action_swap_plan" => "Change plan",
       "subscription_action_cancel_at_period_end" => "Cancel renewal",
       "subscription_action_cancel_now" => "Cancel immediately",
-      "subscription_action_resume" => "Resume",
+      "subscription_action_resume" => "Resume subscription",
+      "subscription_action_back_to_subscription" => "Back to subscription",
       "subscription_action_update_quantity" => "Update quantity",
       "subscription_action_add_item" => "Add item",
       "subscription_action_update_item_quantity" => "Update item quantity",
@@ -524,6 +1204,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
         Copy.subscription_action_cancel_at_period_end(),
       "subscription_action_cancel_now" => Copy.subscription_action_cancel_now(),
       "subscription_action_resume" => Copy.subscription_action_resume(),
+      "subscription_action_back_to_subscription" =>
+        Copy.subscription_action_back_to_subscription(),
       "subscription_action_update_quantity" => Copy.subscription_action_update_quantity(),
       "subscription_action_add_item" => Copy.subscription_action_add_item(),
       "subscription_action_update_item_quantity" =>
@@ -690,6 +1372,200 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert TestRepo.get!(SubscriptionItem, item.id)
   end
 
+  test "terminated subscriptions do not offer lifecycle or billing mutation actions", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    subscription =
+      subscription
+      |> Subscription.changeset(%{status: :canceled, ended_at: DateTime.utc_now()})
+      |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    refute has_element?(view, "[data-ax-primary-action]", "Change plan")
+    refute has_element?(view, "[data-ax-primary-action]", "Cancel renewal")
+
+    for action_type <- ["pause", "resume", "update_quantity", "add_item", "remove_item"] do
+      html = render_click(view, "open_action_drawer", %{"action_type" => action_type})
+      refute html =~ ~s(data-action-type="#{action_type}")
+      refute html =~ ~s(data-role="confirm-action")
+    end
+  end
+
+  test "confirmation rejects a subscription whose lifecycle changed after review", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ "Step-up required"
+
+    current = TestRepo.get!(Subscription, subscription.id)
+    current |> Subscription.changeset(%{status: :canceled}) |> TestRepo.update!()
+
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Review the action again"
+    refute html =~ "Step-up required"
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+  end
+
+  test "confirmation rejects a changed actor and owner after review", %{conn: conn} do
+    %{subscription: subscription, customer: customer} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "stale-review-org",
+        email: "stale-review@example.com"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "stale-review-org",
+        active_organization_slug: "stale-review-org",
+        admin_organization_ids: ["stale-review-org"]
+      )
+
+    {:ok, actor_view, _html} =
+      live(conn, "/billing/subscriptions/#{subscription.id}?org=stale-review-org")
+
+    render_submit(actor_view, "prepare_action", %{
+      "action_type" => "pause",
+      "pause_behavior" => "keep_as_draft"
+    })
+
+    Application.put_env(:accrue_admin, :test_actor_id, "replacement-admin")
+    actor_html = render_click(actor_view, "confirm_action")
+
+    assert actor_html =~ "Review the action again"
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+
+    Application.delete_env(:accrue_admin, :test_actor_id)
+
+    {:ok, owner_view, _html} =
+      live(conn, "/billing/subscriptions/#{subscription.id}?org=stale-review-org")
+
+    render_submit(owner_view, "prepare_action", %{
+      "action_type" => "pause",
+      "pause_behavior" => "keep_as_draft"
+    })
+
+    customer
+    |> Customer.changeset(%{owner_id: "replacement-owner"})
+    |> TestRepo.update!()
+
+    owner_html = render_click(owner_view, "confirm_action")
+
+    assert owner_html =~ "Review the action again"
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+    refute TestRepo.get_by(Event, type: "subscription.paused", subject_id: subscription.id)
+  end
+
+  test "correcting a staged quantity dispatches only the final reviewed intent", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_submit(view, "prepare_action", %{
+      "action_type" => "update_quantity",
+      "new_quantity" => "2"
+    })
+
+    corrected_html =
+      render_submit(view, "prepare_action", %{
+        "action_type" => "update_quantity",
+        "new_quantity" => "3"
+      })
+
+    assert corrected_html =~ "Requested quantity"
+    assert corrected_html =~ ">3</dd>"
+    refute corrected_html =~ ">2</dd>"
+
+    html = render_click(view, "confirm_action")
+
+    assert html =~ Copy.subscription_action_recorded_info()
+    assert Accrue.Processor.Fake.call_count(:update_subscription) == 1
+
+    assert TestRepo.get!(SubscriptionItem, List.first(subscription.subscription_items).id).quantity ==
+             3
+  end
+
+  test "unrelated metadata changes preserve a reviewed action through fresh step-up", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    current = TestRepo.get!(Subscription, subscription.id)
+    current |> Subscription.changeset(%{metadata: %{"note" => "unrelated"}}) |> TestRepo.update!()
+
+    html = render_click(element(view, "[data-role='confirm-action']"))
+    assert html =~ "Step-up required"
+
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+    assert html =~ "Subscription action recorded"
+    assert TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+  end
+
+  test "confirmation rejects a removed or changed item after review", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    item = List.first(subscription.subscription_items)
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Remove item"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{
+        "action_type" => "remove_item",
+        "item_id" => item.id,
+        "proration" => "create_prorations"
+      }
+    )
+
+    current_item = TestRepo.get!(SubscriptionItem, item.id)
+    current_item |> SubscriptionItem.changeset(%{quantity: 2}) |> TestRepo.update!()
+
+    html = render_click(element(view, "[data-role='confirm-action']"))
+
+    assert html =~ "Review the action again"
+    refute html =~ "Step-up required"
+    assert TestRepo.get!(SubscriptionItem, item.id).quantity == 2
+  end
+
   describe "dunning state inside summary and drill sections" do
     test "subscription with no campaign renders the dunning drill without a standalone card", %{
       conn: conn,
@@ -796,6 +1672,16 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     |> length()
   end
 
+  defp link_href(view, label) do
+    view
+    |> element("a", label)
+    |> render()
+    |> Floki.parse_document!()
+    |> Floki.find("a")
+    |> Floki.attribute("href")
+    |> hd()
+  end
+
   defp assert_text_order(html, labels) do
     positions =
       Enum.map(labels, fn label ->
@@ -819,6 +1705,25 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     |> File.read!()
     |> Jason.decode!()
   end
+
+  defp action_label_for_test("swap_plan"), do: Copy.subscription_action_swap_plan()
+
+  defp action_label_for_test("cancel_at_period_end"),
+    do: Copy.subscription_action_cancel_at_period_end()
+
+  defp action_label_for_test("cancel_now"), do: Copy.subscription_action_cancel_now()
+
+  defp action_label_for_test("comp_subscription"),
+    do: Copy.subscription_action_create_comp_replacement()
+
+  defp action_label_for_test("pause"), do: Copy.subscription_action_pause_collection()
+  defp action_label_for_test("update_quantity"), do: Copy.subscription_action_update_quantity()
+  defp action_label_for_test("add_item"), do: Copy.subscription_action_add_item()
+
+  defp action_label_for_test("update_item_quantity"),
+    do: Copy.subscription_action_update_item_quantity()
+
+  defp action_label_for_test("remove_item"), do: Copy.subscription_action_remove_item()
 
   defp organization_owner_scope(organization_id) do
     %OwnerScope{

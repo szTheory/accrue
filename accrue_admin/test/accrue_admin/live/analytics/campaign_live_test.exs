@@ -33,6 +33,55 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
   end
 
   describe "Dunning Timeline" do
+    test "direct and untrusted origins return through both Recovery links in current scope", %{
+      conn: conn
+    } do
+      customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+      subscription_id = insert_subscription(customer).id
+
+      conn =
+        init_test_session(conn, %{
+          :admin_token => "admin",
+          :active_organization_id => "org_allowed",
+          :active_organization_slug => "allowed-org",
+          :admin_organization_ids => ["org_allowed"],
+          "accrue_admin" => %{"mount_path" => "/billing"}
+        })
+
+      raw_origins = [
+        nil,
+        "",
+        "/billing/analytics/recovery?window=bad",
+        "/billing/customers",
+        "/admin/analytics/recovery?window=7d",
+        "https://evil.example"
+      ]
+
+      Enum.each(raw_origins, fn raw_origin ->
+        query =
+          case raw_origin do
+            nil -> ""
+            value -> "?" <> URI.encode_query(%{"return_to" => value})
+          end
+
+        assert {:ok, _view, html} =
+                 live(
+                   conn,
+                   "/billing/analytics/recovery/subscriptions/#{subscription_id}" <>
+                     query <>
+                     if(query == "", do: "?org=allowed-org", else: "&org=allowed-org")
+                 )
+
+        expected = "/billing/analytics/recovery?org=allowed-org"
+        assert length(Regex.scan(~r|href="#{Regex.escape(expected)}"|, html)) >= 2
+
+        assert html =~
+                 ~r|<a class="ax-link" href="#{Regex.escape(expected)}">Back to Recovery</a>|
+
+        refute html =~ "evil.example"
+      end)
+    end
+
     test "D-20 D-21 renders Campaign as a detail drill-down with summary rows and primary timeline",
          %{conn: conn} do
       subscription_id = insert_subscription().id
@@ -73,11 +122,17 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
 
       assert html =~ "Subscription"
       assert html =~ subscription_id
-      assert html =~ "Campaign state"
+      assert html =~ "Latest recorded outcome"
       assert html =~ "Timeline events"
       assert html =~ "Invoice count"
       assert html =~ "ax-campaign-timeline"
       assert html =~ "Campaign started"
+      assert html =~ ~r|href="/billing/subscriptions/#{subscription_id}"|
+
+      timestamps = Floki.parse_document!(html) |> Floki.find("[data-time-display]")
+      assert length(timestamps) >= 3
+      timestamp_ids = Enum.flat_map(timestamps, &Floki.attribute(&1, "id"))
+      assert length(Enum.uniq(timestamp_ids)) == length(timestamp_ids)
 
       refute html =~ ~s(class="ax-kpi-grid")
       refute html =~ ~s(data-ax-zone="kpi-cluster")
@@ -101,6 +156,43 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       assert html =~ "ax-campaign-timeline"
 
       refute html =~ ~s(class="ax-kpi-grid")
+    end
+
+    test "selected Recovery window does not filter the historical campaign timeline", %{
+      conn: conn
+    } do
+      subscription_id = insert_subscription().id
+      historical_at = DateTime.add(DateTime.utc_now(), -120, :day)
+
+      for {type, step} <- [{"dunning.campaign_started", nil}, {"dunning.step_sent", "email_1"}] do
+        data = %{"campaign_anchor" => "historical_campaign"}
+        data = if step, do: Map.put(data, "step", step), else: data
+
+        Accrue.Repo.insert!(%Accrue.Events.Event{
+          type: type,
+          subject_type: "Subscription",
+          subject_id: subscription_id,
+          actor_id: Ecto.UUID.generate(),
+          actor_type: "system",
+          data: data,
+          inserted_at: historical_at
+        })
+      end
+
+      return_to = URI.encode_query(%{"return_to" => "/billing/analytics/recovery?window=7d"})
+
+      {:ok, _view, html} =
+        conn
+        |> init_test_session(%{
+          "admin_token" => "admin",
+          "accrue_admin" => %{"mount_path" => "/billing"}
+        })
+        |> live("/billing/analytics/recovery/subscriptions/#{subscription_id}?#{return_to}")
+
+      assert html =~ "In progress"
+      assert html =~ "Step sent"
+      assert html =~ "Back to Recovery"
+      assert html =~ ~r|href="/billing/analytics/recovery\?window=7d"|
     end
 
     test "renders dunning timeline for subscription with 2 campaign arcs", %{conn: conn} do
@@ -145,7 +237,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
         })
         |> live("/billing/analytics/recovery/subscriptions/#{subscription_id}")
 
-      assert html =~ "Campaign History" || html =~ "Dunning Timeline"
+      assert html =~ "Payment retry history"
       assert html =~ "Campaign started"
     end
 
@@ -193,7 +285,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       # and ax-eyebrow — these satisfy dims ② (visual hierarchy) and ⑧ (brand expression)
       assert html =~ "ax-summary-card"
       assert html =~ "ax-summary-title"
-      assert html =~ "ax-eyebrow"
+      refute html =~ "Campaign history"
     end
 
     test "renders semantic aria-label on the timeline section (dim ⑦)", %{conn: conn} do

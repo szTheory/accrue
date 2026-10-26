@@ -31,13 +31,14 @@ defmodule Accrue.Processor.Braintree do
         fetch: true,
         lifecycle_webhook_projection: true,
         update: true,
+        swap_plan: false,
         cancel_at_period_end: false,
         cancel_immediately: true,
         pause: false,
         resume: false
       },
       checkout: %{create: true, fetch: true, hosted: true, embedded: false},
-      invoice: %{lifecycle_webhook_projection: true},
+      invoice: %{lifecycle_webhook_projection: true, preview_upcoming_invoice: false},
       webhook: %{verify: true, parse: true},
       billing_portal: %{create: true},
       entitlements: %{local_mapping: true},
@@ -50,8 +51,14 @@ defmodule Accrue.Processor.Braintree do
     braintree_params = build_request(params)
 
     case subscription_gateway().create(braintree_params, opts) do
-      {:ok, sub} -> {:ok, translate_subscription(sub)}
-      {:error, raw} -> {:error, to_accrue_error(raw)}
+      {:ok, sub} ->
+        {:ok, translate_subscription(sub)}
+
+      {:error, %Elixir.Braintree.ErrorResponse{} = error} ->
+        {:error, translate_charge_error(error)}
+
+      {:error, raw} ->
+        {:error, to_accrue_error(raw)}
     end
   end
 

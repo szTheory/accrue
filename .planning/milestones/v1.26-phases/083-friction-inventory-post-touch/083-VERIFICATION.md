@@ -1,6 +1,6 @@
 ---
 phase: 83-friction-inventory-post-touch
-status: complete
+status: passed
 ---
 
 # Phase 83 — Friction inventory post-touch — Verification

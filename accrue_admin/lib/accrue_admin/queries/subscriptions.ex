@@ -13,6 +13,8 @@ defmodule AccrueAdmin.Queries.Subscriptions do
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Behaviour
 
+  @valid_subscription_statuses ~w(past_due canceling active trialing paused canceled)
+
   @time_field :inserted_at
 
   @impl true
@@ -103,11 +105,35 @@ defmodule AccrueAdmin.Queries.Subscriptions do
     end
   end
 
+  @doc false
+  def cursor_valid?(cursor, params, owner_scope) when is_binary(cursor) and is_map(params) do
+    with {:ok, {timestamp, id}} <- AccrueAdmin.Queries.Cursor.decode(cursor) do
+      filter = decode_filter(params)
+
+      Subscription
+      |> join(:inner, [subscription], customer in Customer,
+        on: customer.id == subscription.customer_id
+      )
+      |> scope_query(owner_scope)
+      |> filter_query(filter)
+      |> where(
+        [subscription, _customer],
+        subscription.id == ^id and subscription.inserted_at == ^timestamp
+      )
+      |> Repo.aggregate(:count, :id)
+      |> Kernel.>(0)
+    else
+      :error -> false
+    end
+  end
+
+  def cursor_valid?(_cursor, _params, _owner_scope), do: false
+
   @impl true
   def decode_filter(params) when is_map(params) do
     %{
       q: Behaviour.normalize_string(Map.get(params, "q") || Map.get(params, :q)),
-      status: Behaviour.normalize_string(Map.get(params, "status") || Map.get(params, :status)),
+      status: normalize_status_selection(Map.get(params, "status") || Map.get(params, :status)),
       customer_id:
         Behaviour.normalize_string(
           Map.get(params, "customer_id") || Map.get(params, :customer_id)
@@ -119,18 +145,50 @@ defmodule AccrueAdmin.Queries.Subscriptions do
   @impl true
   def encode_filter(filter) when is_map(filter), do: Behaviour.compact_filter(filter)
 
+  @doc "Normalizes selected subscription statuses to a bounded, stable URL order."
+  def normalize_status_selection(value) do
+    selected =
+      case value do
+        values when is_list(values) ->
+          Enum.flat_map(values, &String.split(to_string(&1), ",", trim: true))
+
+        nil ->
+          []
+
+        value ->
+          String.split(to_string(value), ",", trim: true)
+      end
+
+    statuses = Enum.filter(@valid_subscription_statuses, &(&1 in selected))
+    if statuses == [], do: nil, else: Enum.join(statuses, ",")
+  end
+
   defp filter_query(query, filter) do
     Enum.reduce(filter, query, fn
       {:q, term}, query ->
         pattern = "%#{term}%"
 
-        where(
-          query,
-          [subscription, customer],
-          ilike(customer.email, ^pattern) or
-            ilike(customer.name, ^pattern) or
-            ilike(subscription.processor_id, ^pattern)
-        )
+        text_match =
+          dynamic(
+            [subscription, customer],
+            ilike(customer.email, ^pattern) or
+              ilike(customer.name, ^pattern) or
+              ilike(subscription.processor_id, ^pattern)
+          )
+
+        match =
+          case Ecto.UUID.cast(term) do
+            {:ok, uuid} ->
+              dynamic(
+                [subscription, customer],
+                ^text_match or subscription.id == ^uuid or customer.id == ^uuid
+              )
+
+            :error ->
+              text_match
+          end
+
+        where(query, ^match)
 
       {:status, status}, query ->
         filter_status(query, status)

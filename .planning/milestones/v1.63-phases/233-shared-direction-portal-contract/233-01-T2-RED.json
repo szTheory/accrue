@@ -1,0 +1,10 @@
+{
+  "command": "cd accrue_portal && GSD_TAP_REPORT=/tmp/accrue-233-t2-denial-red.tap mix test test/accrue_portal/auth_hook_test.exs --name-pattern authenticated denied context --formatter AccruePortal.TapFormatter",
+  "exitCode": 2,
+  "output": "TAP version 13\n1..5\nok 1 - test unauthenticated initial GET stores return path before login redirect\nok 2 - test ensure_customer_no_create reuses the existing customer row\nok 3 - test ensure_customer resolves current_user and current_customer\nok 4 - test unauthenticated access redirects before render\nnot ok 5 - test authenticated denied context goes to the non-login blocked destination\n",
+  "targetTest": "test authenticated denied context goes to the non-login blocked destination",
+  "targetFile": "test/accrue_portal/auth_hook_test.exs",
+  "expected": "An authenticated actor denied by host policy is redirected to the dedicated blocked recovery route.",
+  "actual": "The denied actor followed the login destination when the mounted identity path still conflated policy denial with missing authentication.",
+  "semanticAssessment": "The real AuthHook unit test executed with a denied ContextAdapter and failed specifically because the denied actor was sent to login instead of the dedicated blocked destination."
+}

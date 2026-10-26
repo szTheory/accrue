@@ -19,6 +19,7 @@ defmodule AccrueAdmin.Components.Overlay do
   attr(:close_event, :string, default: nil)
   attr(:close_target, :string, default: nil)
   attr(:initial_focus, :string, default: nil)
+  attr(:focus_return_to, :string, default: nil)
   attr(:component_group, :string, default: nil)
   attr(:class, :any, default: nil)
   attr(:rest, :global, include: ~w(phx-click phx-target))
@@ -64,6 +65,7 @@ defmodule AccrueAdmin.Components.Overlay do
         data-focus-trap-close-target={@focus_trap_close_target}
         data-focus-trap-fallback={@focus_trap_fallback}
         data-focus-trap-initial={@initial_focus}
+        data-focus-trap-return-to={@focus_return_to}
         phx-mounted={mounted_transition(@presentation)}
         phx-remove={remove_transition(@presentation)}
       >
@@ -171,7 +173,7 @@ defmodule AccrueAdmin.Components.Overlay do
   defp panel_class(_presentation), do: panel_class(:modal)
 
   defp panel_tag(:drawer), do: "aside"
-  defp panel_tag(:modal), do: "article"
+  defp panel_tag(:modal), do: "div"
   defp panel_tag(_presentation), do: "div"
 
   defp header_class(:drawer), do: "ax-detail-drawer-header"
@@ -200,7 +202,7 @@ defmodule AccrueAdmin.Components.Overlay do
     )
   end
 
-  defp mounted_transition(_presentation), do: Phoenix.LiveView.JS.push_focus()
+  defp mounted_transition(_presentation), do: nil
 
   defp remove_transition(:drawer) do
     Phoenix.LiveView.JS.hide(
@@ -209,7 +211,7 @@ defmodule AccrueAdmin.Components.Overlay do
     )
   end
 
-  defp remove_transition(_presentation), do: Phoenix.LiveView.JS.pop_focus()
+  defp remove_transition(_presentation), do: nil
 
   defp focus_trap_close_event(assigns),
     do: assigns.close_event || rest_value(assigns.rest, "phx-click")

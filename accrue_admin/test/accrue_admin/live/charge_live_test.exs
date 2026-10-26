@@ -84,7 +84,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
         actor_type: "system"
       })
 
-    {:ok, charge: charge, source_event: source_event}
+    {:ok, charge: charge, customer: customer, source_event: source_event}
   end
 
   test "D-09 D-13 D-14 D-15 D-16 D-17 renders charge summary and refund drawer contract",
@@ -102,12 +102,94 @@ defmodule AccrueAdmin.ChargeLiveTest do
     assert data_attr_count(html, "data-ax-lazy-json") == 1
 
     assert has_element?(view, "[data-ax-primary-action]", "Refund charge")
-    assert html =~ "Created / inserted"
-    assert html =~ "Net / fees / refunds"
+    assert html =~ "Recorded"
+    assert html =~ "Fee breakdown"
 
     refute has_element?(view, "[data-role='refund-form']")
     refute has_element?(view, "[data-role='confirm-panel']")
     refute html =~ ~s(class="ax-kpi-grid")
+  end
+
+  test "refund action fixture retains the scoped target and raw money contract", %{
+    conn: conn,
+    charge: charge,
+    customer: customer
+  } do
+    refund = TestRepo.one!(from(refund in Refund, where: refund.charge_id == ^charge.id))
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert customer.owner_type == "User"
+    assert is_binary(customer.owner_id)
+    assert charge.customer_id == customer.id
+    assert charge.status == "succeeded"
+    assert charge.amount_cents == 10_000
+    assert charge.currency == "usd"
+    assert refund.amount_minor == 2_500
+    assert refund.currency == "usd"
+
+    assert {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    assert has_element?(view, "[data-ax-primary-action]", "Refund charge")
+  end
+
+  test "payment contextual return accepts only its loaded customer's local detail origin", %{
+    conn: conn,
+    charge: charge,
+    customer: customer
+  } do
+    customer =
+      customer
+      |> Customer.changeset(%{owner_type: "Organization", owner_id: "payment-return-org"})
+      |> TestRepo.update!()
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "payment-return-org",
+        active_organization_slug: "payment-return-org",
+        admin_organization_ids: ["payment-return-org"]
+      )
+
+    other_customer_id = Ecto.UUID.generate()
+
+    for {origin_id, expected_path, expected_label} <- [
+          {customer.id, "/billing/customers/#{customer.id}", "Back to customer payments"},
+          {other_customer_id, "/billing/payments", "Back to payments"}
+        ] do
+      origin = "/billing/customers/#{origin_id}?tab=payments&org=foreign-org"
+
+      assert {:ok, view, html} =
+               live(
+                 conn,
+                 "/billing/payments/#{charge.id}?org=payment-return-org&return_to=#{URI.encode_www_form(origin)}"
+               )
+
+      refute html =~ other_customer_id
+
+      back_href =
+        view
+        |> element("a", expected_label)
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.find("a")
+        |> Floki.attribute("href")
+        |> hd()
+
+      assert URI.parse(back_href).path == expected_path
+      assert URI.decode_query(URI.parse(back_href).query)["org"] == "payment-return-org"
+
+      if expected_path == "/billing/customers/#{customer.id}" do
+        assert URI.decode_query(URI.parse(back_href).query)["tab"] == "payments"
+        assert {:ok, returned_view, returned_html} = live(conn, back_href)
+
+        assert has_element?(
+                 returned_view,
+                 "[aria-label='Customer peer record sets'] .ax-tab-active",
+                 "Payments"
+               )
+
+        assert returned_html =~ "ch_detail"
+      end
+    end
   end
 
   test "D-09 D-11 D-12 D-13 charge refund opens drawer after intent and requires step-up",
@@ -137,6 +219,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
       )
 
     assert html =~ "Confirm refund"
+    assert has_element?(view, "[data-role='confirm-refund']")
 
     html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm refund"))
     assert html =~ Copy.step_up_title()
@@ -150,10 +233,25 @@ defmodule AccrueAdmin.ChargeLiveTest do
     # UX-02: single ax-page on charge detail
     assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
 
-    assert html =~ "Tax &amp; ownership"
+    assert html =~ "Account type"
     assert html =~ "Platform fee"
     assert html =~ "merchant loss"
     assert html =~ "fee refunded"
+  end
+
+  test "missing fee evidence is unavailable rather than an inferred zero", %{
+    conn: conn,
+    charge: charge
+  } do
+    charge
+    |> Charge.changeset(%{stripe_fee_amount_minor: nil, data: %{}})
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/payments/#{charge.id}")
+
+    assert html =~ "Platform fee unavailable"
+    refute html =~ "Platform fee $0.00"
   end
 
   test "refund initiation requires step-up and records admin refund audit linkage", %{
@@ -374,6 +472,289 @@ defmodule AccrueAdmin.ChargeLiveTest do
     # Confirm panel must show and its prose must have ax-measure
     assert html =~ "Confirm refund"
     assert html =~ ~s(class="ax-body ax-measure")
+  end
+
+  test "refund review identifies the exact charge and refuses an amount above its remaining balance",
+       %{
+         conn: conn,
+         charge: charge
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{"amount_minor" => "3000", "reason" => "requested_by_customer"}
+      )
+
+    assert html =~ "Refund charge ch_detail"
+    assert html =~ "$30.00"
+
+    open_refund_drawer(view)
+
+    html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{"amount_minor" => "8000", "reason" => "requested_by_customer"}
+      )
+
+    assert html =~ "Refund amount cannot exceed the remaining refundable balance."
+    refute has_element?(view, "[data-role='confirm-panel']")
+  end
+
+  test "refund review shows exact payment, customer, owner, state, requested and remaining money",
+       %{
+         conn: conn,
+         charge: charge,
+         customer: customer
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{"amount_minor" => "4321", "reason" => "requested_by_customer"}
+      )
+
+    assert html =~ "Payment record ID"
+    assert html =~ charge.id
+    assert html =~ charge.processor_id
+    assert html =~ customer.id
+    assert html =~ customer.name
+    assert html =~ "Owner"
+    assert html =~ "succeeded"
+    assert html =~ "Refund amount"
+    assert html =~ "43.21"
+    assert html =~ "Remaining refundable before this request"
+    assert html =~ "75.00"
+    assert html =~ "USD"
+    assert html =~ "does not confirm settlement"
+    assert html =~ "Back to payment"
+  end
+
+  test "refund amount boundaries preserve blank remaining intent and reject zero, negative, and excess",
+       %{
+         conn: conn,
+         charge: charge
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+
+    for amount <- ["", "0", "-1", "7501"] do
+      open_refund_drawer(view)
+
+      html =
+        render_submit(
+          element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+          %{"amount_minor" => amount, "reason" => "requested_by_customer"}
+        )
+
+      if amount == "" do
+        assert html =~ "$75.00"
+        assert has_element?(view, "[data-role='confirm-refund']")
+        render_click(view, "cancel_pending_refund", %{})
+      else
+        assert html =~
+                 if(amount == "7501",
+                   do: "Refund amount cannot exceed the remaining refundable balance.",
+                   else: "Refund amount must be greater than zero."
+                 )
+
+        refute has_element?(view, "[data-role='confirm-refund']")
+      end
+    end
+  end
+
+  test "Back to payment dismisses a staged refund and its step-up continuation", %{
+    conn: conn,
+    charge: charge
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    render_submit(
+      element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+      %{"amount_minor" => "4000", "reason" => "requested_by_customer"}
+    )
+
+    render_click(element(view, "[data-ax-action-drawer-confirm]"))
+    assert render(view) =~ "Step-up required"
+
+    html = render_click(view, "cancel_pending_refund")
+    refute html =~ ~s(id="accrue-admin-step-up-dialog")
+
+    render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert TestRepo.aggregate(
+             from(refund in Refund, where: refund.charge_id == ^charge.id),
+             :count
+           ) == 1
+  end
+
+  test "refund review keeps large and zero-decimal minor units exact", %{conn: conn} do
+    customer = insert_customer(%{name: "JPY Review", email: "jpy-review@example.com"})
+    subscription = insert_subscription(customer)
+
+    charge =
+      insert_charge(customer, subscription, %{
+        processor: "fake",
+        processor_id: "ch_jpy_review",
+        status: "succeeded",
+        amount_cents: 2_147_483_000,
+        currency: "jpy"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{"amount_minor" => "2147483000", "reason" => "requested_by_customer"}
+      )
+
+    assert html =~ "2,147,483,000"
+
+    assert html =~
+             AccrueAdmin.Components.MoneyFormatter.format_money(2_147_483_000, "jpy")
+
+    refute html =~ "2,147,482,999"
+  end
+
+  test "refund confirmation revalidates the reviewed charge after step-up", %{
+    conn: conn,
+    charge: charge
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    _html =
+      render_submit(
+        element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+        %{"amount_minor" => "4000", "reason" => "requested_by_customer"}
+      )
+
+    _html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm refund"))
+
+    charge
+    |> Charge.changeset(%{amount_cents: 3_000})
+    |> TestRepo.update!()
+
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Charge details changed after review. No refund was submitted."
+
+    assert TestRepo.aggregate(
+             from(refund in Refund, where: refund.charge_id == ^charge.id),
+             :count
+           ) == 1
+  end
+
+  test "refund timeout is counted at the provider boundary and cannot be blindly retried", %{
+    conn: conn,
+    charge: charge
+  } do
+    Accrue.Processor.Fake.scripted_response(:create_refund, {:error, :timeout})
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    open_refund_drawer(view)
+
+    render_submit(
+      element(view, "[data-ax-action-drawer-form][data-role='refund-form']"),
+      %{"amount_minor" => "4000", "reason" => "requested_by_customer"}
+    )
+
+    render_click(element(view, "[data-ax-action-drawer-confirm]"))
+    render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    html = render(view)
+    assert html =~ "Outcome not confirmed"
+    refute has_element?(view, "[data-role='confirm-refund']")
+    assert Accrue.Processor.Fake.call_count(:create_refund) == 1
+
+    html = render_click(view, "confirm_refund", %{})
+    assert html =~ "Outcome not confirmed"
+    assert Accrue.Processor.Fake.call_count(:create_refund) == 1
+  end
+
+  test "charge detail preserves zero and three-decimal charge, refund, and fee evidence", %{
+    conn: conn,
+    charge: charge
+  } do
+    original_refund = TestRepo.one!(from(refund in Refund, where: refund.charge_id == ^charge.id))
+
+    charge
+    |> Charge.changeset(%{
+      amount_cents: 0,
+      currency: "jpy",
+      stripe_fee_amount_minor: 0,
+      data: %{"application_fee_amount" => 0}
+    })
+    |> TestRepo.update!()
+
+    original_refund
+    |> Refund.changeset(%{
+      amount_minor: 0,
+      currency: "jpy",
+      stripe_fee_refunded_amount_minor: 0,
+      merchant_loss_amount_minor: 0
+    })
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, zero_html} = live(conn, "/billing/payments/#{charge.id}")
+    assert zero_html =~ AccrueAdmin.Components.MoneyFormatter.format_money(0, "jpy")
+
+    three_decimal_customer =
+      insert_customer(%{name: "BHD Detail", email: "bhd-detail@example.com"})
+
+    three_decimal_subscription = insert_subscription(three_decimal_customer)
+
+    three_decimal_charge =
+      insert_charge(three_decimal_customer, three_decimal_subscription, %{
+        processor: "fake",
+        processor_id: "ch_bhd_detail",
+        status: "succeeded",
+        amount_cents: 1234,
+        currency: "bhd",
+        stripe_fee_amount_minor: 12,
+        data: %{"application_fee_amount" => 34}
+      })
+
+    insert_refund(three_decimal_charge, %{
+      stripe_id: "re_bhd_detail",
+      amount_minor: 234,
+      currency: "bhd",
+      status: :pending,
+      stripe_fee_refunded_amount_minor: 1,
+      merchant_loss_amount_minor: 2
+    })
+
+    assert {:ok, _view, three_decimal_html} =
+             live(conn, "/billing/payments/#{three_decimal_charge.id}")
+
+    assert three_decimal_html =~ AccrueAdmin.Components.MoneyFormatter.format_money(1234, "bhd")
+    assert three_decimal_html =~ AccrueAdmin.Components.MoneyFormatter.format_money(234, "bhd")
+    assert three_decimal_html =~ AccrueAdmin.Components.MoneyFormatter.format_money(12, "bhd")
+    assert three_decimal_html =~ AccrueAdmin.Components.MoneyFormatter.format_money(1, "bhd")
+  end
+
+  test "an ineligible charge exposes no refund action", %{conn: conn, charge: charge} do
+    charge
+    |> Charge.changeset(%{status: "failed"})
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+    refute has_element?(view, "[data-ax-primary-action]")
+    refute has_element?(view, "[data-role='confirm-refund']")
   end
 
   test "out-of-scope charge route redirects with denial flash before rendering detail", %{

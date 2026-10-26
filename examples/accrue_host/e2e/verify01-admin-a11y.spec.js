@@ -427,7 +427,8 @@ test.describe("core-admin-invoices-detail", () => {
 
     await expect(page.locator("html")).toHaveClass(/accrue-admin/);
 
-    await expect(page.getByText(copyStrings.invoice_detail_eyebrow)).toBeVisible();
+    // The "Invoice detail" eyebrow was dropped from the page header; the invoice number is its h1.
+    await expect(page.getByRole("heading", { name: "HOST-BROWSER-VERIFY01", level: 1 })).toBeVisible();
 
     const taxDocuments = page.locator("[data-ax-drill-section='tax-documents']");
 

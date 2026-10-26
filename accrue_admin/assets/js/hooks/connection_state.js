@@ -34,7 +34,10 @@ export const ConnectionState = {
     this.message = this.el.querySelector("[data-connection-state-message]");
     this.staleSelector = this.el.dataset.staleDisableSelector || DEFAULT_STALE_SELECTOR;
     this.disabledControls = new Map();
+    this.busyControls = new Map();
+    this.isDisconnected = false;
     this.preStaleFocus = null;
+    this.preStaleFocusDescriptor = null;
 
     this.handleClick = (event) => {
       const staleControl = event.target.closest("[data-stale-disabled='true']");
@@ -45,7 +48,37 @@ export const ConnectionState = {
     };
 
     this.handleOffline = () => this.markDisconnected();
-    this.handleOnline = () => this.markRestored();
+    this.handleOnline = () => this.markNetworkOnline();
+
+    this.controlObserver = new MutationObserver((records) => {
+      for (const record of records) {
+        if (record.type === "attributes" && record.target instanceof Element) {
+          this.syncBusyControl(record.target);
+        }
+
+        for (const node of record.addedNodes || []) {
+          if (!(node instanceof Element)) continue;
+          this.syncBusyControl(node);
+          if (this.isDisconnected && node.matches(this.staleSelector)) this.disableControl(node);
+          for (const control of node.querySelectorAll(this.staleSelector)) {
+            if (this.isDisconnected) this.disableControl(control);
+          }
+        }
+
+        for (const node of record.removedNodes || []) {
+          if (node instanceof Element) this.forgetRemovedBusyControls(node);
+        }
+      }
+    });
+
+    // Overlay.portal mounts into #ax-overlay-root beside the shell. Observe the
+    // document so pending and replacement controls there receive the guard.
+    this.controlObserver.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["class", "data-phx-ref-loading"]
+    });
 
     document.addEventListener("click", this.handleClick, true);
     window.addEventListener("offline", this.handleOffline);
@@ -68,15 +101,32 @@ export const ConnectionState = {
     document.removeEventListener("click", this.handleClick, true);
     window.removeEventListener("offline", this.handleOffline);
     window.removeEventListener("online", this.handleOnline);
+    this.controlObserver.disconnect();
+    this.restoreBusyControls();
+    this.isDisconnected = false;
   },
 
   markDisconnected() {
-    this.preStaleFocus = document.activeElement;
+    if (!this.isDisconnected) {
+      this.preStaleFocus = document.activeElement;
+      this.preStaleFocusDescriptor = this.focusDescriptor(this.preStaleFocus);
+    }
+    this.isDisconnected = true;
     this.setState("disconnected");
     this.disableStaleControls();
   },
 
+  markNetworkOnline() {
+    if (!this.isDisconnected) return;
+
+    // Browser connectivity does not establish a joined LiveView or refresh
+    // action authorization. Keep every stale control locked until reconnected.
+    this.setState("reconnecting");
+    this.disableStaleControls();
+  },
+
   markRestored() {
+    this.isDisconnected = false;
     this.restoreStaleControls();
     this.setState("restored");
     this.restoreFocusIfNeeded();
@@ -95,29 +145,35 @@ export const ConnectionState = {
       this.message.textContent = this.message.dataset.disconnectedCopy;
     } else if (state === "restored") {
       this.message.textContent = this.message.dataset.restoredCopy;
+    } else if (state === "reconnecting") {
+      this.message.textContent = this.message.dataset.reconnectingCopy || this.message.dataset.disconnectedCopy;
     } else {
       this.message.textContent = "";
     }
   },
 
   disableStaleControls() {
-    for (const control of this.el.querySelectorAll(this.staleSelector)) {
-      if (this.disabledControls.has(control)) continue;
+    for (const control of document.querySelectorAll(this.staleSelector)) {
+      this.disableControl(control);
+    }
+  },
 
-      this.disabledControls.set(control, {
-        disabled: "disabled" in control ? control.disabled : undefined,
-        ariaDisabled: control.getAttribute("aria-disabled"),
-        tabindex: control.getAttribute("tabindex")
-      });
+  disableControl(control) {
+    if (this.disabledControls.has(control)) return;
 
-      control.dataset.staleDisabled = "true";
-      control.setAttribute("aria-disabled", "true");
+    this.disabledControls.set(control, {
+      disabled: "disabled" in control ? control.disabled : undefined,
+      ariaDisabled: control.getAttribute("aria-disabled"),
+      tabindex: control.getAttribute("tabindex")
+    });
 
-      if ("disabled" in control) {
-        control.disabled = true;
-      } else {
-        control.setAttribute("tabindex", "-1");
-      }
+    control.dataset.staleDisabled = "true";
+    control.setAttribute("aria-disabled", "true");
+
+    if ("disabled" in control) {
+      control.disabled = true;
+    } else {
+      control.setAttribute("tabindex", "-1");
     }
   },
 
@@ -138,16 +194,101 @@ export const ConnectionState = {
     this.disabledControls.clear();
   },
 
+  syncBusyControl(control) {
+    if (!control.matches("[data-role='step-up-submit'], [data-role='confirm-action']")) return;
+
+    const loading = control.classList.contains("phx-click-loading") ||
+      control.classList.contains("phx-submit-loading") ||
+      control.hasAttribute("data-phx-ref-loading");
+
+    if (loading) {
+      if (!this.busyControls.has(control)) {
+        this.busyControls.set(control, control.getAttribute("aria-busy"));
+      }
+      control.setAttribute("aria-busy", "true");
+
+      if (!control.querySelector(":scope > .ax-button-spinner")) {
+        const spinner = document.createElement("span");
+        spinner.className = "ax-button-spinner";
+        spinner.setAttribute("aria-hidden", "true");
+        control.prepend(spinner);
+      }
+    } else {
+      this.restoreBusyControl(control);
+    }
+  },
+
+  restoreBusyControl(control) {
+    if (!this.busyControls.has(control)) return;
+
+    const priorAriaBusy = this.busyControls.get(control);
+    if (priorAriaBusy === null) {
+      control.removeAttribute("aria-busy");
+    } else {
+      control.setAttribute("aria-busy", priorAriaBusy);
+    }
+
+    control.querySelector(":scope > .ax-button-spinner")?.remove();
+    this.busyControls.delete(control);
+  },
+
+  forgetRemovedBusyControls(node) {
+    if (this.busyControls.has(node)) this.busyControls.delete(node);
+    for (const control of node.querySelectorAll("[data-role='step-up-submit'], [data-role='confirm-action']")) {
+      if (this.busyControls.has(control)) this.busyControls.delete(control);
+    }
+  },
+
+  restoreBusyControls() {
+    for (const control of this.busyControls.keys()) {
+      if (control.isConnected) this.restoreBusyControl(control);
+    }
+    this.busyControls.clear();
+  },
+
   restoreFocusIfNeeded() {
     const active = document.activeElement;
     const focusWasLost = !active || active === document.body;
     const target = this.preStaleFocus;
 
-    if (focusWasLost && target && target.isConnected) {
-      focusWithoutScroll(target);
+    if (focusWasLost) {
+      const replacement = target && target.isConnected ? target : this.findFocusReplacement();
+      const canFocus = replacement && !replacement.disabled && replacement.getAttribute("aria-disabled") !== "true";
+
+      if (canFocus) {
+        focusWithoutScroll(replacement);
+      } else {
+        this.ensurePageFocus();
+      }
     }
 
     this.preStaleFocus = null;
+    this.preStaleFocusDescriptor = null;
+  },
+
+  focusDescriptor(target) {
+    if (!(target instanceof Element)) return null;
+
+    return {
+      tagName: target.tagName,
+      click: target.getAttribute("phx-click"),
+      submit: target.getAttribute("phx-submit"),
+      role: target.getAttribute("data-role"),
+      ariaLabel: target.getAttribute("aria-label")
+    };
+  },
+
+  findFocusReplacement() {
+    const descriptor = this.preStaleFocusDescriptor;
+    if (!descriptor) return null;
+
+    return Array.from(document.querySelectorAll(this.staleSelector)).find((control) =>
+      control.tagName === descriptor.tagName &&
+      control.getAttribute("phx-click") === descriptor.click &&
+      control.getAttribute("phx-submit") === descriptor.submit &&
+      control.getAttribute("data-role") === descriptor.role &&
+      control.getAttribute("aria-label") === descriptor.ariaLabel
+    ) || null;
   },
 
   ensurePageFocus() {

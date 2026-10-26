@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="8.147340999999999">
+<testsuite name="admin-page-flow-phase191.spec.js" timestamp="2026-10-09T22:37:17.883Z" hostname="chromium-desktop" tests="1" failures="0" skipped="0" time="3.058" errors="0">
+<testcase name="Phase 191 page-flow regression harness › disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187" classname="admin-page-flow-phase191.spec.js" time="3.058">
+</testcase>
+</testsuite>
+</testsuites>

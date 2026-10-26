@@ -1,6 +1,6 @@
 ---
 phase: 70-friction-evidence-refresh
-status: complete
+status: passed
 ---
 
 # Phase 70 — Friction evidence refresh — Verification

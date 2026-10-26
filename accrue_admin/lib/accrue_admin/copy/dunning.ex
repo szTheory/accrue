@@ -47,4 +47,8 @@ defmodule AccrueAdmin.Copy.Dunning do
   def dunning_state_none, do: "No active campaign"
 
   def dunning_state_recovered, do: "Recovered"
+
+  def recovery_data_error_copy,
+    do:
+      "We couldn't load this billing data. Refresh the page or return to the list and try again."
 end

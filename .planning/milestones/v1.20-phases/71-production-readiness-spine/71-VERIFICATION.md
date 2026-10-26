@@ -1,6 +1,6 @@
 ---
 phase: 71-production-readiness-spine
-status: complete
+status: passed
 ---
 
 # Phase 71 — Production readiness spine — Verification

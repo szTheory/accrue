@@ -19,6 +19,32 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   alias AccrueAdmin.Components.{MoneyFormatter, RelatedResources, Timeline}
   alias AccrueAdmin.Components.StepUpAuthModal
 
+  test "payload copy preserves JSON null and boolean types, including nested values" do
+    payload = %{
+      "missing" => nil,
+      "enabled" => true,
+      "disabled" => false,
+      "nested" => [nil, true, false]
+    }
+
+    html =
+      render_component(&JsonViewer.json_viewer/1, %{
+        id: "typed-payload",
+        payload: payload,
+        show_heading: false
+      })
+
+    document = Floki.parse_document!(html)
+    [copied] = Floki.attribute(document, "#typed-payload-copy", "data-clipboard-text")
+    assert Floki.attribute(document, "#typed-payload-copy", "data-clipboard-label") == ["payload"]
+    assert Jason.decode!(copied) == payload
+
+    assert Floki.text(Floki.find(document, "#typed-payload-raw-panel")) |> Jason.decode!() ==
+             payload
+
+    assert Floki.attribute(document, "#typed-payload-title", "class") == ["ax-visually-hidden"]
+  end
+
   describe "FilterChipBar" do
     test "renders active server-driven filter chips and clear links" do
       html =
@@ -339,6 +365,101 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   end
 
   describe "Timeline" do
+    test "an explicit heading carries the detail link and a short visible ID label" do
+      html =
+        render_component(&Timeline.timeline/1,
+          items: [
+            %{
+              id: 42,
+              title: "Subscription created",
+              event_type: "subscription.created",
+              subject_type: "Subscription",
+              subject_id: "sub_42",
+              href: "/billing/events/42?org=acme"
+            },
+            %{
+              id: 43,
+              title: "Billing event",
+              event_type: "provider.unknown",
+              subject_type: "Customer",
+              subject_id: "cus_43",
+              href: "/billing/events/43?org=acme"
+            }
+          ]
+        )
+
+      document = Floki.parse_fragment!(html)
+
+      labels =
+        document
+        |> Floki.find(".ax-timeline-subject-label")
+        |> Enum.map(&(Floki.text(&1) |> String.trim()))
+
+      assert labels == ["ID", "Customer ID"]
+
+      assert document |> Floki.find(".ax-timeline-title-link") |> Floki.attribute("href") ==
+               ["/billing/events/42?org=acme", "/billing/events/43?org=acme"]
+
+      assert document |> Floki.find(".ax-timeline-link") == []
+      assert html =~ "Copy Subscription ID sub_42"
+      assert html =~ ~s(data-clipboard-text="sub_42")
+      assert html =~ ~s(data-clipboard-label="subscription ID")
+      assert html =~ ~s(data-clipboard-label="customer ID")
+    end
+
+    test "event-family icons replace dots while generic timelines keep their existing markers" do
+      html =
+        render_component(&Timeline.timeline/1,
+          items: [
+            %{title: "Customer created", event_type: "customer.created"},
+            %{title: "Subscription created", event_type: "subscription.created"},
+            %{title: "Payment failed", event_type: "charge.failed"},
+            %{title: "Provider event", event_type: "provider.unknown"},
+            %{title: "Attempt queued", status: :queued}
+          ]
+        )
+
+      document = Floki.parse_fragment!(html)
+
+      assert document |> Floki.find("[data-event-family]") |> Floki.attribute("data-event-family") ==
+               ["customer", "subscription", "payment", "other"]
+
+      assert length(Floki.find(document, ".ax-timeline-dot")) == 1
+      assert length(Floki.find(document, ".ax-event-icon-amber")) == 1
+
+      assert Enum.all?(Floki.find(document, ".ax-event-icon"), fn icon ->
+               Floki.attribute(icon, "aria-hidden") == ["true"]
+             end)
+    end
+
+    test "automatic provenance is quiet while operator attribution remains visible" do
+      html =
+        render_component(&Timeline.timeline/1,
+          items: [
+            %{
+              id: 1,
+              title: "Customer created",
+              subject_type: "Customer",
+              subject_id: "customer-1",
+              actor: "system"
+            },
+            %{
+              id: 2,
+              title: "Customer updated",
+              subject_type: "Customer",
+              subject_id: "customer-1",
+              actor: "admin",
+              actor_id: "admin-1"
+            }
+          ]
+        )
+
+      refute html =~ "Recorded automatically"
+      assert html =~ "Recorded by admin"
+      assert html =~ ~s(data-clipboard-text="admin-1")
+      assert html =~ ~s(data-clipboard-text="customer-1")
+    end
+
     test "renders escaped timeline items with expandable detail blocks" do
       html =
         render_component(&Timeline.timeline/1, %{
@@ -408,11 +529,11 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   end
 
   describe "JsonViewer" do
-    test "renders tree, raw, and copy surfaces with escaped structured payloads" do
+    test "renders accessible tree and raw tabs with a separate copy action" do
       html =
         render_component(&JsonViewer.json_viewer/1, %{
           id: "payload",
-          active_tab: "copy",
+          active_tab: "tree",
           payload: %{
             "id" => "evt_123",
             "nested" => [%{"kind" => "charge.succeeded"}],
@@ -423,9 +544,18 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert html =~ "Payload"
       assert html =~ "Tree"
       assert html =~ "Raw"
-      assert html =~ "Copy"
+      assert html =~ ~s(role="tablist")
+      assert html =~ ~s(role="tab")
+      assert html =~ ~s(aria-selected="true")
+      assert html =~ ~s(aria-selected="false")
+      assert html =~ ~s(data-json-tab="tree")
+      assert html =~ ~s(data-json-tab="raw")
+      refute html =~ ~s(data-json-tab="copy")
       assert html =~ "Copy payload"
       assert html =~ ~s(phx-hook="Clipboard")
+      assert html =~ ~s(phx-hook="JsonViewerTabs")
+      raw_panel = Floki.find(Floki.parse_document!(html), "#payload-raw-panel") |> hd()
+      assert Floki.attribute(raw_panel, "hidden") == ["hidden"]
       assert html =~ "&lt;script&gt;alert(1)&lt;/script&gt;"
       refute html =~ "<script>alert(1)</script>"
     end
@@ -441,6 +571,16 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert html =~ "__struct__"
       assert html =~ "Accrue.Money"
       refute html =~ "amount_minor"
+
+      document = Floki.parse_document!(html)
+      raw_tab = Floki.find(document, "#payload-raw-tab") |> hd()
+      assert Floki.attribute(raw_tab, "aria-selected") == ["true"]
+
+      tree_panel = Floki.find(document, "#payload-tree-panel") |> hd()
+      assert Floki.attribute(tree_panel, "hidden") == ["hidden"]
+
+      raw_panel = Floki.find(document, "#payload-raw-panel") |> hd()
+      assert Floki.attribute(raw_panel, "hidden") == []
     end
   end
 

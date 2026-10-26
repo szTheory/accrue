@@ -12,9 +12,12 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     AppShell,
     DataTable,
     FilterChipBar,
+    IdBadge,
     PageHeader,
     StatStrip
   }
+
+  alias AccrueAdmin.Components.Timestamp
 
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.ConnectAccounts
@@ -93,8 +96,8 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Connect"
           breadcrumbs={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.connect_accounts_breadcrumb_connect()}
           ]}
           title={Copy.connect_accounts_list_heading()}
@@ -112,12 +115,10 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
               <:stat
                 label={Copy.connect_accounts_kpi_label_charges_enabled()}
                 value={Integer.to_string(@summary.charges_enabled_count)}
-                tone="cobalt"
               />
               <:stat
                 label={Copy.connect_accounts_kpi_label_overrides()}
                 value={Integer.to_string(@summary.override_count)}
-                tone="amber"
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -125,10 +126,10 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
           <:filter_toolbar>
             <DataTable.filter_toolbar
               id="connect-accounts"
-              filter_fields={connect_filter_fields()}
+              filter_fields={connect_filter_fields(@params)}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
+              clear_href={@table_path}
               clear_visible={filter_active?(@params)}
             />
           </:filter_toolbar>
@@ -147,27 +148,29 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           row_label={Copy.connect_accounts_list_result_label_pair()}
           filter_submit_label={Copy.connect_accounts_apply_filters()}
           columns={[
             %{
               label: Copy.connect_accounts_table_column_account(),
-              render: &account_link(&1, @admin_mount_path, @current_owner_scope)
+              render: &account_link(&1, @admin_mount_path, @current_owner_scope, @params, :table)
             },
             %{label: Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
-            %{label: Copy.connect_accounts_table_column_readiness(), render: &readiness_summary/1},
-            %{label: Copy.connect_accounts_table_column_override(), render: &override_summary/1},
+            %{label: "Last stored Stripe snapshot readiness", render: &readiness_summary(&1, @current_owner_scope)},
+            %{label: "Local platform fee override", render: &override_summary(&1, @current_owner_scope)},
             %{label: Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&account_link(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
             %{label: Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
-            %{label: Copy.connect_accounts_table_column_readiness(), render: &readiness_summary/1},
-            %{label: Copy.connect_accounts_table_column_override(), render: &override_summary/1},
+            %{label: "Last stored Stripe snapshot readiness", render: &readiness_summary(&1, @current_owner_scope)},
+            %{label: "Local platform fee override", render: &override_summary(&1, @current_owner_scope)},
             %{label: Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
-          filter_fields={connect_filter_fields()}
+          filter_fields={connect_filter_fields(@params)}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.connect_accounts_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -175,11 +178,11 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
         >
           <:list_status :let={status}>
             <FilterChipBar.filter_chip_bar
+              compact={true}
               items={connect_lens_chips(@params, @table_path)}
               label="Connect account view"
               result_count={status.visible_count}
               result_label={Copy.connect_accounts_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -202,19 +205,18 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     |> assign(:current_path, admin_path(admin, "/connect"))
   end
 
-  defp connect_filter_fields do
+  defp connect_filter_fields(params) do
     [
       %{
         id: :q,
-        label: Copy.connect_accounts_filter_label_search(),
-        placeholder: Copy.connect_accounts_filter_label_search()
+        label: "Search Connect by Stripe account ID, email, or owner ID",
+        placeholder: "Stripe account ID, email, or owner ID"
       },
       %{
         id: :type,
-        label: Copy.connect_accounts_filter_label_type(),
-        type: :segmented,
+        label: "Account type",
+        type: :datalist,
         options: [
-          {"", "All"},
           {"standard", Copy.connect_accounts_filter_option_type_standard()},
           {"express", Copy.connect_accounts_filter_option_type_express()},
           {"custom", Copy.connect_accounts_filter_option_type_custom()}
@@ -222,45 +224,59 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       },
       %{
         id: :charges_enabled,
-        label: Copy.connect_accounts_filter_label_charges(),
-        type: :segmented,
+        label: "Charges enabled",
+        type: :select,
+        all_label: "All charge settings",
         options: [
-          {"", "All"},
           {"true", Copy.connect_accounts_filter_option_charges_enabled()},
           {"false", Copy.connect_accounts_filter_option_charges_disabled()}
         ]
       },
       %{
         id: :payouts_enabled,
-        label: Copy.connect_accounts_filter_label_payouts(),
-        type: :segmented,
+        label: "Payouts enabled",
+        type: :select,
+        all_label: "All payout settings",
         options: [
-          {"", "All"},
           {"true", Copy.connect_accounts_filter_option_payouts_enabled()},
           {"false", Copy.connect_accounts_filter_option_payouts_disabled()}
         ]
       },
       %{
         id: :details_submitted,
-        label: Copy.connect_accounts_filter_label_onboarding(),
-        type: :segmented,
+        label: "Details submitted",
+        type: :select,
+        all_label: "All verification states",
         options: [
-          {"", "All"},
           {"true", Copy.connect_accounts_filter_option_onboarding_submitted()},
           {"false", Copy.connect_accounts_filter_option_onboarding_pending()}
         ]
       },
       %{
         id: :deauthorized,
-        label: Copy.connect_accounts_filter_label_authorization(),
-        type: :segmented,
+        label: "Authorization",
+        type: :select,
+        all_label: "All authorization states",
         options: [
-          {"", "All"},
           {"true", Copy.connect_accounts_filter_option_authorization_deauthorized()},
           {"false", Copy.connect_accounts_filter_option_authorization_active()}
         ]
       }
     ]
+    |> Enum.map(fn
+      %{id: :type, options: options} = field ->
+        current_type = Map.get(params, "type")
+        known_values = Enum.map(options, fn {value, _label} -> value end)
+
+        if is_binary(current_type) and current_type != "" and current_type not in known_values do
+          %{field | options: options ++ [{current_type, "Current type: #{current_type}"}]}
+        else
+          field
+        end
+
+      field ->
+        field
+    end)
   end
 
   defp filter_params(params) do
@@ -365,10 +381,6 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
 
   defp filter_active?(params), do: filter_params(params) != %{}
 
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
-
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil
   end
@@ -444,11 +456,11 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       total_count: Repo.aggregate(accounts, :count, :id),
       charges_enabled_count:
         accounts
-        |> where([account], account.charges_enabled == true)
+        |> where([account], fragment("?->>'charges_enabled' = 'true'", account.data))
         |> Repo.aggregate(:count, :id),
       details_submitted_count:
         accounts
-        |> where([account], account.details_submitted == true)
+        |> where([account], fragment("?->>'details_submitted' = 'true'", account.data))
         |> Repo.aggregate(:count, :id),
       deauthorized_count:
         accounts
@@ -474,33 +486,74 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
 
   defp scoped_accounts(_owner_scope), do: Account
 
-  defp account_link(row, mount_path, owner_scope),
-    do:
-      safe_link(
-        ScopedPath.build(mount_path, "/connect/#{row.id}", owner_scope),
-        row.stripe_account_id || row.id
-      )
+  defp account_link(row, mount_path, owner_scope, params, presentation) do
+    filters = filter_params(params)
+    return_params = Map.take(params, ["view"]) |> Map.merge(stringify_keys(filters))
+    return_to = ScopedPath.build(mount_path, "/connect", owner_scope, return_params)
+
+    href =
+      ScopedPath.build(mount_path, "/connect/#{row.id}", owner_scope, %{
+        "return_to" => return_to
+      })
+
+    assigns = %{
+      href: href,
+      label: row.email || row.stripe_account_id || to_string(row.id),
+      badge_id:
+        "ax-id-badge-connected-account-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
+      id_value: row.stripe_account_id || to_string(row.id)
+    }
+
+    ~H"""
+    <DataTable.identity_cell label={@label}>
+      <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
+      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy connected account ID" copy_label="connected account ID" variant="plain" /></:secondary>
+    </DataTable.identity_cell>
+    """
+  end
+
+  defp stringify_keys(map),
+    do: Map.new(map, fn {key, value} -> {to_string(key), to_string(value)} end)
 
   defp owner_summary(row),
     do: "#{row.owner_type || Copy.connect_accounts_row_owner_fallback()} #{row.owner_id || "--"}"
 
-  defp readiness_summary(row) do
-    [
-      row.type && String.capitalize(row.type),
-      row.charges_enabled && "charges",
-      row.payouts_enabled && "payouts",
-      row.details_submitted && "submitted"
-    ]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.reject(&(&1 == false))
-    |> case do
-      [] -> Copy.connect_accounts_readiness_needs_onboarding()
-      values -> Enum.join(values, Copy.connect_accounts_readiness_joiner())
+  defp readiness_summary(row, owner_scope) do
+    case load_scoped_account(row.id, owner_scope) do
+      nil ->
+        "Last stored Stripe snapshot: unavailable"
+
+      account ->
+        facts = [
+          provider_fact(account, "charges_enabled", "charges enabled", "charges disabled"),
+          provider_fact(account, "payouts_enabled", "payouts enabled", "payouts disabled"),
+          provider_fact(
+            account,
+            "details_submitted",
+            "details submitted",
+            "onboarding incomplete"
+          )
+        ]
+
+        if Enum.all?(facts, &(&1 == "Unknown")) do
+          "Last stored Stripe snapshot: unavailable"
+        else
+          "Last stored Stripe snapshot: " <>
+            Enum.join(facts, Copy.connect_accounts_readiness_joiner())
+        end
     end
   end
 
-  defp override_summary(%{id: id}) do
-    case Repo.get(Account, id) do
+  defp provider_fact(account, key, true_label, false_label) do
+    case Map.fetch(account.data || %{}, key) do
+      {:ok, true} -> true_label
+      {:ok, false} -> false_label
+      _ -> "Unknown"
+    end
+  end
+
+  defp override_summary(row, owner_scope) do
+    case load_scoped_account(row.id, owner_scope) do
       nil ->
         Copy.connect_accounts_override_default_only()
 
@@ -511,8 +564,25 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     end
   end
 
-  defp status_summary(%{deauthorized_at: %DateTime{} = value}),
-    do: Copy.connect_accounts_status_deauthorized_prefix() <> format_datetime(value)
+  defp load_scoped_account(id, %{mode: :organization, organization_id: organization_id}) do
+    Repo.one(
+      from(account in Account,
+        where:
+          account.id == ^id and account.owner_type == "Organization" and
+            account.owner_id == ^organization_id
+      )
+    )
+  end
+
+  defp load_scoped_account(id, _owner_scope), do: Repo.get(Account, id)
+
+  defp status_summary(%{deauthorized_at: %DateTime{} = value} = row) do
+    assigns = %{value: value, id: "connect-account-row-deauthorized-#{row.id}"}
+
+    ~H"""
+    <span><%= Copy.connect_accounts_status_deauthorized_prefix() %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
 
   defp status_summary(row) do
     if row.country do
@@ -521,8 +591,6 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       row.email || Copy.connect_accounts_status_no_email()
     end
   end
-
-  defp card_title(row), do: row.stripe_account_id || row.id
 
   defp has_override?(account) do
     account
@@ -540,13 +608,6 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
       _ -> %{}
     end
   end
-
-  defp safe_link(href, label) do
-    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
-  end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

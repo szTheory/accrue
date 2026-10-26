@@ -1,0 +1,10 @@
+{
+  "command": "HEX_HOME=/tmp/accrue-233-hex GSD_TAP_REPORT=../.planning/phases/233-shared-direction-portal-contract/233-07-T2-RED.tap mix test --formatter AccruePortal.TapFormatter test/accrue_portal/checkout_context_test.exs (from accrue_portal)",
+  "exitCode": 2,
+  "output": "TAP version 13\n1..4\nok 1 - test read-only checkout mount never issues a client token or renders Hosted Fields\nok 2 - test rendered checkout form pins and completes the same context through the LiveView event\nok 3 - test checkout POST without rendered pin cannot call the provider\nnot ok 4 - test rendered checkout form posts its pin and nonce through the authorized completion route\n",
+  "targetTest": "test rendered checkout form posts its pin and nonce through the authorized completion route",
+  "targetFile": "accrue_portal/test/accrue_portal/checkout_context_test.exs",
+  "expected": "Rendered checkout form provides method=post, the completion action, CSRF token, context pin, and nonce input for a real POST.",
+  "actual": "The rendered form has no method=post attribute, so the assertion fails before its pin/nonce fields can be posted.",
+  "semanticAssessment": "The target test executed and failed on the intended missing form-to-POST contract. The other three focused tests passed, including the read-only zero-token check and live event positive control."
+}

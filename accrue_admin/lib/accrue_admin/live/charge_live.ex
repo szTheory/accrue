@@ -17,10 +17,12 @@ defmodule AccrueAdmin.Live.ChargeLive do
     RelatedResources,
     StatusBadge,
     StepUpAuthModal,
-    Timeline
+    Timeline,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Charges
   alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.StepUp
@@ -48,10 +50,48 @@ defmodule AccrueAdmin.Live.ChargeLive do
          socket
          |> assign_shell(admin)
          |> assign_charge(charge)
+         |> assign(
+           :return_path,
+           ScopedPath.build(
+             admin["mount_path"] || "/billing",
+             "/payments",
+             socket.assigns.current_owner_scope
+           )
+         )
          |> assign(:flashes, [])
          |> assign(:pending_refund, nil)
          |> assign(:refund_drawer_open?, false)}
     end
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    mount_path = socket.assigns.admin_mount_path
+    scope = socket.assigns.current_owner_scope
+
+    return_destination =
+      ScopedPath.return_destination(
+        mount_path,
+        Map.get(params, "return_to"),
+        scope,
+        socket.assigns.charge.customer_id,
+        "/payments"
+      )
+
+    {:noreply,
+     socket
+     |> assign(:return_path, return_destination.path)
+     |> assign(:return_label, return_destination.label)
+     |> assign(
+       :related_items,
+       related_items(
+         socket.assigns.charge,
+         socket.assigns.customer,
+         mount_path,
+         scope,
+         return_destination.path
+       )
+     )}
   end
 
   @impl true
@@ -66,7 +106,12 @@ defmodule AccrueAdmin.Live.ChargeLive do
   def handle_event("prepare_refund", params, socket) do
     socket = ensure_timeline_events(socket)
 
-    case build_refund_action(params, socket.assigns.charge, socket.assigns.timeline_events) do
+    case build_refund_action(
+           params,
+           socket.assigns.charge,
+           socket.assigns.refunds,
+           socket.assigns.timeline_events
+         ) do
       {:ok, action} ->
         {:noreply,
          socket
@@ -81,6 +126,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   def handle_event("cancel_pending_refund", _params, socket) do
     {:noreply,
      socket
+     |> dismiss_step_up_if_pending()
      |> assign(:pending_refund, nil)
      |> assign(:refund_drawer_open?, false)}
   end
@@ -147,11 +193,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
         phx-key="escape"
       >
         <Breadcrumbs.breadcrumbs
+          group="Billing"
           items={[
-            %{
-              label: "Dashboard",
-              href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
-            },
             %{
               label: "Payments",
               href: ScopedPath.build(@admin_mount_path, "/payments", @current_owner_scope)
@@ -159,14 +202,15 @@ defmodule AccrueAdmin.Live.ChargeLive do
             %{label: @charge.processor_id || @charge.id}
           ]}
         />
+        <p class="ax-detail-back-link">
+          <a class="ax-link" href={@return_path}><%= @return_label %></a>
+        </p>
 
-        <Detail.summary_card eyebrow="Charge detail" title={@charge.processor_id || @charge.id}>
-          <:status><StatusBadge.status_badge status={status_badge(@charge.status)} /></:status>
+        <Detail.summary_card title={@charge.processor_id || @charge.id}>
+          <:status><StatusBadge.status_badge status={status_badge(@charge.status)} label={humanize(@charge.status)} /></:status>
           <:facts>
             <span><%= money_text(@charge.amount_cents, @charge.currency) %></span>
             <span><%= customer_label(@customer) %></span>
-            <span>Payment status <%= humanize(@charge.status) %></span>
-            <span>Inserted <%= format_datetime(@charge.inserted_at) %></span>
           </:facts>
         </Detail.summary_card>
 
@@ -174,17 +218,17 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <section class="ax-card ax-detail-action-band" data-ax-action-band>
+        <section :if={refund_eligible?(@charge, @refunds)} class="ax-card ax-detail-action-band" data-ax-action-band>
           <header class="ax-page-header">
             <div>
-              <p class="ax-eyebrow">Admin actions</p>
-              <h2 class="ax-heading">Charge workflow controls</h2>
+              <h2 class="ax-heading">Refund payment</h2>
               <p class="ax-body ax-measure">
-                Refunds run through the existing billing facade and record admin audit rows.
+                Review the refundable amount before submitting a refund.
               </p>
             </div>
             <div class="ax-page-actions">
               <button
+                :if={refund_eligible?(@charge, @refunds)}
                 type="button"
                 class="ax-button ax-button-primary"
                 phx-click="open_refund_drawer"
@@ -211,9 +255,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
             </summary>
 
             <div class="ax-stack-md">
-              <p class="ax-body ax-measure">
-                Leave the drawer amount blank to refund the full charge. Existing fee fields surface after
-                the refund is created.
+              <p :if={refund_eligible?(@charge, @refunds)} class="ax-body ax-measure">
+                Leave the amount blank to refund the remaining refundable balance.
               </p>
               <div :if={@charge.processor == "braintree"} class="ax-stack-sm">
                 <p class="ax-body ax-measure"><%= Copy.charge_refund_braintree_eligibility_info() %></p>
@@ -229,12 +272,12 @@ defmodule AccrueAdmin.Live.ChargeLive do
                   </p>
                 </div>
                 <div class="ax-stack-sm">
-                  <MoneyFormatter.money_formatter amount_minor={refund.amount_minor} currency={refund.currency || @charge.currency} customer={@customer} />
+                  <MoneyFormatter.money_formatter amount_minor={refund.amount_minor} currency={refund.currency} customer={@customer} />
                   <p class="ax-body">
                     fee refunded
-                    <%= money_text(refund.stripe_fee_refunded_amount_minor || 0, refund.currency || @charge.currency) %>
+                    <%= money_text(refund.stripe_fee_refunded_amount_minor, refund.currency) %>
                     · merchant loss
-                    <%= money_text(refund.merchant_loss_amount_minor || 0, refund.currency || @charge.currency) %>
+                    <%= money_text(refund.merchant_loss_amount_minor, refund.currency) %>
                   </p>
                 </div>
               </div>
@@ -282,22 +325,33 @@ defmodule AccrueAdmin.Live.ChargeLive do
           close_event="cancel_pending_refund"
         >
           <%= if @pending_refund do %>
-            <.refund_confirm_panel pending_refund={@pending_refund} charge={@charge} />
+            <.refund_confirm_panel
+              pending_refund={@pending_refund}
+              charge={@charge}
+              customer={@customer}
+            />
           <% else %>
-            <.refund_form charge={@charge} events={@timeline_events} />
+            <.refund_form
+              charge={@charge}
+              events={@timeline_events}
+              refundable_minor={refundable_minor(@charge, @refunds)}
+            />
           <% end %>
 
           <:footer>
             <button
               :if={@pending_refund}
+              id="charge-refund-confirm"
               phx-click="confirm_refund"
               class="ax-button ax-button-primary"
               data-role="confirm-refund"
               data-ax-action-drawer-confirm
+              disabled={@step_up_pending}
+              phx-disable-with="Submitting refund..."
             >
               Confirm refund
             </button>
-            <button phx-click="cancel_pending_refund" class="ax-button ax-button-ghost">Cancel</button>
+            <button phx-click="cancel_pending_refund" class="ax-button ax-button-ghost">Back to payment</button>
           </:footer>
         </DetailDrawer.detail_drawer>
 
@@ -309,17 +363,27 @@ defmodule AccrueAdmin.Live.ChargeLive do
         >
           <section data-ax-overlay-panel data-presentation="drawer">
             <%= if @pending_refund do %>
-              <.refund_confirm_panel pending_refund={@pending_refund} charge={@charge} />
+              <.refund_confirm_panel
+                pending_refund={@pending_refund}
+                charge={@charge}
+                customer={@customer}
+              />
               <button
                 phx-click="confirm_refund"
                 class="ax-button ax-button-primary"
                 data-role="confirm-refund"
                 data-ax-action-drawer-confirm
+                disabled={@step_up_pending}
               >
                 Confirm refund
               </button>
             <% else %>
-              <.refund_form charge={@charge} events={@timeline_events} id_suffix="-mirror" />
+              <.refund_form
+                charge={@charge}
+                events={@timeline_events}
+                refundable_minor={refundable_minor(@charge, @refunds)}
+                id_suffix="-mirror"
+              />
             <% end %>
           </section>
         </div>
@@ -328,6 +392,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
           pending={@step_up_pending}
           challenge={@step_up_challenge}
           error={@step_up_error}
+          return_focus="#charge-refund-confirm"
         />
 
         <div :if={@step_up_pending} hidden aria-hidden="true" data-role="step-up-test-mirror">
@@ -367,18 +432,26 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
   attr(:pending_refund, :map, required: true)
   attr(:charge, :map, required: true)
+  attr(:customer, :map, required: true)
 
   defp refund_confirm_panel(assigns) do
     ~H"""
     <section class="ax-stack-md" data-role="confirm-panel">
       <p class="ax-label">Confirm refund</p>
       <p class="ax-body ax-measure"><%= refund_copy(@pending_refund, @charge) %></p>
+      <Detail.detail_field_list
+        fields={refund_review_fields(@pending_refund, @charge, @customer)}
+      />
+      <p class="ax-body ax-measure">
+        This creates a refund request in Accrue. Provider acceptance or a new refund record does not confirm settlement; check charge activity for the observed result.
+      </p>
     </section>
     """
   end
 
   attr(:charge, :map, required: true)
   attr(:events, :list, required: true)
+  attr(:refundable_minor, :integer, default: nil)
   attr(:id_suffix, :string, default: "")
 
   defp refund_form(assigns) do
@@ -386,7 +459,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
     <section class="ax-stack-md">
       <p class="ax-label">Confirm refund</p>
       <p class="ax-body ax-measure">
-        Leave the amount blank to refund the full charge. Existing fee fields surface after
+        Leave the amount blank to refund the remaining refundable balance. Existing fee fields surface after
         the refund is created.
       </p>
       <div :if={@charge.processor == "braintree"} class="ax-stack-sm">
@@ -408,7 +481,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
           name="amount_minor"
           value=""
           class="ax-input"
-          placeholder={Integer.to_string(@charge.amount_cents || 0)}
+          placeholder={if is_integer(@refundable_minor), do: Integer.to_string(@refundable_minor), else: "Unavailable"}
+          disabled={not is_integer(@refundable_minor) or @refundable_minor <= 0}
         />
 
         <label class="ax-label" for={"refund-reason" <> @id_suffix}>Reason</label>
@@ -438,7 +512,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Charge")
+    |> assign(:page_title, "Payment")
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -463,7 +537,12 @@ defmodule AccrueAdmin.Live.ChargeLive do
         charge,
         charge.customer,
         socket.assigns.admin_mount_path,
-        socket.assigns.current_owner_scope
+        socket.assigns.current_owner_scope,
+        ScopedPath.build(
+          socket.assigns.admin_mount_path,
+          "/payments",
+          socket.assigns.current_owner_scope
+        )
       )
     )
   end
@@ -478,19 +557,29 @@ defmodule AccrueAdmin.Live.ChargeLive do
     |> assign(:timeline_events_loaded?, true)
   end
 
-  defp build_refund_action(params, charge, events) do
+  defp build_refund_action(params, charge, refunds, events) do
     source_event = selected_source_event(params, events)
+    refundable_minor = refundable_minor(charge, refunds)
 
-    with {:ok, amount_minor} <- parse_amount_minor(params["amount_minor"], charge.amount_cents) do
+    with true <- refund_eligible?(charge, refunds),
+         {:ok, amount_minor} <- parse_amount_minor(params["amount_minor"], refundable_minor) do
       {:ok,
        %{
          type: "refund",
          charge_id: charge.id,
+         charge_identity: charge.processor_id || charge.id,
+         currency: charge.currency,
+         reviewed_amount_minor: charge.amount_cents,
+         reviewed_status: charge.status,
+         reviewed_refundable_minor: refundable_minor,
          amount_minor: amount_minor,
          reason: blank_to_nil(params["reason"]),
          source_event_id: source_event && source_event.id,
          source_webhook_event_id: source_event && source_event.caused_by_webhook_event_id
        }}
+    else
+      false -> {:error, "This charge is not currently eligible for a refund."}
+      {:error, _reason} = error -> error
     end
   end
 
@@ -501,8 +590,17 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
   defp selected_source_event(_params, _events), do: nil
 
-  defp parse_amount_minor(nil, default), do: {:ok, default}
-  defp parse_amount_minor("", default), do: {:ok, default}
+  defp parse_amount_minor(nil, default) when is_integer(default) and default > 0,
+    do: {:ok, default}
+
+  defp parse_amount_minor("", default) when is_integer(default) and default > 0,
+    do: {:ok, default}
+
+  defp parse_amount_minor(nil, _default),
+    do: {:error, "Refund amount is unavailable for this charge."}
+
+  defp parse_amount_minor("", _default),
+    do: {:error, "Refund amount is unavailable for this charge."}
 
   defp parse_amount_minor(value, max_amount) do
     case Integer.parse(value) do
@@ -510,7 +608,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
         {:ok, amount}
 
       {amount, ""} when amount > max_amount ->
-        {:error, "Refund amount cannot exceed the charge amount."}
+        {:error, "Refund amount cannot exceed the remaining refundable balance."}
 
       {amount, ""} when amount <= 0 ->
         {:error, "Refund amount must be greater than zero."}
@@ -539,24 +637,109 @@ defmodule AccrueAdmin.Live.ChargeLive do
   end
 
   defp execute_refund(socket, action) do
-    result =
-      with_admin_context(socket.assigns.current_admin, fn operation_id ->
-        opts = refund_opts(action, socket.assigns.charge.currency, operation_id)
-        Billing.create_refund(socket.assigns.charge, opts)
-      end)
+    case revalidate_refund(socket, action) do
+      {:ok, charge} ->
+        result =
+          with_admin_context(socket.assigns.current_admin, fn operation_id ->
+            opts = refund_opts(action, action.currency, operation_id)
+            Billing.create_refund(charge, opts)
+          end)
 
-    case result do
-      {:ok, %Refund{} = refund} ->
+        case result do
+          {:ok, %Refund{} = refund} ->
+            socket
+            |> record_admin_audit(action, refund.id)
+            |> refresh_charge(charge.id)
+            |> push_flash(:info, Copy.charge_refund_created_info())
+
+          {:error, %Accrue.CardError{}} ->
+            push_flash(
+              socket,
+              :error,
+              "The provider declined the refund. No refund was accepted."
+            )
+
+          {:error, _reason} ->
+            push_flash(
+              socket,
+              :warning,
+              "Outcome not confirmed. Check scoped charge activity before deciding whether another action is needed; Accrue will not retry automatically."
+            )
+        end
+
+      {:changed, charge} ->
         socket
-        |> record_admin_audit(action, refund.id)
-        |> refresh_charge(socket.assigns.charge.id)
-        |> push_flash(:info, Copy.charge_refund_created_info())
+        |> assign_charge(charge)
+        |> push_flash(:warning, "Charge details changed after review. No refund was submitted.")
 
-      {:error, _reason} ->
-        push_flash(socket, :error, charge_refund_error_copy(socket))
+      :not_found ->
+        socket
+        |> push_flash(:error, Copy.Locked.owner_access_denied())
+        |> redirect(
+          to:
+            ScopedPath.build(
+              socket.assigns.admin_mount_path,
+              "/payments",
+              socket.assigns.current_owner_scope
+            )
+        )
+
+      :unauthorized ->
+        socket
+        |> push_flash(:error, Copy.Locked.owner_access_denied())
+        |> redirect(
+          to:
+            ScopedPath.build(
+              socket.assigns.admin_mount_path,
+              "/payments",
+              socket.assigns.current_owner_scope
+            )
+        )
     end
     |> assign(:pending_refund, nil)
     |> assign(:refund_drawer_open?, false)
+  end
+
+  defp revalidate_refund(socket, action) do
+    with {:ok, owner_scope} <- reauthorize_scope(socket),
+         {:ok, charge} <- Charges.detail(action.charge_id, owner_scope) do
+      refundable = refundable_minor(charge, charge.refunds || [])
+
+      if refund_eligible?(charge, charge.refunds || []) and
+           charge.id == action.charge_id and
+           charge.amount_cents == action.reviewed_amount_minor and
+           charge.status == action.reviewed_status and
+           charge.currency == action.currency and
+           refundable == action.reviewed_refundable_minor and
+           is_integer(refundable) and action.amount_minor <= refundable do
+        {:ok, charge}
+      else
+        {:changed, charge}
+      end
+    else
+      :not_found -> :not_found
+      {:error, _reason} -> :unauthorized
+    end
+  end
+
+  defp reauthorize_scope(socket) do
+    original_scope = socket.assigns.current_owner_scope
+    session = socket.assigns.accrue_admin_session
+
+    params =
+      if original_scope.mode == :organization,
+        do: %{"org" => original_scope.organization_slug},
+        else: %{}
+
+    with {:ok, fresh_scope} <- OwnerScope.resolve(session, params),
+         true <-
+           Auth.actor_id(fresh_scope.current_admin) == Auth.actor_id(socket.assigns.current_admin),
+         true <- fresh_scope.mode == original_scope.mode,
+         true <- fresh_scope.organization_id == original_scope.organization_id do
+      {:ok, fresh_scope}
+    else
+      _ -> {:error, :unauthorized}
+    end
   end
 
   defp refund_opts(action, currency, operation_id) do
@@ -569,7 +752,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   defp maybe_put_money(opts, nil, _currency), do: opts
 
   defp maybe_put_money(opts, amount_minor, currency) when is_integer(amount_minor) do
-    Keyword.put(opts, :amount, Money.new(amount_minor, normalize_currency(currency)))
+    Keyword.put(opts, :amount, Money.new(amount_minor, currency_atom(currency)))
   end
 
   defp maybe_put_reason(opts, nil), do: opts
@@ -627,15 +810,18 @@ defmodule AccrueAdmin.Live.ChargeLive do
     end
   end
 
-  defp summary_rows(charge, customer, breakdown) do
+  defp summary_rows(charge, customer, _breakdown) do
     [
       %{label: "Status", value: humanize(charge.status)},
       %{label: "Customer", value: customer_label(customer)},
       %{label: "Amount", value: money_text(charge.amount_cents, charge.currency)},
       %{label: "Processor", value: humanize(charge.processor)},
-      %{label: "Created / inserted", value: charge_boundary_summary(charge)},
-      %{label: "Net / fees / refunds", value: charge_money_signal(charge, breakdown)}
-    ]
+      %{label: "Recorded", value: recorded_timestamp(charge.inserted_at)}
+    ] ++
+      if(charge.data && charge.data["created"],
+        do: [%{label: "Created at processor", value: processor_created(charge.data["created"])}],
+        else: []
+      )
   end
 
   defp fee_breakdown_fields(charge, customer, breakdown) do
@@ -647,39 +833,40 @@ defmodule AccrueAdmin.Live.ChargeLive do
         value: platform_fee_summary(breakdown.platform_fee_minor, charge.currency)
       },
       %{label: "Net", value: money_text(breakdown.net_amount_minor, charge.currency)},
-      %{label: "Tax & ownership", value: charge_owner_summary(customer)}
+      %{label: "Account type", value: charge_owner_summary(customer)}
     ]
   end
 
-  defp charge_boundary_summary(charge) do
-    "created #{provider_created_at(charge)} · inserted #{format_datetime(charge.inserted_at)}"
+  defp processor_created(value) when is_integer(value) do
+    case DateTime.from_unix(value) do
+      {:ok, instant} -> timestamp_field(instant, "payment-processor-created-at")
+      _ -> to_string(value)
+    end
   end
 
-  defp provider_created_at(%{data: %{"created" => created}}) when is_binary(created), do: created
-
-  defp provider_created_at(%{data: %{"created" => created}}) when is_integer(created),
-    do: to_string(created)
-
-  defp provider_created_at(_charge), do: "unknown"
-
-  defp charge_money_signal(charge, breakdown) do
-    [
-      money_text(breakdown.net_amount_minor, charge.currency) <> " net",
-      money_text(breakdown.stripe_fee_minor, charge.currency) <> " Stripe fee",
-      platform_fee_summary(breakdown.platform_fee_minor, charge.currency),
-      refund_count_summary(charge.refunds || [])
-    ]
-    |> Enum.join(" · ")
+  defp processor_created(value) when is_binary(value) do
+    case DateTime.from_iso8601(value) do
+      {:ok, instant, _} -> timestamp_field(instant, "payment-processor-created-at")
+      _ -> value
+    end
   end
 
-  defp refund_count_summary(refunds), do: "#{length(refunds)} refunds"
+  defp processor_created(value), do: inspect(value)
+
+  defp recorded_timestamp(value), do: timestamp_field(value, "payment-recorded-at")
+
+  defp timestamp_field(value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
 
   defp charge_owner_summary(nil), do: "Unknown"
 
   defp charge_owner_summary(customer) do
-    owner = customer.owner_type || "User"
-    tax = if(customer.data && customer.data["tax"], do: "tax data present", else: "tax off")
-    "#{owner} · #{tax}"
+    customer.owner_type || "Unavailable"
   end
 
   defp refund_drawer_open?(open?, pending_refund), do: open? || not is_nil(pending_refund)
@@ -688,20 +875,24 @@ defmodule AccrueAdmin.Live.ChargeLive do
   defp refund_drawer_title(_pending_refund), do: "Confirm refund"
 
   defp fee_breakdown(charge) do
-    stripe_fee = charge.stripe_fee_amount_minor || 0
+    stripe_fee = charge.stripe_fee_amount_minor
     platform_fee = get_platform_fee_minor(charge)
-    net = max(charge.amount_cents - stripe_fee - platform_fee, 0)
+
+    net =
+      if is_integer(charge.amount_cents) and is_integer(stripe_fee) and is_integer(platform_fee) do
+        max(charge.amount_cents - stripe_fee - platform_fee, 0)
+      end
 
     %{
       stripe_fee_minor: stripe_fee,
-      platform_fee_minor: if(platform_fee > 0, do: platform_fee, else: nil),
+      platform_fee_minor: platform_fee,
       net_amount_minor: net
     }
   end
 
   defp get_platform_fee_minor(charge) do
     data = charge.data || %{}
-    data["application_fee_amount"] || get_in(data, ["transfer_data", "amount"]) || 0
+    data["application_fee_amount"] || get_in(data, ["transfer_data", "amount"])
   end
 
   defp timeline_items(events) do
@@ -755,16 +946,16 @@ defmodule AccrueAdmin.Live.ChargeLive do
   end
 
   defp status_badge("succeeded"), do: :paid
-  defp status_badge("failed"), do: :error
+  defp status_badge("failed"), do: :warning
   defp status_badge("processing"), do: :processing
   defp status_badge(_), do: :info
 
-  defp platform_fee_summary(nil, _currency), do: "no platform fee"
+  defp platform_fee_summary(nil, _currency), do: "Platform fee unavailable"
 
   defp platform_fee_summary(amount_minor, currency),
     do: money_text(amount_minor, currency) <> " platform fee"
 
-  defp related_items(charge, customer, mount_path, scope) do
+  defp related_items(charge, customer, mount_path, scope, return_path) do
     customer_items =
       if customer do
         [
@@ -772,13 +963,19 @@ defmodule AccrueAdmin.Live.ChargeLive do
             icon: :users,
             label: "Customer",
             value: customer.name || customer.email,
-            href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
+            href:
+              ScopedPath.build(mount_path, "/customers/#{customer.id}", scope, %{
+                "return_to" => return_path
+              })
           },
           %{
             icon: :payments,
             label: "Other payments for this customer",
             href:
-              ScopedPath.build(mount_path, "/payments", scope, %{"customer_id" => customer.id})
+              ScopedPath.build(mount_path, "/payments", scope, %{
+                "customer_id" => customer.id,
+                "return_to" => return_path
+              })
           }
         ]
       else
@@ -803,24 +1000,38 @@ defmodule AccrueAdmin.Live.ChargeLive do
     do: customer.name || customer.email || customer.processor_id || customer.id
 
   defp money_text(amount_minor, currency) when is_integer(amount_minor) do
-    Accrue.Invoices.Render.format_money(
-      amount_minor,
-      normalize_currency(currency),
-      customer_locale(nil)
-    )
+    MoneyFormatter.format_money(amount_minor, currency)
   end
 
-  defp money_text(_amount_minor, _currency), do: "--"
+  defp money_text(_amount_minor, _currency), do: "Unavailable"
 
   defp refund_copy(action, charge) do
     amount = money_text(action.amount_minor, charge.currency)
 
     Copy.charge_refund_confirm_message(
-      charge_id: charge.id,
+      charge_id: action.charge_identity,
       amount: amount,
       audit_subject: "a refund ledger row",
       source_event_id: action.source_event_id
     )
+  end
+
+  defp refund_review_fields(action, charge, customer) do
+    [
+      %{label: "Payment", value: charge.processor_id || charge.id},
+      %{label: "Payment record ID", value: charge.id},
+      %{label: "Customer", value: customer_label(customer)},
+      %{label: "Customer ID", value: customer.id},
+      %{label: "Owner", value: charge_owner_summary(customer)},
+      %{label: "Current payment state", value: humanize(charge.status)},
+      %{label: "Refund amount", value: money_text(action.amount_minor, action.currency)},
+      %{
+        label: "Remaining refundable before this request",
+        value: money_text(action.reviewed_refundable_minor, action.currency)
+      },
+      %{label: "Requested amount in minor units", value: Integer.to_string(action.amount_minor)},
+      %{label: "Currency", value: String.upcase(action.currency)}
+    ]
   end
 
   defp charge_refund_error_copy(socket) do
@@ -855,21 +1066,48 @@ defmodule AccrueAdmin.Live.ChargeLive do
   defp blank_to_nil(""), do: nil
   defp blank_to_nil(value), do: value
 
-  defp normalize_currency(currency) when is_atom(currency), do: currency
+  defp refund_eligible?(charge, refunds) do
+    charge.processor in ["stripe", "braintree", "fake"] and
+      charge.status in ["succeeded", "settling"] and
+      is_integer(charge.amount_cents) and
+      is_integer(refundable_minor(charge, refunds)) and
+      MoneyFormatter.format_money(charge.amount_cents, charge.currency) != "--"
+  end
 
-  defp normalize_currency(currency) when is_binary(currency) do
-    code = String.downcase(currency)
-
-    try do
-      String.to_existing_atom(code)
-    rescue
-      ArgumentError -> :usd
+  defp refundable_minor(charge, refunds) do
+    with amount when is_integer(amount) <- charge.amount_cents,
+         currency when is_binary(currency) <- supported_currency_code(charge.currency),
+         {:ok, refunded} <- refunded_amount(refunds, currency) do
+      max(amount - refunded, 0)
+    else
+      _ -> nil
     end
   end
 
-  defp normalize_currency(_currency), do: :usd
+  defp refunded_amount(refunds, currency) do
+    Enum.reduce_while(refunds, {:ok, 0}, fn refund, {:ok, total} ->
+      if is_integer(refund.amount_minor) and supported_currency_code(refund.currency) == currency do
+        {:cont, {:ok, total + refund.amount_minor}}
+      else
+        {:halt, :error}
+      end
+    end)
+  end
 
-  defp customer_locale(_customer), do: Accrue.Config.default_locale()
+  defp supported_currency_code(currency) when is_binary(currency) do
+    code = String.downcase(currency)
+
+    case Elixir.Money.Currency.currency_for_code(code) do
+      {:ok, _} -> code
+      _ -> nil
+    end
+  end
+
+  defp supported_currency_code(currency) when is_atom(currency), do: Atom.to_string(currency)
+  defp supported_currency_code(_currency), do: nil
+
+  defp currency_atom(currency) when is_atom(currency), do: currency
+  defp currency_atom(currency), do: String.to_atom(String.downcase(currency))
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 

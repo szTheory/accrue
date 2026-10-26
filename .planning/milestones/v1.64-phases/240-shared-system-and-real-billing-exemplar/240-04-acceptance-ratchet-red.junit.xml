@@ -1,0 +1,56 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="11.895031999999999">
+<testsuite name="admin-interaction-overlay-phase199.spec.js" timestamp="2026-10-09T21:27:25.190Z" hostname="chromium-desktop" tests="1" failures="1" skipped="0" time="8.204" errors="0">
+<testcase name="auto-minted ratchet guards — interaction focus-ring" classname="admin-interaction-overlay-phase199.spec.js" time="8.204">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/phase240-04-acceptance-red-ratchet-desktop/admin-interaction-overlay--f648c-ds-—-interaction-focus-ring-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/phase240-04-acceptance-red-ratchet-desktop/admin-interaction-overlay--f648c-ds-—-interaction-focus-ring-chromium-desktop/error-context.md]]
+
+[[ATTACHMENT|test-results/phase240-04-acceptance-red-ratchet-desktop/admin-interaction-overlay--f648c-ds-—-interaction-focus-ring-chromium-desktop/trace.zip]]
+]]>
+</system-out>
+<failure message="`@ratchet:f-68d2bf118467b34a` [data-ax-zone=attention-rail] must exist" type="expect.toBeVisible">
+<![CDATA[  [chromium-desktop] › admin-interaction-overlay-phase199.spec.js:1145:1 › auto-minted ratchet guards — interaction focus-ring 
+
+    Error: `@ratchet:f-68d2bf118467b34a` [data-ax-zone=attention-rail] must exist
+
+    expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-ax-zone=attention-rail]').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - `@ratchet:f-68d2bf118467b34a` [data-ax-zone=attention-rail] must exist with timeout 5000ms
+      - waiting for locator('[data-ax-zone=attention-rail]').first()
+
+
+      1158 |
+      1159 |     const locator = page.locator(row.selector).first();
+    > 1160 |     await expect(locator, `\`@ratchet:${row.finding_id}\` ${row.selector} must exist`).toBeVisible();
+           |                                                                                        ^
+      1161 |     const outlineStyle = await locator.evaluate((el) => {
+      1162 |       const focusableSelector = [
+      1163 |         "button:not([disabled])",
+        at ./accrue_admin/e2e/admin-interaction-overlay-phase199.spec.js:1160:88
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/phase240-04-acceptance-red-ratchet-desktop/admin-interaction-overlay--f648c-ds-—-interaction-focus-ring-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/phase240-04-acceptance-red-ratchet-desktop/admin-interaction-overlay--f648c-ds-—-interaction-focus-ring-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/phase240-04-acceptance-red-ratchet-desktop/admin-interaction-overlay--f648c-ds-—-interaction-focus-ring-chromium-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/phase240-04-acceptance-red-ratchet-desktop/admin-interaction-overlay--f648c-ds-—-interaction-focus-ring-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

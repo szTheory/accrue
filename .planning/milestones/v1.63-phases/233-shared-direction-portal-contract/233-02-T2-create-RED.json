@@ -1,0 +1,11 @@
+{
+  "command": "HEX_HOME=/tmp/accrue-233-hex GSD_TAP_REPORT=../.planning/phases/233-shared-direction-portal-contract/233-02-T2-create-RED.tap mix test --formatter AccruePortal.TapFormatter test/accrue_portal/context_post_test.exs (from accrue_portal)",
+  "exitCode": 2,
+  "output": "TAP version 13\n1..4\nok 1 - test missing and forged pins block payment method writes\nok 2 - test rendered default and delete forms carry a context pin accepted by their POSTs\nnot ok 3 - test rendered add-card form posts its original pin through create authorization\nnot ok 4 - test read-only organization cannot receive a Braintree client token or Hosted Fields\n",
+  "targetTest": "test rendered add-card form posts its original pin through create authorization",
+  "targetFile": "accrue_portal/test/accrue_portal/context_post_test.exs",
+  "expected": "The rendered add-card form carries the same verified route pin and its POST reaches an authorized create mutation.",
+  "actual": "The target test rendered the eligible add-card form, but it contained no hidden context_pin field.",
+  "reportPath": ".planning/phases/233-shared-direction-portal-contract/233-02-T2-create-RED.tap",
+  "semanticAssessment": "Valid RED: the named custom organization test followed the actual rendered payment-method navigation and eligible add-card route, then failed the planned form pin assertion; the read-only mount failure is separately expected before implementation."
+}

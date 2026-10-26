@@ -7,8 +7,10 @@ defmodule AccrueAdmin.WebhookLiveTest do
   alias Accrue.Events
   alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
+  alias Accrue.Webhooks.DLQ
   alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Events, as: EventQueries
   alias AccrueAdmin.Queries.Webhooks
   alias AccrueAdmin.TestRepo
 
@@ -53,6 +55,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
     on_exit(fn ->
       Application.put_env(:accrue, :auth_adapter, prior)
       Application.delete_env(:accrue_admin, :expected_step_up_subject_id)
+      Application.delete_env(:accrue_admin, :webhook_detail_fun)
     end)
 
     customer = insert_customer(%{processor_id: "cus_123"})
@@ -98,41 +101,60 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
     assert heading_count(html, "h1") == 1
+    assert has_element?(view, "[data-role='webhook-page-header']")
+    assert has_element?(view, "h1", webhook.processor_event_id)
+    assert has_element?(view, "[aria-label='Breadcrumb'] a", "Webhooks")
+    assert has_element?(view, "[aria-label='Breadcrumb'] [aria-current='page']", "Webhook")
+    refute html =~ "Webhook inspector"
+    refute html =~ "Processor event ID"
+    refute html =~ "Replay eligibility"
+    refute html =~ "Dispatch / retry lifecycle"
+    refute html =~ "Derived ledger rows"
     assert data_attr_count(html, "data-ax-summary-list") == 1
     assert data_attr_count(html, "data-ax-action-band") == 1
     assert data_attr_count(html, "data-ax-primary-action") == 1
     assert data_attr_count(html, "data-ax-related-resources") == 1
     assert data_attr_count(html, "data-ax-lazy-activity") == 1
     assert data_attr_count(html, "data-ax-lazy-json") == 1
+    assert length(Regex.scan(~r/phx-hook="PreserveDisclosure"/, html)) == 2
+
+    assert length(
+             Floki.find(Floki.parse_document!(html), "details > summary.ax-disclosure-summary")
+           ) == 2
 
     for label <- [
-          "Status",
-          "Processor event ID",
-          "Endpoint / type",
+          "Endpoint",
           "Received / processed",
-          "Verification",
-          "Attempts",
           "Livemode",
-          "Derived event count"
+          "Failure"
         ] do
       assert html =~ label
     end
 
-    for heading <- [
-          "Replay eligibility",
-          "Dispatch / retry lifecycle",
-          "Derived ledger rows"
-        ] do
-      assert html =~ heading
-    end
+    assert html =~ "processor timeout"
+    refute html =~ "data-role=\"webhook-payload\""
 
     assert has_element?(view, "[data-ax-primary-action]", "Replay webhook")
+
+    assert html =~
+             "Queues another delivery attempt. Queue acceptance does not confirm processing."
+
     refute has_element?(view, "[data-role='replay-confirm']")
 
     html = render_click(element(view, "[data-ax-primary-action]", "Replay webhook"))
 
     assert has_element?(view, "[data-ax-action-drawer-form][data-role='replay-confirm']")
     assert html =~ "Confirm replay"
+    assert html =~ "Cancel replay"
+    assert length(Regex.scan(~r/Cancel replay/, html)) == 2
+
+    active_drawer =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find("#webhook-replay-drawer-portal")
+      |> hd()
+
+    assert length(Floki.find(active_drawer, "button.ax-button-ghost")) == 1
 
     html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm replay"))
     assert html =~ Copy.step_up_title()
@@ -170,13 +192,147 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "data-ax-summary-list"
     refute html =~ "ax-kpi-grid"
 
-    assert html =~ "Signature verification passed"
-    assert html =~ "Attempt 3/25"
+    refute html =~ "Signature verification passed"
+    refute html =~ ">Attempts<"
+    refute html =~ ">Derived event count<"
     assert html =~ "invoice.payment_failed"
-    assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
+    assert [_ | _] = Floki.find(Floki.parse_document!(html), "[data-time-display]")
+
+    activity_html = render_click(element(view, "[data-ax-lazy-activity]"))
+    assert activity_html =~ "Webhook attempt history"
+    assert activity_html =~ "Derived event count"
+    assert activity_html =~ "Attempts"
+    assert activity_html =~ "data-time-display"
+    assert length(Floki.find(Floki.parse_document!(activity_html), "[data-time-display]")) >= 2
+    assert activity_html =~ "Attempt 3/25"
+    assert activity_html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
 
     html = render_click(element(view, "[data-ax-lazy-json]"))
     assert html =~ "cus_123"
+  end
+
+  test "related activity shares event meaning and discloses exact evidence and destination", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    customer = insert_customer(%{processor_id: "cus_related_event"})
+
+    {:ok, event} =
+      Events.record(%{
+        type: "customer.updated",
+        subject_type: "Customer",
+        subject_id: customer.id,
+        actor_type: "webhook",
+        actor_id: webhook.processor_event_id,
+        caused_by_webhook_event_id: webhook.id
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    assert html =~ "Dead"
+
+    html = render_click(element(view, "[data-ax-lazy-activity]"))
+
+    event_item =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find("[aria-label='Derived events'] .ax-timeline-item")
+      |> Enum.find(&(Floki.text(&1) =~ "event ##{event.id}"))
+
+    assert html =~ "Webhook attempt history"
+    assert html =~ "Derived events"
+    assert Floki.text(event_item) =~ "Customer updated"
+    assert Floki.text(event_item) =~ "Inspect event evidence"
+    assert Floki.text(event_item) =~ "Stored event key: customer.updated"
+    assert Floki.text(event_item) =~ "Event ID: #{event.id}"
+    assert Floki.text(event_item) =~ "Webhook delivery ID: #{webhook.id}"
+    assert Floki.text(event_item) =~ "Recorded: #{DateTime.to_iso8601(event.inserted_at)}"
+
+    event_link =
+      Floki.find(event_item, "a.ax-timeline-link")
+
+    assert Floki.text(event_link) |> String.trim() == "Open event"
+    assert Floki.attribute(event_link, "href") == ["/billing/events/#{event.id}"]
+    assert html =~ "Attempt 3/25"
+    assert html =~ "Dead"
+  end
+
+  test "empty webhook activity has one truthful empty state", %{
+    conn: conn
+  } do
+    webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_empty_activity",
+        type: "invoice.payment_failed",
+        status: :dead
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+
+    assert html =~
+             "Open Activity to review processing attempts and linked billing events."
+
+    html = render_click(element(view, "[data-ax-lazy-activity]"))
+
+    assert html =~
+             "No dispatch attempts or derived billing events are recorded for this webhook yet."
+
+    refute html =~ "No dispatch attempts recorded yet"
+    refute html =~ "No derived event rows linked to this webhook yet"
+    refute html =~ "Inspect event evidence"
+  end
+
+  test "multiple derived activity rows retain each label, evidence, and event destination", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    customer = insert_customer(%{processor_id: "cus_many_related_events"})
+
+    {:ok, first_event} =
+      Events.record(%{
+        type: "customer.updated",
+        subject_type: "Customer",
+        subject_id: customer.id,
+        actor_type: "webhook",
+        actor_id: webhook.processor_event_id,
+        caused_by_webhook_event_id: webhook.id
+      })
+
+    {:ok, second_event} =
+      Events.record(%{
+        type: "customer.local_updated",
+        subject_type: "Customer",
+        subject_id: customer.id,
+        actor_type: "webhook",
+        actor_id: webhook.processor_event_id,
+        caused_by_webhook_event_id: webhook.id
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    html = render_click(element(view, "[data-ax-lazy-activity]"))
+
+    rows =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find("[aria-label='Derived events'] .ax-timeline-item")
+
+    assert length(rows) == 3
+
+    for {event, label} <- [
+          {first_event, "Customer updated"},
+          {second_event, "Customer record updated locally"}
+        ] do
+      row = Enum.find(rows, &(Floki.text(&1) =~ "event ##{event.id}"))
+      assert row
+      assert Floki.text(row) =~ label
+      assert Floki.text(row) =~ "Stored event key: #{event.type}"
+
+      assert Floki.attribute(Floki.find(row, "a.ax-timeline-link"), "href") ==
+               ["/billing/events/#{event.id}"]
+    end
   end
 
   test "WebhookLive Related card renders event links pointing to /events/:id", %{
@@ -234,13 +390,261 @@ defmodule AccrueAdmin.WebhookLiveTest do
     Application.put_env(:accrue_admin, :expected_step_up_subject_id, webhook.id)
 
     html = render_click(element(view, "[data-ax-primary-action]", "Replay webhook"))
-    assert html =~ "requeue the webhook delivery and record an admin audit event"
+
+    assert html =~
+             "This will requeue the webhook delivery and record an admin audit event. Confirm replay."
 
     html = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm replay"))
     assert html =~ Copy.step_up_title()
 
     html = render_submit(view, "step_up_submit", %{"code" => "123456"})
     assert html =~ "Replay requested for the active organization."
+  end
+
+  test "single replay rechecks current status after fresh step-up", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, webhook.id)
+
+    assert {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    render_click(element(view, "[data-role='replay-single']"))
+    render_click(element(view, "[data-role='confirm-replay']"))
+    assert render(view) =~ Copy.step_up_title()
+
+    webhook
+    |> Ecto.Changeset.change(status: :received)
+    |> TestRepo.update!()
+
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Replay is blocked because this webhook isn&#39;t linked to a billable row"
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
+
+    refute TestRepo.exists?(
+             from(event in Event,
+               where:
+                 event.type == "admin.webhook.replay.completed" and
+                   event.subject_id == ^webhook.id
+             )
+           )
+  end
+
+  test "single replay dismissal and step-up denial leave delivery, jobs, and audit unchanged", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    jobs_before = dispatch_jobs(webhook.id)
+
+    render_click(element(view, "[data-role='replay-single']"))
+    render_click(element(view, "button", "Cancel"))
+    refute has_element?(view, "[data-role='replay-confirm']")
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :dead
+    assert dispatch_jobs(webhook.id) == jobs_before
+    refute replay_events_exist?(webhook.id)
+
+    render_click(element(view, "[data-role='replay-single']"))
+    render_click(element(view, "[data-role='confirm-replay']"))
+    render_submit(view, "step_up_submit", %{"code" => "wrong"})
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :dead
+    assert dispatch_jobs(webhook.id) == jobs_before
+    refute replay_events_exist?(webhook.id)
+  end
+
+  test "accepted replay remains queued when the follow-up detail read is unavailable", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, webhook.id)
+    base_detail = &Webhooks.detail/2
+
+    # The disconnected and connected mounts plus pre-dispatch reads succeed; only the
+    # post-acceptance evidence refresh fails.
+    calls = :counters.new(1, [:atomics])
+
+    Application.put_env(:accrue_admin, :webhook_detail_fun, fn id, scope ->
+      :counters.add(calls, 1, 1)
+
+      case :counters.get(calls, 1) do
+        4 -> :unavailable
+        _ -> base_detail.(id, scope)
+      end
+    end)
+
+    assert {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    render_click(element(view, "[data-role='replay-single']"))
+    render_click(element(view, "[data-role='confirm-replay']"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~
+             "Replay request accepted. Current processing status is unknown because delivery history could not be loaded. Retry read to check current status."
+
+    assert html =~
+             "Current processing status is unknown because delivery history could not be loaded"
+
+    assert html =~ "Retry read"
+    assert html =~ "Webhook history unavailable"
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
+    assert dispatch_jobs(webhook.id) |> Enum.count(&(&1.state == "available")) == 1
+
+    assert replay_event_types(webhook.id) == [
+             "admin.webhook.replay.completed",
+             "webhook.replay_requested"
+           ]
+
+    html = render_click(element(view, "[data-role='retry-webhook-read']"))
+
+    refute html =~ "Current processing status is unknown"
+    refute html =~ ~s(data-role="webhook-unavailable")
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :received
+    assert dispatch_jobs(webhook.id) |> Enum.count(&(&1.state == "available")) == 1
+
+    assert replay_event_types(webhook.id) == [
+             "admin.webhook.replay.completed",
+             "webhook.replay_requested"
+           ]
+  end
+
+  test "webhook detail preserves only validated family return context and scopes direct fallback",
+       %{
+         conn: conn
+       } do
+    customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    invoice = insert_invoice(customer, %{processor_id: "in_return_context"})
+
+    webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_return_context",
+        data: %{"object" => %{"id" => invoice.processor_id}}
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    return_to = "/billing/webhooks?status=dead&type=invoice.payment_failed&org=wrong-org"
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/webhooks/#{webhook.id}?org=allowed-org&return_to=#{URI.encode_www_form(return_to)}"
+             )
+
+    assert html =~ "status=dead"
+    assert html =~ "type=invoice.payment_failed"
+    assert html =~ "org=allowed-org"
+    refute html =~ "wrong-org"
+
+    assert {:ok, _view, direct_html} =
+             live(conn, "/billing/webhooks/#{webhook.id}?org=allowed-org")
+
+    assert direct_html =~ "href=\"/billing/webhooks?org=allowed-org\""
+  end
+
+  test "single replay revalidates organization ownership inside the claim transaction", %{
+    conn: conn
+  } do
+    customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    invoice = insert_invoice(customer, %{processor_id: "in_reassigned_single"})
+
+    webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_reassigned_single",
+        status: :dead,
+        data: %{"object" => %{"id" => invoice.processor_id}}
+      })
+
+    {:ok, _event} =
+      Events.record(%{
+        type: "invoice.payment_failed",
+        subject_type: "Invoice",
+        subject_id: invoice.id,
+        actor_type: "webhook",
+        actor_id: webhook.processor_event_id,
+        caused_by_webhook_event_id: webhook.id
+      })
+
+    prior_requeue_fun = Application.get_env(:accrue_admin, :webhook_requeue_fun)
+
+    on_exit(fn ->
+      if prior_requeue_fun do
+        Application.put_env(:accrue_admin, :webhook_requeue_fun, prior_requeue_fun)
+      else
+        Application.delete_env(:accrue_admin, :webhook_requeue_fun)
+      end
+    end)
+
+    Application.put_env(:accrue_admin, :webhook_requeue_fun, fn id, authorize_fun ->
+      customer
+      |> Ecto.Changeset.change(owner_id: "org_foreign")
+      |> TestRepo.update!()
+
+      DLQ.requeue(id, authorize_fun)
+    end)
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}?org=allowed-org")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, webhook.id)
+
+    _ = render_click(element(view, "[data-ax-primary-action]", "Replay webhook"))
+    _ = render_click(element(view, "[data-ax-action-drawer-confirm]", "Confirm replay"))
+    html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    assert html =~ "Replay is blocked because this webhook isn&#39;t linked to a billable row"
+    assert TestRepo.get!(WebhookEvent, webhook.id).status == :dead
+
+    refute TestRepo.exists?(
+             from(event in Event,
+               where: event.type == "webhook.replay_requested" and event.subject_id == ^webhook.id
+             )
+           )
+
+    refute TestRepo.exists?(
+             from(event in Event,
+               where:
+                 event.type == "admin.webhook.replay.completed" and
+                   event.subject_id == ^webhook.id
+             )
+           )
+  end
+
+  test "detail read failure is unavailable rather than not-found and retry restores evidence", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
+
+    on_exit(fn -> Application.delete_env(:accrue_admin, :phase238_read_failure_fixture) end)
+    Application.put_env(:accrue_admin, :phase238_read_failure_fixture, :webhook_detail)
+    html = render_click(view, "retry_read", %{})
+
+    assert html =~ ~s(data-role="webhook-unavailable")
+    assert html =~ "Webhook history unavailable"
+    assert html =~ "Retry read"
+    refute html =~ webhook.processor_event_id
+    refute html =~ "fixture database unavailable"
+
+    Application.delete_env(:accrue_admin, :phase238_read_failure_fixture)
+    html = render_click(view, "retry_read", %{})
+
+    assert html =~ webhook.processor_event_id
+    refute html =~ ~s(data-role="webhook-unavailable")
   end
 
   test "forensic payload section uses Detail.detail_section not hand-rolled ax-card", %{
@@ -262,6 +666,23 @@ defmodule AccrueAdmin.WebhookLiveTest do
     html = render_click(element(view, "[data-ax-lazy-json]"))
     assert html =~ "webhook-payload"
     assert html =~ "evt_detail"
+
+    document = Floki.parse_document!(html)
+    tabs = Floki.find(document, "#webhook-payload [role=tab]")
+    assert Enum.map(tabs, &(Floki.text(&1) |> String.trim())) == ["Tree", "Raw"]
+
+    tree_tab = Floki.find(document, "#webhook-payload-tree-tab") |> hd()
+    assert Floki.attribute(tree_tab, "aria-selected") == ["true"]
+
+    raw_panel = Floki.find(document, "#webhook-payload-raw-panel") |> hd()
+    assert Floki.attribute(raw_panel, "hidden") == [""]
+
+    copy_button = Floki.find(document, "#webhook-payload-copy") |> hd()
+    assert Floki.attribute(copy_button, "role") == []
+
+    assert Floki.attribute(copy_button, "data-clipboard-text") == [
+             Jason.encode!(Jason.decode!(webhook.raw_body), pretty: true)
+           ]
   end
 
   test "keeps activity feed path and lazy Activity marker in DETAIL layout", %{
@@ -273,11 +694,11 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert {:ok, view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
     assert html =~ "data-ax-lazy-activity"
-    assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
 
     html = render_click(element(view, "[data-ax-lazy-activity]"))
     assert html =~ "Webhook attempt history"
     assert html =~ "Derived events"
+    assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
   end
 
   test "webhook loader distinguishes in-scope, out-of-scope, and ambiguous ownership" do
@@ -332,6 +753,101 @@ defmodule AccrueAdmin.WebhookLiveTest do
 
     assert {:ambiguous, proof_context} = Webhooks.detail(ambiguous_webhook.id, owner_scope)
     assert proof_context.webhook_id == ambiguous_webhook.id
+  end
+
+  test "organization event feed includes only webhook replay records proven in scope", %{
+    conn: conn
+  } do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    allowed_invoice = insert_invoice(allowed_customer, %{processor_id: "in_replay_allowed"})
+    denied_invoice = insert_invoice(denied_customer, %{processor_id: "in_replay_denied"})
+
+    allowed_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_replay_allowed",
+        data: %{"object" => %{"id" => allowed_invoice.processor_id}}
+      })
+
+    denied_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_replay_denied",
+        data: %{"object" => %{"id" => denied_invoice.processor_id}}
+      })
+
+    {:ok, allowed_single} =
+      Events.record(%{
+        type: "admin.webhook.replay.completed",
+        subject_type: "WebhookEvent",
+        subject_id: allowed_webhook.id,
+        caused_by_webhook_event_id: allowed_webhook.id
+      })
+
+    {:ok, denied_single} =
+      Events.record(%{
+        type: "admin.webhook.replay.completed",
+        subject_type: "WebhookEvent",
+        subject_id: denied_webhook.id,
+        caused_by_webhook_event_id: denied_webhook.id
+      })
+
+    {:ok, allowed_batch} =
+      Events.record(%{
+        type: "admin.webhook.bulk_replay.completed",
+        subject_type: "WebhookBatch",
+        subject_id: "selected",
+        data: %{"ids" => [allowed_webhook.id]}
+      })
+
+    {:ok, mixed_batch} =
+      Events.record(%{
+        type: "admin.webhook.bulk_replay.completed",
+        subject_type: "WebhookBatch",
+        subject_id: "selected",
+        data: %{"ids" => [allowed_webhook.id, denied_webhook.id]}
+      })
+
+    scope = organization_owner_scope("org_allowed")
+
+    {single_rows, _cursor} =
+      EventQueries.list(owner_scope: scope, filter: %{subject_type: "WebhookEvent"})
+
+    assert Enum.any?(single_rows, &(&1.id == allowed_single.id))
+    refute Enum.any?(single_rows, &(&1.id == denied_single.id))
+    assert {:ok, %{id: id}} = EventQueries.detail(allowed_single.id, scope)
+    assert id == allowed_single.id
+    assert :not_found = EventQueries.detail(denied_single.id, scope)
+
+    {batch_rows, _cursor} =
+      EventQueries.list(owner_scope: scope, filter: %{subject_type: "WebhookBatch"})
+
+    assert Enum.any?(batch_rows, &(&1.id == allowed_batch.id))
+    refute Enum.any?(batch_rows, &(&1.id == mixed_batch.id))
+
+    owner_conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, webhook_html} =
+             live(owner_conn, "/billing/webhooks/#{allowed_webhook.id}?org=allowed-org")
+
+    event_path = "/billing/events/#{allowed_single.id}?org=allowed-org"
+    assert webhook_html =~ event_path
+
+    event_conn =
+      Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(),
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, event_html} = live(event_conn, event_path)
+    assert event_html =~ "admin.webhook.replay.completed"
   end
 
   test "out-of-scope webhook route redirects with denial flash before rendering detail", %{
@@ -543,6 +1059,39 @@ defmodule AccrueAdmin.WebhookLiveTest do
       attempted_at: ~U[2026-04-15 10:02:00.000000Z],
       discarded_at: ~U[2026-04-15 10:03:00.000000Z]
     })
+  end
+
+  defp dispatch_jobs(webhook_id) do
+    TestRepo.all(
+      from(job in Oban.Job,
+        where:
+          job.worker == "Accrue.Webhook.DispatchWorker" and
+            fragment("?->>'webhook_event_id' = ?", job.args, ^webhook_id),
+        order_by: [asc: job.inserted_at, asc: job.id]
+      )
+    )
+  end
+
+  defp replay_events_exist?(webhook_id) do
+    TestRepo.exists?(
+      from(event in Event,
+        where:
+          event.subject_id == ^webhook_id and
+            event.type in ["webhook.replay_requested", "admin.webhook.replay.completed"]
+      )
+    )
+  end
+
+  defp replay_event_types(webhook_id) do
+    TestRepo.all(
+      from(event in Event,
+        where:
+          event.subject_id == ^webhook_id and
+            event.type in ["webhook.replay_requested", "admin.webhook.replay.completed"],
+        order_by: [asc: event.type],
+        select: event.type
+      )
+    )
   end
 
   defp data_attr_count(html, attr) do

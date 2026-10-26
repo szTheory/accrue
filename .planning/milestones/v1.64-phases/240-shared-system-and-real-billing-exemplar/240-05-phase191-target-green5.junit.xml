@@ -1,0 +1,52 @@
+<testsuites id="" name="" tests="2" failures="1" skipped="0" errors="0" time="10.234577">
+<testsuite name="admin-page-flow-phase191.spec.js" timestamp="2026-10-09T22:04:05.114Z" hostname="chromium-desktop" tests="2" failures="1" skipped="0" time="7.606" errors="0">
+<testcase name="Phase 191 page-flow regression harness › browser online signal keeps staged billing action disabled until LiveView reconnects @reconnect @ax187" classname="admin-page-flow-phase191.spec.js" time="0.826">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187" classname="admin-page-flow-phase191.spec.js" time="6.78">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/error-context.md]]
+
+[[ATTACHMENT|test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  [chromium-desktop] › admin-page-flow-phase191.spec.js:354:3 › Phase 191 page-flow regression harness › disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "canceled"
+    Received: "active"
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      433 |       const release = await request.post(`/__e2e__/phase240/release-action?token=${hold.token}`);
+      434 |       expect(release.ok()).toBeTruthy();
+    > 435 |       await expect.poll(async () => {
+          |       ^
+      436 |         const completed = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+      437 |         expect(completed.ok()).toBeTruthy();
+      438 |         return (await completed.json()).status;
+        at /Users/dev/projects/accrue/accrue_admin/e2e/admin-page-flow-phase191.spec.js:435:7
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

@@ -5,23 +5,26 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   import Ecto.Query
 
-  alias Accrue.Billing.{Customer, Invoice, Query, Subscription}
+  alias Accrue.Billing.{Query, Subscription}
   alias Accrue.Repo
-  alias Accrue.Webhook.WebhookEvent
-  alias AccrueAdmin.BillingPresentation
+  alias AccrueAdmin.Components.BillingContext
 
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
     FilterChipBar,
     FlashGroup,
+    IdBadge,
     PageHeader,
-    StatStrip
+    StatStrip,
+    Timestamp
   }
 
   alias AccrueAdmin.Components.StatusBadge
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.DataTableNav
   alias AccrueAdmin.Queries.Subscriptions
+  alias AccrueAdmin.ScopedPath
 
   @default_queue_status "past_due,canceling"
 
@@ -54,17 +57,43 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   @impl true
   def handle_event("data_table_filter", params, socket) do
+    params =
+      params
+      |> Map.drop(["_target", "_csrf_token"])
+      |> Map.update("status", nil, &Subscriptions.normalize_status_selection/1)
+
+    params = if is_nil(params["status"]), do: Map.put(params, "view", "all"), else: params
+
     {:noreply,
      AccrueAdmin.DataTableNav.patch_with_filters(
        socket,
        socket.assigns.table_path,
-       Map.drop(params, ["_target", "_csrf_token"])
+       params
      )}
   end
 
   @impl true
+  def handle_params(%{"cursor" => cursor} = params, _uri, socket) do
+    if Subscriptions.cursor_valid?(cursor, params, socket.assigns.current_owner_scope) do
+      {:noreply, assign(socket, :params, params)}
+    else
+      to =
+        socket.assigns.table_path
+        |> DataTableNav.merge_query(Map.drop(params, ["cursor", "org"]))
+
+      {:noreply,
+       socket
+       |> put_flash(
+         :info,
+         "That saved page position expired. Showing the first page with the same filters."
+       )
+       |> push_patch(to: to)}
+    end
+  end
+
+  @impl true
   def handle_params(%{"view" => "all"} = params, _uri, socket) do
-    {:noreply, assign(socket, :params, params)}
+    assign_canonical_params(socket, params)
   end
 
   def handle_params(params, _uri, socket) do
@@ -78,7 +107,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         {:noreply, assign(socket, :params, default)}
       end
     else
-      {:noreply, assign(socket, :params, params)}
+      assign_canonical_params(socket, params)
     end
   end
 
@@ -96,82 +125,20 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Billing"
           breadcrumbs={[
-            %{
-              label: Copy.dashboard_breadcrumb_home(),
-              href: scoped_path(@admin_mount_path, "", @current_owner_scope)
-            },
             %{label: Copy.subscriptions_index_breadcrumb()}
           ]}
           title={Copy.subscriptions_index_breadcrumb()}
         >
           <:description>
-            <p>
-              <StatusBadge.status_badge
-                status={verdict_status(@summary)}
-                label={verdict_label(verdict_status(@summary))}
-                tone={verdict_tone(verdict_status(@summary))}
-              />
-            </p>
             <p class="ax-body"><%= Copy.subscriptions_route_line() %></p>
           </:description>
-          <:actions>
-            <a
-              class="ax-button ax-button-primary ax-button-sm"
-              href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-            >
-              <%= Copy.subscriptions_invoice_queue_cta() %>
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={
-                @admin_mount_path
-                |> scoped_path("/webhooks", @current_owner_scope)
-                |> AccrueAdmin.DataTableNav.merge_query(%{
-                  "status" => "failed,dead",
-                  "type" => "subscription.created"
-                })
-              }
-            >
-              Webhooks: debug failed deliveries
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={scoped_path(@admin_mount_path, "/events", @current_owner_scope, %{"type" => "subscription.created"})}
-            >
-              Events audit log
-            </a>
-          </:actions>
           <:stat_strip>
             <StatStrip.stat_strip label={Copy.subscriptions_kpi_section_aria_label()}>
-              <:stat
-                label="Open invoices"
-                value={count(@summary.open_invoice_count, "invoice")}
-                tone="cobalt"
-                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-              />
-              <:stat
-                label="Exposure"
-                value={format_minor(@summary.open_invoice_exposure_minor, "usd")}
-                tone={exposure_tone(@summary)}
-                href={invoice_queue_path(@admin_mount_path, @current_owner_scope)}
-              />
-              <:stat
-                label="At-risk subscriptions"
-                value={count(@summary.past_due_count, "subscription")}
-                tone="amber"
-                href={scoped_path(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-              />
-              <:stat
-                label="Failed webhooks"
-                value={count(@summary.failed_webhook_count, "failed webhook")}
-                tone={webhook_tone(@summary)}
-                href={
-                  @admin_mount_path
-                  |> scoped_path("/webhooks", @current_owner_scope)
-                  |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "failed,dead"})
-                }
-              />
+              <:stat label="Subscriptions" value={to_string(@summary.total_count)} />
+              <:stat label="Past due" value={to_string(@summary.past_due_count)} tone={if @summary.past_due_count > 0, do: "amber"} />
+              <:stat label="Ending" value={to_string(@summary.canceling_count)} />
             </StatStrip.stat_strip>
           </:stat_strip>
           <:filter_toolbar>
@@ -180,8 +147,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               filter_fields={subscription_filter_fields()}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
-              clear_visible={filter_active?(@params)}
+              clear_href={@table_path}
+              clear_visible={reset_visible?(@params, @summary)}
             />
           </:filter_toolbar>
         </PageHeader.page_header>
@@ -190,6 +157,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.subscriptions_list_result_label_pair()}
           id="subscriptions"
           query_module={Subscriptions}
           current_owner_scope={@current_owner_scope}
@@ -201,47 +169,48 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           loading_fixture={phase196_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
-            %{
-              label: "Customer details",
-              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope)
+            %{width: 34,
+              label: "Subscription",
+              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope, @params, :table)
             },
-            %{label: "State", render: &state_cell/1},
-            %{label: "Plan / amount", render: &plan_amount_cell/1},
-            %{label: "Renews / ends", render: &time_cell/1},
-            %{
-              label: "Signals",
+            %{width: 14, label: "Status", render: &state_cell/1},
+            %{width: 18, label: "Plan", render: &plan_amount_cell/1},
+            %{width: 18, label: "Renews / ends", render: fn row -> time_cell(row, :table) end},
+            %{width: 16,
+              label: Copy.billing_owner_tax_label(),
               render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
             }
           ]}
-          card_title={&customer_label/1}
+          card_title={&identity_cell(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
+            %{label: "Status", render: &state_cell/1},
+            %{label: "Plan", render: &plan_amount_cell/1},
+            %{label: "Renews / ends", render: fn row -> time_cell(row, :card) end},
             %{
-              label: "Customer details",
-              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope)
-            },
-            %{label: "State", render: &state_cell/1},
-            %{label: "Plan / amount", render: &plan_amount_cell/1},
-            %{label: "Renews / ends", render: &time_cell/1},
-            %{
-              label: "Signals",
+              label: Copy.billing_owner_tax_label(),
               render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
             }
           ]}
           filter_fields={subscription_filter_fields()}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.subscriptions_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
           filtered_empty_copy={empty_copy(@params, @summary)}
         >
           <:list_status :let={status}>
+            <DataTable.view_nav label="Subscription view" items={[
+              %{label: "Past due or ending", current: queue_active?(@params), href: view_href(@params, @table_path, default_queue_status())},
+              %{label: "All subscriptions", current: is_nil(@params["status"]), href: view_href(@params, @table_path, nil)}
+            ]} />
             <FilterChipBar.filter_chip_bar
               items={work_queue_chips(@params, @table_path, @summary)}
-              label="Work queue"
+              label="Work queue" compact={true}
               result_count={status.visible_count}
-              result_label={{"subscription row", "subscription rows"}}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
+              result_label={Copy.subscriptions_list_result_label_pair()}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -250,6 +219,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     </AppShell.app_shell>
     """
   end
+
+  defp default_queue_status, do: @default_queue_status
 
   defp assign_shell(socket, admin) do
     socket
@@ -266,29 +237,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp subscription_summary(owner_scope) do
     subscriptions = scoped_subscriptions(owner_scope)
-    invoices = scoped_invoices(owner_scope)
-    open_invoice_statuses = [:draft, :open]
 
     %{
       active_count: subscriptions |> Query.active() |> Repo.aggregate(:count, :id),
       canceling_count: subscriptions |> Query.canceling() |> Repo.aggregate(:count, :id),
       paused_count: subscriptions |> Query.paused() |> Repo.aggregate(:count, :id),
       past_due_count: subscriptions |> Query.past_due() |> Repo.aggregate(:count, :id),
-      total_count: subscriptions |> Repo.aggregate(:count, :id),
-      open_invoice_count:
-        invoices
-        |> where([invoice], invoice.status in ^open_invoice_statuses)
-        |> Repo.aggregate(:count, :id),
-      open_invoice_exposure_minor:
-        invoices
-        |> where([invoice], invoice.status in ^open_invoice_statuses)
-        |> select([invoice], coalesce(sum(invoice.amount_remaining_minor), 0))
-        |> Repo.one()
-        |> Kernel.||(0),
-      failed_webhook_count:
-        WebhookEvent
-        |> where([event], event.status in [:failed, :dead])
-        |> Repo.aggregate(:count, :id)
+      total_count: subscriptions |> Repo.aggregate(:count, :id)
     }
   end
 
@@ -303,87 +258,89 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp scoped_subscriptions(_owner_scope), do: Subscription
 
-  defp scoped_invoices(%{mode: :organization, organization_id: organization_id}) do
-    Invoice
-    |> join(:inner, [invoice], customer in Customer, on: customer.id == invoice.customer_id)
-    |> where(
-      [_invoice, customer],
-      customer.owner_type == "Organization" and customer.owner_id == ^organization_id
-    )
-  end
-
-  defp scoped_invoices(_owner_scope), do: Invoice
-
-  # Compact two-chip idiom (matches invoices_live.ex's billing_signals_cell/1) — no in-cell
-  # actions, no audit/webhook-status lines (per D-01/REIGN-02).
   defp billing_signals_cell(row, _mount_path, _owner_scope) do
-    ownership = BillingPresentation.ownership_label(row)
-    tax = BillingPresentation.tax_health_label(BillingPresentation.tax_health(row))
-    escaped_o = ownership |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    assigns = %{row: row}
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-chip ax-label">Owner: #{escaped_o}</span> <span class="ax-chip ax-label">Tax: #{escaped_t}</span>)
-    )
+    ~H"""
+    <BillingContext.billing_context row={@row} />
+    """
   end
 
   # Primary link resolves to the subscription's own detail page (D-01's literal href
   # mandate) with customer-first TEXT for scannability; secondary link cross-navigates to
   # the customer (mirrors invoices_live.ex's bidirectional identity-cell pattern).
-  defp identity_cell(row, mount_path, owner_scope) do
-    subscription_href = scoped_path(mount_path, "/subscriptions/#{row.id}", owner_scope)
-    customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
+  defp identity_cell(row, mount_path, owner_scope, params, surface) do
+    list_path =
+      mount_path
+      |> scoped_path("/subscriptions", owner_scope)
+      |> DataTableNav.merge_query(params)
+
+    return_to = ScopedPath.return_path(mount_path, list_path, owner_scope)
+
+    subscription_href =
+      ScopedPath.build(mount_path, "/subscriptions/#{row.id}", owner_scope, %{
+        "return_to" => return_to
+      })
+
+    customer_href =
+      ScopedPath.build(mount_path, "/customers/#{row.customer_id}", owner_scope, %{
+        "return_to" => return_to
+      })
+
     subscription_id = row.processor_id || row.id
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{subscription_href}" class="ax-link">#{escape(customer_label(row))}</a><a href="#{customer_href}" class="ax-label ax-muted">#{escape(subscription_id)}</a></span>)
-    )
+    assigns = %{
+      customer_href: customer_href,
+      customer_label: customer_label(row),
+      subscription_href: subscription_href,
+      badge_id: "ax-id-badge-subscription-#{surface}-#{row.id}",
+      subscription_id: subscription_id
+    }
+
+    ~H"""
+    <DataTable.identity_cell label={@customer_label}>
+      <:primary><.link href={@subscription_href} class="ax-link"><%= @customer_label %></.link></:primary>
+      <:secondary>
+        <IdBadge.id_badge id={@badge_id} id_value={to_string(@subscription_id)} label="Copy subscription ID" copy_label="subscription ID" variant="plain" />
+        <.link href={@customer_href} class="ax-label ax-muted">Customer details</.link>
+      </:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
 
-  defp verdict_status(%{open_invoice_count: count}) when count > 0, do: :action_required
-  defp verdict_status(_summary), do: :healthy
-
-  defp verdict_label(:action_required), do: Copy.subscriptions_health_verdict_action_required()
-  defp verdict_label(:healthy), do: Copy.subscriptions_health_verdict_healthy()
-
-  defp verdict_tone(:action_required), do: "amber"
-  defp verdict_tone(:healthy), do: "moss"
-
-  defp exposure_tone(%{open_invoice_exposure_minor: minor}) when minor > 0, do: "amber"
-  defp exposure_tone(_summary), do: "moss"
-
-  defp webhook_tone(%{failed_webhook_count: count}) when count > 0, do: "amber"
-  defp webhook_tone(_summary), do: "moss"
-
   defp state_cell(row) do
     {status, label} = lifecycle_status(row)
 
-    %{
+    assigns = %{
       status: status,
       label: label,
       tone: status_tone(status),
-      __changed__: %{}
+      canceling: row.cancel_at_period_end and not Subscription.canceled?(row)
     }
-    |> StatusBadge.status_badge()
-    |> Phoenix.HTML.Safe.to_iodata()
-    |> IO.iodata_to_binary()
-    |> Phoenix.HTML.raw()
+
+    ~H"""
+    <span class="ax-data-table-value">
+      <StatusBadge.status_badge status={@status} label={@label} tone={@tone} />
+      <span :if={@canceling} class="ax-data-table-value-detail">Cancellation scheduled</span>
+    </span>
+    """
   end
 
-  defp lifecycle_status(%{cancel_at_period_end: true}), do: {:warning, "Canceling at period end"}
-  defp lifecycle_status(%{status: :past_due}), do: {:warning, "At risk"}
-  defp lifecycle_status(%{status: :unpaid}), do: {:warning, "At risk"}
-  defp lifecycle_status(%{status: :trialing}), do: {:trialing, "Trialing"}
-  defp lifecycle_status(%{status: :active}), do: {:active, "Active"}
-  defp lifecycle_status(%{status: :paused}), do: {:neutral, "Paused"}
-
-  defp lifecycle_status(%{ended_at: ended_at}) when not is_nil(ended_at),
-    do: {:neutral, "Canceled"}
-
-  defp lifecycle_status(%{status: :canceled}), do: {:neutral, "Canceled"}
-  defp lifecycle_status(%{status: status}), do: {status, humanize(status)}
+  defp lifecycle_status(row) do
+    cond do
+      row.status == :incomplete_expired -> {:neutral, "Incomplete expired"}
+      Subscription.canceled?(row) -> {:neutral, "Canceled"}
+      row.status == :unpaid -> {:warning, "Unpaid"}
+      Subscription.past_due?(row) -> {:warning, "Past due"}
+      row.status == :incomplete -> {:warning, "Incomplete"}
+      Subscription.trialing?(row) -> {:trialing, "Trialing"}
+      row.status == :paused -> {:neutral, "Paused"}
+      Subscription.active?(row) -> {:active, "Active"}
+      true -> {row.status, humanize(row.status)}
+    end
+  end
 
   defp status_tone(status) when status in [:active, :success, :ok], do: "moss"
   defp status_tone(status) when status in [:trialing, :info], do: "cobalt"
@@ -404,56 +361,56 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       |> Enum.reject(&(&1 in [false, nil, ""]))
       |> Enum.join(" · ")
 
-    setup_gap_cell(plan_context, "Amount not confirmed in admin")
+    evidence_cell(plan_context, "Amount unavailable")
   end
 
   defp plan_amount_cell(%{cancel_at_period_end: true}),
-    do: setup_gap_cell("Renewal ending", "Price not confirmed in admin")
+    do: evidence_cell("Renewal ending", "Price unavailable")
 
   defp plan_amount_cell(_row),
-    do: setup_gap_cell("No renewal data", Copy.subscriptions_list_plan_amount_unavailable())
+    do: evidence_cell("Plan unavailable", "Amount unavailable")
 
-  defp setup_gap_cell(context, issue) do
-    Phoenix.HTML.raw("""
-    <span class="ax-subscription-setup-gap">
-      <strong>Setup gap</strong>
-      <span>#{escape(issue)}</span>
-      <em>#{escape(context)}</em>
-    </span>
-    """)
+  defp evidence_cell(context, detail) do
+    assigns = %{value: context, detail: detail}
+
+    ~H"""
+    <DataTable.value_cell value={@value} detail={@detail} />
+    """
   end
 
-  defp format_minor(amount_minor, _currency) when is_integer(amount_minor) do
-    dollars = amount_minor / 100
-    "$" <> :erlang.float_to_binary(dollars, decimals: 2)
-  end
+  defp time_cell(%{ended_at: %DateTime{} = ended_at} = row, surface),
+    do: timestamp_cell("Ended", ended_at, row.id, surface)
 
-  defp format_minor(%Decimal{} = amount_minor, currency) do
-    amount_minor
-    |> Decimal.to_integer()
-    |> format_minor(currency)
-  end
-
-  defp format_minor(_amount_minor, _currency), do: "$0.00"
-
-  defp time_cell(%{ended_at: %DateTime{} = ended_at}), do: "Ended #{format_date(ended_at)}"
-
-  defp time_cell(%{ended_at: ended_at}) when not is_nil(ended_at),
+  defp time_cell(%{ended_at: ended_at}, _surface) when not is_nil(ended_at),
     do: "Ended #{to_string(ended_at)}"
 
-  defp time_cell(%{cancel_at_period_end: true, current_period_end: %DateTime{} = ends_at}),
-    do: "Ends #{format_date(ends_at)}"
+  defp time_cell(
+         %{cancel_at_period_end: true, current_period_end: %DateTime{} = ends_at} = row,
+         surface
+       ),
+       do: timestamp_cell("Ends", ends_at, row.id, surface)
 
-  defp time_cell(%{current_period_end: %DateTime{} = renews_at}),
-    do: "Renews #{format_date(renews_at)}"
+  defp time_cell(%{cancel_at_period_end: true}, _surface),
+    do: "Cancellation scheduled · end date not shown"
 
-  defp time_cell(%{trial_end: %DateTime{} = trial_end}),
-    do: "Trial ends #{format_date(trial_end)}"
+  defp time_cell(%{current_period_end: %DateTime{} = renews_at} = row, surface),
+    do: timestamp_cell("Renews", renews_at, row.id, surface)
 
-  defp time_cell(_row), do: "No renewal date"
+  defp time_cell(%{trial_end: %DateTime{} = trial_end} = row, surface),
+    do: timestamp_cell("Trial ends", trial_end, row.id, surface)
 
-  defp count(1, noun), do: "1 #{noun}"
-  defp count(n, noun), do: "#{n} #{noun}s"
+  defp time_cell(_row, _surface), do: "Renewal date not shown"
+
+  defp timestamp_cell(label, value, row_id, surface) do
+    assigns = %{label: label, value: value, id: "subscription-#{surface}-time-#{row_id}"}
+
+    ~H"""
+    <span><%= @label %> <Timestamp.timestamp value={@value} id={@id} format={:date} /></span>
+    """
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Phoenix.HTML.raw()
+  end
 
   defp integerish(%Decimal{} = value), do: Decimal.to_integer(value)
   defp integerish(value) when is_integer(value), do: value
@@ -463,25 +420,35 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     [
       %{
         id: :q,
-        label: "Filter subscriptions table",
-        placeholder: "Filter by customer email, customer ID, subscription ID, or actor"
+        label: "Search subscriptions",
+        placeholder: "Customer name, email, or ID"
       },
-      %{
-        id: :status,
-        label: "Status",
-        type: :select,
-        all_label: "All statuses",
-        options: [
-          {"active", "Active"},
-          {"trialing", "Trialing"},
-          {"canceling", "Canceling"},
-          {"paused", "Paused"},
-          {"past_due", "Past due"},
-          {"canceled", "Canceled"}
+      {
+        :status,
+        [
+          label: "Status",
+          type: :checkbox_group,
+          options: [
+            {"active", "Active"},
+            {"trialing", "Trialing"},
+            {"canceling", "Canceling"},
+            {"paused", "Paused"},
+            {"past_due", "Past due"},
+            {"canceled", "Canceled"}
+          ]
         ]
       },
-      %{id: :customer_id, label: "Customer id", placeholder: "Customer id"}
+      %{
+        id: :customer_id,
+        label: "Customer ID",
+        placeholder: "Customer ID",
+        secondary: true
+      }
     ]
+    |> Enum.map(fn
+      {id, opts} -> Map.new(opts) |> Map.put(:id, id)
+      field -> field
+    end)
   end
 
   defp filter_params(params) do
@@ -489,6 +456,29 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     |> Subscriptions.decode_filter()
     |> Subscriptions.encode_filter()
     |> Map.new(fn {key, value} -> {to_string(key), to_string(value)} end)
+  end
+
+  defp assign_canonical_params(socket, params) do
+    canonical =
+      case Map.get(params, "status") do
+        nil ->
+          params
+
+        status ->
+          case Subscriptions.normalize_status_selection(status) do
+            nil -> Map.delete(params, "status")
+            normalized -> Map.put(params, "status", normalized)
+          end
+      end
+
+    if connected?(socket) and canonical != params do
+      {:noreply,
+       Phoenix.LiveView.push_patch(socket,
+         to: AccrueAdmin.DataTableNav.merge_query(socket.assigns.table_path, canonical)
+       )}
+    else
+      {:noreply, assign(socket, :params, canonical)}
+    end
   end
 
   defp flash_messages(flash) do
@@ -500,15 +490,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     end)
   end
 
-  defp work_queue_chips(params, table_path, summary) do
+  defp work_queue_chips(params, table_path, _summary) do
     queue_active = Map.get(params, "status") == @default_queue_status
-    all_active = Map.get(params, "view") == "all"
-    clear_href = clear_all_href(params, table_path)
 
-    filter_chips =
+    filters =
       params
       |> filter_params()
-      |> Enum.reject(fn {key, _value} -> key == "status" and queue_active end)
+      |> Enum.reject(fn {key, _} -> key == "status" and queue_active end)
       |> Enum.map(fn {key, value} ->
         %{
           id: String.to_atom(key),
@@ -520,31 +508,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         }
       end)
 
-    [
-      %{
-        id: :status_queue,
-        label: "At risk",
-        value: "#{count(summary.past_due_count, "at-risk subscription")} - dunning funnel",
-        tone: :cobalt,
-        active: queue_active,
-        remove_href: if(queue_active, do: clear_href, else: nil)
-      },
-      %{
-        id: :view_all,
-        label: "All",
-        tone: :slate,
-        active: queue_active or all_active,
-        href: if(queue_active, do: clear_href, else: nil)
-      },
-      %{
-        id: :open_invoices,
-        label: "Open invoice queue workspace",
-        value: count(summary.open_invoice_count, "open invoice"),
-        tone: :amber,
-        active: true,
-        href: invoice_queue_path_from_table(table_path)
-      }
-    ] ++ filter_chips
+    filters
   end
 
   defp filter_chip_label("q"), do: "Search"
@@ -552,7 +516,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp filter_chip_label("customer_id"), do: "Customer"
   defp filter_chip_label(key), do: humanize(key)
 
-  defp filter_chip_value("status", value), do: humanize(value)
+  defp filter_chip_value("status", value),
+    do: value |> String.split(",") |> Enum.map_join(", ", &humanize/1)
+
   defp filter_chip_value(_key, value), do: value
 
   defp clear_all_href(_params, table_path) do
@@ -566,10 +532,21 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     })
   end
 
+  defp reset_visible?(params, summary) do
+    filter_params(params) != %{"status" => @default_queue_status} and
+      (filter_active?(params) or (params["view"] == "all" and summary.total_count > 0))
+  end
+
   defp filter_active?(params), do: filter_params(params) != %{}
 
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
+  defp view_href(params, path, status) do
+    params =
+      params
+      |> Map.drop(["cursor", "phase196_state"])
+      |> Map.put("status", status)
+      |> Map.put("view", if(is_nil(status), do: "all"))
+
+    AccrueAdmin.DataTableNav.merge_query(path, params)
   end
 
   defp list_state(params, _summary) do
@@ -639,36 +616,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
 
-  defp scoped_path(mount_path, suffix, owner_scope, params) do
-    mount_path
-    |> scoped_path(suffix, owner_scope)
-    |> AccrueAdmin.DataTableNav.merge_query(params)
-  end
-
-  defp invoice_queue_path(mount_path, owner_scope) do
-    mount_path
-    |> scoped_path("/invoices", owner_scope)
-    |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "open"})
-  end
-
-  defp invoice_queue_path_from_table(table_path) do
-    uri = URI.parse(table_path)
-    mount_path = uri.path |> Path.dirname()
-
-    %{uri | path: mount_path <> "/invoices"}
-    |> URI.to_string()
-    |> AccrueAdmin.DataTableNav.merge_query(%{"status" => "open"})
-  end
-
   defp map_only_scope?(params) do
     params != %{} and Map.keys(params) -- ["org"] == []
   end
-
-  defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-
-  # Every caller guards %DateTime{} before calling (see time_cell/1), so a
-  # non-DateTime fallback clause is unreachable — dialyzer flags it (pattern_match_cov).
-  defp format_date(%DateTime{} = value), do: Calendar.strftime(value, "%b %-d, %Y")
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 

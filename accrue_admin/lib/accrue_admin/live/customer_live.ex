@@ -5,13 +5,13 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   import Ecto.Query
 
-  alias Accrue.APIError
-  alias Accrue.Billing
+  alias Accrue.{APIError, Auth, Billing}
   alias Accrue.Billing.{Charge, Invoice, PaymentMethod, Subscription}
   alias Accrue.Events
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Customers
   alias AccrueAdmin.ScopedPath
 
@@ -27,6 +27,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
     StatusBadge,
     Timeline
   }
+
+  alias AccrueAdmin.Components.Timestamp
 
   alias AccrueAdmin.TaxOwnershipRow
 
@@ -54,6 +56,14 @@ defmodule AccrueAdmin.Live.CustomerLive do
            scoped_admin_path(admin, socket.assigns.current_owner_scope, "/customers")
          )
          |> assign(:customer, customer)
+         |> assign(
+           :return_path,
+           ScopedPath.build(
+             admin["mount_path"] || "/billing",
+             "/customers",
+             socket.assigns.current_owner_scope
+           )
+         )
          |> assign(:flashes, [])
          |> assign(:params, %{})
          |> assign(:drawer_action_type, nil)
@@ -84,10 +94,35 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
+    return_destination = customer_return_destination(params, socket.assigns)
+
+    journey_path =
+      ScopedPath.build(
+        socket.assigns.admin_mount_path,
+        "/customers/#{socket.assigns.customer.id}",
+        socket.assigns.current_owner_scope,
+        Map.take(params, ["tab"])
+      )
+
     {:noreply,
      socket
      |> assign(:params, params)
+     |> assign(:return_path, return_destination.path)
+     |> assign(:return_label, return_destination.label)
+     |> assign(:journey_path, journey_path)
      |> assign_peer_record_set(params)}
+  end
+
+  defp customer_return_destination(params, assigns) do
+    mount_path = assigns.admin_mount_path
+
+    ScopedPath.return_destination(
+      mount_path,
+      Map.get(params, "return_to"),
+      assigns.current_owner_scope,
+      assigns.customer.id,
+      "/customers"
+    )
   end
 
   @impl true
@@ -145,19 +180,22 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   def handle_event("confirm_payment_method_action", _params, socket) do
     case socket.assigns.pending_payment_method_action do
-      %{type: "set_default", payment_method: %PaymentMethod{id: payment_method_id}} ->
-        with {:ok, payment_method} <-
-               fetch_customer_payment_method(socket.assigns.customer, payment_method_id),
+      %{type: "set_default"} ->
+        with {:ok, fresh_scope, customer, payment_method} <-
+               revalidate_payment_method_action(
+                 socket,
+                 socket.assigns.pending_payment_method_action
+               ),
              :ok <-
                validate_payment_method_action(
-                 socket.assigns.customer,
+                 customer,
                  "set_default",
                  payment_method
                ),
-             {:ok, _customer} <-
-               Billing.set_default_payment_method(socket.assigns.customer, payment_method, []) do
+             {:ok, _customer} <- Billing.set_default_payment_method(customer, payment_method, []) do
           {:noreply,
            socket
+           |> assign(:current_owner_scope, fresh_scope)
            |> push_flash(:info, Copy.customer_payment_methods_set_default_success())
            |> clear_payment_method_action()
            |> refresh_customer_detail()}
@@ -171,14 +209,18 @@ defmodule AccrueAdmin.Live.CustomerLive do
              )}
         end
 
-      %{type: "delete", payment_method: %PaymentMethod{id: payment_method_id}} ->
-        with {:ok, payment_method} <-
-               fetch_customer_payment_method(socket.assigns.customer, payment_method_id),
-             :ok <-
-               validate_payment_method_action(socket.assigns.customer, "delete", payment_method),
+      %{type: "delete"} ->
+        with {:ok, fresh_scope, customer, payment_method} <-
+               revalidate_payment_method_action(
+                 socket,
+                 socket.assigns.pending_payment_method_action
+               ),
+             :ok <- validate_payment_method_action(customer, "delete", payment_method),
              {:ok, _payment_method} <- Billing.delete_payment_method(payment_method, []) do
           {:noreply,
            socket
+           |> assign(:customer, customer)
+           |> assign(:current_owner_scope, fresh_scope)
            |> reconcile_deleted_payment_method(payment_method)
            |> push_flash(:info, Copy.customer_payment_methods_delete_success())
            |> clear_payment_method_action()
@@ -213,10 +255,10 @@ defmodule AccrueAdmin.Live.CustomerLive do
       current_owner_scope={assigns[:current_owner_scope]}
       active_organization_name={@active_organization_name}
     >
-      <section class="ax-page">
+      <section class="ax-page ax-customer-detail-page">
         <Breadcrumbs.breadcrumbs
+          group="Billing"
           items={[
-            %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope)},
             %{
               label: "Customers",
               href: scoped_mount_path(@admin_mount_path, "/customers", @current_owner_scope)
@@ -224,14 +266,30 @@ defmodule AccrueAdmin.Live.CustomerLive do
             %{label: customer_label(@customer)}
           ]}
         />
+        <p class="ax-detail-back-link">
+          <a class="ax-link" href={@return_path}><%= @return_label %></a>
+        </p>
 
         <Detail.summary_card eyebrow="Customer detail" title={customer_label(@customer)}>
           <:facts>
-            <span><%= @customer.processor_id %></span>
-            <span>locale <%= @customer.preferred_locale || "--" %></span>
-            <span>timezone <%= @customer.preferred_timezone || "--" %></span>
+            <span><strong>Owner</strong> <%= owner_summary(@customer) %></span>
+            <span><strong>Processor customer ID</strong> <%= @customer.processor_id || "Unavailable" %></span>
+            <span>locale <%= @customer.preferred_locale || "Unavailable" %></span>
+            <span>timezone <%= @customer.preferred_timezone || "Unavailable" %></span>
           </:facts>
         </Detail.summary_card>
+
+        <nav class="ax-tabs ax-customer-peer-tabs" aria-label="Customer peer record sets">
+          <a
+            :for={tab <- peer_record_set_links(@customer, @tab_counts, @admin_mount_path, @current_owner_scope, @return_path)}
+            href={tab.href}
+            class={["ax-tab", @tab == tab.id && "ax-tab-active"]}
+            aria-current={if(@tab == tab.id, do: "page", else: nil)}
+          >
+            <span><%= tab.label %></span>
+            <span :if={tab.count} class="ax-tab-count"><%= tab.count %></span>
+          </a>
+        </nav>
 
         <FlashGroup.flash_group flashes={@flashes} />
 
@@ -318,23 +376,11 @@ defmodule AccrueAdmin.Live.CustomerLive do
           </details>
 
           <section class="ax-detail-section" aria-label="Customer record sets">
-            <nav class="ax-tabs" aria-label="Customer peer record sets">
-              <a
-                :for={tab <- peer_record_set_links(@customer, @tab_counts, @admin_mount_path, @current_owner_scope)}
-                href={tab.href}
-                class={["ax-tab", @tab == tab.id && "ax-tab-active"]}
-                aria-current={if(@tab == tab.id, do: "page", else: nil)}
-              >
-                <span><%= tab.label %></span>
-                <span :if={tab.count} class="ax-tab-count"><%= tab.count %></span>
-              </a>
-            </nav>
-
             <%= case @tab do %>
               <% "subscriptions" -> %>
                 <div :for={subscription <- @peer_records} class="ax-list-row">
                   <a
-                    href={ScopedPath.build(@admin_mount_path, "/subscriptions/#{subscription.id}", @current_owner_scope)}
+                    href={ScopedPath.build(@admin_mount_path, "/subscriptions/#{subscription.id}", @current_owner_scope, %{"return_to" => @journey_path})}
                     class="ax-link"
                   >
                     <%= subscription.processor_id %>
@@ -346,24 +392,24 @@ defmodule AccrueAdmin.Live.CustomerLive do
               <% "invoices" -> %>
                 <div :for={invoice <- @peer_records} class="ax-list-row">
                   <a
-                    href={ScopedPath.build(@admin_mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}
+                    href={ScopedPath.build(@admin_mount_path, "/invoices/#{invoice.id}", @current_owner_scope, %{"return_to" => @journey_path})}
                     class="ax-link"
                   >
                     <%= invoice.number || invoice.processor_id || invoice.id %>
                   </a>
-                  <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor || 0} currency={invoice.currency || "usd"} customer={@customer} />
+                  <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor} currency={invoice.currency} customer={@customer} />
                 </div>
                 <p :if={@peer_records == []} class="ax-body"><%= customer_peer_empty_body(:invoices) %></p>
 
               <% "charges" -> %>
                 <div :for={charge <- @peer_records} class="ax-list-row">
                   <a
-                    href={ScopedPath.build(@admin_mount_path, "/payments/#{charge.id}", @current_owner_scope)}
+                    href={ScopedPath.build(@admin_mount_path, "/payments/#{charge.id}", @current_owner_scope, %{"return_to" => @journey_path})}
                     class="ax-link"
                   >
                     <%= charge.processor_id || charge.id %>
                   </a>
-                  <MoneyFormatter.money_formatter amount_minor={charge.amount_cents || 0} currency={charge.currency || "usd"} customer={@customer} />
+                  <MoneyFormatter.money_formatter amount_minor={charge.amount_cents} currency={charge.currency} customer={@customer} />
                 </div>
                 <p :if={@peer_records == []} class="ax-body"><%= customer_peer_empty_body(:payments) %></p>
             <% end %>
@@ -424,11 +470,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
               class="ax-button ax-button-primary"
               data-role="confirm-payment-method-action"
               data-ax-action-drawer-confirm
+              phx-disable-with={payment_method_submitting_label(@pending_payment_method_action.type)}
             >
               Confirm <%= payment_method_action_label(@pending_payment_method_action.type) %>
             </button>
             <button phx-click="cancel_payment_method_action" class="ax-button ax-button-ghost">
-              <%= Copy.customer_payment_methods_cancel_action() %>
+              Back to customer
             </button>
           </:footer>
         </DetailDrawer.detail_drawer>
@@ -450,6 +497,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
               class="ax-button ax-button-primary"
               data-role="confirm-payment-method-action"
               data-ax-action-drawer-confirm
+              phx-disable-with={payment_method_submitting_label(@pending_payment_method_action.type)}
             >
               Confirm <%= payment_method_action_label(@pending_payment_method_action.type) %>
             </button>
@@ -467,6 +515,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
     <div class="ax-stack-md" data-role="payment-method-action-content">
       <p class="ax-body"><%= payment_method_action_copy(@pending_action) %></p>
       <Detail.detail_field_list fields={payment_method_action_fields(@pending_action)} />
+      <p class="ax-body ax-measure"><%= payment_method_action_consequence(@pending_action) %></p>
     </div>
     """
   end
@@ -487,10 +536,11 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp summary_rows(customer, payment_methods, tax_risk, entitlements_view, counts) do
     [
       %{label: "Owner", value: owner_summary(customer)},
-      %{label: "Processor customer ID", value: customer.processor_id || "-"},
+      %{label: "Processor customer ID", value: customer.processor_id || "Unavailable"},
       %{
         label: "Locale / timezone",
-        value: "#{customer.preferred_locale || "--"} / #{customer.preferred_timezone || "--"}"
+        value:
+          "#{customer.preferred_locale || "Unavailable"} / #{customer.preferred_timezone || "Unavailable"}"
       },
       %{
         label: "Default payment method",
@@ -658,7 +708,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
           },
           %{
             label: Copy.entitlements_advisory_observed_at_label(),
-            value: format_advisory_timestamp(advisory.observed_at)
+            value: timestamp_value(advisory.observed_at, "customer-advisory-observed-at")
           },
           %{
             label: Copy.entitlements_advisory_source_label(),
@@ -831,14 +881,15 @@ defmodule AccrueAdmin.Live.CustomerLive do
     }
   end
 
-  defp peer_record_set_links(customer, counts, mount_path, owner_scope) do
+  defp peer_record_set_links(customer, counts, mount_path, owner_scope, return_path) do
     Enum.map(@peer_record_sets, fn tab ->
       %{
         id: tab,
         label: peer_record_set_label(tab),
         href:
           scoped_mount_path(mount_path, "/customers/#{customer.id}", owner_scope, %{
-            "tab" => peer_record_set_param(tab)
+            "tab" => peer_record_set_param(tab),
+            "return_to" => return_path
           }),
         count: Map.get(counts, String.to_existing_atom(tab))
       }
@@ -975,7 +1026,15 @@ defmodule AccrueAdmin.Live.CustomerLive do
     with {:ok, normalized_action_type} <- normalize_payment_method_action_type(action_type),
          {:ok, payment_method} <- fetch_customer_payment_method(customer, payment_method_id),
          :ok <- validate_payment_method_action(customer, normalized_action_type, payment_method) do
-      {:ok, %{type: normalized_action_type, payment_method: payment_method}}
+      {:ok,
+       %{
+         type: normalized_action_type,
+         payment_method: payment_method,
+         customer: customer,
+         reviewed_default?: default_payment_method?(customer, payment_method),
+         reviewed_customer_default_id: customer.default_payment_method_id,
+         reviewed_in_use?: active_subscription_payment_method?(customer, payment_method)
+       }}
     end
   end
 
@@ -1021,6 +1080,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp payment_method_action_label(_action_type),
     do: Copy.customer_payment_methods_section_heading()
 
+  defp payment_method_submitting_label("set_default"), do: "Setting default payment method..."
+  defp payment_method_submitting_label("delete"), do: "Deleting payment method..."
+
   defp payment_method_action_copy(%{type: "set_default"}),
     do: Copy.customer_payment_methods_set_default_drawer_body()
 
@@ -1029,12 +1091,42 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   defp payment_method_action_copy(_action), do: Copy.customer_payment_methods_delete_warning()
 
-  defp payment_method_action_fields(%{payment_method: %PaymentMethod{} = payment_method}) do
+  defp payment_method_action_fields(%{payment_method: %PaymentMethod{} = payment_method} = action) do
+    customer = action.customer
+
     [
+      %{label: "Customer", value: customer_label(customer)},
+      %{label: "Customer ID", value: customer.id},
+      %{label: "Owner", value: owner_summary(customer)},
       %{label: "Payment method", value: payment_method_label(payment_method)},
-      %{label: "Processor ID", value: payment_method.processor_id || payment_method.id}
+      %{label: "Payment method record ID", value: payment_method.id},
+      %{label: "Processor ID", value: payment_method.processor_id || payment_method.id},
+      %{
+        label: "Current default",
+        value: if(action.reviewed_default?, do: "Yes", else: "No")
+      },
+      %{
+        label: "Current use",
+        value:
+          if(action.reviewed_in_use?,
+            do: "Used by an active subscription",
+            else: "Not found on an active subscription"
+          )
+      },
+      %{label: "Action", value: payment_method_action_label(action.type)}
     ]
   end
+
+  defp payment_method_action_consequence(%{type: "set_default"}),
+    do:
+      "This makes the selected payment method the customer's default for future billing. It does not change existing invoices or confirm a payment."
+
+  defp payment_method_action_consequence(%{type: "delete"}),
+    do:
+      "This removes the selected payment method from the customer. Accrue will show the result returned by the current processor integration; deletion is not proof of any prior payment outcome."
+
+  defp payment_method_action_consequence(_action),
+    do: Copy.customer_payment_methods_delete_warning()
 
   defp clear_payment_method_action(socket) do
     socket
@@ -1069,7 +1161,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
     do: Copy.customer_payment_methods_delete_blocked_replacement_required()
 
   defp payment_method_action_flash_kind(reason)
-       when reason in [:in_use, :replacement_required, :payment_method_already_default],
+       when reason in [
+              :in_use,
+              :replacement_required,
+              :payment_method_already_default,
+              :payment_method_changed
+            ],
        do: :warning
 
   defp payment_method_action_flash_kind(_reason), do: :error
@@ -1115,6 +1212,37 @@ defmodule AccrueAdmin.Live.CustomerLive do
     end
   end
 
+  defp revalidate_payment_method_action(socket, action) do
+    original_scope = socket.assigns.current_owner_scope
+    session = socket.assigns.accrue_admin_session
+
+    params =
+      if original_scope.mode == :organization,
+        do: %{"org" => original_scope.organization_slug},
+        else: %{}
+
+    with {:ok, fresh_scope} <- OwnerScope.resolve(session, params),
+         true <-
+           Auth.actor_id(fresh_scope.current_admin) == Auth.actor_id(socket.assigns.current_admin),
+         true <- fresh_scope.mode == original_scope.mode,
+         true <- fresh_scope.organization_id == original_scope.organization_id,
+         {:ok, customer} <- Customers.detail(socket.assigns.customer.id, fresh_scope),
+         {:ok, payment_method} <-
+           fetch_customer_payment_method(customer, action.payment_method.id),
+         :ok <- validate_payment_method_action(customer, action.type, payment_method),
+         true <- customer.default_payment_method_id == action.reviewed_customer_default_id,
+         true <- default_payment_method?(customer, payment_method) == action.reviewed_default?,
+         true <-
+           active_subscription_payment_method?(customer, payment_method) ==
+             action.reviewed_in_use? do
+      {:ok, fresh_scope, customer, payment_method}
+    else
+      false -> {:error, :payment_method_changed}
+      :not_found -> {:error, :payment_method_not_found}
+      {:error, _reason} = error -> error
+    end
+  end
+
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
   end
@@ -1150,22 +1278,28 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp payment_method_error_message(%APIError{code: "payment_method_replacement_required"}),
     do: Copy.customer_payment_methods_delete_blocked_replacement_required()
 
-  defp payment_method_error_message(%APIError{message: message}) when is_binary(message),
-    do: message
-
   defp payment_method_error_message(:payment_method_not_found), do: "Payment method not found."
 
   defp payment_method_error_message(:payment_method_already_default),
     do: Copy.customer_payment_methods_already_default_warning()
 
+  defp payment_method_error_message(:payment_method_changed),
+    do:
+      "Customer payment-method details changed after review. Review the current method before confirming."
+
   defp payment_method_error_message(:payment_method_action_invalid),
     do: "Select a valid payment method action."
+
+  defp payment_method_error_message(reason) when reason in [:timeout, :econnreset, :closed],
+    do:
+      "Outcome not confirmed. Reload this customer's payment methods before deciding whether another action is needed; Accrue will not retry automatically."
 
   defp payment_method_error_message(reason) when reason in [:in_use, :replacement_required],
     do: blocked_reason_copy(reason)
 
   defp payment_method_error_message(_reason),
-    do: "We couldn't update the payment methods for this customer."
+    do:
+      "Outcome not confirmed. Reload this customer's payment methods before deciding whether another action is needed; Accrue will not retry automatically."
 
   defp tax_risk_summary(customer) do
     subscriptions =
@@ -1225,7 +1359,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
     Enum.map(events, fn event ->
       %{
         title: event.type,
-        at: format_datetime(event.inserted_at),
+        id: event.id,
+        at: event.inserted_at,
         body: event.subject_type <> " " <> event.subject_id,
         status: event.actor_type,
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate)
@@ -1268,8 +1403,15 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   defp humanize(_value), do: "Unknown"
 
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
+  defp timestamp_value(%DateTime{} = value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
+
+  defp timestamp_value(_value, _id), do: Copy.entitlements_advisory_age_unknown_copy()
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

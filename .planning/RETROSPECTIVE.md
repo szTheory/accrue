@@ -1756,12 +1756,154 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 ---
 
+
+## Milestone: v1.63 — Admin and Portal UI refinement
+
+**Shipped:** 2026-10-09
+**Phases:** 7 | **Plans:** 45 | **Tasks:** 96
+
+### What Was Built
+
+- Refined existing Admin, Portal, checkout, and host return journeys with fresh owner, actor, provider, eligibility, and target checks.
+- Made lifecycle, money, scope, provider capability, and uncertain outcomes explicit across customer and operator surfaces.
+- Added mounted browser, integration, accessibility, responsive, asset, copy, and documentation evidence for recurring CI use.
+
+### What Worked
+
+- Splitting the work into route-owned phases kept authorization, state truth, and visible outcomes close to the journeys they protect.
+- Using the real host, Repo, and served browser surfaces exposed integration gaps that package-local assertions alone would miss.
+- Recording executable acceptance evidence in each phase supported zero-human UAT for the tested claims.
+
+### What Was Inefficient
+
+- Closeout needed manual normalization of older verification metadata so the audit scanner could interpret their established outcomes consistently.
+- The archive command produced an overly long accomplishment list that needed editorial grouping.
+- Several closeout facts existed in multiple planning files and needed a final consistency pass after archiving.
+
+### Patterns Established
+
+- Signed context pins locate the displayed billing identity; authorization and exact target facts are reloaded at each protected action.
+- Keep operator actor, billed entity, Customer, provider, and target distinct, and report only outcomes supported by current evidence.
+- Shift testable acceptance left by default: use recurring deterministic CI checks and reserve human handoff for real decisions or unrepresentable evidence.
+
+### Key Lessons
+
+1. Keep verification status vocabulary canonical and machine-readable when writing the source artifact, so closeout does not need retroactive normalization.
+2. Run audit and evidence reconciliation during phase work; a clean milestone archive depends on current traceability across reports, roadmap, and requirements.
+3. A zero-human UAT target works best when each phase chooses the cheapest repeatable check that proves its acceptance claims and retains its output.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: multiple, 2026-10-07 → 2026-10-09.
+- Notable: local package, integration, browser, and documentation suites passed; the existing main-branch CI record was a separate remote-SHA check and did not certify this unpushed branch.
+
+
+## Milestone: v1.64 — Admin Operator UI Cleanup
+
+**Shipped:** 2026-10-10
+**Phases:** 4 | **Plans:** 24 | **Tasks:** 53
+
+### What Was Built
+
+- Completed the existing Admin billing, investigation, catalog, Connect, Home, and search journeys with scoped destinations, fresh action checks, truthful outcomes, and shared interaction patterns.
+- Added recurring mounted and served-asset acceptance, a complete reviewed twelve-image Linux visual set with a blocking Ubuntu comparison, and an isolated Fake-backed feedback preview.
+- Reconciled 18 requirements, four fresh phase verifications, ten integration seams, and six end-to-end flows; the audit found zero blockers.
+
+### What Worked
+
+- Keeping proof in existing package, host, browser, and Linux owners preserved recurring value without adding a parallel CI matrix.
+- The integration audit traced shared patterns through consumers and data sources, which made route and evidence boundaries visible before archive.
+- Refreshing phase verifications against current source made the final closeout report reflect the shipped revision rather than historical green results.
+
+### What Was Inefficient
+
+- Later shared-source and evidence changes invalidated earlier phase fingerprints, requiring four owner-specific verification refreshes at closeout.
+- The milestone command generated a long flat accomplishment list; grouping results by outcome made the durable archive easier to scan.
+- Closeout needed a final consistency pass across live project state, archived roadmap, audit, milestone index, and deferred-item counts.
+
+### Patterns Established
+
+- Keep route inventories explicit about source-only, historical, mounted, and current served evidence; additive evidence must not broaden the claim silently.
+- Bind Linux visual results to the exact source SHA, workflow run, complete expected image set, and unchanged blocking thresholds.
+- Carry acknowledged items forward with separate counts for newly acknowledged and previously acknowledged notices.
+
+### Key Lessons
+
+1. Refresh covered-input fingerprints after the last shared-source change and before the integration audit, so the milestone does not pay the same verification tax at archive time.
+2. Treat the integration audit as a cross-phase traceability check and preserve its evidence boundaries in both live state and archived documents.
+3. Curate milestone-level outcomes when archiving; retain detailed plan accomplishments in phase records rather than duplicating them as an unfiltered list.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: multi-session, 2026-10-09 → 2026-10-10.
+- Notable: the closeout span from the first Phase 240 planning commit through the integration audit changed 320 files (+26,725/-1,260); the source-package subset changed 100 files (+6,337/-906).
+
+## Milestone: v1.65 — Accrue Admin Language & Consistency
+
+**Completed and archived:** 2026-10-11
+**Phases:** 1 | **Plans:** 4 | **Tasks:** 8
+
+### What Was Built
+Producer-backed labels across Home, Events and webhook activity; exact keys, IDs and timestamps; patch-safe native disclosures; truthful replay/read outcomes with identified delivery rows and supported read-only recovery.
+
+### What Worked
+Existing copy, LiveView and browser owners tied readable wording to durable evidence. Independent review found concrete disclosure and outcome defects, repaired without dependencies or new CI lanes. Final audit passed all four requirements and four defined seams/flows.
+
+### What Was Inefficient
+Browser fixture and selector corrections required repeated focused attempts. Initial verification found gaps that required a fourth closure plan. Historical UI scores and fixture limitations needed careful disposition rather than broader re-review.
+
+### Patterns Established
+Preserve exact investigation evidence behind plain primary labels. Distinguish accepted dispatch from unavailable observations. Retain selected identity separately from authorization-derived links. Bind each green result to its actual tested revision.
+
+### Key Lessons
+Test copy against the state, jobs and audit facts it describes. Use actual mounted fields and record-specific destinations in browser assertions. Keep unobserved failure branches explicit; passing owner tests do not imply browser observation.
+
+### Cost Observations
+- 55 commits before archival over 2026-10-10 → 2026-10-11; four plans and eight tasks.
+- Model/session percentages are not reliably recorded; no estimate claimed.
+- Reused final Admin 693/693 and browser 6/6 receipts during audit/closeout; avoided duplicate suites.
+
+---
+
+## Milestone: v1.66 — Admin Usability and Visual Consistency
+
+**Completed locally:**2026-10-12 | **Phases:**4 | **Plans:**18 | **Task entries:**41
+
+### What Was Built
+
+Existing Admin collections/search/tables and exact timestamp/detail/recovery conventions; realistic ordinary preview, guarded four-state host tooling and integrated owner/finding proof.
+
+### What Worked
+
+Shared owners and actual mounted source/served-asset receipts kept changes scoped. Independent integration traced all16requirements with0blockers. Negative fixture lifecycle controls found and closed the persisted held-out leak.
+
+### What Was Inefficient
+
+Wrong credential extraction and login timing required correction; a later host regression exposed teardown leakage. Current proof required bounded screenshot framing and exact Unicode corrections. Initial failed records and visual scores remain preserved.
+
+### Patterns Established
+
+Guard every mutation with real target identity; remove only the exact fixture graph. Label historical receipts separately from representative current captures. Do not rewrite limited coverage into full acceptance.
+
+### Key Lessons
+
+Milestone triads must inspect actual SUMMARY completion lists; phase247used empty lists, so final coverage/accomplishments required manual reconciliation. Archive moves invalidate this runtime's path-bound fingerprints; record passed pre-move verification accurately. CLI task stats undercounted34versus41actual task entries; reconcile before publishing totals.
+
+### Cost Observations
+
+No reliable model-cost or session totals were available. Bounded existing owners were used; no new broad product suite or external CI run was claimed during closeout.
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.65 | not measured | 1 | Existing Admin language and evidence; audit passed 4/4 requirements, 4/4 seams, 4/4 flows; no new acknowledgements, six carried forward. |
+| v1.64 | multi (2026-10-09→10-10) | 4 | **ADMIN/BILLING/INVESTIGATION/EVIDENCE** — completed scoped operator journeys and current served proof across the 21-route inventory; passed current-source Ubuntu comparison and isolated Fake preview acceptance. Audit `tech_debt`: 18/18 requirements, 4/4 phases, 10/10 integration seams, 6/6 flows, 0 blockers. Override closeout: 2 newly acknowledged and 4 carried forward. |
+| v1.63 | multi (2026-10-07→10-09) | 7 | **ADMIN/PORTAL/CHECKOUT** — completed the scoped Admin and customer journeys, revalidated host/provider identity at action time, and shifted acceptance into recurring automated evidence. Audit `tech_debt`: 34/34 requirements, 7/7 phase verifications, 5/5 integration seams, 4/4 E2E flows, 0 blockers; four acknowledged closeout items. |
 | v1.62 | multi (2026-09-13→09-18) | 4 | **REPO/INTG/GATE/HYG/REL** — established reproducible repository + recovery truth, built a provenance-backed integration candidate without rewriting published history, recorded exact-SHA gate status per lane under a closed lexicon with no aggregate green boolean, and handed off bounded evidence-backed cleanup as PR #45. Audit `tech_debt`: 14/14 requirements, 4/4 phases, 5/5 integration seams, 1/1 flow, 0 blockers. Override closeout: 1 acknowledged deferral (dormant SEED-008). Candidate SHA honestly recorded **red** — releasing is the next milestone's work. |
 | v1.61 | multi (2026-08-08→09-12) | 4 | **REL/BASE/PATH/SAFE** — repaired required-lane causes, froze a repository-bound 20-path baseline, kept a one-edge exact-three candidate at a 1,125s median, and repaired Stripe boot/live fidelity. Verified closeout: 10/10 requirements, 4/4 phases, 13/13 automated UAT checks, 0 overrides. |
 | v1.59 | multi (2026-07-31→08-05) | 8 | **MULTI-RAIL/OFFLINE** — concurrent Stripe/Apple account projection, strict Apple intake/repair, device-bound offline proof/recovery, and first-adopter release proof. Audit `tech_debt`: 29/29 requirements, 11/11 integrations, 5/5 flows, and Nyquist validation passed; Crosswake runtime remains intentionally feasibility-blocked. |
@@ -1805,6 +1947,8 @@ The first slice (M1) of the SEED-004 redesign of `accrue_admin` from a CRUD surf
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.65 | Admin 693/693; browser 6/6 at its recorded revision; 13 automated UAT items. | 4/4 requirements; 9/9 phase truths; 4/4 seams and flows. Two unavailable-read states remain unobserved in browser. | No dependency, new feature, or CI-lane addition. |
+| v1.63 | Core 2,078 tests + 70 property checks; Admin 614; Portal 111; host 223; configured Braintree host 8; docs verifier 46. | 34/34 requirements; 7/7 phase verifications; 5/5 integration seams; 4/4 E2E flows; zero audit blockers; four acknowledged closeout items. | No new runtime dependencies or billing capabilities; existing packages and host were refined. |
 | v1.61 | Phase 227 strict verifier 11/11 plus exact-three live reconciliation; Phase 228 runtime/fixture/live-terminal suite 46/46 focused Elixir tests; recurring Stripe provider run 2/2 selected, 0 skipped. | 10/10 requirements; 4/4 phase verifications; Phase 227 UAT 7/7 and Phase 228 UAT 6/6; audit-open 0. | No new runtime dependency; CI evidence scripts and planning artifacts only, plus Stripe adapter/action compatibility fixes against the existing `lattice_stripe` dependency. |
 | v1.59 | 8/8 phase verifications; reference-host Apple ingress/recovery, deterministic scenarios, and release-contract gates. | 29/29 requirements; 11/11 integrations; 5/5 flows; all phases Nyquist-compliant. | No required dependency addition; Apple/Crosswake remain bounded host/runtime evidence lanes. |
 | v1.58 | Five phase verifications (63/63 combined must-haves), isolation verifier, package-doc verifier, 81 focused core tests, 37 focused admin/LiveView tests, and executable desktop/Pixel 5 browser UAT. | 11/11 requirements; 10/11 integrations; 5/5 flows | No new required dependency; existing `lattice_stripe` pin advanced to `~> 2.0`. Advisory sync remains default-off and non-authoritative. |

@@ -70,6 +70,70 @@ defmodule AccrueAdmin.CouponsLiveTest do
     refute html =~ "Expired Deal"
   end
 
+  test "coupon identity exposes the full processor ID through a copy action", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/coupons?view=all")
+    document = Floki.parse_document!(html)
+    row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "Spring 25"))
+
+    assert row
+
+    assert length(
+             Floki.find(row, "[data-clipboard-text='coupon_spring'][aria-label='Copy coupon ID']")
+           ) == 1
+
+    card =
+      Floki.find(document, ".ax-data-table-card")
+      |> Enum.find(&(Floki.text(&1) =~ "coupon_spring"))
+
+    assert card
+
+    assert length(
+             Floki.find(
+               card,
+               "[data-clipboard-text='coupon_spring'][aria-label='Copy coupon ID']"
+             )
+           ) == 1
+
+    assert length(Floki.find(card, "[data-clipboard-text]")) == 1
+  end
+
+  test "filter patches keep the coupon name, ID, and detail link in agreement", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/coupons?view=all")
+    html = render_patch(view, "/billing/coupons?q=Spring&valid=true")
+    document = Floki.parse_document!(html)
+    [row] = Floki.find(document, "tr[data-row-id]")
+    [record_id] = Floki.attribute(row, "data-row-id")
+    assert row |> Floki.find(".ax-data-table-identity-primary") |> Floki.text() == "Spring 25"
+
+    assert row |> Floki.find("[data-clipboard-text]") |> Floki.attribute("data-clipboard-text") ==
+             ["coupon_spring"]
+
+    [href] = row |> Floki.find(".ax-data-table-identity-primary a") |> Floki.attribute("href")
+    assert href =~ "/coupons/#{record_id}?"
+    assert href =~ URI.encode_www_form("/billing/coupons?q=Spring&valid=true")
+  end
+
+  test "coupon detail links retain the validated query and validity lens", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/coupons?q=Spring&valid=true")
+
+    href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "Spring 25"))
+      |> Floki.attribute("href")
+      |> hd()
+
+    return_to =
+      href |> URI.parse() |> then(&URI.decode_query(&1.query)) |> Map.fetch!("return_to")
+
+    assert return_to =~ "/billing/coupons?q=Spring&valid=true"
+  end
+
   test "renders Coupons through PageHeader with the Phase 197 LIST chrome", %{conn: conn} do
     contract = ListContracts.fetch!(:coupons)
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
@@ -89,15 +153,41 @@ defmodule AccrueAdmin.CouponsLiveTest do
     assert {:ok, _view, html} = live(conn, contract.route)
 
     assert html =~ ~s(data-ax-filter-chips)
-    assert html =~ contract.default_lens.label
-    assert html =~ "All coupons"
+
+    assert html
+           |> Floki.parse_document!()
+           |> Floki.find("[role='radiogroup'] input[type='radio'][value='true'][checked]")
+           |> length() == 1
+
     assert html =~ ~s(data-ax-result-count)
     assert html =~ "Showing"
     assert html =~ "coupons"
     assert html =~ ~s(data-ax-clear-all)
   end
 
-  test "coupon clear-all routes to All while preserving organization scope", %{conn: conn} do
+  test "All and Valid coupon lenses each expose one selected state", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, valid_html} = live(conn, "/billing/coupons")
+
+    valid_options =
+      Floki.parse_document!(valid_html) |> Floki.find("[role='radiogroup'] input[type='radio']")
+
+    assert Enum.count(valid_options, &(Floki.attribute(&1, "checked") != [])) == 1
+    valid = Enum.find(valid_options, &(Floki.attribute(&1, "value") == ["true"]))
+    assert Floki.attribute(valid, "checked") != []
+
+    assert {:ok, _view, all_html} = live(conn, "/billing/coupons?view=all")
+
+    all_options =
+      Floki.parse_document!(all_html) |> Floki.find("[role='radiogroup'] input[type='radio']")
+
+    assert Enum.count(all_options, &(Floki.attribute(&1, "checked") != [])) == 1
+    all = Enum.find(all_options, &(Floki.attribute(&1, "value") == [""]))
+    assert Floki.attribute(all, "checked") != []
+  end
+
+  test "coupon reset restores its default view while preserving organization scope", %{conn: conn} do
     org_id = Ecto.UUID.generate()
 
     conn =
@@ -113,7 +203,12 @@ defmodule AccrueAdmin.CouponsLiveTest do
              live(conn, "/billing/coupons?org=allowed-org&valid=true&q=Spring")
 
     assert html =~ ~s(data-ax-clear-all)
-    assert html =~ ~s(href="/billing/coupons?org=allowed-org&amp;view=all")
+    document = Floki.parse_document!(html)
+
+    assert Floki.attribute(Floki.find(document, "[data-ax-clear-all]"), "href") == [
+             "/billing/coupons?org=allowed-org"
+           ]
+
     refute html =~ "valid=true"
     refute html =~ "q=Spring"
   end

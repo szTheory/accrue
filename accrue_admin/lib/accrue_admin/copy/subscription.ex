@@ -19,7 +19,8 @@ defmodule AccrueAdmin.Copy.Subscription do
 
   def subscription_action_cancel_now, do: "Cancel immediately"
   def subscription_action_cancel_at_period_end, do: "Cancel renewal"
-  def subscription_action_resume, do: "Resume"
+  def subscription_action_resume, do: "Resume subscription"
+  def subscription_action_back_to_subscription, do: "Back to subscription"
   def subscription_action_swap_plan, do: "Change plan"
   def subscription_action_update_quantity, do: "Update quantity"
   def subscription_action_add_item, do: "Add item"
@@ -107,10 +108,10 @@ defmodule AccrueAdmin.Copy.Subscription do
   def subscriptions_health_verdict_action_required, do: "Action required"
 
   def subscriptions_route_line,
-    do: "Collect open invoices first, then review at-risk subscriptions and failed webhooks."
+    do: "Review subscription status, plans, and scheduled changes."
 
   def subscriptions_kpi_section_aria_label,
-    do: "Open invoices, exposure, at-risk subscriptions, and failed webhooks summary"
+    do: "Subscription summary"
 
   defp subscription_action_label("cancel_now"), do: "Cancel immediately"
   defp subscription_action_label("cancel_at_period_end"), do: "Cancel renewal"

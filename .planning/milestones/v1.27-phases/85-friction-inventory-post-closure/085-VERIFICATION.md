@@ -2,7 +2,7 @@
 phase: 85
 slug: friction-inventory-post-closure
 requirements: [INV-05]
-status: complete
+status: passed
 ---
 
 # Phase 85 — Friction inventory post-closure — Verification

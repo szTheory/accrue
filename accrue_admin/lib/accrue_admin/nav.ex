@@ -8,18 +8,19 @@ defmodule AccrueAdmin.Nav do
     recovery_badge = Map.get(attention_counts, :recovery, 0)
     developer_badge = Map.get(attention_counts, :developer, 0)
 
-    # Grouped by the operator's mental model, not by internal module. Home stands
-    # alone (group: nil → no label). Eyebrow sublabels dropped (Phase 169): they
+    # Grouped by the operator's mental model, not by internal module. Activity belongs
+    # with the billing records it describes. Eyebrow sublabels dropped (Phase 169): they
     # added jargon without prediction value. Icons via AccrueAdmin.Components.Icon.
     # Phase 175-02 added :badge for sidebar attention counts. The :collapsible
     # field was removed (260621-nr8): all groups now render static, always-visible
     # link lists — no collapse toggles.
     [
       %{
-        label: "Home",
+        label: "Recent activity",
         href: nav_href(mount_path, "", org),
-        icon: :home,
-        group: nil,
+        icon: :events,
+        group: "Billing",
+        exact: true,
         badge: nil
       },
       %{
@@ -51,7 +52,7 @@ defmodule AccrueAdmin.Nav do
         badge: nil
       },
       %{
-        label: "Recovery",
+        label: "Payment recovery",
         href: nav_href(mount_path, "/analytics/recovery", org),
         icon: :recovery,
         group: "Recovery",

@@ -93,7 +93,42 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert_single_filter_form(html)
   end
 
-  test "bare events route represents the All ledger lens", %{conn: conn} do
+  test "event identity exposes its exact event key through a copy action", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/events?view=all")
+    document = Floki.parse_document!(html)
+
+    row =
+      Floki.find(document, "tr[data-row-id]")
+      |> Enum.find(&(Floki.text(&1) =~ "invoice.payment_failed.in_scope"))
+
+    assert row
+
+    assert length(
+             Floki.find(
+               row,
+               "[data-clipboard-text='invoice.payment_failed.in_scope'][aria-label='Copy event type']"
+             )
+           ) == 1
+
+    card =
+      Floki.find(document, ".ax-data-table-card")
+      |> Enum.find(&(Floki.text(&1) =~ "invoice.payment_failed.in_scope"))
+
+    assert card
+
+    assert length(
+             Floki.find(
+               card,
+               "[data-clipboard-text='invoice.payment_failed.in_scope'][aria-label='Copy event type']"
+             )
+           ) == 1
+
+    assert length(Floki.find(card, "[data-clipboard-text]")) == 3
+    assert length(Floki.find(card, ".ax-timestamp[data-iso]")) == 1
+  end
+
+  test "bare events route represents the All events view", %{conn: conn} do
     contract = ListContracts.fetch!(:events)
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
@@ -101,10 +136,53 @@ defmodule AccrueAdmin.EventsLiveTest do
 
     assert html =~ ~s(data-ax-filter-chips)
     assert html =~ contract.default_lens.label
-    assert html =~ "Admin changes"
+    assert html =~ "Admin actions"
     assert html =~ ~s(data-ax-result-count)
     assert html =~ "Showing"
     assert html =~ "events"
+  end
+
+  test "filter patches keep each event label and destination attached to its record", %{
+    conn: conn
+  } do
+    customer = insert_customer(%{})
+
+    {:ok, created} =
+      Events.record(%{
+        type: "customer.created",
+        subject_type: "Customer",
+        subject_id: customer.id
+      })
+
+    {:ok, _other} =
+      Events.record(%{
+        type: "subscription.created",
+        subject_type: "Subscription",
+        subject_id: Ecto.UUID.generate()
+      })
+
+    {:ok, updated} =
+      Events.record(%{
+        type: "customer.updated_locally",
+        subject_type: "Customer",
+        subject_id: customer.id
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/events?view=all")
+    html = render_patch(view, "/billing/events?q=#{customer.id}")
+    document = Floki.parse_document!(html)
+
+    for event <- [created, updated] do
+      row = Floki.find(document, "#events-row-#{event.id}")
+
+      assert Floki.find(row, ".ax-event-link") |> Floki.text() |> String.trim() ==
+               Copy.billing_event_label(event.type)
+
+      [href] = row |> Floki.find(".ax-event-link") |> Floki.attribute("href")
+      assert href =~ "/events/#{event.id}?"
+      assert href =~ URI.encode_www_form("/billing/events?q=#{customer.id}")
+    end
   end
 
   test "events Admin changes lens maps to actor_type=admin", %{conn: conn} do
@@ -119,6 +197,38 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert html =~ ~s(value="admin")
     assert html =~ "ax-filter-chip-cobalt"
     refute html =~ ">By actor<"
+  end
+
+  test "event general search stays distinct from exact source ID and accepts custom keys", %{
+    conn: conn,
+    webhook_id: webhook_id
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, search_html} =
+             live(conn, "/billing/events?q=invoice.payment_failed.in_scope")
+
+    search = Floki.parse_document!(search_html) |> Floki.find("#events-filter-q") |> hd()
+    assert Floki.attribute(search, "placeholder") == ["Event type, record ID, or person ID"]
+    assert search_html =~ "invoice.payment_failed.in_scope"
+    refute search_html =~ "invoice.payment_failed.out_of_scope"
+
+    assert {:ok, _view, source_html} =
+             live(conn, "/billing/events?source_webhook_event_id=#{webhook_id}")
+
+    source =
+      Floki.parse_document!(source_html)
+      |> Floki.find("#events-filter-source_webhook_event_id")
+      |> hd()
+
+    assert Floki.attribute(source, "value") == [webhook_id]
+    assert source_html =~ "invoice.payment_failed.in_scope"
+
+    custom_type = "future.event.key"
+    assert {:ok, _view, custom_html} = live(conn, "/billing/events?type=#{custom_type}")
+    type = Floki.parse_document!(custom_html) |> Floki.find("#events-filter-type") |> hd()
+    assert Floki.attribute(type, "value") == [custom_type]
+    assert custom_html =~ Copy.events_list_filtered_empty_title()
   end
 
   test "events clear-all drops filters and preserves organization scope", %{conn: conn} do
@@ -139,7 +249,7 @@ defmodule AccrueAdmin.EventsLiveTest do
                "/billing/events?org=allowed-org&actor_type=admin&type=invoice.payment_failed.in_scope&q=invoice&phase197_state=loading-skeleton"
              )
 
-    assert html =~ ~s(data-ax-clear-all)
+    assert html =~ ~s(data-role="clear-filters")
     assert html =~ ~s(href="/billing/events?org=allowed-org&amp;view=all")
     refute html =~ "actor_type=admin"
     refute html =~ "type=invoice.payment_failed"
@@ -182,7 +292,7 @@ defmodule AccrueAdmin.EventsLiveTest do
 
     assert_list_state(filtered_html, contract, "filtered-empty")
     assert filtered_html =~ contract.states.filtered_empty
-    assert filtered_html =~ ~s(data-ax-clear-all)
+    assert filtered_html =~ ~s(data-role="clear-filters")
 
     loading_conn =
       Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
@@ -217,7 +327,7 @@ defmodule AccrueAdmin.EventsLiveTest do
     assert html =~ Copy.events_list_admin_changes_label()
     assert html =~ "ax-filter-chip-cobalt"
     # should have Clear remove_href
-    assert html =~ "Clear"
+    assert html =~ "Reset filters"
   end
 
   # --- end Plan 175-06 tests ---
@@ -292,6 +402,121 @@ defmodule AccrueAdmin.EventsLiveTest do
     refute html =~ "invoice.payment_failed.out_of_scope"
     refute html =~ out_scope_invoice.id
     assert html =~ webhook_id
+  end
+
+  test "event type links open the exact scoped event record", %{conn: conn} do
+    organization_id = Ecto.UUID.generate()
+    organization_slug = "event-link-#{System.unique_integer([:positive])}"
+
+    customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
+    invoice = insert_invoice(customer, %{processor_id: "in_exact_event_link"})
+
+    {:ok, event} =
+      Events.record(%{
+        type: "invoice.payment_failed.exact_link",
+        subject_type: "Invoice",
+        subject_id: invoice.id,
+        actor_type: "webhook",
+        actor_id: "evt_exact_link"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: organization_id,
+        active_organization_slug: organization_slug,
+        admin_organization_ids: [organization_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing/events?org=#{organization_slug}")
+
+    event_href =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.attribute("a", "href")
+      |> Enum.find(&String.starts_with?(&1, "/billing/events/#{event.id}?"))
+
+    assert event_href
+    assert URI.decode_query(URI.parse(event_href).query)["org"] == organization_slug
+
+    assert URI.decode_query(URI.parse(event_href).query)["return"] ==
+             "/billing/events?org=#{organization_slug}"
+
+    assert html =~ "invoice.payment_failed.exact_link"
+  end
+
+  test "known event rows show one label and keep the exact key on event details", %{conn: conn} do
+    organization_id = Ecto.UUID.generate()
+    organization_slug = "event-label-#{System.unique_integer([:positive])}"
+    customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
+
+    {:ok, event} =
+      Events.record(%{
+        type: "customer.updated",
+        subject_type: "Customer",
+        subject_id: customer.id,
+        actor_type: "admin",
+        actor_id: "admin_1"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: organization_id,
+        active_organization_slug: organization_slug,
+        admin_organization_ids: [organization_id]
+      )
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/events?org=#{organization_slug}&type=customer.updated")
+
+    document = Floki.parse_fragment!(html)
+    event_link = Floki.find(document, "a[href^='/billing/events/#{event.id}?']")
+
+    assert length(event_link) == 2
+    assert Enum.all?(event_link, &(Floki.text(&1) == "Customer updated"))
+
+    assert Floki.find(document, "[data-clipboard-text='customer.updated']") == []
+    assert length(Floki.find(document, "[data-clipboard-text='#{customer.id}']")) == 2
+
+    event_params =
+      event_link
+      |> Floki.attribute("href")
+      |> hd()
+      |> URI.parse()
+      |> Map.fetch!(:query)
+      |> URI.decode_query()
+
+    return_params =
+      event_params
+      |> Map.fetch!("return")
+      |> URI.parse()
+      |> Map.fetch!(:query)
+      |> URI.decode_query()
+
+    assert event_params["org"] == organization_slug
+    assert return_params["type"] == "customer.updated"
+  end
+
+  test "summary read failure is announced as unavailable and can be retried", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/events")
+
+    Application.put_env(:accrue_admin, :phase238_read_failure_fixture, :events_summary)
+
+    try do
+      html = render_click(view, "retry_summary", %{})
+
+      assert html =~ ~s(data-role="event-summary-unavailable")
+      assert html =~ "Event summary unavailable"
+      assert html =~ "Unavailable"
+      refute html =~ "fixture database unavailable"
+    after
+      Application.delete_env(:accrue_admin, :phase238_read_failure_fixture)
+    end
+
+    html = render_click(view, "retry_summary", %{})
+    refute html =~ ~s(data-role="event-summary-unavailable")
   end
 
   test "active-organization event feed summary counts in-scope charge subjects", %{conn: conn} do

@@ -15,6 +15,19 @@ if [ "${ACCRUE_HOST_SKIP_DEV_BOOT:-}" = "1" ]; then
 fi
 
 port="${ACCRUE_HOST_PORT:-4100}"
+proof_run_id="${ACCRUE_HOST_PROOF_RUN_ID:-$$}"
+if [[ ! "$proof_run_id" =~ ^[A-Za-z0-9_-]{1,80}$ ]]; then
+  echo "[preview-custody] REFUSED: ACCRUE_HOST_PROOF_RUN_ID must contain 1-80 letters, digits, underscores, or hyphens" >&2
+  exit 2
+fi
+export ACCRUE_HOST_PROOF_RUN_ID="$proof_run_id"
+export ACCRUE_HOST_DEV_BOOT_DATABASE="${ACCRUE_HOST_DEV_BOOT_DATABASE:-accrue_host_dev_boot_proof}"
+export MIX_BUILD_PATH="${ACCRUE_HOST_DEV_BOOT_BUILD_PATH:-${MIX_BUILD_PATH:-$host_dir/tmp/accrue-host-dev-proof-${proof_run_id}/dev}}"
+repo_root="$(cd "$host_dir/../.." && pwd)"
+custody_tool="$repo_root/scripts/ci/accrue_host_preview_custody.sh"
+export ACCRUE_HOST_PREVIEW_SNAPSHOT="${ACCRUE_HOST_PREVIEW_SNAPSHOT:-${TMPDIR:-/tmp}/accrue-host-preview-${proof_run_id}-dev.snapshot}"
+node "$custody_tool" preflight dev
+node "$custody_tool" snapshot
 log_file="$(mktemp)"
 
 describe_port_owner() {
@@ -47,11 +60,18 @@ stop_process_tree() {
 }
 
 cleanup() {
+  local exit_status=$?
+  trap - EXIT
   if [ -n "${server_pid:-}" ] && kill -0 "$server_pid" >/dev/null 2>&1; then
     stop_process_tree "$server_pid"
   fi
 
   rm -f "$log_file"
+  if ! node "$custody_tool" assert-preserved; then
+    exit_status=1
+  fi
+  rm -f "$ACCRUE_HOST_PREVIEW_SNAPSHOT"
+  exit "$exit_status"
 }
 
 trap cleanup EXIT
@@ -59,10 +79,10 @@ trap 'exit 130' INT TERM
 
 ensure_port_available "$port"
 
-MIX_ENV=dev mix ecto.create --quiet
-MIX_ENV=dev mix ecto.migrate --quiet
+ACCRUE_HOST_DEV_BOOT_DATABASE="$ACCRUE_HOST_DEV_BOOT_DATABASE" MIX_ENV=dev mix ecto.create --quiet
+ACCRUE_HOST_DEV_BOOT_DATABASE="$ACCRUE_HOST_DEV_BOOT_DATABASE" MIX_ENV=dev mix ecto.migrate --quiet
 
-PORT="$port" MIX_ENV=dev mix phx.server >"$log_file" 2>&1 &
+PORT="$port" ACCRUE_HOST_DEV_BOOT_DATABASE="$ACCRUE_HOST_DEV_BOOT_DATABASE" MIX_ENV=dev mix phx.server >"$log_file" 2>&1 &
 server_pid=$!
 
 for _ in $(seq 1 30); do

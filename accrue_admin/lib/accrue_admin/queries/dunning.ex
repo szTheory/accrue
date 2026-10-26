@@ -47,8 +47,8 @@ defmodule AccrueAdmin.Queries.Dunning do
   """
 
   @spec recovered_vs_lost_mrr(map() | nil, keyword()) :: %{
-          recovered: [%{currency: String.t(), cents: non_neg_integer()}],
-          lost: [%{currency: String.t(), cents: non_neg_integer()}]
+          recovered: [%{currency: String.t() | nil, cents: non_neg_integer() | nil}],
+          lost: [%{currency: String.t() | nil, cents: non_neg_integer() | nil}]
         }
   def recovered_vs_lost_mrr(owner_scope, opts \\ [])
 
@@ -63,7 +63,7 @@ defmodule AccrueAdmin.Queries.Dunning do
       |> group_by_recovery_currency()
       |> Repo.all()
       |> Enum.reduce(%{recovered: [], lost: []}, fn {type, currency, cents}, acc ->
-        entry = %{currency: currency || "usd", cents: cents || 0}
+        entry = %{currency: currency, cents: cents}
 
         case type do
           @recovered_type -> Map.update!(acc, :recovered, &[entry | &1])
@@ -137,6 +137,7 @@ defmodule AccrueAdmin.Queries.Dunning do
         group_by: [
           subscription.id,
           subscription.customer_id,
+          subscription.status,
           customer.email,
           customer.name,
           subscription.dunning_campaign_started_at
@@ -145,6 +146,7 @@ defmodule AccrueAdmin.Queries.Dunning do
         select: %{
           subscription_id: subscription.id,
           customer_id: subscription.customer_id,
+          current_status: subscription.status,
           customer_label: fragment("COALESCE(?, ?)", customer.email, customer.name),
           days_in_campaign:
             fragment(
@@ -176,7 +178,7 @@ defmodule AccrueAdmin.Queries.Dunning do
         {event.type, fragment("?->>'currency'", event.data),
          sum(
            fragment(
-             "CASE WHEN jsonb_typeof((?->'mrr_value_cents')) = 'number' THEN (?->>'mrr_value_cents')::integer ELSE 0 END",
+             "CASE WHEN jsonb_typeof((?->'mrr_value_cents')) = 'number' THEN (?->>'mrr_value_cents')::integer ELSE NULL END",
              event.data,
              event.data
            )

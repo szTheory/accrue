@@ -1,6 +1,6 @@
 defmodule AccrueAdmin.Components.JsonViewer do
   @moduledoc """
-  Shared escaped payload viewer with tree, raw, and copy surfaces.
+  Shared escaped payload viewer with Tree and Raw tabs and a separate Copy action.
   """
 
   use Phoenix.Component
@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Components.JsonViewer do
   attr(:payload, :any, required: true)
   attr(:active_tab, :string, default: "tree")
   attr(:label, :string, default: "Payload")
+  attr(:show_heading, :boolean, default: true)
   attr(:max_depth, :integer, default: 8)
 
   def json_viewer(assigns) do
@@ -22,45 +23,69 @@ defmodule AccrueAdmin.Components.JsonViewer do
       |> assign(:active_tab, normalize_tab(assigns.active_tab))
 
     ~H"""
-    <section id={@id} class="ax-card ax-json-viewer" aria-label={@label}>
+    <section
+      id={@id}
+      class="ax-card ax-json-viewer"
+      aria-labelledby={@id <> "-title"}
+      phx-hook="JsonViewerTabs"
+    >
       <header class="ax-json-viewer-header">
         <div>
-          <p class="ax-eyebrow">Payload</p>
-          <h3 class="ax-heading"><%= @label %></h3>
+          <h3 id={@id <> "-title"} class={if(@show_heading, do: "ax-heading", else: "ax-visually-hidden")}><%= @label %></h3>
         </div>
 
-        <nav class="ax-tabs" aria-label="Payload views">
+        <nav class="ax-tabs" role="tablist" aria-label="Payload views" data-json-tabs>
           <button
-            :for={tab <- ["tree", "raw", "copy"]}
+            :for={tab <- ["tree", "raw"]}
+            id={@id <> "-" <> tab <> "-tab"}
             type="button"
+            role="tab"
             class={["ax-tab", @active_tab == tab && "ax-tab-active"]}
-            aria-current={if(@active_tab == tab, do: "page", else: nil)}
+            aria-controls={@id <> "-" <> tab <> "-panel"}
+            aria-selected={if(@active_tab == tab, do: "true", else: "false")}
+            tabindex={if(@active_tab == tab, do: "0", else: "-1")}
+            data-json-tab={tab}
           >
             <%= String.capitalize(tab) %>
           </button>
         </nav>
-      </header>
 
-      <div :if={@active_tab == "tree"} class="ax-json-tree">
-        <ul class="ax-json-tree-root">
-          <.tree_node value={@normalized_payload} depth={0} max_depth={@max_depth} />
-        </ul>
-      </div>
-
-      <pre :if={@active_tab == "raw"} class="ax-json-raw"><%= @raw_json %></pre>
-
-      <div :if={@active_tab == "copy"} class="ax-json-copy">
         <button
           id={@id <> "-copy"}
           type="button"
           class="ax-button ax-button-secondary"
           phx-hook="Clipboard"
           data-clipboard-text={@raw_json}
+          data-clipboard-label={String.downcase(@label)}
+          aria-label={"Copy " <> String.downcase(@label)}
         >
           Copy payload
         </button>
-        <pre class="ax-json-raw ax-json-copy-preview"><%= @raw_json %></pre>
+      </header>
+
+      <div
+        id={@id <> "-tree-panel"}
+        role="tabpanel"
+        aria-labelledby={@id <> "-tree-tab"}
+        tabindex="0"
+        class="ax-json-tree"
+        hidden={@active_tab != "tree"}
+        data-json-panel="tree"
+      >
+        <ul class="ax-json-tree-root">
+          <.tree_node value={@normalized_payload} depth={0} max_depth={@max_depth} />
+        </ul>
       </div>
+
+      <pre
+        id={@id <> "-raw-panel"}
+        role="tabpanel"
+        aria-labelledby={@id <> "-raw-tab"}
+        tabindex="0"
+        class="ax-json-raw"
+        hidden={@active_tab != "raw"}
+        data-json-panel="raw"
+      ><%= @raw_json %></pre>
     </section>
     """
   end
@@ -104,7 +129,7 @@ defmodule AccrueAdmin.Components.JsonViewer do
     """
   end
 
-  defp normalize_tab(tab) when tab in ["tree", "raw", "copy"], do: tab
+  defp normalize_tab(tab) when tab in ["tree", "raw"], do: tab
   defp normalize_tab(_tab), do: "tree"
 
   defp normalize_name(nil), do: nil
@@ -160,6 +185,7 @@ defmodule AccrueAdmin.Components.JsonViewer do
   end
 
   defp normalize_payload(value) when is_list(value), do: Enum.map(value, &normalize_payload/1)
+  defp normalize_payload(value) when value in [nil, true, false], do: value
   defp normalize_payload(value) when is_atom(value), do: Atom.to_string(value)
   defp normalize_payload(value), do: value
 end

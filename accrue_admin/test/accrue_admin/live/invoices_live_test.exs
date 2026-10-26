@@ -4,6 +4,8 @@ defmodule AccrueAdmin.InvoicesLiveTest do
   alias Accrue.Billing.{Customer, Invoice, Subscription}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.ListContracts
+  alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Invoices, as: InvoicesQuery
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -55,16 +57,412 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     {:ok, invoice: invoice}
   end
 
-  test "filters invoice rows and renders detail links", %{conn: conn} do
+  test "filters invoice rows and renders stored identity, status, amount, and detail links",
+       %{conn: conn, invoice: invoice} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/invoices?status=open")
 
     assert html =~ Copy.invoices_index_headline()
     assert html =~ "INV-0002"
-    assert html =~ "/billing/invoices/"
-    assert html =~ "ax-chip ax-label"
+    assert html =~ "/billing/invoices/#{invoice.id}"
+    assert html =~ "Open"
+    assert html =~ "Automatic"
+    refute html =~ "Charge Automatically"
+    assert html =~ "$75.00"
+    assert html =~ "Automatic tax off"
     refute html =~ "ax-text-12"
+  end
+
+  test "keeps invoice number, customer, and exact copyable processor ID on separate lines", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
+    document = Floki.parse_document!(html)
+    row = Floki.find(document, ".ax-data-table-grid [data-row-id='#{invoice.id}']") |> hd()
+
+    assert [primary] = Floki.find(row, ".ax-data-table-identity-primary a")
+    assert Floki.text(primary) == "INV-0002"
+    assert Floki.text(row) =~ "Invoice Customer"
+
+    assert length(
+             Floki.find(row, "[data-clipboard-text='in_0002'][aria-label='Copy invoice ID']")
+           ) == 1
+
+    card = Floki.find(document, ".ax-data-table-card[data-row-id='#{invoice.id}']") |> hd()
+
+    assert length(
+             Floki.find(card, "[data-clipboard-text='in_0002'][aria-label='Copy invoice ID']")
+           ) == 1
+  end
+
+  test "default invoice queue exposes checked status controls for its returned rows", %{
+    conn: conn
+  } do
+    customer = insert_customer(%{name: "Uncollectible Customer"})
+    subscription = insert_subscription(customer)
+
+    uncollectible =
+      insert_invoice(customer, subscription, %{
+        number: "INV-UNCOLLECTIBLE",
+        status: :uncollectible
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/invoices")
+
+    document = Floki.parse_document!(html)
+    status_controls = Floki.find(document, "input[name='status[]'][type='checkbox']")
+
+    assert Enum.any?(
+             status_controls,
+             &(Floki.attribute(&1, "value") == ["open"] and Floki.attribute(&1, "checked") == [""])
+           )
+
+    assert Enum.any?(
+             status_controls,
+             &(Floki.attribute(&1, "value") == ["uncollectible"] and
+                 Floki.attribute(&1, "checked") == [""])
+           )
+
+    assert html =~ "INV-0002"
+    assert html =~ "INV-UNCOLLECTIBLE"
+    refute html =~ "INV-0001"
+    assert uncollectible
+  end
+
+  test "mounted status changes preserve owner and search scope while rows follow the selection",
+       %{
+         conn: conn
+       } do
+    organization_id = Ecto.UUID.generate()
+    foreign_organization_id = Ecto.UUID.generate()
+    owner_customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
+    owner_subscription = insert_subscription(owner_customer)
+
+    insert_invoice(owner_customer, owner_subscription, %{
+      number: "INV-SCOPED-OPEN-OWNER",
+      status: :open
+    })
+
+    owner_paid =
+      insert_invoice(owner_customer, owner_subscription, %{
+        number: "INV-SCOPED-PAID-OWNER",
+        status: :paid
+      })
+
+    foreign_customer =
+      insert_customer(%{owner_type: "Organization", owner_id: foreign_organization_id})
+
+    foreign_subscription = insert_subscription(foreign_customer)
+
+    insert_invoice(foreign_customer, foreign_subscription, %{
+      number: "INV-SCOPED-PAID-FOREIGN",
+      status: :paid
+    })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: organization_id,
+        active_organization_slug: "invoice-owner",
+        admin_organization_ids: [organization_id]
+      )
+
+    assert {:ok, view, html} =
+             live(
+               conn,
+               "/billing/invoices?org=invoice-owner&view=all&status=open,uncollectible&q=INV-SCOPED"
+             )
+
+    assert html =~ "INV-SCOPED-OPEN-OWNER"
+    refute html =~ "INV-SCOPED-PAID-FOREIGN"
+
+    html =
+      view
+      |> element("[data-role='filter-form']")
+      |> render_change(%{"status" => ["paid", ""], "q" => "INV-SCOPED", "view" => "all"})
+
+    assert_patch(view, "/billing/invoices?org=invoice-owner&q=INV-SCOPED&status=paid&view=all")
+    assert html =~ "INV-SCOPED-PAID-OWNER"
+
+    visible_row_ids =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("tbody > tr[data-row-id]")
+      |> Enum.map(&Floki.attribute(&1, "data-row-id"))
+      |> List.flatten()
+
+    assert visible_row_ids == [owner_paid.id]
+    assert owner_paid
+  end
+
+  test "direct multi-status URLs normalize to supported status order and select matching rows", %{
+    conn: conn
+  } do
+    customer = insert_customer(%{name: "Direct Status Customer"})
+    subscription = insert_subscription(customer)
+
+    paid =
+      insert_invoice(customer, subscription, %{number: "INV-DIRECT-PAID", status: :paid})
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, _html} =
+             live(conn, "/billing/invoices?view=all&status=paid,open")
+
+    assert InvoicesQuery.normalize_status_selection("paid,open") == "open,paid"
+    html = render(view)
+    document = Floki.parse_document!(html)
+    status_controls = Floki.find(document, "input[name='status[]'][type='checkbox']")
+
+    assert Enum.any?(
+             status_controls,
+             &(Floki.attribute(&1, "value") == ["open"] and Floki.attribute(&1, "checked") == [""])
+           )
+
+    assert Enum.any?(
+             status_controls,
+             &(Floki.attribute(&1, "value") == ["paid"] and Floki.attribute(&1, "checked") == [""])
+           )
+
+    assert html =~ "INV-0002"
+    assert html =~ "INV-DIRECT-PAID"
+    refute html =~ "INV-0001"
+    assert paid
+  end
+
+  test "organization invoice list excludes invoices owned by another organization", %{conn: conn} do
+    organization_id = Ecto.UUID.generate()
+    foreign_organization_id = Ecto.UUID.generate()
+    owner_customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
+    owner_subscription = insert_subscription(owner_customer)
+
+    owner_invoice =
+      insert_invoice(owner_customer, owner_subscription, %{
+        number: "INV-SCOPED-OWNER",
+        processor_id: "in_scoped_owner",
+        status: :open
+      })
+
+    foreign_customer =
+      insert_customer(%{owner_type: "Organization", owner_id: foreign_organization_id})
+
+    foreign_subscription = insert_subscription(foreign_customer)
+
+    insert_invoice(foreign_customer, foreign_subscription, %{
+      number: "INV-SCOPED-FOREIGN",
+      processor_id: "in_scoped_foreign",
+      status: :open
+    })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: organization_id,
+        active_organization_slug: "invoice-owner",
+        admin_organization_ids: [organization_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?org=invoice-owner&view=all")
+
+    assert html =~ "INV-SCOPED-OWNER"
+    assert html =~ "/billing/invoices/#{owner_invoice.id}"
+    refute html =~ "INV-SCOPED-FOREIGN"
+  end
+
+  test "invoice fixtures preserve raw date, amount, currency, identity, and owner observations" do
+    reference = ~U[2026-10-08 12:00:00.000000Z]
+    organization_id = Ecto.UUID.generate()
+    foreign_organization_id = Ecto.UUID.generate()
+    empty_organization_id = Ecto.UUID.generate()
+
+    empty_owner_scope = organization_scope(empty_organization_id)
+    assert {[], nil} = InvoicesQuery.list(owner_scope: empty_owner_scope)
+
+    single_organization_id = Ecto.UUID.generate()
+
+    single_customer =
+      insert_customer(%{owner_type: "Organization", owner_id: single_organization_id})
+
+    single_subscription = insert_subscription(single_customer)
+
+    single_invoice =
+      insert_invoice(single_customer, single_subscription, %{
+        number: "INV-FIXTURE-SINGLE",
+        status: :paid
+      })
+
+    {single_rows, nil} =
+      InvoicesQuery.list(owner_scope: organization_scope(single_organization_id))
+
+    assert [%{id: single_id, status: :paid}] = single_rows
+    assert single_id == single_invoice.id
+
+    customer = insert_customer(%{owner_type: "Organization", owner_id: organization_id})
+    subscription = insert_subscription(customer)
+    fixtures = invoice_fixture_set(customer, subscription, reference)
+
+    foreign_customer =
+      insert_customer(%{owner_type: "Organization", owner_id: foreign_organization_id})
+
+    foreign_invoice =
+      foreign_customer
+      |> then(&insert_subscription/1)
+      |> then(
+        &insert_invoice(foreign_customer, &1, %{number: "INV-FIXTURE-FOREIGN", status: :paid})
+      )
+
+    assert fixtures.dates.before.due_date == DateTime.add(reference, -1, :second)
+    assert fixtures.dates.equal.due_date == reference
+    assert fixtures.dates.after.due_date == DateTime.add(reference, 1, :second)
+    assert is_nil(fixtures.dates.missing.due_date)
+
+    assert fixtures.money.zero.amount_due_minor == 0
+    assert fixtures.money.zero.currency == "usd"
+    assert fixtures.money.zero_decimal.amount_due_minor == 1_234
+    assert fixtures.money.zero_decimal.currency == "jpy"
+    assert fixtures.money.three_decimal.amount_due_minor == 1_234
+    assert fixtures.money.three_decimal.currency == "kwd"
+    assert fixtures.money.unsupported_currency.currency == "zzz"
+    assert fixtures.money.missing_currency.currency == nil
+
+    all_owner_fixtures = Map.merge(fixtures.dates, fixtures.money) |> Map.values()
+    assert length(all_owner_fixtures) == 10
+    assert Enum.all?(all_owner_fixtures, &(&1.status == :open))
+    assert Enum.all?(all_owner_fixtures, &(&1.inserted_at == reference))
+    assert Enum.all?(all_owner_fixtures, &(&1.customer_id == customer.id))
+    assert length(Enum.uniq_by(all_owner_fixtures, & &1.id)) == 10
+
+    {scoped_rows, nil} = InvoicesQuery.list(owner_scope: organization_scope(organization_id))
+    scoped_ids = MapSet.new(Enum.map(scoped_rows, & &1.id))
+    assert MapSet.equal?(scoped_ids, MapSet.new(Enum.map(all_owner_fixtures, & &1.id)))
+    refute MapSet.member?(scoped_ids, foreign_invoice.id)
+    assert Enum.all?(scoped_rows, &(&1.owner_id == organization_id))
+  end
+
+  test "overdue is a separate collection signal for open invoices strictly past due", %{
+    conn: conn
+  } do
+    now = Accrue.Clock.utc_now()
+    customer = insert_customer(%{name: "Boundary Customer"})
+    subscription = insert_subscription(customer)
+
+    overdue =
+      insert_invoice(customer, subscription, %{
+        number: "INV-OVERDUE-OPEN",
+        status: :open,
+        due_date: DateTime.add(now, -1, :second)
+      })
+
+    due_now =
+      insert_invoice(customer, subscription, %{
+        number: "INV-DUE-NOW",
+        status: :open,
+        due_date: now
+      })
+
+    future =
+      insert_invoice(customer, subscription, %{
+        number: "INV-DUE-FUTURE",
+        status: :open,
+        due_date: DateTime.add(now, 1, :second)
+      })
+
+    unknown =
+      insert_invoice(customer, subscription, %{
+        number: "INV-DUE-UNKNOWN",
+        status: :open,
+        due_date: nil
+      })
+
+    paid =
+      insert_invoice(customer, subscription, %{
+        number: "INV-PAID-PAST-DUE",
+        status: :paid,
+        due_date: DateTime.add(now, -1, :second)
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
+
+    doc = Floki.parse_document!(html)
+    overdue_row = Floki.find(doc, "[data-row-id='#{overdue.id}']") |> hd()
+    due_now_row = Floki.find(doc, "[data-row-id='#{due_now.id}']") |> hd()
+    future_row = Floki.find(doc, "[data-row-id='#{future.id}']") |> hd()
+    unknown_row = Floki.find(doc, "[data-row-id='#{unknown.id}']") |> hd()
+    paid_row = Floki.find(doc, "[data-row-id='#{paid.id}']") |> hd()
+
+    assert Floki.text(overdue_row) =~ "Overdue"
+    refute Floki.text(due_now_row) =~ "Overdue"
+    refute Floki.text(future_row) =~ "Overdue"
+    refute Floki.text(unknown_row) =~ "Overdue"
+    refute Floki.text(paid_row) =~ "Overdue"
+    assert Floki.text(paid_row) =~ "Paid"
+    assert Floki.text(overdue_row) =~ "Open"
+    refute Floki.text(html) =~ "False"
+
+    overdue_card = Floki.find(doc, ".ax-data-table-card[data-row-id='#{overdue.id}']") |> hd()
+    unknown_card = Floki.find(doc, ".ax-data-table-card[data-row-id='#{unknown.id}']") |> hd()
+
+    assert Floki.text(overdue_card) =~
+             Calendar.strftime(overdue.due_date, "%b %d, %Y")
+
+    assert Floki.text(unknown_card) =~ "Due date unavailable"
+    assert Floki.text(overdue_card) =~ "Overdue"
+    assert Floki.find(overdue_card, "a[aria-label^='View invoice']") != []
+  end
+
+  test "invoice list formats supported precision and keeps unknown money unavailable", %{
+    conn: conn
+  } do
+    customer = insert_customer(%{name: "Money Boundary"})
+    subscription = insert_subscription(customer)
+
+    fixtures =
+      [
+        zero: {0, "usd"},
+        zero_decimal: {1_234, "jpy"},
+        three_decimal: {1_234, "kwd"},
+        unsupported: {1_234, "zzz"},
+        missing_currency: {50, nil},
+        missing_amount: {nil, "usd"}
+      ]
+      |> Map.new(fn {key, {amount, currency}} ->
+        invoice =
+          insert_invoice(customer, subscription, %{
+            number: "INV-LIST-MONEY-#{key}",
+            status: :open,
+            amount_due_minor: amount,
+            amount_remaining_minor: amount,
+            total_minor: amount,
+            currency: currency
+          })
+
+        {key, invoice}
+      end)
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
+    doc = Floki.parse_document!(html)
+
+    row_text = fn invoice ->
+      doc |> Floki.find("[data-row-id='#{invoice.id}']") |> hd() |> Floki.text()
+    end
+
+    assert row_text.(fixtures.zero) =~ "$0.00"
+
+    assert row_text.(fixtures.zero_decimal) =~ "¥" or row_text.(fixtures.zero_decimal) =~ "￥" or
+             row_text.(fixtures.zero_decimal) =~ "JPY",
+           inspect(row_text.(fixtures.zero_decimal))
+
+    assert row_text.(fixtures.zero_decimal) =~ "1,234"
+    assert row_text.(fixtures.three_decimal) =~ "1.234"
+    assert row_text.(fixtures.unsupported) =~ "--"
+    assert row_text.(fixtures.missing_currency) =~ "--"
+    assert row_text.(fixtures.missing_amount) =~ "--"
   end
 
   test "renders Copy-backed filtered empty list when search excludes all invoices", %{conn: conn} do
@@ -82,9 +480,15 @@ defmodule AccrueAdmin.InvoicesLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/invoices?status=open,uncollectible")
 
-    # FilterChipBar renders queue chip (cobalt) and All chip (slate)
-    assert html =~ "ax-filter-chip-cobalt"
-    assert html =~ "ax-filter-chip-slate"
+    # The selected queue view is separate from applied-filter chips.
+    assert html =~ ~s(data-ax-view-nav)
+    assert html =~ ~s(aria-current="page")
+
+    assert Floki.find(
+             Floki.parse_document!(html),
+             "[data-ax-filter-chips] [data-filter='status_queue']"
+           ) == []
+
     assert html =~ "?view=all"
   end
 
@@ -94,9 +498,17 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     # ?view=all must not redirect — the sentinel prevents a push_patch loop
     assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
 
-    # All chip is active (slate) — not the queue chip (cobalt)
-    assert html =~ "ax-filter-chip-slate"
-    refute html =~ "ax-filter-chip-cobalt"
+    # All is selected in the view navigation, not represented as a chip.
+    assert html =~ ~s(data-ax-view-nav)
+
+    assert length(
+             Floki.find(Floki.parse_document!(html), "[data-ax-view-nav] a[aria-current='page']")
+           ) == 1
+
+    assert Floki.find(
+             Floki.parse_document!(html),
+             "[data-ax-filter-chips] [data-filter='view_all']"
+           ) == []
   end
 
   test "renders Invoices through PageHeader with exactly one h1", %{conn: conn} do
@@ -107,7 +519,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
 
     assert_page_header_contract(html, contract)
     assert html =~ contract.page_header.title
-    assert html =~ "Work invoices that need collection."
+    assert html =~ "Review outstanding balances and invoice history."
     assert_single_filter_form(html)
   end
 
@@ -124,6 +536,87 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert html =~ "Showing"
     assert html =~ "invoices"
     refute html =~ "total invoices"
+
+    document = Floki.parse_document!(html)
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-filter-chips]")) ==
+             1
+
+    assert length(Floki.find(document, "[data-role='list-status'] [data-ax-page-filter-toolbar]")) ==
+             1
+
+    assert length(Floki.find(document, "[data-ax-result-count]")) == 1
+    assert Floki.find(document, "[data-role='row-count']") == []
+    assert Floki.find(document, "[data-ax-clear-all]") == []
+    assert Floki.find(document, "[data-role='clear-filters']") == []
+  end
+
+  test "invoice filters, lens, active constraints, count, and clear share one hierarchy", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all&status=open&q=INV-0002")
+
+    document = Floki.parse_document!(html)
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-filter-chips]")) ==
+             1
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-filter='status']")) ==
+             1
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-filter='q']")) == 1
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-result-count]")) ==
+             1
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-clear-all]")) == 1
+
+    assert length(Floki.find(document, "[data-role='clear-filters']")) == 1
+
+    assert length(Floki.find(document, "[data-ax-result-count]")) == 1
+    assert Floki.find(document, "[data-role='row-count']") == []
+  end
+
+  test "invoice view is separate from labeled constraints and remove links retain scope and query",
+       %{conn: conn} do
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: Ecto.UUID.generate(),
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: []
+      )
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/invoices?org=allowed-org&view=all&status=open&q=Atelier+Caf%C3%A9"
+             )
+
+    document = Floki.parse_document!(html)
+
+    assert Floki.text(Floki.find(document, "fieldset[data-filter-group='status'] legend")) ==
+             "Status"
+
+    assert length(Floki.find(document, "label[for='invoices-filter-q']")) == 1
+    assert length(Floki.find(document, "details.ax-data-table-filter-disclosure")) == 1
+    assert length(Floki.find(document, "[data-ax-view-nav] a[aria-current='page']")) == 1
+    refute Floki.find(document, "[data-ax-filter-chips] [data-filter='view_all']") != []
+    assert Floki.text(Floki.find(document, "[data-ax-filter-chips]")) =~ "Atelier Café"
+
+    remove_links = Floki.find(document, "[data-ax-filter-chips] a[aria-label^='Remove']")
+    assert Enum.any?(remove_links, &(Floki.attribute(&1, "href") |> hd() =~ "org=allowed-org"))
+    assert Enum.any?(remove_links, &(Floki.attribute(&1, "href") |> hd() =~ "view=all"))
+
+    assert Enum.any?(
+             remove_links,
+             &(Floki.attribute(&1, "href") |> hd() =~ "q=Atelier+Caf%C3%A9")
+           )
+
+    assert length(Floki.find(document, "[data-ax-page-filter-toolbar] [data-ax-clear-all]")) == 1
   end
 
   test "invoice clear-all drops filters and preserves organization scope", %{conn: conn} do
@@ -146,10 +639,15 @@ defmodule AccrueAdmin.InvoicesLiveTest do
              )
 
     assert html =~ ~s(data-ax-clear-all)
-    assert html =~ ~s(href="/billing/invoices?org=allowed-org&amp;view=all")
-    refute html =~ "status=open"
-    refute html =~ "collection_method=send_invoice"
-    refute html =~ "phase197_state=loading-skeleton"
+
+    clear_href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("[data-ax-clear-all]")
+      |> Floki.attribute("href")
+      |> hd()
+
+    assert clear_href == "/billing/invoices?org=allowed-org"
   end
 
   test "distinguishes invoice populated, first-run-empty, filtered-empty, queue-empty, and loading states",
@@ -226,7 +724,8 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert loading_html =~ contract.states.loading
   end
 
-  test "prioritizes invoice identity, state, money, time, and signals columns", %{conn: conn} do
+  test "prioritizes invoice identity, state, money, due date, collection, and ownership columns",
+       %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
@@ -236,7 +735,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
       "Status",
       "Balance",
       "Collection",
-      "Billing signals"
+      "Ownership and tax"
     ])
   end
 
@@ -289,6 +788,69 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     %Invoice{}
     |> Invoice.force_status_changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
+  end
+
+  defp invoice_fixture_set(customer, subscription, reference) do
+    dates =
+      [
+        before: DateTime.add(reference, -1, :second),
+        equal: reference,
+        after: DateTime.add(reference, 1, :second),
+        missing: nil
+      ]
+      |> Map.new(fn {label, due_date} ->
+        invoice =
+          insert_invoice(customer, subscription, %{
+            number: "INV-FIXTURE-DATE-#{label}",
+            status: :open,
+            due_date: due_date
+          })
+          |> pin_invoice_inserted_at(reference)
+
+        {label, invoice}
+      end)
+
+    money =
+      [
+        zero: {0, "usd"},
+        zero_decimal: {1_234, "jpy"},
+        two_decimal: {1_234, "usd"},
+        three_decimal: {1_234, "kwd"},
+        unsupported_currency: {1_234, "zzz"},
+        missing_currency: {50, nil}
+      ]
+      |> Map.new(fn {label, {amount_minor, currency}} ->
+        invoice =
+          insert_invoice(customer, subscription, %{
+            number: "INV-FIXTURE-MONEY-#{label}",
+            status: :open,
+            amount_due_minor: amount_minor,
+            amount_remaining_minor: amount_minor,
+            total_minor: amount_minor,
+            currency: currency
+          })
+          |> pin_invoice_inserted_at(reference)
+
+        {label, invoice}
+      end)
+
+    %{dates: dates, money: money}
+  end
+
+  defp pin_invoice_inserted_at(invoice, timestamp) do
+    invoice
+    |> Ecto.Changeset.change(inserted_at: timestamp)
+    |> TestRepo.update!()
+  end
+
+  defp organization_scope(organization_id) do
+    %OwnerScope{
+      mode: :organization,
+      current_admin: %{id: "admin_1"},
+      organization_id: organization_id,
+      platform_admin?: true,
+      admin_org_ids: []
+    }
   end
 
   defp assert_page_header_contract(html, contract) do

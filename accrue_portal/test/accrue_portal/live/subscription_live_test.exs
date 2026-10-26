@@ -26,8 +26,12 @@ defmodule AccruePortal.SubscriptionLiveTest do
 
     assert html =~ subscription.processor_id
     assert html =~ "Lifecycle summary"
-    assert html =~ "Active and renewing."
+    assert html =~ "Billing reports this subscription as active."
     assert html =~ "Cancel renewal"
+
+    assert html =~
+             "End at period end to turn off renewal now and keep billing through the current period."
+
     refute html =~ "Keep subscription"
     assert html =~ ~s(aria-label="Breadcrumb")
     assert html =~ "Account"
@@ -42,12 +46,12 @@ defmodule AccruePortal.SubscriptionLiveTest do
 
     html =
       view
-      |> element("button[phx-click='cancel']")
+      |> element("button[phx-click='cancel'][phx-value-id='#{subscription.id}']")
       |> render_click()
 
     assert html =~ subscription.processor_id
     assert html =~ "Cancel renewal scheduled"
-    assert html =~ "Access ends at the current period end."
+    assert html =~ "The current billing period ends at the displayed date."
     assert TestRepo.get!(Subscription, subscription.id).cancel_at_period_end
   end
 
@@ -105,39 +109,18 @@ defmodule AccruePortal.SubscriptionLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
     assert html =~ "Canceling"
-    assert html =~ "Cancel renewal scheduled. Access ends at the current period end."
-    assert html =~ "Access ends on the current period end date shown below."
+    assert html =~ "Renewal is scheduled to stop at the current period end."
+    assert html =~ "The current billing period ends at the displayed date."
   end
 
-  test "subscription detail keeps Braintree hard-stop wording separate from host-owned renewal policy",
+  test "subscription detail keeps Braintree immediate cancellation separate from host access",
        %{conn: conn} do
-    user = user_fixture()
-
-    customer =
-      %Customer{}
-      |> Customer.changeset(%{
-        owner_type: AccruePortal.Fixtures.TestUser.__accrue__(:billable_type),
-        owner_id: user.id,
-        processor: "braintree",
-        processor_id: "cus_bt_portal_detail",
-        email: "portal-braintree-#{user.id}@example.com",
-        metadata: %{},
-        data: %{}
-      })
-      |> TestRepo.insert!()
+    %{user: user, subscription: source} = subscription_bundle_fixture!()
 
     subscription =
-      %Subscription{}
-      |> Subscription.changeset(%{
-        customer_id: customer.id,
-        processor: "braintree",
-        processor_id: "sub_bt_portal_detail",
-        status: :active,
-        currency: "usd",
-        current_period_start: DateTime.add(DateTime.utc_now(), -86_400, :second),
-        current_period_end: DateTime.add(DateTime.utc_now(), 2_592_000, :second)
-      })
-      |> TestRepo.insert!()
+      source
+      |> Subscription.changeset(%{processor: "braintree"})
+      |> TestRepo.update!()
 
     conn = sign_in_conn(conn, user)
 
@@ -148,16 +131,50 @@ defmodule AccruePortal.SubscriptionLiveTest do
     assert html =~ "Plan changes are not self-serve here"
 
     assert html =~
-             "Cancel now can end access immediately. If you need end-of-term non-renewal instead, contact support."
+             "Braintree cancels this subscription immediately. Ask your app host about application access."
 
     assert html =~
-             "Immediate cancellation can end access now. Contact support if you need end-of-term handling instead."
+             "Application access is controlled by your app host."
 
     assert html =~
              "This subscription does not offer direct self-serve invoice previews in the portal."
 
     refute html =~ "Cancel renewal"
     refute html =~ "Preview plan change"
+  end
+
+  test "subscription detail leaves a missing period end unavailable", %{conn: conn} do
+    %{user: user, customer: customer} = subscription_bundle_fixture!()
+    subscription = read_only_subscription_fixture!(customer, %{current_period_end: nil})
+    conn = sign_in_conn(conn, user)
+
+    assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    assert html =~ "Not available"
+    refute html =~ "Current period ends</strong><span>-"
+  end
+
+  test "a failed subscription lookup renders unavailable rather than not found", %{conn: conn} do
+    %{user: user, subscription: subscription} = subscription_bundle_fixture!()
+    previous_lookup = Application.get_env(:accrue_portal, :subscription_lookup)
+
+    Application.put_env(:accrue_portal, :subscription_lookup, fn _customer, _id ->
+      {:error, :offline}
+    end)
+
+    on_exit(fn ->
+      if is_nil(previous_lookup),
+        do: Application.delete_env(:accrue_portal, :subscription_lookup),
+        else: Application.put_env(:accrue_portal, :subscription_lookup, previous_lookup)
+    end)
+
+    conn = sign_in_conn(conn, user)
+
+    assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    assert html =~ "Subscription unavailable"
+    assert html =~ "Subscription details could not be loaded. Try again in a moment."
+    refute html =~ "Page not found"
   end
 
   describe "recovery banner (DUN-06)" do
@@ -218,7 +235,7 @@ defmodule AccruePortal.SubscriptionLiveTest do
       assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
       href = recovery_cta_href(html)
-      assert String.ends_with?(href, "/payment-methods/new")
+      assert URI.parse(href).path == "/billing/payment-methods/new"
     end
 
     test "deep-links a past-due non-Braintree banner CTA to the in-portal payment-methods list",
@@ -232,8 +249,7 @@ defmodule AccruePortal.SubscriptionLiveTest do
       assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
       href = recovery_cta_href(html)
-      assert String.ends_with?(href, "/payment-methods")
-      refute String.ends_with?(href, "/payment-methods/new")
+      assert URI.parse(href).path == "/billing/payment-methods"
     end
   end
 

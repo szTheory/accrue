@@ -103,13 +103,27 @@ defmodule AccrueAdmin.Queries.Charges do
       {:q, term}, query ->
         pattern = "%#{term}%"
 
-        where(
-          query,
-          [charge, customer],
-          ilike(charge.processor_id, ^pattern) or
-            ilike(customer.email, ^pattern) or
-            ilike(customer.name, ^pattern)
-        )
+        text_match =
+          dynamic(
+            [charge, customer],
+            ilike(charge.processor_id, ^pattern) or
+              ilike(customer.email, ^pattern) or
+              ilike(customer.name, ^pattern)
+          )
+
+        match =
+          case Ecto.UUID.cast(term) do
+            {:ok, uuid} ->
+              dynamic(
+                [charge, customer],
+                ^text_match or charge.id == ^uuid or customer.id == ^uuid
+              )
+
+            :error ->
+              text_match
+          end
+
+        where(query, ^match)
 
       {:status, status}, query ->
         filter_status(query, status)

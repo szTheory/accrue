@@ -1,0 +1,31 @@
+# GSD resume prompt
+
+We completed Phase 243, **Integrated Evidence and Feedback Preview**: 3/3 plans executed, independent verification passed 3/3 with `behavior_unverified: 0`, seven phase UAT cases passed, and the project contract passed across 15 phases / 113 summaries / 329 automated UAT cases. The reviewed Ubuntu visual comparison is valid at its recorded revision `0197f4ba` (run 38083267168); do not describe it as a comparison of later source.
+
+The current milestone is v1.64, Admin Operator UI Cleanup. All four phases and 24 plans are complete. Phase 243 remains current and passed. The verification reports for Phases 240, 241 and 242 now return `stale` because Phase 243 updated shared sources and evidence those reports cover. Their implementation plans already have matching summaries; only their owning verification paths need to refresh the reports before milestone archival.
+
+## Run next
+
+After clearing context, run this specific GSD command:
+
+`$gsd-execute-phase 240`
+
+Phase 240 is **Shared System and Real Billing Exemplar**. Its six plans are complete and have summaries, so this should resume at verification rather than re-execute implementation tasks. Follow the command's gates and verify its final status. Then refresh the next stale owners, in order:
+
+1. `$gsd-execute-phase 241` — Billing Operator Journeys
+2. `$gsd-execute-phase 242` — Investigations and Remaining Admin Surfaces
+3. `$gsd-complete-milestone v1.64` — after all three verification reports are current and passed
+
+Do not use `$gsd-progress --next` as a substitute for those named routes. If a refreshed phase reveals a real acceptance gap or blocker, handle that finding before moving to the next phase.
+
+## Context and evidence
+
+- Authoritative status and next-step rationale: `.planning/STATE.md`, `.planning/ROADMAP.md`, and `.planning/PROJECT.md`.
+- Completed phase report: `.planning/phases/243-integrated-evidence-and-feedback-preview/243-VERIFICATION.md`.
+- Operator route, accepted revision boundaries, current preview, and evidence limits: `.planning/phases/243-integrated-evidence-and-feedback-preview/243-HANDOFF.md`.
+- Detailed prior-phase regression record: `.planning/phases/243-integrated-evidence-and-feedback-preview/243-REGRESSION.md`.
+- Phase 243 UAT: `.planning/phases/243-integrated-evidence-and-feedback-preview/243-UAT.md`.
+- Dedicated Fake preview: `http://accrue-host-phase243-preview.localhost/admin`; its authoritative invoice/audit/webhook/dispatch snapshot remained unchanged after verification.
+- The approved Linux evidence branch is `gsd/phase-243-linux-evidence`. It is a validation branch; no main merge or release was authorized.
+
+The final Phase 243 commit is `57fb5d25`. No implementation changes are pending. Preserve the recorded failed attempts and evidence limits; do not regenerate visual captures or repeat completed implementation plans just to refresh verification fingerprints.

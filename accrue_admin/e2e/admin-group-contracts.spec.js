@@ -86,7 +86,7 @@ const GROUP_FINDABILITY = {
   ],
   "tabs-subviews": [
     /Webhook delivery attempts/i,
-    /30 days UTC/i,
+    /30 days/i,
     /Overview/i,
   ],
 };
@@ -152,8 +152,7 @@ async function login(page, target = "/billing") {
 }
 
 function resolveRepresentativeRoutes(fixtureData) {
-  const edge = fixtureData["edge-states"];
-  const opFlows = fixtureData["operator-flows"];
+  const edge = fixtureData["phase191-matrix"];
 
   return representativeRoutes.map((route) => {
     if (route.path.includes(":invoice_id")) {
@@ -161,7 +160,7 @@ function resolveRepresentativeRoutes(fixtureData) {
     }
 
     if (route.path.includes(":webhook_id")) {
-      return { ...route, path: route.path.replace(":webhook_id", encodeURIComponent(opFlows.single_webhook_id)) };
+      return { ...route, path: route.path.replace(":webhook_id", encodeURIComponent(edge.phase191_webhook_id)) };
     }
 
     return route;
@@ -267,7 +266,9 @@ async function assertNamedActiveStates(page) {
   await expect(currentSubview).toBeVisible();
   await expect(currentSubview).toContainText("Webhook delivery attempts");
   await expect(currentWindow).toBeVisible();
-  await expect(currentWindow).toContainText("30 days UTC");
+  await expect(currentWindow).toContainText("30 days");
+  // UTC is stated once on the nav accessible name (b4a7eeac), not on each visible label.
+  await expect(tabsRoot.locator('nav[aria-label*="UTC"]').first()).toBeVisible();
 }
 
 async function assertNoOffscreenActions(page, width) {
@@ -468,7 +469,7 @@ async function assertRepresentativeRoute(page, route) {
   if (route.category === "list-table") {
     await expect(groupLocator(page, "table-empty-loading-error-pagination").first()).toBeVisible();
     await expect(page.locator('[data-role="filter-form"]').first()).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Clear open receivables/i }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Invoices", exact: true }).first()).toBeVisible();
     return;
   }
 
@@ -479,18 +480,29 @@ async function assertRepresentativeRoute(page, route) {
   }
 
   if (route.category === "recovery-kpi") {
-    await expect(groupLocator(page, "kpi-chart-table").first()).toBeVisible();
-    await expect(page.locator(".ax-kpi-card").first()).toBeVisible();
-    await expect(page.locator(".ax-funnel-chart").first()).toBeVisible();
-    await expect(groupLocator(page, "table-empty-loading-error-pagination").first()).toBeVisible();
+    const overview = page.locator('[data-ax-overview="recovery"]');
+    await expect(overview).toBeVisible();
+    await expect(overview.locator("[data-ax-recovery-hero]")).toHaveCount(1);
+    await expect(overview.locator("[data-ax-recovery-work-queue]")).toBeVisible();
+    await expect(overview.locator("[data-ax-recovery-supporting-funnel]")).toBeVisible();
+    const order = await overview.evaluate((root) =>
+      [...root.querySelectorAll("[data-ax-recovery-hero], [data-ax-recovery-work-queue], [data-ax-recovery-supporting-funnel]")]
+        .map((node) => node.hasAttribute("data-ax-recovery-hero") ? "hero" :
+          node.hasAttribute("data-ax-recovery-work-queue") ? "work-queue" : "supporting-funnel")
+    );
+    expect(order, "Recovery overview keeps its three current zones in order").toEqual([
+      "hero", "work-queue", "supporting-funnel"
+    ]);
     await expect(groupLocator(page, "tabs-subviews").first()).toBeVisible();
     return;
   }
 
   if (route.category === "overlay-path") {
-    await expect(groupLocator(page, "detail-header-metadata-actions").first()).toBeVisible();
+    // Webhook detail moved to the shared PageHeader with its own group id (e6f39cef, 247-04).
+    await expect(groupLocator(page, "webhook-detail-header").first()).toBeVisible();
+    await expect(page.locator('[data-role="webhook-observed-status"]').first()).toBeVisible();
     await expect(page.locator('[data-role="replay-single"]').first()).toBeVisible();
-    await expect(page.getByText(/Single replay calls the existing DLQ primitive|Replay is unavailable/i).first()).toBeVisible();
+    await expect(page.getByText(/Queues another delivery attempt\. Queue acceptance does not confirm processing\.|Replay is unavailable/i).first()).toBeVisible();
     return;
   }
 
@@ -637,6 +649,7 @@ test.describe("Phase 190 representative live probes", () => {
       "operator-flows": await seed(request, "operator-flows"),
       dashboard: await seed(request, "dashboard"),
       "edge-states": await seed(request, "edge-states"),
+      "phase191-matrix": await seed(request, "phase191-matrix"),
     };
 
     const routes = resolveRepresentativeRoutes(fixtureData);

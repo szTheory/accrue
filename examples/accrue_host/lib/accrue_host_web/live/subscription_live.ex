@@ -4,11 +4,14 @@ defmodule AccrueHostWeb.SubscriptionLive do
   import Ecto.Query
   import Phoenix.Controller, only: [get_csrf_token: 0]
 
-  alias Accrue.Billing.Subscription
+  alias Accrue.Billing.{Customer, Subscription}
+  alias Accrue.Checkout
+  alias Accrue.Checkout.LocalSession
   alias AccrueHost.Accounts.{Organization, OrganizationMembership}
   alias AccrueHost.Billing
   alias AccrueHost.Billing.Plans
   alias AccrueHost.Repo
+  alias Accrue.Processor
 
   @active_organization_label "Active workspace"
   @active_organization_helper "Plan changes and payment actions apply to this workspace only."
@@ -32,6 +35,71 @@ defmodule AccrueHostWeb.SubscriptionLive do
      |> assign(:confirm_cancel, false)
      |> load_state()}
   end
+
+  @impl true
+  def handle_params(params = %{"plan" => plan_id, "selection" => selection_id}, _uri, socket)
+      when is_binary(plan_id) and is_binary(selection_id) and
+             not is_map_key(params, "checkout") do
+    case Plans.get(plan_id) do
+      nil ->
+        {:noreply,
+         socket
+         |> assign(:selected_checkout_plan, nil)
+         |> put_flash(:error, "That plan is unavailable. Choose a plan from pricing to continue.")}
+
+      plan ->
+        case Ecto.UUID.cast(selection_id) do
+          {:ok, _uuid} ->
+            socket = assign(socket, :checkout_selection_id, selection_id)
+            create_selected_checkout(socket, plan, selection_id)
+
+          :error ->
+            {:noreply,
+             socket
+             |> assign(:selected_checkout_plan, nil)
+             |> put_flash(
+               :error,
+               "That plan selection has expired. Choose a plan from pricing to continue."
+             )}
+        end
+    end
+  end
+
+  def handle_params(%{"checkout" => "cancel"} = params, _uri, socket) do
+    {:noreply,
+     socket
+     |> assign_return_offer(params)
+     |> assign(
+       :checkout_return_state,
+       {:canceled, "Checkout was canceled. Return to billing to review the current status."}
+     )}
+  end
+
+  def handle_params(%{"checkout" => "success"} = params, _uri, socket) do
+    socket = assign_return_offer(socket, params)
+
+    state_socket =
+      if Processor.name() == "braintree" do
+        braintree_checkout_return(socket, params)
+      else
+        case params["checkout_session_id"] do
+          session_id when is_binary(session_id) and byte_size(session_id) <= 255 ->
+            stripe_checkout_return(socket, params, session_id)
+
+          _ ->
+            assign_checkout_return(
+              socket,
+              :unavailable,
+              "We couldn't verify this checkout return. Check billing status or contact support before trying again."
+            )
+        end
+      end
+
+    {:noreply, state_socket}
+  end
+
+  def handle_params(_params, _uri, socket),
+    do: {:noreply, assign(socket, :selected_checkout_plan, nil)}
 
   @impl true
   def handle_event("start_subscription", %{"plan" => plan_id} = params, socket) do
@@ -145,26 +213,295 @@ defmodule AccrueHostWeb.SubscriptionLive do
     end
   end
 
+  def handle_event("create_checkout_session", %{"plan" => plan_id}, socket) do
+    case Plans.get(plan_id) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "That plan is unavailable.")}
+
+      plan ->
+        case socket.assigns[:checkout_selection_id] do
+          selection_id when is_binary(selection_id) ->
+            create_selected_checkout(socket, plan, selection_id)
+
+          _ ->
+            {:noreply,
+             put_flash(socket, :error, "Choose a plan from pricing before starting checkout.")}
+        end
+    end
+  end
+
   def handle_event("create_checkout_session", _params, socket) do
-    attrs = %{
-      success_url: url(~p"/app/billing?checkout=success"),
-      cancel_url: url(~p"/app/billing?checkout=cancel"),
-      line_items: [%{price: Plans.ids().pro, quantity: 1}]
+    {:noreply, put_flash(socket, :error, "Choose a plan from pricing before starting checkout.")}
+  end
+
+  defp create_selected_checkout(socket, plan, selection_id) do
+    scope = socket.assigns.current_scope
+    billable = scope.active_organization
+
+    if billing_locked?(socket.assigns.access_state) or is_nil(billable) do
+      {:noreply, put_flash(socket, :error, @member_denial_copy)}
+    else
+      attrs = %{
+        mode: :subscription,
+        ui_mode: :hosted,
+        success_url: hosted_success_url(plan, selection_id),
+        cancel_url: hosted_cancel_url(plan, selection_id),
+        operation_id: "pricing:#{billable.id}:#{plan.id}:#{selection_id}",
+        line_items: [
+          %{
+            "price" => plan.id,
+            "quantity" => 1,
+            "name" => plan.label,
+            "amount" => amount_decimal(plan.unit_amount_minor),
+            "amount_minor" => plan.unit_amount_minor,
+            "currency" => plan.currency,
+            "interval" => plan.billing_cycle.unit,
+            "interval_count" => plan.billing_cycle.count
+          }
+        ],
+        metadata: %{
+          "plan_name" => plan.label,
+          "amount_minor" => plan.unit_amount_minor,
+          "currency" => plan.currency,
+          "interval" => Atom.to_string(plan.billing_cycle.unit),
+          "interval_count" => plan.billing_cycle.count,
+          "billable_type" => "Organization",
+          "billable_id" => to_string(billable.id),
+          "billable_name" => billable.name,
+          "processor" => to_string(Processor.name()),
+          "plan_id" => plan.id,
+          "selection_id" => selection_id
+        }
+      }
+
+      case Billing.create_checkout_session_for_scope(scope, attrs) do
+        {:ok, session} ->
+          {:noreply,
+           socket
+           |> assign(:checkout_url, selected_checkout_url(session))
+           |> assign(:selected_checkout_plan, plan)}
+
+        {:error, reason} ->
+          {:noreply, put_flash(socket, :error, @error_copy <> " (#{inspect(reason)})")}
+      end
+    end
+  end
+
+  defp hosted_success_url(plan, selection_id) do
+    case Processor.name() do
+      "braintree" ->
+        url(~p"/app/billing") <>
+          "?" <> URI.encode_query(%{checkout: "success", plan: plan.id, selection: selection_id})
+
+      _ ->
+        url(~p"/app/billing") <>
+          "?checkout=success&plan=#{URI.encode(plan.id)}&selection=#{URI.encode(selection_id)}&checkout_session_id={CHECKOUT_SESSION_ID}"
+    end
+  end
+
+  defp hosted_cancel_url(plan, selection_id) do
+    url(~p"/app/billing") <>
+      "?" <> URI.encode_query(%{checkout: "cancel", plan: plan.id, selection: selection_id})
+  end
+
+  defp assign_return_offer(socket, %{"plan" => plan_id, "selection" => selection_id}) do
+    case {Plans.get(plan_id), Ecto.UUID.cast(selection_id)} do
+      {%{} = plan, {:ok, _uuid}} -> assign(socket, :selected_checkout_plan, plan)
+      _ -> assign(socket, :selected_checkout_plan, nil)
+    end
+  end
+
+  defp assign_return_offer(socket, _params), do: assign(socket, :selected_checkout_plan, nil)
+
+  defp valid_checkout_session_id?(id), do: Regex.match?(~r/\Acs_[A-Za-z0-9_]+\z/, id)
+
+  defp stripe_checkout_return(socket, params, session_id) do
+    scope = socket.assigns.current_scope
+    organization = scope.active_organization
+
+    if billing_locked?(socket.assigns.access_state) do
+      assign_checkout_return(
+        socket,
+        :blocked,
+        "Billing access is unavailable for this workspace. Ask a workspace admin to review the checkout status."
+      )
+    else
+      if valid_checkout_session_id?(session_id) and not is_nil(organization) do
+        expected_metadata = %{
+          "billable_type" => "Organization",
+          "billable_id" => to_string(organization.id),
+          "processor" => to_string(Processor.name()),
+          "plan_id" => params["plan"],
+          "selection_id" => params["selection"]
+        }
+
+        state =
+          case Checkout.reconcile(session_id, expected_metadata: expected_metadata) do
+            {:ok, session} ->
+              if value(session, :status) == "complete" and
+                   value(session, :payment_status) == "paid" do
+                {:complete,
+                 "Payment confirmed by the provider. Your subscription is being updated."}
+              else
+                {:pending,
+                 "The provider has not confirmed payment yet. Check billing status before trying again."}
+              end
+
+            {:error, _reason} ->
+              {:unavailable,
+               "We couldn't verify this checkout return. Check billing status or contact support before trying again."}
+          end
+
+        assign(socket, :checkout_return_state, state)
+      else
+        assign_checkout_return(
+          socket,
+          :unavailable,
+          "We couldn't verify this checkout return. Check billing status or contact support before trying again."
+        )
+      end
+    end
+  end
+
+  defp braintree_checkout_return(socket, %{"plan" => plan_id, "selection" => selection_id})
+       when is_binary(plan_id) and is_binary(selection_id) and byte_size(selection_id) == 36 do
+    scope = socket.assigns.current_scope
+
+    case {Plans.get(plan_id), Ecto.UUID.cast(selection_id), scope.active_organization} do
+      {%{} = plan, {:ok, _uuid}, %Organization{} = organization} ->
+        operation_id = "pricing:#{organization.id}:#{plan.id}:#{selection_id}"
+
+        case Billing.checkout_session_for_scope(scope, operation_id) do
+          {:ok,
+           %{
+             customer: %Customer{} = customer,
+             local_session: %LocalSession{} = local_session
+           }} ->
+            if braintree_session_matches?(
+                 local_session,
+                 customer,
+                 organization,
+                 plan,
+                 selection_id
+               ) do
+              case local_session.status do
+                "completed" ->
+                  assign_checkout_return(
+                    socket,
+                    :complete,
+                    "Checkout completed. Your workspace subscription is being updated."
+                  )
+
+                status when status in ["open", "processing", "uncertain"] ->
+                  assign_checkout_return(
+                    socket,
+                    :pending,
+                    "Checkout is still being verified. Check billing status before trying again."
+                  )
+
+                _ ->
+                  checkout_return_unavailable(socket)
+              end
+            else
+              checkout_return_unavailable(socket)
+            end
+
+          {:error, :forbidden} ->
+            assign_checkout_return(
+              socket,
+              :blocked,
+              "Billing access is unavailable for this workspace. Ask a workspace admin to review the checkout status."
+            )
+
+          _ ->
+            checkout_return_unavailable(socket)
+        end
+
+      _ ->
+        checkout_return_unavailable(socket)
+    end
+  end
+
+  defp braintree_checkout_return(socket, _params), do: checkout_return_unavailable(socket)
+
+  defp braintree_session_matches?(
+         %LocalSession{} = session,
+         %Customer{} = customer,
+         organization,
+         plan,
+         selection_id
+       ) do
+    expected_metadata = %{
+      "billable_type" => "Organization",
+      "billable_id" => to_string(organization.id),
+      "processor" => "braintree",
+      "plan_id" => plan.id,
+      "selection_id" => selection_id,
+      "amount_minor" => plan.unit_amount_minor,
+      "currency" => plan.currency,
+      "interval" => Atom.to_string(plan.billing_cycle.unit),
+      "interval_count" => plan.billing_cycle.count
     }
 
-    case Billing.create_checkout_session_for_scope(socket.assigns.current_scope, attrs) do
-      {:ok, session} ->
-        {:noreply, assign(socket, :checkout_url, session.url)}
+    metadata_matches? =
+      is_map(session.metadata) and
+        Enum.all?(expected_metadata, fn {key, expected} ->
+          Map.get(session.metadata, key) == expected
+        end)
 
-      {:error, :no_active_organization} ->
-        {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
+    line_item_matches? =
+      case session.line_items do
+        [%{} = item] ->
+          value(item, :price) == plan.id and value(item, :quantity) == 1 and
+            value(item, :amount_minor) == plan.unit_amount_minor and
+            value(item, :currency) == plan.currency and
+            value(item, :interval) == Atom.to_string(plan.billing_cycle.unit) and
+            value(item, :interval_count) == plan.billing_cycle.count
 
-      {:error, :forbidden} ->
-        {:noreply, put_flash(socket, :error, @member_denial_copy)}
+        _ ->
+          false
+      end
 
-      {:error, _reason} ->
-        {:noreply, put_flash(socket, :error, @error_copy)}
+    session.processor == "braintree" and session.customer_id == customer.id and
+      customer.processor == "braintree" and customer.owner_type == "Organization" and
+      customer.owner_id == to_string(organization.id) and session.mode == "subscription" and
+      session.ui_mode == "hosted" and
+      session.operation_id == "pricing:#{organization.id}:#{plan.id}:#{selection_id}" and
+      session.price_id == plan.id and metadata_matches? and line_item_matches?
+  end
+
+  defp checkout_return_unavailable(socket) do
+    assign_checkout_return(
+      socket,
+      :unavailable,
+      "We couldn't verify this checkout return. Check billing status or contact support before trying again."
+    )
+  end
+
+  defp assign_checkout_return(socket, status, message),
+    do: assign(socket, :checkout_return_state, {status, message})
+
+  defp value(%{} = map, key), do: Map.get(map, key) || Map.get(map, Atom.to_string(key))
+  defp value(_, _key), do: nil
+
+  defp selected_checkout_url(%{id: id, url: url}) do
+    case Ecto.UUID.cast(id) do
+      {:ok, _uuid} ->
+        case LocalSession.by_id(id) do
+          %LocalSession{session_token: token} ->
+            AccruePortal.Path.checkout("/shared-billing", token)
+
+          _ ->
+            url
+        end
+
+      :error ->
+        url
     end
+  end
+
+  defp amount_decimal(amount_minor) when is_integer(amount_minor) do
+    "#{div(amount_minor, 100)}.#{String.pad_leading(Integer.to_string(rem(amount_minor, 100)), 2, "0")}"
   end
 
   @impl true
@@ -300,18 +637,32 @@ defmodule AccrueHostWeb.SubscriptionLive do
           <div>
             <h2 class="text-2xl font-semibold">Checkout handoff</h2>
             <p class="mt-1 text-base leading-7 text-base-content/65">
-              Create a hosted checkout link for the Studio plan when a buyer needs to complete payment outside this screen.
+              Continue with the exact plan selected on pricing when a buyer needs to complete payment outside this screen.
             </p>
           </div>
+          <p
+            :if={@checkout_return_state}
+            role="status"
+            aria-live="polite"
+            data-testid="checkout-return-state"
+            class="rounded-lg border border-base-300 p-4 text-base leading-7"
+          >
+            {elem(@checkout_return_state, 1)}
+          </p>
           <div class="flex flex-wrap gap-2">
             <button
+              :if={@selected_checkout_plan}
               type="button"
               phx-click="create_checkout_session"
+              phx-value-plan={@selected_checkout_plan.id}
               class="btn btn-outline rounded-lg"
               disabled={@billing_locked?}
             >
-              Create checkout link
+              Continue with {@selected_checkout_plan.label}
             </button>
+            <p :if={!@selected_checkout_plan} class="text-sm text-base-content/60">
+              Choose a plan from pricing to start checkout.
+            </p>
           </div>
           <div :if={@checkout_url} class="space-y-1">
             <p class="text-sm font-semibold text-base-content/60">Checkout link</p>
@@ -481,6 +832,9 @@ defmodule AccrueHostWeb.SubscriptionLive do
     |> assign(:billing_locked?, billing_locked?(access_state))
     |> assign_new(:braintree_client_token, fn -> nil end)
     |> assign_new(:checkout_url, fn -> nil end)
+    |> assign_new(:selected_checkout_plan, fn -> nil end)
+    |> assign_new(:checkout_selection_id, fn -> nil end)
+    |> assign_new(:checkout_return_state, fn -> nil end)
     |> assign(:customer, customer)
     |> assign(:subscription, subscription)
     |> assign(:subscription_plan_label, plan_label(subscription))

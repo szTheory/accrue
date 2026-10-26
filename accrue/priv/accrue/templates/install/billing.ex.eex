@@ -42,6 +42,36 @@ defmodule <%= @billing_context %> do
     Billing.customer(billable)
   end
 
+  # Optional Portal policy hook. Keep the generated default self-only; hosts
+  # that bill organizations should resolve membership in their own adapter.
+  def portal_organization_for(_actor, _organization_id), do: {:error, :unavailable}
+
+  def authorize_portal_action(actor, billable, customer, action, target)
+      when actor == billable and
+             action in [
+               :read,
+               :payment_method_create,
+               :payment_method_default,
+               :payment_method_delete,
+               :subscription_cancel,
+               :subscription_change,
+               :subscription_preview,
+               :checkout_validate_promo,
+               :checkout_complete
+             ] do
+    if target == billable or target == customer or customer_target?(customer, target) do
+      :ok
+    else
+      {:error, :forbidden}
+    end
+  end
+
+  def authorize_portal_action(_actor, _billable, _customer, _action, _target),
+    do: {:error, :forbidden}
+
+  defp customer_target?(%{id: id}, %{customer_id: id}), do: true
+  defp customer_target?(_, _), do: false
+
   # Host policy hook: resolve the billable boundary before delegating the
   # shared customer-update contract to Accrue.
   def update_customer(billable, attrs) when is_map(attrs) do

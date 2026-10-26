@@ -15,6 +15,9 @@ defmodule AccruePortal.Layouts do
   attr(:phoenix_js_path, :string, default: nil)
   attr(:live_view_js_path, :string, default: nil)
   attr(:base_path, :string, default: nil)
+  attr(:current_context, :map, default: nil)
+  attr(:current_context_pin, :string, default: nil)
+  attr(:flash, :map, default: %{})
 
   def root(assigns) do
     assigns =
@@ -22,6 +25,7 @@ defmodule AccruePortal.Layouts do
       |> assign(:brand_style_tag, brand_style_tag(assigns.brand, assigns.csp_nonce))
       |> assign(:brand_logo_url, sanitize_url(assigns.brand[:logo_url]))
       |> assign(:brand_wordmark, brand_wordmark(assigns.brand))
+      |> assign(:billable_identity, billable_identity(assigns.current_context))
 
     ~H"""
     <!DOCTYPE html>
@@ -38,7 +42,7 @@ defmodule AccruePortal.Layouts do
       <body>
         <header class="portal-topbar">
           <div class="portal-topbar-inner">
-            <a href={@base_path} class="portal-brand-link" aria-label={@brand_wordmark || "Billing home"}>
+            <a href={AccruePortal.Path.context(@base_path, @current_context_pin)} class="portal-brand-link" aria-label={@brand_wordmark || "Billing home"}>
               <img
                 :if={@brand_logo_url}
                 class="portal-logo"
@@ -49,6 +53,19 @@ defmodule AccruePortal.Layouts do
                 {@brand_wordmark}
               </span>
             </a>
+            <div :if={@billable_identity} class="portal-billable-identity">
+              <span class="portal-billable-name">{@billable_identity}</span>
+              <span :if={@current_context.display_detail} class="portal-billable-detail">
+                {@current_context.display_detail}
+              </span>
+              <a
+                :if={@current_context.switch_path}
+                class="portal-billable-switch"
+                href={@current_context.switch_path}
+              >
+                Switch account
+              </a>
+            </div>
             <div
               :if={not @theme_locked}
               class="portal-theme-picker"
@@ -58,7 +75,7 @@ defmodule AccruePortal.Layouts do
               <button
                 type="button"
                 data-portal-theme="system"
-                aria-pressed={@theme == "system"}
+                aria-pressed={to_string(@theme == "system")}
                 class={["portal-theme-option", @theme == "system" && "is-active"]}
                 aria-label="Match system theme"
                 title="System"
@@ -73,7 +90,7 @@ defmodule AccruePortal.Layouts do
               <button
                 type="button"
                 data-portal-theme="light"
-                aria-pressed={@theme == "light"}
+                aria-pressed={to_string(@theme == "light")}
                 class={["portal-theme-option", @theme == "light" && "is-active"]}
                 aria-label="Light theme"
                 title="Light"
@@ -94,7 +111,7 @@ defmodule AccruePortal.Layouts do
               <button
                 type="button"
                 data-portal-theme="dark"
-                aria-pressed={@theme == "dark"}
+                aria-pressed={to_string(@theme == "dark")}
                 class={["portal-theme-option", @theme == "dark" && "is-active"]}
                 aria-label="Dark theme"
                 title="Dark"
@@ -107,6 +124,12 @@ defmodule AccruePortal.Layouts do
             </div>
           </div>
         </header>
+        <div :if={@flash[:error]} id="portal-live-error" class="portal-inline-error" role="alert" aria-live="assertive">
+          {@flash[:error]}
+        </div>
+        <div :if={@flash[:info]} id="portal-live-status" class="portal-inline-status" role="status" aria-live="polite">
+          {@flash[:info]}
+        </div>
         <%= @inner_content %>
         <script :if={@phoenix_js_path} defer src={@phoenix_js_path}></script>
         <script :if={@live_view_js_path} defer src={@live_view_js_path}></script>
@@ -221,4 +244,39 @@ defmodule AccruePortal.Layouts do
   end
 
   defp brand_wordmark(_brand), do: nil
+
+  defp billable_identity(nil), do: nil
+
+  defp billable_identity(context) when is_map(context) do
+    context
+    |> context_value(:display_name)
+    |> nonempty_text()
+    |> case do
+      nil ->
+        customer = context_value(context, :customer)
+
+        nonempty_text(context_value(customer, :name)) ||
+          nonempty_text(context_value(customer, :email))
+
+      display_name ->
+        display_name
+    end
+  end
+
+  defp billable_identity(_context), do: nil
+
+  defp context_value(context, key) when is_map(context) do
+    Map.get(context, key, Map.get(context, Atom.to_string(key)))
+  end
+
+  defp context_value(_context, _key), do: nil
+
+  defp nonempty_text(value) when is_binary(value) do
+    case String.trim(value) do
+      "" -> nil
+      trimmed -> trimmed
+    end
+  end
+
+  defp nonempty_text(_value), do: nil
 end

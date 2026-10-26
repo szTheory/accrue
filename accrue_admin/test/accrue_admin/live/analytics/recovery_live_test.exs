@@ -5,6 +5,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   alias Accrue.Events
   alias Accrue.Events.Event
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.Live.Analytics.RecoveryLive
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -28,9 +29,22 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   end
 
   setup do
+    # Recovery windows use Accrue.Clock. Align the fixed fake clock with the
+    # database wall clock by ceiling plus a 2-second margin, not floor:
+    # accrue_events.inserted_at comes from the database now() default in the
+    # Postgres session TimeZone, so a floored clock excludes same-second events
+    # on a UTC server. Restore the clock for neighboring tests.
+    clock_shift = DateTime.diff(DateTime.utc_now(), Accrue.Clock.utc_now(), :second) + 2
+    :ok = Accrue.Processor.Fake.advance(clock_shift)
+    on_exit(fn -> Accrue.Processor.Fake.advance(-clock_shift) end)
+
     prior = Application.get_env(:accrue, :auth_adapter)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
-    on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
+
+    on_exit(fn ->
+      Application.put_env(:accrue, :auth_adapter, prior)
+      Application.delete_env(:accrue_admin, :recovery_query_fun)
+    end)
 
     # Seed some events with MRR
     {:ok, _} =
@@ -61,21 +75,148 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   test "renders recovery dashboard with MRR totals", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+    assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
     assert html =~ Copy.recovery_index_heading()
     assert html =~ Copy.recovery_index_subtitle()
+    assert html =~ "automated retry outcomes"
+    refute html =~ "dunning funnel"
+    assert html =~ "Payment recovery"
     assert html =~ "Recovered MRR (USD)"
     assert html =~ "$50.00"
-    assert html =~ "Exhausted MRR (USD)"
+    assert html =~ "Unrecovered MRR (USD)"
     refute html =~ "Lost MRR"
     assert html =~ "$20.00"
+  end
+
+  test "renders truthful recurring monthly metric definitions without delta claims", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
+
+    assert html =~ "Monthly recurring revenue observed on recovered subscriptions."
+    assert html =~ "Monthly recurring revenue on subscriptions with exhausted payment retries."
+    refute html =~ "Money Saved"
+    refute html =~ "Churned Revenue"
+    refute html =~ "Amount saved by successful Dunning"
+    refute html =~ "Churn"
+    refute html =~ ~s(class="ax-kpi-delta)
+  end
+
+  test "keeps actual zero separate from absent and unsupported currency amounts", %{conn: conn} do
+    {:ok, _} =
+      Events.record(%{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: "sub_zero_eur",
+        data: %{mrr_value_cents: 0, currency: "eur"}
+      })
+
+    {:ok, _} =
+      Events.record(%{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: "sub_missing_usd",
+        data: %{currency: "usd"}
+      })
+
+    {:ok, _} =
+      Events.record(%{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: "sub_missing_gbp",
+        data: %{currency: "gbp"}
+      })
+
+    {:ok, _} =
+      Events.record(%{
+        type: "dunning.exhausted",
+        subject_type: "Subscription",
+        subject_id: "sub_unsupported",
+        data: %{mrr_value_cents: 9_999, currency: "zzz"}
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
+
+    assert html =~ "Recovered MRR (EUR)"
+    assert html =~ "€0.00"
+    assert html =~ "Unrecovered MRR (EUR)"
+    assert html =~ "Amount unavailable"
+    assert html =~ "Recovered MRR (GBP)"
+    assert html =~ "Unrecovered MRR (GBP)"
+    assert html =~ "Recovered MRR (USD)"
+    assert html =~ "Unrecovered MRR (UNAVAILABLE)"
+    refute html =~ "Money Saved"
+    refute html =~ "Cash saved"
+    refute html =~ "Churned Revenue"
+    refute html =~ "Confirmed churn"
+    refute html =~ "$99.99"
+    refute html =~ "9,999 ZZZ"
+
+    eur_pair =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find(~s([data-ax-currency-pair][data-currency="eur"]))
+      |> hd()
+
+    assert length(Floki.find(eur_pair, ".ax-kpi-card")) == 2
+    assert Floki.text(eur_pair) =~ "€0.00"
+    assert Floki.text(eur_pair) =~ "Amount unavailable"
+
+    css = File.read!("assets/css/app.css")
+
+    assert css =~
+             ~r/@media \(max-width: 599\.98px\).*?\.ax-recovery-currency-pair\s*\{\s*grid-template-columns: minmax\(0, 1fr\);/s
+
+    assert css =~
+             ~r/\.ax-recovery-currency-pair > \.ax-kpi-card\s*\{\s*min-width: 0;\s*overflow-wrap: anywhere;/s
+  end
+
+  test "names payment recovery and separates the selected UTC window from historical coverage", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live_recovery(conn, "/billing/analytics/recovery?window=7d")
+
+    assert html =~ "<h1 class=\"ax-display\">Payment recovery</h1>"
+
+    breadcrumb =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find("nav[aria-label='Breadcrumb'] [aria-current='page']")
+      |> Floki.text()
+      |> String.trim()
+
+    assert breadcrumb == "Payment recovery"
+
+    [window_nav] =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find("nav[aria-label='Time window (UTC)']")
+
+    assert Floki.text(window_nav) =~ "7 days"
+
+    [coverage] =
+      html
+      |> Floki.parse_fragment!()
+      |> Floki.find(".ax-recovery-coverage")
+
+    assert Floki.text(coverage) =~ "Data since January 1, 2024. Reporting windows use UTC."
+    refute Floki.text(window_nav) =~ "Historical data coverage"
+
+    assert Floki.find(coverage, "a") == []
+    assert html =~ "Unavailable amounts are not counted as zero."
   end
 
   test "D-18 D-19 renders Recovery-specific overview grammar in order", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=30d")
+    assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery?window=30d")
 
     assert heading_count(html, "h1") == 1
     assert html =~ Copy.recovery_index_heading()
@@ -102,7 +243,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       # exercise the DISTINCT-(subject_id, campaign_anchor) tuple semantics of
       # Dunning.funnel/1 at the rendering boundary (ground-truth math is enforced
       # by Plan 01's unit tests).
-      now = DateTime.utc_now()
+      now = Accrue.Clock.utc_now()
       anchor_a = DateTime.to_iso8601(now)
       anchor_b = DateTime.to_iso8601(DateTime.add(now, -1, :day))
 
@@ -132,17 +273,17 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
-      assert html =~ "Recovery Funnel"
-      assert html =~ "currently in dunning"
+      assert html =~ "Payment recovery funnel"
+      assert html =~ "recorded campaigns still in progress"
     end
 
     test "Exhausted MRR card carries yearly-plan worked example (ROADMAP SC#5)",
          %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
       # Worked-example copy lives in either the Exhausted KpiCard delta string
       # (recovery_live.ex) or the FunnelChart Exhausted-bar tooltip (DAN-09
@@ -187,7 +328,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     test "renders JPY symbol for the JPY Recovered KPI value", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
       # Since we now render cards per currency, both USD and JPY cards will appear.
       # The JPY card should render ¥/￥/JPY, and the USD card should render $
@@ -202,40 +343,85 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   describe "window parameter (DAN-10)" do
     test "no ?window= param defaults to 30d window selector active", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
       # The 30d button — and only the 30d button — must carry aria-current="page".
       assert active_window_label(html) =~ "30 days"
     end
 
     test "?window=7d renders 7d button as active", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=7d")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery?window=7d")
       assert active_window_label(html) =~ "7 days"
     end
 
     test "?window=90d renders 90d button as active", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=90d")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery?window=90d")
       assert active_window_label(html) =~ "90 days"
     end
 
     test "invalid ?window= falls back to 30d default", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=bad")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery?window=bad")
       assert active_window_label(html) =~ "30 days"
     end
 
     test "window change via render_patch fires handle_params", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      {:ok, view, _html} = live(conn, "/billing/analytics/recovery")
+      {:ok, view, _html} = live_recovery(conn, "/billing/analytics/recovery")
       html = render_patch(view, "/billing/analytics/recovery?window=7d")
       assert active_window_label(html) =~ "7 days"
+    end
+
+    test "loading state keeps the selected owner and UTC window until scoped reads finish", %{
+      conn: conn
+    } do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      {:ok, view, loading_html} =
+        live(conn, "/billing/analytics/recovery?org=allowed-org&window=7d")
+
+      assert loading_html =~ ~s(data-state="loading")
+      assert active_window_label(loading_html) =~ "7 days"
+      assert loading_html =~ "org=allowed-org"
+      assert loading_html =~ "Loading recovery observations for this owner and UTC window."
+      refute loading_html =~ "Recovery Funnel"
+      assert render_async(view) =~ "$12.34"
+      refute render(view) =~ ~s(data-state="loading")
+    end
+
+    test "failed recovery read remains a recoverable error rather than an empty result" do
+      assert {:noreply, socket} =
+               RecoveryLive.handle_async(
+                 :recovery_query,
+                 {:exit, :query_timeout},
+                 %Phoenix.LiveView.Socket{}
+               )
+
+      assert socket.assigns.recovery_loading? == false
+
+      assert socket.assigns.recovery_error ==
+               "We couldn't load this billing data. Refresh the page or return to the list and try again."
+
+      assert socket.assigns.stats == %{recovered: [], lost: []}
+      assert socket.assigns.at_risk == []
     end
 
     test "window change re-queries KPI values rather than only changing the active button", %{
       conn: conn
     } do
-      ten_days_ago = DateTime.utc_now() |> DateTime.add(-10, :day)
+      ten_days_ago =
+        Accrue.Clock.utc_now()
+        |> DateTime.add(-10, :day)
+        |> then(&%{&1 | microsecond: {elem(&1.microsecond, 0), 6}})
 
       TestRepo.insert!(%Event{
         type: "dunning.recovered",
@@ -248,27 +434,155 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       })
 
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      {:ok, view, html_30d} = live(conn, "/billing/analytics/recovery?window=30d")
+      {:ok, view, html_30d} = live_recovery(conn, "/billing/analytics/recovery?window=30d")
 
       assert active_window_label(html_30d) =~ "30 days"
       assert html_30d =~ "$150.00"
 
-      html_7d = render_patch(view, "/billing/analytics/recovery?window=7d")
+      _html_7d = render_patch(view, "/billing/analytics/recovery?window=7d")
+      html_7d = render_async(view)
 
       assert active_window_label(html_7d) =~ "7 days"
       assert html_7d =~ "$50.00"
       refute html_7d =~ "$150.00"
     end
 
+    test "overlapping window reads keep the latest result and loading state", %{conn: conn} do
+      parent = self()
+
+      Application.put_env(:accrue_admin, :recovery_query_fun, fn _owner, since, _until ->
+        window = if DateTime.diff(Accrue.Clock.utc_now(), since, :day) <= 7, do: "7d", else: "30d"
+        send(parent, {:recovery_read_started, window, self()})
+        Process.flag(:trap_exit, true)
+
+        receive do
+          {:resolve_recovery_read, ^window} ->
+            %{
+              stats: %{
+                recovered: [%{currency: "usd", cents: if(window == "7d", do: 700, else: 3_000)}],
+                lost: []
+              },
+              funnel: %{entered: 0, recovered: 0, exhausted: 0, active: 0},
+              at_risk: []
+            }
+        end
+      end)
+
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      {:ok, view, loading_30d} = live(conn, "/billing/analytics/recovery?window=30d")
+      assert loading_30d =~ ~s(data-state="loading")
+      assert_receive {:recovery_read_started, "30d", read_30d}
+
+      loading_7d = render_patch(view, "/billing/analytics/recovery?window=7d")
+      assert loading_7d =~ ~s(data-state="loading")
+      assert active_window_label(loading_7d) =~ "7 days"
+      assert_receive {:recovery_read_started, "7d", read_7d}
+
+      send(read_7d, {:resolve_recovery_read, "7d"})
+      html_7d = render_async(view)
+      assert active_window_label(html_7d) =~ "7 days"
+      assert html_7d =~ "$7.00"
+      refute html_7d =~ "$30.00"
+      refute html_7d =~ ~s(data-state="loading")
+
+      send(read_30d, {:resolve_recovery_read, "30d"})
+      _ = render_async(view)
+      final_html = render(view)
+      assert active_window_label(final_html) =~ "7 days"
+      assert final_html =~ "$7.00"
+      refute final_html =~ "$30.00"
+      refute final_html =~ ~s(data-state="loading")
+    end
+
     test "window links preserve unrelated query params on the live route", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
       assert {:ok, _view, html} =
-               live(conn, "/billing/analytics/recovery?owner=platform&window=30d")
+               live_recovery(conn, "/billing/analytics/recovery?owner=platform&window=30d")
 
       assert html =~ ~r/href="\/billing\/analytics\/recovery\?[^"]*owner=platform[^"]*window=7d/
       assert html =~ ~r/href="\/billing\/analytics\/recovery\?[^"]*owner=platform[^"]*window=30d/
       assert html =~ ~r/href="\/billing\/analytics\/recovery\?[^"]*owner=platform[^"]*window=90d/
+    end
+  end
+
+  describe "Wave 0 raw recovery event fixtures" do
+    test "keeps UTC bounds, event identity, currency, and minor units as stored facts" do
+      reference = Accrue.Clock.utc_now()
+
+      fixtures =
+        [7, 30, 90]
+        |> Enum.with_index()
+        |> Enum.flat_map(fn {days, index} ->
+          boundary = DateTime.add(reference, -days, :day)
+
+          [
+            insert_raw_recovery_event(
+              "sub_wave0_#{days}d_at",
+              boundary,
+              Enum.at(["usd", "jpy", "kwd"], index),
+              Enum.at([12_345, 1_234, 567], index)
+            ),
+            insert_raw_recovery_event(
+              "sub_wave0_#{days}d_outside",
+              DateTime.add(boundary, -1, :second),
+              Enum.at([nil, "unsupported", "usd"], index),
+              Enum.at([0, 9_876, 100], index)
+            )
+          ]
+        end)
+
+      # Two distinct ledger rows at the same UTC instant remain distinguishable.
+      duplicate_timestamp =
+        DateTime.add(reference, -7, :day)
+        |> then(&%{&1 | microsecond: {elem(&1.microsecond, 0), 6}})
+
+      same_instant =
+        insert_raw_recovery_event(
+          "sub_wave0_same_instant",
+          duplicate_timestamp,
+          "usd",
+          0
+        )
+
+      zero_fixtures = []
+      one_fixture = Enum.take(fixtures, 1)
+      multiple_fixtures = fixtures
+
+      assert zero_fixtures == []
+      assert length(one_fixture) == 1
+      assert length(multiple_fixtures) > 1
+      assert Enum.map(fixtures, & &1.id) |> Enum.uniq() |> length() == length(fixtures)
+
+      assert same_instant.id != Enum.at(fixtures, 0).id
+      assert same_instant.inserted_at == duplicate_timestamp
+      assert Enum.at(fixtures, 0).inserted_at == duplicate_timestamp
+
+      Enum.each(fixtures ++ [same_instant], fn fixture ->
+        persisted = TestRepo.get!(Event, fixture.id)
+        assert persisted.id == fixture.id
+        assert persisted.subject_id == fixture.subject_id
+        assert persisted.inserted_at == fixture.inserted_at
+        assert persisted.data == fixture.data
+      end)
+
+      assert Enum.map(fixtures, & &1.data["currency"]) == [
+               "usd",
+               nil,
+               "jpy",
+               "unsupported",
+               "kwd",
+               "usd"
+             ]
+
+      assert Enum.map(fixtures, & &1.data["mrr_value_cents"]) == [
+               12_345,
+               0,
+               1_234,
+               9_876,
+               567,
+               100
+             ]
     end
   end
 
@@ -316,102 +630,275 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   end
 
   describe "at-risk table (DAN-11)" do
-    test "renders At-Risk Subscriptions section on recovery dashboard", %{conn: conn} do
+    test "renders Subscriptions in retry section on recovery dashboard", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      assert {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
-      assert html =~ "At-Risk Subscriptions"
+      assert html =~ "Subscriptions in retry"
 
-      assert html =~ "No active dunning campaigns" or
-               html =~ "active dunning campaigns in this window"
+      assert html =~ "No subscriptions currently need payment retry" or
+               html =~ "subscriptions with active payment retries in this window"
     end
 
     test "window change via render_patch re-assigns at-risk list without crash", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-      {:ok, view, _html} = live(conn, "/billing/analytics/recovery")
+      {:ok, view, _html} = live_recovery(conn, "/billing/analytics/recovery")
       html = render_patch(view, "/billing/analytics/recovery?window=7d")
 
-      assert html =~ "At-Risk Subscriptions"
+      assert html =~ "Subscriptions in retry"
     end
 
     test "at-risk table row links to per-subscription drill-down route", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-      {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      {:ok, _view, html} = live_recovery(conn, "/billing/analytics/recovery")
 
-      assert html =~ "/analytics/recovery/subscriptions/" or html =~ "No active dunning campaigns"
+      assert html =~ "/analytics/recovery/subscriptions/" or
+               html =~ "No subscriptions currently need payment retry"
+    end
+
+    test "current subscription state is separate from the historical failure label", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      assert {:ok, _view, html} = live_recovery(conn, fixture.return_path)
+
+      assert html =~ "Subscription status"
+      assert html =~ "Past due"
+      assert html =~ "Last failure"
+    end
+
+    test "detail links preserve current owner and selected UTC window", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      assert {:ok, _view, html} =
+               live_recovery(conn, "/billing/analytics/recovery?org=allowed-org&window=7d")
+
+      assert html =~
+               ~r|href="/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}\?[^\"]*return_to=%2Fbilling%2Fanalytics%2Frecovery%3Forg%3Dallowed-org%26window%3D7d[^\"]*"|
+    end
+
+    test "related link reflects the latest rapidly selected window", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      {:ok, view, _html} =
+        live_recovery(conn, "/billing/analytics/recovery?org=allowed-org&window=7d")
+
+      _html = render_patch(view, "/billing/analytics/recovery?org=allowed-org&window=90d")
+      html = render_async(view)
+
+      assert html =~ "%26window%3D90d"
+      refute html =~ "%26window%3D7d"
+    end
+
+    test "campaign round trips preserve each supported window and current owner", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      for window <- ["7d", "30d", "90d"] do
+        {:ok, _view, html} =
+          live_recovery(conn, "/billing/analytics/recovery?org=allowed-org&window=#{window}")
+
+        [campaign_path] =
+          Regex.run(
+            ~r|href="([^\"]*/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}[^\"]*)"|,
+            html,
+            capture: :all_but_first
+          )
+
+        campaign_path = String.replace(campaign_path, "&amp;", "&")
+        assert campaign_path =~ "%26window%3D#{window}"
+
+        {:ok, _campaign, campaign_html} = live(conn, campaign_path)
+
+        assert campaign_html =~ "Back to Recovery"
+
+        assert campaign_html =~
+                 ~r|href="/billing/analytics/recovery\?[^\"]*window=#{window}[^\"]*org=allowed-org| or
+                 campaign_html =~
+                   ~r|href="/billing/analytics/recovery\?[^\"]*org=allowed-org[^\"]*window=#{window}|
+      end
+    end
+
+    test "invalid Recovery window falls back to the existing 30 day selection", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      {:ok, _view, html} =
+        live_recovery(conn, "/billing/analytics/recovery?org=allowed-org&window=invalid")
+
+      assert active_window_label(html) =~ "30 days"
+      assert html =~ "%26window%3D30d"
+      refute html =~ "%26window%3Dinvalid"
+    end
+
+    test "returning from campaign detail restores validated owner and window", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      return_to =
+        URI.encode_query(%{
+          "return_to" => "/billing/analytics/recovery?org=forged-org&window=7d"
+        })
+        |> String.replace_prefix("return_to=", "")
+
+      assert {:ok, _view, html} =
+               live(
+                 conn,
+                 "/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}?return_to=#{return_to}&org=allowed-org"
+               )
+
+      assert html =~ "Back to Recovery"
+
+      assert html =~ ~r|href="/billing/analytics/recovery\?[^\"]*window=7d[^\"]*org=allowed-org| or
+               html =~ ~r|href="/billing/analytics/recovery\?[^\"]*org=allowed-org[^\"]*window=7d|
+
+      refute html =~ "forged-org"
+    end
+
+    test "unsafe campaign return target falls back inside the current owner scope", %{conn: conn} do
+      fixture = recovery_navigation_fixture()
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      assert {:ok, _view, html} =
+               live(
+                 conn,
+                 "/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}?return_to=https%3A%2F%2Fevil.example&org=allowed-org"
+               )
+
+      [_, href] =
+        Regex.run(~r|<a class="ax-link" href="([^"]+)">Back to Recovery</a>|, html)
+
+      assert href == "/billing/analytics/recovery?org=allowed-org"
+      refute html =~ "evil.example"
+    end
+
+    test "an empty authorized owner scope does not invent a default-currency total", %{conn: conn} do
+      owner_id = "org_empty_recovery"
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: owner_id,
+          active_organization_slug: "empty-org",
+          admin_organization_ids: [owner_id]
+        )
+
+      assert {:ok, _view, html} =
+               live_recovery(conn, "/billing/analytics/recovery?org=empty-org&window=7d")
+
+      assert active_window_label(html) =~ "7 days"
+      assert html =~ "No subscriptions currently need payment retry"
+      refute html =~ "Recovered MRR (USD)"
+      refute html =~ "Unrecovered MRR (USD)"
+    end
+
+    test "unsupported currency stays unavailable while supported currency remains exact", %{
+      conn: conn
+    } do
+      fixture = recovery_navigation_fixture()
+      insert_raw_recovery_event(fixture.allowed_recovered.id, Accrue.Clock.utc_now(), nil, 9_999)
+
+      conn =
+        Phoenix.ConnTest.init_test_session(conn,
+          admin_token: "admin",
+          active_organization_id: fixture.owner_id,
+          active_organization_slug: "allowed-org",
+          admin_organization_ids: [fixture.owner_id]
+        )
+
+      assert {:ok, _view, html} = live_recovery(conn, fixture.return_path)
+
+      assert html =~ "Recovered MRR (USD)"
+      assert html =~ "$12.34"
+      assert html =~ "Recovered MRR (UNAVAILABLE)"
+      assert html =~ "Amount unavailable"
+      refute html =~ "$99.99"
     end
 
     test "organization scope excludes out-of-scope recovery metrics and at-risk rows", %{
       conn: conn
     } do
-      allowed_customer =
-        insert_customer(%{
-          owner_type: "Organization",
-          owner_id: "org_allowed",
-          email: "allowed-recovery@example.com"
-        })
-
-      denied_customer =
-        insert_customer(%{
-          owner_type: "Organization",
-          owner_id: "org_denied",
-          email: "denied-recovery@example.com"
-        })
-
-      allowed_recovered = insert_subscription(allowed_customer)
-      denied_recovered = insert_subscription(denied_customer)
-
-      allowed_at_risk =
-        insert_subscription(allowed_customer, %{
-          status: :past_due,
-          dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -2 * 86_400, :second)
-        })
-
-      denied_at_risk =
-        insert_subscription(denied_customer, %{
-          status: :past_due,
-          dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -3 * 86_400, :second)
-        })
-
-      record_dunning_event("dunning.recovered", allowed_recovered, %{
-        mrr_value_cents: 1_234,
-        currency: "usd"
-      })
-
-      record_dunning_event("dunning.recovered", denied_recovered, %{
-        mrr_value_cents: 9_876,
-        currency: "usd"
-      })
-
-      record_dunning_event("dunning.campaign_started", allowed_at_risk, %{
-        campaign_anchor: DateTime.to_iso8601(allowed_at_risk.dunning_campaign_started_at)
-      })
-
-      record_dunning_event("dunning.campaign_started", denied_at_risk, %{
-        campaign_anchor: DateTime.to_iso8601(denied_at_risk.dunning_campaign_started_at)
-      })
+      fixture = recovery_navigation_fixture()
 
       conn =
         Phoenix.ConnTest.init_test_session(conn,
           admin_token: "admin",
-          active_organization_id: "org_allowed",
+          active_organization_id: fixture.owner_id,
           active_organization_slug: "allowed-org",
-          admin_organization_ids: ["org_allowed"]
+          admin_organization_ids: [fixture.owner_id]
         )
 
-      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?org=allowed-org")
+      assert {:ok, _view, html} = live_recovery(conn, fixture.return_path)
 
       assert html =~ "$12.34"
       refute html =~ "$98.76"
       assert html =~ "allowed-recovery@example.com"
       refute html =~ "denied-recovery@example.com"
-      assert html =~ allowed_at_risk.id
-      refute html =~ denied_at_risk.id
+      assert html =~ fixture.allowed_at_risk.id
+      refute html =~ fixture.denied_at_risk.id
+      assert active_window_label(html) =~ "30 days"
 
       assert html =~
-               ~s(href="/billing/analytics/recovery/subscriptions/#{allowed_at_risk.id}?org=allowed-org")
+               ~r/href="\/billing\/analytics\/recovery\?[^\"]*org=allowed-org[^\"]*window=7d/
+
+      assert html =~
+               ~r/href="\/billing\/analytics\/recovery\?[^\"]*org=allowed-org[^\"]*window=90d/
+
+      assert html =~
+               ~r|href="/billing/analytics/recovery/subscriptions/#{fixture.allowed_at_risk.id}\?[^\"]*org=allowed-org|
     end
 
     test "cross-package boundary: RecoveryLive does not import Ecto.Query, Accrue.Repo, or Accrue.Billing.Subscription" do
@@ -420,6 +907,13 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       refute source =~ "import Ecto.Query"
       refute source =~ "Accrue.Repo"
       refute source =~ "Accrue.Billing.Subscription"
+    end
+  end
+
+  defp live_recovery(conn, path) do
+    case live(conn, path) do
+      {:ok, view, _html} -> {:ok, view, render_async(view)}
+      result -> result
     end
   end
 
@@ -464,5 +958,79 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
         actor_type: "system",
         data: data
       })
+  end
+
+  defp insert_raw_recovery_event(subject_id, inserted_at, currency, cents) do
+    inserted_at = %{inserted_at | microsecond: {elem(inserted_at.microsecond, 0), 6}}
+    data = %{"mrr_value_cents" => cents}
+    data = if is_nil(currency), do: data, else: Map.put(data, "currency", currency)
+
+    %Event{
+      type: "dunning.recovered",
+      subject_type: "Subscription",
+      subject_id: subject_id,
+      actor_type: "system",
+      schema_version: 1,
+      data: data,
+      inserted_at: inserted_at
+    }
+    |> TestRepo.insert!()
+  end
+
+  defp recovery_navigation_fixture do
+    allowed_customer =
+      insert_customer(%{
+        owner_type: "Organization",
+        owner_id: "org_allowed",
+        email: "allowed-recovery@example.com"
+      })
+
+    denied_customer =
+      insert_customer(%{
+        owner_type: "Organization",
+        owner_id: "org_denied",
+        email: "denied-recovery@example.com"
+      })
+
+    allowed_recovered = insert_subscription(allowed_customer)
+    denied_recovered = insert_subscription(denied_customer)
+
+    allowed_at_risk =
+      insert_subscription(allowed_customer, %{
+        status: :past_due,
+        dunning_campaign_started_at: DateTime.add(Accrue.Clock.utc_now(), -2 * 86_400, :second)
+      })
+
+    denied_at_risk =
+      insert_subscription(denied_customer, %{
+        status: :past_due,
+        dunning_campaign_started_at: DateTime.add(Accrue.Clock.utc_now(), -3 * 86_400, :second)
+      })
+
+    record_dunning_event("dunning.recovered", allowed_recovered, %{
+      mrr_value_cents: 1_234,
+      currency: "usd"
+    })
+
+    record_dunning_event("dunning.recovered", denied_recovered, %{
+      mrr_value_cents: 9_876,
+      currency: "usd"
+    })
+
+    record_dunning_event("dunning.campaign_started", allowed_at_risk, %{
+      campaign_anchor: DateTime.to_iso8601(allowed_at_risk.dunning_campaign_started_at)
+    })
+
+    record_dunning_event("dunning.campaign_started", denied_at_risk, %{
+      campaign_anchor: DateTime.to_iso8601(denied_at_risk.dunning_campaign_started_at)
+    })
+
+    %{
+      owner_id: "org_allowed",
+      allowed_recovered: allowed_recovered,
+      allowed_at_risk: allowed_at_risk,
+      denied_at_risk: denied_at_risk,
+      return_path: "/billing/analytics/recovery?org=allowed-org&window=30d"
+    }
   end
 end

@@ -1,6 +1,8 @@
 import { Socket } from "../../deps/phoenix/priv/static/phoenix.mjs";
 import { LiveSocket } from "../../deps/phoenix_live_view/priv/static/phoenix_live_view.esm.js";
 import { initClipboardControls, Clipboard } from "./hooks/clipboard";
+import { Pagination } from "./hooks/pagination";
+import { initTimeDisplayPreference, TimeDisplay } from "./hooks/time_display";
 import { initThemeControls } from "./hooks/accrue_theme";
 import { initShellNav } from "./hooks/accrue_shell_nav";
 import { initDropdowns } from "./hooks/dropdown";
@@ -8,6 +10,8 @@ import { CommandPalette } from "./hooks/command_palette";
 import { ConnectionState } from "./hooks/connection_state";
 import { FocusTrap } from "./hooks/focus_trap";
 import { Overlay } from "./hooks/overlay";
+import { PreserveDisclosure } from "./hooks/preserve_disclosure";
+import { JsonViewerTabs } from "./hooks/json_viewer_tabs";
 import { initScrollLockReconciler } from "./hooks/scroll_lock";
 import topbar from "../vendor/topbar.js";
 
@@ -38,6 +42,7 @@ function ready(callback) {
 
 ready(() => {
   initClipboardControls();
+  initTimeDisplayPreference();
   initThemeControls();
   initShellNav();
   initDropdowns();
@@ -47,7 +52,7 @@ ready(() => {
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");
 const liveSocket = new LiveSocket("/live", Socket, {
   params: csrfToken ? { _csrf_token: csrfToken } : {},
-  hooks: { CommandPalette, ConnectionState, FocusTrap, Overlay, Clipboard }
+  hooks: { CommandPalette, ConnectionState, FocusTrap, Overlay, Clipboard, PreserveDisclosure, TimeDisplay, JsonViewerTabs, Pagination }
 });
 
 liveSocket.connect();

@@ -50,7 +50,7 @@ defmodule AccrueAdmin.ListContracts do
       },
       quick_lenses: [%{label: "All invoices", params: %{"view" => "all"}}],
       result_label: {"invoice", "invoices"},
-      page_header: %{title: "Clear open receivables", description_key: :invoices_index_body},
+      page_header: %{title: "Invoices", description_key: :invoices_index_body},
       states: %{
         first_run_empty: "No invoices yet.",
         queue_empty: "No invoices need collection.",
@@ -78,7 +78,7 @@ defmodule AccrueAdmin.ListContracts do
       quick_lenses: [%{label: "All payments", params: %{"view" => "all"}}],
       result_label: {"payment", "payments"},
       page_header: %{
-        title: "Recover failed payments",
+        title: "Payments",
         description_key: :charges_index_description
       },
       states: %{
@@ -178,18 +178,18 @@ defmodule AccrueAdmin.ListContracts do
       owner: AccrueAdmin.EventsLiveTest,
       live_view: AccrueAdmin.EventsLive,
       list_id: "events",
-      default_lens: %{label: "All ledger", params: %{"view" => "all"}},
+      default_lens: %{label: "All events", params: %{"view" => "all"}},
       all_target: %{"view" => "all"},
-      quick_lenses: [%{label: "Admin changes", params: %{"actor_type" => "admin"}}],
+      quick_lenses: [%{label: "Admin actions", params: %{"actor_type" => "admin"}}],
       result_label: {"event", "events"},
       page_header: %{
-        title: "Trace billing activity",
+        title: "Billing events",
         description_key: :billing_events_copy_global
       },
       states: %{
         first_run_empty: "No billing events yet.",
         queue_empty: nil,
-        filtered_empty: "No event ledger rows match these filters.",
+        filtered_empty: "No events match these filters.",
         loading: "Loading billing events."
       },
       clear_all_on_default?: false

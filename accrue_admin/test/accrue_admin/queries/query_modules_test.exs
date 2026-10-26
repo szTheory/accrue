@@ -113,6 +113,7 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
       stripe_account_id: "acct_old",
       email: "old-account@example.com",
       charges_enabled: false,
+      data: %{"charges_enabled" => false},
       inserted_at: ~U[2026-04-10 16:00:00Z]
     })
 
@@ -122,10 +123,40 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
       charges_enabled: true,
       payouts_enabled: true,
       details_submitted: true,
+      data: %{
+        "charges_enabled" => true,
+        "payouts_enabled" => true,
+        "details_submitted" => true
+      },
       inserted_at: ~U[2026-04-11 16:00:00Z]
     })
 
     {:ok, customer_new: customer_new, invoice_new: invoice_new, coupon_new: coupon_new}
+  end
+
+  test "record UUID search works across billing lists without escaping owner scope", %{
+    customer_new: customer
+  } do
+    for module <- [Customers, Subscriptions, Invoices, Charges] do
+      {rows, _} = module.list(filter: %{q: customer.id})
+      assert rows != [], "#{inspect(module)} must find the customer's records by UUID"
+      assert Enum.all?(rows, &(Map.get(&1, :customer_id, &1.id) == customer.id))
+
+      for row <- rows do
+        {found, _} = module.list(filter: %{q: String.upcase(row.id)})
+        assert Enum.any?(found, &(&1.id == row.id))
+      end
+
+      scope = %OwnerScope{
+        mode: :organization,
+        organization_id: "another-org",
+        current_admin: %{id: "admin", role: :admin},
+        platform_admin?: false,
+        admin_org_ids: ["another-org"]
+      }
+
+      assert {[], nil} = module.list(filter: %{q: customer.id}, owner_scope: scope)
+    end
   end
 
   test "customer queries filter, paginate, and fail closed on invalid cursors", %{
@@ -214,6 +245,97 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     assert [%{id: ^invoice_new_id, number: "INV-0002", status: :open}] = rows
   end
 
+  test "open invoice destinations preserve customer membership and authorized scope" do
+    org_customer =
+      insert_customer(%{
+        owner_type: "Organization",
+        owner_id: "journey-org",
+        name: "Billing account"
+      })
+
+    other_org_customer =
+      insert_customer(%{
+        owner_type: "Organization",
+        owner_id: "other-org",
+        name: "Other account"
+      })
+
+    same_scope_customer =
+      insert_customer(%{
+        owner_type: "Organization",
+        owner_id: "journey-org",
+        processor: "braintree",
+        name: "Second billing account"
+      })
+
+    first_subscription = insert_subscription(org_customer, %{processor_id: "sub_first"})
+    second_subscription = insert_subscription(org_customer, %{processor_id: "sub_second"})
+
+    same_scope_subscription =
+      insert_subscription(same_scope_customer, %{processor_id: "sub_scope"})
+
+    excluded_subscription =
+      insert_subscription(other_org_customer, %{processor_id: "sub_excluded"})
+
+    first_invoice =
+      insert_invoice(org_customer, first_subscription, %{
+        status: :open,
+        number: "INV-JOURNEY-1",
+        amount_remaining_minor: 2_500
+      })
+
+    second_invoice =
+      insert_invoice(org_customer, second_subscription, %{
+        status: :open,
+        number: "INV-JOURNEY-2",
+        amount_remaining_minor: 2_500
+      })
+
+    scope_invoice =
+      insert_invoice(same_scope_customer, same_scope_subscription, %{
+        processor: "braintree",
+        status: :open,
+        number: "INV-JOURNEY-SCOPE"
+      })
+
+    excluded_invoice =
+      insert_invoice(other_org_customer, excluded_subscription, %{
+        status: :open,
+        number: "INV-JOURNEY-EXCLUDED"
+      })
+
+    owner_scope = organization_owner_scope("journey-org")
+
+    customer_filter =
+      Invoices.decode_filter(%{
+        "customer_id" => org_customer.id,
+        "status" => "open",
+        "subscription_id" => first_subscription.id
+      })
+
+    refute Map.has_key?(customer_filter, :subscription_id)
+
+    {customer_rows, _cursor} =
+      Invoices.list(filter: customer_filter, owner_scope: owner_scope, limit: 20)
+
+    assert Enum.map(customer_rows, & &1.id) |> Enum.sort() ==
+             Enum.map([first_invoice, second_invoice], & &1.id) |> Enum.sort()
+
+    {scope_rows, _cursor} =
+      Invoices.list(
+        filter: Invoices.decode_filter(%{"status" => "open"}),
+        owner_scope: owner_scope,
+        limit: 20
+      )
+
+    assert Enum.map(scope_rows, & &1.id) |> Enum.sort() ==
+             Enum.map([first_invoice, second_invoice, scope_invoice], & &1.id) |> Enum.sort()
+
+    refute Enum.any?(scope_rows, &(&1.id == excluded_invoice.id))
+    assert first_invoice.amount_remaining_minor == second_invoice.amount_remaining_minor
+    assert first_invoice.subscription_id != second_invoice.subscription_id
+  end
+
   test "charge queries surface fee settlement filters" do
     {rows, _cursor} = Charges.list(filter: Charges.decode_filter(%{"fees_settled" => "true"}))
 
@@ -244,6 +366,32 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     assert Enum.any?(rows, &match?(%{stripe_account_id: "acct_new", payouts_enabled: true}, &1))
     assert Enum.all?(rows, &(&1.charges_enabled == true))
     refute Enum.any?(rows, &(&1.stripe_account_id == "acct_old"))
+  end
+
+  test "connect account boolean filters leave missing provider observations unknown" do
+    unknown =
+      insert_connect_account(%{
+        stripe_account_id: "acct_unknown_observations",
+        charges_enabled: true,
+        payouts_enabled: false,
+        details_submitted: true,
+        data: %{}
+      })
+
+    for value <- ["true", "false"] do
+      {rows, _cursor} =
+        ConnectAccounts.list(filter: ConnectAccounts.decode_filter(%{"charges_enabled" => value}))
+
+      refute Enum.any?(rows, &(&1.id == unknown.id))
+    end
+
+    {attention_rows, _cursor} =
+      ConnectAccounts.list(
+        filter: ConnectAccounts.decode_filter(%{"needs_attention" => "true"}),
+        limit: 20
+      )
+
+    assert Enum.any?(attention_rows, &(&1.id == unknown.id))
   end
 
   describe "multi-status filter handling" do
@@ -364,6 +512,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         charges_enabled: true,
         payouts_enabled: true,
         details_submitted: true,
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => true
+        },
         deauthorized_at: ~U[2026-04-11 17:10:00Z],
         inserted_at: ~U[2026-04-11 17:10:00Z]
       })
@@ -374,6 +527,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         charges_enabled: false,
         payouts_enabled: true,
         details_submitted: true,
+        data: %{
+          "charges_enabled" => false,
+          "payouts_enabled" => true,
+          "details_submitted" => true
+        },
         inserted_at: ~U[2026-04-11 17:11:00Z]
       })
 
@@ -383,6 +541,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         charges_enabled: true,
         payouts_enabled: false,
         details_submitted: true,
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => false,
+          "details_submitted" => true
+        },
         inserted_at: ~U[2026-04-11 17:12:00Z]
       })
 
@@ -392,6 +555,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         charges_enabled: true,
         payouts_enabled: true,
         details_submitted: false,
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => false
+        },
         inserted_at: ~U[2026-04-11 17:13:00Z]
       })
 
@@ -401,6 +569,11 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         charges_enabled: true,
         payouts_enabled: true,
         details_submitted: true,
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => true
+        },
         inserted_at: ~U[2026-04-11 17:14:00Z]
       })
 
@@ -426,6 +599,7 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
           owner_type: "Organization",
           owner_id: "org_allowed",
           charges_enabled: false,
+          data: %{"charges_enabled" => false},
           inserted_at: ~U[2026-04-11 18:10:00Z]
         })
 
@@ -434,6 +608,7 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         owner_type: "Organization",
         owner_id: "org_allowed",
         charges_enabled: false,
+        data: %{"charges_enabled" => false},
         inserted_at: ~U[2026-04-11 18:11:00Z]
       })
 
@@ -442,6 +617,7 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
         owner_type: "Organization",
         owner_id: "org_denied",
         charges_enabled: false,
+        data: %{"charges_enabled" => false},
         inserted_at: ~U[2026-04-11 18:12:00Z]
       })
 

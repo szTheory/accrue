@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Components.Topbar do
   alias AccrueAdmin.Components.ThemePicker
 
   attr(:theme, :string, default: "system")
+  attr(:theme_forced, :boolean, default: false)
 
   def topbar(assigns) do
     ~H"""
@@ -16,19 +17,26 @@ defmodule AccrueAdmin.Components.Topbar do
       <a href="#main-content" class="ax-skip-link">Skip to content</a>
 
       <div class="ax-topbar-actions">
+        <div class="ax-time-preference">
+          <label for="admin-time-preference">Time display</label>
+          <div class="ax-time-preference-control">
+            <select id="admin-time-preference" data-time-preference aria-label="Timestamp display timezone">
+              <option value="local">Local</option>
+              <option value="utc">UTC</option>
+            </select>
+            <Icon.icon name={:chevron_down} size="sm" />
+          </div>
+        </div>
+
         <button
           id="search-trigger"
           type="button"
           class="ax-search-trigger"
-          aria-label="Find one customer by name, email, or ID. Opens global customer detail search (Command or Control K)"
+          aria-label="Search billing: customers, invoices, and subscriptions (Command or Control K)"
           data-command-palette-trigger="true"
         >
           <Icon.icon name={:search} size="sm" class="ax-search-trigger-icon" />
-          <span class="ax-search-trigger-text">
-            <strong>Customer billing lookup</strong>
-            <em>Customer name, email, or ID</em>
-          </span>
-          <span class="ax-search-trigger-action">Search customers now</span>
+          <span class="ax-search-trigger-text">Search billing</span>
           <kbd class="ax-kbd">⌘K</kbd>
         </button>
 
@@ -37,7 +45,10 @@ defmodule AccrueAdmin.Components.Topbar do
           <span class="ax-icon-label">Menu</span>
         </button>
 
-        <ThemePicker.theme_picker theme={@theme} />
+        <p :if={@theme_forced} class="ax-label" role="status" data-role="admin-theme-forced">
+          <%= String.capitalize(@theme) %> theme set by host
+        </p>
+        <ThemePicker.theme_picker :if={!@theme_forced} theme={@theme} />
       </div>
     </header>
     """

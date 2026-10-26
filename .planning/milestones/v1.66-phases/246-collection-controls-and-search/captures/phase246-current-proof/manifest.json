@@ -1,0 +1,1673 @@
+{
+  "phase": "246",
+  "captures": [
+    {
+      "file": "ordinary-invoices-toolbar-wide-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "invoices-toolbar-wide-light",
+      "route": "/admin/invoices",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "filter": "paid status selection",
+        "url_matches_selection": true,
+        "removable_chip": true,
+        "result_count_and_rows": true,
+        "removed_filter_and_reset": true
+      },
+      "screenshot": {
+        "sha256": "4a7776eb09dfa8a6f64f3fc5ec34790c0829226cc817fcc4b1d1a6c0ba2cbdb1",
+        "bytes": 630754
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-invoices-toolbar-wide-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "invoices-toolbar-wide-dark",
+      "route": "/admin/invoices",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "filter": "paid status selection",
+        "url_matches_selection": true,
+        "removable_chip": true,
+        "result_count_and_rows": true,
+        "removed_filter_and_reset": true
+      },
+      "screenshot": {
+        "sha256": "d90d124c4e98acb6a07a9eae26a32e689b3ebd0636814e81cfed5c38336a70db",
+        "bytes": 631580
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-invoices-toolbar-narrow-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "invoices-toolbar-narrow-light",
+      "route": "/admin/invoices",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "filter": "paid status selection",
+        "url_matches_selection": true,
+        "removable_chip": true,
+        "result_count_and_rows": true,
+        "removed_filter_and_reset": true
+      },
+      "screenshot": {
+        "sha256": "a56e76a8c112eb10e55a3ee49ecb8fb57f5a94491014d584a44e8da80825d29c",
+        "bytes": 734315
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-invoices-toolbar-narrow-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "invoices-toolbar-narrow-dark",
+      "route": "/admin/invoices",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "filter": "paid status selection",
+        "url_matches_selection": true,
+        "removable_chip": true,
+        "result_count_and_rows": true,
+        "removed_filter_and_reset": true
+      },
+      "screenshot": {
+        "sha256": "03e99dd915e67cdaaeca789a45ef1c4b7e92e768f9e551b9fcb314b8f335c71f",
+        "bytes": 740230
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-payments-wide-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "payments-wide-light",
+      "route": "/admin/payments",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 200.8125,
+            "height": 44
+          },
+          "narrow": {
+            "width": 200.8125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "0a48e2dcb1982c9b1c571a90172badf612f953a33f2f93aaf530f23db15ebd48",
+        "bytes": 168405
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-payments-wide-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "payments-wide-dark",
+      "route": "/admin/payments",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 200.8125,
+            "height": 44
+          },
+          "narrow": {
+            "width": 200.8125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "ff996f891926aa5bc231c9d663a61301b825560ba8d32863fdf7df579d1b294d",
+        "bytes": 167499
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-payments-narrow-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "payments-narrow-light",
+      "route": "/admin/payments",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 200.8125,
+            "height": 44
+          },
+          "narrow": {
+            "width": 200.8125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "705593c811c0deb5190c2d83f8417f2001c9aec75e4a6199855f0b522959b0a0",
+        "bytes": 146087
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-payments-narrow-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "payments-narrow-dark",
+      "route": "/admin/payments",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 200.8125,
+            "height": 44
+          },
+          "narrow": {
+            "width": 200.8125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "65c43f20111effc342d4ade3b665f6f2db904e98d2f07a72946a5829bec23372",
+        "bytes": 147561
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-coupons-wide-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "coupons-wide-light",
+      "route": "/admin/coupons",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 229.609375,
+            "height": 44
+          },
+          "narrow": {
+            "width": 229.609375,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "bde360482439116168131dc82e9362b9d346bdb21cf72e9bdedb6668c9b2060c",
+        "bytes": 177981
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-coupons-wide-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "coupons-wide-dark",
+      "route": "/admin/coupons",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 229.609375,
+            "height": 44
+          },
+          "narrow": {
+            "width": 229.609375,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "4d3cbafd144946f5923f71ce833458c01e7365364836fadd017c7baa4010f65f",
+        "bytes": 171727
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-coupons-narrow-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "coupons-narrow-light",
+      "route": "/admin/coupons",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 229.609375,
+            "height": 44
+          },
+          "narrow": {
+            "width": 229.609375,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "c096956b219d8990f694b238cd6f0ed66e3acc89890c3c578b431d7fe5c0a1ca",
+        "bytes": 173686
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-coupons-narrow-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "coupons-narrow-dark",
+      "route": "/admin/coupons",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 229.609375,
+            "height": 44
+          },
+          "narrow": {
+            "width": 229.609375,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "a8aad9da1e327d0044f2b9c1400d4cd3a5e4c6521867900f74b48de369149a75",
+        "bytes": 166875
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-events-wide-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "events-wide-light",
+      "route": "/admin/events",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 119.265625,
+            "height": 44
+          },
+          "narrow": {
+            "width": 143.203125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "5b2dc0a20b299f38bc0aa4999fb2c4311cbb7876f5449cac02307f722bdc2827",
+        "bytes": 691523
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-events-wide-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "events-wide-dark",
+      "route": "/admin/events",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 119.265625,
+            "height": 44
+          },
+          "narrow": {
+            "width": 143.203125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "73810e3b470959c2f17331c6d1831a07c2acf4c5e5e1f81dd61704f7282a34a3",
+        "bytes": 679901
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-events-narrow-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "events-narrow-light",
+      "route": "/admin/events",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 119.265625,
+            "height": 44
+          },
+          "narrow": {
+            "width": 143.203125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "ea5ded2fff95c00a051556e5bea651e5e9d299338558cbad0f0d7eae36de0a9d",
+        "bytes": 761028
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "ordinary-events-narrow-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "events-narrow-dark",
+      "route": "/admin/events",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 119.265625,
+            "height": 44
+          },
+          "narrow": {
+            "width": 143.203125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "f06120ff217aa188a283296538ced0f2a1d9cb318f3e8f49dcac2537d2ba9bc6",
+        "bytes": 770320
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "heldout-connect-accounts-wide-light.png",
+      "origin_lane": "heldout",
+      "scenario": "connect-accounts-wide-light",
+      "route": "/admin/connect",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 118.65625,
+            "height": 56.390625
+          },
+          "narrow": {
+            "width": 236.8125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "c97a553d43f8036e8ec3c4cb8eb1e9d0da889dbada15f6a45c53ba75ad83f815",
+        "bytes": 246522
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "heldout-connect-accounts-wide-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "connect-accounts-wide-dark",
+      "route": "/admin/connect",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 118.65625,
+            "height": 56.390625
+          },
+          "narrow": {
+            "width": 236.8125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "83410daac99db3cbab73b082cfff917c813817c7a7bd1615b372a4c0fc09f8d4",
+        "bytes": 237414
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "heldout-connect-accounts-narrow-light.png",
+      "origin_lane": "heldout",
+      "scenario": "connect-accounts-narrow-light",
+      "route": "/admin/connect",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 118.65625,
+            "height": 56.390625
+          },
+          "narrow": {
+            "width": 236.8125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "217a50194c2e050b91974153a1f7651f0721dc0dbddf70a221c82a79fefde3bb",
+        "bytes": 206528
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "heldout-connect-accounts-narrow-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "connect-accounts-narrow-dark",
+      "route": "/admin/connect",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 118.65625,
+            "height": 56.390625
+          },
+          "narrow": {
+            "width": 236.8125,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "682cb76a20b670cbe9e9047f93e1ec6b2aa4b6f726c69fbd940b954e53197ba4",
+        "bytes": 209879
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "heldout-webhooks-wide-light.png",
+      "origin_lane": "heldout",
+      "scenario": "webhooks-wide-light",
+      "route": "/admin/webhooks",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 201.828125,
+            "height": 44
+          },
+          "narrow": {
+            "width": 231.734375,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "f726978f109f34d8117f04f28f9be8a96faabd82a77e704bdf98c0c54ab572a6",
+        "bytes": 192571
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "heldout-webhooks-wide-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "webhooks-wide-dark",
+      "route": "/admin/webhooks",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 201.828125,
+            "height": 44
+          },
+          "narrow": {
+            "width": 231.734375,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "7123c2c030461cea272b9595c888c3b77d679b4bdee68b96f3443a20ae722a42",
+        "bytes": 191470
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "heldout-webhooks-narrow-light.png",
+      "origin_lane": "heldout",
+      "scenario": "webhooks-narrow-light",
+      "route": "/admin/webhooks",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "light",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 201.828125,
+            "height": 44
+          },
+          "narrow": {
+            "width": 231.734375,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "9b6e41fd928c76d6c6a1d1b21b184d3c44599bcfc427ae34f0c72bb8fbe3cb05",
+        "bytes": 161711
+      },
+      "capture_mode": "full_page"
+    },
+    {
+      "file": "heldout-webhooks-narrow-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "webhooks-narrow-dark",
+      "route": "/admin/webhooks",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "dark",
+      "source_sha": "39a52efed8fc3a1016f0c636740f5a41bc45540a",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/charges_live.ex": "d8f55ff8b899626231b6cc2dfafcaef27e51902f52c4dd864e8822432bbcceed",
+        "accrue_admin/lib/accrue_admin/live/connect_accounts_live.ex": "189b3e8006852620825568cb19c9d5471dd48eabcecbf2bfb4e8126a83a4b87f",
+        "accrue_admin/lib/accrue_admin/live/coupons_live.ex": "270e3138fe8ba33bbc7fd64f54a47d3692aaf566fe4044204717773944219c8e",
+        "accrue_admin/lib/accrue_admin/live/events_live.ex": "e78688fcab597bee40007178cf2630db4892a9db42402257f93750e9be24a777",
+        "accrue_admin/lib/accrue_admin/live/webhooks_live.ex": "96f0d6d6845fe56588b9288f7516fbf63c4c097bbe700035989474d8675da1a0",
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/filter_chip_bar.ex": "96704ae7a94f08f2de613bb2d8967d46c4509149707a85def80b4260cae7b5e9",
+        "accrue_admin/lib/accrue_admin/components/id_badge.ex": "22183bb804e6e9729c5624e85969839dfea893be7c858338c7fb85a5f42dbe13",
+        "accrue_admin/assets/css/app.css": "e2a58a00d56f046cbce802db2f9ed2ddba4a9da6363632bf78dbf0794c514051",
+        "accrue_admin/assets/js/hooks/clipboard.js": "13a42f46dd6f9c2be04c9fb7b509223a82ec8572347fab960bdf22015e6f5dd8",
+        "accrue_admin/priv/static/accrue_admin.css": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/e2e/phase246-current-proof.spec.js": "3b8e6e46b32f549faab49fa387aef54d27ec5fcd246a1cc45c873a033e6ccc41",
+        "examples/accrue_host/playwright.phase246.config.js": "632ceac23dbed387f4e7524dde626d107c11a8dea51552549fbc812ca2184eb7",
+        "examples/accrue_host/playwright.config.js": "7962cca55a8503e9dd34a42548e57ac2ef338fe09b43d0693fc4b0a38397d4c8",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/verify_phase246_render_proof.mjs": "976ca7c94aac205545faf200c3d4c761ca168555e787e8dcd5f765d9e088fd6a"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-acc5a134ed893066a59c74288fc5e049",
+          "sha256": "19609f6f8b34b835026bd77a56be3a7e878ccc80c3e79a9392b32ab3a1406696",
+          "bytes": 131687
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "checks": {
+        "exact_id_visible": true,
+        "copied": true,
+        "copied_feedback": "data-copied",
+        "targets": {
+          "wide": {
+            "width": 201.828125,
+            "height": 44
+          },
+          "narrow": {
+            "width": 231.734375,
+            "height": 44
+          }
+        },
+        "no_overflow": true
+      },
+      "screenshot": {
+        "sha256": "920812333cda6c5a1310184005ad906c8a9322597791cdb9df27bb691c6bf92a",
+        "bytes": 154867
+      },
+      "capture_mode": "full_page"
+    }
+  ]
+}

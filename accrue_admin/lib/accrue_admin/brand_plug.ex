@@ -20,19 +20,26 @@ defmodule AccrueAdmin.BrandPlug do
 
   @spec call(Plug.Conn.t(), keyword()) :: Plug.Conn.t()
   def call(conn, _opts) do
+    theme_policy = Config.admin_branding(:theme)
+    theme_forced? = theme_policy in [:light, :dark]
+
     theme =
-      conn
-      |> fetch_cookies()
-      |> Map.get(:cookies, %{})
-      |> Map.get(@theme_cookie)
-      |> sanitize_theme()
+      if theme_forced? do
+        Atom.to_string(theme_policy)
+      else
+        conn
+        |> fetch_cookies()
+        |> Map.get(:cookies, %{})
+        |> Map.get(@theme_cookie)
+        |> sanitize_theme()
+      end
 
     conn
     |> assign(:accrue_admin_theme, theme)
-    |> assign(:accrue_admin_brand, build_brand())
+    |> assign(:accrue_admin_brand, build_brand(theme_forced?))
   end
 
-  defp build_brand do
+  defp build_brand(theme_forced?) do
     branding = Config.admin_branding()
     accent_hex = branding[:accent_color] || "#5D79F6"
 
@@ -40,7 +47,8 @@ defmodule AccrueAdmin.BrandPlug do
       app_name: present_or(branding[:app_name], "Billing"),
       logo_url: present_or_nil(branding[:logo_url]),
       accent_hex: accent_hex,
-      accent_contrast_hex: pick_contrast(accent_hex)
+      accent_contrast_hex: pick_contrast(accent_hex),
+      theme_forced?: theme_forced?
     }
   end
 

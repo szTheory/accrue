@@ -12,6 +12,7 @@ defmodule AccrueAdmin.Components.PageHeader do
   alias AccrueAdmin.Components.Breadcrumbs
 
   attr(:breadcrumbs, :list, required: true)
+  attr(:breadcrumb_group, :string, default: nil)
   attr(:title, :string, required: true)
   attr(:heading_id, :string, default: nil)
   attr(:class, :any, default: nil)
@@ -32,7 +33,7 @@ defmodule AccrueAdmin.Components.PageHeader do
       {@rest}
     >
       <div class="ax-page-header-main">
-        <Breadcrumbs.breadcrumbs items={@breadcrumbs} />
+        <Breadcrumbs.breadcrumbs :if={@breadcrumbs != []} items={@breadcrumbs} group={@breadcrumb_group} />
         <div class="ax-page-header-title-row">
           <div class="ax-page-header-title-copy">
             <h1 id={@heading_id} class="ax-display" data-ax-page-title><%= @title %></h1>

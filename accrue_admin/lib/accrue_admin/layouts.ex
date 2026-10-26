@@ -13,7 +13,8 @@ defmodule AccrueAdmin.Layouts do
       app_name: "Billing",
       logo_url: nil,
       accent_hex: "#5D79F6",
-      accent_contrast_hex: "#FFFFFF"
+      accent_contrast_hex: "#FFFFFF",
+      theme_forced?: false
     }
   )
 
@@ -26,13 +27,16 @@ defmodule AccrueAdmin.Layouts do
   def root(assigns) do
     assigns =
       assign(assigns,
-        anti_fouc_script: anti_fouc_script(),
+        anti_fouc_script:
+          anti_fouc_script(
+            if(Map.get(assigns.brand, :theme_forced?, false), do: assigns.theme, else: nil)
+          ),
         runtime_theme_style: runtime_theme_style(assigns.brand)
       )
 
     ~H"""
     <!DOCTYPE html>
-    <html lang="en" class="accrue-admin">
+    <html lang="en" class="accrue-admin" data-theme={@theme}>
       <head>
         <meta charset="utf-8" />
         <meta name="csrf-token" content={Plug.CSRFProtection.get_csrf_token()} />
@@ -54,10 +58,17 @@ defmodule AccrueAdmin.Layouts do
   end
 
   @spec anti_fouc_script() :: String.t()
-  def anti_fouc_script do
+  def anti_fouc_script, do: anti_fouc_script(nil)
+
+  @spec anti_fouc_script(String.t() | nil) :: String.t()
+  def anti_fouc_script(forced_theme) do
+    forced_theme_json =
+      Jason.encode!(if(forced_theme in ["light", "dark"], do: forced_theme, else: nil))
+
     """
     (() => {
       const key = "accrue_theme";
+      const forcedTheme = #{forced_theme_json};
       const allowed = new Set(["light", "dark", "system"]);
       const safeDecodeTheme = (value) => {
         try {
@@ -69,9 +80,9 @@ defmodule AccrueAdmin.Layouts do
       const fromCookie = document.cookie.split("; ").find((chunk) => chunk.startsWith(`${key}=`));
       const cookieValue = fromCookie ? safeDecodeTheme(fromCookie.split("=").slice(1).join("=")) : null;
       const storedValue = window.localStorage.getItem(key);
-      const theme = allowed.has(cookieValue) ? cookieValue : allowed.has(storedValue) ? storedValue : "system";
+      const theme = allowed.has(forcedTheme) ? forcedTheme : allowed.has(cookieValue) ? cookieValue : allowed.has(storedValue) ? storedValue : "system";
       document.documentElement.dataset.theme = theme;
-      window.localStorage.setItem(key, theme);
+      if (!allowed.has(forcedTheme)) window.localStorage.setItem(key, theme);
     })();
     """
   end

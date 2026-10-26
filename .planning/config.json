@@ -75,7 +75,7 @@
     "skip_discuss": false,
     "code_review": true,
     "code_review_depth": "standard",
-    "_auto_chain_active": false,
+    "_auto_chain_active": true,
     "use_worktrees": false,
     "ai_integration_phase": true
   },
@@ -85,22 +85,19 @@
   "project_code": null,
   "phase_naming": "sequential",
   "agent_skills": {},
-  "resolve_model_ids": true,
   "mode": "yolo",
   "granularity": "standard",
   "runtime": "claude",
-  "model_policy": {
-    "provider": "anthropic",
-    "high": "claude-opus-5",
-    "medium": "claude-sonnet-5",
-    "low": "claude-haiku-4-5",
-    "budget": "medium"
-  },
   "model_profile_overrides": {
     "codex": {
-      "opus": "gpt-5.6-sol",
-      "sonnet": "gpt-5.6-terra",
-      "haiku": "gpt-5.6-luna"
+      "opus": "gpt-6.1-sol",
+      "sonnet": "gpt-6-luna",
+      "haiku": "gpt-6-luna"
+    },
+    "claude": {
+      "opus": "claude-opus-5-5",
+      "sonnet": "claude-sonnet-5-5",
+      "haiku": "claude-haiku-5-5"
     }
   },
   "effort": {

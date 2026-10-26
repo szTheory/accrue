@@ -65,7 +65,7 @@ const PHASE199_ROUTE_FLOWS = Object.freeze([
     name: "Webhook list to event drill to replay step-up and back",
     route: () => "/billing/webhooks?view=all",
     steps: [
-      { link: /evt_e2e_phase199_dead/i, expectedAfterClick: /\/billing\/webhooks\/19900000-/ },
+      { link: /Invoice\.payment Failed/i, expectedAfterClick: /\/billing\/webhooks\/19900000-/ },
       { assertText: /Raw payload|Derived ledger rows/i },
       { link: /Event charge\.succeeded/i, expectedAfterClick: /\/billing\/events\/\d+/ },
       { assertText: /Source webhook|Charge 19900000-/i },
@@ -78,7 +78,11 @@ const PHASE199_ROUTE_FLOWS = Object.freeze([
     name: "Recovery list to campaign to subscription detail and back",
     route: () => "/billing/analytics/recovery",
     steps: [
-      { link: /phase199\.route-edge/i, expectedAfterClick: /\/billing\/analytics\/recovery\/subscriptions\/19900000-/ },
+      {
+        linkHref: ({ edgeStates }) => `/billing/analytics/recovery/subscriptions/${edgeStates.recovery_subscription_id}`,
+        linkAccessibleName: /phase199\.route-edge/i,
+        expectedAfterClick: /\/billing\/analytics\/recovery\/subscriptions\/19900000-/,
+      },
       { assertText: /Dunning Timeline|No dunning history/i },
       { link: /subscription detail/i, expectedAfterClick: /\/billing\/subscriptions\/19900000-/ },
       { assertText: /past_due|Payment methods|Subscription/i },
@@ -90,7 +94,7 @@ const PHASE199_ROUTE_FLOWS = Object.freeze([
     name: "Connect list to account detail to platform-fee step-up and back",
     route: () => "/billing/connect?view=all",
     steps: [
-      { link: /acct_e2e_phase199_attention/i, expectedAfterClick: /\/billing\/connect\/19900000-/ },
+      { link: /phase199-connect@example\.com/i, expectedAfterClick: /\/billing\/connect\/19900000-/ },
       { assertText: /Needs attention|currently due: external_account/i },
       { drawerStepUp: /Edit platform fee override|Change platform fee override/i },
       { back: /\/billing\/connect/ },
@@ -192,6 +196,15 @@ const THEME_CASES = Object.freeze([
     localStorage: "system",
     expected: "system",
   },
+  {
+    name: "invalid localStorage uses the system fallback",
+    localStorage: "neon",
+    expected: "system",
+  },
+  {
+    name: "absent preference uses the system fallback",
+    expected: "system",
+  },
 ]);
 
 const COPY_TARGETS = Object.freeze([
@@ -237,7 +250,8 @@ const COPY_ACTION_CONTEXT_TARGETS = Object.freeze([
     actions: [
       {
         visible: /Replay webhook|Replay delivery/i,
-        context: /evt_e2e_phase199_dead/i,
+        context: /Replay webhook|Replay delivery/i,
+        pageHeading: /evt_e2e_phase199_dead/i,
       },
     ],
   },
@@ -291,6 +305,12 @@ async function seedPhase199(request) {
     overflow: phase199,
     phase191: phase199,
   };
+}
+
+async function seedPhase241Reviews(request) {
+  const response = await request.post("/__e2e__/seed/phase241-review-matrix");
+  expect(response.ok(), "Phase 241 disposable review matrix seeds").toBeTruthy();
+  return response.json();
 }
 
 async function login(page, target = "/billing") {
@@ -432,6 +452,10 @@ async function assertThemePersistence(page, themeCase) {
     "data-theme",
     themeCase.expected
   );
+  if (themeCase.expected !== "forced") {
+    await expect(page.locator(`[data-theme-target='${themeCase.expected}']`), `${themeCase.name}: one selected preference`)
+      .toHaveAttribute("aria-checked", "true");
+  }
   await expect
     .poll(() => page.evaluate(() => window.localStorage.getItem("accrue_theme")), {
       message: `${themeCase.name}: production theme key persisted`,
@@ -483,6 +507,51 @@ async function assertThemePickerReloadPersistence(page) {
   );
 }
 
+async function assertSystemThemeTracksAppearance(page) {
+  const systemOption = page.locator("[data-theme-target='system']");
+  const effectiveCanvas = () =>
+    page.locator("html").evaluate((element) => getComputedStyle(element).backgroundColor);
+
+  await page.emulateMedia({ colorScheme: "light" });
+  await systemOption.click();
+  await expect(systemOption).toHaveAttribute("aria-checked", "true");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
+  const lightCanvas = await effectiveCanvas();
+
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect.poll(effectiveCanvas, { message: "System preference applies the dark canvas" }).not.toBe(lightCanvas);
+  await expect(systemOption).toHaveAttribute("aria-checked", "true");
+  await expect.poll(() => page.evaluate(() => window.localStorage.getItem("accrue_theme"))).toBe("system");
+
+  const darkCanvas = await effectiveCanvas();
+  const staleCanvas = await page.locator("html").evaluate((element) => {
+    element.dataset.theme = "light";
+    return getComputedStyle(element).backgroundColor;
+  });
+  expect(staleCanvas, "negative control: a stale light selection keeps the light canvas").toBe(lightCanvas);
+  expect(staleCanvas, "negative control: a stale light selection differs from System dark").not.toBe(darkCanvas);
+  await page.locator("html").evaluate((element) => { element.dataset.theme = "system"; });
+  await expect.poll(effectiveCanvas, { message: "System dark canvas is restored after negative control" }).toBe(darkCanvas);
+
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect.poll(effectiveCanvas, { message: "System preference returns to the light canvas" }).not.toBe(darkCanvas);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
+  await expect(systemOption).toHaveAttribute("aria-checked", "true");
+
+  // This link uses LiveView navigation, so the preference must survive a patch as well as reload.
+  await page.locator("a[href='/billing/invoices']").first().click();
+  await expect(page).toHaveURL(/\/billing\/invoices/);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
+  await expect(page.locator("[data-theme-target='system']")).toHaveAttribute("aria-checked", "true");
+  await expect.poll(effectiveCanvas, { message: "light OS palette remains active after LiveView patch" }).toBe(lightCanvas);
+
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
+  await expect(page.locator("[data-theme-target='system']")).toHaveAttribute("aria-checked", "true");
+  await expect.poll(() => page.evaluate(() => window.localStorage.getItem("accrue_theme"))).toBe("system");
+  await expect.poll(effectiveCanvas, { message: "light OS palette remains active after reload" }).toBe(lightCanvas);
+}
+
 async function assertActionContextLabels(page, label = "action labels") {
   const compactActions = await page.locator("a, button, [role='menuitem']").evaluateAll((elements) =>
     elements
@@ -525,6 +594,12 @@ async function assertActionHasObjectContext(page, action, label = "action") {
 
   expect(match, `${label}: visible action ${action.visible} exists`).toBeTruthy();
   expect(`${match.aria} ${match.fullText}`, `${label}: object/action context`).toMatch(action.context);
+  if (action.pageHeading) {
+    // 247-04 (e6f39cef) moved object identity from a per-button aria-label to the page h1.
+    await expect(page.getByRole("heading", { level: 1 }), `${label}: page heading names the object`).toContainText(
+      action.pageHeading
+    );
+  }
 }
 
 async function bodyScrollTop(page) {
@@ -652,7 +727,7 @@ async function assertDrawerStepUp(page, flow, step) {
   }
 }
 
-async function runRouteFlowStep(page, flow, step) {
+async function runRouteFlowStep(page, flow, step, fixtures) {
   if (step.assertText) {
     await expect(page.locator("main"), `${flow.name}: route text`).toContainText(step.assertText);
     return;
@@ -671,10 +746,15 @@ async function runRouteFlowStep(page, flow, step) {
     return;
   }
 
-  const link = step.linkSelector
-    ? page.locator(step.linkSelector).first()
-    : page.getByRole("link", { name: step.link }).first();
+  const link = step.linkHref
+    ? page.locator(`a[href^="${step.linkHref(fixtures)}"]`).first()
+    : step.linkSelector
+      ? page.locator(step.linkSelector).first()
+      : page.getByRole("link", { name: step.link }).first();
   await expect(link, `${flow.name}: drill link`).toBeVisible();
+  if (step.linkAccessibleName) {
+    await expect(link, `${flow.name}: accessible drill link name`).toHaveAccessibleName(step.linkAccessibleName);
+  }
   await link.click();
   await expect(page, `${flow.name}: routed to related detail`).toHaveURL(step.expectedAfterClick);
   await assertRouteFocusAndScroll(page, `${flow.name}: related detail`);
@@ -775,6 +855,74 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     await assertNoStaleOverlayState(page, "StepUp Escape");
   });
 
+  test("@phase199 @keyboard invoice review contains focus, exposes associated validation, and restores after rapid dismissal", async ({
+    page,
+    request,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-desktop", "invoice review keyboard sequence runs once");
+
+    const fixtures = await seedPhase199(request);
+    await login(page, `/billing/invoices/${fixtures.edgeStates.jpy_invoice_id}`);
+    await setPhase191Theme(page, "light");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+
+    const openInvoiceReview = async () => {
+      const menu = page.locator("[data-ax-action-overflow-menu]").first();
+      await expect(menu, "invoice action menu trigger").toBeVisible();
+      await menu.locator("summary").focus();
+      await page.keyboard.press("Enter");
+      const item = page.getByRole("menuitem", { name: /Void invoice/i }).first();
+      await expect(item, "Void invoice review option").toBeVisible();
+      await item.focus();
+      await page.keyboard.press("Enter");
+      const drawer = page.locator("#ax-overlay-root [data-presentation='drawer']").first();
+      await expect(drawer, "invoice review drawer").toBeVisible();
+      return drawer;
+    };
+
+    const drawer = await openInvoiceReview();
+    const focusable = drawer.locator("button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]");
+    const first = focusable.first();
+    const last = focusable.last();
+    await first.focus();
+    await page.keyboard.press("Shift+Tab");
+    await expect(last, "Shift+Tab wraps to the last review control").toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(first, "Tab wraps to the first review control").toBeFocused();
+
+    await page.keyboard.press("Escape");
+    await assertNoStaleOverlayState(page, "rapid reduced-motion invoice review dismissal");
+    await expect(page.locator("#main-content"), "removed review opener uses logical page focus").toBeFocused();
+    await assertTopPointerTarget(page.locator("[data-theme-target='system']"), "theme control after drawer teardown");
+
+    const reopened = await openInvoiceReview();
+    const prepareAction = reopened.getByRole("button", { name: /Void invoice/i }).first();
+    await prepareAction.focus();
+    await page.keyboard.press("Enter");
+    const stagedConfirm = reopened.getByRole("button", { name: /Confirm Void invoice/i });
+    await expect(stagedConfirm, "review action stages confirmation").toBeVisible();
+    await stagedConfirm.focus();
+    await page.keyboard.press("Enter");
+
+    const modal = page.locator("#accrue-admin-step-up-dialog");
+    const code = modal.locator("input[name='code']");
+    await expect(modal, "step-up modal opens from keyboard review").toBeVisible();
+    await expect(code, "step-up input receives initial focus").toBeFocused();
+    await expect(code).toHaveAttribute("aria-invalid", "false");
+    await code.fill("000000");
+    await page.keyboard.press("Enter");
+    const error = modal.locator("[data-role='step-up-error']");
+    await expect(error, "invalid code exposes an associated error").toBeVisible();
+    await expect(code).toHaveAttribute("aria-invalid", "true");
+    await expect(code).toHaveAttribute("aria-describedby", /step-up-error/);
+    await expect(code, "correction stays inside the active modal").toBeFocused();
+
+    await code.fill("123456");
+    await page.keyboard.press("Enter");
+    await expect(modal, "corrected submission closes step-up").toBeHidden();
+    await assertNoStaleOverlayState(page, "invoice review submission");
+  });
+
   test("@phase199 @motion drawer geometry matches desktop right-dock and mobile bottom-sheet contracts", async ({
     page,
     request,
@@ -808,6 +956,17 @@ test.describe("Phase 199 interaction and overlay contract", () => {
 
     await seedPhase199(request);
     await assertThemePickerReloadPersistence(page);
+  });
+
+  test("@phase199 @theme System keeps one stored choice while effective colors follow OS through patch and reload", async ({
+    page,
+    request,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-desktop", "System appearance lifecycle runs once");
+
+    await seedPhase199(request);
+    await login(page, "/billing/customers");
+    await assertSystemThemeTracksAppearance(page);
   });
 
   test("@phase199 @affordance floating panels stay viewport-bound and non-modal controls stay non-interactive", async ({
@@ -897,8 +1056,355 @@ test.describe("Phase 199 interaction and overlay contract", () => {
       await assertRouteFocusAndScroll(page, flow.name);
 
       for (const step of flow.steps) {
-        await runRouteFlowStep(page, flow, step);
+        await runRouteFlowStep(page, flow, step, fixtures);
       }
+    }
+  });
+
+  test("@phase241 subscription open-invoice destination preserves customer scope and contextual return", async ({
+    page,
+    request,
+  }) => {
+    const fixtures = await seedPhase199(request);
+    const subscriptionId = fixtures.dashboard.subscription_id;
+    const customerId = fixtures.dashboard.customer_id;
+    await page.setViewportSize({ width: 320, height: 844 });
+    await login(page, `/billing/subscriptions/${subscriptionId}`);
+    await setPhase191Theme(page, "dark");
+
+    const customerInvoices = page.getByRole("link", { name: "Open invoices for this customer" });
+    await expect(customerInvoices).toBeVisible();
+    const destination = new URL(await customerInvoices.getAttribute("href"), page.url());
+    expect(destination.pathname).toBe("/billing/invoices");
+    expect(destination.searchParams.get("customer_id")).toBe(customerId);
+    expect(destination.searchParams.get("status")).toBe("open");
+    expect(destination.searchParams.has("subscription_id")).toBe(false);
+    expect(destination.searchParams.get("return_to")).toBe("/billing/subscriptions");
+
+    await customerInvoices.click();
+    await expect(page).toHaveURL(/\/billing\/invoices\?/);
+    await expect(page.locator("main")).toContainText("Showing 1 invoice");
+    const invoiceLinks = page.locator("main a[href^='/billing/invoices/']");
+    // One invoice renders three links: the hidden table-row number, the card heading number,
+    // and the "View invoice" action (separated identity, 246-04); resultIds below dedupes to one.
+    await expect(invoiceLinks).toHaveCount(3);
+    const resultIds = await invoiceLinks.evaluateAll((links) =>
+      [...new Set(links.map((link) => new URL(link.href).pathname.split("/").pop()))]
+    );
+    expect(resultIds).toEqual([fixtures.edgeStates.jpy_invoice_id]);
+
+    await login(page, `/billing/customers/${customerId}?tab=invoices`);
+    const customerInvoice = page.getByRole("link", { name: "E2E-199-JPY-001" });
+    await expect(customerInvoice).toBeVisible();
+    await customerInvoice.click();
+    await expect(page).toHaveURL(/\/billing\/invoices\/[0-9a-f-]+\?/i);
+    const returnLink = page.getByRole("link", { name: "Back to customer invoices" });
+    await expect(returnLink).toBeVisible();
+    const returnDestination = new URL(await returnLink.getAttribute("href"), page.url());
+    expect(returnDestination.pathname).toBe(`/billing/customers/${customerId}`);
+    expect(returnDestination.searchParams.get("tab")).toBe("invoices");
+    await returnLink.click();
+    await expect(page).toHaveURL(new RegExp(`/billing/customers/${customerId}\\?tab=invoices`));
+    await expect(page.locator("main")).toContainText("E2E-199-JPY-001");
+  });
+
+  test("@phase241 action spacing uses the 4px token and stays reachable at narrow/coarse sizes", async ({
+    page,
+    request,
+    browser,
+  }) => {
+    const fixtures = await seedPhase199(request);
+    const surfaces = [
+      {
+        name: "invoice",
+        route: `/billing/invoices/${fixtures.edgeStates.jpy_invoice_id}`,
+        selector: ".ax-detail-action-band .ax-page-actions",
+      },
+      {
+        name: "subscription action band",
+        route: `/billing/subscriptions/${fixtures.dashboard.subscription_id}`,
+        selector: ".ax-detail-action-band .ax-page-actions",
+        checkHitTargets: true,
+      },
+      {
+        name: "subscription dunning action row",
+        route: `/billing/subscriptions/${fixtures.edgeStates.recovery_subscription_id}`,
+        selector: ".ax-detail-actions-row",
+        checkHitTargets: false,
+      },
+    ];
+
+    const measurements = [];
+    for (const surface of surfaces) {
+      await page.setViewportSize({ width: 320, height: 844 });
+      await login(page, surface.route);
+      const geometry = await page.locator(surface.selector).evaluate((group) => {
+        const style = getComputedStyle(group);
+        const tokenProbe = document.createElement("div");
+        tokenProbe.style.cssText = "display:flex;gap:var(--ax-space-xs);position:absolute;visibility:hidden";
+        document.body.append(tokenProbe);
+        const tokenGap = getComputedStyle(tokenProbe).gap;
+        tokenProbe.remove();
+        const controls = [...group.querySelectorAll("button, a")].filter((control) => {
+          const rect = control.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        });
+        const hitTargets = [...group.querySelectorAll("[data-ax-primary-action]")].filter((control) => {
+          const rect = control.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        });
+        return {
+          gap: style.gap,
+          tokenGap,
+          controlCount: controls.length,
+          controlHeights: hitTargets.map((control) => control.getBoundingClientRect().height),
+          pageOverflows: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        };
+      });
+
+      measurements.push({ ...surface, geometry });
+    }
+
+    console.log("Phase 241 action spacing measurements", JSON.stringify(measurements.map(({ name, geometry }) => ({
+      name,
+      gap: geometry.gap,
+      tokenGap: geometry.tokenGap,
+      controlHeights: geometry.controlHeights,
+      pageOverflows: geometry.pageOverflows,
+    }))));
+
+    for (const { name, geometry } of measurements) {
+      expect(geometry.controlCount, `${name} action controls are present`).toBeGreaterThan(0);
+      expect(geometry.gap, `${name} action gap equals the computed token`).toBe(geometry.tokenGap);
+      expect(geometry.gap, `${name} action gap computes to 4px`).toBe("4px");
+      expect(geometry.pageOverflows, `${name} has no ordinary page overflow at 320px`).toBe(false);
+      if (measurements.find((measurement) => measurement.name === name).checkHitTargets) {
+        expect(geometry.controlHeights.length, `${name} has measured primary action controls`).toBeGreaterThan(0);
+        expect(
+          geometry.controlHeights.every((height) => height >= 44),
+          `${name} action controls retain 44px hit height`,
+        ).toBe(true);
+      }
+    }
+
+    const coarseContext = await browser.newContext({
+      viewport: { width: 320, height: 844 },
+      isMobile: true,
+      hasTouch: true,
+    });
+    try {
+      const coarsePage = await coarseContext.newPage();
+      await login(coarsePage, surfaces[1].route);
+      const coarse = await coarsePage.locator(surfaces[1].selector).evaluate((group) => ({
+        coarsePointer: matchMedia("(pointer: coarse)").matches,
+        gap: getComputedStyle(group).gap,
+        controlHeights: [...group.querySelectorAll("[data-ax-primary-action]")]
+          .filter((control) => control.getBoundingClientRect().height > 0)
+          .map((control) => control.getBoundingClientRect().height),
+        pageOverflows: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      }));
+      expect(coarse.coarsePointer, "independent mobile context uses a coarse pointer").toBe(true);
+      expect(coarse.gap, "coarse-pointer action gap computes to 4px").toBe("4px");
+      expect(coarse.pageOverflows, "coarse-pointer layout has no ordinary page overflow").toBe(false);
+      expect(coarse.controlHeights.length, "coarse-pointer context has measured primary action controls").toBeGreaterThan(0);
+      expect(
+        coarse.controlHeights.every((height) => height >= 44),
+        "coarse-pointer action controls retain 44px hit height",
+      ).toBe(true);
+    } finally {
+      await coarseContext.close();
+    }
+  });
+
+  test("@phase241 200% text, WCAG text spacing, and 400% reflow simulation keep changed billing consumers reachable", async ({
+    page,
+    request,
+  }) => {
+    test.setTimeout(120_000);
+    const fixtures = await seedPhase241Reviews(request);
+    const zoomPage = await page.context().newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await zoomPage.setViewportSize({ width: 320, height: 844 });
+    const routes = [
+      ["subscription detail", `/billing/subscriptions/${fixtures.subscription_id}`],
+      ["invoice results", `/billing/invoices?customer_id=${fixtures.customer_id}`],
+      ["invoice detail", `/billing/invoices/${fixtures.invoice_id}`],
+      ["payment detail", `/billing/payments/${fixtures.charge_id}`],
+      ["customer payment methods", `/billing/customers/${fixtures.customer_id}?tab=payment_methods`],
+      ["Recovery list", "/billing/analytics/recovery?window=30d"],
+      ["campaign detail", `/billing/analytics/recovery/subscriptions/${fixtures.recovery_subscription_id}`],
+    ];
+
+    for (const [surface, route] of routes) {
+      await login(page, route);
+      await page.evaluate(() => {
+        const style = document.createElement("style");
+        style.dataset.phase241TextStress = "true";
+        style.nonce = document.querySelector("style[nonce]")?.nonce || "";
+        style.textContent = `
+          p, li, dt, dd, th, td, button, a, label, input, select, textarea {
+            line-height: 1.5 !important;
+            letter-spacing: .12em !important;
+            word-spacing: .16em !important;
+          }
+          p { margin-bottom: 2em !important; }
+        `;
+        document.head.append(style);
+      });
+
+      const enlarged = await page.evaluate(() => ({
+        headingScale: (() => {
+          const elements = [...document.querySelectorAll("body *")];
+          const fontSizes = elements.map((element) => Number.parseFloat(getComputedStyle(element).fontSize));
+          elements.forEach((element, index) => {
+            const fontSize = fontSizes[index];
+            if (Number.isFinite(fontSize) && fontSize > 0) {
+              element.dataset.phase241BaseFontSize = String(fontSize);
+              element.style.setProperty("font-size", `${fontSize * 2}px`, "important");
+            }
+          });
+          const heading = document.querySelector("#main-content, main");
+          const baseFontSize = Number.parseFloat(heading?.dataset.phase241BaseFontSize || "");
+          const enlargedFontSize = Number.parseFloat(getComputedStyle(heading).fontSize);
+          if (!Number.isFinite(baseFontSize) || !Number.isFinite(enlargedFontSize) || baseFontSize <= 0) {
+            throw new Error("Phase 241 200% text instrumentation did not capture a finite main font size");
+          }
+          return enlargedFontSize / baseFontSize;
+        })(),
+        pageWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+        overflowDescendants: [...document.querySelectorAll("body *")]
+          .map((element) => {
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return {
+              tag: element.tagName.toLowerCase(),
+              id: element.id,
+              className: String(element.className || "").slice(0, 100),
+              role: element.getAttribute("role"),
+              left: Math.round(rect.left),
+              right: Math.round(rect.right),
+              width: Math.round(rect.width),
+              scrollWidth: element.scrollWidth,
+              clientWidth: element.clientWidth,
+              overflowX: style.overflowX,
+              text: (element.textContent || "").trim().replace(/\s+/g, " ").slice(0, 45),
+            };
+          })
+          .filter((element) => element.right > window.innerWidth + 1 || element.left < -1)
+          .slice(0, 12),
+      }));
+      expect(enlarged.headingScale, `${surface}: 200% text enlargement applied`).toBeCloseTo(2, 1);
+      if (enlarged.pageWidth > enlarged.viewportWidth + 1) {
+        throw new Error(`${surface}: 200% text layout overflow ${JSON.stringify(enlarged)}`);
+      }
+      // At a 1280 CSS-pixel reference width, a 400% browser zoom exposes a
+      // 320 CSS-pixel layout viewport. A separate page keeps this reflow
+      // simulation independent of the text enlargement override and does not
+      // claim to exercise the browser zoom control.
+      await login(zoomPage, route);
+      const reflow = await zoomPage.evaluate(() => ({
+        pageWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+        width: window.innerWidth,
+        main: (() => {
+          const rect = document.querySelector("#main-content, main").getBoundingClientRect();
+          return { left: Math.round(rect.left), right: Math.round(rect.right) };
+        })(),
+      }));
+      expect(reflow.width, `${surface}: 400% zoom equivalent viewport`).toBe(320);
+      expect(reflow.pageWidth, `${surface}: 400% reflow has no page overflow`).toBeLessThanOrEqual(
+        reflow.viewportWidth + 1
+      );
+      expect(reflow.main.left, `${surface}: 400% main content remains onscreen`).toBeGreaterThanOrEqual(-1);
+      expect(reflow.main.right, `${surface}: 400% main content remains within viewport`).toBeLessThanOrEqual(
+        reflow.viewportWidth + 1
+      );
+    }
+    await zoomPage.close();
+  });
+
+  test("@phase242 mounted CSS stress stays scoped across changed routes and input modes", async ({
+    page,
+    request,
+  }, testInfo) => {
+    const fixtures = await seedPhase199(request);
+    await page.setViewportSize({ width: 320, height: 844 });
+    await login(page, "/billing");
+    const coarsePointer = await page.evaluate(() => window.matchMedia("(pointer: coarse)").matches);
+    expect(coarsePointer, "mobile project emulates coarse pointer input; no physical-device claim").toBe(
+      testInfo.project.name === "chromium-mobile"
+    );
+
+    const routes = [
+      ["events", "/billing/events"],
+      ["webhook delivery", `/billing/webhooks/${fixtures.phase199.single_webhook_id}`],
+      ["Connect account", `/billing/connect/${fixtures.phase199.connect_account_id}`],
+      ["Home and shell", "/billing"],
+    ];
+
+    for (const [surface, route] of routes) {
+      await page.setViewportSize({ width: 320, height: 844 });
+      await login(page, route);
+      for (const theme of ["light", "dark", "system"]) {
+        await page.emulateMedia({ colorScheme: theme === "dark" ? "dark" : "light" });
+        await page.evaluate((value) => {
+          document.documentElement.dataset.theme = value;
+          document.documentElement.setAttribute("data-theme", value);
+        }, theme);
+        await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+
+        const stress = await page.evaluate(() => {
+          const main = document.querySelector("#main-content, main");
+          if (!main) throw new Error("Phase 242 text stress could not find the mounted main region");
+          const base = [main, ...main.querySelectorAll("*")].map((element) => [element, getComputedStyle(element).fontSize]);
+          const baseline = Number.parseFloat(getComputedStyle(main).fontSize);
+          if (!Number.isFinite(baseline) || baseline <= 0) throw new Error("Phase 242 baseline font size is not finite");
+          const style = document.createElement("style");
+          style.dataset.phase242TextSpacing = "true";
+          style.textContent = "#main-content *, main * { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; } #main-content p, main p { margin-bottom: 2em !important; }";
+          document.head.append(style);
+          for (const [element, size] of base) {
+            const parsed = Number.parseFloat(size);
+            if (Number.isFinite(parsed) && parsed > 0) element.style.setProperty("font-size", `${parsed * 2}px`, "important");
+          }
+          const enlarged = Number.parseFloat(getComputedStyle(main).fontSize);
+          const result = {
+            scale: enlarged / baseline,
+            width: document.documentElement.scrollWidth,
+            viewport: window.innerWidth,
+            text: main.innerText.slice(0, 120),
+          };
+          style.remove();
+          for (const [element] of base) element.style.removeProperty("font-size");
+          return result;
+        });
+        expect(stress.scale, `${surface}/${theme}: 200% text captured atomically`).toBeCloseTo(2, 1);
+        expect(stress.width, `${surface}/${theme}: 320 CSS px text-spacing reflow`).toBeLessThanOrEqual(stress.viewport + 1);
+        expect(stress.text.length, `${surface}/${theme}: mounted content exists`).toBeGreaterThan(0);
+      }
+      if (surface === "Home and shell") {
+        await page.emulateMedia({ colorScheme: "dark" });
+        await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
+        await testInfo.attach("phase242-home-dark-320.png", {
+          body: await page.screenshot({ fullPage: true }),
+          contentType: "image/png",
+        });
+      }
+      await page.setViewportSize({ width: 768, height: 1024 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(769);
+      if (surface === "Home and shell" && coarsePointer) {
+        // 3d7d949d removed the Home header shortcut buttons; the shell search trigger is the remaining entry.
+        const shortcutHeights = await page
+          .locator("[data-command-palette-trigger]")
+          .evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().height));
+        expect(shortcutHeights, "shell search trigger is mounted").toHaveLength(1);
+        for (const height of shortcutHeights) {
+          expect(height, "intermediate-width coarse-pointer search trigger hit target is at least 44 CSS px").toBeGreaterThanOrEqual(44);
+        }
+      }
+      await page.setViewportSize({ width: 1280, height: 900 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1281);
     }
   });
 
@@ -971,12 +1477,12 @@ const RATCHET_AUTO_GUARDS = [
   {"finding_id":"f-4f474e99919ee505","kind":"focus-ring","selector":".ax-topbar"}, // @ratchet:f-4f474e99919ee505
   {"finding_id":"f-5b4fde509c9846f7","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-5b4fde509c9846f7
   {"finding_id":"f-66ff3aa97d803c81","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-66ff3aa97d803c81
-  {"finding_id":"f-68d2bf118467b34a","kind":"focus-ring","selector":"[data-ax-zone=attention-rail]","route":"/billing"}, // @ratchet:f-68d2bf118467b34a
+  {"finding_id":"f-68d2bf118467b34a","kind":"focus-ring","selector":"[data-command-palette-trigger]","route":"/billing"}, // @ratchet:f-68d2bf118467b34a
   {"finding_id":"f-8b82f34db2fd2d70","kind":"focus-ring","selector":".ax-content"}, // @ratchet:f-8b82f34db2fd2d70
   {"finding_id":"f-8d4e761ccec068a7","kind":"focus-ring","selector":".ax-primary-nav:visible, [data-sidebar-toggle='true']:visible"}, // @ratchet:f-8d4e761ccec068a7
   {"finding_id":"f-90ff4aae38ba2085","kind":"focus-ring","selector":".ax-toolbar"}, // @ratchet:f-90ff4aae38ba2085
   {"finding_id":"f-988d2a9808195b53","kind":"focus-ring","selector":".ax-detail"}, // @ratchet:f-988d2a9808195b53
-  {"finding_id":"f-9e6f3e53a835a6d5","kind":"focus-ring","selector":"[data-ax-zone=attention-rail]","route":"/billing"}, // @ratchet:f-9e6f3e53a835a6d5
+  {"finding_id":"f-9e6f3e53a835a6d5","kind":"focus-ring","selector":"[data-command-palette-trigger]","route":"/billing"}, // @ratchet:f-9e6f3e53a835a6d5
   {"finding_id":"f-9f433603cde72097","kind":"focus-ring","selector":".ax-kpi-card"}, // @ratchet:f-9f433603cde72097
   {"finding_id":"f-a276757f4dcd510c","kind":"focus-ring","selector":".ax-related-resources"}, // @ratchet:f-a276757f4dcd510c
   {"finding_id":"f-a3421a7901c75b6b","kind":"focus-ring","selector":".ax-layer"}, // @ratchet:f-a3421a7901c75b6b

@@ -139,6 +139,15 @@ defmodule AccrueAdmin.Copy.Connect do
 
   def connect_account_breadcrumb_connect, do: "Connect"
 
+  def connect_account_back_to_connect, do: "Back to Connect accounts"
+
+  def connect_account_review_stale,
+    do:
+      "The account owner or fee policy changed after review. Review the current policy and try again."
+
+  def connect_account_override_unchanged,
+    do: "The platform fee override already matches this policy."
+
   def connect_account_eyebrow, do: "Connect account detail"
 
   def connect_account_actions_eyebrow, do: "Actions"
@@ -172,6 +181,10 @@ defmodule AccrueAdmin.Copy.Connect do
   def connect_account_readiness_ready, do: "Ready"
 
   def connect_account_readiness_needs_attention, do: "Needs attention"
+
+  def connect_account_provider_snapshot_note,
+    do:
+      "Provider readiness, capabilities, and requirements below are the last stored Stripe snapshot; this page does not track when Stripe last reported them."
 
   def connect_account_kpi_section_aria_label, do: "Connect account summary"
 
@@ -213,11 +226,23 @@ defmodule AccrueAdmin.Copy.Connect do
 
   def connect_account_detail_label_stored_override, do: "Stored override:"
 
+  def connect_account_detail_label_review_account, do: "Account under review:"
+
+  def connect_account_detail_label_review_owner, do: "Owner under review:"
+
+  def connect_account_detail_label_current_override, do: "Current local override:"
+
+  def connect_account_detail_label_proposed_override, do: "Proposed local override:"
+
   def connect_account_detail_label_default_policy, do: "Default policy:"
 
   def connect_account_detail_label_preview_gross, do: "Preview gross:"
 
   def connect_account_detail_label_computed_fee, do: "Computed fee:"
+
+  def connect_account_default_policy_unavailable, do: "No default fee policy configured"
+
+  def connect_account_proposed_use_default, do: "Remove local override; use the global default"
 
   def connect_account_section_platform_fee_eyebrow, do: "Platform fee override"
 
@@ -225,12 +250,13 @@ defmodule AccrueAdmin.Copy.Connect do
 
   def connect_account_section_platform_fee_body,
     do:
-      "Empty fields fall back to the global `Accrue.Config` default. Validation and preview both use `Accrue.Connect.platform_fee/2` before anything is persisted."
+      "Empty fields fall back to the global `Accrue.Config` default. Validation and preview both use `Accrue.Connect.platform_fee/2` before anything is persisted. This changes Accrue's local policy only; it does not update Stripe readiness or capabilities."
 
   def connect_account_drawer_title(_account_label), do: "Save a per-account fee policy"
 
   def connect_account_drawer_subtitle,
-    do: "Preview the effective fee and verify identity before saving the account override."
+    do:
+      "Preview the effective fee and verify identity before saving the account override. Cancel closes this review without saving."
 
   def connect_account_activity_heading, do: "Activity"
 

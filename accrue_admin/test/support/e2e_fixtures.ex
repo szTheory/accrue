@@ -8,6 +8,7 @@ defmodule AccrueAdmin.E2E.Fixtures do
     Coupon,
     Customer,
     Invoice,
+    PaymentMethod,
     PromotionCode,
     Refund,
     Subscription,
@@ -17,8 +18,11 @@ defmodule AccrueAdmin.E2E.Fixtures do
   alias Accrue.Connect.Account
   alias Accrue.Entitlements.Reconcile
   alias Accrue.Events
+  alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
+
+  @phase240_hold_key {__MODULE__, :phase240_action_hold}
 
   @public_tables ~w(
     oban_jobs
@@ -49,6 +53,8 @@ defmodule AccrueAdmin.E2E.Fixtures do
   ]
 
   def reset! do
+    release_current_phase240_action!()
+
     tables =
       @public_tables ++
         Enum.map(@accrue_tables, &Accrue.Migration.qualified_table/1)
@@ -58,6 +64,141 @@ defmodule AccrueAdmin.E2E.Fixtures do
     :ok = Accrue.Actor.put_operation_id("e2e-" <> Ecto.UUID.generate())
     Application.put_env(:accrue, :entitlements, @e2e_entitlements)
     :ok
+  end
+
+  @doc false
+  def hold_phase240_subscription_cancel!(subscription_id, owner_pid \\ self()) do
+    case :persistent_term.get(@phase240_hold_key, nil) do
+      nil ->
+        subscription = TestRepo.get!(Subscription, subscription_id)
+        now = Accrue.Clock.utc_now()
+
+        response = %{
+          id: subscription.processor_id,
+          status: "canceled",
+          cancel_at_period_end: false,
+          current_period_start: subscription.current_period_start,
+          current_period_end: subscription.current_period_end,
+          canceled_at: now,
+          ended_at: now,
+          metadata: subscription.metadata || %{}
+        }
+
+        hold = %{
+          token: Ecto.UUID.generate(),
+          operation: :cancel_subscription,
+          subscription_id: subscription.id,
+          processor_id: subscription.processor_id,
+          response: response,
+          owner_pid: owner_pid,
+          provider_pid: nil,
+          dispatch_count: 0,
+          released: false
+        }
+
+        :persistent_term.put(@phase240_hold_key, hold)
+
+        :ok =
+          Accrue.Processor.Fake.stub(:cancel_subscription, fn processor_id, _opts ->
+            current = :persistent_term.get(@phase240_hold_key, nil)
+
+            if current && processor_id == current.processor_id do
+              active = %{
+                current
+                | provider_pid: self(),
+                  dispatch_count: current.dispatch_count + 1
+              }
+
+              :persistent_term.put(@phase240_hold_key, active)
+              send(active.owner_pid, {:phase240_action_entered, active.token, active.operation})
+
+              receive do
+                {:phase240_release_action, token} when token == active.token ->
+                  {:ok, active.response}
+              end
+            else
+              {:error, :not_found}
+            end
+          end)
+
+        {:ok, %{token: hold.token, operation: Atom.to_string(hold.operation)}}
+
+      _active ->
+        {:error, :action_already_held}
+    end
+  end
+
+  @doc false
+  def phase240_action_status(token) do
+    case :persistent_term.get(@phase240_hold_key, nil) do
+      %{token: ^token} = hold ->
+        subscription = TestRepo.get!(Subscription, hold.subscription_id)
+
+        canceled_events =
+          TestRepo.aggregate(
+            from(event in Event,
+              where:
+                event.type == "subscription.canceled" and event.subject_id == ^subscription.id
+            ),
+            :count,
+            :id
+          )
+
+        admin_audit_events =
+          TestRepo.aggregate(
+            from(event in Event,
+              where:
+                event.type == "admin.subscription.action.completed" and
+                  event.subject_id == ^subscription.id
+            ),
+            :count,
+            :id
+          )
+
+        %{
+          token: hold.token,
+          operation: Atom.to_string(hold.operation),
+          dispatch_count: hold.dispatch_count,
+          held: is_pid(hold.provider_pid) and not hold.released,
+          provider_calls:
+            if(hold.released, do: Accrue.Processor.Fake.call_count(hold.operation), else: nil),
+          status: Atom.to_string(subscription.status),
+          canceled_event_count: canceled_events,
+          admin_audit_count: admin_audit_events
+        }
+
+      _ ->
+        nil
+    end
+  end
+
+  @doc false
+  def release_phase240_action!(token) do
+    case :persistent_term.get(@phase240_hold_key, nil) do
+      %{token: ^token} = hold ->
+        if is_pid(hold.provider_pid) do
+          send(hold.provider_pid, {:phase240_release_action, token})
+        end
+
+        :ok = Accrue.Processor.Fake.unstub(hold.operation)
+        :persistent_term.put(@phase240_hold_key, %{hold | released: true, provider_pid: nil})
+        :ok
+
+      _ ->
+        {:error, :unknown_action_hold}
+    end
+  end
+
+  defp release_current_phase240_action! do
+    case :persistent_term.get(@phase240_hold_key, nil) do
+      %{token: token} ->
+        _ = release_phase240_action!(token)
+        :persistent_term.erase(@phase240_hold_key)
+        :ok
+
+      _ ->
+        :ok
+    end
   end
 
   def seed_advisory_entitlements! do
@@ -554,7 +695,7 @@ defmodule AccrueAdmin.E2E.Fixtures do
     reset!()
 
     owner_id = "19900000-0000-4000-8000-00000000f001"
-    now = DateTime.utc_now() |> DateTime.truncate(:microsecond)
+    now = Accrue.Clock.utc_now() |> DateTime.truncate(:microsecond)
     five_days_ago = DateTime.add(now, -5 * 86_400, :second)
     next_period = DateTime.add(now, 30 * 86_400, :second)
     long_processor_id = "proc_phase199_" <> String.duplicate("edge-route-overflow-", 4)
@@ -736,6 +877,83 @@ defmodule AccrueAdmin.E2E.Fixtures do
   end
 
   def seed_phase199_interaction_matrix!, do: seed_phase199_interactions!()
+
+  # Dedicated disposable fixture for Phase 241 browser review and text-scale
+  # coverage. Keep the existing Phase 191/199 route matrices unchanged.
+  def seed_phase241_review_matrix! do
+    fixtures = seed_phase199_interactions!()
+    customer = TestRepo.get!(Customer, fixtures.customer_id)
+    subscription = TestRepo.get!(Subscription, fixtures.subscription_id)
+
+    item =
+      insert_subscription_item(subscription, %{
+        processor_id: "si_e2e_phase241_review",
+        price_id: "price_phase241_review",
+        processor_plan_id: "price_phase241_review",
+        quantity: 1
+      })
+
+    default_method =
+      TestRepo.insert!(
+        PaymentMethod.changeset(%PaymentMethod{}, %{
+          customer_id: customer.id,
+          processor: "fake",
+          processor_id: "pm_e2e_phase241_default",
+          type: "card",
+          is_default: true,
+          fingerprint: "phase241-default",
+          card_brand: "visa",
+          card_last4: "4242",
+          exp_month: 12,
+          exp_year: 2032
+        })
+      )
+
+    review_method =
+      TestRepo.insert!(
+        PaymentMethod.changeset(%PaymentMethod{}, %{
+          customer_id: customer.id,
+          processor: "fake",
+          processor_id: "pm_e2e_phase241_review",
+          type: "card",
+          is_default: false,
+          fingerprint: "phase241-review",
+          card_brand: "mastercard",
+          card_last4: "5454",
+          exp_month: 4,
+          exp_year: 2034
+        })
+      )
+
+    customer
+    |> Customer.changeset(%{default_payment_method_id: default_method.id})
+    |> TestRepo.update!()
+
+    resume_subscription =
+      insert_subscription(customer, %{
+        processor_id: "sub_e2e_phase241_resume",
+        status: :active,
+        cancel_at_period_end: true,
+        current_period_end: DateTime.add(DateTime.utc_now(), 30 * 86_400, :second)
+      })
+
+    %{
+      phase199: fixtures,
+      dashboard: fixtures,
+      edgeStates: fixtures,
+      operatorFlows: fixtures,
+      phase191: fixtures,
+      customer_id: customer.id,
+      invoice_id: fixtures.invoice_id,
+      charge_id: fixtures.charge_id,
+      recovery_subscription_id: fixtures.recovery_subscription_id,
+      subscription_id: subscription.id,
+      subscription_item_id: item.id,
+      resume_subscription_id: resume_subscription.id,
+      payment_method_id: review_method.id,
+      default_payment_method_id: default_method.id
+    }
+  end
 
   def current_counts do
     %{

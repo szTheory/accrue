@@ -12,6 +12,28 @@ Start with the package quickstart in [`README.md`](../README.md), then return he
 - **Motion:** light CSS transitions on shells, drawers, and modals; honor `prefers-reduced-motion`; reach for LiveView `JS` only when CSS cannot carry the interaction.
 - **Responsive:** keep the mounted shell usable on small viewports first; avoid wide horizontal scroll for primary tables unless unavoidable—prefer column discipline and secondary detail surfaces.
 
+## Feedback placement
+
+Use `assets/js/toast.js` (`showToast`) and `.ax-toast` for short, non-actionable confirmations such as copying an ID or timestamp. All transient confirmations share one bottom-center location, token-based styling, and the toast layer above overlays. The location stays consistent across desktop and mobile, with narrow-screen gutters and a device safe-area inset. Toasts never move focus or require dismissal; a newer message replaces the previous message and restarts the 2.5-second lifetime. The shared live status announces the message politely.
+
+Copy controls supply `data-clipboard-label` (or `IdBadge.copy_label`) to name the copied object: “Copied customer ID to clipboard”, “Copied timestamp to clipboard”, or “Copied event payload to clipboard”. Keep identifiers and payload contents out of the confirmation. The same message is visible and announced, only after the clipboard write succeeds.
+
+Keep failures that require a decision or recovery action in the existing `FlashGroup` or beside the affected control. A copy failure may use the shared toast as brief feedback, but the exact manual-copy fallback remains at the control. Do not put required instructions or actions solely in a disappearing toast. Do not create per-page toast positions or separate notification implementations.
+
+## Billing list and detail hierarchy
+
+Use `DataTable.view_nav` for named destinations such as “Failed payments” and “All payments”; use filter chips only for applied constraints. Switching views retains search and exact customer scope; Reset returns to the default view. Invoice and subscription statuses use the shared multiple-selection disclosure with a readable selection summary. It stays open while selections update, closes on outside pointer interaction or Escape, and restores focus to the summary on Escape. The existing disclosure hook keeps ordinary detail disclosures unchanged.
+
+`DataTable.value_cell` separates a primary amount or fact from its supporting observation. Invoice balances lead with the remaining amount; Stripe fee amounts and settlement observations occupy separate lines. Missing fee evidence is “Not recorded”, not an inferred pending or unsettled state. `BillingContext` preserves the host's account type and explicitly labels automatic tax. Routine values are plain; tax issues use the established warning badge. If a query supplies no tax observation (as on Payments), show the account type alone rather than inferring tax is off.
+
+Billing tables can supply supported percentage `width` values on columns. The shared table applies fixed proportions through stylesheet rules and `data-width`, respecting the mounted host's CSP. Readable labels elide within their column; exact IDs stay available and copyable. Do not rely on inline style attributes for column geometry.
+
+Use `Timestamp.timestamp format={:date}` for date-oriented table cells. Local/UTC selection still determines the displayed date, and clicking copies the original exact UTC ISO timestamp with the shared named toast. Event-history timestamps retain their time precision.
+
+Keep detail headers to identity and actual status, with supporting facts in their field list. Avoid global health verdicts or navigation presented as an unrelated primary action. Payment and invoice action descriptions explain the operator's task; eligibility, review, step-up and dispatch remain at their existing owners. Webhook attempt/derived-event counts appear after history loads; this schema has no independent signature-verification evidence field, so the UI must not manufacture a verification result.
+
+Recovery metrics distinguish unavailable amounts from zero and monthly recurring revenue from cash or confirmed churn. The date selector is compact and its UTC reporting convention is explained once. Recorded campaign outcomes and the current retry queue have different sources; name that distinction instead of presenting an event-history count as the current queue size.
+
 ## Core operator surface parity (checklist)
 
 **ADM-07:** the canonical matrix of mounted core routes vs `AccrueAdmin.Copy`, `ax-*` / token discipline, and VERIFY-01 posture lives in **[`core-admin-parity.md`](core-admin-parity.md)**. Use it when triaging Tier A copy gaps or planning VERIFY extensions—do not maintain a second matrix in planning-only docs.
@@ -181,3 +203,31 @@ Those pages are hidden entirely from prod builds and also refuse to expose tooli
 - runtime: even in `:dev` and `:test`, the pages render only when `Application.get_env(:accrue, :processor)` is `Accrue.Processor.Fake`
 
 Use `MIX_ENV=prod mix compile` in `accrue_admin/` as the smoke check that the package ships without any dev-only admin tooling in production builds.
+
+## Navigation groups and activity cues
+
+The default Admin destination is **Recent activity**, under **Billing**, with the same name in navigation, the page heading, and browser title. Breadcrumbs begin with the corresponding sidebar group as plain text: `Billing / Recent activity`, `Billing / Customers`, `Audit / Events`, and so on. Groups have no destination. Record-detail breadcrumbs retain the actual scoped list link, such as `Billing / Customers / customer name`. Use `PageHeader.breadcrumb_group` or `Breadcrumbs.group`; do not link a peer page as though it were a parent.
+
+`AccrueAdmin.EventPresentation` owns the shared event label, family icon, and outcome tone used by Recent activity and Events. Its catalogue covers registered lifecycle events and additional confirmed producers, but is not an exhaustive ledger enum. Customer, subscription, invoice, payment/refund, recovery, payment-method, webhook, and connected-account families reuse the existing icon set. Icons are decorative supplements to readable text, never the sole meaning. Routine events and unknown types remain neutral; selected recorded outcomes use semantic success/warning tokens. An admin result event's name alone does not establish success. Exact event keys remain available in Events and event details.
+
+The historical `subscription.trial_ended` key is also produced for a trial-will-end webhook, so the UI uses “Subscription trial status recorded” rather than asserting an already-ended trial. Improving that producer's event contract is separate work.
+
+Activity rows group the event heading with its copyable timestamp; narrow screens stack them in the same reading order. The heading is the real link to event details, replacing a repeated “Open event” action. ID copying remains a separate native button. When the heading explicitly names the record type (for example “Subscription created”), show the short visible label “ID”; keep the full type in the accessible copy label, and retain a visible type for ambiguous event headings. Family icons may have exact-event overrides where the family glyph misstates the action: subscription creation uses a document-plus, rather than arrows that suggest renewal or sync.
+
+## List controls and evidence
+
+Page orientation uses the shared shell gutter and PageHeader typography. Recent activity and record details do not remove the top gutter. At desktop widths the breadcrumb begins 32px below the topbar; smaller widths use the shell's existing responsive gutter.
+
+Use a compact filter state row, one toolbar reset, and one resource-specific result count. “Reset filters” returns to the page's default view while preserving organization scope. Choosing an “All” view deliberately broadens the list; removing a chip removes that constraint. When a default work queue is empty, name the alternative “View all deliveries” (or the corresponding resource), rather than calling that navigation a reset. Routine summary counts stay neutral and share a baseline; reserve warning color for a non-zero actionable condition.
+
+Named list records use the primary name with secondary evidence underneath. A record reference without a display name uses `DataTable.identity_cell layout="inline"`: type beside the exact copyable ID, with wrapping confined to the available ID space. Keep full IDs visible so browser Find and exact copying remain useful. Table links use medium-weight neutral text at rest, with an underline on hover and visible keyboard focus. Secondary links recede to the metadata role. Shared table cells use the 14px body role, headers the 14px label role, and IDs the 12px code role; timestamps use the 14px body role with tabular figures. Vertically center cells within each row. Plain ID and timestamp hover feedback is a dotted text underline, without a background fill; retain 44px copy targets and the shared focus outline.
+
+Known Events entries show the readable label once; their stored keys remain in event details, while unknown types retain a quiet exact-key fallback. Events columns follow what changed, the affected record, when, who recorded it, and its linked webhook. “App” describes system attribution without claiming a person acted. A missing link means “No linked webhook”, not proof that an operation bypassed webhooks.
+
+Compact display labels use `--ax-record-label-measure` (36ch, capped by the available space) and CSS ellipsis. Supply `DataTable.identity_cell label` with the full primary label for native title disclosure. Use `.ax-record-label` and a full `title` for equivalent secondary record links and recovery labels. Search-result names and breadcrumb labels follow the same clipping policy. Keep the complete value in the DOM and accessible link name; exact IDs remain complete and copyable, and detail headings/summary values wrap to show the full name. Organization scope names wrap instead of clipping. Never shorten stored data or action-confirmation identity to solve layout overflow.
+
+`Pagination` observes the footer boundary and requests one cursor page at a time, slightly before the reader reaches it, without scrolling or moving focus. Every list retains all requested pages: silently dropping newly fetched records behind a DOM cap is prohibited. Cursor queries still fetch only 25 rows at a time; this is not an eager load of the whole dataset. Native Load more remains visible when observation is unavailable and is revealed on keyboard focus when automatic scrolling works. Errors pause observation and expose the existing explicit retry; recovery resumes at the failed cursor.
+
+The shared footer reports resource-specific loaded counts, loading feedback, and “End of list” when the cursor is exhausted. An optional `total_count` adds a truthful denominator; Customers supplies its scoped total only for the unfiltered list starting at the beginning. Filtered lists with no known total report loaded counts without inventing a percentage. The count measures loaded records, not the reader's scroll position. Unchanged polling patches must not request another page. Short pages may continue until the viewport is filled, but requests remain serialized. Do not mount LiveView's native infinite-scroll hook on a moving footer: its row-anchoring behavior belongs on actual row containers and can otherwise move the reader to each new page.
+
+Customers labels its default-method FK as “Default payment method”; a missing default uses the shared amber warning badge, while “On file” stays neutral. This absence alone is not a failed payment, and it does not prove that no other saved methods exist. Red belongs to an actual failure.

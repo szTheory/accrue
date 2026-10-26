@@ -62,8 +62,50 @@ defmodule AccrueAdmin.ChargesLiveTest do
     assert html =~ Copy.payments_list_subtitle()
     assert html =~ "Succeeded"
     assert html =~ "/billing/payments/"
-    assert html =~ "ax-chip ax-label"
+    refute html =~ "Automatic tax off"
     refute html =~ "ax-text-12"
+  end
+
+  test "payment identity exposes the full processor ID through a copy action", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/payments?view=all")
+    document = Floki.parse_document!(html)
+    row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "ch_open"))
+
+    assert row
+
+    assert length(
+             Floki.find(row, "[data-clipboard-text='ch_open'][aria-label='Copy payment ID']")
+           ) == 1
+
+    card =
+      Floki.find(document, ".ax-data-table-card") |> Enum.find(&(Floki.text(&1) =~ "ch_open"))
+
+    assert card
+
+    assert length(
+             Floki.find(card, "[data-clipboard-text='ch_open'][aria-label='Copy payment ID']")
+           ) == 1
+
+    assert length(Floki.find(card, "[data-clipboard-text]")) == 1
+  end
+
+  test "payment search guidance and secondary exact customer criteria match query semantics", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/payments?view=all")
+    parsed = Floki.parse_document!(html)
+
+    assert html =~ "Search payments"
+
+    exact_customer =
+      Floki.find(parsed, "details.ax-data-table-filter-disclosure #payments-filter-customer_id")
+
+    assert length(exact_customer) == 1
+    assert html =~ "Customer ID"
+    assert html =~ "Fee settlement"
+    assert html =~ "All fee states"
   end
 
   test "renders Copy-backed filtered empty index when search excludes all payments", %{conn: conn} do
@@ -82,8 +124,8 @@ defmodule AccrueAdmin.ChargesLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/payments?status=failed")
 
     # FilterChipBar renders queue chip (cobalt) and All chip (slate)
-    assert html =~ "ax-filter-chip-cobalt"
-    assert html =~ "ax-filter-chip-slate"
+    assert html =~ "Failed payments"
+    assert html =~ "All payments"
     assert html =~ "?view=all"
   end
 
@@ -95,7 +137,7 @@ defmodule AccrueAdmin.ChargesLiveTest do
 
     assert_page_header_contract(html, contract)
     assert html =~ contract.page_header.title
-    assert html =~ "Inspect charges that need follow-up."
+    assert html =~ "Review payments, investigate failures, and check recorded fees."
     refute html =~ ">Charges<"
     assert_single_filter_form(html)
   end
@@ -136,9 +178,7 @@ defmodule AccrueAdmin.ChargesLiveTest do
              )
 
     assert html =~ ~s(data-ax-clear-all)
-    assert html =~ ~s(href="/billing/payments?org=allowed-org&amp;view=all")
-    refute html =~ "status=failed"
-    refute html =~ "fees_settled=false"
+    assert html =~ ~s(href="/billing/payments?org=allowed-org")
     refute html =~ "phase197_state=loading-skeleton"
   end
 
@@ -226,11 +266,79 @@ defmodule AccrueAdmin.ChargesLiveTest do
       "Payment",
       "Status",
       "Amount",
-      "Fees",
-      "Billing signals"
+      "Stripe fee",
+      "Account type"
     ])
 
     refute html =~ "/billing/charges"
+    assert html =~ "Stripe fee"
+    assert html =~ "Fees settled"
+    assert html =~ "User"
+    refute html =~ "Automatic tax off"
+  end
+
+  test "shows unavailable fee evidence without inferring pending or unsettled state", %{
+    conn: conn,
+    charge: charge
+  } do
+    charge
+    |> Charge.changeset(%{stripe_fee_amount_minor: nil, fees_settled_at: nil})
+    |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/payments?view=all")
+
+    assert html =~ "Not recorded"
+    refute html =~ "pending stripe fee"
+    refute html =~ "unsettled"
+  end
+
+  test "formats exact payment amounts and leaves unsupported currencies unavailable", %{
+    conn: conn,
+    charge: charge
+  } do
+    charge
+    |> Charge.changeset(%{amount_cents: 0, currency: "jpy", stripe_fee_amount_minor: 0})
+    |> TestRepo.update!()
+
+    three_decimal_customer = insert_customer(%{name: "Three Decimal", email: "bhd@example.com"})
+    three_decimal_subscription = insert_subscription(three_decimal_customer)
+
+    insert_charge(three_decimal_customer, three_decimal_subscription, %{
+      processor_id: "ch_three_decimal",
+      status: "succeeded",
+      amount_cents: 1234,
+      currency: "bhd"
+    })
+
+    unsupported_customer =
+      insert_customer(%{name: "Unsupported", email: "bad-currency@example.com"})
+
+    unsupported_subscription = insert_subscription(unsupported_customer)
+
+    insert_charge(unsupported_customer, unsupported_subscription, %{
+      processor_id: "ch_unknown_currency",
+      status: "succeeded",
+      amount_cents: 1234,
+      currency: "not-a-currency"
+    })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/payments?view=all")
+
+    rows = Floki.parse_document!(html) |> Floki.find("tr[data-row-id]")
+
+    amount_text = fn processor_id ->
+      row = Enum.find(rows, &(Floki.text(&1) =~ processor_id))
+      row |> Floki.find("td") |> Enum.at(2) |> Floki.text()
+    end
+
+    assert amount_text.("ch_open") == AccrueAdmin.Components.MoneyFormatter.format_money(0, "jpy")
+
+    assert amount_text.("ch_three_decimal") ==
+             AccrueAdmin.Components.MoneyFormatter.format_money(1234, "bhd")
+
+    assert amount_text.("ch_unknown_currency") == "--"
   end
 
   defp insert_customer(attrs) do

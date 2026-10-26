@@ -1,0 +1,56 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="11.410452">
+<testsuite name="admin-page-flow-phase191.spec.js" timestamp="2026-10-09T21:55:13.389Z" hostname="chromium-desktop" tests="1" failures="1" skipped="0" time="6.719" errors="0">
+<testcase name="Phase 191 page-flow regression harness › disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187" classname="admin-page-flow-phase191.spec.js" time="6.719">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/error-context.md]]
+
+[[ATTACHMENT|test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeDisabled() failed" type="expect.toBeDisabled">
+<![CDATA[  [chromium-desktop] › admin-page-flow-phase191.spec.js:354:3 › Phase 191 page-flow regression harness › disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  locator('#accrue-admin-step-up-dialog').locator('[data-role="step-up-submit"]')
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" with timeout 5000ms
+      - waiting for locator('#accrue-admin-step-up-dialog').locator('[data-role="step-up-submit"]')
+        9 × locator resolved to <button type="submit" data-role="step-up-submit" class="ax-button ax-button-primary" phx-disable-with="Processing action…">Verify identity</button>
+          - unexpected value "enabled"
+
+
+      381 |
+      382 |       await context.setOffline(true);
+    > 383 |       await expect(submit).toBeDisabled();
+          |                            ^
+      384 |       await context.setOffline(false);
+      385 |       await page.evaluate(() => window.dispatchEvent(new Event("online")));
+      386 |       await expect(submit).toBeDisabled();
+        at /Users/dev/projects/accrue/accrue_admin/e2e/admin-page-flow-phase191.spec.js:383:28
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/admin-page-flow-phase191-P-f0874-ld-dispatch-reconnect-ax187-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

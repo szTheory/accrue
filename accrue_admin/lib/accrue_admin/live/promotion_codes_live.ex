@@ -13,8 +13,10 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     DataTable,
     FilterChipBar,
     FlashGroup,
+    IdBadge,
     PageHeader,
-    StatStrip
+    StatStrip,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -93,8 +95,8 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Catalog"
           breadcrumbs={[
-            %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.promotion_codes_breadcrumb_index()}
           ]}
           title={Copy.promotion_codes_list_heading()}
@@ -112,12 +114,10 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
               <:stat
                 label={Copy.promotion_codes_kpi_label_active()}
                 value={Integer.to_string(@summary.active_count)}
-                tone="amber"
               />
               <:stat
                 label={Copy.promotion_codes_kpi_label_expiring()}
                 value={Integer.to_string(@summary.expiring_count)}
-                tone="cobalt"
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -128,7 +128,7 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
               filter_fields={promotion_code_filter_fields()}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
+              clear_href={@table_path}
               clear_visible={filter_active?(@params)}
             />
           </:filter_toolbar>
@@ -138,6 +138,7 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.promotion_codes_list_result_label_pair()}
           id="promotion-codes"
           query_module={PromotionCodes}
           current_owner_scope={@current_owner_scope}
@@ -149,22 +150,24 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
-            %{label: Copy.promotion_codes_table_column_code(), render: &promotion_code_link(&1, @admin_mount_path, @current_owner_scope)},
-            %{label: Copy.promotion_codes_table_column_status(), render: &status_summary/1},
+            %{label: Copy.promotion_codes_table_column_code(), render: &promotion_code_link(&1, @admin_mount_path, @current_owner_scope, @params, :table)},
+            %{label: Copy.promotion_codes_table_column_status(), render: &status_summary(&1, :table)},
             %{label: Copy.promotion_codes_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope)},
-            %{label: Copy.promotion_codes_table_column_expires(), render: &expires_summary/1},
+            %{label: Copy.promotion_codes_table_column_expires(), render: &expires_summary(&1, :table)},
             %{label: Copy.promotion_codes_table_column_redemptions(), render: &redemption_summary/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&promotion_code_link(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
-            %{label: Copy.promotion_codes_table_column_status(), render: &status_summary/1},
+            %{label: Copy.promotion_codes_table_column_status(), render: &status_summary(&1, :card)},
             %{label: Copy.promotion_codes_table_column_coupon(), render: &coupon_label/1},
-            %{label: Copy.promotion_codes_table_column_expires(), render: &expires_summary/1},
+            %{label: Copy.promotion_codes_table_column_expires(), render: &expires_summary(&1, :card)},
             %{label: Copy.promotion_codes_table_column_redemptions(), render: &redemption_summary/1}
           ]}
           filter_fields={promotion_code_filter_fields()}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.promotion_codes_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -172,11 +175,11 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
         >
           <:list_status :let={status}>
             <FilterChipBar.filter_chip_bar
+              compact={true}
               items={promotion_code_lens_chips(@params, @table_path)}
               label="Promotion code view"
               result_count={status.visible_count}
               result_label={Copy.promotion_codes_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -227,19 +230,39 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     }
   end
 
-  defp promotion_code_link(row, mount_path, owner_scope) do
+  defp promotion_code_link(row, mount_path, owner_scope, params, surface) do
     label = row.code || row.processor_id || row.id
-    href = scoped_path(mount_path, "/promotion-codes/#{row.id}", owner_scope)
+    return_to = promotion_code_return_path(mount_path, owner_scope, params)
 
-    processor_line =
-      if (row.active == true and row.processor_id) && row.processor_id != label do
-        ~s(<span class="ax-body ax-text-muted ax-type-code-xs">#{escape(row.processor_id)}</span>)
-      else
-        ""
-      end
+    href =
+      AccrueAdmin.ScopedPath.build(mount_path, "/promotion-codes/#{row.id}", owner_scope, %{
+        "return_to" => return_to
+      })
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{href}" class="ax-link">#{escape(label)}</a>#{processor_line}</span>)
+    assigns = %{
+      href: href,
+      label: label,
+      badge_id: "ax-id-badge-promotion-code-#{surface}-#{row.id}",
+      id_value: row.processor_id || to_string(row.id)
+    }
+
+    ~H"""
+    <DataTable.identity_cell label={@label}>
+      <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
+      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy promotion code ID" copy_label="promotion code ID" variant="plain" /></:secondary>
+    </DataTable.identity_cell>
+    """
+  end
+
+  defp promotion_code_return_path(mount_path, owner_scope, params) do
+    filters = filter_params(params)
+    view = Map.take(params, ["view"])
+
+    AccrueAdmin.ScopedPath.build(
+      mount_path,
+      "/promotion-codes",
+      owner_scope,
+      Map.merge(filters, view)
     )
   end
 
@@ -259,34 +282,33 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
   defp coupon_label(%{coupon_name: nil, coupon_id: coupon_id}), do: coupon_id
   defp coupon_label(%{coupon_name: coupon_name}), do: coupon_name
 
-  defp status_summary(%{active: true, expires_at: %DateTime{} = expires_at}),
-    do:
-      Copy.promotion_codes_status_active_expires_separator() <>
-        format_datetime(expires_at)
-
-  defp status_summary(%{active: true}), do: Copy.promotion_codes_status_active()
-  defp status_summary(%{active: false}), do: Copy.promotion_codes_status_inactive()
+  defp status_summary(%{active: true}, _surface), do: Copy.promotion_codes_status_active()
+  defp status_summary(%{active: false}, _surface), do: Copy.promotion_codes_status_inactive()
+  defp status_summary(_row, _surface), do: Copy.PromotionCode.promotion_code_status_unknown()
 
   defp redemption_summary(row) do
-    used = row.times_redeemed || 0
-
-    case row.max_redemptions do
-      nil -> "#{used} used"
-      max -> "#{used} of #{max}"
+    case row.times_redeemed do
+      used when is_integer(used) -> Integer.to_string(used)
+      _ -> Copy.PromotionCode.promotion_code_redemptions_unknown()
     end
   end
 
-  defp expires_summary(%{expires_at: %DateTime{} = value}), do: format_datetime(value)
-  defp expires_summary(_row), do: Copy.promotion_codes_expires_summary_no_expiry()
+  defp expires_summary(%{expires_at: %DateTime{} = value} = row, surface) do
+    assigns = %{value: value, id: "promotion-code-row-expires-#{surface}-#{row.id}"}
 
-  defp card_title(row), do: row.code || row.processor_id || row.id
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
+
+  defp expires_summary(_row, _surface), do: Copy.promotion_codes_expires_summary_no_expiry()
 
   defp promotion_code_filter_fields do
     [
       %{
         id: :q,
-        label: Copy.promotion_codes_filter_label_search(),
-        placeholder: Copy.promotion_codes_filter_label_search()
+        label: "Search promotion codes",
+        placeholder: "Code, processor ID, or coupon name"
       },
       %{
         id: :active,
@@ -300,8 +322,9 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
       },
       %{
         id: :coupon_id,
-        label: Copy.promotion_codes_filter_label_coupon_id(),
-        placeholder: Copy.promotion_codes_filter_label_coupon_id()
+        label: "Exact associated Coupon ID",
+        placeholder: "Exact associated Coupon ID",
+        secondary: true
       }
     ]
   end
@@ -373,10 +396,6 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
 
   defp filter_active?(params), do: filter_params(params) != %{}
 
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
-
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil
   end
@@ -444,10 +463,10 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
   end
 
   defp safe_link(href, label) do
-    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escape(label)}</a>))
+    Phoenix.HTML.raw(
+      ~s(<a href="#{href}" class="ax-link ax-record-label" title="#{escape(label)}">#{escape(label)}</a>)
+    )
   end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

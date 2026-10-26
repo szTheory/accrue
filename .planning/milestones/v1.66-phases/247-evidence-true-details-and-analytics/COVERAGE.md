@@ -1,0 +1,1 @@
+No external API integration: Phase 247 changes presentation and browser interactions around existing owner-scoped LiveViews, replay handlers, and recovery queries; it adds no external service or SDK capability.

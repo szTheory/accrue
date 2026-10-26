@@ -1,0 +1,11 @@
+{
+  "command": "HEX_HOME=/tmp/accrue-233-hex GSD_TAP_REPORT=.planning/phases/233-shared-direction-portal-contract/233-02-T1-RED.tap mix test --formatter AccruePortal.TapFormatter test/accrue_portal/context_post_test.exs (from accrue_portal)",
+  "exitCode": 2,
+  "output": "TAP version 13\n1..2\nnot ok 1 - test missing and forged pins block payment method writes\nnot ok 2 - test rendered default and delete forms carry a context pin accepted by their POSTs\n",
+  "targetTest": "test rendered default and delete forms carry a context pin accepted by their POSTs",
+  "targetFile": "accrue_portal/test/accrue_portal/context_post_test.exs",
+  "expected": "Both rendered payment method forms contain a context_pin field.",
+  "actual": "The target test ran and failed because the rendered HTML contained zero context_pin fields.",
+  "reportPath": ".planning/phases/233-shared-direction-portal-contract/233-02-T1-RED.tap",
+  "semanticAssessment": "Valid RED: the named integration test executed through LiveView rendering and failed on the planned missing rendered-form pin assertion; test setup and fixtures completed successfully."
+}

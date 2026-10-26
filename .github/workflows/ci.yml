@@ -100,7 +100,9 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: brandbook/tokens/harness/package-lock.json
+          cache-dependency-path: |
+            brandbook/tokens/harness/package-lock.json
+            examples/accrue_host/package-lock.json
 
       # Quick task 260917-l7v (SL-E): a requirement marked Complete must carry
       # evidence checkable at branch tip -- a phase VERIFICATION.md with
@@ -366,6 +368,11 @@ jobs:
       # the literal 40-hex SHA below -- never the mutable integration branch
       # name (see the comment above the D-29/D-01/D-09 steps: a step bound to
       # a moving ref verifies a different tree on every run).
+      #
+      # Phase 249: the record is a frozen v1.62 point-in-time artifact covering
+      # ledger ids 1-14. --ledger-through-id 14 bounds ONLY the record join;
+      # later rows are held to this step's global no-open-row check plus SL-A
+      # claim C1. Never raise the bound without minting a new record.
       - name: Committed window dispositions at the pinned candidate SHA (D-16)
         run: >-
           node scripts/ci/verify_window_dispositions.mjs --repo .
@@ -373,6 +380,7 @@ jobs:
           --rendered "$(node scripts/ci/phase_evidence_path.mjs 232-bounded-hygiene-release-handoff 232-WINDOW-DISPOSITIONS.md)"
           --expected-repository szTheory/accrue
           --candidate c1397fe9127a9b4b2b1d3a0758d57879b14f4604
+          --ledger-through-id 14
           --require-row-join --require-evidence-freshness --require-waiver-completeness --require-determinism
 
       # Phase 232 (HYG-01, D-45..D-54): the pre-cleanup classification triad,
@@ -438,6 +446,11 @@ jobs:
       # logic against synthetic inputs; the --repo . invocation below runs
       # it against the real cohort, closing the exact D-16 class of
       # "documented but never executed" verification.
+      # The two host cohort files require() examples/accrue_host/playwright.config.js,
+      # which requires @playwright/test. `npm ci` is lockfile-pinned and downloads no browsers.
+      - name: Install host Playwright config dependencies (D-32 cohort)
+        run: cd examples/accrue_host && npm ci
+
       - name: CI script contract (D-32)
         run: >-
           node --test --test-reporter=tap scripts/ci/verify_ci_script_contract.mjs &&
@@ -1356,6 +1369,9 @@ jobs:
           --health-retries 5
 
     env:
+      # Hosted runners have no maintainer preview, so the custody check must prove absence
+      # rather than identify a preview (maintainer decision 2026-10-25); any preview found still refuses.
+      ACCRUE_HOST_CUSTODY_CI_ABSENT: "1"
       MIX_ENV: test
       PGUSER: postgres
       PGPASSWORD: postgres
@@ -1428,6 +1444,7 @@ jobs:
         run: |
           echo "## Host and CI setup evidence" >> "$GITHUB_STEP_SUMMARY"
           if [ -s "$ACCRUE_CI_SETUP_FACTS" ]; then
+            # shellcheck disable=SC2016 # Node template interpolation is intentional, not shell expansion.
             node -e 'const fs=require("fs"); for (const line of fs.readFileSync(process.argv[1], "utf8").trim().split("\n")) { const fact=JSON.parse(line); console.log(`- **Fact:** ${fact.code}; **State:** ${fact.result}; **Owner:** ${fact.owner}; **Next command:** see scripts/ci/ci_setup_diagnostic.sh describe ${fact.code}; **Evidence:** accrue-host-ci-setup-facts artifact`); }' "$ACCRUE_CI_SETUP_FACTS" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- **Fact:** setup record; **State:** no validated setup fact was emitted; **Owner:** CI; **Next command:** inspect the failing host-integration step; **Evidence:** accrue-host-ci-setup-facts artifact" >> "$GITHUB_STEP_SUMMARY"
@@ -1511,6 +1528,9 @@ jobs:
         shard: [1, 2, 3]
 
     env:
+      # Hosted runners have no maintainer preview, so the custody check must prove absence
+      # rather than identify a preview (maintainer decision 2026-10-25); any preview found still refuses.
+      ACCRUE_HOST_CUSTODY_CI_ABSENT: "1"
       MIX_ENV: test
       PGUSER: postgres
       PGPASSWORD: postgres
@@ -1519,6 +1539,12 @@ jobs:
       ACCRUE_HOST_TEST_POOL_SIZE: 8
       ACCRUE_HOST_PLAYWRIGHT_WORKERS: 1
       ACCRUE_HOST_E2E_FIXTURE: /tmp/accrue-host-e2e-fixture-${{ matrix.shard }}.json
+      # playwright.config.js runs `mix phx.server` with MIX_BUILD_PATH forced inside the proof-run
+      # directory (examples/accrue_host/tmp/accrue-host-proof-<id>). Without a fixed id and path here,
+      # every compile step below fills the default _build and the server cold-compiles all deps inside
+      # Playwright's 120s webServer timeout. Sharing one proof path makes the compile steps warm it.
+      ACCRUE_HOST_PROOF_RUN_ID: playwright-shard-${{ matrix.shard }}
+      MIX_BUILD_PATH: ${{ github.workspace }}/examples/accrue_host/tmp/accrue-host-proof-playwright-shard-${{ matrix.shard }}/test
 
     steps:
       - uses: actions/checkout@v6
@@ -1580,6 +1606,40 @@ jobs:
           ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
         run: cd examples/accrue_host && npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
 
+      - name: Upload Phase 239 Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase239-playwright-evidence-shard-${{ matrix.shard }}
+          path: |
+            examples/accrue_host/playwright-report
+            examples/accrue_host/test-results
+          if-no-files-found: ignore
+
+      - name: Run Phase 238 Admin browser contract with host-forced dark theme
+        if: matrix.shard == 1
+        env:
+          ACCRUE_HOST_ADMIN_THEME: dark
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+        run: >-
+          cd examples/accrue_host && npx playwright test
+          e2e/phase238-admin-events-webhooks.spec.js --project=chromium-desktop
+
+      - name: Compile host for real async search lane
+        if: matrix.shard == 1
+        run: cd examples/accrue_host && ACCRUE_HOST_E2E_DISABLE_SQL_SANDBOX=1 mix compile --force
+
+      - name: Run real database-backed global search
+        if: matrix.shard == 1
+        env:
+          ACCRUE_HOST_E2E_DISABLE_SQL_SANDBOX: "1"
+          ACCRUE_HOST_BROWSER_PORT: 4102
+        run: cd examples/accrue_host && npm run e2e:search -- --workers=1
+
+      - name: Restore SQL Sandbox host compile for later browser lanes
+        if: matrix.shard == 1
+        run: cd examples/accrue_host && mix compile --force
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v7
@@ -1593,6 +1653,70 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: playwright-e2e-traces-shard-${{ matrix.shard }}
+          path: examples/accrue_host/test-results
+          if-no-files-found: ignore
+
+      - name: Run configured Braintree return ExUnit suite
+        env:
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE: "1"
+        run: cd examples/accrue_host && mix test test/accrue_host_web/live/subscription_live_braintree_test.exs
+
+      - name: Refresh Braintree checkout browser fixture
+        run: |
+          cd examples/accrue_host
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 mix run ../../scripts/ci/accrue_host_seed_e2e.exs
+
+      - name: Run configured Braintree checkout browser lane
+        env:
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE: "1"
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+        run: cd examples/accrue_host && npm run e2e:braintree-checkout
+
+      - name: Run Phase 236 Portal self-service browser contract
+        if: matrix.shard == 1
+        env:
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE: "1"
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+        run: >-
+          cd examples/accrue_host && npm run e2e --
+          --config=playwright.braintree.config.js
+          e2e/phase236-portal-self-service.spec.js
+
+      - name: Run Phase 236 Portal Hosted Fields with forced light theme
+        if: matrix.shard == 1
+        env:
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE: "1"
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+          ACCRUE_HOST_PORTAL_THEME: light
+        run: >-
+          cd examples/accrue_host && npm run e2e --
+          --config=playwright.braintree.config.js
+          e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'
+
+      - name: Run Phase 236 Portal Hosted Fields with forced dark theme
+        if: matrix.shard == 1
+        env:
+          ACCRUE_HOST_BROWSER_USE_BRAINTREE: "1"
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+          ACCRUE_HOST_PORTAL_THEME: dark
+        run: >-
+          cd examples/accrue_host && npm run e2e --
+          --config=playwright.braintree.config.js
+          e2e/phase236-portal-self-service.spec.js --grep 'Hosted Fields'
+
+      - name: Upload Braintree Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-braintree-checkout-report-shard-${{ matrix.shard }}
+          path: examples/accrue_host/playwright-report
+          if-no-files-found: ignore
+
+      - name: Upload Braintree Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-braintree-checkout-traces-shard-${{ matrix.shard }}
           path: examples/accrue_host/test-results
           if-no-files-found: ignore
 

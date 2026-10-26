@@ -7,13 +7,15 @@ defmodule AccrueAdmin.Live.ChargesLive do
 
   alias Accrue.Billing.{Charge, Customer, Refund}
   alias Accrue.Repo
-  alias AccrueAdmin.BillingPresentation
+  alias AccrueAdmin.Components.BillingContext
 
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
     FilterChipBar,
     FlashGroup,
+    IdBadge,
+    MoneyFormatter,
     PageHeader,
     StatStrip
   }
@@ -94,8 +96,8 @@ defmodule AccrueAdmin.Live.ChargesLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Billing"
           breadcrumbs={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.charges_index_heading()}
           ]}
           title={Copy.payments_list_heading()}
@@ -110,7 +112,6 @@ defmodule AccrueAdmin.Live.ChargesLive do
               <:stat
                 label="Fees settled"
                 value={Integer.to_string(@summary.fees_settled_count)}
-                tone="cobalt"
               />
               <:stat label="Refunded" value={Integer.to_string(@summary.refunded_count)} />
             </StatStrip.stat_strip>
@@ -122,8 +123,8 @@ defmodule AccrueAdmin.Live.ChargesLive do
               filter_fields={payment_filter_fields()}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
-              clear_visible={filter_active?(@params)}
+              clear_href={@table_path}
+              clear_visible={reset_visible?(@params, @summary)}
             />
           </:filter_toolbar>
         </PageHeader.page_header>
@@ -132,6 +133,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.payments_list_result_label_pair()}
           id="payments"
           query_module={Charges}
           current_owner_scope={@current_owner_scope}
@@ -143,35 +145,40 @@ defmodule AccrueAdmin.Live.ChargesLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
-            %{label: "Payment", render: &payment_identity_cell(&1, @admin_mount_path, @current_owner_scope)},
-            %{label: "Status", render: &status_summary/1},
-            %{label: "Amount", render: &amount_summary/1},
-            %{label: "Fees", render: &fee_summary/1},
-            %{label: "Billing signals", render: &billing_signals_cell/1}
+            %{width: 32, label: "Payment", render: &payment_identity_cell(&1, @admin_mount_path, @current_owner_scope, :table)},
+            %{width: 12, label: "Status", render: &status_summary/1},
+            %{width: 12, label: "Amount", render: &amount_summary/1},
+            %{width: 24, label: "Stripe fee", render: &fee_summary/1},
+            %{width: 20, label: "Account type", render: &billing_signals_cell/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&payment_identity_cell(&1, @admin_mount_path, @current_owner_scope, :card)}
           card_fields={[
-            %{label: "Customer", render: &customer_label/1},
             %{label: "Status", render: &status_summary/1},
             %{label: "Amount", render: &amount_summary/1},
-            %{label: "Fees", render: &fee_summary/1},
-            %{label: "Billing signals", render: &billing_signals_cell/1}
+            %{label: "Stripe fee", render: &fee_summary/1},
+            %{label: "Account type", render: &billing_signals_cell/1}
           ]}
           filter_fields={payment_filter_fields()}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.payments_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
           filtered_empty_copy={empty_copy(@params, @summary)}
         >
           <:list_status :let={status}>
+            <DataTable.view_nav label="Payment view" items={[
+              %{label: "Failed payments", current: @params["status"] == "failed", href: payment_view_href(@params, @table_path, "failed")},
+              %{label: "All payments", current: is_nil(@params["status"]), href: payment_view_href(@params, @table_path, nil)}
+            ]} />
             <FilterChipBar.filter_chip_bar
+              compact={true}
               items={work_queue_chips(@params, @table_path)}
               label="Payment view"
               result_count={status.visible_count}
               result_label={Copy.payments_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -249,71 +256,81 @@ defmodule AccrueAdmin.Live.ChargesLive do
   defp scope_refunds(query, _owner_scope), do: query
 
   defp billing_signals_cell(row) do
-    ownership = BillingPresentation.ownership_label(row)
-    tax = BillingPresentation.tax_health_label(BillingPresentation.tax_health(row))
-    escaped_o = ownership |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    assigns = %{row: row}
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span>)
-    )
+    ~H"""
+    <BillingContext.billing_context row={@row} />
+    """
   end
 
-  defp payment_identity_cell(row, mount_path, owner_scope) do
+  defp payment_identity_cell(row, mount_path, owner_scope, presentation) do
     payment_href = scoped_path(mount_path, "/payments/#{row.id}", owner_scope)
     customer_href = scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope)
-    payment_label = row.processor_id || row.id
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{payment_href}" class="ax-link">#{escape(payment_label)}</a><a href="#{customer_href}" class="ax-label ax-muted">#{escape(customer_label(row))}</a></span>)
-    )
+    assigns = %{
+      payment_href: payment_href,
+      customer_href: customer_href,
+      customer_label: customer_label(row),
+      badge_id: "ax-id-badge-payment-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
+      payment_id: row.processor_id || to_string(row.id)
+    }
+
+    ~H"""
+    <DataTable.identity_cell label={@customer_label}>
+      <:primary><.link href={@payment_href} class="ax-link"><%= @customer_label %></.link></:primary>
+      <:secondary>
+        <IdBadge.id_badge id={@badge_id} id_value={@payment_id} label="Copy payment ID" copy_label="payment ID" variant="plain" />
+        <.link href={@customer_href} class="ax-label ax-muted">Customer details</.link>
+      </:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp customer_label(row), do: row.customer_name || row.customer_email || row.customer_id
+
+  defp status_summary(%{status: "failed"}) do
+    assigns = %{}
+
+    ~H"""
+    <AccrueAdmin.Components.StatusBadge.status_badge status={:warning} label="Failed" tone="amber" />
+    """
+  end
+
   defp status_summary(row), do: humanize(row.status)
-  defp card_title(row), do: row.processor_id || row.id
 
   defp amount_summary(row) do
     format_money(row.amount_cents, row.currency)
   end
 
   defp fee_summary(row) do
-    stripe_fee =
+    amount =
       case row.stripe_fee_amount_minor do
         amount when is_integer(amount) ->
           format_money(amount, row.stripe_fee_currency || row.currency)
 
         _ ->
-          "pending"
+          "Not recorded"
       end
 
-    settled = if row.fees_settled_at, do: "settled", else: "unsettled"
-    "#{stripe_fee} stripe fee · #{settled}"
+    detail =
+      cond do
+        row.fees_settled_at -> "Fees settled"
+        is_integer(row.stripe_fee_amount_minor) -> "Settlement not recorded"
+        true -> nil
+      end
+
+    assigns = %{value: amount, detail: detail}
+
+    ~H"""
+    <DataTable.value_cell value={@value} detail={@detail} />
+    """
   end
 
   defp format_money(amount_minor, currency) when is_integer(amount_minor) do
-    Accrue.Invoices.Render.format_money(
-      amount_minor,
-      normalize_currency(currency),
-      Accrue.Config.default_locale()
-    )
+    MoneyFormatter.format_money(amount_minor, currency)
   end
 
   defp format_money(_amount_minor, _currency), do: "--"
-
-  defp normalize_currency(currency) when is_atom(currency), do: currency
-
-  defp normalize_currency(currency) when is_binary(currency) do
-    code = String.downcase(currency)
-
-    try do
-      String.to_existing_atom(code)
-    rescue
-      ArgumentError -> :usd
-    end
-  end
-
-  defp normalize_currency(_currency), do: :usd
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 
@@ -326,7 +343,11 @@ defmodule AccrueAdmin.Live.ChargesLive do
 
   defp payment_filter_fields do
     [
-      %{id: :q, label: "Search", placeholder: "Search payments"},
+      %{
+        id: :q,
+        label: "Search payments",
+        placeholder: "Customer name, email, or payment ID"
+      },
       {
         :status,
         [
@@ -341,12 +362,19 @@ defmodule AccrueAdmin.Live.ChargesLive do
           ]
         ]
       },
-      %{id: :customer_id, label: "Customer id", placeholder: "Customer id"},
+      %{
+        id: :customer_id,
+        label: "Customer ID",
+        placeholder: "Customer ID",
+        secondary: true
+      },
       %{
         id: :fees_settled,
-        label: "Fees settled",
-        type: :segmented,
-        options: [{"", "All"}, {"true", "Settled"}, {"false", "Pending"}]
+        label: "Fee settlement",
+        type: :select,
+        all_label: "All fee states",
+        options: [{"true", "Recorded"}, {"false", "Not recorded"}],
+        secondary: true
       }
     ]
     |> Enum.map(fn
@@ -363,41 +391,29 @@ defmodule AccrueAdmin.Live.ChargesLive do
   end
 
   defp work_queue_chips(params, table_path) do
-    queue_active = Map.get(params, "status") == @default_queue_status
-    all_active = Map.get(params, "view") == "all"
-    clear_href = clear_all_href(params, table_path)
-
-    filter_chips =
-      params
-      |> filter_params()
-      |> Enum.reject(fn {key, _value} -> key == "status" and queue_active end)
-      |> Enum.map(fn {key, value} ->
-        %{
-          id: String.to_atom(key),
-          label: filter_chip_label(key),
-          value: filter_chip_value(key, value),
-          tone: :slate,
-          active: true,
-          remove_href: AccrueAdmin.DataTableNav.merge_query(table_path, %{key => nil})
-        }
-      end)
-
-    [
+    params
+    |> filter_params()
+    |> Enum.reject(fn {key, value} -> key == "status" and value == @default_queue_status end)
+    |> Enum.map(fn {key, value} ->
       %{
-        id: :status_queue,
-        label: Copy.payments_list_default_lens_label(),
-        tone: :cobalt,
-        active: queue_active,
-        remove_href: if(queue_active, do: clear_href)
-      },
-      %{
-        id: :view_all,
-        label: Copy.payments_list_all_lens_label(),
+        id: String.to_atom(key),
+        label: filter_chip_label(key),
+        value: filter_chip_value(key, value),
         tone: :slate,
-        active: queue_active or all_active,
-        href: if(queue_active, do: clear_href)
+        active: true,
+        remove_href: AccrueAdmin.DataTableNav.merge_query(table_path, %{key => nil})
       }
-    ] ++ filter_chips
+    end)
+  end
+
+  defp payment_view_href(params, path, status) do
+    params =
+      params
+      |> Map.drop(["cursor", "phase197_state"])
+      |> Map.put("status", status)
+      |> Map.put("view", if(is_nil(status), do: "all"))
+
+    AccrueAdmin.DataTableNav.merge_query(path, params)
   end
 
   defp filter_chip_label("q"), do: "Search"
@@ -423,11 +439,12 @@ defmodule AccrueAdmin.Live.ChargesLive do
     })
   end
 
-  defp filter_active?(params), do: filter_params(params) != %{}
-
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
+  defp reset_visible?(params, summary) do
+    filter_params(params) != %{"status" => @default_queue_status} and
+      (filter_active?(params) or (params["view"] == "all" and summary.total_count > 0))
   end
+
+  defp filter_active?(params), do: filter_params(params) != %{}
 
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil
@@ -507,8 +524,6 @@ defmodule AccrueAdmin.Live.ChargesLive do
   defp map_only_scope?(params) do
     params != %{} and Map.keys(params) -- ["org"] == []
   end
-
-  defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

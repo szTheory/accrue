@@ -60,7 +60,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
       |> Ecto.Changeset.put_change(:status, :dead)
     )
 
-    {:ok, _event} =
+    {:ok, event} =
       Events.record(%{
         type: "customer.updated",
         subject_type: "Customer",
@@ -85,102 +85,199 @@ defmodule AccrueAdmin.DashboardLiveTest do
     |> MeterEvent.failed_changeset(%APIError{message: "x", code: "test", http_status: 400})
     |> TestRepo.update!()
 
-    :ok
+    {:ok, %{event: event}}
   end
 
-  test "renders attention rail, task launchers, demoted KPIs, and activity", %{conn: conn} do
+  test "renders factual recent activity without unsupported health or aggregate claims", %{
+    conn: conn,
+    event: event
+  } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing")
 
-    # Page chrome — PageHeader emits the single top-level h1 (ax-display) + one verdict
+    # Home presents observable activity and scope-matched destinations only.
     assert html =~ "ax-display"
-    assert html =~ "data-ax-health-verdict"
-    # Seed has one open invoice → verdict is :action_required (single StatusBadge verdict)
-    assert html =~ Copy.dashboard_health_verdict_action_required()
+    assert html =~ "Recent activity"
 
-    # Zone 1 — attention rail: heading + seeded exceptions (open invoice P1, dead webhook P2,
-    # failed meter P4), rebuilt from StatusBadge / .ax-chip / .ax-link-quiet primitives
-    assert html =~ Copy.home_attention_priority_heading()
-    assert html =~ "Work invoice queue"
-    assert html =~ Copy.home_attention_webhooks_label()
-    assert html =~ "Debug failed webhook queue"
-    assert html =~ Copy.home_attention_meter_label()
-    assert html =~ Copy.home_attention_action_investigate()
-    assert html =~ ~s(href="/billing/events?q=meter_event")
-    assert html =~ ~s(href="/billing/invoices?status=open")
+    assert html
+           |> Floki.parse_document!()
+           |> Floki.find(".ax-breadcrumbs-group")
+           |> Floki.text()
+           |> String.trim() == "Billing"
 
-    # Header actions — single customer-lookup control + audit-ledger link
-    assert html =~ "data-ax-command-palette-trigger"
-    assert html =~ Copy.home_customer_search_cta()
-    assert html =~ "Audit ledger"
+    assert html =~ "data-event-family=\"customer\""
+    refute html =~ "Recorded automatically"
+    assert html =~ "ax-id-badge-plain"
+    assert html =~ "Customer updated"
+    refute html =~ "data-ax-command-palette-trigger"
+    refute html =~ Copy.home_customer_search_cta()
+    refute html =~ "Audit event"
+    assert html =~ "Copy Customer ID"
+    assert html =~ ~s(class="ax-timeline-subject-label">ID</span>)
+    assert html =~ "data-clipboard-text"
+    refute html =~ ">Open event<"
+    assert html =~ "ax-timeline-title-link"
+    assert html =~ "View events"
 
-    # Header StatStrip — 4-stat exposure-first strip
-    assert html =~ "Open invoices"
-    assert html =~ "Exposure"
-    assert html =~ "At-risk subscriptions"
-    assert html =~ "Failed webhooks"
-
-    # Zone 2 — task launchers (three JTBD doors; customer tile folded into the header)
-    assert html =~ "data-ax-launcher-primary"
-    assert html =~ Copy.home_launcher_invoices_title()
-    assert html =~ Copy.home_launcher_recovery_title()
-    assert html =~ "Open dunning analytics"
-    assert html =~ Copy.home_launcher_developer_title()
-    assert html =~ "Debug webhook failures"
-
-    # Zone 3 — demoted KPI strip
-    assert html =~ Copy.dashboard_kpi_customers_label()
-    assert html =~ Copy.dashboard_kpi_active_subscriptions_label()
-    assert html =~ Copy.dashboard_kpi_open_invoice_balance_label()
-    assert html =~ Copy.dashboard_kpi_webhook_backlog_label()
-    assert html =~ Copy.dashboard_kpi_customers_aria_label()
-    assert html =~ Copy.dashboard_kpi_subscriptions_aria_label()
-    assert html =~ Copy.dashboard_kpi_invoices_aria_label()
-    assert html =~ Copy.dashboard_kpi_webhooks_aria_label()
-
-    # Zone 4 — recent activity timelines
-    assert html =~ Copy.dashboard_activity_event_ledger_eyebrow()
-    assert html =~ Copy.dashboard_activity_webhook_health_eyebrow()
-    assert html =~ "invoice.payment_failed"
-    assert html =~ "customer.updated"
-    assert html =~ "Open event"
-    assert html =~ "Debug delivery trace"
-    assert html =~ "Debug failed webhook queue"
-    assert html =~ "Open full event ledger"
-    assert html =~ "Load more audit events"
-    assert html =~ "Filter admin actors"
-    assert html =~ "Filter system actors"
-    assert html =~ "Admin user Admin 1"
-    assert html =~ "Latest event ledger summary"
-    assert html =~ "Action"
-    assert html =~ "Audit event"
-
-    # Regrouped sidebar nav still threads to every section (exact, query-free hrefs)
+    refute html =~ "data-ax-health-verdict"
+    refute html =~ "Healthy"
+    refute html =~ "above $0.00 target"
+    refute html =~ "Failed webhooks"
+    refute html =~ "At-risk subscriptions"
     assert html =~ ~s(href="/billing/customers")
-    assert html =~ ~s(href="/billing/subscriptions")
-    assert html =~ ~s(href="/billing/invoices")
-    assert html =~ ~s(href="/billing/webhooks")
     assert html =~ ~s(href="/billing/events")
+    assert html =~ ~s(href="/billing/events/#{event.id}")
   end
 
-  test "header verdict is 'Action required' when open invoices are zero but another signal fires (WR-01)",
-       %{conn: conn} do
+  test "organization Home shows its event and same-scope destinations only", %{conn: conn} do
+    org_id = Ecto.UUID.generate()
+    allowed = customer_for_org(org_id)
+    foreign = customer_for_org(Ecto.UUID.generate())
+
+    {:ok, allowed_event} =
+      Events.record(%{
+        type: "home.allowed_scope_event",
+        subject_type: "Customer",
+        subject_id: allowed.id,
+        actor_type: "admin",
+        actor_id: "admin_1"
+      })
+
+    {:ok, _} =
+      Events.record(%{
+        type: "home.foreign_scope_event",
+        subject_type: "Customer",
+        subject_id: foreign.id,
+        actor_type: "admin",
+        actor_id: "admin_1"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: org_id,
+        active_organization_slug: "home-org",
+        admin_organization_ids: [org_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing?org=home-org")
+    assert html =~ "Billing event"
+    refute html =~ "home.foreign_scope_event"
+    assert html =~ ~s(href="/billing/events/#{allowed_event.id}?org=home-org")
+    assert html =~ ~s(href="/billing/customers?org=home-org")
+    assert html =~ ~s(href="/billing/events?org=home-org")
+
+    assert html =~
+             ~r/href="\/billing\?org=home-org"[^>]*class="ax-sidebar-link ax-sidebar-link-active"/
+  end
+
+  test "organization Home keeps the activity empty state distinct from scoped destinations", %{
+    conn: conn
+  } do
+    org_id = Ecto.UUID.generate()
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: org_id,
+        active_organization_slug: "empty-home-org",
+        admin_organization_ids: [org_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing?org=empty-home-org")
+
+    assert html =~ "No recent billing activity in this scope."
+    assert html =~ ~s(href="/billing/events?org=empty-home-org")
+    refute html =~ "Open event"
+    refute html =~ "Customer updated"
+  end
+
+  test "organization Home keeps multiple activity rows attached to their scoped event records", %{
+    conn: conn
+  } do
+    org_id = Ecto.UUID.generate()
+    first_customer = customer_for_org(org_id)
+
+    {:ok, first_event} =
+      Events.record(%{
+        type: "customer.updated",
+        subject_type: "Customer",
+        subject_id: first_customer.id,
+        actor_type: "admin",
+        actor_id: "admin_1"
+      })
+
+    {:ok, second_event} =
+      Events.record(%{
+        type: "customer.local_updated",
+        subject_type: "Customer",
+        subject_id: first_customer.id,
+        actor_type: "admin",
+        actor_id: "admin_1"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: org_id,
+        active_organization_slug: "many-home-org",
+        admin_organization_ids: [org_id]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing?org=many-home-org")
+
+    rows = html |> Floki.parse_fragment!() |> Floki.find(".ax-timeline-item")
+    assert length(rows) == 2
+
+    assert Enum.any?(rows, fn row ->
+             text = Floki.text(row)
+             href = row |> Floki.find("a.ax-timeline-title-link") |> Floki.attribute("href")
+
+             text =~ "Customer updated" and text =~ first_customer.id and
+               href == ["/billing/events/#{first_event.id}?org=many-home-org"]
+           end)
+
+    assert Enum.any?(rows, fn row ->
+             text = Floki.text(row)
+             href = row |> Floki.find("a.ax-timeline-title-link") |> Floki.attribute("href")
+
+             text =~ "Customer record updated locally" and text =~ first_customer.id and
+               href == ["/billing/events/#{second_event.id}?org=many-home-org"]
+           end)
+  end
+
+  test "Billing destinations are peers under a non-linked navigation group", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    # Drive open_invoice_count to 0 while the setup's dead webhook (blocked_webhook_count > 0)
-    # and failed meter event remain. The header verdict must key off ALL attention signals,
-    # so it must render "Action required" — never a green "Healthy" while the attention rail
-    # lists priority exceptions on the same page (the IA-01 answer-first contract).
-    TestRepo.delete_all(Invoice)
+    for path <- [
+          "/billing",
+          "/billing/customers",
+          "/billing/subscriptions",
+          "/billing/invoices",
+          "/billing/payments"
+        ] do
+      assert {:ok, _view, html} = live(conn, path)
+      document = Floki.parse_fragment!(html)
+      crumbs = Floki.find(document, "nav[aria-label='Breadcrumb']")
 
-    assert {:ok, _view, html} = live(conn, "/billing")
+      assert crumbs |> Floki.find(".ax-breadcrumbs-group") |> Floki.text() |> String.trim() ==
+               "Billing"
 
-    assert html =~ "data-ax-health-verdict"
-    assert html =~ Copy.dashboard_health_verdict_action_required()
-    refute html =~ Copy.dashboard_health_verdict_healthy()
+      assert Floki.find(crumbs, "a") == []
+      refute Floki.text(crumbs) =~ "Dashboard"
+      assert length(Floki.find(crumbs, "[aria-current='page']")) == 1
+    end
+  end
 
-    # The exception the verdict must not contradict is still surfaced in the rail.
-    assert html =~ Copy.home_attention_webhooks_label()
+  defp customer_for_org(org_id) do
+    %{customer: customer} =
+      Factory.customer(%{
+        owner_type: "Organization",
+        owner_id: org_id,
+        email: "#{org_id}@example.com"
+      })
+
+    customer
   end
 end

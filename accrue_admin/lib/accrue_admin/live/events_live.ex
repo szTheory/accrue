@@ -10,9 +10,12 @@ defmodule AccrueAdmin.Live.EventsLive do
   alias AccrueAdmin.Components.{
     AppShell,
     DataTable,
+    EventIcon,
     FilterChipBar,
+    IdBadge,
     PageHeader,
-    StatStrip
+    StatStrip,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -56,6 +59,10 @@ defmodule AccrueAdmin.Live.EventsLive do
      )}
   end
 
+  def handle_event("retry_summary", _params, socket) do
+    {:noreply, assign(socket, :summary, event_summary(socket.assigns.current_owner_scope))}
+  end
+
   @impl true
   def handle_params(params, _uri, socket) do
     {:noreply,
@@ -78,8 +85,8 @@ defmodule AccrueAdmin.Live.EventsLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Audit"
           breadcrumbs={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.billing_events_breadcrumb_events()}
           ]}
           title={Copy.events_list_heading()}
@@ -92,17 +99,15 @@ defmodule AccrueAdmin.Live.EventsLive do
             <StatStrip.stat_strip label={Copy.billing_events_kpi_section_aria_label()}>
               <:stat
                 label={Copy.billing_events_kpi_label_ledger_rows()}
-                value={Integer.to_string(@summary.total_count)}
+                value={summary_value(@summary, :total_count)}
               />
               <:stat
                 label={Copy.billing_events_kpi_label_webhook_sourced()}
-                value={Integer.to_string(@summary.webhook_linked_count)}
-                tone="cobalt"
+                value={summary_value(@summary, :webhook_linked_count)}
               />
               <:stat
                 label={Copy.billing_events_kpi_label_last_24h()}
-                value={Integer.to_string(@summary.last_day_count)}
-                tone="moss"
+                value={summary_value(@summary, :last_day_count)}
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -115,9 +120,18 @@ defmodule AccrueAdmin.Live.EventsLive do
               path={@table_path}
               clear_href={clear_all_href(@params, @table_path)}
               clear_visible={filter_active?(@params)}
+              clear_label="Reset filters"
             />
           </:filter_toolbar>
         </PageHeader.page_header>
+
+        <div :if={@summary == :unavailable} class="ax-card ax-data-table-unavailable" data-role="event-summary-unavailable" role="alert">
+          <p class="ax-heading">Event summary unavailable</p>
+          <p class="ax-body">The event history summary could not be loaded. Current evidence may be incomplete.</p>
+          <button type="button" phx-click="retry_summary" class="ax-button ax-button-secondary" data-role="retry-event-summary">
+            Retry summary
+          </button>
+        </div>
 
         <.live_component
           module={DataTable}
@@ -132,28 +146,35 @@ defmodule AccrueAdmin.Live.EventsLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
+          empty_action_label="Reset filters"
           clear_href={clear_all_href(@params, @table_path)}
           row_label={Copy.events_list_result_label_pair()}
           filter_submit_label={Copy.billing_events_apply_filters()}
+          unavailable_copy="Event history could not be loaded. Current results are not a complete history. Retry the read."
+          partial_load_copy="More event history could not be loaded. The rows shown are incomplete. Retry to continue."
           columns={[
-            %{id: :type, label: Copy.billing_events_table_column_event()},
+            %{
+              id: :type,
+              label: Copy.billing_events_table_column_event(),
+              render: fn row -> event_cell(row, @admin_mount_path, @current_owner_scope, @params, :table) end
+            },
             %{
               label: Copy.billing_events_table_column_subject(),
-              render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope) end
+              render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope, :table) end
             },
+            %{label: Copy.billing_events_table_column_when(), render: &when_summary(&1, :table)},
             %{label: Copy.billing_events_table_column_actor(), render: &actor_summary/1},
-            %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
-            %{label: Copy.billing_events_table_column_when(), render: &when_summary/1}
+            %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary(&1, @admin_mount_path, @current_owner_scope)}
           ]}
-          card_title={&card_title/1}
+          card_title={&event_cell(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
             %{
               label: Copy.billing_events_table_column_subject(),
-              render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope) end
+              render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope, :card) end
             },
+            %{label: Copy.billing_events_table_column_when(), render: &when_summary(&1, :card)},
             %{label: Copy.billing_events_table_column_actor(), render: &actor_summary/1},
-            %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
-            %{label: Copy.billing_events_table_column_when(), render: &when_summary/1}
+            %{label: Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary(&1, @admin_mount_path, @current_owner_scope)}
           ]}
           filter_fields={event_filter_fields()}
           empty_title={empty_title(@params, @summary)}
@@ -165,9 +186,9 @@ defmodule AccrueAdmin.Live.EventsLive do
             <FilterChipBar.filter_chip_bar
               items={event_lens_chips(@params, @table_path)}
               label="Event view"
+              compact={true}
               result_count={status.visible_count}
               result_label={Copy.events_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -191,39 +212,81 @@ defmodule AccrueAdmin.Live.EventsLive do
   end
 
   defp event_summary(owner_scope) do
-    day_ago = DateTime.add(DateTime.utc_now(), -86_400, :second)
-    base_query = Events.scoped_base_query(owner_scope)
+    try do
+      raise_fixture_read_failure!(:events_summary)
+      day_ago = DateTime.add(DateTime.utc_now(), -86_400, :second)
+      base_query = Events.scoped_base_query(owner_scope)
 
-    %{
-      total_count: Repo.aggregate(base_query, :count, :id),
-      webhook_linked_count:
-        base_query
-        |> where([event], not is_nil(event.caused_by_webhook_event_id))
-        |> Repo.aggregate(:count, :id),
-      admin_count:
-        base_query
-        |> where([event], event.actor_type == "admin")
-        |> Repo.aggregate(:count, :id),
-      last_day_count:
-        base_query
-        |> where([event], event.inserted_at >= ^day_ago)
-        |> Repo.aggregate(:count, :id),
-      unique_subject_types:
-        base_query
-        |> select([event], count(fragment("distinct ?", event.subject_type)))
-        |> Repo.one()
-    }
+      %{
+        total_count: Repo.aggregate(base_query, :count, :id),
+        webhook_linked_count:
+          base_query
+          |> where(
+            [event],
+            not is_nil(event.caused_by_webhook_event_id) or event.subject_type == "WebhookEvent"
+          )
+          |> Repo.aggregate(:count, :id),
+        admin_count:
+          base_query
+          |> where([event], event.actor_type == "admin")
+          |> Repo.aggregate(:count, :id),
+        last_day_count:
+          base_query
+          |> where([event], event.inserted_at >= ^day_ago)
+          |> Repo.aggregate(:count, :id),
+        unique_subject_types:
+          base_query
+          |> select([event], count(fragment("distinct ?", event.subject_type)))
+          |> Repo.one()
+      }
+    rescue
+      _error in DBConnection.ConnectionError -> :unavailable
+    end
+  end
+
+  defp summary_value(:unavailable, _key), do: "Unavailable"
+  defp summary_value(summary, key), do: summary |> Map.fetch!(key) |> Integer.to_string()
+
+  defp raise_fixture_read_failure!(source) do
+    if Application.get_env(:accrue_admin, :env) == :test and
+         Application.get_env(:accrue_admin, :phase238_read_failure_fixture) == source do
+      raise DBConnection.ConnectionError, message: "fixture database unavailable"
+    end
   end
 
   defp event_filter_fields do
     [
-      %{id: :q, label: Copy.billing_events_filter_label_search()},
-      %{id: :type, label: Copy.billing_events_filter_label_event_type()},
-      %{id: :actor_type, label: Copy.billing_events_filter_label_actor_type()},
-      %{id: :subject_type, label: Copy.billing_events_filter_label_subject_type()},
+      %{
+        id: :q,
+        label: "Search events",
+        placeholder: "Event type, record ID, or person ID"
+      },
+      %{id: :type, label: Copy.billing_events_filter_label_event_type(), secondary: true},
+      %{
+        id: :actor_type,
+        label: Copy.billing_events_filter_label_actor_type(),
+        type: :select,
+        all_label: "Anyone",
+        options: [
+          {"system", "App"},
+          {"oban", "Background job"},
+          {"admin", "Admin"},
+          {"webhook", "Webhook"},
+          {"user", "User"}
+        ],
+        secondary: true
+      },
+      %{
+        id: :subject_type,
+        label: Copy.billing_events_filter_label_subject_type(),
+        type: :datalist,
+        options: ["Customer", "Subscription", "Invoice", "Charge", "WebhookEvent"],
+        secondary: true
+      },
       %{
         id: :source_webhook_event_id,
-        label: Copy.billing_events_filter_label_source_webhook_id()
+        label: "Linked webhook ID",
+        secondary: true
       }
     ]
   end
@@ -321,10 +384,6 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   defp filter_active?(params), do: filter_params(params) != %{}
 
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
-
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil
   end
@@ -356,27 +415,87 @@ defmodule AccrueAdmin.Live.EventsLive do
     if first_run_empty?(params, summary), do: :first_run_empty, else: :filtered_empty
   end
 
+  defp list_state_copy(:filtered_empty) do
+    Copy.resource_state_copy(:events, :filtered_empty)
+    |> Map.put(:heading, Copy.events_list_filtered_empty_title())
+    |> Map.put(:body, Copy.events_list_filtered_empty_body())
+  end
+
   defp list_state_copy(state), do: Copy.resource_state_copy(:events, state)
 
+  defp first_run_empty?(params, :unavailable), do: !filter_active?(params)
+
   defp first_run_empty?(params, summary),
-    do: summary.total_count == 0 and !filter_active?(params)
+    do: is_map(summary) and summary.total_count == 0 and !filter_active?(params)
 
   defp phase197_loading_fixture?(params) do
     Application.get_env(:accrue_admin, :env) == :test and
       Map.get(params, "phase197_state") == "loading-skeleton"
   end
 
-  defp subject_cell(row, mount_path, owner_scope) do
-    label = "#{row.subject_type} #{row.subject_id}"
+  defp subject_cell(row, mount_path, owner_scope, surface) do
+    label =
+      case row.subject_type do
+        "Charge" -> "Payment"
+        "WebhookEvent" -> "Webhook"
+        other -> other || "Record"
+      end
 
-    case subject_href(row, mount_path, owner_scope) do
-      nil ->
-        label
+    assigns = %{
+      label: label,
+      value: row.subject_id,
+      href: subject_href(row, mount_path, owner_scope),
+      id: "event-record-#{surface}-#{row.id}"
+    }
 
-      href ->
-        escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-        Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
-    end
+    ~H"""
+    <DataTable.identity_cell layout="inline">
+      <:primary>
+        <a :if={@href} href={@href} class="ax-link"><%= @label %></a>
+        <span :if={!@href}><%= @label %></span>
+      </:primary>
+      <:secondary :if={@value}>
+        <IdBadge.id_badge id={@id} id_value={@value} label={"Copy #{String.downcase(@label)} ID"} copy_label={String.downcase(@label) <> " ID"} variant="plain" />
+      </:secondary>
+    </DataTable.identity_cell>
+    """
+  end
+
+  defp event_cell(row, mount_path, owner_scope, params, presentation) do
+    label = Copy.billing_event_label(row.type)
+    key = row.type
+    list_return = scoped_events_return(mount_path, owner_scope, params)
+
+    href =
+      ScopedPath.build(mount_path, "/events/#{row.id}", owner_scope, %{"return" => list_return})
+
+    assigns = %{
+      href: href,
+      label: label,
+      badge_id:
+        "ax-id-badge-event-type-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
+      event_key: key
+    }
+
+    ~H"""
+    <DataTable.identity_cell label={@label}>
+      <:primary>
+        <.link href={@href} class="ax-link ax-event-link">
+          <EventIcon.event_icon type={@event_key} />
+          <span><%= @label %></span>
+        </.link>
+      </:primary>
+      <:secondary :if={@label in ["Billing event", "Event details unavailable"] and is_binary(@event_key) and @event_key != ""}>
+        <IdBadge.id_badge id={@badge_id} id_value={@event_key} label="Copy event type" copy_label="event type" variant="plain" />
+      </:secondary>
+    </DataTable.identity_cell>
+    """
+  end
+
+  defp scoped_events_return(mount_path, owner_scope, params) do
+    filter = Events.decode_filter(params) |> Events.encode_filter()
+    raw = ScopedPath.build(mount_path, "/events", owner_scope, filter)
+    ScopedPath.return_destination(mount_path, raw, owner_scope, nil, "/events").path
   end
 
   defp subject_href(%{subject_type: "Customer", subject_id: id}, mount_path, scope),
@@ -397,19 +516,59 @@ defmodule AccrueAdmin.Live.EventsLive do
   defp subject_href(_row, _mount_path, _scope), do: nil
 
   defp actor_summary(row) do
-    case row.actor_id do
-      nil -> humanize(row.actor_type)
-      actor_id -> "#{humanize(row.actor_type)} #{actor_id}"
-    end
+    label =
+      case row.actor_type do
+        "system" -> "App"
+        "oban" -> "Background job"
+        "admin" -> "Admin"
+        "webhook" -> "Webhook"
+        nil -> "Unavailable"
+        other -> humanize(other)
+      end
+
+    assigns = %{label: label, value: row.actor_id}
+
+    ~H"""
+    <span title={@value}><%= @label %></span>
+    """
   end
 
-  defp webhook_source_summary(%{caused_by_webhook_event_id: nil}),
-    do: Copy.billing_events_webhook_source_direct()
+  defp webhook_source_summary(
+         %{subject_type: "WebhookEvent", subject_id: id, caused_by_webhook_event_id: nil},
+         mount_path,
+         scope
+       ) do
+    webhook_source_summary(%{caused_by_webhook_event_id: id}, mount_path, scope)
+  end
 
-  defp webhook_source_summary(%{caused_by_webhook_event_id: webhook_id}), do: webhook_id
+  defp webhook_source_summary(%{caused_by_webhook_event_id: nil}, _mount_path, _scope) do
+    assigns = %{}
 
-  defp when_summary(row), do: format_datetime(row.inserted_at)
-  defp card_title(row), do: row.type
+    ~H"""
+    <span title="No linked webhook" aria-label="No linked webhook">—</span>
+    """
+  end
+
+  defp webhook_source_summary(%{caused_by_webhook_event_id: webhook_id}, mount_path, scope) do
+    assigns = %{
+      href: ScopedPath.build(mount_path, "/webhooks/#{webhook_id}", scope),
+      value: webhook_id
+    }
+
+    ~H"""
+    <a href={@href} title={@value} class="ax-link">View webhook</a>
+    """
+  end
+
+  defp when_summary(%{inserted_at: %DateTime{} = value} = row, surface) do
+    assigns = %{value: value, id: "event-row-timestamp-#{surface}-#{row.id}"}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
+
+  defp when_summary(_row, _surface), do: Copy.billing_events_when_unknown()
 
   defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
 
@@ -419,9 +578,6 @@ defmodule AccrueAdmin.Live.EventsLive do
     |> String.split()
     |> Enum.map_join(" ", &String.capitalize/1)
   end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: Copy.billing_events_when_unknown()
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

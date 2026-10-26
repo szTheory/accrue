@@ -113,6 +113,19 @@ accrue_portal_version=$(extract_version "$ROOT_DIR/accrue_portal/mix.exs")
 
 first_hour_md="$ROOT_DIR/accrue/guides/first_hour.md"
 host_readme_md="$ROOT_DIR/examples/accrue_host/README.md"
+phase239_dir="$ROOT_DIR/.planning/milestones/v1.63-phases/239-integrated-quality-handoff"
+
+# Phase 239 accepted handoff scope and evidence boundaries (Plan 05).
+require_fixed "$host_readme_md" 'The Fake-backed preview does not establish live-provider parity or real customer billing outcomes.'
+require_fixed "$phase239_dir/239-SCOPE-DISPOSITION.md" '**Date:** 2026-10-09'
+require_fixed "$phase239_dir/239-SCOPE-DISPOSITION.md" '**Attribution:** Project maintainer, by explicit planning instruction for Plan 05.'
+require_fixed "$phase239_dir/239-SCOPE-DISPOSITION.md" 'Optional feedback is collected outside the app.'
+require_fixed "$phase239_dir/239-SCOPE-DISPOSITION.md" 'No in-app feedback widget, feedback loading controls, or long-feedback-text behavior is claimed.'
+require_fixed "$phase239_dir/239-SCOPE-DISPOSITION.md" 'Routine human UAT is not required.'
+require_fixed "$phase239_dir/239-SCOPE-DISPOSITION.md" 'Recurring host checks cover horizontal overflow at direct 320 CSS px and a read-only reload after login.'
+require_fixed "$phase239_dir/239-SCOPE-DISPOSITION.md" "Plan 04's transparency prohibition is resolved by the deterministic documentation contract in scripts/ci/verify_package_docs.sh; its original prohibition remains in force."
+require_fixed "$phase239_dir/239-SCOPE-DISPOSITION.md" 'The Fake-backed preview still must not be presented as live-provider evidence or real customer billing outcomes.'
+require_fixed "$phase239_dir/239-HANDOFF.md" 'If a route or resource is unavailable, keep it explicitly unavailable and safely restart the preview server with the README startup path (`cd examples/accrue_host`, `make proxy` once, then `make up`) or retry after server readiness; do not label unavailable content empty, successful, or verified.'
 
 require_fixed "$ROOT_DIR/accrue/guides/quickstart.md" '[First Hour](first_hour.md)'
 require_fixed "$ROOT_DIR/accrue/guides/quickstart.md" 'capsule'

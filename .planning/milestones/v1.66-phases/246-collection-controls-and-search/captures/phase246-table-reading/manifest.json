@@ -1,0 +1,181 @@
+{
+  "phase": "246",
+  "captures": [
+    {
+      "file": "heldout-wide-light.png",
+      "route": "/admin/__phase246/states",
+      "captured_at": "2026-10-11T19:07:58.714Z",
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "source_sha": "ffb7f872d5a06de0ab96fcf7de917e7442ac5bd4",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/customers_live.ex": "c46680ad11a3e16370cef045256865f142c4f84b5f3e348e3b0a85207e08130a",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "659ded0a020511c664bf45d2dc174739ada6f830409d0760134b347ca413ac72",
+        "accrue_admin/lib/accrue_admin/live/promotion_codes_live.ex": "1108c1559e62d0eadeef7da77a61317cf3686984cc1d740328885efb24055837",
+        "accrue_admin/assets/css/app.css": "a8632c657924a2ff3473d1f90d94082bd01432096c547f7d6d651340e84c8447",
+        "accrue_admin/priv/static/accrue_admin.css": "a615ce356fc9e52e0042aa579c601d5c4759c0e487fb998cd1b7b296e9172b48",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex": "b2a9215c7d4ed10a155760d0e4352cb2fb9a71ad344087abc1a567fa64982424",
+        "examples/accrue_host/e2e/phase246-table-reading.spec.js": "ac02896d053fb37f7bc51b60d06616b0b5fe49bf9f33b0e932477e8ca2723eda"
+      },
+      "assets": {
+        "css": {
+          "path": "/admin/assets/css-5b0fcebc20e6a620df1041a56e4a0db9",
+          "sha256": "a615ce356fc9e52e0042aa579c601d5c4759c0e487fb998cd1b7b296e9172b48",
+          "bytes": 131646
+        },
+        "js": {
+          "path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "screenshot": {
+        "sha256": "8282200e3ced9f00b8fca7aede2b304336e639f295dc23383027726c6e579ef1",
+        "bytes": 129912
+      }
+    },
+    {
+      "file": "heldout-wide-dark.png",
+      "route": "/admin/__phase246/states",
+      "captured_at": "2026-10-11T19:07:58.830Z",
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "dark",
+      "source_sha": "ffb7f872d5a06de0ab96fcf7de917e7442ac5bd4",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/customers_live.ex": "c46680ad11a3e16370cef045256865f142c4f84b5f3e348e3b0a85207e08130a",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "659ded0a020511c664bf45d2dc174739ada6f830409d0760134b347ca413ac72",
+        "accrue_admin/lib/accrue_admin/live/promotion_codes_live.ex": "1108c1559e62d0eadeef7da77a61317cf3686984cc1d740328885efb24055837",
+        "accrue_admin/assets/css/app.css": "a8632c657924a2ff3473d1f90d94082bd01432096c547f7d6d651340e84c8447",
+        "accrue_admin/priv/static/accrue_admin.css": "a615ce356fc9e52e0042aa579c601d5c4759c0e487fb998cd1b7b296e9172b48",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex": "b2a9215c7d4ed10a155760d0e4352cb2fb9a71ad344087abc1a567fa64982424",
+        "examples/accrue_host/e2e/phase246-table-reading.spec.js": "ac02896d053fb37f7bc51b60d06616b0b5fe49bf9f33b0e932477e8ca2723eda"
+      },
+      "assets": {
+        "css": {
+          "path": "/admin/assets/css-5b0fcebc20e6a620df1041a56e4a0db9",
+          "sha256": "a615ce356fc9e52e0042aa579c601d5c4759c0e487fb998cd1b7b296e9172b48",
+          "bytes": 131646
+        },
+        "js": {
+          "path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "screenshot": {
+        "sha256": "6c0b78ea6ce9a19a9ec5714253cee8ef30a9d7e43ff5d18e2a2dcb4722b7d3b8",
+        "bytes": 128920
+      }
+    },
+    {
+      "file": "heldout-320-light.png",
+      "route": "/admin/__phase246/states",
+      "captured_at": "2026-10-11T19:07:58.947Z",
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "light",
+      "source_sha": "ffb7f872d5a06de0ab96fcf7de917e7442ac5bd4",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/customers_live.ex": "c46680ad11a3e16370cef045256865f142c4f84b5f3e348e3b0a85207e08130a",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "659ded0a020511c664bf45d2dc174739ada6f830409d0760134b347ca413ac72",
+        "accrue_admin/lib/accrue_admin/live/promotion_codes_live.ex": "1108c1559e62d0eadeef7da77a61317cf3686984cc1d740328885efb24055837",
+        "accrue_admin/assets/css/app.css": "a8632c657924a2ff3473d1f90d94082bd01432096c547f7d6d651340e84c8447",
+        "accrue_admin/priv/static/accrue_admin.css": "a615ce356fc9e52e0042aa579c601d5c4759c0e487fb998cd1b7b296e9172b48",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex": "b2a9215c7d4ed10a155760d0e4352cb2fb9a71ad344087abc1a567fa64982424",
+        "examples/accrue_host/e2e/phase246-table-reading.spec.js": "ac02896d053fb37f7bc51b60d06616b0b5fe49bf9f33b0e932477e8ca2723eda"
+      },
+      "assets": {
+        "css": {
+          "path": "/admin/assets/css-5b0fcebc20e6a620df1041a56e4a0db9",
+          "sha256": "a615ce356fc9e52e0042aa579c601d5c4759c0e487fb998cd1b7b296e9172b48",
+          "bytes": 131646
+        },
+        "js": {
+          "path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "screenshot": {
+        "sha256": "8e83f3206d06073b500e46c915f12acc324d0e625f60df7488cb6fbc842150d4",
+        "bytes": 84313
+      }
+    },
+    {
+      "file": "heldout-320-dark.png",
+      "route": "/admin/__phase246/states",
+      "captured_at": "2026-10-11T19:07:59.062Z",
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "dark",
+      "source_sha": "ffb7f872d5a06de0ab96fcf7de917e7442ac5bd4",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/data_table.ex": "fb508421836108668d29872dd8a6bd25154df433f2ad1c91a1e5d61e5ffa1e8f",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "62772dca992603cf09b9d89601199fe02008e0e4504761b2b06c1bb479cb383e",
+        "accrue_admin/lib/accrue_admin/live/customers_live.ex": "c46680ad11a3e16370cef045256865f142c4f84b5f3e348e3b0a85207e08130a",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "659ded0a020511c664bf45d2dc174739ada6f830409d0760134b347ca413ac72",
+        "accrue_admin/lib/accrue_admin/live/promotion_codes_live.ex": "1108c1559e62d0eadeef7da77a61317cf3686984cc1d740328885efb24055837",
+        "accrue_admin/assets/css/app.css": "a8632c657924a2ff3473d1f90d94082bd01432096c547f7d6d651340e84c8447",
+        "accrue_admin/priv/static/accrue_admin.css": "a615ce356fc9e52e0042aa579c601d5c4759c0e487fb998cd1b7b296e9172b48",
+        "accrue_admin/priv/static/accrue_admin.js": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+        "examples/accrue_host/lib/accrue_host_web/live/phase246_states_live.ex": "b2a9215c7d4ed10a155760d0e4352cb2fb9a71ad344087abc1a567fa64982424",
+        "examples/accrue_host/e2e/phase246-table-reading.spec.js": "ac02896d053fb37f7bc51b60d06616b0b5fe49bf9f33b0e932477e8ca2723eda"
+      },
+      "assets": {
+        "css": {
+          "path": "/admin/assets/css-5b0fcebc20e6a620df1041a56e4a0db9",
+          "sha256": "a615ce356fc9e52e0042aa579c601d5c4759c0e487fb998cd1b7b296e9172b48",
+          "bytes": 131646
+        },
+        "js": {
+          "path": "/admin/assets/js-459d26a06eb44ed2da22b55dad1679a4",
+          "sha256": "7607c7103b0fa7103f806d1ff2b8b121376f31cc163bbfe3dcc1509c07fda053",
+          "bytes": 161997
+        }
+      },
+      "screenshot": {
+        "sha256": "8b59e90b3ddb3e9ba51f47b408f5cc065548962714cbe237742bd4bd3951b731",
+        "bytes": 79773
+      }
+    }
+  ]
+}

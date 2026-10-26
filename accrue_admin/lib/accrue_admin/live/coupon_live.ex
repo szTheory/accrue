@@ -17,31 +17,94 @@ defmodule AccrueAdmin.Live.CouponLive do
     Timeline
   }
 
+  alias AccrueAdmin.Components.Timestamp
+
   alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(%{"id" => coupon_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
 
-    case Repo.get(Coupon, coupon_id) do
+    case read_coupon(coupon_id) do
+      :unavailable ->
+        {:ok,
+         socket
+         |> assign_shell(admin)
+         |> assign(:coupon_id, coupon_id)
+         |> assign(:coupon, nil)
+         |> assign(:promotion_codes, [])
+         |> assign(:related_items, [])
+         |> assign(:activity_loaded?, false)
+         |> assign(:raw_json_loaded?, false)
+         |> assign(:read_unavailable?, true)}
+
       nil ->
         {:ok,
          socket
          |> put_flash(:error, AccrueAdmin.Copy.coupon_not_found())
          |> redirect(to: admin_path(admin, "/coupons"))}
 
-      coupon ->
+      {:ok, coupon, codes} ->
         mount_path = admin["mount_path"] || "/billing"
         scope = socket.assigns.current_owner_scope
 
         {:ok,
          socket
          |> assign_shell(admin)
+         |> assign(:coupon_id, coupon_id)
          |> assign(:coupon, coupon)
-         |> assign(:promotion_codes, promotion_codes(coupon.id))
+         |> assign(:promotion_codes, codes)
          |> assign(:related_items, related_items(coupon, mount_path, scope))
          |> assign(:activity_loaded?, false)
-         |> assign(:raw_json_loaded?, false)}
+         |> assign(:raw_json_loaded?, false)
+         |> assign(:read_unavailable?, false)}
+    end
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    destination =
+      ScopedPath.return_destination(
+        socket.assigns.admin_mount_path,
+        Map.get(params, "return_to"),
+        socket.assigns.current_owner_scope,
+        nil,
+        "/coupons"
+      )
+
+    {:noreply,
+     socket
+     |> assign(:return_path, destination.path)
+     |> assign(:return_label, destination.label)}
+  end
+
+  def handle_event("retry_read", _params, socket) do
+    case read_coupon(socket.assigns.coupon_id) do
+      {:ok, coupon, codes} ->
+        {:noreply,
+         socket
+         |> assign(:coupon, coupon)
+         |> assign(:promotion_codes, codes)
+         |> assign(
+           :related_items,
+           related_items(
+             coupon,
+             socket.assigns.admin_mount_path,
+             socket.assigns.current_owner_scope
+           )
+         )
+         |> assign(:read_unavailable?, false)}
+
+      :unavailable ->
+        {:noreply, assign(socket, :read_unavailable?, true)}
+
+      nil ->
+        {:noreply,
+         socket
+         |> put_flash(:error, AccrueAdmin.Copy.coupon_not_found())
+         |> redirect(
+           to: admin_path(%{"mount_path" => socket.assigns.admin_mount_path}, "/coupons")
+         )}
     end
   end
 
@@ -67,9 +130,15 @@ defmodule AccrueAdmin.Live.CouponLive do
       active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
+        <div :if={@read_unavailable?} class="ax-card ax-data-table-unavailable" data-role="coupon-unavailable" role="alert">
+          <p class="ax-heading">Coupon record unavailable</p>
+          <p class="ax-body">This coupon and its related codes could not be loaded. Their details are unknown until the read succeeds.</p>
+          <button type="button" phx-click="retry_read" class="ax-button ax-button-secondary" data-role="retry-coupon-read">Retry</button>
+        </div>
         <Breadcrumbs.breadcrumbs
+          group="Catalog"
+          :if={@coupon}
           items={[
-            %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{
               label: AccrueAdmin.Copy.coupon_breadcrumb_coupons(),
               href: ScopedPath.build(@admin_mount_path, "/coupons", @current_owner_scope)
@@ -77,8 +146,10 @@ defmodule AccrueAdmin.Live.CouponLive do
             %{label: coupon_label(@coupon)}
           ]}
         />
+        <p :if={@coupon} class="ax-body"><a class="ax-link" href={@return_path}><%= @return_label %></a></p>
 
         <Detail.summary_card
+          :if={@coupon}
           eyebrow={AccrueAdmin.Copy.coupon_detail_eyebrow()}
           title={coupon_label(@coupon)}
         >
@@ -89,9 +160,9 @@ defmodule AccrueAdmin.Live.CouponLive do
           </:facts>
         </Detail.summary_card>
 
-        <Detail.summary_list rows={summary_rows(@coupon, @promotion_codes)} />
+        <Detail.summary_list :if={@coupon} rows={summary_rows(@coupon, @promotion_codes)} />
 
-        <section class="ax-stack-xl" aria-label="Coupon details">
+        <section :if={@coupon} class="ax-stack-xl" aria-label="Coupon details">
           <details class="ax-detail-section" data-ax-drill-section="promotion-codes" open>
             <summary class="ax-detail-section-head">
               <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.coupon_detail_section_codes_heading() %></span>
@@ -103,7 +174,8 @@ defmodule AccrueAdmin.Live.CouponLive do
                   ScopedPath.build(
                     @admin_mount_path,
                     "/promotion-codes/#{promotion_code.id}",
-                    @current_owner_scope
+                    @current_owner_scope,
+                    %{"return_to" => ScopedPath.build(@admin_mount_path, "/promotion-codes", @current_owner_scope, %{"coupon_id" => @coupon.id})}
                   )
                 }
                 class="ax-link"
@@ -126,11 +198,11 @@ defmodule AccrueAdmin.Live.CouponLive do
           </details>
         </section>
 
-        <div data-ax-related-resources>
+        <div :if={@coupon} data-ax-related-resources>
           <RelatedResources.related_resources items={@related_items} />
         </div>
 
-        <details class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
+        <details :if={@coupon} class="ax-detail-section" data-ax-lazy-activity phx-click="load_activity">
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.coupon_lazy_activity_heading() %></span>
           </summary>
@@ -148,7 +220,7 @@ defmodule AccrueAdmin.Live.CouponLive do
           <% end %>
         </details>
 
-        <details class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
+        <details :if={@coupon} class="ax-detail-section" data-ax-lazy-json phx-click="load_raw_json">
           <summary class="ax-detail-section-head">
             <span class="ax-detail-section-title"><%= AccrueAdmin.Copy.coupon_lazy_raw_data_heading() %></span>
           </summary>
@@ -161,6 +233,22 @@ defmodule AccrueAdmin.Live.CouponLive do
       </section>
     </AppShell.app_shell>
     """
+  end
+
+  defp read_coupon(coupon_id) do
+    try do
+      if Application.get_env(:accrue_admin, :env) == :test and
+           Application.get_env(:accrue_admin, :phase238_read_failure_fixture) == :coupon_detail do
+        raise DBConnection.ConnectionError, message: "fixture database unavailable"
+      end
+
+      case Repo.get(Coupon, coupon_id) do
+        nil -> nil
+        coupon -> {:ok, coupon, promotion_codes(coupon.id)}
+      end
+    rescue
+      _error in DBConnection.ConnectionError -> :unavailable
+    end
   end
 
   defp assign_shell(socket, admin) do
@@ -190,7 +278,11 @@ defmodule AccrueAdmin.Live.CouponLive do
       %{label: "Duration", value: duration_summary(coupon)},
       %{label: "Redeem by", value: redeem_by_summary(coupon)},
       %{label: "Max redemptions", value: max_redemptions_summary(coupon)},
-      %{label: "Current redemptions", value: Integer.to_string(coupon.times_redeemed || 0)},
+      %{label: "Current redemptions", value: redemptions_summary(coupon)},
+      %{
+        label: "Provider restrictions",
+        value: AccrueAdmin.Copy.Coupon.coupon_provider_restrictions_unknown()
+      },
       %{label: "Promotion codes", value: Integer.to_string(length(promotion_codes))}
     ]
   end
@@ -221,8 +313,14 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp projection_detail_fields(coupon) do
     [
       %{label: AccrueAdmin.Copy.coupon_detail_label_duration(), value: duration_summary(coupon)},
-      %{label: AccrueAdmin.Copy.coupon_detail_label_currency(), value: coupon.currency || "--"},
-      %{label: AccrueAdmin.Copy.coupon_detail_label_processor(), value: coupon.processor || "--"}
+      %{
+        label: AccrueAdmin.Copy.coupon_detail_label_currency(),
+        value: coupon.currency || "Unavailable"
+      },
+      %{
+        label: AccrueAdmin.Copy.coupon_detail_label_processor(),
+        value: coupon.processor || "Unavailable"
+      }
     ]
   end
 
@@ -255,14 +353,22 @@ defmodule AccrueAdmin.Live.CouponLive do
 
   defp status_summary(%{valid: true}), do: AccrueAdmin.Copy.coupon_status_valid()
   defp status_summary(%{valid: false}), do: AccrueAdmin.Copy.coupon_status_invalid()
+  defp status_summary(_coupon), do: AccrueAdmin.Copy.Coupon.coupon_unknown_value()
 
-  defp redeem_by_summary(%{redeem_by: %DateTime{} = value}), do: format_datetime(value)
+  defp redeem_by_summary(%{redeem_by: %DateTime{} = value} = coupon),
+    do: timestamp_value(value, "coupon-redeem-by-#{coupon.id}")
+
   defp redeem_by_summary(_coupon), do: AccrueAdmin.Copy.coupon_redeem_by_no_expiry()
 
   defp max_redemptions_summary(%{max_redemptions: nil}),
     do: AccrueAdmin.Copy.coupon_kpi_meta_redemptions_cap()
 
   defp max_redemptions_summary(%{max_redemptions: max}), do: "#{max} max"
+
+  defp redemptions_summary(%{times_redeemed: count}) when is_integer(count),
+    do: Integer.to_string(count)
+
+  defp redemptions_summary(_coupon), do: AccrueAdmin.Copy.Coupon.coupon_redemptions_unknown()
 
   defp duration_summary(%{duration: nil}), do: "One-off"
 
@@ -273,12 +379,19 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp duration_summary(%{duration: duration}) when is_binary(duration),
     do: String.capitalize(duration)
 
-  defp duration_summary(_coupon), do: "--"
+  defp duration_summary(_coupon), do: "Unavailable"
 
-  defp promotion_code_status(%{active: true, expires_at: %DateTime{} = expires_at}),
-    do:
-      AccrueAdmin.Copy.coupon_promotion_code_status_active_until_prefix() <>
-        format_datetime(expires_at)
+  defp promotion_code_status(%{active: true, expires_at: %DateTime{} = expires_at} = code) do
+    assigns = %{
+      value: expires_at,
+      id: "coupon-promotion-code-expires-#{code.id}",
+      prefix: AccrueAdmin.Copy.coupon_promotion_code_status_active_until_prefix()
+    }
+
+    ~H"""
+    <span><%= @prefix %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
 
   defp promotion_code_status(%{active: true}),
     do: AccrueAdmin.Copy.coupon_promotion_code_status_active()
@@ -286,42 +399,71 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp promotion_code_status(%{active: false}),
     do: AccrueAdmin.Copy.coupon_promotion_code_status_inactive()
 
-  defp promotion_code_redemptions(%{times_redeemed: used, max_redemptions: nil}),
-    do: "#{used || 0} used"
+  defp promotion_code_status(_promotion_code), do: AccrueAdmin.Copy.Coupon.coupon_unknown_value()
 
-  defp promotion_code_redemptions(%{times_redeemed: used, max_redemptions: max}),
-    do: "#{used || 0} of #{max}"
+  defp promotion_code_redemptions(%{times_redeemed: used}) when is_integer(used),
+    do: Integer.to_string(used)
+
+  defp promotion_code_redemptions(_promotion_code),
+    do: AccrueAdmin.Copy.Coupon.coupon_redemptions_unknown()
 
   defp format_minor(amount_minor, currency) when is_integer(amount_minor) do
-    Accrue.Invoices.Render.format_money(
-      amount_minor,
-      normalize_currency(currency),
-      Accrue.Config.default_locale()
-    )
+    case normalize_currency(currency) do
+      {:ok, currency_atom} ->
+        Accrue.Invoices.Render.format_money(
+          amount_minor,
+          currency_atom,
+          Accrue.Config.default_locale()
+        )
+
+      {:error, :missing} ->
+        "Amount unavailable (currency missing)"
+
+      {:error, {:unsupported, code}} ->
+        "Amount unavailable (unsupported currency: #{code})"
+
+      {:error, :unknown} ->
+        "Amount unavailable (currency unknown)"
+    end
   end
 
-  defp normalize_currency(currency) when is_atom(currency), do: currency
+  defp normalize_currency(nil), do: {:error, :missing}
+
+  defp normalize_currency(currency) when is_atom(currency) do
+    case Money.Currency.currency_for_code(Atom.to_string(currency)) do
+      {:ok, _currency} -> {:ok, currency}
+      _unknown -> {:error, {:unsupported, Atom.to_string(currency)}}
+    end
+  end
 
   defp normalize_currency(currency) when is_binary(currency) do
     code = String.downcase(currency)
 
     try do
-      String.to_existing_atom(code)
+      code
+      |> String.to_existing_atom()
+      |> normalize_currency()
     rescue
-      ArgumentError -> :usd
+      ArgumentError -> {:error, {:unsupported, currency}}
     end
   end
 
-  defp normalize_currency(_currency), do: :usd
+  defp normalize_currency(_currency), do: {:error, :unknown}
 
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
+  defp timestamp_value(value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
 
   defp related_items(coupon, mount_path, scope) do
     [
       %{
         icon: :promotions,
         label: "Promotion codes",
-        href: ScopedPath.build(mount_path, "/promotion-codes", scope)
+        href: ScopedPath.build(mount_path, "/promotion-codes", scope, %{"coupon_id" => coupon.id})
       },
       %{
         icon: :events,

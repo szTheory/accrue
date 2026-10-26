@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="21.205299">
+<testsuite name="admin-interaction-overlay-phase199.spec.js" timestamp="2026-10-09T21:32:29.047Z" hostname="chromium-desktop" tests="1" failures="0" skipped="0" time="16.499" errors="0">
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @fixture deterministic route flows preserve focus, scroll, clipping, and back navigation" classname="admin-interaction-overlay-phase199.spec.js" time="16.499">
+</testcase>
+</testsuite>
+</testsuites>

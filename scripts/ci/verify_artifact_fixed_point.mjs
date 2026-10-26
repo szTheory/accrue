@@ -263,7 +263,7 @@ function resolveCoveredPath(repo, rel) {
   return null;
 }
 
-export function computeDigest(repo, coveredFiles) {
+function digestOver(coveredFiles, readBlob) {
   if (!Array.isArray(coveredFiles) || coveredFiles.length === 0) {
     fail("covered_files is empty -- refusing to compute a digest over zero files");
   }
@@ -276,9 +276,7 @@ export function computeDigest(repo, coveredFiles) {
     if (rel === "" || rel === ".." || rel.startsWith("../") || path.isAbsolute(rel)) {
       fail(`covered file escapes the repository root: ${rel}`);
     }
-    const absolute = resolveCoveredPath(repo, rel);
-    if (!absolute) fail(`covered file missing on disk: ${rel}`);
-    const fileHash = crypto.createHash("sha256").update(fs.readFileSync(absolute)).digest("hex");
+    const fileHash = crypto.createHash("sha256").update(readBlob(rel)).digest("hex");
     // The recorded `rel` string -- never the resolved location -- feeds the
     // digest, so archiving a phase directory does not perturb a fingerprint
     // minted before the move.
@@ -289,6 +287,37 @@ export function computeDigest(repo, coveredFiles) {
     .update(`v${FINGERPRINT_VERSION}\n${parts.join("")}`, "utf-8")
     .digest("hex");
   return `v${FINGERPRINT_VERSION}:sha256:${aggregate}`;
+}
+
+export function computeDigest(repo, coveredFiles) {
+  return digestOver(coveredFiles, (rel) => {
+    const absolute = resolveCoveredPath(repo, rel);
+    if (!absolute) fail(`covered file missing on disk: ${rel}`);
+    return fs.readFileSync(absolute);
+  });
+}
+
+// Same digest, but every recorded path is read as a git blob at `commit`: the
+// tree the fingerprint was minted against. Archived fingerprints are frozen by
+// design, so they are checked here and never against live files.
+export function computeDigestAtCommit(repo, commit, coveredFiles) {
+  const show = (spec) => spawnSync("git", ["-C", repo, "--no-optional-locks", "show", spec], { shell: false, timeout: 20000, maxBuffer: 50_000_000 });
+  return digestOver(coveredFiles, (rel) => {
+    let result = show(`${commit}:${rel}`);
+    // A milestone close can already have moved the phase directory by the time a
+    // fingerprint is re-stamped; the recorded string stays, the blob is read from
+    // the archive that existed at that commit.
+    if ((result.error || result.status !== 0) && rel.startsWith(".planning/phases/")) {
+      const remainder = rel.slice(".planning/phases/".length);
+      const archives = git(repo, ["ls-tree", "--name-only", commit, ".planning/milestones/"]).split("\n").filter((n) => /-phases$/.test(n));
+      for (const archive of archives) {
+        result = show(`${commit}:${archive}/${remainder}`);
+        if (!result.error && result.status === 0) break;
+      }
+    }
+    if (result.error || result.status !== 0) fail(`covered file missing at commit ${commit}: ${rel}`);
+    return result.stdout;
+  });
 }
 
 export function assertDigestMatch(repo, verificationArtifacts) {
@@ -564,7 +593,7 @@ const SCENARIOS = [
     }
   ],
   [
-    "the live 232-UAT.md / 232-VERIFICATION.md pair passes all three checks after the cycle is broken at its source",
+    "the archived 232 pair is acyclic, a fixed point, and its covered_digest matches the tree it was minted at",
     () => {
       const repo = path.resolve(process.cwd());
       const phase = "232";
@@ -576,7 +605,15 @@ const SCENARIOS = [
       assert.doesNotThrow(() => assertFixedPoint(pairs));
       const verificationArtifacts = liveVerificationArtifacts(repo, phase);
       assert.ok(verificationArtifacts.length > 0, "expected at least one covered_digest artifact for phase 232");
-      assert.doesNotThrow(() => assertDigestMatch(repo, verificationArtifacts));
+      for (const artifact of verificationArtifacts) {
+        // The minting commit is the one that introduced the archived covered_digest string.
+        const introduced = git(repo, ["log", "--format=%H", "-S", artifact.coveredDigest, "--", ".planning"]).split("\n").filter(Boolean);
+        assert.ok(introduced.length >= 1, "expected the covered_digest to be found in git history (fetch-depth: 0)");
+        const mint = introduced[introduced.length - 1];
+        assert.equal(computeDigestAtCommit(repo, mint, artifact.coveredFiles), artifact.coveredDigest);
+        // negative control: the tree one commit earlier must NOT reproduce the digest
+        assert.notEqual(computeDigestAtCommit(repo, `${mint}~1`, artifact.coveredFiles), artifact.coveredDigest);
+      }
     }
   ]
 ];

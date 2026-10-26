@@ -28,7 +28,7 @@ defmodule AccrueAdmin.Components.WindowSelector do
 
     ~H"""
     <nav
-      class="ax-tabs"
+      class="ax-tabs ax-window-selector"
       aria-label="Time window (UTC)"
       data-component-group="tabs-subviews"
       data-phase191-focus="window-selector"
@@ -41,7 +41,7 @@ defmodule AccrueAdmin.Components.WindowSelector do
         data-phase191-focus="window-link"
         data-phase191-focus-current={if(@current_window == value, do: "true", else: nil)}
       >
-        <%= label %> UTC
+        <%= label %>
       </.link>
     </nav>
     """

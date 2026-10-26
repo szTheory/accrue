@@ -1,6 +1,11 @@
 const { test, expect } = require("./support/test.js");
 const { readFixture, login, workspaceBillingLink, waitForLiveView } = require("./support/fixture.js");
 
+test.skip(
+  process.env.ACCRUE_HOST_BROWSER_USE_BRAINTREE === "1",
+  "This legacy plan journey uses the default Fake processor configuration"
+);
+
 test.describe("Core User Journeys", () => {
   // Use serial mode to prevent any possible collision between browser runs
   test.describe.configure({ mode: 'serial' });
@@ -54,20 +59,17 @@ test.describe("Core User Journeys", () => {
     await expect(currentSubscription.getByText("Launch", { exact: true })).toBeVisible();
     await waitForLiveView(page);
 
-    // 5. Payment method management surface
+    // 5. This default Fake app run is paired with a Braintree-seeded Portal
+    // customer, so the app must fail closed on the processor mismatch. The
+    // dedicated Phase 236 lane covers the matching Braintree card-entry path.
     await page.goto("/billing/payment-methods", { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
     await expect(page.getByRole("heading", { name: "Payment methods" })).toBeVisible();
-    await expect(page.getByText("visa ending in 4242")).toBeVisible();
-    await expect(page.getByText("mastercard ending in 4444")).toBeVisible();
-    await expect(page.getByText("Default", { exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Add a card" })).toHaveAttribute("href", "/billing/payment-methods/new");
-    await expect(page.getByRole("button", { name: "Set default" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Delete card" })).toHaveCount(2);
-
-    await page.getByRole("link", { name: "Add a card" }).click();
-    await expect(page.getByRole("heading", { name: "Add payment method" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Save card" })).toBeVisible();
+    await expect(page.getByText("Payment methods unavailable")).toBeVisible();
+    await expect(
+      page.getByText("Saved payment method management isn't available for this billing provider.")
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Add a card" })).toHaveCount(0);
 
     await page.goto("/app/billing", { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);

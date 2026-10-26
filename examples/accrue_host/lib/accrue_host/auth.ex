@@ -42,6 +42,18 @@ defmodule AccrueHost.Auth do
   def actor_id(user) when is_map(user), do: user[:id] || user["id"]
   def actor_id(_user), do: nil
 
+  # Browser tests need to exercise the real nested challenge rather than the
+  # dev/test auto-approval fallback. Keep this credential out of production builds.
+  if Mix.env() == :test do
+    @impl Accrue.Auth
+    def step_up_challenge(_user, _action),
+      do: %{kind: :totp, message: "Enter your test verification code"}
+
+    @impl Accrue.Auth
+    def verify_step_up(_user, %{"code" => "123456"}, _action), do: :ok
+    def verify_step_up(_user, _params, _action), do: {:error, :invalid_code}
+  end
+
   def admin?(%User{billing_admin: billing_admin}), do: billing_admin
   def admin?(user) when is_map(user), do: user[:billing_admin] || user["billing_admin"] || false
   def admin?(_user), do: false

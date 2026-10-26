@@ -1,0 +1,14 @@
+{
+  "command": "ACCRUE_TAP_REPORT=/tmp/accrue-233-t1-red.tap ./node_modules/.bin/playwright test e2e/phase233-context.spec.js --workers=1 --reporter=./e2e/tap-reporter.js",
+  "exitCode": 1,
+  "output": "ok 1 - personal-only Portal mount needs no account picker and renders secure card entry\nnot ok 2 - host-selected member context shows its billable and blocks payment collection\n1..2\n",
+  "targetTest": "host-selected member context shows its billable and blocks payment collection",
+  "targetFile": "e2e/phase233-context.spec.js",
+  "expected": "The host-selected Portal mount responds successfully and renders the authorized billable context.",
+  "actual": "The route returned HTTP 404 before the host context could render.",
+  "semanticAssessment": {
+    "status": "valid_red",
+    "assessment": "The named browser test executed. Its explicit response-status assertion failed because the canonical host has no adapter-backed Portal mount. The personal-only control passed; this is missing planned functionality, not a browser setup or fixture failure."
+  },
+  "consoleOutput": "17:36:52.380 [warning] [ex_money] Automatically starting the exchange rate service is deprecated. Set `auto_start_exchange_rate_service: false` and, if you use the service, add `Money.ExchangeRates.Retriever` to your supervision tree.\nwrote /var/folders/f3/f0clj9rd2zb85n2c849wcsrc0000gn/T/accrue-host-e2e-fixture.json\nhost-selected member context shows its billable and blocks payment collection: Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m200\u001b[39m\nReceived: \u001b[31m404\u001b[39m\n"
+}

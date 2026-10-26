@@ -65,11 +65,13 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
     previous_processor = Application.get_env(:accrue, :processor)
     previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
     previous_auth = Application.get_env(:accrue, :auth_adapter)
+    previous_portal_base_url = Application.get_env(:accrue, :portal_base_url)
     previous_test_pid = Application.get_env(:accrue_portal, :checkout_discount_test_pid)
 
     Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
     Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
+    Application.put_env(:accrue, :portal_base_url, "https://app.example.test")
     Application.put_env(:accrue_portal, :checkout_discount_test_pid, self())
     BraintreeMox.stub_client_token("portal-client-token")
 
@@ -93,6 +95,12 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
         Application.put_env(:accrue, :auth_adapter, previous_auth)
       else
         Application.delete_env(:accrue, :auth_adapter)
+      end
+
+      if previous_portal_base_url do
+        Application.put_env(:accrue, :portal_base_url, previous_portal_base_url)
+      else
+        Application.delete_env(:accrue, :portal_base_url)
       end
 
       if previous_test_pid do
@@ -124,6 +132,10 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
     conn = sign_in_customer(conn, user)
 
     assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
     assert html =~ "Pay $49.00"
 
     html =
@@ -137,12 +149,15 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
     assert html =~ ~s(aria-live="polite")
 
     assert {:error, {:redirect, %{to: "https://app.example.test/billing/success"}}} =
-             render_hook(view, "checkout_tokenized", %{"nonce" => "fake-valid-nonce"})
+             render_hook(view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
 
     assert_received {:gateway_create,
                      %{
                        payment_method_token: "fake-valid-nonce",
-                       plan_id: "price_fixture",
+                       plan_id: "price_pro",
                        discounts: %{add: [%{inherited_from_id: "bt_discount_25"}]}
                      }}
 
@@ -187,7 +202,10 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
 
     conn = sign_in_customer(conn, user)
 
-    assert {:ok, view, _html} = live(conn, "/billing/checkout/#{session.session_token}")
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
 
     preview_html =
       view
@@ -208,7 +226,11 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
                [Ecto.UUID.dump!(mapping.id), DateTime.utc_now() |> DateTime.truncate(:second)]
              )
 
-    submit_html = render_hook(view, "checkout_tokenized", %{"nonce" => "fake-valid-nonce"})
+    submit_html =
+      render_hook(view, "checkout_tokenized", %{
+        "nonce" => "fake-valid-nonce",
+        "context_pin" => pin
+      })
 
     assert submit_html =~ "This promotion is temporarily unavailable."
     assert LocalSession.by_id(session.id).status == "open"
@@ -216,7 +238,7 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
   end
 
   defp checkout_fixture(%Customer{} = customer, attrs \\ %{}) do
-    attrs = Enum.into(attrs, %{})
+    provided = Enum.into(attrs, %{})
 
     attrs =
       Map.merge(
@@ -226,17 +248,72 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
           ui_mode: "hosted",
           status: "open",
           price_id: "price_fixture",
-          line_items: [%{"price" => "price_fixture", "amount" => "49.00"}],
+          line_items: [
+            %{
+              "price" => "price_fixture",
+              "amount" => "49.00",
+              "amount_minor" => 4_900,
+              "quantity" => 1,
+              "currency" => "USD"
+            }
+          ],
           success_url: "https://app.example.test/billing/success",
           cancel_url: "https://app.example.test/billing/cancel",
           return_url: "https://app.example.test/settings/billing",
           operation_id:
             "checkout-discount-fixture-" <> Integer.to_string(System.unique_integer([:positive])),
-          metadata: %{"source" => "fixture"},
+          metadata: %{
+            "amount_minor" => 4_900,
+            "currency" => "USD",
+            "interval" => "month",
+            "interval_count" => 1,
+            "plan_name" => "Studio",
+            "billable_name" => customer.name || "Fixture account",
+            "billable_id" => customer.owner_id,
+            "processor" => "braintree"
+          },
           data: %{"local_portal" => true}
         },
-        attrs
+        provided
       )
+
+    price_id =
+      Map.get(provided, :price_id) ||
+        case Map.get(provided, :line_items) do
+          [%{"price" => item_price} | _] -> item_price
+          _ -> attrs.price_id
+        end
+
+    line_items =
+      if Map.has_key?(provided, :line_items) do
+        Enum.map(provided.line_items, fn item ->
+          Map.merge(
+            %{
+              "price" => price_id,
+              "amount" => "49.00",
+              "amount_minor" => 4_900,
+              "quantity" => 1,
+              "currency" => "USD"
+            },
+            item
+          )
+        end)
+      else
+        [
+          %{
+            "price" => price_id,
+            "amount" => "49.00",
+            "amount_minor" => 4_900,
+            "quantity" => 1,
+            "currency" => "USD"
+          }
+        ]
+      end
+
+    metadata = Map.put(attrs.metadata, "billable_id", customer.owner_id)
+    attrs = Map.put(attrs, :metadata, metadata)
+
+    attrs = Map.merge(attrs, %{price_id: price_id, line_items: line_items})
 
     {:ok, session} = LocalSession.create_or_reuse(customer, attrs)
     session

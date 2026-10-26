@@ -25,7 +25,8 @@ if Code.ensure_loaded?(Chimeway) do
         pool_size: 10,
         username: System.get_env("PGUSER", "postgres"),
         password: System.get_env("PGPASSWORD", "postgres"),
-        hostname: System.get_env("PGHOST", "localhost")
+        hostname: System.get_env("PGHOST", "localhost"),
+        port: String.to_integer(System.get_env("PGPORT", "5432"))
       ]
 
       Application.put_env(:chimeway, Chimeway.Repo, repo_config)

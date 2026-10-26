@@ -1,0 +1,264 @@
+#!/usr/bin/env node
+/* Read-only custody gate for the host verifier and direct Playwright entry. */
+const { execFileSync, spawnSync } = require("node:child_process");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const repoRoot = path.resolve(__dirname, "../..");
+const hostRoot = path.join(repoRoot, "examples/accrue_host");
+
+function fail(message) {
+  console.error(`[preview-custody] REFUSED: ${message}`);
+  process.exit(2);
+}
+
+function requireIdentity(identity, label) {
+  for (const field of ["databaseHost", "database", "connection", "databaseInstance", "composeProject", "volume", "port", "process", "databaseProcess", "buildPath"]) {
+    if (identity[field] === undefined || identity[field] === null || String(identity[field]).trim() === "") {
+      fail(`${label} identity is unavailable (${field})`);
+    }
+  }
+}
+
+function fixtureTargets(fixturePath) {
+  if (!fixturePath) return null;
+  const fixtures = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
+  if (fixtures.target.process === "inspect-listener") fixtures.target.process = portOwner(fixtures.target.port);
+  return fixtures;
+}
+
+function previewIdentity() {
+  const project = process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host";
+  const databaseHost = process.env.ACCRUE_HOST_PREVIEW_DATABASE_HOST || "db";
+  const database = process.env.ACCRUE_HOST_PREVIEW_DATABASE || "accrue_host_dev";
+  const volumes = execFileSync("docker", ["volume", "ls", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Name}}"], { encoding: "utf8" })
+    .trim().split(/\s+/).filter(Boolean);
+  const databaseVolume = process.env.ACCRUE_HOST_PREVIEW_VOLUME || `${project}_pgdata`;
+  if (!volumes.includes(databaseVolume)) fail(`preview database volume ${databaseVolume} is unavailable for Compose instance ${project}`);
+  const containers = execFileSync("docker", ["ps", "-q", "--filter", `label=com.docker.compose.project=${project}`, "--filter", "label=com.docker.compose.service=web"], { encoding: "utf8" })
+    .trim().split(/\s+/).filter(Boolean);
+  const databaseContainers = execFileSync("docker", ["ps", "-q", "--filter", `label=com.docker.compose.project=${project}`, "--filter", "label=com.docker.compose.service=db"], { encoding: "utf8" })
+    .trim().split(/\s+/).filter(Boolean);
+  let port = process.env.ACCRUE_HOST_PREVIEW_PORT || "container:4000 (proxy :80)";
+  let buildPath = process.env.ACCRUE_HOST_PREVIEW_BUILD_PATH;
+  if (containers[0]) {
+    const published = execFileSync("docker", ["port", containers[0], "4000/tcp"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    if (published) port = published.split("\n").map((line) => line.split(":").at(-1)).join(",");
+  }
+  if (!buildPath) {
+    const composeConfig = JSON.parse(execFileSync("docker", ["compose", "-p", project, "-f", path.join(hostRoot, "docker-compose.yml"), "config", "--format", "json"], {
+      cwd: hostRoot,
+      encoding: "utf8",
+      env: { ...process.env, COMPOSE_PROJECT_NAME: project }
+    }));
+    const mounts = composeConfig.services.web.volumes
+      .filter((mount) => mount.target.includes("/_build"))
+      .map((mount) => `${mount.target}[${project}_${mount.source}]`);
+    buildPath = mounts.join(";") || "unavailable";
+  }
+  return {
+    databaseHost,
+    database,
+    connection: `${databaseHost}:${process.env.ACCRUE_HOST_PREVIEW_DATABASE_PORT || "5432"}/${database}`,
+    databaseInstance: `docker-volume:${databaseVolume}`,
+    composeProject: project,
+    volume: databaseVolume,
+    port,
+    process: process.env.ACCRUE_HOST_PREVIEW_PROCESS || (containers.length ? `container:${containers[0]}` : "stopped"),
+    databaseProcess: process.env.ACCRUE_HOST_PREVIEW_DATABASE_PROCESS || (databaseContainers.length ? `container:${databaseContainers[0]}` : "stopped"),
+    buildPath
+  };
+}
+
+function ciAbsentMode() {
+  const flag = process.env.ACCRUE_HOST_CUSTODY_CI_ABSENT;
+  if (flag === undefined) return false;
+  if (flag !== "1") fail("ACCRUE_HOST_CUSTODY_CI_ABSENT must be unset or 1");
+  return true;
+}
+
+// Proves that no preview instance exists. Anything short of proof refuses.
+function previewAbsence(project, absence) {
+  let volumes;
+  let containers;
+  if (absence) {
+    if (absence.docker === "missing") return "docker binary not found";
+    if (absence.docker === "daemon-error") fail("cannot prove preview absence: docker query failed");
+    volumes = absence.volumes || [];
+    containers = absence.containers || [];
+  } else {
+    const query = (args) => {
+      const result = spawnSync("docker", args, { encoding: "utf8" });
+      if (result.error && result.error.code === "ENOENT") return null;
+      if (result.error || result.status !== 0) fail("cannot prove preview absence: docker query failed");
+      return result.stdout.trim().split(/\s+/).filter(Boolean);
+    };
+    const label = `label=com.docker.compose.project=${project}`;
+    volumes = query(["volume", "ls", "--filter", label, "--format", "{{.Name}}"]);
+    if (volumes === null) return "docker binary not found";
+    containers = query(["ps", "-a", "-q", "--filter", label]);
+    if (containers === null) return "docker binary not found";
+  }
+  if (volumes.length || containers.length) {
+    fail(`CI absent-mode found a ${project} preview instance (${volumes.length} volumes, ${containers.length} containers)`);
+  }
+  return `no ${project} preview instance exists (zero labelled volumes and containers)`;
+}
+
+function previewProject() {
+  return process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host";
+}
+
+function portOwner(port) {
+  const result = spawnSync("lsof", ["-nP", "-t", `-iTCP:${port}`, "-sTCP:LISTEN"], { encoding: "utf8" });
+  if (result.error || result.status > 1) return "unavailable";
+  const pids = result.stdout.trim().split(/\s+/).filter(Boolean);
+  if (pids.length === 1) {
+    const [pid] = pids;
+    if (process.env.ACCRUE_HOST_REUSE_SERVER === "1" && process.env.ACCRUE_HOST_PROOF_SERVER_PID === pid) {
+      return `proof-server:${pid}`;
+    }
+    if (process.env.ACCRUE_HOST_DIRECT_PROOF_PID === pid) return `proof-server:${pid}`;
+  }
+  return pids.join(",") || "unoccupied";
+}
+
+function targetIdentity(mode) {
+  const testMode = mode === "browser";
+  const port = String(process.env[testMode ? "ACCRUE_HOST_BROWSER_PORT" : "ACCRUE_HOST_PORT"] || (testMode ? "4101" : "4100"));
+  const host = process.env.PGHOST || "localhost";
+  const database = testMode
+    ? `accrue_host_test${process.env.MIX_TEST_PARTITION || ""}`
+    : process.env.ACCRUE_HOST_DEV_BOOT_DATABASE || "accrue_host_dev";
+  const connectionPort = process.env.PGPORT || "5432";
+  const pgIdentity = spawnSync("psql", ["-h", host, "-p", connectionPort, "-U", process.env.PGUSER || "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-Atc", "SELECT current_setting('data_directory') || '|' || (pg_control_system()).system_identifier"], {
+    encoding: "utf8",
+    env: { ...process.env, PGPASSWORD: process.env.PGPASSWORD || "postgres" }
+  });
+  if (pgIdentity.error || pgIdentity.status !== 0) fail(`${mode} proof database instance could not be identified by a read-only PostgreSQL query`);
+  const [dataDirectory, systemIdentifier] = pgIdentity.stdout.trim().split("|");
+  if (!dataDirectory || !systemIdentifier) fail(`${mode} proof database instance identity is incomplete`);
+  return {
+    databaseHost: host,
+    database,
+    connection: `${normalizeHost(host)}:${connectionPort}/${database}`,
+    databaseInstance: `postgres-system:${systemIdentifier}`,
+    composeProject: process.env.COMPOSE_PROJECT_NAME || "none (native PostgreSQL)",
+    volume: `pgdata:${dataDirectory}`,
+    port,
+    process: portOwner(port),
+    databaseProcess: portOwner(connectionPort),
+    buildPath: [
+      path.resolve(process.env.MIX_BUILD_PATH || path.join(hostRoot, "_build/test")),
+      ...(mode === "browser" && process.env.ACCRUE_ADMIN_MIX_BUILD_PATH ? [path.resolve(process.env.ACCRUE_ADMIN_MIX_BUILD_PATH)] : [])
+    ].join(";")
+  };
+}
+
+function assertDistinct(preview, target, mode) {
+  requireIdentity(preview, "preview");
+  requireIdentity(target, `${mode} proof`);
+  const pairs = [
+    ["database host", normalizeHost(preview.databaseHost), normalizeHost(target.databaseHost)],
+    ["database name", preview.database, target.database],
+    ["database connection", preview.connection, target.connection],
+    ["database instance", preview.databaseInstance, target.databaseInstance],
+    ["Compose instance", preview.composeProject, target.composeProject],
+    ["database volume", preview.volume, target.volume],
+    ["port", preview.port, target.port],
+    ["listener process", preview.process, target.process],
+    ["database process", preview.databaseProcess, target.databaseProcess],
+    ["build path", preview.buildPath, target.buildPath]
+  ];
+  for (const [name, left, right] of pairs) {
+    if (String(left).toLowerCase() === String(right).toLowerCase()) fail(`${mode} proof aliases preview ${name}`);
+  }
+  console.log(`[preview-custody] preview databaseHost=${preview.databaseHost} database=${preview.database} connection=${preview.connection} databaseInstance=${preview.databaseInstance} compose=${preview.composeProject} volume=${preview.volume} port=${preview.port} process=${preview.process} databaseProcess=${preview.databaseProcess} buildPath=${preview.buildPath}`);
+  assertTarget(target, mode);
+}
+
+function assertTarget(target, mode) {
+  if (target.process !== "unoccupied" && !target.process.startsWith("proof-server:")) {
+    fail(`${mode} proof listener port is occupied by process ${target.process}`);
+  }
+  if (target.process === "unavailable") fail(`${mode} proof listener ownership could not be inspected`);
+  console.log(`[preview-custody] mode=${mode} target databaseHost=${target.databaseHost} database=${target.database} connection=${target.connection} databaseInstance=${target.databaseInstance} compose=${target.composeProject} volume=${target.volume} port=${target.port} process=${target.process} databaseProcess=${target.databaseProcess} buildPath=${target.buildPath}`);
+}
+
+function normalizeHost(host) {
+  const value = String(host).toLowerCase().replace(/^\[|\]$/g, "");
+  return ["localhost", "127.0.0.1", "::1"].includes(value) ? "loopback" : value;
+}
+
+function authoritativeSnapshot() {
+  const project = process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host";
+  const sql = `SELECT jsonb_build_object(
+    'invoice_sentinel', (SELECT jsonb_agg(to_jsonb(i) ORDER BY i.id) FROM billing.accrue_invoices i WHERE to_jsonb(i)::text LIKE '%in_showcase_paid_usd%'),
+    'accrue_events', (SELECT jsonb_agg(to_jsonb(e) ORDER BY e.id) FROM billing.accrue_events e WHERE to_jsonb(e)::text LIKE '%showcase%' OR to_jsonb(e)::text LIKE '%in_showcase_paid_usd%'),
+    'webhook_events', (SELECT jsonb_agg(to_jsonb(w) ORDER BY w.id) FROM billing.accrue_webhook_events w WHERE to_jsonb(w)::text LIKE '%in_showcase_paid_usd%' OR to_jsonb(w)::text LIKE '%showcase%'),
+    'oban_dispatch', (SELECT jsonb_agg(to_jsonb(j) ORDER BY j.id) FROM public.oban_jobs j WHERE to_jsonb(j)::text LIKE '%in_showcase_paid_usd%' OR to_jsonb(j)::text LIKE '%showcase%')
+  )::text`;
+  const output = execFileSync("docker", ["compose", "-p", project, "-f", path.join(hostRoot, "docker-compose.yml"), "exec", "-T", "db", "psql", "-U", "postgres", "-d", "accrue_host_dev", "-v", "ON_ERROR_STOP=1", "-Atc", sql], { cwd: hostRoot, encoding: "utf8", env: { ...process.env, COMPOSE_PROJECT_NAME: project } }).trim();
+  if (!output || output === "{}") fail(`authoritative preview snapshot unavailable for ${project}`);
+  let parsed;
+  try { parsed = JSON.parse(output); } catch { fail(`authoritative preview snapshot was not valid JSON for ${project}`); }
+  if (!Array.isArray(parsed.invoice_sentinel) || parsed.invoice_sentinel.length === 0) fail(`seeded invoice sentinel is missing for ${project}`);
+  if (!Array.isArray(parsed.accrue_events) || parsed.accrue_events.length === 0) fail(`showcase audit event is missing for ${project}`);
+  return output;
+}
+
+function absentSnapshot(command, file, options) {
+  const project = previewProject();
+  const fixtures = fixtureTargets(options.fixturePath);
+  const reason = previewAbsence(project, fixtures ? fixtures.absence : undefined);
+  const value = `absent:${project}:${reason}`;
+  if (command === "snapshot") {
+    fs.writeFileSync(file, value + "\n", { mode: 0o600 });
+    console.log(`[preview-custody] CI absent-mode: ${reason}`);
+    return;
+  }
+  if (!fs.existsSync(file)) fail(`preview snapshot is missing at ${file}`);
+  if (fs.readFileSync(file, "utf8").trim() !== value) fail(`CI absent-mode preview absence changed for ${project}`);
+  console.log("[preview-custody] CI absent-mode: preview still absent");
+}
+
+function snapshot(command, options = {}) {
+  const file = process.env.ACCRUE_HOST_PREVIEW_SNAPSHOT;
+  if (!file) fail("ACCRUE_HOST_PREVIEW_SNAPSHOT path is required");
+  if (ciAbsentMode()) return absentSnapshot(command, file, options);
+  const value = authoritativeSnapshot();
+  if (command === "snapshot") {
+    fs.writeFileSync(file, value + "\n", { mode: 0o600 });
+    console.log(`[preview-custody] snapshot captured for ${process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host"}`);
+  } else {
+    if (!fs.existsSync(file)) fail(`preview snapshot is missing at ${file}`);
+    const before = fs.readFileSync(file, "utf8").trim();
+    if (before !== value) fail(`authoritative preview sentinel/audit/dispatch state changed for ${process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host"}`);
+    console.log(`[preview-custody] authoritative preview sentinel/audit/dispatch state preserved for ${process.env.ACCRUE_HOST_PREVIEW_INSTANCE || "accrue-host"}`);
+  }
+}
+
+function run(options = {}) {
+  const [command, mode] = process.argv.slice(2);
+  if (command === "snapshot" || command === "assert-preserved") return snapshot(command, options);
+  if (command !== "preflight" || !["browser", "dev"].includes(mode)) fail("usage: accrue_host_preview_custody.sh preflight <browser|dev> | snapshot | assert-preserved");
+  if (process.env.ACCRUE_HOST_CUSTODY_TEST_MODE !== undefined || process.env.ACCRUE_HOST_CUSTODY_TEST_FIXTURE !== undefined) {
+    fail("caller-supplied test fixture environment is forbidden; use the test-only custody entry point");
+  }
+  const absentMode = ciAbsentMode();
+  const fixtures = fixtureTargets(options.fixturePath);
+  if (absentMode) {
+    const reason = previewAbsence(previewProject(), fixtures ? fixtures.absence : undefined);
+    console.log(`[preview-custody] CI absent-mode: ${reason}`);
+    const target = fixtures ? fixtures.target : targetIdentity(mode);
+    requireIdentity(target, `${mode} proof`);
+    assertTarget(target, mode);
+    return;
+  }
+  const preview = fixtures ? fixtures.preview : previewIdentity();
+  const target = fixtures ? fixtures.target : targetIdentity(mode);
+  assertDistinct(preview, target, mode);
+}
+
+if (require.main === module) run();
+module.exports = { run };

@@ -1,10 +1,10 @@
 ---
 schema_version: 1
 open_count: 0
-waived_count: 6
-fixed_count: 8
-total_count: 14
-last_updated: 2026-09-17T14:50:38.272Z
+waived_count: 12
+fixed_count: 26
+total_count: 38
+last_updated: 2026-10-25T01:38:50.931Z
 ---
 
 # Broken Windows Ledger
@@ -29,6 +29,30 @@ last_updated: 2026-09-17T14:50:38.272Z
 | 12 | 232 | unmet-truth | accrue/test/accrue/docs/package_docs_verifier_test.exs |  | docs-contracts-shift-left is failing on the merits at the frozen re-cut candidate SHA (c1397fe9127a9b4b2b1d3a0758d57879b14f4604): verify_executable_uat_contract.mjs --all-since 229 caught two human_judgment:true Executable Acceptance Policy violations in 232-08/232-09-SUMMARY.md (now fixed on the milestone line, commit 11d42183), plus a structural, self-resolving gap (phase 232 cannot carry its own closing 232-VERIFICATION.md/232-UAT.md until it completes). | waived | Owner: Accrue maintainer (szTheory). Rationale: both root causes (two human_judgment:true Executable Acceptance Policy violations, plus the phase-232-self-referential missing-VERIFICATION-artifact gap) are real and root-caused, but the frozen candidate SHA integration/v1.62-candidate-recut@c1397fe9 is immutable under this plan's own hard limits (no force-push, no second merge point, no moving that ref); the SUMMARY.md fix is already committed on the milestone line (11d42183) and will land in the next re-cut. Release impact: the human_judgment findings are policy-text corrections with zero behavioral risk; the missing-artifact gap self-resolves the moment phase 232 reaches its own closing plan and mints 232-VERIFICATION.md/232-UAT.md. Neither blocks shipping v1.62 once re-cut. | 2026-09-17T14:50:26.979Z | 2026-09-17T14:50:38.090Z |
 | 13 | 232 | unmet-truth | accrue/test/accrue/docs/package_docs_verifier_test.exs |  | release-gate (all required matrix cells: Floor, Primary, Primary+OpenTelemetry) is failing on the merits at the frozen re-cut candidate SHA: package_docs_verifier_test.exs's seed_tmp_dir! fixture never copied the new scripts/ci/main_module.mjs dependency that scripts/ci/verify_foundation_contrast.mjs (introduced by this phase's D-29 shared module-boundary guard) now imports, so every spawned foundation-contrast subprocess crashed with ERR_MODULE_NOT_FOUND. Fixed and verified on the milestone line (commit 11d42183, mix test test/accrue/docs/package_docs_verifier_test.exs --seed 0 now 46/46). | waived | Owner: Accrue maintainer (szTheory). Rationale: root cause is a stale test fixture (missing scripts/ci/main_module.mjs in seed_tmp_dir!) introduced by this phase's own D-29 shared module-boundary guard; fixed and verified on the milestone line (11d42183, mix test test/accrue/docs/package_docs_verifier_test.exs --seed 0 now 46/46 across the whole file). The frozen candidate SHA is immutable under this plan's hard limits, so the fix is not yet incorporated into it. Release impact: none to shipped behavior -- the failure is confined to a CI test-fixture gap in the verifier's own scratch-copy machinery, not a regression in any package's runtime code; the fix will land in the next re-cut. | 2026-09-17T14:50:27.063Z | 2026-09-17T14:50:38.182Z |
 | 14 | 232 | unmet-truth | .github/workflows/ci.yml |  | annotation-sweep is failing at the frozen re-cut candidate SHA (run 35232417814) purely as a downstream consequence of the docs-contracts-shift-left and release-gate regressions above -- it sweeps release-facing annotations from those same jobs and has no independent local-equivalent form (its only proof is a real GitHub Actions dispatch, per 231-GATE-01-EVIDENCE.md's established precedent for this exact lane). | waived | Owner: Accrue maintainer (szTheory). Rationale: purely a downstream consequence of ship-window rows 12 and 13 (annotation-sweep sweeps the same jobs that failed for those reasons); no independent defect. Release impact: none beyond rows 12/13 -- resolves automatically once those land in a future re-cut and this lane is re-dispatched. | 2026-09-17T14:50:27.147Z | 2026-09-17T14:50:38.272Z |
+| 15 | 234 | deviation | accrue_admin/test/accrue_admin/live/dashboard_live_test.exs |  | Dashboard scope-control tests were added after the initial implementation instead of preceding it in a RED-first cycle. | waived | Owner: Accrue maintainer (szTheory). Rationale: Phase 234 TDD-ordering process deviation; the tests landed after the implementation with no RED commit, and they exist and pass in the admin suite. Release impact: none. | 2026-10-08T00:50:59.696Z | 2026-10-25T01:38:50.515Z |
+| 16 | 234 | deviation | .planning/phases/234-admin-customers-subscriptions/234-03-SUMMARY.md |  | TDD-marked task tests were added after implementation; workflow TDD mode was disabled and no RED commit was produced. | waived | Owner: Accrue maintainer (szTheory). Rationale: Phase 234 TDD-ordering process deviation; the tests landed after the implementation with no RED commit, and they exist and pass in the admin suite. Release impact: none. | 2026-10-08T01:20:22.343Z | 2026-10-25T01:38:50.593Z |
+| 17 | 234 | deviation | accrue_admin/test/accrue_admin/live/subscription_live_test.exs |  | Task 2 delayed review assertions were committed after the overlapping fresh-dispatch implementation, so Task 2 has no separate RED commit. | waived | Owner: Accrue maintainer (szTheory). Rationale: Phase 234 TDD-ordering process deviation; the tests landed after the implementation with no RED commit, and they exist and pass in the admin suite. Release impact: none. | 2026-10-08T01:31:43.711Z | 2026-10-25T01:38:50.676Z |
+| 18 | 234 | deviation | .planning/ROADMAP.md |  | roadmap.update-plan-progress 234 returned missing_phase_details, so the aggregate Phase 234 roadmap entry could not be updated. | waived | Owner: Accrue maintainer (szTheory). Rationale: GSD tool defect; roadmap.update-plan-progress returned missing_phase_details and ROADMAP was reconciled by hand. Release impact: none. | 2026-10-08T01:32:40.174Z | 2026-10-25T01:38:50.762Z |
+| 19 | 235 | deviation | examples/accrue_host/e2e/phase233-braintree-checkout.spec.js |  | Mock SDK proves the nonce-bearing server denial; live Braintree provider acceptance was not verified because the configured gateway returned HTTP 500. | waived | Owner: Accrue maintainer (szTheory). Rationale: live Braintree provider acceptance cannot be verified; the configured gateway returned HTTP 500 and live provider lanes are credential-gated under the Executable Acceptance Policy. The mock SDK spec proves the nonce-bearing server denial. Release impact: none for the Stripe-first slice. | 2026-10-08T04:49:19.603Z | 2026-10-25T01:38:50.847Z |
+| 20 | 235 | deviation |  |  | Added test-only Portal origin and organization shared-billing route after deterministic browser verification exposed the missing runtime context. | fixed |  | 2026-10-08T12:01:21.609Z | 2026-10-25T01:38:41.852Z |
+| 21 | 236 | deviation | .planning/ROADMAP.md |  | The roadmap.update-plan-progress SDK writer could not target the active milestone table, so the Phase 236 6/6 In Progress row was reconciled directly. | fixed |  | 2026-10-08T19:16:35.467Z | 2026-10-08T19:16:48.715Z |
+| 22 | 238 | deviation | accrue_admin/lib/accrue_admin/live/webhook_live.ex |  | Axe heading-order violation in the webhook replay detail was fixed by correcting the section heading level. | fixed |  | 2026-10-09T04:19:27.287Z | 2026-10-09T04:19:38.013Z |
+| 23 | 238 | deviation | accrue_admin/lib/accrue_admin/components/overlay.ex |  | Axe found an invalid article element with dialog role on the step-up modal; the modal panel now uses a div. | fixed |  | 2026-10-09T04:19:34.737Z | 2026-10-09T04:19:39.526Z |
+| 24 | 238 | deviation | accrue_admin/test/accrue_admin/components/data_table_test.exs |  | The required warnings-as-errors Admin command was blocked by an unused test binding and unused private helper; both warnings were removed and the suite passed. | fixed |  | 2026-10-09T04:19:36.443Z | 2026-10-09T04:19:40.710Z |
+| 25 | 239 | deviation | .planning/phases/239-integrated-quality-handoff/239-COVERAGE.md |  | Phase 239 route ledger duplicate stylesheet row was corrected and deterministic ordering is now enforced by ExUnit. | fixed |  | 2026-10-09T06:55:22.555Z | 2026-10-09T06:55:27.423Z |
+| 26 | 239 | deviation | .planning/ROADMAP.md |  | The roadmap progress SDK missed its existing Phase 239 checklist and row; the current plan checkbox and 1/4 In Progress row were reconciled directly. | fixed |  | 2026-10-09T06:56:00.230Z | 2026-10-09T06:56:00.293Z |
+| 27 | 240 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Linux Phase 211 visual comparison was not run on macOS; the baseline set is Linux-specific. | fixed |  | 2026-10-09T19:50:49.478Z | 2026-10-10T20:40:35.310Z |
+| 28 | 241 | deviation | accrue_admin/lib/accrue_admin/live/charge_live.ex | 80 | Renamed the validated return destination value and corrected two related-resource arguments after a focused compile error. | fixed |  | 2026-10-10T01:36:59.322Z | 2026-10-25T01:38:41.939Z |
+| 29 | 241 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex |  | Confirmation controls expose disabled/loading state while step-up or dispatch is pending. | fixed |  | 2026-10-10T01:52:12.988Z | 2026-10-25T01:38:42.030Z |
+| 30 | 241 | deviation | examples/accrue_host/e2e/generated/copy_strings.json |  | Generated browser copy strings are regenerated to match the updated subscription action labels. | fixed |  | 2026-10-10T01:52:13.282Z | 2026-10-25T01:38:42.121Z |
+| 31 | 241 | unrun-verify | .planning/phases/241-billing-operator-journeys/241-07-PLAN.md |  | A separate 200% text-spacing and supported 400% zoom simulation was not run in Plan 241-07; direct narrow-width and long-text evidence ran. | fixed |  | 2026-10-10T03:10:50.370Z | 2026-10-10T03:54:19.174Z |
+| 32 | 241 | unrun-verify | accrue_admin/e2e/admin-page-flow-phase191.spec.js |  | Per-variant browser review interactions were not established; the complete Admin suite covers subscription and payment-method review variants at the route owners. | fixed |  | 2026-10-10T03:27:48.492Z | 2026-10-10T06:34:44.612Z |
+| 33 | 242 | deviation | accrue_admin/lib/accrue_admin/live/connect_account_live.ex |  | Optimistic-lock races after fee-review reread return stale-review feedback instead of escaping as an error. | fixed |  | 2026-10-10T13:22:18.081Z | 2026-10-10T13:22:22.341Z |
+| 34 | 243 | unrun-verify | .github/workflows/accrue_admin_browser.yml |  | Ubuntu mint and normal selected visual comparison were unavailable because the committed phase source ref does not exist on origin. | fixed |  | 2026-10-10T18:19:10.468Z | 2026-10-10T20:40:35.186Z |
+| 35 | 243 | deviation | examples/accrue_host/playwright.config.js |  | Generic Playwright preview URL override can route unrelated specs to the feedback preview while global setup prepares the native test database. | fixed | Fixed in f425645f: generic preview URL routing now refuses; the explicit e2e:preview runner accepts only the Phase243 preservation spec and pins test discovery. Custody controls passed 12/12, preservation passed 1/1, generic Phase238 passed 2/2, and authoritative preview state matched before/after. | 2026-10-10T21:23:22.852Z | 2026-10-10T21:35:04.328Z |
+| 36 | 244 | deviation | examples/accrue_host/e2e/phase244-operator-evidence.spec.js |  | Mounted browser read-outage state remained unobserved; focused LiveView tests verify read-retry behavior. | waived | Owner: Accrue maintainer (szTheory). Rationale: the mounted browser read-outage state cannot be observed in the browser harness; focused LiveView tests cover read-retry. Release impact: none. | 2026-10-11T02:32:19.747Z | 2026-10-25T01:38:50.931Z |
+| 37 | 246 | deviation | accrue_admin/lib/accrue_admin/live/coupons_live.ex |  | Direct coupon q URLs preserve the default Valid selection. | fixed |  | 2026-10-11T16:56:32.083Z | 2026-10-25T01:38:42.214Z |
+| 38 | 247 | deviation | accrue_admin/assets/js/hooks/time_display.js | 4 | Rejected impossible ISO date/time components before browser formatting to prevent normalized, invented instants. | fixed |  | 2026-10-11T21:25:35.951Z | 2026-10-25T01:38:42.306Z |
 
 ````json
 [
@@ -203,6 +227,318 @@ last_updated: 2026-09-17T14:50:38.272Z
     "recorded_at": "2026-09-17T14:50:27.147Z",
     "resolved_at": "2026-09-17T14:50:38.272Z",
     "milestone": "v1.62"
+  },
+  {
+    "id": 15,
+    "kind": "deviation",
+    "phase": "234",
+    "file": "accrue_admin/test/accrue_admin/live/dashboard_live_test.exs",
+    "line": null,
+    "description": "Dashboard scope-control tests were added after the initial implementation instead of preceding it in a RED-first cycle.",
+    "status": "waived",
+    "reason": "Owner: Accrue maintainer (szTheory). Rationale: Phase 234 TDD-ordering process deviation; the tests landed after the implementation with no RED commit, and they exist and pass in the admin suite. Release impact: none.",
+    "recorded_at": "2026-10-08T00:50:59.696Z",
+    "resolved_at": "2026-10-25T01:38:50.515Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 16,
+    "kind": "deviation",
+    "phase": "234",
+    "file": ".planning/phases/234-admin-customers-subscriptions/234-03-SUMMARY.md",
+    "line": null,
+    "description": "TDD-marked task tests were added after implementation; workflow TDD mode was disabled and no RED commit was produced.",
+    "status": "waived",
+    "reason": "Owner: Accrue maintainer (szTheory). Rationale: Phase 234 TDD-ordering process deviation; the tests landed after the implementation with no RED commit, and they exist and pass in the admin suite. Release impact: none.",
+    "recorded_at": "2026-10-08T01:20:22.343Z",
+    "resolved_at": "2026-10-25T01:38:50.593Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 17,
+    "kind": "deviation",
+    "phase": "234",
+    "file": "accrue_admin/test/accrue_admin/live/subscription_live_test.exs",
+    "line": null,
+    "description": "Task 2 delayed review assertions were committed after the overlapping fresh-dispatch implementation, so Task 2 has no separate RED commit.",
+    "status": "waived",
+    "reason": "Owner: Accrue maintainer (szTheory). Rationale: Phase 234 TDD-ordering process deviation; the tests landed after the implementation with no RED commit, and they exist and pass in the admin suite. Release impact: none.",
+    "recorded_at": "2026-10-08T01:31:43.711Z",
+    "resolved_at": "2026-10-25T01:38:50.676Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 18,
+    "kind": "deviation",
+    "phase": "234",
+    "file": ".planning/ROADMAP.md",
+    "line": null,
+    "description": "roadmap.update-plan-progress 234 returned missing_phase_details, so the aggregate Phase 234 roadmap entry could not be updated.",
+    "status": "waived",
+    "reason": "Owner: Accrue maintainer (szTheory). Rationale: GSD tool defect; roadmap.update-plan-progress returned missing_phase_details and ROADMAP was reconciled by hand. Release impact: none.",
+    "recorded_at": "2026-10-08T01:32:40.174Z",
+    "resolved_at": "2026-10-25T01:38:50.762Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 19,
+    "kind": "deviation",
+    "phase": "235",
+    "file": "examples/accrue_host/e2e/phase233-braintree-checkout.spec.js",
+    "line": null,
+    "description": "Mock SDK proves the nonce-bearing server denial; live Braintree provider acceptance was not verified because the configured gateway returned HTTP 500.",
+    "status": "waived",
+    "reason": "Owner: Accrue maintainer (szTheory). Rationale: live Braintree provider acceptance cannot be verified; the configured gateway returned HTTP 500 and live provider lanes are credential-gated under the Executable Acceptance Policy. The mock SDK spec proves the nonce-bearing server denial. Release impact: none for the Stripe-first slice.",
+    "recorded_at": "2026-10-08T04:49:19.603Z",
+    "resolved_at": "2026-10-25T01:38:50.847Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 20,
+    "kind": "deviation",
+    "phase": "235",
+    "file": "",
+    "line": null,
+    "description": "Added test-only Portal origin and organization shared-billing route after deterministic browser verification exposed the missing runtime context.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-08T12:01:21.609Z",
+    "resolved_at": "2026-10-25T01:38:41.852Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 21,
+    "kind": "deviation",
+    "phase": "236",
+    "file": ".planning/ROADMAP.md",
+    "line": null,
+    "description": "The roadmap.update-plan-progress SDK writer could not target the active milestone table, so the Phase 236 6/6 In Progress row was reconciled directly.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-08T19:16:35.467Z",
+    "resolved_at": "2026-10-08T19:16:48.715Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 22,
+    "kind": "deviation",
+    "phase": "238",
+    "file": "accrue_admin/lib/accrue_admin/live/webhook_live.ex",
+    "line": null,
+    "description": "Axe heading-order violation in the webhook replay detail was fixed by correcting the section heading level.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T04:19:27.287Z",
+    "resolved_at": "2026-10-09T04:19:38.013Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 23,
+    "kind": "deviation",
+    "phase": "238",
+    "file": "accrue_admin/lib/accrue_admin/components/overlay.ex",
+    "line": null,
+    "description": "Axe found an invalid article element with dialog role on the step-up modal; the modal panel now uses a div.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T04:19:34.737Z",
+    "resolved_at": "2026-10-09T04:19:39.526Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 24,
+    "kind": "deviation",
+    "phase": "238",
+    "file": "accrue_admin/test/accrue_admin/components/data_table_test.exs",
+    "line": null,
+    "description": "The required warnings-as-errors Admin command was blocked by an unused test binding and unused private helper; both warnings were removed and the suite passed.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T04:19:36.443Z",
+    "resolved_at": "2026-10-09T04:19:40.710Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 25,
+    "kind": "deviation",
+    "phase": "239",
+    "file": ".planning/phases/239-integrated-quality-handoff/239-COVERAGE.md",
+    "line": null,
+    "description": "Phase 239 route ledger duplicate stylesheet row was corrected and deterministic ordering is now enforced by ExUnit.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T06:55:22.555Z",
+    "resolved_at": "2026-10-09T06:55:27.423Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 26,
+    "kind": "deviation",
+    "phase": "239",
+    "file": ".planning/ROADMAP.md",
+    "line": null,
+    "description": "The roadmap progress SDK missed its existing Phase 239 checklist and row; the current plan checkbox and 1/4 In Progress row were reconciled directly.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T06:56:00.230Z",
+    "resolved_at": "2026-10-09T06:56:00.293Z",
+    "milestone": "v1.63"
+  },
+  {
+    "id": 27,
+    "kind": "unrun-verify",
+    "phase": "240",
+    "file": ".github/workflows/accrue_admin_browser.yml",
+    "line": null,
+    "description": "Linux Phase 211 visual comparison was not run on macOS; the baseline set is Linux-specific.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-09T19:50:49.478Z",
+    "resolved_at": "2026-10-10T20:40:35.310Z",
+    "milestone": "v1.64"
+  },
+  {
+    "id": 28,
+    "kind": "deviation",
+    "phase": "241",
+    "file": "accrue_admin/lib/accrue_admin/live/charge_live.ex",
+    "line": 80,
+    "description": "Renamed the validated return destination value and corrected two related-resource arguments after a focused compile error.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-10T01:36:59.322Z",
+    "resolved_at": "2026-10-25T01:38:41.939Z",
+    "milestone": "v1.64"
+  },
+  {
+    "id": 29,
+    "kind": "deviation",
+    "phase": "241",
+    "file": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+    "line": null,
+    "description": "Confirmation controls expose disabled/loading state while step-up or dispatch is pending.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-10T01:52:12.988Z",
+    "resolved_at": "2026-10-25T01:38:42.030Z",
+    "milestone": "v1.64"
+  },
+  {
+    "id": 30,
+    "kind": "deviation",
+    "phase": "241",
+    "file": "examples/accrue_host/e2e/generated/copy_strings.json",
+    "line": null,
+    "description": "Generated browser copy strings are regenerated to match the updated subscription action labels.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-10T01:52:13.282Z",
+    "resolved_at": "2026-10-25T01:38:42.121Z",
+    "milestone": "v1.64"
+  },
+  {
+    "id": 31,
+    "kind": "unrun-verify",
+    "phase": "241",
+    "file": ".planning/phases/241-billing-operator-journeys/241-07-PLAN.md",
+    "line": null,
+    "description": "A separate 200% text-spacing and supported 400% zoom simulation was not run in Plan 241-07; direct narrow-width and long-text evidence ran.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-10T03:10:50.370Z",
+    "resolved_at": "2026-10-10T03:54:19.174Z",
+    "milestone": "v1.64"
+  },
+  {
+    "id": 32,
+    "kind": "unrun-verify",
+    "phase": "241",
+    "file": "accrue_admin/e2e/admin-page-flow-phase191.spec.js",
+    "line": null,
+    "description": "Per-variant browser review interactions were not established; the complete Admin suite covers subscription and payment-method review variants at the route owners.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-10T03:27:48.492Z",
+    "resolved_at": "2026-10-10T06:34:44.612Z",
+    "milestone": "v1.64"
+  },
+  {
+    "id": 33,
+    "kind": "deviation",
+    "phase": "242",
+    "file": "accrue_admin/lib/accrue_admin/live/connect_account_live.ex",
+    "line": null,
+    "description": "Optimistic-lock races after fee-review reread return stale-review feedback instead of escaping as an error.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-10T13:22:18.081Z",
+    "resolved_at": "2026-10-10T13:22:22.341Z",
+    "milestone": "v1.64"
+  },
+  {
+    "id": 34,
+    "kind": "unrun-verify",
+    "phase": "243",
+    "file": ".github/workflows/accrue_admin_browser.yml",
+    "line": null,
+    "description": "Ubuntu mint and normal selected visual comparison were unavailable because the committed phase source ref does not exist on origin.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-10T18:19:10.468Z",
+    "resolved_at": "2026-10-10T20:40:35.186Z",
+    "milestone": "v1.64"
+  },
+  {
+    "id": 35,
+    "kind": "deviation",
+    "phase": "243",
+    "file": "examples/accrue_host/playwright.config.js",
+    "line": null,
+    "description": "Generic Playwright preview URL override can route unrelated specs to the feedback preview while global setup prepares the native test database.",
+    "status": "fixed",
+    "reason": "Fixed in f425645f: generic preview URL routing now refuses; the explicit e2e:preview runner accepts only the Phase243 preservation spec and pins test discovery. Custody controls passed 12/12, preservation passed 1/1, generic Phase238 passed 2/2, and authoritative preview state matched before/after.",
+    "recorded_at": "2026-10-10T21:23:22.852Z",
+    "resolved_at": "2026-10-10T21:35:04.328Z",
+    "milestone": "v1.64"
+  },
+  {
+    "id": 36,
+    "kind": "deviation",
+    "phase": "244",
+    "file": "examples/accrue_host/e2e/phase244-operator-evidence.spec.js",
+    "line": null,
+    "description": "Mounted browser read-outage state remained unobserved; focused LiveView tests verify read-retry behavior.",
+    "status": "waived",
+    "reason": "Owner: Accrue maintainer (szTheory). Rationale: the mounted browser read-outage state cannot be observed in the browser harness; focused LiveView tests cover read-retry. Release impact: none.",
+    "recorded_at": "2026-10-11T02:32:19.747Z",
+    "resolved_at": "2026-10-25T01:38:50.931Z",
+    "milestone": "v1.65"
+  },
+  {
+    "id": 37,
+    "kind": "deviation",
+    "phase": "246",
+    "file": "accrue_admin/lib/accrue_admin/live/coupons_live.ex",
+    "line": null,
+    "description": "Direct coupon q URLs preserve the default Valid selection.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-11T16:56:32.083Z",
+    "resolved_at": "2026-10-25T01:38:42.214Z",
+    "milestone": "v1.66"
+  },
+  {
+    "id": 38,
+    "kind": "deviation",
+    "phase": "247",
+    "file": "accrue_admin/assets/js/hooks/time_display.js",
+    "line": 4,
+    "description": "Rejected impossible ISO date/time components before browser formatting to prevent normalized, invented instants.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-11T21:25:35.951Z",
+    "resolved_at": "2026-10-25T01:38:42.306Z",
+    "milestone": "v1.66"
   }
 ]
 ````

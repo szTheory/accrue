@@ -90,9 +90,38 @@ defmodule AccrueAdmin.E2E.Plug do
     json(conn, 200, Fixtures.seed_phase199_interaction_matrix!())
   end
 
+  post "/__e2e__/seed/phase241-review-matrix" do
+    json(conn, 200, Fixtures.seed_phase241_review_matrix!())
+  end
+
+  post "/seed/phase241-review-matrix" do
+    json(conn, 200, Fixtures.seed_phase241_review_matrix!())
+  end
+
   post "/__e2e__/reset" do
     Fixtures.reset!()
     json(conn, 200, %{ok: true})
+  end
+
+  post "/phase240/hold-subscription-cancel" do
+    case Fixtures.hold_phase240_subscription_cancel!(conn.params["subscription_id"]) do
+      {:ok, hold} -> json(conn, 200, hold)
+      {:error, :action_already_held} -> json(conn, 409, %{error: "action_already_held"})
+    end
+  end
+
+  get "/phase240/action-status" do
+    case Fixtures.phase240_action_status(conn.params["token"]) do
+      nil -> json(conn, 404, %{error: "unknown_action_hold"})
+      observation -> json(conn, 200, observation)
+    end
+  end
+
+  post "/phase240/release-action" do
+    case Fixtures.release_phase240_action!(conn.params["token"]) do
+      :ok -> json(conn, 200, %{ok: true})
+      {:error, :unknown_action_hold} -> json(conn, 404, %{error: "unknown_action_hold"})
+    end
   end
 
   post "/__e2e__/seed/dashboard" do

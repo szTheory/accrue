@@ -94,7 +94,7 @@ async function clickActionTrigger(page, { name, trigger, preferMenu = false }) {
 
   const menu = page.locator("[data-ax-action-overflow-menu]").first();
   await expect(menu, `${name}: overflow action menu`).toBeVisible();
-  await menu.click();
+  await menu.locator("summary").click();
 
   const item = page.getByRole("menuitem", { name: trigger }).first();
   await expect(item, `${name}: menu item`).toBeVisible();
@@ -150,6 +150,15 @@ async function seedPhase191Matrix(request) {
   };
 }
 
+async function seedPhase241ReviewMatrix(request) {
+  const response = await request.post("/__e2e__/seed/phase241-review-matrix");
+  expect(
+    response.ok(),
+    `Phase 241 disposable review matrix seeds (HTTP ${response.status()}): ${await response.text()}`
+  ).toBeTruthy();
+  return response.json();
+}
+
 async function login(page, target = "/billing") {
   await page.goto(`/__e2e__/login?to=${encodeURIComponent(target)}`);
   await expect(page.locator("#main-content, main").first()).toBeVisible();
@@ -160,6 +169,83 @@ function allAx187Ids() {
 }
 
 test.describe("Phase 191 page-flow regression harness", () => {
+  test("@phase241 every eligible subscription and payment-method review opens in the browser", async ({
+    page,
+    request,
+  }) => {
+    const fixtures = await seedPhase241ReviewMatrix(request);
+    const actions = [
+      { label: /^Change plan for subscription/i, type: "swap_plan", fields: { new_price_id: "price_phase241_review_next", proration: "none" } },
+      { label: /^Cancel renewal for subscription/i, type: "cancel_at_period_end" },
+      { label: /Cancel immediately/i, type: "cancel_now" },
+      { label: /Comp this subscription/i, type: "comp_subscription", fields: { new_price_id: "price_phase241_comp" } },
+      { label: /Pause collection/i, type: "pause", fields: { pause_behavior: "keep_as_draft" } },
+      { label: /Update quantity/i, type: "update_quantity", fields: { new_quantity: "3" } },
+      { label: /Add item/i, type: "add_item", fields: { new_price_id: "price_phase241_addon", new_quantity: "2", proration: "none" } },
+      { label: /Update item quantity/i, type: "update_item_quantity", fields: { item_id: fixtures.subscription_item_id, new_quantity: "4", proration: "none" } },
+      { label: /Remove item/i, type: "remove_item", fields: { item_id: fixtures.subscription_item_id, proration: "none" } },
+    ];
+
+    await login(page, `/billing/subscriptions/${fixtures.subscription_id}`);
+    for (const action of actions) {
+      await clickActionTrigger(page, {
+        name: `subscription ${action.type}`,
+        trigger: action.label,
+        // The plan and renewal actions also have summary controls with similar
+        // labels; these anchored names select the canonical action buttons.
+        preferMenu: !["swap_plan", "cancel_at_period_end"].includes(action.type),
+      });
+      const drawer = await visibleDrawer(page, `subscription ${action.type}`);
+      const form = drawer.locator("[data-ax-action-drawer-form]");
+      await expect(form, `${action.type}: action-specific form`).toBeVisible();
+      for (const [name, value] of Object.entries(action.fields || {})) {
+        const field = form.locator(`[name="${name}"]`);
+        if (name === "item_id" || name === "pause_behavior" || name === "proration") {
+          await field.selectOption(value);
+        } else {
+          await field.fill(value);
+        }
+      }
+      await form.evaluate((element) => element.requestSubmit());
+      const review = drawer.locator('[data-role="subscription-action-review-facts"]');
+      await expect(review, `${action.type}: review facts`).toBeVisible();
+      await expect(review).toContainText(`Subscription ID: ${fixtures.subscription_id}`);
+      await expect(review).toContainText(action.type === "swap_plan" ? "price_phase241_review_next" : /Current state/);
+      await expect(review).toContainText(/Back to subscription|Current state/);
+      await drawer.getByRole("button", { name: "Back to subscription" }).first().click();
+      await expect(drawer.locator("[data-ax-action-drawer-form]")).toBeHidden();
+    }
+
+    await login(page, `/billing/subscriptions/${fixtures.resume_subscription_id}`);
+    await clickActionTrigger(page, { name: "subscription resume", trigger: /Resume subscription/i });
+    let drawer = await visibleDrawer(page, "subscription resume");
+    let form = drawer.locator("[data-ax-action-drawer-form]");
+    await form.evaluate((element) => element.requestSubmit());
+    let review = drawer.locator('[data-role="subscription-action-review-facts"]');
+    await expect(review).toBeVisible();
+    await expect(drawer).toContainText("Resume subscription");
+    await drawer.getByRole("button", { name: "Back to subscription" }).first().click();
+
+    await login(page, `/billing/customers/${fixtures.customer_id}?tab=payment_methods`);
+    for (const [role, action, effect] of [
+      ["open-set-default-payment-method", "set default", /future billing/i],
+      ["open-delete-payment-method", "delete", /removes the selected payment method from the customer/i],
+    ]) {
+      const trigger = page.locator(`[data-role="${role}"][phx-value-payment_method_id="${fixtures.payment_method_id}"]`);
+      await expect(trigger, `${action}: seeded non-default payment method control`).toBeVisible();
+      await trigger.click();
+      const paymentDrawer = page.locator("#customer-payment-method-action-drawer [data-ax-overlay-panel]");
+      await expect(paymentDrawer, `${action}: review drawer`).toBeVisible();
+      const content = paymentDrawer.locator('[data-role="payment-method-action-content"]');
+      await expect(content).toContainText(fixtures.payment_method_id);
+      await expect(content).toContainText("5454");
+      await expect(content).toContainText(effect);
+      await expect(paymentDrawer.getByRole("button", { name: "Confirm", exact: false })).toBeVisible();
+      await paymentDrawer.getByRole("button", { name: "Back to customer" }).first().click();
+      await expect(paymentDrawer).toBeHidden();
+    }
+  });
+
   test("AX187 source map covers owner-phase 191 rows and D-30 categories @ax187", async () => {
     const defects = loadPhase191Defects();
     const high = defects.filter((defect) => defect.severity === "high").map((defect) => defect.id).sort();
@@ -320,15 +406,168 @@ test.describe("Phase 191 page-flow regression harness", () => {
     const staleAction = page.getByRole("button", { name: "Refund charge" });
     await expect(staleAction).toBeVisible();
     await staleAction.focus();
+    await page.evaluate(() => {
+      window.__phase240ReplacementTemplate = document.querySelector("#accrue-admin-shell button[phx-click='open_refund_drawer']").cloneNode(true);
+      const originallyDisabled = window.__phase240ReplacementTemplate.cloneNode(true);
+      originallyDisabled.id = "phase240-original-disabled-control";
+      originallyDisabled.disabled = true;
+      originallyDisabled.setAttribute("aria-disabled", "true");
+      const hiddenFixture = document.createElement("div");
+      hiddenFixture.hidden = true;
+      hiddenFixture.append(originallyDisabled);
+      document.querySelector("#ax-overlay-root").append(hiddenFixture);
+    });
 
     await context.setOffline(true);
     await expect(page.getByText(/Connection lost\. Reconnecting before actions can run\./i)).toBeVisible();
     await expect(staleAction).toBeDisabled();
+    await page.evaluate(() => {
+      const current = document.querySelector("#accrue-admin-shell button[phx-click='open_refund_drawer']");
+      current.replaceWith(window.__phase240ReplacementTemplate);
+      delete window.__phase240ReplacementTemplate;
+    });
+    await expect(staleAction).toBeDisabled();
+    await page.evaluate(() => window.liveSocket.disconnect());
 
     await context.setOffline(false);
+    await page.evaluate(() => window.liveSocket.connect());
     await expect(page.getByText(/Connection restored\. Review the current state before running an action\./i)).toBeVisible();
     await expect(staleAction).toBeEnabled();
-    await assertNoBodyFocus(page, "charge reconnect focus");
+    await expect.poll(() => page.evaluate(() => {
+      const control = document.querySelector("#phase240-original-disabled-control");
+      return {
+        disabled: control?.disabled,
+        ariaDisabled: control?.getAttribute("aria-disabled"),
+        staleDisabled: control?.getAttribute("data-stale-disabled")
+      };
+    })).toEqual({ disabled: true, ariaDisabled: "true", staleDisabled: null });
+    await page.evaluate(() => document.querySelector("#phase240-original-disabled-control")?.parentElement.remove());
+    await expect.poll(() => page.evaluate(() => document.activeElement?.tagName || "")).not.toBe("BODY");
+  });
+
+  test("browser online signal keeps staged billing action disabled until LiveView reconnects @reconnect @ax187", async ({
+    page,
+    request,
+    context,
+  }) => {
+    await reset(request);
+    const fixtureData = await seedPhase191Matrix(request);
+    await login(page, resolvePhase191Route("charge-detail", fixtureData));
+
+    const staleAction = page.getByRole("button", { name: "Refund charge" });
+    await expect(staleAction).toBeVisible();
+    await context.setOffline(true);
+    await expect(page.getByText(/Connection lost\. Reconnecting before actions can run\./i)).toBeVisible();
+    await expect(staleAction).toBeDisabled();
+
+    await page.evaluate(() => window.dispatchEvent(new Event("online")));
+
+    await expect(staleAction).toBeDisabled();
+    await expect(page.getByText(/Connection lost\. Reconnecting before actions can run\./i)).toBeVisible();
+  });
+
+  test("disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187", async ({
+    page,
+    request,
+    context,
+  }) => {
+    await reset(request);
+    const fixtureData = await seedPhase191Matrix(request);
+    const response = await request.post(
+      `/__e2e__/phase240/hold-subscription-cancel?subscription_id=${fixtureData.subscription_id}`
+    );
+
+    expect(response.ok()).toBeTruthy();
+    const hold = await response.json();
+    expect(hold.operation).toBe("cancel_subscription");
+    expect(hold.token).toBeTruthy();
+
+    try {
+      await login(page, resolvePhase191Route("subscription-detail", fixtureData));
+      await clickActionTrigger(page, { name: "subscription cancel", trigger: /Cancel immediately/i, preferMenu: true });
+      const drawer = await visibleDrawer(page, "subscription cancel");
+      await drawer.locator('[data-role="cancel-now-form"]').evaluate((form) => form.requestSubmit());
+      await drawer.locator('[data-role="confirm-action"]').click();
+
+      const stepUp = page.locator("#accrue-admin-step-up-dialog");
+      await expect(stepUp).toBeVisible();
+      await stepUp.locator("#step-up-code").fill("123456");
+      const submit = stepUp.locator('[data-role="step-up-submit"]');
+
+      await context.setOffline(true);
+      await expect(page.getByText(/Connection lost\. Reconnecting before actions can run\./i)).toBeVisible();
+      await expect(submit).toBeDisabled();
+      await page.evaluate(() => window.liveSocket.disconnect());
+
+      // The actual transport must recover before the lifecycle owner unlocks
+      // the staged operation and permits the real LiveView event.
+      await context.setOffline(false);
+      await page.evaluate(() => window.liveSocket.connect());
+      await expect(page.getByText(/Connection restored\. Review the current state before running an action\./i)).toBeVisible();
+      await expect(stepUp).toBeHidden();
+      const beforeDispatchResponse = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+      expect(beforeDispatchResponse.ok()).toBeTruthy();
+      const beforeDispatch = await beforeDispatchResponse.json();
+      expect(beforeDispatch.dispatch_count).toBe(0);
+      expect(beforeDispatch.status).toBe("active");
+
+      // A staged confirmation is intentionally not replayed after a real
+      // LiveView rejoin; an operator must review and stage it again.
+      await clickActionTrigger(page, { name: "subscription cancel", trigger: /Cancel immediately/i, preferMenu: true });
+      const rejoinedDrawer = await visibleDrawer(page, "subscription cancel");
+      await rejoinedDrawer.locator('[data-role="cancel-now-form"]').evaluate((form) => form.requestSubmit());
+      await rejoinedDrawer.locator('[data-role="confirm-action"]').click();
+      await expect(stepUp).toBeVisible();
+      await stepUp.locator("#step-up-code").fill("123456");
+      await expect(submit).toBeEnabled();
+      await submit.click();
+
+      await expect.poll(async () => {
+        const statusResponse = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+        expect(statusResponse.ok()).toBeTruthy();
+        return (await statusResponse.json()).dispatch_count;
+      }).toBe(1);
+      const statusResponse = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+      expect(statusResponse.ok()).toBeTruthy();
+      const held = await statusResponse.json();
+      expect(held.dispatch_count).toBe(1);
+      expect(held.held).toBeTruthy();
+      expect(held.status).toBe("active");
+      expect(held.canceled_event_count).toBe(0);
+      expect(held.admin_audit_count).toBe(0);
+      await expect(submit).toBeDisabled();
+      await expect(submit).toHaveAttribute("aria-busy", "true");
+      await expect(submit.locator(":scope > .ax-button-spinner")).toBeVisible();
+
+      // While the server is held, the real submit stays disabled and busy.
+      // Releasing it completes the one authorized dispatch.
+      await expect(submit).toBeDisabled();
+      await expect(submit).toHaveAttribute("aria-busy", "true");
+      await expect(submit.locator(":scope > .ax-button-spinner")).toBeVisible();
+
+      const release = await request.post(`/__e2e__/phase240/release-action?token=${hold.token}`);
+      expect(release.ok()).toBeTruthy();
+      await expect.poll(async () => {
+        const completed = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+        expect(completed.ok()).toBeTruthy();
+        return (await completed.json()).status;
+      }).toBe("canceled");
+      await expect(page.getByText("Subscription action recorded.", { exact: true })).toBeVisible();
+      await expect(page.getByText("Canceled", { exact: true }).first()).toBeVisible();
+      await expect(stepUp).toBeHidden();
+      await expect(page.locator(".ax-button-spinner")).toHaveCount(0);
+
+      const completedResponse = await request.get(`/__e2e__/phase240/action-status?token=${hold.token}`);
+      expect(completedResponse.ok()).toBeTruthy();
+      const completed = await completedResponse.json();
+      expect(completed.dispatch_count).toBe(1);
+      expect(completed.provider_calls).toBe(1);
+      expect(completed.status).toBe("canceled");
+      expect(completed.canceled_event_count).toBe(1);
+      expect(completed.admin_audit_count).toBe(1);
+    } finally {
+      await request.post(`/__e2e__/phase240/release-action?token=${hold.token}`);
+    }
   });
 
   test("AX187-440 AX187-441 AX187-442 AX187-443 destructive confirmations name object, billing effect, scope, and audit outcome @copy @destructive @ax187", async ({
@@ -351,26 +590,24 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await expect(confirmPanel).toContainText(/admin audit row/i);
 
     const subscriptionRoute = resolvePhase191Route("subscription-detail", fixtureData);
-    const subscriptionId = subscriptionRoute.split("/").pop();
     await login(page, subscriptionRoute);
     await clickActionTrigger(page, { name: "subscription cancel", trigger: /Cancel immediately/i, preferMenu: true });
     const subscriptionDrawer = await visibleDrawer(page, "subscription cancel");
     await subscriptionDrawer.locator('[data-role="cancel-now-form"]').evaluate((form) => form.requestSubmit());
     confirmPanel = subscriptionDrawer.locator('[data-role="confirm-panel"]');
     await expect(confirmPanel).toBeVisible();
-    await expect(confirmPanel).toContainText(new RegExp(`subscription ${subscriptionId}`, "i"));
+    await expect(confirmPanel).toContainText(/subscription sub_e2e_phase191_active/i);
     await expect(confirmPanel).toContainText(/billing period|billing schedule/i);
     await expect(confirmPanel).toContainText(/admin audit row/i);
 
     const chargeRoute = resolvePhase191Route("charge-detail", fixtureData);
-    const chargeId = chargeRoute.split("/").pop();
     await login(page, chargeRoute);
     await clickActionTrigger(page, { name: "charge refund", trigger: /Refund charge/i });
     const refundDrawer = await visibleDrawer(page, "charge refund");
     await refundDrawer.locator("#charge-refund-form").evaluate((form) => form.requestSubmit());
     confirmPanel = refundDrawer.locator('[data-role="confirm-panel"]');
     await expect(confirmPanel).toBeVisible();
-    await expect(confirmPanel).toContainText(new RegExp(`Refund charge ${chargeId}`, "i"));
+    await expect(confirmPanel).toContainText(/Refund charge ch_e2e_phase191_boundary/i);
     await expect(confirmPanel).toContainText(/refund ledger row|admin audit row/i);
 
     await login(page, "/billing/webhooks");
@@ -382,7 +619,7 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await page.locator('[data-role="bulk-action"]').click();
     const bulkReplayConfirm = page.locator('[data-role="bulk-replay-confirm"]');
     await expect(bulkReplayConfirm).toBeVisible();
-    await expect(bulkReplayConfirm).toContainText(/failed every automatic retry/i);
+    await expect(bulkReplayConfirm).toContainText(/Only deliveries still eligible when confirmed will be queued/i);
     await expect(bulkReplayConfirm.locator('[data-role="confirm-retry-selected"]')).toBeVisible();
   });
 
@@ -404,5 +641,50 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await login(page, "/billing/webhooks");
     await expect(page.locator("body")).not.toContainText(/\bare you sure\?\b|\boops\b|request failed|something failed/i);
     await expect(page.locator("body")).toContainText(/webhook|event|owner scope|Retry|Replay webhook/i);
+  });
+
+  test("@phase242 coupon, promotion-code, and Connect routes retain exact relationships and fee review target", async ({
+    page,
+    request,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-desktop", "catalog and Connect consumer flow runs once");
+
+    await reset(request);
+    const fixtures = await seedPhase191Matrix(request);
+
+    await login(page, `/billing/coupons/${fixtures.phase191_coupon_id}`);
+    await expect(page.locator("main")).toContainText(/coupon_e2e_phase191/i);
+    const promotionCodes = page.locator('a[href^="/billing/promotion-codes?"]');
+    await expect(promotionCodes.first(), "coupon links to its actual child-code list").toBeVisible();
+    const codeList = new URL(await promotionCodes.first().getAttribute("href"), page.url());
+    expect(codeList.searchParams.get("coupon_id")).toBe(fixtures.phase191_coupon_id);
+    await promotionCodes.first().click();
+    await expect(page).toHaveURL(/\/billing\/promotion-codes\?/);
+    const code = page.locator(`a[href^="/billing/promotion-codes/${fixtures.phase191_promo_code_id}"]`).first();
+    await expect(code, "the filtered child list contains the exact seeded code").toBeVisible();
+    await code.click();
+    await expect(page).toHaveURL(new RegExp(`/billing/promotion-codes/${fixtures.phase191_promo_code_id}`));
+    await expect(page.locator(`a[href^="/billing/coupons/${fixtures.phase191_coupon_id}"]`).first()).toBeVisible();
+
+    await login(page, `/billing/connect/${fixtures.phase191_connect_account_id}`);
+    await expect(page.locator("main")).toContainText(/Last stored Stripe snapshot readiness/);
+    await expect(page.locator("main")).toContainText(/Local platform fee override/);
+    const editFee = page.getByRole("button", { name: "Change platform fee override for acct_e2e_phase191" });
+    await editFee.focus();
+    await page.keyboard.press("Enter");
+    const drawer = page.locator("#connect-platform-fee-drawer");
+    await expect(drawer).toBeVisible();
+    await expect(drawer).toContainText("acct_e2e_phase191");
+    await expect(drawer.getByRole("button", { name: "Close" })).toBeFocused();
+    await page.keyboard.press("Tab");
+    const percent = drawer.locator('input[name="override[percent]"]');
+    await expect(percent).toBeFocused();
+    await percent.fill("invalid");
+    await expect(drawer).toContainText(/invalid|must be|percentage/i);
+    await percent.fill("2.5");
+    await expect(drawer).toContainText(/2\.5%/);
+    await page.keyboard.press("Escape");
+    await expect(drawer).toBeHidden();
+    await expect(editFee).toBeFocused();
   });
 });

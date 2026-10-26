@@ -4,7 +4,48 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
   import Phoenix.LiveViewTest
 
   alias AccrueAdmin.Components.GlobalSearch
+  alias AccrueAdmin.Components.Topbar
   alias AccrueAdmin.OwnerScope
+
+  test "overlong query is reported as validation, not a completed no-results search" do
+    query = String.duplicate("x", 101)
+
+    socket = %Phoenix.LiveView.Socket{
+      assigns: %{
+        __changed__: %{},
+        id: "global-search",
+        query: "previous",
+        current_owner_scope: nil,
+        generation: 3,
+        results: %{customers: [%{id: "stale"}], invoices: [], subscriptions: []},
+        failures: [],
+        loading: true,
+        query_too_long: false
+      }
+    }
+
+    assert {:noreply, updated} = GlobalSearch.handle_event("search", %{"q" => query}, socket)
+    assert updated.assigns.query == query
+    assert updated.assigns.query_too_long
+    refute updated.assigns.loading
+    assert updated.assigns.results == %{customers: [], invoices: [], subscriptions: []}
+    assert updated.assigns.generation == 4
+
+    html =
+      render_component(GlobalSearch, %{
+        id: "global-search",
+        mount_path: "/billing",
+        query: query,
+        query_too_long: true,
+        results: %{customers: [], invoices: [], subscriptions: []},
+        failures: [],
+        is_open: true,
+        loading: false
+      })
+
+    assert html =~ "Search is limited to 100 characters."
+    refute html =~ "No billing records match"
+  end
 
   describe "path/2 nil-guard (regression: WR-03 fix)" do
     test "renders without crashing when mount_path is nil (pre-update/2 state)" do
@@ -24,7 +65,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
         })
 
       # Component must render without raising
-      assert html =~ "Jump to"
+      assert html =~ "Browse billing records"
 
       # All four shortcut links should fall back to "#"
       assert html =~ ~s(data-path="#")
@@ -44,9 +85,9 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
 
       assert html =~ ~s(data-path="/billing/customers")
       assert html =~ ~s(href="/billing/customers")
-      assert html =~ ~s(data-path="/billing/invoices?status=open")
-      assert html =~ ~s(data-path="/billing/analytics/recovery")
-      assert html =~ ~s(data-path="/billing/webhooks?status=dead")
+      assert html =~ ~s(data-path="/billing/invoices")
+      assert html =~ ~s(data-path="/billing/subscriptions")
+      refute html =~ "Open invoice queue to $0.00"
     end
 
     test "preserves organization owner scope in shortcut and result paths" do
@@ -67,19 +108,19 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
           id: "global-search",
           mount_path: "/billing",
           current_owner_scope: owner_scope,
-          query: "acme",
+          query: "",
           results: %{
-            customers: [%{id: "cus_1", name: "Acme", email: "ops@example.com"}],
-            invoices: [%{id: "inv_1", number: "INV-1"}],
-            subscriptions: [%{id: "sub_1", status: :active}]
+            customers: [],
+            invoices: [],
+            subscriptions: []
           },
           is_open: true,
           loading: false
         })
 
-      assert html =~ ~s(data-path="/billing/customers/cus_1?org=acme")
-      assert html =~ ~s(data-path="/billing/invoices/inv_1?org=acme")
-      assert html =~ ~s(data-path="/billing/subscriptions/sub_1?org=acme")
+      assert html =~ ~s(data-path="/billing/customers?org=acme")
+      assert html =~ ~s(data-path="/billing/invoices?org=acme")
+      assert html =~ ~s(data-path="/billing/subscriptions?org=acme")
     end
   end
 
@@ -136,10 +177,45 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
         })
 
       assert html =~
-               ~s(<a class="ax-command-palette-item" href="/billing/customers" data-path="/billing/customers")
+               ~s(<a id="global-search-option-shortcut-customers" role="option" aria-selected="false" class="ax-command-palette-item" href="/billing/customers" data-path="/billing/customers")
 
       assert html =~
-               ~s(<a class="ax-command-palette-item" href="/billing/invoices?status=open" data-path="/billing/invoices?status=open")
+               ~s(<a id="global-search-option-shortcut-invoices" role="option" aria-selected="false" class="ax-command-palette-item" href="/billing/invoices" data-path="/billing/invoices")
+    end
+
+    test "exposes grouped results as combobox options with stable active-target ids" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "ada",
+          results: %{
+            customers: [
+              %{
+                id: "cus_accessible",
+                name: "Ada",
+                email: "ada@example.com",
+                owner_type: nil,
+                owner_id: nil,
+                processor: nil,
+                processor_id: nil
+              }
+            ],
+            invoices: [],
+            subscriptions: []
+          },
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ ~s(role="combobox")
+      assert html =~ ~s(aria-haspopup="listbox")
+
+      assert html =~ ~s(id="global-search-options-customers")
+      assert html =~ ~s(role="listbox" aria-label="Customers")
+
+      assert html =~
+               ~s(id="global-search-option-customers-cus_accessible" role="option" aria-selected="false")
     end
 
     test "Phase 199 command palette declares Overlay-backed or overlay-equivalent source markers" do
@@ -169,7 +245,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
              "command palette must either use Overlay or declare equivalent focus/portal markers"
     end
 
-    test "Phase 199 no-results copy names the billing search domain" do
+    test "no matches are distinct from failed lookups" do
       html =
         render_component(GlobalSearch, %{
           id: "global-search",
@@ -180,8 +256,266 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
           loading: false
         })
 
-      refute html =~ "No results found"
       assert html =~ ~s(No billing records match "missing-acme")
+      refute html =~ "Some lookups are unavailable"
+    end
+
+    test "partial failure retains successful groups and offers a read retry" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "ada@example.com",
+          results: %{
+            customers: [
+              %{
+                id: "cus_exact_123",
+                name: "Ada Lovelace",
+                email: "ada@example.com",
+                owner_type: "Organization",
+                owner_id: "org-1",
+                processor: "stripe",
+                processor_id: "cus_stripe_9"
+              }
+            ],
+            invoices: [],
+            subscriptions: []
+          },
+          failures: [:invoices],
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ "Results couldn't be loaded"
+      assert html =~ "Retry failed groups"
+      assert html =~ "Ada Lovelace"
+      assert html =~ "ada@example.com"
+      assert html =~ "Organization org-1"
+      assert html =~ "stripe cus_stripe_9"
+      assert html =~ "Customer ID: cus_exact_123"
+      assert html =~ ~s(href="/billing/customers/cus_exact_123")
+    end
+
+    test "keeps same-name records as distinct scoped links and describes the active result status" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "Ada Lovelace",
+          results: %{
+            customers: [
+              %{
+                id: "cus_first",
+                name: "Ada Lovelace",
+                email: "ada@example.com",
+                owner_id: nil,
+                owner_type: nil,
+                processor_id: nil,
+                processor: nil
+              },
+              %{
+                id: "cus_second",
+                name: "Ada Lovelace",
+                email: "ada@example.com",
+                owner_id: nil,
+                owner_type: nil,
+                processor_id: nil,
+                processor: nil
+              }
+            ],
+            invoices: [],
+            subscriptions: []
+          },
+          failures: [],
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ ~s(aria-describedby="global-search-help global-search-active-result")
+      assert html =~ ~s(id="global-search-active-result" class="ax-visually-hidden" role="status")
+      assert html =~ ~s(href="/billing/customers/cus_first")
+      assert html =~ ~s(href="/billing/customers/cus_second")
+      assert html =~ "Customer ID: cus_first"
+      assert html =~ "Customer ID: cus_second"
+    end
+
+    test "retry fetch preserves completed groups while replacing only the retried group" do
+      customer = %{id: "cus_preserved"}
+      invoice = %{id: "inv_retried"}
+      initial = %{customers: [customer], invoices: [], subscriptions: []}
+
+      {results, failures} =
+        GlobalSearch.run_group_lookups([:invoices], initial, fn :invoices ->
+          {[invoice], nil}
+        end)
+
+      assert results == %{customers: [customer], invoices: [invoice], subscriptions: []}
+      assert failures == []
+
+      {failed_results, failed_groups} =
+        GlobalSearch.run_group_lookups([:invoices], initial, fn :invoices ->
+          raise "invoice query unavailable"
+        end)
+
+      assert failed_results == initial
+      assert failed_groups == [:invoices]
+
+      # A fresh full query deliberately starts from an empty result map.
+      {fresh_results, _} =
+        GlobalSearch.run_group_lookups(
+          [:customers],
+          %{customers: [], invoices: [], subscriptions: []},
+          fn :customers ->
+            {[], nil}
+          end
+        )
+
+      assert fresh_results == %{customers: [], invoices: [], subscriptions: []}
+    end
+
+    test "help copy names the supported record groups without adding more instructions" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "ada",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          failures: [],
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ "Search by name, email, invoice number, or ID."
+      refute html =~ "Customers: name, email, owner ID, processor ID"
+      refute html =~ "Up to five results per group"
+      refute html =~ "Type customer name, email, or ID"
+      refute html =~ "Open invoice queue to $0.00"
+    end
+
+    test "keeps the initial dialog orientation compact and uses the approved billing copy" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~ "Browse billing records"
+      refute html =~ "Open a scoped list"
+      refute html =~ "Up to five results per group"
+      assert html =~ "Navigate"
+      assert html =~ "Select"
+      assert html =~ "Close"
+    end
+
+    test "topbar trigger is a single-line billing search with destinations and shortcut" do
+      html = render_component(&Topbar.topbar/1, %{theme: "light", theme_forced: false})
+
+      assert html =~ "Search billing"
+      assert html =~ "customers, invoices, and subscriptions"
+      assert html =~ "⌘K"
+      refute html =~ "Customer billing lookup"
+      refute html =~ "Search customers now"
+    end
+
+    test "sizes the current loading indicator and makes hidden win in authored CSS" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "ada",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          is_open: true,
+          loading: true
+        })
+
+      css = File.read!("assets/css/app.css")
+
+      assert html =~ ~s(class="ax-spinner ax-spinner-md" hidden={false}) or
+               html =~ ~s(class="ax-spinner ax-spinner-md")
+
+      assert html =~ "Searching billing records"
+      assert css =~ ~r/\.ax-spinner\[hidden\]\s*\{[^}]*display:\s*none/s
+      assert css =~ "@media (prefers-reduced-motion: reduce)"
+    end
+
+    test "async replies are accepted only for the current query, scope and generation" do
+      source = File.read!("lib/accrue_admin/components/global_search.ex")
+
+      assert source =~ "query == socket.assigns.query"
+      assert source =~ "owner_scope == socket.assigns.current_owner_scope"
+      assert source =~ "generation == socket.assigns.generation"
+      assert source =~ "Task.start(fn ->"
+      assert source =~ "view_pid = self()"
+      assert source =~ "send_update(view_pid, __MODULE__,"
+      assert source =~ "current_owner_scope: next_scope"
+      assert source =~ "generation: socket.assigns.generation + 1"
+    end
+
+    test "late results cannot replace the current query results" do
+      socket = %Phoenix.LiveView.Socket{
+        assigns: %{
+          query: "current query",
+          current_owner_scope: nil,
+          generation: 4,
+          results: %{customers: [%{id: "current"}], invoices: [], subscriptions: []},
+          failures: [],
+          loading: false
+        }
+      }
+
+      assert {:ok, updated} =
+               GlobalSearch.update(
+                 %{
+                   action: "search_results",
+                   query: "old query",
+                   owner_scope: nil,
+                   generation: 3,
+                   results: %{customers: [%{id: "stale"}], invoices: [], subscriptions: []},
+                   failures: []
+                 },
+                 socket
+               )
+
+      assert updated.assigns.results.customers == [%{id: "current"}]
+    end
+
+    test "changing owner scope clears query and prior results" do
+      owner_scope = %OwnerScope{
+        mode: :organization,
+        current_admin: %{id: "admin_1", role: :admin},
+        organization_id: "org_1",
+        organization_slug: "acme",
+        organization_display_name: "Acme",
+        platform_admin?: false,
+        admin_org_ids: ["org_1"],
+        active_organization_id: "org_1",
+        active_organization_slug: "acme"
+      }
+
+      socket = %Phoenix.LiveView.Socket{
+        assigns: %{
+          __changed__: %{},
+          query: "stale query",
+          current_owner_scope: nil,
+          generation: 1,
+          results: %{customers: [%{id: "foreign"}], invoices: [], subscriptions: []},
+          failures: [],
+          loading: true
+        }
+      }
+
+      assert {:ok, updated} =
+               GlobalSearch.update(%{current_owner_scope: owner_scope}, socket)
+
+      assert updated.assigns.current_owner_scope == owner_scope
+      assert updated.assigns.query == ""
+      assert updated.assigns.results == %{customers: [], invoices: [], subscriptions: []}
+      refute updated.assigns.loading
+      assert updated.assigns.generation == 2
     end
 
     test "Phase 199 search source uses owner-scoped query modules" do
@@ -196,7 +530,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert source =~
                "Subscriptions.list(filter: %{q: query}, limit: 5, owner_scope: owner_scope)"
 
-      assert source =~ "ScopedPath.build(mount_path, suffix, owner_scope, params)"
+      assert source =~ "ScopedPath.build(mount_path, suffix, owner_scope)"
     end
   end
 end

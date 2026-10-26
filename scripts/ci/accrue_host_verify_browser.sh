@@ -59,6 +59,20 @@ if [ -n "${ACCRUE_HOST_SETUP_DIAGNOSTIC_FIXTURE:-}" ]; then
 fi
 
 browser_port="${ACCRUE_HOST_BROWSER_PORT:-4101}"
+proof_run_id="${ACCRUE_HOST_PROOF_RUN_ID:-$$}"
+if [[ ! "$proof_run_id" =~ ^[A-Za-z0-9_-]{1,80}$ ]]; then
+  echo "[preview-custody] REFUSED: ACCRUE_HOST_PROOF_RUN_ID must contain 1-80 letters, digits, underscores, or hyphens" >&2
+  exit 2
+fi
+export ACCRUE_HOST_PROOF_RUN_ID="$proof_run_id"
+export MIX_BUILD_PATH="${MIX_BUILD_PATH:-$host_dir/tmp/accrue-host-proof-${proof_run_id}/test}"
+export ACCRUE_ADMIN_MIX_BUILD_PATH="${ACCRUE_ADMIN_MIX_BUILD_PATH:-$repo_root/accrue_admin/_build/accrue-host-proof-${proof_run_id}/test}"
+export ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR="${ACCRUE_HOST_PLAYWRIGHT_OUTPUT_DIR:-${TMPDIR:-/tmp}/accrue-host-proof-${proof_run_id}/playwright-results}"
+export ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR="${ACCRUE_HOST_PLAYWRIGHT_REPORT_DIR:-${TMPDIR:-/tmp}/accrue-host-proof-${proof_run_id}/playwright-report}"
+custody_tool="$repo_root/scripts/ci/accrue_host_preview_custody.sh"
+export ACCRUE_HOST_PREVIEW_SNAPSHOT="${ACCRUE_HOST_PREVIEW_SNAPSHOT:-${TMPDIR:-/tmp}/accrue-host-preview-${proof_run_id}.snapshot}"
+node "$custody_tool" preflight browser || setup_failure fixture_or_database
+node "$custody_tool" snapshot
 fixture_file="$(mktemp)"
 browser_log_file="${ACCRUE_HOST_BROWSER_LOG:-$(mktemp)}"
 browser_failed=0
@@ -91,6 +105,8 @@ stop_process_tree() {
 }
 
 cleanup() {
+  local exit_status=$?
+  trap - EXIT
   if [ -n "${browser_server_pid:-}" ] && kill -0 "$browser_server_pid" >/dev/null 2>&1; then
     stop_process_tree "$browser_server_pid"
   fi
@@ -100,6 +116,12 @@ cleanup() {
   if [ -z "${ACCRUE_HOST_BROWSER_LOG:-}" ] && [ "$browser_failed" != "1" ]; then
     rm -f "$browser_log_file"
   fi
+
+  if ! node "$custody_tool" assert-preserved; then
+    exit_status=1
+  fi
+  rm -f "$ACCRUE_HOST_PREVIEW_SNAPSHOT"
+  exit "$exit_status"
 }
 
 trap cleanup EXIT
@@ -118,6 +140,7 @@ run_classified fixture_or_database bash "$repo_root/scripts/ci/verify_e2e_fixtur
 # Building assets requires a standalone Mix project cwd with its own `deps/` tree.
 (
   cd "$repo_root/accrue_admin"
+  export MIX_BUILD_PATH="$ACCRUE_ADMIN_MIX_BUILD_PATH"
   run_classified fixture_or_database mix deps.get --quiet
   run_classified fixture_or_database mix accrue_admin.assets.build
   run_classified fixture_or_database mkdir -p "$repo_root/examples/accrue_host/e2e/generated"
@@ -146,7 +169,7 @@ for _ in $(seq 1 30); do
     # Full Playwright suite (blocking PR gate via host-integration). Includes
     # mounted-admin axe checks: e2e/verify01-admin-a11y.spec.js (light + dark).
     ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED=1 \
-      ACCRUE_HOST_REUSE_SERVER=1 ACCRUE_HOST_BROWSER_PORT="$browser_port" ACCRUE_HOST_E2E_FIXTURE="$fixture_file" npm run e2e
+      ACCRUE_HOST_REUSE_SERVER=1 ACCRUE_HOST_PROOF_SERVER_PID="$browser_server_pid" ACCRUE_HOST_BROWSER_PORT="$browser_port" ACCRUE_HOST_E2E_FIXTURE="$fixture_file" npm run e2e
     e2e_status=$?
     set -e
 
@@ -155,7 +178,50 @@ for _ in $(seq 1 30); do
       setup_failure browser_launch "$e2e_status"
     fi
 
-    exit "$e2e_status"
+    # Local checkout sessions are Braintree-specific. Run their promo and
+    # Hosted Fields acceptance cases in a separate server process configured
+    # for Braintree; the default full browser suite remains on Fake.
+    stop_process_tree "$browser_server_pid"
+    browser_server_pid=""
+    run_classified fixture_or_database env \
+      ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 \
+      ACCRUE_HOST_E2E_FIXTURE="$fixture_file" \
+      MIX_ENV=test mix run "$repo_root/scripts/ci/accrue_host_seed_e2e.exs"
+
+    ACCRUE_HOST_BROWSER_USE_BRAINTREE=1 PORT="$browser_port" PHX_SERVER=true MIX_ENV=test \
+      mix phx.server >>"$browser_log_file" 2>&1 &
+    browser_server_pid=$!
+
+    for _ in $(seq 1 30); do
+      if ! kill -0 "$browser_server_pid" >/dev/null 2>&1; then
+        browser_failed=1
+        setup_failure port_or_server_readiness
+      fi
+
+      if curl --fail --silent --show-error "http://127.0.0.1:${browser_port}/" >/dev/null; then
+        set +e
+        ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED=1 \
+          ACCRUE_HOST_REUSE_SERVER=1 \
+          ACCRUE_HOST_PROOF_SERVER_PID="$browser_server_pid" \
+          ACCRUE_HOST_BROWSER_PORT="$browser_port" \
+          ACCRUE_HOST_E2E_FIXTURE="$fixture_file" \
+          npm run e2e:braintree-checkout
+        e2e_status=$?
+        set -e
+
+        if [ "$e2e_status" -ne 0 ]; then
+          browser_failed=1
+          setup_failure browser_launch "$e2e_status"
+        fi
+
+        exit 0
+      fi
+
+      sleep 1
+    done
+
+    browser_failed=1
+    setup_failure port_or_server_readiness
   fi
 
   sleep 1

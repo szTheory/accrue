@@ -1,0 +1,6 @@
+TAP version 13
+1..4
+ok 1 - test read-only checkout mount never issues a client token or renders Hosted Fields
+ok 2 - test rendered checkout form pins and completes the same context through the LiveView event
+ok 3 - test checkout POST without rendered pin cannot call the provider
+not ok 4 - test rendered checkout form posts its pin and nonce through the authorized completion route

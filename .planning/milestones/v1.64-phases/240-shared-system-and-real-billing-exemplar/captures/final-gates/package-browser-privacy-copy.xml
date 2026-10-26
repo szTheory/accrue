@@ -1,0 +1,364 @@
+<testsuites id="" name="" tests="108" failures="0" skipped="19" errors="0" time="133.713823">
+<testsuite name="admin-interaction-overlay-phase199.spec.js" timestamp="2026-10-09T23:38:44.841Z" hostname="chromium-desktop" tests="18" failures="0" skipped="0" time="32.313" errors="0">
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay overlay targets declare the required cross-page representatives" classname="admin-interaction-overlay-phase199.spec.js" time="0.002">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay Subscription drawer is portaled, hit-testable, inert, and dismisses cleanly" classname="admin-interaction-overlay-phase199.spec.js" time="1.421">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay Invoice drawer is portaled, hit-testable, inert, and dismisses cleanly" classname="admin-interaction-overlay-phase199.spec.js" time="0.96">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay Charge drawer is portaled, hit-testable, inert, and dismisses cleanly" classname="admin-interaction-overlay-phase199.spec.js" time="0.702">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay Webhook drawer is portaled, hit-testable, inert, and dismisses cleanly" classname="admin-interaction-overlay-phase199.spec.js" time="0.841">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay Connect drawer is portaled, hit-testable, inert, and dismisses cleanly" classname="admin-interaction-overlay-phase199.spec.js" time="0.701">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay command palette behaves as an overlay-equivalent named wrapper" classname="admin-interaction-overlay-phase199.spec.js" time="0.45">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay step-up modal uses the overlay root and restores cleanly" classname="admin-interaction-overlay-phase199.spec.js" time="0.727">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @keyboard invoice review contains focus, exposes associated validation, and restores after rapid dismissal" classname="admin-interaction-overlay-phase199.spec.js" time="0.743">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @motion drawer geometry matches desktop right-dock and mobile bottom-sheet contracts" classname="admin-interaction-overlay-phase199.spec.js" time="0.936">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @theme production accrue_theme persistence has no legacy-key dependency" classname="admin-interaction-overlay-phase199.spec.js" time="0.495">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @theme theme picker writes accrue_theme and survives reload" classname="admin-interaction-overlay-phase199.spec.js" time="0.334">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @theme System keeps one stored choice while effective colors follow OS through patch and reload" classname="admin-interaction-overlay-phase199.spec.js" time="0.51">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @affordance floating panels stay viewport-bound and non-modal controls stay non-interactive" classname="admin-interaction-overlay-phase199.spec.js" time="0.844">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @affordance action menu stays adjacent and bounded at locked viewport edges" classname="admin-interaction-overlay-phase199.spec.js" time="1.282">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @fixture deterministic route flows preserve focus, scroll, clipping, and back navigation" classname="admin-interaction-overlay-phase199.spec.js" time="14.64">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @copy empty-state and repeated action labels use state-specific copy and hidden context" classname="admin-interaction-overlay-phase199.spec.js" time="1.243">
+</testcase>
+<testcase name="auto-minted ratchet guards — interaction focus-ring" classname="admin-interaction-overlay-phase199.spec.js" time="5.482">
+</testcase>
+</testsuite>
+<testsuite name="admin-page-flow-phase191.spec.js" timestamp="2026-10-09T23:38:44.841Z" hostname="chromium-desktop" tests="13" failures="0" skipped="0" time="34.531" errors="0">
+<testcase name="Phase 191 page-flow regression harness › AX187 source map covers owner-phase 191 rows and D-30 categories @ax187" classname="admin-page-flow-phase191.spec.js" time="0.006">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-116 AX187-442 AX187-443 AX187-444 AX187-445 route every manifest page-flow through fixtures @fixtures @ax187" classname="admin-page-flow-phase191.spec.js" time="0.127">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy phone-320" classname="admin-page-flow-phase191.spec.js" time="5.048">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy phone-375" classname="admin-page-flow-phase191.spec.js" time="4.863">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy tablet-768" classname="admin-page-flow-phase191.spec.js" time="5.547">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy desktop-1024" classname="admin-page-flow-phase191.spec.js" time="6.14">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy desktop-1440" classname="admin-page-flow-phase191.spec.js" time="5.874">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-097 AX187-098 AX187-099 AX187-100 AX187-101 AX187-102 AX187-103 AX187-111 AX187-112 AX187-113 AX187-114 AX187-117 AX187-118 overlays trap focus, layer above scrims, and dismiss safely @overlay @focus @floating @ax187" classname="admin-page-flow-phase191.spec.js" time="1.461">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-104 AX187-105 AX187-106 AX187-107 AX187-108 AX187-109 AX187-110 AX187-115 AX187-116 LiveView patch and reconnect states keep focus stable @reconnect @ax187" classname="admin-page-flow-phase191.spec.js" time="0.8">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › browser online signal keeps staged billing action disabled until LiveView reconnects @reconnect @ax187" classname="admin-page-flow-phase191.spec.js" time="0.546">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187" classname="admin-page-flow-phase191.spec.js" time="1.848">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-440 AX187-441 AX187-442 AX187-443 destructive confirmations name object, billing effect, scope, and audit outcome @copy @destructive @ax187" classname="admin-page-flow-phase191.spec.js" time="1.448">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-340 AX187-341 AX187-342 AX187-343 AX187-344 AX187-345 AX187-346 AX187-347 AX187-348 AX187-349 AX187-350 AX187-351 AX187-352 AX187-353 AX187-354 AX187-355 AX187-356 AX187-357 AX187-358 AX187-359 AX187-360 AX187-361 AX187-362 AX187-363 AX187-364 AX187-365 AX187-366 AX187-367 AX187-368 AX187-369 AX187-370 AX187-371 AX187-372 AX187-373 AX187-374 AX187-375 AX187-376 AX187-377 AX187-378 AX187-379 AX187-380 AX187-381 AX187-382 AX187-383 AX187-384 AX187-385 AX187-386 AX187-387 AX187-388 AX187-389 AX187-390 AX187-391 AX187-392 AX187-393 AX187-394 AX187-395 AX187-396 AX187-397 AX187-398 AX187-399 AX187-400 AX187-401 AX187-402 AX187-403 AX187-404 AX187-405 AX187-406 AX187-407 AX187-408 AX187-409 AX187-410 AX187-411 AX187-412 AX187-413 AX187-414 AX187-415 AX187-416 AX187-417 AX187-418 AX187-419 AX187-420 AX187-421 AX187-422 AX187-423 AX187-424 AX187-425 AX187-426 AX187-427 AX187-428 AX187-429 AX187-430 AX187-431 AX187-432 AX187-433 AX187-434 AX187-435 AX187-440 AX187-441 AX187-442 AX187-443 state copy is recoverable and object-specific @copy @fixtures @ax187" classname="admin-page-flow-phase191.spec.js" time="0.823">
+</testcase>
+</testsuite>
+<testsuite name="admin-spec-detail-phase198.spec.js" timestamp="2026-10-09T23:38:44.841Z" hostname="chromium-desktop" tests="16" failures="0" skipped="0" time="11.696" errors="0">
+<testcase name="Phase 198 propagated DETAIL contract › Customer initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.668">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Invoice initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.738">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Charge initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.753">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Coupon initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.626">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Promotion code initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.595">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Connect account initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.597">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Webhook initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.648">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Event initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.677">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Invoice action opens drawer and requires step-up before execution" classname="admin-spec-detail-phase198.spec.js" time="1.014">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Charge action opens drawer and requires step-up before execution" classname="admin-spec-detail-phase198.spec.js" time="0.979">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Webhook action opens drawer and requires step-up before execution" classname="admin-spec-detail-phase198.spec.js" time="0.779">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Connect account action opens drawer and requires step-up before execution" classname="admin-spec-detail-phase198.spec.js" time="1.003">
+</testcase>
+<testcase name="Phase 198 analytics propagation contract › Recovery follows locked analytics/detail grammar" classname="admin-spec-detail-phase198.spec.js" time="0.516">
+</testcase>
+<testcase name="Phase 198 analytics propagation contract › Campaign follows locked analytics/detail grammar" classname="admin-spec-detail-phase198.spec.js" time="0.342">
+</testcase>
+<testcase name="Phase 240 invoice detail and review responsive contract › preserves real invoice identity, money, state, review target, and focus at required widths" classname="admin-spec-detail-phase198.spec.js" time="1.142">
+<system-out>
+<![CDATA[Phase 240 detail zoom evidence: {"visualScale":3,"cssViewportWidth":320}; CDP page scale is pinch/visual scaling, not browser page zoom. A faithful 400% browser zoom control is unavailable in this headless Playwright run.
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 240 intermediate coarse-pointer invoice review › keeps invoice facts and staged action controls usable with coarse pointer" classname="admin-spec-detail-phase198.spec.js" time="0.619">
+</testcase>
+</testsuite>
+<testsuite name="admin-spec-list-phase196.spec.js" timestamp="2026-10-09T23:38:44.841Z" hostname="chromium-desktop" tests="7" failures="0" skipped="0" time="2.906" errors="0">
+<testcase name="Phase 196 Subscriptions LIST contract › desktop LIST contract renders PageHeader, chips, count, and prioritized columns" classname="admin-spec-list-phase196.spec.js" time="0.437">
+</testcase>
+<testcase name="Phase 196 Subscriptions LIST contract › default At risk queue is URL-backed with an All escape hatch" classname="admin-spec-list-phase196.spec.js" time="0.273">
+</testcase>
+<testcase name="Phase 196 Subscriptions LIST contract › empty and loading states expose exact markers, reasons, copy, and skeleton accessibility" classname="admin-spec-list-phase196.spec.js" time="0.533">
+</testcase>
+<testcase name="Phase 196 Subscriptions LIST contract › mobile cards preserve LIST priority without horizontal clipping" classname="admin-spec-list-phase196.spec.js" time="0.349">
+</testcase>
+<testcase name="Phase 240 invoice list responsive contract › keeps seeded invoice identity, exact money, status, and target reachable at width boundaries" classname="admin-spec-list-phase196.spec.js" time="0.586">
+</testcase>
+<testcase name="Phase 240 invoice list responsive contract › records separate CSS text-enlargement, text-spacing, and page-scale evidence" classname="admin-spec-list-phase196.spec.js" time="0.39">
+<system-out>
+<![CDATA[Phase 240 zoom evidence: {"visualScale":3,"cssViewportWidth":320}; CDP page scale is pinch/visual scaling, not browser page zoom. A faithful 400% browser zoom control is unavailable in this headless Playwright run.
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 240 intermediate coarse-pointer invoice list › keeps identity, money, status, and action reachable with coarse pointer" classname="admin-spec-list-phase196.spec.js" time="0.338">
+</testcase>
+</testsuite>
+<testsuite name="admin-interaction-overlay-phase199.spec.js" timestamp="2026-10-09T23:38:44.841Z" hostname="chromium-mobile" tests="18" failures="0" skipped="15" time="6.879" errors="0">
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay overlay targets declare the required cross-page representatives" classname="admin-interaction-overlay-phase199.spec.js" time="0.002">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay Subscription drawer is portaled, hit-testable, inert, and dismisses cleanly" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="drawer matrix runs once on desktop">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay Invoice drawer is portaled, hit-testable, inert, and dismisses cleanly" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="drawer matrix runs once on desktop">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay Charge drawer is portaled, hit-testable, inert, and dismisses cleanly" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="drawer matrix runs once on desktop">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay Webhook drawer is portaled, hit-testable, inert, and dismisses cleanly" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="drawer matrix runs once on desktop">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay Connect drawer is portaled, hit-testable, inert, and dismisses cleanly" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="drawer matrix runs once on desktop">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay command palette behaves as an overlay-equivalent named wrapper" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="command palette overlay check runs once">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @overlay step-up modal uses the overlay root and restores cleanly" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="step-up representative runs once">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @keyboard invoice review contains focus, exposes associated validation, and restores after rapid dismissal" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="invoice review keyboard sequence runs once">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @motion drawer geometry matches desktop right-dock and mobile bottom-sheet contracts" classname="admin-interaction-overlay-phase199.spec.js" time="0.977">
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @theme production accrue_theme persistence has no legacy-key dependency" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="theme persistence matrix runs once">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @theme theme picker writes accrue_theme and survives reload" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="theme picker persistence runs once">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @theme System keeps one stored choice while effective colors follow OS through patch and reload" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="System appearance lifecycle runs once">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @affordance floating panels stay viewport-bound and non-modal controls stay non-interactive" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="affordance matrix runs once">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @affordance action menu stays adjacent and bounded at locked viewport edges" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="viewport matrix is driven manually">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @fixture deterministic route flows preserve focus, scroll, clipping, and back navigation" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="fixture route flows run once">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 199 interaction and overlay contract › @phase199 @copy empty-state and repeated action labels use state-specific copy and hidden context" classname="admin-interaction-overlay-phase199.spec.js">
+<properties>
+<property name="skip" value="copy contract runs once">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="auto-minted ratchet guards — interaction focus-ring" classname="admin-interaction-overlay-phase199.spec.js" time="4.961">
+</testcase>
+</testsuite>
+<testsuite name="admin-page-flow-phase191.spec.js" timestamp="2026-10-09T23:38:44.841Z" hostname="chromium-mobile" tests="13" failures="0" skipped="0" time="31.049" errors="0">
+<testcase name="Phase 191 page-flow regression harness › AX187 source map covers owner-phase 191 rows and D-30 categories @ax187" classname="admin-page-flow-phase191.spec.js" time="0.009">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-116 AX187-442 AX187-443 AX187-444 AX187-445 route every manifest page-flow through fixtures @fixtures @ax187" classname="admin-page-flow-phase191.spec.js" time="0.184">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy phone-320" classname="admin-page-flow-phase191.spec.js" time="4.928">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy phone-375" classname="admin-page-flow-phase191.spec.js" time="5.077">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy tablet-768" classname="admin-page-flow-phase191.spec.js" time="4.992">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy desktop-1024" classname="admin-page-flow-phase191.spec.js" time="5.179">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-436 AX187-437 AX187-438 AX187-439 AX187-446 AX187-447 page flows avoid clipping at required widths @responsive @scroll @copy desktop-1440" classname="admin-page-flow-phase191.spec.js" time="5.226">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-097 AX187-098 AX187-099 AX187-100 AX187-101 AX187-102 AX187-103 AX187-111 AX187-112 AX187-113 AX187-114 AX187-117 AX187-118 overlays trap focus, layer above scrims, and dismiss safely @overlay @focus @floating @ax187" classname="admin-page-flow-phase191.spec.js" time="1.329">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-104 AX187-105 AX187-106 AX187-107 AX187-108 AX187-109 AX187-110 AX187-115 AX187-116 LiveView patch and reconnect states keep focus stable @reconnect @ax187" classname="admin-page-flow-phase191.spec.js" time="0.625">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › browser online signal keeps staged billing action disabled until LiveView reconnects @reconnect @ax187" classname="admin-page-flow-phase191.spec.js" time="0.391">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › disposable phase 240 subscription action stays busy through a single held dispatch @reconnect @ax187" classname="admin-page-flow-phase191.spec.js" time="1.064">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-440 AX187-441 AX187-442 AX187-443 destructive confirmations name object, billing effect, scope, and audit outcome @copy @destructive @ax187" classname="admin-page-flow-phase191.spec.js" time="1.61">
+</testcase>
+<testcase name="Phase 191 page-flow regression harness › AX187-340 AX187-341 AX187-342 AX187-343 AX187-344 AX187-345 AX187-346 AX187-347 AX187-348 AX187-349 AX187-350 AX187-351 AX187-352 AX187-353 AX187-354 AX187-355 AX187-356 AX187-357 AX187-358 AX187-359 AX187-360 AX187-361 AX187-362 AX187-363 AX187-364 AX187-365 AX187-366 AX187-367 AX187-368 AX187-369 AX187-370 AX187-371 AX187-372 AX187-373 AX187-374 AX187-375 AX187-376 AX187-377 AX187-378 AX187-379 AX187-380 AX187-381 AX187-382 AX187-383 AX187-384 AX187-385 AX187-386 AX187-387 AX187-388 AX187-389 AX187-390 AX187-391 AX187-392 AX187-393 AX187-394 AX187-395 AX187-396 AX187-397 AX187-398 AX187-399 AX187-400 AX187-401 AX187-402 AX187-403 AX187-404 AX187-405 AX187-406 AX187-407 AX187-408 AX187-409 AX187-410 AX187-411 AX187-412 AX187-413 AX187-414 AX187-415 AX187-416 AX187-417 AX187-418 AX187-419 AX187-420 AX187-421 AX187-422 AX187-423 AX187-424 AX187-425 AX187-426 AX187-427 AX187-428 AX187-429 AX187-430 AX187-431 AX187-432 AX187-433 AX187-434 AX187-435 AX187-440 AX187-441 AX187-442 AX187-443 state copy is recoverable and object-specific @copy @fixtures @ax187" classname="admin-page-flow-phase191.spec.js" time="0.435">
+</testcase>
+</testsuite>
+<testsuite name="admin-spec-detail-phase198.spec.js" timestamp="2026-10-09T23:38:44.841Z" hostname="chromium-mobile" tests="16" failures="0" skipped="4" time="7.818" errors="0">
+<testcase name="Phase 198 propagated DETAIL contract › Customer initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.531">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Invoice initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.667">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Charge initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.618">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Coupon initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.467">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Promotion code initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.467">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Connect account initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.749">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Webhook initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.561">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Event initial render follows DETAIL markers in light and dark" classname="admin-spec-detail-phase198.spec.js" time="0.415">
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Invoice action opens drawer and requires step-up before execution" classname="admin-spec-detail-phase198.spec.js">
+<properties>
+<property name="skip" value="Representative drawer flow checks run once on desktop">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Charge action opens drawer and requires step-up before execution" classname="admin-spec-detail-phase198.spec.js">
+<properties>
+<property name="skip" value="Representative drawer flow checks run once on desktop">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Webhook action opens drawer and requires step-up before execution" classname="admin-spec-detail-phase198.spec.js">
+<properties>
+<property name="skip" value="Representative drawer flow checks run once on desktop">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 198 propagated DETAIL contract › Connect account action opens drawer and requires step-up before execution" classname="admin-spec-detail-phase198.spec.js">
+<properties>
+<property name="skip" value="Representative drawer flow checks run once on desktop">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Phase 198 analytics propagation contract › Recovery follows locked analytics/detail grammar" classname="admin-spec-detail-phase198.spec.js" time="0.347">
+</testcase>
+<testcase name="Phase 198 analytics propagation contract › Campaign follows locked analytics/detail grammar" classname="admin-spec-detail-phase198.spec.js" time="0.325">
+</testcase>
+<testcase name="Phase 240 invoice detail and review responsive contract › preserves real invoice identity, money, state, review target, and focus at required widths" classname="admin-spec-detail-phase198.spec.js" time="1.197">
+<system-out>
+<![CDATA[Phase 240 detail zoom evidence: {"visualScale":4,"cssViewportWidth":320}; CDP page scale is pinch/visual scaling, not browser page zoom. A faithful 400% browser zoom control is unavailable in this headless Playwright run.
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 240 intermediate coarse-pointer invoice review › keeps invoice facts and staged action controls usable with coarse pointer" classname="admin-spec-detail-phase198.spec.js" time="1.236">
+</testcase>
+</testsuite>
+<testsuite name="admin-spec-list-phase196.spec.js" timestamp="2026-10-09T23:38:44.841Z" hostname="chromium-mobile" tests="7" failures="0" skipped="0" time="2.985" errors="0">
+<testcase name="Phase 196 Subscriptions LIST contract › desktop LIST contract renders PageHeader, chips, count, and prioritized columns" classname="admin-spec-list-phase196.spec.js" time="0.427">
+</testcase>
+<testcase name="Phase 196 Subscriptions LIST contract › default At risk queue is URL-backed with an All escape hatch" classname="admin-spec-list-phase196.spec.js" time="0.255">
+</testcase>
+<testcase name="Phase 196 Subscriptions LIST contract › empty and loading states expose exact markers, reasons, copy, and skeleton accessibility" classname="admin-spec-list-phase196.spec.js" time="0.495">
+</testcase>
+<testcase name="Phase 196 Subscriptions LIST contract › mobile cards preserve LIST priority without horizontal clipping" classname="admin-spec-list-phase196.spec.js" time="0.408">
+</testcase>
+<testcase name="Phase 240 invoice list responsive contract › keeps seeded invoice identity, exact money, status, and target reachable at width boundaries" classname="admin-spec-list-phase196.spec.js" time="0.679">
+</testcase>
+<testcase name="Phase 240 invoice list responsive contract › records separate CSS text-enlargement, text-spacing, and page-scale evidence" classname="admin-spec-list-phase196.spec.js" time="0.309">
+<system-out>
+<![CDATA[Phase 240 zoom evidence: {"visualScale":4,"cssViewportWidth":320}; CDP page scale is pinch/visual scaling, not browser page zoom. A faithful 400% browser zoom control is unavailable in this headless Playwright run.
+]]>
+</system-out>
+</testcase>
+<testcase name="Phase 240 intermediate coarse-pointer invoice list › keeps identity, money, status, and action reachable with coarse pointer" classname="admin-spec-list-phase196.spec.js" time="0.412">
+</testcase>
+</testsuite>
+</testsuites>

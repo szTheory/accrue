@@ -140,6 +140,8 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert html =~ "Amount remaining"
     assert html =~ "Amount paid"
     assert html =~ "Collection method"
+    assert html =~ "Automatic"
+    refute html =~ "Charge Automatically"
     assert html =~ "Document state"
     assert html =~ "Tax risk"
     assert html =~ "Line items"
@@ -147,6 +149,583 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert html =~ "Tax and documents"
 
     refute html =~ ~s(class="ax-kpi-grid")
+  end
+
+  test "invoice action fixture retains the scoped target and raw money contract", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    customer = TestRepo.get!(Customer, invoice.customer_id)
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert invoice.status == :draft
+    assert invoice.amount_due_minor == 9_900
+    assert invoice.currency == "usd"
+    assert customer.owner_type == "User"
+    assert is_binary(customer.owner_id)
+
+    assert {:ok, view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    assert has_element?(view, "[data-ax-primary-action]", Copy.Invoice.invoice_action_finalize())
+    assert html =~ "INV-2000"
+    assert invoice.customer_id == customer.id
+  end
+
+  test "unsupported invoice action is rejected with a scoped safe next step", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    html = render_click(view, "open_action_drawer", %{"action_type" => "refund"})
+
+    assert html =~ "This invoice action is unavailable for the current state or owner scope."
+    assert html =~ "Return to the invoice and choose one of its listed actions."
+    refute html =~ "data-ax-action-drawer-form"
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :refund_invoice end)
+  end
+
+  test "payment review shows exact amount and cancels when amount or currency changes", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        status: :open,
+        amount_remaining_minor: 9_900,
+        amount_due_minor: 9_900
+      })
+      |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    render_click(element(view, "button", Copy.Invoice.invoice_action_manual_pay()))
+
+    render_submit(
+      element(view, "form[data-action-type='pay']"),
+      %{"action_type" => "pay"}
+    )
+
+    html = render(view)
+
+    dismissal_labels =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("button[phx-click='cancel_pending_action']")
+      |> Enum.map(&Floki.text/1)
+      |> Enum.map(&String.trim/1)
+
+    assert "Back to invoice" in dismissal_labels
+
+    review =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("[data-role='confirm-panel']")
+      |> Floki.text(sep: " ")
+
+    customer = TestRepo.get!(Customer, invoice.customer_id)
+
+    assert review =~ "Customer"
+    assert review =~ "Invoice Detail"
+    assert review =~ "Customer ID"
+    assert review =~ invoice.customer_id
+    assert review =~ "Owner target"
+    assert review =~ "#{customer.owner_type} · #{customer.owner_id}"
+    assert review =~ "Owner scope"
+    assert review =~ "global owner scope"
+    assert review =~ invoice.id
+
+    assert html =~ "99.00"
+    assert html =~ "(usd)"
+
+    confirm_labels =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("button[data-role='confirm-action']")
+      |> Enum.map(&Floki.text/1)
+      |> Enum.map(&String.trim/1)
+
+    assert "Pay invoice" in confirm_labels
+    refute "Confirm Pay invoice" in confirm_labels
+
+    invoice
+    |> Invoice.changeset(%{amount_remaining_minor: 10_100, currency: "eur"})
+    |> TestRepo.update!()
+
+    html = render_click(element(view, "button[data-role='confirm-action']"))
+
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :pay_invoice end)
+    assert html =~ "changed"
+    assert TestRepo.get!(Invoice, invoice.id).amount_remaining_minor == 10_100
+  end
+
+  test "step-up continuation cancels when invoice leaves the reviewed owner scope", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    customer =
+      TestRepo.get!(Customer, invoice.customer_id)
+      |> Customer.changeset(%{owner_type: "Organization", owner_id: "reviewed-invoice-org"})
+      |> TestRepo.update!()
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "reviewed-invoice-org",
+        active_organization_slug: "reviewed-invoice-org",
+        admin_organization_ids: ["reviewed-invoice-org"]
+      )
+
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, invoice.id)
+
+    assert {:ok, view, _html} =
+             live(conn, "/billing/invoices/#{invoice.id}?org=reviewed-invoice-org")
+
+    render_click(element(view, "button[role='menuitem']", Copy.Invoice.invoice_action_void()))
+
+    render_submit(
+      element(view, "form[data-action-type='void']"),
+      %{"action_type" => "void"}
+    )
+
+    render_click(view, "confirm_action", %{})
+
+    customer
+    |> Customer.changeset(%{owner_id: "changed-invoice-org"})
+    |> TestRepo.update!()
+
+    result = render_submit(view, "step_up_submit", %{"code" => "123456"})
+
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :void_invoice end)
+    assert match?({:error, {:redirect, _redirect}}, result)
+    assert TestRepo.get!(Invoice, invoice.id).status == :draft
+  end
+
+  test "payment result is tied to the refreshed scoped invoice and duplicate confirm is inert", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    invoice =
+      invoice
+      |> Invoice.changeset(%{status: :open, amount_remaining_minor: 9_900})
+      |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+    render_click(element(view, "button", Copy.Invoice.invoice_action_manual_pay()))
+
+    render_submit(element(view, "form[data-action-type='pay']"), %{"action_type" => "pay"})
+
+    html = render_click(element(view, "button[data-role='confirm-action']"))
+
+    assert html =~ "processor returned a successful payment response"
+    assert html =~ "current scoped invoice reports Paid"
+    refute html =~ "settlement confirmed"
+    assert TestRepo.get!(Invoice, invoice.id).status == :paid
+
+    render_click(view, "confirm_action", %{})
+
+    assert Enum.count(Fake.calls(), fn {operation, _args} -> operation == :pay_invoice end) == 1
+  end
+
+  test "finalization result names the refreshed invoice state", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+    render_click(element(view, "button", Copy.Invoice.invoice_action_finalize()))
+
+    render_submit(
+      element(view, "form[data-action-type='finalize']"),
+      %{"action_type" => "finalize"}
+    )
+
+    html = render_click(element(view, "button[data-role='confirm-action']"))
+
+    assert html =~ "processor returned success for Finalize invoice"
+    assert html =~ "current scoped invoice reports Open"
+    refute html =~ "processor settlement"
+    assert TestRepo.get!(Invoice, invoice.id).status == :open
+  end
+
+  test "requires-action payment result stays distinct from a completed invoice", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        status: :open,
+        amount_remaining_minor: 9_900,
+        data: %{
+          "payment_intent" => %{
+            "id" => "pi_review_required",
+            "object" => "payment_intent",
+            "status" => "requires_action",
+            "next_action" => %{"type" => "use_stripe_sdk"}
+          }
+        }
+      })
+      |> TestRepo.update!()
+
+    assert {:ok, stripe_invoice} = Fake.retrieve_invoice(invoice.processor_id)
+
+    :ok =
+      Fake.scripted_response(
+        :pay_invoice,
+        {:ok,
+         Map.merge(stripe_invoice, %{
+           status: "open",
+           amount_due: 9_900,
+           amount_remaining: 9_900,
+           amount_paid: 0,
+           payment_intent: %{
+             id: "pi_review_required",
+             object: "payment_intent",
+             status: "requires_action",
+             next_action: %{type: "use_stripe_sdk"}
+           }
+         })}
+      )
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+    render_click(element(view, "button", Copy.Invoice.invoice_action_manual_pay()))
+    render_submit(element(view, "form[data-action-type='pay']"), %{"action_type" => "pay"})
+
+    html = render_click(element(view, "button[data-role='confirm-action']"))
+
+    assert html =~ "Customer action is required"
+    assert html =~ "payment is not complete"
+    refute html =~ "payment response"
+    assert TestRepo.get!(Invoice, invoice.id).status == :open
+  end
+
+  test "definitive card decline is distinct from an ambiguous processor outcome", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    invoice =
+      invoice
+      |> Invoice.changeset(%{status: :open, amount_remaining_minor: 9_900})
+      |> TestRepo.update!()
+
+    :ok =
+      Fake.scripted_response(
+        :pay_invoice,
+        {:error, %Accrue.CardError{code: "card_declined", message: "card declined"}}
+      )
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+    render_click(element(view, "button", Copy.Invoice.invoice_action_manual_pay()))
+    render_submit(element(view, "form[data-action-type='pay']"), %{"action_type" => "pay"})
+
+    html = render_click(element(view, "button[data-role='confirm-action']"))
+
+    assert html =~ "processor declined"
+    assert html =~ "No payment was accepted"
+    refute html =~ "Outcome not confirmed"
+    assert TestRepo.get!(Invoice, invoice.id).status == :open
+  end
+
+  test "ambiguous payment error stays unconfirmed and is not automatically retried", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    invoice =
+      invoice
+      |> Invoice.changeset(%{status: :open, amount_remaining_minor: 9_900})
+      |> TestRepo.update!()
+
+    :ok =
+      Fake.scripted_response(
+        :pay_invoice,
+        {:error, %Accrue.APIError{code: "rate_limit", http_status: 429, message: "rate limited"}}
+      )
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+    render_click(element(view, "button", Copy.Invoice.invoice_action_manual_pay()))
+
+    render_submit(element(view, "form[data-action-type='pay']"), %{"action_type" => "pay"})
+
+    html = render_click(element(view, "button[data-role='confirm-action']"))
+
+    assert html =~ "Outcome not confirmed"
+    assert html =~ "will not retry automatically"
+    refute html =~ "processor declined"
+
+    render_click(view, "confirm_action", %{})
+
+    assert Enum.count(Fake.calls(), fn {operation, _args} -> operation == :pay_invoice end) == 1
+  end
+
+  test "invoice detail preserves supported money precision, unavailable evidence, and overdue separation",
+       %{
+         conn: conn,
+         invoice: invoice
+       } do
+    now = Accrue.Clock.utc_now()
+    customer = TestRepo.get!(Customer, invoice.customer_id)
+
+    _customer =
+      customer
+      |> Customer.changeset(%{name: "顧客 🧾 Long Name"})
+      |> TestRepo.update!()
+
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        number: "INV-精密-🧾-0001",
+        status: :open,
+        currency: "jpy",
+        amount_due_minor: 1_234,
+        amount_remaining_minor: 1_234,
+        amount_paid_minor: 0,
+        due_date: DateTime.add(now, -1, :second)
+      })
+      |> TestRepo.update!()
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    assert html =~ "顧客 🧾 Long Name"
+    assert html =~ "INV-精密-🧾-0001"
+    assert html =~ "Open"
+    assert html =~ "Overdue"
+    assert html =~ "1,234"
+    refute html =~ "1,234.00"
+    assert html =~ "Due"
+
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        currency: "kwd",
+        amount_due_minor: 1_234,
+        amount_remaining_minor: 1_234,
+        amount_paid_minor: 0
+      })
+      |> TestRepo.update!()
+
+    assert {:ok, _view, kwd_html} = live(conn, "/billing/invoices/#{invoice.id}")
+    assert kwd_html =~ "1.234"
+
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        currency: "usd",
+        amount_due_minor: 0,
+        amount_remaining_minor: 0,
+        amount_paid_minor: 0
+      })
+      |> TestRepo.update!()
+
+    assert {:ok, _view, zero_html} = live(conn, "/billing/invoices/#{invoice.id}")
+    assert zero_html =~ "$0.00"
+
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        currency: "zzz",
+        amount_due_minor: 1_234,
+        amount_remaining_minor: nil,
+        amount_paid_minor: 0
+      })
+      |> TestRepo.update!()
+
+    assert {:ok, _view, unavailable_html} = live(conn, "/billing/invoices/#{invoice.id}")
+    assert unavailable_html =~ "--"
+    refute unavailable_html =~ "$12.34"
+
+    invoice =
+      invoice
+      |> Invoice.changeset(%{
+        currency: nil,
+        amount_due_minor: 1_234,
+        amount_remaining_minor: 1_234,
+        amount_paid_minor: 0
+      })
+      |> TestRepo.update!()
+
+    assert {:ok, _view, missing_currency_html} = live(conn, "/billing/invoices/#{invoice.id}")
+    assert missing_currency_html =~ "--"
+    refute missing_currency_html =~ "$12.34"
+  end
+
+  test "invoice contextual return rebuilds active owner scope and rejects foreign customer origin",
+       %{
+         conn: conn,
+         invoice: invoice
+       } do
+    customer =
+      TestRepo.get!(Customer, invoice.customer_id)
+      |> Customer.changeset(%{owner_type: "Organization", owner_id: "invoice-return-org"})
+      |> TestRepo.update!()
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "invoice-return-org",
+        active_organization_slug: "invoice-return-org",
+        admin_organization_ids: ["invoice-return-org"]
+      )
+
+    foreign_customer_id = Ecto.UUID.generate()
+    raw_origin = "/billing/customers/#{foreign_customer_id}?org=foreign-org&tab=payments"
+
+    assert {:ok, view, html} =
+             live(
+               conn,
+               "/billing/invoices/#{invoice.id}?org=invoice-return-org&return_to=#{URI.encode_www_form(raw_origin)}"
+             )
+
+    refute html =~ foreign_customer_id
+
+    back_href =
+      view
+      |> element("a", "Back to invoices")
+      |> render()
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Floki.attribute("href")
+      |> hd()
+
+    assert URI.parse(back_href).path == "/billing/invoices"
+    assert URI.decode_query(URI.parse(back_href).query)["org"] == "invoice-return-org"
+
+    own_origin = "/billing/customers/#{customer.id}?org=foreign-org&tab=payments"
+
+    assert {:ok, view, _html} =
+             live(
+               conn,
+               "/billing/invoices/#{invoice.id}?org=invoice-return-org&return_to=#{URI.encode_www_form(own_origin)}"
+             )
+
+    back_href =
+      view
+      |> element("a", "Back to customer payments")
+      |> render()
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Floki.attribute("href")
+      |> hd()
+
+    back_params = URI.parse(back_href).query |> URI.decode_query()
+    assert back_params["org"] == "invoice-return-org"
+    assert back_params["tab"] == "payments"
+    refute back_href =~ "foreign-org"
+  end
+
+  test "invoice return restores supported list filters, exact authorized results, and query-free routes",
+       %{
+         conn: conn,
+         invoice: invoice
+       } do
+    customer =
+      TestRepo.get!(Customer, invoice.customer_id)
+      |> Customer.changeset(%{
+        name: "Northwind Billing",
+        owner_type: "Organization",
+        owner_id: "invoice-return-org"
+      })
+      |> TestRepo.update!()
+
+    matching_customer =
+      insert_customer(%{
+        name: "Northwind Services",
+        owner_type: "Organization",
+        owner_id: "invoice-return-org",
+        processor: "fake"
+      })
+
+    matching_invoice =
+      insert_invoice(matching_customer, %{
+        number: "INV-NORTHWIND-MATCH",
+        status: :open,
+        collection_method: "send_invoice"
+      })
+
+    excluded_customer =
+      insert_customer(%{
+        name: "Northwind Excluded",
+        owner_type: "Organization",
+        owner_id: "another-org"
+      })
+
+    excluded_invoice =
+      insert_invoice(excluded_customer, %{
+        number: "INV-NORTHWIND-EXCLUDED",
+        status: :open,
+        collection_method: "send_invoice"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "invoice-return-org",
+        active_organization_slug: "invoice-return-org",
+        admin_organization_ids: ["invoice-return-org"]
+      )
+
+    raw_origin =
+      "/billing/invoices?view=all&q=Northwind&status=open&collection_method=send_invoice&sort=ignored&org=foreign"
+
+    assert {:ok, view, html} =
+             live(
+               conn,
+               "/billing/invoices/#{invoice.id}?org=invoice-return-org&return_to=#{URI.encode_www_form(raw_origin)}"
+             )
+
+    assert html =~ customer.name
+    assert has_element?(view, "a", "Back to invoices")
+
+    href =
+      view
+      |> element("a", "Back to invoices")
+      |> render()
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Floki.attribute("href")
+      |> hd()
+
+    assert URI.parse(href).path == "/billing/invoices"
+    restored_params = href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    assert restored_params["org"] == "invoice-return-org"
+    assert restored_params["q"] == "Northwind"
+    assert restored_params["status"] == "open"
+    assert restored_params["collection_method"] == "send_invoice"
+    assert restored_params["view"] == "all"
+    refute Map.has_key?(restored_params, "sort")
+    refute href =~ "foreign"
+
+    assert {:ok, destination_view, destination_html} = live(conn, href)
+    assert destination_html =~ matching_invoice.number
+    refute destination_html =~ excluded_invoice.number
+    refute destination_html =~ invoice.number
+    assert has_element?(destination_view, ".ax-filter-chip[data-filter='status']", "Open")
+
+    assert {:ok, query_free_view, _query_free_html} =
+             live(
+               conn,
+               "/billing/invoices/#{invoice.id}?org=invoice-return-org&return_to=#{URI.encode_www_form("/billing/invoices")}"
+             )
+
+    assert query_free_view |> element("a", "Back to invoices") |> render() =~
+             "/billing/invoices?org=invoice-return-org"
+
+    assert {:ok, malformed_view, _malformed_html} =
+             live(
+               conn,
+               "/billing/invoices/#{invoice.id}?org=invoice-return-org&return_to=#{URI.encode_www_form("/billing/customers/#{Ecto.UUID.generate()}?tab=payments")}"
+             )
+
+    assert malformed_view |> element("a", "Back to invoices") |> render() =~
+             "/billing/invoices?org=invoice-return-org"
   end
 
   test "D-10 D-11 D-12 D-13 invoice danger actions stay overflow-owned and step-up gated",
@@ -177,6 +756,33 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     refute TestRepo.get!(Invoice, invoice.id).status == :void
     assert html =~ Copy.step_up_title()
+  end
+
+  test "dismissing invoice step-up allows the staged action to be confirmed again", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, invoice.id)
+
+    assert {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    render_click(element(view, "button[role='menuitem']", Copy.Invoice.invoice_action_void()))
+
+    render_submit(
+      element(view, "form[data-action-type='void']"),
+      %{"action_type" => "void"}
+    )
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ Copy.step_up_title()
+
+    render_click(view, "step_up_dismiss", %{})
+
+    refute has_element?(view, "[data-role='step-up-cancel']")
+    refute TestRepo.get!(Invoice, invoice.id).status == :void
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :void_invoice end)
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ Copy.step_up_title()
   end
 
   test "D-13 collectible invoices prioritize pay and keep danger actions in overflow", %{
@@ -306,7 +912,8 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     html = render_submit(view, "step_up_submit", %{"code" => "123456"})
 
-    assert html =~ Copy.invoice_action_recorded_info()
+    assert html =~ "current scoped invoice reports Void"
+    refute html =~ Copy.invoice_action_recorded_info()
 
     audit_event =
       TestRepo.one!(
@@ -361,6 +968,85 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     html = render_click(element(view, "button", "Confirm"))
     assert html =~ Copy.invoice_remove_manual_item_success()
+  end
+
+  test "rejects client requests to remove priced invoice items", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    priced_item =
+      insert_invoice_item(invoice, %{
+        stripe_id: "ii_priced",
+        description: "Subscription plan",
+        price_ref: "price_monthly"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    html = render_click(view, "stage_remove_item", %{"id" => priced_item.id})
+
+    refute html =~ Copy.invoice_remove_manual_item_confirm()
+    assert html =~ "manual invoice line item"
+
+    # A forged confirmation with no staged, eligible item must be harmless.
+    html = render_click(view, "confirm_remove_item", %{})
+
+    assert html =~ "manual invoice line item"
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :invoice_item_delete end)
+    assert TestRepo.get!(InvoiceItem, priced_item.id)
+  end
+
+  test "rechecks manual-item eligibility before removal", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    item =
+      insert_invoice_item(invoice, %{
+        stripe_id: "ii_manual_rechecked",
+        description: "Manual setup fee"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    render_click(view, "stage_remove_item", %{"id" => item.id})
+
+    item
+    |> InvoiceItem.changeset(%{price_ref: "price_now_managed"})
+    |> TestRepo.update!()
+
+    html = render_click(view, "confirm_remove_item", %{})
+
+    assert html =~ "manual invoice line item"
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :invoice_item_delete end)
+    assert TestRepo.get!(InvoiceItem, item.id)
+  end
+
+  test "rechecks invoice draft status before removing a staged item", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    item =
+      insert_invoice_item(invoice, %{
+        stripe_id: "ii_manual_status_rechecked",
+        description: "Manual setup fee"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    render_click(view, "stage_remove_item", %{"id" => item.id})
+
+    invoice
+    |> Invoice.force_status_changeset(%{status: :open})
+    |> TestRepo.update!()
+
+    html = render_click(view, "confirm_remove_item", %{})
+
+    assert html =~ "manual invoice line item"
+    refute Enum.any?(Fake.calls(), fn {operation, _args} -> operation == :invoice_item_delete end)
+    assert TestRepo.get!(InvoiceItem, item.id)
   end
 
   test "applies ax-measure to tax-risk prose paragraphs", %{

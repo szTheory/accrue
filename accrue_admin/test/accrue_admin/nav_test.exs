@@ -7,9 +7,9 @@ defmodule AccrueAdmin.NavTest do
     items = Nav.items("/billing", "/billing")
     labels = Enum.map(items, & &1.label)
 
-    assert hd(labels) == "Home"
+    assert hd(labels) == "Recent activity"
     assert "Payments" in labels
-    assert "Recovery" in labels
+    assert "Payment recovery" in labels
 
     events_idx = Enum.find_index(labels, &(&1 == "Events"))
     webhooks_idx = Enum.find_index(labels, &(&1 == "Webhooks"))
@@ -26,8 +26,9 @@ defmodule AccrueAdmin.NavTest do
     assert Map.has_key?(first, :icon)
     assert Map.has_key?(first, :group)
     assert first.href == "/billing"
-    # Home stands alone with no group label.
-    assert first.group == nil
+    # Activity is a billing destination, matching only the mount root.
+    assert first.group == "Billing"
+    assert first.exact == true
   end
 
   test "groups follow the operator's mental model (Phase 169 regroup)" do
@@ -35,7 +36,7 @@ defmodule AccrueAdmin.NavTest do
 
     assert Enum.find(items, &(&1.label == "Customers")).group == "Billing"
     assert Enum.find(items, &(&1.label == "Invoices queue")).group == "Billing"
-    assert Enum.find(items, &(&1.label == "Recovery")).group == "Recovery"
+    assert Enum.find(items, &(&1.label == "Payment recovery")).group == "Recovery"
     assert Enum.find(items, &(&1.label == "Webhooks")).group == "Developer"
     assert Enum.find(items, &(&1.label == "Events")).group == "Audit"
     assert Enum.find(items, &(&1.label == "Coupons")).group == "Catalog"
@@ -43,14 +44,16 @@ defmodule AccrueAdmin.NavTest do
     assert Enum.find(items, &(&1.label == "Connect")).group == "Connect"
     # Updated to /payments (IA-06 route reshape)
     assert Enum.find(items, &(&1.label == "Payments")).href == "/billing/payments"
-    assert Enum.find(items, &(&1.label == "Recovery")).href == "/billing/analytics/recovery"
+
+    assert Enum.find(items, &(&1.label == "Payment recovery")).href ==
+             "/billing/analytics/recovery"
   end
 
   # --- Phase 175-02: badge contract (collapsible removed 260621-nr8) ---
 
-  test "items/3 with recovery > 0 returns Recovery group item with badge" do
+  test "items/3 with recovery > 0 returns Payment recovery item with badge" do
     items = Nav.items("/billing", "/billing", %{recovery: 2, developer: 0})
-    recovery = Enum.find(items, &(&1.label == "Recovery"))
+    recovery = Enum.find(items, &(&1.label == "Payment recovery"))
     assert recovery.badge == 2
   end
 
@@ -60,9 +63,9 @@ defmodule AccrueAdmin.NavTest do
     assert invoices.badge == 3
   end
 
-  test "items/3 with recovery == 0 returns Recovery group item with badge: nil" do
+  test "items/3 with recovery == 0 returns Payment recovery item with badge: nil" do
     items = Nav.items("/billing", "/billing", %{recovery: 0, developer: 0})
-    recovery = Enum.find(items, &(&1.label == "Recovery"))
+    recovery = Enum.find(items, &(&1.label == "Payment recovery"))
     assert recovery.badge == nil
   end
 

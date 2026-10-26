@@ -109,14 +109,22 @@ defmodule AccrueAdmin.Queries.Customers do
       {:q, term}, query ->
         pattern = "%#{term}%"
 
-        where(
-          query,
-          [customer],
-          ilike(customer.email, ^pattern) or
-            ilike(customer.name, ^pattern) or
-            ilike(customer.owner_id, ^pattern) or
-            ilike(customer.processor_id, ^pattern)
-        )
+        text_match =
+          dynamic(
+            [customer],
+            ilike(customer.email, ^pattern) or
+              ilike(customer.name, ^pattern) or
+              ilike(customer.owner_id, ^pattern) or
+              ilike(customer.processor_id, ^pattern)
+          )
+
+        match =
+          case Ecto.UUID.cast(term) do
+            {:ok, uuid} -> dynamic([customer], ^text_match or customer.id == ^uuid)
+            :error -> text_match
+          end
+
+        where(query, ^match)
 
       {:owner_type, owner_type}, query ->
         where(query, [customer], customer.owner_type == ^owner_type)

@@ -3,50 +3,19 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   use Phoenix.LiveView
 
-  import Ecto.Query
-
-  alias Accrue.Billing.{Customer, Invoice, MeterEvent, Query, Subscription}
-  alias Accrue.Events.Event
-  alias Accrue.Repo
-  alias Accrue.Webhook.WebhookEvent
-  alias AccrueAdmin.AttentionCounts
-
-  alias AccrueAdmin.Components.{
-    AppShell,
-    EmptyState,
-    FlashGroup,
-    Icon,
-    KpiCard,
-    PageHeader,
-    StatStrip,
-    Timeline
-  }
-
-  alias AccrueAdmin.Components.StatusBadge
+  alias AccrueAdmin.Components.{AppShell, FlashGroup, PageHeader, Timeline}
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.Queries.Events
   alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(_params, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
-    stats = dashboard_stats()
     socket = assign_shell(socket, admin)
-
     scope = socket.assigns[:current_owner_scope]
+    events = recent_events(scope, socket.assigns.admin_mount_path)
 
-    {:ok,
-     socket
-     |> assign(:stats, stats)
-     |> assign(
-       :attention,
-       attention_items(
-         stats,
-         socket.assigns.admin_mount_path,
-         scope
-       )
-     )
-     |> assign(:recent_events, recent_events(socket.assigns.admin_mount_path, scope))
-     |> assign(:webhook_health, webhook_health(socket.assigns.admin_mount_path, scope))}
+    {:ok, assign(socket, recent_events: events)}
   end
 
   @impl true
@@ -63,302 +32,26 @@ defmodule AccrueAdmin.Live.DashboardLive do
     >
       <section class="ax-page ax-home">
         <PageHeader.page_header
-          breadcrumbs={[%{label: Copy.dashboard_breadcrumb_home()}]}
+          breadcrumb_group="Billing"
+          breadcrumbs={[%{label: Copy.home_intro_headline()}]}
           title={Copy.home_intro_headline()}
         >
           <:description>
-            <p data-ax-health-verdict="true">
-              <StatusBadge.status_badge
-                status={verdict_status(@stats)}
-                label={verdict_label(verdict_status(@stats))}
-                tone={verdict_tone(verdict_status(@stats))}
-              />
-            </p>
-            <p class="ax-body"><%= Copy.home_intro_copy() %></p>
+            <p class="ax-body">See what changed in customer billing, and open an event for details.</p>
           </:description>
-          <:actions>
-            <a
-              class="ax-button ax-button-primary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-            >
-              Open invoice queue
-              <Icon.icon name={:arrow_right} size="sm" />
-            </a>
-            <button
-              type="button"
-              class="ax-button ax-button-secondary ax-button-sm"
-              data-command-palette-trigger="true"
-              data-ax-command-palette-trigger="true"
-            >
-              <%= Copy.home_customer_search_cta() %>
-              <Icon.icon name={:search} size="sm" />
-            </button>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
-            >
-              Audit ledger
-              <Icon.icon name={:arrow_right} size="sm" />
-            </a>
-          </:actions>
-          <:stat_strip>
-            <StatStrip.stat_strip label={Copy.dashboard_kpi_section_aria_label()}>
-              <:stat
-                label="Open invoices"
-                value={count(@stats.open_invoice_count, "invoice")}
-                tone="cobalt"
-                href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-              />
-              <:stat
-                label="Exposure"
-                value={format_minor(@stats.open_invoice_balance_minor, "usd")}
-                tone={exposure_tone(@stats)}
-                href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-              />
-              <:stat
-                label="At-risk subscriptions"
-                value={count(@stats.past_due_subscription_count, "subscription")}
-                tone="amber"
-                href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-              />
-              <:stat
-                label="Failed webhooks"
-                value={count(@stats.blocked_webhook_count, "failed webhook")}
-                tone={stat_webhook_tone(@stats)}
-                href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
-              />
-            </StatStrip.stat_strip>
-          </:stat_strip>
         </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
-        <%!-- Zone 1 — Attention rail: exceptions first, only non-zero rows --%>
-        <section class="ax-home-section" aria-label="Billing exceptions" data-ax-zone="attention-rail">
+        <section class="ax-home-section" aria-label="Recent billing activity">
           <header class="ax-section-head">
-            <h3 class="ax-heading"><%= attention_rail_heading(@attention) %></h3>
-            <a
-              :if={@attention != []}
-              class="ax-link-quiet"
-              href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
-            >
-              <%= Copy.home_attention_all_signals() %>
-              <Icon.icon name={:arrow_right} size="sm" />
-            </a>
+            <a class="ax-link-quiet" href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}>View events</a>
           </header>
-          <div :if={@attention != []} class="ax-card ax-attention">
-            <a :for={row <- @attention} href={row.href} class="ax-attention-row">
-              <StatusBadge.status_badge
-                status={:info}
-                label={row.priority}
-                tone={attention_status_badge_tone(row.tone)}
-              />
-              <span class="ax-attention-text ax-stack-xs">
-                <strong><%= row.metric %></strong> <%= row.label %>
-              </span>
-              <span :if={row.pill} class="ax-chip ax-label"><%= row.pill %></span>
-              <span class="ax-link-quiet"><%= row.action %></span>
-            </a>
-          </div>
-
-          <EmptyState.empty_state
-            :if={@attention == []}
-            icon={:check_circle}
-            title={Copy.home_attention_empty_title()}
-            body={Copy.home_attention_empty_copy()}
-            class="ax-attention-rail--empty"
+          <Timeline.timeline
+            label="Recent billing activity"
+            empty_label="No recent billing activity in this scope."
+            items={@recent_events}
           />
-        </section>
-
-        <%!-- Zone 2 — Task launchers: one door per JTBD --%>
-        <section class="ax-home-section" aria-label="Tasks" data-ax-zone="task-launcher">
-          <header class="ax-section-head">
-            <h3 class="ax-heading"><%= Copy.home_tasks_heading() %></h3>
-          </header>
-
-          <div class="ax-launchers ax-launchers-tri">
-            <a
-              class="ax-card ax-home-launcher-card"
-              data-ax-launcher-primary="true"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-            >
-              <span class="ax-home-launcher-icon"><Icon.icon name={:invoices} size="lg" /></span>
-              <h4 class="ax-heading"><%= Copy.home_launcher_invoices_title() %></h4>
-              <span :if={@stats.open_invoice_count > 0} class="ax-chip ax-label">
-                <%= count(@stats.open_invoice_count, "open invoice") %> · <%= format_minor(@stats.open_invoice_balance_minor, "usd") %> above target
-              </span>
-              <span class="ax-button ax-button-secondary ax-button-sm ax-home-launcher-action">
-                Open invoice queue <Icon.icon name={:arrow_right} size="sm" />
-              </span>
-            </a>
-
-            <a
-              class="ax-card ax-home-launcher-card"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              <span class="ax-home-launcher-icon"><Icon.icon name={:recovery} size="lg" /></span>
-              <h4 class="ax-heading"><%= Copy.home_launcher_recovery_title() %></h4>
-              <span :if={@stats.past_due_subscription_count > 0} class="ax-chip ax-label">
-                <%= count(@stats.past_due_subscription_count, "at-risk account") %>
-              </span>
-              <span class="ax-button ax-button-secondary ax-button-sm ax-home-launcher-action">
-                Open dunning analytics <Icon.icon name={:arrow_right} size="sm" />
-              </span>
-            </a>
-
-            <a
-              class="ax-card ax-home-launcher-card"
-              href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}
-            >
-              <span class="ax-home-launcher-icon"><Icon.icon name={:webhooks} size="lg" /></span>
-              <h4 class="ax-heading"><%= Copy.home_launcher_developer_title() %></h4>
-              <span :if={@stats.blocked_webhook_count > 0} class="ax-chip ax-label">
-                <%= count(@stats.blocked_webhook_count, "dead-letter event") %>
-              </span>
-              <span class="ax-button ax-button-secondary ax-button-sm ax-home-launcher-action">
-                Debug webhook failures <Icon.icon name={:arrow_right} size="sm" />
-              </span>
-            </a>
-          </div>
-        </section>
-
-        <%!-- Zone 3 — At a glance: demoted KPIs --%>
-        <section class="ax-home-section" aria-label={Copy.dashboard_kpi_section_aria_label()} data-ax-zone="kpi-cluster">
-          <header class="ax-section-head">
-            <h3 class="ax-heading"><%= Copy.home_kpi_heading() %></h3>
-          </header>
-
-          <div class="ax-kpi-grid ax-kpi-grid-4">
-            <KpiCard.kpi_card
-              label={Copy.dashboard_kpi_customers_label()}
-              value={Integer.to_string(@stats.customer_count)}
-              href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}
-              aria_label={Copy.dashboard_kpi_customers_aria_label()}
-            />
-            <KpiCard.kpi_card
-              label={Copy.dashboard_kpi_active_subscriptions_label()}
-              value={Integer.to_string(@stats.active_subscription_count)}
-              delta={
-                Integer.to_string(@stats.canceling_subscription_count) <>
-                  Copy.dashboard_kpi_active_subscriptions_canceling_suffix()
-              }
-              delta_tone="amber"
-              href={ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope, %{"status" => "canceling"})}
-              aria_label={Copy.dashboard_kpi_subscriptions_aria_label()}
-            >
-              <:meta>Canceling subscriptions need renewal review when above 0.</:meta>
-            </KpiCard.kpi_card>
-            <KpiCard.kpi_card
-              label={Copy.dashboard_kpi_open_invoice_balance_label()}
-              value={format_minor(@stats.open_invoice_balance_minor, "usd")}
-              delta={
-                Integer.to_string(@stats.open_invoice_count) <>
-                  Copy.dashboard_kpi_open_invoice_delta_suffix()
-              }
-              delta_tone={if(@stats.open_invoice_count > 0, do: "amber", else: "moss")}
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-              aria_label={Copy.dashboard_kpi_invoices_aria_label()}
-            >
-              <:meta><%= Copy.dashboard_kpi_open_invoice_balance_meta() %></:meta>
-            </KpiCard.kpi_card>
-            <KpiCard.kpi_card
-              label={Copy.dashboard_kpi_webhook_backlog_label()}
-              value={Integer.to_string(@stats.blocked_webhook_count)}
-              delta={
-                Integer.to_string(@stats.events_last_day_count) <>
-                  Copy.dashboard_kpi_webhook_events_suffix()
-              }
-              delta_tone={if(@stats.blocked_webhook_count > 0, do: "amber", else: "moss")}
-              href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "dead"})}
-              aria_label={Copy.dashboard_kpi_webhooks_aria_label()}
-            >
-              <:meta><%= if @stats.blocked_webhook_count > 0, do: "Failed or dead events need debugging.", else: "No failed webhook backlog." %></:meta>
-            </KpiCard.kpi_card>
-          </div>
-        </section>
-
-        <%!-- Zone 4 — Recent activity --%>
-        <section class="ax-grid ax-grid-2" aria-label={Copy.dashboard_activity_section_aria_label()} data-ax-zone="recent-activity">
-          <article class="ax-card ax-activity-card ax-activity-card-ledger">
-            <header class="ax-section-head">
-              <div>
-                <p class="ax-eyebrow"><%= Copy.dashboard_activity_event_ledger_eyebrow() %></p>
-                <h3 class="ax-heading"><%= Copy.dashboard_activity_recent_local_heading() %></h3>
-              </div>
-              <div class="ax-activity-actions" aria-label="Actor filters">
-                <a
-                  class="ax-button ax-button-secondary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
-                >
-                  <%= Copy.home_activity_events_link() %>
-                </a>
-                <a
-                  class="ax-button ax-button-secondary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "admin"})}
-                >
-                  Filter admin actors
-                </a>
-                <a
-                  class="ax-button ax-button-secondary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{"actor_type" => "system"})}
-                >
-                  Filter system actors
-                </a>
-              </div>
-            </header>
-
-            <% latest_event = latest_dashboard_audit(@recent_events) %>
-            <div :if={latest_event} class="ax-audit-summary-row ax-dashboard-audit-summary" aria-label="Latest event ledger summary">
-              <span><strong>Actor</strong><em><%= latest_event.actor %></em></span>
-              <span><strong>Action</strong><em><%= latest_event.action %></em></span>
-              <span><strong>Timestamp</strong><em><%= latest_event.at %></em></span>
-            </div>
-
-            <Timeline.timeline
-              label={Copy.dashboard_timeline_events_label()}
-              empty_label={Copy.dashboard_timeline_events_empty()}
-              items={@recent_events}
-            />
-            <div class="ax-activity-actions ax-activity-footer" aria-label="Event ledger navigation">
-              <a
-                class="ax-button ax-button-primary ax-button-sm"
-                href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
-              >
-                Open full event ledger
-              </a>
-              <a
-                class="ax-button ax-button-secondary ax-button-sm"
-                href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{"limit" => "25"})}
-              >
-                Load more audit events
-              </a>
-            </div>
-          </article>
-
-          <article class="ax-card ax-activity-card ax-activity-card-pipeline">
-            <header class="ax-section-head">
-              <div>
-                <p class="ax-eyebrow"><%= Copy.dashboard_activity_webhook_health_eyebrow() %></p>
-                <h3 class="ax-heading"><%= Copy.dashboard_activity_projection_pipeline_heading() %></h3>
-              </div>
-              <a
-                class="ax-button ax-button-warning ax-button-sm"
-                href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "failed,dead"})}
-              >
-                Debug failed webhook queue
-              </a>
-            </header>
-
-            <p class="ax-body ax-activity-context">
-              Recent rows below are individual deliveries. Use each Debug delivery trace link for one failed delivery, or open the queue for all failures.
-            </p>
-
-            <Timeline.timeline
-              label={Copy.dashboard_timeline_webhooks_label()}
-              empty_label={Copy.dashboard_timeline_webhooks_empty()}
-              items={@webhook_health}
-            />
-          </article>
         </section>
       </section>
     </AppShell.app_shell>
@@ -375,119 +68,35 @@ defmodule AccrueAdmin.Live.DashboardLive do
     |> assign(:assets_css_path, admin["assets_css_path"])
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
-    |> assign(:current_path, admin["mount_path"] || "/billing")
+    |> assign(
+      :current_path,
+      ScopedPath.build(
+        admin["mount_path"] || "/billing",
+        "",
+        socket.assigns[:current_owner_scope]
+      )
+    )
   end
 
-  defp dashboard_stats do
-    open_invoice_statuses = [:draft, :open]
+  defp recent_events(owner_scope, mount_path) do
+    {events, _cursor} = Events.list(limit: 6, owner_scope: owner_scope)
 
-    %{
-      customer_count: Repo.aggregate(Customer, :count, :id),
-      active_subscription_count: Subscription |> Query.active() |> Repo.aggregate(:count, :id),
-      canceling_subscription_count:
-        Subscription |> Query.canceling() |> Repo.aggregate(:count, :id),
-      past_due_subscription_count: AttentionCounts.compute(nil).recovery,
-      open_invoice_count:
-        Invoice
-        |> where([invoice], invoice.status in ^open_invoice_statuses)
-        |> Repo.aggregate(:count, :id),
-      open_invoice_balance_minor:
-        Invoice
-        |> where([invoice], invoice.status in ^open_invoice_statuses)
-        |> select([invoice], coalesce(sum(invoice.amount_remaining_minor), 0))
-        |> Repo.one()
-        |> Kernel.||(0),
-      blocked_webhook_count: AttentionCounts.compute(nil).developer,
-      failed_meter_event_count:
-        MeterEvent
-        |> where([m], m.stripe_status == "failed")
-        |> Repo.aggregate(:count, :id),
-      events_last_day_count:
-        Event
-        |> where(
-          [event],
-          event.inserted_at >= ^DateTime.add(DateTime.utc_now(), -86_400, :second)
-        )
-        |> Repo.aggregate(:count, :id)
-    }
+    Enum.map(events, fn event ->
+      %{
+        title: Copy.billing_event_label(event.type),
+        event_type: event.type,
+        id: event.id,
+        at: event.inserted_at,
+        subject_type: event.subject_type,
+        subject_id: event.subject_id,
+        actor: event.actor_type,
+        actor_id: event.actor_id,
+        tone: AccrueAdmin.EventPresentation.for(event.type).tone,
+        href: ScopedPath.build(mount_path, "/events/#{event.id}", owner_scope),
+        href_label: "Open event"
+      }
+    end)
   end
-
-  # Attention rail rows — only exceptions that exist, highest-signal first.
-  defp attention_items(stats, mount_path, scope) do
-    [
-      stats.open_invoice_count > 0 &&
-        %{
-          tone: "warning",
-          priority: "P1",
-          metric: count(stats.open_invoice_count, "open invoice"),
-          label:
-            "above $0.00 target - #{format_minor(stats.open_invoice_balance_minor, "usd")} open",
-          pill: nil,
-          action: "Work invoice queue",
-          href: ScopedPath.build(mount_path, "/invoices", scope, %{"status" => "open"})
-        },
-      stats.blocked_webhook_count > 0 &&
-        %{
-          tone: "danger",
-          priority: "P2",
-          metric: count(stats.blocked_webhook_count, "webhook"),
-          label: Copy.home_attention_webhooks_label(),
-          pill: nil,
-          action: "Debug failed webhook queue",
-          href: ScopedPath.build(mount_path, "/webhooks", scope, %{"status" => "failed,dead"})
-        },
-      stats.past_due_subscription_count > 0 &&
-        %{
-          tone: "warning",
-          priority: "P3",
-          metric: count(stats.past_due_subscription_count, "subscription"),
-          label: Copy.home_attention_past_due_label(),
-          pill: nil,
-          action: "Review dunning",
-          href: ScopedPath.build(mount_path, "/analytics/recovery", scope)
-        },
-      stats.failed_meter_event_count > 0 &&
-        %{
-          tone: "info",
-          priority: "P4",
-          metric: count(stats.failed_meter_event_count, "meter event"),
-          label: Copy.home_attention_meter_label(),
-          pill: nil,
-          action: Copy.home_attention_action_investigate(),
-          href: ScopedPath.build(mount_path, "/events", scope, %{"q" => "meter_event"})
-        }
-    ]
-    |> Enum.filter(& &1)
-  end
-
-  # Single billing-health verdict. Keyed off the SAME four attention signals that drive
-  # `attention_items/3` so the answer-first header verdict can never contradict the priority
-  # exceptions listed beneath it (IA-01). Any live signal → :action_required, else :healthy.
-  defp verdict_status(%{
-         open_invoice_count: open_invoices,
-         blocked_webhook_count: blocked_webhooks,
-         past_due_subscription_count: past_due_subscriptions,
-         failed_meter_event_count: failed_meter_events
-       })
-       when open_invoices > 0 or blocked_webhooks > 0 or past_due_subscriptions > 0 or
-              failed_meter_events > 0,
-       do: :action_required
-
-  defp verdict_status(_stats), do: :healthy
-
-  defp verdict_label(:action_required), do: Copy.dashboard_health_verdict_action_required()
-  defp verdict_label(:healthy), do: Copy.dashboard_health_verdict_healthy()
-
-  defp verdict_tone(:action_required), do: "amber"
-  defp verdict_tone(:healthy), do: "moss"
-
-  defp exposure_tone(%{open_invoice_balance_minor: minor}) when minor > 0, do: "amber"
-  defp exposure_tone(_stats), do: "moss"
-
-  # StatStrip webhook tone — named distinctly from the timeline `webhook_tone/1` below
-  # (arity-collision by name); reads Home's `blocked_webhook_count` stat.
-  defp stat_webhook_tone(%{blocked_webhook_count: count}) when count > 0, do: "amber"
-  defp stat_webhook_tone(_stats), do: "moss"
 
   defp flash_messages(flash) do
     Enum.flat_map([:error, :info], fn kind ->
@@ -498,147 +107,13 @@ defmodule AccrueAdmin.Live.DashboardLive do
     end)
   end
 
-  defp attention_rail_heading([]), do: Copy.dashboard_display_headline()
-  defp attention_rail_heading(_attention), do: Copy.home_attention_priority_heading()
-
-  # Map attention-rail row tone → StatusBadge tone (StatusBadge scale: moss/cobalt/amber/slate/ink).
-  defp attention_status_badge_tone("warning"), do: "amber"
-  defp attention_status_badge_tone("danger"), do: "amber"
-  defp attention_status_badge_tone("info"), do: "cobalt"
-  defp attention_status_badge_tone(_tone), do: "slate"
-
-  defp count(1, noun), do: "1 #{noun}"
-  defp count(n, noun), do: "#{n} #{noun}s"
-
-  defp recent_events(mount_path, scope) do
-    Event
-    |> order_by([event], desc: event.inserted_at, desc: event.id)
-    |> limit(6)
-    |> Repo.all()
-    |> Enum.map(fn event ->
-      %{
-        title: event_actor_summary(event),
-        at: format_datetime(event.inserted_at),
-        body: "#{event.type} · #{event_subject_summary(event)}",
-        status: event.actor_type,
-        tone: if(event.actor_type == "admin", do: :cobalt, else: :slate),
-        meta: "Audit event",
-        audit_actor: event_actor_summary(event),
-        audit_action: event.type,
-        audit_at: format_datetime(event.inserted_at),
-        href: ScopedPath.build(mount_path, "/events/#{event.id}", scope),
-        href_label: "Open event"
-      }
-    end)
-  end
-
-  defp latest_dashboard_audit([event | _events]) do
-    %{
-      actor: Map.get(event, :audit_actor),
-      action: Map.get(event, :audit_action),
-      at: Map.get(event, :audit_at)
-    }
-  end
-
-  defp latest_dashboard_audit(_events), do: nil
-
-  defp webhook_health(mount_path, scope) do
-    WebhookEvent
-    |> order_by([event], desc: event.inserted_at, desc: event.id)
-    |> limit(6)
-    |> Repo.all()
-    |> Enum.map(fn event ->
-      %{
-        title: event.type,
-        at: format_datetime(event.received_at || event.inserted_at),
-        body: webhook_body(event),
-        status: event.status,
-        tone: webhook_tone(event.status),
-        meta: endpoint_label(event.endpoint),
-        href: ScopedPath.build(mount_path, "/webhooks/#{event.id}", scope),
-        href_label: "Debug delivery trace"
-      }
-    end)
-  end
-
-  defp event_subject_summary(%{subject_type: subject_type, subject_id: subject_id}) do
-    if subject_id do
-      "#{humanize(subject_type)} activity"
-    else
-      "#{humanize(subject_type)} activity without linked record"
-    end
-  end
-
-  defp event_actor_summary(%{actor_type: actor_type, actor_id: actor_id}) do
-    case to_string(actor_type) do
-      "admin" ->
-        if actor_id, do: "Admin user #{humanize_identifier(actor_id)}", else: "Admin user"
-
-      "system" ->
-        "Accrue system"
-
-      actor ->
-        humanize(actor)
-    end
-  end
-
-  defp humanize_identifier(value) do
-    value
-    |> to_string()
-    |> String.replace(["_", "-"], " ")
-    |> String.split()
-    |> Enum.map_join(" ", &String.capitalize/1)
-  end
-
-  defp webhook_body(event) do
-    "#{event.processor |> to_string() |> humanize()} delivery #{short_id(event.processor_event_id)}"
-  end
-
-  defp webhook_tone(status) when status in [:succeeded, :processing], do: :moss
-  defp webhook_tone(status) when status in [:received, :replayed], do: :cobalt
-  defp webhook_tone(status) when status in [:failed, :dead], do: :amber
-  defp webhook_tone(_status), do: :slate
-
-  defp endpoint_label(nil), do: nil
-  defp endpoint_label(endpoint), do: "endpoint #{endpoint}"
-
-  defp short_id(nil), do: "unavailable"
-
-  defp short_id(value) do
-    value = to_string(value)
-
-    if String.length(value) > 14 do
-      String.slice(value, 0, 6) <> "..." <> String.slice(value, -5, 5)
-    else
-      value
-    end
-  end
-
-  defp humanize(value) do
-    value
-    |> to_string()
-    |> String.replace("_", " ")
-    |> String.replace("-", " ")
-    |> String.capitalize()
-  end
-
-  defp format_minor(amount_minor, _currency) when is_integer(amount_minor) do
-    dollars = amount_minor / 100
-    "$" <> :erlang.float_to_binary(dollars, decimals: 2)
-  end
-
-  defp format_minor(%Decimal{} = amount_minor, currency) do
-    amount_minor
-    |> Decimal.to_integer()
-    |> format_minor(currency)
-  end
-
-  defp format_minor(_amount_minor, _currency), do: "$0.00"
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
-
   defp default_brand do
-    %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}
+    %{
+      "name" => "Accrue",
+      "logo_url" => nil,
+      "primary_color" => "#254ee8",
+      "secondary_color" => "#667085",
+      "accent_color" => "#12b76a"
+    }
   end
 end

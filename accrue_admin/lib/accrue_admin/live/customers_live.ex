@@ -15,11 +15,13 @@ defmodule AccrueAdmin.Live.CustomersLive do
     FlashGroup,
     IdBadge,
     PageHeader,
-    StatStrip
+    StatStrip,
+    StatusBadge
   }
 
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Customers
+  alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(_params, session, socket) do
@@ -97,8 +99,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Billing"
           breadcrumbs={[
-            %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.customers_index_heading()}
           ]}
           title={Copy.customers_list_heading()}
@@ -111,7 +113,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
             <StatStrip.stat_strip label="Customer summary">
               <:stat label="Customers" value={Integer.to_string(@summary.customer_count)} />
               <:stat
-                label="With payment method"
+                label="With default method"
                 value={Integer.to_string(@summary.with_default_payment_method_count)}
               />
             </StatStrip.stat_strip>
@@ -123,7 +125,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
               filter_fields={customer_filter_fields(@owner_type_type, @owner_type_options)}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
+              clear_href={@table_path}
               clear_visible={filter_active?(@params)}
             />
           </:filter_toolbar>
@@ -133,6 +135,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.customers_list_result_label_pair()}
+          total_count={if !filter_active?(@params) && !@params["cursor"], do: @summary.customer_count}
           id="customers"
           query_module={Customers}
           current_owner_scope={@current_owner_scope}
@@ -144,18 +148,18 @@ defmodule AccrueAdmin.Live.CustomersLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
-            %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope)},
-            %{label: "Payment method", render: &default_payment_method_label/1},
-            %{label: "ID", render: &id_badge_cell(&1, "table")}
+            %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope, customer_return_path(@admin_mount_path, @current_owner_scope, @params), :table)},
+            %{label: "Default payment method", render: &default_payment_method_label/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&customer_link(&1, @admin_mount_path, @current_owner_scope, customer_return_path(@admin_mount_path, @current_owner_scope, @params), :card)}
           card_fields={[
-            %{label: "Payment method", render: &default_payment_method_label/1},
-            %{label: "ID", render: &id_badge_cell(&1, "card")}
+            %{label: "Default payment method", render: &default_payment_method_label/1},
           ]}
           filter_fields={customer_filter_fields(@owner_type_type, @owner_type_options)}
+          empty_action_href={@table_path}
+          empty_action_label="Reset filters"
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -164,11 +168,11 @@ defmodule AccrueAdmin.Live.CustomersLive do
         >
           <:list_status :let={status}>
             <FilterChipBar.filter_chip_bar
+              compact={true}
               items={customer_lens_chips(@params, @table_path)}
               label="Customer view"
               result_count={status.visible_count}
               result_label={Copy.customers_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -215,49 +219,59 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   # Customer cell: primary name/identifier as a link, with email stacked beneath it
   # so the column reads as a find-and-open target (name + contact at a glance).
-  defp customer_link(row, mount_path, owner_scope) do
+  defp customer_link(row, mount_path, owner_scope, return_path, surface) do
     label = row.name || row.email || row.processor_id || row.id
-    href = scoped_path(mount_path, "/customers/#{row.id}", owner_scope)
-    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
-    email_line =
-      if row.email && row.email != label do
-        escaped_email = row.email |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-        ~s(<span class="ax-body ax-text-muted ax-type-code-xs">#{escaped_email}</span>)
-      else
-        ""
-      end
-
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{href}" class="ax-link">#{escaped}</a>#{email_line}</span>)
-    )
-  end
-
-  # Click-to-copy processor (or local) id chip, rendered via the shared IdBadge
-  # component. A unique DOM id per row gives each chip its own Clipboard hook
-  # instance, so copy keeps working on infinite-scroll-appended/filter-re-rendered rows.
-  defp id_badge_cell(row, surface) do
-    id_value = row.processor_id || to_string(row.id)
+    href =
+      ScopedPath.build(mount_path, "/customers/#{row.id}", owner_scope, %{
+        "return_to" => return_path
+      })
 
     assigns = %{
-      __changed__: %{},
-      dom_id: "ax-id-badge-#{surface}-#{row.id}",
-      id_value: id_value
+      label: label,
+      href: href,
+      email: if(row.email && row.email != label, do: row.email),
+      badge_id: "ax-id-badge-customer-#{surface}-#{row.id}",
+      id_value: row.processor_id || to_string(row.id)
     }
 
     ~H"""
-    <IdBadge.id_badge id={@dom_id} id_value={@id_value} />
+    <DataTable.identity_cell label={@label}>
+      <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
+      <:secondary>
+        <span :if={@email} class="ax-data-table-identity-email" title={@email}><%= @email %></span>
+        <IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy customer ID" copy_label="customer ID" variant="plain" />
+      </:secondary>
+    </DataTable.identity_cell>
     """
   end
 
-  defp default_payment_method_label(%{default_payment_method_id: nil}), do: "Missing"
-  defp default_payment_method_label(%{default_payment_method_id: _id}), do: "On file"
+  defp customer_return_path(mount_path, owner_scope, params) do
+    return_params =
+      Map.take(params, ~w(q owner_type has_default_payment_method sort direction cursor tab))
 
-  defp card_title(row), do: row.name || row.email || row.processor_id || row.id
+    ScopedPath.build(mount_path, "/customers", owner_scope, return_params)
+  end
+
+  defp default_payment_method_label(%{default_payment_method_id: nil}) do
+    assigns = %{}
+
+    ~H"""
+    <span title="No default payment method is set. Other saved methods may still be available.">
+      <StatusBadge.status_badge status={:warning} label="Missing" />
+    </span>
+    """
+  end
+
+  defp default_payment_method_label(%{default_payment_method_id: _id}), do: "On file"
 
   defp customer_filter_fields(owner_type_type, owner_type_options) do
     [
-      %{id: :q, label: "Search", placeholder: "Search customers"},
+      %{
+        id: :q,
+        label: "Search customers",
+        placeholder: "Email, name, owner ID, or processor ID"
+      },
       %{
         id: :owner_type,
         label: "Owner type",
@@ -267,7 +281,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
       },
       %{
         id: :has_default_payment_method,
-        label: "Payment method",
+        label: "Default payment method",
         type: :segmented,
         options: [{"", "All"}, {"true", "On file"}, {"false", "Missing"}]
       }
@@ -339,7 +353,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   defp filter_chip_label("q"), do: "Search"
   defp filter_chip_label("owner_type"), do: "Owner type"
-  defp filter_chip_label("has_default_payment_method"), do: "Payment method"
+  defp filter_chip_label("has_default_payment_method"), do: "Default payment method"
   defp filter_chip_label(key), do: humanize(key)
 
   defp filter_chip_value("has_default_payment_method", "true"), do: "On file"
@@ -358,10 +372,6 @@ defmodule AccrueAdmin.Live.CustomersLive do
   end
 
   defp filter_active?(params), do: filter_params(params) != %{}
-
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
 
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil

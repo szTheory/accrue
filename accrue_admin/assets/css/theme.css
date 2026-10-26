@@ -78,6 +78,7 @@ html.accrue-admin {
   --ax-tracking-caps: 0.08em;   /* uppercase eyebrows / section labels */
   /* Reading measure — ch ≈ one "0" advance; 68ch ≈ 66 chars (60–75 sweet spot) */
   --ax-measure: 68ch;
+  --ax-record-label-measure: 36ch; /* scan labels; exact identifiers stay complete */
 
   /* Composed typography roles — semantic bundles consumed by app.css utilities. */
   --ax-type-body-font: 400 var(--ax-type-md)/var(--ax-leading-normal) var(--ax-font-sans);

@@ -203,6 +203,7 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 - From Phase 218 onward, post-hoc human verification and manual UAT are not completion gates. Machine-verifiable behavior must be proved by deterministic unit, integration, property, contract, or browser tests and shifted left into merge-blocking CI.
 - Plans must use automated tasks for machine-verifiable vertical slices, even when the slice is described as a tracer. Do not use `type="tracer"`, `checkpoint:human-verify`, or `<human-check>` when an executable assertion can decide the outcome.
 - Phase completion requires committed SUMMARY coverage with `human_judgment: false`, a generated automated UAT artifact, `VERIFICATION.md` with `status: passed` and `behavior_unverified: 0`, and the project-wide executable-UAT CI contract.
+- When automated evidence covers every acceptance item, record the UAT as automated and proceed from the evidence; do not request a confirmation-only UAT checkpoint.
 - Human interaction remains valid only for genuine product decisions, credential/bootstrap actions, or irreversible external operations. Those interactions are not substitutes for acceptance tests and must not become recurring UAT.
 - Provider-live fidelity lanes are added only when credentials exist and recurring upstream-drift detection has demonstrated value. Deterministic fixtures and repository-backed integration tests remain the required PR gate.
 

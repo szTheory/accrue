@@ -61,7 +61,10 @@
               </li>
             </ul>
 
-            <.link href={~p"/users/log-in"} class="btn btn-primary btn-block mt-6 rounded-lg">
+            <.link
+              href={~p"/pricing?#{[plan: plan.id]}"}
+              class="btn btn-primary btn-block mt-6 rounded-lg"
+            >
               Choose {plan.label}
             </.link>
           </article>

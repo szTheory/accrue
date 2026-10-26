@@ -7,6 +7,10 @@ operator surface remains **Accrue Admin**.
 
 ## Start Here
 
+Phase 239's [read-only preview handoff](../../.planning/milestones/v1.63-phases/239-integrated-quality-handoff/239-HANDOFF.md) summarizes current local evidence, optional feedback boundaries, and the separate proof path.
+
+The Fake-backed preview does not establish live-provider parity or real customer billing outcomes.
+
 The whole happy path is three steps:
 
 ```bash
@@ -110,6 +114,60 @@ Run the focused proof after the walkthrough:
 ```bash
 cd examples/accrue_host
 mix verify
+```
+
+## Isolated ordinary preview
+
+For a Phase 245 rendered baseline, use a separate Compose project and database.
+This starts the named instance with automatic seeds disabled, then applies only
+the ordinary preview stories after the app is ready:
+
+```bash
+cd examples/accrue_host
+make proxy # only when the shared proxy is not running
+ACCRUE_HOST_SKIP_SEEDS=1 make up INSTANCE=accrue-host-phase245-ordinary
+cd ../..
+scripts/ci/seed_phase245_ordinary.sh
+```
+
+The wrapper inspects the actual Compose network, database volume, and Postgres
+fingerprint, snapshots the protected Phase 243 preview, runs the explicit
+ordinary seed, then asserts the protected snapshot is unchanged. It refuses a
+missing ordinary stack or a mismatched target. For warm recovery, run the same
+`ACCRUE_HOST_SKIP_SEEDS=1 make up INSTANCE=accrue-host-phase245-ordinary`
+command; it migrates and starts the isolated app without replaying the default
+stress seeds. The connected Repo independently checks its actual database name,
+role, and resolved Compose database address before evaluating any seed file.
+Confirm the instance uses `Accrue.Processor.Fake` before browser inspection.
+Sign into `/admin` with the local demo operator account described
+above; never put its password in capture output or manifests. A missing external
+credential makes that inspection unavailable and is never a reason to bypass
+authentication.
+
+The ordinary seed includes `ordinary_payment_methods.exs`: roughly 80% of the
+background customer personas have a default test card, with the rest preserving
+the missing-default scenario. The split is stable per customer; cards are Fake
+fixtures, not real payment outcomes. This additive file can be applied alone to
+an existing named ordinary preview without rerunning the aggregate seed. It
+checks the connected database, role/address, instance, skip-seeds guard, and Fake
+processor, and preserves existing methods, exceptional personas, and event history.
+
+The wrapper writes its temporary protected snapshot under `${TMPDIR:-/tmp}`.
+The explicit manual custody commands remain available for separate audits:
+
+```bash
+cd ../..
+ACCRUE_HOST_PREVIEW_INSTANCE=accrue-host-phase243-preview ACCRUE_HOST_PREVIEW_SNAPSHOT=/tmp/accrue245-phase243.snapshot.json node scripts/ci/accrue_host_preview_custody.sh snapshot
+# Seed and inspect accrue-host-phase245-ordinary, then:
+ACCRUE_HOST_PREVIEW_INSTANCE=accrue-host-phase243-preview ACCRUE_HOST_PREVIEW_SNAPSHOT=/tmp/accrue245-phase243.snapshot.json node scripts/ci/accrue_host_preview_custody.sh assert-preserved
+```
+
+Do not reset the protected Phase 243 data or the default seed aggregator. Stop
+only the isolated instance when finished:
+
+```bash
+cd examples/accrue_host
+make down INSTANCE=accrue-host-phase245-ordinary
 ```
 
 ## Apple notification ingress
@@ -290,6 +348,82 @@ mix verify
 
 Package-facing docs mirror the same order in
 [`../../accrue/guides/first_hour.md`](../../accrue/guides/first_hour.md).
+
+### Feedback preview: first bootstrap and warm recovery
+
+For the persistent Fake-backed Admin preview, use Docker Compose from this
+directory. First bootstrap creates the instance's database, applies migrations,
+and seeds the showcase records:
+
+```bash
+make up
+```
+
+Read the launch banner for the stable `http://accrue.localhost/admin` URL and
+the loopback fallback; `make url` prints both again. The stable host requires
+the shared proxy (`make proxy`, once). Sign in with the existing operator
+credentials documented above, inspect `/admin`, open the seeded invoice and
+Events views, then reload and record optional feedback outside the app. `/admin`
+is the operator surface; `/billing` is the customer Portal.
+
+To recover a warm preview, keep the same Compose instance and skip only the
+seed step:
+
+```bash
+ACCRUE_HOST_SKIP_SEEDS=1 make up
+```
+
+This keeps its named database volume and applies normal startup migrations.
+Do not use `make reset` for feedback sessions: it removes this instance's
+volumes and rebuilds the showcase data. For a separate preview, pass the same
+DNS-safe name on every command, for example `make up INSTANCE=accrue-review`;
+the stable URL is then `http://accrue-review.localhost/admin`.
+
+The Phase 243 preservation check is restricted to its dedicated preview
+instance. Set `ACCRUE_HOST_PREVIEW_INSTANCE=accrue-host-phase243-preview`,
+`ACCRUE_HOST_PREVIEW_BASE_URL=http://accrue-host-phase243-preview.localhost`,
+`ACCRUE_HOST_PREVIEW_OPERATOR_EMAIL=admin@example.com`, and
+`ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD` to the existing local operator password,
+then run this explicit single-spec command from the repository root:
+
+```bash
+npm --prefix examples/accrue_host run e2e:preview -- e2e/phase243-preview-preservation.spec.js --project chromium-desktop --workers 1
+```
+
+The selector rejects all-suite and unrelated-spec arguments before Playwright
+starts. It authenticates against the named preview and performs the documented
+warm recovery, so run it when that preview can be restarted.
+
+## Optional customer Portal context
+
+`/billing` is the personal-only mount: it has no account picker and no custom
+context adapter. `/shared-billing` is a second example for hosts where one human
+may bill personally or through a workspace. It passes only the auth token and
+the host's active-scope keys to
+[`AccrueHost.PortalContextAdapter`](lib/accrue_host/portal_context_adapter.ex).
+The adapter reloads organization membership and current billing policy for each
+Portal read or action. The example uses `portal_billable_selection: "personal"`
+for an explicit personal selection; otherwise it resolves the active
+organization. These keys, organization schema, and membership roles belong to
+Cadence and are not required by `accrue_portal`.
+
+The resolver keeps the signed-in human (`actor`) separate from the billed user
+or organization (`billable`), its exact Accrue `Customer`, configured
+`processor`, and the action's server-loaded `target`. The visible billed name
+and the `/app/billing` switch link are presentation/navigation data only. A
+signed context pin keeps an open tab on the billable it displayed, then current
+membership and action policy are checked again before protected LiveView or
+POST operations. A member can review an organization but cannot add payment
+methods; denied forms render no Hosted Fields or submit button. Billing owner or
+admin membership roles only govern that billable; `/admin` still requires the
+separate operator authorization.
+
+Use the built-in Portal adapter contract in another host only when there is a
+real custom or mixed billable need. The personal `/billing` mount above remains
+the no-adapter path. Hosted Fields remain provider-specific: mounted Braintree
+forms use the official Braintree client, while provider-hosted sessions stay on
+their existing hosted path. The browser cases for these two example mounts are
+in `e2e/phase233-context.spec.js`.
 
 ## Seeded history
 
@@ -551,6 +685,78 @@ gh run download RUN_ID --repo szTheory/accrue -n accrue-host-phase15-screenshots
 **Video on CI:** workflows still upload **PNGs** only (`accrue-host-phase15-screenshots`).
 For a human screen-recording checklist (OBS / QuickTime), see
 [`docs/evaluator-walkthrough-script.md`](docs/evaluator-walkthrough-script.md).
+
+## Phase 248 reproducible Admin scenarios
+
+Phase 248 adds host-only scenario selection and current-revision render receipts.
+The ordinary scenario reads the existing Phase 245 Fake preview and stops at the
+invoice action review drawer; it never confirms an action. Start or recover that
+instance with automatic seeds disabled, then apply the explicit ordinary seed
+only if the reviewer chooses to seed it:
+
+```bash
+cd examples/accrue_host
+ACCRUE_HOST=accrue-host-phase245-ordinary.localhost ACCRUE_HOST_SKIP_SEEDS=1 make up INSTANCE=accrue-host-phase245-ordinary
+```
+
+After the ordinary host is ready, run this from `examples/accrue_host`. The
+operator password is read into a mode-0600 temporary file, loaded into the test
+process environment without printing, then removed. The CSRF token is read from
+the login page and submitted through Playwright's request helper; credentials
+and tokens are never added to a capture or manifest:
+
+```bash
+credential_file=$(mktemp)
+chmod 600 "$credential_file"
+trap 'rm -f "$credential_file"' EXIT
+python3 -c 'import re,sys; text=open("README.md", encoding="utf-8").read(); match=re.search(r"logged in as `admin@example.com` \(password\s*`([A-Za-z0-9-]+)`\) to access `/admin`", text); sys.exit("documented operator credential not found") if not match else print(match.group(1))' > "$credential_file"
+export ACCRUE_HOST_ORDINARY_BASE_URL=http://accrue-host-phase245-ordinary.localhost/
+export PHASE248_PROOF_LANE=ordinary
+export ACCRUE_HOST_PREVIEW_OPERATOR_PASSWORD="$(<"$credential_file")"
+npm run e2e -- --config=playwright.phase248-ordinary.config.js e2e/phase248-scenarios.spec.js --project=chromium-desktop --grep @phase248-ordinary --workers=1
+```
+
+The expected route is an existing `/admin/invoices/:id` record with its current
+identity and status visible in an overview frame paired with the open action
+review at 1280×900 light and 320×820 dark. Stop the review by closing the drawer
+or browser; do not submit it. The
+ordinary host and protected Phase 243 host are durable previews: scenario
+selection never resets either one.
+
+The isolated held-out lane runs only on port 4102 and owns its SQL sandbox
+transaction. Its named cases cover a genuine zero-subscription organization, a
+discarded webhook with its observed next step, and the existing long-name
+Unicode customer. The sandbox is checked out per browser test and rolled back
+when the test ends. Run all three with:
+
+```bash
+PHASE248_PROOF_LANE=heldout npm run e2e -- --config=playwright.phase248-heldout.config.js e2e/phase248-scenarios.spec.js --project=chromium-desktop --grep @phase248-heldout --workers=1
+```
+
+The expected routes are `/admin/subscriptions?org=<held-out-owner>`,
+`/admin/webhooks/:id?org=<held-out-owner>`, and the long-name customer detail.
+The empty case checks the scoped database count is zero before rendering the
+unfiltered first-run empty state, and frames the heading, full explanation and
+zero-row context within both viewports. Failure proof records an observed discarded
+status and available replay review without submitting it. Boundary proof compares
+the exact seeded Unicode identity and checks page width at 320px. No production
+selector is added.
+
+The current receipts live in
+`.planning/phases/248-reproducible-scenarios-and-integrated-proof/captures/phase248-current-proof/`.
+Open every PNG at full size, inspect composition and clipping, then set that
+manifest row to `inspection_status: "inspected"` with `inspection_by:
+"Impeccable visual inspection"`, an ISO `inspected_at`, and concise
+`inspection_notes`. Validate with:
+
+```bash
+node scripts/ci/verify_phase248_render_proof.mjs --manifest .planning/phases/248-reproducible-scenarios-and-integrated-proof/captures/phase248-current-proof/manifest.json --scenario ordinary
+node scripts/ci/verify_phase248_render_proof.mjs --manifest .planning/phases/248-reproducible-scenarios-and-integrated-proof/captures/phase248-current-proof/manifest.json
+```
+
+The first command validates the ordinary tracer slice. The second requires all
+four scenario states, source and served asset digests, image hashes, viewport
+metadata and visual inspection records.
 
 ## What this app proves
 

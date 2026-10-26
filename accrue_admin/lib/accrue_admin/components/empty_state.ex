@@ -27,10 +27,12 @@ defmodule AccrueAdmin.Components.EmptyState do
     ~H"""
     <div class={["ax-empty", @class]}>
       <Icon.icon name={@icon} size="lg" class="ax-empty-icon ax-empty-icon-muted" />
-      <p class="ax-type-title ax-empty-title"><%= @title %></p>
-      <p class="ax-type-body-sm ax-muted ax-empty-copy"><%= @body %></p>
-      <div :if={@actions != []} class="ax-empty-actions">
-        <%= render_slot(@actions) %>
+      <div class="ax-empty-content">
+        <p class="ax-type-title ax-empty-title"><%= @title %></p>
+        <p class="ax-type-body-sm ax-muted ax-empty-copy"><%= @body %></p>
+        <div :if={@actions != []} class="ax-empty-actions">
+          <%= render_slot(@actions) %>
+        </div>
       </div>
     </div>
     """

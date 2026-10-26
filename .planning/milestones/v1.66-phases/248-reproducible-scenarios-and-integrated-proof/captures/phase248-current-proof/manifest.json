@@ -1,0 +1,765 @@
+{
+  "phase": "248",
+  "captures": [
+    {
+      "file": "ordinary-ordinary-invoice-review-overview-wide-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "ordinary-invoice-review",
+      "route": "/admin/invoices/e8f9ba69-ee85-4efa-9939-d9a8979429f4",
+      "state": "invoice-overview",
+      "frame": "overview",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "source_sha": "112d484d729e0867a9e04ebc1ad133e2ba91cdcb",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/customer_live.ex": "30b2f013495dd46734a986c510723c98e8188cc344a0baa2f18b95ea42a3160c",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "a6e1235be2fb6ab608ae4985c5613a75ca5872d86afecc507a48a99a62a7de90",
+        "accrue_admin/assets/css/app.css": "8af0b46e8128d248168d7a138debc18871072db88934f6ab4d193be696a405d3",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/priv/static/accrue_admin.css": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase248-scenarios.spec.js": "25a101a373dbf0dedec285fcebd560122d45a4bbbd561637df9d6f97c640cf27",
+        "examples/accrue_host/e2e/phase248-heldout-setup.js": "de493bab437ab70ebc96109aa4616f43f1c2046d9bdbd2db3b88ebf604218722",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.phase248-ordinary.config.js": "0dd2122c42aa0cdb9dbac2acc0aab0233500cd8d513470cdd1589dfc59267b60",
+        "examples/accrue_host/playwright.phase248-heldout.config.js": "fdec6c4c8d76d3dd5a1126d6b572f042bb837b9503fe1ff5ea66b0d87f9053a3",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/verify_phase248_render_proof.mjs": "e6deb8fd3dc291f51bb9030a8397091c4eb1c60b7446c7f8fced3fcd9df20170"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "viewport",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-2377c3f27add6029702a7ee3d7f868d7",
+          "sha256": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+          "bytes": 134234
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "state": "invoice-overview",
+        "record_identity_visible": true,
+        "record_status_visible": true,
+        "invoice_identity": "EDGE-JPY-001",
+        "invoice_status": "Open"
+      },
+      "evidence_at": "2026-10-12T03:17:11.350Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "266b9919c441ecb453ffd486ce3de5e84dba6f4d18b6665ebdcef75dccba1de6",
+        "bytes": 186284
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-12T03:18:45.768Z",
+      "inspection_notes": "Unobscured invoice overview shows EDGE-JPY-001 and Open status before action review."
+    },
+    {
+      "file": "ordinary-ordinary-invoice-review-overview-narrow-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "ordinary-invoice-review",
+      "route": "/admin/invoices/e8f9ba69-ee85-4efa-9939-d9a8979429f4",
+      "state": "invoice-overview",
+      "frame": "overview",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "dark",
+      "source_sha": "112d484d729e0867a9e04ebc1ad133e2ba91cdcb",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/customer_live.ex": "30b2f013495dd46734a986c510723c98e8188cc344a0baa2f18b95ea42a3160c",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "a6e1235be2fb6ab608ae4985c5613a75ca5872d86afecc507a48a99a62a7de90",
+        "accrue_admin/assets/css/app.css": "8af0b46e8128d248168d7a138debc18871072db88934f6ab4d193be696a405d3",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/priv/static/accrue_admin.css": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase248-scenarios.spec.js": "25a101a373dbf0dedec285fcebd560122d45a4bbbd561637df9d6f97c640cf27",
+        "examples/accrue_host/e2e/phase248-heldout-setup.js": "de493bab437ab70ebc96109aa4616f43f1c2046d9bdbd2db3b88ebf604218722",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.phase248-ordinary.config.js": "0dd2122c42aa0cdb9dbac2acc0aab0233500cd8d513470cdd1589dfc59267b60",
+        "examples/accrue_host/playwright.phase248-heldout.config.js": "fdec6c4c8d76d3dd5a1126d6b572f042bb837b9503fe1ff5ea66b0d87f9053a3",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/verify_phase248_render_proof.mjs": "e6deb8fd3dc291f51bb9030a8397091c4eb1c60b7446c7f8fced3fcd9df20170"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "viewport",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-2377c3f27add6029702a7ee3d7f868d7",
+          "sha256": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+          "bytes": 134234
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "state": "invoice-overview",
+        "record_identity_visible": true,
+        "record_status_visible": true,
+        "invoice_identity": "EDGE-JPY-001",
+        "invoice_status": "Open"
+      },
+      "evidence_at": "2026-10-12T03:17:11.411Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "3c8154e020df1fda86e732de26efb242ab420a2b758ade16892aef8edeed3879",
+        "bytes": 87506
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-12T03:18:45.768Z",
+      "inspection_notes": "Narrow overview shows invoice identifier and Open status together in the summary card."
+    },
+    {
+      "file": "ordinary-ordinary-invoice-review-action-review-wide-light.png",
+      "origin_lane": "ordinary",
+      "scenario": "ordinary-invoice-review",
+      "route": "/admin/invoices/e8f9ba69-ee85-4efa-9939-d9a8979429f4",
+      "state": "action-review-open",
+      "frame": "action-review",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "source_sha": "112d484d729e0867a9e04ebc1ad133e2ba91cdcb",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/customer_live.ex": "30b2f013495dd46734a986c510723c98e8188cc344a0baa2f18b95ea42a3160c",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "a6e1235be2fb6ab608ae4985c5613a75ca5872d86afecc507a48a99a62a7de90",
+        "accrue_admin/assets/css/app.css": "8af0b46e8128d248168d7a138debc18871072db88934f6ab4d193be696a405d3",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/priv/static/accrue_admin.css": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase248-scenarios.spec.js": "25a101a373dbf0dedec285fcebd560122d45a4bbbd561637df9d6f97c640cf27",
+        "examples/accrue_host/e2e/phase248-heldout-setup.js": "de493bab437ab70ebc96109aa4616f43f1c2046d9bdbd2db3b88ebf604218722",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.phase248-ordinary.config.js": "0dd2122c42aa0cdb9dbac2acc0aab0233500cd8d513470cdd1589dfc59267b60",
+        "examples/accrue_host/playwright.phase248-heldout.config.js": "fdec6c4c8d76d3dd5a1126d6b572f042bb837b9503fe1ff5ea66b0d87f9053a3",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/verify_phase248_render_proof.mjs": "e6deb8fd3dc291f51bb9030a8397091c4eb1c60b7446c7f8fced3fcd9df20170"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "viewport",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-2377c3f27add6029702a7ee3d7f868d7",
+          "sha256": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+          "bytes": 134234
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "state": "action-review-open",
+        "record_identity_visible": true,
+        "record_status_visible": true,
+        "invoice_identity": "EDGE-JPY-001",
+        "invoice_status": "Open",
+        "confirmation_not_submitted": true
+      },
+      "evidence_at": "2026-10-12T03:17:11.664Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "7e5a628122ea4b1e4c038395446b79a2bc15f4e2307725098c441f832687d81d",
+        "bytes": 94434
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-12T03:18:45.768Z",
+      "inspection_notes": "Staged Pay invoice drawer is paired with the same route and the overview capture shows invoice identity/status; no action submitted."
+    },
+    {
+      "file": "ordinary-ordinary-invoice-review-action-review-narrow-dark.png",
+      "origin_lane": "ordinary",
+      "scenario": "ordinary-invoice-review",
+      "route": "/admin/invoices/e8f9ba69-ee85-4efa-9939-d9a8979429f4",
+      "state": "action-review-open",
+      "frame": "action-review",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "dark",
+      "source_sha": "112d484d729e0867a9e04ebc1ad133e2ba91cdcb",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/customer_live.ex": "30b2f013495dd46734a986c510723c98e8188cc344a0baa2f18b95ea42a3160c",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "a6e1235be2fb6ab608ae4985c5613a75ca5872d86afecc507a48a99a62a7de90",
+        "accrue_admin/assets/css/app.css": "8af0b46e8128d248168d7a138debc18871072db88934f6ab4d193be696a405d3",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/priv/static/accrue_admin.css": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase248-scenarios.spec.js": "25a101a373dbf0dedec285fcebd560122d45a4bbbd561637df9d6f97c640cf27",
+        "examples/accrue_host/e2e/phase248-heldout-setup.js": "de493bab437ab70ebc96109aa4616f43f1c2046d9bdbd2db3b88ebf604218722",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.phase248-ordinary.config.js": "0dd2122c42aa0cdb9dbac2acc0aab0233500cd8d513470cdd1589dfc59267b60",
+        "examples/accrue_host/playwright.phase248-heldout.config.js": "fdec6c4c8d76d3dd5a1126d6b572f042bb837b9503fe1ff5ea66b0d87f9053a3",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/verify_phase248_render_proof.mjs": "e6deb8fd3dc291f51bb9030a8397091c4eb1c60b7446c7f8fced3fcd9df20170"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "viewport",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-2377c3f27add6029702a7ee3d7f868d7",
+          "sha256": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+          "bytes": 134234
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "state": "action-review-open",
+        "record_identity_visible": true,
+        "record_status_visible": true,
+        "invoice_identity": "EDGE-JPY-001",
+        "invoice_status": "Open",
+        "confirmation_not_submitted": true
+      },
+      "evidence_at": "2026-10-12T03:17:11.712Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "3b203502b6cdfb6af9a7c53e933efade9deeb2bbcc6ea6b1d63b401a6ba99e6f",
+        "bytes": 52176
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-12T03:18:45.768Z",
+      "inspection_notes": "Narrow staged action sheet is paired with the same route and overview identity/status capture; no action submitted."
+    },
+    {
+      "file": "heldout-empty-subscriptions-wide-light.png",
+      "origin_lane": "heldout",
+      "scenario": "empty-subscriptions",
+      "route": "/admin/subscriptions?org=accrue-e2e-beta&view=all",
+      "state": "genuinely-empty",
+      "frame": "default",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "source_sha": "112d484d729e0867a9e04ebc1ad133e2ba91cdcb",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/customer_live.ex": "30b2f013495dd46734a986c510723c98e8188cc344a0baa2f18b95ea42a3160c",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "a6e1235be2fb6ab608ae4985c5613a75ca5872d86afecc507a48a99a62a7de90",
+        "accrue_admin/assets/css/app.css": "8af0b46e8128d248168d7a138debc18871072db88934f6ab4d193be696a405d3",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/priv/static/accrue_admin.css": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase248-scenarios.spec.js": "25a101a373dbf0dedec285fcebd560122d45a4bbbd561637df9d6f97c640cf27",
+        "examples/accrue_host/e2e/phase248-heldout-setup.js": "de493bab437ab70ebc96109aa4616f43f1c2046d9bdbd2db3b88ebf604218722",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.phase248-ordinary.config.js": "0dd2122c42aa0cdb9dbac2acc0aab0233500cd8d513470cdd1589dfc59267b60",
+        "examples/accrue_host/playwright.phase248-heldout.config.js": "fdec6c4c8d76d3dd5a1126d6b572f042bb837b9503fe1ff5ea66b0d87f9053a3",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/verify_phase248_render_proof.mjs": "e6deb8fd3dc291f51bb9030a8397091c4eb1c60b7446c7f8fced3fcd9df20170"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "viewport",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-2377c3f27add6029702a7ee3d7f868d7",
+          "sha256": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+          "bytes": 134234
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "state": "genuinely-empty",
+        "underlying_scoped_record_count": 0,
+        "unfiltered": true,
+        "owner_scope": "accrue-e2e-beta",
+        "empty_heading_visible": true,
+        "empty_explanation_visible": true,
+        "zero_row_context": "first-run-empty"
+      },
+      "evidence_at": "2026-10-12T03:18:26.195Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "6a214f97ed66fb6fe80a33b65e438b6fa1540bb48e31ba096fdda92f1124c8e4",
+        "bytes": 162375
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-12T03:18:45.768Z",
+      "inspection_notes": "Complete empty heading, explanatory copy and visible Showing 0 subscription rows context fit in the wide frame."
+    },
+    {
+      "file": "heldout-empty-subscriptions-narrow-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "empty-subscriptions",
+      "route": "/admin/subscriptions?org=accrue-e2e-beta&view=all",
+      "state": "genuinely-empty",
+      "frame": "default",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "dark",
+      "source_sha": "112d484d729e0867a9e04ebc1ad133e2ba91cdcb",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/customer_live.ex": "30b2f013495dd46734a986c510723c98e8188cc344a0baa2f18b95ea42a3160c",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "a6e1235be2fb6ab608ae4985c5613a75ca5872d86afecc507a48a99a62a7de90",
+        "accrue_admin/assets/css/app.css": "8af0b46e8128d248168d7a138debc18871072db88934f6ab4d193be696a405d3",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/priv/static/accrue_admin.css": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase248-scenarios.spec.js": "25a101a373dbf0dedec285fcebd560122d45a4bbbd561637df9d6f97c640cf27",
+        "examples/accrue_host/e2e/phase248-heldout-setup.js": "de493bab437ab70ebc96109aa4616f43f1c2046d9bdbd2db3b88ebf604218722",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.phase248-ordinary.config.js": "0dd2122c42aa0cdb9dbac2acc0aab0233500cd8d513470cdd1589dfc59267b60",
+        "examples/accrue_host/playwright.phase248-heldout.config.js": "fdec6c4c8d76d3dd5a1126d6b572f042bb837b9503fe1ff5ea66b0d87f9053a3",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/verify_phase248_render_proof.mjs": "e6deb8fd3dc291f51bb9030a8397091c4eb1c60b7446c7f8fced3fcd9df20170"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "viewport",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-2377c3f27add6029702a7ee3d7f868d7",
+          "sha256": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+          "bytes": 134234
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "state": "genuinely-empty",
+        "underlying_scoped_record_count": 0,
+        "unfiltered": true,
+        "owner_scope": "accrue-e2e-beta",
+        "empty_heading_visible": true,
+        "empty_explanation_visible": true,
+        "zero_row_context": "first-run-empty"
+      },
+      "evidence_at": "2026-10-12T03:18:26.280Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "2cc644171091b96c39ad6770c7585cf3a22aac46f6fbbc6dc0a8aa755f17ad13",
+        "bytes": 47835
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-12T03:18:45.768Z",
+      "inspection_notes": "After narrow viewport scroll, complete empty heading and explanatory copy are visible with Showing 0 subscription rows context."
+    },
+    {
+      "file": "heldout-failed-webhook-wide-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "failed-webhook",
+      "route": "/admin/webhooks/a1bdb232-19a6-4820-9c12-5b59614f23aa?org=accrue-e2e-alpha",
+      "state": "observed-webhook-failure",
+      "frame": "default",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "dark",
+      "source_sha": "112d484d729e0867a9e04ebc1ad133e2ba91cdcb",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/customer_live.ex": "30b2f013495dd46734a986c510723c98e8188cc344a0baa2f18b95ea42a3160c",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "a6e1235be2fb6ab608ae4985c5613a75ca5872d86afecc507a48a99a62a7de90",
+        "accrue_admin/assets/css/app.css": "8af0b46e8128d248168d7a138debc18871072db88934f6ab4d193be696a405d3",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/priv/static/accrue_admin.css": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase248-scenarios.spec.js": "25a101a373dbf0dedec285fcebd560122d45a4bbbd561637df9d6f97c640cf27",
+        "examples/accrue_host/e2e/phase248-heldout-setup.js": "de493bab437ab70ebc96109aa4616f43f1c2046d9bdbd2db3b88ebf604218722",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.phase248-ordinary.config.js": "0dd2122c42aa0cdb9dbac2acc0aab0233500cd8d513470cdd1589dfc59267b60",
+        "examples/accrue_host/playwright.phase248-heldout.config.js": "fdec6c4c8d76d3dd5a1126d6b572f042bb837b9503fe1ff5ea66b0d87f9053a3",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/verify_phase248_render_proof.mjs": "e6deb8fd3dc291f51bb9030a8397091c4eb1c60b7446c7f8fced3fcd9df20170"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "viewport",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-2377c3f27add6029702a7ee3d7f868d7",
+          "sha256": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+          "bytes": 134234
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "state": "observed-webhook-failure",
+        "observed_status": "Dead",
+        "owner_scope": "accrue-e2e-alpha",
+        "supported_next_step_visible": true,
+        "action_submitted": false
+      },
+      "evidence_at": "2026-10-12T03:18:26.706Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "7e823b69bd51683d0f751f39d2f447844a67a39361b7525de441a72b876f758e",
+        "bytes": 155213
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-12T03:18:45.768Z",
+      "inspection_notes": "Observed Dead webhook state and qualified replay explanation are visible; replay was not submitted."
+    },
+    {
+      "file": "heldout-failed-webhook-narrow-light.png",
+      "origin_lane": "heldout",
+      "scenario": "failed-webhook",
+      "route": "/admin/webhooks/a1bdb232-19a6-4820-9c12-5b59614f23aa?org=accrue-e2e-alpha",
+      "state": "observed-webhook-failure",
+      "frame": "default",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "light",
+      "source_sha": "112d484d729e0867a9e04ebc1ad133e2ba91cdcb",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/customer_live.ex": "30b2f013495dd46734a986c510723c98e8188cc344a0baa2f18b95ea42a3160c",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "a6e1235be2fb6ab608ae4985c5613a75ca5872d86afecc507a48a99a62a7de90",
+        "accrue_admin/assets/css/app.css": "8af0b46e8128d248168d7a138debc18871072db88934f6ab4d193be696a405d3",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/priv/static/accrue_admin.css": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase248-scenarios.spec.js": "25a101a373dbf0dedec285fcebd560122d45a4bbbd561637df9d6f97c640cf27",
+        "examples/accrue_host/e2e/phase248-heldout-setup.js": "de493bab437ab70ebc96109aa4616f43f1c2046d9bdbd2db3b88ebf604218722",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.phase248-ordinary.config.js": "0dd2122c42aa0cdb9dbac2acc0aab0233500cd8d513470cdd1589dfc59267b60",
+        "examples/accrue_host/playwright.phase248-heldout.config.js": "fdec6c4c8d76d3dd5a1126d6b572f042bb837b9503fe1ff5ea66b0d87f9053a3",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/verify_phase248_render_proof.mjs": "e6deb8fd3dc291f51bb9030a8397091c4eb1c60b7446c7f8fced3fcd9df20170"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "viewport",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-2377c3f27add6029702a7ee3d7f868d7",
+          "sha256": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+          "bytes": 134234
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "state": "observed-webhook-failure",
+        "observed_status": "Dead",
+        "owner_scope": "accrue-e2e-alpha",
+        "supported_next_step_visible": true,
+        "action_submitted": false
+      },
+      "evidence_at": "2026-10-12T03:18:26.760Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "46a71cfda8df9a24e841a70be6cbec947ff072f8c0adc56f40c77ac83ddc8e30",
+        "bytes": 99743
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-12T03:18:45.768Z",
+      "inspection_notes": "Narrow webhook state retains Dead label and qualified next-step explanation without horizontal clipping."
+    },
+    {
+      "file": "heldout-long-name-boundary-wide-dark.png",
+      "origin_lane": "heldout",
+      "scenario": "long-name-boundary",
+      "route": "/admin/customers/7a460160-7cdc-448a-9ceb-126491c8efc0?return_to=%2Fadmin%2Fcustomers",
+      "state": "long-name-unicode-boundary",
+      "frame": "default",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot_dimensions": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "dark",
+      "source_sha": "112d484d729e0867a9e04ebc1ad133e2ba91cdcb",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/customer_live.ex": "30b2f013495dd46734a986c510723c98e8188cc344a0baa2f18b95ea42a3160c",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "a6e1235be2fb6ab608ae4985c5613a75ca5872d86afecc507a48a99a62a7de90",
+        "accrue_admin/assets/css/app.css": "8af0b46e8128d248168d7a138debc18871072db88934f6ab4d193be696a405d3",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/priv/static/accrue_admin.css": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase248-scenarios.spec.js": "25a101a373dbf0dedec285fcebd560122d45a4bbbd561637df9d6f97c640cf27",
+        "examples/accrue_host/e2e/phase248-heldout-setup.js": "de493bab437ab70ebc96109aa4616f43f1c2046d9bdbd2db3b88ebf604218722",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.phase248-ordinary.config.js": "0dd2122c42aa0cdb9dbac2acc0aab0233500cd8d513470cdd1589dfc59267b60",
+        "examples/accrue_host/playwright.phase248-heldout.config.js": "fdec6c4c8d76d3dd5a1126d6b572f042bb837b9503fe1ff5ea66b0d87f9053a3",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/verify_phase248_render_proof.mjs": "e6deb8fd3dc291f51bb9030a8397091c4eb1c60b7446c7f8fced3fcd9df20170"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "viewport",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-2377c3f27add6029702a7ee3d7f868d7",
+          "sha256": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+          "bytes": 134234
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "state": "long-name-unicode-boundary",
+        "expected_identity": "E2E Edge LongName \u2014 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "exact_identity_accessible": true,
+        "narrow_page_dimensions": {
+          "client": 320,
+          "scroll": 320
+        }
+      },
+      "evidence_at": "2026-10-12T03:18:27.281Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "0565d8b46d06d3ea68de1977d21f02fdd2427974c2bb1beb9bb7b26817e064a7",
+        "bytes": 180159
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-12T03:18:45.768Z",
+      "inspection_notes": "Exact long Unicode identity renders in the customer detail heading and remains legible at wide size."
+    },
+    {
+      "file": "heldout-long-name-boundary-narrow-light.png",
+      "origin_lane": "heldout",
+      "scenario": "long-name-boundary",
+      "route": "/admin/customers/7a460160-7cdc-448a-9ceb-126491c8efc0?return_to=%2Fadmin%2Fcustomers",
+      "state": "long-name-unicode-boundary",
+      "frame": "default",
+      "viewport": {
+        "width": 320,
+        "height": 820
+      },
+      "screenshot_dimensions": {
+        "width": 320,
+        "height": 820
+      },
+      "theme": "light",
+      "source_sha": "112d484d729e0867a9e04ebc1ad133e2ba91cdcb",
+      "source_digests": {
+        "accrue_admin/lib/accrue_admin/components/app_shell.ex": "4b831ba17a59d9a6534b3aa39b8566a9d2a4b533766cb21d7dbdb1dddd396531",
+        "accrue_admin/lib/accrue_admin/components/empty_state.ex": "6de0a5b21be2cae093b0ff2cd8414894efbf48403e22dbdddf5ec70dbcfddf3c",
+        "accrue_admin/lib/accrue_admin/live/customer_live.ex": "30b2f013495dd46734a986c510723c98e8188cc344a0baa2f18b95ea42a3160c",
+        "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "c271c19d48fcf0f956b7e9a9f055804dee76f89094cf295601a131087218e223",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "38e2f75dedc6093ef2cdce85aa08c007715ff8790519af9114e48b9ce3f12a64",
+        "accrue_admin/lib/accrue_admin/live/webhook_live.ex": "a6e1235be2fb6ab608ae4985c5613a75ca5872d86afecc507a48a99a62a7de90",
+        "accrue_admin/assets/css/app.css": "8af0b46e8128d248168d7a138debc18871072db88934f6ab4d193be696a405d3",
+        "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+        "accrue_admin/assets/js/app.js": "a40ebc266ed96a37fb53774f272a6d3483edb2165ceacad5136c33050e380c55",
+        "accrue_admin/priv/static/accrue_admin.css": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+        "accrue_admin/priv/static/accrue_admin.js": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+        "examples/accrue_host/e2e/phase248-scenarios.spec.js": "25a101a373dbf0dedec285fcebd560122d45a4bbbd561637df9d6f97c640cf27",
+        "examples/accrue_host/e2e/phase248-heldout-setup.js": "de493bab437ab70ebc96109aa4616f43f1c2046d9bdbd2db3b88ebf604218722",
+        "examples/accrue_host/e2e/support/fixture.js": "f4820cd6be0dc4d4f328f8b782347897d53382ce2f25f4c0af8d3cc3a8ea305f",
+        "examples/accrue_host/e2e/support/test.js": "47e507fbc72b06a2ad9f0e6f3a3c267c3690b78df867afa97a0353f194269e64",
+        "examples/accrue_host/playwright.phase248-ordinary.config.js": "0dd2122c42aa0cdb9dbac2acc0aab0233500cd8d513470cdd1589dfc59267b60",
+        "examples/accrue_host/playwright.phase248-heldout.config.js": "fdec6c4c8d76d3dd5a1126d6b572f042bb837b9503fe1ff5ea66b0d87f9053a3",
+        "scripts/ci/accrue_host_seed_e2e.exs": "c645159635f1cc882e714f5ecf3c1f122688f0b49a38808a501e3cd7fe4b861f",
+        "scripts/ci/seed_phase245_ordinary.sh": "cfa16a418dd3c353bbaafddafc89221054ee3b3522d11a3c8d0daf91aae9bf90",
+        "scripts/ci/verify_phase248_render_proof.mjs": "e6deb8fd3dc291f51bb9030a8397091c4eb1c60b7446c7f8fced3fcd9df20170"
+      },
+      "browser": {
+        "name": "chromium",
+        "version": "147.0.7727.15"
+      },
+      "capture_mode": "viewport",
+      "assets": {
+        "css": {
+          "path": "accrue_admin/priv/static/accrue_admin.css",
+          "served_path": "/admin/assets/css-2377c3f27add6029702a7ee3d7f868d7",
+          "sha256": "6d11cbbf99cfb76210e039c6105ab9dd891c7e75ff859ceba35d458da98fc922",
+          "bytes": 134234
+        },
+        "js": {
+          "path": "accrue_admin/priv/static/accrue_admin.js",
+          "served_path": "/admin/assets/js-167f6b9c3d196314318a0af0d580f49f",
+          "sha256": "d5364c9046af7e2f27a23deab81b2045cee87098852f50d66b6b8f6126537e32",
+          "bytes": 166855
+        }
+      },
+      "checks": {
+        "state": "long-name-unicode-boundary",
+        "expected_identity": "E2E Edge LongName \u2014 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "exact_identity_accessible": true,
+        "narrow_page_dimensions": {
+          "client": 320,
+          "scroll": 320
+        }
+      },
+      "evidence_at": "2026-10-12T03:18:27.347Z",
+      "inspection_status": "inspected",
+      "screenshot": {
+        "sha256": "56357b21c38ded3f5b9ddece0de6a1c7463157bb9e6dcaf0bc46114139d13fa3",
+        "bytes": 91020
+      },
+      "inspection_by": "Impeccable visual inspection",
+      "inspected_at": "2026-10-12T03:18:45.768Z",
+      "inspection_notes": "Exact long Unicode identity wraps within 320px; the page has no horizontal overflow."
+    }
+  ]
+}

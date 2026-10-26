@@ -95,6 +95,66 @@ defmodule AccrueAdmin.CouponLiveTest do
            ]
   end
 
+  test "coupon detail identifies unrecorded limits and counts", %{conn: conn} do
+    coupon =
+      insert_coupon(%{
+        name: "Incomplete definition",
+        processor_id: "coupon_incomplete",
+        max_redemptions: nil,
+        times_redeemed: 0,
+        valid: true
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+    assert html =~ "Limit not recorded"
+    assert html =~ "Current redemptions"
+    assert html =~ ">0</dd>"
+    assert html =~ "Provider restrictions not recorded"
+
+    zero_coupon =
+      insert_coupon(%{
+        name: "Zero limit definition",
+        processor_id: "coupon_zero_limit",
+        max_redemptions: 0,
+        times_redeemed: 0,
+        valid: true
+      })
+
+    assert {:ok, _view, zero_html} = live(conn, "/billing/coupons/#{zero_coupon.id}")
+    assert zero_html =~ "0 max"
+  end
+
+  test "fixed discount with unsupported currency is never shown as USD", %{conn: conn} do
+    coupon =
+      insert_coupon(%{
+        name: "Unsupported currency coupon",
+        amount_off_minor: 1_500,
+        currency: "xyz"
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+
+    assert html =~ "Amount unavailable (unsupported currency: xyz)"
+    refute html =~ "$15.00"
+  end
+
+  test "fixed discount with missing currency is shown as unavailable", %{conn: conn} do
+    coupon =
+      insert_coupon(%{
+        name: "Missing currency coupon",
+        amount_off_minor: 1_500,
+        currency: nil
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+
+    assert html =~ "Amount unavailable (currency missing)"
+    refute html =~ "$15.00"
+  end
+
   test "renders RelatedResources card with promotion codes and events links", %{
     conn: conn,
     coupon: coupon
@@ -177,10 +237,54 @@ defmodule AccrueAdmin.CouponLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}?org=allowed-org")
 
     assert html =~
-             ~s(href="/billing/promotion-codes/#{promotion_code.id}?org=allowed-org")
+             ~s(href="/billing/promotion-codes/#{promotion_code.id}?org=allowed-org&amp;return_to=)
 
-    assert html =~ ~s(href="/billing?org=allowed-org")
+    refute html =~ ~s(href="/billing?org=allowed-org")
     assert html =~ ~s(href="/billing/coupons?org=allowed-org")
+  end
+
+  test "coupon detail returns to its validated filter context and constrains child codes", %{
+    conn: conn,
+    coupon: coupon
+  } do
+    other_coupon = insert_coupon(%{name: "Other coupon", processor_id: "coupon_other"})
+
+    other_code =
+      insert_promotion_code(other_coupon, %{code: "OTHER-CODE", processor_id: "promo_other"})
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/coupons/#{coupon.id}?return_to=%2Fbilling%2Fcoupons%3Fview%3Dall%26q%3DSpring%26valid%3Dtrue"
+             )
+
+    return_href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "Back to coupons"))
+      |> Floki.attribute("href")
+      |> hd()
+
+    assert URI.decode_query(URI.parse(return_href).query) == %{
+             "q" => "Spring",
+             "valid" => "true",
+             "view" => "all"
+           }
+
+    [child_link | _] =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a[href*='/promotion-codes/']")
+
+    child_href = Floki.attribute(child_link, "href") |> hd()
+
+    assert child_href =~ "/billing/promotion-codes/"
+    assert child_href =~ "return_to=%2Fbilling%2Fpromotion-codes%3Fcoupon_id%3D#{coupon.id}"
+    refute html =~ "OTHER-CODE"
+    refute html =~ other_code.id
   end
 
   test "lazy activity expands to quiet empty state when no coupon activity exists", %{
@@ -242,6 +346,28 @@ defmodule AccrueAdmin.CouponLiveTest do
       end
 
     assert flash["error"] != nil
+  end
+
+  test "detail read failure is distinct from not-found and retry restores coupon terms and codes",
+       %{
+         conn: conn,
+         coupon: coupon
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/coupons/#{coupon.id}")
+    on_exit(fn -> Application.delete_env(:accrue_admin, :phase238_read_failure_fixture) end)
+    Application.put_env(:accrue_admin, :phase238_read_failure_fixture, :coupon_detail)
+
+    html = render_click(view, "retry_read", %{})
+    assert html =~ ~s(data-role="coupon-unavailable")
+    assert html =~ "Coupon record unavailable"
+    refute html =~ "fixture database unavailable"
+
+    Application.delete_env(:accrue_admin, :phase238_read_failure_fixture)
+    html = render_click(view, "retry_read", %{})
+    refute html =~ ~s(data-role="coupon-unavailable")
+    assert html =~ "Annual discount"
+    assert html =~ "ANNUAL15"
   end
 
   defp insert_coupon(attrs) do

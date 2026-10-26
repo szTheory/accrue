@@ -8,6 +8,8 @@
  */
 
 const { test, expect } = require("@playwright/test");
+const { readFileSync } = require("node:fs");
+const { join } = require("node:path");
 
 const {
   setPhase191Theme,
@@ -54,6 +56,9 @@ const DETAIL_TARGETS = Object.freeze([
     name: "Event",
     route: ({ phase191 }) => `/billing/events/${phase191.source_event_id}`,
     readOnly: true,
+    // 3d7d949d: an event is itself the activity record, so it has no lazy Activity
+    // section; its payload is a disclosure that is open on load.
+    inlinePayload: true,
   },
 ]);
 
@@ -137,6 +142,12 @@ async function assertNoHorizontalClipping(page, label) {
   await assertNoHorizontalClip(page, "#main-content, main, .ax-page", label);
 }
 
+async function assertInlinePayloadBottom(page, label) {
+  await expect(page.locator("[data-ax-lazy-activity]"), `${label}: no lazy Activity`).toHaveCount(0);
+  await expect(page.locator("[data-ax-lazy-json]"), `${label}: no lazy Raw data`).toHaveCount(0);
+  await expect(page.locator("[data-ax-event-payload]"), `${label}: payload disclosure`).toHaveCount(1);
+}
+
 async function assertLazyBottom(page, label) {
   await expect(page.locator("[data-ax-lazy-activity]"), `${label}: lazy Activity marker`).toHaveCount(1);
   await expect(page.locator("[data-ax-lazy-json]"), `${label}: lazy Raw data marker`).toHaveCount(1);
@@ -156,7 +167,11 @@ async function assertInitialDetailInvariants(page, target) {
   await expect(page.locator("h1"), `${label}: exactly one h1`).toHaveCount(1);
   await expect(page.locator("[data-ax-summary-list]"), `${label}: summary list`).toHaveCount(1);
   await expect(page.locator("[data-ax-related-resources]"), `${label}: one related strip`).toHaveCount(1);
-  await assertLazyBottom(page, label);
+  if (target.inlinePayload) {
+    await assertInlinePayloadBottom(page, label);
+  } else {
+    await assertLazyBottom(page, label);
+  }
 
   const actionBand = page.locator("[data-ax-action-band]");
   await expect(actionBand.locator("form:visible"), `${label}: no visible action-band forms`).toHaveCount(0);
@@ -167,6 +182,42 @@ async function assertInitialDetailInvariants(page, target) {
     await primaryActions.count(),
     `${label}: DETAIL pages may expose at most two visible primary actions`
   ).toBeLessThanOrEqual(2);
+
+  if (target.name === "Invoice") {
+    const primaryActionRects = await primaryActions.evaluateAll((elements) =>
+      elements.map((element) => element.getBoundingClientRect().height)
+    );
+    expect(
+      primaryActionRects.every((height) => height >= 44),
+      "Invoice task actions retain the shared 44px minimum hit area"
+    ).toBe(true);
+
+    const sectionGeometry = await page.locator(".ax-detail-section").first().evaluate((element) => ({
+      gap: getComputedStyle(element).rowGap,
+      structuralRule: (() => {
+        const probe = document.createElement("div");
+        probe.className = "ax-detail-section-separated";
+        document.body.append(probe);
+        const borderTopWidth = getComputedStyle(probe).borderTopWidth;
+        probe.remove();
+        return borderTopWidth;
+      })(),
+    }));
+    expect(sectionGeometry, "Invoice detail keeps the intentional dense and structural spacing").toEqual({
+      gap: "2px",
+      structuralRule: "1px",
+    });
+
+    const cssHref = await page.locator('link[rel="stylesheet"]').evaluateAll((links) =>
+      links.map((link) => link.href).find((href) => /\/assets\/css-[a-f0-9]+$/.test(href))
+    );
+    expect(cssHref, "The mounted route serves the package fingerprinted CSS").toBeTruthy();
+    const servedCSS = await page.request.get(cssHref);
+    expect(servedCSS.ok(), "The mounted package CSS responds successfully").toBe(true);
+    expect(await servedCSS.body(), "Served CSS bytes match the rebuilt package artifact").toEqual(
+      readFileSync(join(__dirname, "../priv/static/accrue_admin.css"))
+    );
+  }
 
   const overflowMenus = await page.locator("[data-ax-action-overflow-menu]:visible").count();
   expect(overflowMenus, `${label}: at most one visible action overflow menu`).toBeLessThanOrEqual(1);
@@ -360,4 +411,160 @@ test.describe("Phase 198 analytics propagation contract", () => {
       await target.assertion(page);
     });
   }
+});
+
+test.describe("Phase 240 invoice detail and review responsive contract", () => {
+  test("preserves real invoice identity, money, state, review target, and focus at required widths", async ({
+    page,
+    request,
+  }) => {
+    const { fixtures } = await openPhase198Route(
+      page,
+      request,
+      ({ phase191 }) => `/billing/invoices/${phase191.phase191_invoice_id}`
+    );
+    const invoiceId = fixtures.phase191.phase191_invoice_id;
+
+    for (const width of [320, 600, 767, 768, 1024, 1280]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const detail = page.locator(".ax-page").first();
+      await expect(detail, `invoice detail at ${width}px`).toContainText("E2E-191-JPY-001");
+      await expect(detail, `Unicode customer at ${width}px`).toContainText(
+        "E2E Phase 191 株式会社 Café Boundary Customer"
+      );
+      await expect(detail, `exact JPY amount at ${width}px`).toContainText("100,000");
+      await expect(detail, `exact JPY-formatted amount at ${width}px`).toContainText("¥100,000");
+      await expect(detail, `open state at ${width}px`).toContainText("Open");
+      await expect(detail, `missing due date remains explicit at ${width}px`).toContainText(
+        "No due or finalized boundary"
+      );
+      await assertNoHorizontalClipping(page, `Invoice detail ${width}px`);
+    }
+
+    await page.setViewportSize({ width: 320, height: 1000 });
+    await clickActionTrigger(page, {
+      name: "Invoice",
+      trigger: /void invoice/i,
+      preferMenu: true,
+    });
+    const drawer = page.locator("#ax-overlay-root [data-presentation='drawer']:visible").first();
+    await expect(drawer, "invoice action drawer opens without dispatch").toBeVisible();
+    await drawer.locator("form[data-action-type='void'] button[type='submit']").click();
+
+    const review = page.locator("#ax-overlay-root [data-role='confirm-panel']:visible").first();
+    await expect(review, "void review remains staged").toBeVisible();
+    await expect(review).toContainText(invoiceId);
+    await expect(review).toContainText("E2E Phase 191 株式会社 Café Boundary Customer");
+    await expect(review).toContainText("Owner target");
+    await expect(review).toContainText("Owner scope");
+    await expect(review).toContainText("100,000");
+    await expect(review).toContainText("¥100,000");
+    await expect(review).toContainText(/Verify invoice action|step-up/i);
+
+    const confirm = drawer.locator("[data-role='confirm-action']:visible").first();
+    await expect(confirm, "confirm remains available in review").toBeVisible();
+    await confirm.focus();
+    const focused = await confirm.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth, boxShadow: style.boxShadow };
+    });
+    expect(
+      focused.outlineStyle !== "none" || Number.parseFloat(focused.outlineWidth) > 0 || focused.boxShadow !== "none",
+      "keyboard focus is visibly styled on the review confirm"
+    ).toBe(true);
+
+    for (const width of [320, 600, 767, 768, 1024]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await expect(review, `review panel at ${width}px`).toBeVisible();
+      await expect(review, `exact target at ${width}px`).toContainText(invoiceId);
+      await expect(review, `exact amount at ${width}px`).toContainText("100,000");
+      await expect(confirm, `confirm target at ${width}px`).toBeVisible();
+      await assertNoHorizontalClipping(page, `Invoice review ${width}px`);
+    }
+
+    await page.setViewportSize({ width: 320, height: 1000 });
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "200%";
+    });
+    await expect(review, "CSS root-font enlargement retains review identity").toContainText(invoiceId);
+    await expect(review, "CSS root-font enlargement retains exact amount").toContainText("100,000");
+    await expect(confirm, "CSS root-font enlargement retains confirm control").toBeVisible();
+    await assertNoHorizontalClipping(page, "Invoice review 200% CSS font-size simulation");
+    await page.evaluate(() => {
+      document.documentElement.style.removeProperty("font-size");
+    });
+
+    await page.evaluate(() => {
+      const source = document.querySelector("style[nonce], script[nonce]");
+      const style = document.createElement("style");
+      style.nonce = source?.nonce || "";
+      style.dataset.phase240TextSpacing = "true";
+      style.textContent = `
+        :where(*) { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; }
+        :where(p) { margin-block-end: 2em !important; }
+      `;
+      document.head.append(style);
+    });
+    await expect(review, "WCAG text-spacing CSS simulation retains identity").toContainText(invoiceId);
+    await expect(review, "WCAG text-spacing CSS simulation retains exact amount").toContainText("100,000");
+    await expect(confirm, "WCAG text-spacing CSS simulation retains confirm control").toBeVisible();
+    await assertNoHorizontalClipping(page, "Invoice review text-spacing CSS simulation");
+
+    let zoomEvidence;
+    try {
+      const session = await page.context().newCDPSession(page);
+      await session.send("Emulation.setPageScaleFactor", { pageScaleFactor: 4 });
+      zoomEvidence = await page.evaluate(() => ({
+        visualScale: window.visualViewport?.scale,
+        cssViewportWidth: window.innerWidth,
+      }));
+      await session.send("Emulation.setPageScaleFactor", { pageScaleFactor: 1 });
+      await session.detach();
+    } catch (error) {
+      zoomEvidence = { unavailable: String(error.message || error) };
+    }
+    console.log(
+      `Phase 240 detail zoom evidence: ${JSON.stringify(zoomEvidence)}; CDP page scale is pinch/visual scaling, not browser page zoom. A faithful 400% browser zoom control is unavailable in this headless Playwright run.`
+    );
+  });
+});
+
+test.describe("Phase 240 intermediate coarse-pointer invoice review", () => {
+  test.use({ viewport: { width: 768, height: 1024 }, isMobile: true, hasTouch: true });
+
+  test("keeps invoice facts and staged action controls usable with coarse pointer", async ({ page, request }) => {
+    const { fixtures } = await openPhase198Route(
+      page,
+      request,
+      ({ phase191 }) => `/billing/invoices/${phase191.phase191_invoice_id}`
+    );
+    expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
+    const invoiceId = fixtures.phase191.phase191_invoice_id;
+    await expect(page.locator(".ax-page").first()).toContainText("E2E-191-JPY-001");
+    await expect(page.locator(".ax-page").first()).toContainText("100,000");
+
+    const primary = page.locator("[data-ax-primary-action]:visible").first();
+    await expect(primary).toBeVisible();
+    const primarySize = await primary.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { width: rect.width, height: rect.height };
+    });
+    expect(primarySize.height).toBeGreaterThanOrEqual(44);
+
+    await clickActionTrigger(page, { name: "Invoice", trigger: /void invoice/i, preferMenu: true });
+    const drawer = page.locator("#ax-overlay-root [data-presentation='drawer']:visible").first();
+    await expect(drawer).toBeVisible();
+    const reviewButton = drawer.locator("form[data-action-type='void'] button[type='submit']");
+    await expect(reviewButton).toBeVisible();
+    const reviewSize = await reviewButton.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { width: rect.width, height: rect.height };
+    });
+    expect(reviewSize.height).toBeGreaterThanOrEqual(44);
+    await reviewButton.click();
+    await expect(page.locator("#ax-overlay-root [data-role='confirm-panel']:visible").first()).toContainText(
+      "Owner target"
+    );
+    await assertNoHorizontalClipping(page, "Invoice review 768px coarse pointer");
+  });
 });

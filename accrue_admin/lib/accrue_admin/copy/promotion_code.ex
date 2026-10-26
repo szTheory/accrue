@@ -106,6 +106,14 @@ defmodule AccrueAdmin.Copy.PromotionCode do
   def promotion_code_detail_no_coupon_projection,
     do: "No coupon projection is linked to this promotion code."
 
+  def promotion_code_coupon_unavailable(id), do: "Coupon record unavailable (#{id})"
+
+  def promotion_code_unknown_value, do: "Not recorded"
+
+  def promotion_code_redemptions_unknown, do: "Redemption count not recorded"
+
+  def promotion_code_customer_restriction_unknown, do: "Customer restriction not recorded"
+
   def promotion_code_json_payload_label, do: "Promotion code payload"
 
   def promotion_code_lazy_activity_heading, do: "Activity"
@@ -137,7 +145,9 @@ defmodule AccrueAdmin.Copy.PromotionCode do
 
   def promotion_codes_expires_summary_no_expiry, do: "No expiry"
 
-  def promotion_code_kpi_meta_unlimited_cap, do: "Unlimited cap"
+  def promotion_code_kpi_meta_unlimited_cap, do: "Limit not recorded"
+
+  def promotion_code_status_unknown, do: "Activity state not recorded"
 
   def promotion_code_not_found,
     do:

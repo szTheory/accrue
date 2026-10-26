@@ -219,6 +219,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscription_action_cancel_now(), to: Subscription
   defdelegate subscription_action_cancel_at_period_end(), to: Subscription
   defdelegate subscription_action_resume(), to: Subscription
+  defdelegate subscription_action_back_to_subscription(), to: Subscription
   defdelegate subscription_action_swap_plan(), to: Subscription
   defdelegate subscription_action_update_quantity(), to: Subscription
   defdelegate subscription_action_add_item(), to: Subscription
@@ -269,6 +270,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate dunning_state_active(), to: Dunning
   defdelegate dunning_state_none(), to: Dunning
   defdelegate dunning_state_recovered(), to: Dunning
+  defdelegate recovery_data_error_copy(), to: Dunning
 
   defdelegate invoices_index_empty_title(), to: Invoice
   defdelegate invoices_index_empty_copy(), to: Invoice
@@ -303,10 +305,16 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoices_column_invoice(), to: Invoice
   defdelegate invoices_column_customer(), to: Invoice
   defdelegate invoices_column_billing_signals(), to: Invoice
+  def billing_owner_tax_label, do: "Ownership and tax"
   defdelegate invoices_column_status(), to: Invoice
+  defdelegate invoices_column_due_date(), to: Invoice
   defdelegate invoices_column_balance(), to: Invoice
   defdelegate invoices_column_collection(), to: Invoice
   defdelegate invoices_card_customer(), to: Invoice
+  defdelegate invoices_card_action(), to: Invoice
+  defdelegate invoices_card_action_label(), to: Invoice
+  defdelegate invoices_due_date_unavailable(), to: Invoice
+  defdelegate invoices_overdue_signal(), to: Invoice
   defdelegate invoices_filter_search(), to: Invoice
   defdelegate invoices_filter_status(), to: Invoice
   defdelegate invoices_filter_customer_id(), to: Invoice
@@ -318,6 +326,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoices_filter_status_void(), to: Invoice
   defdelegate invoices_filter_collection_automatic(), to: Invoice
   defdelegate invoices_filter_collection_send_invoice(), to: Invoice
+  defdelegate invoices_collection_method_label(value), to: Invoice
   defdelegate invoices_balance_word_due(), to: Invoice
   defdelegate invoices_balance_word_paid(), to: Invoice
   defdelegate invoices_balance_word_remaining(), to: Invoice
@@ -358,6 +367,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoice_confirm_panel_label(), to: Invoice
   defdelegate invoice_confirm_action_verb(), to: Invoice
   defdelegate invoice_confirm_cancel(), to: Invoice
+  defdelegate invoice_remove_manual_item_cancel(), to: Invoice
   defdelegate invoice_confirm_workflow_message(action_label, source_suffix), to: Invoice
   defdelegate invoice_confirm_source_event_suffix(source_event_id), to: Invoice
   defdelegate invoice_pdf_section_eyebrow(), to: Invoice
@@ -673,6 +683,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate connect_account_error_field_must_be_integer_minor(field_label), to: Connect
   defdelegate connect_account_not_found(), to: Connect
 
+  defdelegate billing_event_label(value), to: BillingEvent
   defdelegate billing_events_page_title(), to: BillingEvent
   defdelegate billing_events_breadcrumb_events(), to: BillingEvent
   defdelegate events_list_heading(), to: BillingEvent
@@ -857,9 +868,10 @@ defmodule AccrueAdmin.Copy do
 
   def customers_list_all_lens_label, do: "All customers"
 
-  def customers_list_missing_payment_method_label, do: "Missing payment method"
+  def customers_list_missing_payment_method_label, do: "Missing default method"
 
   def customers_list_result_label_pair, do: {"customer", "customers"}
+  def subscriptions_list_result_label_pair, do: {"subscription", "subscriptions"}
 
   def customers_index_empty_title, do: "No customers for this organization yet"
 
@@ -893,9 +905,10 @@ defmodule AccrueAdmin.Copy do
     do:
       "Every charge and refund for this organization. Filter by status, or open a charge to see its fees, payment method, and any failure."
 
-  def payments_list_heading, do: "Recover failed payments"
+  def payments_list_heading, do: "Payments"
 
-  def payments_list_subtitle, do: "Inspect charges that need follow-up."
+  def payments_list_subtitle,
+    do: "Review payments, investigate failures, and check recorded fees."
 
   def payments_list_first_run_empty_title, do: "No payments yet."
 
@@ -963,29 +976,25 @@ defmodule AccrueAdmin.Copy do
     to: Locked,
     as: :single_replay_confirmation
 
-  def recovery_index_heading, do: "Revenue Recovery"
+  def recovery_index_heading, do: "Payment recovery"
 
   def recovery_index_subtitle,
     do:
-      "Track the dunning funnel and customers at risk of churn — how many recover after a failed payment, and which are nearing cancellation."
+      "Review recovery from failed payments, automated retry outcomes, and subscriptions still in retry."
 
-  def recovery_cutoff_link_label, do: "Showing data since 2024-01-01"
+  def recovery_cutoff_link_label, do: "Cutoff-date semantics"
 
   def recovery_recovered_mrr_label(currency),
     do: "Recovered MRR (#{String.upcase(to_string(currency))})"
 
-  def recovery_recovered_mrr_delta, do: "Amount saved by successful Dunning"
-
-  def recovery_recovered_mrr_meta, do: "Money Saved"
+  def recovery_recovered_mrr_meta,
+    do: "Monthly recurring revenue observed on recovered subscriptions."
 
   def recovery_exhausted_mrr_label(currency),
-    do: "Exhausted MRR (#{String.upcase(to_string(currency))})"
+    do: "Unrecovered MRR (#{String.upcase(to_string(currency))})"
 
-  def recovery_exhausted_mrr_delta,
-    do:
-      "Annualized MRR snapshot at the exhaustion event — e.g., a $120/yr plan contributes $10/mo to Exhausted MRR."
-
-  def recovery_exhausted_mrr_meta, do: "Churned Revenue"
+  def recovery_exhausted_mrr_meta,
+    do: "Monthly recurring revenue on subscriptions with exhausted payment retries."
 
   def subscription_select_action_warning, do: "Select an action before confirming."
 
@@ -1268,13 +1277,15 @@ defmodule AccrueAdmin.Copy do
   @doc "Helper line above the webhooks table — plain-language JTBD framing."
   def webhooks_retry_selected_helper,
     do:
-      "Events that failed every automatic retry land here. Filter, select the ones to re-run, then Retry selected."
+      "Failed and dead webhook deliveries land here. Select deliveries to review and queue eligible ones for replay."
 
   @doc "Primary selection action on the webhooks list."
-  def webhooks_retry_selected_label, do: "Retry selected"
+  def webhooks_retry_selected_label, do: "Replay selected deliveries"
+
+  def webhooks_retry_queue_label, do: "Queue eligible deliveries"
 
   @doc "Secondary action that dismisses bulk retry confirmation."
-  def webhooks_retry_cancel_label, do: "Cancel"
+  def webhooks_retry_cancel_label, do: "Keep deliveries"
 
   @doc """
   Plural-aware confirm question for retrying selected webhook events.
@@ -1283,19 +1294,76 @@ defmodule AccrueAdmin.Copy do
   def webhooks_retry_confirm_question(count), do: webhooks_retry_confirm_question(count, [])
 
   def webhooks_retry_confirm_question(count, _opts) do
-    word = if count == 1, do: "webhook event", else: "webhook events"
+    word = if count == 1, do: "delivery", else: "deliveries"
 
-    "Retry #{count} #{word}? They failed every automatic retry — retrying runs them through processing again."
+    "Replay #{count} selected #{word}? Only deliveries still eligible when confirmed will be queued. Queue acceptance does not mean processing is complete."
   end
 
   @doc "Guard flash when Retry selected is triggered with nothing selected."
-  def webhooks_retry_no_selection_warning, do: "Select at least one event to retry first."
+  def webhooks_retry_no_selection_warning, do: "Select at least one delivery to replay first."
 
   @doc "Success flash after retrying selected events (plural-aware)."
   def webhooks_retry_success(count) do
-    word = if count == 1, do: "event", else: "events"
-    "Retrying #{count} #{word}…"
+    word = if count == 1, do: "delivery", else: "deliveries"
+    "Queued #{count} #{word}."
   end
+
+  def webhooks_retry_result(
+        %{
+          queued: queued,
+          skipped: skipped,
+          denied: denied,
+          failed: failed,
+          unknown: unknown
+        } = result
+      ) do
+    counts =
+      "#{skipped} skipped; #{denied} denied; #{failed} failed; #{unknown} unknown."
+
+    reread =
+      case Map.get(result, :reread_unknown, 0) do
+        0 ->
+          ""
+
+        count ->
+          " #{count} accepted enqueue(s) could not be reread; processing status is unknown."
+      end
+
+    cond do
+      queued > 0 ->
+        "Queued #{queued} #{plural(queued, "delivery", "deliveries")}. #{counts}#{reread}"
+
+      failed > 0 or denied > 0 or unknown > 0 ->
+        "No deliveries were queued. #{counts}#{reread}"
+
+      true ->
+        "No eligible deliveries were queued. #{counts}#{reread}"
+    end
+  end
+
+  @doc "Status label for one result in a completed bulk replay selection."
+  def webhooks_retry_outcome(:queued), do: "Queue request accepted."
+  def webhooks_retry_outcome(:skipped), do: "Not queued."
+  def webhooks_retry_outcome(:denied), do: "Not queued because access could not be confirmed."
+  def webhooks_retry_outcome(:failed), do: "The queue request failed."
+  def webhooks_retry_outcome(:unknown), do: "Dispatch result could not be confirmed."
+
+  def webhooks_retry_outcome(:unknown, false),
+    do: "Delivery could not be read; replay was not requested."
+
+  def webhooks_retry_outcome(outcome, _attempted), do: webhooks_retry_outcome(outcome)
+
+  @doc "Safe read-only next step for an unconfirmed bulk replay result."
+  def webhooks_retry_unknown_next_step,
+    do: "Inspect its current status and history before deciding what to do next."
+
+  @doc "Guidance shown when a fresh scoped delivery read cannot authorize a result link."
+  def webhooks_retry_detail_unavailable,
+    do:
+      "Delivery detail is currently unavailable in this scope. Read it again later to check status and history."
+
+  defp plural(1, singular, _plural), do: singular
+  defp plural(_count, _singular, plural), do: plural
 
   def step_up_submit_label, do: "Verify identity"
 
@@ -1317,7 +1385,7 @@ defmodule AccrueAdmin.Copy do
 
   # --- Operator dashboard (DashboardLive) — Phase 35, OPS-05
 
-  def dashboard_breadcrumb_home, do: "Dashboard"
+  def dashboard_breadcrumb_home, do: "Recent activity"
 
   def dashboard_chrome_eyebrow, do: "Command center"
 
@@ -1406,7 +1474,7 @@ defmodule AccrueAdmin.Copy do
   # --- Home start page (DashboardLive IA — Phase 169 / v1.50 AUI-03)
   # Task-launcher home: attention rail → JTBD launchers → demoted KPIs → activity.
 
-  def home_intro_headline, do: "Billing operations"
+  def home_intro_headline, do: "Recent activity"
 
   def home_intro_copy,
     do:

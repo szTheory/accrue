@@ -1,0 +1,10 @@
+{
+  "command": "cd accrue_portal && GSD_TAP_REPORT=/tmp/accrue-233-03-t2-red.tap HEX_HOME=/tmp/accrue-233-hex mix test --formatter AccruePortal.TapFormatter test/accrue_portal/context_live_test.exs",
+  "exitCode": 2,
+  "output": "TAP version 13\n1..6\nok 1 - test a forged foreign subscription event cannot mutate another customer's subscription\nok 2 - test home and subscription routes keep the selected billed identity and signed navigation pin\nnot ok 3 - test an invoice route pins its initial selection into the browser URL for reconnect\nok 4 - test invoices are loaded for the selected organization and a revoked pinned reconnect is blocked\nok 5 - test an authorized subscription cancellation records the signed-in human actor\nok 6 - test revoked subscription cancellation clears confirmation and performs no provider mutation\n",
+  "targetTest": "test an invoice route pins its initial selection into the browser URL for reconnect",
+  "targetFile": "accrue_portal/test/accrue_portal/context_live_test.exs",
+  "expected": "A fresh invoice LiveView patches the initial selection's signed context pin into the browser URL so reconnect cannot silently select a different billable.",
+  "actual": "InvoicesLive emitted no URL patch; refreshing the old tab after the host selection changes can resolve the new selection.",
+  "semanticAssessment": "The target connected LiveView test executed and failed specifically because the expected signed context URL patch was absent. The complete TAP report from the run shows the target failure while retaining all five passing route/event tests."
+}

@@ -67,6 +67,17 @@ defmodule AccrueAdmin.Components.ThemePickerTest do
     assert source =~ ~S|candidate.setAttribute("tabindex", isActive ? "0" : "-1")|
   end
 
+  test "Phase 240 resynchronizes replacement controls from the effective stored preference" do
+    source = theme_hook_source()
+
+    assert source =~ "new MutationObserver(() => {"
+
+    assert source =~
+             "observer.observe(document.documentElement, { childList: true, subtree: true })"
+
+    assert source =~ "syncThemeButtonActiveState(sanitizeTheme(activeTheme))"
+  end
+
   defp theme_hook_source do
     Path.expand("../../../assets/js/hooks/accrue_theme.js", __DIR__)
     |> File.read!()

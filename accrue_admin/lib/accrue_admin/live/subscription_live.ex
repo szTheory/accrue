@@ -3,13 +3,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   use Phoenix.LiveView
 
-  import Ecto.Query
-
   alias Accrue.{Actor, Auth, Billing, Clock, Config, Events, PlanResolver}
-  alias Accrue.Billing.{Invoice, Subscription, UpcomingInvoice}
+  alias Accrue.Billing.{Subscription, UpcomingInvoice}
   alias Accrue.Dunning.Campaign
-  alias Accrue.Invoices.Render, as: InvoiceRender
-  alias Accrue.Repo
 
   alias AccrueAdmin.Components.{
     AppShell,
@@ -18,10 +14,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     DetailDrawer,
     DropdownMenu,
     FlashGroup,
+    IdBadge,
     JsonViewer,
     RelatedResources,
+    StatusBadge,
     StepUpAuthModal,
-    Timeline
+    Timeline,
+    Timestamp
   }
 
   alias AccrueAdmin.BillingPresentation
@@ -67,18 +66,44 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          )
          |> assign(:subscription, subscription)
          |> assign(:customer, subscription.customer)
-         |> assign(:open_invoice_summary, open_invoice_summary(subscription))
-         |> assign(:global_open_invoice_queue, global_open_invoice_queue(scope))
          |> assign(:timeline_events, events)
          |> assign(:timeline_events_loaded?, true)
          |> assign(:raw_json_loaded?, false)
+         |> assign(:action_result, nil)
          |> assign(:proration_options, proration_options())
          |> assign(:swap_plan_available, swap_plan_available?(subscription))
-         |> assign(:related_items, related_items(subscription, mount_path, scope))
+         |> assign(:related_items, related_items(subscription, mount_path, scope, nil))
          |> assign(:flashes, [])
+         |> assign(:dispatch_state, :idle)
          |> assign(:drawer_action_type, nil)
          |> assign(:pending_action, nil)}
     end
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    return_destination =
+      ScopedPath.return_destination(
+        socket.assigns.admin_mount_path,
+        Map.get(params, "return_to"),
+        socket.assigns.current_owner_scope,
+        socket.assigns.subscription.customer_id,
+        "/subscriptions"
+      )
+
+    {:noreply,
+     socket
+     |> assign(:return_path, return_destination.path)
+     |> assign(:return_label, return_destination.label)
+     |> assign(
+       :related_items,
+       related_items(
+         socket.assigns.subscription,
+         socket.assigns.admin_mount_path,
+         socket.assigns.current_owner_scope,
+         return_destination.path
+       )
+     )}
   end
 
   @impl true
@@ -86,13 +111,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       when is_binary(action_type) do
     socket = ensure_timeline_events(socket)
 
-    if action_available?(socket.assigns.subscription, action_type) do
-      {:noreply,
-       socket
-       |> assign(:drawer_action_type, action_type)
-       |> assign(:pending_action, nil)}
-    else
-      {:noreply, reject_unavailable_action(socket)}
+    cond do
+      outcome_requires_reconciliation?(socket) ->
+        {:noreply, require_outcome_review(socket)}
+
+      action_available?(socket.assigns.subscription, action_type) ->
+        {:noreply,
+         socket
+         |> assign(:drawer_action_type, action_type)
+         |> assign(:pending_action, nil)}
+
+      true ->
+        {:noreply, reject_unavailable_action(socket)}
     end
   end
 
@@ -103,16 +133,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       when is_binary(action_type) do
     socket = ensure_timeline_events(socket)
 
-    case pending_action(params, socket) do
-      {:ok, action} ->
-        if action_available?(socket.assigns.subscription, action.type) do
-          {:noreply, assign(socket, :pending_action, maybe_attach_preview(socket, action))}
-        else
-          {:noreply, reject_unavailable_action(socket)}
-        end
-
-      :error ->
-        {:noreply, reject_unavailable_action(socket)}
+    if outcome_requires_reconciliation?(socket) do
+      {:noreply, require_outcome_review(socket)}
+    else
+      prepare_staged_action(params, socket)
     end
   end
 
@@ -122,8 +146,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   def handle_event("cancel_pending_action", _params, socket) do
     {:noreply,
      socket
+     |> dismiss_step_up_if_pending()
      |> assign(:pending_action, nil)
-     |> assign(:drawer_action_type, nil)}
+     |> assign(:drawer_action_type, nil)
+     |> assign(:dispatch_state, :idle)}
   end
 
   def handle_event("load_activity", _params, socket) do
@@ -135,30 +161,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   def handle_event("confirm_action", _params, socket) do
-    pending_action = socket.assigns.pending_action
-
-    case pending_action do
-      nil ->
-        {:noreply, push_flash(socket, :warning, Copy.subscription_select_action_warning())}
-
-      %{type: type} = action when type in @destructive_actions ->
-        case StepUp.require_fresh(
-               socket,
-               step_up_action(action, socket.assigns.subscription),
-               &execute_pending_action(&1, action)
-             ) do
-          {:ok, socket} ->
-            {:noreply, socket}
-
-          {:challenge, socket} ->
-            {:noreply, socket}
-
-          {:error, _reason, socket} ->
-            {:noreply, push_flash(socket, :error, subscription_action_error_copy(socket, action))}
-        end
-
-      action ->
-        {:noreply, execute_pending_action(socket, action)}
+    if socket.assigns[:dispatch_state] in [:awaiting_step_up, :dispatching, :submitted] do
+      {:noreply, socket}
+    else
+      confirm_staged_action(socket)
     end
   end
 
@@ -175,6 +181,72 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   def handle_event("step_up_dismiss", _params, socket) do
     {:noreply, dismiss_step_up_if_pending(socket)}
+  end
+
+  defp prepare_staged_action(params, socket) do
+    case pending_action(params, socket) do
+      {:ok, action} ->
+        if action_available?(socket.assigns.subscription, action.type) and
+             action_input_valid?(socket.assigns.subscription, action) do
+          action = maybe_attach_preview(socket, action)
+
+          action =
+            action
+            |> Map.put(:subscription_id, socket.assigns.subscription.id)
+            |> Map.put(:review_actor_id, Auth.actor_id(socket.assigns.current_admin))
+            |> Map.put(:review_scope, scope_identity(socket.assigns.current_owner_scope))
+            |> Map.put(
+              :review_fingerprint,
+              review_fingerprint(action, socket.assigns.subscription)
+            )
+
+          {:noreply, stage_action(socket, action)}
+        else
+          {:noreply, reject_unavailable_action(socket)}
+        end
+
+      :error ->
+        {:noreply, reject_unavailable_action(socket)}
+    end
+  end
+
+  defp confirm_staged_action(socket) do
+    pending_action = socket.assigns.pending_action
+
+    case pending_action do
+      nil ->
+        {:noreply, push_flash(socket, :warning, Copy.subscription_select_action_warning())}
+
+      %{type: type} = action when type in @destructive_actions ->
+        case validate_review(socket, action) do
+          {:ok, fresh_socket, fresh_subscription} ->
+            fresh_socket = assign(fresh_socket, :dispatch_state, :awaiting_step_up)
+
+            case StepUp.require_fresh(
+                   fresh_socket,
+                   step_up_action(action, fresh_subscription),
+                   &execute_pending_action(&1, action)
+                 ) do
+              {:ok, socket} ->
+                {:noreply, socket}
+
+              {:challenge, socket} ->
+                {:noreply, socket}
+
+              {:error, _reason, socket} ->
+                {:noreply,
+                 socket
+                 |> assign(:dispatch_state, :staged)
+                 |> push_flash(:error, subscription_action_error_copy(socket, action))}
+            end
+
+          {:error, socket} ->
+            {:noreply, reject_stale_review(socket)}
+        end
+
+      action ->
+        {:noreply, execute_pending_action(socket, action)}
+    end
   end
 
   @impl true
@@ -195,11 +267,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         phx-key="escape"
       >
         <Breadcrumbs.breadcrumbs
+          group="Billing"
           items={[
-            %{
-              label: Copy.dashboard_breadcrumb_home(),
-              href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
-            },
             %{
               label: Copy.subscription_breadcrumb_subscriptions(),
               href: ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope)
@@ -211,122 +280,20 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             %{label: subscription_title(@subscription, @customer)}
           ]}
         />
-
-        <% health = detail_health_summary(@subscription) %>
-        <section class={["ax-detail-health-summary ax-detail-health-summary-top", "ax-detail-health-summary-" <> health.tone]} aria-label="Primary billing health summary">
-          <div class="ax-detail-health-copy" role="status">
-            <span class="ax-detail-health-label">Billing status</span>
-            <strong class="ax-detail-health-answer"><%= health.answer %></strong>
-            <span class="ax-detail-health-metric"><%= detail_health_metric(health) %></span>
-            <strong :if={health.caveats == []} class="ax-detail-health-verdict"><%= health.headline %></strong>
-            <span :if={health.caveats == []} class="ax-detail-health-body"><%= health.body %></span>
-          </div>
-          <span :if={health.caveats != []} class="ax-detail-health-body ax-detail-health-setup-note">
-            Billing is not active until setup fields are fixed; finish setup before trusting revenue, renewal, or recovery numbers.
-          </span>
-          <div class="ax-detail-health-actions" aria-label="Primary billing action from health summary">
-            <a
-              class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-            >
-              Work global invoice queue
-            </a>
-            <a
-              class="ax-button ax-button-secondary ax-button-sm"
-              href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
-            >
-              Fix customer setup
-            </a>
-            <a
-              class="ax-button ax-button-warning ax-button-sm ax-detail-recovery-shortcut"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Review dunning after invoices
-            </a>
-          </div>
-        </section>
+        <p class="ax-detail-back-link">
+          <a class="ax-link" href={@return_path}><%= @return_label %></a>
+        </p>
 
         <Detail.summary_card
-          eyebrow={Copy.subscription_detail_eyebrow()}
           title={subscription_title(@subscription, @customer)}
         >
+          <:status>
+            <StatusBadge.status_badge status={@subscription.status} label={lifecycle_health_label(@subscription)} tone={lifecycle_tone(@subscription.status)} />
+          </:status>
           <:facts>
-            <span class="ax-summary-fact">
-              <strong>Subscription</strong>
-              <%= @subscription.processor_id || @subscription.id %>
-            </span>
-            <span class="ax-summary-fact">
-              <strong>Customer</strong>
-              <%= @customer.name || @customer.email || @customer.id %>
-            </span>
-            <span :for={fact <- summary_health_facts(@subscription)} class="ax-summary-fact">
-              <strong><%= fact.label %></strong>
-              <%= fact.value %>
-            </span>
+            <IdBadge.id_badge id="subscription-summary-id" id_value={@subscription.processor_id || @subscription.id} label="Copy subscription ID" copy_label="subscription ID" variant="plain" />
           </:facts>
         </Detail.summary_card>
-
-        <section class="ax-detail-priority-actions ax-detail-priority-actions-compact" aria-label="Global invoice queue workspace">
-          <span class="ax-label ax-detail-priority-label">Global invoice queue workspace</span>
-          <span class="ax-detail-queue-depth"><strong>Local context</strong><%= invoice_queue_summary(@open_invoice_summary) %></span>
-          <a
-            class="ax-button ax-button-primary ax-button-sm ax-detail-priority-primary ax-detail-invoice-primary"
-            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-          >
-            Work all open invoice records
-          </a>
-          <div class="ax-detail-priority-links">
-            <a
-              class="ax-link-quiet"
-              href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open", "subscription_id" => @subscription.id})}
-            >
-              Filter this subscription's invoices
-            </a>
-            <a
-              class="ax-link-quiet"
-              href={
-                ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{
-                  "status" => "failed,dead"
-                })
-              }
-            >
-              Webhook debugger after invoice queue
-            </a>
-            <a
-              class="ax-link-quiet"
-              href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
-            >
-              Open dunning funnel and at-risk analytics
-            </a>
-          </div>
-        </section>
-
-        <section class="ax-inline-worklist ax-detail-open-invoice-queue" aria-label="Global open invoice queue preview">
-          <div class="ax-inline-worklist-copy">
-            <strong>Global open-invoice queue rows</strong>
-            <span>Each row opens one invoice record; use the full queue link to work every open invoice to $0.00.</span>
-          </div>
-          <ol :if={@global_open_invoice_queue != []} class="ax-detail-open-invoice-list">
-            <li :for={invoice <- @global_open_invoice_queue}>
-              <a href={global_invoice_row_href(@admin_mount_path, @current_owner_scope, invoice)} class="ax-detail-open-invoice-row">
-                <strong><%= global_invoice_row_customer(invoice) %></strong>
-                <span><%= format_invoice_exposure(invoice.amount_remaining_minor || 0) %> remaining</span>
-                <em><%= global_invoice_row_due(invoice) %></em>
-                <span class="ax-detail-open-invoice-action">Open invoice record</span>
-              </a>
-            </li>
-          </ol>
-          <span :if={@global_open_invoice_queue == []} class="ax-detail-open-invoice-empty">
-            No open invoice records in this owner scope.
-          </span>
-          <a class="ax-button ax-button-primary ax-button-sm ax-detail-invoice-primary" href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}>
-            Work all invoices in queue
-          </a>
-        </section>
-
-        <div data-ax-related-resources>
-          <RelatedResources.related_resources items={@related_items} />
-        </div>
 
         <Detail.summary_list
           rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)}
@@ -334,16 +301,27 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         />
 
         <FlashGroup.flash_group flashes={@flashes} />
+        <section
+          :if={@action_result}
+          class="ax-card"
+          data-role="subscription-action-result"
+          role="status"
+          aria-live="polite"
+        >
+          <p class="ax-body"><%= @action_result.message %></p>
+          <a :if={@action_result.href} class="ax-link" href={@action_result.href}>
+            <%= @action_result.link_label %>
+          </a>
+        </section>
 
         <section class="ax-card ax-detail-action-band" data-ax-action-band>
           <header class="ax-page-header">
             <div>
-              <p class="ax-eyebrow">Actions</p>
               <h2 class="ax-heading">Subscription actions</h2>
             </div>
             <div class="ax-page-actions">
               <button
-                :if={@swap_plan_available}
+                :if={action_available?(@subscription, "swap_plan")}
                 type="button"
                 class="ax-button ax-button-primary"
                 phx-click="open_action_drawer"
@@ -354,7 +332,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <%= action_label("swap_plan") %>
               </button>
               <button
-                :if={!braintree_processor?(@subscription)}
+                :if={action_available?(@subscription, "cancel_at_period_end")}
                 type="button"
                 class="ax-button ax-button-secondary"
                 phx-click="open_action_drawer"
@@ -378,6 +356,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <p class="ax-body"><%= Copy.subscription_action_braintree_quantity_item_guidance() %></p>
           </div>
         </section>
+
+        <div data-ax-related-resources>
+          <RelatedResources.related_resources items={@related_items} />
+        </div>
 
         <section class="ax-stack-md" aria-label="Subscription details">
           <details
@@ -410,7 +392,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <%= if Subscription.dunning_campaign_active?(@subscription) do %>
                 <p class="ax-body">
                   <strong class="ax-label"><%= Copy.dunning_started_label() %></strong>
-                  <%= format_datetime(@subscription.dunning_campaign_started_at) %>
+                  <Timestamp.timestamp value={@subscription.dunning_campaign_started_at} id="subscription-dunning-started-at" />
                 </p>
                 <p class="ax-body">
                   <strong class="ax-label"><%= Copy.dunning_next_action_label() %></strong>
@@ -420,7 +402,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <div class="ax-detail-dunning-summary" aria-label="Dunning funnel state for this subscription">
                   <span><strong>Global dunning funnel</strong><em>No subscription-level campaign here; recovery analytics still shows at-risk accounts and funnel trends.</em></span>
                   <a
-                    class="ax-button ax-button-primary ax-button-sm ax-detail-dunning-action"
+                    class="ax-link"
                     href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                   >
                     Open dunning funnel and at-risk analytics
@@ -431,34 +413,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 </p>
               <% end %>
 
-              <div class="ax-detail-actions-row">
+              <div :if={Subscription.dunning_campaign_active?(@subscription)} class="ax-detail-actions-row">
                 <a
-                  class="ax-button ax-button-primary ax-button-sm ax-detail-recovery-shortcut"
+                  class="ax-link"
                   href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
                 >
                   Open dunning funnel and at-risk analytics
                 </a>
-                <a
-                  class="ax-button ax-button-secondary ax-button-sm"
-                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
-                >
-                  Work global invoice queue
-                </a>
-                <a
-                  class="ax-button ax-button-secondary ax-button-sm"
-                  href={
-                    ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{
-                      "status" => "open",
-                      "subscription_id" => @subscription.id
-                    })
-                  }
-                >
-                  Open local invoice context
-                </a>
               </div>
-              <span class="ax-detail-hint-chip">
-                Global queue works every open invoice to $0.00; local context is secondary.
-              </span>
             </div>
           </details>
 
@@ -480,7 +442,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
               <span><strong>Actor</strong><em><%= latest_audit.actor %></em></span>
               <span><strong>Action</strong><em><%= latest_audit.action %></em></span>
-              <span><strong>Timestamp</strong><em><%= latest_audit.at %></em></span>
+              <span><strong>Timestamp</strong><em><Timestamp.timestamp value={latest_audit.at} id="subscription-latest-audit-timestamp" /></em></span>
             </div>
             <p class="ax-body"><%= activity_audit_summary(@timeline_events, @subscription) %></p>
             <div class="ax-activity-actions">
@@ -505,7 +467,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <li :for={row <- audit_rows(@timeline_events, @subscription)} class="ax-audit-row">
                 <strong><%= row.actor %></strong>
                 <span><%= row.action %></span>
-                <time><%= row.at %></time>
+                <Timestamp.timestamp value={row.at} id={"subscription-audit-row-#{row.id}"} />
               </li>
             </ul>
           </div>
@@ -539,6 +501,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           open={drawer_open?(@drawer_action_type, @pending_action)}
           title={drawer_title(@drawer_action_type, @pending_action)}
           subtitle="Review the staged billing change before confirming it."
+          close_label={Copy.subscription_action_back_to_subscription()}
           close_event="cancel_pending_action"
         >
           <%= if @pending_action do %>
@@ -546,6 +509,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               pending_action={@pending_action}
               subscription={@subscription}
               customer={@customer}
+              owner_scope={@current_owner_scope}
             />
           <% else %>
             <.action_form
@@ -559,14 +523,19 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <:footer>
             <button
               :if={@pending_action}
+              id="subscription-action-confirm"
               phx-click="confirm_action"
               class="ax-button ax-button-primary"
               data-role="confirm-action"
               data-ax-action-drawer-confirm
+              disabled={@dispatch_state in [:awaiting_step_up, :dispatching, :submitted]}
+              phx-disable-with={"Submitting " <> action_label(@pending_action.type)}
             >
               Confirm <%= action_label(@pending_action.type) %>
             </button>
-            <button phx-click="cancel_pending_action" class="ax-button ax-button-ghost">Cancel</button>
+            <button phx-click="cancel_pending_action" class="ax-button ax-button-ghost">
+              <%= Copy.subscription_action_back_to_subscription() %>
+            </button>
           </:footer>
         </DetailDrawer.detail_drawer>
 
@@ -582,12 +551,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 pending_action={@pending_action}
                 subscription={@subscription}
                 customer={@customer}
+                owner_scope={@current_owner_scope}
               />
               <button
                 phx-click="confirm_action"
                 class="ax-button ax-button-primary"
                 data-role="confirm-action"
                 data-ax-action-drawer-confirm
+                disabled={@dispatch_state in [:awaiting_step_up, :dispatching, :submitted]}
+                phx-disable-with={"Submitting " <> action_label(@pending_action.type)}
               >
                 Confirm <%= action_label(@pending_action.type) %>
               </button>
@@ -607,6 +579,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           pending={@step_up_pending}
           challenge={@step_up_challenge}
           error={@step_up_error}
+          return_focus="#subscription-action-confirm"
         />
 
         <div :if={@step_up_pending} hidden aria-hidden="true" data-role="step-up-test-mirror">
@@ -623,11 +596,57 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   attr(:pending_action, :map, required: true)
   attr(:subscription, :map, required: true)
   attr(:customer, :map, required: true)
+  attr(:owner_scope, :map, required: true)
 
   defp pending_action_content(assigns) do
     ~H"""
     <section class="ax-stack-md" data-role="confirm-panel">
-      <p class="ax-label">Confirm action</p>
+      <p class="ax-label">Confirm action · <%= action_label(@pending_action.type) %></p>
+      <dl class="ax-detail-field-list" data-role="subscription-action-review-facts">
+        <div>
+          <dt class="ax-label">Subscription</dt>
+          <dd class="ax-body"><%= customer_label(@customer) %></dd>
+          <dd class="ax-body">Subscription ID: <%= @subscription.id %></dd>
+          <dd :if={@subscription.processor_id} class="ax-body">
+            Processor subscription ID: <%= @subscription.processor_id %>
+          </dd>
+        </div>
+        <div>
+          <dt class="ax-label">Customer</dt>
+          <dd class="ax-body"><%= customer_label(@customer) %> · Customer ID: <%= @customer.id %></dd>
+        </div>
+        <div>
+          <dt class="ax-label">Owner and active scope</dt>
+          <dd class="ax-body">
+            Customer owner: <%= @customer.owner_type %> <%= @customer.owner_id %>.
+            Active review scope: <%= owner_scope_copy(@owner_scope) %>.
+          </dd>
+        </div>
+        <div>
+          <dt class="ax-label">Current state</dt>
+          <dd class="ax-body"><%= lifecycle_health_label(@subscription) %></dd>
+        </div>
+        <div>
+          <dt class="ax-label">Current plan / price</dt>
+          <dd class="ax-body"><%= current_price_id(@subscription) || "Price unavailable" %></dd>
+        </div>
+        <div>
+          <dt class="ax-label">Current charge amount</dt>
+          <dd class="ax-body">Unavailable; no estimate is shown.</dd>
+        </div>
+        <div :if={@pending_action[:item_id]}>
+          <dt class="ax-label">Selected subscription item</dt>
+          <dd class="ax-body">Item ID: <%= @pending_action.item_id %></dd>
+        </div>
+        <div :if={@pending_action[:new_quantity]}>
+          <dt class="ax-label">Requested quantity</dt>
+          <dd class="ax-body"><%= @pending_action.new_quantity %></dd>
+        </div>
+        <div :if={@pending_action[:new_price_id]}>
+          <dt class="ax-label">Requested price</dt>
+          <dd class="ax-body"><%= @pending_action.new_price_id %></dd>
+        </div>
+      </dl>
       <p class="ax-body"><%= confirm_copy(@pending_action, @subscription, @customer) %></p>
       <section
         :if={match?(%UpcomingInvoice{}, @pending_action[:preview])}
@@ -646,6 +665,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </li>
         </ul>
       </section>
+      <p
+        :if={@pending_action.type == "swap_plan" and not match?(%UpcomingInvoice{}, @pending_action[:preview])}
+        class="ax-body"
+        data-role="subscription-preview-unavailable"
+      >
+        Invoice amount and currency preview are unavailable; no estimate is shown.
+      </p>
     </section>
     """
   end
@@ -806,15 +832,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     |> assign(:current_path, admin_path(admin, "/subscriptions"))
   end
 
-  defp load_subscription(subscription_id) do
-    Subscription
-    |> Repo.get(subscription_id)
-    |> case do
-      nil -> nil
-      subscription -> Repo.preload(subscription, [:customer, :subscription_items])
-    end
-  end
-
   defp timeline_events(subscription_id),
     do: Events.timeline_for("Subscription", subscription_id, limit: 25)
 
@@ -831,10 +848,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
     base_rows =
       [
-        %{
-          label: "Billing health verdict",
-          value: detail_health_summary(subscription).answer
-        },
         %{
           label: "Lifecycle state",
           value: lifecycle_health_label(subscription)
@@ -867,7 +880,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             action_event: "open_action_drawer",
             action_value: "swap_plan"
           }),
-          %{label: "Current period", value: current_period_summary(subscription)},
+          %{label: "Current period", value: current_period_summary(subscription, :summary)},
+          %{label: "Cancellation", value: cancellation_summary(subscription)},
           renews_or_ends_row(subscription),
           %{label: "Amount (MRR)", value: mrr_summary(subscription)}
         ]
@@ -920,12 +934,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       caveats ->
         [
           %{
-            label: "Billing setup gaps",
+            label: "Billing evidence",
             value: Enum.join(caveats, ", "),
-            action_label: "Audit",
+            action_label: "View events",
             action_context:
-              Copy.action_hidden_context("Audit",
-                resource: "setup events",
+              Copy.action_hidden_context("View",
+                resource: "events",
                 object: "subscription #{subscription.processor_id || subscription.id}"
               ),
             action_href:
@@ -963,7 +977,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp renews_or_ends_row(subscription) do
     %{
       label: "Renews / ends",
-      value: renews_or_ends_summary(subscription),
+      value: renews_or_ends_summary(subscription, :summary),
       action_label: renews_or_ends_action_label(subscription),
       action_context:
         Copy.action_hidden_context("Change",
@@ -993,212 +1007,59 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       else: "cancel_at_period_end"
   end
 
-  defp current_period_summary(%{
-         current_period_start: %DateTime{} = starts_at,
-         current_period_end: %DateTime{} = ends_at
-       }) do
-    "#{format_datetime(starts_at)} - #{format_datetime(ends_at)}"
-  end
-
-  defp current_period_summary(_subscription), do: not_projected_copy(:period)
-
-  defp summary_health_facts(subscription) do
-    [
-      %{label: "Renewal", value: renews_or_ends_summary(subscription)},
-      %{label: "MRR", value: mrr_summary(subscription)}
-    ]
-  end
-
-  defp open_invoice_summary(subscription) do
-    open_statuses = [:draft, :open]
-
-    Invoice
-    |> where(
-      [invoice],
-      invoice.subscription_id == ^subscription.id and invoice.status in ^open_statuses
-    )
-    |> select([invoice], %{
-      count: count(invoice.id),
-      exposure_minor: fragment("coalesce(sum(?), 0)", invoice.amount_remaining_minor)
-    })
-    |> Repo.one()
-    |> case do
-      %{count: count, exposure_minor: exposure_minor} ->
-        %{count: count || 0, exposure_minor: exposure_minor || 0}
-
-      _summary ->
-        %{count: 0, exposure_minor: 0}
-    end
-  end
-
-  defp invoice_queue_summary(%{count: count, exposure_minor: exposure_minor}) do
-    "#{pluralize(count, "open invoice")}; #{format_invoice_exposure(exposure_minor)} exposure"
-  end
-
-  defp invoice_queue_summary(_summary), do: "0 open invoices; $0.00 exposure"
-
-  defp format_invoice_exposure(amount_minor) when is_integer(amount_minor),
-    do: InvoiceRender.format_money(amount_minor, :usd, "en")
-
-  defp format_invoice_exposure(_amount_minor), do: "$0.00"
-
-  defp global_open_invoice_queue(owner_scope) do
-    open_statuses = [:draft, :open]
-
-    owner_scope
-    |> global_open_invoice_base(open_statuses)
-    |> order_by([invoice, _customer, _subscription],
-      asc_nulls_last: invoice.due_date,
-      desc: invoice.amount_remaining_minor
-    )
-    |> limit(3)
-    |> select([invoice, customer, subscription], %{
-      id: invoice.id,
-      number: invoice.number,
-      customer_id: customer.id,
-      customer_name: customer.name,
-      customer_email: customer.email,
-      subscription_id: invoice.subscription_id,
-      subscription_processor_id: subscription.processor_id,
-      amount_remaining_minor: invoice.amount_remaining_minor,
-      currency: invoice.currency,
-      due_date: invoice.due_date,
-      status: invoice.status
-    })
-    |> Repo.all()
-  end
-
-  defp global_open_invoice_base(
-         %{mode: :organization, organization_id: organization_id},
-         statuses
+  defp current_period_summary(
+         %{
+           current_period_start: %DateTime{} = starts_at,
+           current_period_end: %DateTime{} = ends_at
+         },
+         surface
        ) do
-    Invoice
-    |> join(:inner, [invoice], customer in assoc(invoice, :customer))
-    |> join(:left, [invoice, _customer], subscription in assoc(invoice, :subscription))
-    |> where(
-      [invoice, customer, _subscription],
-      invoice.status in ^statuses and customer.owner_type == "Organization" and
-        customer.owner_id == ^organization_id
-    )
+    assigns = %{
+      starts_at: starts_at,
+      ends_at: ends_at,
+      start_id: "subscription-period-start-#{surface}",
+      end_id: "subscription-period-end-#{surface}"
+    }
+
+    ~H"""
+    <span><Timestamp.timestamp value={@starts_at} id={@start_id} /> – <Timestamp.timestamp value={@ends_at} id={@end_id} /></span>
+    """
   end
 
-  defp global_open_invoice_base(_owner_scope, statuses) do
-    Invoice
-    |> join(:inner, [invoice], customer in assoc(invoice, :customer))
-    |> join(:left, [invoice, _customer], subscription in assoc(invoice, :subscription))
-    |> where([invoice, _customer, _subscription], invoice.status in ^statuses)
-  end
+  defp current_period_summary(_subscription, _surface), do: not_projected_copy(:period)
 
-  defp global_invoice_row_href(mount_path, owner_scope, invoice) do
-    ScopedPath.build(mount_path, "/invoices", owner_scope, %{
-      "status" => "open",
-      "invoice_id" => invoice.id
-    })
-  end
+  defp cancellation_summary(%{
+         cancel_at_period_end: true,
+         current_period_end: %DateTime{} = ending
+       }),
+       do: timestamp_summary("Scheduled for", ending, "subscription-cancellation-summary")
 
-  defp global_invoice_row_customer(invoice),
-    do:
-      invoice.customer_name || invoice.customer_email || invoice.customer_id || "Unknown customer"
+  defp cancellation_summary(%{cancel_at_period_end: true}),
+    do: "Scheduled; effective date not shown"
 
-  defp global_invoice_row_due(%{due_date: %DateTime{} = due_date}),
-    do: "Due #{format_datetime(due_date)}"
+  defp cancellation_summary(%{status: status}) when status in [:canceled, :incomplete_expired],
+    do: "Canceled"
 
-  defp global_invoice_row_due(_invoice), do: "Due now - prioritize before dunning"
+  defp cancellation_summary(_), do: "No cancellation scheduled"
 
-  defp detail_health_summary(subscription) do
-    caveats = projection_caveats(subscription)
+  defp collection_summary(%{pause_collection: pause}) when not is_nil(pause),
+    do: "Paused"
 
-    cond do
-      Accrue.Billing.Subscription.past_due?(subscription) ->
-        %{
-          tone: "amber",
-          label: "At risk",
-          answer: "Unhealthy - payment recovery needed",
-          headline: "Payment recovery is needed",
-          body:
-            "Open invoices or dunning activity need operator attention before this account is healthy.",
-          caveats: caveats
-        }
+  defp collection_summary(%{status: :paused}), do: "Paused"
+  defp collection_summary(_subscription), do: "Not paused"
 
-      caveats != [] ->
-        %{
-          tone: "danger",
-          label: "Setup incomplete",
-          answer: "No - billing is not active",
-          headline: "Billing is not active",
-          body:
-            "Setup fields must be fixed before billing, revenue, renewal, or recovery reporting can be trusted.",
-          caveats: caveats
-        }
-
-      Accrue.Billing.Subscription.canceling?(subscription) ->
-        %{
-          tone: "amber",
-          label: "Ending",
-          answer: "Renewal is ending",
-          headline: "Renewal is scheduled to end",
-          body: "The account remains active through the paid-through date.",
-          caveats: []
-        }
-
-      Accrue.Billing.Subscription.paused?(subscription) ->
-        %{
-          tone: "amber",
-          label: "Paused",
-          answer: "Collection is paused",
-          headline: "Collection is paused",
-          body: "Review collection settings before relying on recurring revenue.",
-          caveats: []
-        }
-
-      Accrue.Billing.Subscription.canceled?(subscription) ->
-        %{
-          tone: "slate",
-          label: "Ended",
-          answer: "No active billing",
-          headline: "No active billing",
-          body: "This subscription is no longer collecting recurring revenue.",
-          caveats: []
-        }
-
-      Accrue.Billing.Subscription.active?(subscription) ->
-        %{
-          tone: "moss",
-          label: "Healthy",
-          answer: "Yes - active billing is healthy right now",
-          headline: "Active billing is healthy right now",
-          body: "No dunning, cancellation, or payment-risk flags are active.",
-          caveats: []
-        }
-
-      true ->
-        %{
-          tone: "slate",
-          label: humanize(subscription.status),
-          answer: "Review subscription state",
-          headline: "Review subscription state",
-          body: "Confirm the processor state before taking billing action.",
-          caveats: caveats
-        }
-    end
-  end
-
-  defp detail_health_metric(%{caveats: caveats}) when is_list(caveats) and caveats != [],
-    do: "Setup required now"
-
-  defp detail_health_metric(%{tone: "moss"}), do: "0 blockers"
-
-  defp detail_health_metric(%{tone: "amber"}), do: "Operator action required"
-
-  defp detail_health_metric(_health), do: "Review required"
+  defp lifecycle_tone(status) when status in [:past_due, :unpaid, :incomplete], do: "amber"
+  defp lifecycle_tone(:active), do: "moss"
+  defp lifecycle_tone(:trialing), do: "cobalt"
+  defp lifecycle_tone(_), do: "slate"
 
   defp projection_caveats(subscription) do
     [
       unless(match?(%DateTime{}, subscription.current_period_end),
-        do: "Renewal date not shown"
+        do: "Renewal date unavailable"
       ),
-      unless(present?(current_price_id(subscription)), do: "Price not shown"),
-      "Charge amount not shown"
+      unless(present?(current_price_id(subscription)), do: "Price unavailable"),
+      "Charge amount unavailable"
     ]
     |> Enum.reject(&is_nil/1)
   end
@@ -1207,48 +1068,62 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp lifecycle_health_label(subscription) do
     cond do
+      subscription.status == :incomplete_expired ->
+        "Incomplete expired"
+
+      Subscription.canceled?(subscription) ->
+        "Canceled"
+
+      subscription.status == :unpaid ->
+        "Unpaid"
+
       Accrue.Billing.Subscription.past_due?(subscription) ->
-        "At risk - payment recovery needed"
+        "Past due"
 
-      Accrue.Billing.Subscription.canceling?(subscription) ->
-        "Canceling - renewal ends this period"
+      subscription.status == :incomplete ->
+        "Incomplete"
 
-      Accrue.Billing.Subscription.paused?(subscription) ->
-        "Paused - collection paused"
+      Subscription.trialing?(subscription) ->
+        "Trialing"
 
-      Accrue.Billing.Subscription.canceled?(subscription) ->
-        "Ended - no active billing"
-
-      projection_caveats(subscription) != [] ->
-        "Setup incomplete - active billing unverified"
+      subscription.status == :paused ->
+        "Paused"
 
       Accrue.Billing.Subscription.active?(subscription) ->
-        "Healthy - active billing"
+        if Subscription.trialing?(subscription), do: "Trialing", else: "Active"
 
       true ->
         humanize(subscription.status)
     end
   end
 
-  defp renews_or_ends_summary(subscription) do
+  defp renews_or_ends_summary(subscription, surface) do
     cond do
       Accrue.Billing.Subscription.canceled?(subscription) ->
         ended_at = subscription.ended_at || subscription.canceled_at
 
         if ended_at do
-          "Ended #{format_datetime(ended_at)}"
+          timestamp_summary("Ended", ended_at, "subscription-ended-at-#{surface}")
         else
-          "End date is not shown in admin"
+          not_projected_copy(:end_date)
         end
 
       Accrue.Billing.Subscription.canceling?(subscription) ->
-        "Ends #{format_datetime(subscription.current_period_end)}"
+        timestamp_summary(
+          "Ends",
+          subscription.current_period_end,
+          "subscription-ends-at-#{surface}"
+        )
 
       subscription.cancel_at_period_end ->
         not_projected_copy(:end_date)
 
       match?(%DateTime{}, subscription.current_period_end) ->
-        "Renews #{format_datetime(subscription.current_period_end)}"
+        timestamp_summary(
+          "Renews",
+          subscription.current_period_end,
+          "subscription-renews-at-#{surface}"
+        )
 
       true ->
         not_projected_copy(:renewal)
@@ -1262,8 +1137,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         label: "Plan / price",
         value: current_price_id(subscription) || not_projected_copy(:price)
       },
-      %{label: "Current period", value: current_period_summary(subscription)},
-      %{label: "Renewal", value: renews_or_ends_summary(subscription)},
+      %{label: "Current period", value: current_period_summary(subscription, :billing)},
+      %{label: "Renewal", value: renews_or_ends_summary(subscription, :billing)},
+      %{label: "Collection", value: collection_summary(subscription)},
       %{label: "Quantity", value: quantity_summary(subscription)}
     ]
   end
@@ -1299,19 +1175,19 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp not_projected_copy(:amount),
-    do: "Amount is not confirmed in admin"
+    do: "Unavailable"
 
   defp not_projected_copy(:end_date),
-    do: "End date is not shown in admin"
+    do: "End date unavailable"
 
   defp not_projected_copy(:period),
-    do: "Current period is not shown in admin"
+    do: "Current period unavailable"
 
   defp not_projected_copy(:price),
-    do: "Price is not confirmed in admin"
+    do: "Price unavailable"
 
   defp not_projected_copy(:renewal),
-    do: "Renewal date is not shown in admin"
+    do: "Renewal date unavailable"
 
   defp default_drill_open?(subscription, :billing),
     do: not Subscription.dunning_campaign_active?(subscription)
@@ -1334,13 +1210,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         label: "Edit billing",
         items:
           [
-            quantity_change_available?(subscription) &&
+            action_available?(subscription, "update_quantity") &&
               action_item("update_quantity", subscription_label),
-            quantity_item_changes_available?(subscription) &&
+            action_available?(subscription, "add_item") &&
               action_item("add_item", subscription_label),
-            quantity_item_changes_available?(subscription) &&
+            action_available?(subscription, "update_item_quantity") &&
               action_item("update_item_quantity", subscription_label),
-            quantity_item_changes_available?(subscription) &&
+            action_available?(subscription, "remove_item") &&
               action_item("remove_item", subscription_label)
           ]
           |> Enum.reject(&(&1 in [false, nil]))
@@ -1348,18 +1224,22 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       %{
         label: "Collection",
         items:
-          if braintree_processor?(subscription) do
-            []
-          else
-            [action_item("pause", subscription_label), action_item("resume", subscription_label)]
-          end
+          [
+            action_available?(subscription, "pause") && action_item("pause", subscription_label),
+            action_available?(subscription, "resume") && action_item("resume", subscription_label)
+          ]
+          |> Enum.reject(&(&1 in [false, nil]))
       },
       %{
         label: "Danger zone",
-        items: [
-          action_item("cancel_now", subscription_label, danger?: true),
-          action_item("comp_subscription", subscription_label, danger?: true)
-        ]
+        items:
+          [
+            action_available?(subscription, "cancel_now") &&
+              action_item("cancel_now", subscription_label, danger?: true),
+            action_available?(subscription, "comp_subscription") &&
+              action_item("comp_subscription", subscription_label, danger?: true)
+          ]
+          |> Enum.reject(&(&1 in [false, nil]))
       }
     ]
     |> Enum.reject(&(Map.get(&1, :items) == []))
@@ -1400,11 +1280,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp action_label(action_type), do: humanize(action_type)
 
   defp activity_audit_summary([event | _events], _subscription) do
-    "#{event.type} · #{event_actor_summary(event)} · #{format_datetime(event.inserted_at)}"
+    "#{event.type} · #{event_actor_summary(event)}"
   end
 
-  defp activity_audit_summary(_events, subscription) do
-    "Subscription status reviewed · Accrue system · #{format_datetime(subscription.inserted_at || subscription.current_period_start)}"
+  defp activity_audit_summary(_events, _subscription) do
+    "Subscription status reviewed · Accrue system"
   end
 
   defp latest_audit_row(events, subscription) do
@@ -1422,7 +1302,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           %{
             actor: "Accrue system",
             action: "Subscription status reviewed",
-            at: format_datetime(subscription.inserted_at || subscription.current_period_start)
+            id: "projection",
+            at: subscription.inserted_at || subscription.current_period_start
           }
         ]
 
@@ -1433,7 +1314,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           %{
             actor: event_actor_summary(event),
             action: event.type,
-            at: format_datetime(event.inserted_at)
+            id: event.id,
+            at: event.inserted_at
           }
         end)
     end
@@ -1452,7 +1334,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp timeline_event_item(event, mount_path, scope) do
     %{
       title: event.type,
-      at: format_datetime(event.inserted_at),
+      id: event.id,
+      at: event.inserted_at,
       body: event_subject_summary(event),
       status: event.actor_type,
       tone: tone(event),
@@ -1465,7 +1348,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp subscription_projection_timeline_item(subscription, mount_path, scope) do
     %{
       title: "Subscription status reviewed",
-      at: format_datetime(subscription.inserted_at || subscription.current_period_start),
+      id: "projection",
+      at: subscription.inserted_at || subscription.current_period_start,
       body: "Accrue checked #{lifecycle_health_label(subscription)} for this customer",
       status: "system",
       tone: :cobalt,
@@ -1533,6 +1417,50 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
+  defp stage_action(socket, action) do
+    previous = socket.assigns[:pending_action]
+    same_intent? = intent_identity(previous) == intent_identity(action)
+
+    action =
+      Map.put(
+        action,
+        :operation_id,
+        if(same_intent? && previous[:operation_id],
+          do: previous[:operation_id],
+          else: "admin-ui-" <> Ecto.UUID.generate()
+        )
+      )
+
+    socket =
+      if not same_intent? and socket.assigns[:step_up_pending],
+        do: StepUp.dismiss_challenge(socket),
+        else: socket
+
+    socket
+    |> assign(:pending_action, action)
+    |> assign(:dispatch_state, :staged)
+    |> maybe_clear_previous_result(not same_intent?)
+  end
+
+  defp intent_identity(nil), do: nil
+
+  defp intent_identity(action) do
+    Map.take(action, [
+      :type,
+      :subscription_id,
+      :new_price_id,
+      :new_quantity,
+      :item_id,
+      :pause_behavior,
+      :proration,
+      :source_event_id,
+      :source_webhook_event_id
+    ])
+  end
+
+  defp maybe_clear_previous_result(socket, true), do: assign(socket, :action_result, nil)
+  defp maybe_clear_previous_result(socket, false), do: socket
+
   defp optional_string(value) when value in [nil, ""], do: {:ok, nil}
   defp optional_string(value) when is_binary(value), do: {:ok, value}
   defp optional_string(_value), do: :error
@@ -1550,10 +1478,19 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp action_available?(subscription, "swap_plan"), do: swap_plan_available?(subscription)
 
   defp action_available?(subscription, "cancel_at_period_end"),
-    do: not braintree_processor?(subscription)
+    do:
+      not braintree_processor?(subscription) and Subscription.active?(subscription) and
+        not Subscription.canceled?(subscription) and not Subscription.canceling?(subscription)
 
-  defp action_available?(subscription, "pause"), do: not braintree_processor?(subscription)
-  defp action_available?(subscription, "resume"), do: not braintree_processor?(subscription)
+  defp action_available?(subscription, "pause"),
+    do:
+      not braintree_processor?(subscription) and Subscription.active?(subscription) and
+        not Subscription.paused?(subscription) and not Subscription.canceled?(subscription)
+
+  defp action_available?(subscription, "resume"),
+    do:
+      not braintree_processor?(subscription) and
+        (Subscription.paused?(subscription) or Subscription.canceling?(subscription))
 
   defp action_available?(subscription, "update_quantity"),
     do: quantity_change_available?(subscription)
@@ -1562,9 +1499,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
        when action in ["add_item", "update_item_quantity", "remove_item"],
        do: quantity_item_changes_available?(subscription)
 
-  defp action_available?(_subscription, action)
+  defp action_available?(subscription, action)
        when action in ["cancel_now", "comp_subscription"],
-       do: true
+       do:
+         (action == "cancel_now" and not Subscription.canceled?(subscription)) or
+           (action == "comp_subscription" and not is_nil(subscription.customer_id))
 
   defp action_available?(_subscription, _action), do: false
 
@@ -1584,7 +1523,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp dismiss_step_up_if_pending(socket) do
     if socket.assigns[:step_up_pending] do
-      StepUp.dismiss_challenge(socket)
+      socket
+      |> StepUp.dismiss_challenge()
+      |> assign(:dispatch_state, :staged)
     else
       socket
     end
@@ -1601,38 +1542,198 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp execute_pending_action(socket, action) do
+    current_action = socket.assigns[:pending_action]
+
+    if socket.assigns[:dispatch_state] in [:dispatching, :submitted] or
+         is_nil(current_action) or current_action[:operation_id] != action[:operation_id] do
+      reject_stale_review(socket)
+    else
+      socket = assign(socket, :dispatch_state, :dispatching)
+
+      case validate_review(socket, action) do
+        {:ok, fresh_socket, fresh_subscription} ->
+          if action.type not in @destructive_actions or StepUp.fresh?(fresh_socket) do
+            fresh_socket =
+              fresh_socket
+              |> assign(:subscription, fresh_subscription)
+              |> assign(:customer, fresh_subscription.customer)
+
+            execute_pending_action_fresh(fresh_socket, action)
+          else
+            reject_stale_review(fresh_socket)
+          end
+
+        {:error, socket} ->
+          reject_stale_review(socket)
+      end
+    end
+  end
+
+  defp execute_pending_action_fresh(socket, action) do
     subscription = socket.assigns.subscription
 
     result =
-      with_admin_context(socket.assigns.current_admin, fn operation_id ->
+      with_admin_context(socket.assigns.current_admin, action.operation_id, fn operation_id ->
         execute_action(subscription, socket.assigns.customer, action, operation_id)
       end)
 
     case result do
       {:ok, {:comped, new_subscription}} ->
-        socket
-        |> record_admin_audit(action, subscription.id, new_subscription.id)
-        |> refresh_subscription(subscription.id)
-        |> push_flash(
-          :info,
-          "Comp replacement created: #{new_subscription.processor_id || new_subscription.id}"
-        )
+        present_compensation_result(socket, action, subscription.id, new_subscription)
 
       {:ok, %Subscription{} = updated_subscription} ->
-        socket
-        |> record_admin_audit(action, updated_subscription.id, updated_subscription.id)
-        |> refresh_subscription(updated_subscription.id)
-        |> push_flash(:info, Copy.subscription_action_recorded_info())
+        case refresh_subscription(socket, updated_subscription.id) do
+          {:ok, refreshed} ->
+            refreshed
+            |> record_admin_audit(action, updated_subscription.id, updated_subscription.id)
+            |> put_action_result(:confirmed, Copy.subscription_action_recorded_info())
+            |> finish_action_submission(:submitted, true)
+
+          :not_found ->
+            socket
+            |> put_action_result(
+              :unconfirmed,
+              "The provider returned a change, but the subscription is no longer available in this owner scope. Check scoped activity before taking another action."
+            )
+            |> finish_action_submission(:submitted, true)
+        end
 
       {:ok, :requires_action, payment_intent} ->
-        push_flash(socket, :warning, Copy.payment_processor_action_warning(payment_intent))
+        _ = payment_intent
 
-      {:error, _reason} ->
-        push_flash(socket, :error, subscription_action_error_copy(socket, action))
+        socket
+        |> put_action_result(
+          :pending,
+          "The provider requires another action. A completed subscription change is not confirmed; check scoped activity before deciding what to do next."
+        )
+        |> finish_action_submission(:submitted, true)
+
+      {:error, reason} ->
+        handle_action_error(socket, action, reason)
     end
+  end
+
+  defp validate_review(socket, action) do
+    session = socket.assigns[:accrue_admin_session] || %{}
+    current_scope = socket.assigns.current_owner_scope
+
+    params =
+      if current_scope.mode == :organization,
+        do: %{"org" => current_scope.organization_slug},
+        else: %{}
+
+    with {:ok, scope} <- AccrueAdmin.OwnerScope.resolve(session, params),
+         true <- Auth.actor_id(scope.current_admin) == action.review_actor_id,
+         true <- scope_identity(scope) == action.review_scope,
+         {:ok, subscription} <- Subscriptions.detail(action.subscription_id, scope),
+         true <- action_available?(subscription, action.type),
+         true <- action_input_valid?(subscription, action),
+         true <- review_fingerprint(action, subscription) == action.review_fingerprint do
+      {:ok,
+       socket
+       |> assign(:current_admin, scope.current_admin)
+       |> assign(:current_owner_scope, scope), subscription}
+    else
+      _ -> {:error, socket}
+    end
+  end
+
+  defp reject_stale_review(socket) do
+    socket
     |> assign(:pending_action, nil)
     |> assign(:drawer_action_type, nil)
+    |> assign(:dispatch_state, :idle)
+    |> push_flash(
+      :warning,
+      "The subscription or action details changed. Review the action again before confirming."
+    )
   end
+
+  defp scope_identity(scope) do
+    {scope.mode, scope.organization_id, scope.organization_slug, scope.platform_admin?,
+     scope.admin_org_ids}
+  end
+
+  defp review_fingerprint(action, subscription) do
+    material_subscription = %{
+      id: subscription.id,
+      customer_id: subscription.customer_id,
+      customer_owner_type: subscription.customer && subscription.customer.owner_type,
+      customer_owner_id: subscription.customer && subscription.customer.owner_id,
+      processor: subscription.processor,
+      processor_id: subscription.processor_id,
+      status: subscription.status,
+      ended_at: subscription.ended_at,
+      cancel_at_period_end: subscription.cancel_at_period_end,
+      cancel_at: subscription.cancel_at,
+      current_period_end: subscription.current_period_end,
+      pause_collection: subscription.pause_collection,
+      items:
+        Enum.map(subscription.subscription_items || [], fn item ->
+          Map.take(item, [:id, :processor_id, :price_id, :quantity])
+        end)
+    }
+
+    material_action =
+      Map.take(action, [
+        :type,
+        :new_price_id,
+        :new_quantity,
+        :item_id,
+        :pause_behavior,
+        :proration,
+        :source_event_id,
+        :source_webhook_event_id,
+        :preview
+      ])
+
+    :crypto.hash(:sha256, :erlang.term_to_binary({material_subscription, material_action}))
+  end
+
+  defp action_input_valid?(_subscription, %{
+         type: "swap_plan",
+         new_price_id: price,
+         proration: proration
+       }),
+       do: present?(price) and Map.has_key?(@proration_atoms, proration)
+
+  defp action_input_valid?(_subscription, %{
+         type: "update_quantity",
+         new_quantity: quantity,
+         proration: proration
+       }),
+       do: is_integer(quantity) and quantity > 0 and Map.has_key?(@proration_atoms, proration)
+
+  defp action_input_valid?(_subscription, %{
+         type: "add_item",
+         new_price_id: price,
+         new_quantity: quantity,
+         proration: proration
+       }),
+       do:
+         present?(price) and is_integer(quantity) and quantity > 0 and
+           Map.has_key?(@proration_atoms, proration)
+
+  defp action_input_valid?(subscription, %{
+         type: "update_item_quantity",
+         item_id: id,
+         new_quantity: quantity,
+         proration: proration
+       }),
+       do:
+         present?(id) and is_integer(quantity) and quantity > 0 and
+           Map.has_key?(@proration_atoms, proration) and
+           match?({:ok, _}, subscription_item(subscription, id))
+
+  defp action_input_valid?(subscription, %{type: "remove_item", item_id: id, proration: proration}),
+       do:
+         present?(id) and Map.has_key?(@proration_atoms, proration) and
+           match?({:ok, _}, subscription_item(subscription, id))
+
+  defp action_input_valid?(_subscription, %{type: "pause", pause_behavior: behavior}),
+    do: behavior in @pause_behaviors
+
+  defp action_input_valid?(_subscription, _action), do: true
 
   defp execute_action(subscription, _customer, %{type: "cancel_now"}, operation_id) do
     Billing.cancel(subscription, operation_id: operation_id)
@@ -1842,8 +1943,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp execute_action(_subscription, _customer, %{type: other}, _operation_id),
     do: {:error, {:unsupported_action, other}}
 
-  defp with_admin_context(user, fun) do
-    operation_id = "admin-ui-" <> Ecto.UUID.generate()
+  defp with_admin_context(user, operation_id, fun) do
     prior_operation_id = Actor.current_operation_id()
 
     try do
@@ -1876,16 +1976,140 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp refresh_subscription(socket, subscription_id) do
-    subscription = load_subscription(subscription_id)
-    events = timeline_events(subscription.id)
+    case Subscriptions.detail(subscription_id, socket.assigns.current_owner_scope) do
+      {:ok, subscription} ->
+        events = timeline_events(subscription.id)
 
-    socket
-    |> assign(:subscription, subscription)
-    |> assign(:customer, subscription.customer)
-    |> assign(:timeline_events, events)
-    |> assign(:timeline_events_loaded?, true)
-    |> assign(:swap_plan_available, swap_plan_available?(subscription))
+        {:ok,
+         socket
+         |> assign(:subscription, subscription)
+         |> assign(:customer, subscription.customer)
+         |> assign(:timeline_events, events)
+         |> assign(:timeline_events_loaded?, true)
+         |> assign(:swap_plan_available, swap_plan_available?(subscription))}
+
+      :not_found ->
+        :not_found
+    end
   end
+
+  defp present_compensation_result(socket, action, original_id, replacement) do
+    scope = socket.assigns.current_owner_scope
+
+    with {:ok, original} <- Subscriptions.detail(original_id, scope),
+         {:ok, scoped_replacement} <- Subscriptions.detail(replacement.id, scope),
+         {:ok, refreshed} <- refresh_subscription(socket, original.id) do
+      replacement_path =
+        ScopedPath.build(
+          socket.assigns.admin_mount_path,
+          "/subscriptions/#{scoped_replacement.id}",
+          scope,
+          %{"return_to" => socket.assigns.return_path}
+        )
+
+      refreshed
+      |> record_admin_audit(action, original.id, scoped_replacement.id)
+      |> put_action_result(
+        :confirmed,
+        "Compensation created a replacement subscription.",
+        replacement_path,
+        "Open replacement subscription"
+      )
+      |> finish_action_submission(:submitted, true)
+    else
+      _ ->
+        socket
+        |> put_action_result(
+          :unconfirmed,
+          "The compensation request returned, but its replacement is not available in this owner scope. Check scoped subscription activity before taking another action."
+        )
+        |> finish_action_submission(:submitted, true)
+    end
+  end
+
+  defp put_action_result(socket, kind, message, href \\ nil, link_label \\ nil) do
+    assign(socket, :action_result, %{
+      kind: kind,
+      message: message,
+      href: href || action_activity_path(socket),
+      link_label: link_label || "Open scoped subscription activity"
+    })
+  end
+
+  defp finish_action_submission(socket, state, clear_review?) do
+    socket = assign(socket, :dispatch_state, state)
+
+    if clear_review? do
+      socket
+      |> assign(:pending_action, nil)
+      |> assign(:drawer_action_type, nil)
+    else
+      socket
+    end
+  end
+
+  defp action_activity_path(socket) do
+    ScopedPath.build(
+      socket.assigns.admin_mount_path,
+      "/events",
+      socket.assigns.current_owner_scope,
+      %{"subject_type" => "Subscription", "subject_id" => socket.assigns.subscription.id}
+    )
+  end
+
+  defp outcome_requires_reconciliation?(socket) do
+    match?(%{kind: :unconfirmed}, socket.assigns[:action_result])
+  end
+
+  defp require_outcome_review(socket) do
+    push_flash(
+      socket,
+      :warning,
+      "Check scoped subscription activity before starting another action for this subscription."
+    )
+  end
+
+  defp unconfirmed_action_copy(_socket, _action) do
+    "Outcome not confirmed. The request may have reached the provider. Check scoped subscription activity before deciding whether another action is needed; Accrue will not retry automatically."
+  end
+
+  defp handle_action_error(socket, action, reason) do
+    cond do
+      local_action_rejection?(reason) ->
+        socket
+        |> assign(:pending_action, action)
+        |> assign(:drawer_action_type, action.type)
+        |> put_action_result(
+          :rejected,
+          "The action was rejected before provider submission. Review the form values and confirm again when they are ready."
+        )
+        |> finish_action_submission(:staged, false)
+
+      definitive_provider_rejection?(reason) ->
+        socket
+        |> put_action_result(:failed, "The provider rejected the action. No change was accepted.")
+        |> finish_action_submission(:submitted, true)
+
+      true ->
+        socket
+        |> put_action_result(:unconfirmed, unconfirmed_action_copy(socket, action))
+        |> finish_action_submission(:submitted, true)
+    end
+  end
+
+  defp definitive_provider_rejection?(%Accrue.APIError{http_status: status})
+       when is_integer(status) and status >= 400 and status < 500 and
+              status not in [408, 409, 429],
+       do: true
+
+  defp definitive_provider_rejection?(_reason), do: false
+
+  defp local_action_rejection?(reason)
+       when reason in [:missing_new_price_id, :invalid_proration, :invalid_quantity],
+       do: true
+
+  defp local_action_rejection?({:unsupported_action, _}), do: true
+  defp local_action_rejection?(_reason), do: false
 
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
@@ -1895,12 +2119,65 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp present?(_value), do: true
 
   defp confirm_copy(action, subscription, customer) do
-    Copy.subscription_confirm_workflow_message(action.type,
-      subscription_id: subscription.id,
-      customer_id: customer_label(customer),
-      source_event_id: action.source_event_id
-    )
+    base =
+      Copy.subscription_confirm_workflow_message(action.type,
+        subscription_id: subscription.processor_id || subscription.id,
+        customer_id: customer_label(customer),
+        source_event_id: action.source_event_id
+      )
+
+    base <> " " <> review_consequence(action, subscription)
   end
+
+  defp review_consequence(%{type: "cancel_now"}, _subscription),
+    do: "This cancels the subscription immediately."
+
+  defp review_consequence(%{type: "cancel_at_period_end"}, _subscription),
+    do: "This schedules cancellation at period end."
+
+  defp review_consequence(%{type: "pause", pause_behavior: behavior}, _subscription),
+    do: "This pauses collection using #{humanize(behavior)} behavior."
+
+  defp review_consequence(%{type: "resume"}, subscription) do
+    if Subscription.paused?(subscription),
+      do: "This resumes collection for the paused subscription.",
+      else: "This cancels the scheduled end and keeps the subscription active."
+  end
+
+  defp review_consequence(%{type: "swap_plan"} = action, _subscription) do
+    preview =
+      if action[:preview],
+        do: "Review the displayed invoice preview.",
+        else: "Invoice amount and currency preview are unavailable."
+
+    "This changes the plan to #{action.new_price_id || "an unselected plan"} with #{humanize(action.proration || "create_prorations")} proration. #{preview}"
+  end
+
+  defp review_consequence(%{type: "update_quantity"} = action, _subscription),
+    do:
+      "This changes the single subscription item quantity to #{action.new_quantity || "not selected"} with #{humanize(action.proration || "create_prorations")} proration."
+
+  defp review_consequence(%{type: "add_item"} = action, _subscription),
+    do:
+      "This adds #{action.new_price_id || "an unselected price"} at quantity #{action.new_quantity || "not selected"} with #{humanize(action.proration || "create_prorations")} proration."
+
+  defp review_consequence(%{type: type, item_id: item_id} = action, subscription)
+       when type in ["update_item_quantity", "remove_item"] do
+    item = Enum.find(subscription.subscription_items || [], &(to_string(&1.id) == item_id))
+    item_label = if item, do: subscription_item_label(item), else: "an unavailable item"
+
+    if type == "remove_item" do
+      "This removes #{item_label} with #{humanize(action.proration || "create_prorations")} proration."
+    else
+      "This changes #{item_label} to quantity #{action.new_quantity || "not selected"} with #{humanize(action.proration || "create_prorations")} proration."
+    end
+  end
+
+  defp review_consequence(%{type: "comp_subscription"}, _subscription),
+    do: "This creates a replacement subscription; it does not change the existing subscription."
+
+  defp review_consequence(_action, _subscription),
+    do: "Review the selected billing change before confirming."
 
   defp subscription_action_error_copy(socket, action) do
     [
@@ -1948,9 +2225,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     |> Enum.map_join(" ", &String.capitalize/1)
   end
 
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Date not shown"
+  defp timestamp_summary(label, %DateTime{} = value, id) do
+    assigns = %{label: label, value: value, id: id}
 
+    ~H"""
+    <span><%= @label %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
+
+  defp timestamp_summary(label, _value, _id), do: label
+
+  # The audit sentence keeps its existing human-readable event text; the exact
+  # copyable timestamp is rendered separately in the adjacent audit row.
   # Read-only dunning-state panel (DUN-07 / SC#2). Tone is conveyed by the
   # status-badge variant only — the panel has no accent fill and no actions.
   # Amber = active dunning in progress; slate = no campaign has ever run.
@@ -2033,11 +2319,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp maybe_attach_preview(_socket, action), do: action
 
   defp swap_plan_available?(subscription) do
-    if braintree_processor?(subscription) do
-      PlanResolver.configured?()
-    else
-      true
-    end
+    Subscription.active?(subscription) and not Subscription.paused?(subscription) and
+      not Subscription.canceled?(subscription) and
+      (not braintree_processor?(subscription) or PlanResolver.configured?())
   end
 
   defp preview_supported?(subscription), do: not braintree_processor?(subscription)
@@ -2046,7 +2330,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     quantity_item_changes_available?(subscription) and single_item_subscription?(subscription)
   end
 
-  defp quantity_item_changes_available?(subscription), do: not braintree_processor?(subscription)
+  defp quantity_item_changes_available?(subscription),
+    do:
+      not braintree_processor?(subscription) and Subscription.active?(subscription) and
+        not Subscription.paused?(subscription) and not Subscription.canceled?(subscription)
 
   defp single_item_subscription?(subscription) do
     length(subscription.subscription_items || []) == 1
@@ -2128,7 +2415,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     "#{money.amount_minor} #{money.currency}"
   end
 
-  defp related_items(subscription, mount_path, scope) do
+  defp related_items(subscription, mount_path, scope, return_path) do
     customer_items =
       if subscription.customer do
         customer = subscription.customer
@@ -2146,14 +2433,40 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         []
       end
 
+    invoice_items = [
+      %{
+        icon: :invoices,
+        label: "Open invoices for this customer",
+        value: "Customer-wide results; open status",
+        href:
+          ScopedPath.build(mount_path, "/invoices", scope, %{
+            "customer_id" => subscription.customer_id,
+            "status" => "open",
+            "return_to" => return_path
+          })
+      },
+      %{
+        icon: :invoices,
+        label: invoice_scope_label(scope),
+        value: "All authorized open invoices",
+        href:
+          ScopedPath.build(mount_path, "/invoices", scope, %{
+            "status" => "open",
+            "return_to" => return_path
+          })
+      }
+    ]
+
     customer_items ++
+      invoice_items ++
       [
         %{
           icon: :payments,
           label: Copy.subscription_drill_link_charges_for_customer(),
           href:
             ScopedPath.build(mount_path, "/payments", scope, %{
-              "customer_id" => subscription.customer_id
+              "customer_id" => subscription.customer_id,
+              "return_to" => return_path
             })
         },
         %{
@@ -2173,6 +2486,15 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         }
       ]
   end
+
+  defp invoice_scope_label(%{mode: :organization} = scope) do
+    organization =
+      scope.organization_display_name || scope.organization_slug || "selected organization"
+
+    "All open invoices for #{organization}"
+  end
+
+  defp invoice_scope_label(_scope), do: "All open invoices in global scope"
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

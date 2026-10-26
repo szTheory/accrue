@@ -225,6 +225,131 @@ defmodule AccrueAdmin.CustomerLiveTest do
     refute html =~ ~s(href="/billing/charges)
   end
 
+  test "subscription link returns to the active customer tab under current owner scope", %{
+    conn: conn,
+    customer: customer
+  } do
+    subscription = TestRepo.one!(from(s in Subscription, where: s.customer_id == ^customer.id))
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        active_organization_name: "Allowed Org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    allowed_customer =
+      customer
+      |> Customer.changeset(%{owner_type: "Organization", owner_id: "org_allowed"})
+      |> TestRepo.update!()
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/customers/#{allowed_customer.id}?org=allowed-org&tab=subscriptions"
+             )
+
+    href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find_value(fn node ->
+        if Floki.text(node) =~ subscription.processor_id,
+          do: Floki.attribute(node, "href") |> List.first()
+      end)
+
+    params = href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    return_path = URI.decode_www_form(params["return_to"])
+    return_query = return_path |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(return_path).path == "/billing/customers/#{allowed_customer.id}"
+    assert return_query["org"] == "allowed-org"
+    assert return_query["tab"] == "subscriptions"
+  end
+
+  test "direct customer links have scoped customer-list fallback and hostile origins are ignored",
+       %{
+         conn: conn,
+         customer: customer
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    foreign_id = Ecto.UUID.generate()
+
+    for suffix <- [
+          "",
+          "?return_to=https%3A%2F%2Fevil.example%2Fbilling%2Fcustomers",
+          "?return_to=#{URI.encode_www_form("/billing/customers/#{foreign_id}?tab=payments")}"
+        ] do
+      assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}" <> suffix)
+
+      href =
+        view
+        |> element("a", "Back to customers")
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.find("a")
+        |> Floki.attribute("href")
+        |> hd()
+
+      assert URI.parse(href).path == "/billing/customers"
+      refute href =~ "evil.example"
+      refute href =~ foreign_id
+    end
+  end
+
+  test "customer return labels identify a matching peer tab and reject another customer's tab", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    foreign_id = Ecto.UUID.generate()
+
+    for {origin, expected_label, expected_path, expected_tab} <- [
+          {"/billing/customers/#{customer.id}?tab=payments", "Back to customer payments",
+           "/billing/customers/#{customer.id}", "payments"},
+          {"/billing/customers/#{foreign_id}?tab=payments", "Back to customers",
+           "/billing/customers", nil},
+          {"/billing/customers?q=Detail%20Customer&owner_type=User&has_default_payment_method=true&sort=unsafe",
+           "Back to customers", "/billing/customers", nil}
+        ] do
+      assert {:ok, view, _html} =
+               live(
+                 conn,
+                 "/billing/customers/#{customer.id}?return_to=#{URI.encode_www_form(origin)}"
+               )
+
+      href =
+        view
+        |> element("a", expected_label)
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.find("a")
+        |> Floki.attribute("href")
+        |> hd()
+
+      assert URI.parse(href).path == expected_path
+      query = if URI.parse(href).query, do: URI.decode_query(URI.parse(href).query), else: %{}
+      assert query["tab"] == expected_tab
+      assert query["sort"] == nil
+
+      if expected_path == "/billing/customers/#{customer.id}" do
+        assert {:ok, returned_view, returned_html} = live(conn, href)
+
+        assert has_element?(
+                 returned_view,
+                 "[aria-label='Customer peer record sets'] .ax-tab-active",
+                 "Payments"
+               )
+
+        assert returned_html =~ "ch_detail"
+      end
+    end
+  end
+
   test "D-08 D-09 customer payment-method actions do not render visible initial forms", %{
     conn: conn,
     customer: customer
@@ -262,6 +387,147 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert html =~ Copy.customer_payment_methods_delete_action()
     assert has_element?(view, "[data-role='payment-method-action-drawer-test-mirror']")
     assert has_element?(view, "[data-role='confirm-payment-method-action']")
+  end
+
+  test "set-default and delete reviews identify the selected method and customer effect", %{
+    conn: conn,
+    customer: customer,
+    deletable_payment_method: deletable_payment_method
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    for {action_type, expected_effect} <- [
+          {"set_default", "future billing"},
+          {"delete", "removes the selected payment method from the customer"}
+        ] do
+      html =
+        render_click(view, "open_payment_method_action", %{
+          "action_type" => action_type,
+          "payment_method_id" => deletable_payment_method.id
+        })
+
+      assert html =~ deletable_payment_method.card_last4
+      assert html =~ deletable_payment_method.id
+      assert html =~ deletable_payment_method.processor_id
+      assert html =~ customer.name
+      assert html =~ customer.id
+      assert html =~ "Current default"
+      assert html =~ "Current use"
+      assert html =~ expected_effect
+      assert html =~ "Back to customer"
+      assert has_element?(view, "[data-role='confirm-payment-method-action']")
+
+      html = render_click(view, "cancel_payment_method_action")
+      refute html =~ ~s(data-role="payment-method-action-drawer-test-mirror")
+    end
+
+    refreshed_customer = TestRepo.get!(Customer, customer.id)
+    assert refreshed_customer.default_payment_method_id == customer.default_payment_method_id
+    assert TestRepo.get!(PaymentMethod, deletable_payment_method.id)
+  end
+
+  test "payment-method confirmation rejects customer default changes made after review", %{
+    conn: conn,
+    customer: customer,
+    deletable_payment_method: payment_method
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    render_click(view, "open_payment_method_action", %{
+      "action_type" => "set_default",
+      "payment_method_id" => payment_method.id
+    })
+
+    customer
+    |> Customer.changeset(%{default_payment_method_id: payment_method.id})
+    |> TestRepo.update!()
+
+    render_click(view, "confirm_payment_method_action", %{})
+    html = render(view)
+
+    assert html =~ Copy.customer_payment_methods_already_default_warning()
+    assert TestRepo.get!(Customer, customer.id).default_payment_method_id == payment_method.id
+  end
+
+  test "payment-method confirms use authoritative provider counts and timeout never auto-retries",
+       %{
+         conn: conn,
+         customer: customer,
+         deletable_payment_method: payment_method
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    render_click(view, "open_payment_method_action", %{
+      "action_type" => "delete",
+      "payment_method_id" => payment_method.id
+    })
+
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == 0
+    Accrue.Processor.Fake.scripted_response(:detach_payment_method, {:error, :timeout})
+    render_click(view, "confirm_payment_method_action", %{})
+    html = render(view)
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == 1
+    assert html =~ "Outcome not confirmed"
+
+    render_click(view, "confirm_payment_method_action", %{})
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == 1
+
+    {:ok, reconnected_view, _html} = live(conn, "/billing/customers/#{customer.id}")
+    refute has_element?(reconnected_view, "[data-role='confirm-payment-method-action']")
+    assert Accrue.Processor.Fake.call_count(:detach_payment_method) == 1
+
+    render_click(reconnected_view, "open_payment_method_action", %{
+      "action_type" => "set_default",
+      "payment_method_id" => payment_method.id
+    })
+
+    assert Accrue.Processor.Fake.call_count(:set_default_payment_method) == 0
+    render_click(reconnected_view, "confirm_payment_method_action", %{})
+    assert Accrue.Processor.Fake.call_count(:set_default_payment_method) == 1
+  end
+
+  test "ambiguous provider API errors keep payment-method outcomes unconfirmed without retry", %{
+    conn: conn,
+    customer: customer,
+    deletable_payment_method: payment_method
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+
+    render_click(view, "open_payment_method_action", %{
+      "action_type" => "delete",
+      "payment_method_id" => payment_method.id
+    })
+
+    Fake.scripted_response(
+      :detach_payment_method,
+      {:error,
+       %Accrue.APIError{
+         code: "api_error",
+         http_status: 500,
+         message: "Provider internal failure"
+       }}
+    )
+
+    render_click(view, "confirm_payment_method_action", %{})
+    html = render(view)
+    text = html |> Floki.parse_document!() |> Floki.text()
+    assert Fake.call_count(:detach_payment_method) == 1
+    assert text =~ "Outcome not confirmed"
+    assert text =~ "Reload this customer's payment methods"
+    assert text =~ "will not retry automatically"
+    refute text =~ "Provider internal failure"
+    refute has_element?(view, "[data-role='confirm-payment-method-action']")
+
+    render_click(view, "confirm_payment_method_action", %{})
+    assert Fake.call_count(:detach_payment_method) == 1
+
+    {:ok, reconnected_view, _html} = live(conn, "/billing/customers/#{customer.id}")
+    refute has_element?(reconnected_view, "[data-role='confirm-payment-method-action']")
+    assert Fake.call_count(:detach_payment_method) == 1
   end
 
   test "D-09 blocks deleting payment methods tied to active subscriptions for any processor", %{
@@ -327,7 +593,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
     # UX-02: single ax-page shell on customer detail
-    assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
+    assert Regex.scan(~r/class="ax-page(?: |")/, html) |> length() == 1
     assert html =~ "Detail Customer"
     assert html =~ "Tax and ownership"
     assert html =~ "Subscriptions"
@@ -336,6 +602,25 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert html =~ "Tax risk detected"
     assert html =~ "1 subscription needs attention"
     assert html =~ "1 invoice needs attention"
+  end
+
+  test "customer identity and peer tabs precede secondary detail sections", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
+
+    {identity, _} = :binary.match(html, "Customer detail")
+    {owner, _} = :binary.match(html, "Owner")
+    {tabs, _} = :binary.match(html, "Customer peer record sets")
+    {secondary, _} = :binary.match(html, "Payment methods")
+    assert identity < owner
+    assert owner < tabs
+    assert tabs < secondary
+    assert html =~ "Subscriptions"
+    assert html =~ "Invoices"
+    assert html =~ "Payments"
   end
 
   test "customer loader denies rows outside the active organization" do
@@ -402,7 +687,21 @@ defmodule AccrueAdmin.CustomerLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}?tab=invoices")
 
-    assert html =~ ~s(href="/billing/invoices/#{invoice.id}")
+    invoice_href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find_value(fn node ->
+        href = Floki.attribute(node, "href") |> List.first()
+        if URI.parse(href || "").path == "/billing/invoices/#{invoice.id}", do: href
+      end)
+
+    assert invoice_href
+    invoice_params = invoice_href |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+
+    assert URI.parse(URI.decode_www_form(invoice_params["return_to"])).path ==
+             "/billing/customers/#{customer.id}"
+
     assert html =~ "INV-001"
   end
 

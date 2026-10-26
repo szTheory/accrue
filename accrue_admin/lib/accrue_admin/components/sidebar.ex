@@ -132,7 +132,7 @@ defmodule AccrueAdmin.Components.Sidebar do
     item_root = item.href |> URI.parse() |> Map.get(:path) |> Kernel.||("")
 
     active? =
-      if item.label == "Home" do
+      if Map.get(item, :exact, false) do
         current_path_root == item_root
       else
         current_path_root == item_root or String.starts_with?(current_path_root, item_root <> "/")

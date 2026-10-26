@@ -46,6 +46,31 @@ defmodule AccrueAdmin.ThemeTest do
     assert conn.assigns.accrue_admin_brand.logo_url == "https://example.test/logo.svg"
     assert conn.assigns.accrue_admin_brand.accent_hex == "#5D79F6"
     assert conn.assigns.accrue_admin_brand.accent_contrast_hex == "#FFFFFF"
+    refute conn.assigns.accrue_admin_brand.theme_forced?
+  end
+
+  test "host-forced admin theme overrides the preference cookie and locks the picker" do
+    Application.put_env(:accrue, :admin_branding,
+      app_name: "Accrue Admin",
+      theme: :dark
+    )
+
+    conn =
+      build_conn()
+      |> Plug.Conn.put_req_header("cookie", "accrue_theme=light")
+      |> AccrueAdmin.BrandPlug.call([])
+
+    assert conn.assigns.accrue_admin_theme == "dark"
+    assert conn.assigns.accrue_admin_brand.theme_forced?
+
+    html =
+      Phoenix.LiveViewTest.render_component(&AccrueAdmin.Components.Topbar.topbar/1, %{
+        theme: "dark",
+        theme_forced: true
+      })
+
+    assert html =~ "Dark theme set by host"
+    refute html =~ ~s(role="radiogroup")
   end
 
   test "brand plug can keep admin chrome separate from customer billing branding" do
@@ -122,6 +147,7 @@ defmodule AccrueAdmin.ThemeTest do
     runtime_style_index = find_index(html, "--ax-accent: #5D79F6;")
     js_index = find_index(html, ~s(src="/billing/assets/app.js"))
 
+    assert html =~ ~s(data-theme="system")
     assert anti_fouc_index
     assert brand_css_index
     assert app_css_index
@@ -131,6 +157,17 @@ defmodule AccrueAdmin.ThemeTest do
     assert brand_css_index < app_css_index
     assert app_css_index < runtime_style_index
     assert runtime_style_index < js_index
+  end
+
+  test "host-forced anti-fouc theme wins without overwriting the saved preference" do
+    script = AccrueAdmin.Layouts.anti_fouc_script("dark")
+
+    assert script =~ ~s(const forcedTheme = "dark";)
+    assert script =~ "allowed.has(forcedTheme) ? forcedTheme"
+    assert script =~ "if (!allowed.has(forcedTheme)) window.localStorage.setItem(key, theme)"
+
+    assert %{"stored" => "light", "theme" => "dark"} =
+             run_anti_fouc_script("accrue_theme=dark", "light", "dark")
   end
 
   test "Phase 199 anti-fouc script resolves cookie before localStorage using production key" do
@@ -246,11 +283,11 @@ defmodule AccrueAdmin.ThemeTest do
     end
   end
 
-  defp run_anti_fouc_script(cookie, stored_value) do
+  defp run_anti_fouc_script(cookie, stored_value, forced_theme \\ nil) do
     payload =
       Jason.encode!(%{
         cookie: cookie,
-        script: AccrueAdmin.Layouts.anti_fouc_script(),
+        script: AccrueAdmin.Layouts.anti_fouc_script(forced_theme),
         stored: stored_value
       })
       |> Base.encode64()

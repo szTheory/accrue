@@ -92,6 +92,35 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
            ]
   end
 
+  test "promotion code detail identifies unrecorded limits and counts", %{conn: conn} do
+    code =
+      insert_promotion_code(nil, %{
+        code: "INCOMPLETE",
+        processor_id: "promo_incomplete",
+        active: true,
+        max_redemptions: nil,
+        times_redeemed: 0
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/promotion-codes/#{code.id}")
+    assert html =~ "Limit not recorded"
+    assert html =~ "Redemption count"
+    assert html =~ "Customer restriction not recorded"
+
+    zero_code =
+      insert_promotion_code(nil, %{
+        code: "ZERO-LIMIT",
+        processor_id: "promo_zero_limit",
+        active: true,
+        max_redemptions: 0,
+        times_redeemed: 0
+      })
+
+    assert {:ok, _view, zero_html} = live(conn, "/billing/promotion-codes/#{zero_code.id}")
+    assert zero_html =~ "0 max"
+  end
+
   test "renders RelatedResources card with coupon link and events link", %{
     conn: conn,
     promotion_code: promotion_code
@@ -176,6 +205,48 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert html =~ "Referral coupon"
   end
 
+  test "promotion code detail returns to its validated context and never substitutes another parent",
+       %{
+         conn: conn,
+         promotion_code: promotion_code
+       } do
+    other_coupon = insert_coupon(%{name: "Unrelated coupon", processor_id: "coupon_unrelated"})
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/promotion-codes/#{promotion_code.id}?return_to=%2Fbilling%2Fpromotion-codes%3Fview%3Dall%26q%3DREFER%26active%3Dtrue%26coupon_id%3D#{promotion_code.coupon_id}"
+             )
+
+    return_href =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "Back to promotion codes"))
+      |> Floki.attribute("href")
+      |> hd()
+
+    assert URI.decode_query(URI.parse(return_href).query) == %{
+             "view" => "all",
+             "q" => "REFER",
+             "active" => "true",
+             "coupon_id" => promotion_code.coupon_id
+           }
+
+    assert html =~ "/billing/coupons/#{promotion_code.coupon_id}"
+    refute html =~ "/billing/coupons/#{other_coupon.id}"
+  end
+
+  test "an unlinked promotion code has no parent coupon link", %{conn: conn} do
+    code = insert_promotion_code(nil, %{code: "ORPHAN", processor_id: "promo_orphan"})
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/promotion-codes/#{code.id}")
+    assert html =~ Copy.promotion_codes_coupon_none_label()
+    refute html =~ ~s(href="/billing/coupons/)
+  end
+
   test "breadcrumbs preserve active organization scope", %{
     conn: conn,
     promotion_code: promotion_code
@@ -191,7 +262,7 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert {:ok, _view, html} =
              live(conn, "/billing/promotion-codes/#{promotion_code.id}?org=allowed-org")
 
-    assert html =~ ~s(href="/billing?org=allowed-org")
+    refute html =~ ~s(href="/billing?org=allowed-org")
     assert html =~ ~s(href="/billing/promotion-codes?org=allowed-org")
   end
 
@@ -220,6 +291,27 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert flash["error"] != nil
   end
 
+  test "detail read failure is distinct from not-found and retry restores code restrictions", %{
+    conn: conn,
+    promotion_code: promotion_code
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/promotion-codes/#{promotion_code.id}")
+    on_exit(fn -> Application.delete_env(:accrue_admin, :phase238_read_failure_fixture) end)
+    Application.put_env(:accrue_admin, :phase238_read_failure_fixture, :promotion_code_detail)
+
+    html = render_click(view, "retry_read", %{})
+    assert html =~ ~s(data-role="promotion-code-unavailable")
+    assert html =~ "Promotion code record unavailable"
+    refute html =~ "fixture database unavailable"
+
+    Application.delete_env(:accrue_admin, :phase238_read_failure_fixture)
+    html = render_click(view, "retry_read", %{})
+    refute html =~ ~s(data-role="promotion-code-unavailable")
+    assert html =~ "REFER15"
+    assert html =~ "Referral coupon"
+  end
+
   defp insert_coupon(attrs) do
     defaults = %{
       processor: "stripe",
@@ -236,7 +328,7 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
   defp insert_promotion_code(coupon, attrs) do
     defaults = %{
       processor: "stripe",
-      coupon_id: coupon.id,
+      coupon_id: coupon && coupon.id,
       metadata: %{},
       data: %{},
       lock_version: 1

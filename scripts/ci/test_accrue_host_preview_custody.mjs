@@ -1,0 +1,444 @@
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import test from "node:test";
+import { fileURLToPath } from "node:url";
+import { isMainModule } from "./main_module.mjs";
+
+let entry = false;
+try {
+  entry = isMainModule(import.meta.url);
+} catch {
+  entry = false;
+}
+// Register tests only when this file is the invoked entrypoint, so a bare import is side-effect free.
+const registerTest = entry ? test : () => {};
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const custody = path.join(repoRoot, "scripts/ci/accrue_host_preview_custody.sh");
+const custodyTestEntry = path.join(repoRoot, "scripts/ci/accrue_host_preview_custody_test_entry.mjs");
+const browserWrapper = path.join(repoRoot, "scripts/ci/accrue_host_verify_browser.sh");
+const devWrapper = path.join(repoRoot, "scripts/ci/accrue_host_verify_dev_boot.sh");
+const previewRunner = path.join(repoRoot, "examples/accrue_host/e2e/preview-runner.js");
+const { validatePreviewSelection } = await import(path.join(repoRoot, "examples/accrue_host/e2e/preview-routing.js"));
+
+function fixture(overrides = {}) {
+  return {
+    preview: {
+      databaseHost: "db",
+      database: "accrue_host_dev",
+      connection: "postgres://preview/db/accrue_host_dev",
+      databaseInstance: "docker-volume:accrue-host_pgdata",
+      composeProject: "accrue-host",
+      volume: "accrue-host_pgdata",
+      port: 4000,
+      process: "container:preview-web",
+      databaseProcess: "container:preview-db",
+      buildPath: "/workspace/examples/accrue_host/_build"
+    },
+    target: {
+      databaseHost: "localhost",
+      database: "accrue_host_test",
+      connection: "postgres://localhost/accrue_host_test",
+      databaseInstance: "postgres-system:proof-71",
+      composeProject: "accrue-host-proof-71",
+      volume: "accrue-host-proof-71_pgdata",
+      port: 47101,
+      process: "unoccupied",
+      databaseProcess: "pid:5432-proof",
+      buildPath: "/private/tmp/accrue-host-proof-71/_build"
+    },
+    ...overrides
+  };
+}
+
+function run(mode, data, extraEnv = {}) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-test-"));
+  const fixturePath = path.join(dir, "targets.json");
+  fs.writeFileSync(fixturePath, JSON.stringify(data));
+  const result = spawnSync("node", [custodyTestEntry, fixturePath, mode], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      ...extraEnv
+    }
+  });
+  fs.rmSync(dir, { recursive: true, force: true });
+  return result;
+}
+
+registerTest("accepts a fully identified disposable browser target", () => {
+  const result = run("browser", fixture());
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /database=accrue_host_test/);
+});
+
+registerTest("accepts the dedicated dev-boot database and rejects the historical preview DB", () => {
+  assert.equal(run("dev", fixture()).status, 0);
+  const collision = fixture();
+  collision.target.database = "accrue_host_dev";
+  assert.notEqual(run("dev", collision).status, 0);
+});
+
+registerTest("rejects every preview identity alias, including the connection and build path", () => {
+  const preview = fixture().preview;
+  for (const key of Object.keys(preview)) {
+    const result = run("browser", fixture({ target: { ...fixture().target, [key]: preview[key] } }));
+    assert.notEqual(result.status, 0, `accepted aliased ${key}`);
+  }
+});
+
+registerTest("rejects unknown target identity and occupied listener before mutation", () => {
+  const unknown = fixture();
+  delete unknown.target.connection;
+  assert.notEqual(run("browser", unknown).status, 0);
+
+  const occupied = fixture();
+  occupied.target.process = "pid:4321";
+  assert.notEqual(run("browser", occupied).status, 0);
+});
+
+registerTest("direct Playwright preflight permits only its exact listener PID and rejects foreign owners", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-direct-owner-"));
+  const binDir = path.join(dir, "bin");
+  const fixturePath = path.join(dir, "targets.json");
+  const fixtureFile = path.join(dir, "existing-fixture.json");
+  fs.mkdirSync(binDir);
+  fs.writeFileSync(fixtureFile, "{}");
+  fs.writeFileSync(path.join(binDir, "lsof"), "#!/bin/sh\nprintf '4242\\n'\n");
+  fs.chmodSync(path.join(binDir, "lsof"), 0o755);
+  const targets = fixture();
+  targets.target.process = "inspect-listener";
+  fs.writeFileSync(fixturePath, JSON.stringify(targets));
+  const env = {
+    ...process.env,
+    PATH: `${binDir}:${process.env.PATH}`,
+    ACCRUE_HOST_DIRECT_PROOF_PID: "4242"
+  };
+  const accepted = spawnSync("node", [custodyTestEntry, fixturePath, "browser"], { cwd: repoRoot, env, encoding: "utf8" });
+  assert.equal(accepted.status, 0, accepted.stderr || accepted.stdout);
+  assert.match(accepted.stdout, /process=proof-server:4242/);
+
+  const pidFile = path.join(dir, "webserver.pid");
+  fs.writeFileSync(pidFile, "4242\n", { mode: 0o600 });
+  const setupEnv = {
+    ...env,
+    ACCRUE_HOST_CUSTODY_TEST_MODE: "1",
+    ACCRUE_HOST_CUSTODY_TEST_FIXTURE: fixturePath,
+    ACCRUE_HOST_DIRECT_PROOF_PID_FILE: pidFile,
+    ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1",
+    ACCRUE_HOST_E2E_FIXTURE: fixtureFile
+  };
+  delete setupEnv.ACCRUE_HOST_DIRECT_PROOF_PID;
+  const globalSetup = path.join(repoRoot, "examples/accrue_host/e2e/global-setup.js");
+  const setupAccepted = spawnSync("node", ["-e", `require(${JSON.stringify(globalSetup)})()`], {
+    cwd: repoRoot,
+    env: setupEnv,
+    encoding: "utf8"
+  });
+  assert.notEqual(setupAccepted.status, 0, "global setup accepted caller-supplied fixture environment");
+  assert.match(`${setupAccepted.stderr}\n${setupAccepted.stdout}`, /caller-supplied test fixture environment is forbidden/);
+  assert.equal(fs.existsSync(pidFile), true, "rejected global setup unexpectedly removed the PID marker");
+
+  const foreign = spawnSync("node", [custodyTestEntry, fixturePath, "browser"], {
+    cwd: repoRoot,
+    env: { ...env, ACCRUE_HOST_DIRECT_PROOF_PID: "9999" },
+    encoding: "utf8"
+  });
+  assert.notEqual(foreign.status, 0, "foreign listener was accepted");
+  assert.match(foreign.stderr, /occupied by process 4242/);
+
+  fs.writeFileSync(pidFile, "9999\n", { mode: 0o600 });
+  const setupRejected = spawnSync("node", ["-e", `require(${JSON.stringify(globalSetup)})()`], {
+    cwd: repoRoot,
+    env: { ...setupEnv, ACCRUE_HOST_E2E_FIXTURE: path.join(dir, "must-not-be-created", "fixture.json") },
+    encoding: "utf8"
+  });
+  assert.notEqual(setupRejected.status, 0, "global setup accepted a foreign listener");
+  assert.equal(fs.existsSync(path.join(dir, "must-not-be-created")), false, "global setup created fixtures before rejecting a foreign listener");
+  fs.writeFileSync(path.join(binDir, "lsof"), "#!/bin/sh\nprintf '4242\\n4343\\n'\n");
+  const mixed = spawnSync("node", [custodyTestEntry, fixturePath, "browser"], { cwd: repoRoot, env, encoding: "utf8" });
+  assert.notEqual(mixed.status, 0, "multiple listener owners were accepted with one matching token");
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+registerTest("rejects loopback host aliases and does not report DATABASE_URL credentials", () => {
+  const data = fixture();
+  data.preview.databaseHost = "localhost";
+  data.preview.connection = "loopback:5432/accrue_host_dev";
+  data.target.databaseHost = "127.0.0.1";
+  const result = run("browser", data, { DATABASE_URL: "postgres://private-user:private-password@example.invalid/other" });
+  assert.notEqual(result.status, 0);
+  assert.doesNotMatch(`${result.stdout}\n${result.stderr}`, /private-user|private-password|example\.invalid/);
+});
+
+registerTest("both wrappers invoke custody before database mutation and dev uses its isolated database", () => {
+  for (const wrapper of [browserWrapper, devWrapper]) {
+    const source = fs.readFileSync(wrapper, "utf8");
+    const guard = source.indexOf("accrue_host_preview_custody.sh");
+    const mutation = source.search(/mix ecto\.(drop|create|migrate)/);
+    assert.ok(guard >= 0 && guard < mutation, `${wrapper} does not guard before DB mutation`);
+  }
+  const dev = fs.readFileSync(path.join(repoRoot, "examples/accrue_host/config/dev.exs"), "utf8");
+  assert.match(dev, /ACCRUE_HOST_DEV_BOOT_DATABASE/);
+});
+
+registerTest("both verifier wrappers snapshot the preview before work and assert preservation during cleanup", () => {
+  for (const wrapper of [browserWrapper, devWrapper]) {
+    const source = fs.readFileSync(wrapper, "utf8");
+    const preflight = source.indexOf('node "$custody_tool" preflight');
+    const snapshot = source.indexOf('node "$custody_tool" snapshot');
+    const cleanup = source.indexOf("cleanup() {");
+    const assertion = source.indexOf("assert-preserved");
+    assert.ok(preflight >= 0 && snapshot > preflight, `${wrapper} does not capture preview state after preflight`);
+    assert.ok(cleanup >= 0 && assertion > cleanup, `${wrapper} does not compare preview state during cleanup`);
+  }
+  const custodySource = fs.readFileSync(custody, "utf8");
+  assert.match(custodySource, /seeded invoice sentinel is missing/);
+  assert.match(custodySource, /showcase audit event is missing/);
+  assert.match(custodySource, /assert-preserved/);
+});
+
+registerTest("direct Playwright config and setup both preflight before server or fixture work", () => {
+  const config = fs.readFileSync(path.join(repoRoot, "examples/accrue_host/playwright.config.js"), "utf8");
+  const setup = fs.readFileSync(path.join(repoRoot, "examples/accrue_host/e2e/global-setup.js"), "utf8");
+  assert.match(config, /accrue_host_preview_custody\.sh/);
+  assert.match(setup, /accrue_host_preview_custody\.sh/);
+  assert.ok(config.indexOf("accrue_host_preview_custody.sh") < config.indexOf("webServer:"));
+  assert.ok(setup.indexOf("accrue_host_preview_custody.sh") < setup.indexOf("fs.mkdirSync"));
+});
+
+registerTest("direct Playwright config and setup execute the same failing collision preflight", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-direct-"));
+  const fixturePath = path.join(dir, "collision.json");
+  const collision = fixture();
+  collision.target.database = collision.preview.database;
+  fs.writeFileSync(fixturePath, JSON.stringify(collision));
+  const env = {
+    ...process.env,
+    ACCRUE_HOST_CUSTODY_TEST_MODE: "1",
+    ACCRUE_HOST_CUSTODY_TEST_FIXTURE: fixturePath,
+    ACCRUE_HOST_REUSE_SERVER: "0",
+    ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1",
+    ACCRUE_HOST_E2E_FIXTURE: path.join(dir, "must-not-be-created", "fixture.json")
+  };
+  for (const entry of [
+    "require('./examples/accrue_host/playwright.config.js')",
+    "require('./examples/accrue_host/e2e/global-setup.js')()"
+  ]) {
+    const result = spawnSync("node", ["-e", entry], { cwd: repoRoot, env, encoding: "utf8" });
+    assert.notEqual(result.status, 0, `${entry} accepted caller-supplied fixtures`);
+    assert.match(`${result.stdout}\n${result.stderr}`, /caller-supplied test fixture environment is forbidden/);
+  }
+  assert.equal(fs.existsSync(path.join(dir, "must-not-be-created")), false);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+registerTest("production custody refuses fixture environment while test-only entry retains fixture coverage", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-production-entry-"));
+  const fixturePath = path.join(dir, "targets.json");
+  fs.writeFileSync(fixturePath, JSON.stringify(fixture()));
+  const result = spawnSync("node", [custody, "preflight", "browser"], {
+    cwd: repoRoot,
+    env: { ...process.env, ACCRUE_HOST_CUSTODY_TEST_MODE: "1", ACCRUE_HOST_CUSTODY_TEST_FIXTURE: fixturePath },
+    encoding: "utf8"
+  });
+  assert.notEqual(result.status, 0, "production custody accepted fixture environment");
+  assert.match(result.stderr, /caller-supplied test fixture environment is forbidden/);
+  const fixtureRun = run("browser", fixture());
+  assert.equal(fixtureRun.status, 0, fixtureRun.stderr || fixtureRun.stdout);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+registerTest("preview URL fails closed unless the exclusive preservation spec is explicitly selected", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-preview-routing-"));
+  const markerPath = path.join(dir, "mutable-setup-ran");
+  const configPath = path.join(repoRoot, "examples/accrue_host/playwright.config.js");
+  const setupPath = path.join(repoRoot, "examples/accrue_host/e2e/global-setup.js");
+  const baseEnv = {
+    ...process.env,
+    ACCRUE_HOST_PREVIEW_BASE_URL: "http://accrue-host-phase243-preview.localhost",
+    ACCRUE_HOST_PREVIEW_INSTANCE: "accrue-host-phase243-preview",
+    ACCRUE_HOST_E2E_FIXTURE: markerPath
+  };
+  const runConfig = (args, extraEnv = {}) => spawnSync("node", ["-e", `process.argv = ["node", "playwright", ...${JSON.stringify(args)}]; const config = require(${JSON.stringify(configPath)}); if (config.webServer || config.globalSetup) process.exit(9); console.log(JSON.stringify(config.testMatch));`], {
+    cwd: repoRoot,
+    env: { ...baseEnv, ...extraEnv },
+    encoding: "utf8"
+  });
+  const runSetup = (args, extraEnv = {}) => spawnSync("node", ["-e", `process.argv = ["node", "playwright", ...${JSON.stringify(args)}]; require(${JSON.stringify(setupPath)})().then((teardown) => teardown && teardown());`], {
+    cwd: repoRoot,
+    env: { ...baseEnv, ...extraEnv },
+    encoding: "utf8"
+  });
+  const previewSpec = "examples/accrue_host/e2e/phase243-preview-preservation.spec.js";
+  const genericSpec = "examples/accrue_host/e2e/phase238-admin-events-webhooks.spec.js";
+  const previewEnv = {
+    ACCRUE_HOST_PREVIEW_MODE: "preservation",
+    ACCRUE_HOST_PREVIEW_SELECTION: "phase243-preview-preservation",
+    npm_lifecycle_event: "e2e:preview"
+  };
+
+  for (const [label, args, env] of [
+    ["URL without explicit mode", [genericSpec], {}],
+    ["REUSE_SERVER generic route", [genericSpec], { ...previewEnv, ACCRUE_HOST_REUSE_SERVER: "1" }]
+  ]) {
+    const result = runConfig(args, env);
+    assert.notEqual(result.status, 0, `accepted ${label}`);
+    assert.match(`${result.stdout}\n${result.stderr}`, /preview|preservation/i);
+    assert.equal(fs.existsSync(markerPath), false, `${label} reached mutable setup`);
+  }
+
+  for (const args of [[], [genericSpec], [previewSpec, genericSpec], [previewSpec, "--grep=all"]]) {
+    assert.throws(() => validatePreviewSelection(args), /select exactly|unsupported preview runner argument/);
+    const result = spawnSync("node", [previewRunner, ...args], { cwd: path.dirname(previewRunner), env: baseEnv, encoding: "utf8" });
+    assert.notEqual(result.status, 0, `preview runner accepted ${args.join(" ") || "all-spec selection"}`);
+    assert.equal(fs.existsSync(markerPath), false, "rejected preview selection reached mutable setup");
+  }
+  assert.doesNotThrow(() => validatePreviewSelection(["e2e/phase243-preview-preservation.spec.js", "--project=chromium-desktop", "--workers=1"]));
+
+  const accepted = runConfig([previewSpec, "--project=chromium-desktop", "--workers=1"], previewEnv);
+  assert.equal(accepted.status, 0, accepted.stderr || accepted.stdout);
+  assert.match(accepted.stdout, /e2e\/phase243-preview-preservation\.spec\.js/);
+  const setupAccepted = runSetup([previewSpec], previewEnv);
+  assert.equal(setupAccepted.status, 0, setupAccepted.stderr || setupAccepted.stdout);
+  assert.equal(fs.existsSync(markerPath), false, "preview global setup created a fixture or mutation marker");
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+registerTest("both wrappers reject a collision before invoking any Mix mutation", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-wrapper-"));
+  const fixturePath = path.join(dir, "collision.json");
+  const markerPath = path.join(dir, "mix-was-invoked");
+  const binDir = path.join(dir, "bin");
+  fs.mkdirSync(binDir);
+  fs.writeFileSync(path.join(binDir, "mix"), `#!/bin/sh\necho invoked >> '${markerPath}'\nexit 92\n`);
+  fs.chmodSync(path.join(binDir, "mix"), 0o755);
+  const collision = fixture();
+  collision.target.database = collision.preview.database;
+  fs.writeFileSync(fixturePath, JSON.stringify(collision));
+  const env = {
+    ...process.env,
+    PATH: `${binDir}:${process.env.PATH}`,
+    ACCRUE_HOST_CUSTODY_TEST_MODE: "1",
+    ACCRUE_HOST_CUSTODY_TEST_FIXTURE: fixturePath
+  };
+  for (const wrapper of [browserWrapper, devWrapper]) {
+    const result = spawnSync("bash", [wrapper], { cwd: repoRoot, env, encoding: "utf8" });
+    assert.notEqual(result.status, 0, `${path.basename(wrapper)} accepted the preview DB alias`);
+  }
+  assert.equal(fs.existsSync(markerPath), false, "Mix was invoked before collision refusal");
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+// ---- CI absent-mode (249-18): explicit opt-in, refuses unless absence is proven ----
+const ABSENT = { ACCRUE_HOST_CUSTODY_CI_ABSENT: "1" };
+
+function absentFixture(absence) {
+  const data = fixture();
+  delete data.preview;
+  data.absence = absence;
+  return data;
+}
+
+function runCommand(command, data, extraEnv = {}) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-absent-"));
+  const fixturePath = path.join(dir, "targets.json");
+  fs.writeFileSync(fixturePath, JSON.stringify(data));
+  const result = spawnSync("node", [custodyTestEntry, fixturePath, command], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    env: { ...process.env, ...extraEnv }
+  });
+  fs.rmSync(dir, { recursive: true, force: true });
+  return result;
+}
+
+registerTest("absent-mode refuses when a labelled preview volume exists", () => {
+  const result = run("browser", absentFixture({ volumes: ["accrue-host_pgdata"], containers: [] }), ABSENT);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /REFUSED/);
+  assert.match(result.stderr, /CI absent-mode found a accrue-host preview instance \(1 volumes, 0 containers\)/);
+});
+
+registerTest("absent-mode refuses when a labelled preview container exists", () => {
+  const result = run("browser", absentFixture({ volumes: [], containers: ["abc"] }), ABSENT);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /CI absent-mode found a accrue-host preview instance \(0 volumes, 1 containers\)/);
+});
+
+registerTest("without the flag an absent preview still refuses with today's message", () => {
+  const data = fixture();
+  delete data.preview.volume;
+  const result = run("browser", data);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /preview identity is unavailable \(volume\)/);
+  const absentOnly = absentFixture({ volumes: [], containers: [] });
+  const noFlag = run("browser", absentOnly);
+  assert.notEqual(noFlag.status, 0, "absence fixture must not pass without the flag");
+});
+
+registerTest("absent-mode passes on zero labelled volumes and containers and logs the reason", () => {
+  const result = run("browser", absentFixture({ volumes: [], containers: [] }), ABSENT);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /\[preview-custody\] CI absent-mode: no accrue-host preview instance exists \(zero labelled volumes and containers\)/);
+  assert.match(result.stdout, /mode=browser target /);
+});
+
+registerTest("absent-mode passes when the docker binary is missing and says so", () => {
+  const result = run("browser", absentFixture({ docker: "missing" }), ABSENT);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /CI absent-mode:.*docker binary not found/);
+});
+
+registerTest("absent-mode refuses on a docker daemon error because absence is not proven", () => {
+  const result = run("browser", absentFixture({ docker: "daemon-error" }), ABSENT);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /cannot prove preview absence: docker query failed/);
+});
+
+registerTest("absent-mode opts in only on the exact value 1", () => {
+  for (const value of ["yes", "true", "0", "", " 1"]) {
+    const result = run("browser", absentFixture({ volumes: [], containers: [] }), { ACCRUE_HOST_CUSTODY_CI_ABSENT: value });
+    assert.equal(result.status, 2, `flag value ${JSON.stringify(value)} was accepted`);
+    assert.match(result.stderr, /ACCRUE_HOST_CUSTODY_CI_ABSENT must be unset or 1/);
+  }
+});
+
+registerTest("absent-mode still refuses a foreign process on the proof listener port", () => {
+  const data = absentFixture({ volumes: [], containers: [] });
+  data.target.process = "pid:4321";
+  const result = run("browser", data, ABSENT);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /proof listener port is occupied by process pid:4321/);
+});
+
+registerTest("absent-mode snapshot and assert-preserved pass when absent and refuse once a preview appears", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accrue-custody-absent-snap-"));
+  const snap = path.join(dir, "snapshot.txt");
+  const env = { ...ABSENT, ACCRUE_HOST_PREVIEW_SNAPSHOT: snap };
+  const absent = absentFixture({ volumes: [], containers: [] });
+  const taken = runCommand("snapshot", absent, env);
+  assert.equal(taken.status, 0, taken.stderr || taken.stdout);
+  assert.match(taken.stdout, /CI absent-mode:/);
+  const kept = runCommand("assert-preserved", absent, env);
+  assert.equal(kept.status, 0, kept.stderr || kept.stdout);
+  assert.match(kept.stdout, /CI absent-mode: preview still absent/);
+  const appeared = runCommand("assert-preserved", absentFixture({ volumes: ["accrue-host_pgdata"], containers: [] }), env);
+  assert.equal(appeared.status, 2);
+  assert.match(appeared.stderr, /CI absent-mode found a accrue-host preview instance/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+registerTest("the real entry still refuses caller-supplied fixture environment even with the flag", () => {
+  const result = spawnSync("node", [custody, "preflight", "browser"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    env: { ...process.env, ...ABSENT, ACCRUE_HOST_CUSTODY_TEST_FIXTURE: "/nonexistent" }
+  });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /caller-supplied test fixture environment is forbidden/);
+});

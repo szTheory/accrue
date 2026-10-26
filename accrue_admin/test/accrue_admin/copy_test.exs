@@ -75,6 +75,11 @@ defmodule AccrueAdmin.CopyTest do
     refute_vague_copy!(states)
   end
 
+  test "billing ownership and tax use one concise shared column label" do
+    assert Copy.billing_owner_tax_label() == "Ownership and tax"
+    assert Copy.invoices_column_billing_signals() == Copy.billing_owner_tax_label()
+  end
+
   test "CPY-02 destructive and consequential helpers name object, billing effect, and audit consequence" do
     invoice =
       Invoice.invoice_confirm_workflow_message(
@@ -127,9 +132,10 @@ defmodule AccrueAdmin.CopyTest do
     assert single_webhook =~ "organization org_phase191"
     assert single_webhook =~ "admin audit event"
 
-    assert bulk_webhooks =~ "Retry 3 webhook events"
-    assert bulk_webhooks =~ "failed every automatic retry"
-    assert Copy.webhooks_retry_cancel_label() == "Cancel"
+    assert bulk_webhooks =~ "Replay 3 selected deliveries?"
+    assert bulk_webhooks =~ "Only deliveries still eligible when confirmed will be queued"
+    assert bulk_webhooks =~ "Queue acceptance does not mean processing is complete"
+    assert Copy.webhooks_retry_cancel_label() == "Keep deliveries"
 
     refute_vague_copy!([
       invoice,
@@ -195,8 +201,8 @@ defmodule AccrueAdmin.CopyTest do
       %{
         heading: Copy.invoices_list_heading(),
         subtitle: Copy.invoices_list_subtitle(),
-        expected_heading: "Clear open receivables",
-        expected_subtitle: "Work invoices that need collection.",
+        expected_heading: "Invoices",
+        expected_subtitle: "Review outstanding balances and invoice history.",
         states: [
           Copy.invoices_list_first_run_empty_title(),
           Copy.invoices_list_queue_empty_title(),
@@ -212,8 +218,8 @@ defmodule AccrueAdmin.CopyTest do
       %{
         heading: Copy.payments_list_heading(),
         subtitle: Copy.payments_list_subtitle(),
-        expected_heading: "Recover failed payments",
-        expected_subtitle: "Inspect charges that need follow-up.",
+        expected_heading: "Payments",
+        expected_subtitle: "Review payments, investigate failures, and check recorded fees.",
         states: [
           Copy.payments_list_first_run_empty_title(),
           Copy.payments_list_queue_empty_title(),
@@ -280,8 +286,8 @@ defmodule AccrueAdmin.CopyTest do
       %{
         heading: Copy.events_list_heading(),
         subtitle: Copy.events_list_subtitle(),
-        expected_heading: "Trace billing activity",
-        expected_subtitle: "Read the append-only billing event ledger.",
+        expected_heading: "Billing events",
+        expected_subtitle: "Find what changed, when it happened, and how it was recorded.",
         states: [
           Copy.events_list_first_run_empty_title(),
           Copy.events_list_filtered_empty_title(),
@@ -341,6 +347,44 @@ defmodule AccrueAdmin.CopyTest do
       assert sample =~ "Open"
       assert sample =~ "owner scope"
     end
+  end
+
+  test "catalog copy distinguishes definitions, codes, empty states and unknown limits" do
+    assert Coupon.coupon_index_headline() == "Coupons"
+    assert PromotionCode.promotion_codes_index_headline() == "Promotion codes"
+    assert Coupon.coupon_kpi_meta_promotion_codes_child() =~ "Separate child-code surface"
+
+    assert Coupon.coupon_kpi_meta_redemptions_cap() == "Limit not recorded"
+    assert Coupon.coupon_unknown_value() == "Not recorded"
+    assert Coupon.coupon_redemptions_unknown() == "Redemption count not recorded"
+    assert PromotionCode.promotion_code_kpi_meta_unlimited_cap() == "Limit not recorded"
+    assert PromotionCode.promotion_code_unknown_value() == "Not recorded"
+    assert PromotionCode.promotion_code_redemptions_unknown() == "Redemption count not recorded"
+
+    assert Coupon.coupons_list_first_run_empty_title() == "No coupons yet."
+    assert Coupon.coupons_list_filtered_empty_title() == "No coupons match these filters."
+
+    assert Coupon.coupon_promotion_code_unavailable("cpn_missing") ==
+             "Coupon record unavailable (cpn_missing)"
+
+    assert PromotionCode.promotion_codes_list_first_run_empty_title() ==
+             "No promotion codes yet."
+
+    assert PromotionCode.promotion_codes_list_filtered_empty_title() ==
+             "No promotion codes match these filters."
+
+    assert PromotionCode.promotion_code_coupon_unavailable("cpn_missing") ==
+             "Coupon record unavailable (cpn_missing)"
+
+    assert PromotionCode.promotion_code_detail_no_coupon_projection() ==
+             "No coupon projection is linked to this promotion code."
+  end
+
+  test "routine collection labels are humanized while unknown values stay unknown" do
+    assert Copy.invoices_collection_method_label(:charge_automatically) == "Automatic"
+    assert Copy.invoices_collection_method_label("send_invoice") == "Send invoice"
+    assert Copy.invoices_collection_method_label(nil) == "Unknown"
+    assert Copy.invoices_collection_method_label("future_provider_enum") == "Unknown"
   end
 
   test "CPY-01 command-palette no-results copy names the billing search domain" do
@@ -464,20 +508,19 @@ defmodule AccrueAdmin.CopyTest do
       ],
       "lib/accrue_admin/live/invoice_live.ex" => [
         "Copy.action_hidden_context(",
-        "Copy.resource_state_copy(:invoices"
+        "Copy.Invoice.invoice_action_unavailable("
       ],
       "lib/accrue_admin/live/charge_live.ex" => [
         "Copy.action_hidden_context(",
         "Copy.resource_state_copy(:payments"
       ],
       "lib/accrue_admin/live/webhook_live.ex" => [
-        "Copy.action_hidden_context(",
-        "Copy.resource_state_copy(:webhooks",
-        "Copy.resource_state_copy(:events"
+        "Copy.Locked.replay_blocked()",
+        "Copy.webhook_replay_unavailable_status(webhook.status)"
       ],
       "lib/accrue_admin/live/connect_account_live.ex" => [
         "Copy.action_hidden_context(",
-        "Copy.resource_state_copy(:connect_accounts"
+        "AccrueAdmin.Copy.Connect.connect_account_provider_snapshot_note()"
       ],
       "lib/accrue_admin/live/subscription_live.ex" => [
         "Copy.action_hidden_context(",
@@ -493,8 +536,8 @@ defmodule AccrueAdmin.CopyTest do
         "AccrueAdmin.Copy.resource_state_copy(:coupons"
       ],
       "lib/accrue_admin/live/event_live.ex" => [
-        "Copy.resource_state_copy(:events",
-        "Copy.resource_state_copy(:webhooks"
+        "Copy.event_detail_related_resources_empty()",
+        "Copy.BillingEvent.event_detail_no_linked_webhook()"
       ],
       "lib/accrue_admin/live/analytics/campaign_live.ex" => [
         "Copy.resource_state_copy(:dunning",
@@ -536,6 +579,31 @@ defmodule AccrueAdmin.CopyTest do
       assert exporter_source =~ name, "#{name} must be allow-listed for browser fixtures"
       assert fixture[name] == expected, "#{name} must match AccrueAdmin.Copy"
     end
+  end
+
+  test "generated copy export exactly matches the checked-in browser fixture" do
+    temp_dir =
+      Path.join(
+        System.tmp_dir!(),
+        "accrue-copy-strings-#{Base.encode16(:crypto.strong_rand_bytes(16))}"
+      )
+
+    assert :ok = File.mkdir(temp_dir)
+
+    output = Path.join(temp_dir, "copy_strings.json")
+
+    fixture =
+      Path.expand("../../../examples/accrue_host/e2e/generated/copy_strings.json", __DIR__)
+
+    on_exit(fn -> File.rm_rf(temp_dir) end)
+
+    assert {_, 0} =
+             System.cmd("mix", ["accrue_admin.export_copy_strings", "--out", output],
+               cd: Path.expand("../..", __DIR__),
+               stderr_to_stdout: true
+             )
+
+    assert File.read!(output) == File.read!(fixture)
   end
 
   test "CPY-01 copy modules avoid generic fallbacks and bare action terms" do

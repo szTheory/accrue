@@ -6,6 +6,7 @@ defmodule AccrueHost.SeedE2ECleanupTest do
   use AccrueHost.DataCase, async: false
 
   alias Accrue.Billing.Customer
+  alias Accrue.Billing.Invoice
   alias Accrue.Billing.PaymentMethod
   alias Accrue.Billing.Subscription
   alias Accrue.Billing.SubscriptionItem
@@ -29,7 +30,13 @@ defmodule AccrueHost.SeedE2ECleanupTest do
 
     fixture_webhook_id = first_fixture.webhook_id
     fixture_subscription_id = first_fixture.subscription_id
+    beta_invoice_id = first_fixture.admin_beta_invoice_id
     fixture_payment_method_ids = Map.values(first_fixture.admin_denial_payment_method_ids)
+
+    beta_invoice = Repo.get!(Invoice, beta_invoice_id)
+    beta_customer = Repo.get!(Customer, beta_invoice.customer_id)
+    assert beta_customer.owner_type == "Organization"
+    assert to_string(beta_customer.owner_id) == first_fixture.admin_org_beta_id
 
     assert length(fixture_payment_method_ids) == 3
 
@@ -59,6 +66,12 @@ defmodule AccrueHost.SeedE2ECleanupTest do
 
     second_fixture = AccrueHostSeedE2E.run!(fixture_file)
     second_fixture_payment_method_ids = Map.values(second_fixture.admin_denial_payment_method_ids)
+
+    refute Repo.get(Invoice, beta_invoice_id)
+    assert second_fixture.admin_beta_invoice_id != beta_invoice_id
+    second_beta_invoice = Repo.get!(Invoice, second_fixture.admin_beta_invoice_id)
+    second_beta_customer = Repo.get!(Customer, second_beta_invoice.customer_id)
+    assert to_string(second_beta_customer.owner_id) == second_fixture.admin_org_beta_id
 
     assert second_fixture.webhook_id != fixture_webhook_id
     assert second_fixture.subscription_id != fixture_subscription_id

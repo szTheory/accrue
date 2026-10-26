@@ -8,6 +8,13 @@ defmodule AccrueHostWeb.RecoveryAnalyticsTest do
   alias AccrueHost.Repo
 
   setup do
+    # The recovery window uses Accrue.Clock, while Events.record timestamps
+    # rows from the database clock. Align the fake clock so these fixtures are
+    # inside the selected 30-day window, then restore it for neighboring tests.
+    clock_shift = DateTime.diff(DateTime.utc_now(), Accrue.Clock.utc_now(), :second) + 2
+    :ok = Accrue.Processor.Fake.advance(clock_shift)
+    on_exit(fn -> Accrue.Processor.Fake.advance(-clock_shift) end)
+
     # Insert only the handful of `dunning.*` ledger events this test asserts on,
     # rather than running the full demo seed script (which registers/confirms
     # users, creates orgs, and subscribes via the Fake processor) — those
@@ -38,11 +45,12 @@ defmodule AccrueHostWeb.RecoveryAnalyticsTest do
 
     conn = log_in_user(conn, user)
 
-    assert {:ok, _view, html} = live(conn, "/admin/analytics/recovery")
+    assert {:ok, view, _html} = live(conn, "/admin/analytics/recovery")
+    html = render_async(view)
 
     # Assert KPI cards render the multi-currency data from seeds
     assert html =~ "Recovered MRR (USD)"
-    assert html =~ "Exhausted MRR (JPY)"
+    assert html =~ AccrueAdmin.Copy.recovery_exhausted_mrr_label("jpy")
 
     # 12000 cents in USD
     assert html =~ "$120.00"
@@ -50,9 +58,9 @@ defmodule AccrueHostWeb.RecoveryAnalyticsTest do
     assert html =~ "¥30,000"
 
     # Assert funnel chart
-    assert html =~ "Recovery Funnel"
+    assert html =~ "Payment recovery funnel"
 
     # Assert At-Risk table
-    assert html =~ "At-Risk Subscriptions"
+    assert html =~ "Subscriptions in retry"
   end
 end

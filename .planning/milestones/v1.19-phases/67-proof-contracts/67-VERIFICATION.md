@@ -1,6 +1,6 @@
 ---
 phase: 67-proof-contracts
-status: complete
+status: passed
 ---
 
 # Phase 67 — Verification

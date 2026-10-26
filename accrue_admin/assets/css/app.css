@@ -26,6 +26,8 @@
    --ax-bp-lg      : 1024px
    --ax-bp-sm ↓    : 599.98px  (max-width guard = bp-sm - 0.02px)
    --ax-bp-lg ↓    : 1023.98px (max-width guard = bp-lg - 0.02px)
+   --ax-bp-content ↓ : 639px  (max-width guard = bp-content - 1px)
+   --ax-bp-1000 ↑  : 1000px  (ad-hoc wide-content step, like --ax-bp-700)
    =========================== */
 
 html,
@@ -665,6 +667,9 @@ button {
 .ax-active-org-name {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-weight: 600;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
 }
 
 .ax-connection-state {
@@ -913,8 +918,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 
 .ax-body {
   margin: 0;
-  font: var(--ax-type-body-relaxed-font);
-  letter-spacing: var(--ax-type-body-relaxed-tracking); /* ax-type-exception: semantic body class exposes composed role tracking. */
+  font: var(--ax-type-body-font);
+  letter-spacing: var(--ax-type-body-tracking); /* ax-type-exception: semantic body class exposes composed role tracking. */
   overflow-wrap: anywhere;
 }
 
@@ -952,7 +957,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 
 .ax-topbar-actions {
   align-items: center;
-  gap: 0.375rem;
+  gap: var(--ax-space-sm);
 }
 
 .ax-icon-button {
@@ -969,6 +974,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
    subtle Cobalt accent ring. Icon + label per segment; labels collapse to
    icon-only on narrow viewports (the accessible name survives via aria-label). */
 .ax-theme-picker {
+  box-sizing: border-box;
+  min-block-size: 44px;
   display: inline-flex;
   align-items: center;
   gap: 2px; /* ax-spacing-exception: segmented-control internal thumb gap — sub-token precision spacing for the raised-thumb segmented UI */
@@ -979,6 +986,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 }
 
 .ax-theme-picker-option {
+  box-sizing: border-box;
+  min-block-size: 36px;
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-xs);
@@ -987,6 +996,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
   border-radius: calc(var(--ax-radius-md) - 3px);
   background: transparent;
   color: var(--ax-muted);
+  font: var(--ax-type-label-font);
+  font-weight: 500; /* ax-type-exception: shared header utility weight */
   cursor: pointer;
   transition: var(--ax-transition-colors);
 }
@@ -1087,15 +1098,6 @@ html.accrue-admin[data-theme="dark"] .ax-theme-picker-option-active {
   outline: none;
 }
 
-.ax-shell-content:has(> .ax-subscription-detail-page),
-.ax-shell-content:has(> .ax-home) {
-  padding-top: 0;
-}
-
-.ax-shell-content:has(> .ax-home) {
-  padding-bottom: 0.5rem;
-}
-
 .ax-breadcrumbs-list,
 .ax-flash-group {
   display: flex;
@@ -1117,6 +1119,21 @@ html.accrue-admin[data-theme="dark"] .ax-theme-picker-option-active {
   align-items: center;
   gap: var(--ax-space-sm);
   min-width: 0;
+  max-inline-size: 100%;
+}
+
+.ax-breadcrumbs-link,
+.ax-breadcrumbs-current {
+  min-inline-size: 0;
+  max-inline-size: min(var(--ax-record-label-measure), 100%);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.ax-breadcrumbs-separator {
+  flex: none;
 }
 
 .ax-filter-chip-bar,
@@ -1137,6 +1154,15 @@ html.accrue-admin[data-theme="dark"] .ax-theme-picker-option-active {
 .ax-timeline-card {
   border-radius: var(--ax-radius-lg);
   padding: var(--ax-space-lg);
+}
+
+.ax-filter-chip-bar-compact {
+  display: grid;
+  gap: var(--ax-space-sm);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 a.ax-kpi-card--linked {
@@ -1289,8 +1315,62 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-filter-chip-action {
-  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  margin: -0.5rem -0.5rem -0.5rem 0;
+  border-radius: 999px;
+  text-decoration: none;
   text-underline-offset: 0.15em;
+}
+
+.ax-filter-chip-action:focus-visible {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+}
+
+.ax-data-table-filter-disclosure summary {
+  min-block-size: 2.75rem;
+  display: flex;
+  align-items: center;
+  color: var(--ax-accent-readable);
+  font: var(--ax-type-label-font);
+  cursor: pointer;
+  gap: var(--ax-space-sm);
+}
+
+.ax-data-table-filter-disclosure[open] .ax-filter-disclosure-chevron { transform: rotate(180deg); }
+.ax-data-table-scroll-boundary { display: block; min-block-size: 1px; min-inline-size: 1px; }
+
+.ax-data-table-filter-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-md);
+  padding-block-start: var(--ax-space-sm);
+}
+
+.ax-invoice-view-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-sm);
+}
+
+.ax-invoice-view-nav a {
+  min-block-size: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: var(--ax-space-md);
+  border-radius: var(--ax-radius-md);
+  color: var(--ax-text);
+}
+
+.ax-invoice-view-nav a[aria-current="page"] {
+  background: color-mix(in srgb, var(--ax-accent) 10%, var(--ax-elevated));
+  color: var(--ax-accent-readable);
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+  font-weight: 600;
 }
 
 .ax-kpi-card {
@@ -1402,9 +1482,8 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-stat-value {
   /* ax-type-exception: component-local metric-value type, documented until migrated to a composed role utility in markup. */
   margin: 0;
-  font-size: var(--ax-type-md);
+  font: var(--ax-type-label-font);
   font-weight: 600;
-  line-height: var(--ax-leading-tight);
   color: var(--ax-primary);
   font-variant-numeric: tabular-nums;
 }
@@ -1601,6 +1680,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-detail-drawer-body {
   display: grid;
   gap: var(--ax-space-lg);
+  align-content: start;
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
@@ -1842,6 +1922,26 @@ a.ax-kpi-card--linked:focus-visible {
   line-height: var(--ax-leading-relaxed);
 }
 
+.ax-json-raw {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ax-timeline-details {
+  min-width: 0;
+}
+
+.ax-timeline-details pre {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .ax-timeline-meta {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: 0.875rem;
@@ -1874,9 +1974,9 @@ a.ax-kpi-card--linked:focus-visible {
   content: "";
   position: absolute;
   left: calc(0.6875rem / 2);
-  top: calc(0.5rem + 0.6875rem);
+  top: calc((44px - 0.6875rem) / 2 + 0.6875rem);
   width: 1px;
-  height: calc(100% - 0.6875rem - 0.5rem + var(--ax-space-lg));
+  height: calc(100% - 0.6875rem + var(--ax-space-lg));
   background: var(--ax-border-strong);
   transform: translateX(-0.5px);
   z-index: 0; /* ax-z-micro-stack: rail behind the node inside the isolated timeline row */
@@ -1886,15 +1986,38 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-timeline-dot {
   width: 0.6875rem;
   height: 0.6875rem;
-  margin-top: 0.5rem;
+  margin-top: calc((44px - 0.6875rem) / 2);
   box-shadow: 0 0 0 3px var(--ax-elevated);
   z-index: 1; /* ax-z-micro-stack: node above the rail inside the isolated timeline row */
 }
 
+/* Billing event families use the existing icon vocabulary in place of a dot. */
+.ax-timeline-item-with-icon {
+  grid-template-columns: var(--ax-icon-lg) minmax(0, 1fr);
+  isolation: isolate; /* keeps the marker micro-stack below scoped to this row */
+}
+.ax-timeline-item-with-icon:not(:last-child)::before {
+  left: calc(var(--ax-icon-lg) / 2);
+  top: calc((44px + var(--ax-icon-lg)) / 2);
+  height: calc(100% - var(--ax-icon-lg) + var(--ax-space-lg));
+}
+.ax-timeline-marker {
+  position: relative;
+  z-index: 1; /* ax-z-micro-stack: family glyph interrupts its row's rail */
+  height: var(--ax-icon-lg);
+  margin-top: calc((44px - var(--ax-icon-lg)) / 2);
+  background: var(--ax-base);
+}
+.ax-event-icon { flex-shrink: 0; color: var(--ax-muted); }
+.ax-event-icon-moss { color: var(--ax-status-success-text); }
+.ax-event-icon-amber { color: var(--ax-status-warning-text); }
+.ax-event-link { display: inline-flex; align-items: baseline; gap: var(--ax-space-xs); }
+.ax-event-link > .ax-icon { align-self: center; }
+
 /* (c) ENTRY — borderless, transparent threaded-feed row with a quiet hover surface.
    Overrides the shared .ax-kpi-card/.ax-timeline-card group (border/background/padding/radius). */
 .ax-timeline-card {
-  padding: var(--ax-space-sm) var(--ax-space-md);
+  padding: 0 var(--ax-space-sm) var(--ax-space-sm);
   border: 0;
   border-radius: var(--ax-radius-md);
   background: transparent;
@@ -1921,10 +2044,43 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-muted);
 }
 
+.ax-timestamp-copy {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ax-radius-sm);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: var(--ax-type-body-sm-font);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.ax-timestamp-copy:focus-visible {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+}
+
+.ax-timestamp-zone {
+  color: var(--ax-muted);
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+  font-size: var(--ax-type-sm);
+}
+
 .ax-json-viewer {
   display: grid;
   gap: var(--ax-space-lg);
   min-width: 0;
+}
+
+.ax-json-viewer [hidden] {
+  display: none;
+}
+
+.ax-json-viewer-header > .ax-tabs {
+  flex: 1 1 auto;
 }
 
 .ax-json-tree-root,
@@ -2045,6 +2201,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-breadcrumbs-link,
+.ax-breadcrumbs-group,
 .ax-breadcrumbs-current,
 .ax-breadcrumbs-separator {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
@@ -2055,6 +2212,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-breadcrumbs-link,
+.ax-breadcrumbs-group,
 .ax-breadcrumbs-separator {
   color: var(--ax-muted);
 }
@@ -2238,7 +2396,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-component-kitchen-page .ax-dev-audit-strip span {
   color: var(--ax-muted);
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 600;
+  font-weight: 950;
 }
 
 .ax-dev-audit-strip {
@@ -3400,17 +3558,74 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   min-width: 0;
 }
 
+.ax-data-table-footer {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-sm) var(--ax-space-md);
+  padding-block: var(--ax-space-md);
+}
+
+.ax-data-table-pagination-status {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ax-space-xs) var(--ax-space-md);
+  margin: 0;
+  color: var(--ax-muted);
+  font: var(--ax-type-body-sm-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.ax-data-table-pagination-loading,
+.ax-data-table-scroll-hint { display: none; }
+
+.ax-data-table-footer[data-pagination-auto="true"] .ax-data-table-scroll-hint,
+.ax-data-table-footer[data-pagination-loading="true"] .ax-data-table-pagination-loading { display: inline; }
+
+.ax-data-table-footer[data-pagination-loading="true"] .ax-data-table-scroll-hint { display: none; }
+
+/* Automatic scrolling is the pointer path; Tab reveals its native fallback.
+   Browsers without observation keep the control visible in the normal flow. */
+.ax-data-table-footer[data-pagination-auto="true"] .ax-data-table-manual-load:not(:focus-visible) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Filter toolbar: mobile-first single column that fans out to a wrapping flex
    row at md+. Search grows; categorical controls stay intrinsic; Clear pushes
    to the row end. Spacing tokens only. */
 .ax-data-table-filters {
   display: flex;
   flex-direction: column;
-  gap: 0.1875rem;
+  gap: var(--ax-space-xs);
+}
+
+.ax-data-table-filter {
+  display: grid;
+  gap: var(--ax-space-xs);
+  align-content: start;
+}
+
+.ax-data-table-filter > .ax-label { margin: 0; }
+
+.ax-data-table-filter .ax-segmented {
+  box-sizing: border-box;
+  min-block-size: 44px;
 }
 
 .ax-data-table-filter-grow {
-  flex: 1 1 16rem;
+  flex: 0 1 auto;
   min-width: 12rem;
 }
 
@@ -3517,8 +3732,12 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
   .ax-data-table-filters {
     flex-direction: row;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-end;
     gap: var(--ax-space-md);
+  }
+
+  .ax-data-table-filter-grow {
+    flex: 1 1 16rem;
   }
 
   .ax-data-table-filter-clear {
@@ -3533,6 +3752,77 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-data-table-card {
   padding: var(--ax-space-sm);
+}
+
+.ax-data-table-identity {
+  display: grid;
+  gap: var(--ax-space-xs);
+  min-width: 0;
+}
+
+.ax-data-table-identity-stacked {
+  max-inline-size: min(var(--ax-record-label-measure), 100%);
+}
+
+/* Elide compact display labels in CSS, preserving full DOM text and destinations.
+   Detail headings and exact copyable evidence wrap instead. */
+.ax-record-label,
+.ax-data-table-identity-stacked .ax-data-table-identity-primary > a,
+.ax-data-table-identity-stacked .ax-data-table-identity-primary > span,
+.ax-data-table-identity-email {
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: min(var(--ax-record-label-measure), 100%);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.ax-data-table-identity-stacked .ax-data-table-identity-primary > .ax-event-link {
+  display: flex;
+}
+
+.ax-data-table-identity-primary > .ax-event-link > span {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.ax-data-table-identity-primary,
+.ax-data-table-identity-secondary {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.ax-data-table-identity-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  color: var(--ax-muted);
+  font: var(--ax-type-body-sm-font);
+  gap: 0 var(--ax-space-sm);
+}
+
+/* Record references have no display name: keep their type and exact ID together.
+   Named records retain the conventional name + secondary evidence hierarchy. */
+.ax-data-table-identity-inline {
+  grid-template-columns: fit-content(40%) minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: var(--ax-space-sm);
+}
+
+.ax-data-table-identity-secondary .ax-id-badge {
+  max-inline-size: 100%;
+}
+
+.ax-data-table-identity-secondary .ax-id-badge-text {
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .ax-data-table-card-header {
@@ -3551,15 +3841,16 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-data-table-card-field {
   display: grid;
-  gap: var(--ax-space-2xs);
+  gap: var(--ax-space-xs);
 }
 
 .ax-data-table-card dd {
   margin: 0;
+  font: var(--ax-type-body-sm-font);
 }
 
 .ax-data-table-card .ax-stack-sm {
-  gap: var(--ax-space-2xs);
+  gap: var(--ax-space-xs);
 }
 
 /* De-nested Signals/audit column: borderless fields grouped by spacing, not boxes */
@@ -3610,7 +3901,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-dev-health-snapshot strong {
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .ax-dev-health-snapshot-header {
@@ -3639,7 +3930,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-dev-health-snapshot-header .ax-dev-health-status em {
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 750;
+  font-weight: 950;
 }
 
 .ax-dev-health-snapshot-header strong,
@@ -3650,7 +3941,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-dev-health-snapshot-header a {
   /* ax-type-exception: dev-kitchen specimen type mirrors production scale */
-  font-weight: 900;
+  font-weight: 950;
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
@@ -3746,11 +4037,22 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 
 .ax-data-table-grid th,
 .ax-data-table-grid td {
-  padding: 0.75rem var(--ax-space-md);
+  padding: var(--ax-space-sm) var(--ax-space-md);
   border-bottom: 1px solid var(--ax-border);
   text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
 }
+
+.ax-data-table-grid th {
+  font: var(--ax-type-label-font);
+}
+
+.ax-data-table-grid td,
+.ax-data-table-card {
+  font: var(--ax-type-body-sm-font);
+}
+
+.ax-data-table-grid tbody tr:last-child td { border-bottom: 0; }
 
 .ax-page-header-compact .ax-data-table-filters {
   gap: var(--ax-space-sm);
@@ -4051,6 +4353,27 @@ details[open].ax-dropdown .ax-dropdown-panel {
   color: var(--ax-primary);
 }
 
+@media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
+  .ax-recovery-currency-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ax-page[data-ax-overview="recovery"] .ax-tabs {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ax-space-xs);
+    overflow-x: visible;
+  }
+
+  .ax-page[data-ax-overview="recovery"] .ax-tab {
+    justify-content: center;
+    min-width: 0;
+    padding-inline: var(--ax-space-xs);
+    text-align: center;
+    white-space: normal;
+  }
+}
+
 .ax-tab-count {
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
@@ -4061,6 +4384,47 @@ details[open].ax-dropdown .ax-dropdown-panel {
 .ax-kpi-grid {
   display: grid;
   min-width: 0;
+}
+
+.ax-kpi-grid.ax-recovery-currency-groups {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ax-recovery-coverage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-xs);
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ax-window-selector {
+  margin-block-start: var(--ax-space-sm);
+}
+
+.ax-recovery-currency-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ax-space-md);
+  min-width: 0;
+}
+
+.ax-recovery-currency-groups {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ax-recovery-currency-pair > .ax-kpi-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
+  .ax-kpi-grid.ax-recovery-currency-groups,
+  .ax-recovery-currency-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .ax-kpi-card {
@@ -4081,35 +4445,6 @@ details[open].ax-dropdown .ax-dropdown-panel {
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, var(--ax-accent) 55%, transparent);
   text-underline-offset: 0.15em;
-}
-
-.ax-search-trigger {
-  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ax-space-sm);
-  min-height: 2.25rem;
-  padding: 0 0.625rem;
-  border: 2px solid var(--ax-border);
-  border-radius: var(--ax-radius-pill);
-  background: color-mix(in srgb, var(--ax-accent-subtle) 58%, var(--ax-elevated));
-  color: var(--ax-primary);
-  font-size: var(--ax-type-sm);
-  font-weight: 700;
-  /* Intentional exception: two-token asymmetric transition — not collapsible to a single bundle.
-     Color/border/background use --ax-theme-transition (180ms); transform uses --ax-motion-fast (120ms).
-     Collapsing would lose the enter/exit speed difference. See Phase 174 Gap 3 resolution. */
-  transition:
-    border-color var(--ax-theme-transition),
-    background var(--ax-theme-transition),
-    color var(--ax-theme-transition),
-    transform var(--ax-motion-fast);
-}
-
-.ax-search-trigger:hover,
-.ax-search-trigger:focus-visible {
-  border-color: var(--ax-focus-ring);
-  outline: none;
 }
 
 .ax-search-trigger kbd,
@@ -4158,8 +4493,11 @@ details[open].ax-dropdown .ax-dropdown-panel {
 .ax-command-palette {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ax-space-md);
-  width: min(42rem, calc(100vw - 2rem));
+  width: min(42rem, 100%);
+  max-width: 100%;
+  box-sizing: border-box;
   max-height: min(42rem, 82vh);
   overflow: hidden;
   border: 1px solid var(--ax-border-strong);
@@ -4225,21 +4563,32 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 .ax-command-palette-input {
+  min-width: 0;
   min-height: 2.75rem;
   border: 0;
   background: transparent;
   color: var(--ax-primary);
-  font: inherit;
+  font: var(--ax-type-body-font);
   outline: none;
 }
 
 .ax-command-palette-body {
+  min-inline-size: 0;
   min-height: 10rem;
   max-height: min(28rem, calc(82vh - 8rem));
   overflow: auto;
   overscroll-behavior: contain;
   padding: 0 var(--ax-space-md) var(--ax-space-md);
 }
+
+.ax-command-palette-help {
+  margin: 0;
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  font: var(--ax-type-body-sm-font);
+  color: var(--ax-muted);
+}
+
+.ax-command-palette-orientation { margin: 0; font: var(--ax-type-body-sm-font); }
 
 .ax-command-palette-empty,
 .ax-command-palette-results,
@@ -4250,6 +4599,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 
 .ax-command-palette-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--ax-space-xs);
   margin: 0;
   padding: 0;
@@ -4257,8 +4607,13 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 .ax-command-palette-item {
+  display: flex;
+  min-inline-size: 0;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  box-sizing: border-box;
   min-height: 2.75rem;
-  padding: 0.75rem 0.875rem;
+  padding: var(--ax-space-sm) var(--ax-space-md);
   border: 1px solid transparent;
   border-radius: var(--ax-radius-md);
   color: var(--ax-primary);
@@ -4266,9 +4621,32 @@ details[open].ax-dropdown .ax-dropdown-panel {
   text-decoration: none;
 }
 
+.ax-command-palette-item > span {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.ax-command-palette-list-item {
+  min-inline-size: 0;
+}
+
+.ax-command-palette-item strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
 .ax-command-palette-item:hover {
   border-color: var(--ax-border-strong);
   background: var(--ax-interactive-hover);
+}
+
+.ax-command-palette-item.ax-active:hover {
+  border-color: color-mix(in srgb, var(--ax-accent) 36%, var(--ax-border));
+  background: var(--ax-interactive-selected);
 }
 
 .ax-command-palette-item.ax-active {
@@ -4300,6 +4678,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
    token-sized rem values for sm/md/lg. Reduced-motion collapses animation-duration
    to 0ms while keeping the visual (border) indicator. */
 .ax-spinner { display: inline-block; border-radius: 50%; border: 2px solid var(--ax-border); border-top-color: var(--ax-accent-strong); animation: ax-spin var(--ax-dur-3) linear infinite; }
+.ax-spinner[hidden] { display: none; }
 .ax-spinner-sm { width: 1rem; height: 1rem; }
 .ax-spinner-md { width: 1.25rem; height: 1.25rem; }
 .ax-spinner-lg { width: 1.5rem; height: 1.5rem; }
@@ -4312,25 +4691,60 @@ details[open].ax-dropdown .ax-dropdown-panel {
 .ax-button-spinner { display: inline-block; inline-size: 1em; block-size: 1em; flex: none; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: ax-spin var(--ax-dur-3) linear infinite; }
 @media (prefers-reduced-motion: reduce) { .ax-button-spinner { animation-duration: 0ms; } }
 
-.ax-data-table-shell .ax-link {
-  color: var(--ax-accent-readable);
+.ax-data-table-grid .ax-link,
+.ax-data-table-card .ax-link {
+  color: var(--ax-primary);
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.ax-data-table-identity-secondary a:not(.ax-button) {
+  color: var(--ax-muted);
+  font: var(--ax-type-body-sm-font);
+  text-decoration: none;
+}
+
+.ax-data-table-grid .ax-link:hover,
+.ax-data-table-grid .ax-link:focus-visible,
+.ax-data-table-card .ax-link:hover,
+.ax-data-table-card .ax-link:focus-visible {
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+}
+
+.ax-data-table-identity-secondary a:not(.ax-button):hover,
+.ax-data-table-identity-secondary a:not(.ax-button):focus-visible {
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+}
+
+/* At intermediate touch widths the desktop table remains the active layout.
+   Preserve compact rows for fine pointers, but give table links the shared
+   44px frequent-action target when the input is coarse. */
+@media (pointer: coarse) {
+  .ax-home .ax-page-header-actions > .ax-button {
+    min-block-size: 44px;
+  }
+
+  .ax-data-table-shell .ax-link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+  }
+
+  #ax-overlay-root [data-ax-action-drawer-form] .ax-button {
+    min-block-size: 44px;
+  }
 }
 
 html.accrue-admin[data-theme="dark"] .ax-card.ax-data-table-shell {
-  background-color: #171d24 !important;
-}
-
-html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
-  color: #f4f7fa !important;
+  background-color: var(--ax-elevated) !important;
 }
 
 @media (prefers-color-scheme: dark) {
   html.accrue-admin[data-theme="system"] .ax-card.ax-data-table-shell {
-    background-color: #171d24 !important;
-  }
-
-  html.accrue-admin[data-theme="system"] .ax-data-table-shell .ax-link {
-    color: #f4f7fa !important;
+    background-color: var(--ax-elevated) !important;
   }
 }
 
@@ -4425,6 +4839,13 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   flex-wrap: wrap;
 }
 
+.ax-at-risk-scroll-region {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
 .ax-at-risk-grid {
   display: none;
   width: 100%;
@@ -4477,6 +4898,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-at-risk-card-identity {
   min-width: 0;
+}
+
+.ax-at-risk-card-identity .ax-heading {
+  overflow-wrap: anywhere;
 }
 
 .ax-at-risk-card-status {
@@ -4569,48 +4994,43 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
    Phase 169 (v1.50 AUI-03) — IA: home start page, nav icons, elevated search
    ========================================================================== */
 
-/* Topbar search rendered as a search-input affordance (not a pill button). */
+/* Shared topbar controls stay neutral until hover or keyboard focus. */
 .ax-search-trigger {
-  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+  display: inline-flex;
+  align-items: center;
   justify-content: flex-start;
-  width: 27rem;
-  max-width: min(27rem, calc(100vw - 7rem));
+  gap: var(--ax-space-sm);
+  width: 15rem;
+  max-width: min(15rem, calc(100vw - 7rem));
   min-width: 0;
-  min-height: 2rem;
-  border-color: var(--ax-focus-ring);
-  border-width: 2px;
+  min-height: 44px;
+  padding-inline: var(--ax-space-sm);
+  border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
-  background: color-mix(in srgb, var(--ax-accent-subtle) 88%, var(--ax-elevated));
+  background: var(--ax-elevated);
   color: var(--ax-primary);
-  font-size: var(--ax-type-sm);
-  font-weight: 900;
+  font: var(--ax-type-label-font);
+  font-weight: 500; /* ax-type-exception: quiet utility control, below primary action weight */
   cursor: pointer;
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--ax-accent-border) 28%, transparent),
-    var(--ax-shadow-sm);
+  transition: var(--ax-transition-colors);
 }
 
 .ax-search-trigger:hover {
-  background: var(--ax-elevated);
-  border-color: var(--ax-focus-ring);
-  transform: translateY(-1px);
+  border-color: var(--ax-border-strong);
 }
 
 .ax-search-trigger-icon {
-  color: var(--ax-accent-readable);
+  color: var(--ax-muted);
 }
 
 .ax-search-trigger-text {
-  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
-  display: grid;
-  gap: 0;
+  display: block;
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
-  color: var(--ax-primary);
-  font-weight: 750;
+  white-space: nowrap;
 }
 
 .ax-search-trigger-text strong,
@@ -4648,12 +5068,42 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-search-trigger .ax-kbd {
   margin-left: auto;
-  border-color: var(--ax-border);
-  background: var(--ax-sunken);
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--ax-muted);
+  font-weight: 500; /* ax-type-exception: shortcut hint recedes below the control label */
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
+  .ax-topbar-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--ax-space-xs);
+  }
+
+  .ax-topbar-actions > .ax-theme-picker {
+    grid-column: 1 / -1; /* WCAG 1.4.10 reflow: own row so the three segments never push past 320px at 200% root font */
+    justify-self: start;
+    max-width: 100%;
+  }
+
+  .ax-time-preference {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    flex-wrap: wrap; /* WCAG 1.4.10 reflow: label and select wrap at 200% root font on 320px */
+    min-width: 0;
+  }
+
+  .ax-topbar-actions > .ax-search-trigger {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    justify-content: center;
+  }
+
   .ax-icon-label {
     position: absolute;
     width: 1px;
@@ -4670,14 +5120,11 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 
   .ax-search-trigger {
-    width: min(12.5rem, calc(100vw - 10.75rem));
-    max-width: min(12.5rem, calc(100vw - 10.75rem));
-    min-height: 1.75rem;
-    gap: 0.1875rem;
-    padding: 0 0.25rem;
-    border-width: 1px;
-    /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-    font-size: var(--ax-type-xs);
+    width: min(12.5rem, calc(100vw - 12.5rem));
+    max-width: min(12.5rem, calc(100vw - 12.5rem));
+    min-height: 44px;
+    gap: var(--ax-space-xs);
+    padding-inline: var(--ax-space-sm);
   }
 
   .ax-search-trigger-text {
@@ -4770,25 +5217,6 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 /* Home page vertical rhythm + section headers */
 .ax-home {
   gap: var(--ax-space-md);
-}
-
-.ax-home > .ax-page-header {
-  gap: 0;
-  padding-block: 0;
-}
-
-.ax-home > .ax-page-header .ax-display {
-  color: var(--ax-primary);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-size: 1.5rem;
-  font-weight: 950;
-}
-
-.ax-home > .ax-page-header .ax-page-copy {
-  color: var(--ax-primary);
-  font: var(--ax-type-label-sm-font);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  line-height: var(--ax-leading-tight);
 }
 
 .ax-home .ax-home-section {
@@ -4901,9 +5329,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 /* Empty state (home attention zero; reused by slice D) — Phase 189 (CMP-01):
    token-consuming replacement. No cursor:pointer, no :hover rule on .ax-empty. */
 .ax-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--ax-space-md); padding: var(--ax-space-2xl) var(--ax-space-lg); }
+.ax-empty-content { display: grid; justify-items: center; gap: var(--ax-space-sm); min-width: 0; }
 .ax-empty-icon { color: var(--ax-muted); }
-.ax-empty-title { font: var(--ax-type-title-font); color: var(--ax-primary); }
-.ax-empty-copy { font: var(--ax-type-body-sm-font); color: var(--ax-muted); max-width: 28rem; }
+.ax-empty-title { margin: 0; font: var(--ax-type-title-font); color: var(--ax-primary); }
+.ax-empty-copy { margin: 0; font: var(--ax-type-body-sm-font); color: var(--ax-muted); max-width: 28rem; }
 .ax-empty-actions { margin-top: var(--ax-space-sm); }
 
 /* SPEC-OVERVIEW (Phase 194): elevated healthy "all clear" hero — NON-INTERACTIVE.
@@ -4976,13 +5405,6 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-activity-footer {
   margin-top: var(--ax-space-sm);
-}
-
-@media (min-width: 1024px) { /* --ax-bp-lg ↑ */
-  .ax-shell-content:has(> .ax-subscription-detail-page),
-  .ax-shell-content:has(> .ax-home) {
-    padding-top: 0;
-  }
 }
 
 /* Demoted KPI strip on home: explicit responsive 4-up */
@@ -5262,25 +5684,10 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   flex-wrap: wrap;
 }
 
-.ax-subscription-detail-page .ax-summary-card {
-  padding: 0 0.25rem;
-  gap: var(--ax-space-2xs) var(--ax-space-xs);
-}
-
 .ax-summary-main {
   display: grid;
   gap: var(--ax-space-sm);
   min-width: 0;
-}
-
-.ax-subscription-detail-page .ax-summary-main {
-  gap: 0.125rem;
-}
-
-.ax-subscription-detail-page .ax-summary-facts,
-.ax-subscription-detail-page .ax-summary-fact,
-.ax-subscription-detail-page .ax-summary-fact strong {
-  color: var(--ax-primary);
 }
 
 .ax-summary-title-row {
@@ -5300,12 +5707,6 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   overflow-wrap: anywhere;
 }
 
-.ax-subscription-detail-page .ax-summary-title {
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-size: 1.375rem;
-  font-weight: 950;
-}
-
 .ax-summary-facts {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: flex;
@@ -5315,10 +5716,6 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   font-size: var(--ax-type-sm);
   min-width: 0;
   overflow-wrap: anywhere;
-}
-
-.ax-subscription-detail-page .ax-summary-facts {
-  gap: var(--ax-space-2xs) var(--ax-space-md);
 }
 
 .ax-summary-fact {
@@ -5386,8 +5783,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: 0;
-  padding: 0;
+  gap: var(--ax-space-xs);
+  padding: var(--ax-space-md);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-sm);
   /* border-box so the 1–2px status border sits inside the capped grid track
@@ -5433,8 +5830,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.03125rem 0.25rem;
-  padding: 0.03125rem 0.25rem;
+  gap: var(--ax-space-xs) var(--ax-space-sm);
+  padding: var(--ax-space-xs);
   /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   line-height: var(--ax-leading-tight);
 }
@@ -5443,8 +5840,6 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   flex-basis: auto;
   color: var(--ax-primary);
   font: var(--ax-type-label-font);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 950;
 }
 
 .ax-detail-health-metric {
@@ -5458,16 +5853,14 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   font: var(--ax-type-label-font);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 950;
   box-shadow: var(--ax-shadow-sm);
 }
 
 .ax-detail-health-exposure strong {
   color: inherit;
   font: inherit;
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 950;
+  /* ax-type-exception: preserve inherited size for shared health emphasis; approved 600 weight matches the label role */
+  font-weight: 600;
 }
 
 .ax-detail-health-summary-amber .ax-detail-health-metric {
@@ -5508,15 +5901,13 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-detail-health-label {
   color: var(--ax-primary);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 800;
+  /* ax-type-exception: preserve inherited size for shared health emphasis; approved 600 weight matches the label role */
+  font-weight: 600;
 }
 
 .ax-detail-health-verdict {
   color: var(--ax-primary);
   font: var(--ax-type-label-font);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 900;
 }
 
 .ax-detail-health-body {
@@ -5547,7 +5938,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-primary);
   /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
   font-size: var(--ax-type-xs);
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .ax-detail-health-caveat {
@@ -5772,35 +6163,6 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   font-weight: 800;
 }
 
-.ax-detail-dunning-action {
-  align-self: center;
-  min-height: 1.5rem;
-  border-width: 2px;
-  border-color: var(--ax-status-warning-solid);
-  background: var(--ax-status-warning-solid);
-  color: var(--ax-status-warning-on-solid);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 950;
-  white-space: normal;
-}
-
-/* In dark / system@dark the higher-specificity primary-button override
-   (`html[data-theme="dark"] .ax-button-primary`) re-tints the fill to cobalt,
-   which strips this button's amber warning intent and leaves dark on-solid text
-   on cobalt (fails WCAG AA at 2.76:1). Re-assert the amber warning pair with
-   matching specificity so the dunning action stays legible in every theme. */
-html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
-  background: var(--ax-status-warning-solid);
-  color: var(--ax-status-warning-on-solid);
-}
-
-@media (prefers-color-scheme: dark) {
-  html.accrue-admin[data-theme="system"] .ax-detail-dunning-action {
-    background: var(--ax-status-warning-solid);
-    color: var(--ax-status-warning-on-solid);
-  }
-}
-
 .ax-detail-open-invoice-queue {
   width: min(100%, 62rem);
   box-sizing: border-box;
@@ -5813,9 +6175,6 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 
 .ax-detail-open-invoice-queue .ax-inline-worklist-copy strong {
   color: var(--ax-accent-readable);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-size: var(--ax-type-md);
-  font-weight: 950;
 }
 
 .ax-detail-open-invoice-list {
@@ -5882,18 +6241,6 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 .ax-subscription-detail-page .ax-detail-priority-group .ax-button-sm {
   min-height: 1.5rem;
   padding: 0.125rem 0.4375rem;
-}
-
-.ax-detail-recovery-shortcut {
-  width: fit-content;
-  min-height: 1.5rem;
-  padding-inline: 0.375rem;
-  border-width: 2px;
-  border-color: var(--ax-status-warning-border);
-  background: var(--ax-status-warning-bg);
-  color: var(--ax-primary);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-weight: 950;
 }
 
 @media (max-width: 700px) { /* --ax-bp-700 ↓ */
@@ -6018,11 +6365,6 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
   border-top: 1px solid var(--ax-border);
 }
 
-.ax-subscription-detail-page .ax-summary-list {
-  margin-top: 0.25rem;
-  border-top: 2px solid var(--ax-border-strong);
-}
-
 .ax-summary-list-row {
   display: grid;
   grid-template-columns: minmax(0, 12rem) minmax(0, 1fr) max-content;
@@ -6035,31 +6377,6 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 
 .ax-summary-list-compact .ax-summary-list-row {
   padding: var(--ax-space-sm) 0;
-}
-
-.ax-subscription-detail-page .ax-summary-list-compact .ax-summary-list-row {
-  padding: 0.3125rem 0;
-  border-bottom-color: var(--ax-border-strong);
-  grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) max-content;
-  gap: 0.0625rem var(--ax-space-xs);
-}
-
-.ax-subscription-detail-page .ax-summary-list-key,
-.ax-subscription-detail-page .ax-summary-list-value,
-.ax-subscription-detail-page .ax-summary-list-action {
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  line-height: var(--ax-leading-tight);
-}
-
-.ax-subscription-detail-page .ax-summary-list-key {
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-size: 0.6875rem;
-}
-
-.ax-subscription-detail-page .ax-summary-list-value,
-.ax-subscription-detail-page .ax-summary-list-action {
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-size: 0.8125rem;
 }
 
 .ax-summary-list-key,
@@ -6120,11 +6437,11 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 /* Detail section */
 .ax-detail-section {
   display: grid;
-  gap: 0.0625rem;
+  gap: var(--ax-space-2xs);
 }
 
 .ax-subscription-detail-page .ax-detail-section {
-  gap: 0;
+  gap: var(--ax-space-2xs);
   margin-block: 0;
 }
 
@@ -6142,19 +6459,45 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
   padding-block: 0.03125rem;
 }
 
+.ax-disclosure-summary {
+  min-height: 44px;
+  cursor: pointer;
+  border-radius: var(--ax-radius-sm);
+  list-style: none;
+}
+
+.ax-disclosure-summary::after {
+  content: "▾";
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--ax-accent-readable);
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.ax-detail-section[open] > .ax-disclosure-summary::after {
+  content: "▴";
+}
+
+.ax-disclosure-summary:focus-visible {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+}
+
 .ax-detail-section-title {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   color: var(--ax-primary);
-  font-size: var(--ax-type-md);
-  font-weight: 850;
+  font-size: var(--ax-type-lg);
+  font-weight: 600;
 }
 
 .ax-subscription-detail-page .ax-detail-section-title {
   color: var(--ax-primary);
-  /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  font-size: var(--ax-type-md);
-  font-weight: 900;
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+  font-size: var(--ax-type-lg);
+  font-weight: 600;
 }
 
 .ax-subscription-detail-page .ax-detail-section-title-audit {
@@ -6172,7 +6515,7 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 .ax-detail-actions-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.1875rem;
+  gap: var(--ax-space-xs);
 }
 
 .ax-detail-critical-actions {
@@ -6184,17 +6527,17 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 }
 
 .ax-detail-action-band .ax-page-header {
-  gap: 0.0625rem;
+  gap: var(--ax-space-xs);
   max-width: 100%;
 }
 
 .ax-detail-action-band .ax-page-actions {
-  gap: 0.125rem;
+  gap: var(--ax-space-xs);
 }
 
 .ax-detail-action-band .ax-button {
-  min-height: 1.5rem;
-  padding: 0.125rem 0.4375rem;
+  min-height: 2.75rem;
+  padding: 0 var(--ax-space-md);
 }
 
 .ax-activity-audit-strip {
@@ -6356,13 +6699,13 @@ html.accrue-admin[data-theme="dark"] .ax-detail-dunning-action {
 .ax-subscription-detail-page .ax-field-label,
 .ax-subscription-detail-page .ax-field-value {
   /* ax-type-exception: component-scoped type from the 209/210 reign; convert to .ax-type-* primitives in the type-system pass (see .planning/CI-GREEN-REMEDIATION.md) */
-  line-height: 1.1;
+  line-height: var(--ax-leading-normal);
 }
 
 .ax-field-label {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
-  font-size: var(--ax-type-xs);
+  font-size: var(--ax-type-sm);
   font-weight: 600;
   color: var(--ax-muted);
   text-transform: uppercase;
@@ -6455,6 +6798,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-theme-picker-option:focus-visible,
 .ax-icon-button:focus-visible,
 .ax-link:focus-visible,
+.ax-link-quiet:focus-visible,
 .ax-dropdown-item:focus-visible,
 .ax-tab-more-item:focus-visible,
 .ax-input:focus-visible,
@@ -6767,6 +7111,8 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-2xs);
+  min-inline-size: 44px;
+  min-block-size: 44px;
   max-inline-size: 16ch;
   padding: var(--ax-space-2xs) var(--ax-space-xs);
   border: 1px solid var(--ax-border);
@@ -6778,9 +7124,194 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   transition: var(--ax-transition-colors);
 }
 
-.ax-id-badge:hover {
+.ax-id-badge:hover .ax-id-badge-text {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+
+.ax-time-preference {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+}
+
+.ax-time-preference label {
+  color: var(--ax-muted);
+  font: var(--ax-type-label-sm-font);
+}
+
+.ax-time-preference-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ax-time-preference select {
+  appearance: none;
+  min-block-size: 44px;
+  min-inline-size: 5.5rem;
+  padding-inline: var(--ax-space-sm) var(--ax-space-xl);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  font: var(--ax-type-label-font);
+  font-weight: 500; /* ax-type-exception: matches adjacent utility control */
+  cursor: pointer;
+  transition: var(--ax-transition-colors);
+}
+
+.ax-time-preference select:hover {
   background: var(--ax-interactive-hover);
   border-color: var(--ax-border-strong);
+}
+
+.ax-time-preference select:focus-visible {
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+}
+
+.ax-time-preference-control > .ax-icon {
+  position: absolute;
+  inset-inline-end: var(--ax-space-sm);
+  color: var(--ax-muted);
+  pointer-events: none;
+}
+
+/* Activity and evidence share compact rows, copy controls, and view tabs. */
+.ax-timeline-header .ax-label { margin: 0; min-height: 44px; display: flex; align-items: center; }
+.ax-timeline-header > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--ax-space-md);
+  min-width: 0;
+}
+.ax-timeline-subject {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-space-xs);
+  min-width: 0;
+}
+.ax-timeline-subject-label, .ax-timeline-actor {
+  color: var(--ax-muted);
+  font: var(--ax-type-label-sm-font);
+  margin: 0;
+}
+.ax-timeline-subject .ax-id-badge { max-width: 100%; }
+.ax-timeline-record { grid-template-columns: minmax(0, 1fr); gap: 0 var(--ax-space-md); }
+.ax-timeline-record .ax-timeline-header,
+.ax-timeline-record .ax-timeline-actor { grid-column: 1 / -1; }
+.ax-timeline-title-link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+  text-decoration: underline;
+  text-underline-offset: var(--ax-space-2xs);
+}
+.ax-timeline-record .ax-timeline-header > div { width: 100%; justify-content: flex-start; column-gap: var(--ax-space-md); }
+.ax-home .ax-timeline { max-inline-size: 52rem; }
+.ax-timeline-record .ax-timestamp { color: var(--ax-muted); font: var(--ax-type-body-sm-font); }
+.ax-timeline-record .ax-timestamp-copy { padding-inline: 0; }
+.ax-timeline-record .ax-timeline-subject {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+}
+.ax-timeline-record .ax-timeline-subject .ax-id-badge { justify-self: start; min-width: 0; }
+.ax-timeline-record .ax-timeline-subject-label { font: var(--ax-type-body-sm-font); }
+.ax-timeline-record .ax-timeline-link { align-self: center; display: flex; align-items: center; min-height: 44px; font: var(--ax-type-body-sm-font); }
+@media (max-width: 639px) { /* --ax-bp-content ↓ */
+  .ax-timeline-record { grid-template-columns: minmax(0, 1fr); }
+  .ax-timeline-record .ax-timeline-link { justify-self: start; }
+  .ax-timeline-record .ax-timeline-header > div { flex-direction: column; align-items: flex-start; }
+}
+.ax-event-page { gap: var(--ax-space-md); }
+.ax-event-header { margin: 0; }
+.ax-event-header h1 { margin: 0; }
+.ax-event-page .ax-detail-section-head { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.ax-event-page details[open] > summary .ax-event-payload-chevron { transform: rotate(180deg); }
+.ax-event-facts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 var(--ax-space-lg);
+  margin: 0;
+}
+.ax-event-facts .ax-summary-list-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-space-xs);
+}
+/* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+.ax-event-facts .ax-summary-list-key { text-transform: none; letter-spacing: normal; }
+.ax-event-facts .ax-id-badge { max-inline-size: 100%; }
+@media (min-width: 640px) { /* --ax-bp-content ↑ */
+  .ax-event-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1000px) { /* --ax-bp-1000 ↑ */
+  .ax-event-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.ax-json-viewer-header { flex-direction: row; align-items: center; flex-wrap: wrap; gap: var(--ax-space-sm); }
+.ax-json-viewer-header > div:has(.ax-visually-hidden) { display: contents; }
+.ax-json-viewer-header > .ax-tabs {
+  width: auto;
+  flex: 0 1 auto;
+  gap: var(--ax-space-2xs);
+  padding: var(--ax-space-2xs);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-sunken);
+}
+.ax-json-viewer .ax-tab {
+  appearance: none;
+  min-height: 44px;
+  padding: var(--ax-space-xs) var(--ax-space-md);
+  border: 0;
+  border-radius: var(--ax-radius-sm);
+  background: transparent;
+  color: var(--ax-muted);
+  font: var(--ax-type-label-font);
+  cursor: pointer;
+}
+.ax-json-viewer .ax-tab[aria-selected="true"] { background: var(--ax-elevated); color: var(--ax-primary); }
+.ax-json-viewer-header > .ax-button { margin-inline-start: auto; }
+.ax-json-leaf { display: flex; flex-wrap: wrap; gap: var(--ax-space-xs) var(--ax-space-md); align-items: baseline; }
+.ax-json-leaf .ax-json-key { min-inline-size: min(11rem, 100%); color: var(--ax-primary); }
+.ax-json-leaf .ax-json-value { color: var(--ax-muted); }
+.ax-timestamp-copy:hover time {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+.ax-toast {
+  position: fixed;
+  inset-inline: var(--ax-space-md);
+  bottom: calc(var(--ax-space-lg) + env(safe-area-inset-bottom, 0px));
+  width: fit-content;
+  max-width: calc(100% - 2 * var(--ax-space-md));
+  margin-inline: auto;
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  border: 1px solid var(--ax-border-strong);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  font: var(--ax-type-label-font);
+  z-index: var(--ax-z-toast);
+}
+.ax-toast[hidden] { display: none; }
+
+.ax-timestamp-copy-fallback {
+  display: block;
+  display: block;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+  user-select: text;
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+  font-family: var(--ax-type-code-font);
+}
+
+.ax-timestamp-copy-fallback[hidden] {
+  display: none;
 }
 
 .ax-id-badge-text {
@@ -6837,3 +7368,184 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   transition: var(--ax-transition-base);
 }
 .ax-toggle[aria-checked="true"] .ax-toggle-thumb { transform: translateX(1rem); }
+.ax-customer-peer-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-sm);
+  margin-block: var(--ax-space-md);
+}
+
+.ax-customer-peer-tabs .ax-tab {
+  min-height: 2.75rem;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+
+.ax-subscription-detail-page .ax-detail-health-summary {
+  order: initial;
+  width: 100%;
+  margin-block: var(--ax-space-md);
+}
+
+.ax-subscription-detail-page .ax-detail-health-copy {
+  font: var(--ax-type-body-font);
+}
+
+.ax-customer-detail-page .ax-summary-facts {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ax-customer-detail-page .ax-detail-section,
+.ax-customer-detail-page .ax-field-list,
+.ax-customer-detail-page .ax-field,
+.ax-customer-detail-page .ax-list-row,
+.ax-customer-detail-page .ax-list-row > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 40rem) {
+  .ax-customer-peer-tabs .ax-tab {
+    flex: 1 1 8rem;
+  }
+
+  .ax-customer-detail-page .ax-button,
+  .ax-subscription-detail-page [data-ax-action-band] .ax-button {
+    min-height: 2.75rem;
+  }
+}
+
+/* Plain copyable evidence: text at rest, shared hover/focus and toast feedback. */
+.ax-id-badge.ax-id-badge-plain { max-inline-size: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
+.ax-id-badge-plain:focus-visible { outline: 2px solid var(--ax-focus-ring); outline-offset: 2px; }
+.ax-id-badge-plain .ax-id-badge-text { white-space: normal; overflow-wrap: anywhere; }
+
+/* Billing list hierarchy: a value and its quieter supporting fact. */
+.ax-data-table-value {
+  display: grid;
+  justify-items: start;
+  gap: var(--ax-space-xs);
+  min-inline-size: 0;
+  font: var(--ax-type-body-sm-font);
+  overflow-wrap: anywhere;
+}
+.ax-data-table-value-detail {
+  color: var(--ax-muted);
+  font: var(--ax-type-body-sm-font);
+}
+.ax-data-table-value .ax-status-badge { white-space: nowrap; }
+.ax-data-table-value .ax-timestamp { display: inline-flex; }
+
+/* Native multiple selection, disclosed in place with readable selected values. */
+.ax-multi-select { min-inline-size: 12rem; max-inline-size: 100%; }
+.ax-multi-select > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ax-space-md);
+  min-block-size: 44px;
+  box-sizing: border-box;
+  padding: var(--ax-space-xs) var(--ax-space-md);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  font: var(--ax-type-body-sm-font);
+  list-style: none;
+  cursor: pointer;
+}
+.ax-multi-select > summary::-webkit-details-marker { display: none; }
+.ax-multi-select > summary:focus-visible { outline: 2px solid var(--ax-focus-ring); outline-offset: 2px; }
+.ax-multi-select[open] > summary > .ax-icon { transform: rotate(180deg); }
+.ax-multi-select .ax-data-table-checkbox-group {
+  display: grid;
+  gap: 0;
+  margin: var(--ax-space-xs) 0 0;
+  padding: var(--ax-space-xs);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-elevated);
+}
+.ax-multi-select .ax-field-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  min-block-size: 44px;
+  margin: 0;
+  padding-inline: var(--ax-space-xs);
+  font: var(--ax-type-body-sm-font);
+  cursor: pointer;
+}
+.ax-multi-select .ax-checkbox { accent-color: var(--ax-accent); }
+.ax-multi-select .ax-field-inline:has(:focus-visible) { outline: 2px solid var(--ax-focus-ring); outline-offset: -2px; }
+
+.ax-window-selector {
+  display: inline-flex;
+  width: fit-content;
+  max-inline-size: 100%;
+  flex-wrap: wrap;
+  gap: var(--ax-space-2xs);
+  padding: var(--ax-space-2xs);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-sunken);
+}
+.ax-window-selector .ax-tab {
+  min-block-size: 44px;
+  padding: var(--ax-space-xs) var(--ax-space-md);
+  border: 0;
+  border-radius: var(--ax-radius-sm);
+  font: var(--ax-type-label-font);
+}
+.ax-window-selector .ax-tab-active { background: var(--ax-elevated); color: var(--ax-primary); }
+.ax-kpi-value.ax-kpi-value-unavailable { color: var(--ax-muted); font: var(--ax-type-body-sm-font); }
+.ax-recovery-definition { max-inline-size: 75ch; margin-block: var(--ax-space-md) var(--ax-space-xl); color: var(--ax-muted); }
+.ax-json-tree { font: var(--ax-type-code-font); }
+.ax-json-viewer .ax-json-tree-root,
+.ax-json-viewer .ax-json-children { gap: var(--ax-space-xs); }
+.ax-json-details > summary { min-block-size: 2rem; }
+@media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
+  .ax-multi-select { min-inline-size: 0; }
+}
+
+.ax-data-table-grid-fixed { table-layout: fixed; }
+.ax-data-table-grid-fixed .ax-data-table-identity { max-inline-size: 100%; }
+.ax-data-table-grid-fixed .ax-data-table-identity-secondary { flex-wrap: wrap; }
+.ax-multi-select { position: relative; }
+.ax-multi-select .ax-data-table-checkbox-group {
+  position: absolute;
+  z-index: var(--ax-z-popover);
+  inset-block-start: 100%;
+  inset-inline: 0;
+  min-inline-size: 0;
+}
+.ax-page:has(> .ax-detail-back-link) { gap: var(--ax-space-md); }
+.ax-detail-back-link { margin: 0; font: var(--ax-type-label-font); }
+/* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
+.ax-summary-list-key { text-transform: none; letter-spacing: normal; font: var(--ax-type-label-font); }
+
+.ax-command-palette-item small,
+.ax-command-palette-item code { display: block; }
+.ax-command-palette-item code { margin-block-start: var(--ax-space-xs); font: var(--ax-type-code-xs-font); color: var(--ax-muted); }
+
+.ax-window-selector .ax-tab { background: transparent; color: var(--ax-muted); }
+.ax-window-selector .ax-tab-active { background: var(--ax-elevated); color: var(--ax-primary); }
+.ax-at-risk-cards,
+.ax-at-risk-card { grid-template-columns: minmax(0, 1fr); max-inline-size: 100%; box-sizing: border-box; }
+.ax-at-risk-card-identity { flex: 1 1 0; max-inline-size: 100%; }
+.ax-at-risk-card-identity .ax-record-label { display: block; max-inline-size: 100%; }
+
+/* Column proportions use stylesheet rules to respect the host CSP. */
+.ax-data-table-select-column { width: var(--ax-space-xl); }
+.ax-data-table-grid col[data-width="12"] { width: 12%; }
+.ax-data-table-grid col[data-width="13"] { width: 13%; }
+.ax-data-table-grid col[data-width="14"] { width: 14%; }
+.ax-data-table-grid col[data-width="16"] { width: 16%; }
+.ax-data-table-grid col[data-width="18"] { width: 18%; }
+.ax-data-table-grid col[data-width="20"] { width: 20%; }
+.ax-data-table-grid col[data-width="24"] { width: 24%; }
+.ax-data-table-grid col[data-width="27"] { width: 27%; }
+.ax-data-table-grid col[data-width="32"] { width: 32%; }
+.ax-data-table-grid col[data-width="34"] { width: 34%; }

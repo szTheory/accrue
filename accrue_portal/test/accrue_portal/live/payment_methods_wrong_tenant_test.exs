@@ -23,17 +23,24 @@ defmodule AccruePortal.PaymentMethodsWrongTenantTest do
       foreign_payment_method: foreign_payment_method
     } = dashboard_fixture!()
 
+    conn = sign_in_conn(conn, user)
+    assert {:ok, _view, html} = live(conn, "/billing/payment-methods")
+
+    [[context_pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
     response =
-      conn
-      |> sign_in_conn(user)
-      |> post("/billing/payment-methods/#{foreign_payment_method.id}/default")
+      post(conn, "/billing/payment-methods/#{foreign_payment_method.id}/default", %{
+        "context_pin" => context_pin
+      })
 
     assert response.status == 404
 
     response =
       conn
-      |> sign_in_conn(user)
-      |> post("/billing/payment-methods/#{foreign_payment_method.id}/delete")
+      |> post("/billing/payment-methods/#{foreign_payment_method.id}/delete", %{
+        "context_pin" => context_pin
+      })
 
     assert response.status == 404
 

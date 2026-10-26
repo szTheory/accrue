@@ -9,6 +9,29 @@ defmodule AccrueAdmin.NavigationComponentsTest do
   alias AccrueAdmin.Components.{DropdownMenu, Input, Select, Sidebar, Tabs, WindowSelector}
 
   describe "Breadcrumbs" do
+    test "a navigation group is plain text while real list parents remain links" do
+      html =
+        render_component(&Breadcrumbs.breadcrumbs/1, %{
+          group: "Billing",
+          items: [
+            %{label: "Customers", href: "/billing/customers?org=acme"},
+            %{label: "Northwind"}
+          ]
+        })
+
+      document = Floki.parse_fragment!(html)
+
+      assert document |> Floki.find(".ax-breadcrumbs-group") |> Floki.text() |> String.trim() ==
+               "Billing"
+
+      assert document |> Floki.find("a") |> Floki.attribute("href") == [
+               "/billing/customers?org=acme"
+             ]
+
+      assert document |> Floki.find("[aria-current='page']") |> Floki.text() |> String.trim() ==
+               "Northwind"
+    end
+
     test "renders linked ancestors and current page" do
       html =
         render_component(&Breadcrumbs.breadcrumbs/1, %{
@@ -39,6 +62,28 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ ~s(<nav class="ax-breadcrumbs" aria-label="Breadcrumb">)
       assert html =~ ~s(class="ax-breadcrumbs-current" aria-current="page")
       refute html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
+    end
+
+    test "omits parents without a real destination and keeps one scoped parent link" do
+      html =
+        render_component(&Breadcrumbs.breadcrumbs/1, %{
+          items: [
+            %{label: "Unavailable parent", href: nil},
+            %{label: "Invoices", href: "/billing/invoices?org=acme"},
+            %{label: "INV-0001"}
+          ]
+        })
+
+      links =
+        html
+        |> Floki.parse_fragment!()
+        |> Floki.find("nav[aria-label='Breadcrumb'] a")
+
+      assert length(links) == 1
+      assert Floki.attribute(List.first(links), "href") == ["/billing/invoices?org=acme"]
+      assert html =~ ~s(aria-current="page")
+      assert html =~ "INV-0001"
+      refute html =~ "Unavailable parent"
     end
   end
 
@@ -432,9 +477,9 @@ defmodule AccrueAdmin.NavigationComponentsTest do
           base_path: "/billing/analytics/recovery"
         })
 
-      assert html =~ "7 days UTC"
-      assert html =~ "30 days UTC"
-      assert html =~ "90 days UTC"
+      assert html =~ "7 days"
+      assert html =~ "30 days"
+      assert html =~ "90 days"
     end
 
     test "marks active window with aria-current and ax-tab-active" do

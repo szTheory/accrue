@@ -3,6 +3,40 @@ defmodule AccrueAdmin.BillingPresentationTest do
 
   alias AccrueAdmin.BillingPresentation
 
+  test "billing context preserves host account types and reserves warning badges for tax issues" do
+    import Phoenix.LiveViewTest
+    alias AccrueAdmin.Components.BillingContext
+
+    ordinary =
+      render_component(&BillingContext.billing_context/1,
+        row: %{owner_type: "Workspace", automatic_tax: false}
+      )
+
+    assert ordinary =~ "Workspace"
+    assert ordinary =~ "Automatic tax off"
+    refute ordinary =~ "ax-status-badge"
+
+    unobserved =
+      render_component(&BillingContext.billing_context/1, row: %{owner_type: "Organization"})
+
+    assert unobserved =~ "Organization"
+    refute unobserved =~ "Automatic tax off"
+    refute unobserved =~ "ax-status-badge"
+
+    blocked =
+      render_component(&BillingContext.billing_context/1,
+        row: %{
+          owner_type: "Team",
+          automatic_tax: true,
+          automatic_tax_disabled_reason: "requires_location"
+        }
+      )
+
+    assert blocked =~ "Team"
+    assert blocked =~ "Tax needs review"
+    assert blocked =~ "ax-status-badge-amber"
+  end
+
   describe "tax_health/1" do
     test "off when automatic tax is disabled and no risk flags" do
       assert :off ==

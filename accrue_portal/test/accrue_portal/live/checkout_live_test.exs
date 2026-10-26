@@ -1,6 +1,8 @@
 defmodule AccruePortal.CheckoutLiveTest do
   use AccruePortal.ConnCase, async: false
 
+  import Ecto.Query
+
   alias Accrue.Billing.Customer
   alias Accrue.Checkout.LocalSession
   alias AccruePortal.BraintreeMox
@@ -43,27 +45,44 @@ defmodule AccruePortal.CheckoutLiveTest do
 
   defmodule SubscriptionGatewayStub do
     def create(params, _opts) do
-      {:ok,
-       struct!(Elixir.Braintree.Subscription,
-         id: "sub_bt_checkout_123",
-         plan_id: params[:plan_id],
-         payment_method_token: params[:payment_method_token],
-         status: "Active",
-         billing_period_start_date: "2024-01-01T00:00:00Z",
-         billing_period_end_date: "2024-02-01T00:00:00Z",
-         updated_at: "2024-01-01T00:00:00Z"
-       )}
+      if pid = Application.get_env(:accrue_portal, :checkout_live_test_pid) do
+        send(pid, {:gateway_create, params[:payment_method_token]})
+      end
+
+      if after_accept = Application.get_env(:accrue_portal, :checkout_live_after_accept) do
+        after_accept.()
+      end
+
+      if params[:payment_method_token] == "fake-declined-nonce" do
+        {:error, %Elixir.Braintree.ErrorResponse{message: "Processor Declined: Do Not Honor"}}
+      else
+        {:ok,
+         struct!(Elixir.Braintree.Subscription,
+           id: "sub_bt_checkout_123",
+           plan_id: params[:plan_id],
+           payment_method_token: params[:payment_method_token],
+           status: "Active",
+           billing_period_start_date: "2024-01-01T00:00:00Z",
+           billing_period_end_date: "2024-02-01T00:00:00Z",
+           updated_at: "2024-01-01T00:00:00Z"
+         )}
+      end
     end
   end
 
   setup do
     previous_processor = Application.get_env(:accrue, :processor)
     previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
+    previous_portal_base_url = Application.get_env(:accrue, :portal_base_url)
     previous_auth = Application.get_env(:accrue, :auth_adapter)
+    previous_after_accept = Application.get_env(:accrue_portal, :checkout_live_after_accept)
+    previous_test_pid = Application.get_env(:accrue_portal, :checkout_live_test_pid)
 
     Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
     Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
+    Application.put_env(:accrue, :portal_base_url, "https://app.example.test")
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
+    Application.put_env(:accrue_portal, :checkout_live_test_pid, self())
     BraintreeMox.stub_client_token("portal-client-token")
 
     user = %TestUser{id: Ecto.UUID.generate()}
@@ -82,10 +101,28 @@ defmodule AccruePortal.CheckoutLiveTest do
         Application.delete_env(:accrue, :braintree_subscription_gateway)
       end
 
+      if previous_portal_base_url do
+        Application.put_env(:accrue, :portal_base_url, previous_portal_base_url)
+      else
+        Application.delete_env(:accrue, :portal_base_url)
+      end
+
       if previous_auth do
         Application.put_env(:accrue, :auth_adapter, previous_auth)
       else
         Application.delete_env(:accrue, :auth_adapter)
+      end
+
+      if previous_after_accept do
+        Application.put_env(:accrue_portal, :checkout_live_after_accept, previous_after_accept)
+      else
+        Application.delete_env(:accrue_portal, :checkout_live_after_accept)
+      end
+
+      if previous_test_pid do
+        Application.put_env(:accrue_portal, :checkout_live_test_pid, previous_test_pid)
+      else
+        Application.delete_env(:accrue_portal, :checkout_live_test_pid)
       end
     end)
 
@@ -100,7 +137,9 @@ defmodule AccruePortal.CheckoutLiveTest do
     session =
       checkout_fixture(customer,
         price_id: "price_pro",
-        line_items: [%{"price" => "price_pro", "amount" => "49.00"}]
+        line_items: [
+          %{"price" => "price_pro", "quantity" => 1, "amount" => "49.00", "amount_minor" => 4900}
+        ]
       )
 
     conn = sign_in_customer(conn, user)
@@ -111,7 +150,13 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert html =~ ~s(data-braintree-field="expirationDate")
     assert html =~ ~s(data-braintree-field="cvv")
     assert html =~ "Pay $49.00"
+    assert html =~ "Studio"
+    assert html =~ "USD $49.00 / per month"
+    assert html =~ ~s(data-testid="checkout-offer-summary")
+    assert html =~ ~s(name="promotion_code" value="")
+    assert html =~ "Billed to"
     assert html =~ "Leave checkout"
+    refute html =~ "Cancel subscription"
     assert html =~ ~s(src="https://js.braintreegateway.com/web/3.132.0/js/client.min.js")
     assert html =~ ~s(integrity="#{@client_sri}")
     assert html =~ ~s(src="https://js.braintreegateway.com/web/3.132.0/js/hosted-fields.min.js")
@@ -119,11 +164,93 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert html =~ ~s(crossorigin="anonymous")
   end
 
-  test "checkout hook contract sends only the nonce back to LiveView" do
+  test "an explicit trusted zero remains visible as zero", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session =
+      checkout_fixture(customer,
+        line_items: [
+          %{"price" => "price_fixture", "quantity" => 1, "amount" => "0.00", "amount_minor" => 0}
+        ],
+        metadata: checkout_metadata(%{"amount_minor" => 0})
+      )
+
+    assert {:ok, _view, html} =
+             live(sign_in_customer(conn, user), "/billing/checkout/#{session.session_token}")
+
+    assert html =~ "USD $0.00 / per month"
+    assert html =~ "Pay $0.00"
+    assert html =~ ~s(id="checkout-form")
+  end
+
+  test "incomplete or inconsistent terms disable payment and offer safe recovery", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    invalid_sessions = [
+      checkout_fixture(customer, metadata: %{"source" => "missing terms"}),
+      checkout_fixture(customer, line_items: [], metadata: checkout_metadata()),
+      checkout_fixture(customer,
+        line_items: [%{"price" => "price_fixture", "amount" => "49.001", "amount_minor" => 4900}],
+        metadata: checkout_metadata()
+      ),
+      checkout_fixture(customer,
+        line_items: [%{"price" => "price_fixture", "amount" => "-1.00", "amount_minor" => 4900}],
+        metadata: checkout_metadata()
+      ),
+      checkout_fixture(customer, metadata: checkout_metadata(%{"currency" => "US"})),
+      checkout_fixture(customer, metadata: checkout_metadata(%{"interval" => ""})),
+      checkout_fixture(customer,
+        line_items: [
+          %{
+            "price" => "price_fixture",
+            "quantity" => 1,
+            "amount" => "49.00",
+            "amount_minor" => 4900
+          },
+          %{"price" => "second", "quantity" => 1, "amount" => "1.00", "amount_minor" => 100}
+        ],
+        metadata: checkout_metadata()
+      )
+    ]
+
+    for session <- invalid_sessions do
+      assert {:ok, _view, html} =
+               live(sign_in_customer(conn, user), "/billing/checkout/#{session.session_token}")
+
+      assert html =~ "Plan details are unavailable"
+      assert html =~ "Return to billing"
+      refute html =~ ~s(id="checkout-form")
+      refute html =~ ~s(id="promo-code-form")
+    end
+  end
+
+  test "long Unicode plan labels render as escaped trusted data", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    long_name = String.duplicate("航🚀", 80)
+    session = checkout_fixture(customer, metadata: checkout_metadata(%{"plan_name" => long_name}))
+
+    assert {:ok, _view, html} =
+             live(sign_in_customer(conn, user), "/billing/checkout/#{session.session_token}")
+
+    assert html =~ long_name
+    refute html =~ "price_fixture</strong>"
+  end
+
+  test "checkout hook returns the nonce and rendered context pin, never card fields" do
     js = File.read!(Path.expand("../../../priv/static/accrue_portal.js", __DIR__))
 
-    assert js =~ ~s|pushEvent("checkout_tokenized", { nonce: payload.nonce }, function ()|
-    refute js =~ ~s|pushEvent("checkout_tokenized", { nonce: payload.nonce,|
+    assert js =~ ~s|pushEvent("checkout_tokenized", {|
+    assert js =~ "context_pin: contextPin"
+    assert js =~ "nonce: payload.nonce"
+    assert js =~ "Submitting your payment securely. Keep this page open."
+    assert js =~ "aria-live"
     refute js =~ ~s|pushEvent("checkout_tokenized", { number:|
     refute js =~ ~s|pushEvent("checkout_tokenized", { cvv:|
     refute js =~ "payment_method_nonce"
@@ -137,15 +264,245 @@ defmodule AccruePortal.CheckoutLiveTest do
     session = checkout_fixture(customer, price_id: "price_basic")
     conn = sign_in_customer(conn, user)
 
-    assert {:ok, view, _html} = live(conn, "/billing/checkout/#{session.session_token}")
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
 
     assert {:error, {:redirect, %{to: "https://app.example.test/billing/success"}}} =
              render_hook(view, "checkout_tokenized", %{
                "nonce" => "fake-valid-nonce",
+               "context_pin" => pin,
                "number" => "4111111111111111",
                "cvv" => "123"
              })
 
+    flash = assert_redirect(view, "https://app.example.test/billing/success")
+    assert flash["info"] =~ "Subscription created."
+    assert LocalSession.by_id(session.id).status == "completed"
+  end
+
+  test "query-only success markers do not complete or cancel the checkout", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer)
+
+    assert {:ok, _view, html} =
+             live(
+               sign_in_customer(conn, user),
+               "/billing/checkout/#{session.session_token}?checkout=success&success=true"
+             )
+
+    assert html =~ ~s(id="checkout-form")
+    refute html =~ "Subscription created."
+    refute html =~ "Cancel subscription"
+    assert LocalSession.by_id(session.id).status == "open"
+    refute_received {:gateway_create, _}
+  end
+
+  test "a declined card announces that no subscription was created", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer)
+    conn = sign_in_customer(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    declined_html =
+      render_hook(view, "checkout_tokenized", %{
+        "nonce" => "fake-declined-nonce",
+        "context_pin" => pin
+      })
+
+    assert declined_html =~ "Your card was declined. No subscription was created."
+    refute declined_html =~ "Subscription created."
+    assert_received {:gateway_create, "fake-declined-nonce"}
+    assert LocalSession.by_id(session.id).status == "open"
+  end
+
+  test "unsafe persisted success URL redirects to the portal home after completion", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session =
+      checkout_fixture(customer,
+        success_url: "javascript:window.location='https://attacker.example/'"
+      )
+
+    conn = sign_in_customer(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    assert {:error, {:redirect, %{to: "/billing"}}} =
+             render_hook(view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
+
+    flash = assert_redirect(view, "/billing")
+    assert flash["info"] =~ "Subscription created."
+    assert LocalSession.by_id(session.id).status == "completed"
+  end
+
+  test "local success URL remains an accepted destination", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer, success_url: "/billing/thanks")
+    conn = sign_in_customer(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    assert {:error, {:redirect, %{to: "/billing/thanks"}}} =
+             render_hook(view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
+  end
+
+  test "unapproved HTTPS success host falls back to the portal home", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer, success_url: "https://attacker.example/success")
+    conn = sign_in_customer(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    assert {:error, {:redirect, %{to: "/billing"}}} =
+             render_hook(view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
+
+    flash = assert_redirect(view, "/billing")
+    assert flash["info"] =~ "Subscription created."
+    assert LocalSession.by_id(session.id).status == "completed"
+  end
+
+  test "missing success URL returns home with a success announcement", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer, success_url: nil)
+    conn = sign_in_customer(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    assert {:error, {:redirect, %{to: "/billing"}}} =
+             render_hook(view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
+
+    flash = assert_redirect(view, "/billing")
+    assert flash["info"] =~ "Subscription created."
+    assert LocalSession.by_id(session.id).status == "completed"
+  end
+
+  test "expired checkout with unapproved HTTPS recovery only links to the portal", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session =
+      checkout_fixture(customer,
+        expires_at: DateTime.add(DateTime.utc_now(), -300, :second),
+        cancel_url: "https://attacker.example/billing"
+      )
+
+    assert {:ok, _view, html} =
+             live(sign_in_customer(conn, user), "/billing/checkout/#{session.session_token}")
+
+    assert html =~ ~s(href="/billing")
+    refute html =~ "attacker.example"
+    assert LocalSession.by_id(session.id).status == "open"
+  end
+
+  test "accepted provider result with failed completion persistence shows uncertainty", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer)
+    conn = sign_in_customer(conn, user)
+    assert {:ok, view, html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, html, capture: :all_but_first)
+
+    Application.put_env(:accrue_portal, :checkout_live_after_accept, fn ->
+      TestRepo.update_all(
+        from(checkout in LocalSession, where: checkout.id == ^session.id),
+        set: [status: "uncertain"]
+      )
+    end)
+
+    uncertain_html =
+      render_hook(view, "checkout_tokenized", %{
+        "nonce" => "fake-valid-nonce",
+        "context_pin" => pin
+      })
+
+    assert uncertain_html =~ "We could not confirm the payment result. Do not submit again."
+    refute uncertain_html =~ ~s(id="checkout-form")
+    assert LocalSession.by_id(session.id).status == "uncertain"
+  end
+
+  test "two LiveViews cannot submit the same persisted operation twice", %{
+    conn: conn,
+    user: user,
+    customer: customer
+  } do
+    session = checkout_fixture(customer)
+    conn = sign_in_customer(conn, user)
+    assert {:ok, first, first_html} = live(conn, "/billing/checkout/#{session.session_token}")
+    assert {:ok, second, second_html} = live(conn, "/billing/checkout/#{session.session_token}")
+
+    [[first_pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, first_html, capture: :all_but_first)
+
+    [[second_pin] | _] =
+      Regex.scan(~r/name="context_pin" value="([^"]+)"/, second_html, capture: :all_but_first)
+
+    assert {:error, {:redirect, %{to: "https://app.example.test/billing/success"}}} =
+             render_hook(first, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => first_pin
+             })
+
+    replay_html =
+      render_hook(second, "checkout_tokenized", %{
+        "nonce" => "fake-second-nonce",
+        "context_pin" => second_pin
+      })
+
+    assert replay_html =~ "This checkout has already been completed."
+    assert_received {:gateway_create, "fake-valid-nonce"}
+    refute_received {:gateway_create, "fake-second-nonce"}
     assert LocalSession.by_id(session.id).status == "completed"
   end
 
@@ -156,7 +513,8 @@ defmodule AccruePortal.CheckoutLiveTest do
   } do
     expired =
       checkout_fixture(customer,
-        expires_at: DateTime.add(DateTime.utc_now(), -300, :second)
+        expires_at: DateTime.add(DateTime.utc_now(), -300, :second),
+        cancel_url: "javascript:alert(1)"
       )
 
     conn = sign_in_customer(conn, user)
@@ -164,15 +522,41 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert {:ok, expired_view, expired_html} =
              live(conn, "/billing/checkout/#{expired.session_token}")
 
+    [[pinned_path]] =
+      Regex.scan(~r/href="([^"]*context_pin=[^"]+)"/, expired_html, capture: :all_but_first)
+
+    pin =
+      pinned_path
+      |> URI.parse()
+      |> Map.get(:query)
+      |> URI.decode_query()
+      |> Map.fetch!("context_pin")
+
     assert expired_html =~ "This checkout link has expired"
-    assert expired_html =~ "Leave checkout"
+
+    assert [[recovery_href]] =
+             Regex.scan(
+               ~r/<a[^>]+href="([^"]+)"[^>]*>Return to billing<\/a>/,
+               expired_html,
+               capture: :all_but_first
+             )
+
+    assert recovery_href == "/billing"
+    refute expired_html =~ ~s(id="checkout-form")
+    refute expired_html =~ ~s(id="promo-code-form")
 
     assert expired_html_after =
-             render_hook(expired_view, "checkout_tokenized", %{"nonce" => "fake-valid-nonce"})
+             render_hook(expired_view, "checkout_tokenized", %{
+               "nonce" => "fake-valid-nonce",
+               "context_pin" => pin
+             })
 
     assert expired_html_after =~ "This checkout link has expired"
     assert expired_html_after =~ "Return to your account and start a new subscription."
+    assert expired_html_after =~ ~s(href="/billing")
+    refute expired_html_after =~ ~s(id="checkout-form")
     assert LocalSession.by_id(expired.id).status == "open"
+    refute_received {:gateway_create, _}
 
     assert {:error, {:redirect, %{to: "/billing"}}} =
              live(conn, "/billing/checkout/missing-token")
@@ -199,7 +583,7 @@ defmodule AccruePortal.CheckoutLiveTest do
   end
 
   defp checkout_fixture(%Customer{} = customer, attrs \\ %{}) do
-    attrs = Enum.into(attrs, %{})
+    provided = Enum.into(attrs, %{})
 
     attrs =
       Map.merge(
@@ -209,20 +593,60 @@ defmodule AccruePortal.CheckoutLiveTest do
           ui_mode: "hosted",
           status: "open",
           price_id: "price_fixture",
-          line_items: [%{"price" => "price_fixture", "amount" => "49.00"}],
+          line_items: [
+            %{
+              "price" => "price_fixture",
+              "quantity" => 1,
+              "amount" => "49.00",
+              "amount_minor" => 4900
+            }
+          ],
           success_url: "https://app.example.test/billing/success",
           cancel_url: "https://app.example.test/billing/cancel",
           return_url: "https://app.example.test/settings/billing",
           operation_id:
             "checkout-fixture-" <> Integer.to_string(System.unique_integer([:positive])),
-          metadata: %{"source" => "fixture"},
+          metadata: checkout_metadata(),
           data: %{"local_portal" => true}
         },
-        attrs
+        provided
       )
+
+    price_id =
+      Map.get(provided, :price_id) ||
+        case Map.get(provided, :line_items) do
+          [%{"price" => item_price} | _] -> item_price
+          _ -> attrs.price_id
+        end
+
+    line_items =
+      if Map.has_key?(provided, :line_items) do
+        provided.line_items
+      else
+        [%{"price" => price_id, "quantity" => 1, "amount" => "49.00", "amount_minor" => 4900}]
+      end
+
+    attrs = Map.merge(attrs, %{price_id: price_id, line_items: line_items})
 
     {:ok, session} = LocalSession.create_or_reuse(customer, attrs)
     session
+  end
+
+  defp checkout_metadata(overrides \\ %{}) do
+    Map.merge(
+      %{
+        "plan_name" => "Studio",
+        "amount_minor" => 4900,
+        "currency" => "USD",
+        "interval" => "month",
+        "interval_count" => 1,
+        "billable_type" => "User",
+        "billable_id" => "fixture-billable",
+        "billable_name" => "Fixture account",
+        "processor" => "braintree"
+      },
+      overrides
+    )
   end
 
   defp build_customer(attrs) do

@@ -1,0 +1,20 @@
+{
+  "key": "phase199-ratchet-acceptance-green",
+  "command": "CI=1 npx playwright test e2e/admin-interaction-overlay-phase199.spec.js --grep auto-minted-ratchet-guards --reporter=junit",
+  "exitCode": 0,
+  "reportPath": ".planning/phases/240-shared-system-and-real-billing-exemplar/240-04-acceptance-ratchet-green.junit.xml",
+  "suites": [
+    {
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0
+    }
+  ],
+  "semanticAssessment": "Native Playwright JUnit report records the focused acceptance case(s) passing on their intended Chromium project(s).",
+  "output": "<testsuites id=\"\" name=\"\" tests=\"2\" failures=\"0\" skipped=\"0\" errors=\"0\" time=\"19.355010999999998\">\n<testsuite name=\"admin-interaction-overlay-phase199.spec.js\" timestamp=\"2026-10-09T21:32:50.127Z\" hostname=\"chromium-desktop\" tests=\"1\" failures=\"0\" skipped=\"0\" time=\"8.652\" errors=\"0\">\n<testcase name=\"auto-minted ratchet guards — interaction focus-ring\" classname=\"admin-interaction-overlay-phase199.spec.js\" time=\"8.652\">\n</testcase>\n</testsuite>\n<testsuite name=\"admin-interaction-overlay-phase199.spec.js\" timestamp=\"2026-10-09T21:32:50.127Z\" hostname=\"chromium-mobile\" tests=\"1\" failures=\"0\" skipped=\"0\" time=\"6.446\" errors=\"0\">\n<testcase name=\"auto-minted ratchet guards — interaction focus-ring\" classname=\"admin-interaction-overlay-phase199.spec.js\" time=\"6.446\">\n</testcase>\n</testsuite>\n</testsuites>\n"
+}

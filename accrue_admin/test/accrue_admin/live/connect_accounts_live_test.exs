@@ -31,7 +31,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
     on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
 
-    _match =
+    match =
       insert_account(%{
         stripe_account_id: "acct_match",
         owner_type: "Team",
@@ -40,7 +40,12 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
         charges_enabled: true,
         payouts_enabled: true,
         details_submitted: true,
-        data: %{"platform_fee_override" => %{"percent" => "1.5"}}
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => true,
+          "platform_fee_override" => %{"percent" => "1.5"}
+        }
       })
 
     _other =
@@ -54,7 +59,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
         details_submitted: false
       })
 
-    :ok
+    {:ok, match: match}
   end
 
   test "renders Connect accounts through PageHeader with exactly one h1", %{conn: conn} do
@@ -67,6 +72,38 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     assert html =~ contract.page_header.title
     assert html =~ Copy.connect_accounts_list_subtitle()
     assert_single_filter_form(html)
+  end
+
+  test "connected account identity exposes the full Stripe ID through a copy action", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/connect?view=all")
+    document = Floki.parse_document!(html)
+    row = Floki.find(document, "tr[data-row-id]") |> Enum.find(&(Floki.text(&1) =~ "acct_match"))
+
+    assert row
+
+    assert length(
+             Floki.find(
+               row,
+               "[data-clipboard-text='acct_match'][aria-label='Copy connected account ID']"
+             )
+           ) == 1
+
+    card =
+      Floki.find(document, ".ax-data-table-card") |> Enum.find(&(Floki.text(&1) =~ "acct_match"))
+
+    assert card
+
+    assert length(
+             Floki.find(
+               card,
+               "[data-clipboard-text='acct_match'][aria-label='Copy connected account ID']"
+             )
+           ) == 1
+
+    assert length(Floki.find(card, "[data-clipboard-text]")) == 1
   end
 
   test "bare connect route represents the Needs attention queue", %{conn: conn} do
@@ -133,15 +170,21 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
   test "connect organization scope limits rows and KPI counts", %{conn: conn} do
     org_id = Ecto.UUID.generate()
 
-    insert_account(%{
-      stripe_account_id: "acct_org_allowed",
-      owner_type: "Organization",
-      owner_id: org_id,
-      charges_enabled: true,
-      payouts_enabled: true,
-      details_submitted: true,
-      data: %{"platform_fee_override" => %{"percent" => "1.0"}}
-    })
+    allowed =
+      insert_account(%{
+        stripe_account_id: "acct_org_allowed",
+        owner_type: "Organization",
+        owner_id: org_id,
+        charges_enabled: true,
+        payouts_enabled: true,
+        details_submitted: true,
+        data: %{
+          "charges_enabled" => true,
+          "payouts_enabled" => true,
+          "details_submitted" => true,
+          "platform_fee_override" => %{"percent" => "1.0"}
+        }
+      })
 
     insert_account(%{
       stripe_account_id: "acct_org_denied",
@@ -166,6 +209,7 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
 
     assert html =~ "acct_org_allowed"
     refute html =~ "acct_org_denied"
+    assert html =~ "/billing/connect/#{allowed.id}?org=allowed-org"
 
     stats =
       html
@@ -222,7 +266,12 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
       stripe_account_id: "acct_ready",
       charges_enabled: true,
       payouts_enabled: true,
-      details_submitted: true
+      details_submitted: true,
+      data: %{
+        "charges_enabled" => true,
+        "payouts_enabled" => true,
+        "details_submitted" => true
+      }
     })
 
     queue_conn =
@@ -257,6 +306,163 @@ defmodule AccrueAdmin.ConnectAccountsLiveTest do
     assert html =~ "Override saved"
     assert html =~ "/billing/connect/"
     refute html =~ "acct_other"
+  end
+
+  test "Connect criteria are labeled native controls and retain host-defined account types", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/connect?view=all&type=partner")
+    parsed = Floki.parse_document!(html)
+    form = Floki.find(parsed, "[data-role='filter-form']") |> hd()
+
+    assert html =~ "Search Connect by Stripe account ID, email, or owner ID"
+    assert html =~ "Charges"
+    assert html =~ "Payouts"
+    assert html =~ "Account type"
+    assert html =~ "Details submitted"
+    assert html =~ "Authorization"
+    assert Floki.find(form, "input#connect-accounts-filter-type[list]") |> length() == 1
+
+    assert Floki.attribute(hd(Floki.find(form, "#connect-accounts-filter-type")), "value") == [
+             "partner"
+           ]
+  end
+
+  test "account detail return keeps the exact Connect lens and filters", %{
+    conn: conn,
+    match: match
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/connect?view=all&type=express&charges_enabled=true&q=acct_match"
+             )
+
+    account_links =
+      html
+      |> Floki.parse_document!()
+      |> Floki.find("a[href*='/billing/connect/#{match.id}']")
+
+    assert length(account_links) == 2
+
+    [account_link] =
+      account_links |> Enum.map(&(Floki.attribute(&1, "href") |> hd())) |> Enum.uniq()
+
+    detail_path = account_link
+
+    detail_conn =
+      Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
+
+    assert {:ok, _view, detail_html} = live(detail_conn, detail_path)
+
+    [return_link] =
+      detail_html
+      |> Floki.parse_document!()
+      |> Floki.find("nav[aria-label='Breadcrumb'] a")
+      |> Enum.filter(&(Floki.text(&1) |> String.trim() == "Connect"))
+
+    return_href = return_link |> Floki.attribute("href") |> hd()
+
+    assert URI.parse(return_href).query |> URI.decode_query() == %{
+             "charges_enabled" => "true",
+             "q" => "acct_match",
+             "type" => "express",
+             "view" => "all"
+           }
+  end
+
+  test "provider boolean filters and KPI counts use observations stored in account data", %{
+    conn: conn
+  } do
+    insert_account(%{
+      stripe_account_id: "acct_snapshot_disabled",
+      charges_enabled: true,
+      payouts_enabled: true,
+      details_submitted: true,
+      data: %{
+        "charges_enabled" => false,
+        "payouts_enabled" => false,
+        "details_submitted" => false
+      }
+    })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, filtered_html} =
+             live(conn, "/billing/connect?view=all&charges_enabled=false")
+
+    assert filtered_html =~ "acct_snapshot_disabled"
+    refute filtered_html =~ "acct_other"
+    refute filtered_html =~ "acct_match"
+
+    all_conn =
+      Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
+
+    assert {:ok, _view, all_html} = live(all_conn, "/billing/connect?view=all")
+
+    stats =
+      all_html
+      |> Floki.parse_document!()
+      |> Floki.find(".ax-stat")
+      |> Enum.map(fn stat ->
+        {
+          stat |> Floki.find(".ax-stat-label") |> Floki.text() |> String.trim(),
+          stat |> Floki.find(".ax-stat-value") |> Floki.text() |> String.trim()
+        }
+      end)
+      |> Map.new()
+
+    assert stats[Copy.connect_accounts_kpi_label_charges_enabled()] == "1"
+  end
+
+  test "connect list labels the stored Stripe snapshot separately from the local fee override", %{
+    conn: conn
+  } do
+    unknown =
+      insert_account(%{
+        id: "00000000-0000-0000-0000-000000000001",
+        stripe_account_id: "acct_unknown_observation",
+        charges_enabled: false,
+        payouts_enabled: false,
+        details_submitted: false,
+        data: %{"platform_fee_override" => %{"percent" => "1.5"}}
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/connect?view=all")
+
+    assert html =~ "Last stored Stripe snapshot"
+    assert html =~ "Last stored Stripe snapshot: unavailable"
+    assert html =~ "Local platform fee override"
+    assert html =~ "Override saved"
+    assert html =~ "/billing/connect/#{unknown.id}"
+    refute html =~ "Ready"
+  end
+
+  test "equal observation timestamps order account rows by stable ID", %{conn: conn} do
+    timestamp = ~U[2026-01-01 00:00:00Z]
+
+    insert_account(%{
+      id: "00000000-0000-0000-0000-000000000001",
+      stripe_account_id: "acct_tie_a",
+      inserted_at: timestamp
+    })
+
+    insert_account(%{
+      id: "00000000-0000-0000-0000-000000000002",
+      stripe_account_id: "acct_tie_b",
+      inserted_at: timestamp
+    })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/connect?view=all")
+
+    assert :binary.match(html, "acct_tie_b") |> elem(0) <
+             :binary.match(html, "acct_tie_a") |> elem(0)
   end
 
   defp assert_page_header_contract(html, contract) do

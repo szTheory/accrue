@@ -418,13 +418,21 @@ defmodule Accrue.Config do
         accent_color: [
           type: {:custom, __MODULE__, :validate_hex, []},
           default: "#5D79F6"
+        ],
+        theme: [
+          type: {:in, [:system, :light, :dark]},
+          default: :system,
+          doc:
+            "Admin theme policy. `:system` (default) follows the saved operator preference and allows switching; " <>
+              "`:light` or `:dark` locks the mounted Admin UI to that theme and hides the picker."
         ]
       ],
       doc:
         "Optional Accrue Admin chrome branding. When unset, admin chrome keeps the " <>
           "legacy behavior and derives its app name, logo, and accent from " <>
           "`:branding`. Set this when customer-facing billing should use one brand " <>
-          "while the mounted operator UI keeps an Accrue/admin identity."
+          "while the mounted operator UI keeps an Accrue/admin identity. Set `theme: :light` " <>
+          "or `:dark` to lock the Admin theme for this host."
     ],
 
     # --- Locale / timezone defaults (enrich/2 precedence) ----------------
@@ -1078,6 +1086,7 @@ defmodule Accrue.Config do
 
   Backwards compatible default: when `:admin_branding` is unset, derive the
   admin label, logo, and accent from the customer billing `:branding` config.
+  The Admin theme defaults to `:system`.
   Hosts that need a split identity can set `:admin_branding` explicitly.
   """
   @spec admin_branding() :: keyword()
@@ -1089,7 +1098,8 @@ defmodule Accrue.Config do
         [
           app_name: Keyword.get(customer_branding, :business_name, "Billing"),
           logo_url: Keyword.get(customer_branding, :logo_url),
-          accent_color: Keyword.get(customer_branding, :accent_color, "#5D79F6")
+          accent_color: Keyword.get(customer_branding, :accent_color, "#5D79F6"),
+          theme: :system
         ]
 
       raw when is_list(raw) ->

@@ -243,7 +243,7 @@ async function focusCycleProbe(page, surfaceSelector, recorder, surface, trigger
 }
 
 async function probeModalDrawerScrim(page, recorder, fixtureData) {
-  await login(page, `/billing/webhooks/${fixtureData["operator-flows"].single_webhook_id}`);
+  await login(page, `/billing/webhooks/${fixtureData["phase191-matrix"].phase191_webhook_id}`);
   await expect(page.locator("#main-content")).toBeVisible();
 
   await clickOrObserve(page.locator('[data-role="replay-single"]').first(), recorder, {
@@ -344,14 +344,15 @@ async function openChargeStepUp(page, recorder, chargeId) {
   const refundForm = drawer.locator('[data-role="refund-form"]').first();
   await expect(drawer).toBeVisible();
   await expect(refundForm).toBeVisible();
-  await refundForm.locator('input[name="reason"]').fill("requested_by_customer").catch(() => {});
-  await clickOrObserve(refundForm.locator('button[type="submit"], button[form="charge-refund-form"]').first(), recorder, {
+  await refundForm.locator('input[name="amount_minor"]').fill("4000");
+  await refundForm.locator('input[name="reason"]').fill("requested_by_customer");
+  expect(await clickOrObserve(refundForm.locator('[data-role="prepare-refund"]'), recorder, {
     interaction_class: "step-up-auth-modal",
     surface: "charge refund",
     target_selector: '[data-role="refund-form"]',
     expected: "Refund form stages a confirmation panel.",
     overlay_tags: ["actionability"],
-  });
+  })).toBeTruthy();
 
   await expect(drawer.locator('[data-role="confirm-panel"]')).toBeVisible();
   await clickOrObserve(drawer.locator('[data-role="confirm-refund"]').first(), recorder, {
@@ -530,24 +531,26 @@ async function probeDropdownPopoverToast(page, recorder, fixtureData) {
 
   await login(page, `/billing/customers/${fixtureData.dashboard.customer_id}`);
   await expect(page.locator("#main-content")).toBeVisible();
-  const moreTrigger = page.locator(".ax-tab-more-trigger");
-  await clickOrObserve(moreTrigger, recorder, {
+  const peerNav = page.getByRole("navigation", { name: "Customer peer record sets" });
+  const invoicesTab = peerNav.getByRole("link", { name: /^Invoices/ });
+  await clickOrObserve(invoicesTab, recorder, {
     interaction_class: "dropdown-popover-toast",
-    surface: "customer more menu",
-    target_selector: ".ax-tab-more-trigger, .ax-tab-more-menu",
-    expected: "More tab trigger opens `.ax-tab-more-menu` and exposes open state through visibility/classes.",
-    overlay_tags: ["overlay-position", "actionability"],
+    surface: "customer peer record tabs",
+    target_selector: "nav[aria-label='Customer peer record sets'] a",
+    expected: "Customer peer record navigation opens the selected invoices tab and marks it current.",
+    overlay_tags: ["actionability", "live-focus"],
   });
+  await expect(invoicesTab).toHaveAttribute("aria-current", "page");
   recorder.observe({
     interaction_class: "dropdown-popover-toast",
-    surface: "customer more menu",
-    target_selector: ".ax-tab-more-menu",
-    expected: "Menu appears near trigger, is not clipped, and keyboard activation works for menu items.",
-    actual: `menuVisible=${await visible(page.locator(".ax-tab-more-menu"))}; top=${JSON.stringify(await topElementAt(page.locator(".ax-tab-more-menu")))}`,
-    assertions: ["keyboard activation", "open-state exposure", "aria-expanded"],
-    overlay_tags: ["overlay-position", "actionability", "focus-trap"],
-    coverage_status: (await visible(page.locator(".ax-tab-more-menu"))) ? "covered" : "gap",
-    failure_kind: (await visible(page.locator(".ax-tab-more-menu"))) ? null : "missing-selector",
+    surface: "customer peer record tabs",
+    target_selector: "nav[aria-label='Customer peer record sets'] a[aria-current='page']",
+    expected: "Selected customer record-set tab remains visibly and semantically current after navigation.",
+    actual: `current=${await peerNav.locator("a[aria-current='page']").innerText().catch(() => "missing")}; url=${page.url()}`,
+    assertions: ["keyboard activation", "aria-current", "route update"],
+    overlay_tags: ["actionability", "live-focus"],
+    coverage_status: (await visible(peerNav.locator("a[aria-current='page']"))) ? "covered" : "gap",
+    failure_kind: (await visible(peerNav.locator("a[aria-current='page']"))) ? null : "missing-selector",
   });
 
   await login(page, "/billing/dev/components");
@@ -618,7 +621,7 @@ async function probeScrollFocusKeyboard(page, recorder, fixtureData) {
     overlay_tags: ["actionability", "focus-semantics", "live-focus"].filter((tag) => OVERLAY_TAGS.includes(tag)),
   });
 
-  await login(page, `/billing/webhooks/${fixtureData["operator-flows"].single_webhook_id}`);
+  await login(page, `/billing/webhooks/${fixtureData["phase191-matrix"].phase191_webhook_id}`);
   await expect(page.locator("#main-content")).toBeVisible();
   const replayTrigger = page.locator('[data-role="replay-single"]').first();
   await replayTrigger.focus().catch(() => {});
@@ -640,7 +643,7 @@ async function probeScrollFocusKeyboard(page, recorder, fixtureData) {
   recorder.observe({
     interaction_class: "liveview-patch-focus",
     surface: "LiveView patch focus",
-    target_selector: "#search-trigger, .ax-tab-more-trigger, [data-role=\"replay-single\"], #accrue-admin-step-up-dialog",
+    target_selector: "#search-trigger, nav[aria-label='Customer peer record sets'] a, [data-role=\"replay-single\"], #accrue-admin-step-up-dialog",
     expected: "Focus after LiveView patches from search/filter/menu selection/replay confirmation/step-up submit/cancel is recorded.",
     actual: `active=${await activeSelector(page)}; url=${page.url()}`,
     assertions: ["live-focus", "focus-restore", "LiveView patch"],
@@ -685,7 +688,7 @@ async function probeAffordanceAndStates(page, recorder) {
   }
 
   await loginMember(page, "/billing");
-  await page.waitForLoadState("networkidle").catch(() => {});
+  await page.waitForLoadState("networkidle", { timeout: 2_000 }).catch(() => {});
   recorder.observe({
     interaction_class: "permission-denied",
     surface: "permission denied state",
@@ -1210,6 +1213,7 @@ test.describe("Admin live interaction baseline", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
 
     const fixtureData = {
+      "phase191-matrix": await seed(request, "phase191-matrix"),
       "operator-flows": await seed(request, "operator-flows"),
       dashboard: await seed(request, "dashboard"),
       "edge-states": await seed(request, "edge-states"),

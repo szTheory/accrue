@@ -80,7 +80,14 @@ defmodule Accrue.Processor.Stripe do
   def capabilities do
     %{
       customer: %{create: true, retrieve: true, update: true},
-      payment_method: %{vault_acquisition: true, list: true},
+      payment_method: %{
+        vault_acquisition: true,
+        create: true,
+        list: true,
+        update: true,
+        delete: true,
+        set_default: true
+      },
       checkout: %{create: true, fetch: true, hosted: true, embedded: true},
       subscription: %{
         direct_create: true,
@@ -88,13 +95,14 @@ defmodule Accrue.Processor.Stripe do
         cancel: true,
         lifecycle_webhook_projection: true,
         update: true,
+        swap_plan: true,
         cancel_at_period_end: true,
         cancel_immediately: true,
         pause: true,
         resume: true
       },
       billing_portal: %{create: true},
-      invoice: %{lifecycle_webhook_projection: true},
+      invoice: %{lifecycle_webhook_projection: true, preview_upcoming_invoice: true},
       webhook: %{verify: true, parse: true},
       entitlements: %{local_mapping: true},
       dunning: %{campaign: true, smart_retry_alignment: true}

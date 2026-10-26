@@ -15,6 +15,7 @@ defmodule AccrueAdmin.Components.FilterChipBar do
   attr(:result_plural_label, :string, default: "results")
   attr(:clear_all_href, :string, default: nil)
   attr(:clear_all_label, :string, default: "Clear filters")
+  attr(:compact, :boolean, default: false)
 
   def filter_chip_bar(assigns) do
     assigns =
@@ -24,13 +25,13 @@ defmodule AccrueAdmin.Components.FilterChipBar do
       |> assign(:result_label_pair, result_label_pair(assigns))
 
     ~H"""
-    <section class={["ax-filter-chip-bar", @class]} aria-label={@label} data-phase191-focus="filter-chip-bar">
-      <header class="ax-filter-chip-header">
+    <section class={["ax-filter-chip-bar", @compact && "ax-filter-chip-bar-compact", @class]} aria-label={@label} data-phase191-focus="filter-chip-bar">
+      <header :if={!@compact} class="ax-filter-chip-header">
         <p class="ax-eyebrow">Filters</p>
         <p class="ax-body"><%= @label %></p>
       </header>
 
-      <div :if={@has_items} class="ax-filter-chip-content">
+      <div :if={@has_items || !is_nil(@result_count)} class="ax-filter-chip-content">
         <div class="ax-filter-chip-list" data-ax-filter-chips>
           <.chip :for={item <- @active_items} item={item} />
         </div>
@@ -51,7 +52,7 @@ defmodule AccrueAdmin.Components.FilterChipBar do
         </div>
       </div>
 
-      <p :if={!@has_items} class="ax-body ax-filter-chip-empty"><%= @empty_label %></p>
+      <p :if={!@has_items && is_nil(@result_count)} class="ax-body ax-filter-chip-empty"><%= @empty_label %></p>
     </section>
     """
   end
@@ -86,7 +87,7 @@ defmodule AccrueAdmin.Components.FilterChipBar do
         data-phase191-focus="filter-chip-clear"
         aria-label={"Remove #{chip_accessible_label(@item)} filter"}
       >
-        Clear
+        ×
       </a>
     </span>
     """

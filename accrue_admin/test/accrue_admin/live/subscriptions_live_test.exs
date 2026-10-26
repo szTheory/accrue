@@ -47,15 +47,16 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?status=canceling")
 
-    assert html =~ "Action required" or
-             html =~ "Healthy"
+    refute html =~ "Action required"
+    refute html =~ "Healthy"
 
-    assert html =~ "Exposure"
+    refute html =~ "Exposure"
     assert html =~ "target"
 
-    assert html =~ "Canceling at period end"
+    assert html =~ "Active"
+    assert html =~ "Ends"
     assert html =~ "/billing/subscriptions/"
-    assert html =~ "ax-chip ax-label"
+    assert html =~ "Automatic tax off"
   end
 
   test "renders filtered-empty copy when search excludes all subscriptions", %{conn: conn} do
@@ -74,9 +75,51 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?status=past_due,canceling")
 
     # FilterChipBar renders queue chip (cobalt) and All chip (slate)
-    assert html =~ "ax-filter-chip-cobalt"
-    assert html =~ "ax-filter-chip-slate"
+    assert html =~ "Past due or ending"
+    assert html =~ "All subscriptions"
     assert html =~ "?view=all"
+  end
+
+  test "status controls round-trip the default queue, direct sets, and All rows", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, default_html} = live(conn, "/billing/subscriptions")
+
+    default_controls =
+      Floki.parse_document!(default_html) |> Floki.find("[data-filter-group='status'] input")
+
+    default_selected =
+      Enum.filter(default_controls, &(Floki.attribute(&1, "checked") != []))
+      |> Enum.map(&(Floki.attribute(&1, "value") |> hd()))
+      |> Enum.sort()
+
+    assert default_selected == ["canceling", "past_due"]
+
+    assert {:ok, _view, direct_html} =
+             live(
+               conn,
+               "/billing/subscriptions?view=all&status=paused%2Cactive&q=factory-sub-active"
+             )
+
+    direct_controls =
+      Floki.parse_document!(direct_html) |> Floki.find("[data-filter-group='status'] input")
+
+    selected =
+      Enum.filter(direct_controls, &(Floki.attribute(&1, "checked") != []))
+      |> Enum.map(&(Floki.attribute(&1, "value") |> hd()))
+      |> Enum.sort()
+
+    assert selected == ["active", "paused"]
+    rows = Floki.parse_document!(direct_html) |> Floki.find("tbody > tr[data-row-id]")
+    assert length(rows) == 1
+    assert Floki.text(hd(rows)) =~ "factory-sub-active@example.com"
+
+    assert {:ok, _view, all_html} = live(conn, "/billing/subscriptions?view=all")
+
+    all_controls =
+      Floki.parse_document!(all_html) |> Floki.find("[data-filter-group='status'] input")
+
+    refute Enum.any?(all_controls, &(Floki.attribute(&1, "checked") != []))
   end
 
   test "renders Subscriptions through PageHeader with exactly one h1", %{conn: conn} do
@@ -88,26 +131,24 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ ~s(data-ax-page-title)
     assert html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
     assert html =~ ~s(data-ax-page-filter-toolbar)
-    assert html =~ ~s(data-ax-page-actions)
+    refute html =~ ~s(data-ax-page-actions)
     refute html =~ "Search customer, open detail"
 
-    assert html =~ "Action required" or
-             html =~ "Healthy"
+    refute html =~ "Action required"
+    refute html =~ "Healthy"
 
-    assert html =~ "Exposure"
+    refute html =~ "Exposure"
     assert html =~ "target"
 
-    assert html =~ "Customer billing lookup"
-    assert html =~ "Search customers now"
-    assert html =~ "Open invoice queue"
+    assert html =~ Copy.subscriptions_route_line()
 
     assert html =~ Copy.subscriptions_kpi_section_aria_label()
-    assert html =~ "At-risk subscriptions"
-    assert html =~ "Open invoices"
-    assert html =~ "Webhooks: debug failed deliveries"
-    assert html =~ "Events audit log"
+    assert html =~ "Past due"
+    refute html =~ "Open invoices"
+    refute html =~ "Webhooks: debug failed deliveries"
+    refute html =~ "Events audit log"
     assert html =~ "ax-status-badge"
-    assert html =~ "Failed webhooks"
+    refute html =~ "Failed webhooks"
     refute html =~ "Bulk invoice actions"
     refute html =~ "Process next invoice"
     refute html =~ "Send invoice reminders"
@@ -129,9 +170,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions")
 
     assert html =~ ~s(data-ax-filter-chips)
-    assert html =~ "At risk"
+    assert html =~ "Past due or ending"
     assert html =~ "All"
-    assert html =~ "Open invoice queue workspace"
+    refute html =~ "Open invoice queue workspace"
     assert html =~ "Billing"
     assert html =~ ~s(data-ax-state="filtered-empty") or html =~ ~s(data-ax-state="populated")
     refute html =~ "No subscriptions yet."
@@ -152,9 +193,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert {:ok, _view, html} =
              live(conn, "/billing/subscriptions?org=allowed-org&status=past_due,canceling")
 
-    assert html =~ ~s(data-ax-clear-all)
+    refute html =~ ~s(data-ax-clear-all)
     assert html =~ ~s(href="/billing/subscriptions?org=allowed-org&amp;view=all")
-    assert html =~ "At risk"
+    assert html =~ "Past due or ending"
     assert html =~ "All"
   end
 
@@ -177,6 +218,11 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert populated_html =~ ~s(data-ax-list="subscriptions")
     assert populated_html =~ ~s(data-ax-state="populated")
 
+    assert populated_html
+           |> Floki.parse_document!()
+           |> Floki.find("tbody > tr[data-row-id]")
+           |> length() >= 2
+
     empty_org = "org-empty-#{System.unique_integer([:positive])}"
 
     first_run_conn =
@@ -194,7 +240,38 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert first_run_html =~ ~s(data-ax-state="first-run-empty")
     assert first_run_html =~ ~s(data-ax-empty-reason="first-run")
     assert first_run_html =~ "No subscriptions yet."
+
+    assert first_run_html
+           |> Floki.parse_document!()
+           |> Floki.find("tbody > tr[data-row-id]")
+           |> length() == 0
+
     refute first_run_html =~ ~s(data-ax-clear-all)
+
+    single_org = "org-single-#{System.unique_integer([:positive])}"
+
+    %{subscription: single_subscription} =
+      Factory.active_subscription(%{owner_type: "Organization", owner_id: single_org})
+
+    single_conn =
+      Phoenix.ConnTest.build_conn()
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: single_org,
+        active_organization_slug: "single-org",
+        admin_organization_ids: [single_org]
+      )
+
+    assert {:ok, _view, single_html} =
+             live(single_conn, "/billing/subscriptions?org=single-org&view=all")
+
+    single_rows =
+      single_html
+      |> Floki.parse_document!()
+      |> Floki.find("tbody > tr[data-row-id]")
+
+    assert length(single_rows) == 1
+    assert Floki.text(hd(single_rows)) =~ single_subscription.processor_id
 
     filtered_conn =
       Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
@@ -263,62 +340,139 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
 
-    assert html =~ "Exposure"
+    refute html =~ "Exposure"
     assert html =~ "target"
     refute html =~ "ax-health-verdict"
 
-    assert html =~ "Action required" or
-             html =~ "Healthy"
+    refute html =~ "Action required"
+    refute html =~ "Healthy"
 
-    assert html =~ "Owner: User"
-    assert html =~ "Tax: Off"
+    assert html =~ "User"
+    assert html =~ "Automatic tax off"
     refute html =~ "Search customer, open detail"
-    assert html =~ "Setup gap"
-    assert html =~ "Amount not confirmed in admin"
+    refute html =~ "Setup gap"
+    assert html =~ "Amount unavailable"
 
     assert_table_headings_in_order(html, [
-      "Customer details",
-      "State",
-      "Plan / amount",
+      "Subscription",
+      "Status",
+      "Plan",
       "Renews / ends",
-      "Signals"
+      "Ownership and tax"
     ])
+
+    assert html =~ "Customer details"
 
     assert html =~ "ax-data-table-grid"
   end
 
-  test "renders the identity cell as a customer-label link to the subscription and a muted subscription-id link to the customer",
+  test "renders customer and subscription labels to their own destination with list context",
        %{conn: conn} do
     %{subscription: subscription} =
-      Factory.active_subscription(%{email: "phase196-primary@example.com"})
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "journey-org",
+        email: "phase234-journey@example.com"
+      })
 
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "journey-org",
+        active_organization_slug: "journey-org",
+        admin_organization_ids: ["journey-org"]
+      )
 
-    assert {:ok, _view, html} = live(conn, "/billing/subscriptions?view=all")
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/subscriptions?org=journey-org&view=all&status=active&q=phase234"
+             )
 
-    assert html =~ "phase196-primary@example.com"
+    assert html =~ "phase234-journey@example.com"
 
     parsed = Floki.parse_document!(html)
 
-    assert parsed
-           |> Floki.find("a.ax-link")
-           |> Enum.any?(fn link ->
-             Floki.text(link) == "phase196-primary@example.com" and
-               link
-               |> Floki.attribute("href")
-               |> Enum.any?(&String.contains?(&1, "/subscriptions/#{subscription.id}"))
-           end)
+    customer_link =
+      parsed
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "Customer details"))
 
-    assert parsed
-           |> Floki.find("a.ax-label.ax-muted")
-           |> Enum.any?(fn link ->
-             Floki.text(link) == subscription.processor_id and
-               link
-               |> Floki.attribute("href")
-               |> Enum.any?(&String.contains?(&1, "/customers/#{subscription.customer_id}"))
-           end)
+    subscription_id_copy =
+      parsed
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == subscription.processor_id))
 
-    assert_before(html, "phase196-primary@example.com", subscription.processor_id)
+    subscription_details =
+      parsed
+      |> Floki.find("a")
+      |> Enum.find(&(Floki.text(&1) == "phase234-journey@example.com"))
+
+    assert customer_link
+    assert subscription_id_copy == nil
+    assert subscription_details
+
+    id_copy =
+      parsed
+      |> Floki.find("button.ax-id-badge")
+      |> Enum.find(&(Floki.attribute(&1, "data-clipboard-text") == [subscription.processor_id]))
+
+    assert id_copy
+
+    assert Floki.attribute(customer_link, "href") |> hd() =~
+             "/customers/#{subscription.customer_id}"
+
+    assert Floki.attribute(subscription_details, "href") |> hd() =~
+             "/subscriptions/#{subscription.id}"
+
+    detail_path = Floki.attribute(subscription_details, "href") |> hd()
+    detail_query = detail_path |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query()
+    assert detail_query["org"] == "journey-org"
+    assert detail_query["return_to"] =~ "/billing/subscriptions?"
+    assert detail_query["return_to"] =~ "status=active"
+    assert detail_query["return_to"] =~ "view=all"
+
+    assert_before(html, "phase234-journey@example.com", subscription.processor_id)
+  end
+
+  test "invalid cursor recovers to the first page without dropping organization or filters", %{
+    conn: conn
+  } do
+    %{subscription: subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: "cursor-org",
+        email: "phase234-cursor@example.com"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(
+        conn,
+        admin_token: "admin",
+        active_organization_id: "cursor-org",
+        active_organization_slug: "cursor-org",
+        admin_organization_ids: ["cursor-org"]
+      )
+
+    stale_cursor =
+      AccrueAdmin.Queries.Cursor.encode(
+        ~U[2026-01-01 00:00:00Z],
+        Ecto.UUID.generate()
+      )
+
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/subscriptions?org=cursor-org&view=all&status=active&q=phase234&cursor=#{stale_cursor}"
+             )
+
+    assert html =~
+             "That saved page position expired. Showing the first page with the same filters."
+
+    assert html =~ "phase234-cursor@example.com"
+    assert html =~ subscription.processor_id
+    refute html =~ "cursor=#{stale_cursor}"
   end
 
   # Shared SPA-filter contract smoke (260621-io6): proves the parent-targeted

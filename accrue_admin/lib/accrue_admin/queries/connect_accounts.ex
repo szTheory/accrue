@@ -116,13 +116,13 @@ defmodule AccrueAdmin.Queries.ConnectAccounts do
         where(query, [account], account.type == ^type)
 
       {:charges_enabled, value}, query ->
-        where(query, [account], account.charges_enabled == ^value)
+        observed_boolean_filter(query, "charges_enabled", value)
 
       {:payouts_enabled, value}, query ->
-        where(query, [account], account.payouts_enabled == ^value)
+        observed_boolean_filter(query, "payouts_enabled", value)
 
       {:details_submitted, value}, query ->
-        where(query, [account], account.details_submitted == ^value)
+        observed_boolean_filter(query, "details_submitted", value)
 
       {:deauthorized, true}, query ->
         where(query, [account], not is_nil(account.deauthorized_at))
@@ -135,12 +135,12 @@ defmodule AccrueAdmin.Queries.ConnectAccounts do
           query,
           [account],
           not is_nil(account.deauthorized_at) or
-            account.details_submitted == false or
-            is_nil(account.details_submitted) or
-            account.charges_enabled == false or
-            is_nil(account.charges_enabled) or
-            account.payouts_enabled == false or
-            is_nil(account.payouts_enabled)
+            fragment("?->>'details_submitted' = 'false'", account.data) or
+            is_nil(fragment("?->>'details_submitted'", account.data)) or
+            fragment("?->>'charges_enabled' = 'false'", account.data) or
+            is_nil(fragment("?->>'charges_enabled'", account.data)) or
+            fragment("?->>'payouts_enabled' = 'false'", account.data) or
+            is_nil(fragment("?->>'payouts_enabled'", account.data))
         )
 
       {:needs_attention, false}, query ->
@@ -150,4 +150,11 @@ defmodule AccrueAdmin.Queries.ConnectAccounts do
         query
     end)
   end
+
+  defp observed_boolean_filter(query, key, value) when is_boolean(value) do
+    observed_value = to_string(value)
+    where(query, [account], fragment("?->>? = ?", account.data, ^key, ^observed_value))
+  end
+
+  defp observed_boolean_filter(query, _key, _value), do: query
 end

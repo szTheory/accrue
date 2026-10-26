@@ -13,9 +13,12 @@ defmodule AccrueAdmin.Live.CouponsLive do
     DataTable,
     FilterChipBar,
     FlashGroup,
+    IdBadge,
     PageHeader,
     StatStrip
   }
+
+  alias AccrueAdmin.Components.Timestamp
 
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Coupons
@@ -59,11 +62,20 @@ defmodule AccrueAdmin.Live.CouponsLive do
 
   @impl true
   def handle_event("data_table_filter", params, socket) do
+    params = Map.drop(params, ["_target", "_csrf_token"])
+
+    params =
+      if Map.get(params, "valid") in [nil, ""] do
+        params |> Map.put("valid", nil) |> Map.put("view", "all")
+      else
+        Map.put(params, "view", nil)
+      end
+
     {:noreply,
      AccrueAdmin.DataTableNav.patch_with_filters(
        socket,
        socket.assigns.table_path,
-       Map.drop(params, ["_target", "_csrf_token"])
+       params
      )}
   end
 
@@ -73,8 +85,9 @@ defmodule AccrueAdmin.Live.CouponsLive do
   end
 
   def handle_params(params, _uri, socket) do
-    if map_size(params) == 0 or map_only_scope?(params) do
+    if not Map.has_key?(params, "valid") and not Map.has_key?(params, "view") do
       default = build_default_params(socket.assigns[:current_owner_scope], @default_valid)
+      default = Map.merge(params, default)
       to = AccrueAdmin.DataTableNav.merge_query(socket.assigns.table_path, default)
 
       if connected?(socket) do
@@ -101,8 +114,8 @@ defmodule AccrueAdmin.Live.CouponsLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Catalog"
           breadcrumbs={[
-            %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.coupon_breadcrumb_coupons()}
           ]}
           title={Copy.coupons_list_heading()}
@@ -121,12 +134,10 @@ defmodule AccrueAdmin.Live.CouponsLive do
               <:stat
                 label={Copy.coupon_kpi_label_valid()}
                 value={Integer.to_string(@summary.valid_count)}
-                tone="amber"
               />
               <:stat
                 label={Copy.coupon_kpi_label_promotion_codes()}
                 value={Integer.to_string(@summary.promotion_code_count)}
-                tone="cobalt"
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -137,7 +148,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
               filter_fields={coupon_filter_fields()}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
+              clear_href={@table_path}
               clear_visible={filter_active?(@params)}
             />
           </:filter_toolbar>
@@ -147,6 +158,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
 
         <.live_component
           module={DataTable}
+          row_label={Copy.coupons_list_result_label_pair()}
           id="coupons"
           query_module={Coupons}
           current_owner_scope={@current_owner_scope}
@@ -158,22 +170,24 @@ defmodule AccrueAdmin.Live.CouponsLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={@table_path}
           columns={[
-            %{label: Copy.coupon_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope)},
+            %{label: Copy.coupon_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path, @current_owner_scope, @params, :table)},
             %{label: Copy.coupon_table_column_status(), render: &status_summary/1},
             %{label: Copy.coupon_table_column_discount(), render: &discount_summary/1},
-            %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary/1},
+            %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary(&1, :table)},
             %{label: Copy.coupon_table_column_redemptions(), render: &redemption_summary/1}
           ]}
-          card_title={&card_title/1}
+          card_title={&coupon_link(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
           card_fields={[
             %{label: Copy.coupon_table_column_status(), render: &status_summary/1},
             %{label: Copy.coupon_table_column_discount(), render: &discount_summary/1},
-            %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary/1},
+            %{label: Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary(&1, :card)},
             %{label: Copy.coupon_table_column_redemptions(), render: &redemption_summary/1}
           ]}
           filter_fields={coupon_filter_fields()}
+          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.coupons_list_result_label_pair(), 1), else: "Reset filters"}
           empty_title={empty_title(@params, @summary)}
           empty_copy={empty_copy(@params, @summary)}
           filtered_empty_title={empty_title(@params, @summary)}
@@ -181,11 +195,11 @@ defmodule AccrueAdmin.Live.CouponsLive do
         >
           <:list_status :let={status}>
             <FilterChipBar.filter_chip_bar
+              compact={true}
               items={coupon_lens_chips(@params, @table_path)}
               label="Coupon view"
               result_count={status.visible_count}
               result_label={Copy.coupons_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -223,20 +237,35 @@ defmodule AccrueAdmin.Live.CouponsLive do
     }
   end
 
-  defp coupon_link(row, mount_path, owner_scope) do
+  defp coupon_link(row, mount_path, owner_scope, params, presentation) do
     label = coupon_label(row)
-    href = scoped_path(mount_path, "/coupons/#{row.id}", owner_scope)
+    return_to = coupon_return_path(mount_path, owner_scope, params)
 
-    processor_line =
-      if row.processor_id && row.processor_id != label do
-        ~s(<span class="ax-body ax-text-muted ax-type-code-xs">#{escape(row.processor_id)}</span>)
-      else
-        ""
-      end
+    href =
+      AccrueAdmin.ScopedPath.build(mount_path, "/coupons/#{row.id}", owner_scope, %{
+        "return_to" => return_to
+      })
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-stack-xs"><a href="#{href}" class="ax-link">#{escape(label)}</a>#{processor_line}</span>)
-    )
+    assigns = %{
+      href: href,
+      label: label,
+      badge_id: "ax-id-badge-coupon-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
+      id_value: row.processor_id || to_string(row.id)
+    }
+
+    ~H"""
+    <DataTable.identity_cell label={@label}>
+      <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
+      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy coupon ID" copy_label="coupon ID" variant="plain" /></:secondary>
+    </DataTable.identity_cell>
+    """
+  end
+
+  defp coupon_return_path(mount_path, owner_scope, params) do
+    filters = filter_params(params)
+    view = Map.take(params, ["view"])
+
+    AccrueAdmin.ScopedPath.build(mount_path, "/coupons", owner_scope, Map.merge(filters, view))
   end
 
   defp coupon_label(row), do: row.name || row.processor_id || row.id
@@ -255,21 +284,20 @@ defmodule AccrueAdmin.Live.CouponsLive do
   defp discount_summary(_row), do: Copy.coupon_discount_processor_defined()
 
   defp redemption_summary(row) do
-    used = row.times_redeemed || 0
-
-    case row.max_redemptions do
-      nil -> "#{used} used"
-      max -> "#{used} of #{max}"
+    case row.times_redeemed do
+      used when is_integer(used) -> Integer.to_string(used)
+      _ -> Copy.Coupon.coupon_redemptions_unknown()
     end
   end
 
   defp status_summary(%{valid: true}), do: Copy.coupon_status_valid()
   defp status_summary(%{valid: false}), do: Copy.coupon_status_invalid()
+  defp status_summary(_row), do: Copy.Coupon.coupon_unknown_value()
 
-  defp redeem_by_summary(%{redeem_by: %DateTime{} = value}), do: format_datetime(value)
-  defp redeem_by_summary(_row), do: Copy.coupon_redeem_by_no_expiry()
+  defp redeem_by_summary(%{redeem_by: %DateTime{} = value} = row, presentation),
+    do: timestamp_value(value, "coupon-row-redeem-by-#{presentation}-#{row.id}")
 
-  defp card_title(row), do: coupon_label(row)
+  defp redeem_by_summary(_row, _presentation), do: Copy.coupon_redeem_by_no_expiry()
 
   defp coupon_filter_fields do
     [
@@ -299,10 +327,6 @@ defmodule AccrueAdmin.Live.CouponsLive do
   end
 
   defp coupon_lens_chips(params, table_path) do
-    valid_active? = default_valid_active?(params)
-    all_active? = Map.get(params, "view") == "all"
-    clear_href = clear_all_href(params, table_path)
-
     filter_chips =
       params
       |> filter_params()
@@ -318,22 +342,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
         }
       end)
 
-    [
-      %{
-        id: :valid_coupons,
-        label: Copy.coupons_list_default_lens_label(),
-        tone: :cobalt,
-        active: valid_active?,
-        remove_href: if(valid_active?, do: clear_href)
-      },
-      %{
-        id: :view_all,
-        label: Copy.coupons_list_all_lens_label(),
-        tone: :slate,
-        active: valid_active? or all_active?,
-        href: if(valid_active?, do: clear_href)
-      }
-    ] ++ filter_chips
+    filter_chips
   end
 
   defp filter_chip_label("q"), do: Copy.coupon_filter_label_search()
@@ -355,10 +364,6 @@ defmodule AccrueAdmin.Live.CouponsLive do
   end
 
   defp filter_active?(params), do: filter_params(params) != %{}
-
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
 
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil
@@ -432,7 +437,13 @@ defmodule AccrueAdmin.Live.CouponsLive do
     :erlang.float_to_binary(dollars, decimals: 2) <> " " <> code
   end
 
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
+  defp timestamp_value(value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 
@@ -442,12 +453,6 @@ defmodule AccrueAdmin.Live.CouponsLive do
   end
 
   defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
-
-  defp map_only_scope?(params) do
-    params != %{} and Map.keys(params) -- ["org"] == []
-  end
-
-  defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
   defp humanize(value) when is_binary(value) do
     value

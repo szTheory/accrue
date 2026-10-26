@@ -12,12 +12,16 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     DataTable,
     FilterChipBar,
     FlashGroup,
+    IdBadge,
     PageHeader,
-    StatStrip
+    StatStrip,
+    StepUpAuthModal,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Webhooks
+  alias AccrueAdmin.StepUp
 
   @default_queue_status "failed,dead"
 
@@ -47,7 +51,13 @@ defmodule AccrueAdmin.Live.WebhooksLive do
      )
      |> assign(:summary, webhook_summary(socket.assigns.current_owner_scope))
      |> assign(:flashes, [])
-     |> assign(:pending_bulk_replay, nil)}
+     |> assign(:bulk_replay_result, nil)
+     |> assign(:pending_bulk_replay, nil)
+     |> assign(:step_up_pending, false)
+     |> assign(:step_up_action, nil)
+     |> assign(:step_up_challenge, nil)
+     |> assign(:step_up_error, nil)
+     |> assign(:step_up_continuation, nil)}
   end
 
   @impl true
@@ -86,10 +96,17 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   @impl true
   def handle_info({:data_table_bulk_action, "retry_selected", ids}, socket) do
+    ids = canonical_ids(ids)
+
     if ids == [] do
       {:noreply, push_flash(socket, :warning, Copy.webhooks_retry_no_selection_warning())}
     else
-      {:noreply, assign(socket, :pending_bulk_replay, %{ids: ids, count: length(ids)})}
+      reviewed = review_bulk_selection(ids, socket)
+
+      {:noreply,
+       socket
+       |> assign(:bulk_replay_result, nil)
+       |> assign(:pending_bulk_replay, reviewed)}
     end
   end
 
@@ -107,51 +124,348 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     {:noreply, assign(socket, :pending_bulk_replay, nil)}
   end
 
-  def handle_event("confirm_retry_selected", _params, socket) do
-    %{ids: ids, count: count} = socket.assigns.pending_bulk_replay
+  def handle_event(
+        "confirm_retry_selected",
+        params,
+        %{assigns: %{pending_bulk_replay: %{ids: ids} = review}} = socket
+      ) do
+    socket = assign(socket, :pending_bulk_replay, nil)
 
-    case scope_selected_ids(socket.assigns.current_owner_scope, ids) do
-      [] ->
+    selection_matches? = reviewed_selection_matches?(params, ids)
+
+    case StepUp.require_fresh(
+           socket,
+           bulk_step_up_action(),
+           &execute_bulk_replay(&1, review, selection_matches?)
+         ) do
+      {:ok, socket} ->
+        {:noreply, socket}
+
+      {:challenge, socket} ->
+        {:noreply, socket}
+
+      {:error, _reason, socket} ->
         {:noreply,
          socket
-         |> assign(:pending_bulk_replay, nil)
-         |> push_flash(:warning, Copy.Locked.replay_blocked())}
-
-      scoped_ids ->
-        case replay_scoped_rows(scoped_ids) do
-          {:ok, result} ->
-            socket =
-              socket
-              |> record_bulk_replay(scoped_ids, count, result)
-              |> assign(:pending_bulk_replay, nil)
-              |> assign(:summary, webhook_summary(socket.assigns.current_owner_scope))
-              |> push_flash(:info, Copy.webhooks_retry_success(count))
-
-            {:noreply, socket}
-
-          {:error, _reason} ->
-            {:noreply, push_flash(socket, :error, bulk_replay_error_copy(socket))}
-        end
+         |> clear_step_up()
+         |> push_flash(:error, Copy.webhook_replay_step_up_unavailable())}
     end
   end
 
-  defp replay_scoped_rows(ids) do
-    Enum.reduce_while(ids, {:ok, %{requeued: 0}}, fn id, {:ok, acc} ->
-      case DLQ.requeue(id) do
-        {:ok, _row} -> {:cont, {:ok, %{requeued: acc.requeued + 1}}}
-        {:error, reason} -> {:halt, {:error, reason}}
+  def handle_event("confirm_retry_selected", _params, socket) do
+    {:noreply, push_flash(socket, :warning, Copy.webhooks_retry_no_selection_warning())}
+  end
+
+  def handle_event("step_up_submit", params, %{assigns: %{step_up_pending: true}} = socket) do
+    case StepUp.verify(socket, params) do
+      {:ok, socket} -> {:noreply, socket}
+      {:error, _reason, socket} -> {:noreply, socket}
+    end
+  end
+
+  def handle_event("step_up_submit", _params, socket), do: {:noreply, socket}
+
+  def handle_event("step_up_escape", _params, socket), do: {:noreply, dismiss_step_up(socket)}
+  def handle_event("step_up_dismiss", _params, socket), do: {:noreply, dismiss_step_up(socket)}
+
+  defp execute_bulk_replay(socket, review, selection_matches?) do
+    result =
+      if selection_matches? and
+           review.scope_key == scope_key(socket.assigns.current_owner_scope) and
+           review.actor_id == Auth.actor_id(socket.assigns.current_admin) do
+        replay_scoped_rows(review, socket.assigns.current_owner_scope)
+      else
+        denied_bulk_result(review)
       end
+
+    socket
+    |> record_bulk_replay(result)
+    |> assign(:summary, webhook_summary(socket.assigns.current_owner_scope))
+    |> assign(:bulk_replay_result, bulk_replay_result_rows(result, socket))
+    |> push_flash(:info, Copy.webhooks_retry_result(result))
+  end
+
+  defp bulk_replay_result_rows(result, socket) do
+    Enum.map(result.outcomes, fn outcome ->
+      detail_available? =
+        outcome[:detail_available?] == true and outcome.outcome != :denied and
+          outcome[:reread] != :unknown
+
+      %{
+        selected_id: outcome.selected_id,
+        outcome: Copy.webhooks_retry_outcome(outcome.outcome, outcome.attempted),
+        href:
+          if detail_available? do
+            scoped_path(
+              socket.assigns.admin_mount_path,
+              "/webhooks/#{outcome.selected_id}",
+              socket.assigns.current_owner_scope
+            )
+          end,
+        next_step:
+          if outcome.outcome == :unknown or outcome[:reread] == :unknown do
+            if detail_available?,
+              do: Copy.webhooks_retry_unknown_next_step(),
+              else: Copy.webhooks_retry_detail_unavailable()
+          end
+      }
     end)
   end
 
-  # Keep only the selected ids that resolve inside the active owner scope, mirroring
-  # the per-row ownership check the filtered flow used.
-  defp scope_selected_ids(nil, ids), do: ids
+  defp reviewed_selection_matches?(params, ids) do
+    case Map.get(params, "reviewed_ids") || Map.get(params, "reviewed-ids") do
+      nil ->
+        true
 
-  defp scope_selected_ids(owner_scope, ids) do
-    Enum.filter(ids, fn id ->
-      match?({:ok, _}, Webhooks.detail(id, owner_scope))
-    end)
+      reviewed_ids when is_binary(reviewed_ids) ->
+        canonical_ids(String.split(reviewed_ids, ",")) == ids
+
+      _other ->
+        false
+    end
+  end
+
+  defp review_bulk_selection(ids, socket) do
+    owner_scope = socket.assigns.current_owner_scope
+
+    rows =
+      Enum.zip(ids, Enum.map(ids, &selected_replay_row(&1, owner_scope)))
+      |> Enum.map(fn {selected_id, row} -> Map.put(row, :selected_id, selected_id) end)
+
+    %{
+      ids: ids,
+      count: length(ids),
+      rows: rows,
+      scope_key: scope_key(owner_scope),
+      scope_label: owner_scope_label(owner_scope),
+      eligible_count: Enum.count(rows, &(&1.status in [:dead, :failed])),
+      actor_id: Auth.actor_id(socket.assigns.current_admin)
+    }
+  end
+
+  defp replay_scoped_rows(%{ids: ids, rows: reviewed_rows}, owner_scope) do
+    selected_rows =
+      ids
+      |> Enum.zip(reviewed_rows)
+      |> Enum.map(fn {id, reviewed} ->
+        current = selected_replay_row(id, owner_scope)
+
+        Map.merge(current, %{
+          selected_id: id,
+          reviewed_status: reviewed[:status],
+          reviewed_id: reviewed[:id]
+        })
+      end)
+      |> Enum.sort_by(
+        fn %{id: id, row: row} ->
+          received_at =
+            if row && row.received_at,
+              do: DateTime.to_unix(row.received_at, :microsecond),
+              else: 0
+
+          {received_at, id || ""}
+        end,
+        :desc
+      )
+
+    eligible =
+      Enum.count(selected_rows, fn %{row: row} -> row && row.status in [:failed, :dead] end)
+
+    outcomes =
+      Enum.map(selected_rows, &replay_outcome(&1, owner_scope))
+
+    queued = Enum.count(outcomes, &(&1.outcome == :queued))
+
+    %{
+      selected: length(ids),
+      eligible: eligible,
+      attempted: Enum.count(outcomes, & &1.attempted),
+      queued: queued,
+      skipped: Enum.count(outcomes, &(&1.outcome == :skipped)),
+      denied: Enum.count(outcomes, &(&1.outcome == :denied)),
+      failed: Enum.count(outcomes, &(&1.outcome == :failed)),
+      unknown: Enum.count(outcomes, &(&1.outcome == :unknown)),
+      reread_unknown: Enum.count(outcomes, &(&1[:reread] == :unknown)),
+      outcomes: outcomes
+    }
+  end
+
+  defp denied_bulk_result(review) do
+    outcomes =
+      Enum.map(review.ids, &%{id: &1, selected_id: &1, outcome: :denied, attempted: false})
+
+    %{
+      selected: length(review.ids),
+      eligible: 0,
+      attempted: 0,
+      queued: 0,
+      skipped: 0,
+      denied: length(review.ids),
+      failed: 0,
+      unknown: 0,
+      reread_unknown: 0,
+      outcomes: outcomes
+    }
+  end
+
+  defp selected_replay_row(id, owner_scope) do
+    case replay_detail(id, owner_scope) do
+      {:ok, row} -> %{id: row.id, row: row, status: row.status, authorized?: true}
+      _inaccessible -> %{id: nil, row: nil, status: nil, authorized?: false}
+    end
+  rescue
+    _read_error -> %{id: nil, row: nil, status: nil, authorized?: false, read_failed?: true}
+  end
+
+  defp replay_detail(id, owner_scope) do
+    if Mix.env() == :test do
+      case Application.get_env(:accrue_admin, :webhook_replay_detail_fun) do
+        fun when is_function(fun, 2) -> fun.(id, owner_scope)
+        _configured_fun -> Webhooks.detail(id, owner_scope)
+      end
+    else
+      Webhooks.detail(id, owner_scope)
+    end
+  end
+
+  defp replay_outcome(selection, owner_scope) do
+    selection
+    |> do_replay_outcome(owner_scope)
+    |> Map.put_new(:selected_id, selection.selected_id)
+    |> Map.put_new(:detail_available?, selection[:authorized?])
+  end
+
+  defp do_replay_outcome(%{read_failed?: true}, _owner_scope),
+    do: %{id: nil, outcome: :unknown, attempted: false}
+
+  defp do_replay_outcome(%{id: nil}, _owner_scope),
+    do: %{id: nil, outcome: :skipped, attempted: false}
+
+  defp do_replay_outcome(%{id: id, row: %{status: status}}, _owner_scope)
+       when status not in [:failed, :dead],
+       do: %{id: id, outcome: :skipped, attempted: false, reread: :not_applicable}
+
+  defp do_replay_outcome(
+         %{id: id, row: %{status: status}, reviewed_status: reviewed},
+         _owner_scope
+       )
+       when status != reviewed,
+       do: %{id: id, outcome: :skipped, attempted: false, reread: :not_applicable}
+
+  defp do_replay_outcome(%{id: id} = selection, owner_scope) do
+    enqueue_result =
+      try do
+        requeue_delivery(id, owner_scope)
+      rescue
+        _queue_error -> :unknown_dispatch_outcome
+      end
+
+    case enqueue_result do
+      {:ok, _queued} ->
+        %{
+          id: id,
+          selected_id: selection.selected_id,
+          detail_available?: selection[:authorized?],
+          outcome: :queued,
+          attempted: true,
+          reread: post_enqueue_status(id, owner_scope)
+        }
+
+      {:error, :out_of_scope} ->
+        %{
+          id: nil,
+          selected_id: selection.selected_id,
+          outcome: :denied,
+          attempted: false,
+          reread: :not_applicable
+        }
+
+      {:error, reason} when reason in [:already_replayed, :not_dead_lettered, :not_found] ->
+        %{
+          id: id,
+          selected_id: selection.selected_id,
+          detail_available?: selection[:authorized?],
+          outcome: :skipped,
+          attempted: false,
+          reread: :not_applicable
+        }
+
+      {:error, _reason} ->
+        %{
+          id: id,
+          selected_id: selection.selected_id,
+          detail_available?: selection[:authorized?],
+          outcome: :failed,
+          attempted: true,
+          reread: :not_applicable
+        }
+
+      _unclassifiable ->
+        %{
+          id: id,
+          selected_id: selection.selected_id,
+          detail_available?: selection[:authorized?],
+          outcome: :unknown,
+          attempted: true,
+          reread: :not_applicable
+        }
+    end
+  end
+
+  defp post_enqueue_status(id, owner_scope) do
+    case selected_replay_row(id, owner_scope) do
+      %{row: %{status: status}} -> status
+      _unavailable -> :unknown
+    end
+  rescue
+    _read_error -> :unknown
+  end
+
+  defp scope_key(%{mode: mode, organization_id: organization_id, organization_slug: slug}),
+    do: {mode, organization_id, slug}
+
+  defp scope_key(_scope), do: :global
+
+  defp owner_scope_label(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
+    do: "Organization #{slug}"
+
+  defp owner_scope_label(_scope), do: "Global admin"
+
+  defp canonical_ids(ids) do
+    ids
+    |> Enum.filter(&is_binary/1)
+    |> Enum.uniq()
+    |> Enum.sort()
+  end
+
+  defp requeue_delivery(id, owner_scope) do
+    authorize_fun = &Webhooks.owner_scope_allows_replay?(&1, owner_scope)
+
+    if Mix.env() == :test do
+      case Application.get_env(:accrue_admin, :webhook_requeue_fun) do
+        fun when is_function(fun, 2) -> fun.(id, authorize_fun)
+        _configured_fun -> DLQ.requeue(id, authorize_fun)
+      end
+    else
+      DLQ.requeue(id, authorize_fun)
+    end
+  end
+
+  defp bulk_step_up_action do
+    %{type: "admin.webhook.bulk_replay", subject_type: "WebhookBatch", subject_id: "selected"}
+  end
+
+  defp dismiss_step_up(socket) do
+    if socket.assigns[:step_up_pending], do: StepUp.dismiss_challenge(socket), else: socket
+  end
+
+  defp clear_step_up(socket) do
+    socket
+    |> assign(:step_up_pending, false)
+    |> assign(:step_up_action, nil)
+    |> assign(:step_up_challenge, nil)
+    |> assign(:step_up_error, nil)
+    |> assign(:step_up_continuation, nil)
   end
 
   @impl true
@@ -168,8 +482,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     >
       <section class="ax-page">
         <PageHeader.page_header
+          breadcrumb_group="Developer"
           breadcrumbs={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.webhooks_index_heading()}
           ]}
           title={Copy.webhooks_list_heading()}
@@ -184,12 +498,11 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               <:stat
                 label="Blocked"
                 value={Integer.to_string(@summary.blocked_count)}
-                tone="amber"
+                tone={if @summary.blocked_count > 0, do: "amber"}
               />
               <:stat
                 label="Replayed"
                 value={Integer.to_string(@summary.replayed_count)}
-                tone="cobalt"
               />
             </StatStrip.stat_strip>
           </:stat_strip>
@@ -200,30 +513,75 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               filter_fields={webhook_filter_fields(@current_owner_scope)}
               filter_params={filter_params(@params)}
               path={@table_path}
-              clear_href={clear_all_href(@params, @table_path)}
-              clear_visible={filter_active?(@params)}
+              clear_href={reset_href(@table_path)}
+              clear_visible={!default_view?(@params, @current_owner_scope)}
+              clear_label="Reset filters"
             />
           </:filter_toolbar>
         </PageHeader.page_header>
 
         <FlashGroup.flash_group flashes={@flashes} />
 
+        <section
+          :if={@bulk_replay_result}
+          id="bulk-replay-results"
+          class="ax-card"
+          data-role="bulk-replay-results"
+          aria-label="Bulk replay results"
+        >
+          <h2 class="ax-heading">Delivery results</h2>
+          <ul class="ax-list">
+            <li
+              :for={item <- @bulk_replay_result}
+              class="ax-body"
+              data-delivery-id={item.selected_id}
+            >
+              <code><%= item.selected_id %></code>
+              <span><%= item.outcome %></span>
+              <a :if={item.href} href={item.href} class="ax-link">Open delivery</a>
+              <span :if={item.next_step}><%= item.next_step %></span>
+            </li>
+          </ul>
+        </section>
+
         <p class="ax-body ax-page-copy" data-role="webhooks-retry-helper">
           <%= Copy.webhooks_retry_selected_helper() %>
         </p>
 
-        <section :if={@pending_bulk_replay} class="ax-card" data-role="bulk-replay-confirm">
+        <section
+          :if={@pending_bulk_replay}
+          id="bulk-replay-confirm"
+          class="ax-card"
+          data-role="bulk-replay-confirm"
+          phx-hook="FocusTrap"
+          data-focus-trap-active="false"
+          data-focus-trap-return-to="[data-role='bulk-action']"
+          data-focus-trap-initial="#confirm-retry-selected"
+        >
           <p class="ax-body">
             <%= Copy.webhooks_retry_confirm_question(@pending_bulk_replay.count) %>
           </p>
+          <p class="ax-body" data-role="bulk-replay-review-scope">
+            Reviewed for <%= @pending_bulk_replay.scope_label %> ·
+            <%= @pending_bulk_replay.eligible_count %> of
+            <%= @pending_bulk_replay.count %> currently eligible
+          </p>
+          <ul class="ax-list" data-role="bulk-replay-reviewed-deliveries">
+            <li :for={reviewed <- @pending_bulk_replay.rows} class="ax-body">
+              <code><%= reviewed.selected_id %></code> ·
+              <%= if reviewed.row, do: humanize(reviewed.status), else: "Unavailable in this scope" %>
+            </li>
+          </ul>
           <div class="ax-page-header">
             <button
               type="button"
               phx-click="confirm_retry_selected"
+              phx-value-reviewed-ids={Enum.join(@pending_bulk_replay.ids, ",")}
               class="ax-button ax-button-primary"
+              id="confirm-retry-selected"
               data-role="confirm-retry-selected"
             >
-              <%= Copy.webhooks_retry_selected_label() %>
+              <%= Copy.webhooks_retry_queue_label() %>
             </button>
             <button
               type="button"
@@ -234,6 +592,19 @@ defmodule AccrueAdmin.Live.WebhooksLive do
             </button>
           </div>
         </section>
+
+        <StepUpAuthModal.step_up_auth_modal
+          pending={@step_up_pending}
+          challenge={@step_up_challenge}
+          error={@step_up_error}
+        />
+
+        <div :if={@step_up_pending} hidden aria-hidden="true" data-role="step-up-test-mirror">
+          <form phx-submit="step_up_submit">
+            <input type="text" name="code" value="" />
+            <button type="submit" data-role="step-up-submit"><%= Copy.step_up_submit_label() %></button>
+          </form>
+        </div>
 
         <.live_component
           module={DataTable}
@@ -248,24 +619,25 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           loading_fixture={phase197_loading_fixture?(@params)}
           loading_label={list_state_copy(:loading).heading}
           render_filter_toolbar={false}
-          clear_href={clear_all_href(@params, @table_path)}
+          clear_href={reset_href(@table_path)}
+          empty_action_href={if queue_active?(@params), do: clear_all_href(@params, @table_path), else: reset_href(@table_path)}
+          empty_action_label={if queue_active?(@params), do: "View all deliveries", else: "Reset filters"}
           selectable={true}
-          row_label={{"event", "events"}}
+          row_label={{"delivery", "deliveries"}}
           bulk_action_label={Copy.webhooks_retry_selected_label()}
           bulk_action_event="retry_selected"
           columns={[
-            %{label: "Webhook", render: &webhook_link(&1, @admin_mount_path, @current_owner_scope)},
+            %{label: "Webhook", render: &webhook_link(&1, @admin_mount_path, @current_owner_scope, :table)},
             %{id: :type, label: "Type"},
             %{label: "Status", render: &status_summary/1},
             %{label: "Endpoint", render: &endpoint_summary/1},
-            %{label: "Received", render: &received_summary/1}
+            %{label: "Received", render: fn row -> received_summary(row, :table) end}
           ]}
-          card_title={&card_title/1}
+          card_title={&webhook_link(&1, @admin_mount_path, @current_owner_scope, :card)}
           card_fields={[
             %{label: "Status", render: &status_summary/1},
-            %{id: :type, label: "Type"},
             %{label: "Endpoint", render: &endpoint_summary/1},
-            %{label: "Received", render: &received_summary/1}
+            %{label: "Received", render: fn row -> received_summary(row, :card) end}
           ]}
           filter_fields={webhook_filter_fields(@current_owner_scope)}
           empty_title={empty_title(@params, @summary)}
@@ -278,9 +650,9 @@ defmodule AccrueAdmin.Live.WebhooksLive do
             <FilterChipBar.filter_chip_bar
               items={work_queue_chips(@params, @table_path)}
               label="Webhook view"
+              compact={true}
               result_count={status.visible_count}
               result_label={Copy.webhooks_list_result_label_pair()}
-              clear_all_href={active_clear_all_href(@params, @table_path)}
               clear_all_label={Copy.data_table_clear_filters_label()}
             />
           </:list_status>
@@ -426,9 +798,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   defp filter_active?(params), do: filter_params(params) != %{}
 
-  defp active_clear_all_href(params, table_path) do
-    if filter_active?(params), do: clear_all_href(params, table_path)
-  end
+  defp reset_href(table_path), do: table_path
+
+  defp default_view?(params, scope),
+    do: params == build_default_params(scope, @default_queue_status)
 
   defp list_state(params) do
     if phase197_loading_fixture?(params), do: "loading-skeleton", else: nil
@@ -488,8 +861,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
       Map.get(params, "phase197_state") == "loading-skeleton"
   end
 
-  defp record_bulk_replay(socket, ids, count, result) do
+  defp record_bulk_replay(socket, result) do
     current_admin = socket.assigns.current_admin
+    scoped_ids = result.outcomes |> Enum.map(& &1.id) |> Enum.reject(&is_nil/1)
+    scoped_outcomes = Enum.reject(result.outcomes, &is_nil(&1.id))
 
     {:ok, _event} =
       Events.record(%{
@@ -499,46 +874,67 @@ defmodule AccrueAdmin.Live.WebhooksLive do
         actor_type: "admin",
         actor_id: Auth.actor_id(current_admin),
         data: %{
-          "count" => count,
-          "requeued" => result.requeued,
-          "skipped" => Map.get(result, :skipped, 0),
-          "ids" => ids
+          "selected" => result.selected,
+          "eligible" => result.eligible,
+          "attempted" => result.attempted,
+          "queued" => result.queued,
+          "skipped" => result.skipped,
+          "denied" => result.denied,
+          "failed" => result.failed,
+          "unknown" => result.unknown,
+          "reread_unknown" => result.reread_unknown,
+          "ids" => scoped_ids,
+          "outcomes" =>
+            Enum.map(scoped_outcomes, fn outcome ->
+              %{
+                "id" => outcome.id,
+                "outcome" => Atom.to_string(outcome.outcome),
+                "reread" => outcome[:reread] && to_string(outcome.reread)
+              }
+            end)
         }
       })
 
     :ok =
       Auth.log_audit(current_admin, %{
         type: "admin.webhook.bulk_replay.completed",
-        count: count,
+        selected: result.selected,
+        eligible: result.eligible,
+        attempted: result.attempted,
+        queued: result.queued,
+        skipped: result.skipped,
+        denied: result.denied,
+        failed: result.failed,
+        unknown: result.unknown,
+        reread_unknown: result.reread_unknown,
+        ids: scoped_ids,
         source: :accrue_admin
       })
 
     socket
   end
 
-  defp bulk_replay_error_copy(socket) do
-    Copy.page_state_copy(:recoverable_error,
-      resource: "webhook bulk replay",
-      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope),
-      recovery: "retry from the filtered webhook queue"
-    ).body
-  end
-
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
   end
 
-  defp webhook_link(row, mount_path, owner_scope) do
+  defp webhook_link(row, mount_path, owner_scope, presentation) do
     label = row.processor_event_id || row.id
-    safe_link(scoped_path(mount_path, "/webhooks/#{row.id}", owner_scope), label)
-  end
 
-  defp safe_link(href, label) do
-    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    assigns = %{
+      href: scoped_path(mount_path, "/webhooks/#{row.id}", owner_scope),
+      label: humanize(row.type),
+      badge_id:
+        "ax-id-badge-webhook-event-#{row.id}#{if presentation == :card, do: "-card", else: ""}",
+      id_value: to_string(label)
+    }
 
-    Phoenix.HTML.raw(
-      ~s(<span class="ax-body"><a href="#{href}" class="ax-link">#{escaped}</a></span>)
-    )
+    ~H"""
+    <DataTable.identity_cell label={@label}>
+      <:primary><.link href={@href} class="ax-link"><%= @label %></.link></:primary>
+      <:secondary><IdBadge.id_badge id={@badge_id} id_value={@id_value} label="Copy webhook event ID" copy_label="webhook event ID" /></:secondary>
+    </DataTable.identity_cell>
+    """
   end
 
   defp status_summary(row) do
@@ -552,13 +948,18 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     Phoenix.HTML.raw(~s(<span class="ax-body">#{escaped}</span>))
   end
 
-  defp received_summary(row) do
-    text = format_datetime(row.received_at)
-    escaped = text |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    Phoenix.HTML.raw(~s(<span class="ax-body">#{escaped}</span>))
+  defp received_summary(%{received_at: %DateTime{} = value} = row, surface) do
+    assigns = %{value: value, id: "webhook-#{surface}-received-#{row.id}"}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Phoenix.HTML.raw()
   end
 
-  defp card_title(row), do: row.processor_event_id || row.id
+  defp received_summary(_row, _surface), do: "Unknown"
 
   defp mode_label(true), do: "live"
   defp mode_label(false), do: "test"
@@ -572,9 +973,6 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     |> Enum.map_join(" ", &String.capitalize/1)
   end
 
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
-
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 
   defp scoped_path(mount_path, suffix, %{mode: :organization, organization_slug: slug})
@@ -587,12 +985,6 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   defp map_only_scope?(params) do
     params != %{} and Map.keys(params) -- ["org"] == []
   end
-
-  defp owner_scope_copy(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
-    do: "organization #{slug}"
-
-  defp owner_scope_copy(%{mode: :global}), do: "global owner scope"
-  defp owner_scope_copy(_owner_scope), do: "the active organization scope"
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

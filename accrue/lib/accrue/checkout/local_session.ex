@@ -68,7 +68,7 @@ defmodule Accrue.Checkout.LocalSession do
       op_id when is_binary(op_id) and op_id != "" ->
         case by_operation_id(customer, op_id) do
           %__MODULE__{} = existing -> {:ok, existing}
-          nil -> insert_session(customer, attrs)
+          nil -> insert_or_reuse_after_conflict(customer, attrs, op_id)
         end
 
       _ ->
@@ -84,11 +84,72 @@ defmodule Accrue.Checkout.LocalSession do
     Repo.get_by(__MODULE__, session_token: token)
   end
 
+  @doc "Looks up one Braintree checkout operation within the supplied Customer boundary."
+  @spec for_customer_operation(Customer.t(), String.t()) :: t() | nil
+  def for_customer_operation(%Customer{id: customer_id}, operation_id)
+      when is_binary(operation_id) and byte_size(operation_id) > 0 and
+             byte_size(operation_id) <= 255 do
+    Repo.one(
+      from(session in __MODULE__,
+        where:
+          session.customer_id == ^customer_id and session.processor == "braintree" and
+            session.operation_id == ^operation_id,
+        limit: 1
+      )
+    )
+  end
+
+  def for_customer_operation(_, _), do: nil
+
+  @doc "Whether a persisted checkout may be acted on at the supplied instant."
+  @spec actionable?(t(), DateTime.t()) :: boolean()
+  def actionable?(
+        %__MODULE__{status: "open", expires_at: %DateTime{} = expires_at},
+        %DateTime{} = now
+      ),
+      do: DateTime.compare(expires_at, now) == :gt
+
+  def actionable?(%__MODULE__{}, %DateTime{}), do: false
+
   @spec mark_completed(t()) :: {:ok, t()} | {:error, Ecto.Changeset.t()}
   def mark_completed(%__MODULE__{} = session) do
-    session
-    |> changeset(%{status: "completed"})
-    |> Repo.update()
+    update_claimed_status(session, "completed")
+  end
+
+  @doc "Atomically claims an open, unexpired session for one provider operation."
+  @spec claim(t(), DateTime.t()) :: {:ok, t()} | {:error, :unavailable}
+  def claim(%__MODULE__{} = session, %DateTime{} = now) do
+    query =
+      from(checkout in __MODULE__,
+        where:
+          checkout.id == ^session.id and checkout.status == "open" and
+            checkout.expires_at > ^now
+      )
+
+    case Repo.update_all(query, set: [status: "processing", updated_at: now]) do
+      {1, _} -> {:ok, by_id(session.id)}
+      _ -> {:error, :unavailable}
+    end
+  end
+
+  @doc "Records a provider operation whose result is not yet authoritative."
+  @spec mark_uncertain(t()) :: {:ok, t()} | {:error, term()}
+  def mark_uncertain(%__MODULE__{} = session), do: update_claimed_status(session, "uncertain")
+
+  @doc "Releases a claim only after a definite provider rejection."
+  @spec release_claim(t()) :: {:ok, t()} | {:error, term()}
+  def release_claim(%__MODULE__{} = session), do: update_claimed_status(session, "open")
+
+  defp update_claimed_status(%__MODULE__{} = session, status) do
+    query =
+      from(checkout in __MODULE__,
+        where: checkout.id == ^session.id and checkout.status == "processing"
+      )
+
+    case Repo.update_all(query, set: [status: status, updated_at: DateTime.utc_now()]) do
+      {1, _} -> {:ok, by_id(session.id)}
+      _ -> {:error, :not_claimed}
+    end
   end
 
   defp by_operation_id(%Customer{id: customer_id}, operation_id) do
@@ -98,6 +159,23 @@ defmodule Accrue.Checkout.LocalSession do
         limit: 1
       )
     )
+  end
+
+  defp insert_or_reuse_after_conflict(%Customer{} = customer, attrs, operation_id) do
+    case insert_session(customer, attrs) do
+      {:ok, _session} = inserted ->
+        inserted
+
+      {:error, %Ecto.Changeset{errors: errors}} = error ->
+        if Keyword.has_key?(errors, :operation_id) do
+          case by_operation_id(customer, operation_id) do
+            %__MODULE__{} = existing -> {:ok, existing}
+            nil -> error
+          end
+        else
+          error
+        end
+    end
   end
 
   defp insert_session(%Customer{} = customer, attrs) do

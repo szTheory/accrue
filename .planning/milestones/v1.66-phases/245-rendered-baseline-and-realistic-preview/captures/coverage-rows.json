@@ -1,0 +1,281 @@
+[
+  {
+    "id": "R01-populated",
+    "route": "/admin",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin",
+    "visual_anchor": "Visible route heading: Billing operations",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C01; PNG SHA-256 f3e27ea438ff9fb6eaf0366cdc3743f6d5520da84a418849d816d367cf8edfa1"
+  },
+  {
+    "id": "R01-search-open",
+    "route": "/admin",
+    "state": "global-search-open",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin",
+    "visual_anchor": "Global search dialog with scoped list suggestions; visible page heading: Billing operations",
+    "status": "inspected",
+    "evidence": "manifest capture C21; PNG SHA-256 028b55f275d34f7898d72fe54c5e2a4ed4bcc796b84885e327b88e059c79b36d; Control+K opened the modal dialog, exposed the scoped-list suggestions, and moved focus to its search input."
+  },
+  {
+    "id": "R01-search-pointer-active",
+    "route": "/admin",
+    "state": "global-search-keyboard-and-pointer-active",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin",
+    "visual_anchor": "Search result list with recorded keyboard and pointer selection indicators; visible page heading: Billing operations",
+    "status": "inspected",
+    "evidence": "manifest capture C22; PNG SHA-256 a4dc6a1cd6aac10770622be5a609007c7a05583850543c6725169aad7b7b5cb7; ArrowDown keyboard-active path=/admin/subscriptions/2dda99ea-cc04-4266-a61d-31808a8f5c75; after pointer hover target=/admin/customers/83df248a-b961-4f77-9b26-166b4bd03deb, hovered path=/admin/customers/83df248a-b961-4f77-9b26-166b4bd03deb, hovered has ax-active=true, active paths=[\"/admin/customers/83df248a-b961-4f77-9b26-166b4bd03deb\"], hover background=rgb(229, 235, 255). This records observed behavior without asserting the expected selection state."
+  },
+  {
+    "id": "R20-populated",
+    "route": "/admin/analytics/recovery",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/analytics/recovery",
+    "visual_anchor": "Visible route heading: Revenue Recovery",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C18; PNG SHA-256 d751100ba151067c7221576e1382a843752d57763f5c831054511881938da5a1"
+  },
+  {
+    "id": "R21-populated",
+    "route": "/admin/analytics/recovery/subscriptions/:id",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/analytics/recovery/subscriptions/00e4fb01-4a12-4910-ba50-de7e03d3e248",
+    "visual_anchor": "Visible route heading: Dunning Timeline",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C19; PNG SHA-256 bb5ec177a107208c7cdf9efbdbef3869781e4ee972ec62e3bde9380922b0e236"
+  },
+  {
+    "id": "R14-filtered-to-zero",
+    "route": "/admin/connect",
+    "state": "filtered-to-zero",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/connect",
+    "visual_anchor": "Visible route heading: Finish account readiness",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C14; PNG SHA-256 d85bce5413fa06deb86988c6f313415b2c5c2e22ff3d5faf4dee237d6e3d0a49"
+  },
+  {
+    "id": "R15-populated",
+    "route": "/admin/connect/:id",
+    "state": "populated",
+    "url": null,
+    "visual_anchor": "Admin shell and route-owned content",
+    "status": "unavailable",
+    "reason": "No ordinary Fake connect accounts row exists, so a detail URL cannot be formed; the collection route was still visited."
+  },
+  {
+    "id": "R10-populated",
+    "route": "/admin/coupons",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/coupons",
+    "visual_anchor": "Visible route heading: Review usable discounts",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C10; PNG SHA-256 f87e2f0c3152e8b28d4e69b132ece521ef1e711f07a87f2c50eeb30d48a0d033"
+  },
+  {
+    "id": "R11-populated",
+    "route": "/admin/coupons/:id",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/coupons/907119e2-4a62-4b2f-a9c4-7586d3c889d5",
+    "visual_anchor": "Visible route heading: $10 Welcome Credit",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C11; PNG SHA-256 f5f5b1a1528a9239e2a2fdda95bfc8096341e179d1e3e16a9efdde7190763211"
+  },
+  {
+    "id": "R02-filtered-zero",
+    "route": "/admin/customers",
+    "state": "filtered-to-zero",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/customers?q=phase245-no-results-7c92e34a",
+    "visual_anchor": "Customer collection filtered-zero state and matching query; visible page heading: Find a customer",
+    "status": "inspected",
+    "evidence": "manifest capture C20; PNG SHA-256 565f516a7052e87b565427378452337524c63632ae5bc7ae23a6144e11e9c3be; A safe impossible q parameter remained in the final URL and rendered the explicit filtered-empty state with zero table rows."
+  },
+  {
+    "id": "R02-populated",
+    "route": "/admin/customers",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/customers",
+    "visual_anchor": "Visible route heading: Find a customer",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C02; PNG SHA-256 2a9f842816fde330cbeceba788c117c506f93975da51b0a875c9e5b17376834d"
+  },
+  {
+    "id": "R03-activity-disclosure-open",
+    "route": "/admin/customers/:id",
+    "state": "activity-disclosure-expanded",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/customers/83df248a-b961-4f77-9b26-166b4bd03deb?return_to=%2Fadmin%2Fcustomers&tab=invoices",
+    "visual_anchor": "Customer detail with expanded Activity disclosure; visible page heading: Atelier Café",
+    "status": "inspected",
+    "evidence": "manifest capture C24; PNG SHA-256 c9165999e612a7dc138f3112ead72a8aa9c804d7c1c9be58cab2612c3379352f; Opening the Activity disclosure rendered its available timeline/empty evidence without a record mutation."
+  },
+  {
+    "id": "R03-invoices-tab",
+    "route": "/admin/customers/:id",
+    "state": "peer-record-invoices-tab-selected",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/customers/83df248a-b961-4f77-9b26-166b4bd03deb?return_to=%2Fadmin%2Fcustomers&tab=invoices",
+    "visual_anchor": "Customer detail with invoice peer-record tab selected; visible page heading: Atelier Café",
+    "status": "inspected",
+    "evidence": "manifest capture C23; PNG SHA-256 60b06eaab0e6bc7e61d26dd7e8711aee54595d3304ded2c17d4e6ed44966cfb9; Clicking the Invoices peer tab updated the URL to tab=invoices and set aria-current=page; the rendered peer-record panel reflects the selected tab."
+  },
+  {
+    "id": "R03-populated",
+    "route": "/admin/customers/:id",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/customers/028e6898-ca99-47c0-a011-f67f60a655c2",
+    "visual_anchor": "Visible route heading: Mohr-Donnelly",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C03; PNG SHA-256 73d0997d644e1da8f28ceaddabdd5a6d55fbed892a184ed3605a51081439651b"
+  },
+  {
+    "id": "DEV-01-not-mounted",
+    "route": "/admin/dev/clock",
+    "state": "not-mounted",
+    "url": "/admin/dev/clock",
+    "visual_anchor": "Development route activation under the host mount",
+    "status": "not-applicable",
+    "reason": "Direct navigation returned HTTP 404; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance."
+  },
+  {
+    "id": "DEV-04-not-mounted",
+    "route": "/admin/dev/components",
+    "state": "not-mounted",
+    "url": "/admin/dev/components",
+    "visual_anchor": "Development route activation under the host mount",
+    "status": "not-applicable",
+    "reason": "Direct navigation returned HTTP 404; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance."
+  },
+  {
+    "id": "DEV-02-not-mounted",
+    "route": "/admin/dev/email-preview",
+    "state": "not-mounted",
+    "url": "/admin/dev/email-preview",
+    "visual_anchor": "Development route activation under the host mount",
+    "status": "not-applicable",
+    "reason": "Direct navigation returned HTTP 404; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance."
+  },
+  {
+    "id": "DEV-05-not-mounted",
+    "route": "/admin/dev/fake-inspect",
+    "state": "not-mounted",
+    "url": "/admin/dev/fake-inspect",
+    "visual_anchor": "Development route activation under the host mount",
+    "status": "not-applicable",
+    "reason": "Direct navigation returned HTTP 404; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance."
+  },
+  {
+    "id": "DEV-03-not-mounted",
+    "route": "/admin/dev/webhook-fixtures",
+    "state": "not-mounted",
+    "url": "/admin/dev/webhook-fixtures",
+    "visual_anchor": "Development route activation under the host mount",
+    "status": "not-applicable",
+    "reason": "Direct navigation returned HTTP 404; the host mount has allow_live_reload: false, so this package development route is not active in the ordinary instance."
+  },
+  {
+    "id": "R16-populated",
+    "route": "/admin/events",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/events",
+    "visual_anchor": "Visible route heading: Trace billing activity",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C15; PNG SHA-256 f2e15913e7a0fe175a1dc26d73ef61676ba1f71f6a8d65a7384e2b5385cc6f07"
+  },
+  {
+    "id": "R17-populated",
+    "route": "/admin/events/:id",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/events/1",
+    "visual_anchor": "Visible route heading: Billing event",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C16; PNG SHA-256 2cf65173adeb3092590525a890572397fc47d03e592aff5d0c40b50b1b0edf76"
+  },
+  {
+    "id": "R06-populated",
+    "route": "/admin/invoices",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/invoices?view=all",
+    "visual_anchor": "Visible route heading: Clear open receivables",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C06; PNG SHA-256 17276a8bbb74cae9c191b4878389d9630ade50b56536c11ba813711b23dacd84"
+  },
+  {
+    "id": "R07-populated",
+    "route": "/admin/invoices/:id",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/invoices/05f639e3-4b31-4ee7-a226-b249e2122a66",
+    "visual_anchor": "Visible route heading: DEMO-UNCOLL-0006",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C07; PNG SHA-256 6463c3956d72c8d7723001ad6b81fbde85fef5a7f8922e4b985f3e3faa80f681"
+  },
+  {
+    "id": "R08-populated",
+    "route": "/admin/payments",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/payments",
+    "visual_anchor": "Visible route heading: Recover failed payments",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C08; PNG SHA-256 8952eed301c404f02f7cbd54639ab8d0b6e2ecc79bdcba3b2c584f8d2e05d5d5"
+  },
+  {
+    "id": "R09-populated",
+    "route": "/admin/payments/:id",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/payments/07fce207-1342-479e-a64b-946f1d937854",
+    "visual_anchor": "Visible route heading: ch_showcase_refunded",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C09; PNG SHA-256 456d5238ebef9c245797e47c02c26c34af286c20a7c082b707fe458bb21648d6"
+  },
+  {
+    "id": "R12-populated",
+    "route": "/admin/promotion-codes",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/promotion-codes",
+    "visual_anchor": "Visible route heading: Find active codes",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C12; PNG SHA-256 f9b9a67a7ee217fbe8ad4d3ac4be38e901e903adf741ec557b9ae0f11b130fea"
+  },
+  {
+    "id": "R13-populated",
+    "route": "/admin/promotion-codes/:id",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/promotion-codes/3bb400f1-b8a6-4182-9890-37fcfdd60a4f",
+    "visual_anchor": "Visible route heading: WELCOME10",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C13; PNG SHA-256 fd62640a884615e5513edeb9db16f0580222a895d3def093b0b4ebac7c8b7f57"
+  },
+  {
+    "id": "R04-populated",
+    "route": "/admin/subscriptions",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/subscriptions",
+    "visual_anchor": "Visible route heading: Subscriptions",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C04; PNG SHA-256 9dda7a107e54bf82159af7d7b0274e03a2ecc5697e5849a7920a810f9b093b46"
+  },
+  {
+    "id": "R05-populated",
+    "route": "/admin/subscriptions/:id",
+    "state": "populated",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/subscriptions/00e4fb01-4a12-4910-ba50-de7e03d3e248",
+    "visual_anchor": "Visible route heading: Flatley-McDermott",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C05; PNG SHA-256 5abb4516f47788cc2b5e44326bef1c3be894c452829aa745d737faa556a3b12d"
+  },
+  {
+    "id": "R18-filtered-to-zero",
+    "route": "/admin/webhooks",
+    "state": "filtered-to-zero",
+    "url": "http://accrue-host-phase245-ordinary.localhost/admin/webhooks",
+    "visual_anchor": "Visible route heading: Replay failed deliveries",
+    "status": "inspected",
+    "evidence": "final URL matched requested template; main h1 rendered; manifest capture C17; PNG SHA-256 7e51a06ebc306eeb994ba59c137333ac65d94a382760d86f8680007e1fff9c43"
+  },
+  {
+    "id": "R19-populated",
+    "route": "/admin/webhooks/:id",
+    "state": "populated",
+    "url": null,
+    "visual_anchor": "Admin shell and route-owned content",
+    "status": "unavailable",
+    "reason": "No ordinary Fake webhook events row exists, so a detail URL cannot be formed; the collection route was still visited."
+  }
+]

@@ -37,6 +37,23 @@ defmodule AccruePortal.AuthHookTest do
     def actor_id(%{id: id}), do: id
   end
 
+  defmodule DeniedContextAdapter do
+    def resolve(_actor, _selection), do: {:error, :forbidden}
+    def authorize(_, _, _, _), do: {:error, :forbidden}
+  end
+
+  defmodule ReauthorizationAdapter do
+    def resolve(actor, _selection) do
+      if Process.get({__MODULE__, :revoked}, false) do
+        {:error, :forbidden}
+      else
+        {:ok, %{billable: actor, display_name: "Personal billing"}}
+      end
+    end
+
+    def authorize(_, _, :read, _), do: :ok
+  end
+
   setup do
     previous_auth = Application.get_env(:accrue, :auth_adapter)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
@@ -99,5 +116,65 @@ defmodule AccruePortal.AuthHookTest do
 
     assert redirected_to(conn) == "/users/log-in"
     assert get_session(conn, :user_return_to) == "/billing"
+  end
+
+  test "authenticated denied context goes to the non-login blocked destination" do
+    session = %{
+      "user_token" => "customer-token",
+      "accrue_portal" => %{
+        "mount_path" => "/billing",
+        "login_path" => "/users/log-in",
+        "context_adapter" => DeniedContextAdapter,
+        "context_session_keys" => ["active_billable_id"]
+      },
+      "active_billable_id" => "invalid-selection"
+    }
+
+    assert {:halt, socket} =
+             Accrue.Portal.AuthHook.on_mount(
+               :ensure_customer,
+               %{},
+               session,
+               %Phoenix.LiveView.Socket{}
+             )
+
+    assert socket.redirected == {:redirect, %{status: 302, to: "/billing/blocked"}}
+  end
+
+  test "a repeated mount re-resolves and reauthorizes a previously allowed context" do
+    user = %TestUser{id: "00000000-0000-0000-0000-000000000001"}
+    assert {:ok, %Customer{}} = Billing.customer(user)
+    Process.delete({ReauthorizationAdapter, :revoked})
+
+    session = %{
+      "user_token" => "customer-token",
+      "accrue_portal" => %{
+        "mount_path" => "/billing",
+        "login_path" => "/users/log-in",
+        "context_adapter" => ReauthorizationAdapter
+      }
+    }
+
+    assert {:cont, mounted} =
+             Accrue.Portal.AuthHook.on_mount(
+               :ensure_customer_no_create,
+               %{},
+               session,
+               %Phoenix.LiveView.Socket{}
+             )
+
+    assert mounted.assigns.current_customer
+    Process.put({ReauthorizationAdapter, :revoked}, true)
+
+    assert {:halt, remounted} =
+             Accrue.Portal.AuthHook.on_mount(
+               :ensure_customer_no_create,
+               %{},
+               session,
+               %Phoenix.LiveView.Socket{}
+             )
+
+    assert remounted.redirected == {:redirect, %{status: 302, to: "/billing/blocked"}}
+    Process.delete({ReauthorizationAdapter, :revoked})
   end
 end

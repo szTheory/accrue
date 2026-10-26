@@ -1,0 +1,6 @@
+TAP version 13
+1..4
+ok 1 - test missing and forged pins block payment method writes
+ok 2 - test rendered default and delete forms carry a context pin accepted by their POSTs
+not ok 3 - test rendered add-card form posts its original pin through create authorization
+not ok 4 - test read-only organization cannot receive a Braintree client token or Hosted Fields

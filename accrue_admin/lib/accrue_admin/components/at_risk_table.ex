@@ -18,7 +18,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
   | `:currency` | `String.t() | atom() | nil` | optional currency for amount display |
   | `:days_in_campaign` | `non_neg_integer()` | displayed as "N days" |
   | `:current_step` | `non_neg_integer()` | 0 → "Pending"; N → "Step N" |
-  | `:next_step_eta` | `%DateTime{} | nil` | formatted as date-time string; nil → "—" |
+  | `:next_step_eta` | `%DateTime{} | nil` | shared exact timestamp control; nil → "—" |
   | `:failure_reason` | `map() | nil` | most-recent `invoice.payment_failed` data; extracts `failure_code`/`failure_message` keys; nil or missing invoice → "—" |
 
   ## Example
@@ -29,11 +29,13 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
   use Phoenix.Component
 
+  alias AccrueAdmin.Components.Timestamp
   alias AccrueAdmin.ScopedPath
 
   attr(:rows, :list, required: true)
   attr(:base_path, :string, default: "/billing")
   attr(:owner_scope, :any, default: nil)
+  attr(:current_window, :string, default: "30d")
   attr(:class, :string, default: nil)
   attr(:loading, :boolean, default: false)
   attr(:error, :any, default: nil)
@@ -48,8 +50,8 @@ defmodule AccrueAdmin.Components.AtRiskTable do
       |> assign(
         :empty_copy,
         normalize_state_copy(assigns[:empty_copy], %{
-          heading: "No active dunning campaigns",
-          body: "All subscriptions in this window have recovered or exhausted their campaign."
+          heading: "No subscriptions currently need payment retry",
+          body: "All subscriptions in this window recovered or exhausted their retry schedule."
         })
       )
 
@@ -60,13 +62,15 @@ defmodule AccrueAdmin.Components.AtRiskTable do
       data-state={@state}
     >
       <header class="ax-at-risk-header">
-        <p class="ax-label">At-Risk Subscriptions</p>
-        <p class="ax-body ax-muted">{length(@rows)} active dunning campaigns in this window</p>
+        <p class="ax-label">Subscriptions in retry</p>
+        <p :if={@state not in ["loading", "error"]} class="ax-body ax-muted">
+          {length(@rows)} subscriptions with active payment retries in this window
+        </p>
       </header>
 
       <div :if={@state == "loading"} class="ax-at-risk-state" data-state="loading" role="status">
         <p class="ax-heading">Loading at-risk subscriptions</p>
-        <p class="ax-body">Checking active dunning campaigns for this recovery window.</p>
+            <p class="ax-body">Checking payment retry status for this recovery window.</p>
       </div>
 
       <div :if={@state == "error"} class="ax-at-risk-state ax-at-risk-state-error" data-state="error" role="alert">
@@ -74,47 +78,61 @@ defmodule AccrueAdmin.Components.AtRiskTable do
         <p class="ax-body">{error_message(@error)}</p>
       </div>
 
-      <table :if={@state in ["no-pagination", "has-pagination"]} class="ax-at-risk-grid">
-        <thead>
-          <tr>
-            <th scope="col" class="ax-label">Customer</th>
-            <th scope="col" class="ax-label">Amount</th>
-            <th scope="col" class="ax-label">Campaign Age</th>
-            <th scope="col" class="ax-label">Current Step</th>
-            <th scope="col" class="ax-label">Next-Step ETA</th>
-            <th scope="col" class="ax-label">Last Failure Reason</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr :for={row <- @rows}>
-            <td>
-              <a
-                href={subscription_href(@base_path, row, @owner_scope)}
-                class="ax-link"
-              >
-                {row.customer_label || "—"}
-              </a>
-            </td>
-            <td class="ax-body">{format_amount(row)}</td>
-            <td class="ax-body">{campaign_age(row)}</td>
-            <td class="ax-body">{step_label(row)}</td>
-            <td class="ax-body">{format_eta(row.next_step_eta)}</td>
-            <td class="ax-body ax-muted">{format_failure(row.failure_reason)}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div
+        :if={@state in ["no-pagination", "has-pagination"]}
+        class="ax-at-risk-scroll-region"
+        role="region"
+        aria-label="At-risk subscriptions table"
+        tabindex="0"
+      >
+        <table class="ax-at-risk-grid">
+          <thead>
+            <tr>
+              <th scope="col" class="ax-label">Customer</th>
+              <th scope="col" class="ax-label">Subscription status</th>
+              <th scope="col" class="ax-label">Amount</th>
+              <th scope="col" class="ax-label">Time in retry</th>
+              <th scope="col" class="ax-label">Retry step</th>
+              <th scope="col" class="ax-label">Next retry</th>
+              <th scope="col" class="ax-label">Last failure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr :for={row <- @rows}>
+              <td>
+                <a
+                  href={subscription_href(@base_path, row, @owner_scope, @current_window)}
+                  class="ax-link ax-record-label"
+                  title={row.customer_label}
+                >
+                  {row.customer_label || "—"}
+                </a>
+              </td>
+              <td class="ax-body">{current_status(row)}</td>
+              <td class="ax-body">{format_amount(row)}</td>
+              <td class="ax-body">{campaign_age(row)}</td>
+              <td class="ax-body">{step_label(row)}</td>
+              <td class="ax-body">{eta_cell(row.next_step_eta, row.subscription_id, :table)}</td>
+              <td class="ax-body ax-muted">{format_failure(row.failure_reason)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <div :if={@state in ["no-pagination", "has-pagination"]} class="ax-at-risk-cards" data-role="card-list">
         <article :for={row <- @rows} class="ax-at-risk-card">
           <header class="ax-at-risk-card-header">
             <div class="ax-at-risk-card-identity">
-              <p class="ax-eyebrow">Subscription</p>
-              <h3 class="ax-heading">{row.customer_label || "—"}</h3>
+              <h3 class="ax-heading ax-record-label" title={row.customer_label}>{row.customer_label || "—"}</h3>
             </div>
             <span class="ax-at-risk-card-status">{step_label(row)}</span>
           </header>
 
           <dl class="ax-at-risk-card-facts">
+            <div>
+              <dt class="ax-label">Subscription status</dt>
+              <dd class="ax-body">{current_status(row)}</dd>
+            </div>
             <div>
               <dt class="ax-label">Amount</dt>
               <dd class="ax-body">{format_amount(row)}</dd>
@@ -125,16 +143,16 @@ defmodule AccrueAdmin.Components.AtRiskTable do
             </div>
             <div>
               <dt class="ax-label">Next step</dt>
-              <dd class="ax-body">{format_eta(row.next_step_eta)}</dd>
+              <dd class="ax-body">{eta_cell(row.next_step_eta, row.subscription_id, :card)}</dd>
             </div>
             <div>
-              <dt class="ax-label">Last failure</dt>
+              <dt class="ax-label">Historical failure reason</dt>
               <dd class="ax-body ax-muted">{format_failure(row.failure_reason)}</dd>
             </div>
           </dl>
 
           <a
-            href={subscription_href(@base_path, row, @owner_scope)}
+            href={subscription_href(@base_path, row, @owner_scope, @current_window)}
             class="ax-button ax-button-secondary"
             aria-label={"Open recovery campaign for #{row.customer_label || row.subscription_id}"}
           >
@@ -148,12 +166,12 @@ defmodule AccrueAdmin.Components.AtRiskTable do
         <p class="ax-body"><%= @empty_copy.body %></p>
       </div>
 
-      <footer :if={@state in ["no-pagination", "has-pagination"]} class="ax-at-risk-footer">
+      <footer :if={@state == "has-pagination"} class="ax-at-risk-footer">
         <p class="ax-body" data-role="pagination-state">
           <%= if @next_cursor do %>
             More at-risk subscriptions are available.
           <% else %>
-            No pagination control is shown for this recovery window.
+            All subscriptions in this view are shown.
           <% end %>
         </p>
         <a
@@ -181,13 +199,27 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
   defp normalize_state_copy(_copy, fallback), do: fallback
 
-  defp subscription_href(base_path, row, owner_scope) do
+  defp subscription_href(base_path, row, owner_scope, current_window) do
+    return_to =
+      ScopedPath.build(base_path, "/analytics/recovery", owner_scope, %{
+        "window" => current_window
+      })
+
     ScopedPath.build(
       base_path,
       "/analytics/recovery/subscriptions/" <> row.subscription_id,
-      owner_scope
+      owner_scope,
+      %{"return_to" => return_to}
     )
   end
+
+  defp current_status(%{current_status: status}) when is_atom(status),
+    do: current_status(%{current_status: Atom.to_string(status)})
+
+  defp current_status(%{current_status: status}) when is_binary(status),
+    do: status |> String.replace("_", " ") |> String.capitalize()
+
+  defp current_status(_row), do: "Unavailable"
 
   defp load_more_href(_base_path, _next_cursor, href, _owner_scope)
        when is_binary(href) and href != "",
@@ -209,7 +241,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
   defp format_amount(%{amount_due_minor: amount_minor, currency: currency})
        when is_integer(amount_minor) do
-    case normalize_currency(currency || "usd") do
+    case normalize_currency(currency) do
       nil ->
         "Amount unavailable"
 
@@ -236,10 +268,17 @@ defmodule AccrueAdmin.Components.AtRiskTable do
 
   defp normalize_currency(_currency), do: nil
 
-  defp format_eta(nil), do: "—"
+  defp eta_cell(nil, _subscription_id, _surface), do: "—"
 
-  defp format_eta(%DateTime{} = dt) do
-    Calendar.strftime(dt, "%Y-%m-%d %H:%M UTC")
+  defp eta_cell(%DateTime{} = value, subscription_id, surface) do
+    assigns = %{value: value, id: "at-risk-#{surface}-eta-#{subscription_id}"}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+    |> Phoenix.HTML.raw()
   end
 
   defp format_failure(nil), do: "—"

@@ -75,4 +75,13 @@ export function initThemeControls() {
   document.addEventListener("keydown", onThemeTargetKeydown, true);
   const initial = document.documentElement.dataset.theme;
   if (initial) syncThemeButtonActiveState(sanitizeTheme(initial));
+
+  // LiveView can replace the picker after the anti-FOUC script has selected a
+  // localStorage preference that is newer than the server-rendered cookie.
+  // Keep the new controls truthful to the effective stored preference.
+  const observer = new MutationObserver(() => {
+    const activeTheme = document.documentElement.dataset.theme;
+    if (activeTheme) syncThemeButtonActiveState(sanitizeTheme(activeTheme));
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
 }

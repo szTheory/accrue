@@ -1,6 +1,6 @@
 ---
 phase: 69-doc-planning-mirrors
-status: complete
+status: passed
 ---
 
 ## DOC integrator proof (DOC-01, DOC-02)

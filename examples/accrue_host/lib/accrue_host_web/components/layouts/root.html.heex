@@ -51,10 +51,12 @@
         </.link>
 
         <div class="flex min-w-0 items-center gap-2">
-          <.link href={~p"/pricing"} class="btn btn-ghost btn-sm rounded-lg">
+          <.link href={~p"/pricing"} class="btn btn-ghost btn-sm hidden rounded-lg sm:inline-flex">
             Pricing
           </.link>
-          <.theme_toggle />
+          <div class="hidden sm:block">
+            <.theme_toggle />
+          </div>
           <%= if current_user do %>
             <.link
               href={~p"/app/billing"}

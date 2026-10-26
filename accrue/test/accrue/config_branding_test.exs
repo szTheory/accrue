@@ -108,6 +108,7 @@ defmodule Accrue.ConfigBrandingTest do
       assert Config.admin_branding(:app_name) == "Acme Billing"
       assert Config.admin_branding(:logo_url) == "https://example.test/logo.svg"
       assert Config.admin_branding(:accent_color) == "#5E9E84"
+      assert Config.admin_branding(:theme) == :system
     end
 
     test "uses explicit admin branding without changing customer billing branding" do
@@ -127,6 +128,16 @@ defmodule Accrue.ConfigBrandingTest do
       assert Config.admin_branding(:app_name) == "Accrue Admin"
       assert Config.admin_branding(:logo_url) == nil
       assert Config.admin_branding(:accent_color) == "#5D79F6"
+      assert Config.admin_branding(:theme) == :system
+    end
+
+    test "accepts a host-forced admin theme" do
+      Application.put_env(:accrue, :admin_branding,
+        app_name: "Accrue Admin",
+        theme: :dark
+      )
+
+      assert Config.admin_branding(:theme) == :dark
     end
   end
 

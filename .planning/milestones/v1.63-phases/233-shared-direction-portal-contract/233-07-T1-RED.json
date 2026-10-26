@@ -1,0 +1,10 @@
+{
+  "command": "HEX_HOME=/tmp/accrue-233-hex GSD_TAP_REPORT=../.planning/phases/233-shared-direction-portal-contract/233-07-T1-RED.tap mix test --formatter AccruePortal.TapFormatter test/accrue_portal/checkout_context_test.exs (from accrue_portal)",
+  "exitCode": 2,
+  "output": "TAP version 13\n1..2\nnot ok 1 - test rendered checkout form pins its displayed context and tokenized event\nnot ok 2 - test read-only checkout mount never issues a client token or renders Hosted Fields\n",
+  "targetTest": "test read-only checkout mount never issues a client token or renders Hosted Fields",
+  "targetFile": "accrue_portal/test/accrue_portal/checkout_context_test.exs",
+  "expected": "A read-authorized checkout without complete_checkout authority receives no Braintree client token.",
+  "actual": "TokenCounter.count() was nonzero because checkout mount issued a client token without checking the named completion grant.",
+  "semanticAssessment": "Target test executed and failed the planned zero-token assertion. TAP report contains both discovered target tests; failure was not a setup, collection, import, or fixture error."
+}

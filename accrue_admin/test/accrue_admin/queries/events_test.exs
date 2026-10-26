@@ -2,6 +2,7 @@ defmodule AccrueAdmin.Queries.EventsTest do
   use AccrueAdmin.RepoCase, async: false
 
   alias Accrue.Billing.{Charge, Customer}
+  alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Cursor
   alias AccrueAdmin.TestRepo
@@ -92,6 +93,48 @@ defmodule AccrueAdmin.Queries.EventsTest do
              AccrueAdmin.Queries.Events.detail(allowed_event_id, scope)
 
     assert :not_found = AccrueAdmin.Queries.Events.detail(denied_event.id, scope)
+  end
+
+  test "event filters decode, encode and select rows by every supported meaning" do
+    source =
+      %{
+        processor: "stripe",
+        processor_event_id: "evt_filter_contract",
+        type: "invoice.payment_failed",
+        livemode: false,
+        endpoint: :default,
+        status: :received,
+        raw_body: Jason.encode!(%{"id" => "evt_filter_contract", "object" => "event"}),
+        received_at: DateTime.utc_now(),
+        data: %{}
+      }
+      |> WebhookEvent.ingest_changeset()
+      |> TestRepo.insert!()
+
+    {:ok, target} =
+      Accrue.Events.record(%{
+        type: "invoice.payment_failed.filter_contract",
+        subject_type: "Invoice",
+        subject_id: "invoice_filter_contract",
+        actor_type: "admin",
+        actor_id: "actor_filter_contract",
+        caused_by_webhook_event_id: source.id
+      })
+
+    filters = [
+      %{q: "filter_contract"},
+      %{type: target.type},
+      %{actor_type: target.actor_type},
+      %{subject_type: target.subject_type},
+      %{source_webhook_event_id: target.caused_by_webhook_event_id}
+    ]
+
+    for filter <- filters do
+      encoded = AccrueAdmin.Queries.Events.encode_filter(filter)
+      assert AccrueAdmin.Queries.Events.decode_filter(encoded) == filter
+      {rows, _cursor} = AccrueAdmin.Queries.Events.list(filter: filter, limit: 100)
+      assert Enum.any?(rows, &(&1.id == target.id))
+    end
   end
 
   defp insert_customer(attrs) do

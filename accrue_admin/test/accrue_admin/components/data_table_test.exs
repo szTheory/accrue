@@ -1,5 +1,7 @@
 defmodule AccrueAdmin.DataTableTest do
   use AccrueAdmin.LiveCase, async: false
+  use Phoenix.Component
+  import Phoenix.LiveViewTest
 
   alias AccrueAdmin.Components.DataTable
   alias AccrueAdmin.Queries.Cursor
@@ -8,10 +10,25 @@ defmodule AccrueAdmin.DataTableTest do
     use Agent
 
     def start_link(_opts) do
-      Agent.start_link(fn -> %{rows: [], list_calls: [], count_calls: []} end, name: __MODULE__)
+      Agent.start_link(
+        fn ->
+          %{rows: [], list_calls: [], count_calls: [], fail_lists?: false, fail_counts?: false}
+        end,
+        name: __MODULE__
+      )
     end
 
     def put_rows(rows), do: Agent.update(__MODULE__, &Map.put(&1, :rows, rows))
+    def fail_lists, do: Agent.update(__MODULE__, &Map.put(&1, :fail_lists?, true))
+    def recover_lists, do: Agent.update(__MODULE__, &Map.put(&1, :fail_lists?, false))
+    def fail_counts, do: Agent.update(__MODULE__, &Map.put(&1, :fail_counts?, true))
+    def recover_counts, do: Agent.update(__MODULE__, &Map.put(&1, :fail_counts?, false))
+
+    def consume_list_failure do
+      Agent.get_and_update(__MODULE__, fn state ->
+        {state.fail_lists?, state}
+      end)
+    end
 
     def record_list_call(opts) do
       Agent.update(__MODULE__, fn state ->
@@ -28,6 +45,7 @@ defmodule AccrueAdmin.DataTableTest do
     def list_calls, do: Agent.get(__MODULE__, &Enum.reverse(&1.list_calls))
     def count_calls, do: Agent.get(__MODULE__, &Enum.reverse(&1.count_calls))
     def rows, do: Agent.get(__MODULE__, & &1.rows)
+    def count_failure?, do: Agent.get(__MODULE__, & &1.fail_counts?)
   end
 
   defmodule FixtureQuery do
@@ -39,6 +57,10 @@ defmodule AccrueAdmin.DataTableTest do
     @impl true
     def list(opts \\ []) do
       FixtureStore.record_list_call(opts)
+
+      if FixtureStore.consume_list_failure() do
+        raise DBConnection.ConnectionError, message: "fixture database unavailable"
+      end
 
       filter = Keyword.get(opts, :filter, %{})
       limit = AccrueAdmin.Queries.Behaviour.normalize_limit(opts)
@@ -54,6 +76,10 @@ defmodule AccrueAdmin.DataTableTest do
     @impl true
     def count_newer_than(opts \\ []) do
       FixtureStore.record_count_call(opts)
+
+      if FixtureStore.count_failure?() do
+        raise DBConnection.ConnectionError, message: "fixture database unavailable"
+      end
 
       filter = Keyword.get(opts, :filter, %{})
       cursor = AccrueAdmin.Queries.Behaviour.decode_cursor(opts)
@@ -144,6 +170,8 @@ defmodule AccrueAdmin.DataTableTest do
        )
        |> Phoenix.Component.assign(:poll_interval_ms, Map.get(session, "poll_interval_ms", 5_000))
        |> Phoenix.Component.assign(:table_caption, Map.get(session, "table_caption"))
+       |> Phoenix.Component.assign(:limit, Map.get(session, "limit", 2))
+       |> Phoenix.Component.assign(:total_count, Map.get(session, "total_count"))
        |> Phoenix.Component.assign(:test_pid, Map.get(session, "test_pid"))}
     end
 
@@ -162,8 +190,8 @@ defmodule AccrueAdmin.DataTableTest do
         loading_state?={@loading_state?}
         clear_filters_patch={@clear_filters_patch}
         render_filter_toolbar={@render_filter_toolbar}
-        limit={2}
-        dom_limit={4}
+        limit={@limit}
+        total_count={@total_count}
         poll_interval_ms={@poll_interval_ms}
         selectable={true}
         bulk_action_label="Retry selected"
@@ -200,6 +228,15 @@ defmodule AccrueAdmin.DataTableTest do
       {:noreply, socket}
     end
 
+    def handle_event("change_query", params, socket) do
+      params = if params == %{}, do: %{"status" => "closed"}, else: params
+
+      {:noreply,
+       socket
+       |> Phoenix.Component.assign(:table_params, params)
+       |> Phoenix.Component.assign(:total_count, nil)}
+    end
+
     @impl true
     def handle_info({:data_table_bulk_action, event, ids}, socket) do
       if pid = socket.assigns[:test_pid] do
@@ -233,7 +270,6 @@ defmodule AccrueAdmin.DataTableTest do
         path={@path}
         params={@table_params}
         limit={2}
-        dom_limit={4}
         poll_interval_ms={5_000}
         columns={[%{id: :label, label: "Label"}]}
         card_title={& &1.label}
@@ -380,6 +416,108 @@ defmodule AccrueAdmin.DataTableTest do
     assert {:ok, {~U[2026-04-15 17:00:04Z], "row-4"}} = Cursor.decode(pagination_call[:cursor])
   end
 
+  test "initial list failure is unavailable and retry restores results", %{conn: conn} do
+    FixtureStore.fail_lists()
+
+    {:ok, view, html} = live_isolated(conn, TableLive, session: %{"params" => %{}})
+
+    assert html =~ ~s(data-ax-state="unavailable")
+    assert html =~ ~s(data-role="unavailable-state")
+    assert html =~ ~s(role="alert")
+    assert html =~ "History unavailable"
+    refute html =~ ~s(data-role="empty-state")
+    refute html =~ "fixture database unavailable"
+
+    FixtureStore.recover_lists()
+    html = render_click(element(view, "[data-role='retry-read']"))
+
+    assert html =~ ~s(data-ax-state="populated")
+    assert html =~ "Newest open"
+    refute html =~ ~s(data-role="unavailable-state")
+  end
+
+  test "poll count failure keeps rows visible and an explicit retry recovers", %{conn: conn} do
+    {:ok, view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{}, "poll_interval_ms" => 0})
+
+    assert html =~ "Newest open"
+
+    FixtureStore.put_rows([
+      %{
+        id: "row-6",
+        label: "Newest added",
+        status: "open",
+        category: "zeta",
+        inserted_at: ~U[2026-04-15 17:00:06Z]
+      }
+      | FixtureStore.rows()
+    ])
+
+    FixtureStore.fail_counts()
+    Phoenix.LiveView.send_update(view.pid, DataTable, id: "fixtures", action: :poll)
+    html = render(view)
+
+    assert html =~ ~s(data-role="poll-read-error")
+    assert html =~ "Newest open"
+    refute html =~ ~s(data-role="unavailable-state")
+
+    FixtureStore.recover_counts()
+    html = render_click(element(view, "[data-role='retry-poll']"))
+
+    refute html =~ ~s(data-role="poll-read-error")
+    assert html =~ "1 new rows - click to load"
+    assert html =~ "Newest open"
+  end
+
+  test "load-more failure keeps loaded rows and retry loads the failed page", %{conn: conn} do
+    {:ok, view, html} = live_isolated(conn, TableLive, session: %{"params" => %{}})
+    assert html =~ "Newest open"
+    assert html =~ "Load more"
+
+    FixtureStore.fail_lists()
+    html = render_click(element(view, "[data-role='load-more']"))
+
+    assert html =~ ~s(data-role="partial-read-error")
+    assert html =~ "Some results could not be loaded"
+    assert html =~ "Newest open"
+    refute html =~ "Oldest open"
+
+    FixtureStore.recover_lists()
+    html = render_click(element(view, "[data-role='retry-read']"))
+
+    assert html =~ "Newest closed"
+    refute html =~ ~s(data-role="partial-read-error")
+  end
+
+  test "first-page failure clears stale rows, pagination, and selection while preserving filters",
+       %{
+         conn: conn
+       } do
+    {:ok, view, _html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
+
+    html = render_click(element(view, "[data-role='toggle-all']"))
+    assert html =~ "2 selected"
+    assert html =~ ~s(data-role="load-more")
+
+    FixtureStore.fail_lists()
+    html = render_click(view, "change_query", %{})
+
+    assert html =~ ~s(data-ax-state="unavailable")
+    assert html =~ ~s(data-role="unavailable-state")
+    refute html =~ "Newest open"
+    refute html =~ "2 selected"
+    refute html =~ ~s(data-role="load-more")
+    assert html =~ ~s(name="status")
+
+    FixtureStore.recover_lists()
+    html = render_click(element(view, "[data-role='retry-read']"))
+
+    assert html =~ "Newest closed"
+    refute html =~ "Newest open"
+    assert List.last(FixtureStore.list_calls())[:filter] == %{status: "closed"}
+  end
+
   test "exposes Phase 190 data-display group contract and cursor-gated pagination", %{
     conn: conn
   } do
@@ -392,7 +530,7 @@ defmodule AccrueAdmin.DataTableTest do
     {:ok, _view, html} =
       live_isolated(conn, TableLive, session: %{"params" => %{"status" => "closed"}})
 
-    assert html =~ ~s(data-role="row-count">Showing 2 results<)
+    assert html =~ ~s(data-role="pagination-progress">2 results loaded<)
     refute html =~ ~s(data-role="load-more")
   end
 
@@ -492,6 +630,27 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ ~s(data-role="clear-filters")
     assert html =~ ~s(data-phx-link="patch")
     assert html =~ "Clear filters"
+
+    assert html =~
+             ~r/class="ax-empty-content"[^>]*>.*No fixtures match these filters.*Adjust the filters above\..*Clear filters.*<\/div>/s
+  end
+
+  test "renders identity as separate primary and secondary lines with an exact copy action" do
+    html =
+      render_component(fn assigns ->
+        assigns = assigns
+
+        ~H"""
+        <DataTable.identity_cell>
+          <:primary><a href="/admin/invoices/in_123">Invoice № 42</a></:primary>
+          <:secondary><button type="button" data-clipboard-text="in_123">Copy invoice ID</button></:secondary>
+        </DataTable.identity_cell>
+        """
+      end)
+
+    assert html =~ ~r/class="ax-data-table-identity-primary"[^>]*>.*Invoice № 42.*<\/span>/s
+    assert html =~ ~r/class="ax-data-table-identity-secondary"[^>]*>.*in_123.*<\/span>/s
+    assert html =~ ~s(data-clipboard-text="in_123")
   end
 
   test "renders loading skeleton as an accessible fixture state", %{conn: conn} do
@@ -555,6 +714,34 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ ~s(href="/billing/subscriptions?view=all&amp;org=acme")
   end
 
+  test "keeps secondary categorical filters in an explicit disclosure with visible labels" do
+    html =
+      render_component(&DataTable.filter_toolbar/1, %{
+        id: "invoices",
+        path: "/billing/invoices?org=acme",
+        filter_params: %{"q" => "Atelier Café", "collection_method" => "send_invoice"},
+        filter_fields: [
+          %{id: :q, label: "Search invoices", placeholder: "Search invoices"},
+          %{
+            id: :collection_method,
+            label: "Collection method",
+            type: :select,
+            secondary: true,
+            options: [{"send_invoice", "Email invoice"}]
+          }
+        ]
+      })
+
+    assert html =~ ~s(<label for="invoices-filter-q" class="ax-label">Search invoices</label>)
+    assert html =~ ~s(<details class="ax-data-table-filter-disclosure">)
+    assert html =~ "Filters"
+
+    assert html =~
+             ~s(<select id="invoices-filter-collection_method" name="collection_method" class="ax-select")
+
+    assert html =~ ~s(<option value="send_invoice" selected>)
+  end
+
   test "renders card mode fields and contextual selection controls", %{conn: conn} do
     {:ok, view, html} =
       live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
@@ -566,7 +753,7 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ "alpha"
     refute html =~ "do-not-render"
     assert html =~ ~s(aria-label="Select Newest open")
-    assert html =~ "Clear filters"
+    assert html =~ "Reset filters"
     assert html =~ ~s(aria-label="Select visible fixture rows")
 
     html = render_click(element(view, "[data-role='toggle-all']"))
@@ -672,16 +859,19 @@ defmodule AccrueAdmin.DataTableTest do
       assert html =~ ~s(data-phx-link="patch")
     end
 
-    test "renders a viewport-bottom sentinel only while a next cursor exists under dom_limit", %{
+    test "renders an observable boundary only while more rows can be loaded", %{
       conn: conn
     } do
-      # 5 rows, limit 2, dom_limit 4 → next_cursor present and rows (2) < dom_limit.
+      # More matches remain after the initial two rows.
       {:ok, view, html} =
         live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
 
       assert html =~ ~s(data-role="viewport-sentinel")
-      assert html =~ "phx-viewport-bottom"
-      # Load more button remains for a11y / no-JS / past-cap loading.
+      assert html =~ ~s(phx-hook="Pagination")
+      assert html =~ ~s(id="fixtures-scroll-container")
+      assert html =~ "data-pagination-target"
+
+      # Load more remains as the progressive keyboard/manual fallback.
       assert html =~ ~s(data-role="load-more")
 
       # A view with no further pages must not render the sentinel.
@@ -709,6 +899,51 @@ defmodule AccrueAdmin.DataTableTest do
       # Parent-targeted: the event lands on TableLive's handle_event, not the component.
       assert_receive {:data_table_filter_received, %{"q" => "closed", "status" => "closed"}}
     end
+  end
+
+  test "all lists keep every requested page beyond 100 rows and identify the final page", %{
+    conn: conn
+  } do
+    FixtureStore.put_rows(
+      Enum.map(125..1//-1, fn index ->
+        %{
+          id: "row-#{index}",
+          label: "Customer #{index}",
+          status: "open",
+          category: "alpha",
+          inserted_at: DateTime.add(~U[2026-04-15 17:00:00Z], index, :second)
+        }
+      end)
+    )
+
+    {:ok, view, html} =
+      live_isolated(conn, TableLive,
+        session: %{"params" => %{}, "limit" => 25, "total_count" => 125}
+      )
+
+    assert html =~ "25 of 125 results loaded"
+
+    for expected <- [50, 75, 100, 125] do
+      html = render_click(element(view, "[data-role='load-more']"))
+      rows = Floki.find(Floki.parse_fragment!(html), "tr[data-row-id]")
+      assert length(rows) == expected
+      assert length(Enum.uniq(Floki.attribute(rows, "data-row-id"))) == expected
+      assert html =~ "Customer 125"
+      assert html =~ "#{expected} of 125 results loaded"
+      assert has_element?(view, "[data-role='viewport-sentinel']") == expected < 125
+    end
+
+    html = render(view)
+    refute html =~ ~s(data-role="load-more")
+    assert has_element?(view, "[data-role='end-of-list']", "End of list")
+
+    Phoenix.LiveView.send_update(view.pid, DataTable, id: "fixtures", action: :poll)
+    assert render(view) =~ "125 of 125 results loaded"
+
+    html = render_click(view, "change_query", %{"q" => "Customer 125"})
+    assert html =~ "1 result loaded"
+    refute html =~ "Customer 124"
+    refute html =~ "of 125"
   end
 
   # ─── Nyquist structural guards (Phase 176-06) ───────────────────────────────

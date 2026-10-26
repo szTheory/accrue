@@ -1,44 +1,47 @@
 ---
-gsd_state_version: 1.0
-milestone: v1.62
-milestone_name: Release Integration & Repository Hygiene
-status: Awaiting next milestone
-stopped_at: Phase 232 complete — all phases complete
-last_updated: "2026-09-18T15:14:54.513Z"
-last_activity: 2026-09-18
-last_activity_desc: Milestone v1.62 completed and archived
+gsd_state_version: "1.0"
+milestone: v1.67
+milestone_name: Integration & CI Green
+current_phase: 250
+current_phase_name: Remote Integration
+status: executing
+stopped_at: Completed 250-05-PLAN.md
+last_updated: "2026-10-25T22:45:00.000Z"
+last_activity: 2026-10-25
+last_activity_desc: Phase 250 pre-merge close (commit E) and body-only evidence-head commit H
+state_head: 6fe35302df0fcc309e28a4985a0fb5371a06f50d
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 44
-  completed_plans: 44
-  percent: 100
-current_phase: 232
-state_head: 4e7715f772d763d7fe6c31f426ee6fafcc66becd
+  total_phases: 3
+  completed_phases: 1
+  total_plans: 25
+  completed_plans: 23
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-18)
+See: .planning/PROJECT.md (updated 2026-10-12)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Planning next milestone. v1.62 shipped a *reviewable, per-lane-proved* release candidate, not a green one — the candidate SHA is red on `docs-contracts-shift-left`, `release-gate`, and `phase18-tax-gate`, with fixes already on the milestone line. Written path forward: push the phase-close commits, re-run CI at the new head, confirm the gates, merge PR #45, then run Release Please.
+**Current focus:** Phase 250 — Remote Integration
+**Phase 250 hand-off:** SL-G and executable-UAT read the current phase. Phase 250 must flip `current_phase: 250` and mint its own tracked VERIFICATION (covered_files + covered_digest) and generated UAT in the same step, then re-run SL-G and exec-UAT before pushing. Phase 249 routes to Phase 250: host-integration dev-boot/browser/assert-preserved and Hex smoke, playwright-e2e shards 1-3, host-docker-smoke, Linux visual-regression baselines.
+**Progress:** [░░░░░░░░░░] 0% (0/3 phases)
+**Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
 
 ## Current Position
 
-Phase: Milestone v1.62 complete
-Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-18 — Completed quick task 260918-hnk: closed v1.62 audit tech-debt item #2
+Phase: 250 (Remote Integration) — EXECUTING
+Plan: 6 of 7
+Status: Awaiting maintainer merge decision (250-06)
+Last activity: 2026-10-25 — 250-05 pre-merge close: commit E (LAND-01 Complete, VERIFICATION 2/3) and body-only commit H recording E as the PR #49 evidence head
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 38
+- Total plans completed: 130
 - Average duration: —
 - Total execution time: —
 
@@ -53,6 +56,22 @@ Last activity: 2026-09-18 — Completed quick task 260918-hnk: closed v1.62 audi
 | 229 | 20 | - | - |
 | 230 | 7 | - | - |
 | 232 | 11 | - | - |
+| 233 | 7 | - | - |
+| 234 | 8 | - | - |
+| 235 | 6 | - | - |
+| 236 | 6 | - | - |
+| 237 | 8 | - | - |
+| 238 | 5 | - | - |
+| 239 | 5 | - | - |
+| 240 | 6 | - | - |
+| 241 | 8 | - | - |
+| 242 | 7 | - | - |
+| 243 | 3 | - | - |
+| 244 | 4 | - | - |
+| 245 | 3 | - | - |
+| 246 | 6 | - | - |
+| 247 | 8 | - | - |
+| 248 | 2 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -94,10 +113,117 @@ Last activity: 2026-09-18 — Completed quick task 260918-hnk: closed v1.62 audi
 | Phase 232 P08 | ~140min | 3 tasks | 8 files |
 | Phase 232-bounded-hygiene-release-handoff P09 | ~25min | 3 tasks | 2 files |
 | Phase 232 P10 | 3h20min | 3 tasks | 7 files |
+| Phase 233 P04 | 25min | 3 tasks | 7 files |
+| Phase 233 P01 | 26min | 2 tasks | 11 files |
+| Phase 233 P06 | 19min | 2 tasks | 5 files |
+| Phase 233 P02 | 26min | 2 tasks | 17 files |
+| Phase 233 P03 | 13min | 2 tasks | 15 files |
+| Phase 233 P07 | 17min | 2 tasks | 13 files |
+| Phase 233 P05 | 26min | 2 tasks | 19 files |
+| Phase 233 P05 | 59min | 2 tasks | 26 files |
+| Phase 234 P01 | 12m | 2 tasks | 12 files |
+| Phase 234 P02 | 7min | 2 tasks | 4 files |
+| Phase 234 P07 | 7min | 2 tasks | 13 files |
+| Phase 234 P03 | 15min | 2 tasks | 13 files |
+| Phase 234 P04 | 6min | 2 tasks | 2 files |
+| Phase 234 P05 | 15min | 2 tasks | 3 files |
+| Phase 234 P06 | 24min | 2 tasks | 10 files |
+| Phase 234 P08 | 21min | 3 tasks | 21 files |
+| Phase 235 P01 | 20 min | 2 tasks | 3 files |
+| Phase 235 P02 | 12min | 3 tasks | 10 files |
+| Phase 235 P03 | 10min | 2 tasks | 7 files |
+| Phase 235 P04 | 17 | 2 tasks | 7 files |
+| Phase 235 P05 | 13 minutes | 2 tasks | 6 files |
+| Phase 235 P06 | 60min | 2 tasks | 6 files |
+| Phase 236 P01 | 12 min | 2 tasks | 4 files |
+| Phase 236 P02 | 15min | 2 tasks | 11 files |
+| Phase 236 P04 | 9 min | 2 tasks | 6 files |
+| Phase 236 P04 | 12 min | 2 tasks | 8 files |
+| Phase 236 P03 | 18min | 2 tasks | 10 files |
+| Phase 236 P06 | 42min | 3 tasks | 6 files |
+| Phase 237 P01 | 3min | 2 tasks | 1 files |
+| Phase 237 P02 | 4min | 2 tasks | 2 files |
+| Phase 237 P03 | 5min | 2 tasks | 1 files |
+| Phase 237 P04 | 6 min | 2 tasks | 5 files |
+| Phase 237 P06 | 12min | 2 tasks | 4 files |
+| Phase 237 P07 | 11min | 2 tasks | 9 files |
+| Phase 237 P05 | 9m | 2 tasks | 2 files |
+| Phase 237 P08 | 16min | 2 tasks | 10 files |
+| Phase 238 P01 | 7min | 2 tasks | 5 files |
+| Phase 238 P02 | 12min | 3 tasks | 8 files |
+| Phase 238 P03 | 5min | 2 tasks | 5 files |
+| Phase 238 P04 | 8min | 2 tasks | 4 files |
+| Phase 238 P5 | 11min | 3 tasks | 6 files |
+| Phase 239 P1 | 6min | 2 tasks | 4 files |
+| Phase 239 P02 | 4min | 2 tasks | 4 files |
+| Phase 239 P03 | 2 min | 2 tasks | 2 files |
+| Phase 239 P04 | 1 min | 2 tasks | 3 files |
+| Phase 239 P05 | 6 min | 2 tasks | 9 files |
+| Phase 240 P01 | 18m | 3 tasks | 10 files |
+| Phase 240 P03 | 9min | 3 tasks | 7 files |
+| Phase 240 P04 | 12 | 2 tasks | 11 files |
+| Phase 240 P05 | 61 | 2 tasks | 23 files |
+| Phase 240 P06 | 15 min | 2 tasks | 12 files |
+| Phase 241 P01 | 4 min | 2 tasks | 3 files |
+| Phase 241 P02 | 5 min | 2 tasks | 4 files |
+| Phase 241 P03 | 5 min | 2 tasks | 6 files |
+| Phase 241 P04 | 5 min | 2 tasks | 4 files |
+| Phase 241 P05 | 8 min | 2 tasks | 6 files |
+| Phase 241 P06 | 9min | 2 tasks | 4 files |
+| Phase 241 P07 | 66 min | 2 tasks | 3 files |
+| Phase 242 P01 | 8min | 2 tasks | 7 files |
+| Phase 242 P05 | 4min | 2 tasks | 4 files |
+| Phase 242 P02 | 8min | 2 tasks | 6 files |
+| Phase 242 P03 | 13m | 3 tasks | 12 files |
+| Phase 242 P04 | 8 min | 2 tasks | 6 files |
+| Phase 242 P06 | 5min | 2 tasks | 11 files |
+| Phase 242 P07 | 19min | 3 tasks | 9 files |
+| Phase 241 P08 | 9min | 2 tasks | 3 files |
+| Phase 243 P02 | 173min | 3 tasks | 17 files |
+| Phase 243 P01 | 144min | 2 tasks | 17 files |
+| Phase 243 P03 | 10min | 2 tasks | 4 files |
+| Phase 244 P01 | 12min | 2 tasks | 11 files |
+| Phase 244 P02 | 29min | 2 tasks | 16 files |
+| Phase 244 P03 | 45min | 2 tasks | 8 files |
+| Phase 244 P04 | 25m | 2 tasks | 5 files |
+| Phase 246 P01 | 19m | 2 tasks | 10 files |
+| Phase 246 P02 | 18m | 3 tasks | 16 files |
+| Phase 246 P03 | 53min | 2 tasks | 15 files |
+| Phase 246 P04 | 56min | 3 tasks | 23 files |
+| Phase 246 P05 | 73min | 2 tasks | 45 files |
+| Phase 247 P01 | 10min | 2 tasks | 12 files |
+| Phase 247 P02 | 5min | 2 tasks | 12 files |
+| Phase 247 P03 | 14min | 3 tasks | 16 files |
+| Phase 247 P08 | 5min | 2 tasks | 12 files |
+| Phase 247 P04 | 15 min | 2 tasks | 9 files |
+| Phase 247 P05 | 16min | 3 tasks | 22 files |
+| Phase 247 P06 | 12min | 2 tasks | 6 files |
+| Phase 247 P07 | continuation; start unavailable | 2 tasks | 31 files |
+| Phase 248 P01 | 45min | 2 tasks | 17 files |
+| Phase 248 P02 | 7min | 2 tasks | 4 files |
+| Phase 249 P05 | 60min | 3 tasks | 7 files |
+| Phase 249 P07 | 25m | 2 tasks | 2 files |
+| Phase 249 P08 | 60min | 2 tasks | 4 files |
+| Phase 249 P09 | 1h | 2 tasks | 8 files |
+| Phase 249 P12 | 35min | 2 tasks | 4 files |
+| Phase 249 P13 | 40m | 2 tasks | 1 files |
+| Phase 249 P17 | 30min | 2 tasks | 6 files |
+| Phase 250 P03 | 5h | 2 tasks | 40 files |
+| Phase 250 P04 | ~2h | 2 tasks | 17 files |
+| Phase 250 P05 | ~1h | 2 tasks | 7 files |
 
 ## Accumulated Context
 
 ### Decisions
+
+- [Work done outside GSD]: Commits 3d7d949d..b4a7eeac (11 commits, 2026-10-12 to 2026-10-19) were owner-feedback work done outside any GSD phase. Receipts are the five `admin-owner-feedback` notes in `.planning/notes/` (2026-10-11, -12, -13, -14, -18). No plan, summary, verification or phase verdict is claimed. Recorded in MILESTONES.md.
+- [Phase 248]: Keep ordinary preview unchanged; isolate held-out 4102 SQL-sandbox scenarios and guard exact five-ID teardown, including partial-seed failure.
+- [Phase 248]: Treat captures as representative evidence at their recorded revision; preserve original audits and disclose current interaction/surface limits.
+- [Phase 248]: Account for every canonical owner topic and finding through executed owner checks and justified dispositions.
+
+- [Phase 242]: Preserve successful search groups on failed-group retry while retaining current query/generation/owner checks; semantic regressions and all 44 hook controls recur in the existing browser CI job.
+- [Phase 242]: Catalog ownership follows the incumbent global schema; exact parent/child identity and current admin/session context are proved without invented tenant filtering.
+- [Phase 242]: Phase acceptance is complete with zero human UAT; Phase 243 owns reviewed Linux goldens and stable Fake preview. Inspect regression capture destinations before invoking owners that write historical evidence.
 
 - v1.62 is release integration and repository hygiene only; no product capability is in scope.
 - Published history and the v1.61 tag remain immutable: no force-push, tag movement, destructive cleanup, required-check weakening, merge to `main`, Release Please merge, or package publication.
@@ -175,10 +301,193 @@ Last activity: 2026-09-18 — Completed quick task 260918-hnk: closed v1.62 audi
 - [Phase 232]: Maintainer decision at 232-08's checkpoint: rewrite .tool-versions to match integration/v1.62-candidate byte-for-byte (nodejs 22.14.0 / elixir 1.19.5-otp-28 / erlang 28.5), joined into the cleanup findings range as finding 8. — Local .tool-versions diverged from the candidate branch in two dimensions (erlang patch version AND a missing nodejs pin entirely); every scripts/ci/*.mjs gate is a Node script and ci.yml pins Node 22, while the local shell runs Node 24 -- local and CI gate runs were on different Node majors.
 - [Phase 232-bounded-hygiene-release-handoff]: Re-cut integration/v1.62-candidate at a new SHA (c1397fe9, merge 3f42158d), proved lossless by a newly generalized --require-union-hunks check (447 inspected, 7 co-touched, 0 drifted). Maintainer checkpoint decision: since updating the published branch required a non-fast-forward (force-push, prohibited), pushed the re-cut to a NEW branch integration/v1.62-candidate-recut instead, leaving integration/v1.62-candidate untouched. — Option A (move the published branch) required a force-push the plan itself prohibits -- an internal plan contradiction for a fresh-supersession re-cut where the old tip is not an ancestor of the new tip. Option B resolves it without relaxing any prohibition; 232-10/232-11 must target integration/v1.62-candidate-recut, not integration/v1.62-candidate.
 - [Phase 232]: Both real regressions found (docs-contracts-shift-left human_judgment violations, release-gate stale test fixture) fixed and verified on the milestone line but NOT pushed to the frozen candidate-recut ref -- recorded waived at the frozen SHA with the fix commit cited as evidence
+- [Phase 233]: Shared semantic roles preserve package token ownership, separate Admin/Portal shells, and host branding; current served assets and bounded visual behavior have executable proof.
+- [Phase 233]: Optional host adapters separate actor from billable and freshly authorize exact Customer/provider/target identity on HTTP, LiveView events, and reconnect; signed pins locate context and never grant authority.
+- [Phase 233]: Personal reads preserve the sole existing Customer; both checkout transports require the configured processor before token issuance or mutation. Dynamic processor routing remains out of scope.
+- [Phase 233]: Invalid selection and revoked membership deny without provisioning or fallback; blocked LiveViews preserve host hooks before user-only authentication, and mutations retain the human actor without Admin privilege bleed.
+- [Phase 233]: Fake and Braintree browser proof run in separate processes with test-only configuration; both lanes run in CI and local full verification. Inherited UI refinements are deferred to owning route phases.
+- [Phase 234]: Return URLs preserve only allowlisted mounted list state; the current server scope owns authorization and organization context.
+- [Phase 234]: Signed subscription cursors must still reference a row within the active owner scope and filter.
+- [Phase 234]: Home shows bounded scoped audit activity instead of unsupported global aggregates.
+- [Phase 234]: Global search is a bounded async preview with explicit partial failure and stale-result invalidation.
+- [Phase 234]: Related customer detail returns are validated against the exact customer on the loaded owner-scoped record.
+- [Phase 234]: Invalid related customer origins fall back to the current detail type list; accepted returns use the current mount and owner scope.
+- [Phase 234]: Lifecycle remains exact when ancillary billing observations are unavailable; schedules, collection behavior, and history are distinct facts.
+- [Phase 234]: Preserved the record-aware ScopedPath return behavior approved in Plan 234-07.
+- [Phase 234]: Lifecycle-aware eligibility distinguishes paused collection from scheduled-cancellation resume.
+- [Phase 234]: Reviewed actions re-read the host actor, owner scope, local target, items, and material consequence facts before dispatch.
+- [Phase 234]: Keep operation identity stable per staged intent and ephemeral across reconnects; reconnect requires a fresh scoped read and review.
+- [Phase 234]: Classify provider outcomes only by available evidence; uncertain outcomes block blind retry and use owner-scoped reads.
+- [Phase 234]: Plan 234-06 kept the existing Playwright CI lane because unrestricted discovery already executes both host specs.
+- [Phase 234]: Plan 234-06 preserved prior served evidence by writing final captures to a plan-specific directory.
+- [Phase 234]: Plan 234-06 kept global-search production code unchanged; host SQL sandbox ownership does not reach async search workers.
+- [Phase 234]: Keep SQL Sandbox as the default test mode and turn it off only in the dedicated real-query browser lane.
+- [Phase 234]: Use the existing merge-blocking Playwright job and its isolated Postgres service because search correctness has recurring value.
+- [Phase 234]: Keep the Phase 234-06 screenshot artifact immutable; verify current served asset equality, accessibility, computed style, and layout directly.
+- [Phase 234]: Skip confirmation-only UAT when all testable acceptance claims have passing automated evidence.
+- [Phase 235]: Preserve the existing checkout POST contract and use fetch so uncertain responses remain visible without replay.
+- [Phase 235]: Treat a nonce and browser navigation as non-authoritative; the deterministic server case asserts context denial.
+- [Phase 235]: Per-pricing-return UUID creates a fresh idempotency namespace while concurrent resumes converge on one persisted session.
+- [Phase 235]: Organization checkout resumes through the freshly authorized shared-billing route.
+- [Phase 235]: Incomplete or mismatched trusted terms block payment; no unsupported numeric charge cap was introduced.
+- [Phase 235]: POST and LiveView atomically claim an open, unexpired persisted session before provider work; only known rejection releases the claim.
+- [Phase 235]: Use one strict LocalSession.actionable?/2 expiry predicate and revalidate the selected promotion on the actual POST form.
+- [Phase 235]: Generic provider errors and local completion failures remain uncertain and cannot be replayed automatically.
+- [Phase 235]: Hosted return query parameters cannot establish payment completion; the host fetches and validates the Stripe session before mirroring it.
+- [Phase 235]: Same-session reconciliation takes a transaction advisory lock before projection to guarantee a single local subscription under concurrent returns.
+- [Phase 235]: Playwright uses a 320 CSS-pixel viewport to exercise the effective layout width of a 1280px display at 400% browser zoom; CSS document zoom did not model browser zoom or responsive media queries correctly.
+- [Phase 235]: Explicit trusted zero-price POST eligibility requires all existing trusted context, offer, terms, and authorization checks; missing, negative, mismatched, and replayed terms remain rejected. — Plan 235-05 aligned the actual POST with visible checkout eligibility without treating an absent amount as zero or weakening existing validation.
+- [Phase 235]: Expired checkout recovery uses the already validated safe recovery URL and leaves payment submission unavailable; hostile cancellation URLs fall back to billing. — Plan 235-05 closes the UI recovery gap while preserving the expired session's non-payment state and safe navigation boundary.
+- [Phase 235]: Default to shift-left verification: automate stable acceptance with focused tests, integration/E2E/smoke/seam checks, and CI when recurring value exists; target zero human UAT and hand off only irreducible human judgment or external/live-provider evidence, with the reason recorded. Do not reopen a verified closure absent new evidence. — The user explicitly asked GSD to automate verification wherever feasible, minimize human UAT, make recurring checks part of CI, and record closure so the workflow does not churn on already-automated coverage.
+- [Phase 235]: Braintree returns locate, but do not prove, payment; display completion only after a current authorized Customer and exact completed LocalSession match.
+- [Phase 235]: Keep Stripe cs_ validation and fetched paid-session reconciliation authoritative.
+- [Phase 235]: Use explicitly fixture-backed LocalSession evidence for the deterministic Braintree browser return; do not claim live-provider success.
+- [Phase 236]: Invoice reads return explicit success or unavailable outcomes; the existing 20-record cap is disclosed as a recent-list limit. — Customers need to distinguish an empty invoice history from a failed read, and the UI must avoid promising complete history or document retention.
+- [Phase 236]: Render payment-method actions only when the configured processor supports them and the selected owner grants the exact action. — The UI should not advertise a mutation that the current provider or fresh owner policy will reject; the POST repeats exact-target authorization.
+- [Phase 236]: A default card with another saved card cannot be removed until a replacement becomes default. — The existing billing deletion guard requires a replacement in this state, so the page should explain the next action before a doomed POST.
+- [Phase 236]: Braintree Hosted Fields are offered only to Braintree and deterministic Fake contexts. — The Portal's secure-field hook issues Braintree client tokens and nonce values; other providers need their own secure entry adapter before this route is available.
+- [Phase 236]: Card reads render explicit successful, unavailable, or unsupported outcomes. — A failed database read or unsupported provider must not be represented as a successfully empty saved-card list.
+- [Phase 236]: Explicit Braintree declines become card errors; unrelated provider failures remain uncertain. — The processor response is authoritative that it declined this card, while generic errors do not prove whether the operation completed.
+- [Phase 236]: External checkout success URLs must match the configured HTTPS portal origin; validated local paths remain supported. — A stored return URL that escapes to an unapproved host creates an open redirect; matching host and effective port keeps navigation within the configured origin.
+- [Phase 236]: Recovery links use the same allowed destination policy as success redirects. — Both destinations come from persisted checkout return data and otherwise could navigate customers to an unapproved external host.
+- [Phase 236]: Phase 236: Gate subscription actions on observed lifecycle and provider capabilities, and freshly authorize the exact target at mutation time.
+- [Phase 236]: Braintree mock evidence covers application style handoff and deterministic lifecycle, not live-provider iframe rendering.
+- [Phase 236]: Refresh Hosted Fields through teardown/create when effective Portal theme colors change.
+- [Phase 237]: Use fixed UTC invoice fixtures and characterize current scoped list behavior before adding presentation expectations in plan 04.
+- [Phase 237]: Wave 0 characterizes existing fixture and action contracts; plans 05 and 06 own new behavior assertions.
+- [Phase 237]: Overdue requires stored open status and a known due date strictly before Accrue.Clock.utc_now().
+- [Phase 237]: Invoice money uses the shared MoneyFormatter; missing or unsupported evidence never defaults to USD.
+- [Phase 237]: Refund review binds to provider charge identity, exact integer amount/currency/status, and refundable balance; dispatch reauthorizes scope and reloads current charge facts after step-up.
+- [Phase 237]: Deterministic charge/refund outcomes are verified in automated LiveView and package tests; ADM-05 remains pending until its other plans complete.
+- [Phase 237]: Recovery amounts remain evidence-based; current subscription state is distinct from historical failures; async reads and validated return links retain authorized owner/window scope.
+- [Phase 237]: Invoice actions re-resolve the actor and owner scope, reload the same invoice, and compare the exact reviewed action and money facts before each dispatch boundary.
+- [Phase 237]: Success messages use fresh scoped invoice evidence; requires-action remains incomplete, CardError is definitive, and other processor errors remain unconfirmed with no automatic retry.
+- [Phase 237]: Use the existing blocking host Playwright job for recurring served browser verification.
+- [Phase 237]: Keep payment review browser coverage read-only; cancel before confirmation or dispatch.
+- [Phase 237]: Use Accrue.Clock for recovery window bounds and deterministic campaign timestamps.
+- [Phase 238]: Queue acceptance is reported separately from downstream processing.
+- [Phase 238]: Replay intent is consumed before step-up and every queue call rechecks scoped eligibility.
+- [Phase 238]: Only DBConnection.ConnectionError is converted to an unavailable state; backend exception details are never rendered.
+- [Phase 238]: A later-page retry keeps loaded rows and retries the failed cursor with the current filter and owner scope.
+- [Phase 238]: Read failures remain distinct from inaccessible or missing records.
+- [Phase 238]: Coupons and promotion codes are global platform projections; active organization context is preserved in navigation without implying tenant ownership.
+- [Phase 238]: Expected coupon and promotion-code detail read failures render generic unavailable states and retry only local reads.
+- [Phase 238]: Treat raw provider snapshot fields in Account.data as Stripe evidence; missing fields are unavailable rather than inferred from false database defaults.
+- [Phase 238]: Keep platform fee override in its separate local Account.data key and preserve it alongside provider facts.
+- [Phase 238]: Phase 238-05 keeps host browser fixtures deterministic and reserves read failures and mixed replay outcomes for the Admin ExUnit seam; the existing unrestricted Playwright shard needs no CI selection change.
+- [Phase 239]: Package mount routes are derived from Admin/Portal route helpers and exact-compared against ordered evidence-ledger rows.
+- [Phase 239]: Current-render screenshots are inspectable evidence; deterministic route, identity, viewport and no-write assertions gate the Playwright smoke.
+- [Phase 239]: Shared-billing selected-customer coverage remains in the existing Phase 233 context journey because selecting context requires the state-changing flow.
+- [Phase 239]: Checked-in CI definitions are recorded separately from remote CI results, which were unobserved.
+- [Phase 239]: Added mounted byte-parity checks only for concrete Portal asset and Admin font response gaps.
+- [Phase 239]: Compared the complete generated copy export in a temporary path without modifying the checked-in fixture.
+- [Phase 239]: Kept ComponentRegistry as the sole component inventory; recorded provenance and intentional exceptions without a duplicate allowlist.
+- [Phase 239]: Retained existing owners for all eight INT-04 state families; no additional assertion or adopter-document correction was warranted.
+- [Phase 239]: Keep preview walkthrough guarantees scoped to the authenticated read-only browser journey; report gaps and provider/remote evidence boundaries explicitly.
+- [Phase 239]: Keep Plan 04 and its original transparency prohibition unchanged; record the maintainer's accepted replacement scope additively and enforce its durable wording contract.
+- [Phase 239]: Keep optional feedback off-app and outside routine UAT; automate only host overflow and read-only reload claims that recur.
+- [Phase 239]: Report remote CI and live-provider outcomes as unobserved.
+- [Phase 240]: Invoice review exposes invoice, customer, and owner identity with exact currency while preserving existing authorization, step-up, eligibility, and duplicate protections.
+- [Phase 240]: Set the owning shared detail action selector to 44px and use the existing 2px dense spacing token; retain the 1px structural rule.
+- [Phase 240]: Initial subscription geometry cross-check preserved dense layout; later named lifecycle spacing/type defects were corrected. Global invoice-queue composition/destinations remain a concrete Phase 241 consumer finding.
+- [Phase 240]: Scoped shared 44px action target sizing to coarse pointers; fine-pointer dense geometry is preserved.
+- [Phase 240]: Actual browser zoom remains unverified because the headless host provides only pinch/visual scaling; CSS enlargement and spacing checks remain separately recorded.
+- [Phase 240]: Keep stored theme preference and computed OS appearance as separate assertions; host-forced appearance wins.
+- [Phase 240]: Keep FocusTrap production behavior unchanged; supply browser focus APIs in its Node harness.
+- [Phase 240]: Browser online is only transport recovery; billing controls remain locked until LiveView reports reconnected.
+- [Phase 240]: Observe billing controls at document scope across overlay replacement and preserve each control's original disabled state.
+- [Phase 240]: Use Phase 239 route authority and live ComponentRegistry APIs rather than adding a second route or component registry.
+- [Phase 240]: Keep first-fresh performance values diagnostic only and keep future behavior guarded by existing owner tests.
+- [Phase 240]: Preserve the 100ms TrustSmoke budget and original 222ms observation; final full host gate passed after repairing archive/test contracts. No open Phase 240 host failure remains.
+- [Phase 241]: Customer invoice links use customer_id and status=open; no subscription-only filter or count is implied.
+- [Phase 241]: The broader invoice destination names the current global or selected-organization scope.
+- [Phase 241]: Return labels and paths come from one validated destination pair; caller labels and owner values are ignored.
+- [Phase 241]: Invoice return origins retain supported decoder filters and drop unsupported sort and cursor state.
+- [Phase 241]: Return labels and hrefs for payment, customer, and subscription detail come from the same ScopedPath validated destination.
+- [Phase 241]: Customer detail return origins must match the loaded customer, and the current owner is rebuilt by ScopedPath.
+- [Phase 241]: Existing billing mutation, fresh-scope, and stale-review checks remain in their current route owners.
+- [Phase 241]: Campaign detail accepts only a validated Recovery origin and falls back to current-scope Recovery for direct or unsupported origins.
+- [Phase 241]: Recovery window context describes the originating dashboard query; the campaign historical timeline remains unfiltered.
+- [Phase 241]: Subscription reviews show exact target/customer/owner/state and keep unsupported money or preview unavailable.
+- [Phase 241]: Review dismissal uses Back to subscription and remains separate from the subscription action.
+- [Phase 241]: Refund reviews use integer minor units and show the exact reviewed amount, currency, and remaining balance.
+- [Phase 241]: Payment-method confirmation reloads the customer and method under a freshly resolved actor and owner scope.
+- [Phase 241]: Billing-review dismissal is distinct from the domain action and clears staged intent.
+- [Phase 241]: Build package assets before browsers and retain the byte-identical checked-in CSS/JS outputs.
+- [Phase 241]: Use a 7-day Recovery selection to prove scoped campaign return-window preservation.
+- [Phase 241]: Keep Admin /admin and customer Portal /billing browser evidence separate.
+- [Phase 241]: Validated returns travel as one path and truthful label derived from supported decoded filters under the current owner. — Prevents stale, foreign or malformed origins from redirecting callers or retaining labels for a filter the destination did not consume.
+- [Phase 241]: Action reviews use exact current target and material facts; uncertainty offers a supported investigation path and suppresses blind retries. — Fresh dispatch checks and actual provider callback counters preserve money, scope, step-up and zero-dispatch dismissal guarantees.
+- [Phase 241]: Complete each phase only after canonical automated UAT generation and the existing project-wide CI contract pass. — Phase 241 reconciled legacy serialization without changing verdicts; preserve resolved-gap history and reuse computed-style/text-stress/browser owners instead of required human UAT.
+- [Phase 242]: Each return family validates through its query decoder and encoder before rebuilding under current owner scope.
+- [Phase 242]: Event related links require an owner-scoped exact identity match.
+- [Phase 242]: Global search keeps native result links and describes one active link through an input-associated status node.
+- [Phase 242]: Search selection persists by exact item identity only within the same query and owner context; otherwise it falls back to the first current item or none.
+- [Phase 242]: Bulk replay binds to unique reviewed delivery identities and records exact observed outcomes.
+- [Phase 242]: Single delivery replay uses validated contextual return and distinguishes accepted enqueue from processing.
+- [Phase 242]: Keep the incumbent global Coupon and PromotionCode schemas; these schemas have no owner fields, so avoid claiming tenant-filtered catalog membership.
+- [Phase 242]: Preserve exact coupon foreign-key identity for promotion-code links, and label nullable catalog limits and unrepresented restriction facts as not recorded.
+- [Phase 242]: Connect account detail returns preserve only validated list context under the current owner scope.
+- [Phase 242]: Stored Stripe observations remain separate from local fee policy and carry no invented report timestamp.
+- [Phase 242]: Fee saves recheck reviewed local account/default state, retain StepUp and optimistic locking, and make identical policy submissions no-ops.
+- [Phase 242]: Build Home's current route through ScopedPath and the resolved owner scope so shell navigation matches scoped destinations.
+- [Phase 242]: Render invoice collection methods through shared Copy labels; unknown enum values remain Unknown.
+- [Phase 242]: Use incumbent package and host browser owners and preserve their existing recurring CI ownership.
+- [Phase 242]: Measure source, package output, host-compiled output and served browser resources separately.
+- [Phase 241]: Billing invoice, subscription, and dunning action groups use the existing --ax-space-xs 4px spacing token.
+- [Phase 241]: Assert that mounted targets exist before checking every target's geometry. Preserve the complete test/reporter chronology and capture budget; a reporter change does not reset the verification budget.
+- [Phase 243]: Keep verifier proof on isolated Compose, database, listener, and per-run build identities; compare exact invoice/audit/dispatch state.
+- [Phase 243]: Selected the seeded invoice list and open action-review composition in light and dark themes.
+- [Phase 243]: Published reviewed Linux evidence only to the authorized gsd/phase-243-linux-evidence validation ref.
+- [Phase 243]: Direct Playwright proof is restricted to its exact private per-run server PID; the documented verifier retains preview custody while using separate proof databases and build outputs.
+- [Phase 243]: Hash actual browser response bodies independently from package, compiled, and direct HTTP responses.
+- [Phase 243]: Keep the existing Phase 240 route and component registry as the sole inventory authority.
+- [Phase 243]: Leave the logo source unchanged after the current mounted host screenshot showed a working wordmark.
+- [Phase 244]: Use explicit labels only for producer-confirmed event keys; keep unknown values neutral and exact evidence in scoped detail.
+- [Phase 244]: Use ISO 8601 for event timestamps so seconds, fractional precision, and UTC offset remain visible.
+- [Phase 244]: Validate served admin assets by comparing their bytes with package and compiled outputs.
+- [Phase 244]: Keep raw event keys and filters exact while using BillingEvent copy for operator-facing labels.
+- [Phase 244]: Keep webhook delivery status, attempt history, and derived ledger events as separate facts.
+- [Phase 244]: Preserve the operator's native disclosure state through LiveView patches using the existing details/summary interaction.
+- [Phase 244]: Preserved Copy.Locked literals and incumbent mutation, step-up, read, and audit paths; wording now follows observed job and state facts.
+- [Phase 244]: Kept mounted read-outage state explicitly unobserved; focused LiveView tests verify the read-only retry handler.
+- [Phase 244]: Bulk replay links only to the existing freshly authorized selected-row read; no extra query or retry mutation was added.
+- [Phase 244]: Adversarial browser values are positional fixture data and use existing schema-supported text fields.
+- [Phase 246]: Invoice view selection is navigation, while only active constraints render as removable chips.
+- [Phase 246]: Clearing all invoice statuses selects the All view; reset preserves the chosen view and owner scope.
+- [Phase 246]: Keep subscription status OR predicates and normalize selections to a stable bounded URL order.
+- [Phase 246]: Keep exact customer, coupon, and webhook relationships separate from broad q search.
+- [Phase 246]: Preserve custom Connect account types as editable values instead of imposing a fixed enum.
+- [Phase 246]: Keep CommandPalette.activeIndex as the single source for pointer highlight, ARIA selection, and Enter navigation.
+- [Phase 246]: Use the existing SQL Sandbox fixture lane for deterministic exceptional states and the guarded ordinary Fake preview for realistic search.
+- [Phase 246]: Remove only allowlisted Phase 191 Fake stress fixtures during ordinary preview normalization; preserve ordinary showcase and linked billing data.
+- [Phase 246]: Use shared identity cells with exact copy actions and keep responsive cards from repeating their default title field.
+- [Phase 246]: Keep Phase 247 status, fee, and time semantics unchanged in the remaining shared-table consumers.
+- [Phase 247]: Webhook received_at renders in explicit UTC before browser Intl formatting shows the resolved IANA timezone.
+- [Phase 247]: Timestamp copy preserves the original ISO string independently from the formatted display.
+- [Phase 247]: Admin timestamps share a persistent Local/UTC preference with UTC fallback when browser storage cannot be read.
+- [Phase 247]: Clipboard success follows resolved writes; failed timestamp copies show the exact UTC ISO value in a selectable fallback.
+- [Phase 247]: Use Timestamp.timestamp/1 for visible instants while preserving Date fields and UTC query boundaries.
+- [Phase 247]: Keep audit prose intact and expose exact copy through adjacent timestamp controls.
+- [Phase 247]: Visible DateTime values use the shared Timestamp component while date-only text, filter serialization, and UTC analytics bounds remain unchanged.
+- [Phase 247]: Repeated timestamp controls use distinct IDs across responsive and summary/timeline surfaces.
+- [Phase 247]: Missing billing plan and fee details stay explicitly unavailable; existing authorization and action flows remain unchanged.
+- [Phase 247]: Preserve Dunning formulas, owner scope, and UTC boundaries while changing recovery presentation.
+- [Phase 247]: Pair recovered and exhausted values per currency; actual zero remains distinct from missing or unsupported amounts.
+- [Phase 247]: Separate historical coverage from the selected UTC window and name the cutoff-semantics help destination.
+- [Phase 247]: Use dedicated Phase247 Playwright configs because the referenced Phase246 config excludes Phase247 tests.
+- [Phase 247]: Independent verification passed 31/31 after race, negative-state and populated payload/history checks closed the initial gaps.
+- [Phase 248]: Keep ordinary evidence on the existing Phase 245 host; use the guarded 4102 test database for exceptional scenarios.
+- [Phase 248]: Bind each inspected viewport capture to exact routes, current source files, served CSS/JS bytes, and image digests.
+- [Phase 248]: Owner topic and accepted finding keys and owners come from Phase 245 canonical JSON blocks; shared findings remain represented once and linked to their owning topic.
+- [Phase 248]: Treat each Phase 248 capture as current only for the route and state it directly shows; retain Phase 245-247 receipts as historical at their recorded source revisions.
+- [Phase 250]: 250-03: PR 49 head b9c98b20 green except the Phase 211 pixel gate (to 250-04); 8 root-cause fixes, 5 of 6 pushes
+- [Phase 250]: 250-04: Phase 211 baselines re-minted only from Linux dispatch run 40232864961 after D4 classification (10 intentional owner-feedback receipts, 2 unchanged, 0 regressions); PR #49 GREEN at 5ad01dee
+- [Phase 250]: 250-05: commit E is the Phase 250 pre-merge close (SUMMARY 05, VERIFICATION 2/3 with SC1 and SC2, LAND-01 Complete; LAND-02/03 Pending until 250-07). The first close 7b1b5862 was red on a SIGPIPE race in verify_release_contract.sh, fixed at source in 5561a9a9; the 30-site pipe-to-grep-q sweep and the SL-D printf/echo exemption are deferred. The body-only commit H names E as the PR #49 evidence head; the merge waits on an explicit maintainer yes (250-06)
 
 ### Pending Todos
 
-None yet.
+None. The next workflow action is recorded under Operator Next Steps; completed Phase 241 discussion and its named spacing closure are not pending work.
 
 ### Deferred / Dormant
 
@@ -198,29 +507,58 @@ None yet.
 
 ### Blockers/Concerns
 
+- **Archived v1.65:** Phase 244 has no remaining verification blockers; milestone audit passed and archival is complete. Preserve revision-specific evidence and distinguish local acceptance from remote delivery.
 - **Resolved by v1.62:** the `main`/v1.61 divergence, the stale local `main` ref, the four unpublished audit-closure commits, and the unavailable live-CI monitor. All are reconciled into the integration candidate with committed evidence.
-- **Open:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
-- **Open (coverage):** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
+- **Historical v1.62 candidate:** the frozen candidate SHA is red on `docs-contracts-shift-left`, `release-gate` (Floor, Primary, Primary+OpenTelemetry), and `phase18-tax-gate`. Fixes exist on the milestone line but were deliberately not force-pushed into the frozen ref. Release requires re-gating at the new head.
+- **Archived v1.62 validation debt:** Nyquist validation is partial — 229 genuine PARTIAL, 230 MISSING, 231/232 `draft`.
+- Phase 243 Plan 01 and EVR-03 are complete: the twelve reviewed Linux baselines passed the complete-set guard and Phase 211 pixel comparison in GitHub Actions run 38083267168.
+- Phase243 Plans02/03 are complete: full-wrapper and later mounted custody/asset/preview checks passed at their recorded revisions with authoritative state preserved. Default-volume fingerprint reconciliation matched the original procedure; final independent verification and ordered UAT passed.
 
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260915-dpd | Fix eager Mix.env/0 evaluation in Accrue auth modules that crashes OTP releases at boot | 2026-09-15 | 5653216c | [260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue](./quick/260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue/) |
-| 260916-gda | Close phase-231 loose ends: STATE.md standing sections, gap-closure TAP harness, 229-UAT regen, CR-01 window-disposition invariant, WR-01 expected-repository validation, REQUIREMENTS.md gate wording | 2026-09-16 | f5b6d390 | [260916-gda-close-phase-231-loose-ends-state-md-stan](./quick/260916-gda-close-phase-231-loose-ends-state-md-stan/) |
-| 260916-hl9 | Resolve the sibling dependency-operator contradiction between CLAUDE.md and the code, and make it machine-enforced | 2026-09-16 | 9f309871 | [260916-hl9-resolve-the-sibling-dependency-operator-](./quick/260916-hl9-resolve-the-sibling-dependency-operator-/) |
-| 260917-l7v | Shift left seven phase-232 session failure modes into merge-blocking CI guards (SL-A through SL-G) | 2026-09-17 | b42c64a5 | [260917-l7v-shift-left-phase-232-session-lessons-int](./quick/260917-l7v-shift-left-phase-232-session-lessons-int/) |
-| 260918-rpt | Fix release-PR title generation (grouped ${version} with no root package) that made release 1.6.0 tag nothing while reporting success; add a merge-blocking round-trip guard | 2026-09-18 | 11cf1e02 | [260918-rpt-fix-release-pr-title-generation](./quick/260918-rpt-fix-release-pr-title-generation/) |
-| 260918-e8m | Correct v1.62 ROADMAP doc-truth drift before archive: two Phase 231 success criteria claimed green gates the candidate SHA never earned, plus a stale 16/20 plan count | 2026-09-18 | 62c5c6a0 | [260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be](./quick/260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be/) |
-| 260918-hnk | Close v1.62 audit tech-debt item #2: the candidate SHA's merge-blocking gates are green at the shipped head, so record the resolution with its evidence | 2026-09-18 | 27a0e42c | [260918-hnk-close-v1-62-audit-tech-debt-item-2-candi](./quick/260918-hnk-close-v1-62-audit-tech-debt-item-2-candi/) |
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 260915-dpd | Fix eager Mix.env/0 evaluation in Accrue auth modules that crashes OTP releases at boot | 2026-09-15 | 5653216c | — | [260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue](./quick/260915-dpd-fix-eager-mix-env-0-evaluation-in-accrue/) |
+| 260916-gda | Close phase-231 loose ends: STATE.md standing sections, gap-closure TAP harness, 229-UAT regen, CR-01 window-disposition invariant, WR-01 expected-repository validation, REQUIREMENTS.md gate wording | 2026-09-16 | f5b6d390 | — | [260916-gda-close-phase-231-loose-ends-state-md-stan](./quick/260916-gda-close-phase-231-loose-ends-state-md-stan/) |
+| 260916-hl9 | Resolve the sibling dependency-operator contradiction between CLAUDE.md and the code, and make it machine-enforced | 2026-09-16 | 9f309871 | — | [260916-hl9-resolve-the-sibling-dependency-operator-](./quick/260916-hl9-resolve-the-sibling-dependency-operator-/) |
+| 260917-l7v | Shift left seven phase-232 session failure modes into merge-blocking CI guards (SL-A through SL-G) | 2026-09-17 | b42c64a5 | — | [260917-l7v-shift-left-phase-232-session-lessons-int](./quick/260917-l7v-shift-left-phase-232-session-lessons-int/) |
+| 260918-rpt | Fix release-PR title generation (grouped ${version} with no root package) that made release 1.6.0 tag nothing while reporting success; add a merge-blocking round-trip guard | 2026-09-18 | 11cf1e02 | — | [260918-rpt-fix-release-pr-title-generation](./quick/260918-rpt-fix-release-pr-title-generation/) |
+| 260918-e8m | Correct v1.62 ROADMAP doc-truth drift before archive: two Phase 231 success criteria claimed green gates the candidate SHA never earned, plus a stale 16/20 plan count | 2026-09-18 | 62c5c6a0 | — | [260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be](./quick/260918-e8m-correct-v1-62-roadmap-doc-truth-drift-be/) |
+| 260918-hnk | Close v1.62 audit tech-debt item #2: the candidate SHA's merge-blocking gates are green at the shipped head, so record the resolution with its evidence | 2026-09-18 | 27a0e42c | — | [260918-hnk-close-v1-62-audit-tech-debt-item-2-candi](./quick/260918-hnk-close-v1-62-audit-tech-debt-item-2-candi/) |
+| 261008-cb9 | Repair two warnings that make the required Admin CI test command fail with --warnings-as-errors: keep all handle_event/3 clauses contiguous by moving prepare_staged_action/2 below them, and rename the unused view test binding to _view. Run the Admin package CI test command and record the change as a quick task. Keep Phase 235 artifacts and checkout source untouched. | 2026-10-08 | 795114d9 | — | [261008-cb9-repair-two-warnings-that-make-the-requir](./quick/261008-cb9-repair-two-warnings-that-make-the-requir/) |
+| 261008-cjc | Repair Playwright CI: automate the existing test-only step-up code in the webhook replay journey and make Phase 234 saved post-layout evidence read-only by default | 2026-10-08 | 519ef895 | Verified | [261008-cjc-repair-playwright-ci-automate-the-existi](./quick/261008-cjc-repair-playwright-ci-automate-the-existi/) |
+| 261008-ffy | Repair Phase 235 regression gaps; isolate Braintree tests, restore processor-neutral facade docs, and add focused CI proof | 2026-10-08 | 42c28c17 | Verified | [261008-ffy-repair-phase-235-regression-gaps-by-isol](./quick/261008-ffy-repair-phase-235-regression-gaps-by-isol/) |
+| 261008-lbv | Repair Phase 236 Hosted Fields security gaps: retry stale asynchronous setup after LiveView updates and guarantee readable malformed-token styles with automated browser coverage | 2026-10-08 | adcdbbfa | complete | [261008-lbv-fix-phase-236-security-audit-gaps-retry-](./quick/261008-lbv-fix-phase-236-security-audit-gaps-retry-/) |
+| 261024-pla | Route archive-unaware phase 245/248 verifier literals through phase_evidence_path so the archive sweep passes | 2026-10-24 | 193a8a8e | — | [261024-pla-route-archive-unaware-phase-245-248-veri](./quick/261024-pla-route-archive-unaware-phase-245-248-veri/) |
 
 ## Deferred Items
 
-| Category | Item | Status |
-|---|---|---|
-| requirement | HOST-01..03 | Deferred at v1.60 override closeout |
-| requirement | READY-01..02 | Deferred at v1.60 override closeout |
-| seed | SEED-008-mailglass-downstream-major-cap | dormant — acknowledged and deferred at v1.62 override closeout (2026-09-18) |
+Items acknowledged and deferred at milestone close, most recent first:
+
+| Category | Item | Status | Deferred At | Milestone |
+|---|---|---|---|---|
+| requirement | `accrue_events.inserted_at` session-timezone dependence (`timestamp without time zone` DEFAULT now(); non-UTC adopter DB mislabels local time as UTC) — needs migration or app-side timestamps; found by Phase 250 research, deferred per D2 | deferred (HIGH, v1.68) | 2026-10-25 | v1.67 |
+| deferred_items | 240/deferred-items.md: Admin asset build reports unavailable development Storybook CSS/JS asset paths while completing the package build successfully | acknowledged | 2026-10-10 | v1.64 |
+| deferred_items | 240/deferred-items.md: ExMoney reports deprecated automatic exchange-rate service startup during the Admin ExUnit suite | acknowledged | 2026-10-10 | v1.64 |
+| requirement | HOST-01..03 | Deferred at v1.60 override closeout | — | v1.60 |
+| requirement | READY-01..02 | Deferred at v1.60 override closeout | — | v1.60 |
+| seed | SEED-008-mailglass-downstream-major-cap | dormant — acknowledged and deferred at v1.62 override closeout | 2026-09-18 | v1.62 |
+| UI refinement | Phase 233 inherited Portal spacing/type/theme targets and narrow Admin density | Follow up in Phases 235/236 and 234/237; see 233-UI-DISPOSITION.md | — | — |
+| archived metadata | Extra executable-UAT probe starting at Phase 218 lacks a deterministic completion date | Outside configured CI scope; current CI self-test, opted-in scan, and all-since-229 checks pass | — | — |
+| seeds | SEED-008 | dormant | 2026-10-09 | v1.63 |
+| verification_gaps | 239/239-VERIFICATION-INITIAL.md | gaps_found | 2026-10-09 | v1.63 |
+| verification_gaps | v1.32/099-VERIFICATION.md | gaps_found | 2026-10-09 | v1.63 |
+| deferred_items | 235/deferred-items.md: Deferred Items — Phase 235 Plan 01 — `accrue_admin/lib/accrue_admin/live/subscription_live.ex:172` emits an existing compiler warning because `handle_event/3` clauses are not grouped. This is unrelated to the mounted checkout hook and browser spec. — The host test application emits an existing `ex_money` warning about automatically starting the exchange rate service. This is unrelated to the mounted checkout hook and browser spec. | acknowledged | 2026-10-09 | v1.63 |
+
+### v1.66 closeout acknowledgements
+
+| Category | Item | Date | Milestone |
+|---|---|---|---|
+| deferred_items | Phase 246/deferred-items.md: `side-tab`: thick left border using warning token — line 3819 — Existing warning-state treatment, outside changed selectors. | 2026-10-12 | v1.66 |
+| deferred_items | Phase 246/deferred-items.md: `side-tab`: thick left border using danger token — line 5032 — Existing danger-state treatment, outside changed selectors. | 2026-10-12 | v1.66 |
+| deferred_items | Phase 246/deferred-items.md: `side-tab`: thick left border using strong border token — line 5252 — Existing card decoration, outside changed selectors. | 2026-10-12 | v1.66 |
+| deferred_items | Phase 246/deferred-items.md: `overused-font`: Geist — line 7 — Existing project-wide typeface; a typography change requires separate design review. | 2026-10-12 | v1.66 |
+| deferred_items | Phase 246/deferred-items.md: `overused-font`: Geist Mono — line 14 — Existing project-wide mono typeface; a typography change requires separate design review. | 2026-10-12 | v1.66 |
 
 ## Post-v1.48 Pause Rule
 
@@ -243,8 +581,9 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-09-17T14:59:41.861Z
-Stopped at: Phase 232 complete — all phases complete
+Last session: 2026-10-25T22:45:00.000Z
+Stopped at: Completed 250-05-PLAN.md
+Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
 
@@ -373,4 +712,4 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- `$gsd-plan-phase 249` — plan Local Gate Parity & Planning Truth for v1.67 Integration & CI Green (Phases 249–251). Pushing to origin (Phase 250) and Hex publication (Phase 251) each require an explicit maintainer yes. Milestone tags remain local.

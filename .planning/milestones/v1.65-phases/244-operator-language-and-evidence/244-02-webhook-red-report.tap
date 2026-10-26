@@ -1,0 +1,22 @@
+TAP version 13
+ok 1 - test D-12 D-13 D-14 D-15 D-16 D-17 renders replayable webhook detail contract
+ok 2 - test safe_utf8/1 returns :error for invalid-UTF-8 raw_body and does not crash Jason.decode
+ok 3 - test single replay dismissal and step-up denial leave delivery, jobs, and audit unchanged
+ok 4 - test detail read failure is unavailable rather than not-found and retry restores evidence
+ok 5 - test forensic payload section uses Detail.detail_section not hand-rolled ax-card
+ok 6 - test in-scope replay uses the exact confirmation and success copy
+ok 7 - test D-13 non-replayable webhook rows omit replay-looking controls and show state copy
+ok 8 - test single replay revalidates organization ownership inside the claim transaction
+ok 9 - test out-of-scope webhook route redirects with denial flash before rendering detail
+ok 10 - test webhook loader distinguishes in-scope, out-of-scope, and ambiguous ownership
+ok 11 - test keeps activity feed path and lazy Activity marker in DETAIL layout
+ok 12 - test webhook detail preserves only validated family return context and scopes direct fallback
+ok 13 - test renders forensic payload, verification summary, attempt history, and derived events
+ok 14 - test organization event feed includes only webhook replay records proven in scope
+ok 15 - test WebhookLive Related card renders event links pointing to /events/:id
+ok 16 - test accepted replay remains queued when the follow-up detail read is unavailable
+ok 17 - test single replay rechecks current status after fresh step-up
+ok 18 - test ambiguous ownership renders blocked copy and no replay action
+not ok 19 - test related activity shares event meaning and discloses exact evidence and destination
+# error: [{:error, %ExUnit.AssertionError{left: "customer.updatedOct 10, 2026 21:11 UTCWebhookCustomer 0aa02f74-2143-4de3-afbd-c47025dd68afevent #2071 · linked in /billing/events?source_webhook_event_id=21a0fca7-dd6f-4c0e-a407-9308da1d4eb9", right: "Customer updated", message: "Assertion with =~ failed", expr: {:assert, [line: 219], [{:=~, [line: 219], [{{:., [line: 219], [{:__aliases__, [line: 219], [:Floki]}, :text]}, [line: 219], [{:event_item, [line: 219], nil}]}, "Customer updated"]}]}, args: :ex_unit_no_meaningful_value, doctest: :ex_unit_no_meaningful_value, context: :==}, [{AccrueAdmin.WebhookLiveTest, :"test related activity shares event meaning and discloses exact evidence and destination", 1, [file: ~c"test/accrue_admin/live/webhook_live_test.exs", line: 219]}]}]
+1..19

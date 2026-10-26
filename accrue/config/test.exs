@@ -18,6 +18,7 @@ config :accrue, Accrue.TestRepo,
   username: System.get_env("PGUSER", "postgres"),
   password: System.get_env("PGPASSWORD", "postgres"),
   hostname: System.get_env("PGHOST", "localhost"),
+  port: String.to_integer(System.get_env("PGPORT", "5432")),
   priv: "priv/repo"
 
 config :accrue, ecto_repos: [Accrue.TestRepo]
@@ -47,4 +48,5 @@ config :chimeway, Chimeway.Repo,
   pool_size: 10,
   username: System.get_env("PGUSER", "postgres"),
   password: System.get_env("PGPASSWORD", "postgres"),
-  hostname: System.get_env("PGHOST", "localhost")
+  hostname: System.get_env("PGHOST", "localhost"),
+  port: String.to_integer(System.get_env("PGPORT", "5432"))

@@ -22,7 +22,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     Select,
     StatusBadge,
     StepUpAuthModal,
-    Timeline
+    Timeline,
+    Timestamp
   }
 
   alias AccrueAdmin.Copy
@@ -54,12 +55,52 @@ defmodule AccrueAdmin.Live.InvoiceLive do
          socket
          |> assign_shell(admin)
          |> assign_invoice(invoice)
+         |> assign(
+           :return_path,
+           ScopedPath.build(
+             admin["mount_path"] || "/billing",
+             "/invoices",
+             socket.assigns.current_owner_scope
+           )
+         )
+         |> assign(:return_label, "Back to invoices")
          |> assign(:flashes, [])
          |> assign(:pending_action, nil)
+         |> assign(:dispatch_state, :idle)
          |> assign(:drawer_action_type, nil)
          |> assign(:generated_pdf_href, nil)
          |> assign(:generated_pdf_filename, nil)}
     end
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    mount_path = socket.assigns.admin_mount_path
+    scope = socket.assigns.current_owner_scope
+
+    destination =
+      ScopedPath.return_destination(
+        mount_path,
+        Map.get(params, "return_to"),
+        scope,
+        socket.assigns.invoice.customer_id,
+        "/invoices"
+      )
+
+    {:noreply,
+     socket
+     |> assign(:return_path, destination.path)
+     |> assign(:return_label, destination.label)
+     |> assign(
+       :related_items,
+       related_items(
+         socket.assigns.invoice,
+         socket.assigns.customer,
+         mount_path,
+         scope,
+         destination.path
+       )
+     )}
   end
 
   @impl true
@@ -84,10 +125,21 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     socket = ensure_timeline_events(socket)
 
     with action_type when is_binary(action_type) <- socket.assigns.drawer_action_type,
-         true <- action_available?(socket.assigns.invoice, action_type) do
-      action = pending_action(action_type, params, socket.assigns.timeline_events)
+         true <- action_available?(socket.assigns.invoice, action_type),
+         true <- review_money_supported?(socket.assigns.invoice, action_type) do
+      action =
+        pending_action(action_type, params, socket.assigns.timeline_events)
+        |> Map.put(:invoice_id, socket.assigns.invoice.id)
+        |> Map.put(:review_actor_id, Auth.actor_id(socket.assigns.current_admin))
+        |> Map.put(:review_scope, scope_identity(socket.assigns.current_owner_scope))
+        |> Map.put(:review_fingerprint, review_fingerprint(action_type, socket.assigns.invoice))
+        |> Map.put(:reviewed_amount_minor, reviewed_amount(socket.assigns.invoice, action_type))
+        |> Map.put(:reviewed_currency, socket.assigns.invoice.currency)
 
-      {:noreply, assign(socket, :pending_action, action)}
+      {:noreply,
+       socket
+       |> assign(:pending_action, action)
+       |> assign(:dispatch_state, :staged)}
     else
       _unavailable -> {:noreply, reject_unavailable_invoice_action(socket)}
     end
@@ -97,7 +149,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     {:noreply,
      socket
      |> assign(:pending_action, nil)
-     |> assign(:drawer_action_type, nil)}
+     |> assign(:drawer_action_type, nil)
+     |> assign(:dispatch_state, :idle)}
   end
 
   def handle_event("load_activity", _params, socket) do
@@ -109,28 +162,43 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   def handle_event("confirm_action", _params, socket) do
-    case socket.assigns.pending_action do
-      nil ->
-        {:noreply, push_flash(socket, :warning, Copy.invoice_select_action_warning())}
+    if socket.assigns[:dispatch_state] in [:awaiting_step_up, :dispatching, :submitted] do
+      {:noreply, socket}
+    else
+      case socket.assigns.pending_action do
+        nil ->
+          {:noreply, push_flash(socket, :warning, Copy.invoice_select_action_warning())}
 
-      %{type: type} = action when type in @destructive_actions ->
-        case StepUp.require_fresh(
-               socket,
-               step_up_action(action, socket.assigns.invoice),
-               &execute_action(&1, action)
-             ) do
-          {:ok, socket} ->
-            {:noreply, socket}
+        action ->
+          case validate_review(socket, action) do
+            {:ok, fresh_socket, fresh_invoice} when action.type in @destructive_actions ->
+              fresh_socket = assign(fresh_socket, :dispatch_state, :awaiting_step_up)
 
-          {:challenge, socket} ->
-            {:noreply, socket}
+              case StepUp.require_fresh(
+                     fresh_socket,
+                     step_up_action(action, fresh_invoice),
+                     &execute_action(&1, action)
+                   ) do
+                {:ok, socket} ->
+                  {:noreply, socket}
 
-          {:error, _reason, socket} ->
-            {:noreply, push_flash(socket, :error, invoice_action_error_copy(socket, action))}
-        end
+                {:challenge, socket} ->
+                  {:noreply, socket}
 
-      action ->
-        {:noreply, execute_action(socket, action)}
+                {:error, _reason, socket} ->
+                  {:noreply,
+                   socket
+                   |> assign(:dispatch_state, :staged)
+                   |> push_flash(:error, invoice_action_error_copy(socket, action))}
+              end
+
+            {:ok, fresh_socket, _fresh_invoice} ->
+              {:noreply, execute_reviewed_action(fresh_socket, action)}
+
+            {:error, stale_socket} ->
+              {:noreply, reject_stale_review(stale_socket)}
+          end
+      end
     end
   end
 
@@ -212,8 +280,27 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   def handle_event("stage_remove_item", %{"id" => item_id}, socket) do
-    item = Enum.find(socket.assigns.line_items, &(&1.id == item_id))
-    {:noreply, assign(socket, :pending_remove_item, item)}
+    case manual_invoice_item(socket, item_id) do
+      {:ok, invoice, item} ->
+        {:noreply,
+         socket
+         |> assign(:invoice, invoice)
+         |> assign(:line_items, invoice.items || [])
+         |> assign(:pending_remove_item, item)}
+
+      :error ->
+        {:noreply,
+         socket
+         |> assign(:pending_remove_item, nil)
+         |> push_flash(:error, invoice_remove_item_error_copy())}
+    end
+  end
+
+  def handle_event("stage_remove_item", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:pending_remove_item, nil)
+     |> push_flash(:error, invoice_remove_item_error_copy())}
   end
 
   def handle_event("cancel_remove_item", _params, socket) do
@@ -221,15 +308,30 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   def handle_event("confirm_remove_item", _params, socket) do
-    case Billing.remove_invoice_item(socket.assigns.invoice, socket.assigns.pending_remove_item) do
-      {:ok, _item} ->
-        {:noreply,
-         socket
-         |> refresh_invoice(socket.assigns.invoice.id)
-         |> assign(:pending_remove_item, nil)
-         |> push_flash(:info, Copy.invoice_remove_manual_item_success())}
+    case socket.assigns[:pending_remove_item] do
+      %{id: item_id} ->
+        case manual_invoice_item(socket, item_id) do
+          {:ok, invoice, item} ->
+            case Billing.remove_invoice_item(invoice, item) do
+              {:ok, _updated_invoice} ->
+                {:noreply,
+                 socket
+                 |> refresh_invoice(invoice.id)
+                 |> assign(:pending_remove_item, nil)
+                 |> push_flash(:info, Copy.invoice_remove_manual_item_success())}
 
-      {:error, _reason} ->
+              {:error, _reason} ->
+                {:noreply, push_flash(socket, :error, invoice_remove_item_error_copy())}
+            end
+
+          :error ->
+            {:noreply,
+             socket
+             |> assign(:pending_remove_item, nil)
+             |> push_flash(:error, invoice_remove_item_error_copy())}
+        end
+
+      _missing_item ->
         {:noreply, push_flash(socket, :error, invoice_remove_item_error_copy())}
     end
   end
@@ -255,8 +357,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         phx-key="escape"
       >
         <Breadcrumbs.breadcrumbs
+          group="Billing"
           items={[
-            %{label: Copy.dashboard_breadcrumb_home(), href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
             %{label: Copy.invoice_breadcrumb_invoices(), href: ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)},
             %{
               label: customer_label(@customer),
@@ -265,13 +367,16 @@ defmodule AccrueAdmin.Live.InvoiceLive do
             %{label: invoice_label(@invoice)}
           ]}
         />
+        <p class="ax-detail-back-link">
+          <a class="ax-link" href={@return_path}><%= @return_label %></a>
+        </p>
 
-        <Detail.summary_card eyebrow={Copy.invoice_detail_eyebrow()} title={invoice_label(@invoice)}>
+        <Detail.summary_card title={invoice_label(@invoice)}>
           <:status><StatusBadge.status_badge status={@invoice.status} /></:status>
           <:facts>
             <span><%= customer_label(@customer) %></span>
             <span><%= @invoice.processor_id || @invoice.id %></span>
-            <span><%= Copy.invoice_detail_due_prefix() %><%= format_datetime(@invoice.due_date) %></span>
+            <span><%= Copy.invoice_detail_due_prefix() %> <%= timestamp_value(@invoice.due_date, "invoice-due-date-card") %></span>
           </:facts>
         </Detail.summary_card>
 
@@ -336,7 +441,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                   <%= Copy.invoice_line_item_qty_prefix() %><%= item.quantity || 1 %>
                   <span :if={item.proration}><%= Copy.invoice_line_item_proration_suffix() %></span>
                   <span :if={item.period_start || item.period_end}>
-                    <%= Copy.invoices_balance_sep() %><%= format_datetime(item.period_start) %><%= Copy.invoice_line_item_period_separator() %><%= format_datetime(item.period_end) %>
+                    <%= Copy.invoices_balance_sep() %><%= timestamp_value(item.period_start, "invoice-line-#{item.id}-period-start") %><%= Copy.invoice_line_item_period_separator() %><%= timestamp_value(item.period_end, "invoice-line-#{item.id}-period-end") %>
                   </span>
                 </p>
               </div>
@@ -362,7 +467,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                 <p class="ax-body"><%= Copy.invoice_remove_manual_item_confirm() %></p>
                 <div class="ax-stack-sm ax-stack-row ax-mt-md">
                   <button phx-click="confirm_remove_item" class="ax-button ax-button-primary"><%= Copy.invoice_confirm_action_verb() %></button>
-                  <button phx-click="cancel_remove_item" class="ax-button ax-button-ghost"><%= Copy.invoice_confirm_cancel() %></button>
+                  <button phx-click="cancel_remove_item" class="ax-button ax-button-ghost"><%= Copy.invoice_remove_manual_item_cancel() %></button>
                 </div>
               </div>
             </div>
@@ -439,7 +544,12 @@ defmodule AccrueAdmin.Live.InvoiceLive do
           close_event="cancel_pending_action"
         >
           <%= if @pending_action do %>
-            <.pending_action_content pending_action={@pending_action} invoice={@invoice} />
+            <.pending_action_content
+              pending_action={@pending_action}
+              invoice={@invoice}
+              customer={@customer}
+              owner_scope={@current_owner_scope}
+            />
           <% else %>
             <.invoice_action_form
               action_type={@drawer_action_type}
@@ -460,7 +570,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
               data-role="confirm-action"
               data-ax-action-drawer-confirm
             >
-              <%= Copy.invoice_confirm_action_verb() %> <%= invoice_action_label(@pending_action.type) %>
+              <%= invoice_confirmation_label(@pending_action.type) %>
             </button>
             <button phx-click="cancel_pending_action" class="ax-button ax-button-ghost"><%= Copy.invoice_confirm_cancel() %></button>
           </:footer>
@@ -474,14 +584,19 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         >
           <section data-ax-overlay-panel data-presentation="drawer">
             <%= if @pending_action do %>
-              <.pending_action_content pending_action={@pending_action} invoice={@invoice} />
+              <.pending_action_content
+                pending_action={@pending_action}
+                invoice={@invoice}
+                customer={@customer}
+                owner_scope={@current_owner_scope}
+              />
               <button
                 phx-click="confirm_action"
                 class="ax-button ax-button-primary"
                 data-role="confirm-action"
                 data-ax-action-drawer-confirm
               >
-                <%= Copy.invoice_confirm_action_verb() %> <%= invoice_action_label(@pending_action.type) %>
+                <%= invoice_confirmation_label(@pending_action.type) %>
               </button>
             <% else %>
               <.invoice_action_form
@@ -593,16 +708,38 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
   attr(:pending_action, :map, required: true)
   attr(:invoice, :map, required: true)
+  attr(:customer, :map, required: true)
+  attr(:owner_scope, :map, required: true)
 
   defp pending_action_content(assigns) do
     assigns =
-      assign(assigns, :requires_step_up?, assigns.pending_action.type in @destructive_actions)
+      assigns
+      |> assign(:requires_step_up?, assigns.pending_action.type in @destructive_actions)
+      |> assign(:reviewed_money, reviewed_money_copy(assigns.pending_action))
+      |> assign(:owner_scope_label, owner_scope_copy(assigns.owner_scope))
 
     ~H"""
     <section class="ax-stack-md" data-role="confirm-panel">
       <p class="ax-label"><%= Copy.invoice_confirm_panel_label() %></p>
       <p :if={@requires_step_up?} class="ax-caption"><%= Copy.step_up_title() %></p>
       <p class="ax-body"><%= confirm_copy(@pending_action, @invoice) %></p>
+      <Detail.detail_field_list
+        class="ax-review-target"
+        fields={[
+          %{label: Copy.Invoice.invoice_review_invoice_label(), value: @invoice.id},
+          %{label: Copy.Invoice.invoice_review_customer_label(), value: customer_label(@customer)},
+          %{label: Copy.Invoice.invoice_review_customer_id_label(), value: @invoice.customer_id},
+          %{
+            label: Copy.Invoice.invoice_review_owner_label(),
+            value: "#{@customer.owner_type} · #{@customer.owner_id}"
+          },
+          %{
+            label: Copy.Invoice.invoice_review_owner_scope_label(),
+            value: @owner_scope_label
+          }
+        ]}
+      />
+      <p :if={@reviewed_money} class="ax-caption" data-role="reviewed-invoice-money"><%= @reviewed_money %></p>
     </section>
     """
   end
@@ -733,7 +870,12 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         invoice,
         invoice.customer,
         socket.assigns.admin_mount_path,
-        socket.assigns.current_owner_scope
+        socket.assigns.current_owner_scope,
+        ScopedPath.build(
+          socket.assigns.admin_mount_path,
+          "/invoices",
+          socket.assigns.current_owner_scope
+        )
       )
     )
     |> assign(:pending_remove_item, nil)
@@ -761,7 +903,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     invoice_label = invoice_label(invoice)
 
     [
-      %{label: "Status", value: humanize(invoice.status)},
+      %{label: "Status", value: invoice_status_summary(invoice)},
       %{
         label: "Customer",
         value: customer_label(customer),
@@ -779,23 +921,42 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         value: money_text(invoice.amount_remaining_minor, invoice.currency)
       },
       %{label: "Amount paid", value: money_text(invoice.amount_paid_minor, invoice.currency)},
-      %{label: "Due / finalized", value: invoice_boundary_summary(invoice)},
-      %{label: "Collection method", value: humanize(invoice.collection_method || "unknown")},
+      %{label: "Due / finalized", value: invoice_boundary_summary(invoice, :summary)},
+      %{
+        label: "Collection method",
+        value: Copy.invoices_collection_method_label(invoice.collection_method)
+      },
       %{label: "Document state", value: pdf_summary(invoice)},
       %{label: "Tax risk", value: tax_risk_summary(invoice)},
       %{label: "Line items", value: Integer.to_string(length(invoice.items || []))}
     ]
   end
 
+  defp invoice_status_summary(invoice) do
+    status = humanize(invoice.status)
+
+    if overdue_invoice?(invoice), do: status <> " · Overdue", else: status
+  end
+
+  defp overdue_invoice?(%{status: status, due_date: %DateTime{} = due_date}) do
+    invoice_status(%{status: status}) == "open" and
+      DateTime.compare(due_date, Accrue.Clock.utc_now()) == :lt
+  end
+
+  defp overdue_invoice?(_invoice), do: false
+
   defp collection_fields(invoice) do
     [
       %{label: "Status", value: humanize(invoice.status)},
-      %{label: "Collection method", value: humanize(invoice.collection_method || "unknown")},
+      %{
+        label: "Collection method",
+        value: Copy.invoices_collection_method_label(invoice.collection_method)
+      },
       %{
         label: "Amount remaining",
         value: money_text(invoice.amount_remaining_minor, invoice.currency)
       },
-      %{label: "Due / finalized", value: invoice_boundary_summary(invoice)}
+      %{label: "Due / finalized", value: invoice_boundary_summary(invoice, :collection)}
     ]
   end
 
@@ -907,11 +1068,122 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
   defp action_available?(_invoice, _action), do: false
 
+  defp review_money_supported?(invoice, action_type) do
+    amount = reviewed_amount(invoice, action_type)
+    currency = invoice.currency
+
+    is_integer(amount) and amount >= 0 and supported_currency?(currency) and
+      (action_type != "pay" or amount > 0)
+  end
+
+  defp supported_currency?(currency) when is_binary(currency) do
+    case Money.Currency.currency_for_code(String.downcase(currency)) do
+      {:ok, _currency} -> true
+      _ -> false
+    end
+  end
+
+  defp supported_currency?(_currency), do: false
+
+  defp reviewed_amount(invoice, "pay"), do: invoice.amount_remaining_minor
+  defp reviewed_amount(invoice, _action_type), do: invoice.amount_due_minor
+
+  defp reviewed_money_copy(%{reviewed_amount_minor: amount, reviewed_currency: currency})
+       when is_integer(amount) and is_binary(currency) do
+    "Reviewed amount: #{MoneyFormatter.format_money(amount, currency)} (#{String.downcase(currency)})"
+  end
+
+  defp reviewed_money_copy(_action), do: nil
+
   defp reject_unavailable_invoice_action(socket) do
     socket
     |> assign(:drawer_action_type, nil)
     |> assign(:pending_action, nil)
+    |> assign(:dispatch_state, :idle)
     |> push_flash(:error, invoice_action_unavailable_copy(socket))
+  end
+
+  defp reject_stale_review(socket) do
+    socket =
+      case Invoices.detail(socket.assigns.invoice.id, socket.assigns.current_owner_scope) do
+        {:ok, invoice} ->
+          assign_invoice(socket, invoice)
+
+        :not_found ->
+          socket
+          |> put_flash(:error, Copy.Locked.owner_access_denied())
+          |> redirect(
+            to:
+              ScopedPath.build(
+                socket.assigns.admin_mount_path,
+                "/invoices",
+                socket.assigns.current_owner_scope
+              )
+          )
+      end
+
+    socket
+    |> assign(:pending_action, nil)
+    |> assign(:drawer_action_type, nil)
+    |> assign(:dispatch_state, :idle)
+    |> push_flash(
+      :warning,
+      "The invoice, owner scope, or reviewed amount/currency changed. Review the current invoice before confirming again."
+    )
+  end
+
+  defp validate_review(socket, action) do
+    original_scope = socket.assigns.current_owner_scope
+    session = socket.assigns[:accrue_admin_session] || %{}
+
+    params =
+      if original_scope.mode == :organization,
+        do: %{"org" => original_scope.organization_slug},
+        else: %{}
+
+    with {:ok, scope} <- AccrueAdmin.OwnerScope.resolve(session, params),
+         true <- Auth.actor_id(scope.current_admin) == action.review_actor_id,
+         true <- scope_identity(scope) == action.review_scope,
+         {:ok, invoice} <- Invoices.detail(action.invoice_id, scope),
+         true <- invoice.id == socket.assigns.invoice.id,
+         true <- action_available?(invoice, action.type),
+         true <- review_money_supported?(invoice, action.type),
+         true <- review_fingerprint(action.type, invoice) == action.review_fingerprint do
+      fresh_socket =
+        socket
+        |> assign(:current_admin, scope.current_admin)
+        |> assign(:current_owner_scope, scope)
+        |> assign_invoice(invoice)
+
+      {:ok, fresh_socket, invoice}
+    else
+      _ -> {:error, socket}
+    end
+  end
+
+  defp scope_identity(scope) do
+    {scope.mode, scope.organization_id, scope.organization_slug, scope.platform_admin?,
+     scope.admin_org_ids}
+  end
+
+  defp review_fingerprint(action_type, invoice) do
+    material = %{
+      action: action_type,
+      id: invoice.id,
+      customer_id: invoice.customer_id,
+      owner_type: invoice.customer && invoice.customer.owner_type,
+      owner_id: invoice.customer && invoice.customer.owner_id,
+      processor: invoice.processor,
+      processor_id: invoice.processor_id,
+      status: invoice.status,
+      currency: invoice.currency,
+      total_minor: invoice.total_minor,
+      amount_due_minor: invoice.amount_due_minor,
+      amount_paid_minor: invoice.amount_paid_minor,
+      amount_remaining_minor: invoice.amount_remaining_minor
+    }
+
+    :crypto.hash(:sha256, :erlang.term_to_binary(material))
   end
 
   defp pending_action(action_type, params, events) do
@@ -946,7 +1218,9 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
   defp dismiss_step_up_if_pending(socket) do
     if socket.assigns[:step_up_pending] do
-      StepUp.dismiss_challenge(socket)
+      socket
+      |> StepUp.dismiss_challenge()
+      |> assign(:dispatch_state, :staged)
     else
       socket
     end
@@ -963,6 +1237,55 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   defp execute_action(socket, action) do
+    case validate_review(socket, action) do
+      {:ok, fresh_socket, _fresh_invoice} -> execute_reviewed_action(fresh_socket, action)
+      {:error, stale_socket} -> reject_stale_review(stale_socket)
+    end
+  end
+
+  defp present_invoice_action_success(socket, action, invoice) do
+    case Invoices.detail(invoice.id, socket.assigns.current_owner_scope) do
+      {:ok, scoped_invoice} when scoped_invoice.id == action.invoice_id ->
+        socket
+        |> record_admin_audit(action, scoped_invoice.id)
+        |> assign_invoice(scoped_invoice)
+        |> push_flash(:info, invoice_action_success_copy(action, scoped_invoice))
+
+      _ ->
+        socket
+        |> push_flash(
+          :warning,
+          "The processor returned success, but the invoice is no longer available in this owner scope. Check scoped invoice/payment activity before taking another action."
+        )
+    end
+  end
+
+  defp invoice_action_success_copy(%{type: "pay"}, invoice) do
+    "The processor returned a successful payment response. The current scoped invoice reports #{humanize(invoice.status)}; check processor activity if settlement confirmation is needed."
+  end
+
+  defp invoice_action_success_copy(action, invoice) do
+    "The processor returned success for #{invoice_action_label(action.type)}. The current scoped invoice reports #{humanize(invoice.status)}."
+  end
+
+  defp refresh_invoice_result(socket, invoice_id: invoice_id) do
+    case Invoices.detail(invoice_id, socket.assigns.current_owner_scope) do
+      {:ok, invoice} -> assign_invoice(socket, invoice)
+      :not_found -> socket
+    end
+  end
+
+  defp execute_reviewed_action(socket, action) do
+    if socket.assigns[:dispatch_state] in [:dispatching, :submitted] do
+      socket
+    else
+      socket
+      |> assign(:dispatch_state, :dispatching)
+      |> dispatch_reviewed_action(action)
+    end
+  end
+
+  defp dispatch_reviewed_action(socket, action) do
     result =
       with_admin_context(socket.assigns.current_admin, fn operation_id ->
         run_invoice_action(socket.assigns.invoice, action, operation_id)
@@ -970,19 +1293,52 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
     case result do
       {:ok, %Invoice{} = invoice} ->
-        socket
-        |> record_admin_audit(action, invoice.id)
-        |> refresh_invoice(invoice.id)
-        |> push_flash(:info, Copy.invoice_action_recorded_info())
+        present_invoice_action_success(socket, action, invoice)
 
       {:ok, :requires_action, payment_intent} ->
-        push_flash(socket, :warning, Copy.payment_processor_action_warning(payment_intent))
+        _ = payment_intent
+
+        socket
+        |> refresh_invoice_result(invoice_id: action.invoice_id)
+        |> push_flash(
+          :warning,
+          "Customer action is required. The invoice payment is not complete. Check scoped invoice/payment activity before deciding on the next step. Accrue will not retry automatically."
+        )
+
+      {:error, %Accrue.CardError{}} ->
+        socket
+        |> refresh_invoice_result(invoice_id: action.invoice_id)
+        |> push_flash(
+          :error,
+          "The processor declined this invoice payment. No payment was accepted."
+        )
+
+      {:error, {:unsupported_action, _reason}} ->
+        push_flash(
+          socket,
+          :error,
+          "This invoice action was rejected before processor submission."
+        )
 
       {:error, _reason} ->
-        push_flash(socket, :error, invoice_action_error_copy(socket, action))
+        socket
+        |> refresh_invoice_result(invoice_id: action.invoice_id)
+        |> push_flash(
+          :warning,
+          "Outcome not confirmed. The request may have reached the processor. Check scoped invoice/payment activity before deciding whether another action is needed; Accrue will not retry automatically."
+        )
+
+      _unexpected ->
+        socket
+        |> refresh_invoice_result(invoice_id: action.invoice_id)
+        |> push_flash(
+          :warning,
+          "Outcome not confirmed. Check scoped invoice/payment activity before deciding whether another action is needed; Accrue will not retry automatically."
+        )
     end
     |> assign(:pending_action, nil)
     |> assign(:drawer_action_type, nil)
+    |> assign(:dispatch_state, :submitted)
   end
 
   defp run_invoice_action(invoice, %{type: "finalize"}, operation_id) do
@@ -1053,7 +1409,22 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     end
   end
 
-  defp related_items(invoice, customer, mount_path, scope) do
+  defp manual_invoice_item(socket, item_id) when is_binary(item_id) do
+    with {:ok, %Invoice{status: :draft} = invoice} <-
+           Invoices.detail(socket.assigns.invoice.id, socket.assigns.current_owner_scope),
+         %{} = item <-
+           Enum.find(invoice.items || [], fn item ->
+             item.id == item_id and is_nil(item.price_ref)
+           end) do
+      {:ok, invoice, item}
+    else
+      _ -> :error
+    end
+  end
+
+  defp manual_invoice_item(_socket, _item_id), do: :error
+
+  defp related_items(invoice, customer, mount_path, scope, return_path) do
     customer_items =
       if customer do
         [
@@ -1061,13 +1432,19 @@ defmodule AccrueAdmin.Live.InvoiceLive do
             icon: :users,
             label: "Customer",
             value: customer.name || customer.email,
-            href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
+            href:
+              ScopedPath.build(mount_path, "/customers/#{customer.id}", scope, %{
+                "return_to" => return_path
+              })
           },
           %{
             icon: :payments,
             label: "Payments for this customer",
             href:
-              ScopedPath.build(mount_path, "/payments", scope, %{"customer_id" => customer.id})
+              ScopedPath.build(mount_path, "/payments", scope, %{
+                "customer_id" => customer.id,
+                "return_to" => return_path
+              })
           }
         ]
       else
@@ -1097,7 +1474,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     Enum.map(events, fn event ->
       %{
         title: event.type,
-        at: format_datetime(event.inserted_at),
+        id: event.id,
+        at: event.inserted_at,
         body: event.subject_type <> " " <> event.subject_id,
         status: event.actor_type,
         tone: tone(event),
@@ -1152,6 +1530,11 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp invoice_action_label(nil), do: "Invoice action"
   defp invoice_action_label(type), do: humanize(type)
 
+  defp invoice_confirmation_label("pay"), do: Copy.invoice_action_manual_pay()
+
+  defp invoice_confirmation_label(type),
+    do: "#{Copy.invoice_confirm_action_verb()} #{invoice_action_label(type)}"
+
   defp invoice_billing_effect("finalize"),
     do: "move the invoice status into the finalized billing workflow"
 
@@ -1175,10 +1558,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     ).body
   end
 
-  defp invoice_action_unavailable_copy(socket) do
-    Copy.resource_state_copy(:invoices, :error,
-      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope)
-    ).body
+  defp invoice_action_unavailable_copy(_socket) do
+    Copy.Invoice.invoice_action_unavailable()
   end
 
   defp invoice_pdf_error_copy(_reason) do
@@ -1209,13 +1590,39 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     end
   end
 
-  defp invoice_boundary_summary(invoice) do
+  defp invoice_boundary_summary(invoice, surface) do
     cond do
-      invoice.finalized_at -> "Finalized #{format_datetime(invoice.finalized_at)}"
-      invoice.due_date -> "Due #{format_datetime(invoice.due_date)}"
-      true -> "No due or finalized boundary"
+      invoice.finalized_at ->
+        timestamp_summary("Finalized", invoice.finalized_at, "invoice-finalized-at-#{surface}")
+
+      invoice.due_date ->
+        timestamp_summary("Due", invoice.due_date, "invoice-boundary-due-date-#{surface}")
+
+      true ->
+        "No due or finalized boundary"
     end
   end
+
+  defp timestamp_summary(label, %DateTime{} = value, id) do
+    assigns = %{label: label, value: value, id: id}
+
+    ~H"""
+    <span><%= @label %> <Timestamp.timestamp value={@value} id={@id} /></span>
+    """
+  end
+
+  defp timestamp_summary(label, %Date{} = value, _id), do: "#{label} #{Date.to_iso8601(value)}"
+
+  defp timestamp_value(%DateTime{} = value, id) do
+    assigns = %{value: value, id: id}
+
+    ~H"""
+    <Timestamp.timestamp value={@value} id={@id} />
+    """
+  end
+
+  defp timestamp_value(%Date{} = value, _id), do: Date.to_iso8601(value)
+  defp timestamp_value(_value, _id), do: "Unavailable"
 
   defp tax_risk_summary(invoice) do
     if tax_failure_visible?(invoice), do: "Needs tax recovery", else: "No tax blocker"
@@ -1246,28 +1653,10 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp invoice_status(_invoice), do: nil
 
   defp money_text(amount_minor, currency) when is_integer(amount_minor) do
-    Accrue.Invoices.Render.format_money(
-      amount_minor,
-      normalize_currency(currency),
-      customer_locale(nil)
-    )
+    MoneyFormatter.format_money(amount_minor, currency, customer_locale(nil))
   end
 
   defp money_text(_amount_minor, _currency), do: "--"
-
-  defp normalize_currency(currency) when is_atom(currency), do: currency
-
-  defp normalize_currency(currency) when is_binary(currency) do
-    code = String.downcase(currency)
-
-    try do
-      String.to_existing_atom(code)
-    rescue
-      ArgumentError -> :usd
-    end
-  end
-
-  defp normalize_currency(_currency), do: :usd
 
   defp customer_locale(%{preferred_locale: locale}) when is_binary(locale) and locale != "",
     do: locale
@@ -1282,9 +1671,6 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     |> String.split()
     |> Enum.map_join(" ", &String.capitalize/1)
   end
-
-  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

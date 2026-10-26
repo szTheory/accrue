@@ -1,0 +1,14 @@
+{
+  "command": "ACCRUE_ADMIN_E2E_PORT=46196 PLAYWRIGHT_OUTPUT_DIR=/private/tmp/accrue-240-03-red/playwright-green-2 ./node_modules/.bin/playwright test e2e/admin-spec-list-phase196.spec.js --grep 'keeps identity, money, status, and action reachable with coarse pointer' --project=chromium-desktop --reporter=junit",
+  "exitCode": 0,
+  "output": "<testsuites id=\"\" name=\"\" tests=\"1\" failures=\"0\" skipped=\"0\" errors=\"0\" time=\"4.204761\">\n<testsuite name=\"admin-spec-list-phase196.spec.js\" timestamp=\"2026-10-09T21:07:43.542Z\" hostname=\"chromium-desktop\" tests=\"1\" failures=\"0\" skipped=\"0\" time=\"0.678\" errors=\"0\">\n<testcase name=\"Phase 240 intermediate coarse-pointer invoice list › keeps identity, money, status, and action reachable with coarse pointer\" classname=\"admin-spec-list-phase196.spec.js\" time=\"0.678\">\n</testcase>\n</testsuite>\n</testsuites>\n",
+  "targetTest": "Phase 240 intermediate coarse-pointer invoice list › keeps identity, money, status, and action reachable with coarse pointer",
+  "targetFile": "accrue_admin/e2e/admin-spec-list-phase196.spec.js",
+  "expected": "The matching regression assertion passes against restored current source.",
+  "actual": "The named current-source target passed in the fresh JUnit report.",
+  "semanticAssessment": "Current-code regression check only; this post-implementation run does not establish historical RED-before-GREEN timing.",
+  "reportPath": ".planning/phases/240-shared-system-and-real-billing-exemplar/240-03-red-evidence/task2-invoice-list-coarse-pointer.current-green.junit.xml",
+  "runStartedAt": "2026-10-09T21:07:43.542Z",
+  "reportModifiedAt": "2026-10-09T21:07:44.783043Z",
+  "sourceCommit": "e855c960"
+}

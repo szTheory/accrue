@@ -13,6 +13,7 @@ defmodule AccrueAdmin.Components.StepUpAuthModal do
   attr(:pending, :boolean, required: true)
   attr(:challenge, :map, default: nil)
   attr(:error, :string, default: nil)
+  attr(:return_focus, :string, default: nil)
 
   def step_up_auth_modal(assigns) do
     assigns =
@@ -34,6 +35,7 @@ defmodule AccrueAdmin.Components.StepUpAuthModal do
       close_label=""
       close_event="step_up_dismiss"
       initial_focus="#step-up-code"
+      focus_return_to={@return_focus}
       component_group="modal-confirm"
     >
       <p :if={@error} id="step-up-error" class="ax-body" data-role="step-up-error"><%= @error %></p>
@@ -59,7 +61,12 @@ defmodule AccrueAdmin.Components.StepUpAuthModal do
             <%= Copy.step_up_cancel_label() %>
           </button>
 
-          <button type="submit" class="ax-button ax-button-primary" data-role="step-up-submit"><%= Copy.step_up_submit_label() %></button>
+          <button
+            type="submit"
+            class="ax-button ax-button-primary"
+            data-role="step-up-submit"
+            phx-disable-with="Processing action…"
+          ><%= Copy.step_up_submit_label() %></button>
         </div>
       </form>
     </Overlay.overlay>

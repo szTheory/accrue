@@ -1,5 +1,113 @@
 # Milestones
 
+## v1.66 Admin Usability and Visual Consistency (Completed locally:2026-10-12)
+
+**Delivered:** Coherent existing Admin collections/search/tables, exact shared timestamps, evidence-true details/navigation/recovery, and guarded evaluation scenarios with revision-bound proof.
+
+**Phases completed:** 245–248:4phases,18actual plans,41task entries. The archive CLI reports34tasks; direct per-plan `<task>` counts and SUMMARYactuals both total41 (7+12+18+4). Its parser undercount is disclosed, not silently used as actual task count.
+
+**Key accomplishments:**
+- Isolated ordinary preview,21route inventory and24historical baseline captures with plausible stored billing stories.
+- Shared filter/status/search and responsive identity/copy owners propagated through existing journeys.
+- Shared Local/UTC timestamps, concrete destinations, readable webhook/payload/action review and currency-qualified recovery.
+- Four guarded evaluation states and exact five-ID held-out cleanup with partial-seed failure and foreign-child protections.
+- Integrated13-topic/five-finding ledger and10inspectedcurrent captures preserving historical receipts and coverage limits.
+
+**Verification:** Override closeout for acknowledged nonblocking debt; audit tech_debt16/16requirements,4/4phase receipts,7/7handoffs,7/7flows;0blockers. Phase scores14/14,10/10,31/31,3/3 before archive. Nyquist3compliant/1partial; original visual scores remain unchanged.
+
+**Known verification overrides:**5newly acknowledged,6carried forward from a prior close (STATE.md Deferred Items). These are disclosed scopes/debt, not rewritten passing behavior.
+
+**Stats:**197pre-archive commits sincev1.65 through2b3d58fd;353files,+32,227/-1,093 before closeout record commit. Timeline2026-10-11→2026-10-12. Actual source and planning changes included; no broad LOC-only quality claim.
+
+**Delivery boundary:** Local archive/tag only. No remote CI run, merge, remote tag push or publication. Quick tasks retained because provenance is unknown. Archival invalidates path-bound canonical fingerprints; passed pre-move receipts are retained without claiming a new post-move pass.
+
+**Next:** `$gsd-new-milestone` for new scope and fresh requirements.
+
+---
+
+**Post-archive tooling:** Canonical archive lookup now keeps recorded proof commands usable. Fresh 27 Node controls and both validators pass; this is tooling evidence, not a new phase-level verification verdict. See [archive compatibility](milestones/v1.66-ARCHIVE-COMPATIBILITY.md).
+
+**Out-of-band owner feedback (outside GSD):** 11 commits 3d7d949d..b4a7eeac landed 2026-10-12 to 2026-10-19 directly from owner review sessions, not through any GSD phase. Receipts: `.planning/notes/2026-10-11-admin-owner-feedback.md`, `.planning/notes/2026-10-12-admin-owner-feedback.md`, `.planning/notes/2026-10-13-admin-owner-feedback.md`, `.planning/notes/2026-10-14-admin-owner-feedback.md` and `.planning/notes/2026-10-18-admin-owner-feedback.md`. No plan, summary, verification or phase verdict is claimed for them; their regression coverage is exercised by the Phase 249 GREEN-05 suites. Two of the three resolved debug sessions were filed under `.planning/debug/resolved/` in Phase 249; the third, `.planning/debug/phase248-ordinary-login.md`, stays at its original path because the archived 248-01-SUMMARY.md and 248-SECURITY.md cite it there (commit 27c8168a).
+
+## v1.65 Accrue Admin Language & Consistency (Shipped: 2026-10-11)
+
+**Phases completed:** 1 phases, 4 plans, 8 tasks
+
+**Key accomplishments:**
+- Home presents a producer-backed customer update label and preserves the exact scoped event key, identity, timestamp, and matching browser assets.
+- Shared event labels now reach Events and webhook activity while exact scoped evidence remains available through patch-safe disclosures at desktop and 320px touch widths.
+- Replay acceptance and read recovery now describe verified effects, while scoped event links and replay step-up are bound to durable evidence.
+
+- Unknown bulk replay outcomes retain each selected delivery identity and supported read-only next steps.
+
+**Delivered:** Clearer existing Admin event language, exact investigation evidence, and truthful replay/read outcomes, without new billing capabilities or dependencies.
+
+**Verification:** Verified closeout; audit passed (4/4 requirements, 1/1 phases, 4/4 integration seams, 4/4 flows). Phase 244 passed 9/9, zero unverified behavior.
+
+**Known verification overrides:** 0 newly acknowledged, 6 carried forward from a prior close (see `STATE.md` Deferred Items).
+
+**Stats:** 55 pre-archive commits, 58 files changed, +4,260/-98 across source and planning; 20 Admin/host files, +1,256/-58 including tests and generated assets. Timeline: 2026-10-10 → 2026-10-11. Git range: `v1.64` → `3e378992` (before archival commits).
+
+**Delivery boundary:** Browser 6/6 at `1b62ad78`; final Admin 693/693; no new remote CI, merge, package publication, or remote tag claimed.
+
+**Archives:** [roadmap](milestones/v1.65-ROADMAP.md), [requirements](milestones/v1.65-REQUIREMENTS.md), [audit](milestones/v1.65-MILESTONE-AUDIT.md), [phase records](milestones/v1.65-phases/).
+
+**Next:** `$gsd-new-milestone`; next phase number 245. Quick-task folders remain in place.
+
+---
+
+## v1.64 Admin Operator UI Cleanup (Shipped: 2026-10-10)
+
+**Phases completed:** 4 phases, 24 plans, 53 tasks
+
+**Key accomplishments:**
+- Established shared Admin invoice/subscription patterns with responsive, theme, keyboard, busy/reconnect, state, and served-asset proof.
+- Completed scoped billing journeys, validated return paths, self-contained action reviews, and the approved mounted action-control spacing.
+- Extended truthful investigation, webhook, catalog, Connect, Home, and search behavior across the remaining Admin surfaces.
+- Passed current served-asset and mounted browser evidence against the existing 21-route inventory, preserving route and provider scope limits.
+- Completed the reviewed twelve-image Linux visual set and blocking Ubuntu comparison at the unchanged thresholds.
+- Delivered an isolated Fake `/admin` feedback preview with custody, warm-recovery, and authoritative-state preservation evidence.
+
+**Delivered:** A consistent, scoped Admin operator experience with recurring mounted acceptance and current-source visual evidence; no new billing capability or Portal scope was added.
+
+**Verification:** Override closeout; audit `tech_debt`, with 18/18 requirements, 4/4 phase verifications, 10/10 integration seams, 6/6 end-to-end flows, 4/4 Nyquist-compliant phases, and zero blockers.
+
+**Linux evidence:** [GitHub Actions run 38094642350](https://github.com/szTheory/accrue/actions/runs/38094642350) passed Browser UAT and Mint visual baselines against source SHA `849f72084a6460ed54ecc06bc261054b15efdde0` on `gsd/phase-243-linux-evidence`.
+
+**Known verification overrides:** 2 newly acknowledged, 4 carried forward from a prior close (see `STATE.md` Deferred Items).
+
+**Stats:** 320 files changed, +26,725/-1,260; 2026-10-09 → 2026-10-10. Git range: `49f058d` → `d33cd11`.
+
+**Archives:** [`milestones/v1.64-ROADMAP.md`](milestones/v1.64-ROADMAP.md), [`milestones/v1.64-REQUIREMENTS.md`](milestones/v1.64-REQUIREMENTS.md), [`milestones/v1.64-MILESTONE-AUDIT.md`](milestones/v1.64-MILESTONE-AUDIT.md), [`milestones/v1.64-phases/`](milestones/v1.64-phases/).
+
+---
+
+## v1.63 Admin and Portal UI refinement (Shipped: 2026-10-09)
+
+**Phases completed:** 7 phases, 45 plans, 96 tasks
+
+**Key accomplishments:**
+- Personal, organization, and mixed Portal billing now use a bounded host-owned resolver with fresh per-action authorization; signed context pins locate identity but never grant authority.
+- Admin, checkout, and Portal actions revalidate owner, target, provider, eligibility, and material state before dispatch, then report evidence-specific outcomes and safe recovery paths.
+- Existing billing journeys now preserve exact lifecycle, money, scope, provider capability, and uncertainty across customer, subscription, invoice, payment, recovery, event, webhook, coupon, promotion-code, and Connect surfaces.
+- Shared visual roles retain distinct Admin identity and host branding, with keyboard, accessibility, theme, narrow-layout, mounted-route, asset, copy, and docs evidence.
+- The example host's checkout, Braintree and Stripe returns, mounted Admin/Portal journeys, and read-only feedback preview have deterministic browser and integration coverage.
+- Testable acceptance is a durable shift-left default: recurring evidence runs in CI, zero-human UAT is the target, and confirmation is reserved for decisions or evidence that automation cannot establish.
+
+**Delivered:** A scoped, capability-explicit, responsive Admin and Portal baseline with current served evidence and recurring automated acceptance.
+
+**Verification:** Override closeout. The audit scored 34/34 requirements, 7/7 phases, 5/5 integration seams, and 4/4 E2E flows with zero blockers; every phase verification passed. Four pre-close items were explicitly acknowledged and recorded in `STATE.md` Deferred Items.
+
+**Known verification overrides:** 4 newly acknowledged, 0 carried forward (see `STATE.md` Deferred Items).
+
+**Stats:** 420 files changed, +44,734/-2,901; 2026-10-07 → 2026-10-09. Git range: `49d7026` → `b113b18`.
+
+**Archives:** [`milestones/v1.63-ROADMAP.md`](milestones/v1.63-ROADMAP.md), [`milestones/v1.63-REQUIREMENTS.md`](milestones/v1.63-REQUIREMENTS.md), [`milestones/v1.63-MILESTONE-AUDIT.md`](milestones/v1.63-MILESTONE-AUDIT.md), [`milestones/v1.63-phases/`](milestones/v1.63-phases/).
+
+**What's next:** No next milestone is selected. The maintainer will choose future scope after confirming a clean workspace; no additional UI cleanup is implied.
+
+---
+
 ## v1.62 Release Integration & Repository Hygiene (Shipped: 2026-09-18)
 
 **Phases completed:** 4 phases, 44 plans (229: 20, 230: 7, 231: 6, 232: 11)

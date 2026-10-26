@@ -7,6 +7,10 @@ trigger_when: A downstream adopter needs mailglass 2.x behavior, OR Accrue's own
 target_version: "mailglass 2.x (2.5.0 published 2026-08-20)"
 scope: small-to-medium
 source: cross-project request from the Adopter-App session, 2026-09-15
+audit_acknowledged:
+  milestone: v1.63
+  at: 2026-10-09
+  status: dormant
 ---
 
 # SEED-008: `mailglass ~> 1.0` caps every downstream consumer at 1.x

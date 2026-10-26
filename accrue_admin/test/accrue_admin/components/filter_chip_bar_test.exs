@@ -31,7 +31,7 @@ defmodule AccrueAdmin.Components.FilterChipBarTest do
     refute html =~ "ax-filter-chip-cobalt"
   end
 
-  test "renders remove_href as Clear link when set" do
+  test "renders remove_href as an accessible X link when set" do
     html =
       render_component(&FilterChipBar.filter_chip_bar/1,
         items: [
@@ -47,7 +47,30 @@ defmodule AccrueAdmin.Components.FilterChipBarTest do
       )
 
     assert html =~ ~s(href="/invoices")
-    assert html =~ "Clear"
+    assert html =~ "×"
+    assert html =~ ~s(aria-label="Remove Status filter")
+  end
+
+  test "renders a touch-sized X removal link with explicit accessible name" do
+    html =
+      render_component(&FilterChipBar.filter_chip_bar/1,
+        items: [
+          %{
+            id: :status,
+            label: "Status",
+            value: "Open",
+            active: true,
+            remove_href: "/billing/invoices?org=acme&view=all&q=Atelier+Caf%C3%A9"
+          }
+        ],
+        label: "Invoice filters"
+      )
+
+    assert html =~ ~s(aria-label="Remove Status Open filter")
+    assert html =~ ~s(class="ax-filter-chip-action")
+    assert html =~ "×"
+    refute html =~ ">Clear</a>"
+    assert html =~ "Caf%C3%A9"
   end
 
   test "emits Phase 191 focus anchors for active chip apply and clear actions" do
@@ -168,10 +191,10 @@ defmodule AccrueAdmin.Components.FilterChipBarTest do
         label: "Quick filters"
       )
 
-    # remove_href renders as Clear link
-    assert html =~ "Clear"
+    # remove_href renders as the removal action.
+    assert html =~ "×"
     assert html =~ ~s(href="/billing/events")
-    # The activation href should NOT be rendered separately (Clear already gives navigation)
+    # The activation href should NOT be rendered separately (the removal link navigates).
     refute html =~ ~s(href="/billing/events?actor_type=admin")
   end
 end

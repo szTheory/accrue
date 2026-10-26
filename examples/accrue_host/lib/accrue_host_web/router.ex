@@ -55,6 +55,16 @@ defmodule AccrueHostWeb.Router do
 
     post("/app/organization-scope", OrganizationScopeController, :update)
 
+    if Application.compile_env(:accrue_host, :sql_sandbox) do
+      get("/api/e2e/dispatch-counts", OrganizationScopeController, :dispatch_counts_for_e2e)
+
+      post(
+        "/api/e2e/revoke-membership",
+        OrganizationScopeController,
+        :revoke_membership_for_e2e
+      )
+    end
+
     # Ordering contract: AccrueHostWeb.UserAuth loads scope/auth first, then
     # Accrue.Live.Entitlements checks access; keep the deny target outside this
     # gated session, and see guides/entitlements.md for why missing or unloaded
@@ -80,6 +90,25 @@ defmodule AccrueHostWeb.Router do
     end
 
     post("/users/update-password", UserSessionController, :update_password)
+  end
+
+  if Application.compile_env(:accrue_host, :sql_sandbox) do
+    scope "/admin", as: :accrue_admin do
+      pipe_through([:browser, :accrue_admin_browser])
+
+      live_session :phase246_search_fixture,
+        root_layout: {AccrueAdmin.Layouts, :root},
+        session: {AccrueAdmin.Router, :__session__, [[:user_token], "/admin"]},
+        on_mount:
+          @live_acceptance_hooks ++
+            [
+              {AccrueHostWeb.UserAuth, :require_authenticated},
+              {AccrueAdmin.AuthHook, :ensure_admin},
+              {AccrueAdmin.NavBadgeHook, :default}
+            ] do
+        live("/__phase246/states", AccrueHostWeb.Phase246StatesLive, :index)
+      end
+    end
   end
 
   scope "/", AccrueHostWeb do
@@ -144,9 +173,22 @@ defmodule AccrueHostWeb.Router do
       session_keys: [:user_token],
       login_path: "/users/log-in"
     )
+
+    accrue_portal("/shared-billing",
+      on_mount: AccrueHostWeb.LiveAcceptance,
+      session_keys: [:user_token, :active_organization_id, :portal_billable_selection],
+      login_path: "/users/log-in",
+      context_adapter: AccrueHost.PortalContextAdapter
+    )
   else
     accrue_admin("/admin", session_keys: [:user_token], allow_live_reload: false)
     accrue_portal("/billing", session_keys: [:user_token], login_path: "/users/log-in")
+
+    accrue_portal("/shared-billing",
+      session_keys: [:user_token, :active_organization_id, :portal_billable_selection],
+      login_path: "/users/log-in",
+      context_adapter: AccrueHost.PortalContextAdapter
+    )
   end
 
   def __live_session__(conn, session_keys) when is_list(session_keys) do

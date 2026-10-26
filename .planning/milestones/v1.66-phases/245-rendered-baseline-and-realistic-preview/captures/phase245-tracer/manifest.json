@@ -1,0 +1,67 @@
+{
+  "phase": "245-rendered-baseline-and-realistic-preview",
+  "capture": "authenticated invoice detail rendered from the isolated ordinary Fake preview",
+  "captured_at": "2026-10-11T15:21:41.292Z",
+  "source_revision": "a8d39ea49089bb682ebbe71be8df21100073fbf9",
+  "source_digests": {
+    "accrue_admin/lib/accrue_admin/live/invoices_live.ex": "4fdf3dd0df97fd73195e38972cbf1e016b696024fa5949081fd0b5db012416f8",
+    "accrue_admin/lib/accrue_admin/live/invoice_live.ex": "04df8cd5a622f8c483682198c2a37cb1c21f4c28487081ce04118c872554df92",
+    "accrue_admin/lib/accrue_admin/router.ex": "774a03c8835890c953808f1a9c07a4f12535e1b7898fe407d778773ceac29418",
+    "accrue_admin/assets/css/app.css": "039de5b2c6deef9621266582e630b645187e51ecf4e10e8a92cc03a29f73bf4f",
+    "accrue_admin/assets/css/theme.css": "079ec99553c73c2df07b6212c1bf9eba18645363e278c3fd7d01374990d1c90e",
+    "accrue_admin/assets/js/app.js": "9649193b673190971ae4bed330c4dea3730829d04ad37989ba2f449e2136b23f",
+    "accrue_admin/priv/static/accrue_admin.css": "b40ac1dc7bb6a09ac7bccedb10ac1856ea9cbad212d69ce11db054a22807b952",
+    "accrue_admin/priv/static/accrue_admin.js": "e228bac9b978a658b37e96b9aa833fe6e8a87358447d00d93e616f55f5667c26",
+    "examples/accrue_host/lib/accrue_host_web/router.ex": "aa87da14b8a6b0ee41c774466a544b9b55c548313ba05c87557836ea433aab91",
+    "examples/accrue_host/e2e/phase245-admin-baseline.spec.js": "454616bf23eea34e1cda0b6cd7ab0ab49b9c1db3efb63758adf1a5b6064799c9",
+    "examples/accrue_host/playwright.phase245.config.js": "0248f7b89a7c0d306d8602c426cb5f2e87d8e7cad5e6920d417f3b6c52f032fe",
+    "scripts/ci/seed_phase245_ordinary.sh": "a1dbf8410c6d6e8a7b203060734a60e2e63fc652e571bb4dd3745ea1ae497055",
+    "scripts/ci/accrue_host_preview_custody.sh": "e146ee3e54676da91bc8b5250286ef3fa17602c88682d2b32723f01145bbe71d",
+    "examples/accrue_host/priv/repo/seeds/helpers.exs": "48b08257bf3991f3e63a6dc7642a95076b896833539d5d4a407ffa1632ff1fdb",
+    "examples/accrue_host/priv/repo/seeds/ordinary.exs": "6a2756f3253aaedb4ffb14ff93e1e4c4f1865aa5a0920ed291b9fbbc8a2c41e7",
+    "examples/accrue_host/priv/repo/seeds/hero_accounts.exs": "bbc624bed1d8af5cd00cf54f3f25ff20a62805ae3a0edfa13d5c041134de2b9c",
+    "examples/accrue_host/priv/repo/seeds/background_data.exs": "f8cfb6c9e23ba177c273b1e37fdc85fbb85eb634f8db171612da2420b5f0c3a6",
+    "examples/accrue_host/priv/repo/seeds/showcase.exs": "f57646f06c943ab22ed4f322157a37965e95731c0b95b5a9a6aa29ce41adfb93"
+  },
+  "scenario": "ordinary paid USD invoice linked to the healthy demo customer's active subscription",
+  "route": "/admin/invoices/7459e7dd-64dc-415e-bcd0-35cde248dbc9",
+  "state": "populated invoice detail",
+  "invoice_identity": {
+    "processor": "fake",
+    "processor_id": "in_seed_healthy_portal_launch_paid",
+    "invoice_number": "PORTAL-LAUNCH-001",
+    "database_id": "7459e7dd-64dc-415e-bcd0-35cde248dbc9"
+  },
+  "browser": {
+    "name": "chromium",
+    "version": "147.0.7727.15"
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "theme": "light",
+  "assets": {
+    "css": {
+      "path": "/admin/assets/css-6ebaf9c9f37c09482f27a19c7df02b0b",
+      "bytes": 129964,
+      "requested_by_document": true,
+      "package": "b40ac1dc7bb6a09ac7bccedb10ac1856ea9cbad212d69ce11db054a22807b952",
+      "compiled": "b40ac1dc7bb6a09ac7bccedb10ac1856ea9cbad212d69ce11db054a22807b952",
+      "served": "b40ac1dc7bb6a09ac7bccedb10ac1856ea9cbad212d69ce11db054a22807b952"
+    },
+    "js": {
+      "path": "/admin/assets/js-bda4f3f51aa85229e5eae0b9ebef2ea7",
+      "bytes": 161648,
+      "requested_by_document": true,
+      "package": "e228bac9b978a658b37e96b9aa833fe6e8a87358447d00d93e616f55f5667c26",
+      "compiled": "e228bac9b978a658b37e96b9aa833fe6e8a87358447d00d93e616f55f5667c26",
+      "served": "e228bac9b978a658b37e96b9aa833fe6e8a87358447d00d93e616f55f5667c26"
+    }
+  },
+  "screenshot": {
+    "file": "invoice-detail.png",
+    "bytes": 266241,
+    "sha256": "282663baa0dfb7a7fc600ba240574f2d58a2a5852417a8f1d5178f8e11e9cfc8"
+  }
+}

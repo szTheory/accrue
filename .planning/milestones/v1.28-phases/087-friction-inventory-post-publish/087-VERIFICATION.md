@@ -2,7 +2,7 @@
 phase: 87
 slug: friction-inventory-post-publish
 requirements: [INV-06]
-status: complete
+status: passed
 ---
 
 # Phase 87 — Friction inventory post-publish — Verification

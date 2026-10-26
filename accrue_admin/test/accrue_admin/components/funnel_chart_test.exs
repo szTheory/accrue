@@ -15,11 +15,11 @@ defmodule AccrueAdmin.Components.FunnelChartTest do
           active: 3
         )
 
-      assert html =~ "Recovery Funnel"
+      assert html =~ "Payment recovery funnel"
       assert html =~ "10"
       assert html =~ "4"
       assert html =~ "3"
-      assert html =~ "3 currently in dunning"
+      assert html =~ "3 recorded campaigns still in progress"
     end
 
     test "renders proportional percentages" do

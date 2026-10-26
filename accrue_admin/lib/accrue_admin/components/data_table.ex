@@ -8,8 +8,21 @@ defmodule AccrueAdmin.Components.DataTable do
   alias AccrueAdmin.Components.Icon
   alias AccrueAdmin.Copy
 
+  attr(:layout, :string, values: ["stacked", "inline"], default: "stacked")
+  attr(:label, :string, default: nil)
+  slot(:primary, required: true)
+  slot(:secondary)
+
+  def identity_cell(assigns) do
+    ~H"""
+    <span class={["ax-data-table-identity", "ax-data-table-identity-" <> @layout]} data-role="identity-cell">
+      <span class="ax-data-table-identity-primary" title={@label}><%= render_slot(@primary) %></span>
+      <span :if={@secondary != []} class="ax-data-table-identity-secondary"><%= render_slot(@secondary) %></span>
+    </span>
+    """
+  end
+
   @default_limit 25
-  @default_dom_limit 100
 
   @impl true
   def update(assigns, socket) do
@@ -55,21 +68,26 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:bulk_action_label, fn -> nil end)
       |> assign_new(:bulk_action_event, fn -> nil end)
       |> assign_new(:row_label, fn -> {"result", "results"} end)
+      |> assign(:total_count, Map.get(assigns, :total_count, previous[:total_count]))
+      |> assign_new(:show_empty_clear, fn -> true end)
+      |> assign_new(:empty_action_href, fn -> nil end)
+      |> assign_new(:empty_action_label, fn -> Copy.data_table_clear_filters_label() end)
       |> assign_new(:enable_polling, fn -> true end)
       |> assign_new(:poll_interval_ms, fn -> 5_000 end)
       |> assign_new(:newer_count, fn -> 0 end)
+      |> assign_new(:poll_error?, fn -> false end)
+      |> assign_new(:read_error, fn -> nil end)
+      |> assign_new(:failed_cursor, fn -> nil end)
+      |> assign_new(:unavailable_copy, fn -> "This history could not be loaded. Try again." end)
+      |> assign_new(
+        :partial_load_copy,
+        fn -> "Some results could not be loaded. The rows shown may be incomplete. Try again." end
+      )
       |> assign(
         :limit,
         normalize_positive(
           Map.get(assigns, :limit, previous[:limit] || @default_limit),
           @default_limit
-        )
-      )
-      |> assign(
-        :dom_limit,
-        normalize_positive(
-          Map.get(assigns, :dom_limit, previous[:dom_limit] || @default_dom_limit),
-          @default_dom_limit
         )
       )
 
@@ -95,7 +113,16 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   defp resolve_list_state(socket) do
-    list_state = normalize_marker(socket.assigns[:list_state]) || derive_list_state(socket)
+    list_state =
+      if socket.assigns[:read_error] == :initial do
+        "unavailable"
+      else
+        case normalize_marker(socket.assigns[:list_state]) do
+          "unavailable" -> derive_list_state(socket)
+          nil -> derive_list_state(socket)
+          state -> state
+        end
+      end
 
     empty_reason =
       normalize_marker(socket.assigns[:empty_reason]) ||
@@ -131,7 +158,7 @@ defmodule AccrueAdmin.Components.DataTable do
   defp assign_render_flags(socket) do
     rows = socket.assigns[:rows] || []
     loading? = loading_fixture_enabled?(socket.assigns)
-    empty? = Enum.empty?(rows) and !loading?
+    empty? = Enum.empty?(rows) and !loading? and socket.assigns[:read_error] != :initial
     populated? = !Enum.empty?(rows) and !loading?
 
     assign(socket,
@@ -139,6 +166,13 @@ defmodule AccrueAdmin.Components.DataTable do
       render_empty_state: empty?,
       render_rows: populated?
     )
+  end
+
+  defp refresh_state(socket) do
+    socket
+    |> resolve_list_state()
+    |> resolve_empty_state()
+    |> assign_render_flags()
   end
 
   # Derive the empty-state title/copy: when filters are active AND the page opted
@@ -178,19 +212,65 @@ defmodule AccrueAdmin.Components.DataTable do
           Map.get(socket.assigns, :current_owner_scope)
         )
 
-      {rows, next_cursor} = socket.assigns.query_module.list(query_opts)
+      case read_page(socket.assigns.query_module, query_opts) do
+        {:ok, {rows, next_cursor}} ->
+          merged_rows = socket.assigns.rows ++ rows
 
-      merged_rows =
-        socket.assigns.rows
-        |> Kernel.++(rows)
-        |> Enum.take(socket.assigns.dom_limit)
+          {:noreply,
+           socket
+           |> assign(:rows, merged_rows)
+           |> assign(:next_cursor, next_cursor)
+           |> assign(:read_error, nil)
+           |> assign(:failed_cursor, nil)
+           |> prune_selected_ids()
+           |> refresh_state()}
 
-      {:noreply,
-       socket
-       |> assign(:rows, merged_rows)
-       |> assign(:next_cursor, next_cursor)
-       |> prune_selected_ids()}
+        :unavailable ->
+          {:noreply,
+           socket
+           |> assign(:read_error, :partial)
+           |> assign(:failed_cursor, socket.assigns.next_cursor)}
+      end
     end
+  end
+
+  def handle_event("retry-read", _params, %{assigns: %{read_error: :partial}} = socket) do
+    cursor = socket.assigns.failed_cursor
+
+    opts =
+      query_opts(
+        socket.assigns.filter,
+        cursor,
+        socket.assigns.limit,
+        Map.get(socket.assigns, :current_owner_scope)
+      )
+
+    case read_page(socket.assigns.query_module, opts) do
+      {:ok, {rows, next_cursor}} ->
+        merged_rows = socket.assigns.rows ++ rows
+
+        {:noreply,
+         socket
+         |> assign(:rows, merged_rows)
+         |> assign(:next_cursor, next_cursor)
+         |> assign(:read_error, nil)
+         |> assign(:failed_cursor, nil)
+         |> prune_selected_ids()
+         |> refresh_state()}
+
+      :unavailable ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("retry-read", _params, socket) do
+    {:noreply,
+     socket
+     |> reload(socket.assigns.params,
+       reset_selection?: true,
+       params_signature: socket.assigns.params_signature
+     )
+     |> refresh_state()}
   end
 
   def handle_event("toggle-row", %{"id" => row_id}, socket) do
@@ -229,7 +309,12 @@ defmodule AccrueAdmin.Components.DataTable do
        reset_selection?: false,
        params_signature: socket.assigns.params_signature
      )
-     |> assign(:newer_count, 0)}
+     |> assign(:newer_count, 0)
+     |> refresh_state()}
+  end
+
+  def handle_event("retry-poll", _params, socket) do
+    {:noreply, socket |> poll_newer() |> refresh_state()}
   end
 
   slot(:list_status)
@@ -279,15 +364,41 @@ defmodule AccrueAdmin.Components.DataTable do
         </button>
       </div>
 
-      <div :if={@list_status != []} class="ax-data-table-list-status" data-role="list-status">
+      <div :if={@poll_error?} class="ax-data-table-partial-alert" data-role="poll-read-error" role="alert">
+        <p class="ax-body">Could not check for newer rows. The rows shown remain available, and polling will retry automatically.</p>
+        <button type="button" phx-click="retry-poll" phx-target={@myself} class="ax-button ax-button-secondary" data-role="retry-poll">
+          Retry check
+        </button>
+      </div>
+
+      <div :if={@list_status != [] and @read_error != :initial} class="ax-data-table-list-status" data-role="list-status">
         <%= render_slot(@list_status, %{visible_count: length(@rows), list_state: @list_state}) %>
+      </div>
+
+      <div :if={@read_error == :initial} class="ax-card ax-data-table-unavailable" data-role="unavailable-state" role="alert">
+        <p class="ax-empty-title">History unavailable</p>
+        <p class="ax-body"><%= @unavailable_copy %></p>
+        <button type="button" phx-click="retry-read" phx-target={@myself} class="ax-button ax-button-secondary" data-role="retry-read">
+          Retry
+        </button>
+      </div>
+
+      <div :if={@read_error == :partial} class="ax-data-table-partial-alert" data-role="partial-read-error" role="alert">
+        <p class="ax-body"><%= @partial_load_copy %></p>
+        <button type="button" phx-click="retry-read" phx-target={@myself} class="ax-button ax-button-secondary" data-role="retry-read">
+          Retry loading remaining rows
+        </button>
       </div>
 
       <div :if={@render_loading_fixture} class="ax-data-table-loading" data-role="loading-skeleton">
         <p class="ax-visually-hidden" role="status"><%= @loading_label %></p>
 
         <div class="ax-card ax-data-table-shell ax-data-table-skeleton-shell" aria-hidden="true">
-          <table class="ax-data-table-grid">
+          <table class={["ax-data-table-grid", Enum.any?(@columns, &Map.has_key?(&1, :width)) && "ax-data-table-grid-fixed"]}>
+          <colgroup :if={Enum.any?(@columns, &Map.has_key?(&1, :width))}>
+            <col :if={@selectable} class="ax-data-table-select-column" />
+            <col :for={column <- @columns} data-width={column[:width]} />
+          </colgroup>
             <caption :if={@table_caption} class="ax-visually-hidden"><%= @table_caption %></caption>
             <thead>
               <tr>
@@ -328,17 +439,19 @@ defmodule AccrueAdmin.Components.DataTable do
 
       <div :if={@render_empty_state} class="ax-card ax-empty ax-data-table-empty" data-role="empty-state">
         <Icon.icon name={:inbox} size="lg" class="ax-empty-icon ax-empty-icon-muted" />
-        <p class="ax-empty-title"><%= @resolved_empty_title %></p>
-        <p class="ax-body ax-empty-copy"><%= @resolved_empty_copy %></p>
-        <.link
-          :if={any_filter_active?(@filter_params)}
-          patch={@clear_href}
-          class="ax-button ax-button-secondary"
-          data-role="clear-filters"
-          data-phase191-focus="clear-filters"
-        >
-          <%= Copy.data_table_clear_filters_label() %>
-        </.link>
+        <div class="ax-empty-content">
+          <p class="ax-empty-title"><%= @resolved_empty_title %></p>
+          <p class="ax-body ax-empty-copy"><%= @resolved_empty_copy %></p>
+          <.link
+            :if={any_filter_active?(@filter_params) and @show_empty_clear}
+            patch={@empty_action_href || @clear_href}
+            class="ax-button ax-button-secondary"
+            data-role="clear-filters"
+            data-phase191-focus="clear-filters"
+          >
+            <%= @empty_action_label %>
+          </.link>
+        </div>
       </div>
 
       <div :if={@render_rows and @selectable} class="ax-data-table-selection" data-role="selection-bar">
@@ -378,7 +491,11 @@ defmodule AccrueAdmin.Components.DataTable do
         :if={@render_rows}
         class="ax-card ax-data-table-shell"
       >
-        <table class="ax-data-table-grid">
+        <table class={["ax-data-table-grid", Enum.any?(@columns, &Map.has_key?(&1, :width)) && "ax-data-table-grid-fixed"]}>
+          <colgroup :if={Enum.any?(@columns, &Map.has_key?(&1, :width))}>
+            <col :if={@selectable} class="ax-data-table-select-column" />
+            <col :for={column <- @columns} data-width={column[:width]} />
+          </colgroup>
           <caption :if={@table_caption} class="ax-visually-hidden"><%= @table_caption %></caption>
           <thead>
             <tr>
@@ -412,7 +529,6 @@ defmodule AccrueAdmin.Components.DataTable do
         <article :for={row <- @rows} class="ax-card ax-data-table-card" data-row-id={row_identity(row, @row_id)}>
           <header class="ax-data-table-card-header">
             <div>
-              <p class="ax-eyebrow">Row</p>
               <p class="ax-heading"><%= card_title(@card_title, row, @columns) %></p>
             </div>
             <input
@@ -431,7 +547,7 @@ defmodule AccrueAdmin.Components.DataTable do
           </header>
 
           <dl class="ax-data-table-card-fields">
-            <div :for={field <- card_fields(@card_fields, @columns)} class="ax-data-table-card-field">
+            <div :for={field <- card_fields(@card_fields, @columns, @card_title)} class="ax-data-table-card-field">
               <dt class="ax-label"><%= column_label(field) %></dt>
               <dd class="ax-body"><%= cell_value(field, row) %></dd>
             </div>
@@ -439,27 +555,66 @@ defmodule AccrueAdmin.Components.DataTable do
         </article>
       </div>
 
-      <footer :if={@render_rows} class="ax-data-table-footer">
-        <p class="ax-body" data-role="row-count"><%= Copy.data_table_row_count(length(@rows), @row_label) %></p>
+      <footer
+        :if={@render_rows}
+        id={@id <> "-scroll-container"}
+        class="ax-data-table-footer"
+        phx-hook="Pagination"
+        data-pagination-target={@myself}
+        data-pagination-cursor={@next_cursor}
+        data-pagination-error={if @read_error, do: "true", else: "false"}
+      >
+        <p class="ax-data-table-pagination-status" data-role="pagination-status" role="status" aria-live="polite" aria-atomic="true">
+          <span data-role="pagination-progress"><%= pagination_progress(length(@rows), @row_label, @total_count) %></span>
+          <span :if={!@next_cursor} data-role="end-of-list">End of list</span>
+          <span :if={@next_cursor && !@read_error} class="ax-data-table-scroll-hint">Scroll for more</span>
+          <span class="ax-data-table-pagination-loading">Loading more <%= elem(@row_label, 1) %>…</span>
+        </p>
         <button
-          :if={@next_cursor}
+          :if={@next_cursor && !@read_error}
           type="button"
           phx-click="load-more"
           phx-target={@myself}
-          class="ax-button ax-button-secondary"
+          phx-disable-with={"Loading more #{elem(@row_label, 1)}…"}
+          class="ax-button ax-button-secondary ax-data-table-manual-load"
           data-role="load-more"
           data-phase191-focus="load-more"
         >
           Load more
         </button>
         <div
-          :if={@next_cursor && length(@rows) < @dom_limit}
-          phx-viewport-bottom={Phoenix.LiveView.JS.push("load-more", target: @myself)}
+          :if={@next_cursor && !@read_error}
+          class="ax-data-table-scroll-boundary"
           data-role="viewport-sentinel"
           aria-hidden="true"
         />
       </footer>
     </section>
+    """
+  end
+
+  attr(:label, :string, required: true)
+  attr(:items, :list, required: true)
+
+  def view_nav(assigns) do
+    ~H"""
+    <nav class="ax-list-view-nav ax-invoice-view-nav" aria-label={@label} data-ax-view-nav>
+      <.link :for={item <- @items} patch={item.href} aria-current={if item.current, do: "page"}>
+        <%= item.label %>
+      </.link>
+    </nav>
+    """
+  end
+
+  attr(:value, :string, required: true)
+  attr(:detail, :string, default: nil)
+
+  def value_cell(assigns) do
+    ~H"""
+    <span class="ax-data-table-value">
+      <span><%= @value %></span>
+      <span :if={@detail} class="ax-data-table-value-detail"><%= @detail %></span>
+    </span>
     """
   end
 
@@ -471,6 +626,9 @@ defmodule AccrueAdmin.Components.DataTable do
   attr(:clear_href, :string, default: nil)
   attr(:clear_filters_patch, :string, default: nil)
   attr(:clear_visible, :any, default: nil)
+  attr(:clear_label, :string, default: nil)
+  attr(:preserve_params, :map, default: %{})
+  attr(:secondary_label, :string, default: "Filters")
 
   def filter_toolbar(assigns) do
     assigns =
@@ -487,6 +645,14 @@ defmodule AccrueAdmin.Components.DataTable do
           _ -> any_filter_active?(assigns.filter_params)
         end
       )
+      |> assign(
+        :primary_filter_fields,
+        Enum.reject(assigns.filter_fields, &Map.get(&1, :secondary, false))
+      )
+      |> assign(
+        :secondary_filter_fields,
+        Enum.filter(assigns.filter_fields, &Map.get(&1, :secondary, false))
+      )
 
     ~H"""
     <form
@@ -497,10 +663,14 @@ defmodule AccrueAdmin.Components.DataTable do
       data-phase191-focus="filter-form"
     >
       <div
-        :for={field <- @filter_fields}
+        :for={field <- @primary_filter_fields}
         class={["ax-data-table-filter", filter_field_class(field)]}
       >
-        <label for={field_id(@id, field)} class="ax-visually-hidden"><%= field_label(field) %></label>
+        <label
+          :if={Map.get(field, :type) != :checkbox_group}
+          for={field_id(@id, field)}
+          class="ax-label"
+        ><%= field_label(field) %></label>
         <.filter_input
           id={field_id(@id, field)}
           field={field}
@@ -508,7 +678,19 @@ defmodule AccrueAdmin.Components.DataTable do
           focus_key={field_param(field)}
         />
       </div>
+      <details :if={@secondary_filter_fields != []} class="ax-data-table-filter-disclosure">
+        <summary><%= @secondary_label %><Icon.icon name={:chevron_down} size="sm" class="ax-filter-disclosure-chevron" /></summary>
+        <div class="ax-data-table-filter-secondary">
+          <div :for={field <- @secondary_filter_fields} class={["ax-data-table-filter", filter_field_class(field)]}>
+            <label :if={Map.get(field, :type) != :checkbox_group} for={field_id(@id, field)} class="ax-label"><%= field_label(field) %></label>
+            <.filter_input id={field_id(@id, field)} field={field} value={Map.get(@filter_params, field_param(field))} focus_key={field_param(field)} />
+          </div>
+        </div>
+      </details>
       <div :for={{key, value} <- @filter_params} :if={!field_defined?(@filter_fields, key)}>
+        <input type="hidden" name={key} value={value} />
+      </div>
+      <div :for={{key, value} <- @preserve_params} :if={!field_defined?(@filter_fields, key)}>
         <input type="hidden" name={key} value={value} />
       </div>
       <%!-- Instant-apply toolbar: phx-change submits on every edit (text debounced
@@ -526,10 +708,11 @@ defmodule AccrueAdmin.Components.DataTable do
         :if={@clear_visible}
         patch={@clear_href}
         class="ax-button ax-button-ghost ax-data-table-filter-clear"
+        data-ax-clear-all
         data-role="clear-filters"
         data-phase191-focus="clear-filters"
       >
-        <%= Copy.data_table_clear_filters_label() %>
+        <%= @clear_label || "Reset filters" %>
       </.link>
     </form>
     """
@@ -619,6 +802,53 @@ defmodule AccrueAdmin.Components.DataTable do
     """
   end
 
+  defp filter_input(%{field: %{type: :checkbox_group} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(:options, Map.get(field, :options, []))
+      |> assign(:selected_values, selected_values(assigns.value))
+
+    assigns =
+      assign(
+        assigns,
+        :selection_label,
+        case Enum.filter(
+               assigns.options,
+               &(to_string(option_value(&1)) in assigns.selected_values)
+             ) do
+          [] -> "All statuses"
+          selected when length(selected) <= 2 -> Enum.map_join(selected, ", ", &option_label/1)
+          selected -> "#{length(selected)} selected"
+        end
+      )
+
+    ~H"""
+    <span id={@id <> "-label"} class="ax-label"><%= field_label(@field) %></span>
+    <details id={@id <> "-picker"} class="ax-multi-select" data-disclosure-dismiss phx-hook="PreserveDisclosure">
+      <summary aria-labelledby={@id <> "-label " <> @id <> "-selection"}>
+        <span id={@id <> "-selection"}><%= @selection_label %></span>
+        <Icon.icon name={:chevron_down} size="sm" />
+      </summary>
+      <fieldset class="ax-data-table-checkbox-group" data-filter-group={field_param(@field)}>
+        <legend class="ax-visually-hidden"><%= field_label(@field) %></legend>
+        <label :for={{option, index} <- Enum.with_index(@options)} class="ax-field-inline">
+          <input
+            id={"#{@id}-#{index}"}
+            type="checkbox"
+            name={"#{field_param(@field)}[]"}
+            value={option_value(option)}
+            checked={to_string(option_value(option)) in @selected_values}
+            class="ax-checkbox"
+            data-phase191-focus={"filter-#{@focus_key}-#{index}"}
+          />
+          <span><%= option_label(option) %></span>
+        </label>
+        <input type="hidden" name={"#{field_param(@field)}[]"} value="" />
+      </fieldset>
+    </details>
+    """
+  end
+
   defp filter_input(assigns) do
     assigns =
       assign(
@@ -646,26 +876,50 @@ defmodule AccrueAdmin.Components.DataTable do
     filter_params = socket.assigns.query_module.encode_filter(filter) |> stringify_map()
     cursor = Map.get(params, "cursor") || Map.get(params, :cursor)
 
-    {rows, next_cursor} =
-      socket.assigns.query_module.list(
-        query_opts(
-          filter,
-          cursor,
-          socket.assigns.limit,
-          Map.get(socket.assigns, :current_owner_scope)
-        )
+    query_opts =
+      query_opts(
+        filter,
+        cursor,
+        socket.assigns.limit,
+        Map.get(socket.assigns, :current_owner_scope)
       )
 
-    socket
-    |> assign(:params_signature, Keyword.fetch!(opts, :params_signature))
-    |> assign(:params, params)
-    |> assign(:filter, filter)
-    |> assign(:filter_params, filter_params)
-    |> assign(:rows, rows)
-    |> assign(:next_cursor, next_cursor)
-    |> assign(:newer_count, 0)
-    |> maybe_reset_selection(opts)
-    |> prune_selected_ids()
+    socket =
+      socket
+      |> assign(:params_signature, Keyword.fetch!(opts, :params_signature))
+      |> assign(:params, params)
+      |> assign(:filter, filter)
+      |> assign(:filter_params, filter_params)
+      |> assign(:newer_count, 0)
+      |> assign(:read_error, nil)
+      |> assign(:failed_cursor, nil)
+      |> maybe_reset_selection(opts)
+
+    case read_page(socket.assigns.query_module, query_opts) do
+      {:ok, {rows, next_cursor}} ->
+        socket
+        |> assign(:rows, rows)
+        |> assign(:next_cursor, next_cursor)
+        |> prune_selected_ids()
+
+      :unavailable ->
+        socket
+        |> assign(:rows, [])
+        |> assign(:next_cursor, nil)
+        |> assign(:read_error, :initial)
+        |> assign(:selected_ids, MapSet.new())
+    end
+  end
+
+  defp read_page(query_module, opts) do
+    try do
+      case query_module.list(opts) do
+        {:error, %DBConnection.ConnectionError{}} -> :unavailable
+        page -> {:ok, page}
+      end
+    rescue
+      _error in DBConnection.ConnectionError -> :unavailable
+    end
   end
 
   defp maybe_reset_selection(socket, opts) do
@@ -728,24 +982,36 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   defp poll_newer(socket) do
-    count =
-      case top_cursor(socket) do
-        nil ->
-          0
+    case top_cursor(socket) do
+      nil ->
+        socket
+        |> assign(:newer_count, 0)
+        |> assign(:poll_error?, false)
 
-        cursor ->
-          socket.assigns.query_module.count_newer_than(
-            query_opts(
-              socket.assigns.filter,
-              cursor,
-              nil,
-              Map.get(socket.assigns, :current_owner_scope)
-            )
-            |> Keyword.delete(:limit)
+      cursor ->
+        opts =
+          query_opts(
+            socket.assigns.filter,
+            cursor,
+            nil,
+            Map.get(socket.assigns, :current_owner_scope)
           )
-      end
+          |> Keyword.delete(:limit)
 
-    assign(socket, :newer_count, count)
+        try do
+          case socket.assigns.query_module.count_newer_than(opts) do
+            {:error, %DBConnection.ConnectionError{}} ->
+              assign(socket, :poll_error?, true)
+
+            count ->
+              socket
+              |> assign(:newer_count, count)
+              |> assign(:poll_error?, false)
+          end
+        rescue
+          _error in DBConnection.ConnectionError -> assign(socket, :poll_error?, true)
+        end
+    end
   end
 
   defp top_cursor(socket) do
@@ -830,6 +1096,15 @@ defmodule AccrueAdmin.Components.DataTable do
   defp normalize_positive(value, _fallback) when is_integer(value) and value > 0, do: value
   defp normalize_positive(_value, fallback), do: fallback
 
+  defp pagination_progress(count, {_singular, plural}, total)
+       when is_integer(total) and total >= count do
+    "#{count} of #{total} #{plural} loaded"
+  end
+
+  defp pagination_progress(count, {singular, plural}, _total) do
+    "#{count} #{if count == 1, do: singular, else: plural} loaded"
+  end
+
   defp query_opts(filter, cursor, limit, nil) do
     [filter: filter, cursor: cursor, limit: limit]
   end
@@ -883,6 +1158,11 @@ defmodule AccrueAdmin.Components.DataTable do
 
   defp option_selected?(value, option), do: to_string(value) == to_string(option_value(option))
 
+  defp selected_values(value) when is_list(value), do: Enum.map(value, &to_string/1)
+  defp selected_values(value) when is_binary(value), do: String.split(value, ",", trim: true)
+  defp selected_values(nil), do: []
+  defp selected_values(value), do: [to_string(value)]
+
   defp option_disabled?(option) when is_map(option), do: Map.get(option, :disabled, false) == true
   defp option_disabled?(_option), do: false
 
@@ -902,8 +1182,9 @@ defmodule AccrueAdmin.Components.DataTable do
 
   defp row_dom_id(table_id, row, row_id), do: "#{table_id}-row-#{row_identity(row, row_id)}"
 
-  defp card_fields([], columns), do: columns
-  defp card_fields(card_fields, _columns), do: card_fields
+  defp card_fields([], [_first_column | rest], nil), do: rest
+  defp card_fields([], columns, _card_title), do: columns
+  defp card_fields(card_fields, _columns, _card_title), do: card_fields
 
   defp card_title(nil, row, [first_column | _rest]), do: cell_value(first_column, row)
   defp card_title(nil, row, _columns), do: row_identity(row, :id)

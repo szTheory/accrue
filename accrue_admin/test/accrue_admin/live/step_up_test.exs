@@ -56,7 +56,7 @@ defmodule AccrueAdmin.StepUpTest do
        |> Phoenix.Component.assign(:step_up_pending, false)
        |> Phoenix.Component.assign(:step_up_challenge, nil)
        |> Phoenix.Component.assign(:step_up_error, nil)
-       |> Phoenix.Component.assign(:step_up_verified_at, nil)
+       |> Phoenix.Component.assign(:step_up_verified_at, session["step_up_verified_at"])
        |> Phoenix.Component.assign(:executed, 0)}
     end
 
@@ -199,6 +199,32 @@ defmodule AccrueAdmin.StepUpTest do
       )
 
     assert length(events) == 1
+  end
+
+  test "expired grace opens a fresh challenge and blocks the continuation until verification", %{
+    conn: conn,
+    source_event: source_event,
+    webhook: webhook
+  } do
+    expired_at = System.system_time(:second) - 301
+
+    {:ok, view, _html} =
+      live_isolated(conn, TestLive,
+        session: %{
+          "current_admin" => %{id: "admin_1", role: :admin},
+          "action_type" => "refund.issue",
+          "source_event_id" => source_event.id,
+          "source_webhook_event_id" => webhook.id,
+          "step_up_verified_at" => expired_at
+        }
+      )
+
+    challenged = render_click(element(view, "button"))
+    assert challenged =~ "Step-up required"
+    assert challenged =~ ~s(data-role="executed">0<)
+
+    verified = render_submit(view, "step_up_submit", %{"code" => "123456"})
+    assert verified =~ ~s(data-role="executed">1<)
   end
 
   test "challenge failures keep the modal open and write denied audit", %{

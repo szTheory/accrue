@@ -136,9 +136,13 @@ config :accrue,
   ],
   admin_branding: [
     app_name: "Accrue Admin",
-    accent_color: "#5D79F6"
+    accent_color: "#5D79F6",
+    theme: :dark
   ]
 ```
 
 When `:admin_branding` is unset, Accrue Admin derives its label, logo, and accent
-from `branding` for backwards compatibility.
+from `branding` for backwards compatibility. Its theme defaults to `:system`,
+which follows the saved operator preference and keeps the theme picker available.
+Set `theme: :light` or `:dark` in `:admin_branding` to force that theme for the
+mounted Admin UI; the `accrue_theme` cookie is ignored and the picker is hidden.

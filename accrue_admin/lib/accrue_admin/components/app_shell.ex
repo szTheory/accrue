@@ -83,7 +83,10 @@ defmodule AccrueAdmin.Components.AppShell do
           </span>
         </div>
 
-        <Topbar.topbar theme={@theme} />
+        <Topbar.topbar
+          theme={@theme}
+          theme_forced={Map.get(@brand, :theme_forced?, false)}
+        />
 
         <main
           class="ax-shell-content ax-content"

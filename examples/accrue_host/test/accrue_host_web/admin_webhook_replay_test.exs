@@ -135,11 +135,11 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
 
     assert events_html =~ AccrueAdmin.Copy.events_list_heading()
     assert events_html =~ AccrueAdmin.Copy.events_list_subtitle()
-    assert events_html =~ "invoice.payment_failed"
+    assert events_html =~ AccrueAdmin.Copy.billing_event_label("invoice.payment_failed")
     assert events_html =~ AccrueAdmin.Copy.billing_events_table_column_webhook_source()
   end
 
-  test "ambiguous or out-of-scope webhook replay blocks single and bulk replay without success audits",
+  test "ambiguous or out-of-scope webhook replay blocks single replay and records a zero-queued bulk outcome",
        %{conn: conn} do
     admin_user =
       AccrueHost.AccountsFixtures.user_fixture()
@@ -233,31 +233,51 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
 
     _ = render(bulk_view)
 
-    blocked_html = render_click(element(bulk_view, "[data-role='confirm-retry-selected']"))
+    challenge = render_click(element(bulk_view, "[data-role='confirm-retry-selected']"))
+    assert challenge =~ "Step-up required"
 
-    # FlashGroup HTML-escapes the message, so the apostrophe in "isn't" renders as
-    # `isn&#39;t`; compare against the escaped form (matching the ambiguous assertion above).
-    expected_blocked_copy =
-      AccrueAdmin.Copy.Locked.replay_blocked()
+    blocked_html = render_submit(bulk_view, "step_up_submit", %{"code" => "123456"})
+
+    # The bulk path reports exact skipped/failed counts when every selected id is
+    # inaccessible; it must not claim success or leak the foreign webhook id.
+    expected_bulk_result =
+      AccrueAdmin.Copy.webhooks_retry_result(%{
+        queued: 0,
+        skipped: 2,
+        denied: 0,
+        failed: 0,
+        unknown: 0
+      })
       |> Phoenix.HTML.html_escape()
       |> Phoenix.HTML.safe_to_string()
 
-    assert blocked_html =~ expected_blocked_copy
+    assert blocked_html =~ expected_bulk_result
 
-    # The original load-bearing zero-success-audit assertion (must not be removed).
+    # The scoped batch gets an outcome audit, but it must record no queued rows,
+    # scoped ids, or per-row success outcomes for these inaccessible selections.
+    bulk_event =
+      Repo.one!(
+        from(event in Event,
+          where: event.type == "admin.webhook.bulk_replay.completed",
+          order_by: [desc: event.inserted_at, desc: event.id],
+          limit: 1
+        )
+      )
+
+    assert bulk_event.data["selected"] == 2
+    assert bulk_event.data["eligible"] == 0
+    assert bulk_event.data["attempted"] == 0
+    assert bulk_event.data["queued"] == 0
+    assert bulk_event.data["skipped"] == 2
+    assert bulk_event.data["failed"] == 0
+    assert bulk_event.data["ids"] == []
+    assert bulk_event.data["outcomes"] == []
+
     assert Repo.aggregate(
              from(event in Event,
-               where: event.type == "admin.webhook.replay.completed"
-             ),
-             :count,
-             :id
-           ) == 0
-
-    # Defense-in-depth: the NEW selection-driven success event must also be zero,
-    # proving the new code path recorded no success audit for the blocked replay.
-    assert Repo.aggregate(
-             from(event in Event,
-               where: event.type == "admin.webhook.bulk_replay.completed"
+               where:
+                 event.type == "admin.webhook.replay.completed" and
+                   event.subject_id in ^[outsider_webhook.id, ambiguous_webhook.id]
              ),
              :count,
              :id

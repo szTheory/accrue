@@ -4,7 +4,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
   use Phoenix.LiveView
 
   alias Accrue.Analytics.Dunning
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, CampaignTimeline, Detail}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, CampaignTimeline, Detail, Timestamp}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.ScopedPath
@@ -42,6 +42,44 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
   end
 
   @impl true
+  def handle_params(params, _uri, socket) do
+    mount_path = socket.assigns.admin_mount_path
+    owner_scope = socket.assigns.current_owner_scope
+
+    return_destination =
+      case Map.get(params, "return_to") do
+        raw_return_path when is_binary(raw_return_path) and raw_return_path != "" ->
+          ScopedPath.return_destination(
+            mount_path,
+            raw_return_path,
+            owner_scope,
+            nil,
+            "/analytics/recovery"
+          )
+
+        _missing_or_blank ->
+          recovery_path = ScopedPath.build(mount_path, "/analytics/recovery", owner_scope)
+          %{path: recovery_path, label: "Back to Recovery"}
+      end
+
+    return_destination =
+      if return_destination.label == "Back to Recovery" do
+        return_destination
+      else
+        recovery_path =
+          ScopedPath.build(
+            mount_path,
+            "/analytics/recovery",
+            owner_scope
+          )
+
+        %{path: recovery_path, label: "Back to Recovery"}
+      end
+
+    {:noreply, assign(socket, :return_destination, return_destination)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <AppShell.app_shell
@@ -53,21 +91,23 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
       current_owner_scope={assigns[:current_owner_scope]}
       active_organization_name={@active_organization_name}
     >
-      <section class="ax-page" aria-label="Dunning timeline for subscription">
-        <Breadcrumbs.breadcrumbs items={[
-          %{label: "Analytics"},
-          %{label: "Recovery", href: @current_path},
+      <section class="ax-page" aria-label="Payment retry history">
+        <Breadcrumbs.breadcrumbs group="Recovery" items={[
+          %{label: Copy.recovery_index_heading(), href: @return_destination.path},
           %{label: "Subscription"}
         ]} />
 
-        <Detail.summary_card eyebrow="Campaign history" title="Dunning Timeline">
+        <Detail.summary_card title="Payment retry history">
           <:facts>
             <span>{@subscription_id}</span>
           </:facts>
         </Detail.summary_card>
 
+        <a class="ax-link" href={@return_destination.path}>{@return_destination.label}</a>
+
         <Detail.summary_list rows={summary_rows(@subscription_id, @arcs, @invoice_map, @admin_mount_path, @current_owner_scope)} />
 
+        <p class="ax-body ax-measure">Recorded retry attempts and outcomes are shown below. Open subscription details for its current status.</p>
         <CampaignTimeline.campaign_timeline arcs={@arcs} invoice_map={@invoice_map} />
       </section>
     </AppShell.app_shell>
@@ -86,7 +126,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
     (campaign_fact_rows(subscription_id, arcs) ++
        [
          %{label: "Invoice count", value: invoice_count_label(invoice_map)},
-         %{label: "Last boundary", value: latest_boundary(arcs)}
+         %{label: "Latest recorded event", value: latest_boundary(arcs)}
        ])
     |> add_subscription_action(subscription_id, mount_path, owner_scope)
   end
@@ -94,7 +134,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
   defp campaign_fact_rows(subscription_id, arcs) do
     [
       %{label: "Subscription", value: subscription_id},
-      %{label: "Campaign state", value: campaign_state(arcs)},
+      %{label: "Latest recorded outcome", value: campaign_state(arcs)},
       %{label: "Timeline events", value: event_count_label(arcs)}
     ]
   end
@@ -104,9 +144,9 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
 
     [
       %{label: "Subscription", value: subscription_id},
-      %{label: "Campaign state", value: copy.heading},
+      %{label: "Latest recorded outcome", value: copy.heading},
       %{label: "Timeline events", value: "0 events"},
-      %{label: "Last boundary", value: copy.body}
+      %{label: "Latest recorded event", value: copy.body}
     ]
   end
 
@@ -136,8 +176,22 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
 
   defp latest_boundary(arcs) do
     case latest_event(arcs) do
-      %{type: type, inserted_at: inserted_at} ->
-        "#{event_label(type)} at #{format_datetime(inserted_at)}"
+      %{id: id, type: type, inserted_at: %DateTime{} = inserted_at} ->
+        assigns = %{
+          label: event_label(type),
+          value: inserted_at,
+          id: "campaign-summary-boundary-#{id}"
+        }
+
+        ~H"""
+        <span>{@label} at <Timestamp.timestamp value={@value} id={@id} /></span>
+        """
+        |> Phoenix.HTML.Safe.to_iodata()
+        |> IO.iodata_to_binary()
+        |> Phoenix.HTML.raw()
+
+      %{type: type} ->
+        "#{event_label(type)} at Unknown time"
 
       _event ->
         Copy.resource_state_copy(:dunning, :first_run_empty).body
@@ -187,17 +241,11 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
     |> String.capitalize()
   end
 
-  defp format_datetime(%DateTime{} = value) do
-    Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  end
-
-  defp format_datetime(_value), do: "Unknown time"
-
   defp assign_shell(socket, admin, owner_scope) do
     mount_path = admin["mount_path"] || "/billing"
 
     socket
-    |> assign(:page_title, "Dunning Timeline")
+    |> assign(:page_title, "Payment retry history")
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
