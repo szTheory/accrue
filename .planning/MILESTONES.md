@@ -1,5 +1,14 @@
 # Milestones
 
+## v1.67 Integration & CI Green (Shipped: 2026-10-26)
+
+**Phases completed:** 3 phases, 32 plans, 1 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+
 ## v1.66 Admin Usability and Visual Consistency (Completed locally:2026-10-12)
 
 **Delivered:** Coherent existing Admin collections/search/tables, exact shared timestamps, evidence-true details/navigation/recovery, and guarded evaluation scenarios with revision-bound proof.
