@@ -116,7 +116,7 @@ Plans:
 **Plans**: 7 plans
 
 Plans:
-- [ ] 251-01-PLAN.md — Bootstrap: current_phase 251 + scoped VERIFICATION/UAT minted in one commit; authorization recorded verbatim (wave 1)
+- [x] 251-01-PLAN.md — Bootstrap: current_phase 251 + scoped VERIFICATION/UAT minted in one commit; authorization recorded verbatim (wave 1)
 - [ ] 251-02-PLAN.md — Workflow fix: delete the stale-base reset, add the merged-but-pending wedge detector, repair-safety verifier with legacy negative controls (wave 2)
 - [ ] 251-03-PLAN.md — SC1 gate: section-scoped curated-CHANGELOG verifier proven on the raw candidate; fix-PR gate replay (wave 3)
 - [ ] 251-04-PLAN.md — Land the fix PR (squash, exact-head green), remove #50's stale label, dispatch Release Please, verify the fresh 1.7.0 PR (wave 4)
@@ -130,7 +130,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 249. Local Gate Parity & Planning Truth | 18/18 | Complete    | 2026-10-25 |
 | 250. Remote Integration | 7/7 | Complete | 2026-10-25 |
-| 251. 1.7.0 Release Alignment | 0/7 | Planned | - |
+| 251. 1.7.0 Release Alignment | 1/7 | In Progress | - |
 
 ## Next
 
