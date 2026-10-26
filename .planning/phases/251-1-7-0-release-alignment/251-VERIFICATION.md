@@ -2,7 +2,7 @@
 phase: 251-1-7-0-release-alignment
 verified: 2026-10-26T14:05:30Z
 status: passed
-score: "completed-plan claims verified: 251-01, 251-02, 251-03; phase success criteria claimed: 0/3 (phase in progress)"
+score: "completed-plan claims verified: 251-01, 251-02, 251-03, 251-04; phase success criteria claimed: 0/3 (phase in progress)"
 covered_files:
   - ".github/workflows/ci.yml"
   - ".github/workflows/release-please.yml"
@@ -13,6 +13,7 @@ covered_files:
   - ".planning/phases/251-1-7-0-release-alignment/251-03-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-03-SUMMARY.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-04-PLAN.md"
+  - ".planning/phases/251-1-7-0-release-alignment/251-04-SUMMARY.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-05-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-06-PLAN.md"
   - ".planning/phases/251-1-7-0-release-alignment/251-07-PLAN.md"
@@ -26,7 +27,7 @@ covered_files:
   - "scripts/ci/verify_release_branch_repair_safety.sh"
   - "scripts/ci/verify_release_changelog_curated.sh"
   - "scripts/ci/verify_release_contract.sh"
-covered_digest: "v1:sha256:1e5d9350487c40e7e2a23b40cb447b0b5c7d3905d1cfa9b89c2da5db24ac17da"
+covered_digest: "v1:sha256:24164063a365fdc56ace671b00c2d3b7cc6aa74c9d1ccf487f02dbe277b10372"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -44,6 +45,10 @@ overrides_applied: 0
 | W2 | A merged release PR still labelled `autorelease: pending` turns Release Please red via a job no publish job needs | `251-02-SUMMARY.md` coverage W2; `verify_release_contract.sh` (N1-N3 single-violation controls) exit 0 | VERIFIED |
 | W3 | RELEASING.md and scripts/ci/README.md give the corrected remedies; legacy reset remedy rejected | `251-02-SUMMARY.md` coverage W3; `verify_release_contract.sh` (N4-N6 single-violation controls) exit 0 | VERIFIED |
 | G1 | The SC1 curated-CHANGELOG gate is committed and merge-blocking, and it fails the real uncurated 963ad2cd candidate for all three packages | `251-03-SUMMARY.md` coverage G1; `verify_release_changelog_curated.sh --self-test` (10 fixtures, FAIL and PASS controls) and the live run exit 0 (grandfathered at 1.6.0); 963ad2cd `--version 1.7.0` exits 1 with 18/168/41 raw lines | VERIFIED |
+| L1 | Workflow-fix PR #54 exact head F green and squash-merged as S `6e285bff`; push CI at S green vs baseline 40281358498 | `251-04-SUMMARY.md` coverage L1; `250-ci-head-status.mjs` at F (pull_request, `--pr-base origin/main`) and at S (push) exit 0 | VERIFIED |
+| L2 | The wedge detector fired live at S: Release Please run 40344886221 has `Release Please=success`, `Release PR wedge check=failure` naming PR 50 | `251-04-SUMMARY.md` coverage L2; `gh run view 40344886221` jobs and `--log-failed` | VERIFIED |
+| L3 | #50 stale-label hazard proven (dry run would tag 3 1.7.0 releases at b4310a39) then removed (merged-pending `[]`, would tag 0); dispatch run 40348672308 success at FREEZE_SHA | `251-04-SUMMARY.md` coverage L3; merged-pending query with negative control; github-release dry run before/after | VERIFIED |
+| L4 | Fresh release PR #55 has the seven release files at 1.7.0, three 1.7.0 component blocks, raw head parent FREEZE_SHA; no 1.7.0 tag, release or Hex package | `251-04-SUMMARY.md` coverage L4; `verify_release_pr_scope.sh --pr 55 --version 1.7.0` exit 0 | VERIFIED |
 | SC1 | Release PR branch carries 1.7.0 README pins, companion notes and curated CHANGELOGs with no raw phase-scoped lines | not yet claimed (in progress); decided by the G1 gate on the release PR head | NOT CLAIMED |
 | SC2 | Every required check on the release PR's exact head SHA concludes `success` | not yet claimed (in progress) | NOT CLAIMED |
 | SC3 | Hex publication of 1.7.0 happens only after a recorded explicit maintainer yes | not yet claimed (in progress) | NOT CLAIMED |
