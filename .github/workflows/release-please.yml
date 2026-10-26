@@ -176,23 +176,12 @@ jobs:
             git fetch origin "$target_branch" "$release_branch"
             git checkout -B "$release_branch" "origin/$release_branch"
 
-            expected_base="$(git rev-parse "origin/${target_branch}")"
-            actual_base="$(git merge-base HEAD "$expected_base")"
-            if [ "$actual_base" != "$expected_base" ]; then
-              git checkout "$target_branch"
-              git checkout -B "$release_branch" "$expected_base"
-              git push --force-with-lease origin HEAD:"$release_branch"
-
-              $release_please release-pr \
-                --repo-url "$repo" \
-                --target-branch "$target_branch" \
-                --config-file release-please-config.json \
-                --manifest-file .release-please-manifest.json \
-                --token "$RELEASE_PLEASE_TOKEN"
-
-              git fetch origin "$release_branch"
-              git checkout -B "$release_branch" "origin/$release_branch"
-            fi
+            # Phase 251 (PR #50): automation never rewrites the release branch.
+            # release-please rebuilds its release commit only when the computed
+            # PR body changes, so resetting the branch to the main tip after a
+            # docs-only push left an empty PR that GitHub auto-merged. That is
+            # unrecoverable by automation; a stale or empty release PR is a
+            # maintainer remedy (RELEASING.md step 3).
 
             repair_version="$(jq -r '.accrue // empty' .release-please-manifest.json)"
             repair_admin_version="$(jq -r '.accrue_admin // empty' .release-please-manifest.json)"
@@ -212,6 +201,34 @@ jobs:
             git checkout "$target_branch"
             bash scripts/ci/verify_release_pr_scope.sh --pr "$release_pr_number"
           fi
+
+  # Phase 251: a merged release PR still labelled `autorelease: pending`
+  # (one that tagged nothing) makes release-please refuse to open a new
+  # release PR while the workflow stays green. Turn that wedge red. This is
+  # its own job and no publish/proof job needs it, so a false positive can
+  # never skip a Hex publish.
+  release-pr-wedge-check:
+    name: Release PR wedge check
+    needs: release
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Fail while a merged release PR is still labelled autorelease pending
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          wedged="$(gh pr list --repo "$REPO" --state merged --label 'autorelease: pending' --json number --jq '.[].number')"
+          if [ -n "$wedged" ]; then
+            numbers="$(tr '\n' ' ' <<<"$wedged")"
+            echo "::error::merged release PR(s) still labelled autorelease: pending (${numbers% }); release-please will not open a new release PR until the label is removed" >&2
+            exit 1
+          fi
+          echo "No merged release PR is still labelled autorelease: pending."
 
   publish-accrue:
     name: Publish accrue

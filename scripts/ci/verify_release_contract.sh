@@ -20,7 +20,19 @@ require_fixed() {
   local file=$1
   local needle=$2
 
-  grep -Fq "$needle" "$file" || fail "$file is missing: $needle"
+  # `-e`: a needle beginning with `--` must not be parsed as a grep option.
+  grep -Fq -e "$needle" "$file" || fail "$file is missing: $needle"
+}
+
+# Phase 251: a needle that must be ABSENT (a legacy remedy or a reintroduced
+# release-branch force write).
+reject_fixed() {
+  local file=$1
+  local needle=$2
+
+  if grep -Fq -e "$needle" "$file"; then
+    fail "$file must not contain: $needle"
+  fi
 }
 
 require_regex() {
@@ -54,6 +66,8 @@ require_fixed "$releasing" 'ACCRUE_PORTAL_HEX_RELEASE=1'
 require_fixed "$releasing" 'choose `accrue`, `accrue_admin`, or `accrue_portal`'
 require_fixed "$releasing" 'Publish `accrue_portal`.'
 require_fixed "$releasing" 'repair_linked_release_pr.sh'
+require_fixed "$releasing" 'remove the label before the next release PR merges'
+reject_fixed "$releasing" 'back to `main`, rerun Release Please'
 
 require_fixed "$release_workflow" 'accrue_portal_release_created'
 require_fixed "$release_workflow" 'publish-accrue-portal:'
@@ -61,7 +75,9 @@ require_fixed "$release_workflow" 'needs: [release, publish-accrue, publish-accr
 require_fixed "$release_workflow" 'ACCRUE_PORTAL_HEX_RELEASE: "1"'
 require_fixed "$release_workflow" 'cd accrue_portal && mix hex.publish --dry-run'
 require_fixed "$release_workflow" 'cd accrue_portal && mix hex.publish --yes'
-require_fixed "$release_workflow" 'git push --force-with-lease origin HEAD:"$release_branch"'
+reject_fixed "$release_workflow" 'git push --force-with-lease origin HEAD:"$release_branch"'
+reject_fixed "$release_workflow" 'git checkout -B "$release_branch" "$expected_base"'
+require_fixed "$release_workflow" "--state merged --label 'autorelease: pending'"
 require_fixed "$release_workflow" 'bash scripts/ci/repair_linked_release_pr.sh --version "$repair_version"'
 require_fixed "$release_workflow" 'bash scripts/ci/verify_release_pr_scope.sh --pr "$release_pr_number"'
 
@@ -75,6 +91,7 @@ require_fixed "$recovery_workflow" 'cd accrue_portal && mix hex.publish --dry-ru
 require_fixed "$recovery_workflow" 'cd accrue_portal && mix hex.publish --yes'
 
 require_fixed "$ROOT_DIR/scripts/ci/README.md" 'repair_linked_release_pr.sh'
+reject_fixed "$ROOT_DIR/scripts/ci/README.md" 'force-sync'
 
 echo "OK: linked release contract aligned for accrue/accrue_admin/accrue_portal"
 

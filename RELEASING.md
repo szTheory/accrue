@@ -74,8 +74,14 @@ title, which parses correctly; the version comes from the PR body, not the title
    — `separate-pull-requests: false` — and `.release-please-manifest.json` for per-package versions).
 3. Review the PR: `accrue/mix.exs`, `accrue_admin/mix.exs`, and `accrue_portal/mix.exs` `@version`
    values match the manifest, all three package-local `CHANGELOG.md` files update, and automation outputs look sane.
-   If the release branch is stale and no longer contains the current `main` tree, reset `release-please--branches--main`
-   back to `main`, rerun Release Please, and review the regenerated PR before any package-specific repair.
+   If the release PR is stale or empty (it no longer carries the release commit, or shows no changed files), close it,
+   delete the remote `release-please--branches--main` branch, and dispatch Release Please: with no open release PR it
+   creates a fresh one from the current `main`. Review the regenerated PR before any package-specific repair.
+   If a merged release PR that tagged nothing is still labelled `autorelease: pending`, release-please will not open a
+   new release PR (the **Release PR wedge check** job turns the workflow red): remove the label before the next release PR merges.
+   Never run `release-please github-release` to "heal" such a PR — it would tag the wrong commit.
+   Automation never rewrites the release branch; alignment commits on it are pushed fast-forward with maintainer
+   credentials, because a push made with `GITHUB_TOKEN` triggers no CI.
    If Release Please leaves `accrue_portal` behind on the release branch, run
    `bash scripts/ci/repair_linked_release_pr.sh --version <target-version>` on the checked-out release branch,
    push the repaired branch, and re-run `bash scripts/ci/verify_release_pr_scope.sh --pr <number> --version <target-version>`.
