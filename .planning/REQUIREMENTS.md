@@ -28,8 +28,8 @@ Milestone v1.67 Integration & CI Green. Lands the never-CI-validated v1.63–v1.
 
 ### Release alignment
 
-- [ ] **RLS-01**: The release-please 1.7.0 PR for `accrue`, `accrue_admin` and `accrue_portal` is aligned on its branch — README version pins, companion notes, and a curated adopter-readable CHANGELOG in place of raw phase-scoped `feat(2xx-yy)` lines — and is green on its exact head.
-- [ ] **RLS-02**: Hex publication happens only after an explicit maintainer yes; if not approved in this milestone, the aligned release PR is left open and green with the decision recorded.
+- [x] **RLS-01**: The release-please 1.7.0 PR for `accrue`, `accrue_admin` and `accrue_portal` is aligned on its branch — README version pins, companion notes, and a curated adopter-readable CHANGELOG in place of raw phase-scoped `feat(2xx-yy)` lines — and is green on its exact head.
+- [x] **RLS-02**: Hex publication happens only after an explicit maintainer yes; if not approved in this milestone, the aligned release PR is left open and green with the decision recorded.
 
 ## Future Requirements
 
@@ -70,8 +70,8 @@ Deferred to a later milestone (tracked, not in this roadmap):
 | LAND-01 | Phase 250 | Complete |
 | LAND-02 | Phase 250 | Complete |
 | LAND-03 | Phase 250 | Complete |
-| RLS-01 | Phase 251 | Pending |
-| RLS-02 | Phase 251 | Pending |
+| RLS-01 | Phase 251 | Complete |
+| RLS-02 | Phase 251 | Complete |
 
 **Coverage:**
 - v1.67 requirements: 12 total
@@ -80,4 +80,4 @@ Deferred to a later milestone (tracked, not in this roadmap):
 
 ---
 *Requirements defined: 2026-10-24*
-*Last updated: 2026-10-25 (Phase 250 close: LAND-02 and LAND-03 Complete after the PR #49 merge commit 3dd5f874 and its post-merge main run passed against run 35374333981; LAND-01 Complete at the pre-merge close ece41e51); previously Phase 249 close (GREEN-01..05 and TRUTH-01..02 Complete after 249-VERIFICATION passed)*
+*Last updated: 2026-10-26 (Phase 251 close: RLS-01 and RLS-02 Complete after 1.7.0 shipped: release PR #55 aligned and exact-head green at 2d3a4c62, merged as M 20a3982c after the recorded maintainer yes, and published to Hex with docs for all three packages); previously Phase 250 close (LAND-01..03 Complete after the PR #49 merge commit 3dd5f874)*
