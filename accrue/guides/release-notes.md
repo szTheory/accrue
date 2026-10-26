@@ -37,6 +37,14 @@ tokens, credentials, provider payloads, or PII.
 
 ## accrue
 
+### 1.7.0
+
+**Admin and Portal refinement, steadier checkout, and safer webhook replay.**
+
+`1.7.0` is mostly about the screens your operators and customers use. `accrue_admin` and `accrue_portal` carry most of the visible change: journeys that keep list and owner context, actions that recheck eligibility before they run, one Local/UTC time convention, and per-action authorization in the Portal. The core `accrue` package adds steadier checkout handling (atomic session claims, stable retries, paid-only return reconciliation, preserved Braintree declines), atomic webhook replay claims, dispatch-time checks on manual invoice items, an `:admin_branding` `theme` option, and self-only Portal policy defaults in the billing context that `mix accrue.install` generates.
+
+Known issue: `accrue_events.inserted_at` follows the database session time zone, so UTC-windowed event queries can be wrong on a database session that is not UTC. Run the session in UTC until the fix, which is planned for the next release.
+
 ### 1.6.0
 
 **Release-safe environment resolution and hardened live Stripe provider contracts.**
@@ -128,6 +136,10 @@ Early **CI and release pipeline** stabilization so public automation and docs pu
 ## accrue_admin
 
 The admin package is the **LiveView dashboard** that mounts into your Phoenix router. It tracks `accrue` closely—install the same version family for both.
+
+### 1.7.0
+
+Matches **accrue 1.7.0** and carries most of its operator-facing change. Billing journeys keep your place and owner scope, actions revalidate before dispatch, lists and search are quieter and more consistent, and timestamps follow one Local/UTC convention with exact-value copy. `accrue_portal` 1.7.0 refines the customer self-service surface the same way: per-action authorization against a pinned billing context, steadier checkout, and scoped hosted invoices. Neither package changes how core decides entitlements or grants.
 
 ### 1.6.0
 

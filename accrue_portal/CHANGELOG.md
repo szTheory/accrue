@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## [1.7.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.6.0...accrue_portal-v1.7.0) (2026-10-26)
+
+### Notes
+
+* Compatibility only: the linked 1.7.0 release asks nothing further of the core `accrue` billing contracts beyond the entries in its own changelog. The core `accrue` package owns billing capability; this package owns only its existing self-service surface, refined as listed below.
+
+### Release highlights
+
+* The billing context is resolved through your host's Portal context adapter (or the signed-in billable when there is none) and is reloaded and rechecked on every action. A signed context pin only locates the account; it never expands what the actor may do.
+* Adding, defaulting and deleting payment methods, cancelling or changing subscriptions, and completing checkout are each authorized against the pinned context. A denied or revoked context blocks safely, and an action the active processor does not support is refused.
+* Checkout is more dependable: Braintree Hosted Fields submit to the server, POST completion claims the checkout before calling the provider, promotion codes are rechecked before that claim, an expired checkout offers a validated way back to billing, return destinations are validated, and decline outcomes are preserved.
+* Hosted invoices open within the billable's scope, and an unavailable invoice read is shown differently from an empty one.
+* Host branding carries through: Hosted Fields colors follow the Portal theme, and status and accent colors are consistent.
+
 ## [1.6.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.5.1...accrue_portal-v1.6.0) (2026-09-18)
 
 ### Notes
