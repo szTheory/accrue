@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## [1.7.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.6.0...accrue_admin-v1.7.0) (2026-10-26)
+
+### Notes
+
+* Compatibility only: the linked 1.7.0 release asks nothing further of the core `accrue` billing contracts beyond the entries in its own changelog. The core `accrue` package owns billing capability; this package owns only its existing UI surface, refined as listed below.
+
+### Release highlights
+
+* Journeys keep their place: customer, subscription, invoice, payment, coupon, promotion code, Connect, webhook, event and Recovery pages preserve the list, filters and owner scope you came from, and return links name and validate their destination.
+* Actions recheck before they run: subscription, invoice, refund, payment-method and webhook-replay reviews revalidate eligibility and ownership after step-up. An outcome the provider has not confirmed is shown as not confirmed, and Accrue does not retry it.
+* Lists and search read faster: labeled filters with removable chips, and a bounded global search whose pointer and keyboard selection always agree.
+* Infinite lists keep every loaded row, report how many rows are loaded (of the total, when known) and say when the list ends. Record IDs are quieter and copy on click, and customers without a default payment method are labeled "Missing default method".
+* Quieter header controls and billing activity, consistent page gutters and breadcrumbs, and clearer Home activity, event details and timelines.
+* One time convention: the Local or UTC preference is shared across pages, and clicking a timestamp copies its exact UTC value with a confirmation that names what was copied. When the clipboard is unavailable, the exact value is shown for manual selection.
+* Events and webhooks are easier to investigate: readable event labels, exact scoped links to event detail, clearer replay acceptance and read-recovery states, and raw payloads that wrap on narrow screens.
+* Accessibility and small screens: 320px reflow fixes for the top bar at 200% text and for the webhook detail header, the shared keyboard focus ring on quiet links, and larger touch targets for table links and review controls on touch screens.
+* The Admin theme can be locked from host config with the core `:admin_branding` `theme` option, and the chosen theme stays applied across LiveView navigation.
+
 ## [1.6.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.5.1...accrue_admin-v1.6.0) (2026-09-18)
 
 ### Notes
