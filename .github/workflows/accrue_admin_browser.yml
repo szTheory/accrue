@@ -16,10 +16,27 @@ on:
       - ".github/workflows/accrue_admin_browser.yml"
   workflow_dispatch: {}
 
+# Quick task 261025-vdn (item 2): pull_request runs for the same ref cancel
+# each other; every other event (push to main, schedule, workflow_dispatch)
+# gets a run_id-unique group and is never cancelled. The run_id half is
+# load-bearing: with one shared main group, a newer PENDING run would REPLACE
+# an older pending push/schedule/dispatch run even with cancel-in-progress
+# false. scripts/ci/verify_ci_efficiency_contract.mjs pins this exact shape.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Quick task 261025-vdn (item 3): compile deps in 4 partitions (ubuntu-24.04
+# runners have 4 vCPU). Workflow-wide; the efficiency contract fails on a
+# missing value or any job-level override.
+env:
+  MIX_OS_DEPS_COMPILE_PARTITION_COUNT: 4
+
 jobs:
   browser-uat:
     name: Browser UAT
     runs-on: ubuntu-24.04
+    timeout-minutes: 35
 
     services:
       postgres:
@@ -113,6 +130,7 @@ jobs:
     name: Mint visual baselines
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
+    timeout-minutes: 35
 
     services:
       postgres:

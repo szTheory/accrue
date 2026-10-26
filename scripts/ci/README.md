@@ -578,3 +578,9 @@ the string being scrubbed, in a file that ships. So:
 
 Adding a placeholder to the allowlist is a one-line edit to `ALLOWED_USERS`;
 prefer that over weakening the pattern.
+
+## CI efficiency contract (quick task 261025-vdn)
+
+| Script | What it answers | Command |
+| --- | --- | --- |
+| `verify_ci_efficiency_contract.mjs` | Whether `ci.yml` and `accrue_admin_browser.yml` keep the efficiency shape without weakening a gate: workflow concurrency cancels only `pull_request` runs and gives every other event a `run_id`-unique group, `MIX_OS_DEPS_COMPILE_PARTITION_COUNT: 4` is set workflow-wide and never overridden, and every job has `timeout-minutes` in [10, 60] | `node --test --test-reporter=tap scripts/ci/verify_ci_efficiency_contract.mjs && node scripts/ci/verify_ci_efficiency_contract.mjs --fixtures && node scripts/ci/verify_ci_efficiency_contract.mjs --repo .` |

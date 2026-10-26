@@ -50,11 +50,28 @@ permissions:
   contents: read
   pull-requests: read
 
+# Quick task 261025-vdn (item 2): pull_request runs for the same ref cancel
+# each other; every other event (push to main, schedule, workflow_dispatch)
+# gets a run_id-unique group and is never cancelled. The run_id half is
+# load-bearing: with one shared main group, a newer PENDING run would REPLACE
+# an older pending push/schedule/dispatch run even with cancel-in-progress
+# false. scripts/ci/verify_ci_efficiency_contract.mjs pins this exact shape.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Quick task 261025-vdn (item 3): compile deps in 4 partitions (ubuntu-24.04
+# runners have 4 vCPU). Workflow-wide; the efficiency contract fails on a
+# missing value or any job-level override.
+env:
+  MIX_OS_DEPS_COMPILE_PARTITION_COUNT: 4
+
 jobs:
   provider-proof-trigger:
     name: Stripe provider-proof trigger classifier
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     outputs:
       should_run: ${{ steps.classify.outputs.should_run }}
       trigger_class: ${{ steps.classify.outputs.trigger_class }}
@@ -80,6 +97,7 @@ jobs:
     # and verify_adoption_proof_matrix.sh all run here as merge-blocking checks.
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
 
     steps:
       # Full history, not the default depth-1: the D-16 step below resolves a
@@ -161,6 +179,16 @@ jobs:
           node --test --test-reporter=tap scripts/ci/verify_pipefail_grep_idiom.mjs &&
           node scripts/ci/verify_pipefail_grep_idiom.mjs --fixtures --require-idiom-ban &&
           node scripts/ci/verify_pipefail_grep_idiom.mjs --repo . --require-idiom-ban
+
+      # Quick task 261025-vdn: the CI efficiency changes (concurrency gated to
+      # pull_request with run_id-unique non-PR groups, the deps compile
+      # partition count, per-job timeouts) are shape-pinned so a later edit
+      # cannot turn an efficiency setting into a weakened gate.
+      - name: CI efficiency shape contract
+        run: >-
+          node --test --test-reporter=tap scripts/ci/verify_ci_efficiency_contract.mjs &&
+          node scripts/ci/verify_ci_efficiency_contract.mjs --fixtures &&
+          node scripts/ci/verify_ci_efficiency_contract.mjs --repo .
 
       # Quick task 260917-l7v (SL-G): 232-UAT.md's started:/updated: used to
       # be derived from 232-VERIFICATION.md's verified: field, while
@@ -482,6 +510,7 @@ jobs:
     name: iOS offline client package compatibility
     if: github.event_name != 'schedule'
     runs-on: macos-15
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v6
@@ -493,6 +522,7 @@ jobs:
     name: Release manifest SSOT (REL-02)
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v6
@@ -539,6 +569,7 @@ jobs:
     name: Release gate (${{ matrix.compatibility }}; elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})${{ matrix.support == 'advisory' && ' [advisory]' || '' }}
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
 
     services:
       postgres:
@@ -758,6 +789,7 @@ jobs:
     name: Phase 18 Stripe Tax gate
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
 
     services:
       postgres:
@@ -811,6 +843,7 @@ jobs:
     if: github.event_name != 'schedule'
     needs: [release-gate]
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v6
@@ -842,6 +875,7 @@ jobs:
     name: Admin group contracts (Phase 190)
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
 
     services:
       postgres:
@@ -971,6 +1005,7 @@ jobs:
     name: Admin hardening guardrails (Phase 192)
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -1078,6 +1113,7 @@ jobs:
     name: Admin Phase 200 deterministic guardrails
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
 
     services:
       postgres:
@@ -1193,6 +1229,7 @@ jobs:
     if: github.event_name != 'schedule'
     needs: [admin-hardening-guardrails, admin-phase200-guardrails]
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v6
@@ -1257,6 +1294,7 @@ jobs:
     if: github.event_name != 'schedule'
     needs: [admin-hardening-guardrails, admin-phase200-guardrails]
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     # NON-BLOCKING (disposition: parked) while the v1.56 Admin UI Ratchet milestone
     # remains PARKED (superseded by v1.57 on 2026-07-19). This lane is failing on
     # the merits, not un-run or advisory-by-design: ledger.baseline.json is
@@ -1352,6 +1390,7 @@ jobs:
     if: github.event_name != 'schedule'
     needs: [docs-contracts-shift-left]
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
 
     services:
       postgres:
@@ -1506,6 +1545,7 @@ jobs:
     if: github.event_name != 'schedule'
     needs: [host-integration]
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -1725,6 +1765,7 @@ jobs:
     if: github.event_name != 'schedule'
     needs: [docs-contracts-shift-left]
     runs-on: ubuntu-24.04
+    timeout-minutes: 12
     env:
       ACCRUE_HOST_DOCKER_PORT: 4000
       ACCRUE_HOST_SKIP_SEEDS: "1"
@@ -1776,6 +1817,7 @@ jobs:
         host-docker-smoke,
       ]
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v6
@@ -1831,6 +1873,7 @@ jobs:
     name: Stripe test-mode parity (mandatory periodic)
     needs: provider-proof-trigger
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     if: ${{ needs.provider-proof-trigger.outputs.should_run == 'true' && (github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_live_stripe)) }}
     concurrency:
       group: live-stripe-${{ github.sha }}
@@ -1934,6 +1977,7 @@ jobs:
     needs: [provider-proof-trigger, live-stripe]
     if: ${{ always() && needs.provider-proof-trigger.result == 'success' && needs.provider-proof-trigger.outputs.should_run == 'true' && (github.event_name != 'workflow_dispatch' || inputs.run_live_stripe) }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       actions: read
       contents: read
