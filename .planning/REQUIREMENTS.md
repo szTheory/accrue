@@ -11,15 +11,15 @@ The owner approved the [reviewed subscription-first proposal](research/ui-qualit
 ### Production-backed stories and a real job
 
 - [ ] **SBK-01**: Maintainer can locate the subscription job's real production callers and useful component → group → area → section → page compositions in one current coverage map, with reachable, uncovered and not-applicable states distinguished and remaining UI jobs visible as gaps.
-- [ ] **SBK-02**: Reviewer can open each retained subscription situation from a stable story/variation URL with its actor, job, input source, production renderer and static-versus-mounted proof lane identified; generated discovery reconciles with actual rendered variations, and metadata-only markers cannot satisfy rendering coverage.
-- [ ] **SBK-03**: Reviewer can inspect complete active, scheduled-cancellation and incomplete-evidence subscription areas rendered by the same production-owned summary/facts/action components used by the application, in light/dark and narrow/desktop contexts, without copied markup or story-local formatting, copy, eligibility or scoped-link rules.
+- [x] **SBK-02**: Reviewer can open each retained subscription situation from a stable story/variation URL with its actor, job, input source, production renderer and static-versus-mounted proof lane identified; generated discovery reconciles with actual rendered variations, and metadata-only markers cannot satisfy rendering coverage.
+- [x] **SBK-03**: Reviewer can inspect complete active, scheduled-cancellation and incomplete-evidence subscription areas rendered by the same production-owned summary/facts/action components used by the application, in light/dark and narrow/desktop contexts, without copied markup or story-local formatting, copy, eligibility or scoped-link rules.
 - [ ] **SBK-04**: Reviewer can inspect the actual subscription collection toolbar/result/table/pagination composition for new-host empty, filtered-empty, one-row, multiple-row and page-boundary situations, plus source-supported loading/error states; existing DataTable lifecycle and event targeting remain intact.
 - [ ] **SBK-05**: Reviewer can inspect a production-shared whole subscription detail screen composed from its real areas, including supported review/action presentation and legitimate incomplete evidence, without a story-specific parallel page or a universal page-schema refactor.
 - [ ] **SBK-06**: An authorized operator can follow the real subscription list → detail → supported action review/result → context-preserving return journey, with mounted automated proof of current scope, fresh authority, exact target, applicable step-up, dismissal without dispatch and truthful outcome; stories do not claim persistence or provider completion.
 
 ### Realistic shared scenario facts
 
-- [ ] **SCEN-01**: Maintainer can select deterministic launch/new-account and growing-team situations in the existing Cadence world from one DB-free fact source, with explicit actor, billed entity, supported provider, lifecycle, fixed clock and stable identities, consumed through narrow story/test/seed adapters rather than a cross-package fixture framework.
+- [x] **SCEN-01**: Maintainer can select deterministic launch/new-account and growing-team situations in the existing Cadence world from one DB-free fact source, with explicit actor, billed entity, supported provider, lifecycle, fixed clock and stable identities, consumed through narrow story/test/seed adapters rather than a cross-package fixture framework.
 - [ ] **SCEN-02**: Maintainer can reject impossible realistic fixtures before rendering using real domain helpers and cross-record invariants for enums, relationships, provider compatibility, money and chronology; deliberately invalid enum, orphan, provider, amount and timestamp controls demonstrate rejection without duplicating billing rules.
 - [ ] **SCEN-03**: Maintainer can persist representative shared scenarios through a narrow disposable Repo adapter and prove actual database constraints and resulting record relationships match the source facts; DB-free validation alone is never reported as persisted conformance.
 - [ ] **SCEN-04**: Reviewer can use plausible ordinary data and separately labelled held-out stress data without cross-lane contamination, real personal data or secrets; existing guarded writes and exact cleanup authority remain proved, including refusal to remove unrelated children.
@@ -79,12 +79,12 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | SBK-01 | Phase 252 | Pending |
-| SBK-02 | Phase 252 | Pending |
-| SBK-03 | Phase 252 | Pending |
+| SBK-02 | Phase 252 | Complete |
+| SBK-03 | Phase 252 | Complete |
 | SBK-04 | Phase 253 | Pending |
 | SBK-05 | Phase 253 | Pending |
 | SBK-06 | Phase 253 | Pending |
-| SCEN-01 | Phase 252 | Pending |
+| SCEN-01 | Phase 252 | Complete |
 | SCEN-02 | Phase 252 | Pending |
 | SCEN-03 | Phase 252 | Pending |
 | SCEN-04 | Phase 252 | Pending |

@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 252
 current_phase_name: Production-backed Subscription Stories
 status: executing
-stopped_at: Phase 252 planned and independently checked; ready to execute 8 plans in 5 waves
-last_updated: "2026-10-26T22:46:52.616Z"
+stopped_at: Completed 252-01-PLAN.md
+last_updated: "2026-10-26T23:05:37.396Z"
 last_activity: 2026-10-26
-last_activity_desc: Phase 252 planning passed; 8 plans, 17 automated tasks, all 10 phase requirements covered
-state_head: c56521972a67d958da335eb5d9bb3c81961e5251
+last_activity_desc: Completed Phase 252 plan 01; Phase 252 execution continues
+state_head: ade424971fe57a4491e72e1a09b1bb742fa6ce73
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 8
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -26,16 +26,16 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.68 UI Storybook Stress Testing — Phase 252 Production-backed Subscription Stories is ready to execute: 8 independently checked plans, 17 automated tasks, 5 waves. Approved Phases 252–254 map all 22 pending requirements; no implementation has started.
-**Progress:** [░░░░░░░░░░] 0% — 0/3 phases and 0/8 planned execution plans complete; Phase 253/254 plan counts TBD.
+**Current focus:** Phase 252 — Production-backed Subscription Stories
+**Progress:** [░░░░░░░░░░] 0% — 0/3 phases and 1/8 planned execution plans complete; Phase 253/254 plan counts TBD.
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
-Phase: 252 (Production-backed Subscription Stories) — READY TO EXECUTE
-Plan: 0 of 8 executed; next 252-01-PLAN.md
+Phase: 252 (Production-backed Subscription Stories) — EXECUTING
+Plan: 2 of 8
 Status: Ready to execute
-Last activity: 2026-10-26 — Phase 252 planning passed; 8 plans, 17 automated tasks, all 10 phase requirements covered
+Last activity: 2026-10-26 — Completed Phase 252 plan 01
 
 Progress: [░░░░░░░░░░] 0%
 Current milestone planning blockers: None known. Historical concerns and deferred correctness work below remain preserved with their original scope.
@@ -221,6 +221,7 @@ Current milestone planning blockers: None known. Historical concerns and deferre
 | Phase 251 P04 | ~70min | 3 tasks | 4 files |
 | Phase 251 P05 | ~65min | 3 tasks | 11 files |
 | Phase 251 P06 | 50min | 3 tasks | 5 files |
+| Phase 252 P01 | 15min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -508,6 +509,8 @@ Current milestone planning blockers: None known. Historical concerns and deferre
 - [Phase 251]: 1.7.0 merged via fail-closed gate (merge commit 20a3982c) and published to Hex for all three packages; classifier-skipped live Stripe jobs at M recorded, not claimed
 - [Phase 251]: v1.68 follow-up: 250-ci-head-status push mode should read the provider-proof classifier should_run=false
 - [Phase 251]: 251-07: RLS-01/02 Complete only at the close after the 251-06 publication evidence; VERIFICATION 3/3 re-minted over seven SUMMARYs; close bookkeeping squash-merged to main from docs/251-close; v1.67 milestone completion is a separate step (tags local, archive-invariant sweep immediately after)
+- [Phase 252]: The static Storybook variation delegates to the production-owned subscription area and makes no claims about mounted authorization, action dispatch, provider success, or persistence.
+- [Phase 252]: Contextual summary actions use Copy.action_hidden_context as the full aria-label and hide its duplicate span from the accessibility tree.
 
 ### Pending Todos
 
@@ -606,8 +609,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-26
-Stopped at: Phase 252 planned and independently checked; ready to execute 8 plans in 5 waves
+Last session: 2026-10-26T23:05:37.371Z
+Stopped at: Completed 252-01-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
