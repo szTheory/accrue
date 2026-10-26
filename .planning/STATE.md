@@ -2,15 +2,18 @@
 gsd_state_version: "1.0"
 milestone: v1.68
 milestone_name: UI Storybook Stress Testing
-status: planning
 current_phase: 252
 current_phase_name: Production-backed Subscription Stories
-last_updated: "2026-10-26T20:25:31.000Z"
+status: executing
+stopped_at: Phase 252 planned and independently checked; ready to execute 8 plans in 5 waves
+last_updated: "2026-10-26T22:46:52.616Z"
 last_activity: 2026-10-26
+last_activity_desc: Phase 252 planning passed; 8 plans, 17 automated tasks, all 10 phase requirements covered
+state_head: c56521972a67d958da335eb5d9bb3c81961e5251
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
+  total_plans: 8
   completed_plans: 0
   percent: 0
 ---
@@ -23,16 +26,16 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** v1.68 UI Storybook Stress Testing — Phase 252 Production-backed Subscription Stories is ready for planning. Approved Phases 252–254 map all 22 pending requirements; no implementation has started.
-**Progress:** [░░░░░░░░░░] 0% — 0/3 phases and 0 plans complete; plan counts TBD.
+**Current focus:** v1.68 UI Storybook Stress Testing — Phase 252 Production-backed Subscription Stories is ready to execute: 8 independently checked plans, 17 automated tasks, 5 waves. Approved Phases 252–254 map all 22 pending requirements; no implementation has started.
+**Progress:** [░░░░░░░░░░] 0% — 0/3 phases and 0/8 planned execution plans complete; Phase 253/254 plan counts TBD.
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
-Phase: 252 (Production-backed Subscription Stories; 1 of 3 in v1.68)
-Plan: Not started (TBD in current phase)
-Status: Ready to plan
-Last activity: 2026-10-26 — Approved v1.68 roadmap created; all 22 requirements mapped to Phases 252–254
+Phase: 252 (Production-backed Subscription Stories) — READY TO EXECUTE
+Plan: 0 of 8 executed; next 252-01-PLAN.md
+Status: Ready to execute
+Last activity: 2026-10-26 — Phase 252 planning passed; 8 plans, 17 automated tasks, all 10 phase requirements covered
 
 Progress: [░░░░░░░░░░] 0%
 Current milestone planning blockers: None known. Historical concerns and deferred correctness work below remain preserved with their original scope.
@@ -604,7 +607,7 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 ## Session Continuity
 
 Last session: 2026-10-26
-Stopped at: v1.68 roadmap and requirement traceability created; Phase 252 ready for planning
+Stopped at: Phase 252 planned and independently checked; ready to execute 8 plans in 5 waves
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -734,6 +737,6 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Plan Phase 252 Production-backed Subscription Stories with `$gsd-plan-phase 252`; use `$gsd-ui-phase 252` for its UI contract during planning.
+- Execute Phase 252 Production-backed Subscription Stories with `$gsd-execute-phase 252`; 8 plans / 17 automated tasks / 5 waves. Research and the approved UI contract are in the phase directory; independent plan checking and all 10 requirement coverage checks passed.
 - Carry Phase 252's actual narrow/light/dark render checks, reset-isolation negative control, production package boundaries and required CI path admission into acceptance. The [approved research](research/ui-quality-engine/RECOMMENDATIONS.md) is authoritative; broader horizons remain outside v1.68.
 - Measure first-slice cold/warm costs before freezing budgets. Keep the independent HIGH event-session-timezone correctness candidate visible; fixed story clocks do not resolve it.

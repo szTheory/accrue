@@ -35,7 +35,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 ## Current Position
 
-v1.68 UI Storybook Stress Testing is active: 22 pending requirements across Phases 252–254. Phase 252 is ready for planning; no implementation has started. The owner approved the [reviewed subscription-first proposal](research/ui-quality-engine/MILESTONE-PROPOSAL.md) with “what do u rec? do that”; this explicit strategy decision satisfies the Planning Doctrine without reopening approval of the same scope.
+v1.68 UI Storybook Stress Testing is active: 22 pending requirements across Phases 252–254. Phase 252 is planned and ready to execute: 8 independently checked plans, 17 automated tasks, 5 waves; no implementation has started. The owner approved the [reviewed subscription-first proposal](research/ui-quality-engine/MILESTONE-PROPOSAL.md) with “what do u rec? do that”; this explicit strategy decision satisfies the Planning Doctrine without reopening approval of the same scope.
 
 v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements). The v1.63–v1.66 line landed on `main` through PR #49, and 1.7.0 of `accrue`, `accrue_admin` and `accrue_portal` is published to Hex with docs. Release policy (maintainer, 2026-10-26): release early and often at any natural, release-worthy stopping point.
 
@@ -67,6 +67,7 @@ v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements).
 ## Phase Details
 
 ### Phase 252: Production-backed Subscription Stories
+
 **Goal**: Reviewers can inspect current production subscription areas through valid, attributable stories in an isolated lab, with production boundaries and CI admission already proved.
 **Depends on**: Phase 251 (v1.67 shipped); approved UI quality research and current pending requirements
 **Requirements**: SBK-01, SBK-02, SBK-03, SCEN-01, SCEN-02, SCEN-03, SCEN-04, LAB-01, LAB-02, CIQ-01
@@ -76,10 +77,31 @@ v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements).
   3. A maintainer can reuse deterministic DB-free launch/new-account and growing-team facts with explicit actors, billed entities, supported providers, lifecycle, fixed clock and stable IDs through narrow adapters; invalid enum/orphan/provider/amount/timestamp controls fail real domain invariants, and a disposable Repo adapter separately proves actual constraints and persisted relationships. (SCEN-01, SCEN-02, SCEN-03)
   4. A reviewer can launch the documented lab on an explicit disposable database/namespace and distinct loopback port with known process identity, see unexpected-server reuse refused, and observe a negative control proving a normal test reset cannot alter review data. Ordinary and labelled held-out data remain separate and privacy-safe, guarded cleanup refuses unrelated children, and production compile/package/route checks exclude fixture payloads and dev tooling while preserving the kitchen and canonical mounts; DB-free rendering is distinguished from DB-backed startup. (SCEN-04, LAB-01, LAB-02)
   5. A maintainer can observe changes confined to each consumed story, shared scenario, component, registry, generated manifest, token or runner root invoke its named required CI owner, through representative positive path/classifier controls and an unrelated-path negative control; in-job selection alone cannot satisfy workflow admission. (CIQ-01)
-**Plans**: TBD
+
+**Plans**: 8 plans
 **UI hint**: yes
 
+Plans:
+**Wave 1**
+- [ ] 252-01-PLAN.md — One active scenario through the production-owned summary/facts/action area
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 252-02-PLAN.md — Valid launch/team facts and complete retained lifecycle situations
+- [ ] 252-03-PLAN.md — Disposable lab ownership and real reset-isolation proof
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 252-04-PLAN.md — Persisted scenario constraints, guarded seeds and cleanup preservation
+- [ ] 252-05-PLAN.md — Compiled variation discovery and current caller/composition gap map
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 252-06-PLAN.md — Twelve direct width/theme render cases and twenty UI predicates
+- [ ] 252-07-PLAN.md — Production compile, package and route boundaries
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 252-08-PLAN.md — Required CI admission and generated automated acceptance evidence
+
 ### Phase 253: Real Groups and a Whole Subscription Job
+
 **Goal**: Operators can understand and complete the real subscription job through production-shared collection and whole-page compositions, preserving responsive access, authority and navigation context.
 **Depends on**: Phase 252
 **Requirements**: SBK-04, SBK-05, SBK-06, UXQ-01, UXQ-03
@@ -89,10 +111,12 @@ v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements).
   3. An authorized operator can follow list → detail → supported action review/result → context-preserving return, with mounted automated evidence for current scope, fresh authority, exact target, applicable step-up, dismissal without dispatch and truthful outcomes; static stories make no persistence or provider-completion claim. (SBK-06)
   4. An operator can read essential identities, exact amounts, state and actions and use the selected compositions at 320 CSS px, representative wider/container widths and relevant breakpoint edges in both themes, without page-level horizontal overflow or hidden essential content. (UXQ-01)
   5. An operator can understand consistent labels, destinations, action consequences and recovery messages through existing Copy/voice/domain owners while engineering investigation retains exact IDs and evidence and locked legal/replay meaning is preserved. (UXQ-03)
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 254: Recurring Quality, Reviewed Fixes and Curation
+
 **Goal**: Maintainers can sustain useful subscription quality coverage at a measured cost, verify bounded design corrections and choose the next existing UI job from explicit gaps.
 **Depends on**: Phase 253
 **Requirements**: CIQ-02, CIQ-03, CIQ-04, UXQ-02, UXQ-04, CURATE-01, CURATE-02
@@ -102,16 +126,17 @@ v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements).
   3. An operator can use selected compositions with keyboard/focus, meaningful accessible names, applicable target-size/contrast rules, supported text enlargement/reflow and normal/reduced motion; existing browser/axe/component checks prove outcomes and unresolved axe observations or standard exceptions receive explicit narrow dispositions. A maintainer can inspect one source-bound assessment/correction/confirmation record across mobile/desktop and both themes for typography, color, hierarchy, redundancy, affordances, microcopy and journey coherence, with confirmed defects fixed at their lowest owning tier and mechanically verifiable outcomes tested. (UXQ-02, UXQ-04)
   4. A maintainer can reproduce cold-start, warm-preview/focused-check and incremental CI measurements, including scenario counts, and use a frozen affordable selection/budget before widening coverage; first-slice measurements inform the freeze and deviations are explicitly resolved without weakening existing gates. Initial targets remain provisional: under 10s warm preview where feasible, under 60s focused checks, at most 3min additional warm browser work and 5min incremental CI critical path. (CIQ-04)
   5. A maintainer can inspect retirement/merge records naming reachability, reason and surviving owner/replacement for stale, impossible or duplicate stories while retaining meaningful legacy/API/negative regressions and kitchen proof, then choose the next existing UI job from a refreshed actor/job/composition gap map and distinct adopter briefs showing remaining Admin/Portal horizons, uncovered states, review triggers and maintenance cost. (CURATE-01, CURATE-02)
+
 **Plans**: TBD
 **UI hint**: yes
 
 ## Progress
 
-**Execution order:** 252 → 253 → 254. All 22 requirements are mapped exactly once and remain Pending; plan counts will be determined during phase planning.
+**Execution order:** 252 → 253 → 254. All 22 requirements are mapped exactly once and remain Pending. Phase 252 has 8 plans; Phase 253/254 plan counts will be determined during their planning.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 252. Production-backed Subscription Stories | 0/TBD | Not started | - |
+| 252. Production-backed Subscription Stories | 0/8 | Ready to execute | - |
 | 253. Real Groups and a Whole Subscription Job | 0/TBD | Not started | - |
 | 254. Recurring Quality, Reviewed Fixes and Curation | 0/TBD | Not started | - |
 
@@ -123,4 +148,4 @@ The [rolling roadmap](research/ui-quality-engine/MILESTONE-PROPOSAL.md#rolling-r
 
 ## Next
 
-Plan Phase 252 with `$gsd-plan-phase 252`, using the current requirements and approved UI quality research. Phase 252 has a UI surface; establish its UI contract with `$gsd-ui-phase 252` during planning. No implementation plan or completed requirement is claimed by this roadmap.
+Execute Phase 252 with `$gsd-execute-phase 252`: 8 plans in 5 waves, using the refreshed research and approved UI contract. Independent plan checking passed and all 10 phase requirements are assigned. Implementation and automated acceptance evidence remain pending; no requirement is marked complete by planning.

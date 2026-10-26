@@ -9,7 +9,7 @@ created: "2026-10-26"
 
 # Phase 252 — Validation Strategy
 
-> Planning contract only. No implementation tests have run. Planner must replace provisional task rows with final plan/task IDs and commands.
+> Final task map for eight executable plans / five waves. No implementation tests have run; all behavior evidence remains pending independent checking and execution.
 
 ## Test Infrastructure
 
@@ -19,7 +19,7 @@ created: "2026-10-26"
 | Config files | accrue_admin/mix.exs; accrue_admin/config/test.exs; accrue_admin/playwright.config.js |
 | Quick existing command | `cd accrue_admin && mix test test/accrue_admin/dev/storybook_coverage_test.exs` |
 | Full existing owner command | `cd accrue_admin && npm run phase200:guardrails` |
-| Full phase command | Planner defines a focused phase252 command using existing frameworks and isolated disposable infrastructure |
+| Full phase command | `npm --prefix accrue_admin run phase252:check` — NEW target created by 252-08-02; guarded infrastructure created in 252-03 |
 | Runtime | Measure cold bootstrap separately from warm checks; budgets remain provisional until measured |
 
 ## Sampling Rate
@@ -33,13 +33,23 @@ created: "2026-10-26"
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| Pending final plan IDs | Pending | Pending | SBK-01, SBK-02 | Pending | Attribution and routes agree with real rendered variations | manifest + browser | Planner assigns concrete generation/reconciliation/direct URL commands | New coverage required | pending |
-| Pending final plan IDs | Pending | Pending | SBK-03 | Pending | Production scope/eligibility retained | component + browser | Planner assigns 320px/desktop x light/dark commands for active/cancel/incomplete | New area proof required | pending |
-| Pending final plan IDs | Pending | Pending | SCEN-01, SCEN-02 | Pending | Invalid enum/orphan/provider/amount/time rejected | pure ExUnit | Planner assigns domain-valid facts and five invalid-control tests | New tests required | pending |
-| Pending final plan IDs | Pending | Pending | SCEN-03 | Pending | Only disposable Repo writes; actual constraints/relationships proved | Repo integration | Planner assigns uniquely namespaced database command and real constraint controls | New adapter proof required | pending |
-| Pending final plan IDs | Pending | Pending | SCEN-04, LAB-01 | Pending | Cleanup refuses unrelated child; test reset cannot alter review DB | launcher + DB integration | Planner assigns negative reset/cleanup/server-reuse controls | New isolation proof required | pending |
-| Pending final plan IDs | Pending | Pending | LAB-02 | Pending | Fixture/tooling absent from prod packages/routes/compile | package + compile + route | Planner assigns isolated production build/package inspection and mount tests | Existing analogs; new assertions required | pending |
-| Pending final plan IDs | Pending | Pending | CIQ-01 | Pending | Every consumed root invokes named required owner | Node + workflow contract | Planner assigns positive path/admission and unrelated selection negative controls | New phase252 contract required | pending |
+| 252-01-01 | 252-01 | 1 | SBK-02, SBK-03, SCEN-01 | T-252-01, T-252-02 | Actual active declared story data reaches the same production summary/facts/actions function. | DB-free ExUnit | `cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_story_slice_test.exs` | New tests; existing owners modified | pending |
+| 252-01-02 | 252-01 | 1 | SBK-02, SBK-03, SCEN-01 | T-252-01, T-252-02 | Exact UI-SPEC names appear once for both Change actions. | DB-free ExUnit | `cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/components/subscription_area_test.exs` | New tests; existing owners modified | pending |
+| 252-02-01 | 252-02 | 2 | SCEN-01, SCEN-02, SBK-03 | T-252-03, T-252-04 | Both adopter situations use one factual source and real domain validators. | DB-free ExUnit | `cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_scenarios_test.exs` | New tests; existing owners modified | pending |
+| 252-02-02 | 252-02 | 2 | SCEN-01, SCEN-02, SBK-03 | T-252-03, T-252-04 | Three canonical variation IDs exist and render through the shared owner. | DB-free ExUnit | `cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/components/subscription_area_test.exs && MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_story_slice_test.exs` | New tests; existing owners modified | pending |
+| 252-03-01 | 252-03 | 2 | LAB-01, SCEN-04 | T-252-05, T-252-06, T-252-07 | CLI exists before later plans invoke it. | Node + DB/process integration | `node --test scripts/dev/phase252_lab.test.mjs` | New tests; existing owners modified | pending |
+| 252-03-02 | 252-03 | 2 | LAB-01, SCEN-04 | T-252-05, T-252-06, T-252-07 | Reset isolation is measured with real database writes and reloads, not configuration text. | Node + DB/process integration | `node --test scripts/dev/phase252_lab.test.mjs scripts/dev/phase252_isolation.test.mjs` | New tests; existing owners modified | pending |
+| 252-04-01 | 252-04 | 3 | SCEN-03, SCEN-04, SCEN-01 | T-252-08, T-252-09, T-252-10 | Both launch/team persisted graphs match the one source. | Repo/seed integration | `node scripts/dev/phase252_lab.mjs exec --lane admin-test -- mix test test/accrue_admin/dev/subscription_scenario_repo_test.exs` | New tests; new targets | pending |
+| 252-04-02 | 252-04 | 3 | SCEN-03, SCEN-04, SCEN-01 | T-252-08, T-252-09, T-252-10 | Story/test/seed adapters share semantic facts while database writing stays local. | Repo/seed integration | `node scripts/dev/phase252_lab.mjs exec --lane host-heldout -- mix test test/accrue_host/phase252_scenario_cleanup_test.exs && node --test scripts/ci/phase248_heldout_isolation.test.mjs` | New tests; existing owners modified | pending |
+| 252-05-01 | 252-05 | 3 | SBK-01, SBK-02 | T-252-11, T-252-12 | Backend declarations are the single discovery owner. | DB-free ExUnit | `cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_manifest_test.exs` | New tests; new targets | pending |
+| 252-05-02 | 252-05 | 3 | SBK-01, SBK-02 | T-252-11, T-252-12 | A reviewer can follow the full production composition chain and see uncovered/N/A states. | DB-free ExUnit | `cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_manifest_test.exs` | New tests; existing owners modified | pending |
+| 252-06-01 | 252-06 | 4 | SBK-02, SBK-03, SCEN-04 | T-252-13, T-252-14 | Twelve separately identified canonical cases prove both themes and exact widths. | Playwright + regression | `node scripts/dev/phase252_lab.mjs browser --spec e2e/subscription-stories-phase252.spec.js` | New tests; existing owners modified | pending |
+| 252-06-02 | 252-06 | 4 | SBK-02, SBK-03, SCEN-04 | T-252-13, T-252-14 | All twenty approved UI predicates have explicit test/evidence references. | Playwright + regression | `node scripts/dev/phase252_lab.mjs browser --spec e2e/subscription-stories-phase252.spec.js && node scripts/dev/phase252_lab.mjs exec --lane admin-test -- mix test test/accrue_admin/live/subscription_live_test.exs` | New tests; existing owners modified | pending |
+| 252-07-01 | 252-07 | 4 | LAB-02 | T-252-15, T-252-16 | Dev-positive/prod-negative assertions use real route tables. | route/compile/package | `node scripts/dev/phase252_lab.mjs exec --lane admin-test -- mix test test/accrue_admin/dev/storybook_asset_test.exs test/accrue_admin/dev/subscription_production_boundary_test.exs test/accrue_admin/dev/component_registry_test.exs test/accrue_admin/dev/component_group_registry_test.exs` | New tests; existing owners modified | pending |
+| 252-07-02 | 252-07 | 4 | LAB-02 | T-252-15, T-252-16 | Actual fresh prod artifacts compile separately from test outputs. | route/compile/package | `node --test scripts/ci/verify_phase252_production_boundary.test.mjs && node scripts/ci/verify_phase252_production_boundary.mjs` | New tests; new targets | pending |
+| 252-08-01 | 252-08 | 5 | CIQ-01, SBK-01, SBK-02, SBK-03, SCEN-01, SCEN-02, SCEN-03, SCEN-04, LAB-01, LAB-02 | T-252-17, T-252-18 | All consumed categories have positive single-path controls. | Node/CI + integration | `node --test scripts/ci/verify_phase252_ci_contract.test.mjs` | New tests; new targets | pending |
+| 252-08-02 | 252-08 | 5 | CIQ-01, SBK-01, SBK-02, SBK-03, SCEN-01, SCEN-02, SCEN-03, SCEN-04, LAB-01, LAB-02 | T-252-17, T-252-18 | The exact complete phase command is executed by the existing required owner. | Node/CI + integration | `node --test scripts/ci/verify_phase252_ci_contract.test.mjs && bash scripts/ci/verify_phase200_guardrail_contract.sh && npm --prefix accrue_admin run phase252:check` | New tests; existing owners modified | pending |
+| 252-08-03 | 252-08 | 5 | CIQ-01, SBK-01, SBK-02, SBK-03, SCEN-01, SCEN-02, SCEN-03, SCEN-04, LAB-01, LAB-02 | T-252-17, T-252-18 | Generated automated UAT covers actual assertion evidence for every acceptance item. | Node/CI + integration | `node --test scripts/ci/generate_phase252_acceptance.test.mjs scripts/ci/verify_phase252_ci_contract.test.mjs && npm --prefix accrue_admin run phase252:check` | New tests; existing owners modified | pending |
 
 ## Wave 0 Requirements
 
@@ -55,12 +65,30 @@ All phase acceptance behaviors have automated verification. Design quality claim
 
 ## Validation Sign-Off
 
-- [ ] Final task map matches PLAN files and names concrete executable commands
-- [ ] All tasks have automated verification and fails_when signals
-- [ ] New test references are created by their owning tasks before invocation
-- [ ] No watch-mode flags or owner manual-UAT gates
-- [ ] Every absence assertion has a positive control
-- [ ] Sampling continuity maintained
+- [x] Final task map matches PLAN files and names concrete executable commands
+- [x] All 17 tasks have automated verification and immediately following fails_when signals
+- [x] New test references are created by their owning tasks or explicit dependencies before invocation
+- [x] No watch-mode flags or owner manual-UAT gates
+- [x] Every absence assertion plans a positive or violation control
+- [x] Sampling continuity specified; execution evidence remains pending
 - [ ] nyquist_compliant set only when final contract is checked
 
-Approval: pending final plans and independent checker.
+Approval: planning contract approved 2026-10-26 after independent recheck; 8 plans / 17 tasks / 10 requirements covered. Execution evidence and Nyquist completion remain pending.
+
+## Planning Validation and Probe Accounting
+
+- Eight PLAN frontmatter validations and eight plan-structure validations pass with no errors or warnings; every file ends with `</output>` and has no write-continuation sentinel. This is plan validity, not application behavior evidence.
+- Waves: 1 = 01; 2 = 02/03; 3 = 04/05; 4 = 06/07; 5 = 08. Same-wave plans have no file ownership overlap. All ten requirement IDs occur in plan frontmatter. Calibration reports factor 1, sample_count 0 and confidence low.
+- Existing command/package/source paths were checked with `git ls-files`; new target paths are explicitly created by their owning tasks. Pure tests use self-starting ExUnit scripts through `mix run --no-start` because the existing shared test helper always starts/migrates Repo. All DB/browser targets use the guarded launcher created in 252-03, with fresh numeric partitions compatible with the current host authority guard.
+- Edge probe: 17 surfaced items = 13 classified explicit acceptance truths plus four unclassified unresolved flagged assumptions (SBK-03, SCEN-01, LAB-02, CIQ-01). Their concrete behavior coverage is assigned explicitly in 01/06, 02/04/07, 07 and 08 respectively. No silent drops and no backstop claims.
+- UI probe: all 20 E1/E2/E3 predicates are present in 252-06 must_haves and receive assertion/evidence mapping. Twelve canonical state/width/theme cases remain separately identified.
+- Prohibition recall retained two bespoke transparency items using the actual `projectProhibitions` serializer. Both remain descriptor-less, unresolved and flagged-unverified in 01/04; no check descriptor or green probe verdict was fabricated. Generic security/privacy-law canon is referred to the security owner, rather than minted as bespoke prohibitions.
+- API coverage detector examined the full nonempty phase section plus eight plans: detected false (exit 1 is the detector's real negative verdict). No external integration matrix is required. Assumption-delta detector: detected false. Schema-push hook: none of its ORM file patterns is introduced or modified; existing Ecto migrations are applied only in disposable verification lanes. ASVS L1; high/critical open threats block.
+- No application tests, package builds, browser cases, DB writes or phase acceptance generators ran during planning. `wave_0_complete` and behavior statuses remain false/pending. Final automated UAT, committed SUMMARY coverage with `human_judgment: false`, and `VERIFICATION.md` with `status: passed` / `behavior_unverified: 0` are execution outputs, not prewritten planning evidence.
+
+## Revision 1 Disposition
+
+- Research resolution blocker: all three research questions are marked RESOLVED with the selected facts path `dev_support/ui_scenarios/cadence_subscriptions.exs`, unconditional required owner `admin-phase200-guardrails` (the narrower Browser UAT workflow is not assigned ownership), and private temporary ownership manifest/namespace-lock contract from 252-03-01. Original repository evidence remains recorded.
+- Scope warning: 252-03-02 owns all guide documentation, including the final `npm --prefix accrue_admin run phase252:check` invocation, availability after 252-08 and evidence/cost limits. 252-08-03 reads and contract-tests guide agreement with mutation controls; it does not modify the guide. Plan 252-08 now owns nine files. Eight plans, seventeen tasks, five waves and existing dependencies remain unchanged.
+- Threat-register warning: numbered threats T-252-01 through T-252-18 remain unique phase-wide. Preserve reserved T-252-SC in every plan per `$HOME/.codex/agents/gsd-planner.toml:366` and `gsd-core/references/planner-gap-closure.md:64`; `gsd-core/workflows/plan-phase.md` threat-ID uniqueness rule explicitly excludes the reserved SC row from duplicate detection. The checker warning for repeated SC is a false positive under that authoritative exception, not a missing mitigation or a decision conflict.
+- Revision verification: frontmatter schema and plan structure pass for modified plans 252-03 and 252-08 with zero errors/warnings. Current-tree consistency assertions pass for all eight plans/seventeen validation-map commands, five waves, dependency ordering, zero same-wave file overlap, every task file declared in its owning plan, all ten requirements, three resolved research questions, eighteen unique numbered threat rows and one reserved SC row per plan. Both modified plans end with `</output>` and contain no continuation sentinel. No application tests or commits ran in this revision.
