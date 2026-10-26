@@ -102,6 +102,19 @@ In warm cells, the docs time is a `_build/dev` deps compile (see follow-ups).
 
 The warm critical path is shift-left (5.2m) → host-integration (11.2m) → playwright (4.3m), about 21m. Release-gate → admin-drift-docs is 8.3 + 1.8 = 10.1m. This does not overturn the item-5 decision, so no edge changed.
 
+A new head also ran warm. Head `e853e754` (this SUMMARY's first commit) ran CI 40272153004 and browser 40272153003. They were the first runs on a new SHA, and they hit the PR-scope caches that 671f02d8 seeded:
+
+| Workflow / job | Head e853e754 (warm, new SHA) |
+|---|---|
+| CI wall / runner-min | 22.8m / 87.5 |
+| Browser UAT | 15.1m |
+| Combined runner-min | 102.6 |
+| Release gate Floor / Primary off-off / otel=on / sigra=on | 6.1 / 5.9 / 3.1 / 4.3 |
+| Host integration | 14.5 |
+| Playwright shards 1/2/3 | 4.0 / 3.6 / 3.1 |
+
+`250-ci-head-status.mjs --event pull_request --pr-base origin/main` was GREEN at e853e754.
+
 ## Cache hit/miss and footprint
 
 | Attempt | Job | `_build` hits | misses | saved | prune removals |
