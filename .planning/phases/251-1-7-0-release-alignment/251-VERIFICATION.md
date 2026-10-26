@@ -23,8 +23,9 @@ covered_files:
   - "RELEASING.md"
   - "scripts/ci/README.md"
   - "scripts/ci/verify_release_branch_repair_safety.sh"
+  - "scripts/ci/verify_release_changelog_curated.sh"
   - "scripts/ci/verify_release_contract.sh"
-covered_digest: "v1:sha256:c2561e920ab6809cfc2996b9bd86b8f29de48813be220c92e57b675fd48e4a92"
+covered_digest: "v1:sha256:7713d75a1f33910c9cda8d474343208bbb7ded3b89a1bcfd242338955688778e"
 behavior_unverified: 0
 overrides_applied: 0
 ---
