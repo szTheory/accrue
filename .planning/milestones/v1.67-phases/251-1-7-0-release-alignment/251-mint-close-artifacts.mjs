@@ -22,7 +22,9 @@ function git(repo, args) {
 }
 
 const repo = git(process.cwd(), ["rev-parse", "--show-toplevel"]).trim();
-const phaseRel = `.planning/phases/${PHASE_SLUG}`;
+// Archive-aware: after milestone close the phase lives under .planning/milestones/<v>-phases/.
+const { resolvePhaseEvidencePath } = await import(pathToFileURL(path.join(repo, "scripts/ci/phase_evidence_path.mjs")).href);
+const phaseRel = path.relative(repo, path.dirname(resolvePhaseEvidencePath(PHASE_SLUG, "251-VERIFICATION.md", { root: repo }))).split(path.sep).join("/");
 const phaseDir = path.join(repo, phaseRel);
 const verificationRel = `${phaseRel}/251-VERIFICATION.md`;
 const verificationPath = path.join(repo, verificationRel);
