@@ -4,17 +4,17 @@ milestone: v1.68
 milestone_name: UI Storybook Stress Testing
 current_phase: 252
 current_phase_name: Production-backed Subscription Stories
-status: executing
-stopped_at: Completed 252-07-PLAN.md
-last_updated: "2026-10-27T03:10:51.121Z"
+status: verifying
+stopped_at: Completed 252-08-PLAN.md
+last_updated: "2026-10-27T04:43:57.825Z"
 last_activity: 2026-10-26
 last_activity_desc: Completed Phase 252 plan 03; Phase 252 execution continues
-state_head: bfd5df138e924a422a5485b2c8e455e4e8ce2fa6
+state_head: 5ff88c478b19f19f3b77ca744447968ef90680c3
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 
 Phase: 252 (Production-backed Subscription Stories) — EXECUTING
 Plan: 8 of 8
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-26 — Completed Phase 252 plan 03; Phase 252 execution continues
 
 Progress: [░░░░░░░░░░] 0%
@@ -228,6 +228,7 @@ Current milestone planning blockers: None known. Historical concerns and deferre
 | Phase 252 P05 | 15min | 2 tasks | 8 files |
 | Phase 252 P06 | 80min | 2 tasks | 15 files |
 | Phase 252 P7 | 35min | 2 tasks | 7 files |
+| Phase 252 P08 | 82min | 3 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -531,6 +532,10 @@ Current milestone planning blockers: None known. Historical concerns and deferre
 - [Phase 252]: Left-align and border-box the action menu to keep it within the narrow Storybook preview.
 - [Phase 252]: Use the existing admin and portal Hex release switches only for actual package metadata generation.
 - [Phase 252]: Canonicalize the temporary root for isolated Mix builds on macOS.
+- [Phase 252]: Run the full owner serially with unique numeric partitions and isolated Mix build outputs so every mutable lane belongs to this run.
+- [Phase 252]: Treat static browser cells, mounted authorization, persisted state, and reset isolation as separate evidence claims.
+- [Phase 252]: Keep four unclassified assumptions and two descriptor-less prohibitions visibly unresolved while reporting their concrete behavior coverage separately.
+- [Phase 252]: Upload structured result bundles and per-run browser JSON; keep raw command logs out of CI artifacts.
 
 ### Pending Todos
 
@@ -629,8 +634,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T03:10:51.094Z
-Stopped at: Completed 252-07-PLAN.md
+Last session: 2026-10-27T04:43:57.797Z
+Stopped at: Completed 252-08-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

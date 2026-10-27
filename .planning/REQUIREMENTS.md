@@ -31,7 +31,7 @@ The owner approved the [reviewed subscription-first proposal](research/ui-qualit
 
 ### Recurring checks and affordable execution
 
-- [ ] **CIQ-01**: A change confined to any consumed story, shared scenario, component, registry, generated manifest, token or runner root invokes its named required CI owner, proved by representative positive path/classifier controls and an unrelated-path negative control; in-job selection cannot substitute for workflow admission.
+- [x] **CIQ-01**: A change confined to any consumed story, shared scenario, component, registry, generated manifest, token or runner root invokes its named required CI owner, proved by representative positive path/classifier controls and an unrelated-path negative control; in-job selection cannot substitute for workflow admission.
 - [ ] **CIQ-02**: Maintainer can see which changed/affected scenarios and stable sentinels the recurring browser checks ran, with total/selected IDs, explicit exclusions and conservative broad selection when dependency metadata is missing or ambiguous; isolated pure-story cases can be scheduled independently without unsafe parallel resets of shared mounted fixtures.
 - [ ] **CIQ-03**: Maintainer can compare selected subscription states in both themes and meaningful narrow/desktop contexts using the existing Linux visual-baseline owner, deterministic data/fonts/motion and current source/served-asset identity, with deliberate reviewed baseline changes and no masking of essential identity, money, state or actions.
 - [ ] **CIQ-04**: Maintainer can reproduce measured cold startup, warm preview/check and incremental CI costs and use a frozen affordable selection/budget before widening coverage; targets begin at under 10s warm preview where feasible, under 60s focused checks, at most 3min additional warm browser work and 5min incremental CI critical path, with deviations explicitly resolved without weakening existing checks.
@@ -90,7 +90,7 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 | SCEN-04 | Phase 252 | Complete |
 | LAB-01 | Phase 252 | Complete |
 | LAB-02 | Phase 252 | Complete |
-| CIQ-01 | Phase 252 | Pending |
+| CIQ-01 | Phase 252 | Complete |
 | CIQ-02 | Phase 254 | Pending |
 | CIQ-03 | Phase 254 | Pending |
 | CIQ-04 | Phase 254 | Pending |
