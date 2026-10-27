@@ -14,8 +14,9 @@ import {
   CONSUMED_ROOTS,
   REQUIRED_OWNER,
 } from "./phase252_paths.mjs";
+import * as phase253Runner from "./verify_phase253_compositions.mjs";
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..");
+const root = path.resolve(process.env.PHASE253_REPO_ROOT || path.resolve(path.dirname(new URL(import.meta.url).pathname), "../.."));
 const workflow = fs.readFileSync(path.join(root, ".github/workflows/ci.yml"), "utf8");
 const ownerRunner = fs.readFileSync(path.join(root, "scripts/ci/verify_phase200_admin_guardrails.sh"), "utf8");
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "storybook/phase252-manifest.json"), "utf8"));
@@ -115,6 +116,89 @@ test("the real required owner invokes the complete phase252 leaf", () => {
   assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true }));
   const packageJson = JSON.parse(fs.readFileSync(path.join(root, "accrue_admin/package.json"), "utf8"));
   assert.equal(packageJson.scripts["phase252:check"], "node ../scripts/ci/verify_phase252_stories.mjs");
+});
+
+test("every newly consumed Phase 253 source class maps to the named required CI owner", () => {
+  const phase253Roots = [
+    ["phase253-collection-renderer", "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex"],
+    ["phase253-focused-runner", "scripts/ci/verify_phase253_compositions.mjs"],
+    ["phase253-focused-runner-tests", "scripts/ci/verify_phase253_compositions.test.mjs"],
+    ["phase253-acceptance-generator", "scripts/ci/generate_phase253_acceptance.mjs"],
+    ["phase253-transparency-fixtures", "scripts/ci/fixtures/phase253-transparency/presentation-violation.json"],
+    ["phase253-prohibition-plan", ".planning/phases/253-real-groups-and-a-whole-subscription-job/253-05-PLAN.md"],
+    ["phase253-validation", ".planning/phases/253-real-groups-and-a-whole-subscription-job/253-VALIDATION.md"],
+    ["phase253-collection-story", "storybook/groups/subscriptions_collection.story.exs"],
+    ["phase253-whole-page-story", "storybook/pages/subscription.story.exs"],
+    ["phase253-admin-adapters", "accrue_admin/storybook/_support/subscription_collection.ex"],
+    ["phase253-admin-tests", "accrue_admin/test/accrue_admin/dev/subscription_collection_transport_test.exs"],
+    ["phase253-browser-spec", "accrue_admin/e2e/subscription-compositions-phase253.spec.js"],
+    ["phase253-browser-helper", "accrue_admin/e2e/phase253-composition-helpers.js"],
+    ["phase253-presentation-controls", "scripts/ci/verify_phase253_presentation.test.mjs"],
+  ];
+  assertOwnerMap(CONSUMED_ROOTS, manifest);
+  for (const [id, sourcePath] of phase253Roots) {
+    assert.equal(CONSUMED_ROOTS.some((row) => row.id === id), true, `${id} must be required`);
+    assert.equal(classifyPath(sourcePath, { manifest }), REQUIRED_OWNER, `${sourcePath} must be admitted`);
+  }
+  for (const [id, sourcePath] of phase253Roots.slice(0, 7)) {
+    const withoutRule = CONSUMED_ROOTS.filter((row) => row.id !== id);
+    assert.throws(() => assertOwnerMap(withoutRule, manifest), new RegExp(id), `${id} removal must fail the owner contract`);
+    assert.equal(classifyPath(sourcePath, { roots: withoutRule, manifest }), null, `${sourcePath} must become unowned when ${id} is removed`);
+  }
+  assert.equal(classifyPath("docs/architecture/unrelated-phase253.md", { manifest }), null);
+});
+
+test("the named required owner invokes both Phase 252 and Phase 253 checks", () => {
+  const missingPhase253 = ownerRunner.replace(/^run_step "Phase 253 focused composition acceptance".*\n/m, "");
+  assert.throws(
+    () => assertCiContract({ workflow, ownerRunner: missingPhase253, manifest, requirePhase252: true, requirePhase253: true }),
+    /phase253|composition acceptance/i,
+  );
+
+  const phase253BeforePhase252 = ownerRunner.replace(
+    /^run_step "Phase 252 complete subscription story acceptance".*\n/m,
+    "",
+  ).replace(
+    "run_step \"Phase 253 focused composition acceptance\" node scripts/ci/verify_phase253_compositions.mjs\n",
+    "",
+  ) + "run_step \"Phase 253 focused composition acceptance\" node scripts/ci/verify_phase253_compositions.mjs\nrun_step \"Phase 252 complete subscription story acceptance\" npm --prefix accrue_admin run phase252:check\n";
+  assert.throws(
+    () => assertCiContract({ workflow, ownerRunner: phase253BeforePhase252, manifest, requirePhase252: true, requirePhase253: true }),
+    /phase252|phase253|order/i,
+  );
+
+  const gatedPhase253 = ownerRunner.replace(
+    'run_step "Phase 253 focused composition acceptance" node scripts/ci/verify_phase253_compositions.mjs',
+    'if [ "${RUN_PHASE253:-false}" = true ]; then run_step "Phase 253 focused composition acceptance" node scripts/ci/verify_phase253_compositions.mjs; fi',
+  );
+  assert.throws(
+    () => assertCiContract({ workflow, ownerRunner: gatedPhase253, manifest, requirePhase252: true, requirePhase253: true }),
+    /phase253|composition acceptance/i,
+  );
+
+  assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true, requirePhase253: true }));
+});
+
+test("the Phase 253 CI reporter requires every owner, path and unrelated-path assertion", () => {
+  const command = phase253Runner.buildCommandPlan({
+    id: "b".repeat(32),
+    adminBuildPath: "/tmp/phase253-ci-contract/admin",
+    outputDirectory: "/tmp/phase253-ci-contract/output",
+  }).find(({ id }) => id === "phase253-ci-contract");
+  assert.deepEqual(Object.keys(command.assertion_bindings).sort(), [
+    "new_root_admission",
+    "required_owner_execution",
+    "unrelated_path_negative_control",
+  ]);
+
+  const missingAssertion = phase253Runner.buildCommandPlan({
+    id: "b".repeat(32),
+    adminBuildPath: "/tmp/phase253-ci-contract/admin",
+    outputDirectory: "/tmp/phase253-ci-contract/output",
+  }).map((row) => row.id === "phase253-ci-contract"
+    ? { ...row, assertion_bindings: Object.fromEntries(Object.entries(row.assertion_bindings).filter(([id]) => id !== "new_root_admission")) }
+    : row);
+  assert.throws(() => phase253Runner.assertRequiredCommandPlan(missingAssertion), /assertion|binding/i);
 });
 
 test("manifest freshness compares JSON content without serializer key-order noise", () => {
