@@ -133,6 +133,14 @@ const ASSERTION_BINDINGS = Object.freeze({
   }),
 });
 
+const REQUIRED_ASSERTION_IDS = Object.freeze({
+  "phase253-ci-contract": Object.freeze([
+    "new_root_admission",
+    "required_owner_execution",
+    "unrelated_path_negative_control",
+  ]),
+});
+
 const PROCESS_MARKERS = Object.freeze({
   "phase253-transparency-controls": Object.freeze([
     "phase253_current_green",
@@ -491,6 +499,13 @@ export function assertRequiredCommandPlan(commands) {
       }
     } else if (row.reporter?.kind !== "process-markers" || row.process_markers.length === 0) {
       fail("lane has no supported reporter contract: " + row.id);
+    }
+  }
+  for (const [commandId, requiredAssertions] of Object.entries(REQUIRED_ASSERTION_IDS)) {
+    const command = commands.find((row) => row.id === commandId);
+    const actualAssertions = Object.keys(command?.assertion_bindings || {}).sort();
+    if (JSON.stringify(actualAssertions) !== JSON.stringify([...requiredAssertions].sort())) {
+      fail(commandId + " reporter assertion binding inventory is incomplete or unexpected");
     }
   }
   return true;

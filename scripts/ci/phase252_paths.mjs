@@ -32,6 +32,20 @@ export const REQUIRED_ROOT_IDS = Object.freeze([
   "phase200-owner-contracts",
   "required-ci-workflow",
   "phase252-package-script",
+  "phase253-collection-renderer",
+  "phase253-focused-runner",
+  "phase253-focused-runner-tests",
+  "phase253-acceptance-generator",
+  "phase253-transparency-fixtures",
+  "phase253-prohibition-plan",
+  "phase253-validation",
+  "phase253-presentation-controls",
+  "phase253-collection-story",
+  "phase253-whole-page-story",
+  "phase253-admin-adapters",
+  "phase253-admin-tests",
+  "phase253-browser-spec",
+  "phase253-browser-helper",
 ]);
 
 export const CONSUMED_ROOTS = Object.freeze([
@@ -69,6 +83,20 @@ export const CONSUMED_ROOTS = Object.freeze([
   { id: "phase200-owner-contracts", path: "scripts/ci/verify_phase200_", mode: "prefix", owner: REQUIRED_OWNER },
   { id: "required-ci-workflow", path: ".github/workflows/ci.yml", mode: "exact", owner: REQUIRED_OWNER },
   { id: "phase252-package-script", path: "accrue_admin/package.json", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-collection-renderer", path: "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-focused-runner", path: "scripts/ci/verify_phase253_compositions.mjs", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-focused-runner-tests", path: "scripts/ci/verify_phase253_compositions.test.mjs", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-acceptance-generator", path: "scripts/ci/generate_phase253_acceptance.mjs", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-transparency-fixtures", path: "scripts/ci/fixtures/phase253-transparency/", mode: "prefix", owner: REQUIRED_OWNER },
+  { id: "phase253-prohibition-plan", path: ".planning/phases/253-real-groups-and-a-whole-subscription-job/253-05-PLAN.md", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-validation", path: ".planning/phases/253-real-groups-and-a-whole-subscription-job/253-VALIDATION.md", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-presentation-controls", path: "scripts/ci/verify_phase253_presentation.test.mjs", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-collection-story", path: "storybook/groups/subscriptions_collection.story.exs", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-whole-page-story", path: "storybook/pages/subscription.story.exs", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-admin-adapters", path: "accrue_admin/storybook/_support/subscription_collection.ex", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-admin-tests", path: "accrue_admin/test/accrue_admin/dev/subscription_collection_transport_test.exs", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-browser-spec", path: "accrue_admin/e2e/subscription-compositions-phase253.spec.js", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase253-browser-helper", path: "accrue_admin/e2e/phase253-composition-helpers.js", mode: "exact", owner: REQUIRED_OWNER },
 ]);
 
 function fail(message) {
@@ -163,6 +191,7 @@ export function assertCiContract({
   ownerRunner,
   manifest,
   requirePhase252 = false,
+  requirePhase253 = false,
   roots = CONSUMED_ROOTS,
 }) {
   if (typeof workflow !== "string" || typeof ownerRunner !== "string") {
@@ -199,8 +228,18 @@ export function assertCiContract({
   if (!/^set -e(?:uo pipefail)?\s*$/m.test(ownerRunner)) {
     fail("required owner runner must stop on a failed focused command");
   }
-  if (requirePhase252 && !ownerRunner.includes("npm --prefix accrue_admin run phase252:check")) {
+  const phase252Step = /^run_step "Phase 252 complete subscription story acceptance" npm --prefix accrue_admin run phase252:check$/m;
+  const phase253Step = /^run_step "Phase 253 focused composition acceptance" node scripts\/ci\/verify_phase253_compositions\.mjs$/m;
+  const phase252Match = phase252Step.exec(ownerRunner);
+  if ((requirePhase252 || requirePhase253) && !phase252Match) {
     fail("required owner runner does not invoke npm --prefix accrue_admin run phase252:check");
+  }
+  if (requirePhase253) {
+    const phase253Match = phase253Step.exec(ownerRunner);
+    if (!phase253Match) fail("required owner runner does not invoke node scripts/ci/verify_phase253_compositions.mjs");
+    if (phase253Match.index < phase252Match.index) {
+      fail("Phase 253 composition acceptance must run after the complete Phase 252 check");
+    }
   }
   return true;
 }

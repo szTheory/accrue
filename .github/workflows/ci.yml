@@ -1325,6 +1325,16 @@ jobs:
             accrue_admin/tmp/phase252/render-results-*.json
           if-no-files-found: ignore
 
+      - name: Upload Phase 253 machine evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase253-machine-evidence
+          path: |
+            accrue_admin/tmp/phase253/ci-results/*/results.json
+            accrue_admin/tmp/phase253/render-results-*.json
+          if-no-files-found: ignore
+
       - name: Upload Phase 200 Playwright report
         if: always()
         uses: actions/upload-artifact@v7

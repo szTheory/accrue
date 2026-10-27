@@ -6,6 +6,7 @@ set -euo pipefail
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 package_file="$root_dir/accrue_admin/package.json"
 runner_file="$root_dir/scripts/ci/verify_phase200_admin_guardrails.sh"
+phase253_runner_file="$root_dir/scripts/ci/verify_phase253_compositions.mjs"
 package_docs_file="$root_dir/scripts/ci/verify_package_docs.sh"
 storybook_spec="$root_dir/accrue_admin/e2e/admin-storybook-a11y-phase200.spec.js"
 page_flow_spec="$root_dir/accrue_admin/e2e/admin-page-flow-phase200.spec.js"
@@ -78,6 +79,7 @@ package_script_value() {
 for file in \
   "$package_file" \
   "$runner_file" \
+  "$phase253_runner_file" \
   "$package_docs_file" \
   "$storybook_spec" \
   "$page_flow_spec" \
@@ -105,6 +107,12 @@ require_fixed "$runner_file" "cd accrue_admin && env -u NO_COLOR npx playwright 
 require_fixed "$runner_file" "cd accrue_admin && npm run phase200:scorecard"
 require_fixed "$runner_file" "cd accrue_admin && npm run phase200:signoff"
 require_fixed "$runner_file" 'run_step "Phase 252 complete subscription story acceptance" npm --prefix accrue_admin run phase252:check'
+require_regex "$runner_file" '^run_step "Phase 253 focused composition acceptance" node scripts/ci/verify_phase253_compositions\.mjs$'
+
+phase252_step_line="$(grep -nFx 'run_step "Phase 252 complete subscription story acceptance" npm --prefix accrue_admin run phase252:check' "$runner_file" | cut -d: -f1)"
+phase253_step_line="$(grep -nFx 'run_step "Phase 253 focused composition acceptance" node scripts/ci/verify_phase253_compositions.mjs' "$runner_file" | cut -d: -f1)"
+[[ "$phase253_step_line" -gt "$phase252_step_line" ]] ||
+  fail "Phase 253 focused composition acceptance must run after the complete Phase 252 check"
 
 storybook_script="$(package_script_value "phase200:storybook")"
 scorecard_script="$(package_script_value "phase200:scorecard")"

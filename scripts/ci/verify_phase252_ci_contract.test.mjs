@@ -141,9 +141,13 @@ test("every newly consumed Phase 253 source class maps to the named required CI 
     assert.equal(classifyPath(sourcePath, { manifest }), REQUIRED_OWNER, `${sourcePath} must be admitted`);
   }
   for (const [id, sourcePath] of phase253Roots.slice(0, 7)) {
+    const manifestWithoutSource = {
+      ...manifest,
+      source_digests: Object.fromEntries(Object.entries(manifest.source_digests).filter(([source]) => source !== sourcePath)),
+    };
     const withoutRule = CONSUMED_ROOTS.filter((row) => row.id !== id);
-    assert.throws(() => assertOwnerMap(withoutRule, manifest), new RegExp(id), `${id} removal must fail the owner contract`);
-    assert.equal(classifyPath(sourcePath, { roots: withoutRule, manifest }), null, `${sourcePath} must become unowned when ${id} is removed`);
+    assert.throws(() => assertOwnerMap(withoutRule, manifestWithoutSource), new RegExp(id), `${id} removal must fail the owner contract`);
+    assert.equal(classifyPath(sourcePath, { roots: withoutRule, manifest: manifestWithoutSource }), null, `${sourcePath} must become unowned when ${id} is removed`);
   }
   assert.equal(classifyPath("docs/architecture/unrelated-phase253.md", { manifest }), null);
 });
@@ -164,7 +168,7 @@ test("the named required owner invokes both Phase 252 and Phase 253 checks", () 
   ) + "run_step \"Phase 253 focused composition acceptance\" node scripts/ci/verify_phase253_compositions.mjs\nrun_step \"Phase 252 complete subscription story acceptance\" npm --prefix accrue_admin run phase252:check\n";
   assert.throws(
     () => assertCiContract({ workflow, ownerRunner: phase253BeforePhase252, manifest, requirePhase252: true, requirePhase253: true }),
-    /phase252|phase253|order/i,
+    /Phase 252|Phase 253|order/i,
   );
 
   const gatedPhase253 = ownerRunner.replace(

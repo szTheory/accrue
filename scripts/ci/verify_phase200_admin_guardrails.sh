@@ -21,3 +21,4 @@ run_step "Admin reduced-motion guardrail" bash -c "cd accrue_admin && env -u NO_
 run_step "Phase 200 scorecard final generator and verifier" bash -c "cd accrue_admin && npm run phase200:scorecard"
 run_step "Phase 200 sign-off verifier" bash -c "cd accrue_admin && npm run phase200:signoff"
 run_step "Phase 252 complete subscription story acceptance" npm --prefix accrue_admin run phase252:check
+run_step "Phase 253 focused composition acceptance" node scripts/ci/verify_phase253_compositions.mjs
