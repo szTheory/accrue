@@ -35,7 +35,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 ## Current Position
 
-v1.68 UI Storybook Stress Testing is active: 22 requirements across Phases 252–254. Phase 252 is executing: 8 independently checked plans, 17 automated tasks, 5 waves. Plans 252-01 and 252-02 completed the production-owned active and lifecycle subscription story slices; six plans remain. The owner approved the [reviewed subscription-first proposal](research/ui-quality-engine/MILESTONE-PROPOSAL.md) with “what do u rec? do that”; this explicit strategy decision satisfies the Planning Doctrine without reopening approval of the same scope.
+v1.68 UI Storybook Stress Testing is active: 22 requirements across Phases 252–254. Phase 252 has execution summaries for all 10 plans and 22 automated tasks across seven waves. The fresh 21-lane acceptance and generated UAT are recorded; the phase remains In Progress pending independent verification. The owner approved the [reviewed subscription-first proposal](research/ui-quality-engine/MILESTONE-PROPOSAL.md) with “what do u rec? do that”; this explicit strategy decision satisfies the Planning Doctrine without reopening approval of the same scope.
 
 v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements). The v1.63–v1.66 line landed on `main` through PR #49, and 1.7.0 of `accrue`, `accrue_admin` and `accrue_portal` is published to Hex with docs. Release policy (maintainer, 2026-10-26): release early and often at any natural, release-worthy stopping point.
 
@@ -78,7 +78,7 @@ v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements).
   4. A reviewer can launch the documented lab on an explicit disposable database/namespace and distinct loopback port with known process identity, see unexpected-server reuse refused, and observe a negative control proving a normal test reset cannot alter review data. Ordinary and labelled held-out data remain separate and privacy-safe, guarded cleanup refuses unrelated children, and production compile/package/route checks exclude fixture payloads and dev tooling while preserving the kitchen and canonical mounts; DB-free rendering is distinguished from DB-backed startup. (SCEN-04, LAB-01, LAB-02)
   5. A maintainer can observe changes confined to each consumed story, shared scenario, component, registry, generated manifest, token or runner root invoke its named required CI owner, through representative positive path/classifier controls and an unrelated-path negative control; in-job selection alone cannot satisfy workflow admission. (CIQ-01)
 
-**Plans**: 9/10 plans executed — the eight original plans and gap-closure plan 09 are complete; plan 10 remains
+**Plans**: 10/10 plans executed — all original and gap-closure plans have summaries; independent phase verification remains
 **UI hint**: yes
 
 Plans:
@@ -104,7 +104,7 @@ Plans:
 - [x] 252-09-PLAN.md — Prove truthful lab presentation and synthetic held-out attribution with clean/violation controls
 
 **Wave 7 — gap closure** *(blocked on 252-09)*
-- [ ] 252-10-PLAN.md — Wire required CI, fresh acceptance and independently proved original prohibition descriptors
+- [x] 252-10-PLAN.md — Wire required CI, fresh acceptance and independently proved original prohibition descriptors
 
 ### Phase 253: Real Groups and a Whole Subscription Job
 
@@ -142,7 +142,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 252. Production-backed Subscription Stories | 9/10 | In Progress | - |
+| 252. Production-backed Subscription Stories | 10/10 | In Progress | - |
 | 253. Real Groups and a Whole Subscription Job | 0/TBD | Not started | - |
 | 254. Recurring Quality, Reviewed Fixes and Curation | 0/TBD | Not started | - |
 
@@ -154,4 +154,4 @@ The [rolling roadmap](research/ui-quality-engine/MILESTONE-PROPOSAL.md#rolling-r
 
 ## Next
 
-Continue Phase 252 with the remaining 6 plans using the refreshed research and approved UI contract. Independent plan checking passed and all 10 phase requirements are assigned. Plans 252-01 and 252-02 are complete; remaining implementation and automated acceptance evidence are pending.
+Phase 252 plan execution is complete. All ten plans have summaries, plan 10's assigned requirements have current acceptance evidence, and the fresh UAT bundle is recorded. Keep the phase In Progress until independent verification passes.
