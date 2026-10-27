@@ -1,4 +1,10 @@
-ExUnit.start()
+Code.require_file(Path.expand("../../../../dev_support/phase252_tap_formatter.ex", __DIR__))
+
+if System.get_env("PHASE252_TAP_REPORT") == "1" do
+  ExUnit.start(formatters: [Accrue.Test.Phase252TapFormatter])
+else
+  ExUnit.start()
+end
 {:ok, _localize_apps} = Application.ensure_all_started(:localize)
 
 defmodule AccrueAdmin.SubscriptionCompositionManifestFixture.Duplicate do
@@ -125,6 +131,11 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
         })
 
       refute Manifest.route_matches?(entry, wrong_route)
+    end
+
+    test "compiled collection inventory exposes every direct variation for responsive evidence" do
+      assert function_exported?(Manifest, :collection_variation_entries, 0),
+             "responsive evidence must discover all collection states from the compiled Storybook tree"
     end
 
     test "compiled whole-page story declares every direct production-rendered variation" do
