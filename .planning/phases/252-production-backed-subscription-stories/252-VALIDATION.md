@@ -95,7 +95,7 @@ Approval: planning contract approved 2026-10-26 after independent recheck; 8 pla
 
 ## Executed Coverage Audit — 2026-10-27
 
-Run `25208-1793075457515-88834-5ee13886b28a` passed all 18 serial commands. The fresh evidence validator passed all ten requirements, thirteen classified edges and twenty UI predicates; the generated UAT has 66/66 passing items. A fresh rerun of the generator/CI contract suites passed 22/22. No requirement is PARTIAL or MISSING; no manual acceptance gate is needed.
+Run `25208-1793086410828-22011-2a58bd0a056d` passed all 18 serial commands. The fresh evidence validator passed all ten requirements, thirteen classified edges and twenty UI predicates; the generated UAT has 66/66 passing items. A fresh rerun of the generator/CI contract suites passed 22/22. No requirement is PARTIAL or MISSING; no manual acceptance gate is needed.
 
 | Task | Executed lane IDs | Status |
 |---|---|---|
@@ -117,7 +117,7 @@ Run `25208-1793075457515-88834-5ee13886b28a` passed all 18 serial commands. The 
 | 252-08-02 | `phase252-ci-contract` | COVERED |
 | 252-08-03 | `phase252-acceptance-contract` | COVERED |
 
-Actual commands, cwd, assertions, exit codes, durations and log digests are recorded in `accrue_admin/tmp/phase252/ci-results/25208-1793075457515-88834-5ee13886b28a/results.json`; each mapped lane exited 0. Guarded Mix commands use the appropriate project cwd; browser selection is forwarded after `--`, correcting the planning-era `--spec` examples. Current compile/package, disposable database, race/rollback, browser and negative controls are all present.
+Actual commands, cwd, assertions, exit codes, durations and log digests are recorded in `accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json`; each mapped lane exited 0. Guarded Mix commands use the appropriate project cwd; browser selection is forwarded after `--`, correcting the planning-era `--spec` examples. Current compile/package, disposable database, race/rollback, browser and negative controls are all present.
 
 The four unclassified assumptions and two descriptor-less prohibitions remain unresolved exactly as planned; they are not reclassified as behavioral proof. Static rendering claims remain bounded. Planning-era statements below describe what had not run at planning time.
 
@@ -128,3 +128,7 @@ The four unclassified assumptions and two descriptor-less prohibitions remain un
 | Gaps found | 0 |
 | Resolved | 0 |
 | Escalated | 0 |
+
+## Remediation Coverage Recheck — 2026-10-27
+
+The current aggregate also requires real descendant interruption, exited-leader cleanup, and unrelated sentinel preservation. All eighteen commands passed after the cleanup correction, bounded compile deadline and settled-theme polling. Independent security re-audit passed 37 focused controls and 2 real interruption tests. Earlier run references in the executed map were refreshed to the passing current bundle; original historical artifacts remain unchanged.
