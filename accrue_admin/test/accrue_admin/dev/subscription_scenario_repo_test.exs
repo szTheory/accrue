@@ -1,8 +1,6 @@
 defmodule AccrueAdmin.SubscriptionScenarioRepoTest do
   use AccrueAdmin.RepoCase
 
-  import Ecto.Query
-
   alias Accrue.Billing.{Customer, Subscription, SubscriptionItem}
   alias AccrueAdmin.TestRepo
   alias Ecto.Adapters.SQL.Sandbox
@@ -81,12 +79,13 @@ defmodule AccrueAdmin.SubscriptionScenarioRepoTest do
     adapter = adapter!()
     facts = validated_facts!(:launch)
     graph = persist!(adapter, facts)
+    missing_subscription_id = Ecto.UUID.generate() |> Ecto.UUID.dump!()
 
     foreign_key_error =
       expect_postgres_error(fn ->
         TestRepo.query!(
-          "INSERT INTO accrue_subscription_items (subscription_id, processor) VALUES ($1, $2)",
-          [Ecto.UUID.generate(), "stripe"]
+          "INSERT INTO billing.accrue_subscription_items (subscription_id, processor, inserted_at, updated_at) VALUES ($1, $2, now(), now())",
+          [missing_subscription_id, "stripe"]
         )
       end)
 
@@ -94,9 +93,10 @@ defmodule AccrueAdmin.SubscriptionScenarioRepoTest do
 
     not_null_error =
       expect_postgres_error(fn ->
-        TestRepo.query!("INSERT INTO accrue_subscription_items (processor) VALUES ($1)", [
-          "stripe"
-        ])
+        TestRepo.query!(
+          "INSERT INTO billing.accrue_subscription_items (processor, inserted_at, updated_at) VALUES ($1, now(), now())",
+          ["stripe"]
+        )
       end)
 
     assert not_null_error.postgres.code == :not_null_violation
@@ -104,9 +104,9 @@ defmodule AccrueAdmin.SubscriptionScenarioRepoTest do
     unique_error =
       expect_postgres_error(fn ->
         TestRepo.query!(
-          "INSERT INTO accrue_subscription_items (subscription_id, processor, processor_id) VALUES ($1, $2, $3)",
+          "INSERT INTO billing.accrue_subscription_items (subscription_id, processor, processor_id, inserted_at, updated_at) VALUES ($1, $2, $3, now(), now())",
           [
-            graph.subscription.id,
+            Ecto.UUID.dump!(graph.subscription.id),
             "stripe",
             facts.subscription.items |> hd() |> Map.fetch!(:processor_id)
           ]
@@ -152,12 +152,14 @@ defmodule AccrueAdmin.SubscriptionScenarioRepoTest do
            ) == 1
 
     run_unboxed(fn ->
-      TestRepo.delete_all(
-        from(item in SubscriptionItem, where: item.subscription_id == ^facts.subscription.id)
-      )
+      TestRepo.transaction(fn ->
+        TestRepo.delete_all(
+          from(item in SubscriptionItem, where: item.subscription_id == ^facts.subscription.id)
+        )
 
-      TestRepo.delete_all(from(row in Subscription, where: row.id == ^facts.subscription.id))
-      TestRepo.delete_all(from(row in Customer, where: row.id == ^facts.customer.id))
+        TestRepo.delete_all(from(row in Subscription, where: row.id == ^facts.subscription.id))
+        TestRepo.delete_all(from(row in Customer, where: row.id == ^facts.customer.id))
+      end)
     end)
   end
 
@@ -175,11 +177,8 @@ defmodule AccrueAdmin.SubscriptionScenarioRepoTest do
   defp persist!(adapter, facts), do: apply(adapter, :persist!, [TestRepo, facts])
   defp reload(adapter, id), do: apply(adapter, :reload, [TestRepo, id])
 
-  defp validated_facts!(scenario) do
-    scenario
-    |> CadenceSubscriptionFacts.fetch!()
-    |> AccrueAdmin.Storybook.SubscriptionScenarios.validate!()
-  end
+  defp validated_facts!(input),
+    do: AccrueAdmin.Storybook.SubscriptionScenarios.validate!(input)
 
   defp duplicate_processor_item_facts!(scenario) do
     facts = validated_facts!(scenario)
@@ -189,14 +188,25 @@ defmodule AccrueAdmin.SubscriptionScenarioRepoTest do
   end
 
   defp assert_graph_matches(graph, facts) do
-    assert Map.take(graph.customer, @ordinary_fields) ==
-             Map.take(facts.customer, @ordinary_fields)
+    assert_fields_match(graph.customer, facts.customer, @ordinary_fields)
 
-    assert Map.take(graph.subscription, @subscription_fields) ==
-             Map.take(facts.subscription, @subscription_fields)
+    assert_fields_match(graph.subscription, facts.subscription, @subscription_fields)
 
     assert Enum.map(graph.items, &Map.take(&1, @item_fields)) ==
              Enum.map(facts.subscription.items, &Map.take(&1, @item_fields))
+  end
+
+  defp assert_fields_match(actual, expected, fields) do
+    for field <- fields do
+      actual_value = Map.fetch!(actual, field)
+      expected_value = Map.fetch!(expected, field)
+
+      if match?(%DateTime{}, actual_value) and match?(%DateTime{}, expected_value) do
+        assert DateTime.compare(actual_value, expected_value) == :eq
+      else
+        assert actual_value == expected_value
+      end
+    end
   end
 
   defp expect_postgres_error(fun) do
@@ -209,12 +219,17 @@ defmodule AccrueAdmin.SubscriptionScenarioRepoTest do
         :ok = Sandbox.checkout(TestRepo, sandbox: false)
 
         try do
-          fun.()
+          {:returned, fun.()}
+        rescue
+          error -> {:raised, error, __STACKTRACE__}
         after
           Sandbox.checkin(TestRepo)
         end
       end)
 
-    Task.await(task, 30_000)
+    case Task.await(task, 30_000) do
+      {:returned, value} -> value
+      {:raised, error, stacktrace} -> reraise error, stacktrace
+    end
   end
 end
