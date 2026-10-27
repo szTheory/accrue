@@ -5,23 +5,23 @@ titles: json
 findings:
   - id: CR-01
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "Storybook theme check adds the missing application scope"
   - id: CR-02
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "Passing exit codes turn skipped required tests into passing evidence"
-open: 2
+open: 0
 total: 2
-recorded: 2026-10-27T08:33:11.742Z
+recorded: 2026-10-27T11:37:46.798Z
 ---
 
 # Phase 252: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | - |
-| CR-02 | critical | open | - |
+| CR-01 | critical | fixed | 252-REVIEW-FIX.md |
+| CR-02 | critical | fixed | 252-REVIEW-FIX.md |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.
