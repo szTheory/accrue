@@ -544,6 +544,10 @@ function buildPackage(appName, projectRoot, temporaryRoot, nodeFreePath, hexHelp
     cwd: projectRoot,
     env,
     label: `${appName} isolated MIX_ENV=prod compile --warnings-as-errors`,
+    // Cold isolated BEAM builds can take substantially longer under shared
+    // developer/CI hosts; keep the check fail-closed while allowing a bounded
+    // 20-minute compile window for each package.
+    timeout: 20 * 60 * 1000,
   });
 
   if (!supportedHexPackageOptions(hexHelp) || !compileHelp.includes("--warnings-as-errors")) {
