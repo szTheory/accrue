@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
+import crypto from "node:crypto";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -14,6 +15,37 @@ const HELDOUT_TEST = "scripts/ci/verify_phase252_heldout_attribution.test.mjs";
 const HELDOUT_CLEAN = "scripts/ci/fixtures/phase252-transparency/heldout-clean.json";
 const HELDOUT_VIOLATION = "scripts/ci/fixtures/phase252-transparency/heldout-violation.json";
 const HELDOUT_ASSERTION = "held-out attribution identifies synthetic stress evidence";
+const PHASE253_TEST = "scripts/ci/verify_phase253_presentation.test.mjs";
+const PHASE253_CLEAN = "scripts/ci/fixtures/phase253-transparency/clean.json";
+const PHASE253_PRESENTATION_VIOLATION = "scripts/ci/fixtures/phase253-transparency/presentation-violation.json";
+const PHASE253_ATTRIBUTION_VIOLATION = "scripts/ci/fixtures/phase253-transparency/attribution-violation.json";
+const PHASE253_ASSERTION = "truthful Phase253 composition attribution remains presentation-only";
+const PHASE253_MANIFEST = "accrue_admin/tmp/phase253/manifest.json";
+const PHASE253_GUIDE = "guides/ui-story-lab.md";
+const PHASE253_COLLECTION_STORY = "storybook/groups/subscriptions_collection.story.exs";
+const PHASE253_PAGE_STORY = "storybook/pages/subscription.story.exs";
+const PHASE253_BROWSER_HELPERS = "accrue_admin/e2e/phase253-composition-helpers.js";
+const PHASE253_BROWSER_SPEC = "accrue_admin/e2e/subscription-compositions-phase253.spec.js";
+const PHASE253_COMPILED_SOURCES = Object.freeze([
+  "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+  "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+  "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+  "accrue_admin/lib/accrue_admin/router.ex",
+  "accrue_admin/storybook/_support/subscription_collection.ex",
+  "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+  "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+  "dev_support/ui_scenarios/cadence_subscriptions.exs",
+  PHASE253_COLLECTION_STORY,
+  PHASE253_PAGE_STORY,
+]);
+const PHASE253_COLLECTION_IDS = Object.freeze([
+  "filtered_empty", "incomplete_projection", "loading", "multiple_rows", "new_host_empty",
+  "one_row", "page_boundary", "partial_cursor_error", "queue_empty", "unavailable",
+]);
+const PHASE253_PAGE_IDS = Object.freeze([
+  "active", "awaiting_step_up", "dispatching", "incomplete_evidence", "result_confirmed",
+  "result_failed", "result_pending", "review_cancel_now", "scheduled_cancellation",
+]);
 
 function fail(message) {
   throw new Error(`Phase252 transparency: ${message}`);
@@ -30,6 +62,253 @@ export function parseSubjectJson(source, label = "subject") {
   } catch {
     fail(`${label} is malformed JSON`);
   }
+}
+
+function phase253Source(root, relative) {
+  const filename = path.resolve(root, relative);
+  let stat;
+  try {
+    stat = fs.statSync(filename);
+  } catch {
+    fail(`Phase253 subject collection: required source is missing (${relative})`);
+  }
+  if (!stat.isFile()) fail(`Phase253 subject collection: required source is not a file (${relative})`);
+  const contents = fs.readFileSync(filename);
+  if (contents.toString("utf8").trim() === "") fail(`Phase253 subject collection: required source is empty (${relative})`);
+  return contents;
+}
+
+function phase253Text(root, relative) {
+  return phase253Source(root, relative).toString("utf8");
+}
+
+function sha256(source) {
+  return crypto.createHash("sha256").update(source).digest("hex");
+}
+
+function phase253Moduledoc(source, label) {
+  const matches = [...source.matchAll(/@moduledoc\s+"""([\s\S]*?)"""/g)];
+  if (matches.length !== 1) fail(`Phase253 subject collection: ${label} moduledoc is missing or duplicated`);
+  return requireText(matches[0][1].replace(/\s+/g, " "), `${label} moduledoc`);
+}
+
+function phase253ManifestRows(rows, label) {
+  if (!Array.isArray(rows) || rows.length === 0) fail(`Phase253 subject collection: ${label} are missing or empty`);
+  const seen = new Set();
+  return rows.map((row) => {
+    if (!row || typeof row !== "object" || Array.isArray(row)) fail(`Phase253 subject collection: malformed ${label} row`);
+    const variationId = requireText(row.variation_id || row.key, `${label} variation identity`);
+    if (seen.has(variationId)) fail(`Phase253 subject collection: duplicate ${label} identity (${variationId})`);
+    seen.add(variationId);
+    return {
+      variation_id: variationId,
+      fact_source: requireText(row.fact_source, `${label} fact source`),
+      production_renderer: requireText(row.production_renderer, `${label} production renderer`),
+      proof_lane: requireText(row.proof_lane, `${label} proof lane`),
+      transport_kind: requireText(row.transport_kind, `${label} transport kind`),
+    };
+  });
+}
+
+function phase253CurrentManifest(root, manifest, manifestBytes) {
+  const collection = phase253ManifestRows(manifest.collection_variations, "collection variations");
+  const pages = phase253ManifestRows(manifest.page_entries, "page entries");
+  if (JSON.stringify([...collection.map(({ variation_id }) => variation_id)].sort()) !== JSON.stringify([...PHASE253_COLLECTION_IDS].sort())) {
+    fail("Phase253 subject collection: compiled collection inventory differs from the bounded ten-state contract");
+  }
+  if (JSON.stringify([...pages.map(({ variation_id }) => variation_id)].sort()) !== JSON.stringify([...PHASE253_PAGE_IDS].sort())) {
+    fail("Phase253 subject collection: compiled page inventory differs from the bounded nine-state contract");
+  }
+
+  const sourceDigests = manifest.source_digests;
+  if (!sourceDigests || typeof sourceDigests !== "object" || Array.isArray(sourceDigests)) {
+    fail("Phase253 subject collection: compiled manifest source digests are missing");
+  }
+  if (JSON.stringify(Object.keys(sourceDigests).sort()) !== JSON.stringify([...PHASE253_COMPILED_SOURCES].sort())) {
+    fail("Phase253 subject collection: compiled source inventory differs from the bounded source contract");
+  }
+
+  const files = {};
+  for (const relative of [...PHASE253_COMPILED_SOURCES, PHASE253_GUIDE, PHASE253_BROWSER_HELPERS, PHASE253_BROWSER_SPEC]) {
+    const contents = phase253Source(root, relative);
+    const currentDigest = sha256(contents);
+    if (Object.hasOwn(sourceDigests, relative) && sourceDigests[relative] !== currentDigest) {
+      fail(`Phase253 subject collection: compiled source digest is stale (${relative})`);
+    }
+    files[relative] = currentDigest;
+  }
+  files[PHASE253_MANIFEST] = sha256(manifestBytes);
+  return { collection, pages, files };
+}
+
+/** Collect only enumerated story, guide, manifest, and browser-label surfaces. */
+export function collectPhase253Subject(root = ROOT) {
+  const guide = phase253Text(root, PHASE253_GUIDE);
+  const manifestBytes = phase253Source(root, PHASE253_MANIFEST);
+  const manifest = parseSubjectJson(manifestBytes.toString("utf8"), "Phase253 compiled manifest");
+  const inventory = phase253CurrentManifest(root, manifest, manifestBytes);
+  const collectionSource = phase253Text(root, PHASE253_COLLECTION_STORY);
+  const pageSource = phase253Text(root, PHASE253_PAGE_STORY);
+  const browserHelpers = phase253Text(root, PHASE253_BROWSER_HELPERS);
+  const collectionLabel = browserHelpers.match(/stress_label\s*:\s*["']([^"']+)["']/)?.[1];
+  const pageLabel = browserHelpers.match(/stress_label\s*:\s*kind\s*===\s*["']synthetic["']\s*\?\s*`([^`]+)`/)?.[1];
+  const syntheticLabels = [collectionLabel, pageLabel].map((label) => requireText(label, "Phase253 browser synthetic label"));
+  const entries = phase253ManifestRows(manifest.entries, "compiled manifest entries");
+  return {
+    schema_version: 1,
+    guide: { source: PHASE253_GUIDE, text: guide },
+    collection_story: { source: PHASE253_COLLECTION_STORY, moduledoc: phase253Moduledoc(collectionSource, "collection story") },
+    page_story: { source: PHASE253_PAGE_STORY, moduledoc: phase253Moduledoc(pageSource, "page story") },
+    manifest: {
+      source: PHASE253_MANIFEST,
+      entries,
+      collection_variations: inventory.collection,
+      page_entries: inventory.pages,
+    },
+    browser_evidence: {
+      source: PHASE253_BROWSER_HELPERS,
+      proof_lane: "actual direct browser presentation; no mounted-effect claims",
+      synthetic_labels: syntheticLabels,
+    },
+    source_identity: {
+      manifest_sha256: sha256(manifestBytes),
+      files: inventory.files,
+    },
+  };
+}
+
+/** Read an injected subject when present; otherwise collect current bounded sources. */
+export function loadPhase253Subject(env = process.env, root = ROOT, cwd = process.cwd()) {
+  if (!Object.prototype.hasOwnProperty.call(env, "GSD_PROHIB_SUBJECT")) return collectPhase253Subject(root);
+  const supplied = requireText(env.GSD_PROHIB_SUBJECT, "GSD_PROHIB_SUBJECT");
+  let source;
+  try {
+    source = fs.readFileSync(path.resolve(cwd, supplied), "utf8");
+  } catch {
+    fail("injected subject file is missing or unreadable");
+  }
+  return parseSubjectJson(source, "injected subject");
+}
+
+const PHASE253_EFFECT_CLAIMS = Object.freeze([
+  {
+    id: "mounted-authority",
+    pattern: /\b(?:the\s+)?(?:settled\s+)?(?:subscription\s+story|storybook|lab\s+rendering|rendered\s+controls|story\s+rendering)\s+(?:proves?|shows?|confirms?|demonstrates?|establish(?:es)?)\b[^.!?\n]{0,180}\bmounted\s+(?:authority|authorization)\b/i,
+  },
+  {
+    id: "persistence",
+    pattern: /\b(?:the\s+)?(?:settled\s+)?(?:subscription\s+story|storybook|lab\s+rendering|rendered\s+controls|story\s+rendering)\s+(?:proves?|shows?|confirms?|demonstrates?|establish(?:es)?)\b[^.!?\n]{0,180}\b(?:persistence|persisted\s+billing\s+state)\b/i,
+  },
+  {
+    id: "action-dispatch",
+    pattern: /\b(?:the\s+)?(?:settled\s+)?(?:subscription\s+story|storybook|lab\s+rendering|rendered\s+controls|story\s+rendering)\s+(?:proves?|shows?|confirms?|demonstrates?|establish(?:es)?)\b[^.!?\n]{0,180}\b(?:action\s+dispatch|dispatched\s+action\s+behavior|action\s+success)\b/i,
+  },
+  {
+    id: "provider-completion",
+    pattern: /\b(?:the\s+)?(?:settled\s+)?(?:subscription\s+story|storybook|lab\s+rendering|rendered\s+controls|story\s+rendering)\s+(?:proves?|shows?|confirms?|demonstrates?|establish(?:es)?)\b[^.!?\n]{0,180}\bprovider\s+completion\b/i,
+  },
+]);
+
+const PHASE253_SYNTHETIC_CLAIMS = Object.freeze([
+  {
+    id: "representative-customer-behavior",
+    pattern: /\bsynthetic\b[^.!?\n]{0,100}\b(?:collection|held-out|stress|facts|scenario|input)\b[^.!?\n]{0,50}\b(?:represents?|reflects?|models?)\b[^.!?\n]{0,50}\b(?:typical|representative)\s+(?:customer|adopter)\s+(?:behavior|usage)\b/i,
+  },
+  {
+    id: "real-adopter-usage",
+    pattern: /\bsynthetic\b[^.!?\n]{0,100}\b(?:collection|held-out|stress|facts|scenario|input)\b[^.!?\n]{0,50}\b(?:is|are)\b[^.!?\n]{0,40}\b(?:real|actual)\s+(?:customer|adopter)\s+(?:behavior|usage|evidence)\b/i,
+  },
+]);
+
+function phase253SubjectText(subject, guide, collectionStory, pageStory, entries, collections, pages, labels) {
+  return [
+    guide,
+    collectionStory,
+    pageStory,
+    ...entries.map((row) => Object.values(row).join("\n")),
+    ...collections.map((row) => Object.values(row).join("\n")),
+    ...pages.map((row) => Object.values(row).join("\n")),
+    subject.browser_evidence.proof_lane,
+    ...labels,
+  ].join("\n");
+}
+
+export function assertPhase253Presentation(subject) {
+  if (!subject || typeof subject !== "object" || Array.isArray(subject)) fail("Phase253 assertion: subject must be an object");
+  if (subject.schema_version !== 1) fail("Phase253 assertion: unrecognized subject schema");
+  const guide = requireText(subject.guide?.text, "Phase253 assertion: guide prose");
+  const guideSource = requireText(subject.guide?.source, "Phase253 assertion: guide source");
+  const collectionStory = requireText(subject.collection_story?.moduledoc, "Phase253 assertion: collection story moduledoc");
+  const collectionSource = requireText(subject.collection_story?.source, "Phase253 assertion: collection story source");
+  const pageStory = requireText(subject.page_story?.moduledoc, "Phase253 assertion: page story moduledoc");
+  const pageSource = requireText(subject.page_story?.source, "Phase253 assertion: page story source");
+  const manifestSource = requireText(subject.manifest?.source, "Phase253 assertion: manifest source");
+  const entries = phase253ManifestRows(subject.manifest?.entries, "manifest entries");
+  const collections = phase253ManifestRows(subject.manifest?.collection_variations, "collection variations");
+  const pages = phase253ManifestRows(subject.manifest?.page_entries, "page entries");
+  const browserSource = requireText(subject.browser_evidence?.source, "Phase253 assertion: browser evidence source");
+  const browserLane = requireText(subject.browser_evidence?.proof_lane, "Phase253 assertion: browser proof lane");
+  const labels = subject.browser_evidence?.synthetic_labels;
+  if (!Array.isArray(labels) || labels.length < 2) fail("Phase253 assertion: synthetic browser stress labels are missing or empty");
+  const syntheticLabels = labels.map((label) => requireText(label, "Phase253 assertion: synthetic browser stress label"));
+  const manifestDigest = requireText(subject.source_identity?.manifest_sha256, "Phase253 assertion: manifest digest");
+  if (!/^[a-f0-9]{64}$/.test(manifestDigest)) fail("Phase253 assertion: manifest digest is malformed");
+  const sourceFiles = subject.source_identity?.files;
+  if (!sourceFiles || typeof sourceFiles !== "object" || Array.isArray(sourceFiles) || Object.keys(sourceFiles).length === 0) {
+    fail("Phase253 assertion: source identities are missing or empty");
+  }
+  for (const [relative, digest] of Object.entries(sourceFiles)) {
+    requireText(relative, "Phase253 assertion: source identity path");
+    if (typeof digest !== "string" || !/^[a-f0-9]{64}$/.test(digest)) fail(`Phase253 assertion: malformed source identity digest (${relative})`);
+  }
+
+  if (guideSource !== PHASE253_GUIDE || collectionSource !== PHASE253_COLLECTION_STORY || pageSource !== PHASE253_PAGE_STORY ||
+      manifestSource !== PHASE253_MANIFEST || browserSource !== PHASE253_BROWSER_HELPERS) {
+    fail("Phase253 assertion: enumerated source identity differs from the bounded Phase253 contract");
+  }
+  if (!/synthetic stress scenarios, not representative customer behavior or real adopter usage evidence/i.test(guide) ||
+      !/disposable, non-production review lab/i.test(guide) ||
+      !/static review surface/i.test(guide) ||
+      !/rendered controls do not establish completed billing actions, mounted authorization, provider completion, or persistence/i.test(guide) ||
+      !/static rendering verifies story state and visual\/semantic output\. it does not prove mounted authorization, provider completion, dispatched action behavior, or persistence\./i.test(guide)) {
+    fail("Phase253 assertion: guide omits static-presentation or synthetic-stress limits");
+  }
+  if (!/production subscription collection with a connected DataTable LiveComponent/i.test(collectionStory) ||
+      !/deterministic development adapter over validated Cadence subscription facts/i.test(collectionStory) ||
+      !/routed billing page continues to use the scoped Repo query/i.test(collectionStory)) {
+    fail("Phase253 assertion: collection story omits its production-renderer and development-adapter attribution");
+  }
+  if (!/whole subscription detail page rendered by SubscriptionLive's production component/i.test(pageStory) ||
+      !/variations carry deterministic story facts only/i.test(pageStory) ||
+      !/do not establish mounted authorization, persistence, action dispatch, or provider completion/i.test(pageStory)) {
+    fail("Phase253 assertion: whole-page story omits its presentation-only effect limits");
+  }
+  if (browserLane !== "actual direct browser presentation; no mounted-effect claims" ||
+      syntheticLabels.some((label) => !/synthetic/i.test(label) || !/not customer evidence/i.test(label))) {
+    fail("Phase253 assertion: browser evidence does not preserve presentation-only and synthetic-stress labels");
+  }
+
+  for (const [label, rows, renderer, transport] of [
+    ["manifest entries", entries, null, null],
+    ["collection variations", collections, "AccrueAdmin.Live.SubscriptionsLive.subscriptions_collection/1", "live_component"],
+    ["page entries", pages, "AccrueAdmin.Live.SubscriptionLive.subscription_page/1", "page_story"],
+  ]) {
+    for (const row of rows) {
+      if (!/^CadenceSubscriptionFacts\.fetch!\(:[a-z_]+\)$/.test(row.fact_source) || row.proof_lane !== "presentation-only" ||
+          (renderer && row.production_renderer !== renderer) || (transport && row.transport_kind !== transport)) {
+        fail(`Phase253 assertion: ${label} lost bounded production/source/presentation attribution`);
+      }
+    }
+  }
+
+  const surfaces = phase253SubjectText(subject, guide, collectionStory, pageStory, entries, collections, pages, syntheticLabels);
+  for (const claim of PHASE253_EFFECT_CLAIMS) {
+    if (claim.pattern.test(surfaces)) fail(`Phase253 assertion: contradictory public claim phase253-static-effects (${claim.id})`);
+  }
+  for (const claim of PHASE253_SYNTHETIC_CLAIMS) {
+    if (claim.pattern.test(surfaces)) fail(`Phase253 assertion: contradictory public claim phase253-synthetic-attribution (${claim.id})`);
+  }
+  return true;
 }
 
 function readRequired(root, relative) {
@@ -405,6 +684,40 @@ export function selfTestHeldout(includeLabTarget = false) {
   return controls;
 }
 
+function requirePhase253Control(label, subjectPath, expectedStatus, expectedExit, expectedDiagnostic = null) {
+  const result = runTestTargets([PHASE253_TEST], subjectPath);
+  const tap = tapSummary(result.output);
+  if (tap.planned === null || tap.planned <= 0 || tap.records.length !== tap.planned || tap.tests !== tap.planned) {
+    fail(`Phase253 self-test ${label} has a missing or vacuous named TAP report`);
+  }
+  if (tap.cancelled !== 0 || tap.skipped !== 0 || tap.todo !== 0) fail(`Phase253 self-test ${label} has skipped, TODO, or cancelled tests`);
+  const target = tap.records.filter((record) => record.name === PHASE253_ASSERTION);
+  if (target.length !== 1 || target[0].status !== expectedStatus || result.status !== expectedExit) {
+    fail(`Phase253 self-test ${label} did not produce the required named ${expectedStatus === "ok" ? "GREEN" : "RED"}`);
+  }
+  if (expectedExit === 0 && (tap.pass !== tap.tests || tap.fail !== 0)) fail(`Phase253 self-test ${label} is not a clean non-vacuous pass`);
+  if (expectedExit !== 0 && (tap.fail !== 1 || !result.output.includes(expectedDiagnostic))) {
+    fail(`Phase253 self-test ${label} RED lacks the intended content diagnostic`);
+  }
+  return { label, tests: tap.tests, pass: tap.pass, fail: tap.fail };
+}
+
+export function selfTestCompositions() {
+  const controls = [
+    requirePhase253Control("current", null, "ok", 0),
+    requirePhase253Control("clean", PHASE253_CLEAN, "ok", 0),
+    requirePhase253Control("presentation-violation", PHASE253_PRESENTATION_VIOLATION, "not ok", 1,
+      "Phase252 transparency: Phase253 assertion: contradictory public claim phase253-static-effects"),
+    requirePhase253Control("attribution-violation", PHASE253_ATTRIBUTION_VIOLATION, "not ok", 1,
+      "Phase252 transparency: Phase253 assertion: contradictory public claim phase253-synthetic-attribution"),
+  ];
+  process.stdout.write(`PASS Phase 253 presentation transparency: controls=${controls.map(({ label }) => label).join(",")} target_tests=${controls.map(({ tests }) => tests).join(",")} assertion=${PHASE253_ASSERTION}\n`);
+  for (const marker of ["phase253_current_green", "phase253_clean_green", "phase253_static_violation_red", "phase253_synthetic_violation_red"]) {
+    process.stdout.write(`PHASE253_ASSERTION=${marker}\n`);
+  }
+  return controls;
+}
+
 function main() {
   const args = process.argv.slice(2);
   if (!args.includes("--self-test")) fail("usage: node scripts/ci/verify_phase252_transparency.mjs --self-test --only lab");
@@ -412,11 +725,12 @@ function main() {
   const only = onlyIndex === -1 ? "both" : args[onlyIndex + 1];
   if (only === "lab") selfTestLab();
   else if (only === "heldout") selfTestHeldout(false);
+  else if (only === "compositions") selfTestCompositions();
   else if (only === "both") {
     selfTestHeldout(true);
     selfTestLab();
   }
-  else fail("expected --only lab, --only heldout, or the default both-target mode");
+  else fail("expected --only lab, --only heldout, --only compositions, or the default both-target mode");
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

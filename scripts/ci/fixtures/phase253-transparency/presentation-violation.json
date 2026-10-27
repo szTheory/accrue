@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "guide": {
+    "source": "guides/ui-story-lab.md",
+    "text": "Ordinary and held-out subscription facts are synthetic stress scenarios, not representative customer behavior or real adopter usage evidence. This disposable, non-production review lab presents a static review surface. Rendered controls do not establish completed billing actions, mounted authorization, provider completion, or persistence. Static rendering verifies story state and visual/semantic output. It does not prove mounted authorization, provider completion, dispatched action behavior, or persistence."
+  },
+  "collection_story": {
+    "source": "storybook/groups/subscriptions_collection.story.exs",
+    "moduledoc": "The production subscription collection with a connected DataTable LiveComponent. The collection query is a deterministic development adapter over validated Cadence subscription facts. The routed billing page continues to use the scoped Repo query. The settled subscription story proves mounted authority, persistence, action dispatch, and provider completion."
+  },
+  "page_story": {
+    "source": "storybook/pages/subscription.story.exs",
+    "moduledoc": "Whole subscription detail page rendered by SubscriptionLive's production component. Variations carry deterministic story facts only. They do not establish mounted authorization, persistence, action dispatch, or provider completion."
+  },
+  "manifest": {
+    "source": "accrue_admin/tmp/phase253/manifest.json",
+    "entries": [
+      {
+        "key": "/groups/subscriptions_collection||one_row",
+        "variation_id": "one_row",
+        "fact_source": "CadenceSubscriptionFacts.fetch!(:launch)",
+        "production_renderer": "AccrueAdmin.Live.SubscriptionsLive.subscriptions_collection/1",
+        "proof_lane": "presentation-only",
+        "transport_kind": "live_component"
+      }
+    ],
+    "collection_variations": [
+      {
+        "variation_id": "one_row",
+        "fact_source": "CadenceSubscriptionFacts.fetch!(:launch)",
+        "production_renderer": "AccrueAdmin.Live.SubscriptionsLive.subscriptions_collection/1",
+        "proof_lane": "presentation-only",
+        "transport_kind": "live_component"
+      }
+    ],
+    "page_entries": [
+      {
+        "variation_id": "active",
+        "fact_source": "CadenceSubscriptionFacts.fetch!(:active)",
+        "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_page/1",
+        "proof_lane": "presentation-only",
+        "transport_kind": "page_story"
+      }
+    ]
+  },
+  "browser_evidence": {
+    "source": "accrue_admin/e2e/phase253-composition-helpers.js",
+    "proof_lane": "actual direct browser presentation; no mounted-effect claims",
+    "synthetic_labels": [
+      "separately labelled synthetic browser-only layout stress; not customer evidence",
+      "separately labelled synthetic active stress only; not customer evidence"
+    ]
+  },
+  "source_identity": {
+    "manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "files": {
+      "guides/ui-story-lab.md": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "storybook/groups/subscriptions_collection.story.exs": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "storybook/pages/subscription.story.exs": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "accrue_admin/e2e/phase253-composition-helpers.js": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    }
+  }
+}
