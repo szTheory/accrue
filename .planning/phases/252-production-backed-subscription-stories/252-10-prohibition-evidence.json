@@ -37,8 +37,8 @@
       ".planning/phases/252-production-backed-subscription-stories/252-04-PLAN.md": "d09ddbb087cbaa3d114070fdc3851100e9a895177c5199a5df028e276a743cda"
     },
     "original_plan_after_descriptor": {
-      ".planning/phases/252-production-backed-subscription-stories/252-01-PLAN.md": "b2675ee2702e6cea7616124405ad01cca187c51936a1f4eefd0f29fdb33db702",
-      ".planning/phases/252-production-backed-subscription-stories/252-04-PLAN.md": "427df570f90ed16412cd19ba6d8f63e013c0b9942ef5af58bd80a7e16291f813"
+      ".planning/phases/252-production-backed-subscription-stories/252-01-PLAN.md": "9134bfd54de13cd63a0d318f044042784f397f65b9717bfc97f1791d8ffe43d4",
+      ".planning/phases/252-production-backed-subscription-stories/252-04-PLAN.md": "7654303a0c457f972092ac330ba547bc4f1e87126f55bae976c5fa48eb87912e"
     }
   },
   "projection_reconstruction": [
@@ -47,13 +47,13 @@
       "plan_path": ".planning/phases/252-production-backed-subscription-stories/252-01-PLAN.md",
       "pre_metadata_commit": "4b8abe80",
       "pre_metadata_sha256": "453e70580d6099106043d436608506197d1d1deb684ff0480b651c6b75d4dda2",
-      "post_metadata_sha256": "b2675ee2702e6cea7616124405ad01cca187c51936a1f4eefd0f29fdb33db702",
+      "post_metadata_sha256": "9134bfd54de13cd63a0d318f044042784f397f65b9717bfc97f1791d8ffe43d4",
       "parsed_prohibition": {
         "statement": "The review lab must not be presented as a production operations console or evidence of completed billing actions.",
         "category": "transparency",
         "status": "resolved",
         "verification": "test",
-        "resolution": "The bounded lab presentation check and its current, clean, and known-violation controls were machine-proven by the native GSD prohibition producer.",
+        "resolution": "The bounded target scripts/ci/verify_phase252_lab_presentation.test.mjs and its current, clean, and known-violation controls were machine-proven by the native GSD prohibition producer.",
         "check_kind": "node-test",
         "check_target": "scripts/ci/verify_phase252_lab_presentation.test.mjs",
         "check_violation_fixture": "scripts/ci/fixtures/phase252-transparency/lab-violation.json",
@@ -66,7 +66,8 @@
         "check_kind": "node-test",
         "check_target": "scripts/ci/verify_phase252_lab_presentation.test.mjs",
         "check_violation_fixture": "scripts/ci/fixtures/phase252-transparency/lab-violation.json",
-        "check_clean_fixture": "scripts/ci/fixtures/phase252-transparency/lab-clean.json"
+        "check_clean_fixture": "scripts/ci/fixtures/phase252-transparency/lab-clean.json",
+        "resolution": "The bounded target scripts/ci/verify_phase252_lab_presentation.test.mjs and its current, clean, and known-violation controls were machine-proven by the native GSD prohibition producer."
       },
       "reconstructed_check": {
         "kind": "node-test",
@@ -80,13 +81,13 @@
       "plan_path": ".planning/phases/252-production-backed-subscription-stories/252-04-PLAN.md",
       "pre_metadata_commit": "4b8abe80",
       "pre_metadata_sha256": "d09ddbb087cbaa3d114070fdc3851100e9a895177c5199a5df028e276a743cda",
-      "post_metadata_sha256": "427df570f90ed16412cd19ba6d8f63e013c0b9942ef5af58bd80a7e16291f813",
+      "post_metadata_sha256": "7654303a0c457f972092ac330ba547bc4f1e87126f55bae976c5fa48eb87912e",
       "parsed_prohibition": {
         "statement": "Held-out adversarial scenarios must not be presented as representative customer behavior or evidence of real adopter usage.",
         "category": "transparency",
         "status": "resolved",
         "verification": "test",
-        "resolution": "The bounded held-out attribution check and its current, clean, and known-violation controls were machine-proven by the native GSD prohibition producer.",
+        "resolution": "The bounded target scripts/ci/verify_phase252_heldout_attribution.test.mjs and its current, clean, and known-violation controls were machine-proven by the native GSD prohibition producer.",
         "check_kind": "node-test",
         "check_target": "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
         "check_violation_fixture": "scripts/ci/fixtures/phase252-transparency/heldout-violation.json",
@@ -99,7 +100,8 @@
         "check_kind": "node-test",
         "check_target": "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
         "check_violation_fixture": "scripts/ci/fixtures/phase252-transparency/heldout-violation.json",
-        "check_clean_fixture": "scripts/ci/fixtures/phase252-transparency/heldout-clean.json"
+        "check_clean_fixture": "scripts/ci/fixtures/phase252-transparency/heldout-clean.json",
+        "resolution": "The bounded target scripts/ci/verify_phase252_heldout_attribution.test.mjs and its current, clean, and known-violation controls were machine-proven by the native GSD prohibition producer."
       },
       "reconstructed_check": {
         "kind": "node-test",
@@ -257,5 +259,80 @@
       }
     }
   ],
-  "historical_context": "Prior unresolved reason retained in appended notes in both original plans: flagged-unverified specless fallback; no wired-check descriptor."
+  "historical_context": "Prior unresolved reason retained in appended notes in both original plans: flagged-unverified specless fallback; no wired-check descriptor.",
+  "final_native_runs": [
+    {
+      "id": "PROH-LAB-PRESENTATION",
+      "request_path": "/private/tmp/phase252-10-native-CVxYYA/final/lab-final-request.json",
+      "request_sha256": "005f8a559b35b685f657628b5e667baa16115a113ffa69b46adcf055356189b9",
+      "stdout_path": "/private/tmp/phase252-10-native-CVxYYA/final/lab-final-stdout.json",
+      "stdout_sha256": "76da5a8639760dbdda42420e47a05449d71ac8f066886fe7d96b08f62d7eeba2",
+      "stdout": "{\n  \"status\": \"green\",\n  \"flagged\": false,\n  \"tier\": \"test\",\n  \"reason\": \"test-tier prohibition has wired enforcement evidence\",\n  \"located\": true,\n  \"kind\": \"node-test\",\n  \"evidence\": [\n    {\n      \"kind\": \"node-test\",\n      \"target\": \"scripts/ci/verify_phase252_lab_presentation.test.mjs\",\n      \"failFirst\": true,\n      \"passed\": true,\n      \"failFirstProof\": \"violation-fixture\"\n    }\n  ]\n}",
+      "exit_code": 0,
+      "payload": {
+        "status": "green",
+        "flagged": false,
+        "tier": "test",
+        "reason": "test-tier prohibition has wired enforcement evidence",
+        "located": true,
+        "kind": "node-test",
+        "evidence": [
+          {
+            "kind": "node-test",
+            "target": "scripts/ci/verify_phase252_lab_presentation.test.mjs",
+            "failFirst": true,
+            "passed": true,
+            "failFirstProof": "violation-fixture"
+          }
+        ]
+      },
+      "required_assertions": {
+        "status_green": true,
+        "flagged_false": true,
+        "located_true": true,
+        "node_test_kind": true,
+        "nonempty_evidence": true,
+        "passed": true,
+        "fail_first": true,
+        "fail_first_proof": true
+      }
+    },
+    {
+      "id": "PROH-HELDOUT-ATTRIBUTION",
+      "request_path": "/private/tmp/phase252-10-native-CVxYYA/final/heldout-final-request.json",
+      "request_sha256": "496e4e4ccdcc342d11458ef9006b056ac4ebfa9cf8754f574ea390780c4d5eed",
+      "stdout_path": "/private/tmp/phase252-10-native-CVxYYA/final/heldout-final-stdout.json",
+      "stdout_sha256": "294885d0886f97c93b78c2ec8681b88c7069e235ed3ac8b971ade5739dab04f7",
+      "stdout": "{\n  \"status\": \"green\",\n  \"flagged\": false,\n  \"tier\": \"test\",\n  \"reason\": \"test-tier prohibition has wired enforcement evidence\",\n  \"located\": true,\n  \"kind\": \"node-test\",\n  \"evidence\": [\n    {\n      \"kind\": \"node-test\",\n      \"target\": \"scripts/ci/verify_phase252_heldout_attribution.test.mjs\",\n      \"failFirst\": true,\n      \"passed\": true,\n      \"failFirstProof\": \"violation-fixture\"\n    }\n  ]\n}",
+      "exit_code": 0,
+      "payload": {
+        "status": "green",
+        "flagged": false,
+        "tier": "test",
+        "reason": "test-tier prohibition has wired enforcement evidence",
+        "located": true,
+        "kind": "node-test",
+        "evidence": [
+          {
+            "kind": "node-test",
+            "target": "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
+            "failFirst": true,
+            "passed": true,
+            "failFirstProof": "violation-fixture"
+          }
+        ]
+      },
+      "required_assertions": {
+        "status_green": true,
+        "flagged_false": true,
+        "located_true": true,
+        "node_test_kind": true,
+        "nonempty_evidence": true,
+        "passed": true,
+        "fail_first": true,
+        "fail_first_proof": true
+      }
+    }
+  ],
+  "native_proof_updated_for_final_descriptor": true
 }

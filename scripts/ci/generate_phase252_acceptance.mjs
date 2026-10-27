@@ -737,6 +737,23 @@ export function validatePhase252Evidence({ root = ROOT, resultsPath }) {
   };
 }
 
+export function validateCurrentPhase252Metadata({ root = ROOT } = {}) {
+  const repository = realRoot(root);
+  const plan = inspectPlanSources(repository);
+  const guidePath = resolveRelative(repository, "guides/ui-story-lab.md");
+  const guideContract = validateGuideContract(fs.readFileSync(guidePath, "utf8"));
+  return {
+    status: "metadata_passed",
+    requirements: plan.requirements.length,
+    tasks: plan.tasks.length,
+    classified_edges: plan.edges.length,
+    unclassified_assumptions: plan.unclassified.length,
+    ui_predicates: plan.uiIds.length,
+    prohibitions: plan.prohibitions.map(({ id, target, resolution }) => ({ id, target, resolution })),
+    guide_contract: guideContract,
+  };
+}
+
 export function generatePhase252Acceptance({ root = ROOT, resultsPath, writeUat = false }) {
   const evidence = validatePhase252Evidence({ root, resultsPath });
   if (!writeUat) return { evidence, uat_written: false, uat_path: null };

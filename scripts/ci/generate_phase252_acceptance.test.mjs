@@ -11,6 +11,7 @@ import { deriveExecutionEvidence, expectedExUnitIdentities, expectedNodeTestIden
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import {
   generatePhase252Acceptance,
+  validateCurrentPhase252Metadata,
   validateGuideContract,
   validatePhase252Evidence,
 } from "./generate_phase252_acceptance.mjs";
@@ -966,5 +967,30 @@ test("acceptance UAT is archive-aware and follows the project automated UAT shap
     assert.equal(result.evidence.prohibition_evidence.length, 2);
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
+  }
+});
+
+test("current source metadata validates before the full aggregate runs", () => {
+  const metadata = validateCurrentPhase252Metadata({ root: repositoryRoot });
+  assert.equal(metadata.status, "metadata_passed");
+  assert.deepEqual({
+    requirements: metadata.requirements,
+    tasks: metadata.tasks,
+    classified_edges: metadata.classified_edges,
+    unclassified_assumptions: metadata.unclassified_assumptions,
+    ui_predicates: metadata.ui_predicates,
+  }, {
+    requirements: 10,
+    tasks: 8,
+    classified_edges: 13,
+    unclassified_assumptions: 4,
+    ui_predicates: 20,
+  });
+  assert.deepEqual(metadata.prohibitions.map(({ id, target }) => [id, target]), [
+    ["PROH-LAB-PRESENTATION", "scripts/ci/verify_phase252_lab_presentation.test.mjs"],
+    ["PROH-HELDOUT-ATTRIBUTION", "scripts/ci/verify_phase252_heldout_attribution.test.mjs"],
+  ]);
+  for (const prohibition of metadata.prohibitions) {
+    assert.ok(prohibition.resolution.includes(prohibition.target));
   }
 });
