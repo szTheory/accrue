@@ -451,6 +451,32 @@ test("fresh actual runner, manifest and browser evidence produce complete covera
   }
 });
 
+test("resolved transparency descriptors require live target assertions and fresh controls", () => {
+  const fixture = createFixture();
+  try {
+    const descriptors = [
+      ["252-01-PLAN.md", "The review lab must not be presented as a production operations console or evidence of completed billing actions.", "scripts/ci/verify_phase252_lab_presentation.test.mjs", "scripts/ci/fixtures/phase252-transparency/lab-violation.json", "scripts/ci/fixtures/phase252-transparency/lab-clean.json"],
+      ["252-04-PLAN.md", "Held-out adversarial scenarios must not be presented as representative customer behavior or evidence of real adopter usage.", "scripts/ci/verify_phase252_heldout_attribution.test.mjs", "scripts/ci/fixtures/phase252-transparency/heldout-violation.json", "scripts/ci/fixtures/phase252-transparency/heldout-clean.json"],
+    ];
+    for (const [filename, statement, target, violation, clean] of descriptors) {
+      const absolute = path.join(fixture.phaseDir, filename);
+      const source = fs.readFileSync(absolute, "utf8");
+      const resolved = `prohibitions:\n  - statement: "${statement}"\n    category: transparency\n    status: resolved\n    verification: test\n    resolution: "Bounded by ${target} with fresh clean and violation controls."\n    check_kind: node-test\n    check_target: ${target}\n    check_violation_fixture: ${violation}\n    check_clean_fixture: ${clean}\n`;
+      fs.writeFileSync(absolute, source.replace(/prohibitions:\n[\s\S]*?(?=---\n)/, resolved));
+    }
+    const bundle = JSON.parse(fs.readFileSync(fixture.resultsPath, "utf8"));
+    bundle.commands = bundle.commands.filter((row) => !["lab-presentation", "heldout-attribution", "transparency-controls"].includes(row.id));
+    bundle.run_completed_at = "2026-10-27T00:00:00.205Z";
+    fs.writeFileSync(fixture.resultsPath, JSON.stringify(bundle, null, 2) + "\n");
+    const evidence = validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath });
+    assert.equal(evidence.prohibition_evidence.length, 2);
+    assert.equal(evidence.unresolved_prohibitions.length, 0);
+    assert.ok(evidence.prohibition_evidence.every((item) => item.status === "green" && item.flagged === false));
+  } finally {
+    fs.rmSync(fixture.root, { recursive: true, force: true });
+  }
+});
+
 test("missing and failed commands cannot become passing UAT evidence", () => {
   for (const mutate of [
     (bundle) => { bundle.commands = bundle.commands.filter((row) => row.id !== "scenario-domain"); },
