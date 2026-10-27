@@ -1,27 +1,21 @@
 import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import * as generator from "./generate_phase253_acceptance.mjs";
 
 const root = path.resolve(process.env.PHASE253_REPO_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.."));
-const generatorPath = path.join(root, "scripts/ci/generate_phase253_acceptance.mjs");
-
-async function loadGenerator() {
-  try {
-    return await import(pathToFileURL(generatorPath));
-  } catch {
-    assert.fail("Phase 253 acceptance generator must be importable");
-  }
-}
-
-test("acceptance generator parses five requirements, fourteen tasks, ten edges, and twenty-six UI IDs", async () => {
-  const generator = await loadGenerator();
+test("acceptance requires all five requirements, fourteen tasks, ten edges, and twenty-six UI criteria", () => {
   assert.equal(typeof generator.inspectPhase253Metadata, "function");
   const metadata = generator.inspectPhase253Metadata({ root });
   assert.equal(metadata.requirements.length, 5);
   assert.equal(metadata.tasks.length, 14);
   assert.equal(metadata.edges.length, 10);
   assert.equal(metadata.ui.length, 26);
+});
+
+test("current and historical unclassified assumptions remain unresolved", () => {
+  const metadata = generator.inspectPhase253Metadata({ root });
   assert.deepEqual(metadata.current_unclassified, ["EDGE-SBK-05-unclassified", "EDGE-UXQ-01-unclassified"]);
   assert.deepEqual(metadata.historical_unclassified, [
     "EDGE-CIQ-01-unclassified",
@@ -31,14 +25,29 @@ test("acceptance generator parses five requirements, fourteen tasks, ten edges, 
   ]);
 });
 
-test("latest acceptance rejects missing, stale, skipped, pooled, and unsafe runtime evidence", async () => {
-  const generator = await loadGenerator();
+test("process-marker lanes retain named assertion references when TAP bindings are empty", () => {
+  assert.deepEqual(generator.expectedAssertionReferences({
+    assertion_bindings: {},
+    process_markers: ["phase253_current_green", "phase253_clean_green"],
+  }), ["phase253_current_green", "phase253_clean_green"]);
+});
+
+test("both project prohibitions require native clean and independent violation descriptors", () => {
+  const metadata = generator.inspectPhase253Metadata({ root });
+  assert.equal(metadata.prohibitions.length, 2);
+  assert.ok(metadata.prohibitions.every((item) => item.status === "resolved" && item.verification === "test"));
+  assert.ok(metadata.prohibitions.every((item) => item.check_kind === "node-test"));
+  assert.ok(metadata.prohibitions.every((item) => item.check_target === "scripts/ci/verify_phase253_presentation.test.mjs"));
+  assert.ok(metadata.prohibitions.every((item) => item.check_clean_fixture === "scripts/ci/fixtures/phase253-transparency/clean.json"));
+  assert.equal(new Set(metadata.prohibitions.map((item) => item.check_violation_fixture)).size, 2);
+});
+
+test("latest acceptance rejects missing, stale, skipped, pooled, and unsafe runtime evidence", () => {
   assert.throws(() => generator.validatePhase253Evidence({ root, resultsPath: "accrue_admin/tmp/phase253/ci-results/missing/results.json" }), /missing|result|bundle/i);
   assert.throws(() => generator.validatePhase253Evidence({ root, resultsPath: "../outside/results.json" }), /unsafe|repository-relative|path/i);
 });
 
-test("automated UAT generation waits for every complete human-judgment-free summary", async () => {
-  const generator = await loadGenerator();
-  assert.throws(() => generator.generatePhase253Acceptance({ root, latest: true, writeUat: true }), /253-06-SUMMARY|summary|complete/i);
+test("acceptance UAT generation requires every completed summary", () => {
+  assert.throws(() => generator.validateCompletedSummaries({ root }), /253-06-SUMMARY|summary|complete/i);
 });
 

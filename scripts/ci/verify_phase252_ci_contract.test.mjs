@@ -124,6 +124,8 @@ test("every newly consumed Phase 253 source class maps to the named required CI 
     ["phase253-focused-runner", "scripts/ci/verify_phase253_compositions.mjs"],
     ["phase253-focused-runner-tests", "scripts/ci/verify_phase253_compositions.test.mjs"],
     ["phase253-acceptance-generator", "scripts/ci/generate_phase253_acceptance.mjs"],
+    ["phase253-ci-imported-module", "scripts/ci/main_module.mjs"],
+    ["phase253-historical-unclassified-summary", ".planning/phases/252-production-backed-subscription-stories/252-08-SUMMARY.md"],
     ["phase253-transparency-fixtures", "scripts/ci/fixtures/phase253-transparency/presentation-violation.json"],
     ["phase253-prohibition-plan", ".planning/phases/253-real-groups-and-a-whole-subscription-job/253-05-PLAN.md"],
     ["phase253-validation", ".planning/phases/253-real-groups-and-a-whole-subscription-job/253-VALIDATION.md"],
@@ -355,6 +357,7 @@ test("all transparency and original descriptor inputs are fresh, owner-classifie
 
 test("new consumed roots have positive paths and fail when their admission rule is removed", () => {
   const newRoots = [
+    ["phase253-ci-imported-module", "scripts/ci/main_module.mjs"],
     ...[2, 3, 5, 6, 7, 8, 9, 10].map((number) => [`phase252-acceptance-plan-${number}`, `.planning/phases/252-production-backed-subscription-stories/252-${String(number).padStart(2, "0")}-PLAN.md`]),
     ["phase252-validation-accounting", ".planning/phases/252-production-backed-subscription-stories/252-VALIDATION.md"],
     ["phase252-transparency-fixtures", "scripts/ci/fixtures/phase252-transparency/lab-clean.json"],

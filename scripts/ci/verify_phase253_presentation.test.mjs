@@ -6,10 +6,9 @@ import path from "node:path";
 import test from "node:test";
 import * as transparency from "./verify_phase252_transparency.mjs";
 
-const ASSERTION = "truthful Phase253 composition attribution remains presentation-only";
 const CLEAN = "scripts/ci/fixtures/phase253-transparency/clean.json";
 
-test(ASSERTION, () => {
+test("truthful Phase253 composition attribution remains presentation-only", () => {
   assert.equal(typeof transparency.loadPhase253Subject, "function");
   assert.equal(typeof transparency.assertPhase253Presentation, "function");
   assert.equal(transparency.assertPhase253Presentation(transparency.loadPhase253Subject()), true);

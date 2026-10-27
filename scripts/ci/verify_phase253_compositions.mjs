@@ -45,6 +45,7 @@ const COMMON_SOURCES = Object.freeze([
   "scripts/ci/verify_phase253_presentation.test.mjs",
   "scripts/ci/generate_phase253_acceptance.mjs",
   "scripts/ci/generate_phase253_acceptance.test.mjs",
+  ".planning/phases/252-production-backed-subscription-stories/252-08-SUMMARY.md",
   "scripts/ci/verify_phase200_admin_guardrails.sh",
   "scripts/ci/verify_phase200_guardrail_contract.sh",
   "scripts/dev/phase252_lab.mjs",
@@ -65,6 +66,15 @@ const COLLECTION_ASSERTIONS = Object.freeze([
   "theme_and_served_asset_identity",
   "no_hidden_essential_or_page_overflow",
 ]);
+const COLLECTION_BREAKPOINT_ASSERTIONS = Object.freeze([
+  ...COLLECTION_ASSERTIONS,
+  "actual_767_768_card_table_transition",
+  "table_local_scroll_is_separate",
+]);
+const COLLECTION_FILTERED_EMPTY_BREAKPOINT_ASSERTIONS = Object.freeze([
+  ...COLLECTION_ASSERTIONS,
+  "filtered_empty_is_visible_without_inventing_empty_table_or_cards",
+]);
 const COLLECTION_STRESS_ASSERTIONS = Object.freeze([
   "synthetic_name_and_id_wrap",
   "filter_value_remains_text_without_page_overflow",
@@ -82,6 +92,10 @@ const PAGE_ASSERTIONS = Object.freeze([
   "native_disclosures_activity_and_related_links",
   "theme_and_served_asset_identity",
   "no_hidden_essential_content_or_page_overflow",
+]);
+const PAGE_STRESS_ASSERTIONS = Object.freeze([
+  ...PAGE_ASSERTIONS,
+  "long_source_preserving_synthetic_stress_is_visible_and_unclipped",
 ]);
 const RECONCILIATION_TITLE = "reconciles every compiled collection and whole-page cell against this run and served assets";
 const EXPECTED_ASSET_PATHS = Object.freeze([
@@ -123,7 +137,7 @@ const ASSERTION_BINDINGS = Object.freeze({
   "phase253-ci-contract": Object.freeze({
     new_root_admission: ["every newly consumed Phase 253 source class maps to the named required CI owner"],
     required_owner_execution: ["the named required owner invokes both Phase 252 and Phase 253 checks"],
-    unrelated_path_negative_control: ["unrelated paths remain outside the focused required owner"],
+    unrelated_path_negative_control: ["unrelated docs are not focused while unconditional required CI still admits them"],
   }),
   "phase253-acceptance-contract": Object.freeze({
     complete_phase_mapping: ["acceptance requires all five requirements, fourteen tasks, ten edges, and twenty-six UI criteria"],
@@ -294,9 +308,14 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
     "accrue_admin/e2e/subscription-compositions-phase253.spec.js",
     "accrue_admin/e2e/phase253-composition-helpers.js",
     "accrue_admin/playwright.phase252.config.js",
+    "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+    "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+    "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+    "accrue_admin/lib/accrue_admin/router.ex",
     "accrue_admin/storybook/_support/subscription_collection.ex",
     "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
     "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+    "dev_support/ui_scenarios/cadence_subscriptions.exs",
     "storybook/groups/subscriptions_collection.story.exs",
     "storybook/pages/subscription.story.exs",
     "accrue_admin/assets/css/app.css",
@@ -304,7 +323,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
     "accrue_admin/priv/static/storybook.css",
     "accrue_admin/priv/static/storybook.js",
   ];
-  const nodeTap = (testId, file, assertions, sources = []) => command(
+  const nodeTap = (testId, file, assertions, sources = [], testFiles = [file]) => command(
     testId,
     "node --test --test-reporter=tap",
     process.execPath,
@@ -312,7 +331,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
     {
       lane: "read-only",
       sources: [file, ...sources],
-      reporter: { kind: "node-tap", testFiles: [file] },
+      reporter: { kind: "node-tap", testFiles },
       assertion_bindings: assertions,
     },
   );
@@ -385,12 +404,15 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
           asset_paths: EXPECTED_ASSET_PATHS,
           assertion_ids: {
             viewport: COLLECTION_ASSERTIONS,
-            breakpoint: COLLECTION_ASSERTIONS,
+            breakpoint: {
+              one_row: COLLECTION_BREAKPOINT_ASSERTIONS,
+              filtered_empty: COLLECTION_FILTERED_EMPTY_BREAKPOINT_ASSERTIONS,
+            },
             container: COLLECTION_ASSERTIONS,
             synthetic_text_stress: COLLECTION_STRESS_ASSERTIONS,
             geometry_negative_controls: GEOMETRY_ASSERTIONS,
             page_composition: PAGE_ASSERTIONS,
-            page_synthetic_text_stress: PAGE_ASSERTIONS,
+          page_synthetic_text_stress: PAGE_STRESS_ASSERTIONS,
           },
           result_path: browserResultPath,
         },
@@ -439,6 +461,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
       "scripts/ci/verify_phase252_ci_contract.test.mjs",
       ASSERTION_BINDINGS["phase253-ci-contract"],
       [
+        "scripts/ci/main_module.mjs",
         "scripts/ci/phase252_paths.mjs",
         "scripts/ci/verify_phase252_stories.mjs",
         "scripts/ci/phase252_reporters.mjs",
@@ -446,6 +469,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
         "scripts/ci/verify_phase200_guardrail_contract.sh",
         ".github/workflows/ci.yml",
       ],
+      ["scripts/ci/verify_phase252_ci_contract.test.mjs", "scripts/ci/main_module.mjs"],
     ),
     nodeTap(
       "phase253-acceptance-contract",
@@ -455,7 +479,9 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
         "scripts/ci/generate_phase253_acceptance.mjs",
         "scripts/ci/verify_executable_uat_contract.mjs",
         "scripts/ci/phase_evidence_path.mjs",
+        "scripts/ci/main_module.mjs",
       ],
+      ["scripts/ci/generate_phase253_acceptance.test.mjs", "scripts/ci/main_module.mjs"],
     ),
   ];
   assertRequiredCommandPlan(plan);
@@ -584,13 +610,16 @@ function playrightTestIdentities(report) {
   const visit = (suite) => {
     for (const item of suite.specs || []) {
       if (item.ok === false) fail("Playwright spec failed: " + String(item.title || "unnamed"));
+      if (typeof item.title !== "string" || item.title.length === 0 ||
+          !Array.isArray(item.tests) || item.tests.length !== 1) {
+        fail("Playwright spec identity is missing or pooled across test projects");
+      }
       for (const test of item.tests || []) {
-        if (typeof test.title !== "string" || test.title.length === 0 ||
-            test.expectedStatus !== "passed" || !Array.isArray(test.results) || test.results.length !== 1 ||
-            test.results[0]?.status !== "passed") {
+        if (test.expectedStatus !== "passed" || !Array.isArray(test.results) || test.results.length !== 1 ||
+            test.results[0]?.status !== "passed" || test.results[0]?.retry !== 0) {
           fail("Playwright test identity is missing, skipped, failed, or retried");
         }
-        tests.push(test.title);
+        tests.push(item.title);
       }
     }
     for (const nested of suite.suites || []) visit(nested);
@@ -647,7 +676,11 @@ function validateBrowserEvidence(spec, execution, { root, expectedSourceDigests,
         typeof row.completed_at !== "string" || row.completed_at.length === 0) {
       fail("browser cell is missing an executed test identity or completion time: " + row.key);
     }
-    assertExactStrings(row.assertion_ids, spec.browser_contract.assertion_ids[row.case_kind], "browser row assertions for " + row.key);
+    const assertionInventory = spec.browser_contract.assertion_ids[row.case_kind];
+    const expectedAssertions = Array.isArray(assertionInventory)
+      ? assertionInventory
+      : assertionInventory?.[row.key.split("::")[0]];
+    assertExactStrings(row.assertion_ids, expectedAssertions, "browser row assertions for " + row.key);
     if (!row.source_identity || typeof row.source_identity !== "object" || Object.values(row.source_identity).every((value) => value == null || value === "")) {
       fail("browser cell lacks compiled source identity: " + row.key);
     }

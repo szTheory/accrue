@@ -180,7 +180,7 @@ function playwrightReport(identities) {
       specs: identities.map((title) => ({
         title,
         ok: true,
-        tests: [{ title, expectedStatus: "passed", results: [{ status: "passed" }] }],
+        tests: [{ expectedStatus: "passed", results: [{ status: "passed", retry: 0 }] }],
       })),
     }],
   };
@@ -195,12 +195,19 @@ function browserFixture(runner, resultPath) {
     [js]: runner.fileDigest(root, js),
   };
   const keys = [
+    { key: "one_row::breakpoint::767::light", case_kind: "breakpoint", variation_id: "one_row" },
+    { key: "filtered_empty::breakpoint::767::light", case_kind: "breakpoint", variation_id: "filtered_empty" },
     { key: "state::viewport::320::light", case_kind: "viewport" },
     { key: "state::viewport::1280::dark", case_kind: "viewport" },
     { key: "geometry::negative-controls::320::light", case_kind: "geometry_negative_controls" },
   ];
-  const cases = keys.map(({ key, case_kind }) => {
+  const cases = keys.map(({ key, case_kind, variation_id }) => {
     const testTitle = "rendered " + key;
+    const assertionIds = case_kind === "geometry_negative_controls"
+      ? ["geometry_detected"]
+      : case_kind === "breakpoint"
+        ? [variation_id === "one_row" ? "actual_transition" : "filtered_empty_layout"]
+        : ["cell_rendered"];
     return {
       key,
       case_kind,
@@ -209,7 +216,7 @@ function browserFixture(runner, resultPath) {
       executed_test: testTitle,
       completed_at: "2026-10-27T20:00:00.000Z",
       status: "passed",
-      assertion_ids: case_kind === "geometry_negative_controls" ? ["geometry_detected"] : ["cell_rendered"],
+      assertion_ids: assertionIds,
       source_identity: { story_path: "/groups/subscriptions_collection", renderer: "Production.Renderer/1", proof_lane: "presentation-only" },
       served_assets: { css_sha256: digests[css], js_sha256: digests[js], verified: true },
       negative_controls: case_kind === "geometry_negative_controls"
@@ -226,6 +233,7 @@ function browserFixture(runner, resultPath) {
     reporter: { kind: "playwright-json" },
     assertion_bindings: {
       rendered_cells: ["viewport"],
+      breakpoint_controls: ["breakpoint"],
       geometry_negative_controls: ["geometry_negative_controls"],
       manifest_reconciliation: ["__reconciliation__"],
     },
@@ -233,7 +241,14 @@ function browserFixture(runner, resultPath) {
       expected_cell_definitions: () => keys,
       reconciliation_title: reconciliation,
       asset_paths: [css, js],
-      assertion_ids: { viewport: ["cell_rendered"], geometry_negative_controls: ["geometry_detected"] },
+      assertion_ids: {
+        viewport: ["cell_rendered"],
+        breakpoint: {
+          one_row: ["actual_transition"],
+          filtered_empty: ["filtered_empty_layout"],
+        },
+        geometry_negative_controls: ["geometry_detected"],
+      },
       result_path: resultPath,
     },
   };
@@ -274,9 +289,29 @@ test("browser evidence accepts the complete cell control and rejects duplicates,
       browserResult: fixture.result,
       expectedBrowserCells: fixture.keys,
     });
-    assert.equal(accepted.test_count, 4);
-    assert.equal(accepted.browser_cells.length, 3);
-    assert.deepEqual(accepted.assertion_refs, ["geometry_negative_controls", "manifest_reconciliation", "rendered_cells"]);
+    assert.equal(accepted.test_count, 6);
+    assert.equal(accepted.browser_cells.length, 5);
+    assert.deepEqual(accepted.assertion_refs, ["breakpoint_controls", "geometry_negative_controls", "manifest_reconciliation", "rendered_cells"]);
+
+    const missingIdentity = structuredClone(fixture.report);
+    delete missingIdentity.suites[0].specs[0].title;
+    assert.throws(() => runner.validateLaneEvidence(fixture.spec, {
+      ...execution,
+      stdout: JSON.stringify(missingIdentity),
+    }, {
+      root, expectedRunId: runId, expectedSourceDigests: fixture.digests,
+      expectedManifestDigest: manifestDigest, browserResult: fixture.result, expectedBrowserCells: fixture.keys,
+    }), /spec identity/);
+
+    const retried = structuredClone(fixture.report);
+    retried.suites[0].specs[0].tests[0].results[0].retry = 1;
+    assert.throws(() => runner.validateLaneEvidence(fixture.spec, {
+      ...execution,
+      stdout: JSON.stringify(retried),
+    }, {
+      root, expectedRunId: runId, expectedSourceDigests: fixture.digests,
+      expectedManifestDigest: manifestDigest, browserResult: fixture.result, expectedBrowserCells: fixture.keys,
+    }), /retried/);
 
     const duplicate = structuredClone(fixture.result);
     duplicate.cases[1].key = duplicate.cases[0].key;
@@ -308,4 +343,78 @@ test("browser evidence accepts the complete cell control and rejects duplicates,
   } finally {
     fs.rmSync(absoluteResultPath, { force: true });
   }
+});
+
+test("browser assertion inventories include breakpoint and page stress controls", async () => {
+  const runner = await loadRunner();
+  const browser = runner.buildCommandPlan({
+    id: runId,
+    adminBuildPath: "/tmp/phase253-contract/admin",
+    outputDirectory: "/tmp/phase253-contract/output",
+  }).find(({ id }) => id === "phase253-compositions-browser");
+  const manifestSourcePaths = [
+    "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+    "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+    "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+    "accrue_admin/lib/accrue_admin/router.ex",
+    "accrue_admin/storybook/_support/subscription_collection.ex",
+    "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+    "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+    "dev_support/ui_scenarios/cadence_subscriptions.exs",
+    "storybook/groups/subscriptions_collection.story.exs",
+    "storybook/pages/subscription.story.exs",
+  ];
+  assert.ok(manifestSourcePaths.every((source) => browser.sources.includes(source)));
+  assert.deepEqual(Object.keys(browser.browser_contract.assertion_ids.breakpoint).sort(), ["filtered_empty", "one_row"]);
+  assert.deepEqual([...browser.browser_contract.assertion_ids.breakpoint.one_row].sort(), [
+    "actual_767_768_card_table_transition",
+    "compiled_direct_route",
+    "no_hidden_essential_or_page_overflow",
+    "ordered_collection_content",
+    "source_facts_and_state_controls",
+    "table_local_scroll_is_separate",
+    "theme_and_served_asset_identity",
+  ].sort());
+  assert.deepEqual([...browser.browser_contract.assertion_ids.breakpoint.filtered_empty].sort(), [
+    "compiled_direct_route",
+    "filtered_empty_is_visible_without_inventing_empty_table_or_cards",
+    "no_hidden_essential_or_page_overflow",
+    "ordered_collection_content",
+    "source_facts_and_state_controls",
+    "theme_and_served_asset_identity",
+  ].sort());
+  assert.deepEqual([...browser.browser_contract.assertion_ids.page_synthetic_text_stress].sort(), [
+    "compiled_direct_whole_page_route",
+    "exact_ids_amount_caveats_state_and_destinations",
+    "long_source_preserving_synthetic_stress_is_visible_and_unclipped",
+    "native_disclosures_activity_and_related_links",
+    "no_hidden_essential_content_or_page_overflow",
+    "production_source_identity_and_fact_content",
+    "theme_and_served_asset_identity",
+  ].sort());
+});
+
+test("CI and acceptance contracts include imported main-module test identities", async () => {
+  const runner = await loadRunner();
+  const ciContract = runner.buildCommandPlan({
+    id: runId,
+    adminBuildPath: "/tmp/phase253-contract/admin",
+    outputDirectory: "/tmp/phase253-contract/output",
+  }).find(({ id }) => id === "phase253-ci-contract");
+  assert.deepEqual(ciContract.reporter.testFiles, [
+    "scripts/ci/verify_phase252_ci_contract.test.mjs",
+    "scripts/ci/main_module.mjs",
+  ]);
+  assert.ok(ciContract.sources.includes("scripts/ci/main_module.mjs"));
+
+  const acceptanceContract = runner.buildCommandPlan({
+    id: runId,
+    adminBuildPath: "/tmp/phase253-contract/admin",
+    outputDirectory: "/tmp/phase253-contract/output",
+  }).find(({ id }) => id === "phase253-acceptance-contract");
+  assert.deepEqual(acceptanceContract.reporter.testFiles, [
+    "scripts/ci/generate_phase253_acceptance.test.mjs",
+    "scripts/ci/main_module.mjs",
+  ]);
+  assert.ok(acceptanceContract.sources.includes("scripts/ci/main_module.mjs"));
 });
