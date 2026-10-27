@@ -173,7 +173,10 @@ defmodule AccrueAdmin.Router do
           scope mount_path do
             pipe_through(:accrue_admin_browser)
             import PhoenixStorybook.Router
-            live_storybook("/dev/storybook", backend_module: AccrueAdmin.Dev.Storybook)
+            live_storybook("/dev/storybook",
+              backend_module: AccrueAdmin.Dev.Storybook,
+              csp_nonce_assign_key: :accrue_admin_csp_nonce
+            )
           end
         end
 

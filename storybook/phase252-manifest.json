@@ -6,12 +6,16 @@
       "expected": {
         "identity": {
           "actor": "vendor billing support operator",
-          "owner_slug": "cadence-demo",
           "customer_id": "3a632d30-37d1-4c08-a5bf-2b14f2862520",
-          "customer_processor_id": "cus_cadence_active",
           "customer_name": "Acme Research",
+          "customer_processor_id": "cus_cadence_active",
+          "owner_slug": "cadence-demo",
           "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457",
           "subscription_processor_id": "sub_cadence_active"
+        },
+        "actions": {
+          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          "proof": "rendered by production eligibility; no action dispatch claim"
         },
         "facts": {
           "currency": "usd",
@@ -28,23 +32,19 @@
           "cancel_at_period_end": false,
           "current_period_start": "2026-10-24T12:00:00Z",
           "current_period_end": "2026-11-24T12:00:00Z"
-        },
-        "actions": {
-          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
-          "proof": "rendered by production eligibility; no action dispatch claim"
         }
       },
-      "group_id": null,
       "story_path": "/components/subscription_detail",
       "variation_id": "active",
-      "route_variation_id": "active",
-      "scenario_id": "active",
       "actor": "vendor billing support operator",
       "job": "understand subscription state and choose a supported next action",
       "input_source": "deterministic Cadence scenario facts",
       "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "proof_lane": "static render",
       "composition_tier": "component",
-      "proof_lane": "static render"
+      "group_id": null,
+      "route_variation_id": "active",
+      "scenario_id": "active"
     },
     {
       "key": "/components/subscription_detail||braintree_pruned",
@@ -52,12 +52,16 @@
       "expected": {
         "identity": {
           "actor": "vendor billing support operator",
-          "owner_slug": "cadence-demo",
           "customer_id": "3a632d30-37d1-4c08-a5bf-2b14f2862520",
-          "customer_processor_id": "cus_cadence_active",
           "customer_name": "Acme Research",
+          "customer_processor_id": "cus_cadence_active",
+          "owner_slug": "cadence-demo",
           "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457",
           "subscription_processor_id": "sub_cadence_active"
+        },
+        "actions": {
+          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          "proof": "rendered by production eligibility; no action dispatch claim"
         },
         "facts": {
           "currency": "usd",
@@ -74,23 +78,19 @@
           "cancel_at_period_end": false,
           "current_period_start": "2026-10-24T12:00:00Z",
           "current_period_end": "2026-11-24T12:00:00Z"
-        },
-        "actions": {
-          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
-          "proof": "rendered by production eligibility; no action dispatch claim"
         }
       },
-      "group_id": null,
       "story_path": "/components/subscription_detail",
       "variation_id": "braintree_pruned",
-      "route_variation_id": "braintree_pruned",
-      "scenario_id": "braintree_pruned",
       "actor": "vendor billing support operator",
       "job": "understand subscription state and choose a supported next action",
       "input_source": "deterministic Cadence scenario facts",
       "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "proof_lane": "static render",
       "composition_tier": "component",
-      "proof_lane": "static render"
+      "group_id": null,
+      "route_variation_id": "braintree_pruned",
+      "scenario_id": "braintree_pruned"
     },
     {
       "key": "/components/subscription_detail||dunning_active",
@@ -98,12 +98,16 @@
       "expected": {
         "identity": {
           "actor": "vendor billing support operator",
-          "owner_slug": "cadence-demo",
           "customer_id": "3a632d30-37d1-4c08-a5bf-2b14f2862520",
-          "customer_processor_id": "cus_cadence_active",
           "customer_name": "Acme Research",
+          "customer_processor_id": "cus_cadence_active",
+          "owner_slug": "cadence-demo",
           "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457",
           "subscription_processor_id": "sub_cadence_active"
+        },
+        "actions": {
+          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          "proof": "rendered by production eligibility; no action dispatch claim"
         },
         "facts": {
           "currency": "usd",
@@ -120,23 +124,19 @@
           "cancel_at_period_end": false,
           "current_period_start": "2026-10-24T12:00:00Z",
           "current_period_end": "2026-11-24T12:00:00Z"
-        },
-        "actions": {
-          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
-          "proof": "rendered by production eligibility; no action dispatch claim"
         }
       },
-      "group_id": null,
       "story_path": "/components/subscription_detail",
       "variation_id": "dunning_active",
-      "route_variation_id": "dunning_active",
-      "scenario_id": "dunning_active",
       "actor": "vendor billing support operator",
       "job": "understand subscription state and choose a supported next action",
       "input_source": "deterministic Cadence scenario facts",
       "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "proof_lane": "static render",
       "composition_tier": "component",
-      "proof_lane": "static render"
+      "group_id": null,
+      "route_variation_id": "dunning_active",
+      "scenario_id": "dunning_active"
     },
     {
       "key": "/components/subscription_detail||incomplete_evidence",
@@ -144,12 +144,16 @@
       "expected": {
         "identity": {
           "actor": "vendor billing support operator",
-          "owner_slug": "cadence-demo",
           "customer_id": "3a632d30-37d1-4c08-a5bf-2b14f2862520",
-          "customer_processor_id": "cus_cadence_active",
           "customer_name": "Acme Research",
+          "customer_processor_id": "cus_cadence_active",
+          "owner_slug": "cadence-demo",
           "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457",
           "subscription_processor_id": "sub_cadence_active"
+        },
+        "actions": {
+          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          "proof": "rendered by production eligibility; no action dispatch claim"
         },
         "facts": {
           "currency": "usd",
@@ -166,23 +170,19 @@
           "cancel_at_period_end": false,
           "current_period_start": null,
           "current_period_end": null
-        },
-        "actions": {
-          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
-          "proof": "rendered by production eligibility; no action dispatch claim"
         }
       },
-      "group_id": null,
       "story_path": "/components/subscription_detail",
       "variation_id": "incomplete_evidence",
-      "route_variation_id": "incomplete_evidence",
-      "scenario_id": "incomplete_evidence",
       "actor": "vendor billing support operator",
       "job": "understand subscription state and choose a supported next action",
       "input_source": "deterministic Cadence scenario facts",
       "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "proof_lane": "static render",
       "composition_tier": "component",
-      "proof_lane": "static render"
+      "group_id": null,
+      "route_variation_id": "incomplete_evidence",
+      "scenario_id": "incomplete_evidence"
     },
     {
       "key": "/components/subscription_detail||populated",
@@ -190,12 +190,16 @@
       "expected": {
         "identity": {
           "actor": "vendor billing support operator",
-          "owner_slug": "cadence-demo",
           "customer_id": "3a632d30-37d1-4c08-a5bf-2b14f2862520",
-          "customer_processor_id": "cus_cadence_active",
           "customer_name": "Acme Research",
+          "customer_processor_id": "cus_cadence_active",
+          "owner_slug": "cadence-demo",
           "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457",
           "subscription_processor_id": "sub_cadence_active"
+        },
+        "actions": {
+          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          "proof": "rendered by production eligibility; no action dispatch claim"
         },
         "facts": {
           "currency": "usd",
@@ -212,23 +216,19 @@
           "cancel_at_period_end": false,
           "current_period_start": "2026-10-24T12:00:00Z",
           "current_period_end": "2026-11-24T12:00:00Z"
-        },
-        "actions": {
-          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
-          "proof": "rendered by production eligibility; no action dispatch claim"
         }
       },
-      "group_id": null,
       "story_path": "/components/subscription_detail",
       "variation_id": "populated",
-      "route_variation_id": "populated",
-      "scenario_id": "populated",
       "actor": "vendor billing support operator",
       "job": "understand subscription state and choose a supported next action",
       "input_source": "deterministic Cadence scenario facts",
       "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "proof_lane": "static render",
       "composition_tier": "component",
-      "proof_lane": "static render"
+      "group_id": null,
+      "route_variation_id": "populated",
+      "scenario_id": "populated"
     },
     {
       "key": "/components/subscription_detail||scheduled_cancellation",
@@ -236,12 +236,16 @@
       "expected": {
         "identity": {
           "actor": "vendor billing support operator",
-          "owner_slug": "cadence-demo",
           "customer_id": "3a632d30-37d1-4c08-a5bf-2b14f2862520",
-          "customer_processor_id": "cus_cadence_active",
           "customer_name": "Acme Research",
+          "customer_processor_id": "cus_cadence_active",
+          "owner_slug": "cadence-demo",
           "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457",
           "subscription_processor_id": "sub_cadence_active"
+        },
+        "actions": {
+          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          "proof": "rendered by production eligibility; no action dispatch claim"
         },
         "facts": {
           "currency": "usd",
@@ -258,23 +262,19 @@
           "cancel_at_period_end": true,
           "current_period_start": "2026-10-24T12:00:00Z",
           "current_period_end": "2026-11-24T12:00:00Z"
-        },
-        "actions": {
-          "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
-          "proof": "rendered by production eligibility; no action dispatch claim"
         }
       },
-      "group_id": null,
       "story_path": "/components/subscription_detail",
       "variation_id": "scheduled_cancellation",
-      "route_variation_id": "scheduled_cancellation",
-      "scenario_id": "scheduled_cancellation",
       "actor": "vendor billing support operator",
       "job": "understand subscription state and choose a supported next action",
       "input_source": "deterministic Cadence scenario facts",
       "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "proof_lane": "static render",
       "composition_tier": "component",
-      "proof_lane": "static render"
+      "group_id": null,
+      "route_variation_id": "scheduled_cancellation",
+      "scenario_id": "scheduled_cancellation"
     }
   ],
   "source_digests": {
@@ -282,7 +282,7 @@
     "accrue_admin/lib/accrue_admin/dev/storybook.ex": "2cea8b08edad6d18383220b23c020e0fbbf7ca7c2c8a884729270779ecfa983d",
     "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "3bf2522162b43c6c792632bc78da91e2a3c6804b594c34f418ef2b5f5de95a01",
     "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "ec57ce13ee8169a50eee27c04c9dd3c9f5846f365cc143fc58a690edd4989e6e",
-    "accrue_admin/lib/accrue_admin/router.ex": "774a03c8835890c953808f1a9c07a4f12535e1b7898fe407d778773ceac29418",
+    "accrue_admin/lib/accrue_admin/router.ex": "ac297c4571c305c031161d969e6473cb4f85dcf481dec5a720fb7c5420d9e972",
     "accrue_admin/storybook/_support/subscription_manifest.ex": "bcd47f6c8ab118a2074115240de54429c9f88ffde622bf235bfe5e08555d4149",
     "accrue_admin/storybook/_support/subscription_scenarios.ex": "734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d",
     "accrue_portal/lib/accrue_portal/live/subscription_live.ex": "c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372",

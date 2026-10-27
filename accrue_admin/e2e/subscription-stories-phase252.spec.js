@@ -1,37 +1,31 @@
-const fs = require("fs");
-const path = require("path");
 const { test, expect } = require("@playwright/test");
+const {
+  RESULT_PATH,
+  beginResults,
+  createCases,
+  readManifest,
+  readResults,
+  reconcileResults,
+  runRenderCase,
+} = require("./phase252-story-helpers.js");
 
-const RESULT_PATH = path.join(__dirname, "..", "tmp", "phase252", "render-results.json");
-const ACTIVE_URL = "/billing/dev/storybook/components/subscription_detail?variation_id=active";
+const { manifest, manifestDigest } = readManifest();
+const runId = process.env.PHASE252_E2E_NONCE;
+const cases = createCases(manifest);
 
-test.describe("Phase 252 direct subscription story renders", () => {
-  test("active at 320px in light theme renders the actual subscription facts", async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 900 });
-    await page.goto(`/__e2e__/login?to=${encodeURIComponent(ACTIVE_URL)}`);
+test.describe("Phase 252 generated direct subscription story renders", () => {
+  test.beforeAll(() => beginResults(runId, manifestDigest));
 
-    const story = page.locator(".psb-sandbox").first();
-    await expect(story, "the direct Storybook variation should render").toBeVisible();
-    await expect(story).toContainText("Acme Research");
-    await expect(story).toContainText("Active");
-    await expect(page).toHaveURL(/variation_id=active/);
-  });
+  for (const testCase of cases) {
+    test(testCase.title, async ({ page }, testInfo) => {
+      await runRenderCase(page, testCase, manifestDigest, runId, testInfo);
+    });
+  }
 
-  test("generated render ledger contains this direct variation", async () => {
-    const rows = fs.existsSync(RESULT_PATH)
-      ? JSON.parse(fs.readFileSync(RESULT_PATH, "utf8")).cases
-      : [];
-
-    expect(
-      rows,
-      "every direct render must produce an attributed browser evidence row"
-    ).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "/components/subscription_detail||active::320::light",
-          status: "passed",
-        }),
-      ])
-    );
+  test("reconciles every declared direct render against the generated manifest", async () => {
+    const results = readResults();
+    expect(results.run_id).toBe(runId);
+    expect(results.manifest_sha256).toBe(manifestDigest);
+    expect(reconcileResults(manifest, results.cases, manifestDigest), RESULT_PATH).toEqual([]);
   });
 });
