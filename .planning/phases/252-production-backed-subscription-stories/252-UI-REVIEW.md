@@ -8,7 +8,7 @@
 
 This re-audit inspected the actual PNGs for all three states at 320px and 1280px in both themes. `scheduled_cancellation` correctly retains the active lifecycle label while showing its scheduled cancellation date and omitting `Cancel renewal`; `incomplete_evidence` shows its unavailable facts and ordered caveats. The earlier token-scope and cramped-preview findings are resolved in these captures.
 
-One current visual defect remains: the eligible `Change plan` action is present in the light-theme DOM but has no visible fill or text in the 1280px light captures, while it is visibly filled in the dark captures. Light-theme summary row actions also render black instead of the contract’s accent color. The evidence points to `--ax-accent` missing from the real light Storybook sandbox scope. The 1280px captures also show the summary header and action band much narrower than the full-width fact list.
+At the re-audited revision, one visual defect remained (resolved in the addendum below): the eligible `Change plan` action is present in the light-theme DOM but has no visible fill or text in the 1280px light captures, while it is visibly filled in the dark captures. Light-theme summary row actions also render black instead of the contract’s accent color. The evidence points to `--ax-accent` missing from the real light Storybook sandbox scope. The 1280px captures also show the summary header and action band much narrower than the full-width fact list.
 
 ## Current Pillar Scores
 
@@ -111,3 +111,7 @@ The owner run result bundle is `accrue_admin/tmp/phase252/ci-results/25208-17931
 - `accrue_admin/assets/css/theme.css`, `accrue_admin/assets/css/app.css`, `accrue_admin/priv/static/storybook.css`
 - `accrue_admin/e2e/phase252-story-helpers.js`, `accrue_admin/e2e/phase200-storybook-helpers.js`
 - The 12 canonical and 4 focused screenshots listed above
+
+## Accent Visibility Resolution — 2026-10-27
+
+The light accent finding was corrected in `3991d890`. The actual sandbox inherits the production host accent with the existing brandbook fallback. Focused unmodified active-light cases at 320px and 1280px passed: primary contrast 5.98:1 and row Change contrast 6.84:1; a host override propagated correctly. The parent also directly inspected the current active desktop/mobile captures and confirmed visible colored primary and row actions. Current captures: `accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/`. The current eighteen-command aggregate and sixteen executed browser tests pass. This resolves the accent/blank-primary warning; the 18/24 score above records its prior audited revision and is not silently re-scored. Desktop summary/action width and copy-affordance recommendations remain deferred, non-blocking polish.

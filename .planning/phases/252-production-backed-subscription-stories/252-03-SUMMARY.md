@@ -100,16 +100,16 @@ coverage:
     requirement: LAB-01
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-lab-contract:owned_process_group_identity"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/results.json#commands:phase252-lab-contract:owned_process_group_identity"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:isolation-reset:interrupted_descendant_cleanup_before_database_drop"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/results.json#commands:isolation-reset:interrupted_descendant_cleanup_before_database_drop"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:isolation-reset:owned_descendants_cleanup_after_leader_exit"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/results.json#commands:isolation-reset:owned_descendants_cleanup_after_leader_exit"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:isolation-reset:unrelated_process_survives_group_cleanup"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/results.json#commands:isolation-reset:unrelated_process_survives_group_cleanup"
         status: pass
     human_judgment: false
 
@@ -267,7 +267,7 @@ None. Local PostgreSQL, Mix, Node, and already-installed Playwright dependencies
 
 ## Next Phase Readiness
 
-Plan 252-04 can use the launcher and the separate test/review lanes. The fresh Phase 252 required owner completed all 18 commands with `human_judgment: false`; its bundle and current automated UAT were regenerated from run `25208-1793100141333-35541-feacb3440bfa`. No provider-completion, mounted-authorization, persistence, or visual-judgment claims are made here.
+Plan 252-04 can use the launcher and the separate test/review lanes. The fresh Phase 252 required owner completed all 18 commands with `human_judgment: false`; its bundle and current automated UAT were regenerated from run `25208-1793102721082-59067-6ba5536df2dd`. No provider-completion, mounted-authorization, persistence, or visual-judgment claims are made here.
 
 ---
 *Phase: 252-production-backed-subscription-stories*
@@ -277,4 +277,4 @@ Plan 252-04 can use the launcher and the separate test/review lanes. The fresh P
 
 - Summary, all plan artifacts, and all three RED evidence records exist.
 - All six measured task commits are ancestors of the plan head recorded above.
-- The T-252-07 RED evidence and four follow-up commits are present and verified; the fresh required-owner result and browser result match run `25208-1793100141333-35541-feacb3440bfa`.
+- The T-252-07 RED evidence and four follow-up commits are present and verified; the fresh required-owner result and browser result match run `25208-1793102721082-59067-6ba5536df2dd`.
