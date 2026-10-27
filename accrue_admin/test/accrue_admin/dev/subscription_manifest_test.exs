@@ -124,6 +124,7 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
 
     alias AccrueAdmin.Dev.Storybook
     alias AccrueAdmin.Storybook.SubscriptionManifest
+    alias AccrueAdmin.Storybook.SubscriptionCompositionsManifest
     alias PhoenixStorybook.{NavigationHelpers, StoryEntry}
     alias PhoenixStorybook.Stories.{Variation, VariationGroup}
 
@@ -439,6 +440,45 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert guide =~ "Not applicable"
       assert guide =~ "AccruePortal.Live.SubscriptionsLive.render/1"
       assert guide =~ "does not prove a whole page"
+    end
+
+    test "generated guide preserves Phase 253 compiled routes and their presentation proof limits" do
+      assert Code.ensure_loaded?(SubscriptionCompositionsManifest)
+
+      collection_entries = SubscriptionCompositionsManifest.collection_variation_entries()
+      page_entries = SubscriptionCompositionsManifest.page_entries()
+      entries = SubscriptionManifest.entries()
+
+      assert length(collection_entries) == 10
+      assert length(page_entries) == 9
+      assert length(entries) == 6
+
+      root = Path.expand("../../../../", __DIR__)
+      guide_path = Path.join(root, "guides/subscription-story-coverage.md")
+      :ok = SubscriptionManifest.write_coverage_guide!(guide_path)
+      guide = File.read!(guide_path)
+
+      assert guide =~ "## Phase 253 compiled composition supplement"
+      assert guide =~ "Phase 252's six canonical component entries and coverage assertions remain unchanged."
+      assert guide =~ "Phase 253's compiled composition supplement below documents the Admin whole-page and collection stories. Mounted route and action-journey behavior is verified separately."
+      refute guide =~ "Admin whole-page/list/action-journey work remains in Phase 253."
+      assert guide =~ "Presentation-only evidence covers settled appearance; it does not establish mounted authority, persistence, dispatch, or provider completion."
+
+      for entry <- collection_entries do
+        assert guide =~ entry.direct_path
+        assert guide =~ entry.iframe_path
+        assert guide =~ entry.production_renderer
+        assert guide =~ entry.fact_source
+        assert guide =~ entry.proof_lane
+      end
+
+      for entry <- page_entries do
+        assert guide =~ entry.direct_path
+        assert guide =~ entry.production_renderer
+        assert guide =~ entry.fact_source
+        assert guide =~ entry.presentation_snapshot
+        assert guide =~ entry.proof_lane
+      end
     end
 
     defp caller_row(label, owner, path, tier, state) do

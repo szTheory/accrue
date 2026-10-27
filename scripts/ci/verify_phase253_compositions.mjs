@@ -35,6 +35,9 @@ const PHASE_METADATA = Object.freeze([
 const COMMON_SOURCES = Object.freeze([
   ".github/workflows/ci.yml",
   "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+  "accrue_admin/storybook/_support/subscription_manifest.ex",
+  "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs",
+  "guides/subscription-story-coverage.md",
   "scripts/ci/verify_phase253_compositions.mjs",
   "scripts/ci/verify_phase253_compositions.test.mjs",
   "scripts/ci/phase252_reporters.mjs",

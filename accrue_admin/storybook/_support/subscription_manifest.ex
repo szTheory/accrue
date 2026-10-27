@@ -5,6 +5,7 @@ if Mix.env() != :prod do
     alias AccrueAdmin.Dev.Storybook
     alias AccrueAdmin.Dev.ComponentRegistry
     alias AccrueAdmin.Storybook.SubscriptionScenarios
+    alias AccrueAdmin.Storybook.SubscriptionCompositionsManifest
     alias PhoenixStorybook.{NavigationHelpers, StoryEntry}
     alias PhoenixStorybook.Stories.{Variation, VariationGroup}
 
@@ -27,6 +28,19 @@ if Mix.env() != :prod do
       "storybook/components/subscription_detail.story.exs"
     ]
     @source_paths @manifest_source_paths ++ @caller_source_paths
+    @phase253_guide_source_paths [
+      "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+      "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+      "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+      "accrue_admin/lib/accrue_admin/router.ex",
+      "accrue_admin/storybook/_support/subscription_collection.ex",
+      "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+      "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+      "dev_support/ui_scenarios/cadence_subscriptions.exs",
+      "storybook/groups/subscriptions_collection.story.exs",
+      "storybook/pages/subscription.story.exs"
+    ]
 
     @doc "Discovers retained subscription variations from the compiled PhoenixStorybook backend."
     @spec entries() :: [map()]
@@ -488,6 +502,7 @@ if Mix.env() != :prod do
 
       digests =
         source_digests()
+        |> Map.merge(phase253_guide_source_digests())
         |> Enum.sort()
         |> Enum.map(fn {source, digest} -> "- `#{source}` — `#{digest}`" end)
 
@@ -500,9 +515,10 @@ if Mix.env() != :prod do
         "",
         "Selected story IDs are discovered from the compiled tree. Source-supported compatibility declarations retained with their scenario contracts: #{compatibility}.",
         "",
-        "Admin whole-page/list/action-journey work remains in Phase 253. Portal subscription list/detail and mounted cancellation/plan-change jobs remain visible below for later coverage planning; this guide does not implement those jobs.",
+        "Phase 253's compiled composition supplement below documents the Admin whole-page and collection stories. Mounted route and action-journey behavior is verified separately. Portal subscription list/detail and mounted cancellation/plan-change jobs remain visible below for later coverage planning; this guide does not implement those jobs.",
         "",
         state_tables,
+        phase253_composition_section(),
         "## Source digests",
         "",
         digests,
@@ -511,6 +527,63 @@ if Mix.env() != :prod do
       |> List.flatten()
       |> Enum.join("\n")
     end
+
+    defp phase253_composition_section do
+      collection_entries = SubscriptionCompositionsManifest.collection_variation_entries()
+      page_entries = SubscriptionCompositionsManifest.page_entries()
+
+      collection_rows =
+        Enum.map(collection_entries, fn entry ->
+          "| `#{guide_cell(entry.variation_id)}` | `#{guide_cell(entry.scenario_id)}` | #{guide_route(entry.direct_path)} | #{guide_route(entry.iframe_path)} | `#{guide_cell(entry.production_renderer)}` | `#{guide_cell(entry.fact_source)}` | `#{guide_cell(entry.proof_lane)}` |"
+        end)
+
+      page_rows =
+        Enum.map(page_entries, fn entry ->
+          "| `#{guide_cell(entry.variation_id)}` | `#{guide_cell(entry.expected.scenario)}` | `#{guide_cell(entry.presentation_snapshot)}` | #{guide_route(entry.direct_path)} | `#{guide_cell(entry.production_renderer)}` | `#{guide_cell(entry.fact_source)}` | `#{guide_cell(entry.proof_lane)}` |"
+        end)
+
+      [
+        "## Phase 253 compiled composition supplement",
+        "",
+        "This additive section is generated from `SubscriptionCompositionsManifest.collection_variation_entries/0` and `page_entries/0`. Phase 252's six canonical component entries and coverage assertions remain unchanged.",
+        "",
+        "Review the direct routes and their compiled renderers below. The collection also lists its iframe route because the browser evidence visits that compiled route.",
+        "",
+        "### Collection compositions",
+        "",
+        "| Variation | Scenario | Direct route | Story iframe route | Production renderer | Source facts | Proof lane |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        collection_rows,
+        "",
+        "### Whole subscription pages",
+        "",
+        "| Variation | Scenario | Snapshot | Direct route | Production renderer | Source facts | Proof lane |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        page_rows,
+        "",
+        "Presentation-only evidence covers settled appearance; it does not establish mounted authority, persistence, dispatch, or provider completion. Use the mounted route and action-journey tests for those claims. The collection preview is backed by validated development/test facts; it does not claim provider price lookup or a persisted action.",
+        ""
+      ]
+    end
+
+    defp phase253_guide_source_digests do
+      root = repository_root()
+
+      @phase253_guide_source_paths
+      |> Enum.sort()
+      |> Map.new(fn relative_path ->
+        path = Path.join(root, relative_path)
+
+        unless File.regular?(path) do
+          raise ArgumentError, "Phase 253 coverage guide source file is missing: #{relative_path}"
+        end
+
+        digest = :crypto.hash(:sha256, File.read!(path)) |> Base.encode16(case: :lower)
+        {relative_path, digest}
+      end)
+    end
+
+    defp guide_route(route), do: "[`#{guide_cell(route)}`](#{route})"
 
     defp flatten_variations!(variations, path) when is_list(variations) do
       flattened =

@@ -476,6 +476,13 @@ test("browser assertion inventories include breakpoint and page stress controls"
   assert.ok(manifestSourcePaths.every((source) => browser.sources.includes(source)));
   assert.ok(runner.sourceInventory([browser]).includes("accrue_admin/lib/accrue_admin/live/subscription_live.ex"),
     "common aggregate source inventory includes the production whole-page renderer");
+  for (const source of [
+    "accrue_admin/storybook/_support/subscription_manifest.ex",
+    "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs",
+    "guides/subscription-story-coverage.md",
+  ]) {
+    assert.ok(runner.sourceInventory([browser]).includes(source), `aggregate source identity includes generated guide dependency ${source}`);
+  }
   const manifest = JSON.parse(fs.readFileSync(path.join(root, "accrue_admin/tmp/phase253/manifest.json"), "utf8"));
   const definitions = browser.browser_contract.expected_cell_definitions(manifest);
   assert.equal(definitions.length, 151, "finite browser inventory retains every one of the 151 cells");
