@@ -78,7 +78,7 @@ v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements).
   4. A reviewer can launch the documented lab on an explicit disposable database/namespace and distinct loopback port with known process identity, see unexpected-server reuse refused, and observe a negative control proving a normal test reset cannot alter review data. Ordinary and labelled held-out data remain separate and privacy-safe, guarded cleanup refuses unrelated children, and production compile/package/route checks exclude fixture payloads and dev tooling while preserving the kitchen and canonical mounts; DB-free rendering is distinguished from DB-backed startup. (SCEN-04, LAB-01, LAB-02)
   5. A maintainer can observe changes confined to each consumed story, shared scenario, component, registry, generated manifest, token or runner root invoke its named required CI owner, through representative positive path/classifier controls and an unrelated-path negative control; in-job selection alone cannot satisfy workflow admission. (CIQ-01)
 
-**Plans**: 5/8 plans executed
+**Plans**: 6/8 plans executed
 **UI hint**: yes
 
 Plans:
@@ -94,7 +94,7 @@ Plans:
 - [x] 252-05-PLAN.md — Compiled variation discovery and current caller/composition gap map
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 252-06-PLAN.md — Twelve direct width/theme render cases and twenty UI predicates
+- [x] 252-06-PLAN.md — Twelve direct width/theme render cases and twenty UI predicates
 - [ ] 252-07-PLAN.md — Production compile, package and route boundaries
 
 **Wave 5** *(blocked on Wave 4 completion)*
@@ -136,7 +136,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 252. Production-backed Subscription Stories | 5/8 | In Progress | - |
+| 252. Production-backed Subscription Stories | 6/8 | In Progress | - |
 | 253. Real Groups and a Whole Subscription Job | 0/TBD | Not started | - |
 | 254. Recurring Quality, Reviewed Fixes and Curation | 0/TBD | Not started | - |
 

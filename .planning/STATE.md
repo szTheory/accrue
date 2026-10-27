@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 252
 current_phase_name: Production-backed Subscription Stories
 status: executing
-stopped_at: Completed 252-05-PLAN.md
-last_updated: "2026-10-27T01:10:59.857Z"
+stopped_at: Completed 252-06-PLAN.md
+last_updated: "2026-10-27T02:33:12.621Z"
 last_activity: 2026-10-26
 last_activity_desc: Completed Phase 252 plan 03; Phase 252 execution continues
-state_head: b5505854f80685ac162f8db67d1adcdd4b41b446
+state_head: 85ee42df92944f56b9aacfd29504cf6057597296
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 8
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 ## Current Position
 
 Phase: 252 (Production-backed Subscription Stories) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-10-26 — Completed Phase 252 plan 03; Phase 252 execution continues
 
@@ -226,6 +226,7 @@ Current milestone planning blockers: None known. Historical concerns and deferre
 | Phase 252 P03 | 43min | 2 tasks | 14 files |
 | Phase 252 P04 | 25min | 2 tasks | 11 files |
 | Phase 252 P05 | 15min | 2 tasks | 8 files |
+| Phase 252 P06 | 80min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -524,6 +525,9 @@ Current milestone planning blockers: None known. Historical concerns and deferre
 - [Phase 252]: Held-out facts use independent stable identities, and cleanup locks and verifies the fixture customer owner before deleting.
 - [Phase 252]: Build caller coverage from compiled declarations, checked production source markers, current routes, and ComponentRegistry contracts so missing links fail closed.
 - [Phase 252]: Keep static-render reachability separate from browser DOM proof and mounted Admin or Portal behavior; record broader gaps for their owning plans.
+- [Phase 252]: Reuse the application existing LiveView hook implementations in Storybook iframe.
+- [Phase 252]: Static story evidence establishes content and presentation only; it does not claim mounted authorization, provider completion, or persistence.
+- [Phase 252]: Left-align and border-box the action menu to keep it within the narrow Storybook preview.
 
 ### Pending Todos
 
@@ -622,8 +626,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T01:10:59.830Z
-Stopped at: Completed 252-05-PLAN.md
+Last session: 2026-10-27T02:33:12.594Z
+Stopped at: Completed 252-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
