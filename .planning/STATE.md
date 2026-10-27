@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 253
 current_phase_name: Real Groups and a Whole Subscription Job
 status: executing
-stopped_at: Completed 253-03-PLAN.md
-last_updated: "2026-10-27T18:25:50.272Z"
+stopped_at: Completed 253-04-PLAN.md
+last_updated: "2026-10-27T18:51:04.258Z"
 last_activity: 2026-10-27
 last_activity_desc: Phase 253 execution started
-state_head: 3c710cce648ad8e259bb0089eaa1eb03dd936016
+state_head: 85ad12c1290f5210469277fc9c63de8a2bcfae70
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 16
-  completed_plans: 13
+  completed_plans: 14
   percent: 33
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 ## Current Position
 
 Phase: 253 (Real Groups and a Whole Subscription Job) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-10-27 — Phase 253 execution started
 
@@ -235,6 +235,7 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 | Phase 253 P01 | 25min | 2 tasks | 10 files |
 | Phase 253 P02 | 33m | 2 tasks | 6 files |
 | Phase 253 P03 | 23m | 2 tasks | 8 files |
+| Phase 253 P04 | 22m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -557,6 +558,8 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 - [Phase 253]: Keep route scope, authorization, event handlers, and lazy reads in SubscriptionLive while sharing only the page composition.
 - [Phase 253]: Use validated Cadence facts, production copy, and scoped links for static review/result snapshots without dispatch claims.
 - [Phase 253]: Keep collection transport evidence focused on its unique one-row component and validate page story entries separately.
+- [Phase 253]: Reused the real list/detail routes, existing Auth adapter seam, Processor.Fake, TestRepo and event ledger for execution evidence.
+- [Phase 253]: Only an authenticated, authorized active organization from session scope may be used to preserve the initial missing-detail denial path.
 
 ### Pending Todos
 
@@ -655,8 +658,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T18:25:49.942Z
-Stopped at: Completed 253-03-PLAN.md
+Last session: 2026-10-27T18:51:03.942Z
+Stopped at: Completed 253-04-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

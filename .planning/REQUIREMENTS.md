@@ -15,7 +15,7 @@ The owner approved the [reviewed subscription-first proposal](research/ui-qualit
 - [x] **SBK-03**: Reviewer can inspect complete active, scheduled-cancellation and incomplete-evidence subscription areas rendered by the same production-owned summary/facts/action components used by the application, in light/dark and narrow/desktop contexts, without copied markup or story-local formatting, copy, eligibility or scoped-link rules.
 - [ ] **SBK-04**: Reviewer can inspect the actual subscription collection toolbar/result/table/pagination composition for new-host empty, filtered-empty, one-row, multiple-row and page-boundary situations, plus source-supported loading/error states; existing DataTable lifecycle and event targeting remain intact.
 - [x] **SBK-05**: Reviewer can inspect a production-shared whole subscription detail screen composed from its real areas, including supported review/action presentation and legitimate incomplete evidence, without a story-specific parallel page or a universal page-schema refactor.
-- [ ] **SBK-06**: An authorized operator can follow the real subscription list → detail → supported action review/result → context-preserving return journey, with mounted automated proof of current scope, fresh authority, exact target, applicable step-up, dismissal without dispatch and truthful outcome; stories do not claim persistence or provider completion.
+- [x] **SBK-06**: An authorized operator can follow the real subscription list → detail → supported action review/result → context-preserving return journey, with mounted automated proof of current scope, fresh authority, exact target, applicable step-up, dismissal without dispatch and truthful outcome; stories do not claim persistence or provider completion.
 
 ### Realistic shared scenario facts
 
@@ -83,7 +83,7 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 | SBK-03 | Phase 252 | Complete |
 | SBK-04 | Phase 253 | Pending |
 | SBK-05 | Phase 253 | Complete |
-| SBK-06 | Phase 253 | Pending |
+| SBK-06 | Phase 253 | Complete |
 | SCEN-01 | Phase 252 | Complete |
 | SCEN-02 | Phase 252 | Complete |
 | SCEN-03 | Phase 252 | Complete |
