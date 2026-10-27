@@ -610,6 +610,38 @@ test("TAP reporter rejects excluded or mismatched required identities", () => {
   }), /executed test identities mismatch/i);
 });
 
+test("ExUnit source identities retain enclosing describe labels", () => {
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "phase252-exunit-describe-"));
+  try {
+    const testFile = path.join(fixtureRoot, "test", "described_test.exs");
+    fs.mkdirSync(path.dirname(testFile), { recursive: true });
+    fs.writeFileSync(testFile, [
+      "defmodule Example.DescribedTest do",
+      "  use ExUnit.Case",
+      "",
+      "  describe \"outer context\" do",
+      "    test \"outer case\" do",
+      "      :ok",
+      "    end",
+      "",
+      "    describe \"nested context\" do",
+      "      test \"nested case\" do",
+      "        :ok",
+      "      end",
+      "    end",
+      "  end",
+      "end",
+      "",
+    ].join("\n"));
+    assert.deepEqual(expectedExUnitIdentities(fixtureRoot, ["test/described_test.exs"]), [
+      "Example.DescribedTest::test outer context outer case",
+      "Example.DescribedTest::test outer context nested context nested case",
+    ]);
+  } finally {
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
 test("report assertion references bind to executed test identities", () => {
   const testFiles = ["scripts/dev/phase252_lab.test.mjs"];
   const identities = expectedNodeTestIdentities(repositoryRoot, testFiles);

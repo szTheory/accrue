@@ -178,16 +178,25 @@ export function expectedExUnitIdentities(root, testFiles) {
     const source = fs.readFileSync(path.join(root, relativePath), "utf8");
     let currentModule = null;
     let caseModule = null;
+    const describeStack = [];
     for (const line of source.split(/\r?\n/)) {
+      if (/^\s*#/.test(line)) continue;
+      const indentation = line.match(/^\s*/)[0].length;
+      if (/^\s*end\b/.test(line)) {
+        while (describeStack.length > 0 && indentation <= describeStack.at(-1).indentation) describeStack.pop();
+      }
       const moduleMatch = line.match(/^\s*defmodule\s+([A-Z][A-Za-z0-9_.]*)/);
       if (moduleMatch) currentModule = moduleMatch[1];
+      const describeMatch = line.match(/^\s*describe\s+"((?:\\.|[^"\\])*)"\s+do\s*$/);
+      if (describeMatch) describeStack.push({ name: elixirString(describeMatch[1]), indentation });
       if (/\buse\s+[\w.]*Case\b/.test(line)) {
         if (!currentModule) fail(`cannot identify test case module in ${relativePath}`);
         caseModule = currentModule;
       }
       for (const match of line.matchAll(/\btest\s+"((?:\\.|[^"\\])*)"/g)) {
         if (!caseModule) fail(`test has no source ExUnit.Case identity in ${relativePath}`);
-        identities.push(`${caseModule}::test ${elixirString(match[1])}`);
+        const describe = describeStack.map(({ name }) => name).join(" ");
+        identities.push(`${caseModule}::test ${describe ? `${describe} ` : ""}${elixirString(match[1])}`);
       }
     }
   }
