@@ -5,11 +5,11 @@ titles: json
 findings:
   - id: CR-03
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "Extra malformed prohibition entries are silently ignored"
   - id: CR-04
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "Plans 09/10 used for coverage are absent from the freshness snapshot"
   - id: CR-01
     severity: critical
@@ -19,17 +19,17 @@ findings:
     severity: critical
     disposition: fixed
     title: "Passing exit codes turn skipped required tests into passing evidence"
-open: 2
+open: 0
 total: 4
-recorded: 2026-10-27T15:19:22.567Z
+recorded: 2026-10-27T15:19:42.249Z
 ---
 
 # Phase 252: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-03 | critical | open | - |
-| CR-04 | critical | open | - |
+| CR-03 | critical | fixed | 252-REVIEW-FIX.md |
+| CR-04 | critical | fixed | 252-REVIEW-FIX.md |
 | CR-01 | critical | fixed | 252-REVIEW-FIX.md (not in the current review) |
 | CR-02 | critical | fixed | 252-REVIEW-FIX.md (not in the current review) |
 
