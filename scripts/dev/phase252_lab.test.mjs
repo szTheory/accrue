@@ -98,6 +98,29 @@ test("checks server, database and port before creating the owned target", async 
   assert.deepEqual(order, ["identity", "database", "port", "create"]);
 });
 
+test("accepts loopback PostgreSQL inet addresses with a host mask", async () => {
+  const config = buildLaunchConfig({
+    lane: "admin-review",
+    partition: "925210042",
+    port: 4318,
+  });
+  let createdDatabase;
+
+  const result = await assert.doesNotReject(() => prepareLaunch(config, {
+    readServerIdentity: async () => ({
+      database: "postgres",
+      role: "postgres",
+      address: "127.0.0.1/32",
+    }),
+    databaseExists: async () => false,
+    portAvailable: async () => true,
+    createDatabase: async (database) => { createdDatabase = database; },
+  }));
+
+  assert.equal(createdDatabase, config.database);
+  assert.equal(result.serverAddress, "127.0.0.1");
+});
+
 test("accepts cleanup only when pid, start identity, command, DB, port and nonce all match", () => {
   const manifest = {
     pid: 1500,
