@@ -187,7 +187,7 @@ async function assertCurrentStorybookAssets(page, assets) {
 }
 
 async function assertUiPredicateContract(page, preview, story, entry, testCase) {
-  const ui = await story.evaluate((element) => {
+  const ui = await story.evaluate((element, verifyHostAccentOverride) => {
     const viewportWidth = window.innerWidth;
     const probe = (node, label) => {
       const rect = node.getBoundingClientRect();
@@ -249,6 +249,10 @@ async function assertUiPredicateContract(page, preview, story, entry, testCase) 
     const actionTargets = actionBand
       ? [...actionBand.querySelectorAll(".ax-button, summary")].map((target) => probe(target, target.getAttribute("aria-label") || target.textContent.trim()))
       : [];
+    const primaryAction = [...element.querySelectorAll("[data-ax-action-band] [data-ax-primary-action]")]
+      .find((action) => (action.getAttribute("aria-label") || "").startsWith("Change plan"));
+    const planRow = summaryRows.find((row) => row.querySelector("dt")?.textContent.replace(/\s+/g, " ").trim() === "Plan / price");
+    const changeRowAction = planRow?.querySelector(".ax-summary-list-actions a, .ax-summary-list-actions button");
     const grid = summaryRows[0] ? getComputedStyle(summaryRows[0]) : null;
     const root = document.documentElement;
     const body = document.body;
@@ -265,7 +269,10 @@ async function assertUiPredicateContract(page, preview, story, entry, testCase) 
     }));
     const ratio = (foreground, background) => {
       const luminance = (color) => {
-        const values = color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+        const srgb = color.match(/^color\(srgb\s+([-+\d.]+)\s+([-+\d.]+)\s+([-+\d.]+)(?:\s*\/\s*[-+\d.]+)?\)$/i);
+        const values = srgb
+          ? srgb.slice(1, 4).map((value) => Number(value) * 255)
+          : color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
         if (!values || values.length !== 3) return null;
         const channels = values.map((value) => {
           const normalized = value / 255;
@@ -279,6 +286,30 @@ async function assertUiPredicateContract(page, preview, story, entry, testCase) 
       const [lighter, darker] = [first, second].sort((left, right) => right - left);
       return (lighter + 0.05) / (darker + 0.05);
     };
+    const alpha = (color) => {
+      if (color === "transparent") return 0;
+      const match = color.match(/^rgba?\((.*)\)$/);
+      if (!match) return 1;
+      const channels = match[1].split(/[\s,/]+/).filter(Boolean);
+      return channels.length === 4 ? Number(channels[3]) : 1;
+    };
+    const effectiveBackground = (node) => {
+      for (let current = node; current; current = current.parentElement) {
+        const color = getComputedStyle(current).backgroundColor;
+        if (alpha(color) > 0) return color;
+      }
+      return "";
+    };
+    const resolveTokenColor = (token) => {
+      const probe = document.createElement("span");
+      probe.style.color = `var(${token})`;
+      probe.style.position = "fixed";
+      probe.style.visibility = "hidden";
+      element.appendChild(probe);
+      const resolved = getComputedStyle(probe).color;
+      probe.remove();
+      return resolved;
+    };
     const title = element.querySelector("h1");
     const idText = element.querySelector(".ax-id-badge-text");
     const firstKey = element.querySelector(".ax-summary-list-key");
@@ -287,6 +318,23 @@ async function assertUiPredicateContract(page, preview, story, entry, testCase) 
     const keyStyle = firstKey ? getComputedStyle(firstKey) : null;
     const valueStyle = firstValue ? getComputedStyle(firstValue) : null;
     const summaryBackground = summary ? getComputedStyle(summary).backgroundColor : "";
+    const hostAccentMutation = verifyHostAccentOverride
+      ? (() => {
+          const previousAccent = root.style.getPropertyValue("--ax-accent");
+          const previousPriority = root.style.getPropertyPriority("--ax-accent");
+          try {
+            root.style.setProperty("--ax-accent", "#26428b");
+            return {
+              resolvedAccent: getComputedStyle(element).getPropertyValue("--ax-accent").trim().toLowerCase(),
+              rowChangeColor: changeRowAction ? getComputedStyle(changeRowAction).color : "",
+              accentReadable: resolveTokenColor("--ax-accent-readable"),
+            };
+          } finally {
+            if (previousAccent) root.style.setProperty("--ax-accent", previousAccent, previousPriority);
+            else root.style.removeProperty("--ax-accent");
+          }
+        })()
+      : null;
     return {
       viewportWidth,
       document: { clientWidth: root.clientWidth, scrollWidth: Math.max(root.scrollWidth, body.scrollWidth) },
@@ -325,7 +373,28 @@ async function assertUiPredicateContract(page, preview, story, entry, testCase) 
         base: getComputedStyle(element).getPropertyValue("--ax-base").trim().toLowerCase(),
         elevated: getComputedStyle(element).getPropertyValue("--ax-elevated").trim().toLowerCase(),
         primary: getComputedStyle(element).getPropertyValue("--ax-primary").trim().toLowerCase(),
+        surfaceBackground: summaryBackground,
+        accent: getComputedStyle(element).getPropertyValue("--ax-accent").trim().toLowerCase(),
+        expectedAccent: (
+          getComputedStyle(document.documentElement).getPropertyValue("--ax-accent").trim() ||
+          getComputedStyle(document.documentElement).getPropertyValue("--accrue-interactive-accent").trim() ||
+          "#5d79f6"
+        ).toLowerCase(),
+        accentReadable: resolveTokenColor("--ax-accent-readable"),
       },
+      actionPaint: primaryAction && changeRowAction
+        ? {
+            primaryText: primaryAction.innerText.replace(/\s+/g, " ").trim(),
+            primaryBackground: getComputedStyle(primaryAction).backgroundColor,
+            primaryOpaque: alpha(getComputedStyle(primaryAction).backgroundColor) > 0,
+            primaryEffectiveBackground: effectiveBackground(primaryAction),
+            primaryColor: getComputedStyle(primaryAction).color,
+            primaryContrast: ratio(getComputedStyle(primaryAction).color, effectiveBackground(primaryAction)),
+            rowChangeColor: getComputedStyle(changeRowAction).color,
+            rowChangeEffectiveBackground: effectiveBackground(changeRowAction),
+            rowChangeContrast: ratio(getComputedStyle(changeRowAction).color, effectiveBackground(changeRowAction)),
+          }
+        : null,
       typography: {
         bodyFont: getComputedStyle(element).fontFamily,
         titleFont: titleStyle?.fontFamily || "",
@@ -341,9 +410,10 @@ async function assertUiPredicateContract(page, preview, story, entry, testCase) 
         title: titleStyle ? ratio(titleStyle.color, summaryBackground) : 0,
         factValue: valueStyle ? ratio(valueStyle.color, summaryBackground) : 0,
       },
+      hostAccentMutation,
       summaryDisplay: summary ? getComputedStyle(summary).display : "",
     };
-  });
+  }, entry.variation_id === "active" && testCase.theme === "light" && testCase.width === 1280);
   const previewWidth = await preview.evaluate((element) => element.getBoundingClientRect().width);
 
   expect(ui.document.scrollWidth, "UI-E1-overflow / UI-E2-overflow / UI-E3-overflow: document has no horizontal overflow").toBeLessThanOrEqual(ui.document.clientWidth + 1);
@@ -376,6 +446,20 @@ async function assertUiPredicateContract(page, preview, story, entry, testCase) 
   expect(Number.parseFloat(ui.typography.titleLineHeight)).toBeGreaterThanOrEqual(33);
   expect(ui.contrast.title, "subscription heading meets readable text contrast").toBeGreaterThanOrEqual(4.5);
   expect(ui.contrast.factValue, "subscription facts meet readable text contrast").toBeGreaterThanOrEqual(4.5);
+  if (entry.variation_id === "active" && testCase.theme === "light") {
+    expect(ui.themeTokens.accent, "light Storybook sandbox resolves the current host/default accent").toBe(ui.themeTokens.expectedAccent);
+    expect(ui.actionPaint?.primaryText).toBe("Change plan");
+    expect(ui.actionPaint?.primaryOpaque, "light primary action has a painted background").toBe(true);
+    expect(ui.actionPaint?.primaryBackground, "light primary action differs from its light card surface").not.toBe(ui.themeTokens.surfaceBackground);
+    expect(ui.actionPaint?.primaryContrast, "light primary action text contrasts its effective painted background").toBeGreaterThanOrEqual(4.5);
+    expect(ui.actionPaint?.rowChangeColor, "the Change row action uses the resolved readable accent token").toBe(ui.themeTokens.accentReadable);
+    expect(ui.actionPaint?.rowChangeContrast, "the Change row action remains readable on its effective surface").toBeGreaterThanOrEqual(4.5);
+  }
+  if (ui.hostAccentMutation) {
+    expect(ui.hostAccentMutation.resolvedAccent, "an inline host accent override flows into the Storybook sandbox").toBe("#26428b");
+    expect(ui.hostAccentMutation.rowChangeColor, "row actions follow the host-overridden readable accent").toBe(ui.hostAccentMutation.accentReadable);
+    expect(ui.hostAccentMutation.rowChangeColor).not.toBe(ui.actionPaint?.rowChangeColor);
+  }
 
   const copyButton = story.locator('button[aria-label="Copy subscription ID"]');
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);

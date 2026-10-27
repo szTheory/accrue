@@ -6,6 +6,13 @@
    scattered magic percentages), a display type step, and split duration/easing motion tokens
    with a tiered reduced-motion strategy. The legacy `--ax-motion-*` tokens are retained as
    back-compat aliases so existing `app.css` transitions keep working unchanged. */
+/* The production layout publishes its host accent on :root at runtime. Preserve that value
+   for direct Storybook routes, which use the production sandbox but not the admin layout;
+   brandbook's interactive accent is the established static fallback. */
+:root {
+  --ax-storybook-accent: var(--ax-accent, var(--accrue-interactive-accent, #5d79f6));
+}
+
 /* Bind semantic tokens to the same element that carries theme state. The Storybook
    backend assigns `accrue-admin` to each sandbox and `ax-theme-dark-shim` through its
    supported color-mode option, so the production token set can serve that real scope
@@ -219,6 +226,12 @@ html.accrue-admin,
   --ax-status-neutral-solid: #24303b;
   --ax-status-neutral-on-solid: #ffffff;
   color-scheme: light;
+}
+
+/* Route the host accent alias into Storybook's real sandbox scope. Keeping this separate
+   from html.accrue-admin avoids a custom-property cycle on the production root. */
+.psb-sandbox.accrue-admin {
+  --ax-accent: var(--ax-storybook-accent);
 }
 
 /* Phase 189 / quick 260718-u1s — dark token set, single-sourced.
