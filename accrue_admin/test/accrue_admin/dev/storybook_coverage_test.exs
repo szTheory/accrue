@@ -8,6 +8,28 @@ defmodule AccrueAdmin.Dev.StorybookCoverageTest do
   alias AccrueAdmin.Storybook.Groups.ComponentGroups, as: ComponentGroupsStory
   alias AccrueAdmin.Storybook.RegistryStory
 
+  setup_all do
+    previous_accrue_env = Application.get_env(:accrue, :env, :unset)
+    previous_locale = Application.get_env(:localize, :default_locale, :unset)
+    Application.put_env(:accrue, :env, :test)
+    Application.put_env(:localize, :default_locale, :en)
+    {:ok, _started} = Application.ensure_all_started(:localize)
+
+    on_exit(fn ->
+      case previous_accrue_env do
+        :unset -> Application.delete_env(:accrue, :env)
+        value -> Application.put_env(:accrue, :env, value)
+      end
+
+      case previous_locale do
+        :unset -> Application.delete_env(:localize, :default_locale)
+        value -> Application.put_env(:localize, :default_locale, value)
+      end
+    end)
+
+    :ok
+  end
+
   test "component registry story derives one coverage row per registry family" do
     expected_families =
       ComponentRegistry.entries()

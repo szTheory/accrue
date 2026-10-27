@@ -354,6 +354,7 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert rows == SubscriptionManifest.caller_map_for(Enum.reverse(same_label))
       assert Enum.map(rows, & &1.label) == ["Subscription detail", "Subscription detail"]
       assert length(Enum.uniq(Enum.map(rows, & &1.key))) == 2
+
       assert Enum.map(rows, &{&1.owner, &1.path, &1.tier, &1.state}) == [
                {"Owner A", "lib/a.ex", "area", "uncovered"},
                {"Owner B", "lib/b.ex", "page", "uncovered"}

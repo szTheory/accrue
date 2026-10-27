@@ -3,13 +3,22 @@ if Mix.env() != :prod do
     @moduledoc false
 
     alias AccrueAdmin.Dev.Storybook
+    alias AccrueAdmin.Dev.ComponentRegistry
     alias AccrueAdmin.Storybook.SubscriptionScenarios
     alias PhoenixStorybook.{NavigationHelpers, StoryEntry}
     alias PhoenixStorybook.Stories.{Variation, VariationGroup}
 
     @storybook_root "/dev/storybook"
     @subscription_story_path "/components/subscription_detail"
-    @source_paths [
+    @caller_source_paths [
+      "accrue_admin/lib/accrue_admin/dev/component_registry.ex",
+      "accrue_admin/lib/accrue_admin/router.ex",
+      "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+      "accrue_portal/lib/accrue_portal/router.ex",
+      "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex",
+      "accrue_portal/lib/accrue_portal/live/subscription_live.ex"
+    ]
+    @manifest_source_paths [
       "accrue_admin/lib/accrue_admin/dev/storybook.ex",
       "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
       "accrue_admin/storybook/_support/subscription_manifest.ex",
@@ -17,6 +26,7 @@ if Mix.env() != :prod do
       "dev_support/ui_scenarios/cadence_subscriptions.exs",
       "storybook/components/subscription_detail.story.exs"
     ]
+    @source_paths @manifest_source_paths ++ @caller_source_paths
 
     @doc "Discovers retained subscription variations from the compiled PhoenixStorybook backend."
     @spec entries() :: [map()]
@@ -164,6 +174,343 @@ if Mix.env() != :prod do
     end
 
     def route_matches?(_entry, _url), do: false
+
+    @doc "Returns stable production call-site rows linked to compiled story declarations and registry contracts."
+    @spec caller_map() :: [map()]
+    def caller_map do
+      root = repository_root()
+      entries = entries()
+      manifest_keys = Enum.map(entries, & &1.key) |> Enum.sort()
+
+      component_rows =
+        [
+          {"Detail.summary_card/1", nil, "Detail.summary_card title="},
+          {"Detail.summary_list/1", nil, "Detail.summary_list"},
+          {"StatusBadge.status_badge/1", "status", "StatusBadge.status_badge"},
+          {"IdBadge.id_badge/1", "id-badge", "IdBadge.id_badge"},
+          {"DropdownMenu.action_menu/1", nil, "DropdownMenu.action_menu"},
+          {"Action band buttons", "button", "class=\"ax-button ax-button-primary\""}
+        ]
+        |> Enum.map(fn {label, family, marker} ->
+          extra =
+            if family do
+              variants = ComponentRegistry.variants_for(family)
+
+              unless variants != [] do
+                raise ArgumentError,
+                      "subscription caller has no component registry family: #{family}"
+              end
+
+              %{registry_family: family, registry_variants: Enum.map(variants, & &1.variant)}
+            else
+              %{}
+            end
+
+          caller_row!(
+            root,
+            label,
+            "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+            "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+            marker,
+            "component",
+            "reachable",
+            manifest_keys: manifest_keys,
+            story_path: @subscription_story_path,
+            extra: extra
+          )
+        end)
+
+      story_rows =
+        Enum.map(entries, fn entry ->
+          compatibility? =
+            entry.variation_id in ["populated", "braintree_pruned", "dunning_active"]
+
+          caller_row!(
+            root,
+            "#{entry.variation_id} story variation",
+            "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0",
+            "storybook/components/subscription_detail.story.exs",
+            ":#{entry.variation_id},",
+            "component",
+            "reachable",
+            manifest_keys: [entry.key],
+            story_path: entry.story_path,
+            manifest_urls: [entry.url],
+            contract: entry.scenario_id,
+            classification:
+              if(compatibility?,
+                do: "source-supported compatibility declaration",
+                else: "selected subscription state"
+              )
+          )
+        end)
+
+      group_contract =
+        ComponentRegistry.group_contract_by_slug("detail-header-metadata-actions") ||
+          raise ArgumentError,
+                "subscription detail group contract is missing from ComponentRegistry"
+
+      group_row =
+        caller_row!(
+          root,
+          group_contract.name,
+          "AccrueAdmin.Dev.ComponentRegistry.group_contracts/0",
+          "accrue_admin/lib/accrue_admin/dev/component_registry.ex",
+          group_contract.proof_id,
+          "group",
+          "uncovered",
+          reason:
+            "The selected subscription story reaches the shared area and action band, but does not render the full registered detail-header group contract.",
+          contract: group_contract.slug,
+          registry_proof_id: group_contract.proof_id,
+          registry_components: group_contract.primary_components
+        )
+
+      area_row =
+        caller_row!(
+          root,
+          "Subscription summary, facts, and eligible actions",
+          "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "def subscription_area(assigns) do",
+          "area",
+          "reachable",
+          manifest_keys: manifest_keys,
+          story_path: @subscription_story_path
+        )
+
+      section_row =
+        caller_row!(
+          root,
+          "Subscription actions section",
+          "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "data-ax-action-band",
+          "section",
+          "reachable",
+          manifest_keys: manifest_keys,
+          story_path: @subscription_story_path
+        )
+
+      admin_rows = [
+        caller_row!(
+          root,
+          "Admin subscription detail page",
+          "AccrueAdmin.Live.SubscriptionLive.render/1",
+          "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "<.subscription_area",
+          "page",
+          "uncovered",
+          reason:
+            "The legacy detail Storybook route renders subscription_area/1 only. It does not prove the whole-page shell, breadcrumb, related resources, drill sections, or full-page route.",
+          route_path: "/subscriptions/:id",
+          route_evidence:
+            source_evidence!(
+              root,
+              "accrue_admin/lib/accrue_admin/router.ex",
+              "live(\"/subscriptions/:id\", AccrueAdmin.Live.SubscriptionLive"
+            )
+        ),
+        caller_row!(
+          root,
+          "Admin subscription list",
+          "AccrueAdmin.Live.SubscriptionsLive.render/1",
+          "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+          "def render(assigns) do",
+          "job",
+          "uncovered",
+          reason: "The subscription list has no selected subscription Storybook composition.",
+          route_path: "/subscriptions",
+          route_evidence:
+            source_evidence!(
+              root,
+              "accrue_admin/lib/accrue_admin/router.ex",
+              "live(\"/subscriptions\", AccrueAdmin.Live.SubscriptionsLive"
+            )
+        ),
+        caller_row!(
+          root,
+          "Admin mounted subscription action journey",
+          "AccrueAdmin.Live.SubscriptionLive.handle_event/3",
+          "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "def handle_event(\"open_action_drawer\"",
+          "job",
+          "uncovered",
+          reason:
+            "Static stories do not exercise mount authorization, step-up, preview, confirmation, provider results, or persistence; Phase 253 owns the mounted Admin journey.",
+          route_path: "/subscriptions/:id",
+          route_evidence:
+            source_evidence!(
+              root,
+              "accrue_admin/lib/accrue_admin/router.ex",
+              "live(\"/subscriptions/:id\", AccrueAdmin.Live.SubscriptionLive"
+            )
+        )
+      ]
+
+      portal_rows = [
+        caller_row!(
+          root,
+          "Portal subscription list",
+          "AccruePortal.Live.SubscriptionsLive.render/1",
+          "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex",
+          "def render(assigns) do",
+          "job",
+          "uncovered",
+          reason:
+            "The customer-facing subscription list and its cancellation controls have no selected Portal Storybook composition.",
+          route_path: "/subscriptions",
+          route_evidence:
+            source_evidence!(
+              root,
+              "accrue_portal/lib/accrue_portal/router.ex",
+              "live(\"/subscriptions\", AccruePortal.Live.SubscriptionsLive"
+            )
+        ),
+        caller_row!(
+          root,
+          "Portal subscription detail page",
+          "AccruePortal.Live.SubscriptionLive.render/1",
+          "accrue_portal/lib/accrue_portal/live/subscription_live.ex",
+          "def render(assigns) do",
+          "job",
+          "uncovered",
+          reason:
+            "Portal subscription detail, recovery messaging, and plan-change preview have no selected Storybook composition.",
+          route_path: "/subscriptions/:id",
+          route_evidence:
+            source_evidence!(
+              root,
+              "accrue_portal/lib/accrue_portal/router.ex",
+              "live(\"/subscriptions/:id\", AccruePortal.Live.SubscriptionLive"
+            )
+        ),
+        caller_row!(
+          root,
+          "Portal mounted cancellation and plan-change journey",
+          "AccruePortal.Live.SubscriptionLive.handle_event/3",
+          "accrue_portal/lib/accrue_portal/live/subscription_live.ex",
+          "\"confirm_plan_change\"",
+          "job",
+          "uncovered",
+          reason:
+            "Static stories do not exercise Portal authorization, plan-change preview/commit, cancellation, provider results, or persisted effects.",
+          route_path: "/subscriptions/:id",
+          route_evidence:
+            source_evidence!(
+              root,
+              "accrue_portal/lib/accrue_portal/router.ex",
+              "live(\"/subscriptions/:id\", AccruePortal.Live.SubscriptionLive"
+            )
+        ),
+        caller_row!(
+          root,
+          "Mounted authority, provider completion, and persistence",
+          "AccrueAdmin.Storybook.Components.SubscriptionDetail.subscription_detail_story/1",
+          "storybook/components/subscription_detail.story.exs",
+          "Every variation is a static render",
+          "proof-lane",
+          "not_applicable",
+          reason:
+            "These effects are not observable in the static render proof lane; the story delegates presentation and does not execute mounted or provider workflows.",
+          story_path: @subscription_story_path
+        )
+      ]
+
+      ([group_row, area_row, section_row] ++
+         component_rows ++ story_rows ++ admin_rows ++ portal_rows)
+      |> caller_map_for()
+    end
+
+    @doc "Normalizes and validates caller coverage rows, refusing empty or duplicate identities."
+    @spec caller_map_for([map()]) :: [map()]
+    def caller_map_for(rows) when is_list(rows) do
+      if rows == [] do
+        raise ArgumentError, "production caller source contains zero rows"
+      end
+
+      normalized = Enum.map(rows, &normalize_caller_row!/1)
+
+      duplicate =
+        normalized
+        |> Enum.group_by(& &1.key)
+        |> Enum.find(fn {_key, matching_rows} -> length(matching_rows) > 1 end)
+
+      if duplicate do
+        {key, _matching_rows} = duplicate
+        raise ArgumentError, "duplicate production caller identity: #{key}"
+      end
+
+      Enum.sort_by(normalized, &{&1.owner, &1.path, &1.tier, &1.state, &1.label, &1.key})
+    end
+
+    def caller_map_for(_rows),
+      do: raise(ArgumentError, "production caller source must be a non-empty list")
+
+    @doc "Writes a deterministic guide from the current production caller map."
+    @spec write_coverage_guide!(Path.t()) :: :ok
+    def write_coverage_guide!(path) when is_binary(path) do
+      contents = coverage_guide()
+      path |> Path.dirname() |> File.mkdir_p!()
+      File.write!(path, contents)
+    end
+
+    @doc "Renders the deterministic current caller and composition guide."
+    @spec coverage_guide() :: String.t()
+    def coverage_guide do
+      rows = caller_map()
+
+      sections = [
+        {"Reachable", "reachable"},
+        {"Uncovered", "uncovered"},
+        {"Not applicable", "not_applicable"}
+      ]
+
+      state_tables =
+        Enum.map(sections, fn {title, state} ->
+          state_rows = Enum.filter(rows, &(&1.state == state))
+
+          [
+            "## #{title}",
+            "",
+            "| Tier | Caller | Production owner | Source evidence | Route / story links | Contract or reason |",
+            "| --- | --- | --- | --- | --- | --- |",
+            Enum.map(state_rows, &guide_row/1),
+            ""
+          ]
+        end)
+
+      compatibility =
+        rows
+        |> Enum.filter(&(&1.classification == "source-supported compatibility declaration"))
+        |> Enum.map(&"`#{&1.label}` (`#{&1.contract}`)")
+        |> Enum.join(", ")
+
+      digests =
+        source_digests()
+        |> Enum.sort()
+        |> Enum.map(fn {source, digest} -> "- `#{source}` — `#{digest}`" end)
+
+      [
+        "# Production caller and composition coverage",
+        "",
+        "Generated from compiled subscription Storybook declarations, production source call sites, current router routes, and ComponentRegistry contracts. `Reachable` means the named source is linked to a selected static-render manifest entry; browser DOM verification is supplied separately by Phase 252-06.",
+        "",
+        "The composition trace is component → group → area → section → page. The current story calls the same `SubscriptionLive.subscription_area/1` owner used by the Admin detail page, and includes its action band. The legacy detail Storybook route `/dev/storybook/components/subscription_detail` does not prove a whole page.",
+        "",
+        "Selected story IDs are discovered from the compiled tree. Source-supported compatibility declarations retained with their scenario contracts: #{compatibility}.",
+        "",
+        "Admin whole-page/list/action-journey work remains in Phase 253. Portal subscription list/detail and mounted cancellation/plan-change jobs remain visible below for later coverage planning; this guide does not implement those jobs.",
+        "",
+        state_tables,
+        "## Source digests",
+        "",
+        digests,
+        ""
+      ]
+      |> List.flatten()
+      |> Enum.join("\n")
+    end
 
     defp flatten_variations!(variations, path) when is_list(variations) do
       flattened =
@@ -313,5 +660,119 @@ if Mix.env() != :prod do
     defp repository_root do
       Path.expand("../../../", __DIR__)
     end
+
+    defp caller_row!(root, label, owner, path, marker, tier, state, opts) do
+      evidence = source_evidence!(root, path, marker)
+      options = Map.new(opts)
+
+      route_evidence = Map.get(options, :route_evidence)
+
+      row = %{
+        label: label,
+        owner: owner,
+        path: path,
+        tier: tier,
+        state: state,
+        evidence: evidence,
+        reason: Map.get(options, :reason),
+        contract: Map.get(options, :contract),
+        registry_proof_id: Map.get(options, :registry_proof_id),
+        registry_components: Map.get(options, :registry_components),
+        story_path: Map.get(options, :story_path),
+        manifest_keys: Map.get(options, :manifest_keys, []),
+        manifest_urls: Map.get(options, :manifest_urls, []),
+        route_path: Map.get(options, :route_path),
+        route_evidence: route_evidence,
+        classification: Map.get(options, :classification)
+      }
+
+      Map.merge(row, Map.get(options, :extra, %{}))
+    end
+
+    defp source_evidence!(root, relative_path, marker) do
+      source_path = Path.join(root, relative_path)
+
+      unless File.regular?(source_path) do
+        raise ArgumentError, "production caller source is missing: #{relative_path}"
+      end
+
+      source_path
+      |> File.read!()
+      |> String.split("\n")
+      |> Enum.with_index(1)
+      |> Enum.find_value(fn {line, line_number} ->
+        if String.contains?(line, marker) do
+          "#{relative_path}:#{line_number}: #{String.trim(line)}"
+        end
+      end)
+      |> case do
+        nil ->
+          raise ArgumentError,
+                "production caller evidence is missing from #{relative_path}: #{marker}"
+
+        evidence ->
+          evidence
+      end
+    end
+
+    defp normalize_caller_row!(row) when is_map(row) do
+      fields = [:label, :owner, :path, :tier, :state, :evidence]
+
+      Enum.each(fields, fn field ->
+        value = Map.get(row, field)
+
+        unless is_binary(value) and String.trim(value) != "" do
+          raise ArgumentError, "production caller row is missing #{field}"
+        end
+      end)
+
+      unless row.state in ["reachable", "uncovered", "not_applicable"] do
+        raise ArgumentError, "production caller row has unsupported state: #{inspect(row.state)}"
+      end
+
+      if row.state != "reachable" and not non_empty_string?(Map.get(row, :reason)) do
+        raise ArgumentError, "#{row.state} production caller row is missing a reason"
+      end
+
+      manifest_keys = Map.get(row, :manifest_keys, [])
+
+      unless is_list(manifest_keys) and Enum.all?(manifest_keys, &non_empty_string?/1) do
+        raise ArgumentError, "production caller row has invalid manifest keys"
+      end
+
+      identity = [row.owner, row.path, row.tier, row.state, row.label]
+      key = Enum.map_join(identity, "|", &URI.encode/1)
+
+      row
+      |> Map.put(:key, key)
+      |> Map.put(:manifest_keys, Enum.sort(Enum.uniq(manifest_keys)))
+    end
+
+    defp normalize_caller_row!(_row),
+      do: raise(ArgumentError, "production caller row must be a map")
+
+    defp non_empty_string?(value), do: is_binary(value) and String.trim(value) != ""
+
+    defp guide_row(row) do
+      links =
+        (Map.get(row, :manifest_urls, []) ++
+           Enum.map(Map.get(row, :manifest_keys, []), &"manifest key `#{&1}`") ++
+           List.wrap(Map.get(row, :route_path)))
+        |> Enum.reject(&is_nil/1)
+        |> Enum.join("<br>")
+
+      source_evidence =
+        [Map.get(row, :evidence), Map.get(row, :route_evidence)]
+        |> Enum.reject(&is_nil/1)
+        |> Enum.join("<br>")
+
+      contract_or_reason =
+        Map.get(row, :reason) || Map.get(row, :contract) || Map.get(row, :classification) || "—"
+
+      "| #{guide_cell(row.tier)} | #{guide_cell(row.label)} | #{guide_cell(row.owner)} | `#{guide_cell(source_evidence)}` | #{guide_cell(links)} | #{guide_cell(contract_or_reason)} |"
+    end
+
+    defp guide_cell(nil), do: "—"
+    defp guide_cell(value), do: value |> to_string() |> String.replace("|", "\\|")
   end
 end
