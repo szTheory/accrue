@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -48,6 +50,22 @@ test("latest acceptance rejects missing, stale, skipped, pooled, and unsafe runt
 });
 
 test("acceptance UAT generation requires every completed summary", () => {
-  assert.throws(() => generator.validateCompletedSummaries({ root }), /253-06-SUMMARY|summary|complete/i);
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "phase253-missing-summary-"));
+  const phaseDir = path.join(tempRoot, ".planning", "phases", generator.PHASE_SLUG);
+  fs.mkdirSync(phaseDir, { recursive: true });
+  try {
+    for (const plan of ["01", "02", "03", "04", "05"]) {
+      const name = `253-${plan}-SUMMARY.md`;
+      fs.copyFileSync(path.join(root, ".planning", "phases", generator.PHASE_SLUG, name), path.join(phaseDir, name));
+    }
+    assert.throws(() => generator.validateCompletedSummaries({ root: tempRoot }), /253-06-SUMMARY|summary|complete/i);
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("completed-summary dates accept the existing nested metrics completed_date field", () => {
+  assert.equal(generator.completedSummaryDate("metrics:\n  duration: 33m\n  completed_date: 2026-10-27\nstatus: complete"), "2026-10-27");
+  assert.equal(generator.completedSummaryDate("completed: 2026-10-27\nstatus: complete"), "2026-10-27");
 });
 

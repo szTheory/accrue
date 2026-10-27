@@ -246,6 +246,13 @@ function scalar(frontmatter, key) {
   return match ? unquote(match[1]) : undefined;
 }
 
+export function completedSummaryDate(frontmatter) {
+  const topLevel = scalar(frontmatter, "completed") || scalar(frontmatter, "completed_date");
+  if (topLevel) return topLevel;
+  const nested = frontmatter.match(/^[ \t]+completed_date:\s*(.*?)\s*$/m);
+  return nested ? unquote(nested[1]) : undefined;
+}
+
 function listField(frontmatter, key, file) {
   const match = frontmatter.match(new RegExp(`^${key}:\\s*\\[([^\\]]*)\\]\\s*$`, "m"));
   if (!match) fail(`${file} has no finite ${key} list`);
@@ -708,7 +715,7 @@ export function validateCompletedSummaries({ root = ROOT } = {}) {
     const metadata = extractFrontmatter(source, name);
     if (scalar(metadata, "status") !== "complete") fail(`${name} must have status: complete before UAT generation`);
     const entries = coverageBlock(metadata, name).map((entry) => summaryCoverageEntry(entry, name));
-    const completed = scalar(metadata, "completed") || scalar(metadata, "completed_date");
+    const completed = completedSummaryDate(metadata);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(completed || "")) fail(`${name} needs a deterministic completed date`);
     return { name, absolute, directory: path.dirname(absolute), source, completed, entries };
   });
