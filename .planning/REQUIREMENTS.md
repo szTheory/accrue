@@ -10,7 +10,7 @@ The owner approved the [reviewed subscription-first proposal](research/ui-qualit
 
 ### Production-backed stories and a real job
 
-- [ ] **SBK-01**: Maintainer can locate the subscription job's real production callers and useful component → group → area → section → page compositions in one current coverage map, with reachable, uncovered and not-applicable states distinguished and remaining UI jobs visible as gaps.
+- [x] **SBK-01**: Maintainer can locate the subscription job's real production callers and useful component → group → area → section → page compositions in one current coverage map, with reachable, uncovered and not-applicable states distinguished and remaining UI jobs visible as gaps.
 - [x] **SBK-02**: Reviewer can open each retained subscription situation from a stable story/variation URL with its actor, job, input source, production renderer and static-versus-mounted proof lane identified; generated discovery reconciles with actual rendered variations, and metadata-only markers cannot satisfy rendering coverage.
 - [x] **SBK-03**: Reviewer can inspect complete active, scheduled-cancellation and incomplete-evidence subscription areas rendered by the same production-owned summary/facts/action components used by the application, in light/dark and narrow/desktop contexts, without copied markup or story-local formatting, copy, eligibility or scoped-link rules.
 - [ ] **SBK-04**: Reviewer can inspect the actual subscription collection toolbar/result/table/pagination composition for new-host empty, filtered-empty, one-row, multiple-row and page-boundary situations, plus source-supported loading/error states; existing DataTable lifecycle and event targeting remain intact.
@@ -78,7 +78,7 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SBK-01 | Phase 252 | Pending |
+| SBK-01 | Phase 252 | Complete |
 | SBK-02 | Phase 252 | Complete |
 | SBK-03 | Phase 252 | Complete |
 | SBK-04 | Phase 253 | Pending |
