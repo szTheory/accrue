@@ -186,7 +186,7 @@ async function assertCurrentStorybookAssets(page, assets) {
   return { storybook_css_sha256: sha256(servedCss), storybook_js_sha256: sha256(servedJs) };
 }
 
-async function assertUiPredicateContract(page, story, entry, testCase) {
+async function assertUiPredicateContract(page, preview, story, entry, testCase) {
   const ui = await story.evaluate((element) => {
     const viewportWidth = window.innerWidth;
     const probe = (node, label) => {
@@ -263,6 +263,30 @@ async function assertUiPredicateContract(page, story, entry, testCase) {
       label: group.getAttribute("aria-label") || "",
       items: group.querySelectorAll('[role="menuitem"]').length,
     }));
+    const ratio = (foreground, background) => {
+      const luminance = (color) => {
+        const values = color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+        if (!values || values.length !== 3) return null;
+        const channels = values.map((value) => {
+          const normalized = value / 255;
+          return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+        });
+        return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+      };
+      const first = luminance(foreground);
+      const second = luminance(background);
+      if (first === null || second === null) return 0;
+      const [lighter, darker] = [first, second].sort((left, right) => right - left);
+      return (lighter + 0.05) / (darker + 0.05);
+    };
+    const title = element.querySelector("h1");
+    const idText = element.querySelector(".ax-id-badge-text");
+    const firstKey = element.querySelector(".ax-summary-list-key");
+    const firstValue = element.querySelector(".ax-summary-list-value");
+    const titleStyle = title ? getComputedStyle(title) : null;
+    const keyStyle = firstKey ? getComputedStyle(firstKey) : null;
+    const valueStyle = firstValue ? getComputedStyle(firstValue) : null;
+    const summaryBackground = summary ? getComputedStyle(summary).backgroundColor : "";
     return {
       viewportWidth,
       document: { clientWidth: root.clientWidth, scrollWidth: Math.max(root.scrollWidth, body.scrollWidth) },
@@ -302,15 +326,33 @@ async function assertUiPredicateContract(page, story, entry, testCase) {
         elevated: getComputedStyle(element).getPropertyValue("--ax-elevated").trim().toLowerCase(),
         primary: getComputedStyle(element).getPropertyValue("--ax-primary").trim().toLowerCase(),
       },
+      typography: {
+        bodyFont: getComputedStyle(element).fontFamily,
+        titleFont: titleStyle?.fontFamily || "",
+        identifierFont: idText ? getComputedStyle(idText).fontFamily : "",
+        bodySize: getComputedStyle(element).fontSize,
+        titleSize: titleStyle?.fontSize || "",
+        titleWeight: titleStyle?.fontWeight || "",
+        titleLineHeight: titleStyle?.lineHeight || "",
+        labelSize: keyStyle?.fontSize || "",
+        valueSize: valueStyle?.fontSize || "",
+      },
+      contrast: {
+        title: titleStyle ? ratio(titleStyle.color, summaryBackground) : 0,
+        factValue: valueStyle ? ratio(valueStyle.color, summaryBackground) : 0,
+      },
       summaryDisplay: summary ? getComputedStyle(summary).display : "",
     };
   });
+  const previewWidth = await preview.evaluate((element) => element.getBoundingClientRect().width);
 
   expect(ui.document.scrollWidth, "UI-E1-overflow / UI-E2-overflow / UI-E3-overflow: document has no horizontal overflow").toBeLessThanOrEqual(ui.document.clientWidth + 1);
   expect(ui.story.outsideViewport, "production summary remains within the browser viewport").toBe(false);
+  expect(ui.story.width, "the subscription preview keeps usable width at each viewport").toBeGreaterThanOrEqual(testCase.width === 1280 ? 640 : 250);
   expect(ui.required.filter((item) => item.outsideViewport || item.textClipped || item.clippingAncestor), "required title, IDs, facts, labels, and menu content are not clipped").toEqual([]);
   expect(ui.summaryColumns, "summary rows use the agreed responsive column count").toBe(testCase.width < 600 ? 1 : 3);
   expect(ui.summaryRowCount).toBeGreaterThan(0);
+  expect(previewWidth, "the Storybook preview column uses the story's full-width layout").toBeGreaterThanOrEqual(testCase.width === 1280 ? 680 : 250);
   expect(ui.actionTargets.length).toBeGreaterThan(0);
   expect(ui.actionTargets.filter((target) => target.height < 44), "UI action targets retain a 44px minimum at both widths").toEqual([]);
   expect(ui.headings).toMatchObject({ h1: 1, h2: 1, h2Text: "Subscription actions" });
@@ -327,6 +369,13 @@ async function assertUiPredicateContract(page, story, entry, testCase) {
 
   const expectedBase = testCase.theme === "light" ? "#fafbfc" : "#0f1318";
   expect(ui.themeTokens, `current Storybook CSS resolves the ${testCase.theme} Accrue base token`).toMatchObject({ base: expectedBase });
+  expect(ui.typography.bodyFont).toContain("Geist");
+  expect(ui.typography.titleFont).toContain("Geist");
+  expect(ui.typography.identifierFont).toContain("Geist Mono");
+  expect(ui.typography).toMatchObject({ bodySize: "16px", titleSize: "28px", titleWeight: "600", labelSize: "12px", valueSize: "14px" });
+  expect(Number.parseFloat(ui.typography.titleLineHeight)).toBeGreaterThanOrEqual(33);
+  expect(ui.contrast.title, "subscription heading meets readable text contrast").toBeGreaterThanOrEqual(4.5);
+  expect(ui.contrast.factValue, "subscription facts meet readable text contrast").toBeGreaterThanOrEqual(4.5);
 
   const copyButton = story.locator('button[aria-label="Copy subscription ID"]');
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
@@ -454,6 +503,30 @@ function statusLabel(status) {
     canceled: "Canceled",
   };
   return labels[status] || status.replaceAll("_", " ");
+}
+
+async function captureCanonicalScreenshot(preview, testCase) {
+  const configuredDirectory = process.env.PHASE252_SCREENSHOT_DIR;
+  if (!configuredDirectory || testCase.kind !== "canonical") return null;
+
+  const captureRoot = path.resolve(REPO_ROOT, "accrue_admin/tmp/phase252/ci-results");
+  const directory = path.resolve(configuredDirectory);
+  const expectedDirectory = path.join(captureRoot, RESULT_ID, "screenshots");
+  if (directory !== expectedDirectory) {
+    throw new Error("Phase 252 screenshots must stay inside the unique private CI result directory");
+  }
+
+  fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+  const name = `${testCase.entry.scenario_id}-${testCase.width}-${testCase.theme}.png`;
+  const destination = path.join(directory, name);
+  const bytes = await preview.screenshot({ path: destination, animations: "disabled" });
+  return {
+    path: path.relative(REPO_ROOT, destination).split(path.sep).join("/"),
+    sha256: sha256(bytes),
+    state: testCase.entry.scenario_id,
+    width: testCase.width,
+    theme: testCase.theme,
+  };
 }
 
 function expectedCaveats(entry) {
@@ -625,7 +698,6 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
     const story = preview.locator(".psb-sandbox").first();
     await expect(story, "the direct Storybook variation should render actual production content").toBeVisible();
     await setSettledThemeForScan(page, theme);
-    await page.locator("html").evaluate((element) => element.classList.add("accrue-admin"));
     await page.evaluate(async () => {
       if (document.fonts?.ready) await document.fonts.ready;
       await Promise.all([...document.images].map((image) => image.decode().catch(() => undefined)));
@@ -644,35 +716,56 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
     const viewport = await page.evaluate(() => ({ width: window.innerWidth, clientWidth: document.documentElement.clientWidth }));
     expect(viewport.width).toBe(width);
     await expect.poll(async () => story.evaluate((element) => ({
-      dataTheme: element.getAttribute("data-theme"),
+      mode: element.classList.contains("ax-theme-dark-shim") ? "dark" : "light",
+      sandboxHasAdminClass: element.classList.contains("accrue-admin"),
+      documentRootHasAdminClass: document.documentElement.classList.contains("accrue-admin"),
       darkShim: element.classList.contains("ax-theme-dark-shim"),
     })), { message: `settled Storybook wrapper theme ${theme}` }).toEqual({
-      dataTheme: theme,
+      mode: theme,
+      sandboxHasAdminClass: true,
+      documentRootHasAdminClass: false,
       darkShim: theme === "dark",
     });
     const themeState = await story.evaluate((element) => {
       const summary = element.querySelector(".ax-summary-card");
       const summaryStyle = summary ? getComputedStyle(summary) : null;
+      const title = element.querySelector("h1");
+      const titleStyle = title ? getComputedStyle(title) : null;
       return {
-        dataTheme: element.getAttribute("data-theme"),
-        sandboxClasses: element.className,
+        mode: element.classList.contains("ax-theme-dark-shim") ? "dark" : "light",
+        dataTheme: element.classList.contains("ax-theme-dark-shim") ? "dark" : "light",
+        sandboxHasAdminClass: element.classList.contains("accrue-admin"),
+        documentRootHasAdminClass: document.documentElement.classList.contains("accrue-admin"),
+        sandboxClasses: [...element.classList],
         darkShim: element.classList.contains("ax-theme-dark-shim"),
         base: getComputedStyle(element).getPropertyValue("--ax-base").trim().toLowerCase(),
         summaryBackground: summaryStyle?.backgroundColor || "",
         summaryColor: summaryStyle?.color || "",
         summaryFontSize: summaryStyle?.fontSize || "",
         summaryDisplay: summaryStyle?.display || "",
+        titleColor: titleStyle?.color || "",
+        titleFontFamily: titleStyle?.fontFamily || "",
+        titleFontSize: titleStyle?.fontSize || "",
+        titleFontWeight: titleStyle?.fontWeight || "",
       };
     });
     row.applied_theme = themeState;
+    expect(themeState.mode).toBe(theme);
     expect(themeState.dataTheme).toBe(theme);
+    expect(themeState.sandboxHasAdminClass).toBe(true);
+    expect(themeState.documentRootHasAdminClass, "the direct route must not receive a helper-added root class").toBe(false);
     expect(themeState.darkShim).toBe(theme === "dark");
     expect(themeState.summaryDisplay, "committed subscription CSS must apply to the actual summary").toBe("flex");
+    expect(themeState.titleFontFamily).toContain("Geist");
+    expect(themeState.titleFontSize).toBe("28px");
+    expect(themeState.titleFontWeight).toBe("600");
+    const screenshot = await captureCanonicalScreenshot(preview, testCase);
+    if (screenshot) row.screenshot = screenshot;
     row.fact_rows = await readFactRows(story);
 
     const content = await assertStoryFacts(story, entry);
     const actions = await assertActionAvailability(story, entry);
-    const uiMetrics = await assertUiPredicateContract(page, story, entry, testCase);
+    const uiMetrics = await assertUiPredicateContract(page, preview, story, entry, testCase);
     const actualRoute = new URL(page.url());
     expect(actualRoute.searchParams.get("variation_id")).toBe(entry.route_variation_id);
     expect(actualRoute.pathname).toContain("/billing/dev/storybook/");

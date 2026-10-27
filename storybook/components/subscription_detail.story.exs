@@ -14,6 +14,10 @@ defmodule AccrueAdmin.Storybook.Components.SubscriptionDetail do
 
   def function, do: &__MODULE__.subscription_detail_story/1
 
+  # This subscription preview needs the full Storybook content width for the
+  # production three-column facts layout; keep source code below the preview.
+  def layout, do: :one_column
+
   def variations do
     [
       variation(:active, :active, "Active Cadence subscription"),

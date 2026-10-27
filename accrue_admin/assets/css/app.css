@@ -36,7 +36,8 @@ body {
   min-height: 100%;
 }
 
-html.accrue-admin {
+html.accrue-admin,
+.psb-sandbox.accrue-admin {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   /* Tabular figures everywhere — this is a data tool; numbers must align across
@@ -46,6 +47,16 @@ html.accrue-admin {
      gradient on top). Without this the page has no solid background-color, which
      breaks contrast tooling and risks a flash of the wrong base. */
   background-color: var(--ax-base);
+}
+
+/* PhoenixStorybook owns this sandbox class; give its preview the same root
+   typography and semantic surface that the admin layout gives the page body. */
+.psb-sandbox.accrue-admin {
+  background-color: var(--ax-base);
+  color: var(--ax-primary);
+  font-family: var(--ax-font-sans);
+  font-size: var(--ax-type-md);
+  line-height: var(--ax-leading-normal);
 }
 
 /* Inline icon primitive (AccrueAdmin.Components.Icon): inherits color via
@@ -2847,7 +2858,8 @@ a.ax-kpi-card--linked:focus-visible {
    it's confident, not neon — lower saturation, calmer against the near-black chrome.
    White --ax-accent-contrast stays well above WCAG AA (~6.9:1). Light mode keeps
    --ax-accent-strong unchanged; hover/active still darken from there. */
-html.accrue-admin[data-theme="dark"] .ax-button-primary {
+html.accrue-admin[data-theme="dark"] .ax-button-primary,
+.psb-sandbox.accrue-admin.ax-theme-dark-shim .ax-button-primary {
   background: color-mix(in srgb, var(--ax-accent) 62%, var(--ax-elevated));
 }
 
@@ -6773,26 +6785,31 @@ html.accrue-admin[data-theme="dark"] .ax-card.ax-data-table-shell {
 }
 
 /* Phase 188 foundation state-role consumers. */
-html.accrue-admin {
+html.accrue-admin,
+.psb-sandbox.accrue-admin {
   scrollbar-color: var(--ax-scrollbar-thumb) var(--ax-scrollbar-track);
 }
 
-html.accrue-admin::-webkit-scrollbar {
+html.accrue-admin::-webkit-scrollbar,
+.psb-sandbox.accrue-admin::-webkit-scrollbar {
   width: 0.75rem;
   height: 0.75rem;
 }
 
-html.accrue-admin::-webkit-scrollbar-track {
+html.accrue-admin::-webkit-scrollbar-track,
+.psb-sandbox.accrue-admin::-webkit-scrollbar-track {
   background: var(--ax-scrollbar-track);
 }
 
-html.accrue-admin::-webkit-scrollbar-thumb {
+html.accrue-admin::-webkit-scrollbar-thumb,
+.psb-sandbox.accrue-admin::-webkit-scrollbar-thumb {
   background: var(--ax-scrollbar-thumb);
   border: 2px solid var(--ax-scrollbar-track);
   border-radius: var(--ax-radius-pill);
 }
 
-html.accrue-admin::-webkit-scrollbar-thumb:hover {
+html.accrue-admin::-webkit-scrollbar-thumb:hover,
+.psb-sandbox.accrue-admin::-webkit-scrollbar-thumb:hover {
   background: var(--ax-scrollbar-thumb-hover);
 }
 

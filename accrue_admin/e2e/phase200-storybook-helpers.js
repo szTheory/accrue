@@ -81,23 +81,14 @@ async function setSettledThemeForScan(page, theme) {
   }
 
   await page.evaluate((value) => {
-    const root = document.documentElement;
-    root.dataset.theme = value;
-    root.setAttribute("data-theme", value);
-    root.dataset.phase200SettledScanBypass = "true";
-
-    for (const sandbox of document.querySelectorAll(".psb-sandbox, .accrue-admin")) {
-      sandbox.classList.add("accrue-admin");
-      sandbox.classList.toggle("ax-theme-dark-shim", value === "dark");
-      sandbox.dataset.theme = value;
-      sandbox.setAttribute("data-theme", value);
-      sandbox.dataset.phase200SettledScanBypass = "true";
-    }
+    window.dispatchEvent(new CustomEvent("psb:set-color-mode", { detail: { mode: value } }));
   }, theme);
 
   await expect
-    .poll(() => page.locator("html").evaluate((element) => element.dataset.theme || ""), {
-      message: `settled scan theme ${theme}`,
+    .poll(() => page.locator(".psb-sandbox.accrue-admin").first().evaluate((element) =>
+      element.classList.contains("ax-theme-dark-shim") ? "dark" : "light"
+    ), {
+      message: `PhoenixStorybook color mode settles to ${theme}`,
     })
     .toBe(theme);
 }

@@ -13,7 +13,7 @@ defmodule AccrueAdmin.Test.TapFormatter do
     tests
     |> Enum.with_index(1)
     |> Enum.each(fn {test, index} ->
-      name = test.name |> to_string() |> String.replace(~r/[\r\n]+/u, " ")
+      name = "#{inspect(test.module)}::#{test.name}" |> String.replace(~r/[\r\n]+/u, " ")
 
       case test.state do
         nil ->
@@ -94,6 +94,10 @@ defmodule AccrueAdmin.SubscriptionStorySliceTest do
     end)
 
     :ok
+  end
+
+  test "subscription story declares the one-column layout for its preview" do
+    assert SubscriptionDetail.layout() == :one_column
   end
 
   test "the declared active variation renders the production area from real facts without Repo" do
