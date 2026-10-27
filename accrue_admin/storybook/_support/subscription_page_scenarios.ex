@@ -12,6 +12,15 @@ defmodule AccrueAdmin.Storybook.SubscriptionPageScenarios do
   alias AccrueAdmin.Storybook.SubscriptionScenarios
 
   @scenarios [:active, :scheduled_cancellation, :incomplete_evidence]
+  @snapshots [
+    :canonical,
+    :review_cancel_now,
+    :awaiting_step_up,
+    :dispatching,
+    :result_confirmed,
+    :result_pending,
+    :result_failed
+  ]
   @attribution %{
     actor: "vendor billing support operator",
     job: "understand subscription state and choose a supported next action",
@@ -19,22 +28,32 @@ defmodule AccrueAdmin.Storybook.SubscriptionPageScenarios do
     production_renderer: "AccrueAdmin.Live.SubscriptionLive.subscription_page/1",
     proof_lane: "static whole-page render"
   }
-  @allowed_attributes Map.keys(@attribution) ++ [:scenario]
+  @allowed_attributes Map.keys(@attribution) ++ [:scenario, :snapshot]
 
   @doc "Lists the canonical whole subscription detail situations."
   def list, do: @scenarios
 
   @doc "Returns the page-level static-review attribution for a supported scenario."
-  def attributes(scenario) when scenario in @scenarios do
-    Map.put(@attribution, :scenario, scenario)
+  def attributes(scenario), do: attributes(scenario, :canonical)
+
+  def attributes(scenario, :canonical) when scenario in @scenarios do
+    Map.merge(@attribution, %{scenario: scenario, snapshot: :canonical})
   end
 
-  def attributes(scenario),
-    do: raise(ArgumentError, "unsupported whole subscription page scenario: #{inspect(scenario)}")
+  def attributes(:active, snapshot) when snapshot in @snapshots do
+    Map.merge(@attribution, %{scenario: :active, snapshot: snapshot})
+  end
+
+  def attributes(scenario, snapshot),
+    do:
+      raise(
+        ArgumentError,
+        "unsupported whole subscription page scenario/snapshot: #{inspect({scenario, snapshot})}"
+      )
 
   @doc "Builds production renderer assigns from validated facts without starting Repo."
   def assigns!(input) do
-    scenario = scenario!(input)
+    {scenario, snapshot} = scenario!(input)
     base = SubscriptionScenarios.assigns!(scenario)
     subscription = base.subscription
     customer = base.customer
@@ -50,35 +69,39 @@ defmodule AccrueAdmin.Storybook.SubscriptionPageScenarios do
         "/subscriptions"
       )
 
-    Map.merge(base, %{
-      brand: default_brand(),
-      current_path: ScopedPath.build(mount_path, "/subscriptions", scope),
-      page_title: Copy.subscription_page_title(),
-      theme: "system",
-      active_organization_name:
-        scope.organization_display_name || scope.organization_slug || "selected organization",
-      return_path: destination.path,
-      return_label: destination.label,
-      related_items: related_items(subscription, mount_path, scope, destination.path),
-      timeline_events: [],
-      timeline_events_loaded?: true,
-      raw_json_loaded?: false,
-      proration_options: proration_options(),
-      drawer_action_type: nil,
-      pending_action: nil,
-      dispatch_state: :idle,
-      step_up_pending: false,
-      step_up_challenge: nil,
-      step_up_error: nil
-    })
-    |> Map.put(:customer, customer)
+    page =
+      Map.merge(base, %{
+        brand: default_brand(),
+        current_path: ScopedPath.build(mount_path, "/subscriptions", scope),
+        page_title: Copy.subscription_page_title(),
+        theme: "system",
+        active_organization_name:
+          scope.organization_display_name || scope.organization_slug || "selected organization",
+        return_path: destination.path,
+        return_label: destination.label,
+        related_items: related_items(subscription, mount_path, scope, destination.path),
+        timeline_events: [],
+        timeline_events_loaded?: true,
+        raw_json_loaded?: false,
+        proration_options: proration_options(),
+        drawer_action_type: nil,
+        pending_action: nil,
+        dispatch_state: :idle,
+        step_up_pending: false,
+        step_up_challenge: nil,
+        step_up_error: nil
+      })
+      |> Map.put(:customer, customer)
+
+    apply_snapshot(page, snapshot)
   end
 
-  defp scenario!(scenario) when scenario in @scenarios, do: scenario
+  defp scenario!(scenario) when scenario in @scenarios, do: {scenario, :canonical}
 
   defp scenario!(attributes) when is_map(attributes) do
     scenario = Map.fetch!(attributes, :scenario)
-    expected = attributes(scenario)
+    snapshot = Map.get(attributes, :snapshot, :canonical)
+    expected = attributes(scenario, snapshot)
     unknown = Map.keys(attributes) -- @allowed_attributes
 
     mismatch =
@@ -93,8 +116,11 @@ defmodule AccrueAdmin.Storybook.SubscriptionPageScenarios do
       mismatch ->
         raise ArgumentError, "whole page attribution does not match the static review contract"
 
+      attributes != expected ->
+        raise ArgumentError, "whole page attribution is incomplete"
+
       true ->
-        scenario
+        {scenario, snapshot}
     end
   end
 
@@ -104,6 +130,75 @@ defmodule AccrueAdmin.Storybook.SubscriptionPageScenarios do
         ArgumentError,
         "whole page input must be a supported scenario or attribution map: #{inspect(input)}"
       )
+
+  defp apply_snapshot(page, :canonical), do: page
+
+  defp apply_snapshot(page, :review_cancel_now),
+    do: put_review(page, :staged)
+
+  defp apply_snapshot(page, :awaiting_step_up) do
+    page
+    |> put_review(:awaiting_step_up)
+    |> Map.merge(%{
+      step_up_pending: true,
+      step_up_challenge: %{kind: :totp, message: "Verify admin action"}
+    })
+  end
+
+  defp apply_snapshot(page, :dispatching), do: put_review(page, :dispatching)
+  defp apply_snapshot(page, :result_confirmed), do: put_result(page, :confirmed)
+  defp apply_snapshot(page, :result_pending), do: put_result(page, :pending)
+  defp apply_snapshot(page, :result_failed), do: put_result(page, :failed)
+
+  defp put_review(page, state) do
+    subscription = page.subscription
+    scope = page.current_owner_scope
+
+    action = %{
+      type: "cancel_now",
+      new_price_id: nil,
+      new_quantity: nil,
+      item_id: nil,
+      pause_behavior: "void",
+      proration: "create_prorations",
+      source_event_id: nil,
+      source_webhook_event_id: nil,
+      subscription_id: subscription.id,
+      review_actor_id: scope.current_admin.id,
+      review_scope:
+        {scope.mode, scope.organization_id, scope.organization_slug, scope.platform_admin?,
+         scope.admin_org_ids}
+    }
+
+    Map.merge(page, %{
+      drawer_action_type: action.type,
+      pending_action: action,
+      dispatch_state: state
+    })
+  end
+
+  defp put_result(page, kind) do
+    subscription = page.subscription
+    scope = page.current_owner_scope
+
+    result = %{
+      kind: kind,
+      message: AccrueAdmin.Live.SubscriptionLive.action_result_message(kind),
+      href:
+        ScopedPath.build(page.admin_mount_path, "/events", scope, %{
+          "subject_type" => "Subscription",
+          "subject_id" => subscription.id
+        }),
+      link_label: "Open scoped subscription activity"
+    }
+
+    Map.merge(page, %{
+      action_result: result,
+      drawer_action_type: nil,
+      pending_action: nil,
+      dispatch_state: :submitted
+    })
+  end
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

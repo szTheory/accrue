@@ -4,13 +4,17 @@ if Mix.env() != :prod do
 
     alias AccrueAdmin.Dev.Storybook
     alias AccrueAdmin.Storybook.SubscriptionScenarios
+    alias AccrueAdmin.Storybook.SubscriptionPageScenarios
     alias PhoenixStorybook.{NavigationHelpers, StoryEntry}
     alias PhoenixStorybook.Stories.{Variation, VariationGroup}
 
     @storybook_root "/dev/storybook"
     @mounted_storybook_root "/billing/dev/storybook"
     @story_path "/groups/subscriptions_collection"
+    @page_story_path "/pages/subscription"
     @required_variation "one_row"
+    @required_variation_id :one_row
+    @required_page_variations ~w(active scheduled_cancellation incomplete_evidence review_cancel_now awaiting_step_up dispatching result_confirmed result_pending result_failed)
     @renderer "AccrueAdmin.Live.SubscriptionsLive.subscriptions_collection/1"
     @query_module "AccrueAdmin.Storybook.SubscriptionCollectionQuery"
     @source_paths [
@@ -20,8 +24,10 @@ if Mix.env() != :prod do
       "accrue_admin/lib/accrue_admin/router.ex",
       "accrue_admin/storybook/_support/subscription_collection.ex",
       "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+      "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
       "dev_support/ui_scenarios/cadence_subscriptions.exs",
-      "storybook/groups/subscriptions_collection.story.exs"
+      "storybook/groups/subscriptions_collection.story.exs",
+      "storybook/pages/subscription.story.exs"
     ]
 
     @doc "Discovers the collection composition from the compiled PhoenixStorybook tree."
@@ -51,10 +57,89 @@ if Mix.env() != :prod do
       end
     end
 
+    @doc "Discovers the approved whole-page variations from the compiled PhoenixStorybook tree."
+    @spec page_entries() :: [map()]
+    def page_entries do
+      case Enum.filter(Storybook.leaves(), &(&1.path == @page_story_path)) do
+        [%StoryEntry{path: path}] ->
+          case Storybook.load_story(String.trim_leading(path, "/")) do
+            {:ok, story} ->
+              page_entries_for([{path, story}], @storybook_root)
+
+            {:error, reason} ->
+              raise ArgumentError,
+                    "compiled whole-page story could not be loaded: #{inspect(reason)}"
+          end
+
+        [] ->
+          raise ArgumentError, "compiled Storybook tree is missing #{@page_story_path}"
+
+        _duplicates ->
+          raise ArgumentError,
+                "compiled Storybook tree contains duplicate #{@page_story_path} leaves"
+      end
+    end
+
+    @doc "Builds fail-closed manifest entries for the compiled whole-page story."
+    @spec page_entries_for([{String.t(), module()}], String.t()) :: [map()]
+    def page_entries_for(stories, root_path) when is_list(stories) and is_binary(root_path) do
+      unless Enum.any?(stories, fn
+               {@page_story_path, _story} -> true
+               _other -> false
+             end) do
+        raise ArgumentError, "compiled page Storybook tree is missing #{@page_story_path}"
+      end
+
+      entries =
+        Enum.flat_map(stories, fn
+          {@page_story_path = path, story} when is_atom(story) ->
+            validate_page_story!(story)
+
+            story
+            |> apply(:variations, [])
+            |> flatten_page_variations!(path)
+            |> Enum.map(&page_entry!(path, &1, root_path))
+
+          {path, _story} ->
+            raise ArgumentError, "unexpected whole-page story path: #{inspect(path)}"
+
+          other ->
+            raise ArgumentError, "invalid compiled whole-page story source: #{inspect(other)}"
+        end)
+
+      if entries == [] do
+        raise ArgumentError, "compiled whole-page story contains zero variations"
+      end
+
+      duplicate =
+        entries
+        |> Enum.group_by(& &1.variation_id)
+        |> Enum.find(fn {_id, same_id} -> length(same_id) > 1 end)
+
+      if duplicate do
+        {id, _entries} = duplicate
+        raise ArgumentError, "duplicate whole-page path/variation identity: #{id}"
+      end
+
+      actual_ids = Enum.map(entries, & &1.variation_id)
+      missing = @required_page_variations -- actual_ids
+      extra = actual_ids -- @required_page_variations
+
+      unless missing == [] and extra == [] do
+        raise ArgumentError,
+              "whole-page variation set is incomplete or unsupported (missing: #{inspect(missing)}, extra: #{inspect(extra)})"
+      end
+
+      Enum.sort_by(entries, &{&1.story_path, &1.variation_id})
+    end
+
+    def page_entries_for(_stories, _root_path),
+      do: raise(ArgumentError, "whole-page stories and Storybook root must be provided")
+
     @doc "Builds a stable, narrow projection from compiled collection stories."
     @spec entries_for([{String.t(), module()}], String.t()) :: [map()]
     def entries_for(stories, root_path) when is_list(stories) and is_binary(root_path) do
-      entries =
+      declarations =
         stories
         |> Enum.flat_map(fn
           {@story_path = path, story} when is_atom(story) ->
@@ -63,9 +148,6 @@ if Mix.env() != :prod do
             story
             |> apply(:variations, [])
             |> flatten_variations!(path)
-            |> Enum.map(fn {group_id, variation} ->
-              entry!(path, group_id, variation, root_path)
-            end)
 
           {path, _story} ->
             raise ArgumentError,
@@ -75,9 +157,21 @@ if Mix.env() != :prod do
             raise ArgumentError, "invalid compiled collection story source: #{inspect(other)}"
         end)
 
-      if entries == [] do
+      if declarations == [] do
         raise ArgumentError, "compiled collection story contains zero variations"
       end
+
+      # This manifest preserves the task 1 one-row transport proof. Additional
+      # settled collection states are exercised by the collection slice tests;
+      # they do not carry the launch/team source attribution required here.
+      entries =
+        declarations
+        |> Enum.filter(fn {_group_id, %Variation{id: variation_id}} ->
+          variation_id == @required_variation_id
+        end)
+        |> Enum.map(fn {group_id, variation} ->
+          entry!(@story_path, group_id, variation, root_path)
+        end)
 
       duplicate =
         entries
@@ -128,7 +222,8 @@ if Mix.env() != :prod do
         human_judgment: false,
         source_digests: source_digests(),
         transport: transport!(current_entries),
-        entries: current_entries
+        entries: current_entries,
+        page_entries: page_entries()
       }
 
       json = Jason.encode!(contents, pretty: true) <> "\n"
@@ -153,6 +248,12 @@ if Mix.env() != :prod do
 
       unless manifest["entries"] == current_entries do
         raise ArgumentError, "collection manifest entries or direct routes are stale"
+      end
+
+      current_page_entries = page_entries() |> Jason.encode!() |> Jason.decode!()
+
+      unless manifest["page_entries"] == current_page_entries do
+        raise ArgumentError, "whole-page manifest entries or direct routes are stale"
       end
 
       current_transport = transport!(entries())
@@ -224,8 +325,10 @@ if Mix.env() != :prod do
       if group_id, do: validate_id!(group_id, "variation group", path)
 
       scenario = if is_map(attributes), do: Map.get(attributes, :scenario)
+      expected_attributes = %{scenario: scenario}
+      canonical_attributes = %{scenario: scenario, collection_state: :one_row}
 
-      unless is_map(attributes) and attributes == %{scenario: scenario} and
+      unless is_map(attributes) and attributes in [expected_attributes, canonical_attributes] and
                scenario in [:launch, :growing_team] do
         raise ArgumentError,
               "collection variation #{inspect(variation_id)} in #{path} needs only a launch or growing_team fact"
@@ -267,6 +370,80 @@ if Mix.env() != :prod do
       }
     end
 
+    defp flatten_page_variations!(variations, path) when is_list(variations) do
+      Enum.map(variations, fn
+        %Variation{} = variation ->
+          variation
+
+        other ->
+          raise ArgumentError,
+                "unsupported whole-page variation declaration in #{path}: #{inspect(other)}"
+      end)
+    end
+
+    defp flatten_page_variations!(_variations, path),
+      do: raise(ArgumentError, "whole-page story #{path} variations must be a list")
+
+    defp page_entry!(path, %Variation{id: variation_id, attributes: attributes}, root_path) do
+      validate_id!(variation_id, "whole-page variation", path)
+
+      unless is_map(attributes) do
+        raise ArgumentError,
+              "whole-page variation #{inspect(variation_id)} in #{path} needs an attribution map"
+      end
+
+      scenario = Map.get(attributes, :scenario)
+      snapshot = Map.get(attributes, :snapshot)
+
+      expected_attributes =
+        try do
+          SubscriptionPageScenarios.attributes(scenario, snapshot)
+        rescue
+          ArgumentError -> nil
+        end
+
+      unless is_map(expected_attributes) and attributes == expected_attributes do
+        raise ArgumentError,
+              "whole-page variation #{inspect(variation_id)} in #{path} has malformed or incomplete attribution"
+      end
+
+      facts = scenario |> CadenceSubscriptionFacts.fetch!() |> SubscriptionScenarios.validate!()
+      route_id = Atom.to_string(variation_id)
+
+      url =
+        NavigationHelpers.path_to_story(root_path, String.trim_leading(path, "/"), %{
+          variation_id: route_id
+        })
+
+      %{
+        key: key(path, nil, variation_id),
+        story_path: path,
+        group_id: nil,
+        variation_id: route_id,
+        route_variation_id: route_id,
+        url: url,
+        direct_path: @mounted_storybook_root <> String.replace_prefix(url, @storybook_root, ""),
+        transport_kind: "page_story",
+        production_renderer: "AccrueAdmin.Live.SubscriptionLive.subscription_page/1",
+        fact_source: "CadenceSubscriptionFacts.fetch!(:#{scenario})",
+        presentation_snapshot: Atom.to_string(snapshot),
+        proof_lane: "presentation-only",
+        expected: %{
+          scenario: Atom.to_string(scenario),
+          snapshot: Atom.to_string(snapshot),
+          subscription_id: facts.subscription.id,
+          processor_id: facts.subscription.processor_id,
+          customer_name: facts.customer.name,
+          customer_email: facts.customer.email,
+          owner_slug: facts.owner.slug,
+          status: Atom.to_string(facts.subscription.status),
+          plan_price_id: hd(facts.subscription.items).price_id,
+          plan_quantity: hd(facts.subscription.items).quantity,
+          amount_state: "unavailable"
+        }
+      }
+    end
+
     defp transport!(entries) do
       root = repository_root()
       path = Path.join(root, "accrue_admin/tmp/phase253/transport.json")
@@ -276,10 +453,20 @@ if Mix.env() != :prod do
       end
 
       transport = path |> File.read!() |> Jason.decode!()
-      [one_row] = Enum.filter(entries, &(&1.variation_id == @required_variation))
+      [_one_row] = Enum.filter(entries, &(&1.variation_id == @required_variation))
+
+      component_url =
+        NavigationHelpers.path_to_story(
+          "#{@storybook_root}/iframe",
+          "groups/subscriptions_collection",
+          %{variation_id: @required_variation}
+        )
+
+      component_direct_path =
+        @mounted_storybook_root <> String.replace_prefix(component_url, @storybook_root, "")
 
       expected = %{
-        "direct_path" => one_row.direct_path,
+        "direct_path" => component_direct_path,
         "fact_sources" => [
           "CadenceSubscriptionFacts.fetch!(:launch)",
           "CadenceSubscriptionFacts.fetch!(:growing_team)"
@@ -308,6 +495,14 @@ if Mix.env() != :prod do
       unless Code.ensure_loaded?(story) and function_exported?(story, :variations, 0) do
         raise ArgumentError,
               "compiled collection story does not export variations/0: #{inspect(story)}"
+      end
+    end
+
+    defp validate_page_story!(story) do
+      unless Code.ensure_loaded?(story) and function_exported?(story, :variations, 0) and
+               function_exported?(story, :render, 1) do
+        raise ArgumentError,
+              "compiled whole-page story must export variations/0 and render/1: #{inspect(story)}"
       end
     end
 

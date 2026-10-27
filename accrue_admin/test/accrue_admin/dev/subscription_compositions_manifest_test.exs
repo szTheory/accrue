@@ -18,6 +18,47 @@ defmodule AccrueAdmin.SubscriptionCompositionManifestFixture.Missing do
   def variations, do: [%Variation{id: :other, attributes: %{scenario: :launch}}]
 end
 
+defmodule AccrueAdmin.SubscriptionPageManifestFixture.Duplicate do
+  alias AccrueAdmin.Storybook.SubscriptionPageScenarios
+  alias PhoenixStorybook.Stories.Variation
+
+  def variations do
+    attributes = SubscriptionPageScenarios.attributes(:active, :canonical)
+    variation = %Variation{id: :active, attributes: attributes}
+    [variation, variation]
+  end
+
+  def render(assigns), do: assigns
+end
+
+defmodule AccrueAdmin.SubscriptionPageManifestFixture.Missing do
+  alias AccrueAdmin.Storybook.SubscriptionPageScenarios
+  alias PhoenixStorybook.Stories.Variation
+
+  def variations do
+    [
+      %Variation{
+        id: :active,
+        attributes: SubscriptionPageScenarios.attributes(:active, :canonical)
+      }
+    ]
+  end
+
+  def render(assigns), do: assigns
+end
+
+defmodule AccrueAdmin.SubscriptionPageManifestFixture.Malformed do
+  alias PhoenixStorybook.Stories.Variation
+
+  def variations, do: [%Variation{id: :active, attributes: %{scenario: :active}}]
+  def render(assigns), do: assigns
+end
+
+defmodule AccrueAdmin.SubscriptionPageManifestFixture.Empty do
+  def variations, do: []
+  def render(assigns), do: assigns
+end
+
 defmodule AccrueAdmin.SubscriptionCompositionsManifestBootTest do
   use ExUnit.Case, async: false
 
@@ -37,6 +78,7 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
 
     @storybook_root "/dev/storybook"
     @story_path "/groups/subscriptions_collection"
+    @page_story_path "/pages/subscription"
     @manifest_path Path.expand("../../../tmp/phase253/manifest.json", __DIR__)
 
     test "compiled one_row identity resolves to the mounted collection story and current transport" do
@@ -85,6 +127,49 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
       refute Manifest.route_matches?(entry, wrong_route)
     end
 
+    test "compiled whole-page story declares every direct production-rendered variation" do
+      assert Process.whereis(AccrueAdmin.TestRepo) == nil
+
+      assert [%StoryEntry{path: @page_story_path}] =
+               Enum.filter(Storybook.leaves(), &(&1.path == @page_story_path))
+
+      entries = Manifest.page_entries()
+
+      assert Enum.map(entries, & &1.variation_id) == [
+               "active",
+               "awaiting_step_up",
+               "dispatching",
+               "incomplete_evidence",
+               "result_confirmed",
+               "result_failed",
+               "result_pending",
+               "review_cancel_now",
+               "scheduled_cancellation"
+             ]
+
+      assert Enum.all?(entries, fn entry ->
+               entry.story_path == @page_story_path and entry.group_id == nil and
+                 entry.transport_kind == "page_story" and
+                 entry.production_renderer ==
+                   "AccrueAdmin.Live.SubscriptionLive.subscription_page/1" and
+                 entry.proof_lane == "presentation-only" and
+                 entry.direct_path ==
+                   "/billing/dev/storybook/pages/subscription?variation_id=#{entry.variation_id}"
+             end)
+
+      active = Enum.find(entries, &(&1.variation_id == "active"))
+      assert active.fact_source == "CadenceSubscriptionFacts.fetch!(:active)"
+      assert active.expected.amount_state == "unavailable"
+      assert Manifest.route_matches?(active, active.url)
+
+      wrong_route =
+        NavigationHelpers.path_to_story(@storybook_root, "pages/subscription", %{
+          variation_id: "not_declared"
+        })
+
+      refute Manifest.route_matches?(active, wrong_route)
+    end
+
     test "manifest write verifies current source digests and keeps task 1 transport provenance" do
       :ok = Manifest.write!(@manifest_path)
       assert :ok = Manifest.verify!(@manifest_path)
@@ -92,14 +177,28 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
       manifest = @manifest_path |> File.read!() |> Jason.decode!()
       assert manifest["human_judgment"] == false
       assert manifest["transport"]["transport_kind"] == "live_component"
+      assert length(manifest["page_entries"]) == 9
+      assert Enum.any?(manifest["page_entries"], &(&1["variation_id"] == "result_pending"))
 
       assert Map.has_key?(
                manifest["source_digests"],
                "accrue_admin/lib/accrue_admin/queries/subscriptions.ex"
              )
 
+      assert Map.has_key?(
+               manifest["source_digests"],
+               "accrue_admin/storybook/_support/subscription_page_scenarios.ex"
+             )
+
+      assert Map.has_key?(manifest["source_digests"], "storybook/pages/subscription.story.exs")
+
       assert manifest["transport"]["direct_path"] ==
-               "/billing/dev/storybook/groups/subscriptions_collection?variation_id=one_row"
+               "/billing" <>
+                 NavigationHelpers.path_to_story(
+                   "#{@storybook_root}/iframe",
+                   "groups/subscriptions_collection",
+                   %{variation_id: "one_row"}
+                 )
 
       [{source_path, _digest} | _] = Enum.sort(manifest["source_digests"])
 
@@ -136,6 +235,40 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
 
       assert_raise ArgumentError, ~r/zero variations/i, fn ->
         Manifest.entries_for([], @storybook_root)
+      end
+    end
+
+    test "whole-page manifest rejects malformed, missing, duplicate, and omitted variations" do
+      assert_raise ArgumentError, ~r/duplicate whole-page path\/variation identity/i, fn ->
+        Manifest.page_entries_for(
+          [{@page_story_path, AccrueAdmin.SubscriptionPageManifestFixture.Duplicate}],
+          @storybook_root
+        )
+      end
+
+      assert_raise ArgumentError, ~r/variation set is incomplete/i, fn ->
+        Manifest.page_entries_for(
+          [{@page_story_path, AccrueAdmin.SubscriptionPageManifestFixture.Missing}],
+          @storybook_root
+        )
+      end
+
+      assert_raise ArgumentError, ~r/malformed or incomplete attribution/i, fn ->
+        Manifest.page_entries_for(
+          [{@page_story_path, AccrueAdmin.SubscriptionPageManifestFixture.Malformed}],
+          @storybook_root
+        )
+      end
+
+      assert_raise ArgumentError, ~r/zero variations/i, fn ->
+        Manifest.page_entries_for(
+          [{@page_story_path, AccrueAdmin.SubscriptionPageManifestFixture.Empty}],
+          @storybook_root
+        )
+      end
+
+      assert_raise ArgumentError, ~r/missing \/pages\/subscription/i, fn ->
+        Manifest.page_entries_for([], @storybook_root)
       end
     end
   end

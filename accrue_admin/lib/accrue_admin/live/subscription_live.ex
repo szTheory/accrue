@@ -1647,7 +1647,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           {:ok, refreshed} ->
             refreshed
             |> record_admin_audit(action, updated_subscription.id, updated_subscription.id)
-            |> put_action_result(:confirmed, Copy.subscription_action_recorded_info())
+            |> put_action_result(:confirmed, action_result_message(:confirmed))
             |> finish_action_submission(:submitted, true)
 
           :not_found ->
@@ -1665,7 +1665,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         socket
         |> put_action_result(
           :pending,
-          "The provider requires another action. A completed subscription change is not confirmed; check scoped activity before deciding what to do next."
+          action_result_message(:pending)
         )
         |> finish_action_submission(:submitted, true)
 
@@ -2118,6 +2118,16 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     )
   end
 
+  @doc false
+  def action_result_message(:confirmed), do: Copy.subscription_action_recorded_info()
+
+  def action_result_message(:pending),
+    do:
+      "The provider requires another action. A completed subscription change is not confirmed; check scoped activity before deciding what to do next."
+
+  def action_result_message(:failed),
+    do: "The provider rejected the action. No change was accepted."
+
   defp outcome_requires_reconciliation?(socket) do
     match?(%{kind: :unconfirmed}, socket.assigns[:action_result])
   end
@@ -2148,7 +2158,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
       definitive_provider_rejection?(reason) ->
         socket
-        |> put_action_result(:failed, "The provider rejected the action. No change was accepted.")
+        |> put_action_result(:failed, action_result_message(:failed))
         |> finish_action_submission(:submitted, true)
 
       true ->
