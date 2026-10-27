@@ -2,6 +2,8 @@
 
 This lab supports disposable production-backed Storybook review for subscription details. It separates static render evidence, local database evidence, and mounted browser review. Every browser server is created by the Phase 252 launcher and tied to a fresh numeric partition, database, port, nonce, and process identity.
 
+Ordinary and held-out subscription facts are synthetic stress scenarios, not representative customer behavior or real adopter usage evidence. The long-text browser clone is a separate synthetic stress input, distinct from the manifest fixture entries and the `CadenceSubscriptionFacts.held_out!/1` source. This disposable, non-production review lab presents a static review surface. Rendered controls do not establish completed billing actions, mounted authorization, provider completion, or persistence.
+
 ## Prerequisites
 
 - Run commands from the repository root.
