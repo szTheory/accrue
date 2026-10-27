@@ -46,7 +46,7 @@ The fresh owner run `25208-1793102721082-59067-6ba5536df2dd` passed all 18 comma
 
 **Verification:** `node --test --test-reporter=tap scripts/ci/generate_phase252_acceptance.test.mjs` passed 20/20, including negative controls for skipped records, exclusions, mismatched or missing identities, empty/truncated output, fake assertion references, and digest changes, plus genuine TAP and Playwright positive controls. The final owner run recorded 20/20 acceptance-contract TAP tests, 0 skipped, 0 failed; all 18 owner commands exited zero. `node scripts/ci/generate_phase252_acceptance.mjs --results accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json` independently validated the current bundle as passed.
 
-**Fix status:** Fixed; requires human verification of the evidence-mapping logic during the parent-owned review recheck.
+**Fix status:** Implemented and regression-tested. Final independent verification of the evidence mapping belongs to `252-VERIFICATION.md`; no confirmation-only manual acceptance gate is required.
 
 ## Verification Run
 
