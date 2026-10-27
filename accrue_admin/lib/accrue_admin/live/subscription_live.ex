@@ -25,6 +25,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   alias AccrueAdmin.BillingPresentation
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.StepUp
@@ -48,9 +49,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         {:ok,
          socket
          |> put_flash(:error, Copy.Locked.owner_access_denied())
-         |> redirect(
-           to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/subscriptions")
-         )}
+         |> redirect(to: missing_subscription_path(admin, socket.assigns.current_owner_scope))}
 
       {:ok, subscription} ->
         mount_path = admin["mount_path"] || "/billing"
@@ -2427,6 +2426,33 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp scoped_admin_path(admin, _owner_scope, suffix), do: admin_path(admin, suffix)
+
+  defp missing_subscription_path(admin, %{mode: :organization} = owner_scope),
+    do: scoped_admin_path(admin, owner_scope, "/subscriptions")
+
+  defp missing_subscription_path(
+         admin,
+         %OwnerScope{
+           mode: :global,
+           active_organization_id: organization_id,
+           active_organization_slug: organization_slug,
+           platform_admin?: platform_admin?,
+           admin_org_ids: admin_org_ids
+         }
+       )
+       when is_binary(organization_id) and is_binary(organization_slug) do
+    if platform_admin? or organization_id in admin_org_ids do
+      scoped_admin_path(
+        admin,
+        %{mode: :organization, organization_slug: organization_slug},
+        "/subscriptions"
+      )
+    else
+      admin_path(admin, "/subscriptions")
+    end
+  end
+
+  defp missing_subscription_path(admin, _owner_scope), do: admin_path(admin, "/subscriptions")
 
   defp owner_scope_copy(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
     do: "organization #{slug}"

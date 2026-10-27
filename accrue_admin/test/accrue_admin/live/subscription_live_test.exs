@@ -1046,7 +1046,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert {:error, {:redirect, %{to: path, flash: %{"error" => denied}}}} =
              live(conn, "/billing/subscriptions/#{Ecto.UUID.generate()}?org=#{organization_slug}")
 
-    assert path == "/billing/subscriptions"
+    assert path == "/billing/subscriptions?org=#{organization_slug}"
     assert denied == Copy.Locked.owner_access_denied()
   end
 
