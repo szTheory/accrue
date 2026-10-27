@@ -7,6 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { deriveExecutionEvidence, PHASE252_REPORTER_SPECS } from "./phase252_reporters.mjs";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
 export const REQUIRED_COMMAND_IDS = Object.freeze([
   "manifest-current",
@@ -26,6 +27,9 @@ export const REQUIRED_COMMAND_IDS = Object.freeze([
   "heldout-cleanup",
   "isolation-reset",
   "subscription-render-browser",
+  "lab-presentation",
+  "heldout-attribution",
+  "transparency-controls",
   "phase252-acceptance-contract",
 ]);
 
@@ -35,6 +39,29 @@ const HISTORICAL_RENDER_RESULT = "accrue_admin/tmp/phase252/render-results.json"
 const MANIFEST_PATH = "storybook/phase252-manifest.json";
 const GENERATED_RENDER_RESULT_DIR = "accrue_admin/tmp/phase252";
 const REQUIREMENT_IDS = ["CIQ-01", "SBK-01", "SBK-02", "SBK-03", "SCEN-01", "SCEN-02", "SCEN-03", "SCEN-04", "LAB-01", "LAB-02"];
+const PHASE_SLUG = "252-production-backed-subscription-stories";
+const PHASE_ARTIFACT_PREFIX = `.planning/phases/${PHASE_SLUG}/`;
+const ORIGINAL_PROHIBITION_PLANS = Object.freeze([
+  `${PHASE_ARTIFACT_PREFIX}252-01-PLAN.md`,
+  `${PHASE_ARTIFACT_PREFIX}252-04-PLAN.md`,
+]);
+const TRANSPARENCY_SOURCE_PATHS = Object.freeze([
+  "scripts/ci/phase_evidence_path.mjs",
+  "scripts/ci/verify_phase252_transparency.mjs",
+  "scripts/ci/verify_phase252_lab_presentation.test.mjs",
+  "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
+  "scripts/ci/fixtures/phase252-transparency/lab-clean.json",
+  "scripts/ci/fixtures/phase252-transparency/lab-violation.json",
+  "scripts/ci/fixtures/phase252-transparency/heldout-clean.json",
+  "scripts/ci/fixtures/phase252-transparency/heldout-violation.json",
+  "guides/ui-story-lab.md",
+  "storybook/components/subscription_detail.story.exs",
+  MANIFEST_PATH,
+  "dev_support/ui_scenarios/cadence_subscriptions.exs",
+  "accrue_admin/storybook/_support/subscription_scenarios.ex",
+  "accrue_admin/e2e/phase252-story-helpers.js",
+  ...ORIGINAL_PROHIBITION_PLANS,
+]);
 
 const SOURCE_AND_ASSET_PATHS = Object.freeze([
   ".github/workflows/ci.yml",
@@ -55,10 +82,19 @@ const SOURCE_AND_ASSET_PATHS = Object.freeze([
   "brandbook/tokens/tokens.css",
   "scripts/ci/phase252_paths.mjs",
   "scripts/ci/phase252_reporters.mjs",
+  "scripts/ci/phase_evidence_path.mjs",
   "scripts/ci/verify_phase252_ci_contract.test.mjs",
   "scripts/ci/verify_phase252_production_boundary.mjs",
   "scripts/ci/verify_phase252_production_boundary.test.mjs",
   "scripts/ci/verify_phase252_stories.mjs",
+  "scripts/ci/verify_phase252_transparency.mjs",
+  "scripts/ci/verify_phase252_lab_presentation.test.mjs",
+  "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
+  "scripts/ci/fixtures/phase252-transparency/lab-clean.json",
+  "scripts/ci/fixtures/phase252-transparency/lab-violation.json",
+  "scripts/ci/fixtures/phase252-transparency/heldout-clean.json",
+  "scripts/ci/fixtures/phase252-transparency/heldout-violation.json",
+  ...ORIGINAL_PROHIBITION_PLANS,
   "scripts/ci/generate_phase252_acceptance.mjs",
   "scripts/ci/generate_phase252_acceptance.test.mjs",
   "guides/ui-story-lab.md",
@@ -80,15 +116,22 @@ function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
-function fileDigest(root, relativePath) {
-  const absolutePath = path.join(root, relativePath);
+function sourceFilePath(root, relativePath) {
+  if (relativePath.startsWith(PHASE_ARTIFACT_PREFIX)) {
+    return resolvePhaseEvidencePath(PHASE_SLUG, relativePath.slice(PHASE_ARTIFACT_PREFIX.length), { root });
+  }
+  return path.join(root, relativePath);
+}
+
+export function fileDigest(root, relativePath) {
+  const absolutePath = sourceFilePath(root, relativePath);
   if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) {
     throw new Error("Phase 252 source or asset is missing: " + relativePath);
   }
   return sha256(fs.readFileSync(absolutePath));
 }
 
-function sourceSnapshot(root, manifest, extraPaths = []) {
+export function sourceSnapshot(root, manifest, extraPaths = []) {
   const paths = [...new Set([
     ...SOURCE_AND_ASSET_PATHS,
     ...Object.keys(manifest?.source_digests || {}),
@@ -160,7 +203,7 @@ function command(id, display, executable, args, options = {}) {
   };
 }
 
-function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }) {
+export function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }) {
   const usedPartitions = new Set();
   const tap = (file) => ["--test", "--test-reporter=tap", file];
   const phase252LabExec = (testId, files, assertions = [], lane = "admin-test") => {
@@ -197,7 +240,7 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
     dbFree("manifest-contract", "test/accrue_admin/dev/subscription_manifest_test.exs", ["compiled_variation_routes", "stable_group_and_same_id_keys", "current_caller_map", "stale_manifest_rejection", "story_variation_identity_adjacency", "zero_variation_and_missing_attribution_refusal", "deterministic_manifest_ordering", "caller_identity_adjacency", "empty_caller_source_refusal", "stable_caller_ordering"]),
     dbFree("production-boundary-db-free", "test/accrue_admin/dev/subscription_production_boundary_test.exs", ["production_route_and_compile_boundary"]),
     command("phase248-heldout-contract", "node --test Phase 248 held-out isolation contract", process.execPath, tap("scripts/ci/phase248_heldout_isolation.test.mjs"), { lane: "read-only", sources: ["scripts/ci/phase248_heldout_isolation.test.mjs"], assertions: ["held_out_partition_and_owner"] }),
-    command("phase252-ci-contract", "node --test Phase 252 CI admission contract", process.execPath, tap("scripts/ci/verify_phase252_ci_contract.test.mjs"), { lane: "read-only", sources: ["scripts/ci/verify_phase252_ci_contract.test.mjs", ".github/workflows/ci.yml", "scripts/ci/verify_phase200_admin_guardrails.sh"], assertions: ["consumed_root_owner_map", "workflow_admission", "named_required_owner_execution", "required_owner_invocation_mutations"] }),
+    command("phase252-ci-contract", "node --test Phase 252 CI admission contract", process.execPath, tap("scripts/ci/verify_phase252_ci_contract.test.mjs"), { lane: "read-only", sources: ["scripts/ci/verify_phase252_ci_contract.test.mjs", ".github/workflows/ci.yml", "scripts/ci/verify_phase200_admin_guardrails.sh"], assertions: ["consumed_root_owner_map", "workflow_admission", "named_required_owner_execution", "required_owner_invocation_mutations", "required_transparency_lane_inventory", "transparency_reporter_bindings", "transparency_source_freshness", "transparency_consumed_root_admission", "transparency_non_vacuity"] }),
     command("production-boundary-controls", "node scripts/ci/verify_phase252_production_boundary.mjs --self-test", process.execPath, ["scripts/ci/verify_phase252_production_boundary.mjs", "--self-test"], { lane: "isolated-build", sources: ["scripts/ci/verify_phase252_production_boundary.mjs"], assertions: ["production_package_leak_negative_controls", "development_positive_production_route_exclusion"] }),
     command("production-packages", "node scripts/ci/verify_phase252_production_boundary.mjs", process.execPath, ["scripts/ci/verify_phase252_production_boundary.mjs"], { lane: "isolated-build", warmth: "cold", sources: ["scripts/ci/verify_phase252_production_boundary.mjs", "accrue/mix.exs", "accrue_admin/mix.exs", "accrue_portal/mix.exs"], assertions: ["fresh_production_compiles", "actual_unpacked_hex_archives"] }),
     phase252LabExec("scenario-repo", ["test/accrue_admin/dev/subscription_scenario_repo_test.exs"], ["persisted_launch_and_team_facts", "database_constraints", "replay_identity_conflict_refusal", "transaction_rollback", "concurrent_insert_serialization"]),
@@ -249,6 +292,38 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
     },
   ));
   plan.push(command(
+    "lab-presentation",
+    "node --test Phase 252 lab presentation assertion",
+    process.execPath,
+    tap("scripts/ci/verify_phase252_lab_presentation.test.mjs"),
+    { lane: "read-only", sources: TRANSPARENCY_SOURCE_PATHS, assertions: ["lab_static_limits", "lab_contradiction_controls"] },
+  ));
+  plan.push(command(
+    "heldout-attribution",
+    "node --test Phase 252 held-out attribution assertion",
+    process.execPath,
+    tap("scripts/ci/verify_phase252_heldout_attribution.test.mjs"),
+    { lane: "read-only", sources: TRANSPARENCY_SOURCE_PATHS, assertions: ["heldout_synthetic_attribution", "heldout_contradiction_controls"] },
+  ));
+  plan.push(command(
+    "transparency-controls",
+    "node scripts/ci/verify_phase252_transparency.mjs --self-test",
+    process.execPath,
+    ["scripts/ci/verify_phase252_transparency.mjs", "--self-test"],
+    {
+      lane: "read-only",
+      sources: TRANSPARENCY_SOURCE_PATHS,
+      assertions: [
+        "lab_static_current_green",
+        "lab_static_clean_green",
+        "lab_static_violation_red",
+        "heldout_synthetic_current_green",
+        "heldout_synthetic_clean_green",
+        "heldout_synthetic_violation_red",
+      ],
+    },
+  ));
+  plan.push(command(
     "phase252-acceptance-contract",
     "node --test Phase 252 acceptance evidence contract",
     process.execPath,
@@ -260,6 +335,18 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
     },
   ));
   return plan;
+}
+
+export function assertRequiredCommandPlan(commands) {
+  if (!Array.isArray(commands)) throw new TypeError("Phase 252 required command plan must be an array");
+  const ids = commands.map((row) => row?.id);
+  if (JSON.stringify(ids) !== JSON.stringify(REQUIRED_COMMAND_IDS)) {
+    throw new Error("Phase 252 required command plan does not exactly match the named required lane inventory");
+  }
+  for (const id of REQUIRED_COMMAND_IDS) {
+    if (!PHASE252_REPORTER_SPECS[id]) throw new Error("Phase 252 required command has no reporter specification: " + id);
+  }
+  return true;
 }
 
 export async function executeCommandSequence(commands, execute, persist) {
@@ -420,6 +507,7 @@ async function main() {
     hostBuildPath,
     outputDirectory: resultDirectory,
   });
+  assertRequiredCommandPlan(commandPlan);
   const runSourcePaths = commandPlan.flatMap((commandSpec) => [
     ...(commandSpec.sources || []),
     ...(commandSpec.reporter?.testFiles || []),

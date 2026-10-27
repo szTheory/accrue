@@ -14,6 +14,9 @@ export const PHASE252_REPORTER_SPECS = Object.freeze({
   "production-boundary-db-free": { kind: "exunit-tap", testFiles: [`${ADMIN}dev/subscription_production_boundary_test.exs`] },
   "phase248-heldout-contract": { kind: "node-tap", testFiles: ["scripts/ci/phase248_heldout_isolation.test.mjs"] },
   "phase252-ci-contract": { kind: "node-tap", testFiles: ["scripts/ci/verify_phase252_ci_contract.test.mjs"] },
+  "lab-presentation": { kind: "node-tap", testFiles: ["scripts/ci/verify_phase252_lab_presentation.test.mjs"] },
+  "heldout-attribution": { kind: "node-tap", testFiles: ["scripts/ci/verify_phase252_heldout_attribution.test.mjs"] },
+  "transparency-controls": { kind: "process-markers" },
   "production-boundary-controls": { kind: "process-markers" },
   "production-packages": { kind: "process-markers" },
   "scenario-repo": { kind: "exunit-tap", testFiles: [`${ADMIN}dev/subscription_scenario_repo_test.exs`] },
@@ -45,6 +48,14 @@ const PROCESS_MARKERS = Object.freeze({
   "production-packages": {
     fresh_production_compiles: "PHASE252_ASSERTION=fresh_production_compiles",
     actual_unpacked_hex_archives: "PHASE252_ASSERTION=actual_unpacked_hex_archives",
+  },
+  "transparency-controls": {
+    lab_static_current_green: "PHASE252_ASSERTION=lab_static_current_green",
+    lab_static_clean_green: "PHASE252_ASSERTION=lab_static_clean_green",
+    lab_static_violation_red: "PHASE252_ASSERTION=lab_static_violation_red",
+    heldout_synthetic_current_green: "PHASE252_ASSERTION=heldout_synthetic_current_green",
+    heldout_synthetic_clean_green: "PHASE252_ASSERTION=heldout_synthetic_clean_green",
+    heldout_synthetic_violation_red: "PHASE252_ASSERTION=heldout_synthetic_violation_red",
   },
 });
 
@@ -97,6 +108,19 @@ const TEST_ASSERTION_BINDINGS = Object.freeze({
     workflow_admission: ["pull_request admission rejects path filters and exclusions"],
     named_required_owner_execution: ["the real required owner invokes the complete phase252 leaf"],
     required_owner_invocation_mutations: ["workflow and runner chain must retain the named owner invocation", "the named required job cannot be skipped or made optional"],
+    required_transparency_lane_inventory: ["required phase owner admits both transparency checks and their controls before final acceptance"],
+    transparency_reporter_bindings: ["new reporter lanes bind named target assertions and six independent control markers"],
+    transparency_source_freshness: ["all transparency and original descriptor inputs are fresh, owner-classified sources"],
+    transparency_consumed_root_admission: ["new consumed roots have positive paths and fail when their admission rule is removed"],
+    transparency_non_vacuity: ["an omitted or failed transparency child cannot produce a passing sequence"],
+  },
+  "lab-presentation": {
+    lab_static_limits: ["lab presentation states disposable static limits"],
+    lab_contradiction_controls: ["lab presentation rejects affirmative production and completion claims beside disclaimers"],
+  },
+  "heldout-attribution": {
+    heldout_synthetic_attribution: ["held-out attribution identifies synthetic stress evidence"],
+    heldout_contradiction_controls: ["held-out attribution rejects representative and real-adopter claims beside disclaimers"],
   },
   "scenario-repo": {
     persisted_launch_and_team_facts: ["persists launch and growing-team source facts"],

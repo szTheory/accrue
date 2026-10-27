@@ -357,6 +357,9 @@ export function selfTestLab() {
     requireLabControl("violation", LAB_VIOLATION, "not ok", 1, "Phase252 transparency: lab assertion: contradictory public claim lab-production-console"),
   ];
   process.stdout.write(`PASS Phase 252 lab transparency: controls=${controls.map(({ label }) => label).join(",")} target_tests=${controls.map(({ tests }) => tests).join(",")} assertion=${LAB_ASSERTION}\n`);
+  for (const marker of ["lab_static_current_green", "lab_static_clean_green", "lab_static_violation_red"]) {
+    process.stdout.write(`PHASE252_ASSERTION=${marker}\n`);
+  }
   return controls;
 }
 
@@ -396,6 +399,9 @@ export function selfTestHeldout(includeLabTarget = false) {
   ];
   const targetNames = testFiles.includes(LAB_TEST) ? `${LAB_ASSERTION};${HELDOUT_ASSERTION}` : HELDOUT_ASSERTION;
   process.stdout.write(`PASS Phase 252 held-out transparency: controls=${controls.map(({ label }) => label).join(",")} target_tests=${controls.map(({ tests }) => tests).join(",")} assertions=${targetNames}\n`);
+  for (const marker of ["heldout_synthetic_current_green", "heldout_synthetic_clean_green", "heldout_synthetic_violation_red"]) {
+    process.stdout.write(`PHASE252_ASSERTION=${marker}\n`);
+  }
   return controls;
 }
 
@@ -406,7 +412,10 @@ function main() {
   const only = onlyIndex === -1 ? "both" : args[onlyIndex + 1];
   if (only === "lab") selfTestLab();
   else if (only === "heldout") selfTestHeldout(false);
-  else if (only === "both") selfTestHeldout(true);
+  else if (only === "both") {
+    selfTestHeldout(true);
+    selfTestLab();
+  }
   else fail("expected --only lab, --only heldout, or the default both-target mode");
 }
 
