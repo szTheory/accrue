@@ -48,7 +48,8 @@
     "phase200:guardrails": "bash ../scripts/ci/verify_phase200_admin_guardrails.sh",
     "phase252:lab": "node ../scripts/dev/phase252_lab.mjs",
     "phase252:isolation": "node ../scripts/dev/phase252_lab.mjs isolation",
-    "phase252:browser": "node ../scripts/dev/phase252_lab.mjs browser --"
+    "phase252:browser": "node ../scripts/dev/phase252_lab.mjs browser --",
+    "phase252:check": "node ../scripts/ci/verify_phase252_stories.mjs"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.100.1",

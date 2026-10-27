@@ -86,6 +86,9 @@ defmodule AccrueAdmin.Dev.StorybookCoverageTest do
   test "subscription composition coverage reconciles registry families, group identity, and manifest links" do
     alias AccrueAdmin.Storybook.SubscriptionManifest
 
+    assert Code.ensure_loaded?(SubscriptionManifest),
+           "the compiled subscription manifest module is unavailable"
+
     assert function_exported?(SubscriptionManifest, :caller_map, 0),
            "the production caller map is unavailable"
 

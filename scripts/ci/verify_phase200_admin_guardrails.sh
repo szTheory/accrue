@@ -20,3 +20,4 @@ run_step "Phase 199 interaction regression" bash -c "cd accrue_admin && npm run 
 run_step "Admin reduced-motion guardrail" bash -c "cd accrue_admin && env -u NO_COLOR npx playwright test e2e/reduced-motion.spec.js --timeout=60000 --workers=1"
 run_step "Phase 200 scorecard final generator and verifier" bash -c "cd accrue_admin && npm run phase200:scorecard"
 run_step "Phase 200 sign-off verifier" bash -c "cd accrue_admin && npm run phase200:signoff"
+run_step "Phase 252 complete subscription story acceptance" npm --prefix accrue_admin run phase252:check

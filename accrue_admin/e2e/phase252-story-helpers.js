@@ -10,7 +10,11 @@ const {
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const MANIFEST_PATH = path.join(REPO_ROOT, "storybook", "phase252-manifest.json");
 const RESULT_DIR = path.join(REPO_ROOT, "accrue_admin", "tmp", "phase252");
-const RESULT_PATH = path.join(RESULT_DIR, "render-results.json");
+const RESULT_ID = process.env.PHASE252_RESULT_ID;
+if (RESULT_ID && !/^[a-z0-9-]{1,96}$/.test(RESULT_ID)) {
+  throw new Error("PHASE252_RESULT_ID must be a short lowercase alphanumeric run id");
+}
+const RESULT_PATH = path.join(RESULT_DIR, RESULT_ID ? "render-results-" + RESULT_ID + ".json" : "render-results.json");
 const CANONICAL_STATES = ["active", "scheduled_cancellation", "incomplete_evidence"];
 const WIDTHS = [320, 1280];
 const THEMES = ["light", "dark"];

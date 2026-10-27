@@ -27,6 +27,10 @@ node_modules/
 playwright-report/
 test-results/
 
+# Machine-readable Phase 252 CI results and per-run render captures are uploaded by CI.
+accrue_admin/tmp/phase252/ci-results/
+accrue_admin/tmp/phase252/render-results-*.json
+
 # Editor / OS noise
 .DS_Store
 *~

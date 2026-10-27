@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { executeCommandSequence } from "./verify_phase252_stories.mjs";
+import { executeCommandSequence, manifestFreshnessCode } from "./verify_phase252_stories.mjs";
 import {
   assertCiContract,
   assertOwnerMap,
@@ -103,13 +103,21 @@ test("the workflow and runner chain must retain the named owner invocation", () 
 
 test("a phase252 invocation fixture is required when the focused leaf is enabled", () => {
   const runnerFixture = `${ownerRunner}\nrun_step "Phase 252" npm --prefix accrue_admin run phase252:check\n`;
+  const missingRunner = ownerRunner.replace(/^run_step "Phase 252 complete subscription story acceptance".*\n/m, "");
   assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner: runnerFixture, manifest, requirePhase252: true }));
-  assert.throws(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true }), /phase252:check/i);
+  assert.throws(() => assertCiContract({ workflow, ownerRunner: missingRunner, manifest, requirePhase252: true }), /phase252:check/i);
 });
 
 test("the real required owner invokes the complete phase252 leaf", () => {
   assert.equal(ownerRunner.includes("npm --prefix accrue_admin run phase252:check"), true);
   assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true }));
+  const packageJson = JSON.parse(fs.readFileSync(path.join(root, "accrue_admin/package.json"), "utf8"));
+  assert.equal(packageJson.scripts["phase252:check"], "node ../scripts/ci/verify_phase252_stories.mjs");
+});
+
+test("manifest freshness compares JSON content without serializer key-order noise", () => {
+  const code = manifestFreshnessCode();
+  assert.match(code, /Jason\.decode!\(generated\) != Jason\.decode!\(checked_in\)/);
 });
 
 test("a failed phase command stops the gate and cannot produce passing evidence", async () => {

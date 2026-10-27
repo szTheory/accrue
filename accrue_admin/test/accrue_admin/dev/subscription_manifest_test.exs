@@ -206,7 +206,14 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       end
 
       root = Path.expand("../../../../", __DIR__)
-      manifest_path = Path.join(root, "storybook/phase252-manifest.json")
+      manifest_path =
+        Path.join(
+          System.tmp_dir!(),
+          "phase252-generated-manifest-#{System.unique_integer([:positive])}.json"
+        )
+
+      on_exit(fn -> File.rm(manifest_path) end)
+
       :ok = SubscriptionManifest.write!(manifest_path)
       manifest = manifest_path |> File.read!() |> Jason.decode!()
 
