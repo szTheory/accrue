@@ -505,7 +505,7 @@ function statusLabel(status) {
   return labels[status] || status.replaceAll("_", " ");
 }
 
-async function captureCanonicalScreenshot(preview, testCase) {
+async function captureCanonicalScreenshot(story, testCase) {
   const configuredDirectory = process.env.PHASE252_SCREENSHOT_DIR;
   if (!configuredDirectory || testCase.kind !== "canonical") return null;
 
@@ -519,7 +519,7 @@ async function captureCanonicalScreenshot(preview, testCase) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const name = `${testCase.entry.scenario_id}-${testCase.width}-${testCase.theme}.png`;
   const destination = path.join(directory, name);
-  const bytes = await preview.screenshot({ path: destination, animations: "disabled" });
+  const bytes = await story.screenshot({ path: destination, animations: "disabled" });
   return {
     path: path.relative(REPO_ROOT, destination).split(path.sep).join("/"),
     sha256: sha256(bytes),
@@ -759,7 +759,7 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
     expect(themeState.titleFontFamily).toContain("Geist");
     expect(themeState.titleFontSize).toBe("28px");
     expect(themeState.titleFontWeight).toBe("600");
-    const screenshot = await captureCanonicalScreenshot(preview, testCase);
+    const screenshot = await captureCanonicalScreenshot(story, testCase);
     if (screenshot) row.screenshot = screenshot;
     row.fact_rows = await readFactRows(story);
 
