@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 253
 current_phase_name: Real Groups and a Whole Subscription Job
 status: executing
-stopped_at: Phase 253 planned and independently checked, ready to execute
-last_updated: "2026-10-27T16:44:20.896Z"
+stopped_at: Completed 253-01-PLAN.md
+last_updated: "2026-10-27T17:21:09.974Z"
 last_activity: 2026-10-27
-last_activity_desc: Phase 253 planned, six plans and fourteen tasks passed independent plan review
-state_head: b7d670bf5ebe1b686a015f4c57e7431e358d1de1
+last_activity_desc: Phase 253 execution started
+state_head: 71e122355a6eb046635daf22513fb71af6dcd2a8
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 16
-  completed_plans: 10
+  completed_plans: 11
   percent: 33
 ---
 
@@ -32,10 +32,10 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 
 ## Current Position
 
-Phase: 253 (Real Groups and a Whole Subscription Job) — READY TO EXECUTE
-Plan: 0/6 executed; planning complete
+Phase: 253 (Real Groups and a Whole Subscription Job) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-10-27 — Phase 253 planned and independently checked; ready to execute six plans in five waves
+Last activity: 2026-10-27 — Phase 253 execution started
 
 Progress: [███░░░░░░░] 33%
 Current milestone planning blockers: None. Phase 252 passed independent verification (73/73), the fresh 21-lane aggregate, and executable UAT (124/124). Both prohibition gaps and review findings CR-03/CR-04 are closed. Four unclassified assumptions remain explicit planning debt; six nonblocking summary reference-parser warnings remain recorded by phase.complete.
@@ -232,6 +232,7 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 | Phase 252 P08 | 82min | 3 tasks | 18 files |
 | Phase 252 P09 | 17min | 2 tasks | 10 files |
 | Phase 252 P10 | 56min | 3 tasks | 13 files |
+| Phase 253 P01 | 25min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -545,6 +546,9 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 - [Phase 252]: Keep the original prohibition statements and historical reasons; modify only their authorized metadata and append remediation notes.
 - [Phase 252]: Require each resolved prohibition resolution to name its exact bounded target path.
 - [Phase 252]: Bound the transparency checks to finite public attribution and contradiction-control surfaces.
+- [Phase 253]: Keep production query, owner scope, filter patches, and route lifecycle in SubscriptionsLive; share only the rendered collection composition.
+- [Phase 253]: Use PhoenixStorybook 1.2's connected LiveComponent story transport to mount the actual DataTable and preserve its child event target.
+- [Phase 253]: Keep the existing truthful Amount unavailable display because the production list has a processor price ID but no numeric price source.
 
 ### Pending Todos
 
@@ -643,8 +647,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T15:41:31.162Z
-Stopped at: Phase 252 complete, ready to plan Phase 253
+Last session: 2026-10-27T17:21:09.680Z
+Stopped at: Completed 253-01-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
