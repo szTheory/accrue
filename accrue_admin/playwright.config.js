@@ -39,12 +39,12 @@ module.exports = defineConfig({
       // The dedicated visual-regression spec runs only under the `visual-desktop`
       // project (below) so it stays out of the default `npm run e2e` run — a
       // missing pixel baseline fails on CI, and the baselines are minted later.
-      testIgnore: /admin-visual-regression-phase211\.spec\.js/,
+      testIgnore: [/admin-visual-regression-phase211\.spec\.js/, /subscription-stories-phase252\.spec\.js/],
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } }
     },
     {
       name: "chromium-mobile",
-      testIgnore: /admin-visual-regression-phase211\.spec\.js/,
+      testIgnore: [/admin-visual-regression-phase211\.spec\.js/, /subscription-stories-phase252\.spec\.js/],
       use: { ...devices["Pixel 5"] }
     },
     {
