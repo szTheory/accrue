@@ -3,6 +3,7 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
 
   alias Accrue.Test.Factory
   alias AccrueAdmin.Dev.Storybook
+  alias AccrueAdmin.Storybook.Groups.SubscriptionsCollection
   alias PhoenixStorybook.NavigationHelpers
   alias PhoenixStorybook.StoryEntry
 
@@ -74,6 +75,135 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
     assert length(updated_rows) == 2
 
     write_transport_evidence!(direct_path, story)
+  end
+
+  test "the compiled collection story declares all supported settled states" do
+    expected_variations =
+      MapSet.new(~w(
+        new_host_empty
+        filtered_empty
+        queue_empty
+        one_row
+        multiple_rows
+        page_boundary
+        loading
+        unavailable
+        partial_cursor_error
+        incomplete_projection
+      ))
+
+    assert MapSet.new(Enum.map(SubscriptionsCollection.variations(), &to_string(&1.id))) ==
+             expected_variations
+
+    states = %{
+      "new_host_empty" => {"first-run-empty", "first-run"},
+      "filtered_empty" => {"filtered-empty", "filter"},
+      "queue_empty" => {"filtered-empty", "queue"},
+      "one_row" => {"populated", nil},
+      "multiple_rows" => {"populated", nil},
+      "page_boundary" => {"populated", nil},
+      "loading" => {"loading-skeleton", nil},
+      "unavailable" => {"unavailable", nil},
+      "partial_cursor_error" => {"populated", nil},
+      "incomplete_projection" => {"populated", nil}
+    }
+
+    for {variation_id, {list_state, empty_reason}} <- states do
+      direct_path =
+        NavigationHelpers.path_to_story(@storybook_root, String.trim_leading(@story_path, "/"), %{
+          variation_id: variation_id
+        })
+
+      story_conn =
+        Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
+
+      assert {:ok, view, html} = live(story_conn, "/billing" <> direct_path)
+      assert html =~ ~s(data-ax-state="#{list_state}")
+
+      if empty_reason do
+        assert html =~ ~s(data-ax-empty-reason="#{empty_reason}")
+      end
+
+      case variation_id do
+        "new_host_empty" ->
+          assert html =~ "No subscriptions yet."
+          assert html =~ "Subscriptions appear after a customer completes checkout."
+          assert Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]") == []
+
+        "filtered_empty" ->
+          assert html =~ "No subscriptions match these filters."
+          assert html =~ "Clear filters or adjust the search to see subscriptions."
+          assert html =~ ~s(data-role="clear-filters")
+
+        "queue_empty" ->
+          assert html =~ "Nothing at risk."
+
+          assert html =~
+                   "No past-due or canceling subscriptions. View All to see every subscription."
+
+          assert html =~ "View all subscriptions"
+
+        "one_row" ->
+          assert length(Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]")) == 1
+          assert html =~ "Amount unavailable"
+
+        "multiple_rows" ->
+          rows = Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]")
+          assert length(rows) == 2
+          assert length(Enum.uniq(Floki.attribute(rows, "data-row-id"))) == 2
+          refute html =~ ~s(data-role="load-more")
+
+        "page_boundary" ->
+          rows = Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]")
+          assert length(rows) == 1
+          assert html =~ ~s(data-role="load-more")
+
+          next_page = view |> element("[data-role='load-more']") |> render_click()
+          next_rows = Floki.find(Floki.parse_document!(next_page), "tbody > tr[data-row-id]")
+          assert length(next_rows) == 2
+          refute next_page =~ ~s(data-role="load-more")
+          assert next_page =~ "End of list"
+
+        "loading" ->
+          assert html =~ ~s(data-role="loading-skeleton")
+          assert html =~ "Loading subscriptions."
+
+        "unavailable" ->
+          assert html =~ ~s(data-role="unavailable-state")
+          assert html =~ "History unavailable"
+          assert html =~ "This history could not be loaded. Try again."
+          assert html =~ ">Retry</button>"
+
+        "partial_cursor_error" ->
+          initial_rows = Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]")
+          assert length(initial_rows) == 1
+
+          partial = view |> element("[data-role='load-more']") |> render_click()
+          assert partial =~ ~s(data-role="partial-read-error")
+
+          assert partial =~
+                   "Some results could not be loaded. The rows shown may be incomplete. Try again."
+
+          assert length(Floki.find(Floki.parse_document!(partial), "tbody > tr[data-row-id]")) ==
+                   1
+
+          [retry] = Floki.find(Floki.parse_document!(partial), "[data-role='retry-read']")
+          assert Floki.text(retry) =~ "Retry loading remaining rows"
+          assert [target] = Floki.attribute(retry, "phx-target")
+          assert target != ""
+
+          recovered = view |> element("[data-role='retry-read']") |> render_click()
+
+          assert length(Floki.find(Floki.parse_document!(recovered), "tbody > tr[data-row-id]")) ==
+                   2
+
+          refute recovered =~ ~s(data-role="partial-read-error")
+
+        "incomplete_projection" ->
+          assert html =~ "Amount unavailable"
+          assert length(Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]")) == 1
+      end
+    end
   end
 
   test "production route uses the scoped Subscriptions query despite query-module input", %{

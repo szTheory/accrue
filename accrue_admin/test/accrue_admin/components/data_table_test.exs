@@ -478,7 +478,14 @@ defmodule AccrueAdmin.DataTableTest do
     html = render_click(element(view, "[data-role='load-more']"))
 
     assert html =~ ~s(data-role="partial-read-error")
-    assert html =~ "Some results could not be loaded"
+
+    assert html =~
+             "Some results could not be loaded. The rows shown may be incomplete. Try again."
+
+    [retry] = Floki.find(Floki.parse_document!(html), "[data-role='retry-read']")
+    assert Floki.text(retry) =~ "Retry loading remaining rows"
+    assert [target] = Floki.attribute(retry, "phx-target")
+    assert target != ""
     assert html =~ "Newest open"
     refute html =~ "Oldest open"
 
