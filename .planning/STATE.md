@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 253
 current_phase_name: Real Groups and a Whole Subscription Job
 status: executing
-stopped_at: Completed 253-04-PLAN.md
-last_updated: "2026-10-27T18:51:04.258Z"
+stopped_at: Completed 253-05-PLAN.md
+last_updated: "2026-10-27T20:35:01.872Z"
 last_activity: 2026-10-27
 last_activity_desc: Phase 253 execution started
-state_head: 85ad12c1290f5210469277fc9c63de8a2bcfae70
+state_head: 5f1b4d1c4a74bb432e9c48cdf2f804596536ba87
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 16
-  completed_plans: 14
+  completed_plans: 15
   percent: 33
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 ## Current Position
 
 Phase: 253 (Real Groups and a Whole Subscription Job) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-10-27 — Phase 253 execution started
 
@@ -236,6 +236,7 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 | Phase 253 P02 | 33m | 2 tasks | 6 files |
 | Phase 253 P03 | 23m | 2 tasks | 8 files |
 | Phase 253 P04 | 22m | 2 tasks | 3 files |
+| Phase 253 P05 | 96min | 3 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -560,6 +561,10 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 - [Phase 253]: Keep collection transport evidence focused on its unique one-row component and validate page story entries separately.
 - [Phase 253]: Reused the real list/detail routes, existing Auth adapter seam, Processor.Fake, TestRepo and event ledger for execution evidence.
 - [Phase 253]: Only an authenticated, authorized active organization from session scope may be used to preserve the initial missing-detail denial path.
+- [Phase 253]: Keep the page-boundary fixture one-row limit in the deterministic story adapter and preserve Behaviour.paginate cursor generation.
+- [Phase 253]: Select whole-page Storybook scenarios through supported tabs and use only a story wrapper for nested LiveComponents and the overlay target.
+- [Phase 253]: Refresh Phase252 source digests through the existing manifest writer without changing its compiled cases.
+- [Phase 253]: Keep unavailable amounts truthful and retain presentation-only and synthetic-stress labels.
 
 ### Pending Todos
 
@@ -658,8 +663,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T18:51:03.942Z
-Stopped at: Completed 253-04-PLAN.md
+Last session: 2026-10-27T20:35:01.490Z
+Stopped at: Completed 253-05-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
