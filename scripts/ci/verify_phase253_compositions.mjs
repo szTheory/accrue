@@ -34,6 +34,7 @@ const PHASE_METADATA = Object.freeze([
 ]);
 const COMMON_SOURCES = Object.freeze([
   ".github/workflows/ci.yml",
+  "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
   "scripts/ci/verify_phase253_compositions.mjs",
   "scripts/ci/verify_phase253_compositions.test.mjs",
   "scripts/ci/phase252_reporters.mjs",
@@ -309,6 +310,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
     "accrue_admin/e2e/phase253-composition-helpers.js",
     "accrue_admin/playwright.phase252.config.js",
     "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+    "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
     "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
     "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
     "accrue_admin/lib/accrue_admin/router.ex",
@@ -879,7 +881,7 @@ function spawnCaptured(spec, root, logDirectory) {
   });
 }
 
-function allSources(commands) {
+export function sourceInventory(commands) {
   return uniqueSorted([
     ...COMMON_SOURCES,
     ...PHASE_METADATA,
@@ -979,7 +981,7 @@ async function main() {
     if (compiledManifest.human_judgment !== false || compiledManifest.schema_version !== 1) {
       fail("compiled Phase 253 manifest has unsupported schema or judgment mode");
     }
-    initialSnapshot = sourceSnapshot(ROOT, allSources(plan));
+    initialSnapshot = sourceSnapshot(ROOT, sourceInventory(plan));
     const resultDigest = sha256(fs.readFileSync(safeRepoPath(ROOT, plan[5].browser_contract.result_path.replace(/render-results-[a-f0-9]+\.json$/, "manifest.json"))));
     if (!compiledManifestDigest || !resultDigest) fail("compiled manifest source identity was not captured");
   } catch (error) {

@@ -28,6 +28,7 @@ const PHASE253_BROWSER_HELPERS = "accrue_admin/e2e/phase253-composition-helpers.
 const PHASE253_BROWSER_SPEC = "accrue_admin/e2e/subscription-compositions-phase253.spec.js";
 const PHASE253_COMPILED_SOURCES = Object.freeze([
   "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+  "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
   "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
   "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
   "accrue_admin/lib/accrue_admin/router.ex",

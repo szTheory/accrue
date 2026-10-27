@@ -244,6 +244,7 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
              )
 
       assert Map.has_key?(manifest["source_digests"], "storybook/pages/subscription.story.exs")
+      assert Map.has_key?(manifest["source_digests"], "accrue_admin/lib/accrue_admin/live/subscription_live.ex")
 
       assert manifest["transport"]["direct_path"] ==
                "/billing" <>

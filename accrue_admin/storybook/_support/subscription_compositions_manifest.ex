@@ -20,6 +20,7 @@ if Mix.env() != :prod do
     @query_module "AccrueAdmin.Storybook.SubscriptionCollectionQuery"
     @source_paths [
       "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+      "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
       "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
       "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
       "accrue_admin/lib/accrue_admin/router.ex",

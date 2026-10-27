@@ -7,6 +7,7 @@ import test from "node:test";
 import * as transparency from "./verify_phase252_transparency.mjs";
 
 const CLEAN = "scripts/ci/fixtures/phase253-transparency/clean.json";
+const PAGE_RENDERER_SOURCE = "accrue_admin/lib/accrue_admin/live/subscription_live.ex";
 
 test("truthful Phase253 composition attribution remains presentation-only", () => {
   assert.equal(typeof transparency.loadPhase253Subject, "function");
@@ -28,6 +29,8 @@ test("Phase253 current source and manifest identity is exact", () => {
   }
 
   const manifest = JSON.parse(manifestBytes.toString("utf8"));
+  assert.ok(Object.hasOwn(manifest.source_digests, PAGE_RENDERER_SOURCE), "compiled manifest hashes the production whole-page renderer");
+  assert.ok(Object.hasOwn(subject.source_identity.files, PAGE_RENDERER_SOURCE), "transparency evidence hashes the production whole-page renderer");
   assert.equal(manifest.collection_variations.length, 10);
   assert.equal(manifest.page_entries.length, 9);
   assert.deepEqual(subject.manifest.collection_variations.map((entry) => entry.variation_id).sort(),

@@ -354,6 +354,7 @@ test("browser assertion inventories include breakpoint and page stress controls"
   }).find(({ id }) => id === "phase253-compositions-browser");
   const manifestSourcePaths = [
     "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+    "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
     "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
     "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
     "accrue_admin/lib/accrue_admin/router.ex",
@@ -365,6 +366,8 @@ test("browser assertion inventories include breakpoint and page stress controls"
     "storybook/pages/subscription.story.exs",
   ];
   assert.ok(manifestSourcePaths.every((source) => browser.sources.includes(source)));
+  assert.ok(runner.sourceInventory([browser]).includes("accrue_admin/lib/accrue_admin/live/subscription_live.ex"),
+    "common aggregate source inventory includes the production whole-page renderer");
   assert.deepEqual(Object.keys(browser.browser_contract.assertion_ids.breakpoint).sort(), ["filtered_empty", "one_row"]);
   assert.deepEqual([...browser.browser_contract.assertion_ids.breakpoint.one_row].sort(), [
     "actual_767_768_card_table_transition",
