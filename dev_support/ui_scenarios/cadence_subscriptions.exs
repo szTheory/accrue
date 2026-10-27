@@ -28,6 +28,17 @@ defmodule CadenceSubscriptionFacts do
     processor_suffix: "growing_team"
   }
 
+  @held_out_ids %{
+    owner: "f45ef10d-8726-4b19-bdc6-a80d8891af83",
+    customer: "70bd4053-b454-4446-8474-dc9458a4df80",
+    subscription: "c188ffca-751c-443e-8714-81bdf62f3a61",
+    item: "7a008209-880a-4eba-896f-b321d20b330b",
+    slug: "cadence-heldout-long-text",
+    owner_name: "Northstar Research Held-out Case",
+    actor_id: "admin_cadence_heldout_long_text",
+    processor_suffix: "heldout_long_text"
+  }
+
   @ordinary_scenarios [
     :active,
     :launch,
@@ -87,7 +98,7 @@ defmodule CadenceSubscriptionFacts do
   @doc "Returns separately labelled held-out text stress input, never an ordinary variation."
   def held_out!(:long_text) do
     :held_out_long_text
-    |> base_facts("stripe", :active, @launch_ids, String.duplicate("Northstar Research ", 9), 1)
+    |> base_facts("stripe", :active, @held_out_ids, String.duplicate("Northstar Research ", 9), 1)
     |> Map.put(:lane, :held_out)
     |> Map.put(:held_out_case, :long_text)
     |> put_in([:customer, :name], String.duplicate("Northstar Research billing contact ", 7))
