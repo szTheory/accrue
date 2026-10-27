@@ -112,6 +112,7 @@ export function ownsProcess(manifest, observed) {
   if (manifest.parentPid != null && observed.parentPid !== manifest.parentPid) return false;
   if (manifest.parentStartIdentity != null && observed.parentStartIdentity !== manifest.parentStartIdentity) return false;
   if (manifest.parentCommandHash != null && observed.parentCommandHash !== manifest.parentCommandHash) return false;
+  if (manifest.processGroupId != null && observed.processGroupId !== manifest.processGroupId) return false;
   if (manifest.commandHash != null && observed.commandHash !== manifest.commandHash) return false;
   return true;
 }
@@ -146,47 +147,48 @@ export function matchesStartingHealthIdentity(config, identity, health, pid) {
   );
 }
 
-async function terminateOwnedChild(child, manifest) {
-  if (!child || child.exitCode != null || child.signalCode != null) return true;
-  const expected = {
-    pid: manifest.pid,
-    parentPid: manifest.parentPid,
-    parentStartIdentity: manifest.parentStartIdentity,
-    parentCommandHash: manifest.parentCommandHash,
-    startIdentity: manifest.startIdentity,
-    command: manifest.observedCommand,
-    commandHash: manifest.commandHash,
-    database: manifest.database,
-    port: manifest.port,
-    nonce: manifest.nonce,
+async function terminateOwnedProcessGroup(manifest) {
+  if (!manifest) return false;
+  // Require the full command identity for the first observation. Once that
+  // proves ownership, allow the leader's command title to change as it handles
+  // termination; PID, start time, PGID, and parent identity remain mandatory.
+  let ownerValidated = false;
+  const snapshot = () => ownedProcessGroupSnapshot(manifest, ownerValidated);
+  const waitForGroupExit = async (milliseconds) => {
+    const deadline = Date.now() + milliseconds;
+    while (Date.now() < deadline) {
+      const current = snapshot();
+      if (!current.safe) return false;
+      if (current.members.length === 0) return true;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    const current = snapshot();
+    return current.safe && current.members.length === 0;
   };
-  const observe = () => {
-    const current = processInfo(child.pid);
-    const parent = processInfo(manifest.parentPid);
-    return current && parent && {
-      ...current,
-      parentStartIdentity: parent.startIdentity,
-      parentCommandHash: parent.commandHash,
-      database: manifest.database,
-      port: manifest.port,
-      nonce: manifest.nonce,
-    };
+  const signalGroup = (signal) => {
+    const current = snapshot();
+    if (!current.safe) return false;
+    if (current.members.length === 0) return true;
+    try {
+      process.kill(-manifest.processGroupId, signal);
+      return true;
+    } catch (error) {
+      if (error?.code === "ESRCH") {
+        const after = snapshot();
+        return after.safe && after.members.length === 0;
+      }
+      return false;
+    }
   };
-  const waitForExit = (milliseconds) => new Promise((resolve) => {
-    if (child.exitCode != null || child.signalCode != null) return resolve(true);
-    const timer = setTimeout(() => resolve(false), milliseconds);
-    child.once("exit", () => {
-      clearTimeout(timer);
-      resolve(true);
-    });
-  });
 
-  if (!ownsProcess(expected, observe())) return false;
-  child.kill("SIGTERM");
-  if (await waitForExit(5_000)) return true;
-  if (!ownsProcess(expected, observe())) return false;
-  child.kill("SIGKILL");
-  return waitForExit(5_000);
+  const initial = snapshot();
+  if (!initial.safe) return false;
+  ownerValidated = true;
+  if (initial.members.length === 0) return true;
+  if (!signalGroup("SIGTERM")) return false;
+  if (await waitForGroupExit(5_000)) return true;
+  if (!signalGroup("SIGKILL")) return false;
+  return waitForGroupExit(5_000);
 }
 
 function nonce() {
@@ -345,7 +347,7 @@ async function dropDatabase(config) {
 function processInfo(pid) {
   let output;
   try {
-    output = execFileSync("ps", ["-p", String(pid), "-o", "pid=", "-o", "ppid=", "-o", "lstart=", "-o", "command="], {
+    output = execFileSync("ps", ["-p", String(pid), "-o", "pid=", "-o", "ppid=", "-o", "pgid=", "-o", "lstart=", "-o", "stat=", "-o", "command="], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
@@ -353,39 +355,104 @@ function processInfo(pid) {
     if (error.status === 1 && !String(error.stderr || "").trim()) return null;
     throw error;
   }
-  const match = output.match(/^(\d+)\s+(\d+)\s+(.{24})\s+([\s\S]+)$/);
+  const match = output.match(/^(\d+)\s+(\d+)\s+(\d+)\s+(.{24})\s+(\S+)\s+([\s\S]+)$/);
   if (!match) return null;
-  const command = match[4].trim();
+  const command = match[6].trim();
   return {
     pid: Number(match[1]),
     parentPid: Number(match[2]),
-    startIdentity: match[3].trim().replace(/\s+/g, " "),
+    processGroupId: Number(match[3]),
+    startIdentity: match[4].trim().replace(/\s+/g, " "),
+    state: match[5],
     command,
     commandHash: createHash("sha256").update(command).digest("hex"),
   };
 }
 
-async function refreshOwnedProcessIdentity(child, manifest) {
-  const current = processInfo(manifest.pid);
-  if (!current) {
-    await new Promise((resolve) => {
-      if (child.exitCode != null || child.signalCode != null) return resolve();
-      const timer = setTimeout(resolve, 1_000);
-      child.once("exit", () => {
-        clearTimeout(timer);
-        resolve();
-      });
-    });
-    return false;
+function processGroupMembers(processGroupId) {
+  const output = execFileSync("ps", ["-axo", "pid=", "-o", "ppid=", "-o", "pgid=", "-o", "stat="], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  });
+  const members = output.split("\n").flatMap((line) => {
+    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s*$/);
+    if (!match || Number(match[3]) !== processGroupId) return [];
+    return [{
+      pid: Number(match[1]),
+      parentPid: Number(match[2]),
+      processGroupId: Number(match[3]),
+      state: match[4],
+    }];
+  });
+  return members;
+}
+
+function isRunningProcess(info) {
+  return !info.state.startsWith("Z") && !info.state.startsWith("X");
+}
+
+function ownedProcessGroupSnapshot(manifest, allowLeaderShutdownTransition = false) {
+  if (
+    !manifest ||
+    !Number.isInteger(manifest.processGroupId) ||
+    manifest.processGroupId !== manifest.pid
+  ) {
+    return { safe: false, members: [] };
   }
+
+  const members = processGroupMembers(manifest.processGroupId);
+  let runningMembers = members.filter(isRunningProcess);
+  const leader = runningMembers.find((member) => member.pid === manifest.processGroupId);
+  if (leader) {
+    const current = processInfo(manifest.processGroupId);
+    // `ps` and `processInfo` are separate snapshots. The leader can exit
+    // between them, changing its command to `<defunct>` while its PID, start
+    // time, and process-group ID still prove it is the recorded process.
+    // A zombie cannot execute or be reused, so exclude it and keep tracking
+    // any live descendants that still hold the group open.
+    if (
+      current &&
+      current.pid === manifest.pid &&
+      current.processGroupId === manifest.processGroupId &&
+      current.startIdentity === manifest.startIdentity &&
+      current.state.startsWith("Z")
+    ) {
+      runningMembers = runningMembers.filter((member) => member.pid !== manifest.pid);
+    } else {
+      const parent = processInfo(manifest.parentPid);
+      if (
+        !current ||
+        !parent ||
+        current.pid !== manifest.pid ||
+        current.processGroupId !== manifest.processGroupId ||
+        current.startIdentity !== manifest.startIdentity ||
+        current.parentPid !== manifest.parentPid ||
+        parent.startIdentity !== manifest.parentStartIdentity ||
+        parent.commandHash !== manifest.parentCommandHash ||
+        (!allowLeaderShutdownTransition && current.commandHash !== manifest.commandHash)
+      ) {
+        return { safe: false, members: runningMembers };
+      }
+    }
+  }
+  // A live member keeps its process-group ID allocated after the original
+  // leader exits. When no member remains, never signal that numeric ID: it may
+  // later be reused by an unrelated process group.
+  return { safe: true, members: runningMembers };
+}
+
+async function refreshOwnedProcessIdentity(manifest) {
+  if (!manifest) return false;
+  const current = processInfo(manifest.pid);
+  if (!current) return true;
 
   const parent = processInfo(manifest.parentPid);
   if (
-    !current ||
     !parent ||
     current.pid !== manifest.pid ||
     current.startIdentity !== manifest.startIdentity ||
     current.parentPid !== manifest.parentPid ||
+    current.processGroupId !== manifest.processGroupId ||
     parent.startIdentity !== manifest.parentStartIdentity ||
     parent.commandHash !== manifest.parentCommandHash
   ) {
@@ -542,7 +609,7 @@ export async function openOwnedSession(options) {
       cwd: options.cwd || SCRIPT_ROOT,
       env: runtimeEnv(config, identity),
       shell: false,
-      detached: options.detached === true,
+      detached: true,
       stdio: "inherit",
     });
     childExit = new Promise((resolve) => {
@@ -555,6 +622,9 @@ export async function openOwnedSession(options) {
 
     const observed = processInfo(child.pid);
     if (!observed) fail("could not record started child identity; refusing to continue");
+    if (observed.processGroupId !== observed.pid) {
+      fail("started child is not the leader of its own process group; refusing to continue");
+    }
     manifest = {
       version: 1,
       lane: config.lane,
@@ -569,6 +639,7 @@ export async function openOwnedSession(options) {
       parentCommand: displayedCommand(process.execPath, process.argv.slice(1)),
       parentCommandHash: parentObserved.commandHash,
       pid: observed.pid,
+      processGroupId: observed.processGroupId,
       startIdentity: observed.startIdentity,
       command: displayedCommand(command, args),
       observedCommand: observed.command,
@@ -593,12 +664,11 @@ export async function openOwnedSession(options) {
     async function stop() {
       if (cleanupPromise) return cleanupPromise;
       cleanupPromise = (async () => {
-      let safeToDrop = !child || child.exitCode != null || child.signalCode != null;
-      if (child && !safeToDrop) {
-        const refreshed = await refreshOwnedProcessIdentity(child, manifest);
-        if (refreshed) safeToDrop = await terminateOwnedChild(child, manifest);
-        else safeToDrop = child.exitCode != null || child.signalCode != null;
-        if (!safeToDrop) fail("child PID no longer matches its start identity, command, database, port and nonce; preserving resources");
+      let safeToDrop = !child;
+      if (child) {
+        const refreshed = await refreshOwnedProcessIdentity(manifest);
+        if (refreshed) safeToDrop = await terminateOwnedProcessGroup(manifest);
+        if (!safeToDrop) fail("owned process group no longer matches its recorded leader identity; preserving resources");
       }
 
       if (created && safeToDrop && manifest?.createdDatabase) {
@@ -635,11 +705,10 @@ export async function openOwnedSession(options) {
       stop,
     };
   } catch (error) {
-    let safeToDrop = !child || child.exitCode != null || child.signalCode != null;
-    if (child && !safeToDrop && manifest) {
-      const refreshed = await refreshOwnedProcessIdentity(child, manifest);
-      if (refreshed) safeToDrop = await terminateOwnedChild(child, manifest);
-      else safeToDrop = child.exitCode != null || child.signalCode != null;
+    let safeToDrop = !child;
+    if (child && manifest) {
+      const refreshed = await refreshOwnedProcessIdentity(manifest);
+      if (refreshed) safeToDrop = await terminateOwnedProcessGroup(manifest);
     } else if (child && !safeToDrop) {
       safeToDrop = false;
     }

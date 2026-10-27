@@ -124,9 +124,10 @@ test("accepts loopback PostgreSQL inet addresses with a host mask", async () => 
   assert.equal(result.serverAddress, "127.0.0.1");
 });
 
-test("accepts cleanup only when pid, start identity, command, DB, port and nonce all match", () => {
+test("accepts cleanup only when PID, process group, start identity, command, DB, port and nonce match", () => {
   const manifest = {
     pid: 1500,
+    processGroupId: 1500,
     startIdentity: "2026-10-26T23:00:00Z",
     command: "mix accrue_admin.e2e.server",
     parentPid: 1400,
@@ -139,6 +140,7 @@ test("accepts cleanup only when pid, start identity, command, DB, port and nonce
 
   assert.equal(ownsProcess(manifest, { ...manifest }), true);
   assert.equal(ownsProcess(manifest, { ...manifest, pid: 1501 }), false);
+  assert.equal(ownsProcess(manifest, { ...manifest, processGroupId: 1501 }), false);
   assert.equal(ownsProcess(manifest, { ...manifest, parentStartIdentity: "reused-parent" }), false);
   assert.equal(ownsProcess(manifest, { ...manifest, startIdentity: "reused-pid" }), false);
   assert.equal(ownsProcess(manifest, { ...manifest, command: "unrelated-server" }), false);

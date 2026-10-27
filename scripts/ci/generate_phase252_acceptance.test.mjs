@@ -36,7 +36,7 @@ const UI_IDS = [
 
 const ASSERTIONS = {
   "manifest-current": ["compiled_variation_discovery", "source_digest_freshness", "tracked_manifest_content_identity"],
-  "phase252-lab-contract": ["owned_resource_identity", "unsafe_input_refusal", "cleanup_identity_guard", "namespace_lock_one_owner", "stale_lock_owner_refusal", "exact_process_identity_cleanup"],
+  "phase252-lab-contract": ["owned_resource_identity", "unsafe_input_refusal", "cleanup_identity_guard", "namespace_lock_one_owner", "stale_lock_owner_refusal", "exact_process_identity_cleanup", "owned_process_group_identity"],
   "scenario-domain": ["validated_deterministic_scenarios", "fixed_clock_and_identity", "deterministic_fact_source", "canceling_boundary_exact_clock", "exact_minor_unit_money_precision"],
   "subscription-area": ["production_area_content", "copy_and_scoped_action_semantics"],
   "story-slice": ["shared_renderer_and_active_variation", "no_repo_bootstrap"],
@@ -50,7 +50,7 @@ const ASSERTIONS = {
   "registry-kitchen-mount-scoped-path": ["registry_variant_and_token_reconciliation", "group_contract_and_mounted_kitchen", "production_caller_map_reconciliation", "served_storybook_assets", "development_and_production_route_boundaries", "scoped_return_path_safety"],
   "mounted-subscription-regressions": ["mounted_subscription_structure", "organization_scope_enforcement", "lifecycle_distinctions", "action_review_and_confirmation", "provider_action_boundaries", "authority_regression", "scoped_not_found_regression"],
   "heldout-cleanup": ["exact_cleanup_authority", "unrelated_child_preserved", "heldout_identity_separation", "cleanup_idempotency_absence_mismatch", "serialized_unrelated_child_concurrency"],
-  "isolation-reset": ["normal_reset_positive_control", "review_data_unchanged_negative_control", "distinct_review_process_and_database"],
+  "isolation-reset": ["normal_reset_positive_control", "review_data_unchanged_negative_control", "distinct_review_process_and_database", "interrupted_descendant_cleanup_before_database_drop", "owned_descendants_cleanup_after_leader_exit", "unrelated_process_survives_group_cleanup"],
   "subscription-render-browser": ["exact_twelve_canonical_width_theme_cells", "three_compatibility_render_cases", "manifest_reconciliation_negative_controls", "twenty_ui_predicates", "served_assets_and_fonts"],
   "phase252-acceptance-contract": ["missing_command_rejection", "failed_command_rejection", "stale_source_and_asset_rejection", "pooled_cell_rejection", "missing_predicate_rejection", "unsafe_evidence_path_rejection", "guide_contract_mutation_rejection"],
 };
@@ -79,7 +79,7 @@ const UI_ASSERTIONS = {
 };
 
 const EDGE_EVIDENCE = {
-  "EDGE-LAB-01-concurrency": [["phase252-lab-contract", "namespace_lock_one_owner"], ["phase252-lab-contract", "stale_lock_owner_refusal"], ["phase252-lab-contract", "exact_process_identity_cleanup"]],
+  "EDGE-LAB-01-concurrency": [["phase252-lab-contract", "namespace_lock_one_owner"], ["phase252-lab-contract", "stale_lock_owner_refusal"], ["phase252-lab-contract", "exact_process_identity_cleanup"], ["phase252-lab-contract", "owned_process_group_identity"], ["isolation-reset", "interrupted_descendant_cleanup_before_database_drop"], ["isolation-reset", "owned_descendants_cleanup_after_leader_exit"], ["isolation-reset", "unrelated_process_survives_group_cleanup"]],
   "EDGE-SBK-01-adjacency": [["manifest-contract", "caller_identity_adjacency"]],
   "EDGE-SBK-01-empty": [["manifest-contract", "empty_caller_source_refusal"]],
   "EDGE-SBK-01-ordering": [["manifest-contract", "stable_caller_ordering"]],
@@ -103,7 +103,7 @@ const REQUIREMENT_EVIDENCE = {
   "SCEN-02": [["scenario-domain", "canceling_boundary_exact_clock"], ["scenario-domain", "exact_minor_unit_money_precision"]],
   "SCEN-03": [["scenario-repo", "persisted_launch_and_team_facts"], ["scenario-repo", "replay_identity_conflict_refusal"], ["scenario-repo", "transaction_rollback"], ["scenario-repo", "concurrent_insert_serialization"]],
   "SCEN-04": [["heldout-cleanup", "exact_cleanup_authority"], ["heldout-cleanup", "cleanup_idempotency_absence_mismatch"], ["heldout-cleanup", "serialized_unrelated_child_concurrency"]],
-  "LAB-01": [["phase252-lab-contract", "namespace_lock_one_owner"], ["phase252-lab-contract", "exact_process_identity_cleanup"], ["isolation-reset", "distinct_review_process_and_database"]],
+  "LAB-01": [["phase252-lab-contract", "namespace_lock_one_owner"], ["phase252-lab-contract", "exact_process_identity_cleanup"], ["phase252-lab-contract", "owned_process_group_identity"], ["isolation-reset", "distinct_review_process_and_database"], ["isolation-reset", "interrupted_descendant_cleanup_before_database_drop"], ["isolation-reset", "owned_descendants_cleanup_after_leader_exit"], ["isolation-reset", "unrelated_process_survives_group_cleanup"]],
   "LAB-02": [["production-packages", "fresh_production_compiles"], ["production-packages", "actual_unpacked_hex_archives"], ["production-boundary-controls", "development_positive_production_route_exclusion"]],
 };
 

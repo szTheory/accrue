@@ -51,7 +51,7 @@ export const UI_ASSERTIONS = Object.freeze({
 });
 
 const EDGE_EVIDENCE = Object.freeze({
-  "EDGE-LAB-01-concurrency": [["phase252-lab-contract", "namespace_lock_one_owner"], ["phase252-lab-contract", "stale_lock_owner_refusal"], ["phase252-lab-contract", "exact_process_identity_cleanup"]],
+  "EDGE-LAB-01-concurrency": [["phase252-lab-contract", "namespace_lock_one_owner"], ["phase252-lab-contract", "stale_lock_owner_refusal"], ["phase252-lab-contract", "exact_process_identity_cleanup"], ["phase252-lab-contract", "owned_process_group_identity"], ["isolation-reset", "interrupted_descendant_cleanup_before_database_drop"], ["isolation-reset", "owned_descendants_cleanup_after_leader_exit"], ["isolation-reset", "unrelated_process_survives_group_cleanup"]],
   "EDGE-SBK-01-adjacency": [["manifest-contract", "caller_identity_adjacency"]],
   "EDGE-SBK-01-empty": [["manifest-contract", "empty_caller_source_refusal"]],
   "EDGE-SBK-01-ordering": [["manifest-contract", "stable_caller_ordering"]],
@@ -75,7 +75,7 @@ const REQUIREMENT_EVIDENCE = Object.freeze({
   "SCEN-02": [["scenario-domain", "canceling_boundary_exact_clock"], ["scenario-domain", "exact_minor_unit_money_precision"]],
   "SCEN-03": [["scenario-repo", "persisted_launch_and_team_facts"], ["scenario-repo", "replay_identity_conflict_refusal"], ["scenario-repo", "transaction_rollback"], ["scenario-repo", "concurrent_insert_serialization"]],
   "SCEN-04": [["heldout-cleanup", "exact_cleanup_authority"], ["heldout-cleanup", "cleanup_idempotency_absence_mismatch"], ["heldout-cleanup", "serialized_unrelated_child_concurrency"]],
-  "LAB-01": [["phase252-lab-contract", "namespace_lock_one_owner"], ["phase252-lab-contract", "exact_process_identity_cleanup"], ["isolation-reset", "distinct_review_process_and_database"]],
+  "LAB-01": [["phase252-lab-contract", "namespace_lock_one_owner"], ["phase252-lab-contract", "exact_process_identity_cleanup"], ["phase252-lab-contract", "owned_process_group_identity"], ["isolation-reset", "distinct_review_process_and_database"], ["isolation-reset", "interrupted_descendant_cleanup_before_database_drop"], ["isolation-reset", "owned_descendants_cleanup_after_leader_exit"], ["isolation-reset", "unrelated_process_survives_group_cleanup"]],
   "LAB-02": [["production-packages", "fresh_production_compiles"], ["production-packages", "actual_unpacked_hex_archives"], ["production-boundary-controls", "development_positive_production_route_exclusion"]],
 });
 

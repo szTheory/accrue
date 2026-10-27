@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { randomInt, randomUUID } from "node:crypto";
 import { execFileSync, spawn } from "node:child_process";
 import { createServer } from "node:net";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -94,6 +94,26 @@ async function stopExactProcess(identity) {
   }
   if (await waitUntil(() => !sameProcess(identity), 2_000)) return;
   if (sameProcess(identity)) process.kill(identity.pid, "SIGKILL");
+}
+
+async function findOwnedManifest(pid, database) {
+  const sessions = path.join(os.tmpdir(), `accrue-phase252-${process.getuid()}`, "sessions");
+  let names;
+  try {
+    names = await readdir(sessions);
+  } catch {
+    return null;
+  }
+  for (const name of names) {
+    const manifestPath = path.join(sessions, name);
+    try {
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+      if (manifest.pid === pid && manifest.database === database) return manifestPath;
+    } catch {
+      continue;
+    }
+  }
+  return null;
 }
 
 function insertMarker(database, marker) {
@@ -337,7 +357,10 @@ test("interrupted launcher stops descendants before database teardown and preser
     path.join(ROOT, "scripts/dev/phase252_lab.mjs"), "exec",
     "--lane", "admin-test", "--partition", partition, "--port", String(port),
     "--", process.execPath, "-e", targetProgram,
-  ], { cwd: ROOT, stdio: "ignore" });
+  ], { cwd: ROOT, stdio: ["ignore", "ignore", "pipe"] });
+  let launcherStderr = "";
+  launcher.stderr.setEncoding("utf8");
+  launcher.stderr.on("data", (chunk) => { launcherStderr += chunk; });
   const launcherExited = new Promise((resolve, reject) => {
     launcher.once("exit", (code, signal) => resolve({ code, signal }));
     launcher.once("error", reject);
@@ -346,7 +369,9 @@ test("interrupted launcher stops descendants before database teardown and preser
   let observerRunning = false;
   let droppedWhileGrandchildAlive = false;
   let observer;
+  let targetIdentity;
   let grandchildIdentity;
+  let manifestPath;
   try {
     const ready = await waitUntil(async () => {
       try {
@@ -354,13 +379,19 @@ test("interrupted launcher stops descendants before database teardown and preser
         const state = JSON.parse(rawState.split("\n", 1)[0]);
         const readyRecord = JSON.parse((await readFile(grandchildReadyPath, "utf8")).split("\n", 1)[0]);
         if (readyRecord.token !== childToken || readyRecord.pid !== state.grandchildPid) return false;
+        targetIdentity = processIdentity(state.parentPid);
         grandchildIdentity = processIdentity(state.grandchildPid);
-        return Boolean(grandchildIdentity && databaseExists(database));
+        manifestPath = await findOwnedManifest(state.parentPid, database);
+        return Boolean(targetIdentity && grandchildIdentity && manifestPath && databaseExists(database));
       } catch {
         return false;
       }
     }, 20_000);
     assert.equal(ready, true, "the guarded launcher should create its owned database and child/grandchild pair");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    assert.equal(manifest.processGroupId, manifest.pid, "the manifest should pin the detached child as its process-group leader");
+    assert.equal(manifest.startIdentity, targetIdentity.startIdentity, "the process-group leader must match the observed start identity");
+    assert.equal(manifest.parentPid, launcher.pid, "the exact launcher process should own the recorded process group");
 
     observerRunning = true;
     observer = (async () => {
@@ -372,18 +403,22 @@ test("interrupted launcher stops descendants before database teardown and preser
       }
     })();
     launcher.kill("SIGTERM");
-    const exit = await Promise.race([
-      launcherExited,
-      new Promise((_, reject) => setTimeout(() => reject(new Error("guarded launcher did not finish SIGTERM cleanup")), 15_000)),
-    ]);
+    const exit = await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("guarded launcher did not finish SIGTERM cleanup")), 15_000);
+      launcherExited.then(
+        (result) => { clearTimeout(timer); resolve(result); },
+        (error) => { clearTimeout(timer); reject(error); },
+      );
+    });
     assert.equal(exit.code, 1, "an interrupted owned command should return the documented failure exit status");
     assert.equal(await waitUntil(() => !databaseExists(database)), true, "the launcher should remove its exact disposable database after process cleanup");
     assert.equal(droppedWhileGrandchildAlive, false, "database teardown must wait until the owned grandchild is no longer running");
     const grandchildState = await readFile(grandchildReadyPath, "utf8");
     assert.match(grandchildState, /SIGTERM/, "the grandchild should receive termination through owned cleanup");
-    assert.match(grandchildState, /DONE/, "cleanup should wait until the grandchild finishes its graceful shutdown");
+    assert.match(grandchildState, /DONE/, `cleanup should wait until the grandchild finishes its graceful shutdown\n${launcherStderr}`);
     assert.equal(sameProcess(sentinelIdentity), true, "an unrelated process outside the owned session must remain alive");
     await assert.rejects(readFile(sentinelSignalPath, "utf8"), { code: "ENOENT" }, "cleanup must not signal the unrelated sentinel");
+    await assert.rejects(readFile(manifestPath, "utf8"), { code: "ENOENT" }, "cleanup should remove the exact launcher-owned manifest after process and database teardown");
   } finally {
     observerRunning = false;
     await observer;
@@ -391,11 +426,74 @@ test("interrupted launcher stops descendants before database teardown and preser
       launcher.kill("SIGKILL");
       await launcherExited.catch(() => {});
     }
+    if (targetIdentity) await stopExactProcess(targetIdentity);
     if (grandchildIdentity) await stopExactProcess(grandchildIdentity);
     if (sameProcess(sentinelIdentity)) sentinel.kill("SIGTERM");
     if (sentinel.exitCode == null && sentinel.signalCode == null) {
       await new Promise((resolve) => sentinel.once("exit", resolve));
     }
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("owned process-group cleanup handles live descendants after its leader exits", async () => {
+  const partition = freshPartition();
+  const database = `accrue_admin_test${partition}`;
+  const directory = await mkdtemp(path.join(os.tmpdir(), "phase252-exited-leader-"));
+  const statePath = path.join(directory, "child-state.json");
+  const grandchildReadyPath = path.join(directory, "grandchild-ready.json");
+  const childToken = randomUUID();
+  const grandchildProgram = [
+    "const fs = require('node:fs');",
+    `const ready = ${JSON.stringify(grandchildReadyPath)};`,
+    `const token = ${JSON.stringify(childToken)};`,
+    "process.on('SIGTERM', () => { fs.appendFileSync(ready, '\\nSIGTERM\\n'); setTimeout(() => { fs.appendFileSync(ready, 'DONE\\n'); process.exit(0); }, 350); });",
+    "fs.writeFileSync(ready, JSON.stringify({ pid: process.pid, token }));",
+    "setInterval(() => {}, 1000);",
+  ].join(" ");
+  const targetProgram = [
+    "const fs = require('node:fs');",
+    "const { spawn } = require('node:child_process');",
+    `const state = ${JSON.stringify(statePath)};`,
+    `const ready = ${JSON.stringify(grandchildReadyPath)};`,
+    `const grandchildProgram = ${JSON.stringify(grandchildProgram)};`,
+    "const grandchild = spawn(process.execPath, ['-e', grandchildProgram], { stdio: 'ignore' });",
+    "const deadline = Date.now() + 5000;",
+    "const exitAfterReady = () => { if (fs.existsSync(ready)) { fs.writeFileSync(state, JSON.stringify({ parentPid: process.pid, grandchildPid: grandchild.pid }) + '\\n'); setTimeout(() => process.exit(0), 100); return; } if (Date.now() > deadline) process.exit(31); setTimeout(exitAfterReady, 10); };",
+    "exitAfterReady();",
+  ].join(" ");
+
+  let session;
+  let targetIdentity;
+  let grandchildIdentity;
+  try {
+    session = await openOwnedSession({
+      lane: "admin-test",
+      partition,
+      port: await freePort(),
+      command: process.execPath,
+      args: ["-e", targetProgram],
+    });
+    const exit = await session.wait();
+    assert.equal(exit.code, 0, "the synthetic process-group leader should exit before cleanup begins");
+    const state = JSON.parse((await readFile(statePath, "utf8")).split("\n", 1)[0]);
+    const ready = JSON.parse((await readFile(grandchildReadyPath, "utf8")).split("\n", 1)[0]);
+    assert.equal(ready.token, childToken);
+    assert.equal(ready.pid, state.grandchildPid);
+    targetIdentity = processIdentity(state.parentPid);
+    grandchildIdentity = processIdentity(state.grandchildPid);
+    assert.equal(sameProcess(grandchildIdentity), true, "the grandchild should still be active after its group leader exits");
+    assert.equal(session.manifest.processGroupId, session.manifest.pid, "the manifest should retain the exited leader's exact group ID");
+
+    await session.stop();
+    const childState = await readFile(grandchildReadyPath, "utf8");
+    assert.match(childState, /SIGTERM/, "cleanup should signal descendants in the surviving owned process group");
+    assert.match(childState, /DONE/, "cleanup should wait for graceful descendant completion after the leader exits");
+    assert.equal(databaseExists(database), false, "database teardown should follow completion of the surviving process group");
+  } finally {
+    if (session) await session.stop().catch(() => {});
+    if (targetIdentity) await stopExactProcess(targetIdentity);
+    if (grandchildIdentity) await stopExactProcess(grandchildIdentity);
     await rm(directory, { recursive: true, force: true });
   }
 });
