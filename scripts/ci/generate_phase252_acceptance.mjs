@@ -6,10 +6,36 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { deriveExecutionEvidence, PHASE252_REPORTER_SPECS, requiredAssertionIds } from "./phase252_reporters.mjs";
+import { REQUIRED_COMMAND_IDS } from "./verify_phase252_stories.mjs";
 
 export const PHASE_SLUG = "252-production-backed-subscription-stories";
 export const REQUIREMENT_IDS = Object.freeze(["CIQ-01", "SBK-01", "SBK-02", "SBK-03", "SCEN-01", "SCEN-02", "SCEN-03", "SCEN-04", "LAB-01", "LAB-02"]);
-export const TASK_IDS = Object.freeze(["252-08-01", "252-08-02", "252-08-03"]);
+export const TASK_IDS = Object.freeze(["252-08-01", "252-08-02", "252-08-03", "252-09-01", "252-09-02", "252-10-01", "252-10-02", "252-10-03"]);
+export const PROHIBITION_IDS = Object.freeze(["PROH-LAB-PRESENTATION", "PROH-HELDOUT-ATTRIBUTION"]);
+const ORIGINAL_PROHIBITION_DESCRIPTORS = Object.freeze([
+  {
+    id: "PROH-LAB-PRESENTATION",
+    plan: "252-01-PLAN.md",
+    statement: "The review lab must not be presented as a production operations console or evidence of completed billing actions.",
+    target: "scripts/ci/verify_phase252_lab_presentation.test.mjs",
+    violationFixture: "scripts/ci/fixtures/phase252-transparency/lab-violation.json",
+    cleanFixture: "scripts/ci/fixtures/phase252-transparency/lab-clean.json",
+    targetCommand: "lab-presentation",
+    targetAssertions: ["lab_static_limits", "lab_contradiction_controls"],
+    controlAssertions: ["lab_static_current_green", "lab_static_clean_green", "lab_static_violation_red"],
+  },
+  {
+    id: "PROH-HELDOUT-ATTRIBUTION",
+    plan: "252-04-PLAN.md",
+    statement: "Held-out adversarial scenarios must not be presented as representative customer behavior or evidence of real adopter usage.",
+    target: "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
+    violationFixture: "scripts/ci/fixtures/phase252-transparency/heldout-violation.json",
+    cleanFixture: "scripts/ci/fixtures/phase252-transparency/heldout-clean.json",
+    targetCommand: "heldout-attribution",
+    targetAssertions: ["heldout_synthetic_attribution", "heldout_contradiction_controls"],
+    controlAssertions: ["heldout_synthetic_current_green", "heldout_synthetic_clean_green", "heldout_synthetic_violation_red"],
+  },
+]);
 export const EDGE_IDS = Object.freeze([
   "EDGE-LAB-01-concurrency",
   "EDGE-SBK-01-adjacency", "EDGE-SBK-01-empty", "EDGE-SBK-01-ordering",
@@ -84,16 +110,32 @@ const TASK_EVIDENCE = Object.freeze({
   "252-08-01": [["phase252-ci-contract", "consumed_root_owner_map"], ["phase252-ci-contract", "workflow_admission"], ["phase252-ci-contract", "required_owner_invocation_mutations"]],
   "252-08-02": [["bundle", "all_required_commands_passed"]],
   "252-08-03": [["phase252-acceptance-contract", "missing_command_rejection"], ["phase252-acceptance-contract", "failed_command_rejection"], ["phase252-acceptance-contract", "stale_source_and_asset_rejection"], ["phase252-acceptance-contract", "pooled_cell_rejection"], ["phase252-acceptance-contract", "missing_predicate_rejection"], ["phase252-acceptance-contract", "unsafe_evidence_path_rejection"], ["phase252-acceptance-contract", "guide_contract_mutation_rejection"]],
+  "252-09-01": [["lab-presentation", "lab_static_limits"], ["lab-presentation", "lab_contradiction_controls"], ["transparency-controls", "lab_static_current_green"], ["transparency-controls", "lab_static_clean_green"], ["transparency-controls", "lab_static_violation_red"]],
+  "252-09-02": [["heldout-attribution", "heldout_synthetic_attribution"], ["heldout-attribution", "heldout_contradiction_controls"], ["transparency-controls", "heldout_synthetic_current_green"], ["transparency-controls", "heldout_synthetic_clean_green"], ["transparency-controls", "heldout_synthetic_violation_red"]],
+  "252-10-01": [["phase252-ci-contract", "required_transparency_lane_inventory"], ["phase252-ci-contract", "transparency_reporter_bindings"], ["phase252-ci-contract", "transparency_source_freshness"], ["phase252-ci-contract", "transparency_consumed_root_admission"], ["phase252-ci-contract", "transparency_non_vacuity"]],
+  "252-10-02": [["phase252-acceptance-contract", "missing_command_rejection"], ["phase252-acceptance-contract", "stale_source_and_asset_rejection"], ["phase252-acceptance-contract", "guide_contract_mutation_rejection"]],
+  "252-10-03": [["bundle", "all_required_commands_passed"], ["transparency-controls", "lab_static_violation_red"], ["transparency-controls", "heldout_synthetic_violation_red"]],
 });
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const MANIFEST_PATH = "storybook/phase252-manifest.json";
-const REQUIRED_COMMAND_IDS = Object.freeze([
-  "manifest-current", "phase252-lab-contract", "scenario-domain", "subscription-area", "story-slice",
-  "manifest-contract", "production-boundary-db-free", "phase248-heldout-contract", "phase252-ci-contract",
-  "production-boundary-controls", "production-packages", "scenario-repo", "registry-kitchen-mount-scoped-path",
-  "mounted-subscription-regressions", "heldout-cleanup", "isolation-reset", "subscription-render-browser",
-  "phase252-acceptance-contract",
+const TRANSPARENCY_SOURCE_PATHS = Object.freeze([
+  "scripts/ci/phase_evidence_path.mjs",
+  "scripts/ci/verify_phase252_transparency.mjs",
+  "scripts/ci/verify_phase252_lab_presentation.test.mjs",
+  "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
+  "scripts/ci/fixtures/phase252-transparency/lab-clean.json",
+  "scripts/ci/fixtures/phase252-transparency/lab-violation.json",
+  "scripts/ci/fixtures/phase252-transparency/heldout-clean.json",
+  "scripts/ci/fixtures/phase252-transparency/heldout-violation.json",
+  "guides/ui-story-lab.md",
+  "storybook/components/subscription_detail.story.exs",
+  MANIFEST_PATH,
+  "dev_support/ui_scenarios/cadence_subscriptions.exs",
+  "accrue_admin/storybook/_support/subscription_scenarios.ex",
+  "accrue_admin/e2e/phase252-story-helpers.js",
+  ".planning/phases/252-production-backed-subscription-stories/252-01-PLAN.md",
+  ".planning/phases/252-production-backed-subscription-stories/252-04-PLAN.md",
 ]);
 const STATES = ["active", "scheduled_cancellation", "incomplete_evidence"];
 const WIDTHS = [320, 1280];
@@ -149,8 +191,18 @@ function readJson(file, label) {
   try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch (error) { fail(`${label} is not valid JSON (${error.message})`); }
 }
 
+function resolveSnapshotPath(root, relative) {
+  const prefix = `.planning/phases/${PHASE_SLUG}/`;
+  if (!relative.startsWith(prefix)) return resolveRelative(root, relative);
+  let absolute;
+  try { absolute = fs.realpathSync(resolvePhaseEvidencePath(PHASE_SLUG, relative.slice(prefix.length), { root })); } catch { fail(`phase source does not exist in active or archived evidence: ${relative}`); }
+  const rootPath = realRoot(root);
+  if (!absolute.startsWith(rootPath + path.sep) || !fs.statSync(absolute).isFile()) fail(`phase source does not resolve to a repository file: ${relative}`);
+  return absolute;
+}
+
 function verifyDigest(root, relative, expected, label) {
-  const actual = sha256(fs.readFileSync(resolveRelative(root, relative)));
+  const actual = sha256(fs.readFileSync(resolveSnapshotPath(root, relative)));
   if (!/^[0-9a-f]{64}$/.test(expected || "") || actual !== expected) fail(`${label} digest is stale or invalid: ${relative}`);
   return actual;
 }
@@ -184,6 +236,9 @@ function validateCommands(root, bundle, bundlePath) {
     if (!Array.isArray(row.assertion_refs) || row.assertion_refs.length === 0) fail(`command ${row.id} has no executed assertion references`);
     if (new Set(row.assertion_refs).size !== row.assertion_refs.length) fail(`command ${row.id} repeats executed assertion references`);
     if (!Array.isArray(row.sources) || row.sources.some((source) => !bundle.source_digests?.[source])) fail(`command ${row.id} source is outside the fresh digest snapshot`);
+    if (["lab-presentation", "heldout-attribution", "transparency-controls"].includes(row.id)) {
+      exactSet(row.sources, TRANSPARENCY_SOURCE_PATHS, `${row.id} transparency source set`);
+    }
     for (const kind of ["stdout", "stderr"]) verifyDigest(root, row[`${kind}_path`], row[`${kind}_sha256`], `${row.id} ${kind}`);
     const reporter = PHASE252_REPORTER_SPECS[row.id];
     if (!reporter || row.execution_evidence?.kind !== reporter.kind) fail(`command ${row.id} has no matching executed reporter evidence`);
@@ -219,7 +274,7 @@ function validateSourceSnapshot(root, bundle) {
   const sorted = Object.entries(bundle.source_digests).sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0);
   if (sorted.length === 0) fail("runner source digest snapshot is empty");
   for (const [relative, expected] of sorted) verifyDigest(root, relative, expected, "source");
-  for (const required of ["scripts/ci/verify_phase252_stories.mjs", "scripts/ci/generate_phase252_acceptance.mjs", "scripts/ci/generate_phase252_acceptance.test.mjs", "scripts/ci/phase252_reporters.mjs", "dev_support/phase252_tap_formatter.ex", "accrue_admin/test/test_helper.exs", "examples/accrue_host/test/test_helper.exs", "guides/ui-story-lab.md", ".github/workflows/ci.yml"]) {
+  for (const required of ["scripts/ci/verify_phase252_stories.mjs", "scripts/ci/generate_phase252_acceptance.mjs", "scripts/ci/generate_phase252_acceptance.test.mjs", "scripts/ci/phase252_reporters.mjs", "dev_support/phase252_tap_formatter.ex", "accrue_admin/test/test_helper.exs", "examples/accrue_host/test/test_helper.exs", ".github/workflows/ci.yml", ...TRANSPARENCY_SOURCE_PATHS]) {
     if (!bundle.source_digests[required]) fail(`source snapshot does not pin required acceptance source: ${required}`);
   }
   const digestMap = Object.fromEntries(sorted);
@@ -370,19 +425,47 @@ function collectProhibitions(metadata, file) {
     if (line.trim() && lineIndentation <= indentation && /^[A-Za-z0-9_-]+:\s*$/.test(line.trim())) break;
     section.push(line);
   }
-  const chunks = section.join("\n").split(/^\s*-\s+statement:\s*/m).slice(1);
-  return chunks.map((chunk) => {
-    const statement = chunk.split("\n")[0].trim().replace(/^['"]|['"]$/g, "");
-    const status = chunk.match(/^\s+status:\s*["']?([^\s"']+)/m)?.[1];
-    const reason = chunk.match(/^\s+reason:\s*["']?([^\n"']+)/m)?.[1]?.trim();
-    if (!statement || status !== "unresolved" || !reason?.includes("flagged-unverified")) fail(`${file} has a prohibition that is not explicitly unresolved flagged metadata`);
-    return { plan: file, statement, status, reason };
-  });
+  const raw = section.join("\n");
+  const descriptor = ORIGINAL_PROHIBITION_DESCRIPTORS.find((candidate) => candidate.plan === file);
+  if (!descriptor) {
+    if (/^\s*-\s+statement:/m.test(raw)) fail(`${file} adds an unexpected prohibition statement`);
+    return [];
+  }
+  const itemIndent = indentation + 2;
+  const statementRows = [...raw.matchAll(new RegExp(`^\\s{${itemIndent}}-\\s+statement:\\s*(.+)$`, "gm"))];
+  if (statementRows.length !== 1) fail(`${file} must retain exactly one original prohibition statement`);
+  const statement = statementRows[0][1].trim().replace(/^['"]|['"]$/g, "");
+  if (statement !== descriptor.statement) fail(`${file} prohibition statement changed or was relabelled`);
+  const entryStart = statementRows[0].index;
+  const nextItem = raw.slice(entryStart + statementRows[0][0].length).search(new RegExp(`^\\s{${itemIndent}}-\\s+`, "m"));
+  const chunk = raw.slice(entryStart + statementRows[0][0].length, nextItem === -1 ? raw.length : entryStart + statementRows[0][0].length + nextItem);
+  const fields = new Map();
+  const propertyIndent = itemIndent + 2;
+  for (const line of chunk.split("\n")) {
+    if (!line.trim()) continue;
+    const match = line.match(new RegExp(`^\\s{${propertyIndent}}([a-z_]+):\\s*(.*?)\\s*$`));
+    if (!match) fail(`${file} prohibition descriptor must use flat scalar fields`);
+    const [, key, rawValue] = match;
+    if (fields.has(key)) fail(`${file} prohibition descriptor repeats ${key}`);
+    if (!rawValue || /^[>|[{]/.test(rawValue)) fail(`${file} prohibition descriptor ${key} must be a nonempty scalar`);
+    fields.set(key, rawValue.replace(/^['"]|['"]$/g, ""));
+  }
+  const expectedKeys = ["category", "status", "verification", "resolution", "check_kind", "check_target", "check_violation_fixture", "check_clean_fixture"];
+  exactSet([...fields.keys()], expectedKeys, `${file} prohibition descriptor fields`);
+  if (fields.get("category") !== "transparency" || fields.get("status") !== "resolved" || fields.get("verification") !== "test") {
+    fail(`${file} prohibition must be resolved, test-tier transparency metadata`);
+  }
+  if (fields.get("check_kind") !== "node-test" || fields.get("check_target") !== descriptor.target ||
+      fields.get("check_violation_fixture") !== descriptor.violationFixture || fields.get("check_clean_fixture") !== descriptor.cleanFixture) {
+    fail(`${file} prohibition target or control descriptor is incomplete, changed, or swapped`);
+  }
+  if (!fields.get("resolution").includes(descriptor.target)) fail(`${file} prohibition resolution does not name its bounded target`);
+  return [{ ...descriptor, plan: file, statement, status: fields.get("status"), resolution: fields.get("resolution") }];
 }
 
 function inspectPlanSources(root) {
   const sources = [];
-  for (let number = 1; number <= 8; number += 1) {
+  for (let number = 1; number <= 10; number += 1) {
     const name = `252-${String(number).padStart(2, "0")}-PLAN.md`;
     const { source } = readPhaseArtifact(root, name);
     sources.push({ name, source, metadata: extractFrontmatter(source, name) });
@@ -392,7 +475,8 @@ function inspectPlanSources(root) {
   if (!requirementRow) fail("plan 252-08 has no requirements list");
   const requirements = [...requirementRow[1].matchAll(/["']([^"']+)["']/g)].map((match) => match[1]);
   exactSet(requirements, REQUIREMENT_IDS, "plan requirement IDs");
-  const tasks = [...plan08.source.matchAll(/<name>\s*(252-08-\d+):/g)].map((match) => match[1]);
+  const tasks = sources.filter(({ name }) => ["252-08-PLAN.md", "252-09-PLAN.md", "252-10-PLAN.md"].includes(name))
+    .flatMap(({ source }) => [...source.matchAll(/<name>\s*(252-\d{2}-\d{2}):/g)].map((match) => match[1]));
   exactSet(tasks, TASK_IDS, "plan task IDs");
 
   const edgeIds = [...new Set(sources.flatMap(({ source }) => source.match(/EDGE-[A-Z]+-\d+-[a-z0-9-]+/g) || []))];
@@ -407,7 +491,8 @@ function inspectPlanSources(root) {
     fail("validation accounting must retain 13 classified truths and four unresolved assumptions");
   }
   const prohibitions = sources.flatMap(({ metadata, name }) => collectProhibitions(metadata, name));
-  if (prohibitions.length !== 2) fail(`expected two unresolved descriptor-less fallback prohibitions; found ${prohibitions.length}`);
+  exactSet(prohibitions.map(({ plan }) => plan), ORIGINAL_PROHIBITION_DESCRIPTORS.map(({ plan }) => plan), "original transparency prohibition plans");
+  exactSet(prohibitions.map(({ statement }) => statement), ORIGINAL_PROHIBITION_DESCRIPTORS.map(({ statement }) => statement), "original transparency prohibition statements");
   return { requirements, tasks, edges: EDGE_IDS, unclassified: UNCLASSIFIED_EDGE_IDS, uiIds, prohibitions };
 }
 
@@ -457,6 +542,60 @@ function validateAssertionMaps(commands, bundle, browserData) {
   };
 }
 
+function mapProhibitionEvidence(root, plan, commands, bundle) {
+  validateTransparencyFixtures(root);
+  return plan.prohibitions.map((descriptor) => {
+    const configured = ORIGINAL_PROHIBITION_DESCRIPTORS.find(({ id }) => id === descriptor.id);
+    if (!configured || descriptor.target !== configured.target || descriptor.violationFixture !== configured.violationFixture || descriptor.cleanFixture !== configured.cleanFixture) {
+      fail(`${descriptor.plan} descriptor does not match the bounded current prohibition target`);
+    }
+    const target = refsFor(bundle, configured.targetAssertions.map((assertion) => [configured.targetCommand, assertion]));
+    const controls = refsFor(bundle, configured.controlAssertions.map((assertion) => ["transparency-controls", assertion]));
+    const sourceRefs = [descriptor.plan.startsWith("252-01")
+      ? `.planning/phases/${PHASE_SLUG}/252-01-PLAN.md`
+      : `.planning/phases/${PHASE_SLUG}/252-04-PLAN.md`,
+    configured.target, configured.violationFixture, configured.cleanFixture,
+    "scripts/ci/verify_phase252_transparency.mjs", "guides/ui-story-lab.md"];
+    const sourceDigests = Object.fromEntries(sourceRefs.map((source) => {
+      const value = bundle.source_digests?.[source];
+      if (!value) fail(`${descriptor.id} is missing a fresh descriptor, target, fixture, checker, or guide digest: ${source}`);
+      return [source, value];
+    }));
+    return {
+      id: configured.id,
+      plan: configured.plan,
+      statement: configured.statement,
+      status: "green",
+      flagged: false,
+      check: { kind: "node-test", target: configured.target, violation_fixture: configured.violationFixture, clean_fixture: configured.cleanFixture },
+      evidence_refs: [...target, ...controls],
+      source_digests: sourceDigests,
+    };
+  });
+}
+
+function validateTransparencyFixtures(root) {
+  const claims = {
+    "PROH-LAB-PRESENTATION": /the review lab is a production operations console/i,
+    "PROH-HELDOUT-ATTRIBUTION": /the held-out stress input represents typical customer behavior/i,
+  };
+  for (const descriptor of ORIGINAL_PROHIBITION_DESCRIPTORS) {
+    const violation = readJson(resolveRelative(root, descriptor.violationFixture), `${descriptor.id} violation fixture`);
+    const clean = readJson(resolveRelative(root, descriptor.cleanFixture), `${descriptor.id} clean fixture`);
+    const violationGuide = typeof violation.guide === "string" ? violation.guide : violation.guide?.text;
+    const cleanGuide = typeof clean.guide === "string" ? clean.guide : clean.guide?.text;
+    const claim = claims[descriptor.id];
+    if (typeof violationGuide !== "string" || !claim.test(violationGuide)) fail(`${descriptor.id} violation fixture no longer carries its intended contradictory claim`);
+    if (!/rendered controls do not establish completed billing actions/i.test(violationGuide) ||
+        !/not representative customer behavior or real adopter usage evidence/i.test(violationGuide)) {
+      fail(`${descriptor.id} violation fixture must keep the contradiction beside the original limiting disclaimer`);
+    }
+    if (typeof cleanGuide !== "string" || claim.test(cleanGuide) || !/not representative customer behavior or real adopter usage evidence/i.test(cleanGuide)) {
+      fail(`${descriptor.id} clean fixture is missing its bounded non-contradictory attribution`);
+    }
+  }
+}
+
 function unresolvedMetadata(plan, mapped) {
   const concreteCoverage = {
     "EDGE-CIQ-01-unclassified": ["CIQ-01"],
@@ -471,7 +610,6 @@ function unresolvedMetadata(plan, mapped) {
   }));
   return {
     assumptions,
-    prohibitions: plan.prohibitions.map(({ plan: planName, statement, reason }) => ({ plan: planName, statement, status: "unresolved", reason })),
   };
 }
 
@@ -503,24 +641,25 @@ function parseCoverage(source, file) {
 
 function phaseSummaries(root) {
   const summaries = [];
-  for (let number = 1; number <= 8; number += 1) {
+  for (let number = 1; number <= 10; number += 1) {
     const name = `252-${String(number).padStart(2, "0")}-SUMMARY.md`;
     const artifact = readPhaseArtifact(root, name);
     const parsed = parseCoverage(artifact.source, name);
-    if (number === 8 && parsed.metadata.match(/^human_judgment:\s*(true|false)\s*$/m)?.[1] !== "false") fail(`${name} must declare human_judgment: false`);
+    if ([8, 10].includes(number) && parsed.metadata.match(/^human_judgment:\s*(true|false)\s*$/m)?.[1] !== "false") fail(`${name} must declare human_judgment: false`);
     summaries.push({ name, absolute: artifact.absolute, source: artifact.source, ...parsed });
   }
   return summaries;
 }
 
-function validateCurrentSummary(summaries, bundle, mapped) {
-  const summary = summaries.find(({ name }) => name === "252-08-SUMMARY.md");
+function validateCurrentSummary(summaries, bundle, mapped, prohibitionEvidence) {
+  const summary = summaries.find(({ name }) => name === "252-10-SUMMARY.md");
+  if (!summary) fail("current acceptance requires the completed 252-10-SUMMARY.md");
   const coverageById = new Map(summary.entries.map((entry) => {
     const id = entry.match(/^  - id:\s*["']?([^\s"']+)/m)?.[1];
     return [id, entry];
   }));
-  const expectedIds = [...REQUIREMENT_IDS, ...TASK_IDS, ...EDGE_IDS, ...UI_IDS];
-  exactSet([...coverageById.keys()], expectedIds, "plan 252-08 summary coverage IDs");
+  const expectedIds = [...REQUIREMENT_IDS, ...TASK_IDS, ...EDGE_IDS, ...UI_IDS, ...PROHIBITION_IDS];
+  exactSet([...coverageById.keys()], expectedIds, "plan 252-10 summary coverage IDs");
   for (const id of REQUIREMENT_IDS) {
     const entry = coverageById.get(id);
     for (const ref of mapped.requirements[id]) if (!entry.includes(ref)) fail(`summary coverage ${id} omits current evidence reference ${ref}`);
@@ -537,7 +676,11 @@ function validateCurrentSummary(summaries, bundle, mapped) {
     const entry = coverageById.get(id);
     for (const ref of mapped.ui[id]) if (!entry.includes(ref)) fail(`summary coverage ${id} omits current evidence reference ${ref}`);
   }
-  if (!summary.absolute.endsWith(path.join("252-production-backed-subscription-stories", "252-08-SUMMARY.md"))) fail("summary resolver returned a different phase artifact");
+  for (const item of prohibitionEvidence) {
+    const entry = coverageById.get(item.id);
+    for (const ref of item.evidence_refs) if (!entry.includes(ref)) fail(`summary coverage ${item.id} omits current evidence reference ${ref}`);
+  }
+  if (!summary.absolute.endsWith(path.join(PHASE_SLUG, "252-10-SUMMARY.md"))) fail("summary resolver returned a different current phase artifact");
   if (!bundle.results_path) fail("current runner result path is missing for summary cross-check");
   return coverageById;
 }
@@ -572,6 +715,7 @@ export function validatePhase252Evidence({ root = ROOT, resultsPath }) {
   const guidePath = resolveRelative(repository, "guides/ui-story-lab.md");
   const guideContract = validateGuideContract(fs.readFileSync(guidePath, "utf8"));
   const mapped = validateAssertionMaps(commands, bundle, browserData);
+  const prohibitions = mapProhibitionEvidence(repository, plan, commands, bundle);
   const unresolved = unresolvedMetadata(plan, mapped);
   return {
     status: "passed",
@@ -584,11 +728,12 @@ export function validatePhase252Evidence({ root = ROOT, resultsPath }) {
     classified_edges: plan.edges,
     ui_predicates: plan.uiIds,
     unresolved_assumptions: unresolved.assumptions,
-    unresolved_prohibitions: unresolved.prohibitions,
+    unresolved_prohibitions: [],
+    prohibition_evidence: prohibitions,
     guide_contract: guideContract,
     results_path: bundle.results_path,
     browser_result_path: bundle.browser_result_path,
-    evidence_refs: { requirements: mapped.requirements, tasks: mapped.tasks, edges: mapped.edges, ui: mapped.ui },
+    evidence_refs: { requirements: mapped.requirements, tasks: mapped.tasks, edges: mapped.edges, ui: mapped.ui, prohibitions: Object.fromEntries(prohibitions.map(({ id, evidence_refs }) => [id, evidence_refs])) },
   };
 }
 
@@ -601,8 +746,8 @@ export function generatePhase252Acceptance({ root = ROOT, resultsPath, writeUat 
   const { manifest } = validateManifest(root, bundle, validateSourceSnapshot(root, bundle));
   const browserData = validateBrowser(root, bundle, bundle.source_digests, manifest, bundle.manifest_sha256, new Map(bundle.commands.map((row) => [row.id, row])));
   const mapped = validateAssertionMaps(new Map(bundle.commands.map((row) => [row.id, row])), bundle, browserData);
-  validateCurrentSummary(summaries, bundle, mapped);
-  const destination = path.join(path.dirname(summaries.find(({ name }) => name === "252-08-SUMMARY.md").absolute), "252-UAT.md");
+  validateCurrentSummary(summaries, bundle, mapped, evidence.prohibition_evidence);
+  const destination = path.join(path.dirname(summaries.find(({ name }) => name === "252-10-SUMMARY.md").absolute), "252-UAT.md");
   fs.writeFileSync(destination, renderUat(summaries), { mode: 0o600 });
   return { evidence, uat_written: true, uat_path: path.relative(realRoot(root), destination).split(path.sep).join("/") };
 }

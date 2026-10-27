@@ -8,6 +8,7 @@ import path from "node:path";
 import test from "node:test";
 import { REQUIRED_COMMAND_IDS } from "./verify_phase252_stories.mjs";
 import { deriveExecutionEvidence, expectedExUnitIdentities, expectedNodeTestIdentities, parseTap13Report, PHASE252_REPORTER_SPECS, requiredAssertionIds } from "./phase252_reporters.mjs";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import {
   generatePhase252Acceptance,
   validateGuideContract,
@@ -16,7 +17,18 @@ import {
 
 const PHASE_SLUG = "252-production-backed-subscription-stories";
 const REQUIREMENTS = ["CIQ-01", "SBK-01", "SBK-02", "SBK-03", "SCEN-01", "SCEN-02", "SCEN-03", "SCEN-04", "LAB-01", "LAB-02"];
-const TASK_IDS = ["252-08-01", "252-08-02", "252-08-03"];
+const TASK_IDS = ["252-08-01", "252-08-02", "252-08-03", "252-09-01", "252-09-02", "252-10-01", "252-10-02", "252-10-03"];
+const PROHIBITION_IDS = ["PROH-LAB-PRESENTATION", "PROH-HELDOUT-ATTRIBUTION"];
+const TRANSPARENCY_SOURCE_PATHS = [
+  "scripts/ci/phase_evidence_path.mjs", "scripts/ci/verify_phase252_transparency.mjs",
+  "scripts/ci/verify_phase252_lab_presentation.test.mjs", "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
+  "scripts/ci/fixtures/phase252-transparency/lab-clean.json", "scripts/ci/fixtures/phase252-transparency/lab-violation.json",
+  "scripts/ci/fixtures/phase252-transparency/heldout-clean.json", "scripts/ci/fixtures/phase252-transparency/heldout-violation.json",
+  "guides/ui-story-lab.md", "storybook/components/subscription_detail.story.exs", "storybook/phase252-manifest.json",
+  "dev_support/ui_scenarios/cadence_subscriptions.exs", "accrue_admin/storybook/_support/subscription_scenarios.ex",
+  "accrue_admin/e2e/phase252-story-helpers.js",
+  `.planning/phases/${PHASE_SLUG}/252-01-PLAN.md`, `.planning/phases/${PHASE_SLUG}/252-04-PLAN.md`,
+];
 const EDGE_IDS = [
   "EDGE-LAB-01-concurrency",
   "EDGE-SBK-01-adjacency", "EDGE-SBK-01-empty", "EDGE-SBK-01-ordering",
@@ -89,6 +101,18 @@ function rewriteFixtureCommandOutput(fixture, commandId, transform) {
   command.execution_evidence.stdout_sha256 = digest(nextOutput);
   fs.writeFileSync(fixture.resultsPath, JSON.stringify(bundle, null, 2) + "\n");
   return bundle;
+}
+
+function refreshSourceDigest(fixture, relative) {
+  const bundle = JSON.parse(fs.readFileSync(fixture.resultsPath, "utf8"));
+  const prefix = `.planning/phases/${PHASE_SLUG}/`;
+  const absolute = relative.startsWith(prefix)
+    ? resolvePhaseEvidencePath(PHASE_SLUG, relative.slice(prefix.length), { root: fixture.root })
+    : path.join(fixture.root, relative);
+  bundle.source_digests[relative] = digest(fs.readFileSync(absolute));
+  const sorted = Object.fromEntries(Object.entries(bundle.source_digests).sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0));
+  bundle.source_fingerprint = digest(JSON.stringify(sorted));
+  fs.writeFileSync(fixture.resultsPath, JSON.stringify(bundle, null, 2) + "\n");
 }
 
 const UI_ASSERTIONS = {
@@ -193,13 +217,19 @@ function createFixture() {
     const ids = edgePlans[name] || [];
     const truths = ids.map((id) => `    - "${id}: explicit fixture truth"`).join("\n");
     const prohibitions = plan === 1
-      ? `\nprohibitions:\n  - statement: "The lab is not a production operations console or evidence of completed actions."\n    status: "unresolved"\n    reason: "flagged-unverified specless fallback; no wired-check descriptor"\n`
+      ? `\nprohibitions:\n  - statement: "The review lab must not be presented as a production operations console or evidence of completed billing actions."\n    category: transparency\n    status: resolved\n    verification: test\n    resolution: "Bounded by scripts/ci/verify_phase252_lab_presentation.test.mjs with fresh clean and violation controls."\n    check_kind: node-test\n    check_target: scripts/ci/verify_phase252_lab_presentation.test.mjs\n    check_violation_fixture: scripts/ci/fixtures/phase252-transparency/lab-violation.json\n    check_clean_fixture: scripts/ci/fixtures/phase252-transparency/lab-clean.json\n`
       : plan === 4
-        ? `\nprohibitions:\n  - statement: "Held-out scenarios do not represent customer behavior or adopter usage."\n    status: "unresolved"\n    reason: "flagged-unverified specless fallback; no wired-check descriptor"\n`
+        ? `\nprohibitions:\n  - statement: "Held-out adversarial scenarios must not be presented as representative customer behavior or evidence of real adopter usage."\n    category: transparency\n    status: resolved\n    verification: test\n    resolution: "Bounded by scripts/ci/verify_phase252_heldout_attribution.test.mjs with fresh clean and violation controls."\n    check_kind: node-test\n    check_target: scripts/ci/verify_phase252_heldout_attribution.test.mjs\n    check_violation_fixture: scripts/ci/fixtures/phase252-transparency/heldout-violation.json\n    check_clean_fixture: scripts/ci/fixtures/phase252-transparency/heldout-clean.json\n`
         : "";
     const ui = plan === 6 ? `\nmust_haves:\n  truths:\n${UI_IDS.map((id) => `    - "${id}: explicit UI truth"`).join("\n")}\n` : "";
     write(root, `.planning/milestones/fixture-phases/${PHASE_SLUG}/${name}`, `---\n${truths ? `must_haves:\n  truths:\n${truths}\n` : ""}${ui}${prohibitions}---\n`);
     write(root, `.planning/milestones/fixture-phases/${PHASE_SLUG}/252-${String(plan).padStart(2, "0")}-SUMMARY.md`, `---\nstatus: complete\ncompleted: 2026-10-${String(20 + plan).padStart(2, "0")}\ncoverage:\n  - id: P${plan}\n    description: Previous phase plan evidence\n    verification:\n      - kind: integration\n        ref: "scripts/ci/verify_phase252_stories.mjs#previous-plan-${plan}"\n        status: pass\n    human_judgment: false\n---\n`);
+  }
+  write(root, `.planning/milestones/fixture-phases/${PHASE_SLUG}/252-08-PLAN.md`, `---\n${planRequirements}\n---\n<task><name>252-08-01: Prove required-owner admission</name></task><task><name>252-08-02: Run focused checks</name></task><task><name>252-08-03: Generate acceptance</name></task>\nEDGE-CIQ-01-unclassified remains explicitly unresolved.\n`);
+  write(root, `.planning/milestones/fixture-phases/${PHASE_SLUG}/252-09-PLAN.md`, `---\nphase: 252-production-backed-subscription-stories\nplan: "09"\n---\n<task><name>252-09-01: Prove lab presentation transparency</name></task><task><name>252-09-02: Prove held-out attribution</name></task>\n`);
+  write(root, `.planning/milestones/fixture-phases/${PHASE_SLUG}/252-10-PLAN.md`, `---\nphase: 252-production-backed-subscription-stories\nplan: "10"\n---\n<task><name>252-10-01: Admit transparency owner lanes</name></task><task><name>252-10-02: Migrate fresh acceptance</name></task><task><name>252-10-03: Prove and refresh descriptors</name></task>\n`);
+  for (const plan of [9, 10]) {
+    write(root, `.planning/milestones/fixture-phases/${PHASE_SLUG}/252-${String(plan).padStart(2, "0")}-SUMMARY.md`, `---\nstatus: complete\ncompleted: 2026-10-${String(20 + plan).padStart(2, "0")}\nhuman_judgment: false\ncoverage:\n  - id: P${plan}\n    description: Historical plan evidence\n    verification:\n      - kind: integration\n        ref: "scripts/ci/verify_phase252_stories.mjs#historical-${plan}"\n        status: pass\n    human_judgment: false\n---\n`);
   }
   write(root, `.planning/milestones/fixture-phases/${PHASE_SLUG}/252-VALIDATION.md`, "17 surfaced = 13 classified explicit acceptance truths plus four unclassified unresolved flagged assumptions.\n");
   write(root, "guides/ui-story-lab.md", "The first bootstrap compiles and migrates an empty disposable database. Startup time should be recorded separately from warm browser renders. Budgets are provisional; Phase 254 owns frozen recurring selection and budgets.\n\nStatic rendering verifies story state. It does not prove mounted authorization, provider completion, dispatched action behavior, or persistence. Automated UAT requires fresh assertion evidence for the claim being made; a previous static render or a browser screenshot alone is not persisted/isolation evidence.\n\nThe final repository-root gate is:\n\n```sh\nnpm --prefix accrue_admin run phase252:check\n```\n\nThat command becomes available after plan 252-08 adds its runner and package script.\n");
@@ -218,6 +248,10 @@ function createFixture() {
   write(root, "scripts/ci/generate_phase252_acceptance.test.mjs", "fixture acceptance tests");
   write(root, ".github/workflows/ci.yml", "fixture workflow");
   write(root, "scripts/ci/phase252_reporters.mjs", fs.readFileSync(path.join(repositoryRoot, "scripts/ci/phase252_reporters.mjs")));
+  for (const relativePath of TRANSPARENCY_SOURCE_PATHS.filter((relative) => !relative.startsWith(".planning/") && relative !== "storybook/phase252-manifest.json")) {
+    write(root, relativePath, fs.readFileSync(path.join(repositoryRoot, relativePath)));
+  }
+  write(root, "scripts/ci/phase_evidence_path.mjs", fs.readFileSync(path.join(repositoryRoot, "scripts/ci/phase_evidence_path.mjs")));
   write(root, "dev_support/phase252_tap_formatter.ex", fs.readFileSync(path.join(repositoryRoot, "dev_support/phase252_tap_formatter.ex")));
   write(root, "accrue_admin/test/test_helper.exs", fs.readFileSync(path.join(repositoryRoot, "accrue_admin/test/test_helper.exs")));
   write(root, "examples/accrue_host/test/test_helper.exs", fs.readFileSync(path.join(repositoryRoot, "examples/accrue_host/test/test_helper.exs")));
@@ -228,7 +262,7 @@ function createFixture() {
   write(root, "dev_support/ui_scenarios/cadence_subscriptions.exs", "fixture scenario source");
   const manifest = {
     schema_version: 1,
-    source_digests: { "dev_support/ui_scenarios/cadence_subscriptions.exs": digest("fixture scenario source") },
+    source_digests: { "dev_support/ui_scenarios/cadence_subscriptions.exs": digest(fs.readFileSync(path.join(root, "dev_support/ui_scenarios/cadence_subscriptions.exs"))) },
     entries: ["active", "scheduled_cancellation", "incomplete_evidence", "compat_one", "compat_two", "compat_three"].map((id) => ({
       key: `/components/subscription_detail||${id}`,
       url: `/dev/storybook/components/subscription_detail?variation_id=${id}`,
@@ -342,7 +376,7 @@ function createFixture() {
     ui_predicate_coverage: fixtureUiCoverage(rows),
   };
   const renderPath = write(root, `accrue_admin/tmp/phase252/render-results-${runId.toLowerCase()}.json`, JSON.stringify(renderResults, null, 2) + "\n");
-  const sourcePaths = [
+  const sourcePaths = [...new Set([
     "storybook/phase252-manifest.json", "dev_support/ui_scenarios/cadence_subscriptions.exs",
     assetCssPath, assetJsPath, fontSans, fontMono, "accrue_admin/e2e/phase252-story-helpers.js",
     "scripts/ci/verify_phase252_stories.mjs",
@@ -356,8 +390,11 @@ function createFixture() {
     ...Object.values(PHASE252_REPORTER_SPECS).flatMap((spec) => spec.testFiles || []),
     "guides/ui-story-lab.md",
     ".github/workflows/ci.yml",
-  ].sort();
-  const sourceDigests = Object.fromEntries(sourcePaths.map((relative) => [relative, digest(fs.readFileSync(path.join(root, relative)))]));
+    ...TRANSPARENCY_SOURCE_PATHS,
+  ])].sort();
+  const sourceDigests = Object.fromEntries(sourcePaths.map((relative) => [relative, digest(fs.readFileSync(relative.startsWith(`.planning/phases/${PHASE_SLUG}/`)
+    ? resolvePhaseEvidencePath(PHASE_SLUG, relative.slice(`.planning/phases/${PHASE_SLUG}/`.length), { root })
+    : path.join(root, relative)))]));
   const fingerprint = digest(JSON.stringify(sourceDigests));
   const resultDirectory = `accrue_admin/tmp/phase252/ci-results/${runId}`;
   const commandRecords = REQUIRED_COMMAND_IDS.map((id, index) => {
@@ -383,7 +420,7 @@ function createFixture() {
       lane: "read-only",
       warmth: "warm",
       partition: null,
-      sources: reporter.testFiles || [],
+      sources: ["lab-presentation", "heldout-attribution", "transparency-controls"].includes(id) ? TRANSPARENCY_SOURCE_PATHS : reporter.testFiles || [],
       assertion_refs: executionEvidence.assertion_refs,
       execution_evidence: executionEvidence.execution_evidence,
       started_at: new Date(started).toISOString(),
@@ -418,7 +455,7 @@ function createFixture() {
     commands: commandRecords,
     costs: { cold_build: { duration_ms: 5 }, cold_database_startup: { duration_ms: 5 }, warm_database_lane: { duration_ms: 5 }, production_build: { duration_ms: 5 }, browser_lane: { duration_ms: 5 } },
     run_started_at: "2026-10-27T00:00:00.000Z",
-    run_completed_at: "2026-10-27T00:00:00.185Z",
+    run_completed_at: "2026-10-27T00:00:00.205Z",
   };
   fs.writeFileSync(resultsPath, JSON.stringify(resultBundle, null, 2) + "\n");
 
@@ -430,6 +467,8 @@ function createFixture() {
   ];
   const summaryCoverage = [...REQUIREMENTS, ...TASK_IDS, ...EDGE_IDS, ...UI_IDS].map((id) => `  - id: ${id}\n    description: "Fixture evidence for ${id}"\n    verification:\n      - kind: integration\n        ref: "${refs[0]}"\n        status: pass\n${refs.slice(1).map((ref) => `      - kind: integration\n        ref: "${ref}"\n        status: pass\n`).join("")}    human_judgment: false`).join("\n");
   write(root, `.planning/milestones/fixture-phases/${PHASE_SLUG}/252-08-SUMMARY.md`, `---\nstatus: complete\ncompleted: 2026-10-27\nhuman_judgment: false\ncoverage:\n${summaryCoverage}\n---\n`);
+  const currentSummaryCoverage = [...REQUIREMENTS, ...TASK_IDS, ...EDGE_IDS, ...UI_IDS, ...PROHIBITION_IDS].map((id) => `  - id: ${id}\n    description: "Current fixture evidence for ${id}"\n    verification:\n${refs.map((ref) => `      - kind: integration\n        ref: "${ref}"\n        status: pass\n`).join("")}    human_judgment: false`).join("\n");
+  write(root, `.planning/milestones/fixture-phases/${PHASE_SLUG}/252-10-SUMMARY.md`, `---\nstatus: complete\ncompleted: 2026-10-27\nhuman_judgment: false\ncoverage:\n${currentSummaryCoverage}\n---\n`);
 
   return { root, phaseDir, resultsPath, renderPath, manifestDigest, rows };
 }
@@ -444,7 +483,9 @@ test("fresh actual runner, manifest and browser evidence produce complete covera
     assert.deepEqual(evidence.classified_edges, EDGE_IDS);
     assert.deepEqual(evidence.ui_predicates, UI_IDS);
     assert.deepEqual(evidence.unresolved_assumptions.map((item) => item.id), UNCLASSIFIED);
-    assert.equal(evidence.unresolved_prohibitions.length, 2);
+    assert.deepEqual(evidence.unresolved_prohibitions, []);
+    assert.equal(evidence.prohibition_evidence.length, 2);
+    assert.ok(evidence.prohibition_evidence.every((item) => item.status === "green" && item.flagged === false && item.evidence_refs.length === 5));
     assert.equal(evidence.human_judgment, false);
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
@@ -465,13 +506,157 @@ test("resolved transparency descriptors require live target assertions and fresh
       fs.writeFileSync(absolute, source.replace(/prohibitions:\n[\s\S]*?(?=---\n)/, resolved));
     }
     const bundle = JSON.parse(fs.readFileSync(fixture.resultsPath, "utf8"));
-    bundle.commands = bundle.commands.filter((row) => !["lab-presentation", "heldout-attribution", "transparency-controls"].includes(row.id));
-    bundle.run_completed_at = "2026-10-27T00:00:00.205Z";
     fs.writeFileSync(fixture.resultsPath, JSON.stringify(bundle, null, 2) + "\n");
     const evidence = validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath });
     assert.equal(evidence.prohibition_evidence.length, 2);
     assert.equal(evidence.unresolved_prohibitions.length, 0);
     assert.ok(evidence.prohibition_evidence.every((item) => item.status === "green" && item.flagged === false));
+  } finally {
+    fs.rmSync(fixture.root, { recursive: true, force: true });
+  }
+});
+
+test("prohibition descriptors reject unresolved, partial, nested, changed, and swapped metadata", () => {
+  const mutations = [
+    (source) => source.replace("status: resolved", "status: unresolved"),
+    (source) => source.replace("category: transparency", "category: marketing"),
+    (source) => source.replace("verification: test", "verification: manual"),
+    (source) => source.replace(/    check_clean_fixture:.*\n/, ""),
+    (source) => source.replace("    check_kind: node-test", "    check:\n      kind: node-test"),
+    (source) => source.replace("review lab must not be presented", "review lab may be presented"),
+    (source) => source.replace("check_target: scripts/ci/verify_phase252_lab_presentation.test.mjs", "check_target: scripts/ci/verify_phase252_heldout_attribution.test.mjs"),
+    (source) => source.replace("check_violation_fixture: scripts/ci/fixtures/phase252-transparency/lab-violation.json", "check_violation_fixture: scripts/ci/fixtures/phase252-transparency/lab-clean.json"),
+    (source) => source.replace(/prohibitions:\n[\s\S]*?(?=---\n)/, ""),
+  ];
+  for (const mutate of mutations) {
+    const fixture = createFixture();
+    try {
+      const path01 = path.join(fixture.phaseDir, "252-01-PLAN.md");
+      const original = fs.readFileSync(path01, "utf8");
+      fs.writeFileSync(path01, mutate(original));
+      refreshSourceDigest(fixture, `.planning/phases/${PHASE_SLUG}/252-01-PLAN.md`);
+      assert.throws(() => validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }), /prohibition/i);
+    } finally {
+      fs.rmSync(fixture.root, { recursive: true, force: true });
+    }
+  }
+});
+
+test("fresh descriptor digests do not bless poisoned fixtures or absent transparency controls", () => {
+  const poisoned = createFixture();
+  try {
+    const relative = "scripts/ci/fixtures/phase252-transparency/lab-violation.json";
+    const absolute = path.join(poisoned.root, relative);
+    const subject = JSON.parse(fs.readFileSync(absolute, "utf8"));
+    subject.guide.text = subject.guide.text.replace("The review lab is a production operations console.", "The review lab is a static review surface.");
+    fs.writeFileSync(absolute, JSON.stringify(subject, null, 2) + "\n");
+    refreshSourceDigest(poisoned, relative);
+    assert.throws(() => validatePhase252Evidence({ root: poisoned.root, resultsPath: poisoned.resultsPath }), /intended contradictory claim/i);
+  } finally {
+    fs.rmSync(poisoned.root, { recursive: true, force: true });
+  }
+
+  const disclaimer = createFixture();
+  try {
+    const relative = "scripts/ci/fixtures/phase252-transparency/lab-violation.json";
+    const absolute = path.join(disclaimer.root, relative);
+    const subject = JSON.parse(fs.readFileSync(absolute, "utf8"));
+    subject.guide.text = subject.guide.text.replace("Rendered controls do not establish completed billing actions.", "");
+    fs.writeFileSync(absolute, JSON.stringify(subject, null, 2) + "\n");
+    refreshSourceDigest(disclaimer, relative);
+    assert.throws(() => validatePhase252Evidence({ root: disclaimer.root, resultsPath: disclaimer.resultsPath }), /beside the original limiting disclaimer/i);
+  } finally {
+    fs.rmSync(disclaimer.root, { recursive: true, force: true });
+  }
+
+  for (const relative of [`.planning/phases/${PHASE_SLUG}/252-01-PLAN.md`, "guides/ui-story-lab.md"]) {
+    const stale = createFixture();
+    try {
+      const absolute = relative.startsWith(".planning/")
+        ? path.join(stale.phaseDir, path.basename(relative))
+        : path.join(stale.root, relative);
+      fs.appendFileSync(absolute, "stale digest fixture mutation\n");
+      assert.throws(() => validatePhase252Evidence({ root: stale.root, resultsPath: stale.resultsPath }), /stale or invalid|source digest/i);
+    } finally {
+      fs.rmSync(stale.root, { recursive: true, force: true });
+    }
+  }
+
+  const missingClean = createFixture();
+  try {
+    fs.unlinkSync(path.join(missingClean.root, "scripts/ci/fixtures/phase252-transparency/lab-clean.json"));
+    assert.throws(() => validatePhase252Evidence({ root: missingClean.root, resultsPath: missingClean.resultsPath }), /does not exist|missing/i);
+  } finally {
+    fs.rmSync(missingClean.root, { recursive: true, force: true });
+  }
+
+  const missingMarker = createFixture();
+  try {
+    rewriteFixtureCommandOutput(missingMarker, "transparency-controls", (output) => output.replace("PHASE252_ASSERTION=lab_static_clean_green\n", ""));
+    assert.throws(() => validatePhase252Evidence({ root: missingMarker.root, resultsPath: missingMarker.resultsPath }), /assertion definitions mismatch|missing.*marker|reporter evidence/i);
+  } finally {
+    fs.rmSync(missingMarker.root, { recursive: true, force: true });
+  }
+
+  const skippedTarget = createFixture();
+  try {
+    rewriteFixtureCommandOutput(skippedTarget, "lab-presentation", (output) => output.replace(/^ok (\d+) - lab presentation states disposable static limits$/m, "ok $1 - lab presentation states disposable static limits # SKIP skipped target"));
+    assert.throws(() => validatePhase252Evidence({ root: skippedTarget.root, resultsPath: skippedTarget.resultsPath }), /skipped or marked TODO/i);
+  } finally {
+    fs.rmSync(skippedTarget.root, { recursive: true, force: true });
+  }
+
+  const excludedTarget = createFixture();
+  try {
+    rewriteFixtureCommandOutput(excludedTarget, "heldout-attribution", (output) => {
+      let lines = output.split("\n");
+      const removed = lines.findIndex((line) => line.includes("held-out attribution identifies synthetic stress evidence"));
+      lines.splice(removed, 1);
+      const count = Number(lines.find((line) => /^1\.\.\d+$/.test(line)).slice(3)) - 1;
+      return lines.map((line) => line.replace(/^1\.\.\d+$/, `1..${count}`).replace(/^# tests \d+$/, `# tests ${count}`).replace(/^# pass \d+$/, `# pass ${count}`)).join("\n");
+    });
+    assert.throws(() => validatePhase252Evidence({ root: excludedTarget.root, resultsPath: excludedTarget.resultsPath }), /executed test identities mismatch|excluded|assertion definitions mismatch|TAP test numbering/i);
+  } finally {
+    fs.rmSync(excludedTarget.root, { recursive: true, force: true });
+  }
+
+  const missingLane = createFixture();
+  try {
+    const bundle = JSON.parse(fs.readFileSync(missingLane.resultsPath, "utf8"));
+    bundle.commands = bundle.commands.filter((row) => row.id !== "transparency-controls");
+    fs.writeFileSync(missingLane.resultsPath, JSON.stringify(bundle, null, 2) + "\n");
+    assert.throws(() => validatePhase252Evidence({ root: missingLane.root, resultsPath: missingLane.resultsPath }), /required command IDs mismatch/i);
+  } finally {
+    fs.rmSync(missingLane.root, { recursive: true, force: true });
+  }
+});
+
+test("behavior validation works without the final summary and current UAT owns active evidence", () => {
+  const fixture = createFixture();
+  try {
+    const summary10 = path.join(fixture.phaseDir, "252-10-SUMMARY.md");
+    const summarySource = fs.readFileSync(summary10, "utf8");
+    fs.unlinkSync(summary10);
+    assert.equal(validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }).status, "passed");
+    assert.throws(() => generatePhase252Acceptance({ root: fixture.root, resultsPath: fixture.resultsPath, writeUat: true }), /252-10-SUMMARY|does not exist|not found/i);
+    fs.writeFileSync(summary10, summarySource);
+
+    const activeDirectory = path.join(fixture.root, ".planning", "phases", PHASE_SLUG);
+    fs.mkdirSync(activeDirectory, { recursive: true });
+    for (let number = 1; number <= 10; number += 1) {
+      const suffixes = ["PLAN.md", "SUMMARY.md"];
+      for (const suffix of suffixes) {
+        const filename = `252-${String(number).padStart(2, "0")}-${suffix}`;
+        fs.copyFileSync(path.join(fixture.phaseDir, filename), path.join(activeDirectory, filename));
+      }
+    }
+    fs.copyFileSync(path.join(fixture.phaseDir, "252-VALIDATION.md"), path.join(activeDirectory, "252-VALIDATION.md"));
+    fs.appendFileSync(path.join(fixture.phaseDir, "252-01-PLAN.md"), "\narchive-only mutation is shadowed by the active artifact\n");
+    assert.equal(validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }).status, "passed");
+    const result = generatePhase252Acceptance({ root: fixture.root, resultsPath: fixture.resultsPath, writeUat: true });
+    assert.equal(result.uat_written, true);
+    assert.ok(result.uat_path.endsWith("/252-UAT.md"));
+    assert.match(fs.readFileSync(path.join(activeDirectory, "252-UAT.md"), "utf8"), /PROH-LAB-PRESENTATION/);
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
   }
@@ -777,7 +962,8 @@ test("acceptance UAT is archive-aware and follows the project automated UAT shap
     assert.match(generated, /source: automated/);
     assert.doesNotMatch(generated, /\[(pending|issue|blocked|skipped)\]/i);
     assert.equal(result.evidence.unresolved_assumptions.length, 4);
-    assert.equal(result.evidence.unresolved_prohibitions.length, 2);
+    assert.deepEqual(result.evidence.unresolved_prohibitions, []);
+    assert.equal(result.evidence.prohibition_evidence.length, 2);
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
   }
