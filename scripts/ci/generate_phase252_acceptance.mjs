@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
+import { deriveExecutionEvidence, PHASE252_REPORTER_SPECS, requiredAssertionIds } from "./phase252_reporters.mjs";
 
 export const PHASE_SLUG = "252-production-backed-subscription-stories";
 export const REQUIREMENT_IDS = Object.freeze(["CIQ-01", "SBK-01", "SBK-02", "SBK-03", "SCEN-01", "SCEN-02", "SCEN-03", "SCEN-04", "LAB-01", "LAB-02"]);
@@ -180,10 +181,30 @@ function validateCommands(root, bundle, bundlePath) {
     if (!Number.isFinite(started) || !Number.isFinite(completed) || completed < started) fail(`command ${row.id} has invalid start/end timestamps`);
     if (started < previousCompletion || completed > Date.parse(bundle.run_completed_at)) fail(`command ${row.id} is not part of a fresh serial owner run`);
     previousCompletion = completed;
-    if (!Array.isArray(row.assertion_refs) || row.assertion_refs.length === 0) fail(`command ${row.id} has no assertion references`);
-    if (new Set(row.assertion_refs).size !== row.assertion_refs.length) fail(`command ${row.id} repeats assertion references`);
+    if (!Array.isArray(row.assertion_refs) || row.assertion_refs.length === 0) fail(`command ${row.id} has no executed assertion references`);
+    if (new Set(row.assertion_refs).size !== row.assertion_refs.length) fail(`command ${row.id} repeats executed assertion references`);
     if (!Array.isArray(row.sources) || row.sources.some((source) => !bundle.source_digests?.[source])) fail(`command ${row.id} source is outside the fresh digest snapshot`);
     for (const kind of ["stdout", "stderr"]) verifyDigest(root, row[`${kind}_path`], row[`${kind}_sha256`], `${row.id} ${kind}`);
+    const reporter = PHASE252_REPORTER_SPECS[row.id];
+    if (!reporter || row.execution_evidence?.kind !== reporter.kind) fail(`command ${row.id} has no matching executed reporter evidence`);
+    const stdout = fs.readFileSync(resolveRelative(root, row.stdout_path), "utf8");
+    if (row.execution_evidence.stdout_sha256 !== row.stdout_sha256) fail(`command ${row.id} reporter digest is not bound to its stdout log`);
+    const browserResult = row.id === "subscription-render-browser"
+      ? readJson(resolveRelative(root, bundle.browser_result_path), "browser result for reporter binding")
+      : null;
+    let recomputed;
+    try {
+      recomputed = deriveExecutionEvidence({ root, commandId: row.id, stdout, expectedAssertions: requiredAssertionIds(row.id), browserResult });
+    } catch (error) {
+      fail(`command ${row.id} reporter evidence is invalid: ${error.message}`);
+    }
+    if (JSON.stringify(row.assertion_refs) !== JSON.stringify(recomputed.assertion_refs) ||
+        JSON.stringify(row.execution_evidence) !== JSON.stringify(recomputed.execution_evidence)) {
+      fail(`command ${row.id} assertion references or reporter records differ from its executed stdout`);
+    }
+    for (const testFile of reporter.testFiles || []) {
+      if (!bundle.source_digests?.[testFile]) fail(`command ${row.id} reporter test source is outside the fresh digest snapshot: ${testFile}`);
+    }
     if (["admin-test", "host-heldout", "admin-review-browser"].includes(row.lane) && !/^\d{8,16}$/.test(String(row.partition || ""))) {
       fail(`mutable command ${row.id} lacks a disposable numeric partition`);
     }
@@ -198,7 +219,7 @@ function validateSourceSnapshot(root, bundle) {
   const sorted = Object.entries(bundle.source_digests).sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0);
   if (sorted.length === 0) fail("runner source digest snapshot is empty");
   for (const [relative, expected] of sorted) verifyDigest(root, relative, expected, "source");
-  for (const required of ["scripts/ci/verify_phase252_stories.mjs", "scripts/ci/generate_phase252_acceptance.mjs", "scripts/ci/generate_phase252_acceptance.test.mjs", "guides/ui-story-lab.md", ".github/workflows/ci.yml"]) {
+  for (const required of ["scripts/ci/verify_phase252_stories.mjs", "scripts/ci/generate_phase252_acceptance.mjs", "scripts/ci/generate_phase252_acceptance.test.mjs", "scripts/ci/phase252_reporters.mjs", "dev_support/phase252_tap_formatter.ex", "accrue_admin/test/test_helper.exs", "examples/accrue_host/test/test_helper.exs", "guides/ui-story-lab.md", ".github/workflows/ci.yml"]) {
     if (!bundle.source_digests[required]) fail(`source snapshot does not pin required acceptance source: ${required}`);
   }
   const digestMap = Object.fromEntries(sorted);
@@ -270,6 +291,8 @@ function validateBrowser(root, bundle, sourceDigests, manifest, manifestDigest, 
   if (browser.cases.some((row) => row.status !== "passed" || row.manifest_sha256 !== manifestDigest || !/^[0-9a-f]{64}$/.test(row.actual_content?.text_sha256 || ""))) fail("browser row failed, is stale, or lacks actual DOM content evidence");
   const rowsByKey = new Map(browser.cases.map((row) => [row.key, row]));
   if (rowsByKey.size !== 15) fail("browser result contains duplicate case keys");
+  const screenshotDirectory = `${path.posix.dirname(bundle.results_path)}/screenshots`;
+  const screenshotPaths = new Set();
 
   for (const row of browser.cases) {
     const entry = manifest.entries.find((candidate) => candidate.key === row.variation_key);
@@ -283,6 +306,21 @@ function validateBrowser(root, bundle, sourceDigests, manifest, manifestDigest, 
       fail(`browser case attribution or direct route differs from its manifest entry: ${row.key}`);
     }
     if (row.viewport?.width !== row.width || row.applied_theme?.dataTheme !== row.theme) fail(`browser viewport or theme differs from its declared cell: ${row.key}`);
+    if (row.case_kind === "canonical") {
+      const expectedName = `${row.scenario_id}-${row.width}-${row.theme}.png`;
+      const expectedPath = `${screenshotDirectory}/${expectedName}`;
+      if (row.screenshot?.path !== expectedPath || !/^[0-9a-f]{64}$/.test(row.screenshot?.sha256 || "") || screenshotPaths.has(row.screenshot.path)) {
+        fail(`canonical screenshot path or digest is missing, duplicated, or outside the unique run: ${row.key}`);
+      }
+      if (row.screenshot.state !== row.scenario_id || row.screenshot.width !== row.width || row.screenshot.theme !== row.theme) {
+        fail(`canonical screenshot identity differs from its direct route cell: ${row.key}`);
+      }
+      const image = fs.readFileSync(resolveRelative(root, row.screenshot.path));
+      if (image.length < 100 || !image.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) || sha256(image) !== row.screenshot.sha256) {
+        fail(`canonical screenshot bytes are not a current PNG for the rendered route: ${row.key}`);
+      }
+      screenshotPaths.add(row.screenshot.path);
+    }
     exactSet(row.ui_predicate_ids || [], UI_IDS, `${row.key} UI assertion IDs`);
     if (typeof row.actual_content?.text_length !== "number" || row.actual_content.text_length <= 0) fail(`actual DOM content length is missing: ${row.key}`);
     if (!row.served_assets?.cssHref?.includes("/dev/storybook/assets/storybook-css-") ||
@@ -291,6 +329,7 @@ function validateBrowser(root, bundle, sourceDigests, manifest, manifestDigest, 
     if (row.asset_identity?.storybook_css_sha256 !== sourceDigests["accrue_admin/priv/static/storybook.css"] ||
         row.asset_identity?.storybook_js_sha256 !== sourceDigests["accrue_admin/priv/static/storybook.js"]) fail(`served asset digest is stale or pooled: ${row.key}`);
   }
+  if (screenshotPaths.size !== 12) fail("browser evidence does not contain twelve unique canonical screenshots");
   for (const row of canonical) {
     for (const assertion of REQUIRED_RENDER_ASSERTIONS) if (row.assertions?.[assertion] !== true) fail(`canonical case lacks ${assertion}: ${row.key}`);
   }

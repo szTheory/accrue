@@ -12,7 +12,7 @@ defmodule AccrueAdmin.Test.Phase252SubscriptionManifestTapFormatter do
     tests
     |> Enum.with_index(1)
     |> Enum.each(fn {test, index} ->
-      name = test.name |> to_string() |> String.replace(~r/[\r\n]+/u, " ")
+      name = "#{inspect(test.module)}::#{test.name}" |> String.replace(~r/[\r\n]+/u, " ")
 
       case test.state do
         nil ->
@@ -206,6 +206,7 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       end
 
       root = Path.expand("../../../../", __DIR__)
+
       manifest_path =
         Path.join(
           System.tmp_dir!(),

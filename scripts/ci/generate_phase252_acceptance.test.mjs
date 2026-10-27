@@ -7,6 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { REQUIRED_COMMAND_IDS } from "./verify_phase252_stories.mjs";
+import { deriveExecutionEvidence, expectedExUnitIdentities, expectedNodeTestIdentities, parseTap13Report, PHASE252_REPORTER_SPECS, requiredAssertionIds } from "./phase252_reporters.mjs";
 import {
   generatePhase252Acceptance,
   validateGuideContract,
@@ -33,27 +34,61 @@ const UI_IDS = [
   "UI-E2-empty", "UI-E2-loading", "UI-E2-error", "UI-E2-populated", "UI-E2-partial", "UI-E2-overflow", "UI-E2-zero-one-many", "UI-E2-long-text",
   "UI-E3-empty", "UI-E3-loading", "UI-E3-error", "UI-E3-populated", "UI-E3-partial", "UI-E3-overflow", "UI-E3-zero-one-many", "UI-E3-long-text",
 ];
+const repositoryRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..");
 
-const ASSERTIONS = {
-  "manifest-current": ["compiled_variation_discovery", "source_digest_freshness", "tracked_manifest_content_identity"],
-  "phase252-lab-contract": ["owned_resource_identity", "unsafe_input_refusal", "cleanup_identity_guard", "namespace_lock_one_owner", "stale_lock_owner_refusal", "exact_process_identity_cleanup", "owned_process_group_identity"],
-  "scenario-domain": ["validated_deterministic_scenarios", "fixed_clock_and_identity", "deterministic_fact_source", "canceling_boundary_exact_clock", "exact_minor_unit_money_precision"],
-  "subscription-area": ["production_area_content", "copy_and_scoped_action_semantics"],
-  "story-slice": ["shared_renderer_and_active_variation", "no_repo_bootstrap"],
-  "manifest-contract": ["compiled_variation_routes", "stable_group_and_same_id_keys", "current_caller_map", "stale_manifest_rejection", "story_variation_identity_adjacency", "zero_variation_and_missing_attribution_refusal", "deterministic_manifest_ordering", "caller_identity_adjacency", "empty_caller_source_refusal", "stable_caller_ordering"],
-  "production-boundary-db-free": ["production_route_and_compile_boundary"],
-  "phase248-heldout-contract": ["held_out_partition_and_owner"],
-  "phase252-ci-contract": ["consumed_root_owner_map", "workflow_admission", "named_required_owner_execution", "required_owner_invocation_mutations"],
-  "production-boundary-controls": ["production_package_leak_negative_controls", "development_positive_production_route_exclusion"],
-  "production-packages": ["fresh_production_compiles", "actual_unpacked_hex_archives"],
-  "scenario-repo": ["persisted_launch_and_team_facts", "database_constraints", "replay_identity_conflict_refusal", "transaction_rollback", "concurrent_insert_serialization"],
-  "registry-kitchen-mount-scoped-path": ["registry_variant_and_token_reconciliation", "group_contract_and_mounted_kitchen", "production_caller_map_reconciliation", "served_storybook_assets", "development_and_production_route_boundaries", "scoped_return_path_safety"],
-  "mounted-subscription-regressions": ["mounted_subscription_structure", "organization_scope_enforcement", "lifecycle_distinctions", "action_review_and_confirmation", "provider_action_boundaries", "authority_regression", "scoped_not_found_regression"],
-  "heldout-cleanup": ["exact_cleanup_authority", "unrelated_child_preserved", "heldout_identity_separation", "cleanup_idempotency_absence_mismatch", "serialized_unrelated_child_concurrency"],
-  "isolation-reset": ["normal_reset_positive_control", "review_data_unchanged_negative_control", "distinct_review_process_and_database", "interrupted_descendant_cleanup_before_database_drop", "owned_descendants_cleanup_after_leader_exit", "unrelated_process_survives_group_cleanup"],
-  "subscription-render-browser": ["exact_twelve_canonical_width_theme_cells", "three_compatibility_render_cases", "manifest_reconciliation_negative_controls", "twenty_ui_predicates", "served_assets_and_fonts"],
-  "phase252-acceptance-contract": ["missing_command_rejection", "failed_command_rejection", "stale_source_and_asset_rejection", "pooled_cell_rejection", "missing_predicate_rejection", "unsafe_evidence_path_rejection", "guide_contract_mutation_rejection"],
-};
+function nodeTapReport(identities) {
+  return [
+    "TAP version 13",
+    ...identities.map((identity, index) => `ok ${index + 1} - ${identity}`),
+    `1..${identities.length}`,
+    `# tests ${identities.length}`,
+    `# pass ${identities.length}`,
+    "# fail 0",
+    "# cancelled 0",
+    "# skipped 0",
+    "# todo 0",
+    "",
+  ].join("\n");
+}
+
+function exUnitTapReport(identities) {
+  return ["TAP version 13", ...identities.map((identity, index) => `ok ${index + 1} - ${identity}`), `1..${identities.length}`, ""].join("\n");
+}
+
+function fixtureReporterOutput(root, commandId, rows) {
+  const spec = PHASE252_REPORTER_SPECS[commandId];
+  if (spec.kind === "node-tap") return nodeTapReport(expectedNodeTestIdentities(root, spec.testFiles));
+  if (spec.kind === "exunit-tap") return exUnitTapReport(expectedExUnitIdentities(root, spec.testFiles));
+  if (spec.kind === "playwright-json") {
+    const identities = [...rows.map((row) => row.test_id), "reconciles every declared direct render against the generated manifest"];
+    return JSON.stringify({
+      status: "passed",
+      suites: [{ specs: identities.map((title) => ({ title, tests: [{ title, expectedStatus: "passed", results: [{ status: "passed" }] }] })) }],
+    });
+  }
+  const markers = requiredAssertionIds(commandId).map((assertion) => `PHASE252_ASSERTION=${assertion}`);
+  if (commandId === "production-packages") {
+    return [
+      ...["accrue", "accrue_admin", "accrue_portal"].map((name) => `PASS ${name}: isolated production compile, actual Hex package contents, and runtime boundary (42 files).`),
+      "Phase 252 production package boundary verified for all three packages.",
+      ...markers,
+      "",
+    ].join("\n");
+  }
+  return [...markers, ""].join("\n");
+}
+
+function rewriteFixtureCommandOutput(fixture, commandId, transform) {
+  const bundle = JSON.parse(fs.readFileSync(fixture.resultsPath, "utf8"));
+  const command = bundle.commands.find((row) => row.id === commandId);
+  const outputPath = path.join(fixture.root, command.stdout_path);
+  const nextOutput = transform(fs.readFileSync(outputPath, "utf8"));
+  fs.writeFileSync(outputPath, nextOutput);
+  command.stdout_sha256 = digest(nextOutput);
+  command.execution_evidence.stdout_sha256 = digest(nextOutput);
+  fs.writeFileSync(fixture.resultsPath, JSON.stringify(bundle, null, 2) + "\n");
+  return bundle;
+}
 
 const UI_ASSERTIONS = {
   "UI-E1-loading": ["settled_content_visible", "loading_artifacts_absent"],
@@ -122,7 +157,7 @@ const write = (root, relative, content) => {
 };
 
 function commandRefs(id) {
-  const refs = ASSERTIONS[id] || [];
+  const refs = requiredAssertionIds(id);
   return refs.map((ref) => `${id}#${ref}`);
 }
 
@@ -181,6 +216,14 @@ function createFixture() {
   write(root, "scripts/ci/generate_phase252_acceptance.mjs", "fixture acceptance source");
   write(root, "scripts/ci/generate_phase252_acceptance.test.mjs", "fixture acceptance tests");
   write(root, ".github/workflows/ci.yml", "fixture workflow");
+  write(root, "scripts/ci/phase252_reporters.mjs", fs.readFileSync(path.join(repositoryRoot, "scripts/ci/phase252_reporters.mjs")));
+  write(root, "dev_support/phase252_tap_formatter.ex", fs.readFileSync(path.join(repositoryRoot, "dev_support/phase252_tap_formatter.ex")));
+  write(root, "accrue_admin/test/test_helper.exs", fs.readFileSync(path.join(repositoryRoot, "accrue_admin/test/test_helper.exs")));
+  write(root, "examples/accrue_host/test/test_helper.exs", fs.readFileSync(path.join(repositoryRoot, "examples/accrue_host/test/test_helper.exs")));
+  write(root, "storybook/components/subscription_detail.story.exs", fs.readFileSync(path.join(repositoryRoot, "storybook/components/subscription_detail.story.exs")));
+  for (const relativePath of Object.values(PHASE252_REPORTER_SPECS).flatMap((spec) => spec.testFiles || [])) {
+    write(root, relativePath, fs.readFileSync(path.join(repositoryRoot, relativePath)));
+  }
   write(root, "dev_support/ui_scenarios/cadence_subscriptions.exs", "fixture scenario source");
   const manifest = {
     schema_version: 1,
@@ -243,6 +286,7 @@ function createFixture() {
   for (const id of ["compat_one", "compat_two", "compat_three"]) {
     rows.push({
       key: `/components/subscription_detail||${id}::compatibility::1280::light`,
+      test_id: `${id} | compatibility | 1280px | light`,
       variation_key: `/components/subscription_detail||${id}`,
       scenario_id: id,
       state: id,
@@ -267,9 +311,24 @@ function createFixture() {
       assertions: { direct_route: true, actual_content: true, served_assets: true, fonts_loaded: true },
     });
   }
+  const runId = "25208-1793072424185-64706-61aa2ca2b88c";
+  const screenshotDirectory = `accrue_admin/tmp/phase252/ci-results/${runId}/screenshots`;
+  const fixturePng = Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), Buffer.alloc(112, 42)]);
+  for (const row of rows.filter((candidate) => candidate.case_kind === "canonical")) {
+    const name = `${row.scenario_id}-${row.width}-${row.theme}.png`;
+    const screenshotPath = `${screenshotDirectory}/${name}`;
+    write(root, screenshotPath, fixturePng);
+    row.screenshot = {
+      path: screenshotPath,
+      sha256: digest(fixturePng),
+      state: row.scenario_id,
+      width: row.width,
+      theme: row.theme,
+    };
+  }
   const renderResults = {
     schema_version: 1,
-    run_id: "25208-1793072424185-64706-61aa2ca2b88c",
+    run_id: runId,
     manifest_sha256: manifestDigest,
     human_judgment: false,
     cases: rows,
@@ -281,26 +340,41 @@ function createFixture() {
     },
     ui_predicate_coverage: fixtureUiCoverage(rows),
   };
-  const renderPath = write(root, "accrue_admin/tmp/phase252/render-results-fixture.json", JSON.stringify(renderResults, null, 2) + "\n");
+  const renderPath = write(root, `accrue_admin/tmp/phase252/render-results-${runId.toLowerCase()}.json`, JSON.stringify(renderResults, null, 2) + "\n");
   const sourcePaths = [
     "storybook/phase252-manifest.json", "dev_support/ui_scenarios/cadence_subscriptions.exs",
     assetCssPath, assetJsPath, fontSans, fontMono, "accrue_admin/e2e/phase252-story-helpers.js",
     "scripts/ci/verify_phase252_stories.mjs",
+    "scripts/ci/phase252_reporters.mjs",
     "scripts/ci/generate_phase252_acceptance.mjs",
     "scripts/ci/generate_phase252_acceptance.test.mjs",
+    "dev_support/phase252_tap_formatter.ex",
+    "accrue_admin/test/test_helper.exs",
+    "examples/accrue_host/test/test_helper.exs",
+    "storybook/components/subscription_detail.story.exs",
+    ...Object.values(PHASE252_REPORTER_SPECS).flatMap((spec) => spec.testFiles || []),
     "guides/ui-story-lab.md",
     ".github/workflows/ci.yml",
   ].sort();
   const sourceDigests = Object.fromEntries(sourcePaths.map((relative) => [relative, digest(fs.readFileSync(path.join(root, relative)))]));
   const fingerprint = digest(JSON.stringify(sourceDigests));
+  const resultDirectory = `accrue_admin/tmp/phase252/ci-results/${runId}`;
   const commandRecords = REQUIRED_COMMAND_IDS.map((id, index) => {
-    const stdout = `output ${id}\n`;
+    const reporter = PHASE252_REPORTER_SPECS[id];
+    const stdout = fixtureReporterOutput(root, id, rows);
     const stderr = "";
-    const outPath = `accrue_admin/tmp/phase252/ci-results/fixture/logs/${id}.stdout.log`;
-    const errPath = `accrue_admin/tmp/phase252/ci-results/fixture/logs/${id}.stderr.log`;
+    const outPath = `${resultDirectory}/logs/${id}.stdout.log`;
+    const errPath = `${resultDirectory}/logs/${id}.stderr.log`;
     write(root, outPath, stdout);
     write(root, errPath, stderr);
     const started = Date.parse("2026-10-27T00:00:00.000Z") + (index * 10);
+    const executionEvidence = deriveExecutionEvidence({
+      root,
+      commandId: id,
+      stdout,
+      expectedAssertions: requiredAssertionIds(id),
+      browserResult: id === "subscription-render-browser" ? renderResults : null,
+    });
     return {
       id,
       command: ["node", "fixture"],
@@ -308,8 +382,9 @@ function createFixture() {
       lane: "read-only",
       warmth: "warm",
       partition: null,
-      sources: [],
-      assertion_refs: ASSERTIONS[id] || [],
+      sources: reporter.testFiles || [],
+      assertion_refs: executionEvidence.assertion_refs,
+      execution_evidence: executionEvidence.execution_evidence,
       started_at: new Date(started).toISOString(),
       completed_at: new Date(started + 5).toISOString(),
       duration_ms: 5,
@@ -322,11 +397,11 @@ function createFixture() {
       error: null,
     };
   });
-  const resultsPath = write(root, "accrue_admin/tmp/phase252/ci-results/fixture/results.json", "{}");
+  const resultsPath = write(root, `${resultDirectory}/results.json`, "{}");
   const resultBundle = {
     schema_version: 1,
     plan: "252-08",
-    run_id: "25208-1793072424185-64706-61aa2ca2b88c",
+    run_id: runId,
     status: "passed",
     human_judgment: false,
     source_revision: "0".repeat(40),
@@ -355,7 +430,7 @@ function createFixture() {
   const summaryCoverage = [...REQUIREMENTS, ...TASK_IDS, ...EDGE_IDS, ...UI_IDS].map((id) => `  - id: ${id}\n    description: "Fixture evidence for ${id}"\n    verification:\n      - kind: integration\n        ref: "${refs[0]}"\n        status: pass\n${refs.slice(1).map((ref) => `      - kind: integration\n        ref: "${ref}"\n        status: pass\n`).join("")}    human_judgment: false`).join("\n");
   write(root, `.planning/milestones/fixture-phases/${PHASE_SLUG}/252-08-SUMMARY.md`, `---\nstatus: complete\ncompleted: 2026-10-27\nhuman_judgment: false\ncoverage:\n${summaryCoverage}\n---\n`);
 
-  return { root, phaseDir, resultsPath, manifestDigest, rows };
+  return { root, phaseDir, resultsPath, renderPath, manifestDigest, rows };
 }
 
 test("fresh actual runner, manifest and browser evidence produce complete coverage", () => {
@@ -403,7 +478,7 @@ test("changed source and stale served asset bytes reject the bundle", () => {
 
   const assetFixture = createFixture();
   try {
-    const renderPath = path.join(assetFixture.root, "accrue_admin/tmp/phase252/render-results-fixture.json");
+    const renderPath = assetFixture.renderPath;
     const render = JSON.parse(fs.readFileSync(renderPath, "utf8"));
     render.cases[0].asset_identity.storybook_css_sha256 = "0".repeat(64);
     fs.writeFileSync(renderPath, JSON.stringify(render, null, 2) + "\n");
@@ -419,14 +494,14 @@ test("changed source and stale served asset bytes reject the bundle", () => {
 test("pooled cells and incomplete UI or edge predicates are rejected", () => {
   const fixture = createFixture();
   try {
-    const renderPath = path.join(fixture.root, "accrue_admin/tmp/phase252/render-results-fixture.json");
+    const renderPath = fixture.renderPath;
     const render = JSON.parse(fs.readFileSync(renderPath, "utf8"));
     render.cases = render.cases.filter((row) => row.key !== "/components/subscription_detail||active::320::light");
     fs.writeFileSync(renderPath, JSON.stringify(render, null, 2) + "\n");
     const bundle = JSON.parse(fs.readFileSync(fixture.resultsPath, "utf8"));
     bundle.browser_results_sha256 = digest(fs.readFileSync(renderPath));
     fs.writeFileSync(fixture.resultsPath, JSON.stringify(bundle, null, 2) + "\n");
-    assert.throws(() => validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }), /exactly 15|omitted canonical cell/i);
+    assert.throws(() => validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }), /exactly 15|omitted canonical cell|all 15 rendered result rows/i);
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
   }
@@ -437,14 +512,14 @@ test("pooled cells and incomplete UI or edge predicates are rejected", () => {
   ]) {
     const missing = createFixture();
     try {
-      const renderPath = path.join(missing.root, "accrue_admin/tmp/phase252/render-results-fixture.json");
+      const renderPath = missing.renderPath;
       const render = JSON.parse(fs.readFileSync(renderPath, "utf8"));
       const bundle = JSON.parse(fs.readFileSync(missing.resultsPath, "utf8"));
       mutate(render, bundle);
       fs.writeFileSync(renderPath, JSON.stringify(render, null, 2) + "\n");
       bundle.browser_results_sha256 = digest(fs.readFileSync(renderPath));
       fs.writeFileSync(missing.resultsPath, JSON.stringify(bundle, null, 2) + "\n");
-      assert.throws(() => validatePhase252Evidence({ root: missing.root, resultsPath: missing.resultsPath }), /UI predicate|missing assertion evidence|EDGE-SBK-01|no assertion references/);
+      assert.throws(() => validatePhase252Evidence({ root: missing.root, resultsPath: missing.resultsPath }), /UI predicate|missing assertion evidence|EDGE-SBK-01|no assertion references|no executed assertion references/);
     } finally {
       fs.rmSync(missing.root, { recursive: true, force: true });
     }
@@ -475,6 +550,126 @@ test("guide contract pins the actual owner command, evidence limits, and provisi
     assert.throws(() => validateGuideContract(badBudget), /Phase 254|provisional/i);
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
+  }
+});
+
+test("TAP reporter accepts complete executed records and ignores unrelated compile wording", () => {
+  const testFiles = ["scripts/dev/phase252_lab.test.mjs"];
+  const identities = expectedNodeTestIdentities(repositoryRoot, testFiles);
+  const output = `compile note: optional fixture skip behavior is documented\n${nodeTapReport(identities)}`;
+  const evidence = deriveExecutionEvidence({
+    root: repositoryRoot,
+    commandId: "phase252-lab-contract",
+    stdout: output,
+    expectedAssertions: ["owned_resource_identity", "unsafe_input_refusal", "cleanup_identity_guard", "namespace_lock_one_owner", "stale_lock_owner_refusal", "exact_process_identity_cleanup", "owned_process_group_identity"],
+  });
+  assert.equal(evidence.execution_evidence.test_count, identities.length);
+  assert.equal(evidence.execution_evidence.skipped, 0);
+  assert.equal(evidence.assertion_refs.length, 7);
+});
+
+test("TAP reporter rejects skipped required records", () => {
+  assert.throws(() => parseTap13Report([
+    "TAP version 13",
+    "ok 1 - required identity # SKIP unavailable",
+    "1..1",
+    "# tests 1",
+    "# pass 1",
+    "# fail 0",
+    "# cancelled 0",
+    "# skipped 1",
+    "# todo 0",
+  ].join("\n"), { format: "node-tap" }), /skipped or marked TODO/i);
+});
+
+test("TAP reporter rejects missing, empty, and truncated reports", () => {
+  for (const output of ["", "compile succeeded with no test process output", "TAP version 13\n1..0\n"]) {
+    assert.throws(() => parseTap13Report(output, { format: "exunit-tap" }), /missing|empty|zero executed/i);
+  }
+  assert.throws(() => parseTap13Report("TAP version 13\nok 1 - first\n", { format: "exunit-tap" }), /plan is missing/i);
+  assert.throws(() => parseTap13Report("TAP version 13\nok 1 - first\n1..2\n", { format: "exunit-tap" }), /declared 2 tests but reported 1/i);
+});
+
+test("TAP reporter rejects excluded or mismatched required identities", () => {
+  const testFiles = ["scripts/dev/phase252_lab.test.mjs"];
+  const identities = expectedNodeTestIdentities(repositoryRoot, testFiles);
+  const assertions = ["owned_resource_identity", "unsafe_input_refusal", "cleanup_identity_guard", "namespace_lock_one_owner", "stale_lock_owner_refusal", "exact_process_identity_cleanup", "owned_process_group_identity"];
+  assert.throws(() => deriveExecutionEvidence({
+    root: repositoryRoot,
+    commandId: "phase252-lab-contract",
+    stdout: nodeTapReport(identities.slice(0, -1)),
+    expectedAssertions: assertions,
+  }), /executed test identities mismatch|executed count differs/i);
+  const renamed = [...identities];
+  renamed[0] = "fabricated test identity";
+  assert.throws(() => deriveExecutionEvidence({
+    root: repositoryRoot,
+    commandId: "phase252-lab-contract",
+    stdout: nodeTapReport(renamed),
+    expectedAssertions: assertions,
+  }), /executed test identities mismatch/i);
+});
+
+test("report assertion references bind to executed test identities", () => {
+  const testFiles = ["scripts/dev/phase252_lab.test.mjs"];
+  const identities = expectedNodeTestIdentities(repositoryRoot, testFiles);
+  assert.throws(() => deriveExecutionEvidence({
+    root: repositoryRoot,
+    commandId: "phase252-lab-contract",
+    stdout: nodeTapReport(identities),
+    expectedAssertions: ["fake_asserted_behavior"],
+  }), /assertion definitions mismatch/i);
+  const legitimate = deriveExecutionEvidence({
+    root: repositoryRoot,
+    commandId: "phase252-lab-contract",
+    stdout: nodeTapReport(identities),
+    expectedAssertions: ["owned_resource_identity", "unsafe_input_refusal", "cleanup_identity_guard", "namespace_lock_one_owner", "stale_lock_owner_refusal", "exact_process_identity_cleanup", "owned_process_group_identity"],
+  });
+  assert.ok(Object.values(legitimate.execution_evidence.assertion_bindings).every((ids) => ids.length > 0));
+});
+
+test("acceptance generator re-parses reporter logs after their digests are updated", () => {
+  const skipFixture = createFixture();
+  try {
+    rewriteFixtureCommandOutput(skipFixture, "phase252-lab-contract", (output) =>
+      output.replace(/^ok 1 - (.+)$/m, "ok 1 - $1 # SKIP excluded by mutation"));
+    assert.throws(() => validatePhase252Evidence({ root: skipFixture.root, resultsPath: skipFixture.resultsPath }), /was skipped or marked TODO/i);
+  } finally {
+    fs.rmSync(skipFixture.root, { recursive: true, force: true });
+  }
+
+  const excludedFixture = createFixture();
+  try {
+    rewriteFixtureCommandOutput(excludedFixture, "phase252-lab-contract", (output) => {
+      let lines = output.split("\n");
+      const records = lines.map((line, index) => ({ line, index })).filter(({ line }) => /^ok \d+ - /.test(line));
+      const removed = records.at(-1);
+      lines.splice(removed.index, 1);
+      const remaining = records.length - 1;
+      lines = lines.map((line) => line.replace(/^1\.\.\d+$/, `1..${remaining}`).replace(/^# tests \d+$/, `# tests ${remaining}`).replace(/^# pass \d+$/, `# pass ${remaining}`));
+      return lines.join("\n");
+    });
+    assert.throws(() => validatePhase252Evidence({ root: excludedFixture.root, resultsPath: excludedFixture.resultsPath }), /executed test identities mismatch|executed count differs/i);
+  } finally {
+    fs.rmSync(excludedFixture.root, { recursive: true, force: true });
+  }
+
+  const emptyFixture = createFixture();
+  try {
+    rewriteFixtureCommandOutput(emptyFixture, "scenario-domain", () => "");
+    assert.throws(() => validatePhase252Evidence({ root: emptyFixture.root, resultsPath: emptyFixture.resultsPath }), /missing or empty/i);
+  } finally {
+    fs.rmSync(emptyFixture.root, { recursive: true, force: true });
+  }
+
+  const fakeRefFixture = createFixture();
+  try {
+    const bundle = JSON.parse(fs.readFileSync(fakeRefFixture.resultsPath, "utf8"));
+    bundle.commands.find((row) => row.id === "scenario-domain").assertion_refs = ["fake_asserted_behavior"];
+    fs.writeFileSync(fakeRefFixture.resultsPath, JSON.stringify(bundle, null, 2) + "\n");
+    assert.throws(() => validatePhase252Evidence({ root: fakeRefFixture.root, resultsPath: fakeRefFixture.resultsPath }), /assertion references or reporter records differ/i);
+  } finally {
+    fs.rmSync(fakeRefFixture.root, { recursive: true, force: true });
   }
 });
 

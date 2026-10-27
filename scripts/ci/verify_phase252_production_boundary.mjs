@@ -621,6 +621,8 @@ function runProductionBoundary() {
       );
     }
     process.stdout.write("Phase 252 production package boundary verified for all three packages.\n");
+    process.stdout.write("PHASE252_ASSERTION=fresh_production_compiles\n");
+    process.stdout.write("PHASE252_ASSERTION=actual_unpacked_hex_archives\n");
   } finally {
     rmSync(temporaryRoot, { recursive: true, force: true });
   }
@@ -630,6 +632,8 @@ function main() {
   if (process.argv.includes("--self-test")) {
     const result = runSelfTest();
     process.stdout.write(`Phase 252 production boundary self-test passed (${result.passed} controls).\n`);
+    process.stdout.write("PHASE252_ASSERTION=production_package_leak_negative_controls\n");
+    process.stdout.write("PHASE252_ASSERTION=development_positive_production_route_exclusion\n");
     return;
   }
   if (process.argv.length > 2) {

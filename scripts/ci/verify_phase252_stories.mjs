@@ -6,6 +6,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { deriveExecutionEvidence, PHASE252_REPORTER_SPECS } from "./phase252_reporters.mjs";
 
 export const REQUIRED_COMMAND_IDS = Object.freeze([
   "manifest-current",
@@ -53,6 +54,7 @@ const SOURCE_AND_ASSET_PATHS = Object.freeze([
   "accrue_admin/priv/static/fonts/geist-mono-vf.woff2",
   "brandbook/tokens/tokens.css",
   "scripts/ci/phase252_paths.mjs",
+  "scripts/ci/phase252_reporters.mjs",
   "scripts/ci/verify_phase252_ci_contract.test.mjs",
   "scripts/ci/verify_phase252_production_boundary.mjs",
   "scripts/ci/verify_phase252_production_boundary.test.mjs",
@@ -67,6 +69,11 @@ const SOURCE_AND_ASSET_PATHS = Object.freeze([
   "scripts/dev/phase252_isolation.test.mjs",
   "scripts/ci/phase248_heldout_isolation.test.mjs",
   "accrue_admin/test/accrue_admin/dev/storybook_coverage_test.exs",
+  "accrue_admin/test/test_helper.exs",
+  "examples/accrue_host/test/test_helper.exs",
+  "dev_support/phase252_tap_formatter.ex",
+  "accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs",
+  "storybook/components/subscription_detail.story.exs",
 ]);
 
 function sha256(value) {
@@ -127,6 +134,9 @@ export function manifestFreshnessCode() {
     '  checked_in = File.read!(Path.expand("../storybook/phase252-manifest.json", File.cwd!()))',
     '  if Jason.decode!(generated) != Jason.decode!(checked_in), do: raise("checked-in phase252 manifest is stale; regenerate it from compiled source before browser review")',
     '  IO.puts("Phase 252 manifest: generated compiled-source bytes match the tracked manifest")',
+    '  IO.puts("PHASE252_ASSERTION=compiled_variation_discovery")',
+    '  IO.puts("PHASE252_ASSERTION=source_digest_freshness")',
+    '  IO.puts("PHASE252_ASSERTION=tracked_manifest_content_identity")',
     "after",
     "  File.rm(temp)",
     "end",
@@ -143,8 +153,9 @@ function command(id, display, executable, args, options = {}) {
     lane: options.lane || "read-only",
     warmth: options.warmth || "warm",
     partition: options.partition || null,
-    sources: options.sources || [],
+    sources: [...new Set([...(options.sources || []), ...(PHASE252_REPORTER_SPECS[id]?.testFiles || [])])],
     assertions: options.assertions || [],
+    reporter: PHASE252_REPORTER_SPECS[id],
     env: options.env || {},
   };
 }
@@ -160,7 +171,7 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
       "node ../scripts/dev/phase252_lab.mjs exec",
       process.execPath,
       ["scripts/dev/phase252_lab.mjs", "exec", "--lane", lane, "--partition", partition, "--", "sh", "-c", shell],
-      { lane, partition, warmth: lane === "admin-test" && testId === "scenario-repo" ? "cold-database-startup" : "warm", env: { MIX_ENV: "test", MIX_BUILD_PATH: lane === "host-heldout" ? hostBuildPath : adminBuildPath }, sources: files.map((file) => lane === "host-heldout" ? "examples/accrue_host/" + file : "accrue_admin/" + file), assertions },
+      { lane, partition, warmth: lane === "admin-test" && testId === "scenario-repo" ? "cold-database-startup" : "warm", env: { MIX_ENV: "test", MIX_BUILD_PATH: lane === "host-heldout" ? hostBuildPath : adminBuildPath, PHASE252_TAP_REPORT: "1" }, sources: files.map((file) => lane === "host-heldout" ? "examples/accrue_host/" + file : "accrue_admin/" + file), assertions },
     );
   };
   const dbFree = (testId, file, assertions = []) => command(
@@ -182,7 +193,7 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
     command("phase252-lab-contract", "node --test Phase 252 lab lifecycle contract", process.execPath, tap("scripts/dev/phase252_lab.test.mjs"), { lane: "read-only", sources: ["scripts/dev/phase252_lab.test.mjs", "scripts/dev/phase252_lab.mjs"], assertions: ["owned_resource_identity", "unsafe_input_refusal", "cleanup_identity_guard", "namespace_lock_one_owner", "stale_lock_owner_refusal", "exact_process_identity_cleanup", "owned_process_group_identity"] }),
     dbFree("scenario-domain", "test/accrue_admin/dev/subscription_scenarios_test.exs", ["validated_deterministic_scenarios", "fixed_clock_and_identity", "deterministic_fact_source", "canceling_boundary_exact_clock", "exact_minor_unit_money_precision"]),
     dbFree("subscription-area", "test/accrue_admin/components/subscription_area_test.exs", ["production_area_content", "copy_and_scoped_action_semantics"]),
-    dbFree("story-slice", "test/accrue_admin/dev/subscription_story_slice_test.exs", ["shared_renderer_and_active_variation", "no_repo_bootstrap"]),
+    dbFree("story-slice", "test/accrue_admin/dev/subscription_story_slice_test.exs", ["shared_renderer_and_active_variation", "no_repo_bootstrap", "subscription_story_uses_full_width_layout"]),
     dbFree("manifest-contract", "test/accrue_admin/dev/subscription_manifest_test.exs", ["compiled_variation_routes", "stable_group_and_same_id_keys", "current_caller_map", "stale_manifest_rejection", "story_variation_identity_adjacency", "zero_variation_and_missing_attribution_refusal", "deterministic_manifest_ordering", "caller_identity_adjacency", "empty_caller_source_refusal", "stable_caller_ordering"]),
     dbFree("production-boundary-db-free", "test/accrue_admin/dev/subscription_production_boundary_test.exs", ["production_route_and_compile_boundary"]),
     command("phase248-heldout-contract", "node --test Phase 248 held-out isolation contract", process.execPath, tap("scripts/ci/phase248_heldout_isolation.test.mjs"), { lane: "read-only", sources: ["scripts/ci/phase248_heldout_isolation.test.mjs"], assertions: ["held_out_partition_and_owner"] }),
@@ -206,7 +217,7 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
         "node ../scripts/dev/phase252_lab.mjs exec",
         process.execPath,
         ["scripts/dev/phase252_lab.mjs", "exec", "--lane", "host-heldout", "--partition", partition, "--", "sh", "-c", "cd examples/accrue_host && MIX_ENV=test mix test test/accrue_host/phase252_scenario_cleanup_test.exs"],
-        { lane: "host-heldout", partition, warmth: "cold-database-startup", env: { MIX_ENV: "test", MIX_BUILD_PATH: hostBuildPath }, sources: ["examples/accrue_host/test/accrue_host/phase252_scenario_cleanup_test.exs", "examples/accrue_host/mix.exs", "scripts/dev/phase252_lab.mjs"], assertions: ["exact_cleanup_authority", "unrelated_child_preserved", "heldout_identity_separation", "cleanup_idempotency_absence_mismatch", "serialized_unrelated_child_concurrency"] },
+        { lane: "host-heldout", partition, warmth: "cold-database-startup", env: { MIX_ENV: "test", MIX_BUILD_PATH: hostBuildPath, PHASE252_TAP_REPORT: "1" }, sources: ["examples/accrue_host/test/accrue_host/phase252_scenario_cleanup_test.exs", "examples/accrue_host/mix.exs", "scripts/dev/phase252_lab.mjs"], assertions: ["exact_cleanup_authority", "unrelated_child_preserved", "heldout_identity_separation", "cleanup_idempotency_absence_mismatch", "serialized_unrelated_child_concurrency"] },
       );
     })(),
     command("isolation-reset", "node --test Phase 252 isolated normal/review reset proof", process.execPath, tap("scripts/dev/phase252_isolation.test.mjs"), { lane: "self-owned-disposable-review-and-admin-test", warmth: "cold-database-startup", env: { MIX_BUILD_PATH: adminBuildPath }, sources: ["scripts/dev/phase252_isolation.test.mjs", "scripts/dev/phase252_lab.mjs"], assertions: ["normal_reset_positive_control", "review_data_unchanged_negative_control", "distinct_review_process_and_database", "interrupted_descendant_cleanup_before_database_drop", "owned_descendants_cleanup_after_leader_exit", "unrelated_process_survives_group_cleanup"] }),
@@ -217,9 +228,9 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
   const outputDir = path.join(outputDirectory, "playwright-output");
   plan.push(command(
     "subscription-render-browser",
-    "node scripts/dev/phase252_lab.mjs browser -- --reporter=list e2e/subscription-stories-phase252.spec.js",
+    "node scripts/dev/phase252_lab.mjs browser -- --reporter=json e2e/subscription-stories-phase252.spec.js",
     process.execPath,
-    ["scripts/dev/phase252_lab.mjs", "browser", "--", "--reporter=list", "e2e/subscription-stories-phase252.spec.js"],
+    ["scripts/dev/phase252_lab.mjs", "browser", "--", "--reporter=json", "e2e/subscription-stories-phase252.spec.js"],
     {
       lane: "admin-review-browser",
       partition,
@@ -233,6 +244,7 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
         PHASE252_E2E_NONCE: id,
         PHASE252_RESULT_ID: resultId,
         PLAYWRIGHT_OUTPUT_DIR: outputDir,
+        PHASE252_SCREENSHOT_DIR: path.join(outputDirectory, "screenshots"),
       },
     },
   ));
@@ -244,7 +256,7 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
     {
       lane: "read-only",
       sources: ["scripts/ci/generate_phase252_acceptance.mjs", "scripts/ci/generate_phase252_acceptance.test.mjs", "scripts/ci/verify_phase252_stories.mjs", "guides/ui-story-lab.md", ".github/workflows/ci.yml"],
-      assertions: ["missing_command_rejection", "failed_command_rejection", "stale_source_and_asset_rejection", "pooled_cell_rejection", "missing_predicate_rejection", "unsafe_evidence_path_rejection", "guide_contract_mutation_rejection"],
+      assertions: ["missing_command_rejection", "failed_command_rejection", "stale_source_and_asset_rejection", "pooled_cell_rejection", "missing_predicate_rejection", "unsafe_evidence_path_rejection", "guide_contract_mutation_rejection", "executed_tap_positive_control", "skipped_required_test_rejection", "missing_and_empty_report_rejection", "excluded_required_test_rejection", "fake_assertion_ref_rejection"],
     },
   ));
   return plan;
@@ -265,7 +277,7 @@ export async function executeCommandSequence(commands, execute, persist) {
     if (!Number.isInteger(result?.exitCode)) {
       result = { ...result, exitCode: 1, error: result?.error || "command did not report an integer exit code" };
     }
-    results.push({ ...result, id: commandSpec.id, assertions: commandSpec.assertions || [] });
+    results.push({ ...result, id: commandSpec.id, assertion_refs: result.assertion_refs || [] });
     const failed = result.exitCode !== 0;
     const snapshot = { status: failed ? "failed" : "running", commands: [...results] };
     await persist(snapshot);
@@ -311,7 +323,6 @@ function spawnCaptured(spec, root, logDirectory) {
         warmth: spec.warmth,
         partition: spec.partition,
         sources: spec.sources,
-        assertion_refs: spec.assertions,
         started_at: startedAt,
         completed_at: new Date().toISOString(),
         duration_ms: Date.now() - started,
@@ -350,6 +361,21 @@ function validateRenderResults(resultPath, { id, manifestDigest }) {
   if (results.cases.some((row) => row.status !== "passed" || row.manifest_sha256 !== manifestDigest)) {
     throw new Error("browser result contains a failed or stale render row");
   }
+  const screenshotRoot = path.join(ROOT, RESULT_ROOT_RELATIVE, id, "screenshots");
+  const screenshotPaths = new Set();
+  for (const row of canonical) {
+    const expectedName = `${row.scenario_id}-${row.width}-${row.theme}.png`;
+    const expectedPath = path.relative(ROOT, path.join(screenshotRoot, expectedName)).split(path.sep).join("/");
+    if (row.screenshot?.path !== expectedPath || !/^[0-9a-f]{64}$/.test(row.screenshot?.sha256 || "") || screenshotPaths.has(row.screenshot.path)) {
+      throw new Error("browser result screenshot path is pooled, missing, duplicated, or outside the current run");
+    }
+    screenshotPaths.add(row.screenshot.path);
+    const bytes = fs.readFileSync(path.resolve(ROOT, row.screenshot.path));
+    if (bytes.length < 100 || sha256(bytes) !== row.screenshot.sha256) {
+      throw new Error("browser result screenshot bytes are missing, empty, or stale: " + row.screenshot.path);
+    }
+  }
+  if (screenshotPaths.size !== 12) throw new Error("browser result must capture all 12 canonical state/width/theme screenshots");
   if (results.negative_controls?.baseline_accepted !== true || ["invalid_route", "missing_variation", "metadata_only"].some((key) => results.negative_controls?.[key]?.rejected !== true)) {
     throw new Error("browser reconciliation negative controls are incomplete");
   }
@@ -394,7 +420,10 @@ async function main() {
     hostBuildPath,
     outputDirectory: resultDirectory,
   });
-  const runSourcePaths = commandPlan.flatMap((commandSpec) => commandSpec.sources || []);
+  const runSourcePaths = commandPlan.flatMap((commandSpec) => [
+    ...(commandSpec.sources || []),
+    ...(commandSpec.reporter?.testFiles || []),
+  ]);
   const before = sourceSnapshot(ROOT, parsedManifest, runSourcePaths);
   const sourceRevision = await gitValue(ROOT, ["rev-parse", "HEAD"]);
   const originalRenderPath = path.join(ROOT, HISTORICAL_RENDER_RESULT);
@@ -442,6 +471,27 @@ async function main() {
           result.validation_error = error.message;
           const stderrPath = path.join(ROOT, result.stderr_path);
           fs.appendFileSync(stderrPath, "\n" + error.message + "\n");
+          result.stderr_sha256 = sha256(fs.readFileSync(stderrPath));
+        }
+      }
+      if (result.exitCode === 0 && spec.reporter) {
+        try {
+          const stdout = fs.readFileSync(path.resolve(ROOT, result.stdout_path), "utf8");
+          const browserResult = spec.id === "subscription-render-browser"
+            ? JSON.parse(fs.readFileSync(browserResultPath, "utf8"))
+            : null;
+          Object.assign(result, deriveExecutionEvidence({
+            root: ROOT,
+            commandId: spec.id,
+            stdout,
+            expectedAssertions: spec.assertions || [],
+            browserResult,
+          }));
+        } catch (error) {
+          result.exitCode = 1;
+          result.validation_error = "executed reporter evidence validation failed: " + error.message;
+          const stderrPath = path.resolve(ROOT, result.stderr_path);
+          fs.appendFileSync(stderrPath, "\n" + result.validation_error + "\n");
           result.stderr_sha256 = sha256(fs.readFileSync(stderrPath));
         }
       }
