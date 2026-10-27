@@ -7544,7 +7544,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover,
 .ax-page:has(> .ax-detail-back-link) { gap: var(--ax-space-md); }
 .ax-detail-back-link { margin: 0; font: var(--ax-type-label-font); }
 /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
-.ax-summary-list-key { text-transform: none; letter-spacing: normal; font: var(--ax-type-label-font); }
+.ax-summary-list-key { text-transform: none; letter-spacing: normal; font: 600 var(--ax-type-xs)/var(--ax-leading-normal) var(--ax-font-sans); }
 
 .ax-command-palette-item small,
 .ax-command-palette-item code { display: block; }
