@@ -519,38 +519,47 @@ async function captureCanonicalScreenshot(page, preview, testCase) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const name = `${testCase.entry.scenario_id}-${testCase.width}-${testCase.theme}.png`;
   const destination = path.join(directory, name);
-  const expectedPreviewId = `${testCase.entry.variation_id.replaceAll("_", "-")}-component`;
-  const actualPreviewId = await preview.getAttribute("id");
-  if (actualPreviewId !== expectedPreviewId) {
-    throw new Error(`Phase 252 screenshot preview identity mismatch: expected ${expectedPreviewId}, found ${actualPreviewId}`);
+  const originalViewport = page.viewportSize();
+  const screenshotViewportHeight = 1100;
+  await page.setViewportSize({ width: testCase.width, height: screenshotViewportHeight });
+  try {
+    const expectedPreviewId = `${testCase.entry.variation_id.replaceAll("_", "-")}-component`;
+    const actualPreviewId = await preview.getAttribute("id");
+    if (actualPreviewId !== expectedPreviewId) {
+      throw new Error(`Phase 252 screenshot preview identity mismatch: expected ${expectedPreviewId}, found ${actualPreviewId}`);
+    }
+    const previewBox = await preview.boundingBox();
+    if (!previewBox) throw new Error(`Phase 252 screenshot preview is not measurable: ${expectedPreviewId}`);
+    const topInset = testCase.width < 600 ? 128 : 72;
+    await preview.evaluate((element, inset) => {
+      let scrollParent = element.parentElement;
+      while (scrollParent && scrollParent !== document.body) {
+        const style = getComputedStyle(scrollParent);
+        if (["auto", "scroll"].includes(style.overflowY) && scrollParent.scrollHeight > scrollParent.clientHeight + 1) break;
+        scrollParent = scrollParent.parentElement;
+      }
+      const targetTop = element.getBoundingClientRect().top;
+      const scrollAmount = targetTop - inset;
+      if (scrollParent && scrollParent !== document.body) {
+        scrollParent.scrollTop += scrollAmount;
+      } else {
+        window.scrollTo(0, Math.max(0, window.scrollY + scrollAmount));
+      }
+    }, topInset);
+    await preview.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const bytes = await page.screenshot({ path: destination, animations: "disabled" });
+    return {
+      path: path.relative(REPO_ROOT, destination).split(path.sep).join("/"),
+      sha256: sha256(bytes),
+      state: testCase.entry.scenario_id,
+      preview_id: expectedPreviewId,
+      width: testCase.width,
+      height: screenshotViewportHeight,
+      theme: testCase.theme,
+    };
+  } finally {
+    await page.setViewportSize(originalViewport);
   }
-  const previewBox = await preview.boundingBox();
-  if (!previewBox) throw new Error(`Phase 252 screenshot preview is not measurable: ${expectedPreviewId}`);
-  const topInset = testCase.width < 600 ? 128 : 72;
-  await preview.evaluate((element, inset) => {
-    let scrollParent = element.parentElement;
-    while (scrollParent && scrollParent !== document.body) {
-      const style = getComputedStyle(scrollParent);
-      if (["auto", "scroll"].includes(style.overflowY) && scrollParent.scrollHeight > scrollParent.clientHeight + 1) break;
-      scrollParent = scrollParent.parentElement;
-    }
-    const targetTop = element.getBoundingClientRect().top;
-    const scrollAmount = targetTop - inset;
-    if (scrollParent && scrollParent !== document.body) {
-      scrollParent.scrollTop += scrollAmount;
-    } else {
-      window.scrollTo(0, Math.max(0, window.scrollY + scrollAmount));
-    }
-  }, topInset);
-  await preview.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-  const bytes = await page.screenshot({ path: destination, animations: "disabled" });
-  return {
-    path: path.relative(REPO_ROOT, destination).split(path.sep).join("/"),
-    sha256: sha256(bytes),
-    state: testCase.entry.scenario_id,
-    width: testCase.width,
-    theme: testCase.theme,
-  };
 }
 
 function expectedCaveats(entry) {
