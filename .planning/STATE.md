@@ -5,15 +5,15 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 252
 current_phase_name: Production-backed Subscription Stories
 status: planning
-stopped_at: Phase 252 executed 8/8; verification found two prohibition evidence gaps
-last_updated: "2026-10-27T12:39:29.569Z"
+stopped_at: Phase 252 gap plans 09/10 verified; ready for gaps-only execution
+last_updated: "2026-10-27T13:28:27.244Z"
 last_activity: 2026-10-27
-last_activity_desc: Phase 252 executed 8/8; 64/64 observable truths verified; two prohibition evidence descriptors remain unresolved
-state_head: 5ff88c478b19f19f3b77ca744447968ef90680c3
+last_activity_desc: Phase 252 gap closure planned; 2 plans and 5 tasks verified; 10/10 requirements covered
+state_head: 5a8bc43c1f51636c0242ebbde4b045426bf2584c
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 8
+  total_plans: 10
   completed_plans: 8
   percent: 0
 ---
@@ -26,19 +26,19 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 252 execution complete (8/8 plans); gap planning for two intentionally unresolved prohibition evidence records. No observed requirement behavior gap.
-**Progress:** 0/3 phases formally complete; Phase 252 has 8/8 execution plans complete and 67/67 automated UAT items passed. Phase 253/254 plan counts TBD.
+**Current focus:** Phase 252 gap closure ready to execute: plans 09/10 address the two prohibition evidence gaps. Original plans 01–08 remain executed; no observed requirement behavior gap.
+**Progress:** [░░░░░░░░░░] 0%
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
-Phase: 252 (Production-backed Subscription Stories) — EXECUTED; VERIFICATION GAPS
-Plan: 8 of 8
-Status: Execution complete; verification gaps found
-Last activity: 2026-10-27 — Current 18-command owner and 30 focused contracts pass; verifier recorded two prohibition evidence gaps.
+Phase: 252 (Production-backed Subscription Stories) — READY TO EXECUTE
+Plan: 8 of 10 complete; gap plans 09/10 pending
+Status: Ready to execute
+Last activity: 2026-10-27 — Two gap plans / five tasks passed independent checking after one revision; all 10 requirements remain covered. Execution and fresh proof are pending.
 
 Progress: [░░░░░░░░░░] 0%
-Current milestone planning blockers: Two planned prohibitions remain unresolved without verification tier/descriptor; run `$gsd-plan-phase 252 --gaps`. All ten requirement behaviors have current evidence; no completed plan needs re-execution.
+Current milestone planning blockers: None. Execute `$gsd-execute-phase 252 --gaps-only` for plans 09/10 (waves 6/7). The existing gaps_found verification remains until execution provides both checks, native descriptor proof and fresh acceptance evidence; no completed plan needs re-execution.
 
 ## Performance Metrics
 
@@ -765,6 +765,6 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Execute Phase 252 Production-backed Subscription Stories with `$gsd-execute-phase 252`; 8 plans / 17 automated tasks / 5 waves. Research and the approved UI contract are in the phase directory; independent plan checking and all 10 requirement coverage checks passed.
+- Execute Phase 252 gap closure with `$gsd-execute-phase 252 --gaps-only`; 2 new plans / 5 automated tasks / waves 6–7. Independent plan checking and all 10 requirement coverage checks passed; original plans 01–08 remain executed.
 - Carry Phase 252's actual narrow/light/dark render checks, reset-isolation negative control, production package boundaries and required CI path admission into acceptance. The [approved research](research/ui-quality-engine/RECOMMENDATIONS.md) is authoritative; broader horizons remain outside v1.68.
 - Measure first-slice cold/warm costs before freezing budgets. Keep the independent HIGH event-session-timezone correctness candidate visible; fixed story clocks do not resolve it.

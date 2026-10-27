@@ -78,7 +78,7 @@ v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements).
   4. A reviewer can launch the documented lab on an explicit disposable database/namespace and distinct loopback port with known process identity, see unexpected-server reuse refused, and observe a negative control proving a normal test reset cannot alter review data. Ordinary and labelled held-out data remain separate and privacy-safe, guarded cleanup refuses unrelated children, and production compile/package/route checks exclude fixture payloads and dev tooling while preserving the kitchen and canonical mounts; DB-free rendering is distinguished from DB-backed startup. (SCEN-04, LAB-01, LAB-02)
   5. A maintainer can observe changes confined to each consumed story, shared scenario, component, registry, generated manifest, token or runner root invoke its named required CI owner, through representative positive path/classifier controls and an unrelated-path negative control; in-job selection alone cannot satisfy workflow admission. (CIQ-01)
 
-**Plans**: 8/8 plans executed
+**Plans**: 10 plans — 8 executed, 2 gap-closure plans pending
 **UI hint**: yes
 
 Plans:
@@ -99,6 +99,12 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 - [x] 252-08-PLAN.md — Required CI admission and generated automated acceptance evidence
+
+**Wave 6 — gap closure** *(after executed 252-08)*
+- [ ] 252-09-PLAN.md — Prove truthful lab presentation and synthetic held-out attribution with clean/violation controls
+
+**Wave 7 — gap closure** *(blocked on 252-09)*
+- [ ] 252-10-PLAN.md — Wire required CI, fresh acceptance and independently proved original prohibition descriptors
 
 ### Phase 253: Real Groups and a Whole Subscription Job
 
