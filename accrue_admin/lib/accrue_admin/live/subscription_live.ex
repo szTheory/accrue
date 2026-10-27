@@ -331,7 +331,35 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   @impl true
-  def render(assigns) do
+  def render(assigns), do: subscription_page(assigns)
+
+  attr(:brand, :map, required: true)
+  attr(:current_path, :string, required: true)
+  attr(:admin_mount_path, :string, required: true)
+  attr(:page_title, :string, required: true)
+  attr(:theme, :string, default: "system")
+  attr(:active_organization_name, :string, default: nil)
+  attr(:subscription, :any, required: true)
+  attr(:customer, :any, required: true)
+  attr(:current_owner_scope, :any, default: nil)
+  attr(:return_path, :string, required: true)
+  attr(:return_label, :string, required: true)
+  attr(:related_items, :list, default: [])
+  attr(:flashes, :list, default: [])
+  attr(:action_result, :any, default: nil)
+  attr(:timeline_events, :list, default: [])
+  attr(:timeline_events_loaded?, :boolean, default: true)
+  attr(:raw_json_loaded?, :boolean, default: false)
+  attr(:proration_options, :list, default: [])
+  attr(:drawer_action_type, :string, default: nil)
+  attr(:pending_action, :map, default: nil)
+  attr(:dispatch_state, :atom, default: :idle)
+  attr(:step_up_pending, :boolean, default: false)
+  attr(:step_up_challenge, :map, default: nil)
+  attr(:step_up_error, :string, default: nil)
+  slot(:between_facts_and_actions)
+
+  def subscription_page(assigns) do
     ~H"""
     <AppShell.app_shell
       brand={@brand}
