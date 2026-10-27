@@ -72,6 +72,8 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Sequence:** Phase 252 production-backed subscription stories → Phase 253 real groups and whole subscription job → Phase 254 recurring quality, reviewed fixes and curation. Start at Phase **252**.
 
+**Current progress:** Phases 252 and 253 are complete. Phase 254 is next; its selection, reviewed visual correction, baseline and budget work remains unstarted.
+
 ## Rolling Roadmap and Deferred Priorities
 
 The approved first milestone establishes the method, not a permanent ceiling. Near term: customer investigation and invoice/payment jobs, then recovery/webhook work. Mid term: remaining Admin sections and Portal personal/organization/read-only/host-brand journeys after explicit dev/test harness boundaries are proved. Long term: demand-driven missing situations, cross-section journeys, additional device/browser sentinels and continual pruning. Five synthetic adopter-profile briefs guide distinct coverage; implement launch/team first in the existing Cadence world, then learner/operations/self-hosted only when they add a real equivalence class. Future horizons are directional, not additional committed milestone scope.
@@ -803,12 +805,13 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] **SBK-04..SBK-06, UXQ-01, UXQ-03** — actual group/full-page composition, mounted list/detail/action journey, mobile/theme behavior and coherent user-facing copy (Phase 253).
 - [ ] **CIQ-02..CIQ-04, UXQ-02, UXQ-04, CURATE-01..CURATE-02** — conservative recurring checks, visual evidence and measured budgets, bounded design review, verified fixes and curated next-job coverage (Phase 254).
 
-Canonical atomic requirements and traceability: [REQUIREMENTS.md](REQUIREMENTS.md). Phase 252 is complete; Phases 253–254 remain active.
+Canonical atomic requirements and traceability: [REQUIREMENTS.md](REQUIREMENTS.md). Phases 252–253 are complete; Phase 254 remains active.
 
-### Validated v1.68 (Phase 252 complete 2026-10-27)
+### Validated v1.68 (Phases 252–253 complete 2026-10-27)
+
+- ✓ **SBK-04..SBK-06, UXQ-01, UXQ-03** — production-shared collection and whole subscription detail, 19 compiled variations, guarded mounted job, responsive/theme evidence and source-owned copy. Phase 253 independently verified 56/56 with zero unverified behavior; focused aggregate 10/10 lanes, 151 browser cells/152 tests, retained Phase252 gate 21/21, automated UAT 24/24. Exact monetary values are shown only when supplied by production; unavailable values remain explicit. Six unclassified assumptions and the source-only UI advisory remain recorded.
 
 - ✓ **SBK-01..SBK-03, SCEN-01..SCEN-04, LAB-01..LAB-02, CIQ-01** — production-backed subscription areas, deterministic ordinary/held-out facts, isolated lab, package boundaries and required CI. Independent verification 73/73, fresh required lanes 21/21, executable UAT 124/124. Static and synthetic evidence limits stay explicit; mounted journeys and recurring curation remain Phases 253–254.
 
@@ -1054,6 +1057,8 @@ Admin global search — 4/4 satisfied.
 
 ## Key Decisions
 
+Phase 253 decisions: share production collection/page rendering while retaining routed authority and DataTable lifecycle; bind each browser cell to its exact compiled case and executed test; generate review guidance at its existing owner so CI regeneration preserves it. Numeric amount absence remains explicit rather than inferred from a price ID.
+
 Phase 244 decisions: use explicit producer-confirmed labels, keep unknown outcomes neutral, preserve exact evidence and native disclosure intent through patches, and associate bulk outcomes only with already-authorized delivery reads. Reuse existing test owners and bind each result to the revision tested.
 
 | Decision | Outcome |
@@ -1113,4 +1118,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-27 after Phase 252 completion; Phase 253 is ready to plan. v1.67 remains shipped as 1.7.0.*
+*Last updated: 2026-10-27 after Phase 253 completion; Phase 254 is ready for discussion/planning. v1.67 remains shipped as 1.7.0.*

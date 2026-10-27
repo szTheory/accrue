@@ -61,7 +61,7 @@ v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements).
 ### Approved Phase Sequence
 
 - [x] **Phase 252: Production-backed Subscription Stories** - Inspect real subscription areas using validated shared situations in a safe lab whose changes invoke required CI checks. (completed 2026-10-27)
-- [ ] **Phase 253: Real Groups and a Whole Subscription Job** - Inspect real collection/full-page compositions and complete the guarded subscription journey with clear, responsive presentation.
+- [x] **Phase 253: Real Groups and a Whole Subscription Job** - Inspect real collection/full-page compositions and complete the guarded subscription journey with clear, responsive presentation. (completed 2026-10-27)
 - [ ] **Phase 254: Recurring Quality, Reviewed Fixes and Curation** - Run affordable recurring checks, verify reviewed corrections and curate useful coverage before choosing the next job.
 
 ## Phase Details
@@ -118,7 +118,7 @@ Plans:
   4. An operator can read essential identities, exact amounts, state and actions and use the selected compositions at 320 CSS px, representative wider/container widths and relevant breakpoint edges in both themes, without page-level horizontal overflow or hidden essential content. (UXQ-01)
   5. An operator can understand consistent labels, destinations, action consequences and recovery messages through existing Copy/voice/domain owners while engineering investigation retains exact IDs and evidence and locked legal/replay meaning is preserved. (UXQ-03)
 
-**Plans**: 6/6 plans executed, 14 automated tasks — independently checked; execution pending
+**Plans**: 6/6 plans complete, 14 automated tasks — independently checked; execution pending
 **UI hint**: yes
 
 Plans:
@@ -158,12 +158,12 @@ Cross-cutting constraints: preserve production DataTable/LiveView authority, exi
 
 ## Progress
 
-**Execution order:** 252 → 253 → 254. All 22 requirements are mapped exactly once; Phase 252's ten requirements are complete, with twelve requirements remaining. Phase 252 has ten completed plans; Phase 253 has six checked plans ready to execute; Phase 254's plan count will be determined during planning.
+**Execution order:** 252 → 253 → 254. All 22 requirements are mapped exactly once; Phases 252–253 have completed fifteen requirements, with seven requirements remaining. Phase 252 has ten completed plans and Phase 253 has six; Phase 254's plan count will be determined during planning.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 252. Production-backed Subscription Stories | 10/10 | Complete    | 2026-10-27 |
-| 253. Real Groups and a Whole Subscription Job | 6/6 | Ready to execute | - |
+| 253. Real Groups and a Whole Subscription Job | 6/6 | Complete    | 2026-10-27 |
 | 254. Recurring Quality, Reviewed Fixes and Curation | 0/TBD | Not started | - |
 
 ## Rolling Direction Beyond v1.68
@@ -174,4 +174,4 @@ The [rolling roadmap](research/ui-quality-engine/MILESTONE-PROPOSAL.md#rolling-r
 
 ## Next
 
-Phase 253 planning is complete. Execute its six plans in wave order using `$gsd-execute-phase 253`. Research, UI and independent plan reviews are recorded in its phase directory. No Phase 253 implementation, runtime acceptance or UAT pass is claimed by planning.
+Phase 253 is complete: six plans, 56/56 independently verified must-haves and 24/24 automated UAT items. Next: `$gsd-discuss-phase 254` for recurring quality, reviewed fixes and curation. Preserve the recorded source-only UI recommendations, six unclassified assumptions, exact-available/unavailable amount contract, and measured evidence limits.

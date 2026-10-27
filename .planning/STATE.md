@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.68
 milestone_name: UI Storybook Stress Testing
-current_phase: 253
-current_phase_name: Real Groups and a Whole Subscription Job
-status: verifying
-stopped_at: Completed 253-06-PLAN.md
-last_updated: "2026-10-27T22:20:30.433Z"
+current_phase: 254
+current_phase_name: Recurring Quality, Reviewed Fixes and Curation
+status: planning
+stopped_at: Phase 253 complete, ready to discuss Phase 254
+last_updated: "2026-10-27T23:40:15.158Z"
 last_activity: 2026-10-27
-last_activity_desc: Phase 253 execution started
-state_head: ef93738b55a7a9a9695193ebb9b3af85fca305f0
+last_activity_desc: Phase 253 complete, transitioned to Phase 254
+state_head: 17ba5ff7eac451d9ec51b438e15f5328fe72ccdd
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 16
   completed_plans: 16
-  percent: 33
+  percent: 67
 ---
 
 # Project State
@@ -26,25 +26,25 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 253 — Real Groups and a Whole Subscription Job
-**Progress:** [███░░░░░░░] 33%
+**Current focus:** Phase 254 — Recurring Quality, Reviewed Fixes and Curation
+**Progress:** [███████░░░] 67%
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
-Phase: 253 (Real Groups and a Whole Subscription Job) — EXECUTING
-Plan: 6 of 6
-Status: Phase complete — ready for verification
-Last activity: 2026-10-27 — Phase 253 execution started
+Phase: 254 — Recurring Quality, Reviewed Fixes and Curation
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-27 — Phase 253 complete, transitioned to Phase 254
 
-Progress: [███░░░░░░░] 33%
-Current milestone planning blockers: None. Phase 252 passed independent verification (73/73), the fresh 21-lane aggregate, and executable UAT (124/124). Both prohibition gaps and review findings CR-03/CR-04 are closed. Four unclassified assumptions remain explicit planning debt; six nonblocking summary reference-parser warnings remain recorded by phase.complete.
+Progress: [███████░░░] 67%
+Current milestone planning blockers: None. Phase 253 passed independent verification (56/56, behavior_unverified: 0), the fresh 10-lane aggregate (151 browser cells/152 tests), retained Phase252 gate (21/21), and executable UAT (24/24). CR-01/CR-02 and the guide-regeneration integration defect are fixed. Six current/historical unclassified assumptions, two nonblocking Phase253 summary reference-parser notices, source-only UI recommendations, and the explicit unavailable monetary-source limit remain recorded for Phase254.
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 140
+- Total plans completed: 146
 - Average duration: —
 - Total execution time: —
 
@@ -76,6 +76,7 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 | 247 | 8 | - | - |
 | 248 | 2 | - | - |
 | 252 | 10 | - | - |
+| 253 | 6 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -667,8 +668,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T22:20:30.120Z
-Stopped at: Completed 253-06-PLAN.md
+Last session: 2026-10-27T23:40:14.852Z
+Stopped at: Phase 253 complete, ready to discuss Phase 254
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -798,6 +799,6 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Plan Phase 253 with `$gsd-discuss-phase 253` (or `$gsd-plan-phase 253` using approved research). Phase 252 is complete: 10/10 plans, 73/73 verified truths, 21/21 required lanes, and 124/124 automated UAT tests. Six reference-parser warnings are nonblocking and historical summaries remain preserved.
+- Discuss Phase 254 with `$gsd-discuss-phase 254`. Phase 253 is complete: 6/6 plans, 56/56 verified must-haves, 10/10 focused lanes, 151 browser cells, and 24/24 automated UAT items. Retained Phase252 regression lanes passed 21/21; historical evidence remains preserved.
 - Carry Phase 252's actual narrow/light/dark render checks, reset-isolation negative control, production package boundaries and required CI path admission into acceptance. The [approved research](research/ui-quality-engine/RECOMMENDATIONS.md) is authoritative; broader horizons remain outside v1.68.
 - Measure first-slice cold/warm costs before freezing budgets. Keep the independent HIGH event-session-timezone correctness candidate visible; fixed story clocks do not resolve it.
