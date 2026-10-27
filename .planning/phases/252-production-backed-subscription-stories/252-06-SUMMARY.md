@@ -209,3 +209,10 @@ Plan 252-07 can build on the generated manifest and current direct-render eviden
 - Summary file exists at the expected phase path.
 - All four task commits are ancestors of the current HEAD.
 - `git diff --check` passed.
+
+## Supplemental UI Verification after CR-01
+
+- The final `ERL_FLAGS='+S 4:4' npm --prefix accrue_admin run phase252:check` run `25208-1793100141333-35541-feacb3440bfa` passed all 18 commands. The browser reporter recorded 16 executed tests, zero skipped or failed tests, and 15 distinct render rows including all 12 canonical state × width × theme cells.
+- Canonical viewport screenshots are in `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/` (320 × 1100 and 1280 × 1100, light and dark). I inspected all 12: the production title/facts/actions use the live Geist and theme tokens, the 320px content uses one column, and the scheduled and incomplete variations visibly show their own cancellation and missing-evidence rows.
+- Focused mobile positives `25208-focus-20261027-34785` passed 4/4 for scheduled cancellation and incomplete evidence at 320px, light/dark. The four images in its unique screenshot directory show the title and each variation’s distinguishing rows.
+- The capture uses the declared `#<variation>-component` preview on the page containing all variations, aligns that preview below the Storybook toolbar, and records its identity with the viewport image. No golden image changed; historical `accrue_admin/tmp/phase252/render-results.json` and previous captures remain untouched.

@@ -67,13 +67,13 @@ coverage:
     requirement: CIQ-01
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-ci-contract:consumed_root_owner_map"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-ci-contract:consumed_root_owner_map"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-ci-contract:workflow_admission"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-ci-contract:workflow_admission"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-ci-contract:named_required_owner_execution"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-ci-contract:named_required_owner_execution"
         status: pass
     human_judgment: false
   - id: SBK-01
@@ -81,16 +81,16 @@ coverage:
     requirement: SBK-01
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:current_caller_map"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:current_caller_map"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:caller_identity_adjacency"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:caller_identity_adjacency"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:empty_caller_source_refusal"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:empty_caller_source_refusal"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:stable_caller_ordering"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:stable_caller_ordering"
         status: pass
     human_judgment: false
   - id: SBK-02
@@ -98,19 +98,19 @@ coverage:
     requirement: SBK-02
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:compiled_variation_routes"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:compiled_variation_routes"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:story_variation_identity_adjacency"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:story_variation_identity_adjacency"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:zero_variation_and_missing_attribution_refusal"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:zero_variation_and_missing_attribution_refusal"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:deterministic_manifest_ordering"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:deterministic_manifest_ordering"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:exact_twelve_canonical_width_theme_cells"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:exact_twelve_canonical_width_theme_cells"
         status: pass
     human_judgment: false
   - id: SBK-03
@@ -118,10 +118,10 @@ coverage:
     requirement: SBK-03
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:story-slice:shared_renderer_and_active_variation"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:story-slice:shared_renderer_and_active_variation"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:exact_twelve_canonical_width_theme_cells"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:exact_twelve_canonical_width_theme_cells"
         status: pass
     human_judgment: false
   - id: SCEN-01
@@ -129,13 +129,13 @@ coverage:
     requirement: SCEN-01
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-domain:deterministic_fact_source"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-domain:deterministic_fact_source"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-repo:persisted_launch_and_team_facts"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-repo:persisted_launch_and_team_facts"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:heldout-cleanup:heldout_identity_separation"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:heldout-cleanup:heldout_identity_separation"
         status: pass
     human_judgment: false
   - id: SCEN-02
@@ -143,10 +143,10 @@ coverage:
     requirement: SCEN-02
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-domain:canceling_boundary_exact_clock"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-domain:canceling_boundary_exact_clock"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-domain:exact_minor_unit_money_precision"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-domain:exact_minor_unit_money_precision"
         status: pass
     human_judgment: false
   - id: SCEN-03
@@ -154,16 +154,16 @@ coverage:
     requirement: SCEN-03
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-repo:persisted_launch_and_team_facts"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-repo:persisted_launch_and_team_facts"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-repo:replay_identity_conflict_refusal"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-repo:replay_identity_conflict_refusal"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-repo:transaction_rollback"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-repo:transaction_rollback"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-repo:concurrent_insert_serialization"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-repo:concurrent_insert_serialization"
         status: pass
     human_judgment: false
   - id: SCEN-04
@@ -171,13 +171,13 @@ coverage:
     requirement: SCEN-04
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:heldout-cleanup:exact_cleanup_authority"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:heldout-cleanup:exact_cleanup_authority"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:heldout-cleanup:cleanup_idempotency_absence_mismatch"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:heldout-cleanup:cleanup_idempotency_absence_mismatch"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:heldout-cleanup:serialized_unrelated_child_concurrency"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:heldout-cleanup:serialized_unrelated_child_concurrency"
         status: pass
     human_judgment: false
   - id: LAB-01
@@ -185,25 +185,25 @@ coverage:
     requirement: LAB-01
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-lab-contract:namespace_lock_one_owner"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-lab-contract:namespace_lock_one_owner"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-lab-contract:exact_process_identity_cleanup"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-lab-contract:exact_process_identity_cleanup"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-lab-contract:owned_process_group_identity"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-lab-contract:owned_process_group_identity"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:isolation-reset:distinct_review_process_and_database"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:isolation-reset:distinct_review_process_and_database"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:isolation-reset:interrupted_descendant_cleanup_before_database_drop"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:isolation-reset:interrupted_descendant_cleanup_before_database_drop"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:isolation-reset:owned_descendants_cleanup_after_leader_exit"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:isolation-reset:owned_descendants_cleanup_after_leader_exit"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:isolation-reset:unrelated_process_survives_group_cleanup"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:isolation-reset:unrelated_process_survives_group_cleanup"
         status: pass
     human_judgment: false
   - id: LAB-02
@@ -211,373 +211,373 @@ coverage:
     requirement: LAB-02
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:production-packages:fresh_production_compiles"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:production-packages:fresh_production_compiles"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:production-packages:actual_unpacked_hex_archives"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:production-packages:actual_unpacked_hex_archives"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:production-boundary-controls:development_positive_production_route_exclusion"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:production-boundary-controls:development_positive_production_route_exclusion"
         status: pass
     human_judgment: false
   - id: 252-08-01
     description: "Consumed roots, unconditional workflow admission, and required owner invocation mutations are checked."
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-ci-contract:consumed_root_owner_map"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-ci-contract:consumed_root_owner_map"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-ci-contract:workflow_admission"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-ci-contract:workflow_admission"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-ci-contract:required_owner_invocation_mutations"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-ci-contract:required_owner_invocation_mutations"
         status: pass
     human_judgment: false
   - id: 252-08-02
     description: "The fresh serial required owner completed every source, package, database, isolation, and browser command."
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#bundle:all_required_commands_passed"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#bundle:all_required_commands_passed"
         status: pass
     human_judgment: false
   - id: 252-08-03
     description: "Acceptance fixtures reject missing, failed, stale, pooled, incomplete, unsafe-path, and mutated-guide evidence."
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-acceptance-contract:missing_command_rejection"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-acceptance-contract:missing_command_rejection"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-acceptance-contract:failed_command_rejection"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-acceptance-contract:failed_command_rejection"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-acceptance-contract:stale_source_and_asset_rejection"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-acceptance-contract:stale_source_and_asset_rejection"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-acceptance-contract:pooled_cell_rejection"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-acceptance-contract:pooled_cell_rejection"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-acceptance-contract:missing_predicate_rejection"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-acceptance-contract:missing_predicate_rejection"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-acceptance-contract:unsafe_evidence_path_rejection"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-acceptance-contract:unsafe_evidence_path_rejection"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-acceptance-contract:guide_contract_mutation_rejection"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-acceptance-contract:guide_contract_mutation_rejection"
         status: pass
     human_judgment: false
   - id: EDGE-LAB-01-concurrency
     description: "Concurrent lab starts, stale lock owners, and exact process cleanup all preserve resource ownership."
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-lab-contract:namespace_lock_one_owner"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-lab-contract:namespace_lock_one_owner"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-lab-contract:stale_lock_owner_refusal"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-lab-contract:stale_lock_owner_refusal"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-lab-contract:exact_process_identity_cleanup"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-lab-contract:exact_process_identity_cleanup"
         status: pass
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:phase252-lab-contract:owned_process_group_identity"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:phase252-lab-contract:owned_process_group_identity"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:isolation-reset:interrupted_descendant_cleanup_before_database_drop"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:isolation-reset:interrupted_descendant_cleanup_before_database_drop"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:isolation-reset:owned_descendants_cleanup_after_leader_exit"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:isolation-reset:owned_descendants_cleanup_after_leader_exit"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:isolation-reset:unrelated_process_survives_group_cleanup"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:isolation-reset:unrelated_process_survives_group_cleanup"
         status: pass
     human_judgment: false
   - id: EDGE-SBK-01-adjacency
     description: "Caller identity facts remain adjacent to their resolved compiled caller record."
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:caller_identity_adjacency"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:caller_identity_adjacency"
         status: pass
     human_judgment: false
   - id: EDGE-SBK-01-empty
     description: "An empty caller source is refused rather than represented as complete coverage."
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:empty_caller_source_refusal"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:empty_caller_source_refusal"
         status: pass
     human_judgment: false
   - id: EDGE-SBK-01-ordering
     description: "Caller entries preserve deterministic order."
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:stable_caller_ordering"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:stable_caller_ordering"
         status: pass
     human_judgment: false
   - id: EDGE-SBK-02-adjacency
     description: "Story variation identity remains adjacent to its generated route."
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:story_variation_identity_adjacency"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:story_variation_identity_adjacency"
         status: pass
     human_judgment: false
   - id: EDGE-SBK-02-empty
     description: "Missing attribution and zero-variation declarations are rejected."
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:zero_variation_and_missing_attribution_refusal"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:zero_variation_and_missing_attribution_refusal"
         status: pass
     human_judgment: false
   - id: EDGE-SBK-02-ordering
     description: "Generated manifest output is deterministic."
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:manifest-contract:deterministic_manifest_ordering"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:manifest-contract:deterministic_manifest_ordering"
         status: pass
     human_judgment: false
   - id: EDGE-SCEN-02-boundary
     description: "Cancellation state follows the exact fixed-clock boundary."
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-domain:canceling_boundary_exact_clock"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-domain:canceling_boundary_exact_clock"
         status: pass
     human_judgment: false
   - id: EDGE-SCEN-02-precision
     description: "Money values retain exact integer minor-unit precision."
     verification:
       - kind: unit
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-domain:exact_minor_unit_money_precision"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-domain:exact_minor_unit_money_precision"
         status: pass
     human_judgment: false
   - id: EDGE-SCEN-03-concurrency
     description: "Transactions roll back partial scenario graphs and serialize concurrent inserts."
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-repo:transaction_rollback"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-repo:transaction_rollback"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-repo:concurrent_insert_serialization"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-repo:concurrent_insert_serialization"
         status: pass
     human_judgment: false
   - id: EDGE-SCEN-03-idempotency
     description: "Same-identity scenario replay is checked against persisted launch and team facts."
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-repo:persisted_launch_and_team_facts"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-repo:persisted_launch_and_team_facts"
         status: pass
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:scenario-repo:replay_identity_conflict_refusal"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:scenario-repo:replay_identity_conflict_refusal"
         status: pass
     human_judgment: false
   - id: EDGE-SCEN-04-concurrency
     description: "Cleanup serializes ownership checks and deletes while unrelated child inserts remain protected."
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:heldout-cleanup:serialized_unrelated_child_concurrency"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:heldout-cleanup:serialized_unrelated_child_concurrency"
         status: pass
     human_judgment: false
   - id: EDGE-SCEN-04-idempotency
     description: "Repeated cleanup handles absent rows safely and refuses mismatched ownership."
     verification:
       - kind: integration
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:heldout-cleanup:cleanup_idempotency_absence_mismatch"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:heldout-cleanup:cleanup_idempotency_absence_mismatch"
         status: pass
     human_judgment: false
   - id: UI-E1-loading
     description: "E1 loading and settled content behavior passes on each mapped canonical cell."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E1-loading"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E1-loading"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E1-error
     description: "E1 error state controls reject invalid route, missing variation, metadata-only content, and authority regression."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E1-error"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E1-error"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E1-overflow
     description: "E1 content geometry and keyboard focus remain valid at narrow and desktop widths."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E1-overflow"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E1-overflow"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E1-long-text
     description: "E1 ordinary and held-out long text wraps and the full identifier copy control remains available."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E1-long-text"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E1-long-text"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E2-empty
     description: "E2 requires core facts while omitting optional rows for empty input."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E2-empty"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E2-empty"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E2-loading
     description: "E2 loading artifacts clear before settled content is asserted in every canonical cell."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E2-loading"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E2-loading"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E2-error
     description: "E2 error state rejects bad routes, missing variations, metadata-only output, and authority regression."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E2-error"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E2-error"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E2-populated
     description: "E2 populated state reconciles render attribution with actual facts and eligible actions."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E2-populated"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E2-populated"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E2-partial
     description: "E2 incomplete evidence exposes unavailable values and ordered caveats only on incomplete cells."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E2-partial"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E2-partial"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E2-overflow
     description: "E2 facts and action content remain inside the document with visible keyboard focus."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E2-overflow"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E2-overflow"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E2-zero-one-many
     description: "E2 optional rows and action groups track the declared zero-one-many inputs."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E2-zero-one-many"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E2-zero-one-many"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E2-long-text
     description: "E2 ordinary and held-out long text wraps and the complete identifier copies on long-text cells."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E2-long-text"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E2-long-text"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E3-empty
     description: "E3 requires core facts, omits optional empty rows, and preserves scoped not-found behavior."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E3-empty"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E3-empty"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E3-loading
     description: "E3 loading artifacts clear before settled content is asserted in every canonical cell."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E3-loading"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E3-loading"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E3-error
     description: "E3 error state rejects invalid route, missing variation, metadata-only output, and authority regression."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E3-error"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E3-error"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E3-populated
     description: "E3 populated state reconciles render attribution with actual facts and eligible actions."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E3-populated"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E3-populated"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E3-partial
     description: "E3 incomplete evidence reports unavailable values and ordered caveats on incomplete cells."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E3-partial"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E3-partial"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E3-overflow
     description: "E3 content geometry contains required facts and actions with visible keyboard focus."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E3-overflow"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E3-overflow"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E3-zero-one-many
     description: "E3 optional rows and action groups track the declared zero-one-many inputs."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E3-zero-one-many"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E3-zero-one-many"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
   - id: UI-E3-long-text
     description: "E3 ordinary and held-out long text wraps and the complete identifier copies on long-text cells."
     verification:
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/render-results-25208-1793086410828-22011-2a58bd0a056d.json#ui:UI-E3-long-text"
+        ref: "accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json#ui:UI-E3-long-text"
         status: pass
       - kind: automated_ui
-        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json#commands:subscription-render-browser:twenty_ui_predicates"
+        ref: "accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json#commands:subscription-render-browser:twenty_ui_predicates"
         status: pass
     human_judgment: false
 ---
@@ -602,12 +602,12 @@ coverage:
 - Added complete acceptance mapping for ten requirements, three plan tasks, thirteen classified edge predicates, and twenty UI predicates. The validator rejects missing or failed commands, stale digests, reused partitions, incomplete manifest attribution, pooled render cells, missing predicate assertions, unsafe paths, and guide contract drift.
 - Preserved the four unclassified assumptions and two descriptor-less prohibitions as unresolved metadata, with concrete behavior coverage listed separately from any probe verdict.
 - Added a CI artifact upload for result bundles and per-run browser JSON. Raw command logs are not published.
-- The fresh required owner completed 18 commands, including three fresh production packages, isolated persisted and cleanup lanes, reset-isolation proof, twelve canonical browser cells, three compatibility cases, and the acceptance fixture suite. The acceptance bundle is `accrue_admin/tmp/phase252/ci-results/25208-1793086410828-22011-2a58bd0a056d/results.json`.
+- The fresh required owner completed 18 commands, including three fresh production packages, isolated persisted and cleanup lanes, reset-isolation proof, twelve canonical browser cells, three compatibility cases, and the acceptance fixture suite. The acceptance bundle is `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json`.
 
 ## Verification
 
 - `node --test scripts/ci/generate_phase252_acceptance.test.mjs scripts/ci/verify_phase252_ci_contract.test.mjs` — 22 tests passed.
-- `npm --prefix accrue_admin run phase252:check` — passed, 18/18 serial commands. Production packages: 132,092 ms; cold manifest compile: 66,642 ms; cold database startup: 2,609 ms; warm database lane: 3,138 ms; browser lane: 9,606 ms.
+- `npm --prefix accrue_admin run phase252:check` — passed, 18/18 serial commands. Production packages: 251,477 ms; cold manifest compile: 94,960 ms; cold database startup: 3,095 ms; warm database lane: 3,763 ms; browser lane: 17,236 ms.
 - `gsd_run check tdd-red-evidence .planning/phases/252-production-backed-subscription-stories/252-08-03-red-evidence.json --raw` — `RED_EVIDENCE_OK`; the designated acceptance test failed against the unimplemented validator before implementation.
 
 ## TDD Gate Compliance
@@ -656,4 +656,11 @@ None found in the files created or modified by this plan.
 
 - All 18 source files changed by the plan are accounted for in the key-file list.
 - Task commits through `69c592a5dd4a2713b7e3960ecd4127d541371fe5` and the Plan 05 metadata correction commit `2e27f4cb02252c2f864a1acdfef522e731834d7f` exist on the assigned phase branch.
-- The fresh owner result and browser result exist and carry matching run identity `25208-1793086410828-22011-2a58bd0a056d`.
+- The fresh owner result and browser result exist and carry matching run identity `25208-1793100141333-35541-feacb3440bfa`.
+
+## Supplemental CR-01 / CR-02 Verification
+
+- Final `ERL_FLAGS='+S 4:4' npm --prefix accrue_admin run phase252:check` passed all 18 commands under run `25208-1793100141333-35541-feacb3440bfa`. It recorded 16 executed Playwright tests with no skips or failures, 15 direct render rows, and 20 passing acceptance-contract TAP tests.
+- The final owner bundle is `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json`; its matching browser ledger is `accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json`. All twelve screenshot files are in that run’s unique `screenshots/` directory at 320px and 1280px in light and dark themes. I viewed every capture and confirmed each requested preview ID and state-specific facts.
+- Focused 320px screenshots for the scheduled-cancellation and incomplete-evidence variations passed 4/4 in run `25208-focus-20261027-34785`. Both light and dark captures show the subscription title and distinguishing cancellation or unavailable-evidence rows.
+- `node scripts/ci/generate_phase252_acceptance.mjs --results accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json --write` passed and regenerated `252-UAT.md` from the final bundle. The four unclassified assumptions and two descriptor-less prohibitions remain explicitly unresolved.
