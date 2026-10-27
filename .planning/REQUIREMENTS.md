@@ -14,7 +14,7 @@ The owner approved the [reviewed subscription-first proposal](research/ui-qualit
 - [x] **SBK-02**: Reviewer can open each retained subscription situation from a stable story/variation URL with its actor, job, input source, production renderer and static-versus-mounted proof lane identified; generated discovery reconciles with actual rendered variations, and metadata-only markers cannot satisfy rendering coverage.
 - [x] **SBK-03**: Reviewer can inspect complete active, scheduled-cancellation and incomplete-evidence subscription areas rendered by the same production-owned summary/facts/action components used by the application, in light/dark and narrow/desktop contexts, without copied markup or story-local formatting, copy, eligibility or scoped-link rules.
 - [ ] **SBK-04**: Reviewer can inspect the actual subscription collection toolbar/result/table/pagination composition for new-host empty, filtered-empty, one-row, multiple-row and page-boundary situations, plus source-supported loading/error states; existing DataTable lifecycle and event targeting remain intact.
-- [ ] **SBK-05**: Reviewer can inspect a production-shared whole subscription detail screen composed from its real areas, including supported review/action presentation and legitimate incomplete evidence, without a story-specific parallel page or a universal page-schema refactor.
+- [x] **SBK-05**: Reviewer can inspect a production-shared whole subscription detail screen composed from its real areas, including supported review/action presentation and legitimate incomplete evidence, without a story-specific parallel page or a universal page-schema refactor.
 - [ ] **SBK-06**: An authorized operator can follow the real subscription list → detail → supported action review/result → context-preserving return journey, with mounted automated proof of current scope, fresh authority, exact target, applicable step-up, dismissal without dispatch and truthful outcome; stories do not claim persistence or provider completion.
 
 ### Realistic shared scenario facts
@@ -40,7 +40,7 @@ The owner approved the [reviewed subscription-first proposal](research/ui-qualit
 
 - [ ] **UXQ-01**: Operator can read essential identities, exact amounts, state and actions and use the selected subscription compositions at 320 CSS px, representative wider/container widths and affected breakpoint edges in both themes, without page-level horizontal overflow or hiding essential content to pass a check.
 - [ ] **UXQ-02**: Operator can use the selected compositions with keyboard/focus, applicable target-size and contrast rules, meaningful accessible names, supported text enlargement/reflow and normal/reduced-motion behavior, proved through existing browser/axe/component owners; unresolved axe observations and standard exceptions have narrow explicit dispositions rather than silent passes or broad suppressions.
-- [ ] **UXQ-03**: Operator can understand consistent subscription labels, destinations, action consequences and recovery messages using existing Copy/voice/domain owners, while engineering investigation retains exact identifiers and technical evidence and locked legal/replay meaning remains unchanged.
+- [x] **UXQ-03**: Operator can understand consistent subscription labels, destinations, action consequences and recovery messages using existing Copy/voice/domain owners, while engineering investigation retains exact identifiers and technical evidence and locked legal/replay meaning remains unchanged.
 - [ ] **UXQ-04**: Maintainer can inspect one bounded source-bound rendered review/correction/confirmation record for typography, color, hierarchy, redundancy, affordances, microcopy and journey coherence across representative mobile/desktop and both themes, with confirmed defects fixed at their lowest owning tier and mechanically verifiable outcomes tested; no aesthetic score, screenshot stability or owner manual UAT substitutes for evidence.
 
 ### Curation and continued coverage
@@ -82,7 +82,7 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 | SBK-02 | Phase 252 | Complete |
 | SBK-03 | Phase 252 | Complete |
 | SBK-04 | Phase 253 | Pending |
-| SBK-05 | Phase 253 | Pending |
+| SBK-05 | Phase 253 | Complete |
 | SBK-06 | Phase 253 | Pending |
 | SCEN-01 | Phase 252 | Complete |
 | SCEN-02 | Phase 252 | Complete |
@@ -96,7 +96,7 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 | CIQ-04 | Phase 254 | Pending |
 | UXQ-01 | Phase 253 | Pending |
 | UXQ-02 | Phase 254 | Pending |
-| UXQ-03 | Phase 253 | Pending |
+| UXQ-03 | Phase 253 | Complete |
 | UXQ-04 | Phase 254 | Pending |
 | CURATE-01 | Phase 254 | Pending |
 | CURATE-02 | Phase 254 | Pending |

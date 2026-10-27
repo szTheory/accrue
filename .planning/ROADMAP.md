@@ -118,7 +118,7 @@ Plans:
   4. An operator can read essential identities, exact amounts, state and actions and use the selected compositions at 320 CSS px, representative wider/container widths and relevant breakpoint edges in both themes, without page-level horizontal overflow or hidden essential content. (UXQ-01)
   5. An operator can understand consistent labels, destinations, action consequences and recovery messages through existing Copy/voice/domain owners while engineering investigation retains exact IDs and evidence and locked legal/replay meaning is preserved. (UXQ-03)
 
-**Plans**: 2/6 plans executed, 14 automated tasks — independently checked; execution pending
+**Plans**: 3/6 plans executed, 14 automated tasks — independently checked; execution pending
 **UI hint**: yes
 
 Plans:
@@ -128,7 +128,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion; disjoint source ownership)*
 - [x] 253-02-PLAN.md — Complete collection states, scoped cursor boundaries and recovery
-- [ ] 253-03-PLAN.md — Shared whole detail page with truthful incomplete/review/result presentation
+- [x] 253-03-PLAN.md — Shared whole detail page with truthful incomplete/review/result presentation
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 253-04-PLAN.md — Complete mounted guarded journey, adversarial authority and validated return
@@ -163,7 +163,7 @@ Cross-cutting constraints: preserve production DataTable/LiveView authority, exi
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 252. Production-backed Subscription Stories | 10/10 | Complete    | 2026-10-27 |
-| 253. Real Groups and a Whole Subscription Job | 2/6 | Ready to execute | - |
+| 253. Real Groups and a Whole Subscription Job | 3/6 | Ready to execute | - |
 | 254. Recurring Quality, Reviewed Fixes and Curation | 0/TBD | Not started | - |
 
 ## Rolling Direction Beyond v1.68

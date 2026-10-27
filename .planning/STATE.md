@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 253
 current_phase_name: Real Groups and a Whole Subscription Job
 status: executing
-stopped_at: Completed 253-02-PLAN.md
-last_updated: "2026-10-27T17:58:22.697Z"
+stopped_at: Completed 253-03-PLAN.md
+last_updated: "2026-10-27T18:25:50.272Z"
 last_activity: 2026-10-27
 last_activity_desc: Phase 253 execution started
-state_head: 3b9d647ea6c5998e4a76a41399a4f60df9891b4a
+state_head: 3c710cce648ad8e259bb0089eaa1eb03dd936016
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 16
-  completed_plans: 12
+  completed_plans: 13
   percent: 33
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 ## Current Position
 
 Phase: 253 (Real Groups and a Whole Subscription Job) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-10-27 — Phase 253 execution started
 
@@ -234,6 +234,7 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 | Phase 252 P10 | 56min | 3 tasks | 13 files |
 | Phase 253 P01 | 25min | 2 tasks | 10 files |
 | Phase 253 P02 | 33m | 2 tasks | 6 files |
+| Phase 253 P03 | 23m | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -553,6 +554,9 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 - [Phase 253]: Keep production Amount unavailable wherever the source provides only a processor price ID and no numeric amount.
 - [Phase 253]: Isolate each Storybook variation in its own iframe to avoid duplicate LiveView-generated DOM IDs while retaining the connected production DataTable.
 - [Phase 253]: Leave SubscriptionsLive production code unchanged because mounted route assertions confirmed the existing scope and cursor behavior.
+- [Phase 253]: Keep route scope, authorization, event handlers, and lazy reads in SubscriptionLive while sharing only the page composition.
+- [Phase 253]: Use validated Cadence facts, production copy, and scoped links for static review/result snapshots without dispatch claims.
+- [Phase 253]: Keep collection transport evidence focused on its unique one-row component and validate page story entries separately.
 
 ### Pending Todos
 
@@ -651,8 +655,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T17:58:22.344Z
-Stopped at: Completed 253-02-PLAN.md
+Last session: 2026-10-27T18:25:49.942Z
+Stopped at: Completed 253-03-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
