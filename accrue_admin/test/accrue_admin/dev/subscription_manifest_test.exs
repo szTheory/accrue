@@ -64,6 +64,10 @@ unless Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionScenarios) do
   )
 end
 
+Code.require_file(
+  Path.join(repo_root, "accrue_admin/test/accrue_admin/dev/storybook_coverage_test.exs")
+)
+
 defmodule AccrueAdmin.SubscriptionManifestFixture.Grouped do
   alias AccrueAdmin.Storybook.SubscriptionScenarios
   alias PhoenixStorybook.Stories.{Variation, VariationGroup}
@@ -321,6 +325,115 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
                  [{"/one/subscription", AccrueAdmin.SubscriptionManifestFixture.Flat}],
                  @storybook_root
                )
+    end
+
+    test "caller map rejects empty and duplicate identities, retaining distinct same-label callers in stable order" do
+      assert function_exported?(SubscriptionManifest, :caller_map_for, 1),
+             "the caller-map normalizer is unavailable"
+
+      assert_raise ArgumentError, ~r/zero|empty|caller/i, fn ->
+        SubscriptionManifest.caller_map_for([])
+      end
+
+      one = caller_row("Subscription detail", "Owner A", "lib/a.ex", "area", "uncovered")
+      assert [single] = SubscriptionManifest.caller_map_for([one])
+      assert single.label == "Subscription detail"
+      assert single.state == "uncovered"
+      assert single.reason == "The current story does not render this caller."
+
+      assert_raise ArgumentError, ~r/duplicate/i, fn ->
+        SubscriptionManifest.caller_map_for([one, one])
+      end
+
+      same_label = [
+        caller_row("Subscription detail", "Owner B", "lib/b.ex", "page", "uncovered"),
+        caller_row("Subscription detail", "Owner A", "lib/a.ex", "area", "uncovered")
+      ]
+
+      rows = SubscriptionManifest.caller_map_for(same_label)
+      assert rows == SubscriptionManifest.caller_map_for(Enum.reverse(same_label))
+      assert Enum.map(rows, & &1.label) == ["Subscription detail", "Subscription detail"]
+      assert length(Enum.uniq(Enum.map(rows, & &1.key))) == 2
+      assert Enum.map(rows, &{&1.owner, &1.path, &1.tier, &1.state}) == [
+               {"Owner A", "lib/a.ex", "area", "uncovered"},
+               {"Owner B", "lib/b.ex", "page", "uncovered"}
+             ]
+    end
+
+    test "current caller map reconciles production sources, registry contracts, manifest links, and explicit gaps" do
+      assert function_exported?(SubscriptionManifest, :caller_map, 0),
+             "the production caller map is unavailable"
+
+      rows = SubscriptionManifest.caller_map()
+      entries = SubscriptionManifest.entries()
+      keys = Enum.map(entries, & &1.key) |> Enum.sort()
+      by_owner = Map.new(rows, &{{&1.owner, &1.tier}, &1})
+
+      assert rows == SubscriptionManifest.caller_map_for(rows)
+      assert Enum.all?(rows, &(&1.state in ["reachable", "uncovered", "not_applicable"]))
+      assert Enum.all?(rows, &(&1.evidence != "" and is_binary(&1.path)))
+
+      for row <- rows, row.state != "reachable" do
+        assert is_binary(row.reason) and row.reason != ""
+      end
+
+      for owner <- [
+            "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+            "AccrueAdmin.Live.SubscriptionLive.render/1",
+            "AccrueAdmin.Live.SubscriptionsLive.render/1",
+            "AccruePortal.Live.SubscriptionLive.render/1",
+            "AccruePortal.Live.SubscriptionsLive.render/1"
+          ] do
+        assert Enum.any?(rows, &(&1.owner == owner)), "missing current production owner #{owner}"
+      end
+
+      area = by_owner[{"AccrueAdmin.Live.SubscriptionLive.subscription_area/1", "area"}]
+      action_band = by_owner[{"AccrueAdmin.Live.SubscriptionLive.subscription_area/1", "section"}]
+      page = by_owner[{"AccrueAdmin.Live.SubscriptionLive.render/1", "page"}]
+      group = Enum.find(rows, &(&1.tier == "group"))
+
+      assert area.state == "reachable"
+      assert action_band.state == "reachable"
+      assert area.manifest_keys == keys
+      assert action_band.manifest_keys == keys
+      assert page.state == "uncovered"
+      assert page.reason =~ "whole-page"
+
+      contract =
+        AccrueAdmin.Dev.ComponentRegistry.group_contract_by_slug(group.contract)
+
+      assert group.state == "uncovered"
+      assert group.evidence =~ contract.proof_id
+      assert group.owner == "AccrueAdmin.Dev.ComponentRegistry.group_contracts/0"
+
+      assert Enum.any?(rows, &(&1.tier == "job" and &1.path =~ "accrue_portal"))
+
+      na = Enum.find(rows, &(&1.state == "not_applicable"))
+      assert na.tier == "proof-lane"
+      assert na.reason =~ "static render"
+
+      root = Path.expand("../../../../", __DIR__)
+      guide_path = Path.join(root, "guides/subscription-story-coverage.md")
+      :ok = SubscriptionManifest.write_coverage_guide!(guide_path)
+      guide = File.read!(guide_path)
+      assert guide =~ "Production caller and composition coverage"
+      assert guide =~ "Uncovered"
+      assert guide =~ "Not applicable"
+      assert guide =~ "AccruePortal.Live.SubscriptionsLive.render/1"
+      assert guide =~ "does not prove a whole page"
+    end
+
+    defp caller_row(label, owner, path, tier, state) do
+      %{
+        label: label,
+        owner: owner,
+        path: path,
+        tier: tier,
+        state: state,
+        evidence: "#{path}:1",
+        reason: if(state == "uncovered", do: "The current story does not render this caller."),
+        manifest_keys: []
+      }
     end
 
     setup_all do
