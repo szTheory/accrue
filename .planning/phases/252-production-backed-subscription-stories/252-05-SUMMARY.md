@@ -47,6 +47,7 @@ patterns-established:
   - "Generated subscription artifacts bind to SHA-256 digests of every consumed Admin and Portal source file."
 
 requirements-completed: [SBK-01, SBK-02]
+status: complete
 coverage:
   - id: D1
     description: Compiled subscription variations receive stable keyed entries, direct routes, attribution, factual expectations, and source digests.
