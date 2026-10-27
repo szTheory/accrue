@@ -104,3 +104,15 @@ test("held-out cleanup locks its customer before validating children and deletin
   assert.ok(lock < childGuard, "the lock must precede the child-set guard");
   assert.ok(childGuard < firstDelete, "all child checks must precede deletion");
 });
+
+test("held-out cleanup binds the exact customer ID to its expected synthetic owner", () => {
+  const source = fs.readFileSync(
+    path.join(repo, "examples/accrue_host/priv/repo/seeds/phase248_cleanup_edge.exs"),
+    "utf8"
+  );
+  const ownerGuard = source.indexOf('customer.owner_id != "314e6b2c-fd88-45b9-85b4-2623f3dc35aa"');
+  const firstDelete = source.indexOf("Repo.delete!(row)");
+
+  assert.notEqual(ownerGuard, -1, "cleanup must verify the fixture's exact owner identity");
+  assert.ok(ownerGuard < firstDelete, "owner validation must happen before deletion");
+});
