@@ -249,6 +249,44 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
     test "generated manifest verification rejects stale source digests before accepting routes" do
       assert function_exported?(SubscriptionManifest, :verify!, 1),
              "the generated manifest freshness verifier is unavailable"
+
+      manifest_path =
+        Path.join(
+          System.tmp_dir!(),
+          "phase252-manifest-#{System.unique_integer([:positive])}.json"
+        )
+
+      on_exit(fn -> File.rm(manifest_path) end)
+
+      :ok = SubscriptionManifest.write!(manifest_path)
+      assert :ok = SubscriptionManifest.verify!(manifest_path)
+      first_write = File.read!(manifest_path)
+      :ok = SubscriptionManifest.write!(manifest_path)
+      assert File.read!(manifest_path) == first_write
+
+      manifest = manifest_path |> File.read!() |> Jason.decode!()
+      [{source_path, _digest} | _] = Enum.sort(manifest["source_digests"])
+
+      [first_entry | remaining_entries] = manifest["entries"]
+
+      wrong_route =
+        NavigationHelpers.path_to_story(@storybook_root, @story_path, %{variation_id: "not-real"})
+
+      tampered_entries = [Map.put(first_entry, "url", wrong_route) | remaining_entries]
+      File.write!(manifest_path, Jason.encode!(%{manifest | "entries" => tampered_entries}))
+
+      assert_raise ArgumentError, ~r/entries|routes/i, fn ->
+        SubscriptionManifest.verify!(manifest_path)
+      end
+
+      stale_digests = Map.put(manifest["source_digests"], source_path, String.duplicate("0", 64))
+      File.write!(manifest_path, Jason.encode!(%{manifest | "source_digests" => stale_digests}))
+
+      assert_raise ArgumentError, ~r/source digest/i, fn ->
+        SubscriptionManifest.verify!(manifest_path)
+      end
+
+      refute SubscriptionManifest.route_matches?(hd(SubscriptionManifest.entries()), wrong_route)
     end
 
     test "zero, duplicate, missing-ID, and missing-attribution declarations fail closed while one reconciles" do
