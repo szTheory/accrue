@@ -3,16 +3,25 @@ phase: 252
 review: 252-REVIEW.md
 titles: json
 findings:
-open: 0
-total: 0
-unparsed: 2
-recorded: 2026-10-27T08:32:46.461Z
+  - id: CR-01
+    severity: critical
+    disposition: open
+    title: "Storybook theme check adds the missing application scope"
+  - id: CR-02
+    severity: critical
+    disposition: open
+    title: "Passing exit codes turn skipped required tests into passing evidence"
+open: 2
+total: 2
+recorded: 2026-10-27T08:33:11.742Z
 ---
 
 # Phase 252: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
+| CR-01 | critical | open | - |
+| CR-02 | critical | open | - |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.
