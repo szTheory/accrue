@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 252
 current_phase_name: Production-backed Subscription Stories
 status: executing
-stopped_at: Completed 252-06-PLAN.md
-last_updated: "2026-10-27T02:33:12.621Z"
+stopped_at: Completed 252-07-PLAN.md
+last_updated: "2026-10-27T03:10:51.121Z"
 last_activity: 2026-10-26
 last_activity_desc: Completed Phase 252 plan 03; Phase 252 execution continues
-state_head: 85ee42df92944f56b9aacfd29504cf6057597296
+state_head: bfd5df138e924a422a5485b2c8e455e4e8ce2fa6
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 ## Current Position
 
 Phase: 252 (Production-backed Subscription Stories) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-10-26 — Completed Phase 252 plan 03; Phase 252 execution continues
 
@@ -227,6 +227,7 @@ Current milestone planning blockers: None known. Historical concerns and deferre
 | Phase 252 P04 | 25min | 2 tasks | 11 files |
 | Phase 252 P05 | 15min | 2 tasks | 8 files |
 | Phase 252 P06 | 80min | 2 tasks | 15 files |
+| Phase 252 P7 | 35min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -528,6 +529,8 @@ Current milestone planning blockers: None known. Historical concerns and deferre
 - [Phase 252]: Reuse the application existing LiveView hook implementations in Storybook iframe.
 - [Phase 252]: Static story evidence establishes content and presentation only; it does not claim mounted authorization, provider completion, or persistence.
 - [Phase 252]: Left-align and border-box the action menu to keep it within the narrow Storybook preview.
+- [Phase 252]: Use the existing admin and portal Hex release switches only for actual package metadata generation.
+- [Phase 252]: Canonicalize the temporary root for isolated Mix builds on macOS.
 
 ### Pending Todos
 
@@ -626,8 +629,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T02:33:12.594Z
-Stopped at: Completed 252-06-PLAN.md
+Last session: 2026-10-27T03:10:51.094Z
+Stopped at: Completed 252-07-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

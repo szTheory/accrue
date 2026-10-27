@@ -27,7 +27,7 @@ The owner approved the [reviewed subscription-first proposal](research/ui-qualit
 ### Safe review tooling and publication boundaries
 
 - [x] **LAB-01**: Maintainer can launch the reused lab with documented prerequisites, an explicit disposable database/namespace, distinct loopback port and process identity, refusal of unexpected existing-server reuse, and a negative control proving a normal test reset cannot alter review-session data; DB-free rendering is distinguished from DB-backed endpoint startup.
-- [ ] **LAB-02**: An adopter can compile and use production packages without scenario payloads, fixture imports, Storybook runtime requirements or Node tooling, with production-route absence and package-content/compile checks; canonical example-host dev mounts and the independent component kitchen remain preserved.
+- [x] **LAB-02**: An adopter can compile and use production packages without scenario payloads, fixture imports, Storybook runtime requirements or Node tooling, with production-route absence and package-content/compile checks; canonical example-host dev mounts and the independent component kitchen remain preserved.
 
 ### Recurring checks and affordable execution
 
@@ -89,7 +89,7 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 | SCEN-03 | Phase 252 | Complete |
 | SCEN-04 | Phase 252 | Complete |
 | LAB-01 | Phase 252 | Complete |
-| LAB-02 | Phase 252 | Pending |
+| LAB-02 | Phase 252 | Complete |
 | CIQ-01 | Phase 252 | Pending |
 | CIQ-02 | Phase 254 | Pending |
 | CIQ-03 | Phase 254 | Pending |
