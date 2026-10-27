@@ -527,10 +527,22 @@ async function captureCanonicalScreenshot(page, preview, testCase) {
   const previewBox = await preview.boundingBox();
   if (!previewBox) throw new Error(`Phase 252 screenshot preview is not measurable: ${expectedPreviewId}`);
   const topInset = testCase.width < 600 ? 128 : 72;
-  await page.evaluate(({ targetTop, inset }) => {
-    window.scrollTo(0, Math.max(0, window.scrollY + targetTop - inset));
-  }, { targetTop: previewBox.y, inset: topInset });
-  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => resolve())));
+  await preview.evaluate((element, inset) => {
+    let scrollParent = element.parentElement;
+    while (scrollParent && scrollParent !== document.body) {
+      const style = getComputedStyle(scrollParent);
+      if (["auto", "scroll"].includes(style.overflowY) && scrollParent.scrollHeight > scrollParent.clientHeight + 1) break;
+      scrollParent = scrollParent.parentElement;
+    }
+    const targetTop = element.getBoundingClientRect().top;
+    const scrollAmount = targetTop - inset;
+    if (scrollParent && scrollParent !== document.body) {
+      scrollParent.scrollTop += scrollAmount;
+    } else {
+      window.scrollTo(0, Math.max(0, window.scrollY + scrollAmount));
+    }
+  }, topInset);
+  await preview.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   const bytes = await page.screenshot({ path: destination, animations: "disabled" });
   return {
     path: path.relative(REPO_ROOT, destination).split(path.sep).join("/"),
