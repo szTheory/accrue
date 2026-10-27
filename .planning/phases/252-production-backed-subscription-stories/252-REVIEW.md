@@ -81,7 +81,7 @@ The Phase 252 source scope was reviewed for behavior, input handling, cleanup ow
 
 ### Critical Issues
 
-#### CR-01: Storybook theme check adds the missing application scope
+### CR-01: Storybook theme check adds the missing application scope
 
 **Severity:** BLOCKER  
 **File:** `accrue_admin/e2e/phase252-story-helpers.js:628`
@@ -92,7 +92,7 @@ The Phase 252 source scope was reviewed for behavior, input handling, cleanup ow
 
 **Fix:** Make the complete light token and root styling available in the Storybook document’s real scope (or render the story under the same root layout as the admin app), then remove this class mutation. Keep the browser assertion against the unmodified route.
 
-#### CR-02: Passing exit codes turn skipped required tests into passing evidence
+### CR-02: Passing exit codes turn skipped required tests into passing evidence
 
 **Severity:** BLOCKER  
 **File:** `scripts/ci/verify_phase252_stories.mjs:268`
