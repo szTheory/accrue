@@ -179,3 +179,11 @@ Earlier failed runs were preserved and not reused as passing evidence:
 1. Run `25208-1793111519379-36408-5d5280ffb743` stopped at `phase252-ci-contract`: reporter inventory expected 15 identities and received 20 because five imported `main_module.mjs` tests were absent from its source map. The reporter map, freshness inputs, and regression assertion were fixed.
 2. Run `25208-1793111727518-39797-4ba73827f23a` stopped at `scenario-repo` with `phase252_lab: spawnSync ps EPERM` in the sandbox. The exact lane passed with elevation (4 tests, 0 failures); the final full run used elevation and retained the process-identity checks.
 3. Run `25208-1793111991152-45915-ecc0569f230e` completed all 21 commands but acceptance refused a passing bundle because the first resolution did not name the exact target. The resolutions were corrected, directly validated, and both native producer checks were rerun before the final fresh aggregate.
+
+## Validation Audit 2026-10-27
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 2 |
+| Escalated | 0 |

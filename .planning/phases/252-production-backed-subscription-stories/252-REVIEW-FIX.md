@@ -61,3 +61,13 @@ The generator retains four unresolved assumptions (`EDGE-CIQ-01-unclassified`, `
 _Fixed: 2026-10-27T12:16:53Z_
 _Fixer: the agent (gsd-code-fixer)_  
 _Iteration: 1_
+
+## Fixed Issues
+
+### CR-03: Extra malformed prohibition entries are silently ignored
+
+Fixed in 558b67b4; reject extra or malformed list entries. Regression reproduced RED before correction; acceptance and CI contracts pass 46/46 after it. Details: 252-REVIEW-FIX-2.md.
+
+### CR-04: Plans 09/10 used for coverage are absent from the freshness snapshot
+
+Fixed in 558b67b4; pin all ten plans and validation accounting via archive-aware reads, with required CI ownership and stale-source controls. Details: 252-REVIEW-FIX-2.md.

@@ -1,63 +1,23 @@
 ---
 phase: 252-production-backed-subscription-stories
-reviewed: 2026-10-27T08:30:51Z
+reviewed: 2026-10-27T15:14:51Z
 depth: standard
-files_reviewed: 54
+files_reviewed: 14
 files_reviewed_list:
-  - .github/workflows/ci.yml
-  - .gitignore
-  - accrue/config/prod.exs
-  - accrue_admin/assets/css/app.css
-  - accrue_admin/assets/js/storybook_hooks.js
-  - accrue_admin/config/test.exs
-  - accrue_admin/e2e/phase252-review.spec.js
-  - accrue_admin/e2e/phase252-story-helpers.js
-  - accrue_admin/e2e/subscription-stories-phase252.spec.js
-  - accrue_admin/lib/accrue_admin/components/detail.ex
-  - accrue_admin/lib/accrue_admin/live/subscription_live.ex
-  - accrue_admin/lib/accrue_admin/router.ex
-  - accrue_admin/package.json
-  - accrue_admin/playwright.config.js
-  - accrue_admin/playwright.phase252.config.js
-  - accrue_admin/priv/static/accrue_admin.css
-  - accrue_admin/priv/static/storybook.css
-  - accrue_admin/priv/static/storybook.js
-  - accrue_admin/storybook/_support/subscription_manifest.ex
-  - accrue_admin/storybook/_support/subscription_scenarios.ex
-  - accrue_admin/test/accrue_admin/components/subscription_area_test.exs
-  - accrue_admin/test/accrue_admin/dev/storybook_asset_test.exs
-  - accrue_admin/test/accrue_admin/dev/storybook_coverage_test.exs
-  - accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs
-  - accrue_admin/test/accrue_admin/dev/subscription_production_boundary_test.exs
-  - accrue_admin/test/accrue_admin/dev/subscription_scenario_repo_test.exs
-  - accrue_admin/test/accrue_admin/dev/subscription_scenarios_test.exs
-  - accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs
-  - accrue_admin/test/support/e2e_plug.ex
-  - accrue_admin/test/support/e2e_server.ex
-  - accrue_admin/test/support/subscription_scenario_repo.ex
-  - accrue_admin/tmp/phase252/render-results.json
-  - dev_support/ui_scenarios/cadence_subscriptions.exs
-  - examples/accrue_host/priv/repo/seeds/edge_states.exs
-  - examples/accrue_host/priv/repo/seeds/phase248_cleanup_edge.exs
-  - examples/accrue_host/priv/repo/seeds/phase252_subscription_scenarios.exs
-  - examples/accrue_host/test/accrue_host/phase252_scenario_cleanup_test.exs
-  - guides/subscription-story-coverage.md
   - guides/ui-story-lab.md
+  - scripts/ci/fixtures/phase252-transparency/heldout-clean.json
+  - scripts/ci/fixtures/phase252-transparency/heldout-violation.json
+  - scripts/ci/fixtures/phase252-transparency/lab-clean.json
+  - scripts/ci/fixtures/phase252-transparency/lab-violation.json
   - scripts/ci/generate_phase252_acceptance.mjs
   - scripts/ci/generate_phase252_acceptance.test.mjs
-  - scripts/ci/phase248_heldout_isolation.test.mjs
   - scripts/ci/phase252_paths.mjs
-  - scripts/ci/verify_phase200_admin_guardrails.sh
-  - scripts/ci/verify_phase200_guardrail_contract.sh
+  - scripts/ci/phase252_reporters.mjs
   - scripts/ci/verify_phase252_ci_contract.test.mjs
-  - scripts/ci/verify_phase252_production_boundary.mjs
-  - scripts/ci/verify_phase252_production_boundary.test.mjs
+  - scripts/ci/verify_phase252_heldout_attribution.test.mjs
+  - scripts/ci/verify_phase252_lab_presentation.test.mjs
   - scripts/ci/verify_phase252_stories.mjs
-  - scripts/dev/phase252_isolation.test.mjs
-  - scripts/dev/phase252_lab.mjs
-  - scripts/dev/phase252_lab.test.mjs
-  - storybook/components/subscription_detail.story.exs
-  - storybook/phase252-manifest.json
+  - scripts/ci/verify_phase252_transparency.mjs
 findings:
   critical: 2
   warning: 0
@@ -68,52 +28,46 @@ status: issues_found
 
 # Phase 252: Code Review Report
 
-**Reviewed:** 2026-10-27T08:30:51Z
+**Reviewed:** 2026-10-27T15:14:51Z
 **Depth:** standard
-**Files Reviewed:** 54
+**Files Reviewed:** 14
 **Status:** issues_found
 
 ## Summary
 
-The Phase 252 source scope was reviewed for behavior, input handling, cleanup ownership, production routing and packaging, CI admission, and acceptance evidence. Two blockers remain: the browser helper alters the actual Storybook document before checking its theme, and the command runner can report skipped ExUnit cases as passed evidence. This was a read-only source review; no tests or browser runs were performed.
+The 09/10 increment adds useful named reporter checks and source-backed transparency controls, but two gaps can still let acceptance evidence omit prohibition metadata or drift from the phase plan used to define coverage. The prior 01–08 review context is retained below and is not included in this increment’s finding counts. No tests or aggregate suites were rerun for this review.
 
 ## Narrative Findings (AI reviewer)
 
 ### Critical Issues
 
-### CR-01: Storybook theme check adds the missing application scope
+### CR-03: Extra malformed prohibition entries are silently ignored
 
-**Severity:** BLOCKER  
-**File:** `accrue_admin/e2e/phase252-story-helpers.js:628`
+**Severity:** BLOCKER
+**File:** `scripts/ci/generate_phase252_acceptance.mjs:419-463`
 
-**Issue:** Immediately before measuring theme tokens, the helper adds `accrue-admin` to the real document root. The Storybook route applies that class to its `.psb-sandbox` element (`accrue_admin/lib/accrue_admin/dev/storybook.ex:18`), while the light semantic token set and root typography/background rules are scoped to `html.accrue-admin` (`accrue_admin/assets/css/theme.css:12`, `accrue_admin/assets/css/app.css:39`). The direct Storybook document does not use the normal admin root layout that supplies this root class. As a result, the browser check tests a modified document and passes even though the actual light-theme Storybook route lacks the expected Accrue root styling; the static review story is visibly rendered with fallback styling.
+**Issue:** `collectProhibitions` counts only list rows containing `statement:`. After finding the expected statement, it limits field validation to the chunk before the next list item, but never rejects or parses that next item. A plan can therefore add a second malformed entry such as `- status: unresolved` without a `statement:` field; the generator ignores it, returns only the original resolved descriptor, and reports no unresolved prohibitions. This is a fail-open path for the prohibition inventory.
 
-**Reproduction:** Open a direct subscription variation in the normal Storybook route without modifying the root element. Inspect `document.documentElement.classList` and the computed `--ax-base` value on `.psb-sandbox.accrue-admin`. The helper currently masks the route state by adding the root class before asserting `--ax-base` at lines 300-329.
+**Fix:** Parse and validate every item in the `prohibitions` list, and reject extra or malformed entries. For the two original plans, require exactly one list item with the expected flat descriptor fields; add a regression case with a second item missing `statement:` and require acceptance to fail.
 
-**Fix:** Make the complete light token and root styling available in the Storybook document’s real scope (or render the story under the same root layout as the admin app), then remove this class mutation. Keep the browser assertion against the unmodified route.
+### CR-04: Plans 09/10 used for coverage are absent from the freshness snapshot
 
-### CR-02: Passing exit codes turn skipped required tests into passing evidence
+**Severity:** BLOCKER
+**File:** `scripts/ci/verify_phase252_stories.mjs:48-64`; `scripts/ci/generate_phase252_acceptance.mjs:272-282, 466-496`
 
-**Severity:** BLOCKER  
-**File:** `scripts/ci/verify_phase252_stories.mjs:268`
+**Issue:** The runner fingerprints `ORIGINAL_PROHIBITION_PLANS` (plans 01 and 04), but `inspectPlanSources` reads all ten plan files and derives task IDs from plans 09 and 10. `validateSourceSnapshot` only verifies paths already present in the bundle digest map. A change to either newly consumed plan during the aggregate run therefore does not change the before/after source fingerprint, while the final acceptance step reads the changed plan and can bind the run’s results to metadata from a different plan state. Matching task IDs do not establish that the task criteria remained unchanged.
 
-**Issue:** The runner copies planned `commandSpec.assertions` into each result and marks the entire sequence passed whenever commands return exit code 0 (lines 268-274). The acceptance generator only requires these assertion reference arrays to be non-empty and checks command exit codes (`scripts/ci/generate_phase252_acceptance.mjs:176-184)); it does not verify that named test assertions ran. Several Phase 252 ExUnit formatters explicitly print skipped tests as successful TAP records (`ok … # SKIP`), for example `accrue_admin/test/accrue_admin/dev/subscription_scenarios_test.exs:17-22`. If a required test is skipped or excluded, ExUnit can exit successfully, so the runner still attaches the static assertion labels and the acceptance bundle can claim coverage that was not executed. This can make the required CI owner green without the behavior its evidence claims.
+**Fix:** Include every plan and validation artifact read to construct acceptance metadata in the runner’s source snapshot, and require those digests during acceptance validation. Preserve the logical phase paths while resolving their bytes through the archive-aware phase evidence resolver. Add a contract test that edits a 09/10 plan after fixture bundle creation and expects stale-source rejection.
 
-**Reproduction:** Mark a test in one of the Phase 252 ExUnit files with `@tag :skip` (or exclude that required test), then run its planned command. The formatter emits `ok … # SKIP`; the command can exit zero, and this runner records its predeclared assertion references as if they had executed.
+## Historical Review Context (pre-09 increment)
 
-**Fix:** Parse and validate each test command’s actual TAP output. Require the expected test IDs/counts, reject any `# SKIP` record or missing assertion, and derive evidence references from the executed records instead of copying the static plan labels.
+The earlier review covered 54 files and reported two findings. They are retained here as history, not rescored in the 09/10 increment:
 
-### Warnings
-
-None.
-
-### Info
-
-None.
+- **CR-01 — Storybook theme check adds the missing application scope** (`accrue_admin/e2e/phase252-story-helpers.js:628`): the prior report said the helper mutated the document root before checking theme tokens, masking the direct Storybook route’s styling. Its suggested fix was to correct the real Storybook styling scope and remove the mutation. This increment did not re-review that browser implementation.
+- **CR-02 — Passing exit codes turn skipped required tests into passing evidence** (`scripts/ci/verify_phase252_stories.mjs`, prior version): the prior report said the runner accepted zero exit codes and copied planned assertion labels without validating executed identities. The 09/10 reporter changes now parse TAP and bind required assertions to source-derived executed test names; this historical finding is not counted as current.
 
 ---
 
-_Reviewed: 2026-10-27T08:30:51Z_  
-_Reviewer: the agent (gsd-code-reviewer)_  
+_Reviewed: 2026-10-27T15:14:51Z_
+_Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
-

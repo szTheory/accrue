@@ -12,7 +12,7 @@ created: "2026-10-27"
 
 # Phase 252 Security Verification
 
-ASVS L1 audit of the authored threat register. All nineteen unique threats are closed after independent re-audit. No accepted risks were introduced. Reserved T-252-SC is counted once across eight plans.
+ASVS L1 audit of the authored threat register. All twenty-three unique threats are closed after re-audit, including four added by gap plans 09/10. No accepted risks were introduced. Reserved T-252-SC is counted once across ten plans.
 
 ## Trust Boundaries
 
@@ -24,6 +24,10 @@ ASVS L1 audit of the authored threat register. All nineteen unique threats are c
 
 | Threat ID | Category | Component | Severity | Disposition | Mitigation evidence | Status |
 |---|---|---|---|---|---|---|
+| T-252-19 | Spoofing | Lab and held-out presentation | medium | mitigate | verify_phase252_transparency.mjs:165,188,224,255; both named attribution targets and individual contradiction controls passed | closed |
+| T-252-20 | Tampering | Subject injection and fail-first proof | high | mitigate | verify_phase252_transparency.mjs:199,319; same current/injected assertions, shell-free 10-second Node children, named non-vacuous TAP and native violation/clean proof | closed |
+| T-252-21 | Tampering | Required CI and freshness | high | mitigate | verify_phase252_stories.mjs:48,134,295,515,606; phase252_reporters.mjs:17,52,117; 21 required lanes and mutation/admission controls passed | closed |
+| T-252-22 | Repudiation | Descriptor migration and current acceptance | high | mitigate | generate_phase252_acceptance.mjs:453,459,553; six native payloads in 252-10-prohibition-evidence.json; fresh 21-lane bundle and stale/missing evidence controls passed | closed |
 | T-252-01 | Elevation | SubscriptionLive.subscription_area/1 | high | mitigate | accrue_admin/lib/accrue_admin/live/subscription_live.ex:295; subscription_story_slice_test.exs:112; subscription_live_test.exs:918 | closed |
 | T-252-02 | Information disclosure | static story metadata | medium | mitigate | storybook/components/subscription_detail.story.exs:5; subscription_scenarios.ex:125 | closed |
 | T-252-SC | Tampering | Package boundary | high | mitigate | No dependency declarations/lockfiles changed; installed tools only; verify_phase252_production_boundary.mjs:264,543,557 | closed |
@@ -80,3 +84,11 @@ No accepted risks. The medium finding was fixed and independently re-audited und
 ## Final Source/Evidence Recheck — 2026-10-27
 
 No process/database authorization boundary changed after the independent 19/19 closure. CR-02 strengthened T-252-18 by parsing actual executed test reports and rejecting skips/exclusions, absent identities and forged assertion references. Current owner run `25208-1793102721082-59067-6ba5536df2dd` passed all eighteen commands; independent parent validation and thirty acceptance/CI controls pass. The Storybook token/paint correction uses the backend-owned scope and retains host accent overrides. Final goal verification will cross-check these bounded changes; no accepted risk is introduced.
+
+## Security Audit 2026-10-27
+
+| Metric | Count |
+|---|---|
+| Threats found | 23 |
+| Closed | 23 |
+| Open | 0 |
