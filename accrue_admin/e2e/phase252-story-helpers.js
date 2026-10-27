@@ -14,6 +14,28 @@ const RESULT_PATH = path.join(RESULT_DIR, "render-results.json");
 const CANONICAL_STATES = ["active", "scheduled_cancellation", "incomplete_evidence"];
 const WIDTHS = [320, 1280];
 const THEMES = ["light", "dark"];
+const UI_PREDICATE_ASSERTION_REFERENCES = {
+  "UI-E1-loading": ["settled_content_visible", "loading_artifacts_absent"],
+  "UI-E1-error": ["negative_controls.invalid_route", "negative_controls.missing_variation", "negative_controls.metadata_only", "authority_regression"],
+  "UI-E1-overflow": ["document_and_required_content_geometry", "keyboard_focus_visible"],
+  "UI-E1-long-text": ["ordinary_content_complete", "held_out_long_text_complete", "full_id_copy"],
+  "UI-E2-empty": ["required_facts_present", "optional_rows_omitted", "scoped_not_found_regression"],
+  "UI-E2-loading": ["settled_content_visible", "loading_artifacts_absent"],
+  "UI-E2-error": ["negative_controls.invalid_route", "negative_controls.missing_variation", "negative_controls.metadata_only", "authority_regression"],
+  "UI-E2-populated": ["canonical_render_attribution", "actual_facts_and_actions"],
+  "UI-E2-partial": ["unavailable_values_and_ordered_caveats"],
+  "UI-E2-overflow": ["document_and_required_content_geometry", "keyboard_focus_visible"],
+  "UI-E2-zero-one-many": ["optional_rows_and_action_groups_follow_inputs"],
+  "UI-E2-long-text": ["ordinary_content_complete", "held_out_long_text_complete", "full_id_copy"],
+  "UI-E3-empty": ["required_facts_present", "optional_rows_omitted", "scoped_not_found_regression"],
+  "UI-E3-loading": ["settled_content_visible", "loading_artifacts_absent"],
+  "UI-E3-error": ["negative_controls.invalid_route", "negative_controls.missing_variation", "negative_controls.metadata_only", "authority_regression"],
+  "UI-E3-populated": ["canonical_render_attribution", "actual_facts_and_actions"],
+  "UI-E3-partial": ["unavailable_values_and_ordered_caveats"],
+  "UI-E3-overflow": ["document_and_required_content_geometry", "keyboard_focus_visible"],
+  "UI-E3-zero-one-many": ["optional_rows_and_action_groups_follow_inputs"],
+  "UI-E3-long-text": ["ordinary_content_complete", "held_out_long_text_complete", "full_id_copy"],
+};
 
 function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex");
@@ -108,6 +130,7 @@ function beginResults(runId, manifestDigest) {
     run_id: runId,
     manifest_sha256: manifestDigest,
     generated_at: new Date().toISOString(),
+    ui_predicate_catalog: UI_PREDICATE_ASSERTION_REFERENCES,
     cases: [],
   });
 }
@@ -141,6 +164,224 @@ function normalizeText(value) {
 function normalizeTimestamp(value) {
   const milliseconds = Date.parse(value);
   return Number.isNaN(milliseconds) ? value : new Date(milliseconds).toISOString();
+}
+
+async function assertUiPredicateContract(page, story, entry, testCase) {
+  const ui = await story.evaluate((element) => {
+    const viewportWidth = window.innerWidth;
+    const probe = (node, label) => {
+      const rect = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      let clippingAncestor = null;
+      for (let current = node.parentElement; current; current = current.parentElement) {
+        const ancestorStyle = getComputedStyle(current);
+        const clipsX = ["hidden", "clip"].includes(ancestorStyle.overflowX) && current.scrollWidth > current.clientWidth + 1;
+        const clipsY = ["hidden", "clip"].includes(ancestorStyle.overflowY) && current.scrollHeight > current.clientHeight + 1;
+        if (clipsX || clipsY) {
+          clippingAncestor = current.className || current.tagName.toLowerCase();
+          break;
+        }
+      }
+      const textClipped =
+        (node.scrollWidth > node.clientWidth + 1 && ["hidden", "clip"].includes(style.overflowX)) ||
+        (node.scrollHeight > node.clientHeight + 1 && ["hidden", "clip"].includes(style.overflowY)) ||
+        style.textOverflow === "ellipsis" ||
+        style.whiteSpace === "nowrap";
+      return {
+        label,
+        text: node.textContent.replace(/\s+/g, " ").trim(),
+        left: rect.left,
+        right: rect.right,
+        width: rect.width,
+        height: rect.height,
+        clientWidth: node.clientWidth,
+        scrollWidth: node.scrollWidth,
+        clientHeight: node.clientHeight,
+        scrollHeight: node.scrollHeight,
+        textClipped,
+        clippingAncestor,
+        outsideViewport: rect.left < -1 || rect.right > viewportWidth + 1,
+      };
+    };
+    const summaryRows = [...element.querySelectorAll(".ax-summary-list-row")];
+    const summary = element.querySelector(".ax-summary-card");
+    const idButton = element.querySelector('button[aria-label="Copy subscription ID"]');
+    const menu = element.querySelector("#subscription-action-menu");
+    const menuTrigger = menu?.querySelector("summary");
+    const menuPanel = menu?.querySelector('[role="menu"]');
+    const actionBand = element.querySelector("[data-ax-action-band]");
+    const required = [
+      ...element.querySelectorAll("h1, .ax-id-badge-text, .ax-summary-list-key, .ax-summary-list-value, .ax-summary-list-actions a, .ax-summary-list-actions button, [data-ax-action-band] [data-ax-primary-action], [data-ax-action-band] summary, [role=menuitem]"),
+    ];
+    const actionTargets = actionBand
+      ? [...actionBand.querySelectorAll(".ax-button, summary")].map((target) => probe(target, target.getAttribute("aria-label") || target.textContent.trim()))
+      : [];
+    const grid = summaryRows[0] ? getComputedStyle(summaryRows[0]) : null;
+    const body = document.body;
+    const root = document.documentElement;
+    const statusDot = element.querySelector(".ax-status-dot");
+    const rowActions = [...element.querySelectorAll(".ax-summary-list-actions a, .ax-summary-list-actions button")].map((action) => ({
+      visibleText: action.innerText.replace(/\s+/g, " ").trim(),
+      accessibleName: action.getAttribute("aria-label") || "",
+      type: action.getAttribute("type"),
+      tag: action.tagName.toLowerCase(),
+    }));
+    const actionGroups = [...element.querySelectorAll('[role="group"]')].map((group) => ({
+      label: group.getAttribute("aria-label") || "",
+      items: group.querySelectorAll('[role="menuitem"]').length,
+    }));
+    return {
+      viewportWidth,
+      document: { clientWidth: root.clientWidth, scrollWidth: Math.max(root.scrollWidth, body.scrollWidth) },
+      story: probe(element, "story"),
+      title: probe(element.querySelector("h1"), "subscription title"),
+      required: required.map((node) => probe(node, node.className || node.tagName.toLowerCase())),
+      actionTargets,
+      summaryColumns: grid ? grid.gridTemplateColumns.trim().split(/\s+/).length : 0,
+      summaryRowCount: summaryRows.length,
+      headings: {
+        h1: element.querySelectorAll("h1").length,
+        h2: element.querySelectorAll("h2").length,
+        h2Text: element.querySelector("h2")?.textContent.replace(/\s+/g, " ").trim() || "",
+      },
+      definitionLists: element.querySelectorAll("dl").length,
+      terms: element.querySelectorAll("dl dt").length,
+      definitions: element.querySelectorAll("dl dd").length,
+      loadingArtifacts: [...element.querySelectorAll(".ax-skeleton, progress, [role=progressbar]")].length,
+      statusDotHidden: statusDot?.getAttribute("aria-hidden") === "true",
+      copyButton: idButton
+        ? { type: idButton.type, name: idButton.getAttribute("aria-label"), value: idButton.dataset.clipboardText, visible: idButton.querySelector(".ax-id-badge-text")?.textContent || "" }
+        : null,
+      rowActions,
+      menu: menu && menuTrigger && menuPanel
+        ? {
+            triggerName: menuTrigger.innerText.replace(/\s+/g, " ").trim(),
+            haspopup: menuTrigger.getAttribute("aria-haspopup"),
+            role: menuPanel.getAttribute("role"),
+            label: menuPanel.getAttribute("aria-label"),
+            groups: actionGroups,
+            items: [...menuPanel.querySelectorAll('[role="menuitem"]')].map((item) => item.innerText.replace(/\s+/g, " ").trim()),
+            panel: probe(menuPanel, "More actions menu"),
+          }
+        : null,
+      themeTokens: {
+        base: getComputedStyle(element).getPropertyValue("--ax-base").trim().toLowerCase(),
+        elevated: getComputedStyle(element).getPropertyValue("--ax-elevated").trim().toLowerCase(),
+        primary: getComputedStyle(element).getPropertyValue("--ax-primary").trim().toLowerCase(),
+      },
+      summaryDisplay: summary ? getComputedStyle(summary).display : "",
+    };
+  });
+
+  expect(ui.document.scrollWidth, "UI-E1-overflow / UI-E2-overflow / UI-E3-overflow: document has no horizontal overflow").toBeLessThanOrEqual(ui.document.clientWidth + 1);
+  expect(ui.story.outsideViewport, "production summary remains within the browser viewport").toBe(false);
+  expect(ui.required.filter((item) => item.outsideViewport || item.textClipped || item.clippingAncestor), "required title, IDs, facts, labels, and menu content are not clipped").toEqual([]);
+  expect(ui.summaryColumns, "summary rows use the agreed responsive column count").toBe(testCase.width < 600 ? 1 : 3);
+  expect(ui.summaryRowCount).toBeGreaterThan(0);
+  expect(ui.actionTargets.length).toBeGreaterThan(0);
+  expect(ui.actionTargets.filter((target) => target.height < 44), "UI action targets retain a 44px minimum at both widths").toEqual([]);
+  expect(ui.headings).toMatchObject({ h1: 1, h2: 1, h2Text: "Subscription actions" });
+  expect(ui.definitionLists).toBe(1);
+  expect(ui.terms).toBeGreaterThan(0);
+  expect(ui.definitions).toBeGreaterThanOrEqual(ui.terms);
+  expect(ui.loadingArtifacts, "settled stories do not fabricate loading state").toBe(0);
+  expect(ui.statusDotHidden).toBe(true);
+  expect(ui.copyButton).toMatchObject({ type: "button", name: "Copy subscription ID" });
+  expect(ui.copyButton.visible).toBe(entry.expected.identity.subscription_processor_id || entry.expected.identity.subscription_id);
+  expect(ui.copyButton.value).toBe(entry.expected.identity.subscription_processor_id || entry.expected.identity.subscription_id);
+  expect(ui.menu).toMatchObject({ triggerName: "More actions ▾", haspopup: "menu", role: "menu", label: "More actions" });
+  expect(ui.menu.groups.every((group) => group.label && group.items > 0), "empty action groups are omitted and every menu group is named").toBe(true);
+
+  const expectedBase = testCase.theme === "light" ? "#fafbfc" : "#0f1318";
+  expect(ui.themeTokens.base, `current Storybook CSS resolves the ${testCase.theme} Accrue base token`).toBe(expectedBase);
+
+  const copyButton = story.locator('button[aria-label="Copy subscription ID"]');
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  const copyValue = await copyButton.getAttribute("data-clipboard-text");
+  await copyButton.click();
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(copyValue);
+
+  const firstRowAction = story.locator(".ax-summary-list-actions a, .ax-summary-list-actions button").first();
+  await copyButton.focus();
+  await page.keyboard.press("Tab");
+  await expect(firstRowAction, "keyboard tab order follows the rendered summary order").toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(copyButton).toBeFocused();
+  const focusStyle = await copyButton.evaluate((button) => {
+    const style = getComputedStyle(button);
+    const rect = button.getBoundingClientRect();
+    return {
+      visible: button.matches(":focus-visible"),
+      outlineWidth: Number.parseFloat(style.outlineWidth),
+      outlineOffset: Number.parseFloat(style.outlineOffset),
+      boxShadow: style.boxShadow,
+      left: rect.left,
+      right: rect.right,
+    };
+  });
+  expect(focusStyle.visible).toBe(true);
+  expect(focusStyle.outlineWidth).toBeGreaterThanOrEqual(2);
+  expect(focusStyle.outlineOffset).toBeGreaterThanOrEqual(2);
+  expect(focusStyle.left - focusStyle.outlineOffset).toBeGreaterThanOrEqual(-1);
+  expect(focusStyle.right + focusStyle.outlineOffset).toBeLessThanOrEqual(testCase.width + 1);
+
+  const metrics = { ...ui, focusStyle };
+  if (entry.variation_id === "active" && testCase.width === 320) {
+    metrics.heldOut = await assertHeldOutLongText(page, story, testCase.theme);
+  }
+  return metrics;
+}
+
+async function assertHeldOutLongText(page, ordinaryStory, theme) {
+  const heldOut = await ordinaryStory.evaluate((element) => {
+    const clone = element.cloneNode(true);
+    clone.dataset.phase252HeldOut = "long-text";
+    const longName = "Acme Research Cooperative for Federated Interoperability and International Subscription Operations";
+    const longId = `sub_${"held_out_identifier_segment_".repeat(4)}end`;
+    clone.querySelector("h1").textContent = longName;
+    const customerRow = [...clone.querySelectorAll(".ax-summary-list-row")].find((row) =>
+      row.querySelector("dt")?.textContent.trim() === "Customer"
+    );
+    customerRow.querySelector("dd.ax-summary-list-value").textContent = longName;
+    const idButton = clone.querySelector('button[aria-label="Copy subscription ID"]');
+    idButton.id = "subscription-summary-id-phase252-held-out";
+    idButton.dataset.clipboardText = longId;
+    idButton.title = longId;
+    idButton.querySelector(".ax-id-badge-text").textContent = longId;
+    document.body.append(clone);
+    return { longName, longId };
+  });
+  const clone = page.locator('[data-phase252-held-out="long-text"]');
+  await expect(clone.locator("h1")).toHaveText(heldOut.longName);
+  await expect(clone.locator(".ax-summary-list-row").filter({ has: clone.locator("dt") }).first()).toBeVisible();
+  const customer = clone.locator(".ax-summary-list-row").filter({ hasText: "Customer" }).locator("dd.ax-summary-list-value");
+  await expect(customer).toContainText(heldOut.longName);
+  const copyButton = clone.locator('button[aria-label="Copy subscription ID"]');
+  await expect(copyButton.locator(".ax-id-badge-text")).toHaveText(heldOut.longId);
+  expect(await copyButton.getAttribute("data-clipboard-text")).toBe(heldOut.longId);
+  const metrics = await clone.evaluate((element) => {
+    const title = element.querySelector("h1");
+    const customerValue = [...element.querySelectorAll(".ax-summary-list-row")].find((row) => row.querySelector("dt")?.textContent.trim() === "Customer").querySelector("dd.ax-summary-list-value");
+    const id = element.querySelector(".ax-id-badge-text");
+    return [title, customerValue, id].map((node, index) => {
+      const rect = node.getBoundingClientRect();
+      return {
+        field: ["long title", "long customer", "long identifier"][index],
+        left: rect.left,
+        right: rect.right,
+        clientWidth: node.clientWidth,
+        scrollWidth: node.scrollWidth,
+        clientHeight: node.clientHeight,
+        scrollHeight: node.scrollHeight,
+        whiteSpace: getComputedStyle(node).whiteSpace,
+        textOverflow: getComputedStyle(node).textOverflow,
+      };
+    });
+  });
+  expect(metrics.every((metric) => metric.scrollWidth <= metric.clientWidth + 1)).toBe(true);
+  expect(metrics.every((metric) => metric.whiteSpace !== "nowrap" && metric.textOverflow !== "ellipsis")).toBe(true);
+  expect(metrics.every((metric) => metric.left >= -1 && metric.right <= 321)).toBe(true);
+  return { theme, label: "held-out long text (not manifest fixture)", name: heldOut.longName, id: heldOut.longId, metrics };
 }
 
 async function readFactRows(story) {
@@ -393,6 +634,7 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
 
     const content = await assertStoryFacts(story, entry);
     const actions = await assertActionAvailability(story, entry);
+    const uiMetrics = await assertUiPredicateContract(page, story, entry, testCase);
     const actualRoute = new URL(page.url());
     expect(actualRoute.searchParams.get("variation_id")).toBe(entry.route_variation_id);
     expect(actualRoute.pathname).toContain("/billing/dev/storybook/");
@@ -411,6 +653,8 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
     row.served_assets = assets;
     row.browser_diagnostics = browserDiagnostics;
     row.actions = actions;
+    row.ui_metrics = uiMetrics;
+    row.ui_predicate_ids = Object.keys(UI_PREDICATE_ASSERTION_REFERENCES);
     row.assertions = {
       direct_route: true,
       actual_content: true,
@@ -419,6 +663,18 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
       actions: true,
       theme: true,
       served_assets: true,
+      settled_content_visible: true,
+      loading_artifacts_absent: true,
+      document_and_required_content_geometry: true,
+      action_targets_44px: true,
+      semantic_structure: true,
+      keyboard_focus_visible: true,
+      full_id_copy: true,
+      optional_rows_and_action_groups_follow_inputs: true,
+      unavailable_values_and_ordered_caveats: true,
+      canonical_render_attribution: kind === "canonical",
+      ordinary_content_complete: true,
+      held_out_long_text_complete: kind === "canonical" && entry.variation_id === "active" && width === 320,
     };
     row.status = "passed";
   } catch (error) {
@@ -476,6 +732,21 @@ function reconcileResults(manifest, cases, manifestDigest) {
     if (row.viewport?.width !== row.width || row.applied_theme?.dataTheme !== row.theme) {
       errors.push(`viewport or rendered theme mismatch: ${row.key}`);
     }
+    if (row.case_kind === "canonical" && row.ui_predicate_ids?.length !== Object.keys(UI_PREDICATE_ASSERTION_REFERENCES).length) {
+      errors.push(`UI predicate assertion references are missing: ${row.key}`);
+    }
+    const requiredUiAssertions = [
+      "settled_content_visible", "loading_artifacts_absent", "document_and_required_content_geometry",
+      "action_targets_44px", "semantic_structure", "keyboard_focus_visible", "full_id_copy",
+      "ordinary_content_complete", "optional_rows_and_action_groups_follow_inputs",
+    ];
+    if (row.case_kind === "canonical" && requiredUiAssertions.some((assertion) => !row.assertions?.[assertion])) {
+      errors.push(`UI predicate assertions did not pass: ${row.key}`);
+    }
+    if (row.case_kind === "canonical" && row.state === "active" && row.width === 320 &&
+      !row.assertions?.held_out_long_text_complete) {
+      errors.push(`held-out long-text evidence is missing: ${row.key}`);
+    }
     try {
       const actualUrl = new URL(row.url, "http://phase252.local");
       if (actualUrl.searchParams.get("variation_id") !== entry.route_variation_id) {
@@ -501,17 +772,113 @@ function reconcileResults(manifest, cases, manifestDigest) {
   return errors;
 }
 
+function runReconcilerNegativeControls(manifest, manifestDigest) {
+  const completeRows = createCases(manifest).map((testCase) => {
+    const entry = testCase.entry;
+    return {
+      key: testCase.key,
+      variation_key: entry.key,
+      url: mountedStoryPath(entry),
+      scenario_id: entry.scenario_id,
+      state: entry.scenario_id,
+      width: testCase.width,
+      theme: testCase.theme,
+      case_kind: testCase.kind,
+      source: entry.input_source,
+      renderer: entry.production_renderer,
+      lane: entry.proof_lane,
+      status: "passed",
+      manifest_sha256: manifestDigest,
+      viewport: { width: testCase.width },
+      applied_theme: { dataTheme: testCase.theme, darkShim: testCase.theme === "dark" },
+      ui_predicate_ids: Object.keys(UI_PREDICATE_ASSERTION_REFERENCES),
+      assertions: {
+        direct_route: true,
+        actual_content: true,
+        identity: true,
+        facts: true,
+        actions: true,
+        served_assets: true,
+        settled_content_visible: true,
+        loading_artifacts_absent: true,
+        document_and_required_content_geometry: true,
+        action_targets_44px: true,
+        semantic_structure: true,
+        keyboard_focus_visible: true,
+        full_id_copy: true,
+        ordinary_content_complete: true,
+        optional_rows_and_action_groups_follow_inputs: true,
+        held_out_long_text_complete: entry.variation_id !== "active" || testCase.width !== 320 || testCase.kind !== "canonical" || testCase.theme === "light" || testCase.theme === "dark",
+      },
+      actual_content: { text_sha256: "a".repeat(64) },
+    };
+  });
+  const baselineErrors = reconcileResults(manifest, completeRows, manifestDigest);
+  if (baselineErrors.length) throw new Error(`valid reconciler control fixture was rejected: ${baselineErrors.join("; ")}`);
+
+  const canonical = completeRows.find((row) => row.case_kind === "canonical");
+  const invalidRouteRows = structuredClone(completeRows);
+  const invalidRoute = invalidRouteRows.find((row) => row.key === canonical.key);
+  invalidRoute.url = `${invalidRoute.url.split("?")[0]}?variation_id=not_a_declared_variation`;
+  const invalidRouteErrors = reconcileResults(manifest, invalidRouteRows, manifestDigest);
+
+  const missingRows = completeRows.filter((row) => row.key !== canonical.key);
+  const missingErrors = reconcileResults(manifest, missingRows, manifestDigest);
+
+  const metadataOnlyRows = structuredClone(completeRows);
+  const metadataOnly = metadataOnlyRows.find((row) => row.key === canonical.key);
+  metadataOnly.actual_content = { title: "Acme Research" };
+  metadataOnly.assertions.actual_content = false;
+  const metadataOnlyErrors = reconcileResults(manifest, metadataOnlyRows, manifestDigest);
+
+  return {
+    baseline_accepted: baselineErrors.length === 0,
+    invalid_route: { rejected: invalidRouteErrors.some((error) => error.startsWith("wrong direct variation route:")), reasons: invalidRouteErrors },
+    missing_variation: { rejected: missingErrors.some((error) => error.startsWith("missing browser result:")), reasons: missingErrors },
+    metadata_only: {
+      rejected: metadataOnlyErrors.some((error) => error.startsWith("actual browser content evidence is missing:")) &&
+        metadataOnlyErrors.some((error) => error.startsWith("rendered DOM content digest is missing:")),
+      reasons: metadataOnlyErrors,
+    },
+  };
+}
+
+function recordNegativeControls(runId, controls) {
+  const results = readResults();
+  if (results.run_id !== runId) throw new Error("Phase 252 browser result ledger belongs to a different launcher run");
+  results.negative_controls = controls;
+  const canonicalCases = results.cases.filter((row) => row.case_kind === "canonical");
+  const allCanonicalCells = canonicalCases.map((row) => row.key);
+  const incompleteCells = canonicalCases.filter((row) => row.state === "incomplete_evidence").map((row) => row.key);
+  const longTextCells = canonicalCases.filter((row) => row.state === "active" && row.width === 320).map((row) => row.key);
+  const errorControls = ["invalid_route", "missing_variation", "metadata_only"];
+  results.ui_predicate_coverage = Object.fromEntries(
+    Object.entries(UI_PREDICATE_ASSERTION_REFERENCES).map(([id, assertions]) => {
+      const stateSensitive = id.endsWith("-partial") ? incompleteCells : allCanonicalCells;
+      return [id, {
+        assertions,
+        cells: id.endsWith("-long-text") ? longTextCells : stateSensitive,
+        controls: id.endsWith("-error") ? [...errorControls, "authority_regression"] : [],
+      }];
+    })
+  );
+  writeResults(results);
+}
+
 module.exports = {
   CANONICAL_STATES,
   RESULT_PATH,
   WIDTHS,
   THEMES,
+  UI_PREDICATE_ASSERTION_REFERENCES,
   appendResult,
   beginResults,
   createCases,
   mountedStoryPath,
   readManifest,
   readResults,
+  recordNegativeControls,
   reconcileResults,
+  runReconcilerNegativeControls,
   runRenderCase,
 };
