@@ -4,11 +4,11 @@ milestone: v1.68
 milestone_name: UI Storybook Stress Testing
 current_phase: 252
 current_phase_name: Production-backed Subscription Stories
-status: verifying
-stopped_at: Completed 252-08-PLAN.md
-last_updated: "2026-10-27T04:43:57.825Z"
-last_activity: 2026-10-26
-last_activity_desc: Completed Phase 252 plan 03; Phase 252 execution continues
+status: planning
+stopped_at: Phase 252 executed 8/8; verification found two prohibition evidence gaps
+last_updated: "2026-10-27T12:39:29.569Z"
+last_activity: 2026-10-27
+last_activity_desc: Phase 252 executed 8/8; 64/64 observable truths verified; two prohibition evidence descriptors remain unresolved
 state_head: 5ff88c478b19f19f3b77ca744447968ef90680c3
 progress:
   total_phases: 3
@@ -26,19 +26,19 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 252 — Production-backed Subscription Stories
-**Progress:** [░░░░░░░░░░] 0% — 0/3 phases and 3/8 planned execution plans complete; Phase 253/254 plan counts TBD.
+**Current focus:** Phase 252 execution complete (8/8 plans); gap planning for two intentionally unresolved prohibition evidence records. No observed requirement behavior gap.
+**Progress:** 0/3 phases formally complete; Phase 252 has 8/8 execution plans complete and 67/67 automated UAT items passed. Phase 253/254 plan counts TBD.
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
-Phase: 252 (Production-backed Subscription Stories) — EXECUTING
+Phase: 252 (Production-backed Subscription Stories) — EXECUTED; VERIFICATION GAPS
 Plan: 8 of 8
-Status: Phase complete — ready for verification
-Last activity: 2026-10-26 — Completed Phase 252 plan 03; Phase 252 execution continues
+Status: Execution complete; verification gaps found
+Last activity: 2026-10-27 — Current 18-command owner and 30 focused contracts pass; verifier recorded two prohibition evidence gaps.
 
 Progress: [░░░░░░░░░░] 0%
-Current milestone planning blockers: None known. Historical concerns and deferred correctness work below remain preserved with their original scope.
+Current milestone planning blockers: Two planned prohibitions remain unresolved without verification tier/descriptor; run `$gsd-plan-phase 252 --gaps`. All ten requirement behaviors have current evidence; no completed plan needs re-execution.
 
 ## Performance Metrics
 

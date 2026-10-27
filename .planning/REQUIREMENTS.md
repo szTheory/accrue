@@ -10,28 +10,28 @@ The owner approved the [reviewed subscription-first proposal](research/ui-qualit
 
 ### Production-backed stories and a real job
 
-- [x] **SBK-01**: Maintainer can locate the subscription job's real production callers and useful component → group → area → section → page compositions in one current coverage map, with reachable, uncovered and not-applicable states distinguished and remaining UI jobs visible as gaps.
-- [x] **SBK-02**: Reviewer can open each retained subscription situation from a stable story/variation URL with its actor, job, input source, production renderer and static-versus-mounted proof lane identified; generated discovery reconciles with actual rendered variations, and metadata-only markers cannot satisfy rendering coverage.
-- [x] **SBK-03**: Reviewer can inspect complete active, scheduled-cancellation and incomplete-evidence subscription areas rendered by the same production-owned summary/facts/action components used by the application, in light/dark and narrow/desktop contexts, without copied markup or story-local formatting, copy, eligibility or scoped-link rules.
+- [ ] **SBK-01**: Maintainer can locate the subscription job's real production callers and useful component → group → area → section → page compositions in one current coverage map, with reachable, uncovered and not-applicable states distinguished and remaining UI jobs visible as gaps.
+- [ ] **SBK-02**: Reviewer can open each retained subscription situation from a stable story/variation URL with its actor, job, input source, production renderer and static-versus-mounted proof lane identified; generated discovery reconciles with actual rendered variations, and metadata-only markers cannot satisfy rendering coverage.
+- [ ] **SBK-03**: Reviewer can inspect complete active, scheduled-cancellation and incomplete-evidence subscription areas rendered by the same production-owned summary/facts/action components used by the application, in light/dark and narrow/desktop contexts, without copied markup or story-local formatting, copy, eligibility or scoped-link rules.
 - [ ] **SBK-04**: Reviewer can inspect the actual subscription collection toolbar/result/table/pagination composition for new-host empty, filtered-empty, one-row, multiple-row and page-boundary situations, plus source-supported loading/error states; existing DataTable lifecycle and event targeting remain intact.
 - [ ] **SBK-05**: Reviewer can inspect a production-shared whole subscription detail screen composed from its real areas, including supported review/action presentation and legitimate incomplete evidence, without a story-specific parallel page or a universal page-schema refactor.
 - [ ] **SBK-06**: An authorized operator can follow the real subscription list → detail → supported action review/result → context-preserving return journey, with mounted automated proof of current scope, fresh authority, exact target, applicable step-up, dismissal without dispatch and truthful outcome; stories do not claim persistence or provider completion.
 
 ### Realistic shared scenario facts
 
-- [x] **SCEN-01**: Maintainer can select deterministic launch/new-account and growing-team situations in the existing Cadence world from one DB-free fact source, with explicit actor, billed entity, supported provider, lifecycle, fixed clock and stable identities, consumed through narrow story/test/seed adapters rather than a cross-package fixture framework.
-- [x] **SCEN-02**: Maintainer can reject impossible realistic fixtures before rendering using real domain helpers and cross-record invariants for enums, relationships, provider compatibility, money and chronology; deliberately invalid enum, orphan, provider, amount and timestamp controls demonstrate rejection without duplicating billing rules.
-- [x] **SCEN-03**: Maintainer can persist representative shared scenarios through a narrow disposable Repo adapter and prove actual database constraints and resulting record relationships match the source facts; DB-free validation alone is never reported as persisted conformance.
-- [x] **SCEN-04**: Reviewer can use plausible ordinary data and separately labelled held-out stress data without cross-lane contamination, real personal data or secrets; existing guarded writes and exact cleanup authority remain proved, including refusal to remove unrelated children.
+- [ ] **SCEN-01**: Maintainer can select deterministic launch/new-account and growing-team situations in the existing Cadence world from one DB-free fact source, with explicit actor, billed entity, supported provider, lifecycle, fixed clock and stable identities, consumed through narrow story/test/seed adapters rather than a cross-package fixture framework.
+- [ ] **SCEN-02**: Maintainer can reject impossible realistic fixtures before rendering using real domain helpers and cross-record invariants for enums, relationships, provider compatibility, money and chronology; deliberately invalid enum, orphan, provider, amount and timestamp controls demonstrate rejection without duplicating billing rules.
+- [ ] **SCEN-03**: Maintainer can persist representative shared scenarios through a narrow disposable Repo adapter and prove actual database constraints and resulting record relationships match the source facts; DB-free validation alone is never reported as persisted conformance.
+- [ ] **SCEN-04**: Reviewer can use plausible ordinary data and separately labelled held-out stress data without cross-lane contamination, real personal data or secrets; existing guarded writes and exact cleanup authority remain proved, including refusal to remove unrelated children.
 
 ### Safe review tooling and publication boundaries
 
-- [x] **LAB-01**: Maintainer can launch the reused lab with documented prerequisites, an explicit disposable database/namespace, distinct loopback port and process identity, refusal of unexpected existing-server reuse, and a negative control proving a normal test reset cannot alter review-session data; DB-free rendering is distinguished from DB-backed endpoint startup.
-- [x] **LAB-02**: An adopter can compile and use production packages without scenario payloads, fixture imports, Storybook runtime requirements or Node tooling, with production-route absence and package-content/compile checks; canonical example-host dev mounts and the independent component kitchen remain preserved.
+- [ ] **LAB-01**: Maintainer can launch the reused lab with documented prerequisites, an explicit disposable database/namespace, distinct loopback port and process identity, refusal of unexpected existing-server reuse, and a negative control proving a normal test reset cannot alter review-session data; DB-free rendering is distinguished from DB-backed endpoint startup.
+- [ ] **LAB-02**: An adopter can compile and use production packages without scenario payloads, fixture imports, Storybook runtime requirements or Node tooling, with production-route absence and package-content/compile checks; canonical example-host dev mounts and the independent component kitchen remain preserved.
 
 ### Recurring checks and affordable execution
 
-- [x] **CIQ-01**: A change confined to any consumed story, shared scenario, component, registry, generated manifest, token or runner root invokes its named required CI owner, proved by representative positive path/classifier controls and an unrelated-path negative control; in-job selection cannot substitute for workflow admission.
+- [ ] **CIQ-01**: A change confined to any consumed story, shared scenario, component, registry, generated manifest, token or runner root invokes its named required CI owner, proved by representative positive path/classifier controls and an unrelated-path negative control; in-job selection cannot substitute for workflow admission.
 - [ ] **CIQ-02**: Maintainer can see which changed/affected scenarios and stable sentinels the recurring browser checks ran, with total/selected IDs, explicit exclusions and conservative broad selection when dependency metadata is missing or ambiguous; isolated pure-story cases can be scheduled independently without unsafe parallel resets of shared mounted fixtures.
 - [ ] **CIQ-03**: Maintainer can compare selected subscription states in both themes and meaningful narrow/desktop contexts using the existing Linux visual-baseline owner, deterministic data/fonts/motion and current source/served-asset identity, with deliberate reviewed baseline changes and no masking of essential identity, money, state or actions.
 - [ ] **CIQ-04**: Maintainer can reproduce measured cold startup, warm preview/check and incremental CI costs and use a frozen affordable selection/budget before widening coverage; targets begin at under 10s warm preview where feasible, under 60s focused checks, at most 3min additional warm browser work and 5min incremental CI critical path, with deviations explicitly resolved without weakening existing checks.
@@ -78,19 +78,19 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SBK-01 | Phase 252 | Complete |
-| SBK-02 | Phase 252 | Complete |
-| SBK-03 | Phase 252 | Complete |
+| SBK-01 | Phase 252 | Gaps Found |
+| SBK-02 | Phase 252 | Gaps Found |
+| SBK-03 | Phase 252 | Gaps Found |
 | SBK-04 | Phase 253 | Pending |
 | SBK-05 | Phase 253 | Pending |
 | SBK-06 | Phase 253 | Pending |
-| SCEN-01 | Phase 252 | Complete |
-| SCEN-02 | Phase 252 | Complete |
-| SCEN-03 | Phase 252 | Complete |
-| SCEN-04 | Phase 252 | Complete |
-| LAB-01 | Phase 252 | Complete |
-| LAB-02 | Phase 252 | Complete |
-| CIQ-01 | Phase 252 | Complete |
+| SCEN-01 | Phase 252 | Gaps Found |
+| SCEN-02 | Phase 252 | Gaps Found |
+| SCEN-03 | Phase 252 | Gaps Found |
+| SCEN-04 | Phase 252 | Gaps Found |
+| LAB-01 | Phase 252 | Gaps Found |
+| LAB-02 | Phase 252 | Gaps Found |
+| CIQ-01 | Phase 252 | Gaps Found |
 | CIQ-02 | Phase 254 | Pending |
 | CIQ-03 | Phase 254 | Pending |
 | CIQ-04 | Phase 254 | Pending |
