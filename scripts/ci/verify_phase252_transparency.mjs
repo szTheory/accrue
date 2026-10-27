@@ -10,6 +10,10 @@ const LAB_TEST = "scripts/ci/verify_phase252_lab_presentation.test.mjs";
 const LAB_CLEAN = "scripts/ci/fixtures/phase252-transparency/lab-clean.json";
 const LAB_VIOLATION = "scripts/ci/fixtures/phase252-transparency/lab-violation.json";
 const LAB_ASSERTION = "lab presentation states disposable static limits";
+const HELDOUT_TEST = "scripts/ci/verify_phase252_heldout_attribution.test.mjs";
+const HELDOUT_CLEAN = "scripts/ci/fixtures/phase252-transparency/heldout-clean.json";
+const HELDOUT_VIOLATION = "scripts/ci/fixtures/phase252-transparency/heldout-violation.json";
+const HELDOUT_ASSERTION = "held-out attribution identifies synthetic stress evidence";
 
 function fail(message) {
   throw new Error(`Phase252 transparency: ${message}`);
@@ -69,6 +73,55 @@ function manifestEntries(value) {
   });
 }
 
+function heldOutAttribution(root) {
+  const relative = "dev_support/ui_scenarios/cadence_subscriptions.exs";
+  const source = readRequired(root, relative);
+  const matches = [...source.matchAll(/(@doc\s+"([^"]+)"\s*\n\s*def held_out!\s*\(:long_text\)\s+do([\s\S]*?)\n\s*end(?=\n\s*def held_out!\(case_name\)))/g)];
+  if (matches.length !== 1) fail("held-out subject collection: held_out!(:long_text) attribution block is missing or duplicated");
+  const functionBlock = requireText(matches[0][1], "held_out!(:long_text) source block");
+  const lane = functionBlock.match(/Map\.put\(\s*:lane\s*,\s*:(\w+)\s*\)/)?.[1];
+  const caseName = functionBlock.match(/Map\.put\(\s*:held_out_case\s*,\s*:(\w+)\s*\)/)?.[1];
+  return {
+    source: relative,
+    documentation: requireText(matches[0][2], "held-out source documentation"),
+    function_block: functionBlock,
+    lane: requireText(lane, "held-out source lane"),
+    case: requireText(caseName, "held-out source case"),
+  };
+}
+
+function ordinaryAttribution(root) {
+  const relative = "accrue_admin/storybook/_support/subscription_scenarios.ex";
+  const source = readRequired(root, relative);
+  const clauses = [...source.matchAll(/defp validate_scenario\(%\{lane: :ordinary, scenario: scenario\}\) do([\s\S]*?)\n  end/g)];
+  const refusal = [...source.matchAll(/defp validate_scenario\(_facts\),\s*do:\s*\{:error,\s*"([^"]+)"\}/g)];
+  if (clauses.length !== 1 || refusal.length !== 1) fail("held-out subject collection: ordinary-lane validation or refusal clause is missing or duplicated");
+  const validationBlock = requireText(clauses[0][0], "ordinary-lane validation block");
+  const lane = validationBlock.match(/lane:\s*:(\w+)/)?.[1];
+  return {
+    source: relative,
+    validation_block: `${validationBlock}\n${refusal[0][0]}`,
+    lane: requireText(lane, "ordinary adapter lane"),
+    refusal: requireText(refusal[0][1], "ordinary adapter refusal"),
+  };
+}
+
+function browserHeldOutEvidence(root) {
+  const relative = "accrue_admin/e2e/phase252-story-helpers.js";
+  const source = readRequired(root, relative);
+  const matches = [...source.matchAll(/async function assertHeldOutLongText\(page,\s*ordinaryStory,\s*theme\)\s*\{([\s\S]*?)\n\}/g)];
+  if (matches.length !== 1) fail("held-out subject collection: assertHeldOutLongText function is missing or duplicated");
+  const functionBlock = requireText(matches[0][0], "assertHeldOutLongText source block");
+  const labels = [...functionBlock.matchAll(/\blabel\s*:\s*["']([^"']+)["']/g)];
+  if (labels.length !== 1) fail("held-out subject collection: browser evidence label is missing or duplicated");
+  return {
+    source: relative,
+    function_name: "assertHeldOutLongText",
+    function_block: functionBlock,
+    label: requireText(labels[0][1], "browser held-out evidence label"),
+  };
+}
+
 /**
  * Collect only the named public surfaces: guide prose, SubscriptionDetail's moduledoc,
  * and five public attribution fields from every generated manifest entry. This lexical
@@ -87,6 +140,9 @@ export function collectLabSubject(root = ROOT) {
     guide: { source: guidePath, text: guide },
     story: { source: storyPath, moduledoc: moduledocFrom(storySource) },
     manifest: { source: manifestPath, entries: manifestEntries(manifest) },
+    held_out: heldOutAttribution(root),
+    ordinary: ordinaryAttribution(root),
+    browser_evidence: browserHeldOutEvidence(root),
   };
 }
 
@@ -126,6 +182,17 @@ const LAB_CLAIMS = Object.freeze([
   {
     id: "persistence",
     pattern: /\b(?:the\s+)?(?:lab|storybook|subscription\s+story|story|preview|rendered\s+controls)\s+(?:proves?|shows?|confirms?|demonstrates?|establishes?)\b[^.!?\n]{0,80}\b(?:persistence|persisted\s+billing\s+state)\b/i,
+  },
+]);
+
+const HELDOUT_CLAIMS = Object.freeze([
+  {
+    id: "representative-customer-behavior",
+    pattern: /\bheld-out\s+(?:stress\s+)?(?:input|facts|scenario|scenarios)\s+(?:represents?|reflects?|models?)\s+(?:typical|representative)\s+(?:customer|adopter)\s+(?:behavior|usage)\b/i,
+  },
+  {
+    id: "real-adopter-usage",
+    pattern: /\bheld-out\s+(?:stress\s+)?(?:input|facts|scenario|scenarios)\s+(?:is|are)\s+(?:real|actual)\s+adopter\s+(?:usage|behavior|evidence)\b/i,
   },
 ]);
 
@@ -184,6 +251,53 @@ export function assertLabPresentation(subject) {
   return true;
 }
 
+/** Check only the guide's held-out claims and the three extracted source-attribution contracts. */
+export function assertHeldoutAttribution(subject) {
+  assertLabPresentation(subject);
+  const heldOut = subject.held_out;
+  const ordinary = subject.ordinary;
+  const browser = subject.browser_evidence;
+  const heldOutSource = requireText(heldOut?.source, "held-out assertion: source path");
+  const heldOutDoc = requireText(heldOut?.documentation, "held-out assertion: source documentation");
+  const heldOutBlock = requireText(heldOut?.function_block, "held-out assertion: source lane block");
+  const heldOutLane = requireText(heldOut?.lane, "held-out assertion: source lane");
+  const heldOutCase = requireText(heldOut?.case, "held-out assertion: source case");
+  const ordinarySource = requireText(ordinary?.source, "held-out assertion: ordinary source path");
+  const ordinaryBlock = requireText(ordinary?.validation_block, "held-out assertion: ordinary validation block");
+  const ordinaryLane = requireText(ordinary?.lane, "held-out assertion: ordinary lane");
+  const ordinaryRefusal = requireText(ordinary?.refusal, "held-out assertion: ordinary refusal");
+  const browserSource = requireText(browser?.source, "held-out assertion: browser source path");
+  const browserFunction = requireText(browser?.function_name, "held-out assertion: browser function name");
+  const browserLabel = requireText(browser?.label, "held-out assertion: browser evidence label");
+  requireText(browser?.function_block, "held-out assertion: browser source block");
+
+  if (heldOutSource !== "dev_support/ui_scenarios/cadence_subscriptions.exs" ||
+      !/separately labelled held-out text stress input, never an ordinary variation/i.test(heldOutDoc) ||
+      heldOutLane !== "held_out" || heldOutCase !== "long_text" ||
+      !/Map\.put\(\s*:lane\s*,\s*:held_out\s*\)/.test(heldOutBlock) ||
+      !/Map\.put\(\s*:held_out_case\s*,\s*:long_text\s*\)/.test(heldOutBlock)) {
+    fail("held-out assertion: source facts are not separately attributed to the held_out long-text lane");
+  }
+  if (ordinarySource !== "accrue_admin/storybook/_support/subscription_scenarios.ex" ||
+      ordinaryLane !== "ordinary" || ordinaryRefusal !== "scenario must declare the ordinary review lane" ||
+      !/lane: :ordinary, scenario: scenario/.test(ordinaryBlock) ||
+      !/scenario must be a declared ordinary Cadence fact/.test(ordinaryBlock)) {
+    fail("held-out assertion: ordinary adapter no longer accepts only its ordinary lane");
+  }
+  if (browserSource !== "accrue_admin/e2e/phase252-story-helpers.js" ||
+      browserFunction !== "assertHeldOutLongText" || browserLabel !== "held-out long text (not manifest fixture)") {
+    fail("held-out assertion: browser stress clone is not labelled separately from manifest fixtures");
+  }
+  if (!/long-text browser clone is a separate synthetic stress input,[\s\S]{0,100}distinct from the manifest fixture entries[\s\S]{0,120}CadenceSubscriptionFacts\.held_out!\/1`?\s+source/i.test(subject.guide.text)) {
+    fail("held-out assertion: guide conflates the browser clone with source held-out facts or manifest fixtures");
+  }
+
+  for (const { id, pattern } of HELDOUT_CLAIMS) {
+    if (pattern.test(subject.guide.text)) fail(`held-out assertion: contradictory public claim ${id}`);
+  }
+  return true;
+}
+
 function tapSummary(output) {
   const count = (name) => {
     const match = output.match(new RegExp(`^# ${name} (\\d+)$`, "m"));
@@ -196,13 +310,13 @@ function tapSummary(output) {
   return { planned: plan ? Number(plan[1]) : null, records, tests: count("tests"), pass: count("pass"), fail: count("fail"), cancelled: count("cancelled"), skipped: count("skipped"), todo: count("todo") };
 }
 
-function runLabTarget(subjectPath = null) {
+function runTestTargets(testFiles, subjectPath = null) {
   const env = { ...process.env };
   delete env.NODE_TEST_CONTEXT;
   delete env.NODE_OPTIONS;
   delete env.GSD_PROHIB_SUBJECT;
   if (subjectPath) env.GSD_PROHIB_SUBJECT = path.resolve(ROOT, subjectPath);
-  const result = spawnSync(process.execPath, ["--test", "--test-reporter=tap", LAB_TEST], {
+  const result = spawnSync(process.execPath, ["--test", "--test-reporter=tap", ...testFiles], {
     cwd: ROOT,
     env,
     encoding: "utf8",
@@ -212,6 +326,10 @@ function runLabTarget(subjectPath = null) {
   });
   if (result.error || result.signal || result.status === null) fail("lab self-test child failed or exceeded its 10-second bound");
   return { status: result.status, output: result.stdout || "" };
+}
+
+function runLabTarget(subjectPath = null) {
+  return runTestTargets([LAB_TEST], subjectPath);
 }
 
 function requireLabControl(label, subjectPath, expectedStatus, expectedExit, expectedDiagnostic = null) {
@@ -242,13 +360,54 @@ export function selfTestLab() {
   return controls;
 }
 
+function requireHeldoutControl(label, testFiles, subjectPath, expectedFailure = null) {
+  const result = runTestTargets(testFiles, subjectPath);
+  const tap = tapSummary(result.output);
+  if (tap.planned === null || tap.planned <= 0 || tap.records.length !== tap.planned || tap.tests !== tap.planned) {
+    fail(`held-out self-test ${label} has a missing or vacuous named TAP report`);
+  }
+  if (tap.cancelled !== 0 || tap.skipped !== 0 || tap.todo !== 0) fail(`held-out self-test ${label} has skipped, TODO, or cancelled tests`);
+  const expectedNames = testFiles.includes(LAB_TEST) ? [LAB_ASSERTION, HELDOUT_ASSERTION] : [HELDOUT_ASSERTION];
+  for (const name of expectedNames) {
+    const matches = tap.records.filter((record) => record.name === name);
+    const status = name === expectedFailure ? "not ok" : "ok";
+    if (matches.length !== 1 || matches[0].status !== status) {
+      fail(`held-out self-test ${label} did not produce the required named ${status === "ok" ? "GREEN" : "RED"}`);
+    }
+  }
+  const failures = tap.records.filter((record) => record.status === "not ok").map((record) => record.name);
+  if (expectedFailure === null) {
+    if (result.status !== 0 || failures.length !== 0 || tap.pass !== tap.tests || tap.fail !== 0) {
+      fail(`held-out self-test ${label} is not a clean non-vacuous pass`);
+    }
+  } else if (result.status !== 1 || failures.length !== 1 || failures[0] !== expectedFailure || tap.fail !== 1 ||
+      !result.output.includes("Phase252 transparency: held-out assertion: contradictory public claim representative-customer-behavior")) {
+    fail(`held-out self-test ${label} RED lacks the intended content diagnostic`);
+  }
+  return { label, tests: tap.tests, pass: tap.pass, fail: tap.fail };
+}
+
+export function selfTestHeldout(includeLabTarget = false) {
+  const testFiles = includeLabTarget ? [LAB_TEST, HELDOUT_TEST] : [HELDOUT_TEST];
+  const controls = [
+    requireHeldoutControl("current", testFiles, null),
+    requireHeldoutControl("clean", testFiles, HELDOUT_CLEAN),
+    requireHeldoutControl("violation", testFiles, HELDOUT_VIOLATION, HELDOUT_ASSERTION),
+  ];
+  const targetNames = testFiles.includes(LAB_TEST) ? `${LAB_ASSERTION};${HELDOUT_ASSERTION}` : HELDOUT_ASSERTION;
+  process.stdout.write(`PASS Phase 252 held-out transparency: controls=${controls.map(({ label }) => label).join(",")} target_tests=${controls.map(({ tests }) => tests).join(",")} assertions=${targetNames}\n`);
+  return controls;
+}
+
 function main() {
   const args = process.argv.slice(2);
   if (!args.includes("--self-test")) fail("usage: node scripts/ci/verify_phase252_transparency.mjs --self-test --only lab");
   const onlyIndex = args.indexOf("--only");
-  const only = onlyIndex === -1 ? "lab" : args[onlyIndex + 1];
-  if (only !== "lab" || (onlyIndex !== -1 && !only)) fail("task 09-01 supports --only lab");
-  selfTestLab();
+  const only = onlyIndex === -1 ? "both" : args[onlyIndex + 1];
+  if (only === "lab") selfTestLab();
+  else if (only === "heldout") selfTestHeldout(false);
+  else if (only === "both") selfTestHeldout(true);
+  else fail("expected --only lab, --only heldout, or the default both-target mode");
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
