@@ -106,16 +106,19 @@ test("accepts loopback PostgreSQL inet addresses with a host mask", async () => 
   });
   let createdDatabase;
 
-  const result = await assert.doesNotReject(() => prepareLaunch(config, {
-    readServerIdentity: async () => ({
-      database: "postgres",
-      role: "postgres",
-      address: "127.0.0.1/32",
-    }),
-    databaseExists: async () => false,
-    portAvailable: async () => true,
-    createDatabase: async (database) => { createdDatabase = database; },
-  }));
+  let result;
+  await assert.doesNotReject(async () => {
+    result = await prepareLaunch(config, {
+      readServerIdentity: async () => ({
+        database: "postgres",
+        role: "postgres",
+        address: "127.0.0.1/32",
+      }),
+      databaseExists: async () => false,
+      portAvailable: async () => true,
+      createDatabase: async (database) => { createdDatabase = database; },
+    });
+  });
 
   assert.equal(createdDatabase, config.database);
   assert.equal(result.serverAddress, "127.0.0.1");

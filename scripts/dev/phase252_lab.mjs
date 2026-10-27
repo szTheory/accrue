@@ -21,7 +21,19 @@ function loopbackHost(host) {
 }
 
 function loopbackAddress(address) {
-  return address === "::1" || (isIPv4(address) && Number(address.split(".")[0]) === 127);
+  if (typeof address !== "string") return false;
+  const [host, mask, ...extra] = address.split("/");
+  if (extra.length > 0) return false;
+  if (mask != null) {
+    const expectedMask = host === "::1" ? "128" : isIPv4(host) ? "32" : null;
+    if (mask !== expectedMask) return false;
+  }
+  return host === "::1" || (isIPv4(host) && Number(host.split(".")[0]) === 127);
+}
+
+function normalizedLoopbackAddress(address) {
+  if (!loopbackAddress(address)) return null;
+  return address.split("/", 1)[0];
 }
 
 export function buildLaunchConfig(options = {}) {
@@ -72,10 +84,11 @@ export function buildLaunchConfig(options = {}) {
 
 export async function prepareLaunch(config, adapters) {
   const server = await adapters.readServerIdentity();
+  const serverAddress = normalizedLoopbackAddress(server.address);
   if (
     server.database !== config.controlDatabase ||
     server.role !== config.role ||
-    !loopbackAddress(server.address)
+    serverAddress == null
   ) {
     fail("PostgreSQL server, role, or control database identity does not match the requested local lane");
   }
@@ -88,7 +101,7 @@ export async function prepareLaunch(config, adapters) {
 
   await adapters.beforeCreate?.();
   await adapters.createDatabase(config.database);
-  return { database: config.database, serverAddress: server.address, created: true };
+  return { database: config.database, serverAddress, created: true };
 }
 
 export function ownsProcess(manifest, observed) {
@@ -305,7 +318,7 @@ function psql(config, sql) {
 async function readServerIdentity(config) {
   const [database, role, address] = psql(
     config,
-    "SELECT current_database(), current_user, COALESCE(inet_server_addr()::text, 'local-socket');",
+    "SELECT current_database(), current_user, COALESCE(host(inet_server_addr()), 'local-socket');",
   ).split("\t");
   return { database, role, address };
 }
@@ -330,10 +343,16 @@ async function dropDatabase(config) {
 }
 
 function processInfo(pid) {
-  const output = execFileSync("ps", ["-p", String(pid), "-o", "pid=", "-o", "ppid=", "-o", "lstart=", "-o", "command="], {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "ignore"],
-  }).trim();
+  let output;
+  try {
+    output = execFileSync("ps", ["-p", String(pid), "-o", "pid=", "-o", "ppid=", "-o", "lstart=", "-o", "command="], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch (error) {
+    if (error.status === 1 && !String(error.stderr || "").trim()) return null;
+    throw error;
+  }
   const match = output.match(/^(\d+)\s+(\d+)\s+(.{24})\s+([\s\S]+)$/);
   if (!match) return null;
   const command = match[4].trim();
@@ -344,6 +363,40 @@ function processInfo(pid) {
     command,
     commandHash: createHash("sha256").update(command).digest("hex"),
   };
+}
+
+async function refreshOwnedProcessIdentity(child, manifest) {
+  const current = processInfo(manifest.pid);
+  if (!current) {
+    await new Promise((resolve) => {
+      if (child.exitCode != null || child.signalCode != null) return resolve();
+      const timer = setTimeout(resolve, 1_000);
+      child.once("exit", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+    return false;
+  }
+
+  const parent = processInfo(manifest.parentPid);
+  if (
+    !current ||
+    !parent ||
+    current.pid !== manifest.pid ||
+    current.startIdentity !== manifest.startIdentity ||
+    current.parentPid !== manifest.parentPid ||
+    parent.startIdentity !== manifest.parentStartIdentity ||
+    parent.commandHash !== manifest.parentCommandHash
+  ) {
+    return false;
+  }
+
+  // Script shims such as asdf's `mix` exec into the real runtime under the same
+  // PID. Refresh the exact command only after the PID/start/parent proof holds.
+  manifest.observedCommand = current.command;
+  manifest.commandHash = current.commandHash;
+  return true;
 }
 
 function displayedCommand(command, args) {
@@ -489,6 +542,7 @@ export async function openOwnedSession(options) {
       cwd: options.cwd || SCRIPT_ROOT,
       env: runtimeEnv(config, identity),
       shell: false,
+      detached: options.detached === true,
       stdio: "inherit",
     });
     childExit = new Promise((resolve) => {
@@ -541,7 +595,9 @@ export async function openOwnedSession(options) {
       cleanupPromise = (async () => {
       let safeToDrop = !child || child.exitCode != null || child.signalCode != null;
       if (child && !safeToDrop) {
-        safeToDrop = await terminateOwnedChild(child, manifest);
+        const refreshed = await refreshOwnedProcessIdentity(child, manifest);
+        if (refreshed) safeToDrop = await terminateOwnedChild(child, manifest);
+        else safeToDrop = child.exitCode != null || child.signalCode != null;
         if (!safeToDrop) fail("child PID no longer matches its start identity, command, database, port and nonce; preserving resources");
       }
 
@@ -581,7 +637,9 @@ export async function openOwnedSession(options) {
   } catch (error) {
     let safeToDrop = !child || child.exitCode != null || child.signalCode != null;
     if (child && !safeToDrop && manifest) {
-      safeToDrop = await terminateOwnedChild(child, manifest);
+      const refreshed = await refreshOwnedProcessIdentity(child, manifest);
+      if (refreshed) safeToDrop = await terminateOwnedChild(child, manifest);
+      else safeToDrop = child.exitCode != null || child.signalCode != null;
     } else if (child && !safeToDrop) {
       safeToDrop = false;
     }
@@ -641,7 +699,14 @@ async function runOwned(options, command, args, cwd, waitForHealth = false) {
     pgRole: process.env.PGUSER || "postgres",
     controlDatabase: options.controlDatabase || "postgres",
   };
-  const handle = await openOwnedSession({ ...config, command, args, cwd, waitForHealth });
+  const handle = await openOwnedSession({
+    ...config,
+    command,
+    args,
+    cwd,
+    waitForHealth,
+    detached: options.detached === true,
+  });
   let interrupted = false;
   const onSignal = async () => {
     interrupted = true;
@@ -726,7 +791,7 @@ async function main(argv) {
       pgRole: process.env.PGUSER || "postgres",
     });
     return runOwned(
-      { ...options, ...config },
+      { ...options, ...config, detached: true },
       "mix",
       ["accrue_admin.e2e.server"],
       ADMIN_ROOT,

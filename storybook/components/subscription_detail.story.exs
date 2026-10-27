@@ -35,7 +35,7 @@ defmodule AccrueAdmin.Storybook.Components.SubscriptionDetail do
 
   def subscription_detail_story(assigns) do
     assigns
-    |> Map.delete(:__changed__)
+    |> Map.drop([:__changed__, :id])
     |> SubscriptionScenarios.assigns!()
     |> then(&SubscriptionLive.subscription_area/1)
   end

@@ -202,7 +202,7 @@ defmodule AccrueAdmin.E2E.Server do
       role: identity.role,
       address: identity.pg_host,
       port: Keyword.get(repo, :port, 5432),
-      partition: Integer.to_string(identity.partition),
+      partition: identity.partition,
       endpoint_port: identity.port
     }
 
@@ -251,7 +251,7 @@ defmodule AccrueAdmin.E2E.Server do
     try do
       case Postgrex.query(
              connection,
-             "SELECT current_database(), current_user, inet_server_addr()::text",
+             "SELECT current_database(), current_user, host(inet_server_addr())",
              []
            ) do
         {:ok, %{rows: [[database, role, address]]}}
@@ -293,7 +293,7 @@ defmodule AccrueAdmin.E2E.Server do
         "role" => identity.role,
         "address" => identity.address,
         "port" => identity.port,
-        "partition" => Integer.to_string(identity.partition),
+        "partition" => identity.partition,
         "pid" => String.to_integer(System.pid()),
         "ready" => false
       }

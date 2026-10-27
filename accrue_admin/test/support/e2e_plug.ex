@@ -35,7 +35,8 @@ defmodule AccrueAdmin.E2E.Plug do
           %{ok: true}
       end
 
-    json(conn, 200, payload)
+    status = if identity && identity.ready == false, do: 503, else: 200
+    json(conn, status, payload)
   end
 
   get "/login" do
