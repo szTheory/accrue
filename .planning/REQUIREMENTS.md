@@ -22,11 +22,11 @@ The owner approved the [reviewed subscription-first proposal](research/ui-qualit
 - [x] **SCEN-01**: Maintainer can select deterministic launch/new-account and growing-team situations in the existing Cadence world from one DB-free fact source, with explicit actor, billed entity, supported provider, lifecycle, fixed clock and stable identities, consumed through narrow story/test/seed adapters rather than a cross-package fixture framework.
 - [x] **SCEN-02**: Maintainer can reject impossible realistic fixtures before rendering using real domain helpers and cross-record invariants for enums, relationships, provider compatibility, money and chronology; deliberately invalid enum, orphan, provider, amount and timestamp controls demonstrate rejection without duplicating billing rules.
 - [ ] **SCEN-03**: Maintainer can persist representative shared scenarios through a narrow disposable Repo adapter and prove actual database constraints and resulting record relationships match the source facts; DB-free validation alone is never reported as persisted conformance.
-- [ ] **SCEN-04**: Reviewer can use plausible ordinary data and separately labelled held-out stress data without cross-lane contamination, real personal data or secrets; existing guarded writes and exact cleanup authority remain proved, including refusal to remove unrelated children.
+- [x] **SCEN-04**: Reviewer can use plausible ordinary data and separately labelled held-out stress data without cross-lane contamination, real personal data or secrets; existing guarded writes and exact cleanup authority remain proved, including refusal to remove unrelated children.
 
 ### Safe review tooling and publication boundaries
 
-- [ ] **LAB-01**: Maintainer can launch the reused lab with documented prerequisites, an explicit disposable database/namespace, distinct loopback port and process identity, refusal of unexpected existing-server reuse, and a negative control proving a normal test reset cannot alter review-session data; DB-free rendering is distinguished from DB-backed endpoint startup.
+- [x] **LAB-01**: Maintainer can launch the reused lab with documented prerequisites, an explicit disposable database/namespace, distinct loopback port and process identity, refusal of unexpected existing-server reuse, and a negative control proving a normal test reset cannot alter review-session data; DB-free rendering is distinguished from DB-backed endpoint startup.
 - [ ] **LAB-02**: An adopter can compile and use production packages without scenario payloads, fixture imports, Storybook runtime requirements or Node tooling, with production-route absence and package-content/compile checks; canonical example-host dev mounts and the independent component kitchen remain preserved.
 
 ### Recurring checks and affordable execution
@@ -87,8 +87,8 @@ Each requirement is assigned to exactly one of the approved Phases 252–254. Al
 | SCEN-01 | Phase 252 | Complete |
 | SCEN-02 | Phase 252 | Complete |
 | SCEN-03 | Phase 252 | Pending |
-| SCEN-04 | Phase 252 | Pending |
-| LAB-01 | Phase 252 | Pending |
+| SCEN-04 | Phase 252 | Complete |
+| LAB-01 | Phase 252 | Complete |
 | LAB-02 | Phase 252 | Pending |
 | CIQ-01 | Phase 252 | Pending |
 | CIQ-02 | Phase 254 | Pending |
