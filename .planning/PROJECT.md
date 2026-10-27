@@ -803,11 +803,14 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-- [ ] **SBK-01..SBK-03, SCEN-01..SCEN-04, LAB-01..LAB-02, CIQ-01** — real subscription-area stories, reachable variation coverage, valid shared facts, isolated dev/test lab and first-slice CI admission (Phase 252).
 - [ ] **SBK-04..SBK-06, UXQ-01, UXQ-03** — actual group/full-page composition, mounted list/detail/action journey, mobile/theme behavior and coherent user-facing copy (Phase 253).
 - [ ] **CIQ-02..CIQ-04, UXQ-02, UXQ-04, CURATE-01..CURATE-02** — conservative recurring checks, visual evidence and measured budgets, bounded design review, verified fixes and curated next-job coverage (Phase 254).
 
-Canonical atomic requirements and traceability: [REQUIREMENTS.md](REQUIREMENTS.md). No v1.68 implementation is complete yet.
+Canonical atomic requirements and traceability: [REQUIREMENTS.md](REQUIREMENTS.md). Phase 252 is complete; Phases 253–254 remain active.
+
+### Validated v1.68 (Phase 252 complete 2026-10-27)
+
+- ✓ **SBK-01..SBK-03, SCEN-01..SCEN-04, LAB-01..LAB-02, CIQ-01** — production-backed subscription areas, deterministic ordinary/held-out facts, isolated lab, package boundaries and required CI. Independent verification 73/73, fresh required lanes 21/21, executable UAT 124/124. Static and synthetic evidence limits stay explicit; mounted journeys and recurring curation remain Phases 253–254.
 
 ### Validated v1.66 (Phases245–248; archived2026-10-12)
 
@@ -1110,4 +1113,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-26 after owner approval of v1.68 UI Storybook Stress Testing; v1.67 remains shipped as 1.7.0.*
+*Last updated: 2026-10-27 after Phase 252 completion; Phase 253 is ready to plan. v1.67 remains shipped as 1.7.0.*

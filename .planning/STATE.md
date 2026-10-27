@@ -2,49 +2,49 @@
 gsd_state_version: "1.0"
 milestone: v1.68
 milestone_name: UI Storybook Stress Testing
-current_phase: 252
-current_phase_name: Production-backed Subscription Stories
-status: executing
-stopped_at: Completed 252-10 plan; awaiting parent-owned independent phase verification
-last_updated: "2026-10-27T15:06:40.375Z"
+current_phase: 253
+current_phase_name: Real Groups and a Whole Subscription Job
+status: planning
+stopped_at: Phase 252 complete, ready to plan Phase 253
+last_updated: "2026-10-27T15:41:31.209Z"
 last_activity: 2026-10-27
-last_activity_desc: Phase 252 plan 10 completed; independent verification remains
-state_head: 8b6c6f56159407e36a10bf6be3d19d8323c97165
+last_activity_desc: Phase 252 complete, transitioned to Phase 253
+state_head: 2d5d06e2006fc23dd77487dd8d53910c03659384
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 10
   completed_plans: 10
-  percent: 0
+  percent: 33
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-26)
+See: .planning/PROJECT.md (updated 2026-10-27)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 252 — Production-backed Subscription Stories
-**Progress:** [░░░░░░░░░░] 0%
+**Current focus:** Phase 253 — Real Groups and a Whole Subscription Job
+**Progress:** [███░░░░░░░] 33%
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
-Phase: 252 (Production-backed Subscription Stories) — EXECUTING
-Plan: 10 of 10
-Status: Awaiting independent phase verification
-Last activity: 2026-10-27 — Phase 252 plan 10 execution completed
+Phase: 253 — Real Groups and a Whole Subscription Job
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-27 — Phase 252 complete, transitioned to Phase 253
 
-Progress: [░░░░░░░░░░] 0%
-Current milestone planning blockers: None. All 10 Phase 252 plans have summaries. Fresh native descriptor proof, required-owner evidence, and generated UAT are recorded; the phase remains in progress until the parent-owned independent verifier updates the preserved gaps_found report.
+Progress: [███░░░░░░░] 33%
+Current milestone planning blockers: None. Phase 252 passed independent verification (73/73), the fresh 21-lane aggregate, and executable UAT (124/124). Both prohibition gaps and review findings CR-03/CR-04 are closed. Four unclassified assumptions remain explicit planning debt; six nonblocking summary reference-parser warnings remain recorded by phase.complete.
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 130
+- Total plans completed: 140
 - Average duration: —
 - Total execution time: —
 
@@ -75,6 +75,7 @@ Current milestone planning blockers: None. All 10 Phase 252 plans have summaries
 | 246 | 6 | - | - |
 | 247 | 8 | - | - |
 | 248 | 2 | - | - |
+| 252 | 10 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -642,8 +643,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T15:06:40.306Z
-Stopped at: Completed 252-10 plan; awaiting parent-owned independent phase verification
+Last session: 2026-10-27T15:41:31.162Z
+Stopped at: Phase 252 complete, ready to plan Phase 253
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -773,6 +774,6 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Execute Phase 252 gap closure with `$gsd-execute-phase 252 --gaps-only`; 2 new plans / 5 automated tasks / waves 6–7. Independent plan checking and all 10 requirement coverage checks passed; original plans 01–08 remain executed.
+- Plan Phase 253 with `$gsd-discuss-phase 253` (or `$gsd-plan-phase 253` using approved research). Phase 252 is complete: 10/10 plans, 73/73 verified truths, 21/21 required lanes, and 124/124 automated UAT tests. Six reference-parser warnings are nonblocking and historical summaries remain preserved.
 - Carry Phase 252's actual narrow/light/dark render checks, reset-isolation negative control, production package boundaries and required CI path admission into acceptance. The [approved research](research/ui-quality-engine/RECOMMENDATIONS.md) is authoritative; broader horizons remain outside v1.68.
 - Measure first-slice cold/warm costs before freezing budgets. Keep the independent HIGH event-session-timezone correctness candidate visible; fixed story clocks do not resolve it.

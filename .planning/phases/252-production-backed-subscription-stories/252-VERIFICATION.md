@@ -1,8 +1,8 @@
 ---
 phase: 252-production-backed-subscription-stories
-verified: 2026-10-27T12:37:58Z
-status: gaps_found
-score: "64/64 must-haves verified"
+verified: 2026-10-27T15:39:22Z
+status: passed
+score: "73/73 observable truths verified"
 covered_files:
   - ".github/workflows/accrue_admin_browser.yml"
   - ".github/workflows/ci.yml"
@@ -22,12 +22,18 @@ covered_files:
   - ".planning/phases/252-production-backed-subscription-stories/252-07-SUMMARY.md"
   - ".planning/phases/252-production-backed-subscription-stories/252-08-PLAN.md"
   - ".planning/phases/252-production-backed-subscription-stories/252-08-SUMMARY.md"
+  - ".planning/phases/252-production-backed-subscription-stories/252-09-PLAN.md"
+  - ".planning/phases/252-production-backed-subscription-stories/252-09-SUMMARY.md"
+  - ".planning/phases/252-production-backed-subscription-stories/252-10-PLAN.md"
+  - ".planning/phases/252-production-backed-subscription-stories/252-10-SUMMARY.md"
+  - ".planning/phases/252-production-backed-subscription-stories/252-10-prohibition-evidence.json"
   - ".planning/phases/252-production-backed-subscription-stories/252-REVIEW-DISPOSITION.md"
-  - ".planning/phases/252-production-backed-subscription-stories/252-REVIEW-FIX.md"
+  - ".planning/phases/252-production-backed-subscription-stories/252-REVIEW-FIX-2.md"
   - ".planning/phases/252-production-backed-subscription-stories/252-REVIEW.md"
   - ".planning/phases/252-production-backed-subscription-stories/252-SECURITY.md"
   - ".planning/phases/252-production-backed-subscription-stories/252-UAT.md"
   - ".planning/phases/252-production-backed-subscription-stories/252-UI-REVIEW.md"
+  - ".planning/phases/252-production-backed-subscription-stories/252-UI-SPEC.md"
   - ".planning/phases/252-production-backed-subscription-stories/252-VALIDATION.md"
   - "accrue/mix.exs"
   - "accrue_admin/assets/css/app.css"
@@ -64,21 +70,63 @@ covered_files:
   - "accrue_admin/test/accrue_admin/live/subscription_live_test.exs"
   - "accrue_admin/test/accrue_admin/scoped_path_test.exs"
   - "accrue_admin/test/test_helper.exs"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/results.json"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/active-1280-dark.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/active-1280-light.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/active-320-dark.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/active-320-light.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/incomplete_evidence-1280-dark.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/incomplete_evidence-1280-light.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/incomplete_evidence-320-dark.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/incomplete_evidence-320-light.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/scheduled_cancellation-1280-dark.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/scheduled_cancellation-1280-light.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/scheduled_cancellation-320-dark.png"
-  - "accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/screenshots/scheduled_cancellation-320-light.png"
-  - "accrue_admin/tmp/phase252/render-results-25208-1793102721082-59067-6ba5536df2dd.json"
-  - "accrue_admin/tmp/phase252/render-results.json"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/heldout-attribution.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/heldout-attribution.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/heldout-cleanup.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/heldout-cleanup.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/isolation-reset.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/isolation-reset.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/lab-presentation.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/lab-presentation.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/manifest-contract.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/manifest-contract.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/manifest-current.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/manifest-current.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/mounted-subscription-regressions.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/mounted-subscription-regressions.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/phase248-heldout-contract.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/phase248-heldout-contract.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/phase252-acceptance-contract.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/phase252-acceptance-contract.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/phase252-ci-contract.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/phase252-ci-contract.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/phase252-lab-contract.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/phase252-lab-contract.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/production-boundary-controls.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/production-boundary-controls.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/production-boundary-db-free.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/production-boundary-db-free.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/production-packages.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/production-packages.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/registry-kitchen-mount-scoped-path.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/registry-kitchen-mount-scoped-path.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/scenario-domain.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/scenario-domain.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/scenario-repo.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/scenario-repo.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/story-slice.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/story-slice.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/subscription-area.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/subscription-area.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/subscription-render-browser.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/subscription-render-browser.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/transparency-controls.stderr.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/logs/transparency-controls.stdout.log"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/playwright-output/.last-run.json"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/results.json"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/active-1280-dark.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/active-1280-light.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/active-320-dark.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/active-320-light.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/incomplete_evidence-1280-dark.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/incomplete_evidence-1280-light.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/incomplete_evidence-320-dark.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/incomplete_evidence-320-light.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/scheduled_cancellation-1280-dark.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/scheduled_cancellation-1280-light.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/scheduled_cancellation-320-dark.png"
+  - "accrue_admin/tmp/phase252/ci-results/25208-1793114305326-86494-0c5891181d54/screenshots/scheduled_cancellation-320-light.png"
+  - "accrue_admin/tmp/phase252/render-results-25208-1793114305326-86494-0c5891181d54.json"
   - "accrue_portal/lib/accrue_portal/live/subscription_live.ex"
   - "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex"
   - "accrue_portal/lib/accrue_portal/router.ex"
@@ -90,59 +138,54 @@ covered_files:
   - "examples/accrue_host/test/accrue_host/phase252_scenario_cleanup_test.exs"
   - "examples/accrue_host/test/test_helper.exs"
   - "guides/ui-story-lab.md"
+  - "scripts/ci/fixtures/phase252-transparency/heldout-clean.json"
+  - "scripts/ci/fixtures/phase252-transparency/heldout-violation.json"
+  - "scripts/ci/fixtures/phase252-transparency/lab-clean.json"
+  - "scripts/ci/fixtures/phase252-transparency/lab-violation.json"
   - "scripts/ci/generate_phase252_acceptance.mjs"
   - "scripts/ci/generate_phase252_acceptance.test.mjs"
   - "scripts/ci/main_module.mjs"
   - "scripts/ci/phase248_heldout_isolation.test.mjs"
   - "scripts/ci/phase252_paths.mjs"
   - "scripts/ci/phase252_reporters.mjs"
+  - "scripts/ci/phase_evidence_path.mjs"
   - "scripts/ci/verify_phase200_admin_guardrails.sh"
   - "scripts/ci/verify_phase200_guardrail_contract.sh"
   - "scripts/ci/verify_phase252_ci_contract.test.mjs"
+  - "scripts/ci/verify_phase252_heldout_attribution.test.mjs"
+  - "scripts/ci/verify_phase252_lab_presentation.test.mjs"
   - "scripts/ci/verify_phase252_production_boundary.mjs"
   - "scripts/ci/verify_phase252_production_boundary.test.mjs"
   - "scripts/ci/verify_phase252_stories.mjs"
+  - "scripts/ci/verify_phase252_transparency.mjs"
   - "scripts/dev/phase252_isolation.test.mjs"
   - "scripts/dev/phase252_lab.mjs"
   - "scripts/dev/phase252_lab.test.mjs"
   - "storybook/components/subscription_detail.story.exs"
   - "storybook/phase252-manifest.json"
-covered_digest: "v3:sha256:e345f95de6adbce2b5e085cb090decaae6516a7e8949feea1397951d6c5e4dec"
+covered_digest: "v3:sha256:2591e6497020bf7ba905dc30354960a3908b9a341bb0beba24306d7585838aab"
 behavior_unverified: 0
 overrides_applied: 0
-gaps:
-  - truth: "The review lab must not be presented as a production operations console or evidence of completed billing actions."
-    status: partial
-    reason: "The approved plan deliberately leaves this prohibition unresolved and descriptor-less. Current guide/story copy is bounded and no contrary presentation was observed, but the verifier rule does not allow an unresolved flagged prohibition to count as green."
-    artifacts:
-      - path: ".planning/phases/252-production-backed-subscription-stories/252-01-PLAN.md"
-        issue: "status is unresolved; no wired-check descriptor is declared."
-      - path: "guides/ui-story-lab.md"
-        issue: "Current text identifies a disposable static lab, but this does not resolve the flagged plan metadata."
-    missing:
-      - "A wired prohibition-check descriptor/evidence or an accepted planning disposition; none was authorized or fabricated for this verification."
-  - truth: "Held-out adversarial scenarios must not be presented as representative customer behavior or evidence of real adopter usage."
-    status: partial
-    reason: "The approved plan deliberately leaves this prohibition unresolved and descriptor-less. Current facts and UI attribution label held-out cases separately; no contrary claim was observed, but the verifier rule does not allow an unresolved flagged prohibition to count as green."
-    artifacts:
-      - path: ".planning/phases/252-production-backed-subscription-stories/252-04-PLAN.md"
-        issue: "status is unresolved; no wired-check descriptor is declared."
-      - path: "dev_support/ui_scenarios/cadence_subscriptions.exs"
-        issue: "Ordinary and held-out data are distinguished, but this does not resolve the flagged plan metadata."
-    missing:
-      - "A wired prohibition-check descriptor/evidence or an accepted planning disposition; none was authorized or fabricated for this verification."
+re_verification:
+  previous_status: gaps_found
+  previous_score: "64/64 must-haves verified"
+  gaps_closed:
+    - "The review lab must not be presented as a production operations console or evidence of completed billing actions."
+    - "Held-out adversarial scenarios must not be presented as representative customer behavior or evidence of real adopter usage."
+  gaps_remaining: []
+  regressions: []
 ---
 # Phase 252: Production-Backed Subscription Stories Verification Report
 
 **Phase Goal:** Reviewers can inspect current production subscription areas through valid, attributable stories in an isolated lab, with production boundaries and CI admission already proved.
 
-**Verified:** 2026-10-27T12:37:58Z  
-**Status:** gaps_found  
-**Re-verification:** No — initial verification
+**Verified:** 2026-10-27T15:39:22Z
+**Status:** passed
+**Re-verification:** Yes — after gap closure plans 09/10
 
 ## Goal Achievement
 
-The production behavior and all ten Phase 252 requirements are supported by current executable evidence. All five roadmap success criteria and all 59 plan truth statements pass. The report is gaps_found solely because two must-NOT prohibitions remain explicitly unresolved and descriptor-less in the approved plans; the verifier contract prohibits silently counting flagged prohibitions as passed. These are verification-metadata gaps, not observed product-behavior failures. No human UAT item is manufactured for a condition the code and current evidence can assess.
+The production behavior and all ten Phase 252 requirements are supported by the final fresh owner evidence and direct source tracing. All five roadmap success criteria and all 68 plan truth statements pass. The two prohibitions carried from the previous gaps_found report now have resolved flat descriptors and independently reconstructed GSD enforcement evidence; the current acceptance result has zero unresolved prohibitions. The final 21-lane bundle is fresh against all 84 pinned source files. No human-only item is required.
 
 ### Roadmap Success Criteria
 
@@ -154,8 +197,8 @@ The production behavior and all ten Phase 252 requirements are supported by curr
 | 4 | The lab isolates namespace/process/reset authority and production packages/routes exclude lab-only payload and runtime dependencies. | ✓ VERIFIED | phase252-lab-contract, four isolation-reset tests, production boundary controls, fresh production package inspection, and mounted-route assertions. |
 | 5 | A consumed-root change is admitted to the named CI owner, with positive, unrelated-path, and negative mutation controls. | ✓ VERIFIED | Current pull-request workflow unconditionally includes admin-phase200-guardrails; CI contract and acceptance tests prove consumed-path classification, unrelated path behavior, and failing mutations. |
 
-**Plan truth score:** 59/59 verified.  
-**Overall score:** 64/64 observable truths verified (0 present, behavior-unverified).
+**Plan truth score:** 68/68 verified (59 original plus 9 in gap plans 09/10).
+**Overall score:** 73/73 observable truths verified (0 present, behavior-unverified).
 
 ### Plan Must-Haves
 
@@ -221,9 +264,49 @@ The production behavior and all ten Phase 252 requirements are supported by curr
 | 252-08 T04 | Flagged assumption EDGE-CIQ-01-unclassified remains unresolved in the probe; workflow admission, named-owner invocation and positive/unrelated classification controls explicitly cover the concrete CI contract. | ✓ VERIFIED | phase252-ci-contract (10) and phase252-acceptance-contract (20), backed by the admitted PR workflow/job. |
 | 252-08 T05 | Final automated UAT and committed SUMMARY coverage name actual assertions/commands and human_judgment: false; final verification can pass only with behavior_unverified: 0 and fresh evidence for every acceptance item. | ✓ VERIFIED | phase252-ci-contract (10) and phase252-acceptance-contract (20), backed by the admitted PR workflow/job. |
 
+| 252-09 T01 | The current lab guide and subscription story attribution identify a disposable static review surface and deny production-console, action-completion, authorization and persistence implications. | ✓ VERIFIED | lab-presentation current-source and clean controls plus final guide/story/manifest digest snapshot. |
+| 252-09 T02 | The current guide and held-out source/evidence attribution identify synthetic stress input separately from ordinary scenarios and real adopter evidence. | ✓ VERIFIED | heldout-attribution and transparency-controls current/clean lanes; source and browser-label inputs are pinned. |
+| 252-09 T03 | The same named Node assertions pass current subjects and clean injected controls and fail known violating subject content, including contradictory claims with disclaimers retained. | ✓ VERIFIED | transparency-controls reports current/clean GREEN and violation RED for both targets; dedicated target lanes and contradiction controls pass. |
+| 252-09 T04 | Missing, empty or malformed subjects cannot become a clean pass; evidence describes exactly the checked public-copy and attribution surfaces. | ✓ VERIFIED | Named target tests reject malformed/missing injection; bounded checker describes finite public surfaces; acceptance contract and current-source lanes pass. |
+| 252-10 T01 | The existing required phase252 owner runs both current-subject targets and their RED/GREEN controls, with named executed identities and all consumed check/fixture/guide paths admitted. | ✓ VERIFIED | Workflow-admission and required-owner contract lane plus final 21-command owner bundle; both named targets and all six control markers have executed identities. |
+| 252-10 T02 | The two original prohibition statements survive in plans 01/04 with resolved test-tier flat descriptors only after their checks and clean/violation controls exist and pass machine proof. | ✓ VERIFIED | Exact source statements retained; acceptance metadata validation and independent native replay of both node-test descriptors pass. |
+| 252-10 T03 | Future phase verification reconstructs both descriptors and independently produces status green, flagged false and real fail-first evidence; metadata alone cannot satisfy closure. | ✓ VERIFIED | Independent installed-GSD parser/projector/reconstruction and runProhibitionEnforcement payloads are recorded below; both prove actual violation-fixture red and clean-fixture green. |
+| 252-10 T04 | Fresh acceptance includes both gap behaviors and all original requirements, classified edges and UI predicates, preserving four unresolved unclassified assumptions and historical evidence. | ✓ VERIFIED | No-write acceptance status passed: 10 requirements, 13 classified edges, 4 unresolved assumptions, 20 UI predicates, 2 green prohibitions, 0 unresolved prohibitions. |
+| 252-10 T05 | A single successful fresh aggregate supplies new SUMMARY/UAT references without requiring historical 252-08-SUMMARY edits or a second expensive aggregate. | ✓ VERIFIED | One final 21-lane bundle at 25208-1793114305326-86494-0c5891181d54; 252-10-SUMMARY has 53 coverage rows; generated UAT has 124/124 current-reference passes. |
+
+### Re-verification of Previous Gaps
+
+The previous gaps_found report named two descriptor-less prohibitions. The original statement text and historical context remain intact; both failures are closed by current public-surface assertions and the native GSD producer. Exact reconstructed descriptors, source hashes, and returned payloads follow.
+
+#### Independent native descriptor replay
+
+The replay used installed @opengsd/gsd-core 1.18.0 modules. For each original plan, the verifier parsed the prohibitions block, projected the parsed item, reconstructed the descriptor, and ran the default native enforcement path from the repository root with GSD_PROHIB_SUBJECT unset. It asserted status=green, flagged=false, located=true, kind=node-test, passed=true, failFirst=true, and failFirstProof=violation-fixture.
+
+| Prohibition | Current original-plan SHA-256 | Target SHA-256 | Violation fixture SHA-256 | Clean fixture SHA-256 |
+|---|---|---|---|---|
+| PROH-LAB-PRESENTATION | 9134bfd54de13cd63a0d318f044042784f397f65b9717bfc97f1791d8ffe43d4 | 81e46c2161c28ad1af71f90d366058bca56eb3e739835e9d5aed9d12d245c623 | e5d9312aed3425eff82234f427500922d95596f4a715e193b3693c4b0635c434 | 5ff9893e0ba0a88ba6b68d83a67991a1e3232a0a8231e27a4f9feb015ecaa368 |
+| PROH-HELDOUT-ATTRIBUTION | 7654303a0c457f972092ac330ba547bc4f1e87126f55bae976c5fa48eb87912e | 960ce42fbe9d7cdb8df23faf9f80994d871cbf178227cf71aeac32cda6ba6e05 | 9d875bcd6e471a1b6d87d2254e94c906fca945215e45cc6d532674a9a7d1ec15 | f5be94d3176c1616bee613f15bdd382485d31a97e5c4c67bc77fd426b836d09e |
+
+PROH-LAB-PRESENTATION parsed/projected to node-test target scripts/ci/verify_phase252_lab_presentation.test.mjs, violation fixture scripts/ci/fixtures/phase252-transparency/lab-violation.json, and clean fixture scripts/ci/fixtures/phase252-transparency/lab-clean.json:
+
+```json
+{"status":"green","flagged":false,"tier":"test","reason":"test-tier prohibition has wired enforcement evidence","located":true,"kind":"node-test","evidence":[{"kind":"node-test","target":"scripts/ci/verify_phase252_lab_presentation.test.mjs","failFirst":true,"passed":true,"failFirstProof":"violation-fixture"}]}
+```
+
+PROH-HELDOUT-ATTRIBUTION parsed/projected to node-test target scripts/ci/verify_phase252_heldout_attribution.test.mjs, violation fixture scripts/ci/fixtures/phase252-transparency/heldout-violation.json, and clean fixture scripts/ci/fixtures/phase252-transparency/heldout-clean.json:
+
+```json
+{"status":"green","flagged":false,"tier":"test","reason":"test-tier prohibition has wired enforcement evidence","located":true,"kind":"node-test","evidence":[{"kind":"node-test","target":"scripts/ci/verify_phase252_heldout_attribution.test.mjs","failFirst":true,"passed":true,"failFirstProof":"violation-fixture"}]}
+```
+
+#### Review correction recheck
+
+- CR-03: collectProhibitions counts every prohibition list item and requires exactly one, preserves exactly one original statement, accepts only the exact flat scalar descriptor keys, and rejects unexpected prohibition metadata in other plans. The final acceptance/CI contract logs pass 25/25 and 21/21 respectively.
+- CR-04: the runner source snapshot includes all ten plan files and 252-VALIDATION.md; current validation reads all ten plans archive-aware and enforces the exact requirement/task/edge/UI/prohibition inventory. The CI contract requires owner-map admission for new roots and tests removal of those rules; stale plan/validation mutations are rejected.
+- Review disposition reports four findings, all fixed, open: 0. The final run checks current source digests, reporter identities, and controls against the same snapshot.
 ### Required Artifacts
 
-The artifact verifier reports all 31 declared artifacts as present and substantive. Their production, test, CI, lab, and presentation wiring was manually traced; runtime/data-flow cases are also covered below.
+Plan artifact queries pass for the original scope and gap plans 09/10. The 40 declarations across ten plans are present and substantive; repeated artifact paths are also listed. Runtime/data-flow and the new transparency checks are traced below.
 
 | Artifact | Expected | Status | Details |
 |---|---|---|---|
@@ -259,9 +342,19 @@ The artifact verifier reports all 31 declared artifacts as present and substanti
 | scripts/ci/generate_phase252_acceptance.mjs | automated UAT evidence generator/validator | ✓ VERIFIED | Exists, substantive, and wired; plan artifact query 5/5 passed. |
 | scripts/ci/generate_phase252_acceptance.test.mjs | missing/stale/pooled/unverified evidence rejection controls | ✓ VERIFIED | Exists, substantive, and wired; plan artifact query 5/5 passed. |
 
+| scripts/ci/verify_phase252_transparency.mjs | Bounded current/injected subject collection and named self-test controls | ✓ VERIFIED | Plan 09 artifact query passed 4/4; used by both target tests and the final control lane. |
+| scripts/ci/verify_phase252_lab_presentation.test.mjs | Named bounded lab-presentation assertions | ✓ VERIFIED | Plan 09 artifact query passed 4/4; native GSD replay independently ran clean and violating fixture proofs. |
+| scripts/ci/verify_phase252_heldout_attribution.test.mjs | Named synthetic held-out attribution assertions | ✓ VERIFIED | Plan 09 artifact query passed 4/4; native GSD replay independently ran clean and violating fixture proofs. |
+| guides/ui-story-lab.md | Explicit static/non-production and synthetic-evidence limits | ✓ VERIFIED | Plan 09 artifact query passed 4/4; source pinned in the final aggregate. |
+| scripts/ci/verify_phase252_stories.mjs | Serial required owner with both target lanes and transparency controls | ✓ VERIFIED | Plan 10 artifact query passed 5/5; final 21-lane owner output is current. |
+| scripts/ci/generate_phase252_acceptance.mjs | Ten-plan current-source acceptance and UAT generator | ✓ VERIFIED | Plan 10 artifact query passed 5/5; no-write validation passes with zero unresolved prohibitions. |
+| .planning/phases/252-production-backed-subscription-stories/252-10-prohibition-evidence.json | Execution-generated native GSD proof and source/control digests | ✓ VERIFIED | Plan 10 artifact query passed 5/5; direct independent replay is also captured above. |
+| .planning/phases/252-production-backed-subscription-stories/252-01-PLAN.md | Original lab prohibition with resolved flat test descriptor | ✓ VERIFIED | Plan 10 artifact query passed 5/5; original statement hash and native replay pass. |
+| .planning/phases/252-production-backed-subscription-stories/252-04-PLAN.md | Original held-out prohibition with resolved flat test descriptor | ✓ VERIFIED | Plan 10 artifact query passed 5/5; original statement hash and native replay pass. |
+
 ### Key Link Verification
 
-The plan key-link query could not evaluate links whose from fields are function/module names or prose rather than relative file paths. I manually traced all 23 links from their source modules through their destination owners and tests; no broken connection was found.
+The plan key-link query cannot evaluate from-values that name functions, environment variables, or composed workflow steps instead of relative files. The 23 links from the original eight plans were manually traced in the prior verification; I traced the five new links from plans 09/10 through their current assertion, runner, owner, and output code. No link is broken.
 
 | From | To | Via | Status | Details |
 |---|---|---|---|---|
@@ -289,6 +382,12 @@ The plan key-link query could not evaluate links whose from fields are function/
 | verify_phase200_admin_guardrails.sh | phase252:check | existing required owner serially invokes new complete phase suite | ✓ WIRED | Manually traced through current implementation and owning test lane; key-link CLI could not parse prose/function owners as relative source paths. |
 | actual suite results + SUMMARY coverage | 252-UAT.md and VERIFICATION.md | archive-aware evidence resolution; no inferred greens | ✓ WIRED | Manually traced through current implementation and owning test lane; key-link CLI could not parse prose/function owners as relative source paths. |
 
+| GSD_PROHIB_SUBJECT | Named assertions in both Node test targets | Injected JSON content enters the same collection/assertion functions used for current repository content | ✓ WIRED | loadLabSubject/held-out subject loading is called from inside each named test callback; missing and malformed paths throw instead of passing. |
+| verify_phase252_transparency.mjs --self-test | Both test targets and four clean/violation fixtures | Bounded spawnSync invokes shell-free Node TAP children; controls require named GREEN/RED outcomes | ✓ WIRED | runTestTargets clears ambient subject, injects only the fixture path, enforces a 10-second bound and rejects missing, vacuous, skipped, TODO, or wrong-diagnostic results. |
+| admin-phase200-guardrails | phase252:check → lab-presentation, heldout-attribution, transparency-controls | Pull-request workflow runs required owner; owner script invokes package command; serial runner binds required lanes and reporters | ✓ WIRED | ci.yml, verify_phase200_admin_guardrails.sh, package script, runner, and CI contract align; current lane report records named execution. |
+| Original must_haves.prohibitions in plans 01/04 | GSD descriptorFromProjection → runProhibitionEnforcement | Flat node-test target and clean/violation fixture fields survive parser/projector reconstruction | ✓ WIRED | Both current plan entries were reconstructed and executed independently; native payloads contain actual pass and fail-first evidence. |
+| Final results.json and 252-10-SUMMARY.md | 252-UAT.md and this re-verification | Acceptance uses current assertion references and archive-aware evidence resolution | ✓ WIRED | No-write acceptance passes from final bundle; Summary 10 has 53 coverage rows and UAT is 124/124 from the same run. |
+
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data variable | Source | Produces real data | Status |
@@ -299,16 +398,19 @@ The plan key-link query could not evaluate links whose from fields are function/
 | Acceptance evidence generator | assertion identities, command outcomes, UI predicates | Runner-captured TAP/ExUnit/Playwright reports and log digests are independently re-parsed, bound to real executed test identities, then joined to current source/asset digests. | Yes; reporter-backed evidence, with skipped, missing, truncated, excluded, stale, and mismatched controls rejected. | ✓ FLOWING |
 | Production package boundary | package members and available routes | Fresh isolated production builds and archive contents are inspected; production router tests assert lab/story routes are absent while development mounts remain available. | Yes; actual build outputs and router owners. | ✓ FLOWING |
 
+| Transparency subject assertions | Current or injected public-surface content | Guide, story moduledoc, manifest attribution, held-out source/ordinary adapter/browser label → shared bounded assertions | Yes; current and clean content pass, deliberately violating content fails in named targets. | ✓ FLOWING |
+| Prohibition descriptor enforcement | Parsed descriptor and enforcement evidence | Original plan frontmatter → GSD parser/projector/reconstructor → actual Node target plus violation/clean fixture probes | Yes; native payloads are green only after real pass and fail-first proof. | ✓ FLOWING |
+
 ### Behavioral Spot-Checks
 
 | Behavior | Command/evidence | Result | Status |
 |---|---|---|---|
-| Full Phase 252 owner gate | Recorded current owner run ERL_FLAGS='+S 4:4' npm --prefix accrue_admin run phase252:check; bundle accrue_admin/tmp/phase252/ci-results/25208-1793102721082-59067-6ba5536df2dd/results.json, source revision 3991d8903ae5c7d36b327fe3181daab70e236f9b. | 18/18 commands exited 0; passed; reporter evidence has zero skips/failures. | ✓ PASS |
-| Reporter and acceptance negative controls (CR-02 recheck) | node --test --test-reporter=tap scripts/ci/generate_phase252_acceptance.test.mjs scripts/ci/verify_phase252_ci_contract.test.mjs | 30/30 passed, 0 skipped. Controls reject skipped, empty/truncated, excluded/mismatched/fake assertion identities and reparse reports after digest updates. | ✓ PASS |
-| Browser render and proof lanes | Current per-run render JSON accrue_admin/tmp/phase252/render-results-25208-1793102721082-59067-6ba5536df2dd.json; matching browser report referenced by the owner bundle. | 16 executed browser identities, 15 render records, 20 UI predicates; 12 canonical cells across three lifecycle states, widths and themes. | ✓ PASS |
-| Current automated UAT assertions | 252-UAT.md and acceptance report derived from the current bundle. | 67/67 passed; 0 failed, pending, skipped, blocked, or issue. | ✓ PASS |
+| Final Phase 252 owner gate | Saved owner run 25208-1793114305326-86494-0c5891181d54, source revision 558b67b4f9c9106952afebf64997f42a6b40379f | 21/21 serial commands exit 0; all 84 source digests and all 42 stdout/stderr log digests match; the run-specific browser result digest matches the bundle. The aggregate was not rerun during verification. | ✓ PASS |
+| Current CI/acceptance contract lanes | Current bundle logs for phase252-ci-contract and phase252-acceptance-contract | 21/21 and 25/25 tests pass, zero skipped/TODO; together 46/46. Current source also rejects missing, malformed, duplicate, nested, swapped, stale, and unowned evidence. | ✓ PASS |
+| Browser render and proof lanes | Run-specific render JSON and screenshots in the final owner bundle | 16 browser test identities passed; 12 canonical width/theme/state cells and all 20 UI predicates are attributed in fresh results. | ✓ PASS |
+| Current automated UAT assertions | 252-UAT.md generated from the final bundle after 252-10-SUMMARY.md | 124/124 pass; 0 issue, pending, skipped, or blocked; UAT references the current run. | ✓ PASS |
 
-The full owner gate was recorded in current raw evidence and independently revalidated through its no-write acceptance validator. It was not rerun during this verification because source files and assets match the evidence revision; no server or database was started here. The historical render-results.json is digest-pinned and preserved; current gate and acceptance evidence use the run-specific render JSON. The current light-theme action accent is scoped to the lab sandbox, host overrides flow, and browser assertions enforce 4.5:1 minimum contrast (the recorded CTA and row values are 5.98:1 and 6.84:1). The inspected 320px and 1280px captures show the actions and facts remain usable; review notes about desktop card width/copy-cue polish are nonblocking and outside the UI-SPEC behavior contract.
+The 21-command owner aggregate was not rerun during this verification because the current 84 source digests match its evidence revision; the bundle's 42 stdout/stderr digests, current browser-result digest, and preserved historical-render digest were independently checked. No server or database was started by this verifier. The current UI review remains 18/24 and records desktop summary/action width and a subtle copy cue as polish; the browser lane executes the 12 canonical state/viewport/theme cells and all 20 defined UI predicates. Those taste-level notes are not phase acceptance failures. Static story assertions do not establish mounted authorization, provider completion, dispatched actions, persistence, or customer behavior.
 
 ### Probe Execution
 
@@ -341,11 +443,11 @@ All ten Phase 252 requirement IDs are claimed by the plans and mapped to concret
 |---|---:|---|---|---|
 | None | — | No unresolved TBD, FIXME, or XXX debt markers; no empty behavior implementation or hardcoded empty rendered data. | — | No blocker. |
 
-The only broad grep matches were the CSS placeholder class, prose describing unavailable evidence, and early-return guards; they are not placeholders/stubs. No disabled required tests were found. Review disposition lists both initial CR findings closed. Security review records 19/19 mitigations closed, including real process-descendant cleanup regressions and unrelated sentinel preservation.
+The only matches in newly added sources are deliberate TAP TODO/skip rejection logic and fail-closed parser returns; no unimplemented user-visible path, disabled required test, or unresolved TBD/FIXME/XXX marker was found. Review disposition lists all four findings closed, including CR-03/CR-04. Security review records 23/23 threats closed, including process-descendant cleanup and unrelated sentinel preservation.
 
 ### Unresolved Probe Metadata
 
-The acceptance generator preserves these four unclassified assumptions as unresolved and emits their concrete coverage references; this report does not relabel them as satisfied assumptions:
+The final acceptance validator preserves 13 classified edge predicates and these four intentionally unresolved unclassified assumptions, with current concrete coverage references. This report does not relabel the four assumptions as satisfied:
 
 | Assumption | Concrete coverage recorded | Status |
 |---|---|---|
@@ -356,7 +458,15 @@ The acceptance generator preserves these four unclassified assumptions as unreso
 
 ### Unverified Must-NOT Evidence
 
-The current guide and rendered facts label the lab as disposable/static, distinguish ordinary and held-out data, and disclaim completed action, authority, persistence, and adopter-usage claims. I found no contradictory presentation. The plans intentionally retain both prohibitions as status: unresolved without verification tiers/descriptors. They remain flagged, not green; these two items are the only gaps in this report and do not indicate a demonstrated behavior failure.
+The two original statement strings remain unchanged. Plans 01/04 now carry resolved test-tier descriptors with named node-test targets and clean/violation fixtures. I parsed each plan through installed GSD parseMustHavesBlock, projected with projectProhibitions, rebuilt the check using descriptorFromProjection, then called runProhibitionEnforcement with GSD_PROHIB_SUBJECT unset. Both direct native payloads are green, unflagged, located, and include a passed target plus machine-proven failFirstProof: violation-fixture. The current acceptance validator reports two green prohibition records and zero unresolved ones.
+
+### Advisory (New Scope, Unevidenced)
+
+None. No unverified new-scope finding remains after deterministic review-correction checks; the previous blockers had reproducible closure evidence.
+
+### Decision Coverage
+
+The installed GSD decision-coverage verify gate returned skipped=true, reason CONTEXT.md missing, with zero decisions to check. Plans 09/10 also state no D-NN decisions or context/spec artifact exists.
 
 ### Human Verification Required
 
@@ -364,10 +474,9 @@ None. Behavior-dependent outcomes and cleanup/order invariants have named passin
 
 ### Gaps Summary
 
-All five roadmap criteria, 59 plan truth statements, 31 artifact declarations, 23 manually traced key links, and all ten Phase 252 requirements have evidence. No feature behavior gap was observed. The verifier's mandatory flagged-prohibition rule prevents a passed verdict while the two approved plan prohibitions remain unresolved and descriptor-less. That policy/contract conflict is recorded precisely in the frontmatter; it must not be erased by converting the current evidence into a fabricated green disposition.
+All five roadmap criteria, 68 plan truth statements, 40 plan artifact declarations, 28 manually traced key links, and all ten Phase 252 requirements have evidence. The final aggregate and no-write acceptance validation pass, and both original prohibitions have independent native proof. The four unclassified edge assumptions remain explicitly unresolved; they are planning metadata debt, not missing behavior or prohibition gaps. No phase feature gap remains.
 
 ---
 
-_Verified: 2026-10-27T12:37:58Z_  
+_Verified: 2026-10-27T15:39:22Z_
 _Verifier: the agent (gsd-verifier)_
-
