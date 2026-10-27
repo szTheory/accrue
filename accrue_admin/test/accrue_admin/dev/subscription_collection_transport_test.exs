@@ -3,6 +3,8 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
 
   alias Accrue.Test.Factory
   alias AccrueAdmin.Dev.Storybook
+  alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Storybook.SubscriptionCollectionQuery
   alias AccrueAdmin.Storybook.Groups.SubscriptionsCollection
   alias PhoenixStorybook.NavigationHelpers
   alias PhoenixStorybook.StoryEntry
@@ -212,6 +214,29 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
           assert length(Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]")) == 1
       end
     end
+  end
+
+  test "page-boundary fixture keeps its one-row cursor contract when query defaults are broader" do
+    facts = Enum.map([:launch, :growing_team], &CadenceSubscriptionFacts.fetch!/1)
+
+    owner_scope = %OwnerScope{
+      mode: :global,
+      current_admin: %{id: "admin_253", role: :admin},
+      platform_admin?: true,
+      admin_org_ids: Enum.map(facts, & &1.owner.id)
+    }
+
+    owner_scope =
+      Map.put(owner_scope, :story_collection_context, %{
+        state: :page_boundary,
+        scenario: :launch,
+        instance: "phase253-boundary-regression"
+      })
+
+    {rows, next_cursor} = SubscriptionCollectionQuery.list(owner_scope: owner_scope, limit: 25)
+
+    assert length(rows) == 1
+    assert is_binary(next_cursor)
   end
 
   test "production route uses the scoped Subscriptions query despite query-module input", %{

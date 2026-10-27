@@ -1,0 +1,10 @@
+{
+  "command": "node scripts/dev/phase252_lab.mjs exec --lane admin-test -- bash -c 'cd accrue_admin && PHASE252_TAP_REPORT=1 mix test test/accrue_admin/dev/subscription_collection_transport_test.exs > /private/tmp/phase253-05-boundary-red.tap 2>/private/tmp/phase253-05-boundary-red.stderr; result=$?; cat /private/tmp/phase253-05-boundary-red.tap; exit $result'",
+  "exitCode": 2,
+  "output": "TAP version 13\nnot ok 1 - AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test page-boundary fixture keeps its one-row cursor contract when query defaults are broader\nok 2 - AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test production route uses the scoped Subscriptions query despite query-module input\nok 3 - AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test the compiled collection story declares all supported settled states\nok 4 - AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test the compiled one-row story mounts the connected production DataTable\nok 5 - AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test compiled Storybook declares the production subscription collection path\n1..5\n",
+  "targetTest": "AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test page-boundary fixture keeps its one-row cursor contract when query defaults are broader",
+  "targetFile": "accrue_admin/test/accrue_admin/dev/subscription_collection_transport_test.exs",
+  "expected": "The page-boundary fixture returns one row and a non-nil continuation cursor even when the query adapter receives a broader default limit.",
+  "actual": "The named test failed its one-row assertion; the page-boundary query returned both rows and no continuation cursor.",
+  "semanticAssessment": "The named transport regression executed and failed on its planned one-row assertion; the other four tests in the same TAP run passed. The report isolates the fixture's missing state-specific limit, not a compile, load, database, or unrelated assertion failure."
+}
