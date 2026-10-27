@@ -28,7 +28,8 @@ const TRANSPARENCY_SOURCE_PATHS = [
   "guides/ui-story-lab.md", "storybook/components/subscription_detail.story.exs", "storybook/phase252-manifest.json",
   "dev_support/ui_scenarios/cadence_subscriptions.exs", "accrue_admin/storybook/_support/subscription_scenarios.ex",
   "accrue_admin/e2e/phase252-story-helpers.js",
-  `.planning/phases/${PHASE_SLUG}/252-01-PLAN.md`, `.planning/phases/${PHASE_SLUG}/252-04-PLAN.md`,
+  ...Array.from({ length: 10 }, (_, index) => `.planning/phases/${PHASE_SLUG}/252-${String(index + 1).padStart(2, "0")}-PLAN.md`),
+  `.planning/phases/${PHASE_SLUG}/252-VALIDATION.md`,
 ];
 const EDGE_IDS = [
   "EDGE-LAB-01-concurrency",
@@ -519,6 +520,7 @@ test("resolved transparency descriptors require live target assertions and fresh
 
 test("prohibition descriptors reject unresolved, partial, nested, changed, and swapped metadata", () => {
   const mutations = [
+    (source) => source.replace(/(?=---\n$)/, "  - status: unresolved\n"),
     (source) => source.replace("status: resolved", "status: unresolved"),
     (source) => source.replace("category: transparency", "category: marketing"),
     (source) => source.replace("verification: test", "verification: manual"),
@@ -570,7 +572,7 @@ test("fresh descriptor digests do not bless poisoned fixtures or absent transpar
     fs.rmSync(disclaimer.root, { recursive: true, force: true });
   }
 
-  for (const relative of [`.planning/phases/${PHASE_SLUG}/252-01-PLAN.md`, "guides/ui-story-lab.md"]) {
+  for (const relative of [`.planning/phases/${PHASE_SLUG}/252-01-PLAN.md`, `.planning/phases/${PHASE_SLUG}/252-09-PLAN.md`, `.planning/phases/${PHASE_SLUG}/252-10-PLAN.md`, `.planning/phases/${PHASE_SLUG}/252-VALIDATION.md`, "guides/ui-story-lab.md"]) {
     const stale = createFixture();
     try {
       const absolute = relative.startsWith(".planning/")

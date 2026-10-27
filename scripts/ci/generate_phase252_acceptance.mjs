@@ -134,8 +134,8 @@ const TRANSPARENCY_SOURCE_PATHS = Object.freeze([
   "dev_support/ui_scenarios/cadence_subscriptions.exs",
   "accrue_admin/storybook/_support/subscription_scenarios.ex",
   "accrue_admin/e2e/phase252-story-helpers.js",
-  ".planning/phases/252-production-backed-subscription-stories/252-01-PLAN.md",
-  ".planning/phases/252-production-backed-subscription-stories/252-04-PLAN.md",
+  ...Array.from({ length: 10 }, (_, index) => `.planning/phases/${PHASE_SLUG}/252-${String(index + 1).padStart(2, "0")}-PLAN.md`),
+  `.planning/phases/${PHASE_SLUG}/252-VALIDATION.md`,
 ]);
 const STATES = ["active", "scheduled_cancellation", "incomplete_evidence"];
 const WIDTHS = [320, 1280];
@@ -422,16 +422,18 @@ function collectProhibitions(metadata, file) {
   const section = [];
   for (const line of lines.slice(start + 1)) {
     const lineIndentation = line.match(/^\s*/)[0].length;
-    if (line.trim() && lineIndentation <= indentation && /^[A-Za-z0-9_-]+:\s*$/.test(line.trim())) break;
+    if (line.trim() && lineIndentation <= indentation) break;
     section.push(line);
   }
   const raw = section.join("\n");
   const descriptor = ORIGINAL_PROHIBITION_DESCRIPTORS.find((candidate) => candidate.plan === file);
   if (!descriptor) {
-    if (/^\s*-\s+statement:/m.test(raw)) fail(`${file} adds an unexpected prohibition statement`);
+    if (raw.trim()) fail(`${file} adds unexpected prohibition metadata`);
     return [];
   }
   const itemIndent = indentation + 2;
+  const itemRows = [...raw.matchAll(new RegExp(`^\\s{${itemIndent}}-\\s+`, "gm"))];
+  if (itemRows.length !== 1) fail(`${file} prohibition must contain exactly one list item`);
   const statementRows = [...raw.matchAll(new RegExp(`^\\s{${itemIndent}}-\\s+statement:\\s*(.+)$`, "gm"))];
   if (statementRows.length !== 1) fail(`${file} must retain exactly one original prohibition statement`);
   const statement = statementRows[0][1].trim().replace(/^['"]|['"]$/g, "");

@@ -41,9 +41,9 @@ const GENERATED_RENDER_RESULT_DIR = "accrue_admin/tmp/phase252";
 const REQUIREMENT_IDS = ["CIQ-01", "SBK-01", "SBK-02", "SBK-03", "SCEN-01", "SCEN-02", "SCEN-03", "SCEN-04", "LAB-01", "LAB-02"];
 const PHASE_SLUG = "252-production-backed-subscription-stories";
 const PHASE_ARTIFACT_PREFIX = `.planning/phases/${PHASE_SLUG}/`;
-const ORIGINAL_PROHIBITION_PLANS = Object.freeze([
-  `${PHASE_ARTIFACT_PREFIX}252-01-PLAN.md`,
-  `${PHASE_ARTIFACT_PREFIX}252-04-PLAN.md`,
+const ACCEPTANCE_METADATA_PATHS = Object.freeze([
+  ...Array.from({ length: 10 }, (_, index) => `${PHASE_ARTIFACT_PREFIX}252-${String(index + 1).padStart(2, "0")}-PLAN.md`),
+  `${PHASE_ARTIFACT_PREFIX}252-VALIDATION.md`,
 ]);
 const TRANSPARENCY_SOURCE_PATHS = Object.freeze([
   "scripts/ci/phase_evidence_path.mjs",
@@ -60,7 +60,7 @@ const TRANSPARENCY_SOURCE_PATHS = Object.freeze([
   "dev_support/ui_scenarios/cadence_subscriptions.exs",
   "accrue_admin/storybook/_support/subscription_scenarios.ex",
   "accrue_admin/e2e/phase252-story-helpers.js",
-  ...ORIGINAL_PROHIBITION_PLANS,
+  ...ACCEPTANCE_METADATA_PATHS,
 ]);
 
 const SOURCE_AND_ASSET_PATHS = Object.freeze([
@@ -94,7 +94,7 @@ const SOURCE_AND_ASSET_PATHS = Object.freeze([
   "scripts/ci/fixtures/phase252-transparency/lab-violation.json",
   "scripts/ci/fixtures/phase252-transparency/heldout-clean.json",
   "scripts/ci/fixtures/phase252-transparency/heldout-violation.json",
-  ...ORIGINAL_PROHIBITION_PLANS,
+  ...ACCEPTANCE_METADATA_PATHS,
   "scripts/ci/generate_phase252_acceptance.mjs",
   "scripts/ci/generate_phase252_acceptance.test.mjs",
   "guides/ui-story-lab.md",

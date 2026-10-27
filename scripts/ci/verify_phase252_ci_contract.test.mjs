@@ -244,6 +244,8 @@ test("all transparency and original descriptor inputs are fresh, owner-classifie
     "accrue_admin/e2e/phase252-story-helpers.js",
     ".planning/phases/252-production-backed-subscription-stories/252-01-PLAN.md",
     ".planning/phases/252-production-backed-subscription-stories/252-04-PLAN.md",
+    ...Array.from({ length: 10 }, (_, index) => `.planning/phases/252-production-backed-subscription-stories/252-${String(index + 1).padStart(2, "0")}-PLAN.md`),
+    ".planning/phases/252-production-backed-subscription-stories/252-VALIDATION.md",
   ];
   assert.equal(typeof runner.buildCommandPlan, "function");
   assert.equal(typeof runner.sourceSnapshot, "function");
@@ -265,6 +267,8 @@ test("all transparency and original descriptor inputs are fresh, owner-classifie
 
 test("new consumed roots have positive paths and fail when their admission rule is removed", () => {
   const newRoots = [
+    ...[2, 3, 5, 6, 7, 8, 9, 10].map((number) => [`phase252-acceptance-plan-${number}`, `.planning/phases/252-production-backed-subscription-stories/252-${String(number).padStart(2, "0")}-PLAN.md`]),
+    ["phase252-validation-accounting", ".planning/phases/252-production-backed-subscription-stories/252-VALIDATION.md"],
     ["phase252-transparency-fixtures", "scripts/ci/fixtures/phase252-transparency/lab-clean.json"],
     ["phase252-transparency-guide", "guides/ui-story-lab.md"],
     ["phase252-transparency-reporters", "scripts/ci/phase252_reporters.mjs"],
