@@ -106,6 +106,11 @@ test("a phase252 invocation fixture is required when the focused leaf is enabled
   assert.throws(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true }), /phase252:check/i);
 });
 
+test("the real required owner invokes the complete phase252 leaf", () => {
+  assert.equal(ownerRunner.includes("npm --prefix accrue_admin run phase252:check"), true);
+  assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true }));
+});
+
 test("a missing owner root fails closed instead of becoming unrelated", () => {
   const omitted = CONSUMED_ROOTS.filter((entry) => entry.id !== "brandbook-tokens");
   assert.throws(
