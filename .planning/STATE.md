@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 252 — Production-backed Subscription Stories
-**Progress:** [░░░░░░░░░░] 0% — 0/3 phases and 2/8 planned execution plans complete; Phase 253/254 plan counts TBD.
+**Progress:** [░░░░░░░░░░] 0% — 0/3 phases and 3/8 planned execution plans complete; Phase 253/254 plan counts TBD.
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
@@ -35,7 +35,7 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 Phase: 252 (Production-backed Subscription Stories) — EXECUTING
 Plan: 4 of 8
 Status: Ready to execute
-Last activity: 2026-10-26 — Completed Phase 252 plan 02; Phase 252 execution continues
+Last activity: 2026-10-26 — Completed Phase 252 plan 03; Phase 252 execution continues
 
 Progress: [░░░░░░░░░░] 0%
 Current milestone planning blockers: None known. Historical concerns and deferred correctness work below remain preserved with their original scope.
