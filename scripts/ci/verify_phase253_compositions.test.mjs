@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -8,6 +9,8 @@ import { expectedNodeTestIdentities } from "./phase252_reporters.mjs";
 const root = path.resolve(process.env.PHASE253_REPO_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.."));
 const runnerPath = path.join(root, "scripts/ci/verify_phase253_compositions.mjs");
 const testSource = "scripts/ci/verify_phase253_compositions.test.mjs";
+const require = createRequire(import.meta.url);
+const browserHelpers = require("../../accrue_admin/e2e/phase253-composition-helpers.js");
 const runId = "b".repeat(32);
 const manifestDigest = "c".repeat(64);
 
@@ -194,36 +197,75 @@ function browserFixture(runner, resultPath) {
     [css]: runner.fileDigest(root, css),
     [js]: runner.fileDigest(root, js),
   };
+  const collectionIdentity = (scenarioId, suffix) => ({
+    story_path: "/groups/subscriptions_collection",
+    renderer: "AccrueAdmin.Live.SubscriptionsLive.subscriptions_collection/1",
+    fact_source: `CadenceSubscriptionFacts.fetch!(:${scenarioId})`,
+    proof_lane: "presentation-only",
+    expected_facts: {
+      subscription_id: `subscription-${suffix}`,
+      customer_name: `Customer ${suffix}`,
+      amount_state: "unavailable",
+    },
+  });
   const keys = [
-    { key: "one_row::breakpoint::767::light", case_kind: "breakpoint", variation_id: "one_row" },
-    { key: "filtered_empty::breakpoint::767::light", case_kind: "breakpoint", variation_id: "filtered_empty" },
-    { key: "state::viewport::320::light", case_kind: "viewport" },
-    { key: "state::viewport::1280::dark", case_kind: "viewport" },
-    { key: "geometry::negative-controls::320::light", case_kind: "geometry_negative_controls" },
+    {
+      key: "one_row::breakpoint::767::light", case_kind: "breakpoint",
+      executed_test: "one_row | breakpoint edge | 767px | light", variation_id: "one_row", scenario_id: "launch",
+      width: 767, viewport: { width: 767, container_width: null }, theme: "light",
+      url: "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=one_row",
+      source_identity: collectionIdentity("launch", "one-row"),
+    },
+    {
+      key: "filtered_empty::breakpoint::768::dark", case_kind: "breakpoint",
+      executed_test: "filtered_empty | breakpoint edge | 768px | dark", variation_id: "filtered_empty", scenario_id: "growing_team",
+      width: 768, viewport: { width: 768, container_width: null }, theme: "dark",
+      url: "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=filtered_empty",
+      source_identity: collectionIdentity("growing_team", "filtered-empty"),
+    },
+    {
+      key: "one_row::viewport::320::light", case_kind: "viewport",
+      executed_test: "one_row | viewport | 320px | light", variation_id: "one_row", scenario_id: "launch",
+      width: 320, viewport: { width: 320, container_width: null }, theme: "light",
+      url: "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=one_row",
+      source_identity: collectionIdentity("launch", "one-row"),
+    },
+    {
+      key: "one_row::viewport::1280::dark", case_kind: "viewport",
+      executed_test: "one_row | viewport | 1280px | dark", variation_id: "one_row", scenario_id: "launch",
+      width: 1280, viewport: { width: 1280, container_width: null }, theme: "dark",
+      url: "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=one_row",
+      source_identity: collectionIdentity("launch", "one-row"),
+    },
+    {
+      key: "geometry::negative-controls::320::light", case_kind: "geometry_negative_controls",
+      executed_test: "geometry controls detect hidden essential content and page overflow",
+      variation_id: "one_row", scenario_id: "launch", width: 320,
+      viewport: { width: 320, container_width: null }, theme: "light",
+      url: "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=one_row",
+      source_identity: collectionIdentity("launch", "one-row"),
+    },
   ];
-  const cases = keys.map(({ key, case_kind, variation_id }) => {
-    const testTitle = "rendered " + key;
+  const cases = keys.map((definition) => {
+    const { key, case_kind, variation_id } = definition;
     const assertionIds = case_kind === "geometry_negative_controls"
       ? ["geometry_detected"]
       : case_kind === "breakpoint"
         ? [variation_id === "one_row" ? "actual_transition" : "filtered_empty_layout"]
         : ["cell_rendered"];
     return {
+      ...definition,
       key,
       case_kind,
       run_id: runId,
       manifest_sha256: manifestDigest,
-      executed_test: testTitle,
       completed_at: "2026-10-27T20:00:00.000Z",
       status: "passed",
       assertion_ids: assertionIds,
-      source_identity: { story_path: "/groups/subscriptions_collection", renderer: "Production.Renderer/1", proof_lane: "presentation-only" },
       served_assets: { css_sha256: digests[css], js_sha256: digests[js], verified: true },
       negative_controls: case_kind === "geometry_negative_controls"
         ? { hidden_essential_detected: true, page_overflow_detected: true }
         : undefined,
-      viewport: { width: 320, container_width: null },
-      theme: "light",
     };
   });
   const reconciliation = "reconciles the fixture browser cells";
@@ -293,6 +335,40 @@ test("browser evidence accepts the complete cell control and rejects duplicates,
     assert.equal(accepted.browser_cells.length, 5);
     assert.deepEqual(accepted.assertion_refs, ["breakpoint_controls", "geometry_negative_controls", "manifest_reconciliation", "rendered_cells"]);
 
+    const validateBrowser = (browserResult, stdout = execution.stdout) => runner.validateLaneEvidence(fixture.spec, {
+      ...execution,
+      stdout,
+    }, {
+      root, expectedRunId: runId, expectedSourceDigests: fixture.digests,
+      expectedManifestDigest: manifestDigest, browserResult, expectedBrowserCells: fixture.keys,
+    });
+    const titleSwap = structuredClone(fixture.result);
+    [titleSwap.cases[0].executed_test, titleSwap.cases[1].executed_test] =
+      [titleSwap.cases[1].executed_test, titleSwap.cases[0].executed_test];
+    assert.deepEqual(
+      titleSwap.cases.map(({ executed_test }) => executed_test).sort(),
+      fixture.result.cases.map(({ executed_test }) => executed_test).sort(),
+      "swapping titles preserves the unordered Playwright identity set",
+    );
+    assert.throws(() => validateBrowser(titleSwap), /exact definition/);
+
+    const attributionMutations = [
+      ["case kind", (row) => { row.case_kind = "container"; }],
+      ["scenario", (row) => { row.scenario_id = "launch"; }],
+      ["variation", (row) => { row.variation_id = "one_row"; }],
+      ["route", (row) => { row.url = "/billing/dev/storybook/iframe/wrong"; }],
+      ["renderer", (row) => { row.source_identity.renderer = "Wrong.Renderer/1"; }],
+      ["fact source", (row) => { row.source_identity.fact_source = "CadenceSubscriptionFacts.fetch!(:wrong)"; }],
+      ["proof lane", (row) => { row.source_identity.proof_lane = "provider-completion"; }],
+      ["expected facts", (row) => { row.source_identity.expected_facts.customer_name = "Invented Customer"; }],
+    ];
+    for (const [label, mutate] of attributionMutations) {
+      const changed = structuredClone(fixture.result);
+      mutate(changed.cases[1]);
+      assert.equal(browserHelpers.matchesExpectedBrowserCell(changed.cases[1], fixture.keys[1]), false, `${label} mutation changes the exact cell binding`);
+      assert.throws(() => validateBrowser(changed), /kind|exact definition/, `${label} mutation must fail closed`);
+    }
+
     const missingIdentity = structuredClone(fixture.report);
     delete missingIdentity.suites[0].specs[0].title;
     assert.throws(() => runner.validateLaneEvidence(fixture.spec, {
@@ -345,6 +421,38 @@ test("browser evidence accepts the complete cell control and rejects duplicates,
   }
 });
 
+test("browser helper binds all 151 full cell keys to their exact test and source attribution", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, "accrue_admin/tmp/phase253/manifest.json"), "utf8"));
+  const definitions = browserHelpers.createExpectedBrowserCellDefinitions(manifest);
+  const results = {
+    run_id: runId,
+    expected_case_keys: definitions.map(({ key }) => key),
+    cases: definitions.map((definition) => ({
+      ...definition,
+      run_id: runId,
+      manifest_sha256: manifestDigest,
+      status: "passed",
+      assertion_ids: ["contract-cell"],
+      served_assets: { verified: true },
+    })),
+  };
+  assert.deepEqual(browserHelpers.reconcileResults(results, manifest, manifestDigest), []);
+
+  const swappedTitles = structuredClone(results);
+  [swappedTitles.cases[0].executed_test, swappedTitles.cases[1].executed_test] =
+    [swappedTitles.cases[1].executed_test, swappedTitles.cases[0].executed_test];
+  assert.deepEqual(
+    swappedTitles.cases.map(({ executed_test }) => executed_test).sort(),
+    results.cases.map(({ executed_test }) => executed_test).sort(),
+    "title swapping leaves the aggregate executed-title set intact",
+  );
+  assert.ok(browserHelpers.reconcileResults(swappedTitles, manifest, manifestDigest).some((error) => /exact definition/.test(error)));
+
+  const wrongCollectionFacts = structuredClone(results);
+  wrongCollectionFacts.cases[0].source_identity.expected_facts.customer_name = "Wrong Customer";
+  assert.ok(browserHelpers.reconcileResults(wrongCollectionFacts, manifest, manifestDigest).some((error) => /exact definition/.test(error)));
+});
+
 test("browser assertion inventories include breakpoint and page stress controls", async () => {
   const runner = await loadRunner();
   const browser = runner.buildCommandPlan({
@@ -368,6 +476,20 @@ test("browser assertion inventories include breakpoint and page stress controls"
   assert.ok(manifestSourcePaths.every((source) => browser.sources.includes(source)));
   assert.ok(runner.sourceInventory([browser]).includes("accrue_admin/lib/accrue_admin/live/subscription_live.ex"),
     "common aggregate source inventory includes the production whole-page renderer");
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, "accrue_admin/tmp/phase253/manifest.json"), "utf8"));
+  const definitions = browser.browser_contract.expected_cell_definitions(manifest);
+  assert.equal(definitions.length, 151, "finite browser inventory retains every one of the 151 cells");
+  assert.equal(new Set(definitions.map(({ key }) => key)).size, 151);
+  assert.equal(new Set(definitions.map(({ executed_test }) => executed_test)).size, 151);
+  assert.ok(definitions.every((definition) => definition.executed_test && definition.variation_id && definition.scenario_id &&
+    definition.url && definition.source_identity?.renderer && definition.source_identity?.fact_source &&
+    definition.source_identity?.proof_lane && definition.source_identity?.expected_facts),
+  "every browser cell has an explicit title, route, and manifest-derived attribution");
+  assert.equal(definitions.filter(({ case_kind }) => case_kind === "synthetic_text_stress").length, 2);
+  assert.equal(definitions.filter(({ case_kind }) => case_kind === "page_synthetic_text_stress").length, 6);
+  const oneRowIdentity = definitions.find(({ key }) => key === "one_row::viewport::320::light").source_identity;
+  assert.deepEqual(definitions.find(({ case_kind }) => case_kind === "geometry_negative_controls").source_identity, oneRowIdentity,
+    "geometry control borrows explicit one_row identity without inventing a manifest variation");
   assert.deepEqual(Object.keys(browser.browser_contract.assertion_ids.breakpoint).sort(), ["filtered_empty", "one_row"]);
   assert.deepEqual([...browser.browser_contract.assertion_ids.breakpoint.one_row].sort(), [
     "actual_767_768_card_table_transition",

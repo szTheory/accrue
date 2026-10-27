@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
+const { isDeepStrictEqual } = require("node:util");
 const { expect } = require("@playwright/test");
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
@@ -31,6 +32,17 @@ const PAGE_OVERLAY_VARIATIONS = Object.freeze([
   "result_pending",
   "result_failed",
 ]);
+const EXPECTED_COLLECTION_FACT_KEYS = Object.freeze([
+  "amount_state",
+  "customer_email",
+  "customer_name",
+  "owner_slug",
+  "plan_price_id",
+  "plan_quantity",
+  "processor_id",
+  "status",
+  "subscription_id",
+]);
 const PAGE_VARIATIONS = Object.freeze([...PAGE_DETAIL_VARIATIONS, ...PAGE_OVERLAY_VARIATIONS]);
 const PAGE_WIDTHS = Object.freeze([
   { kind: "viewport", width: 320, viewportWidth: 320, containerWidth: null },
@@ -39,6 +51,9 @@ const PAGE_WIDTHS = Object.freeze([
   { kind: "breakpoint", width: 768, viewportWidth: 768, containerWidth: null },
   { kind: "container", width: 640, viewportWidth: 1280, containerWidth: 640 },
 ]);
+const GEOMETRY_NEGATIVE_CONTROL_TITLE = "geometry controls detect hidden essential content and page overflow";
+const BROWSER_RECONCILIATION_TITLE = "reconciles every compiled collection and whole-page cell against this run and served assets";
+const collectionSyntheticTitle = (theme) => `synthetic long text and markup-like filter remain safe at 320px | ${theme}`;
 const ASSET_PATHS = Object.freeze([
   "accrue_admin/assets/css/app.css",
   "accrue_admin/priv/static/accrue_admin.css",
@@ -83,6 +98,9 @@ function readPhase253Manifest() {
         entry.variation_id !== entry.collection_state ||
         entry.transport_kind !== "live_component" ||
         entry.production_renderer !== "AccrueAdmin.Live.SubscriptionsLive.subscriptions_collection/1" ||
+        entry.fact_source !== `CadenceSubscriptionFacts.fetch!(:${entry.scenario_id})` ||
+        !entry.expected || typeof entry.expected !== "object" || Array.isArray(entry.expected) ||
+        JSON.stringify(Object.keys(entry.expected).sort()) !== JSON.stringify(EXPECTED_COLLECTION_FACT_KEYS) ||
         entry.proof_lane !== "presentation-only" ||
         entry.direct_path !== `/billing/dev/storybook/groups/subscriptions_collection?variation_id=${entry.variation_id}` ||
         entry.iframe_path !== `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=${entry.variation_id}`) {
@@ -108,6 +126,7 @@ function readPhase253Manifest() {
         entry.transport_kind !== "page_story" ||
         entry.route_parameter !== "tab" ||
         entry.production_renderer !== "AccrueAdmin.Live.SubscriptionLive.subscription_page/1" ||
+        entry.fact_source !== `CadenceSubscriptionFacts.fetch!(:${entry.expected?.scenario})` ||
         entry.proof_lane !== "presentation-only" ||
         entry.direct_path !== `/billing/dev/storybook/pages/subscription?tab=${entry.variation_id}` ||
         entry.expected?.snapshot !== entry.presentation_snapshot) {
@@ -218,6 +237,114 @@ function createPageStressCases(manifest) {
   });
 }
 
+function collectionSourceIdentity(entry) {
+  return {
+    story_path: entry.story_path,
+    renderer: entry.production_renderer,
+    fact_source: entry.fact_source,
+    proof_lane: entry.proof_lane,
+    expected_facts: entry.expected,
+  };
+}
+
+function expectedPageFacts(entry) {
+  return {
+    story_path: entry.story_path,
+    renderer: entry.production_renderer,
+    fact_source: entry.fact_source,
+    proof_lane: entry.proof_lane,
+    presentation_snapshot: entry.presentation_snapshot,
+    expected_facts: entry.expected,
+  };
+}
+
+function collectionCellDefinition(testCase) {
+  const { entry } = testCase;
+  return {
+    key: testCase.key,
+    case_kind: testCase.kind,
+    executed_test: testCase.title,
+    variation_id: entry.variation_id,
+    scenario_id: entry.scenario_id,
+    width: testCase.width,
+    viewport: { width: testCase.viewportWidth, container_width: testCase.containerWidth },
+    theme: testCase.theme,
+    url: entry.iframe_path,
+    source_identity: collectionSourceIdentity(entry),
+  };
+}
+
+function pageCellDefinition(testCase) {
+  const { entry } = testCase;
+  const synthetic = testCase.kind === "synthetic";
+  return {
+    key: testCase.key,
+    case_kind: synthetic ? "page_synthetic_text_stress" : "page_composition",
+    executed_test: testCase.title,
+    variation_id: entry.variation_id,
+    scenario_id: entry.expected.scenario,
+    snapshot: entry.presentation_snapshot,
+    width: testCase.width,
+    viewport: { width: testCase.viewportWidth, container_width: testCase.containerWidth },
+    theme: testCase.theme,
+    url: entry.direct_path,
+    source_identity: expectedPageFacts(entry),
+  };
+}
+
+function createExpectedBrowserCellDefinitions(manifest) {
+  const oneRow = manifest.collection_variations.find((entry) => entry.variation_id === "one_row");
+  if (!oneRow) throw new Error("Phase 253 compiled collection is missing one_row");
+
+  const collection = createCollectionCases(manifest).map(collectionCellDefinition);
+  const collectionStress = ["light", "dark"].map((theme) => ({
+    key: `one_row::synthetic-text::320::${theme}`,
+    case_kind: "synthetic_text_stress",
+    executed_test: collectionSyntheticTitle(theme),
+    variation_id: oneRow.variation_id,
+    scenario_id: oneRow.scenario_id,
+    width: 320,
+    viewport: { width: 320, container_width: null },
+    theme,
+    url: oneRow.iframe_path,
+    source_identity: collectionSourceIdentity(oneRow),
+  }));
+  const geometry = [{
+    key: "geometry::negative-controls::320::light",
+    case_kind: "geometry_negative_controls",
+    executed_test: GEOMETRY_NEGATIVE_CONTROL_TITLE,
+    variation_id: oneRow.variation_id,
+    scenario_id: oneRow.scenario_id,
+    width: 320,
+    viewport: { width: 320, container_width: null },
+    theme: "light",
+    url: oneRow.iframe_path,
+    source_identity: collectionSourceIdentity(oneRow),
+  }];
+  return [
+    ...collection,
+    ...collectionStress,
+    ...geometry,
+    ...createPageCases(manifest).map(pageCellDefinition),
+    ...createPageStressCases(manifest).map(pageCellDefinition),
+  ];
+}
+
+function matchesExpectedBrowserCell(row, definition) {
+  if (!row || !definition || row.key !== definition.key || row.case_kind !== definition.case_kind) return false;
+  return [
+    "executed_test",
+    "variation_id",
+    "scenario_id",
+    "snapshot",
+    "width",
+    "viewport",
+    "theme",
+    "url",
+    "source_identity",
+  ].every((field) => !Object.hasOwn(definition, field) || isDeepStrictEqual(row[field], definition[field]));
+}
+
 function resultPath(runId) {
   return path.join(RESULT_ROOT, `render-results-${runId}.json`);
 }
@@ -283,6 +410,8 @@ function reconcileResults(results, manifest, manifestDigest) {
   const errors = [];
   const expected = results.expected_case_keys || [];
   const actual = results.cases || [];
+  const definitions = createExpectedBrowserCellDefinitions(manifest);
+  const definitionsByKey = new Map(definitions.map((definition) => [definition.key, definition]));
   const counts = new Map();
   for (const row of actual) counts.set(row.key, (counts.get(row.key) || 0) + 1);
   for (const key of expected) {
@@ -291,6 +420,11 @@ function reconcileResults(results, manifest, manifestDigest) {
   }
   for (const row of actual) {
     if (!expected.includes(row.key)) errors.push(`unexpected browser cell: ${row.key}`);
+    const definition = definitionsByKey.get(row.key);
+    if (!definition) errors.push(`browser cell key has no exact compiled test definition: ${row.key}`);
+    else if (!matchesExpectedBrowserCell(row, definition)) {
+      errors.push(`browser cell test or compiled source attribution differs from its exact definition: ${row.key}`);
+    }
     if (row.status !== "passed") errors.push(`browser cell did not pass: ${row.key}`);
     if (row.manifest_sha256 !== manifestDigest || row.run_id !== results.run_id) {
       errors.push(`browser cell run or manifest identity differs: ${row.key}`);
@@ -303,19 +437,6 @@ function reconcileResults(results, manifest, manifestDigest) {
     }
     if (row.width !== row.viewport.width && row.viewport.container_width == null) {
       errors.push(`browser cell width does not match the actual viewport: ${row.key}`);
-    }
-    const collectionEntry = manifest.collection_variations.find((entry) => entry.variation_id === row.variation_id);
-    const pageEntry = manifest.page_entries.find((entry) => entry.variation_id === row.variation_id);
-    if (!collectionEntry && !pageEntry) errors.push(`browser cell is absent from the compiled manifest: ${row.key}`);
-    if (pageEntry) {
-      if (row.url !== pageEntry.direct_path || row.source_identity?.story_path !== pageEntry.story_path ||
-          row.source_identity?.renderer !== pageEntry.production_renderer ||
-          row.source_identity?.fact_source !== pageEntry.fact_source ||
-          row.source_identity?.proof_lane !== pageEntry.proof_lane ||
-          row.source_identity?.presentation_snapshot !== pageEntry.presentation_snapshot ||
-          JSON.stringify(row.source_identity?.expected_facts) !== JSON.stringify(pageEntry.expected)) {
-        errors.push(`whole-page browser cell attribution differs from the compiled manifest: ${row.key}`);
-      }
     }
   }
   if (expected.length === 0 || actual.length !== expected.length) errors.push("browser result coverage is empty or incomplete");
@@ -605,7 +726,7 @@ async function runCollectionCase(page, testCase, identity, testInfo) {
     theme,
     case_kind: kind,
     url: entry.iframe_path,
-    source_identity: { story_path: entry.story_path, renderer: entry.production_renderer, proof_lane: entry.proof_lane },
+    source_identity: collectionSourceIdentity(entry),
     assertion_ids: ["compiled_direct_route", "ordered_collection_content", "source_facts_and_state_controls", "theme_and_served_asset_identity", "no_hidden_essential_or_page_overflow"],
     status: "failed",
   };
@@ -684,7 +805,8 @@ async function runSyntheticTextStress(page, entry, identity, theme, testInfo) {
     viewport: { width: viewportWidth, container_width: null },
     theme,
     case_kind: "synthetic_text_stress",
-    source_identity: { story_path: entry.story_path, renderer: entry.production_renderer, proof_lane: entry.proof_lane },
+    url: entry.iframe_path,
+    source_identity: collectionSourceIdentity(entry),
     stress_label: "separately labelled synthetic browser-only layout stress; not customer evidence",
     assertion_ids: ["synthetic_name_and_id_wrap", "filter_value_remains_text_without_page_overflow", "essential_actions_remain_available"],
     status: "failed",
@@ -782,7 +904,8 @@ async function runGeometryNegativeControls(page, entry, identity, testInfo) {
     viewport: { width: 320, container_width: null },
     theme: "light",
     case_kind: "geometry_negative_controls",
-    source_identity: { story_path: entry.story_path, renderer: entry.production_renderer, proof_lane: entry.proof_lane },
+    url: entry.iframe_path,
+    source_identity: collectionSourceIdentity(entry),
     assertion_ids: ["hidden_essential_control_is_detected", "page_overflow_control_is_detected", "restored_actual_layout_passes"],
     status: "failed",
   };
@@ -831,17 +954,6 @@ async function runGeometryNegativeControls(page, entry, identity, testInfo) {
     row.manifest_sha256 = identity.manifestDigest;
     appendResult(identity.resultPath, identity.runId, identity.manifestDigest, row);
   }
-}
-
-function expectedPageFacts(entry) {
-  return {
-    story_path: entry.story_path,
-    renderer: entry.production_renderer,
-    fact_source: entry.fact_source,
-    proof_lane: entry.proof_lane,
-    presentation_snapshot: entry.presentation_snapshot,
-    expected_facts: entry.expected,
-  };
 }
 
 async function readPageGeometry(page) {
@@ -1179,14 +1291,19 @@ async function runPageCase(page, testCase, identity, testInfo) {
 
 module.exports = {
   COLLECTION_STATES,
+  GEOMETRY_NEGATIVE_CONTROL_TITLE,
+  BROWSER_RECONCILIATION_TITLE,
   THEMES,
   WIDTHS,
   appendResult,
   beginCollectionResults,
   createCollectionCases,
+  createExpectedBrowserCellDefinitions,
   createPageCases,
   createPageStressCases,
+  collectionSyntheticTitle,
   currentSourceAndAssetDigests,
+  matchesExpectedBrowserCell,
   readPhase253Manifest,
   reconcileResults,
   recordNegativeControls,

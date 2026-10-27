@@ -98,7 +98,7 @@ const PAGE_STRESS_ASSERTIONS = Object.freeze([
   ...PAGE_ASSERTIONS,
   "long_source_preserving_synthetic_stress_is_visible_and_unclipped",
 ]);
-const RECONCILIATION_TITLE = "reconciles every compiled collection and whole-page cell against this run and served assets";
+const RECONCILIATION_TITLE = browserHelpers.BROWSER_RECONCILIATION_TITLE;
 const EXPECTED_ASSET_PATHS = Object.freeze([
   "accrue_admin/priv/static/storybook.css",
   "accrue_admin/priv/static/storybook.js",
@@ -491,15 +491,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
 }
 
 function expectedBrowserCellDefinitionsFromHelpers(manifest) {
-  const collection = browserHelpers.createCollectionCases(manifest).map((row) => ({ key: row.key, case_kind: row.kind }));
-  const page = browserHelpers.createPageCases(manifest).map((row) => ({ key: row.key, case_kind: "page_composition" }));
-  const pageStress = browserHelpers.createPageStressCases(manifest).map((row) => ({ key: row.key, case_kind: "page_synthetic_text_stress" }));
-  const extra = [
-    { key: "one_row::synthetic-text::320::light", case_kind: "synthetic_text_stress" },
-    { key: "one_row::synthetic-text::320::dark", case_kind: "synthetic_text_stress" },
-    { key: "geometry::negative-controls::320::light", case_kind: "geometry_negative_controls" },
-  ];
-  return [...collection, ...extra, ...page, ...pageStress];
+  return browserHelpers.createExpectedBrowserCellDefinitions(manifest);
 }
 
 export function expectedBrowserCellKeys(manifest) {
@@ -671,6 +663,9 @@ function validateBrowserEvidence(spec, execution, { root, expectedSourceDigests,
   for (const row of rows) {
     const definition = definitionsByKey.get(row.key);
     if (!definition || row.case_kind !== definition.case_kind) fail("browser cell kind does not match its finite source inventory: " + String(row.key));
+    if (!browserHelpers.matchesExpectedBrowserCell(row, definition)) {
+      fail("browser cell test or compiled source attribution differs from its exact definition: " + row.key);
+    }
     if (row.run_id !== execution.run_id || row.manifest_sha256 !== expectedManifestDigest || row.status !== "passed") {
       fail("browser cell is failed, stale, or pooled: " + String(row.key));
     }

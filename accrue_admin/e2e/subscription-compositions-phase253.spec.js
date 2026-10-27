@@ -3,8 +3,11 @@ const { test, expect } = require("@playwright/test");
 const {
   beginCollectionResults,
   createCollectionCases,
+  BROWSER_RECONCILIATION_TITLE,
+  GEOMETRY_NEGATIVE_CONTROL_TITLE,
   createPageCases,
   createPageStressCases,
+  collectionSyntheticTitle,
   readPhase253Manifest,
   reconcileResults,
   resultPath,
@@ -46,12 +49,12 @@ test.describe("Phase 253 compiled production subscription collection", () => {
   }
 
   for (const theme of ["light", "dark"]) {
-    test(`synthetic long text and markup-like filter remain safe at 320px | ${theme}`, async ({ page }, testInfo) => {
+    test(collectionSyntheticTitle(theme), async ({ page }, testInfo) => {
       await runSyntheticTextStress(page, oneRow, { ...identity, resultPath: resultFile }, theme, testInfo);
     });
   }
 
-  test("geometry controls detect hidden essential content and page overflow", async ({ page }, testInfo) => {
+  test(GEOMETRY_NEGATIVE_CONTROL_TITLE, async ({ page }, testInfo) => {
     await runGeometryNegativeControls(page, oneRow, { ...identity, resultPath: resultFile }, testInfo);
   });
 
@@ -61,7 +64,7 @@ test.describe("Phase 253 compiled production subscription collection", () => {
     });
   }
 
-  test("reconciles every compiled collection and whole-page cell against this run and served assets", () => {
+  test(BROWSER_RECONCILIATION_TITLE, () => {
     const results = JSON.parse(fs.readFileSync(resultFile, "utf8"));
     expect(results.run_id).toBe(identity.runId);
     expect(results.manifest_sha256).toBe(identity.manifestDigest);

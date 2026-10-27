@@ -498,6 +498,8 @@ if Mix.env() != :prod do
               "collection variation #{inspect(variation_id)} in #{path} has unsupported scenario or state attribution"
       end
 
+      facts = scenario |> CadenceSubscriptionFacts.fetch!() |> SubscriptionScenarios.validate!()
+
       route_variation_id = group_id || variation_id
       route_id = to_string(route_variation_id)
 
@@ -530,7 +532,18 @@ if Mix.env() != :prod do
         transport_kind: "live_component",
         production_renderer: @renderer,
         fact_source: "CadenceSubscriptionFacts.fetch!(:#{scenario})",
-        proof_lane: "presentation-only"
+        proof_lane: "presentation-only",
+        expected: %{
+          subscription_id: facts.subscription.id,
+          processor_id: facts.subscription.processor_id,
+          customer_name: facts.customer.name,
+          customer_email: facts.customer.email,
+          owner_slug: facts.owner.slug,
+          status: Atom.to_string(facts.subscription.status),
+          plan_price_id: hd(facts.subscription.items).price_id,
+          plan_quantity: hd(facts.subscription.items).quantity,
+          amount_state: "unavailable"
+        }
       }
     end
 
