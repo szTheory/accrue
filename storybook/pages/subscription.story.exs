@@ -12,8 +12,37 @@ defmodule AccrueAdmin.Storybook.Pages.Subscription do
   alias AccrueAdmin.Storybook.SubscriptionPageScenarios
   alias PhoenixStorybook.Stories.Variation
 
+  @page_states %{
+    active: {:active, :canonical},
+    scheduled_cancellation: {:scheduled_cancellation, :canonical},
+    incomplete_evidence: {:incomplete_evidence, :canonical},
+    review_cancel_now: {:active, :review_cancel_now},
+    awaiting_step_up: {:active, :awaiting_step_up},
+    dispatching: {:active, :dispatching},
+    result_confirmed: {:active, :result_confirmed},
+    result_pending: {:active, :result_pending},
+    result_failed: {:active, :result_failed}
+  }
+
   def doc do
     "Complete subscription detail page rendered through its production LiveView owner."
+  end
+
+  # PhoenixStorybook page stories select their supported presentations through
+  # navigation tabs. The `variation_id` query parameter is only read for
+  # component/live_component stories by PhoenixStorybook 1.2.
+  def navigation do
+    [
+      {:active, "Active"},
+      {:scheduled_cancellation, "Scheduled cancellation"},
+      {:incomplete_evidence, "Incomplete evidence"},
+      {:review_cancel_now, "Cancel review"},
+      {:awaiting_step_up, "Step-up review"},
+      {:dispatching, "Dispatching"},
+      {:result_confirmed, "Confirmed result"},
+      {:result_pending, "Pending result"},
+      {:result_failed, "Failed result"}
+    ]
   end
 
   def variations do
@@ -51,10 +80,35 @@ defmodule AccrueAdmin.Storybook.Pages.Subscription do
   end
 
   def render(assigns) do
-    assigns
-    |> Map.drop([:__changed__, :id])
-    |> SubscriptionPageScenarios.assigns!()
-    |> then(&SubscriptionLive.subscription_page/1)
+    page_attributes =
+      case Map.get(assigns, :tab) do
+        nil when is_map_key(assigns, :scenario) ->
+          Map.drop(assigns, [:__changed__, :id])
+
+        nil ->
+          SubscriptionPageScenarios.attributes(:active, :canonical)
+
+        tab ->
+          {scenario, snapshot} = page_state_for_tab!(tab)
+          SubscriptionPageScenarios.attributes(scenario, snapshot)
+      end
+
+    html =
+      Phoenix.LiveViewTest.__render_component__(
+        AccrueAdmin.Endpoint,
+        &SubscriptionLive.subscription_page/1,
+        SubscriptionPageScenarios.assigns!(page_attributes),
+        []
+      )
+
+    Phoenix.HTML.raw(html <> ~s(<div id="ax-overlay-root"></div>))
+  end
+
+  defp page_state_for_tab!(tab) do
+    Enum.find_value(@page_states, fn
+      {^tab, state} -> state
+      {id, state} -> if to_string(id) == to_string(tab), do: state
+    end) || raise ArgumentError, "unsupported subscription page navigation tab: #{inspect(tab)}"
   end
 
   def function, do: &__MODULE__.render/1

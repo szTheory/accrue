@@ -33,18 +33,18 @@ defmodule AccrueAdmin.SubscriptionPageSliceTest do
     assert function_exported?(SubscriptionLive, :subscription_page, 1)
   end
 
-  test "the active page variation is byte-identical to the production renderer and preserves its whole composition" do
+  test "the active page variation preserves production markup and provides the Storybook overlay target" do
     assert Process.whereis(AccrueAdmin.TestRepo) == nil
 
     variation = Enum.find(Subscription.variations(), &(&1.id == :active))
     assert %Variation{} = variation
 
     assigns = SubscriptionPageScenarios.assigns!(variation.attributes)
-    story_html = render_component(Subscription.function(), variation.attributes)
+    story_html = render_story(variation.attributes)
     page_html = render_component(&SubscriptionLive.subscription_page/1, assigns)
     routed_html = render_component(&SubscriptionLive.render/1, assigns)
 
-    assert story_html == page_html
+    assert_story_adapter_matches_production(story_html, page_html)
     assert routed_html == page_html
 
     document = Floki.parse_document!(page_html)
@@ -113,6 +113,22 @@ defmodule AccrueAdmin.SubscriptionPageSliceTest do
     assert Process.whereis(AccrueAdmin.TestRepo) == nil
   end
 
+  test "PhoenixStorybook navigation tabs select the exact compiled whole-page presentation" do
+    assert Process.whereis(AccrueAdmin.TestRepo) == nil
+
+    active = Enum.find(Subscription.variations(), &(&1.id == :active))
+
+    assert render_story(%{}) == render_story(active.attributes)
+
+    for variation <- Subscription.variations() do
+      direct_html = render_story(variation.attributes)
+      tab_html = render_story(%{tab: variation.id})
+
+      assert tab_html == direct_html,
+             "the #{variation.id} page-story tab must render its compiled scenario and snapshot"
+    end
+  end
+
   test "canonical whole-page variations retain the active cancellation and incomplete facts" do
     canonical_variations = Enum.take(Subscription.variations(), 3)
     ids = Enum.map(canonical_variations, & &1.id)
@@ -123,7 +139,7 @@ defmodule AccrueAdmin.SubscriptionPageSliceTest do
         variation = Enum.find(canonical_variations, &(&1.id == id))
         assigns = SubscriptionPageScenarios.assigns!(variation.attributes)
 
-        {id, render_component(Subscription.function(), variation.attributes),
+        {id, render_story(variation.attributes),
          assigns.subscription}
       end)
 
@@ -168,7 +184,7 @@ defmodule AccrueAdmin.SubscriptionPageSliceTest do
 
     html_by_id =
       Map.new(variations, fn variation ->
-        {variation.id, render_component(Subscription.function(), variation.attributes)}
+        {variation.id, render_story(variation.attributes)}
       end)
 
     review = Floki.parse_document!(html_by_id.review_cancel_now)
@@ -316,5 +332,19 @@ defmodule AccrueAdmin.SubscriptionPageSliceTest do
     end
 
     assert Process.whereis(AccrueAdmin.TestRepo) == nil
+  end
+
+  defp render_story(assigns) do
+    assigns
+    |> Subscription.render()
+    |> Phoenix.HTML.safe_to_string()
+  end
+
+  defp assert_story_adapter_matches_production(story_html, page_html) do
+    overlay_root = ~s(<div id="ax-overlay-root"></div>)
+
+    assert String.ends_with?(story_html, overlay_root)
+    assert length(Floki.find(Floki.parse_document!(story_html), "#ax-overlay-root")) == 1
+    assert String.replace_suffix(story_html, overlay_root, "") == page_html
   end
 end

@@ -195,6 +195,21 @@ if Mix.env() != :prod do
       end
 
       actual_ids = Enum.map(entries, & &1.variation_id)
+
+      page_tabs =
+        stories
+        |> Enum.find_value(fn
+          {@page_story_path, story} -> apply(story, :navigation, [])
+          _other -> nil
+        end)
+        |> List.wrap()
+        |> Enum.map(&(elem(&1, 0) |> to_string()))
+
+      unless Enum.sort(page_tabs) == Enum.sort(actual_ids) do
+        raise ArgumentError,
+              "whole-page navigation tabs must map one-to-one to the compiled page variations"
+      end
+
       missing = @required_page_variations -- actual_ids
       extra = actual_ids -- @required_page_variations
 
@@ -347,6 +362,10 @@ if Mix.env() != :prod do
         raise ArgumentError, "collection manifest contains an invalid direct route"
       end
 
+      unless Enum.all?(manifest["page_entries"], &route_matches?(&1, Map.get(&1, "url"))) do
+        raise ArgumentError, "whole-page manifest contains an invalid navigation-tab route"
+      end
+
       :ok
     end
 
@@ -361,8 +380,11 @@ if Mix.env() != :prod do
         actual = URI.parse(url)
         query = URI.decode_query(actual.query || "")
 
+        route_parameter =
+          Map.get(entry, :route_parameter, Map.get(entry, "route_parameter", "variation_id"))
+
         actual.scheme == expected.scheme and actual.host == expected.host and
-          actual.path == expected.path and query == %{"variation_id" => variation_id}
+          actual.path == expected.path and query == %{route_parameter => variation_id}
       else
         false
       end
@@ -553,7 +575,7 @@ if Mix.env() != :prod do
 
       url =
         NavigationHelpers.path_to_story(root_path, String.trim_leading(path, "/"), %{
-          variation_id: route_id
+          tab: route_id
         })
 
       %{
@@ -562,6 +584,7 @@ if Mix.env() != :prod do
         group_id: nil,
         variation_id: route_id,
         route_variation_id: route_id,
+        route_parameter: "tab",
         url: url,
         direct_path: @mounted_storybook_root <> String.replace_prefix(url, @storybook_root, ""),
         transport_kind: "page_story",
@@ -641,9 +664,9 @@ if Mix.env() != :prod do
 
     defp validate_page_story!(story) do
       unless Code.ensure_loaded?(story) and function_exported?(story, :variations, 0) and
-               function_exported?(story, :render, 1) do
+               function_exported?(story, :render, 1) and function_exported?(story, :navigation, 0) do
         raise ArgumentError,
-              "compiled whole-page story must export variations/0 and render/1: #{inspect(story)}"
+              "compiled whole-page story must export variations/0, navigation/0, and render/1: #{inspect(story)}"
       end
     end
 

@@ -3,16 +3,21 @@ const { test, expect } = require("@playwright/test");
 const {
   beginCollectionResults,
   createCollectionCases,
+  createPageCases,
+  createPageStressCases,
   readPhase253Manifest,
   reconcileResults,
   resultPath,
   runCollectionCase,
   runGeometryNegativeControls,
+  runPageCase,
   runSyntheticTextStress,
 } = require("./phase253-composition-helpers.js");
 
 const identity = readPhase253Manifest();
 const cases = createCollectionCases(identity.manifest);
+const pageCases = createPageCases(identity.manifest);
+const pageStressCases = createPageStressCases(identity.manifest);
 const resultFile = resultPath(identity.runId);
 const oneRow = identity.manifest.collection_variations.find((entry) => entry.variation_id === "one_row");
 const extraKeys = [
@@ -27,7 +32,9 @@ test.beforeAll(() => {
     identity.runId,
     identity.manifest,
     identity.manifestDigest,
-    [...cases.map((testCase) => testCase.key), ...extraKeys],
+    [...cases.map((testCase) => testCase.key), ...extraKeys,
+      ...pageCases.map((testCase) => testCase.key),
+      ...pageStressCases.map((testCase) => testCase.key)],
   );
 });
 
@@ -48,7 +55,13 @@ test.describe("Phase 253 compiled production subscription collection", () => {
     await runGeometryNegativeControls(page, oneRow, { ...identity, resultPath: resultFile }, testInfo);
   });
 
-  test("reconciles every compiled collection cell against this run and its served assets", () => {
+  for (const testCase of [...pageCases, ...pageStressCases]) {
+    test(testCase.title, async ({ page }, testInfo) => {
+      await runPageCase(page, testCase, { ...identity, resultPath: resultFile }, testInfo);
+    });
+  }
+
+  test("reconciles every compiled collection and whole-page cell against this run and served assets", () => {
     const results = JSON.parse(fs.readFileSync(resultFile, "utf8"));
     expect(results.run_id).toBe(identity.runId);
     expect(results.manifest_sha256).toBe(identity.manifestDigest);
@@ -57,7 +70,7 @@ test.describe("Phase 253 compiled production subscription collection", () => {
     expect(results.source_and_asset_sha256["accrue_admin/assets/css/app.css"]).toMatch(/^[a-f0-9]{64}$/);
     expect(results.source_and_asset_sha256["accrue_admin/priv/static/accrue_admin.css"]).toMatch(/^[a-f0-9]{64}$/);
     expect(results.source_and_asset_sha256["accrue_admin/priv/static/storybook.css"]).toMatch(/^[a-f0-9]{64}$/);
-    expect(results.cases).toHaveLength(cases.length + extraKeys.length);
+    expect(results.cases).toHaveLength(cases.length + extraKeys.length + pageCases.length + pageStressCases.length);
     expect(reconcileResults(results, identity.manifest, identity.manifestDigest)).toEqual([]);
     const controls = results.cases.find((row) => row.case_kind === "geometry_negative_controls");
     expect(controls?.negative_controls).toEqual({ hidden_essential_detected: true, page_overflow_detected: true });
@@ -65,5 +78,7 @@ test.describe("Phase 253 compiled production subscription collection", () => {
     expect(results.cases.filter((row) => row.case_kind === "breakpoint")).toHaveLength(8);
     expect(results.cases.filter((row) => row.case_kind === "container")).toHaveLength(4);
     expect(results.cases.filter((row) => row.case_kind === "synthetic_text_stress")).toHaveLength(2);
+    expect(results.cases.filter((row) => row.case_kind === "page_composition")).toHaveLength(90);
+    expect(results.cases.filter((row) => row.case_kind === "page_synthetic_text_stress")).toHaveLength(6);
   });
 });

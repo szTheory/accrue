@@ -22,6 +22,23 @@ const COLLECTION_STATES = Object.freeze([
 ]);
 const WIDTHS = Object.freeze([320, 1280]);
 const THEMES = Object.freeze(["light", "dark"]);
+const PAGE_DETAIL_VARIATIONS = Object.freeze(["active", "scheduled_cancellation", "incomplete_evidence"]);
+const PAGE_OVERLAY_VARIATIONS = Object.freeze([
+  "review_cancel_now",
+  "awaiting_step_up",
+  "dispatching",
+  "result_confirmed",
+  "result_pending",
+  "result_failed",
+]);
+const PAGE_VARIATIONS = Object.freeze([...PAGE_DETAIL_VARIATIONS, ...PAGE_OVERLAY_VARIATIONS]);
+const PAGE_WIDTHS = Object.freeze([
+  { kind: "viewport", width: 320, viewportWidth: 320, containerWidth: null },
+  { kind: "viewport", width: 1280, viewportWidth: 1280, containerWidth: null },
+  { kind: "breakpoint", width: 767, viewportWidth: 767, containerWidth: null },
+  { kind: "breakpoint", width: 768, viewportWidth: 768, containerWidth: null },
+  { kind: "container", width: 640, viewportWidth: 1280, containerWidth: 640 },
+]);
 const ASSET_PATHS = Object.freeze([
   "accrue_admin/assets/css/app.css",
   "accrue_admin/priv/static/accrue_admin.css",
@@ -78,6 +95,26 @@ function readPhase253Manifest() {
     throw new Error("Phase 253 compiled collection inventory differs from the ten supported production states");
   }
 
+  const pageEntries = manifest.page_entries;
+  if (!Array.isArray(pageEntries) || pageEntries.length !== PAGE_VARIATIONS.length) {
+    throw new Error("Phase 253 compiled whole-page manifest has an incomplete variation inventory");
+  }
+  const pageIds = pageEntries.map((entry) => entry.variation_id);
+  if (JSON.stringify([...pageIds].sort()) !== JSON.stringify([...PAGE_VARIATIONS].sort())) {
+    throw new Error("Phase 253 compiled whole-page inventory differs from its supported production states");
+  }
+  for (const entry of pageEntries) {
+    if (entry.story_path !== "/pages/subscription" ||
+        entry.transport_kind !== "page_story" ||
+        entry.route_parameter !== "tab" ||
+        entry.production_renderer !== "AccrueAdmin.Live.SubscriptionLive.subscription_page/1" ||
+        entry.proof_lane !== "presentation-only" ||
+        entry.direct_path !== `/billing/dev/storybook/pages/subscription?tab=${entry.variation_id}` ||
+        entry.expected?.snapshot !== entry.presentation_snapshot) {
+      throw new Error(`Phase 253 compiled whole-page attribution is incomplete: ${entry.variation_id}`);
+    }
+  }
+
   return { manifest, manifestDigest: sha256(raw), runId: RUN_ID };
 }
 
@@ -132,6 +169,53 @@ function createCollectionCases(manifest) {
     }
   }
   return cases;
+}
+
+function createPageCases(manifest) {
+  const cases = [];
+  for (const variationId of PAGE_VARIATIONS) {
+    const entry = manifest.page_entries.find((candidate) => candidate.variation_id === variationId);
+    if (!entry) throw new Error(`Phase 253 compiled whole-page manifest is missing ${variationId}`);
+    for (const dimension of PAGE_WIDTHS) {
+      for (const theme of THEMES) {
+        cases.push({
+          entry,
+          pageRole: PAGE_DETAIL_VARIATIONS.includes(variationId) ? "detail" : "overlay_result",
+          kind: dimension.kind,
+          width: dimension.width,
+          viewportWidth: dimension.viewportWidth,
+          containerWidth: dimension.containerWidth,
+          theme,
+          key: `page::${variationId}::${dimension.kind}::${dimension.width}::${theme}`,
+          title: `${variationId} | ${dimension.kind} | ${dimension.width}px | ${theme}`,
+        });
+      }
+    }
+  }
+  return cases;
+}
+
+function createPageStressCases(manifest) {
+  return [
+    ["active", "return"],
+    ["review_cancel_now", "consequence"],
+    ["awaiting_step_up", "recovery"],
+  ].flatMap(([variationId, stressKind]) => {
+    const entry = manifest.page_entries.find((candidate) => candidate.variation_id === variationId);
+    if (!entry) throw new Error(`Phase 253 compiled whole-page manifest is missing ${variationId}`);
+    return THEMES.map((theme) => ({
+      entry,
+      pageRole: PAGE_DETAIL_VARIATIONS.includes(variationId) ? "detail" : "overlay_result",
+      kind: "synthetic",
+      stressKind,
+      width: 320,
+      viewportWidth: 320,
+      containerWidth: null,
+      theme,
+      key: `page::${variationId}::synthetic-${stressKind}::320::${theme}`,
+      title: `${variationId} | synthetic ${stressKind} text stress | 320px | ${theme}`,
+    }));
+  });
 }
 
 function resultPath(runId) {
@@ -220,8 +304,18 @@ function reconcileResults(results, manifest, manifestDigest) {
     if (row.width !== row.viewport.width && row.viewport.container_width == null) {
       errors.push(`browser cell width does not match the actual viewport: ${row.key}`);
     }
-    if (!manifest.collection_variations.some((entry) => entry.variation_id === row.variation_id)) {
-      errors.push(`browser cell is absent from the compiled collection manifest: ${row.key}`);
+    const collectionEntry = manifest.collection_variations.find((entry) => entry.variation_id === row.variation_id);
+    const pageEntry = manifest.page_entries.find((entry) => entry.variation_id === row.variation_id);
+    if (!collectionEntry && !pageEntry) errors.push(`browser cell is absent from the compiled manifest: ${row.key}`);
+    if (pageEntry) {
+      if (row.url !== pageEntry.direct_path || row.source_identity?.story_path !== pageEntry.story_path ||
+          row.source_identity?.renderer !== pageEntry.production_renderer ||
+          row.source_identity?.fact_source !== pageEntry.fact_source ||
+          row.source_identity?.proof_lane !== pageEntry.proof_lane ||
+          row.source_identity?.presentation_snapshot !== pageEntry.presentation_snapshot ||
+          JSON.stringify(row.source_identity?.expected_facts) !== JSON.stringify(pageEntry.expected)) {
+        errors.push(`whole-page browser cell attribution differs from the compiled manifest: ${row.key}`);
+      }
     }
   }
   if (expected.length === 0 || actual.length !== expected.length) errors.push("browser result coverage is empty or incomplete");
@@ -739,6 +833,350 @@ async function runGeometryNegativeControls(page, entry, identity, testInfo) {
   }
 }
 
+function expectedPageFacts(entry) {
+  return {
+    story_path: entry.story_path,
+    renderer: entry.production_renderer,
+    fact_source: entry.fact_source,
+    proof_lane: entry.proof_lane,
+    presentation_snapshot: entry.presentation_snapshot,
+    expected_facts: entry.expected,
+  };
+}
+
+async function readPageGeometry(page) {
+  return page.evaluate(() => {
+    const documentElement = document.documentElement;
+    const root = document.querySelector(".psb-sandbox .ax-subscription-detail-page");
+    const isVisible = (element) => {
+      if (!element) return false;
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0 &&
+        rect.width > 0 && rect.height > 0;
+    };
+    const required = [
+      ["page heading", root?.querySelector("h1")],
+      ["summary facts", root?.querySelector("[data-ax-summary-list]")],
+      ["action band", root?.querySelector("[data-ax-action-band]")],
+      ["return navigation", root?.querySelector(".ax-detail-back-link a")],
+      ["related resources", root?.querySelector("[data-ax-related-resources]")],
+    ];
+    const hiddenEssential = required.filter(([, element]) => !isVisible(element)).map(([name]) => name);
+    const rootRect = root?.getBoundingClientRect();
+    return {
+      viewport_width: window.innerWidth,
+      document_client_width: documentElement.clientWidth,
+      document_scroll_width: documentElement.scrollWidth,
+      page_client_width: root?.clientWidth || 0,
+      page_scroll_width: root?.scrollWidth || 0,
+      page_rendered_width: rootRect ? Math.round(rootRect.width) : 0,
+      hidden_essential: hiddenEssential,
+    };
+  });
+}
+
+function assertPageGeometryClean(geometry, label) {
+  if (geometry.hidden_essential.length) {
+    throw new Error(`${label}: hidden essential content: ${geometry.hidden_essential.join(", ")}`);
+  }
+  if (geometry.document_scroll_width > geometry.document_client_width + 1) {
+    throw new Error(`${label}: document page overflow ${geometry.document_scroll_width}/${geometry.document_client_width}`);
+  }
+  if (geometry.page_scroll_width > geometry.page_client_width + 1) {
+    throw new Error(`${label}: subscription page overflow ${geometry.page_scroll_width}/${geometry.page_client_width}`);
+  }
+}
+
+async function assertPageContent(page, story, entry) {
+  const facts = entry.expected;
+  const root = story.locator(".ax-subscription-detail-page").first();
+  await expect(root, "the direct route uses the compiled whole-page renderer").toBeVisible();
+  await expect(root.locator("h1")).toHaveCount(1);
+  await expect(root.locator("h1")).toContainText(facts.customer_name);
+
+  const copyId = root.locator("#subscription-summary-id");
+  await expect(copyId).toBeVisible();
+  await expect(copyId).toHaveAttribute("data-clipboard-text", facts.processor_id || facts.subscription_id);
+  await expect(copyId).toContainText(facts.processor_id || facts.subscription_id);
+
+  const factRows = await root.locator("[data-ax-summary-list] .ax-summary-list-row").evaluateAll((rows) =>
+    Object.fromEntries(rows.map((row) => [
+      row.querySelector("dt")?.innerText.trim(),
+      row.querySelector("dd.ax-summary-list-value")?.innerText.trim(),
+    ])),
+  );
+  expect(factRows["Lifecycle state"], `${entry.variation_id}: source lifecycle remains visible`).toBe(
+    facts.status === "active" ? "Active" : facts.status,
+  );
+  expect(factRows["Plan / price"], `${entry.variation_id}: exact plan identifier or unavailable caveat`).toBe(
+    facts.plan_price_id || "Price unavailable",
+  );
+  expect(factRows["Amount (MRR)"], `${entry.variation_id}: no invented price or amount`).toBe("Unavailable");
+  if (facts.plan_quantity != null) {
+    expect(factRows["Seats / quantity"]).toBe(String(facts.plan_quantity));
+  }
+  expect(await root.locator("[data-ax-summary-list] .ax-summary-list-row").count()).toBeGreaterThanOrEqual(6);
+  await expect(root).toContainText("Charge amount unavailable");
+
+  if (entry.variation_id === "scheduled_cancellation") {
+    expect(factRows.Cancellation).toContain("Scheduled for");
+  }
+  if (entry.variation_id === "incomplete_evidence") {
+    expect(factRows["Renews / ends"] || Object.values(factRows).join(" ")).toContain("Renewal date unavailable");
+    expect(Object.values(factRows).join(" ")).toContain("Price unavailable");
+    expect(Object.values(factRows).join(" ")).toContain("Charge amount unavailable");
+  }
+
+  const returnLink = root.locator(".ax-detail-back-link a");
+  await expect(returnLink).toBeVisible();
+  const returnHref = await returnLink.getAttribute("href");
+  const returnUrl = new URL(returnHref, page.url());
+  expect(returnUrl.pathname).toBe("/billing/subscriptions");
+  expect(returnUrl.searchParams.get("org")).toBe(facts.owner_slug);
+
+  const related = root.locator("[data-ax-related-resources]");
+  await expect(related).toBeVisible();
+  const relatedHrefs = await related.locator("a[href]").evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+  expect(relatedHrefs.length, "related resources retain destination links").toBeGreaterThan(0);
+  expect(relatedHrefs.every((href) => href && href.startsWith("/billing/"))).toBe(true);
+  await expect(root.locator("[data-ax-action-band]")).toBeVisible();
+  await expect(root.locator("[data-ax-drill-section]")).toHaveCount(3);
+  await expect(root.locator("[data-ax-drill-section] summary")).toHaveCount(3);
+  await expect(root.locator("[data-ax-lazy-activity]")).toHaveCount(1);
+  await expect(root.locator("[data-ax-lazy-json]")).toHaveCount(1);
+
+  const activity = root.getByRole("link", { name: "Open Events audit log with subscription filter" });
+  await expect(activity).toBeVisible();
+  const activityUrl = new URL(await activity.getAttribute("href"), page.url());
+  expect(activityUrl.pathname).toBe("/billing/events");
+  expect(activityUrl.searchParams.get("org")).toBe(facts.owner_slug);
+  expect(activityUrl.searchParams.get("subject_type")).toBe("Subscription");
+  expect(activityUrl.searchParams.get("subject_id")).toBe(facts.subscription_id);
+
+  const pageText = await root.innerText();
+  expect(pageText).toContain(facts.customer_name);
+  expect(pageText).toContain(facts.processor_id);
+  expect(pageText).not.toMatch(/\$\s?\d|\b(?:USD|EUR|GBP)\s?\d/);
+
+  return {
+    heading: await root.locator("h1").innerText(),
+    summary_facts: factRows,
+    copy_id: await copyId.getAttribute("data-clipboard-text"),
+    return_href: returnHref,
+    related_hrefs: relatedHrefs,
+    activity_href: await activity.getAttribute("href"),
+    disclosure_names: await root.locator("[data-ax-drill-section]").evaluateAll((sections) =>
+      sections.map((section) => section.getAttribute("data-ax-drill-section")),
+    ),
+    amount_assertion: "amount unavailable; no numeric amount projected",
+  };
+}
+
+async function assertPageSnapshot(page, story, entry) {
+  const variationId = entry.variation_id;
+  const expected = entry.expected;
+  if (variationId === "review_cancel_now" || variationId === "awaiting_step_up" || variationId === "dispatching") {
+    const drawer = page.locator("#subscription-action-drawer");
+    await expect(drawer, `${variationId}: open review drawer is visible`).toBeVisible();
+    const panel = drawer.locator('[data-role="confirm-panel"]');
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText(expected.subscription_id);
+    await expect(panel).toContainText(expected.processor_id);
+    await expect(panel).toContainText("Unavailable; no estimate is shown.");
+    await expect(panel).toContainText("Current state");
+    const confirm = drawer.locator('[data-role="confirm-action"]');
+    await expect(confirm).toBeVisible();
+    if (variationId === "review_cancel_now") await expect(confirm).toBeEnabled();
+    else await expect(confirm).toBeDisabled();
+    await expect(drawer.getByRole("button", { name: "Back to subscription" }).first()).toBeVisible();
+    await expect(drawer.getByRole("heading", { level: 2 })).toBeVisible();
+
+    if (variationId === "awaiting_step_up") {
+      const modal = page.locator("#accrue-admin-step-up-dialog");
+      await expect(modal).toBeVisible();
+      await expect(modal).toContainText("Verify admin action");
+      await expect(modal.locator("#step-up-code")).toBeVisible();
+      await expect(modal.locator('[data-role="step-up-cancel"]')).toBeVisible();
+      await expect(modal.locator('[data-role="step-up-submit"]')).toBeVisible();
+    }
+    return {
+      composition: variationId,
+      consequence: (await panel.innerText()).replace(/\s+/g, " ").trim(),
+      confirm_disabled: await confirm.isDisabled(),
+      dismiss_label: "Back to subscription",
+      step_up_visible: variationId === "awaiting_step_up",
+    };
+  }
+
+  if (variationId.startsWith("result_")) {
+    const result = story.locator('[data-role="subscription-action-result"]');
+    await expect(result).toBeVisible();
+    await expect(result).toHaveAttribute("role", "status");
+    await expect(result).toHaveAttribute("aria-live", "polite");
+    const expectedMessage = {
+      result_confirmed: "Subscription action recorded.",
+      result_pending: "A completed subscription change is not confirmed",
+      result_failed: "The provider rejected the action. No change was accepted.",
+    }[variationId];
+    await expect(result).toContainText(expectedMessage);
+    const activity = result.getByRole("link", { name: "Open scoped subscription activity" });
+    await expect(activity).toBeVisible();
+    const destination = new URL(await activity.getAttribute("href"), page.url());
+    expect(destination.pathname).toBe("/billing/events");
+    expect(destination.searchParams.get("org")).toBe(expected.owner_slug);
+    expect(destination.searchParams.get("subject_type")).toBe("Subscription");
+    expect(destination.searchParams.get("subject_id")).toBe(expected.subscription_id);
+    return {
+      composition: variationId,
+      result_role: await result.getAttribute("role"),
+      aria_live: await result.getAttribute("aria-live"),
+      result_copy: await result.innerText(),
+      activity_href: await activity.getAttribute("href"),
+    };
+  }
+
+  return { composition: variationId, composition_type: "canonical detail page" };
+}
+
+async function addPageSyntheticStress(page, variationId) {
+  const root = page.locator(".psb-sandbox .ax-subscription-detail-page").first();
+  const longValue = `phase253 synthetic validated origin ${"context remains scoped ".repeat(16)}`.trim();
+  let host;
+  let label;
+  if (variationId === "active") {
+    host = root.locator(".ax-detail-back-link");
+    label = "Synthetic return-label and encoded-origin stress only";
+  } else if (variationId === "review_cancel_now") {
+    host = page.locator("#subscription-action-drawer [data-role='confirm-panel']");
+    label = "Synthetic consequence stress only";
+  } else {
+    host = page.locator("#accrue-admin-step-up-dialog .ax-step-up-modal-body");
+    label = "Synthetic recovery stress only";
+  }
+  const before = await host.innerText();
+  const returnHref = variationId === "active" ? await root.locator(".ax-detail-back-link a").getAttribute("href") : null;
+  const stress = await host.evaluate((element, values) => {
+    const content = document.createElement("span");
+    content.className = "ax-body";
+    content.style.display = "block";
+    content.dataset.phase253SyntheticStress = values.label;
+    content.textContent = `${values.label}: ${values.value}`;
+    element.appendChild(content);
+    let link = null;
+    if (values.href) {
+      link = document.createElement("a");
+      link.className = "ax-link";
+      link.dataset.phase253SyntheticOrigin = "true";
+      link.textContent = `${values.label}: ${values.value}`;
+      link.href = values.href;
+      link.style.display = "block";
+      element.appendChild(link);
+    }
+    const style = getComputedStyle(content);
+    const metrics = {
+      content_width: content.clientWidth,
+      content_scroll_width: content.scrollWidth,
+      parent_width: element.clientWidth,
+      parent_scroll_width: element.scrollWidth,
+      overflow: style.overflow,
+      white_space: style.whiteSpace,
+      text_overflow: style.textOverflow,
+      after_text: element.innerText,
+      encoded_link_href: link?.href || null,
+      link_width: link?.clientWidth || null,
+      link_scroll_width: link?.scrollWidth || null,
+    };
+    return metrics;
+  }, {
+    label,
+    value: longValue,
+    href: returnHref ? `${returnHref}&phase253_origin=${encodeURIComponent(longValue)}` : null,
+  });
+  if (!stress.after_text.includes(before) || !stress.after_text.includes(label)) {
+    throw new Error(`${variationId}: synthetic stress text displaced actual source copy`);
+  }
+  if (stress.content_width <= 0 || stress.content_scroll_width > stress.content_width + 1 ||
+      (stress.link_width != null && stress.link_scroll_width > stress.link_width + 1)) {
+    throw new Error(`${variationId}: long synthetic text is clipped in its source layout boundary`);
+  }
+  if (stress.parent_scroll_width > stress.parent_width + 1) {
+    throw new Error(`${variationId}: long synthetic text overflows its parent composition`);
+  }
+  if (variationId === "active") {
+    const parsed = new URL(stress.encoded_link_href);
+    expect(parsed.searchParams.get("org")).toBe("cadence-demo");
+    expect(parsed.searchParams.get("phase253_origin")).toBe(longValue);
+  }
+  return { label, synthetic_value: longValue, metrics: stress, retained_source_text: true };
+}
+
+async function runPageCase(page, testCase, identity, testInfo) {
+  const { entry, width, viewportWidth, containerWidth, theme, kind, key } = testCase;
+  const row = {
+    key,
+    run_id: identity.runId,
+    executed_test: testInfo.title,
+    variation_id: entry.variation_id,
+    scenario_id: entry.expected.scenario,
+    snapshot: entry.presentation_snapshot,
+    width,
+    viewport: { width: viewportWidth, container_width: containerWidth },
+    theme,
+    case_kind: kind === "synthetic" ? "page_synthetic_text_stress" : "page_composition",
+    url: entry.direct_path,
+    source_identity: expectedPageFacts(entry),
+    stress_label: kind === "synthetic" ? `separately labelled synthetic ${entry.variation_id} stress only; not customer evidence` : undefined,
+    assertion_ids: [
+      "compiled_direct_whole_page_route",
+      "production_source_identity_and_fact_content",
+      "exact_ids_amount_caveats_state_and_destinations",
+      "native_disclosures_activity_and_related_links",
+      "theme_and_served_asset_identity",
+      "no_hidden_essential_content_or_page_overflow",
+    ],
+    status: "failed",
+  };
+  try {
+    await page.setViewportSize({ width: viewportWidth, height: 1000 });
+    await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+    await page.goto(`/__e2e__/login?to=${encodeURIComponent(entry.direct_path)}`);
+    await expect.poll(() => `${new URL(page.url()).pathname}${new URL(page.url()).search}`).toBe(entry.direct_path);
+
+    const story = page.locator(".psb-sandbox").first();
+    await expect(story).toBeVisible();
+    await setTheme(story, theme);
+    const root = story.locator(".ax-subscription-detail-page").first();
+    await expect(root).toBeVisible();
+    if (containerWidth != null) {
+      await constrainContent(root, containerWidth);
+      const actualWidth = await root.evaluate((element) => Math.round(element.getBoundingClientRect().width));
+      expect(actualWidth, "the actual page content container is constrained to 640px").toBe(containerWidth);
+      expect(await page.evaluate(() => window.innerWidth)).toBe(viewportWidth);
+    }
+
+    row.served_assets = await serveAndVerifyAssets(page, entry.direct_path);
+    row.content = await assertPageContent(page, story, entry);
+    row.snapshot_content = await assertPageSnapshot(page, story, entry);
+    if (kind === "synthetic") {
+      row.synthetic_stress = await addPageSyntheticStress(page, entry.variation_id);
+      row.assertion_ids.push("long_source_preserving_synthetic_stress_is_visible_and_unclipped");
+    }
+    row.geometry = await readPageGeometry(page);
+    assertPageGeometryClean(row.geometry, key);
+    expect(row.geometry.viewport_width).toBe(viewportWidth);
+    if (containerWidth != null) expect(row.geometry.page_rendered_width).toBe(containerWidth);
+    row.status = "passed";
+  } catch (error) {
+    row.error = String(error?.message || error).split("\n")[0];
+    throw error;
+  } finally {
+    row.completed_at = new Date().toISOString();
+    row.manifest_sha256 = identity.manifestDigest;
+    appendResult(identity.resultPath, identity.runId, identity.manifestDigest, row);
+  }
+}
+
 module.exports = {
   COLLECTION_STATES,
   THEMES,
@@ -746,6 +1184,8 @@ module.exports = {
   appendResult,
   beginCollectionResults,
   createCollectionCases,
+  createPageCases,
+  createPageStressCases,
   currentSourceAndAssetDigests,
   readPhase253Manifest,
   reconcileResults,
@@ -753,5 +1193,6 @@ module.exports = {
   resultPath,
   runCollectionCase,
   runGeometryNegativeControls,
+  runPageCase,
   runSyntheticTextStress,
 };

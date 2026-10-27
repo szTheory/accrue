@@ -36,6 +36,7 @@ defmodule AccrueAdmin.SubscriptionPageManifestFixture.Duplicate do
   end
 
   def render(assigns), do: assigns
+  def navigation, do: [{:active, "Active"}]
 end
 
 defmodule AccrueAdmin.SubscriptionPageManifestFixture.Missing do
@@ -52,6 +53,7 @@ defmodule AccrueAdmin.SubscriptionPageManifestFixture.Missing do
   end
 
   def render(assigns), do: assigns
+  def navigation, do: [{:active, "Active"}]
 end
 
 defmodule AccrueAdmin.SubscriptionPageManifestFixture.Malformed do
@@ -59,11 +61,13 @@ defmodule AccrueAdmin.SubscriptionPageManifestFixture.Malformed do
 
   def variations, do: [%Variation{id: :active, attributes: %{scenario: :active}}]
   def render(assigns), do: assigns
+  def navigation, do: [{:active, "Active"}]
 end
 
 defmodule AccrueAdmin.SubscriptionPageManifestFixture.Empty do
   def variations, do: []
   def render(assigns), do: assigns
+  def navigation, do: []
 end
 
 defmodule AccrueAdmin.SubscriptionCompositionsManifestBootTest do
@@ -190,11 +194,12 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
       assert Enum.all?(entries, fn entry ->
                entry.story_path == @page_story_path and entry.group_id == nil and
                  entry.transport_kind == "page_story" and
+                 entry.route_parameter == "tab" and
                  entry.production_renderer ==
                    "AccrueAdmin.Live.SubscriptionLive.subscription_page/1" and
                  entry.proof_lane == "presentation-only" and
                  entry.direct_path ==
-                   "/billing/dev/storybook/pages/subscription?variation_id=#{entry.variation_id}"
+                   "/billing/dev/storybook/pages/subscription?tab=#{entry.variation_id}"
              end)
 
       active = Enum.find(entries, &(&1.variation_id == "active"))
@@ -204,10 +209,17 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
 
       wrong_route =
         NavigationHelpers.path_to_story(@storybook_root, "pages/subscription", %{
-          variation_id: "not_declared"
+          tab: "not_declared"
         })
 
       refute Manifest.route_matches?(active, wrong_route)
+
+      legacy_variation_route =
+        NavigationHelpers.path_to_story(@storybook_root, "pages/subscription", %{
+          variation_id: "active"
+        })
+
+      refute Manifest.route_matches?(active, legacy_variation_route)
     end
 
     test "manifest write verifies current source digests and keeps task 1 transport provenance" do
