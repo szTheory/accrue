@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 252
 current_phase_name: Production-backed Subscription Stories
 status: executing
-stopped_at: Completed 252-03-PLAN.md
-last_updated: "2026-10-27T00:16:06.491Z"
+stopped_at: Completed 252-04-PLAN.md
+last_updated: "2026-10-27T00:47:14.669Z"
 last_activity: 2026-10-26
 last_activity_desc: Completed Phase 252 plan 03; Phase 252 execution continues
-state_head: 4ea9ba4875668775f1065df60f02d4a780fd7fe3
+state_head: a266c1db7159878a22cf76f23bcc12f895099b49
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 8
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 ## Current Position
 
 Phase: 252 (Production-backed Subscription Stories) — EXECUTING
-Plan: 4 of 8
+Plan: 5 of 8
 Status: Ready to execute
 Last activity: 2026-10-26 — Completed Phase 252 plan 03; Phase 252 execution continues
 
@@ -224,6 +224,7 @@ Current milestone planning blockers: None known. Historical concerns and deferre
 | Phase 252 P01 | 15min | 2 tasks | 9 files |
 | Phase 252 P2 | 16min | 2 tasks | 8 files |
 | Phase 252 P03 | 43min | 2 tasks | 14 files |
+| Phase 252 P04 | 25min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -518,6 +519,8 @@ Current milestone planning blockers: None known. Historical concerns and deferre
 - [Phase 252]: The launcher derives target databases from fresh numeric partitions and refuses existing targets or mismatched local resources before mutation.
 - [Phase 252]: Review and reset lanes stay on distinct databases, ports, and processes; Playwright never reuses an existing endpoint.
 - [Phase 252]: The host-heldout lane retains its fixed port and guard contract.
+- [Phase 252]: The host seed accepts only explicitly selected ordinary launch or growing-team facts after lane and disposable database checks.
+- [Phase 252]: Held-out facts use independent stable identities, and cleanup locks and verifies the fixture customer owner before deleting.
 
 ### Pending Todos
 
@@ -616,8 +619,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T00:16:06.466Z
-Stopped at: Completed 252-03-PLAN.md
+Last session: 2026-10-27T00:47:14.631Z
+Stopped at: Completed 252-04-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
