@@ -56,8 +56,19 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
       })
 
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    assert {:ok, view, html} = live(conn, "/billing" <> direct_path)
+    assert {:ok, _story_view, story_page_html} = live(conn, "/billing" <> direct_path)
 
+    iframe_sources =
+      story_page_html
+      |> Floki.parse_document!()
+      |> Floki.find("iframe")
+      |> Enum.flat_map(&Floki.attribute(&1, "src"))
+
+    assert Enum.any?(iframe_sources, &String.contains?(&1, "variation_id=one_row"))
+
+    component_path = story_component_path("one_row")
+    assert {:ok, _view, html} = live(conn, "/billing" <> component_path)
+    assert html =~ ~s(data-storybook-subscription-state="one_row")
     assert html =~ ~s(data-ax-page-header)
     assert html =~ ~s(data-ax-page-title)
     assert html =~ ~s(data-ax-page-filter-toolbar)
@@ -65,16 +76,9 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
     rows = Floki.parse_document!(html) |> Floki.find("tbody > tr[data-row-id]")
     assert length(rows) == 1
     assert Floki.text(hd(rows)) =~ "Northstar Research" or Floki.text(hd(rows)) =~ "Juniper Labs"
+    refute html =~ ~s(data-role="load-more")
 
-    [load_more] = Floki.parse_document!(html) |> Floki.find("[data-role=load-more]")
-    [target] = Floki.attribute(load_more, "phx-target")
-    assert target != ""
-
-    updated_html = view |> element("[data-role=load-more]") |> render_click()
-    updated_rows = Floki.parse_document!(updated_html) |> Floki.find("tbody > tr[data-row-id]")
-    assert length(updated_rows) == 2
-
-    write_transport_evidence!(direct_path, story)
+    write_transport_evidence!(component_path, story)
   end
 
   test "the compiled collection story declares all supported settled states" do
@@ -109,15 +113,13 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
     }
 
     for {variation_id, {list_state, empty_reason}} <- states do
-      direct_path =
-        NavigationHelpers.path_to_story(@storybook_root, String.trim_leading(@story_path, "/"), %{
-          variation_id: variation_id
-        })
+      component_path = story_component_path(variation_id)
 
       story_conn =
         Phoenix.ConnTest.init_test_session(Phoenix.ConnTest.build_conn(), admin_token: "admin")
 
-      assert {:ok, view, html} = live(story_conn, "/billing" <> direct_path)
+      assert {:ok, view, html} = live(story_conn, "/billing" <> component_path)
+
       assert html =~ ~s(data-ax-state="#{list_state}")
 
       if empty_reason do
@@ -129,6 +131,7 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
           assert html =~ "No subscriptions yet."
           assert html =~ "Subscriptions appear after a customer completes checkout."
           assert Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]") == []
+          assert subscription_summary_count(html) == "0"
 
         "filtered_empty" ->
           assert html =~ "No subscriptions match these filters."
@@ -145,12 +148,14 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
 
         "one_row" ->
           assert length(Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]")) == 1
+          assert subscription_summary_count(html) == "1"
           assert html =~ "Amount unavailable"
 
         "multiple_rows" ->
           rows = Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]")
           assert length(rows) == 2
           assert length(Enum.uniq(Floki.attribute(rows, "data-row-id"))) == 2
+          assert subscription_summary_count(html) == "2"
           refute html =~ ~s(data-role="load-more")
 
         "page_boundary" ->
@@ -172,7 +177,10 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
           assert html =~ ~s(data-role="unavailable-state")
           assert html =~ "History unavailable"
           assert html =~ "This history could not be loaded. Try again."
-          assert html =~ ">Retry</button>"
+          [retry] = Floki.find(Floki.parse_document!(html), "[data-role='retry-read']")
+          assert Floki.text(retry) =~ "Retry"
+          assert [target] = Floki.attribute(retry, "phx-target")
+          assert target != ""
 
         "partial_cursor_error" ->
           initial_rows = Floki.find(Floki.parse_document!(html), "tbody > tr[data-row-id]")
@@ -254,6 +262,22 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
 
     refute html =~ hidden_subscription.processor_id
     assert html =~ visible_subscription.processor_id
+  end
+
+  defp story_component_path(variation_id) do
+    NavigationHelpers.path_to_story(
+      "#{@storybook_root}/iframe",
+      String.trim_leading(@story_path, "/"),
+      %{variation_id: variation_id}
+    )
+  end
+
+  defp subscription_summary_count(html) do
+    html
+    |> Floki.parse_document!()
+    |> Floki.find("[aria-label='Subscription summary'] .ax-stat-value-text")
+    |> hd()
+    |> Floki.text()
   end
 
   defp write_transport_evidence!(direct_path, story) do
