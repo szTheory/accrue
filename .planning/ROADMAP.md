@@ -35,7 +35,7 @@ Deferred StoreKit, Crosswake physical-device, and Admin UI ratchet work must be 
 
 ## Current Position
 
-v1.68 UI Storybook Stress Testing is active: 22 requirements across Phases 252–254. Phase 252 has execution summaries for all 10 plans and 22 automated tasks across seven waves. Phase 252 is complete: independent verification passed 73/73 observable truths, the fresh aggregate passed 21/21 lanes, and executable UAT passed 124/124. Phase 253 is ready to plan. The owner approved the [reviewed subscription-first proposal](research/ui-quality-engine/MILESTONE-PROPOSAL.md) with “what do u rec? do that”; this explicit strategy decision satisfies the Planning Doctrine without reopening approval of the same scope.
+v1.68 UI Storybook Stress Testing is active: 22 requirements across Phases 252–254. Phase 252 has execution summaries for all 10 plans and 22 automated tasks across seven waves. Phase 252 is complete: independent verification passed 73/73 observable truths, the fresh aggregate passed 21/21 lanes, and executable UAT passed 124/124. Phase 253 has six independently checked plans with 14 automated tasks across five waves and is ready to execute; its implementation and runtime acceptance remain pending. The owner approved the [reviewed subscription-first proposal](research/ui-quality-engine/MILESTONE-PROPOSAL.md) with “what do u rec? do that”; this explicit strategy decision satisfies the Planning Doctrine without reopening approval of the same scope.
 
 v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements). The v1.63–v1.66 line landed on `main` through PR #49, and 1.7.0 of `accrue`, `accrue_admin` and `accrue_portal` is published to Hex with docs. Release policy (maintainer, 2026-10-26): release early and often at any natural, release-worthy stopping point.
 
@@ -78,7 +78,7 @@ v1.67 Integration & CI Green is complete (Phases 249–251, 12/12 requirements).
   4. A reviewer can launch the documented lab on an explicit disposable database/namespace and distinct loopback port with known process identity, see unexpected-server reuse refused, and observe a negative control proving a normal test reset cannot alter review data. Ordinary and labelled held-out data remain separate and privacy-safe, guarded cleanup refuses unrelated children, and production compile/package/route checks exclude fixture payloads and dev tooling while preserving the kitchen and canonical mounts; DB-free rendering is distinguished from DB-backed startup. (SCEN-04, LAB-01, LAB-02)
   5. A maintainer can observe changes confined to each consumed story, shared scenario, component, registry, generated manifest, token or runner root invoke its named required CI owner, through representative positive path/classifier controls and an unrelated-path negative control; in-job selection alone cannot satisfy workflow admission. (CIQ-01)
 
-**Plans**: 10/10 plans complete — all original and gap-closure plans have summaries; independent phase verification remains
+**Plans**: 10/10 plans complete — all original and gap-closure plans have summaries; independent phase verification passed
 **UI hint**: yes
 
 Plans:
@@ -118,8 +118,28 @@ Plans:
   4. An operator can read essential identities, exact amounts, state and actions and use the selected compositions at 320 CSS px, representative wider/container widths and relevant breakpoint edges in both themes, without page-level horizontal overflow or hidden essential content. (UXQ-01)
   5. An operator can understand consistent labels, destinations, action consequences and recovery messages through existing Copy/voice/domain owners while engineering investigation retains exact IDs and evidence and locked legal/replay meaning is preserved. (UXQ-03)
 
-**Plans**: TBD
+**Plans**: 6 plans, 14 automated tasks — independently checked; execution pending
 **UI hint**: yes
+
+Plans:
+
+**Wave 1**
+- [ ] 253-01-PLAN.md — One real production collection through mounted Storybook 1.2 transport
+
+**Wave 2** *(blocked on Wave 1 completion; disjoint source ownership)*
+- [ ] 253-02-PLAN.md — Complete collection states, scoped cursor boundaries and recovery
+- [ ] 253-03-PLAN.md — Shared whole detail page with truthful incomplete/review/result presentation
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 253-04-PLAN.md — Complete mounted guarded journey, adversarial authority and validated return
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 253-05-PLAN.md — Responsive essential content and independently proved truthful presentation
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 253-06-PLAN.md — Existing required CI owner, fresh executed evidence and automated acceptance
+
+Cross-cutting constraints: preserve production DataTable/LiveView authority, existing Copy/scoped paths, disposable lab and package boundaries, all Phase 252 assertions and the independent kitchen. Use existing dependencies. Static stories establish settled presentation; mounted tests establish effects and fresh authority. Phase 254 recurring selection/curation remains separate. Current unclassified probe assumptions remain explicit; planning is not implementation evidence.
 
 ### Phase 254: Recurring Quality, Reviewed Fixes and Curation
 
@@ -138,12 +158,12 @@ Plans:
 
 ## Progress
 
-**Execution order:** 252 → 253 → 254. All 22 requirements are mapped exactly once; SBK-02, SBK-03, SCEN-01, and SCEN-02 are complete, with 18 requirements remaining. Phase 252 has 8 plans; Phase 253/254 plan counts will be determined during their planning.
+**Execution order:** 252 → 253 → 254. All 22 requirements are mapped exactly once; Phase 252's ten requirements are complete, with twelve requirements remaining. Phase 252 has ten completed plans; Phase 253 has six checked plans ready to execute; Phase 254's plan count will be determined during planning.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 252. Production-backed Subscription Stories | 10/10 | Complete    | 2026-10-27 |
-| 253. Real Groups and a Whole Subscription Job | 0/TBD | Not started | - |
+| 253. Real Groups and a Whole Subscription Job | 0/6 | Ready to execute | - |
 | 254. Recurring Quality, Reviewed Fixes and Curation | 0/TBD | Not started | - |
 
 ## Rolling Direction Beyond v1.68
@@ -154,4 +174,4 @@ The [rolling roadmap](research/ui-quality-engine/MILESTONE-PROPOSAL.md#rolling-r
 
 ## Next
 
-Phase 252 plan execution is complete. All ten plans have summaries, plan 10's assigned requirements have current acceptance evidence, and the fresh UAT bundle is recorded. Keep the phase In Progress until independent verification passes.
+Phase 253 planning is complete. Execute its six plans in wave order using `$gsd-execute-phase 253`. Research, UI and independent plan reviews are recorded in its phase directory. No Phase 253 implementation, runtime acceptance or UAT pass is claimed by planning.
