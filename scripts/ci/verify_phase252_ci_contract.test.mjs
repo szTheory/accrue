@@ -22,6 +22,7 @@ const positivePaths = [
   "storybook/phase252-manifest.json",
   "dev_support/ui_scenarios/cadence_subscriptions.exs",
   "accrue_admin/storybook/_support/subscription_scenarios.ex",
+  "accrue_admin/lib/accrue_admin/components/detail.ex",
   "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
   "accrue_admin/lib/accrue_admin/copy.ex",
   "accrue_admin/lib/accrue_admin/copy/subscription.ex",
@@ -30,18 +31,29 @@ const positivePaths = [
   "accrue_admin/assets/css/theme.css",
   "accrue_admin/assets/css/app.css",
   "accrue_admin/priv/static/accrue_admin.css",
+  "accrue_admin/priv/static/storybook.css",
   "brandbook/tokens/tokens.css",
   "accrue_admin/e2e/subscription-stories-phase252.spec.js",
   "accrue_admin/playwright.phase252.config.js",
+  ".github/workflows/accrue_admin_browser.yml",
   "accrue_admin/test/accrue_admin/dev/component_registry_test.exs",
   "accrue_admin/test/accrue_admin/live/subscription_live_test.exs",
   "scripts/dev/phase252_lab.mjs",
+  "scripts/dev/phase252_isolation.test.mjs",
+  "scripts/ci/generate_phase252_acceptance.mjs",
   "scripts/ci/verify_phase252_production_boundary.mjs",
   "scripts/ci/verify_phase252_stories.mjs",
+  "scripts/ci/verify_phase200_guardrail_contract.sh",
 ];
 
 test("every consumed source root maps to the named required CI owner", () => {
   assertOwnerMap(CONSUMED_ROOTS, manifest);
+  for (const rule of CONSUMED_ROOTS) {
+    const representative = rule.mode === "prefix" && rule.path.endsWith("/")
+      ? `${rule.path}representative`
+      : rule.path;
+    assert.equal(classifyPath(representative, { manifest }), REQUIRED_OWNER, rule.id);
+  }
   for (const sourcePath of positivePaths) {
     assert.equal(classifyPath(sourcePath, { manifest }), REQUIRED_OWNER, sourcePath);
   }
@@ -89,7 +101,7 @@ test("the workflow and runner chain must retain the named owner invocation", () 
 });
 
 test("a phase252 invocation fixture is required when the focused leaf is enabled", () => {
-  const runnerFixture = `${ownerRunner}\nrun_step "Phase 252" bash -c "cd accrue_admin && npm run phase252:check"\n`;
+  const runnerFixture = `${ownerRunner}\nrun_step "Phase 252" npm --prefix accrue_admin run phase252:check\n`;
   assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner: runnerFixture, manifest, requirePhase252: true }));
   assert.throws(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true }), /phase252:check/i);
 });
