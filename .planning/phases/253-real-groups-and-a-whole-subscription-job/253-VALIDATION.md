@@ -1,15 +1,15 @@
 ---
 phase: "253"
 slug: "real-groups-and-a-whole-subscription-job"
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-10-27"
 ---
 
 # Phase 253 — Validation Strategy
 
-Execution record for the 14-task Phase 253 plan. Plans 01–05 and all three Plan 06 tasks have passing task summaries and automated evidence. The post-summary UAT generation and project contract remain pending until 253-06-SUMMARY.md is written; independent phase verification remains separate.
+Execution record for the 14-task Phase 253 plan. Plans 01–05 and all three Plan 06 tasks have passing task summaries and automated evidence. All six summaries and the 24-item automated UAT are committed. Independent phase verification and the final executable-UAT contract remain separate completion gates.
 
 ## Test Infrastructure
 
@@ -30,7 +30,7 @@ Execution record for the 14-task Phase 253 plan. Plans 01–05 and all three Pla
 
 ## Per-Task Verification Map
 
-All 14 actual task IDs are mapped below. Commands assume repository root; each PLAN task contains the immediately following fails_when sibling. Task rows reflect completed task summaries and executed checks; the post-summary UAT contract remains outstanding until this plan's summary is written.
+All 14 actual task IDs are mapped below. Commands assume repository root; each PLAN task contains the immediately following fails_when sibling. Task rows reflect completed task summaries and executed checks; the final executable-UAT contract awaits the independently authored verification report.
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Failure Signal | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|----------------|--------|
@@ -66,7 +66,7 @@ Post-summary acceptance: `node scripts/ci/generate_phase253_acceptance.mjs --lat
 
 Wave ownership: 01 in wave 1; 02 and 03 in wave 2 have disjoint writes; 04 in wave 3; 05 in wave 4; 06 in wave 5. Mutable lab commands remain serial even where source planning permits independent execution. Native prohibition metadata initially stays descriptorless/flagged-unverified in 253-05; promotion is an execution task conditioned on actual controls and required admission. Two current edge assumptions (SBK-05 and UXQ-01 unclassified) and four historical Phase252 unclassified assumptions stay explicit unresolved metadata.
 
-The four-source audit is in 253-06-PLAN.md. It covers all five roadmap success criteria, all five requirement IDs, D-01 through D-08, research constraints, 10 resolved edge criteria, 26 UI criteria and both current unresolved assumptions. Coverage is planned; implementation and acceptance remain pending.
+The four-source audit is in 253-06-PLAN.md. It covers all five roadmap success criteria, all five requirement IDs, D-01 through D-08, research constraints, 10 resolved edge criteria, 26 UI criteria and both current unresolved assumptions. Task coverage and runtime acceptance are executed; the independent phase verdict remains pending.
 
 ## Wave 0 Requirements
 
@@ -85,4 +85,12 @@ None required for machine-verifiable phase acceptance. Source-bound design revie
 - [x] Requirement and security negative controls represented.
 - [x] Execution evidence recorded before setting compliant/complete flags.
 
-Approval: task execution and generated UAT are recorded; status remains draft, `nyquist_compliant` and `wave_0_complete` remain false until independent verification produces its passing artifact and the executable-UAT contract passes.
+Validation audit: all 14 tasks have existing, executed, non-skipped automated coverage; all five requirements are represented in the current source-bound acceptance bundle. No coverage gaps were found. Nyquist compliance records test coverage; independent phase verification and its executable-UAT contract remain pending completion gates.
+
+## Validation Audit 2026-10-27
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |

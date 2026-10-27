@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "phase": "253",
+  "executed_at": "2026-10-27T23:23:08.679Z",
+  "projection_owner": "gsd-core/bin/lib/probe-core.cjs#projectProhibitions",
+  "enforcement_owner": "gsd-tools.cjs check prohibition-enforcement",
+  "plan_sha256": "07ec088b9edb91f0587200d6146224873313eb2e2d9adad2847d4e12b8fb9f3b",
+  "checks": [
+    {
+      "projection": {
+        "statement": "MUST NOT present settled subscription story or lab rendering as proof of mounted authority, persistence, action dispatch or provider completion.",
+        "status": "resolved",
+        "verification": "test",
+        "check_kind": "node-test",
+        "check_target": "scripts/ci/verify_phase253_presentation.test.mjs",
+        "check_violation_fixture": "scripts/ci/fixtures/phase253-transparency/presentation-violation.json",
+        "check_clean_fixture": "scripts/ci/fixtures/phase253-transparency/clean.json"
+      },
+      "request": {
+        "prohibition": {
+          "statement": "MUST NOT present settled subscription story or lab rendering as proof of mounted authority, persistence, action dispatch or provider completion.",
+          "status": "resolved",
+          "verification": "test",
+          "check_kind": "node-test",
+          "check_target": "scripts/ci/verify_phase253_presentation.test.mjs",
+          "check_violation_fixture": "scripts/ci/fixtures/phase253-transparency/presentation-violation.json",
+          "check_clean_fixture": "scripts/ci/fixtures/phase253-transparency/clean.json"
+        },
+        "check": {
+          "kind": "node-test",
+          "target": "scripts/ci/verify_phase253_presentation.test.mjs",
+          "violationFixture": "scripts/ci/fixtures/phase253-transparency/presentation-violation.json",
+          "cleanFixture": "scripts/ci/fixtures/phase253-transparency/clean.json"
+        },
+        "mode": "interactive"
+      },
+      "result": {
+        "status": "green",
+        "flagged": false,
+        "tier": "test",
+        "reason": "test-tier prohibition has wired enforcement evidence",
+        "located": true,
+        "kind": "node-test",
+        "evidence": [
+          {
+            "kind": "node-test",
+            "target": "scripts/ci/verify_phase253_presentation.test.mjs",
+            "failFirst": true,
+            "passed": true,
+            "failFirstProof": "violation-fixture"
+          }
+        ],
+        "mode": "interactive"
+      }
+    },
+    {
+      "projection": {
+        "statement": "MUST NOT describe synthetic collection and held-out stress facts as representative customer behavior or real adopter usage evidence.",
+        "status": "resolved",
+        "verification": "test",
+        "check_kind": "node-test",
+        "check_target": "scripts/ci/verify_phase253_presentation.test.mjs",
+        "check_violation_fixture": "scripts/ci/fixtures/phase253-transparency/attribution-violation.json",
+        "check_clean_fixture": "scripts/ci/fixtures/phase253-transparency/clean.json"
+      },
+      "request": {
+        "prohibition": {
+          "statement": "MUST NOT describe synthetic collection and held-out stress facts as representative customer behavior or real adopter usage evidence.",
+          "status": "resolved",
+          "verification": "test",
+          "check_kind": "node-test",
+          "check_target": "scripts/ci/verify_phase253_presentation.test.mjs",
+          "check_violation_fixture": "scripts/ci/fixtures/phase253-transparency/attribution-violation.json",
+          "check_clean_fixture": "scripts/ci/fixtures/phase253-transparency/clean.json"
+        },
+        "check": {
+          "kind": "node-test",
+          "target": "scripts/ci/verify_phase253_presentation.test.mjs",
+          "violationFixture": "scripts/ci/fixtures/phase253-transparency/attribution-violation.json",
+          "cleanFixture": "scripts/ci/fixtures/phase253-transparency/clean.json"
+        },
+        "mode": "interactive"
+      },
+      "result": {
+        "status": "green",
+        "flagged": false,
+        "tier": "test",
+        "reason": "test-tier prohibition has wired enforcement evidence",
+        "located": true,
+        "kind": "node-test",
+        "evidence": [
+          {
+            "kind": "node-test",
+            "target": "scripts/ci/verify_phase253_presentation.test.mjs",
+            "failFirst": true,
+            "passed": true,
+            "failFirstProof": "violation-fixture"
+          }
+        ],
+        "mode": "interactive"
+      }
+    }
+  ],
+  "acceptance_run_id": "862a8694378aec0695891213952c58dd",
+  "source_fingerprint": "7366ed180ed55c37b48af39b3ab3feb2b9b841c00be027d05611448d6ec2289c",
+  "target_sha256": "075ba3c3f1abfd455e74e99ae5438f5417ecc5a5d184d5fd2755411bb399936c"
+}
