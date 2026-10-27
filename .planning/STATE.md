@@ -4,17 +4,17 @@ milestone: v1.68
 milestone_name: UI Storybook Stress Testing
 current_phase: 252
 current_phase_name: Production-backed Subscription Stories
-status: planning
-stopped_at: Phase 252 gap plans 09/10 verified; ready for gaps-only execution
-last_updated: "2026-10-27T13:28:27.244Z"
+status: executing
+stopped_at: Completed 252-09-PLAN.md
+last_updated: "2026-10-27T14:03:38.313Z"
 last_activity: 2026-10-27
-last_activity_desc: Phase 252 gap closure planned; 2 plans and 5 tasks verified; 10/10 requirements covered
-state_head: 5a8bc43c1f51636c0242ebbde4b045426bf2584c
+last_activity_desc: Phase 252 plan 09 completed; plan 10 remains
+state_head: 3ab07226bc8658623bd428091aefd0b152a4ed2b
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 0
 ---
 
@@ -26,19 +26,19 @@ See: .planning/PROJECT.md (updated 2026-10-26)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** Phase 252 gap closure ready to execute: plans 09/10 address the two prohibition evidence gaps. Original plans 01–08 remain executed; no observed requirement behavior gap.
+**Current focus:** Phase 252 — Production-backed Subscription Stories
 **Progress:** [░░░░░░░░░░] 0%
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
-Phase: 252 (Production-backed Subscription Stories) — READY TO EXECUTE
-Plan: 8 of 10 complete; gap plans 09/10 pending
+Phase: 252 (Production-backed Subscription Stories) — EXECUTING
+Plan: 10 of 10
 Status: Ready to execute
-Last activity: 2026-10-27 — Two gap plans / five tasks passed independent checking after one revision; all 10 requirements remain covered. Execution and fresh proof are pending.
+Last activity: 2026-10-27 — Phase 252 execution started
 
 Progress: [░░░░░░░░░░] 0%
-Current milestone planning blockers: None. Execute `$gsd-execute-phase 252 --gaps-only` for plans 09/10 (waves 6/7). The existing gaps_found verification remains until execution provides both checks, native descriptor proof and fresh acceptance evidence; no completed plan needs re-execution.
+Current milestone planning blockers: None. Plan 252-09 is complete; execute plan 252-10 (Wave 7) next. The existing gaps_found verification remains until plan 10 provides native descriptor proof and fresh acceptance evidence; no completed plan needs re-execution.
 
 ## Performance Metrics
 
@@ -229,6 +229,7 @@ Current milestone planning blockers: None. Execute `$gsd-execute-phase 252 --gap
 | Phase 252 P06 | 80min | 2 tasks | 15 files |
 | Phase 252 P7 | 35min | 2 tasks | 7 files |
 | Phase 252 P08 | 82min | 3 tasks | 18 files |
+| Phase 252 P09 | 17min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -536,6 +537,9 @@ Current milestone planning blockers: None. Execute `$gsd-execute-phase 252 --gap
 - [Phase 252]: Treat static browser cells, mounted authorization, persisted state, and reset isolation as separate evidence claims.
 - [Phase 252]: Keep four unclassified assumptions and two descriptor-less prohibitions visibly unresolved while reporting their concrete behavior coverage separately.
 - [Phase 252]: Upload structured result bundles and per-run browser JSON; keep raw command logs out of CI artifacts.
+- [Phase 252]: Keep claims finite and lexical over enumerated public surfaces; do not represent the checker as universal semantic or customer research validation.
+- [Phase 252]: Use the same assertion functions for current repository subjects and injected fixtures; injection changes content only.
+- [Phase 252]: Keep the browser-generated held-out clone distinct from CadenceSubscriptionFacts.held_out!/1 and manifest fixtures.
 
 ### Pending Todos
 
@@ -634,8 +638,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T04:43:57.797Z
-Stopped at: Completed 252-08-PLAN.md
+Last session: 2026-10-27T14:03:38.286Z
+Stopped at: Completed 252-09-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
