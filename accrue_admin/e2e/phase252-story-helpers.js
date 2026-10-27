@@ -505,7 +505,7 @@ function statusLabel(status) {
   return labels[status] || status.replaceAll("_", " ");
 }
 
-async function captureCanonicalScreenshot(page, testCase) {
+async function captureCanonicalScreenshot(page, preview, testCase) {
   const configuredDirectory = process.env.PHASE252_SCREENSHOT_DIR;
   if (!configuredDirectory || testCase.kind !== "canonical") return null;
 
@@ -519,7 +519,18 @@ async function captureCanonicalScreenshot(page, testCase) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const name = `${testCase.entry.scenario_id}-${testCase.width}-${testCase.theme}.png`;
   const destination = path.join(directory, name);
-  await page.evaluate(() => window.scrollTo(0, 0));
+  const expectedPreviewId = `${testCase.entry.variation_id.replaceAll("_", "-")}-component`;
+  const actualPreviewId = await preview.getAttribute("id");
+  if (actualPreviewId !== expectedPreviewId) {
+    throw new Error(`Phase 252 screenshot preview identity mismatch: expected ${expectedPreviewId}, found ${actualPreviewId}`);
+  }
+  const previewBox = await preview.boundingBox();
+  if (!previewBox) throw new Error(`Phase 252 screenshot preview is not measurable: ${expectedPreviewId}`);
+  const topInset = testCase.width < 600 ? 128 : 72;
+  await page.evaluate(({ targetTop, inset }) => {
+    window.scrollTo(0, Math.max(0, window.scrollY + targetTop - inset));
+  }, { targetTop: previewBox.y, inset: topInset });
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => resolve())));
   const bytes = await page.screenshot({ path: destination, animations: "disabled" });
   return {
     path: path.relative(REPO_ROOT, destination).split(path.sep).join("/"),
@@ -760,7 +771,7 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
     expect(themeState.titleFontFamily).toContain("Geist");
     expect(themeState.titleFontSize).toBe("28px");
     expect(themeState.titleFontWeight).toBe("600");
-    const screenshot = await captureCanonicalScreenshot(page, testCase);
+    const screenshot = await captureCanonicalScreenshot(page, preview, testCase);
     if (screenshot) row.screenshot = screenshot;
     row.fact_rows = await readFactRows(story);
 
