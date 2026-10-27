@@ -109,6 +109,15 @@ defmodule AccrueAdmin.SubscriptionManifestFixture.MissingId do
   end
 end
 
+defmodule AccrueAdmin.SubscriptionManifestBootTest do
+  use ExUnit.Case, async: false
+
+  test "compiled subscription story manifest API is available" do
+    assert Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest),
+           "the compiled subscription variation manifest is unavailable"
+  end
+end
+
 if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
   defmodule AccrueAdmin.SubscriptionManifestTest do
     use ExUnit.Case, async: false
@@ -469,15 +478,6 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
 
     defp key(path, group_id, variation_id) do
       Enum.join([path, group_id || "", variation_id], "|")
-    end
-  end
-else
-  defmodule AccrueAdmin.SubscriptionManifestBootTest do
-    use ExUnit.Case, async: false
-
-    test "compiled subscription story manifest API is available" do
-      assert Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest),
-             "the compiled subscription variation manifest is unavailable"
     end
   end
 end
