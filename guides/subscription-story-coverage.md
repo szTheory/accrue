@@ -8,6 +8,14 @@ Selected story IDs are discovered from the compiled tree. Source-supported compa
 
 Admin whole-page/list/action-journey work remains in Phase 253. Portal subscription list/detail and mounted cancellation/plan-change jobs remain visible below for later coverage planning; this guide does not implement those jobs.
 
+## Phase 253 collection composition
+
+The compiled collection story is `/groups/subscriptions_collection`, with the direct review URL `/billing/dev/storybook/groups/subscriptions_collection?variation_id=one_row`. PhoenixStorybook 1.2 mounts it as a connected `LiveComponent`; the preview uses the actual `SubscriptionsLive.subscriptions_collection/1` renderer and the stateful `DataTable` child. The generated current-run manifest and browser spec verify the compiled path, variation, mounted DOM, row identity, list state, and DataTable pagination target. The connected ExUnit proof clicks load-more and observes the child append its second row.
+
+The production `/billing/subscriptions` route passes `AccrueAdmin.Queries.Subscriptions` and its current owner scope directly to the shared renderer. The story's narrow query adapter reads validated Cadence launch and growing-team facts and remains in development/test support. A connected route test proves a production query parameter cannot select that adapter and that an out-of-scope persisted row stays hidden.
+
+The first collection page renders the launch-derived `Active` row and its `pro_monthly_2026` plan label through the production list cells. The list query exposes plan ID and quantity, not a numeric price, so the existing cell shows its source-supported `Amount unavailable` detail. The static preview verifies that rendered state; it does not claim provider price lookup, persistence, or action completion.
+
 ## Reachable
 
 | Tier | Caller | Production owner | Source evidence | Route / story links | Contract or reason |

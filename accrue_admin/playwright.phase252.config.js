@@ -25,7 +25,7 @@ const launcher = `node ../scripts/dev/phase252_lab.mjs serve --lane admin-review
 
 module.exports = defineConfig({
   testDir: "./e2e",
-  testMatch: /(?:phase252-review|subscription-stories-phase252)\.spec\.js/,
+  testMatch: /(?:phase252-review|subscription-stories-phase252|subscription-compositions-phase253)\.spec\.js/,
   timeout: 30_000,
   fullyParallel: false,
   workers: 1,
@@ -44,6 +44,6 @@ module.exports = defineConfig({
     timeout: 120_000,
     gracefulShutdown: { signal: "SIGTERM", timeout: 30_000 },
   },
-  projects: [{ name: "phase252-owned-review", testMatch: /(?:phase252-review|subscription-stories-phase252)\.spec\.js/ }],
+  projects: [{ name: "phase252-owned-review", testMatch: /(?:phase252-review|subscription-stories-phase252|subscription-compositions-phase253)\.spec\.js/ }],
   outputDir: process.env.PLAYWRIGHT_OUTPUT_DIR || "test-results/phase252-review",
 });
