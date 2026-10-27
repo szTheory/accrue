@@ -142,4 +142,18 @@ defmodule AccrueAdmin.SubscriptionPageSliceTest do
     assert active_html =~ "Subscription actions"
     assert Process.whereis(AccrueAdmin.TestRepo) == nil
   end
+
+  test "the compiled page story declares supported review and result snapshots" do
+    assert Enum.map(Subscription.variations(), & &1.id) == [
+             :active,
+             :scheduled_cancellation,
+             :incomplete_evidence,
+             :review_cancel_now,
+             :awaiting_step_up,
+             :dispatching,
+             :result_confirmed,
+             :result_pending,
+             :result_failed
+           ]
+  end
 end
