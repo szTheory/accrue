@@ -29,7 +29,7 @@ export const PHASE252_REPORTER_SPECS = Object.freeze({
   "heldout-cleanup": { kind: "exunit-tap", testFiles: ["examples/accrue_host/test/accrue_host/phase252_scenario_cleanup_test.exs"] },
   "isolation-reset": { kind: "node-tap", testFiles: ["scripts/dev/phase252_isolation.test.mjs"] },
   "subscription-render-browser": { kind: "playwright-json" },
-  "phase252-acceptance-contract": { kind: "node-tap", testFiles: ["scripts/ci/generate_phase252_acceptance.test.mjs"] },
+  "phase252-acceptance-contract": { kind: "node-tap", testFiles: ["scripts/ci/generate_phase252_acceptance.test.mjs", "scripts/ci/main_module.mjs"] },
 });
 
 const PROCESS_MARKERS = Object.freeze({
