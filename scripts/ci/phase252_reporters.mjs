@@ -266,15 +266,25 @@ function parsePlaywrightJson(output) {
   } catch {
     fail("Playwright JSON reporter output is not a single valid JSON report");
   }
-  if (!report || report.status !== "passed" || !Array.isArray(report.suites)) fail("Playwright report status or suites are missing");
+  if (!report || !Array.isArray(report.suites)) fail("Playwright report suites are missing");
+  if (report.status !== undefined && report.status !== "passed") fail(`Playwright report status is ${String(report.status)}, expected passed`);
+  if (!report.stats || !Number.isInteger(report.stats.expected) || !Number.isInteger(report.stats.unexpected) ||
+      !Number.isInteger(report.stats.skipped) || !Number.isInteger(report.stats.flaky)) {
+    fail("Playwright report summary stats are missing or incomplete");
+  }
+  if (report.stats.expected <= 0 || report.stats.unexpected !== 0 || report.stats.skipped !== 0 || report.stats.flaky !== 0) {
+    fail("Playwright report summary contains no expected tests, failed, skipped, or flaky tests");
+  }
+  if (!Array.isArray(report.errors) || report.errors.length !== 0) fail("Playwright report contains global errors");
   const tests = [];
   const visit = (suite) => {
     for (const spec of suite.specs || []) {
+      if (spec.ok === false) fail(`browser spec did not pass: ${spec.title || "<unnamed>"}`);
       for (const test of spec.tests || []) {
         if (test.expectedStatus !== "passed" || !Array.isArray(test.results) || test.results.length !== 1 || test.results[0]?.status !== "passed") {
           fail(`browser test is failed, skipped, retried, or missing a result: ${test.title || spec.title || "<unnamed>"}`);
         }
-        tests.push({ identity: test.title, status: test.results[0].status });
+        tests.push({ identity: test.title || spec.title, status: test.results[0].status });
       }
     }
     for (const nested of suite.suites || []) visit(nested);
@@ -284,6 +294,7 @@ function parsePlaywrightJson(output) {
   if (identities.length === 0 || identities.some((identity) => !identity) || new Set(identities).size !== identities.length) {
     fail("Playwright report is empty or contains unnamed/duplicate test identities");
   }
+  if (tests.length !== report.stats.expected) fail(`Playwright summary expected ${report.stats.expected} tests but reported ${tests.length} executed identities`);
   return { identities, count: tests.length, skipped: 0, failed: 0 };
 }
 

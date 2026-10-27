@@ -62,7 +62,8 @@ function fixtureReporterOutput(root, commandId, rows) {
   if (spec.kind === "playwright-json") {
     const identities = [...rows.map((row) => row.test_id), "reconciles every declared direct render against the generated manifest"];
     return JSON.stringify({
-      status: "passed",
+      errors: [],
+      stats: { expected: identities.length, unexpected: 0, skipped: 0, flaky: 0 },
       suites: [{ specs: identities.map((title) => ({ title, tests: [{ title, expectedStatus: "passed", results: [{ status: "passed" }] }] })) }],
     });
   }
@@ -639,6 +640,38 @@ test("ExUnit source identities retain enclosing describe labels", () => {
     ]);
   } finally {
     fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test("Playwright JSON reporter requires current summary counts and every passing result", () => {
+  const fixture = createFixture();
+  try {
+    const browserResult = JSON.parse(fs.readFileSync(fixture.renderPath, "utf8"));
+    const base = JSON.parse(fixtureReporterOutput(fixture.root, "subscription-render-browser", browserResult.cases));
+    const evidenceFor = (report) => deriveExecutionEvidence({
+      root: fixture.root,
+      commandId: "subscription-render-browser",
+      stdout: JSON.stringify(report),
+      expectedAssertions: requiredAssertionIds("subscription-render-browser"),
+      browserResult,
+    });
+    const positive = evidenceFor(base);
+    assert.equal(positive.execution_evidence.test_count, 16);
+
+    const skip = structuredClone(base);
+    skip.stats.skipped = 1;
+    skip.suites[0].specs[0].tests[0].results[0].status = "skipped";
+    assert.throws(() => evidenceFor(skip), /skipped|failed|flaky/i);
+
+    const excluded = structuredClone(base);
+    excluded.suites[0].specs.pop();
+    assert.throws(() => evidenceFor(excluded), /expected 16 tests but reported 15/i);
+
+    const missingSummary = structuredClone(base);
+    delete missingSummary.stats;
+    assert.throws(() => evidenceFor(missingSummary), /summary stats are missing/i);
+  } finally {
+    fs.rmSync(fixture.root, { recursive: true, force: true });
   }
 });
 
