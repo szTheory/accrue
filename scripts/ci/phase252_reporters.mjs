@@ -13,7 +13,7 @@ export const PHASE252_REPORTER_SPECS = Object.freeze({
   "manifest-contract": { kind: "exunit-tap", testFiles: [`${ADMIN}dev/subscription_manifest_test.exs`, `${ADMIN}dev/storybook_coverage_test.exs`] },
   "production-boundary-db-free": { kind: "exunit-tap", testFiles: [`${ADMIN}dev/subscription_production_boundary_test.exs`] },
   "phase248-heldout-contract": { kind: "node-tap", testFiles: ["scripts/ci/phase248_heldout_isolation.test.mjs"] },
-  "phase252-ci-contract": { kind: "node-tap", testFiles: ["scripts/ci/verify_phase252_ci_contract.test.mjs"] },
+  "phase252-ci-contract": { kind: "node-tap", testFiles: ["scripts/ci/verify_phase252_ci_contract.test.mjs", "scripts/ci/main_module.mjs"] },
   "lab-presentation": { kind: "node-tap", testFiles: ["scripts/ci/verify_phase252_lab_presentation.test.mjs"] },
   "heldout-attribution": { kind: "node-tap", testFiles: ["scripts/ci/verify_phase252_heldout_attribution.test.mjs"] },
   "transparency-controls": { kind: "process-markers" },

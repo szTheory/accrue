@@ -302,3 +302,17 @@ test("an omitted or failed transparency child cannot produce a passing sequence"
   assert.equal(calls.at(-1), "heldout-attribution");
   assert.equal(calls.includes("transparency-controls"), false);
 });
+
+test("Phase 252 CI reporter includes imported module-boundary tests", () => {
+  assert.deepEqual(PHASE252_REPORTER_SPECS["phase252-ci-contract"].testFiles, [
+    "scripts/ci/verify_phase252_ci_contract.test.mjs",
+    "scripts/ci/main_module.mjs",
+  ]);
+  const plan = runner.buildCommandPlan({
+    id: "25210-reporter-source-test",
+    adminBuildPath: "/tmp/phase252-reporter/admin",
+    hostBuildPath: "/tmp/phase252-reporter/host",
+    outputDirectory: "/tmp/phase252-reporter/output",
+  });
+  assert.ok(plan.find(({ id }) => id === "phase252-ci-contract").sources.includes("scripts/ci/phase252_reporters.mjs"));
+});
