@@ -4,17 +4,17 @@ milestone: v1.68
 milestone_name: UI Storybook Stress Testing
 current_phase: 253
 current_phase_name: Real Groups and a Whole Subscription Job
-status: executing
-stopped_at: Completed 253-05-PLAN.md
-last_updated: "2026-10-27T20:35:01.872Z"
+status: verifying
+stopped_at: Completed 253-06-PLAN.md
+last_updated: "2026-10-27T22:20:30.433Z"
 last_activity: 2026-10-27
 last_activity_desc: Phase 253 execution started
-state_head: 5f1b4d1c4a74bb432e9c48cdf2f804596536ba87
+state_head: ef93738b55a7a9a9695193ebb9b3af85fca305f0
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 16
-  completed_plans: 15
+  completed_plans: 16
   percent: 33
 ---
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 
 Phase: 253 (Real Groups and a Whole Subscription Job) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-27 — Phase 253 execution started
 
 Progress: [███░░░░░░░] 33%
@@ -237,6 +237,7 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 | Phase 253 P03 | 23m | 2 tasks | 8 files |
 | Phase 253 P04 | 22m | 2 tasks | 3 files |
 | Phase 253 P05 | 96min | 3 tasks | 20 files |
+| Phase 253 P06 | 1h 44m | 3 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -565,6 +566,9 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 - [Phase 253]: Select whole-page Storybook scenarios through supported tabs and use only a story wrapper for nested LiveComponents and the overlay target.
 - [Phase 253]: Refresh Phase252 source digests through the existing manifest writer without changing its compiled cases.
 - [Phase 253]: Keep unavailable amounts truthful and retain presentation-only and synthetic-stress labels.
+- [Phase 253]: Keep both current and four historical unclassified assumptions unresolved; acceptance verifies their preservation instead of inferring runtime resolution.
+- [Phase 253]: Promote the two Phase 05 prohibition descriptors only after native projection proves current and clean passes and two independent content violations fail.
+- [Phase 253]: Keep presentation evidence separate from mounted dispatch, persistence, and provider-completion claims.
 
 ### Pending Todos
 
@@ -663,8 +667,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T20:35:01.490Z
-Stopped at: Completed 253-05-PLAN.md
+Last session: 2026-10-27T22:20:30.120Z
+Stopped at: Completed 253-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

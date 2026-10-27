@@ -118,7 +118,7 @@ Plans:
   4. An operator can read essential identities, exact amounts, state and actions and use the selected compositions at 320 CSS px, representative wider/container widths and relevant breakpoint edges in both themes, without page-level horizontal overflow or hidden essential content. (UXQ-01)
   5. An operator can understand consistent labels, destinations, action consequences and recovery messages through existing Copy/voice/domain owners while engineering investigation retains exact IDs and evidence and locked legal/replay meaning is preserved. (UXQ-03)
 
-**Plans**: 5/6 plans executed, 14 automated tasks — independently checked; execution pending
+**Plans**: 6/6 plans executed, 14 automated tasks — independently checked; execution pending
 **UI hint**: yes
 
 Plans:
@@ -137,7 +137,7 @@ Plans:
 - [x] 253-05-PLAN.md — Responsive essential content and independently proved truthful presentation
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 253-06-PLAN.md — Existing required CI owner, fresh executed evidence and automated acceptance
+- [x] 253-06-PLAN.md — Existing required CI owner, fresh executed evidence and automated acceptance
 
 Cross-cutting constraints: preserve production DataTable/LiveView authority, existing Copy/scoped paths, disposable lab and package boundaries, all Phase 252 assertions and the independent kitchen. Use existing dependencies. Static stories establish settled presentation; mounted tests establish effects and fresh authority. Phase 254 recurring selection/curation remains separate. Current unclassified probe assumptions remain explicit; planning is not implementation evidence.
 
@@ -163,7 +163,7 @@ Cross-cutting constraints: preserve production DataTable/LiveView authority, exi
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 252. Production-backed Subscription Stories | 10/10 | Complete    | 2026-10-27 |
-| 253. Real Groups and a Whole Subscription Job | 5/6 | Ready to execute | - |
+| 253. Real Groups and a Whole Subscription Job | 6/6 | Ready to execute | - |
 | 254. Recurring Quality, Reviewed Fixes and Curation | 0/TBD | Not started | - |
 
 ## Rolling Direction Beyond v1.68
