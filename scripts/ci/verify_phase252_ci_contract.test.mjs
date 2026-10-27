@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
+import { executeCommandSequence } from "./verify_phase252_stories.mjs";
 import {
   assertCiContract,
   assertOwnerMap,
@@ -109,6 +110,22 @@ test("a phase252 invocation fixture is required when the focused leaf is enabled
 test("the real required owner invokes the complete phase252 leaf", () => {
   assert.equal(ownerRunner.includes("npm --prefix accrue_admin run phase252:check"), true);
   assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true }));
+});
+
+test("a failed phase command stops the gate and cannot produce passing evidence", async () => {
+  const calls = [];
+  const savedStatuses = [];
+  const result = await executeCommandSequence(
+    [{ id: "failing-lane" }, { id: "must-not-run" }],
+    async (command) => {
+      calls.push(command.id);
+      return { exitCode: command.id === "failing-lane" ? 1 : 0 };
+    },
+    async (bundle) => savedStatuses.push(bundle.status),
+  );
+  assert.deepEqual(calls, ["failing-lane"]);
+  assert.equal(result.status, "failed");
+  assert.equal(savedStatuses.includes("passed"), false);
 });
 
 test("a missing owner root fails closed instead of becoming unrelated", () => {
