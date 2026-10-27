@@ -643,6 +643,13 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
 
     const viewport = await page.evaluate(() => ({ width: window.innerWidth, clientWidth: document.documentElement.clientWidth }));
     expect(viewport.width).toBe(width);
+    await expect.poll(async () => story.evaluate((element) => ({
+      dataTheme: element.getAttribute("data-theme"),
+      darkShim: element.classList.contains("ax-theme-dark-shim"),
+    })), { message: `settled Storybook wrapper theme ${theme}` }).toEqual({
+      dataTheme: theme,
+      darkShim: theme === "dark",
+    });
     const themeState = await story.evaluate((element) => {
       const summary = element.querySelector(".ax-summary-card");
       const summaryStyle = summary ? getComputedStyle(summary) : null;
