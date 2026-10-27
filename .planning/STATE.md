@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 253
 current_phase_name: Real Groups and a Whole Subscription Job
 status: executing
-stopped_at: Completed 253-01-PLAN.md
-last_updated: "2026-10-27T17:21:09.974Z"
+stopped_at: Completed 253-02-PLAN.md
+last_updated: "2026-10-27T17:58:22.697Z"
 last_activity: 2026-10-27
 last_activity_desc: Phase 253 execution started
-state_head: 71e122355a6eb046635daf22513fb71af6dcd2a8
+state_head: 3b9d647ea6c5998e4a76a41399a4f60df9891b4a
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 16
-  completed_plans: 11
+  completed_plans: 12
   percent: 33
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 ## Current Position
 
 Phase: 253 (Real Groups and a Whole Subscription Job) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-10-27 — Phase 253 execution started
 
@@ -233,6 +233,7 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 | Phase 252 P09 | 17min | 2 tasks | 10 files |
 | Phase 252 P10 | 56min | 3 tasks | 13 files |
 | Phase 253 P01 | 25min | 2 tasks | 10 files |
+| Phase 253 P02 | 33m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -549,6 +550,9 @@ Current milestone planning blockers: None. Phase 252 passed independent verifica
 - [Phase 253]: Keep production query, owner scope, filter patches, and route lifecycle in SubscriptionsLive; share only the rendered collection composition.
 - [Phase 253]: Use PhoenixStorybook 1.2's connected LiveComponent story transport to mount the actual DataTable and preserve its child event target.
 - [Phase 253]: Keep the existing truthful Amount unavailable display because the production list has a processor price ID but no numeric price source.
+- [Phase 253]: Keep production Amount unavailable wherever the source provides only a processor price ID and no numeric amount.
+- [Phase 253]: Isolate each Storybook variation in its own iframe to avoid duplicate LiveView-generated DOM IDs while retaining the connected production DataTable.
+- [Phase 253]: Leave SubscriptionsLive production code unchanged because mounted route assertions confirmed the existing scope and cursor behavior.
 
 ### Pending Todos
 
@@ -647,8 +651,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-27T17:21:09.680Z
-Stopped at: Completed 253-01-PLAN.md
+Last session: 2026-10-27T17:58:22.344Z
+Stopped at: Completed 253-02-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
