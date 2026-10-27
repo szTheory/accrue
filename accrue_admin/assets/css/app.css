@@ -3791,6 +3791,18 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary,
   min-width: 0;
 }
 
+/* Subscription card identities must remain fully readable at phone widths. */
+.ax-data-table[data-ax-list="subscriptions"] .ax-data-table-identity-stacked .ax-data-table-identity-primary > a:not(.ax-event-link),
+.ax-data-table[data-ax-list="subscriptions"] .ax-data-table-identity-stacked .ax-data-table-identity-primary > span,
+.ax-data-table[data-ax-list="subscriptions"] .ax-data-table-identity-stacked .ax-data-table-identity-primary > .ax-event-link,
+.ax-data-table[data-ax-list="subscriptions"] .ax-data-table-identity-stacked .ax-data-table-identity-primary > .ax-event-link > span {
+  max-inline-size: 100%;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
+}
+
 .ax-data-table-identity-stacked .ax-data-table-identity-primary > .ax-event-link {
   display: flex;
 }

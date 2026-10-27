@@ -5,6 +5,7 @@ if System.get_env("PHASE252_TAP_REPORT") == "1" do
 else
   ExUnit.start()
 end
+
 {:ok, _localize_apps} = Application.ensure_all_started(:localize)
 
 defmodule AccrueAdmin.SubscriptionCompositionManifestFixture.Duplicate do
@@ -136,6 +137,34 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
     test "compiled collection inventory exposes every direct variation for responsive evidence" do
       assert function_exported?(Manifest, :collection_variation_entries, 0),
              "responsive evidence must discover all collection states from the compiled Storybook tree"
+
+      entries = Manifest.collection_variation_entries()
+
+      assert Enum.map(entries, & &1.variation_id) == [
+               "filtered_empty",
+               "incomplete_projection",
+               "loading",
+               "multiple_rows",
+               "new_host_empty",
+               "one_row",
+               "page_boundary",
+               "partial_cursor_error",
+               "queue_empty",
+               "unavailable"
+             ]
+
+      assert Enum.all?(entries, fn entry ->
+               entry.story_path == @story_path and entry.group_id == nil and
+                 entry.variation_id == entry.collection_state and
+                 entry.scenario_id == "launch" and entry.transport_kind == "live_component" and
+                 entry.production_renderer ==
+                   "AccrueAdmin.Live.SubscriptionsLive.subscriptions_collection/1" and
+                 entry.proof_lane == "presentation-only" and
+                 entry.direct_path ==
+                   "/billing/dev/storybook/groups/subscriptions_collection?variation_id=#{entry.variation_id}" and
+                 entry.iframe_path ==
+                   "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=#{entry.variation_id}"
+             end)
     end
 
     test "compiled whole-page story declares every direct production-rendered variation" do
@@ -187,6 +216,7 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
 
       manifest = @manifest_path |> File.read!() |> Jason.decode!()
       assert manifest["human_judgment"] == false
+      assert length(manifest["collection_variations"]) == 10
       assert manifest["transport"]["transport_kind"] == "live_component"
       assert length(manifest["page_entries"]) == 9
       assert Enum.any?(manifest["page_entries"], &(&1["variation_id"] == "result_pending"))

@@ -155,7 +155,6 @@ defmodule AccrueAdmin.Storybook.SubscriptionCollectionQuery do
     filter = Keyword.get(opts, :filter, %{})
     owner_scope = Keyword.get(opts, :owner_scope)
     context = story_context(owner_scope)
-
     if context.state == :unavailable do
       raise DBConnection.ConnectionError, message: "fixture subscription history unavailable"
     end
@@ -174,7 +173,9 @@ defmodule AccrueAdmin.Storybook.SubscriptionCollectionQuery do
       |> Enum.sort_by(&{DateTime.to_unix(&1.inserted_at, :microsecond), &1.id}, :desc)
       |> after_cursor(Keyword.get(opts, :cursor))
 
-    Behaviour.paginate(rows, Behaviour.normalize_limit(opts), :inserted_at)
+    limit = if context.state == :page_boundary, do: 1, else: Behaviour.normalize_limit(opts)
+
+    Behaviour.paginate(rows, limit, :inserted_at)
   end
 
   @impl true

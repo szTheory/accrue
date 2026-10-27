@@ -34,6 +34,7 @@ accrue_admin/tmp/phase252/render-results-*.json
 # Disposable Phase 253 transport and compiled-manifest proof outputs are regenerated per run.
 accrue_admin/tmp/phase253/transport.json
 accrue_admin/tmp/phase253/manifest.json
+accrue_admin/tmp/phase253/render-results-*.json
 
 # Editor / OS noise
 .DS_Store

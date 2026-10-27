@@ -239,6 +239,18 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
     assert is_binary(next_cursor)
   end
 
+  test "page-boundary Storybook route renders one row and the real continuation control", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    component_path = story_component_path("page_boundary")
+
+    assert {:ok, _view, html} = live(conn, "/billing" <> component_path)
+    rows = Floki.parse_document!(html) |> Floki.find("tbody > tr[data-row-id]")
+
+    assert length(rows) == 1
+    assert html =~ ~s(data-role="load-more")
+    assert html =~ ~s(data-pagination-cursor=)
+  end
+
   test "production route uses the scoped Subscriptions query despite query-module input", %{
     conn: conn
   } do
