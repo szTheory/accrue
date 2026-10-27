@@ -25,6 +25,7 @@ export const REQUIRED_COMMAND_IDS = Object.freeze([
   "heldout-cleanup",
   "isolation-reset",
   "subscription-render-browser",
+  "phase252-acceptance-contract",
 ]);
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -56,6 +57,9 @@ const SOURCE_AND_ASSET_PATHS = Object.freeze([
   "scripts/ci/verify_phase252_production_boundary.mjs",
   "scripts/ci/verify_phase252_production_boundary.test.mjs",
   "scripts/ci/verify_phase252_stories.mjs",
+  "scripts/ci/generate_phase252_acceptance.mjs",
+  "scripts/ci/generate_phase252_acceptance.test.mjs",
+  "guides/ui-story-lab.md",
   "scripts/ci/verify_phase200_admin_guardrails.sh",
   "scripts/ci/verify_phase200_guardrail_contract.sh",
   "scripts/dev/phase252_lab.mjs",
@@ -175,17 +179,17 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
       ["run", "--no-start", "-e", manifestFreshnessCode()],
       { cwd: "accrue_admin", lane: "db-free", warmth: "cold-build", env: { MIX_ENV: "test", MIX_BUILD_PATH: adminBuildPath }, sources: [MANIFEST_PATH, "accrue_admin/storybook/_support/subscription_manifest.ex"], assertions: ["compiled_variation_discovery", "source_digest_freshness", "tracked_manifest_content_identity"] },
     ),
-    command("phase252-lab-contract", "node --test Phase 252 lab lifecycle contract", process.execPath, tap("scripts/dev/phase252_lab.test.mjs"), { lane: "read-only", sources: ["scripts/dev/phase252_lab.test.mjs", "scripts/dev/phase252_lab.mjs"], assertions: ["owned_resource_identity", "unsafe_input_refusal", "cleanup_identity_guard"] }),
-    dbFree("scenario-domain", "test/accrue_admin/dev/subscription_scenarios_test.exs", ["validated_deterministic_scenarios", "fixed_clock_and_identity"]),
+    command("phase252-lab-contract", "node --test Phase 252 lab lifecycle contract", process.execPath, tap("scripts/dev/phase252_lab.test.mjs"), { lane: "read-only", sources: ["scripts/dev/phase252_lab.test.mjs", "scripts/dev/phase252_lab.mjs"], assertions: ["owned_resource_identity", "unsafe_input_refusal", "cleanup_identity_guard", "namespace_lock_one_owner", "stale_lock_owner_refusal", "exact_process_identity_cleanup"] }),
+    dbFree("scenario-domain", "test/accrue_admin/dev/subscription_scenarios_test.exs", ["validated_deterministic_scenarios", "fixed_clock_and_identity", "deterministic_fact_source", "canceling_boundary_exact_clock", "exact_minor_unit_money_precision"]),
     dbFree("subscription-area", "test/accrue_admin/components/subscription_area_test.exs", ["production_area_content", "copy_and_scoped_action_semantics"]),
     dbFree("story-slice", "test/accrue_admin/dev/subscription_story_slice_test.exs", ["shared_renderer_and_active_variation", "no_repo_bootstrap"]),
-    dbFree("manifest-contract", "test/accrue_admin/dev/subscription_manifest_test.exs", ["compiled_variation_routes", "stable_group_and_same_id_keys", "current_caller_map", "stale_manifest_rejection"]),
+    dbFree("manifest-contract", "test/accrue_admin/dev/subscription_manifest_test.exs", ["compiled_variation_routes", "stable_group_and_same_id_keys", "current_caller_map", "stale_manifest_rejection", "story_variation_identity_adjacency", "zero_variation_and_missing_attribution_refusal", "deterministic_manifest_ordering", "caller_identity_adjacency", "empty_caller_source_refusal", "stable_caller_ordering"]),
     dbFree("production-boundary-db-free", "test/accrue_admin/dev/subscription_production_boundary_test.exs", ["production_route_and_compile_boundary"]),
     command("phase248-heldout-contract", "node --test Phase 248 held-out isolation contract", process.execPath, tap("scripts/ci/phase248_heldout_isolation.test.mjs"), { lane: "read-only", sources: ["scripts/ci/phase248_heldout_isolation.test.mjs"], assertions: ["held_out_partition_and_owner"] }),
-    command("phase252-ci-contract", "node --test Phase 252 CI admission contract", process.execPath, tap("scripts/ci/verify_phase252_ci_contract.test.mjs"), { lane: "read-only", sources: ["scripts/ci/verify_phase252_ci_contract.test.mjs", ".github/workflows/ci.yml", "scripts/ci/verify_phase200_admin_guardrails.sh"], assertions: ["consumed_root_owner_map", "workflow_admission", "required_owner_execution"] }),
-    command("production-boundary-controls", "node scripts/ci/verify_phase252_production_boundary.mjs --self-test", process.execPath, ["scripts/ci/verify_phase252_production_boundary.mjs", "--self-test"], { lane: "isolated-build", sources: ["scripts/ci/verify_phase252_production_boundary.mjs"], assertions: ["production_package_leak_negative_controls"] }),
+    command("phase252-ci-contract", "node --test Phase 252 CI admission contract", process.execPath, tap("scripts/ci/verify_phase252_ci_contract.test.mjs"), { lane: "read-only", sources: ["scripts/ci/verify_phase252_ci_contract.test.mjs", ".github/workflows/ci.yml", "scripts/ci/verify_phase200_admin_guardrails.sh"], assertions: ["consumed_root_owner_map", "workflow_admission", "named_required_owner_execution", "required_owner_invocation_mutations"] }),
+    command("production-boundary-controls", "node scripts/ci/verify_phase252_production_boundary.mjs --self-test", process.execPath, ["scripts/ci/verify_phase252_production_boundary.mjs", "--self-test"], { lane: "isolated-build", sources: ["scripts/ci/verify_phase252_production_boundary.mjs"], assertions: ["production_package_leak_negative_controls", "development_positive_production_route_exclusion"] }),
     command("production-packages", "node scripts/ci/verify_phase252_production_boundary.mjs", process.execPath, ["scripts/ci/verify_phase252_production_boundary.mjs"], { lane: "isolated-build", warmth: "cold", sources: ["scripts/ci/verify_phase252_production_boundary.mjs", "accrue/mix.exs", "accrue_admin/mix.exs", "accrue_portal/mix.exs"], assertions: ["fresh_production_compiles", "actual_unpacked_hex_archives"] }),
-    phase252LabExec("scenario-repo", ["test/accrue_admin/dev/subscription_scenario_repo_test.exs"], ["persisted_launch_and_team_facts", "database_constraints", "rollback_and_concurrent_insert_serialization"]),
+    phase252LabExec("scenario-repo", ["test/accrue_admin/dev/subscription_scenario_repo_test.exs"], ["persisted_launch_and_team_facts", "database_constraints", "replay_identity_conflict_refusal", "transaction_rollback", "concurrent_insert_serialization"]),
     phase252LabExec("registry-kitchen-mount-scoped-path", [
       "test/accrue_admin/dev/component_registry_test.exs",
       "test/accrue_admin/dev/component_group_registry_test.exs",
@@ -194,7 +198,7 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
       "test/accrue_admin/dev/subscription_production_boundary_test.exs",
       "test/accrue_admin/scoped_path_test.exs",
     ], ["registry_variant_and_token_reconciliation", "group_contract_and_mounted_kitchen", "production_caller_map_reconciliation", "served_storybook_assets", "development_and_production_route_boundaries", "scoped_return_path_safety"]),
-    phase252LabExec("mounted-subscription-regressions", ["test/accrue_admin/live/subscription_live_test.exs"], ["mounted_subscription_structure", "organization_scope_enforcement", "lifecycle_distinctions", "action_review_and_confirmation", "provider_action_boundaries"]),
+    phase252LabExec("mounted-subscription-regressions", ["test/accrue_admin/live/subscription_live_test.exs"], ["mounted_subscription_structure", "organization_scope_enforcement", "lifecycle_distinctions", "action_review_and_confirmation", "provider_action_boundaries", "authority_regression", "scoped_not_found_regression"]),
     (() => {
       const partition = freshPartition(usedPartitions);
       return command(
@@ -202,7 +206,7 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
         "node ../scripts/dev/phase252_lab.mjs exec",
         process.execPath,
         ["scripts/dev/phase252_lab.mjs", "exec", "--lane", "host-heldout", "--partition", partition, "--", "sh", "-c", "cd examples/accrue_host && MIX_ENV=test mix test test/accrue_host/phase252_scenario_cleanup_test.exs"],
-        { lane: "host-heldout", partition, warmth: "cold-database-startup", env: { MIX_ENV: "test", MIX_BUILD_PATH: hostBuildPath }, sources: ["examples/accrue_host/test/accrue_host/phase252_scenario_cleanup_test.exs", "examples/accrue_host/mix.exs", "scripts/dev/phase252_lab.mjs"], assertions: ["exact_cleanup_authority", "unrelated_child_preserved", "heldout_identity_separation"] },
+        { lane: "host-heldout", partition, warmth: "cold-database-startup", env: { MIX_ENV: "test", MIX_BUILD_PATH: hostBuildPath }, sources: ["examples/accrue_host/test/accrue_host/phase252_scenario_cleanup_test.exs", "examples/accrue_host/mix.exs", "scripts/dev/phase252_lab.mjs"], assertions: ["exact_cleanup_authority", "unrelated_child_preserved", "heldout_identity_separation", "cleanup_idempotency_absence_mismatch", "serialized_unrelated_child_concurrency"] },
       );
     })(),
     command("isolation-reset", "node --test Phase 252 isolated normal/review reset proof", process.execPath, tap("scripts/dev/phase252_isolation.test.mjs"), { lane: "self-owned-disposable-review-and-admin-test", warmth: "cold-database-startup", env: { MIX_BUILD_PATH: adminBuildPath }, sources: ["scripts/dev/phase252_isolation.test.mjs", "scripts/dev/phase252_lab.mjs"], assertions: ["normal_reset_positive_control", "review_data_unchanged_negative_control", "distinct_review_process_and_database"] }),
@@ -230,6 +234,17 @@ function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDirectory }
         PHASE252_RESULT_ID: resultId,
         PLAYWRIGHT_OUTPUT_DIR: outputDir,
       },
+    },
+  ));
+  plan.push(command(
+    "phase252-acceptance-contract",
+    "node --test Phase 252 acceptance evidence contract",
+    process.execPath,
+    tap("scripts/ci/generate_phase252_acceptance.test.mjs"),
+    {
+      lane: "read-only",
+      sources: ["scripts/ci/generate_phase252_acceptance.mjs", "scripts/ci/generate_phase252_acceptance.test.mjs", "scripts/ci/verify_phase252_stories.mjs", "guides/ui-story-lab.md", ".github/workflows/ci.yml"],
+      assertions: ["missing_command_rejection", "failed_command_rejection", "stale_source_and_asset_rejection", "pooled_cell_rejection", "missing_predicate_rejection", "unsafe_evidence_path_rejection", "guide_contract_mutation_rejection"],
     },
   ));
   return plan;
@@ -487,6 +502,18 @@ async function main() {
   bundle.status = "passed";
   bundle.run_completed_at = new Date().toISOString();
   bundle.browser_results_sha256 = sha256(fs.readFileSync(browserResultPath));
+  await writeJson(resultPath, bundle);
+  try {
+    const { validatePhase252Evidence } = await import("./generate_phase252_acceptance.mjs");
+    bundle.acceptance = validatePhase252Evidence({ root: ROOT, resultsPath: path.relative(ROOT, resultPath).split(path.sep).join("/") });
+  } catch (error) {
+    bundle.status = "failed";
+    bundle.validation_error = "acceptance evidence validation failed: " + error.message;
+    await writeJson(resultPath, bundle);
+    process.stderr.write("Phase 252 focused gate failed: " + bundle.validation_error + "\n");
+    process.exitCode = 1;
+    return;
+  }
   await writeJson(resultPath, bundle);
   process.stdout.write("Phase 252 focused gate passed: " + bundle.commands.length + " commands; cold compile=" + (bundle.costs.cold_build?.duration_ms ?? 0) + "ms; cold DB=" + (bundle.costs.cold_database_startup?.duration_ms ?? 0) + "ms; warm DB=" + (bundle.costs.warm_database_lane?.duration_ms ?? 0) + "ms; browser lane=" + (bundle.costs.browser_lane?.duration_ms ?? 0) + "ms.\n");
   process.stdout.write("Result bundle: " + path.relative(ROOT, resultPath).split(path.sep).join("/") + "\n");

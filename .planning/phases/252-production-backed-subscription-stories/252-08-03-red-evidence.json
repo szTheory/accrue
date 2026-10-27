@@ -1,0 +1,11 @@
+{
+  "command": "node --test --test-name-pattern='fresh actual runner, manifest and browser evidence produce complete coverage' --test-reporter=tap scripts/ci/generate_phase252_acceptance.test.mjs",
+  "cwd": "/private/tmp/accrue-252-08-03-red.lvyGn6",
+  "exitCode": 1,
+  "output": "TAP version 13\n# Subtest: fresh actual runner, manifest and browser evidence produce complete coverage\nnot ok 1 - fresh actual runner, manifest and browser evidence produce complete coverage\n  ---\n  duration_ms: 11.094083\n  location: '/private/tmp/accrue-252-08-03-red.lvyGn6/scripts/ci/generate_phase252_acceptance.test.mjs:316:1'\n  failureType: 'testCodeFailure'\n  error: 'Phase 252 acceptance evidence validation is not implemented'\n  code: 'ERR_TEST_FAILURE'\n  stack: |-\n    validatePhase252Evidence (file:///private/tmp/accrue-252-08-03-red.lvyGn6/scripts/ci/generate_phase252_acceptance.mjs:2:9)\n    TestContext.<anonymous> (file:///private/tmp/accrue-252-08-03-red.lvyGn6/scripts/ci/generate_phase252_acceptance.test.mjs:319:22)\n    Test.runInAsyncScope (node:async_hooks:211:14)\n    Test.run (node:internal/test_runner/test:979:25)\n    Test.start (node:internal/test_runner/test:877:17)\n    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 46.812791\n",
+  "targetTest": "fresh actual runner, manifest and browser evidence produce complete coverage",
+  "targetFile": "scripts/ci/generate_phase252_acceptance.test.mjs",
+  "expected": "A fresh runner bundle, source snapshot, manifest, 15 independently identified render rows and complete predicate catalog produce a passing coverage report.",
+  "actual": "The acceptance validator throws that evidence validation is not implemented.",
+  "semanticAssessment": "The target test constructed a complete evidence fixture and failed at the intentionally unimplemented validator entry point; it was not a load or fixture error."
+}

@@ -1315,6 +1315,16 @@ jobs:
       - name: Run Phase 200 deterministic guardrails
         run: bash scripts/ci/verify_phase200_admin_guardrails.sh
 
+      - name: Upload Phase 252 machine evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase252-machine-evidence
+          path: |
+            accrue_admin/tmp/phase252/ci-results/*/results.json
+            accrue_admin/tmp/phase252/render-results-*.json
+          if-no-files-found: ignore
+
       - name: Upload Phase 200 Playwright report
         if: always()
         uses: actions/upload-artifact@v7
