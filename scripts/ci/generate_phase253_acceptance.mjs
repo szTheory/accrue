@@ -726,7 +726,7 @@ export function validateCompletedSummaries({ root = ROOT } = {}) {
   return { phaseDir: summaries[0].directory, summaries, coverage, started: dates[0], updated: dates.at(-1) };
 }
 
-function renderUat(summarySet) {
+export function renderUat(summarySet) {
   const tests = summarySet.coverage.map(({ file, id, description, refs }, index) =>
     `### ${index + 1}. ${description}\nsource: automated\nverification: ${refs.join(" | ")}\nresult: [pass]`);
   return `---\nstatus: complete\nphase: 253\nsource: executable-summary-coverage\nstarted: ${summarySet.started}\nupdated: ${summarySet.updated}\n---\n\n# Phase 253 Automated UAT\n\nEvery acceptance item below is produced from committed executable coverage. No post-hoc human verification is required.\n\n## Tests\n\n${tests.join("\n\n")}\n\n## Summary\n\ntotal: ${tests.length}\npassed: ${tests.length}\nissues: 0\npending: 0\nskipped: 0\nblocked: 0\n`;

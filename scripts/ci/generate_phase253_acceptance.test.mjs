@@ -5,6 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import * as generator from "./generate_phase253_acceptance.mjs";
+import { renderAutomatedUat } from "./verify_executable_uat_contract.mjs";
 
 const root = path.resolve(process.env.PHASE253_REPO_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.."));
 test("acceptance requires all five requirements, fourteen tasks, ten edges, and twenty-six UI criteria", () => {
@@ -67,5 +68,22 @@ test("acceptance UAT generation requires every completed summary", () => {
 test("completed-summary dates accept the existing nested metrics completed_date field", () => {
   assert.equal(generator.completedSummaryDate("metrics:\n  duration: 33m\n  completed_date: 2026-10-27\nstatus: complete"), "2026-10-27");
   assert.equal(generator.completedSummaryDate("completed: 2026-10-27\nstatus: complete"), "2026-10-27");
+});
+
+test("generated Phase 253 UAT matches the project contract renderer once verification exists", () => {
+  const sourcePhase = path.join(root, ".planning", "phases", generator.PHASE_SLUG);
+  const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), "phase253-uat-contract-render-"));
+  const temporaryPhase = path.join(temporaryRoot, "253-contract-fixture");
+  fs.mkdirSync(temporaryPhase, { recursive: true });
+  try {
+    for (const { name } of generator.validateCompletedSummaries({ root }).summaries) {
+      fs.copyFileSync(path.join(sourcePhase, name), path.join(temporaryPhase, name));
+    }
+    fs.writeFileSync(path.join(temporaryPhase, "253-VERIFICATION.md"), "---\nstatus: passed\nbehavior_unverified: 0\n---\n");
+    const summarySet = generator.validateCompletedSummaries({ root });
+    assert.equal(generator.renderUat(summarySet), renderAutomatedUat(temporaryPhase));
+  } finally {
+    fs.rmSync(temporaryRoot, { recursive: true, force: true });
+  }
 });
 

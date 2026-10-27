@@ -19,7 +19,7 @@ Execution record for the 14-task Phase 253 plan. Plans 01–05 and all three Pla
 | Config | accrue_admin/mix.exs; accrue_admin/playwright.phase252.config.js; existing disposable lab runner |
 | Quick run | `node scripts/dev/phase252_lab.mjs exec --lane admin-test -- mix test test/accrue_admin/live/subscriptions_live_test.exs test/accrue_admin/live/subscription_live_test.exs test/accrue_admin/components/data_table_test.exs` |
 | Full existing gate | `npm --prefix accrue_admin run phase252:check` passed all 21 commands on 2026-10-27; Phase 253 focused aggregate passed all 10 serial lanes |
-| Runtime | Phase 252 cold compile 70,244 ms, cold DB 2,243 ms, warm DB 3,440 ms, browser 12,431 ms; Phase 253 browser lane 46,800 ms with 151 current-run cells |
+| Runtime | Phase 252 cold compile 70,244 ms, cold DB 2,243 ms, warm DB 3,440 ms, browser 12,431 ms; final Phase 253 browser lane 49,218 ms with 151 current-run cells |
 
 ## Sampling Rate
 
@@ -49,7 +49,7 @@ All 14 actual task IDs are mapped below. Commands assume repository root; each P
 | 253-06-02 | 06 | 5 | SBK-04, SBK-05, SBK-06, UXQ-01, UXQ-03 | T-253-17/18 | Actual workflow/root admission and named invocation | CI contract | `node --test --test-reporter=tap scripts/ci/verify_phase252_ci_contract.test.mjs scripts/ci/verify_phase253_compositions.test.mjs && bash scripts/ci/verify_phase200_guardrail_contract.sh` | contract created in 06-02; other owners tracked | Nonzero, omitted path, accepted removal/filter mutation or old gate loss | pass |
 | 253-06-03 | 06 | 5 | SBK-04, SBK-05, SBK-06, UXQ-01, UXQ-03 | T-253-18/19/20 | Complete fresh acceptance, native controls before descriptors | aggregate/acceptance | `node --test --test-reporter=tap scripts/ci/generate_phase253_acceptance.test.mjs scripts/ci/verify_phase253_compositions.test.mjs scripts/ci/verify_phase252_ci_contract.test.mjs && npm --prefix accrue_admin run phase252:check && PHASE253_RESULT_ID=<unique> node scripts/ci/verify_phase253_compositions.mjs && node scripts/ci/generate_phase253_acceptance.mjs --latest` | generator/acceptance target created in this task; runner from 06-01 | Nonzero, missing assertion/count/native proof, stale source or premature UAT | pass |
 
-Post-summary acceptance (after 253-06-SUMMARY.md exists): `node scripts/ci/generate_phase253_acceptance.mjs --latest --write-uat && node scripts/ci/verify_executable_uat_contract.mjs --phase 253`. Fails on nonzero exit, absent/incomplete summaries, missing automated UAT or unproved items. This is pending until execution; no passing VERIFICATION.md is authored by planning.
+Post-summary acceptance: `node scripts/ci/generate_phase253_acceptance.mjs --latest --write-uat` passed on run `a21bbfdfbd88cfa053171cbe476529ae` and generated 24 automated UAT entries. `node scripts/ci/verify_executable_uat_contract.mjs --phase 253` was run after the UAT render matched the project contract; it stops only because the independent `253-VERIFICATION.md` does not exist yet. The contract requires `status: passed` and `behavior_unverified: 0`; the independent verifier owns that artifact, so no verification report was pre-authored.
 
 ## Creation and Dependency Map
 
@@ -85,4 +85,4 @@ None required for machine-verifiable phase acceptance. Source-bound design revie
 - [x] Requirement and security negative controls represented.
 - [x] Execution evidence recorded before setting compliant/complete flags.
 
-Approval: task execution is recorded; status remains draft, `nyquist_compliant` remains false and `wave_0_complete` remains false until the post-summary UAT generation and project contract pass. Independent phase verification then decides completion.
+Approval: task execution and generated UAT are recorded; status remains draft, `nyquist_compliant` and `wave_0_complete` remain false until independent verification produces its passing artifact and the executable-UAT contract passes.
