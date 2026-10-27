@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { randomInt, randomUUID } from "node:crypto";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { createServer } from "node:net";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
@@ -44,6 +46,54 @@ function psql(database, sql) {
 
 function databaseExists(database) {
   return psql("postgres", `SELECT EXISTS (SELECT 1 FROM pg_database WHERE datname = '${database}')`) === "t";
+}
+
+function processIdentity(pid) {
+  try {
+    const output = execFileSync("ps", ["-p", String(pid), "-o", "pid=", "-o", "lstart=", "-o", "stat=", "-o", "command="], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    const match = output.match(/^(\d+)\s+(.{24})\s+(\S+)\s+([\s\S]+)$/);
+    if (!match) return null;
+    return {
+      pid: Number(match[1]),
+      startIdentity: match[2].trim().replace(/\s+/g, " "),
+      state: match[3],
+      command: match[4].trim(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function sameProcess(identity) {
+  const current = processIdentity(identity.pid);
+  return Boolean(
+    current && current.startIdentity === identity.startIdentity && current.command === identity.command &&
+    !current.state.startsWith("Z") && !current.state.startsWith("X"),
+  );
+}
+
+async function waitUntil(predicate, timeoutMs = 10_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await predicate()) return true;
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  return Boolean(await predicate());
+}
+
+async function stopExactProcess(identity) {
+  if (!sameProcess(identity)) return;
+  try {
+    process.kill(identity.pid, "SIGTERM");
+  } catch (error) {
+    if (error?.code === "ESRCH") return;
+    throw error;
+  }
+  if (await waitUntil(() => !sameProcess(identity), 2_000)) return;
+  if (sameProcess(identity)) process.kill(identity.pid, "SIGKILL");
 }
 
 function insertMarker(database, marker) {
@@ -229,4 +279,123 @@ test("occupied listeners, wrong health identity, failed bootstrap and duplicate 
     assert.equal(review.child.exitCode, null, "duplicate namespace must not terminate the first session process");
     assert.equal(review.manifest.pid, stillOwnedPid);
   });
+});
+
+test("interrupted launcher stops descendants before database teardown and preserves unrelated processes", async () => {
+  const partition = freshPartition();
+  const database = `accrue_admin_test${partition}`;
+  const port = await freePort();
+  const directory = await mkdtemp(path.join(os.tmpdir(), "phase252-process-group-"));
+  const statePath = path.join(directory, "child-state.json");
+  const grandchildReadyPath = path.join(directory, "grandchild-ready.json");
+  const sentinelSignalPath = path.join(directory, "sentinel-signal.txt");
+  const childToken = randomUUID();
+  const sentinel = spawn(process.execPath, ["-e", [
+    "const fs = require('node:fs');",
+    `const marker = ${JSON.stringify(sentinelSignalPath)};`,
+    "process.on('SIGTERM', () => { fs.writeFileSync(marker, 'SIGTERM'); process.exit(0); });",
+    "setInterval(() => {}, 1000);",
+  ].join(" ")], { stdio: "ignore" });
+  const sentinelSpawned = new Promise((resolve, reject) => {
+    sentinel.once("spawn", resolve);
+    sentinel.once("error", reject);
+  });
+  await sentinelSpawned;
+  const sentinelIdentity = await new Promise((resolve, reject) => {
+    const check = async () => {
+      const identity = processIdentity(sentinel.pid);
+      if (identity) return resolve(identity);
+      if (sentinel.exitCode != null || sentinel.signalCode != null) return reject(new Error("sentinel exited during startup"));
+      setTimeout(check, 10);
+    };
+    check();
+  });
+
+  const grandchildProgram = [
+    "const fs = require('node:fs');",
+    `const ready = ${JSON.stringify(grandchildReadyPath)};`,
+    `const token = ${JSON.stringify(childToken)};`,
+    "process.on('SIGTERM', () => { fs.appendFileSync(ready, '\\nSIGTERM\\n'); setTimeout(() => { fs.appendFileSync(ready, 'DONE\\n'); process.exit(0); }, 350); });",
+    "fs.writeFileSync(ready, JSON.stringify({ pid: process.pid, token }));",
+    "setInterval(() => {}, 1000);",
+  ].join(" ");
+  const targetProgram = [
+    "const fs = require('node:fs');",
+    "const { spawn } = require('node:child_process');",
+    `const state = ${JSON.stringify(statePath)};`,
+    `const ready = ${JSON.stringify(grandchildReadyPath)};`,
+    `const grandchildProgram = ${JSON.stringify(grandchildProgram)};`,
+    "const grandchild = spawn(process.execPath, ['-e', grandchildProgram], { stdio: 'ignore' });",
+    "process.on('SIGTERM', () => { fs.appendFileSync(state, '\\nPARENT_SIGTERM\\n'); setTimeout(() => process.exit(0), 40); });",
+    "const deadline = Date.now() + 5000;",
+    "const publishReady = () => { if (fs.existsSync(ready)) { fs.writeFileSync(state, JSON.stringify({ parentPid: process.pid, grandchildPid: grandchild.pid }) + '\\n'); return; } if (Date.now() > deadline) process.exit(31); setTimeout(publishReady, 10); };",
+    "publishReady();",
+    "setInterval(() => {}, 1000);",
+  ].join(" ");
+
+  const launcher = spawn(process.execPath, [
+    path.join(ROOT, "scripts/dev/phase252_lab.mjs"), "exec",
+    "--lane", "admin-test", "--partition", partition, "--port", String(port),
+    "--", process.execPath, "-e", targetProgram,
+  ], { cwd: ROOT, stdio: "ignore" });
+  const launcherExited = new Promise((resolve, reject) => {
+    launcher.once("exit", (code, signal) => resolve({ code, signal }));
+    launcher.once("error", reject);
+  });
+
+  let observerRunning = false;
+  let droppedWhileGrandchildAlive = false;
+  let observer;
+  let grandchildIdentity;
+  try {
+    const ready = await waitUntil(async () => {
+      try {
+        const rawState = await readFile(statePath, "utf8");
+        const state = JSON.parse(rawState.split("\n", 1)[0]);
+        const readyRecord = JSON.parse((await readFile(grandchildReadyPath, "utf8")).split("\n", 1)[0]);
+        if (readyRecord.token !== childToken || readyRecord.pid !== state.grandchildPid) return false;
+        grandchildIdentity = processIdentity(state.grandchildPid);
+        return Boolean(grandchildIdentity && databaseExists(database));
+      } catch {
+        return false;
+      }
+    }, 20_000);
+    assert.equal(ready, true, "the guarded launcher should create its owned database and child/grandchild pair");
+
+    observerRunning = true;
+    observer = (async () => {
+      while (observerRunning) {
+        if (!databaseExists(database) && grandchildIdentity && sameProcess(grandchildIdentity)) {
+          droppedWhileGrandchildAlive = true;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+    })();
+    launcher.kill("SIGTERM");
+    const exit = await Promise.race([
+      launcherExited,
+      new Promise((_, reject) => setTimeout(() => reject(new Error("guarded launcher did not finish SIGTERM cleanup")), 15_000)),
+    ]);
+    assert.equal(exit.code, 1, "an interrupted owned command should return the documented failure exit status");
+    assert.equal(await waitUntil(() => !databaseExists(database)), true, "the launcher should remove its exact disposable database after process cleanup");
+    assert.equal(droppedWhileGrandchildAlive, false, "database teardown must wait until the owned grandchild is no longer running");
+    const grandchildState = await readFile(grandchildReadyPath, "utf8");
+    assert.match(grandchildState, /SIGTERM/, "the grandchild should receive termination through owned cleanup");
+    assert.match(grandchildState, /DONE/, "cleanup should wait until the grandchild finishes its graceful shutdown");
+    assert.equal(sameProcess(sentinelIdentity), true, "an unrelated process outside the owned session must remain alive");
+    await assert.rejects(readFile(sentinelSignalPath, "utf8"), { code: "ENOENT" }, "cleanup must not signal the unrelated sentinel");
+  } finally {
+    observerRunning = false;
+    await observer;
+    if (launcher.exitCode == null && launcher.signalCode == null) {
+      launcher.kill("SIGKILL");
+      await launcherExited.catch(() => {});
+    }
+    if (grandchildIdentity) await stopExactProcess(grandchildIdentity);
+    if (sameProcess(sentinelIdentity)) sentinel.kill("SIGTERM");
+    if (sentinel.exitCode == null && sentinel.signalCode == null) {
+      await new Promise((resolve) => sentinel.once("exit", resolve));
+    }
+    await rm(directory, { recursive: true, force: true });
+  }
 });
