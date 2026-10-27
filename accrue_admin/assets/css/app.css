@@ -4234,7 +4234,10 @@ html.accrue-admin[data-theme="dark"] .ax-button-primary {
 }
 
 .ax-action-menu-panel {
+  left: 0;
+  right: auto;
   transform-origin: var(--ax-dropdown-origin-x) var(--ax-dropdown-origin-y);
+  box-sizing: border-box;
 }
 
 .ax-action-menu-group {

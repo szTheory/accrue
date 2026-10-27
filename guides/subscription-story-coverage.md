@@ -51,7 +51,7 @@ Admin whole-page/list/action-journey work remains in Phase 253. Portal subscript
 - `accrue_admin/lib/accrue_admin/dev/storybook.ex` — `2cea8b08edad6d18383220b23c020e0fbbf7ca7c2c8a884729270779ecfa983d`
 - `accrue_admin/lib/accrue_admin/live/subscription_live.ex` — `3bf2522162b43c6c792632bc78da91e2a3c6804b594c34f418ef2b5f5de95a01`
 - `accrue_admin/lib/accrue_admin/live/subscriptions_live.ex` — `ec57ce13ee8169a50eee27c04c9dd3c9f5846f365cc143fc58a690edd4989e6e`
-- `accrue_admin/lib/accrue_admin/router.ex` — `ac297c4571c305c031161d969e6473cb4f85dcf481dec5a720fb7c5420d9e972`
+- `accrue_admin/lib/accrue_admin/router.ex` — `eec387b5f32297121231fd5d4e0ffd90e516c0b19ebb8dfba9bc2b6def077b54`
 - `accrue_admin/storybook/_support/subscription_manifest.ex` — `bcd47f6c8ab118a2074115240de54429c9f88ffde622bf235bfe5e08555d4149`
 - `accrue_admin/storybook/_support/subscription_scenarios.ex` — `734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d`
 - `accrue_portal/lib/accrue_portal/live/subscription_live.ex` — `c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372`

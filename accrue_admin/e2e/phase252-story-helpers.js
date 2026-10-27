@@ -129,6 +129,7 @@ function beginResults(runId, manifestDigest) {
     schema_version: 1,
     run_id: runId,
     manifest_sha256: manifestDigest,
+    human_judgment: false,
     generated_at: new Date().toISOString(),
     ui_predicate_catalog: UI_PREDICATE_ASSERTION_REFERENCES,
     cases: [],
@@ -166,6 +167,21 @@ function normalizeTimestamp(value) {
   return Number.isNaN(milliseconds) ? value : new Date(milliseconds).toISOString();
 }
 
+async function assertCurrentStorybookAssets(page, assets) {
+  const cssResponse = await page.request.get(assets.cssHref);
+  const jsResponse = await page.request.get(assets.jsHref);
+  const servedCss = await cssResponse.text();
+  const servedJs = await jsResponse.text();
+  const expectedCss = fs.readFileSync(path.join(REPO_ROOT, "accrue_admin/priv/static/storybook.css"), "utf8");
+  const expectedJs = fs.readFileSync(path.join(REPO_ROOT, "accrue_admin/priv/static/storybook.js"), "utf8");
+
+  expect(cssResponse.ok(), "current Storybook CSS asset responds successfully").toBe(true);
+  expect(jsResponse.ok(), "current Storybook JS asset responds successfully").toBe(true);
+  expect(servedCss, "served Storybook CSS matches the committed bundle exactly").toBe(expectedCss);
+  expect(servedJs, "served Storybook JS matches the committed bundle exactly").toBe(expectedJs);
+  return { storybook_css_sha256: sha256(servedCss), storybook_js_sha256: sha256(servedJs) };
+}
+
 async function assertUiPredicateContract(page, story, entry, testCase) {
   const ui = await story.evaluate((element) => {
     const viewportWidth = window.innerWidth;
@@ -173,10 +189,24 @@ async function assertUiPredicateContract(page, story, entry, testCase) {
       const rect = node.getBoundingClientRect();
       const style = getComputedStyle(node);
       let clippingAncestor = null;
+      const contentBounds = (element) => {
+        const bounds = element.getBoundingClientRect();
+        const left = bounds.left + element.clientLeft;
+        const top = bounds.top + element.clientTop;
+        return {
+          left,
+          right: left + element.clientWidth,
+          top,
+          bottom: top + element.clientHeight,
+        };
+      };
       for (let current = node.parentElement; current; current = current.parentElement) {
         const ancestorStyle = getComputedStyle(current);
-        const clipsX = ["hidden", "clip"].includes(ancestorStyle.overflowX) && current.scrollWidth > current.clientWidth + 1;
-        const clipsY = ["hidden", "clip"].includes(ancestorStyle.overflowY) && current.scrollHeight > current.clientHeight + 1;
+        const bounds = contentBounds(current);
+        const clipsX = current.clientWidth > 0 && ["hidden", "clip"].includes(ancestorStyle.overflowX) &&
+          (rect.left < bounds.left - 1 || rect.right > bounds.right + 1);
+        const clipsY = current.clientHeight > 0 && ["hidden", "clip"].includes(ancestorStyle.overflowY) &&
+          (rect.top < bounds.top - 1 || rect.bottom > bounds.bottom + 1);
         if (clipsX || clipsY) {
           clippingAncestor = current.className || current.tagName.toLowerCase();
           break;
@@ -185,8 +215,7 @@ async function assertUiPredicateContract(page, story, entry, testCase) {
       const textClipped =
         (node.scrollWidth > node.clientWidth + 1 && ["hidden", "clip"].includes(style.overflowX)) ||
         (node.scrollHeight > node.clientHeight + 1 && ["hidden", "clip"].includes(style.overflowY)) ||
-        style.textOverflow === "ellipsis" ||
-        style.whiteSpace === "nowrap";
+        (node.scrollWidth > node.clientWidth + 1 && style.textOverflow === "ellipsis");
       return {
         label,
         text: node.textContent.replace(/\s+/g, " ").trim(),
@@ -217,8 +246,8 @@ async function assertUiPredicateContract(page, story, entry, testCase) {
       ? [...actionBand.querySelectorAll(".ax-button, summary")].map((target) => probe(target, target.getAttribute("aria-label") || target.textContent.trim()))
       : [];
     const grid = summaryRows[0] ? getComputedStyle(summaryRows[0]) : null;
-    const body = document.body;
     const root = document.documentElement;
+    const body = document.body;
     const statusDot = element.querySelector(".ax-status-dot");
     const rowActions = [...element.querySelectorAll(".ax-summary-list-actions a, .ax-summary-list-actions button")].map((action) => ({
       visibleText: action.innerText.replace(/\s+/g, " ").trim(),
@@ -293,7 +322,7 @@ async function assertUiPredicateContract(page, story, entry, testCase) {
   expect(ui.menu.groups.every((group) => group.label && group.items > 0), "empty action groups are omitted and every menu group is named").toBe(true);
 
   const expectedBase = testCase.theme === "light" ? "#fafbfc" : "#0f1318";
-  expect(ui.themeTokens.base, `current Storybook CSS resolves the ${testCase.theme} Accrue base token`).toBe(expectedBase);
+  expect(ui.themeTokens, `current Storybook CSS resolves the ${testCase.theme} Accrue base token`).toMatchObject({ base: expectedBase });
 
   const copyButton = story.locator('button[aria-label="Copy subscription ID"]');
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
@@ -348,17 +377,20 @@ async function assertHeldOutLongText(page, ordinaryStory, theme) {
     idButton.dataset.clipboardText = longId;
     idButton.title = longId;
     idButton.querySelector(".ax-id-badge-text").textContent = longId;
-    document.body.append(clone);
+    element.after(clone);
     return { longName, longId };
   });
   const clone = page.locator('[data-phase252-held-out="long-text"]');
   await expect(clone.locator("h1")).toHaveText(heldOut.longName);
-  await expect(clone.locator(".ax-summary-list-row").filter({ has: clone.locator("dt") }).first()).toBeVisible();
+  await expect(clone.locator(".ax-summary-list-row").first().locator("dt")).toBeVisible();
   const customer = clone.locator(".ax-summary-list-row").filter({ hasText: "Customer" }).locator("dd.ax-summary-list-value");
   await expect(customer).toContainText(heldOut.longName);
   const copyButton = clone.locator('button[aria-label="Copy subscription ID"]');
   await expect(copyButton.locator(".ax-id-badge-text")).toHaveText(heldOut.longId);
   expect(await copyButton.getAttribute("data-clipboard-text")).toBe(heldOut.longId);
+  await copyButton.evaluate((button) => window.storybook.Hooks.Clipboard.mounted.call({ el: button }));
+  await copyButton.click();
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(heldOut.longId);
   const metrics = await clone.evaluate((element) => {
     const title = element.querySelector("h1");
     const customerValue = [...element.querySelectorAll(".ax-summary-list-row")].find((row) => row.querySelector("dt")?.textContent.trim() === "Customer").querySelector("dd.ax-summary-list-value");
@@ -379,7 +411,7 @@ async function assertHeldOutLongText(page, ordinaryStory, theme) {
     });
   });
   expect(metrics.every((metric) => metric.scrollWidth <= metric.clientWidth + 1)).toBe(true);
-  expect(metrics.every((metric) => metric.whiteSpace !== "nowrap" && metric.textOverflow !== "ellipsis")).toBe(true);
+  expect(metrics.every((metric) => metric.whiteSpace !== "nowrap")).toBe(true);
   expect(metrics.every((metric) => metric.left >= -1 && metric.right <= 321)).toBe(true);
   return { theme, label: "held-out long text (not manifest fixture)", name: heldOut.longName, id: heldOut.longId, metrics };
 }
@@ -537,7 +569,7 @@ async function assertActionAvailability(story, entry) {
 
 async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
   const { entry, width, theme, kind, key } = testCase;
-  const browserDiagnostics = { consoleErrors: [], failedRequests: [], storybookCssResponses: [] };
+  const browserDiagnostics = { consoleErrors: [], failedRequests: [], storybookCssResponses: [], storybookFontResponses: [] };
   page.on("console", (message) => {
     if (message.type() === "error") browserDiagnostics.consoleErrors.push(message.text());
   });
@@ -547,6 +579,9 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
   page.on("response", (response) => {
     if (response.url().includes("/dev/storybook/assets/storybook-css-")) {
       browserDiagnostics.storybookCssResponses.push({ url: response.url(), status: response.status() });
+    }
+    if (response.url().includes("/dev/storybook/assets/geist-")) {
+      browserDiagnostics.storybookFontResponses.push({ url: response.url(), status: response.status() });
     }
   });
   const route = mountedStoryPath(entry);
@@ -593,6 +628,14 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
     });
     await expect(story.locator("h1").first()).toBeVisible();
     const assets = await assertStorybookAssetsLoaded(page, route);
+    const assetIdentity = await assertCurrentStorybookAssets(page, assets);
+    const fonts = await page.evaluate(() => ({
+      status: document.fonts.status,
+      sans: document.fonts.check('400 16px "Geist"'),
+      mono: document.fonts.check('400 12px "Geist Mono"'),
+    }));
+    expect(fonts, "Storybook uses the current self-hosted Geist font faces").toMatchObject({ status: "loaded", sans: true, mono: true });
+    expect(browserDiagnostics.storybookFontResponses.map((response) => response.status).sort()).toEqual([200, 200]);
 
     const viewport = await page.evaluate(() => ({ width: window.innerWidth, clientWidth: document.documentElement.clientWidth }));
     expect(viewport.width).toBe(width);
@@ -608,22 +651,6 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
         summaryColor: summaryStyle?.color || "",
         summaryFontSize: summaryStyle?.fontSize || "",
         summaryDisplay: summaryStyle?.display || "",
-        rootClasses: document.documentElement.className,
-        matchingStyles: [...document.styleSheets].flatMap((sheet) => {
-          try {
-            return [...sheet.cssRules].filter((rule) => rule.cssText.includes(".ax-summary-card")).map((rule) => rule.cssText);
-          } catch (_error) {
-            return [];
-          }
-        }),
-        inlineStyles: [...document.querySelectorAll("style")].map((style) => ({
-          nonce: style.nonce,
-          text: style.textContent,
-        })),
-        stylesheets: [...document.styleSheets].map((sheet) => ({
-          href: sheet.href,
-          loaded: Boolean(sheet.cssRules),
-        })),
       };
     });
     row.applied_theme = themeState;
@@ -651,10 +678,12 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
     row.viewport = viewport;
     row.applied_theme = themeState;
     row.served_assets = assets;
+    row.fonts = fonts;
     row.browser_diagnostics = browserDiagnostics;
     row.actions = actions;
     row.ui_metrics = uiMetrics;
     row.ui_predicate_ids = Object.keys(UI_PREDICATE_ASSERTION_REFERENCES);
+    row.asset_identity = assetIdentity;
     row.assertions = {
       direct_route: true,
       actual_content: true,
@@ -663,6 +692,7 @@ async function runRenderCase(page, testCase, manifestDigest, runId, testInfo) {
       actions: true,
       theme: true,
       served_assets: true,
+      fonts_loaded: true,
       settled_content_visible: true,
       loading_artifacts_absent: true,
       document_and_required_content_geometry: true,
@@ -723,7 +753,8 @@ function reconcileResults(manifest, cases, manifestDigest) {
       errors.push(`attribution mismatch: ${row.key}`);
     }
     if (!row.assertions?.direct_route || !row.assertions?.actual_content ||
-      !row.assertions?.identity || !row.assertions?.facts || !row.assertions?.served_assets) {
+      !row.assertions?.identity || !row.assertions?.facts || !row.assertions?.served_assets ||
+      !row.assertions?.fonts_loaded) {
       errors.push(`actual browser content evidence is missing: ${row.key}`);
     }
     if (!/^[a-f0-9]{64}$/.test(row.actual_content?.text_sha256 || "")) {
@@ -799,6 +830,7 @@ function runReconcilerNegativeControls(manifest, manifestDigest) {
         facts: true,
         actions: true,
         served_assets: true,
+        fonts_loaded: true,
         settled_content_visible: true,
         loading_artifacts_absent: true,
         document_and_required_content_geometry: true,

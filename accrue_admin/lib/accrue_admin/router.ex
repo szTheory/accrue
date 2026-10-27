@@ -155,6 +155,11 @@ defmodule AccrueAdmin.Router do
     if Code.ensure_loaded?(PhoenixStorybook.Router) do
       dev_ast =
         quote bind_quoted: [mount_path: mount_path] do
+          # PhoenixStorybook's own iframe loads these assets from its default
+          # root path. Keep them in the same dev-only route block as the book.
+          import PhoenixStorybook.Router
+          storybook_assets()
+
           # AccrueAdmin.Dev.Storybook configures absolute css_path/js_path values
           # under /dev/storybook, so these committed bundle routes live beside the
           # Storybook root route and stay behind allow_live_reload.
@@ -169,6 +174,9 @@ defmodule AccrueAdmin.Router do
             AccrueAdmin.Assets,
             :storybook_js
           )
+
+          get("/dev/storybook/assets/geist-sans-vf.woff2", AccrueAdmin.Assets, :font_sans)
+          get("/dev/storybook/assets/geist-mono-vf.woff2", AccrueAdmin.Assets, :font_mono)
 
           scope mount_path do
             pipe_through(:accrue_admin_browser)

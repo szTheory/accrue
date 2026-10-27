@@ -37,6 +37,7 @@ test.describe("Phase 252 generated direct subscription story renders", () => {
     const results = readResults();
     expect(results.run_id).toBe(runId);
     expect(results.manifest_sha256).toBe(manifestDigest);
+    expect(results.human_judgment).toBe(false);
     expect(results.ui_predicate_catalog).toEqual(UI_PREDICATE_ASSERTION_REFERENCES);
     expect(Object.keys(results.ui_predicate_coverage).sort()).toEqual(Object.keys(UI_PREDICATE_ASSERTION_REFERENCES).sort());
     expect(reconcileResults(manifest, results.cases, manifestDigest), RESULT_PATH).toEqual([]);
