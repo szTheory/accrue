@@ -1,74 +1,113 @@
-# Phase 252 — UI Review
+# Phase 252 — UI Review (Re-audit)
 
 **Audited:** 2026-10-27<br>
 **Baseline:** Approved [252-UI-SPEC.md](252-UI-SPEC.md)<br>
-**Screenshots:** captured — active story at 1280px light/dark and 320px light in `.planning/ui-reviews/252-20261027-0815/`<br>
+**Current score:** 18/24<br>
+**Screenshots:** captured — all 12 canonical images from owner run `25208-1793100141333-35541-feacb3440bfa`, plus 4 focused 320px variation images<br>
 **Interaction captures:** off (workflow.ui_interaction_capture is false)
 
-The untouched Storybook route was captured directly. The active story shows the expected content but loses most of its design tokens. Scheduled and incomplete route captures did not reliably show their requested variations, so they are not used as visual evidence for those states. `scheduled-verify.png` showed the Storybook header without story content. No interaction states were captured. The ignored screenshots are review evidence only.
+This re-audit inspected the actual PNGs for all three states at 320px and 1280px in both themes. `scheduled_cancellation` correctly retains the active lifecycle label while showing its scheduled cancellation date and omitting `Cancel renewal`; `incomplete_evidence` shows its unavailable facts and ordered caveats. The earlier token-scope and cramped-preview findings are resolved in these captures.
 
-## Pillar Scores
+One current visual defect remains: the eligible `Change plan` action is present in the light-theme DOM but has no visible fill or text in the 1280px light captures, while it is visibly filled in the dark captures. Light-theme summary row actions also render black instead of the contract’s accent color. The evidence points to `--ax-accent` missing from the real light Storybook sandbox scope. The 1280px captures also show the summary header and action band much narrower than the full-width fact list.
+
+## Current Pillar Scores
 
 | Pillar | Score | Key Finding |
 |--------|-------|-------------|
-| 1. Copywriting | 4/4 | Active story labels and unavailable-value copy match the contract. |
-| 2. Visuals | 1/4 | The live story preview loses its intended hierarchy and is cramped at 1280px. |
-| 3. Color | 1/4 | Dark mode shows black headings and identifiers against dark surfaces. |
-| 4. Typography | 1/4 | The untouched story renders serif browser defaults instead of Geist and the specified type scale. |
-| 5. Spacing | 1/4 | Missing spacing tokens leave a crowded 320px title row and tightly packed facts/actions. |
-| 6. Experience Design | 2/4 | Semantic structure is present, but interaction states were not captured and the rendered action affordances are degraded. |
+| 1. Copywriting | 4/4 | All three requested states show the specified status, unavailable and action copy. |
+| 2. Visuals | 2/4 | The light primary action is visually absent; the desktop summary and action cards are much narrower than the fact list. |
+| 3. Color | 2/4 | Light Storybook scope lacks its accent binding, leaving row links black and the primary action visually blank. |
+| 4. Typography | 4/4 | Current captures show Geist, Geist Mono IDs, 28px title, 14px values and 12px labels. |
+| 5. Spacing | 3/4 | Mobile facts now stack cleanly; the centered desktop action band remains cramped relative to the full-width rows. |
+| 6. Experience Design | 3/4 | Semantics and measured control targets pass; the ID copy affordance is visually subtle and no interaction captures were requested. |
 
-**Overall: 10/24**
+**Overall: 18/24**
 
-## Top 3 Priority Fixes
+## Current Priority Fixes
 
-1. **BLOCKER — Make the production token scope resolve in the Storybook sandbox.** Apply the `accrue-admin` class where `theme.css` expects it on the actual story document, or change the token scope to match the sandbox root. Remove the test-only root-class mutation after the real route supplies the same styling.
-2. **BLOCKER — Restore readable hierarchy and contrast in both themes.** Verify the untouched dark route renders the 28px title, readable primary text, and semantic accent/status colors; the current screenshot shows black title/action text on dark surfaces and default blue links.
-3. **BLOCKER — Give the story content usable width and spacing at 1280px and 320px.** The 1280px Storybook preview leaves roughly 368px for the component, forcing fact values into narrow wraps; at 320px the title and status nearly touch. Recheck the component’s actual content width, single-column mobile rows, and action spacing after token scope is fixed.
+1. **WARNING — Bind the light-theme accent in the Storybook sandbox.** Provide the host `--ax-accent` value to `.psb-sandbox.accrue-admin` in light mode. This should restore accent summary links and the eligible `Change plan` button’s fill and text. Add a rendered-style assertion for the primary button and row-link colors; geometry and existence checks do not catch the invisible light button.
+2. **WARNING — Align the 1280px summary/action hierarchy with the fact list.** The screenshots show a roughly 348px summary card and 263px action card centered under a fact list spanning about 930px. Stretch or otherwise compose these blocks so the action area reads as part of the detail surface at desktop width.
+3. **MINOR — Make the copyable subscription ID easier to discover.** The ID is a plain monospace line with an accessible button name but no visible copy cue. Consider a small copy icon or visible hover/focus treatment while preserving the accessible label and full clipboard value.
 
 ## Detailed Findings
 
 ### Pillar 1: Copywriting (4/4)
 
-- **PASS:** The active capture shows `Change plan`, `Cancel renewal`, `More actions`, `Subscription actions`, and `Amount (MRR) Unavailable`, matching the approved contract. The production composition supplies those labels and actions in `accrue_admin/lib/accrue_admin/live/subscription_live.ex:260-329`; the contract specifies them in `252-UI-SPEC.md:32-40,114-123`.
-- The screenshot confirms active-state copy only. Scheduled-cancellation and incomplete-evidence wording was checked against the contract and source, but their captures did not reliably display the target variations, so those strings are not counted as visually verified.
+- **PASS:** The active captures show `No cancellation scheduled`, `Amount (MRR) Unavailable`, `Change plan`, `Cancel renewal`, `More actions`, and `Subscription actions` where visible. The production composition owns these strings and eligibility (`accrue_admin/lib/accrue_admin/live/subscription_live.ex:260-329`); the contract specifies them at `252-UI-SPEC.md:32-40,114-123`.
+- **PASS:** The scheduled variation shows `Scheduled for Nov 24, 2026, 07:00:00 AM EST`, the matching `Ends` date and a visible `Change` renewal-row link; `Cancel renewal` is omitted. Its top lifecycle label remains `Active`, which is consistent with a still-active subscription scheduled to end.
+- **PASS:** Incomplete evidence shows `Renewal date unavailable`, `Price unavailable`, `Current period unavailable`, and `Charge amount unavailable`; the billing caveats appear in the required order. The three states are visible in the canonical captures listed below.
 
-### Pillar 2: Visuals (1/4)
+### Pillar 2: Visuals (2/4)
 
-- **BLOCKER:** In `active-1280-light.png`, the component preview occupies about 368px beside Storybook’s source pane. The three-column facts technically render, but long values and links wrap into narrow fragments, weakening scan order and the main-card hierarchy required at 1280px (`252-UI-SPEC.md:32,42`).
-- **BLOCKER:** In `active-320-light.png`, the summary title and status badge nearly touch, and the summary/card/actions lose the intended title-to-detail hierarchy. Production markup has the right `h1`, `dl`, and `h2` structure (`detail.ex:125-137`, `subscription_live.ex:288-322`), but the untouched render does not make that structure visually legible.
-- The real page remains the Phoenix Storybook review shell; these findings concern the subscription component as it is actually presented inside that shell, not the overall production admin page.
+- **WARNING:** In all three 1280px light captures, the eligible `Change plan` button occupies the expected position but has no visible fill or text. Its dark-theme counterpart is visibly filled. This removes the expected primary focal point in the light theme even though the action exists in the rendered DOM.
+- **WARNING:** The desktop summary header is approximately 348px wide and the action band approximately 263px, centered below the fact list, which spans about 930px. This splits one detail composition into disconnected visual widths and makes the action hierarchy feel undersized at the 1280px target (`252-UI-SPEC.md:32,42`).
+- **RESOLVED:** The earlier 350px preview and unstyled content findings are not present in the current captures. The selected variation now receives a one-column preview with readable, full-width fact rows; at 320px, facts stack in one column and long caveats wrap without horizontal page overflow.
 
-### Pillar 3: Color (1/4)
+### Pillar 3: Color (2/4)
 
-- **BLOCKER:** `active-1280-dark.png` shows the subscription title, copied ID and `Subscription actions` heading in black on dark surfaces; the row links remain default blue. The contract requires semantic dark tokens and reserves accent for eligible actions, links and focus (`252-UI-SPEC.md:99-110`).
-- The token stylesheet declares its base variables on `html.accrue-admin` and dark variables on `html.accrue-admin[data-theme="dark"]` (`accrue_admin/assets/css/theme.css:12-14,231-240`). Storybook’s backend sets `sandbox_class: "accrue-admin"` (`accrue_admin/lib/accrue_admin/dev/storybook.ex:13-20`), while the E2E helper separately adds that class to `<html>` after navigation (`accrue_admin/e2e/phase252-story-helpers.js:627-628`). The untouched screenshot is direct evidence that the production story route does not receive the same effective token scope as the helper-adjusted scan.
+- **WARNING:** Light-theme summary action links appear black rather than accent-colored, and the `Change plan` primary appears visually blank in the active, scheduled and incomplete 1280px light captures. In each corresponding dark capture, links are blue and the primary button has a visible filled accent surface.
+- The base token block now scopes to `html.accrue-admin, .psb-sandbox.accrue-admin` (`accrue_admin/assets/css/theme.css:13-14`), but it references `--ax-accent` for `--ax-accent-readable` and `--ax-accent-strong` without defining that host token there (`theme.css:162-168`). The dark shim supplies `--ax-accent` (`accrue_admin/priv/static/storybook.css:114-131`); the light sandbox has no corresponding binding. The production layout injects the host accent at `:root` (`accrue_admin/lib/accrue_admin/layouts.ex:100-106`), while the direct Storybook component route does not render that layout.
+- The affected styles are specific: the primary button uses `--ax-accent-strong` and `--ax-accent-contrast` (`accrue_admin/assets/css/app.css:2840-2844`), and summary links use `--ax-accent-readable` (`app.css:6429-6444`). The owner result ledger records the light button’s 118×44px box and `Change plan` text, so its absence is a paint/color issue rather than ineligibility.
 
-### Pillar 4: Typography (1/4)
+### Pillar 4: Typography (4/4)
 
-- **BLOCKER:** Desktop and mobile captures show Times-style serif text in the subscription title, IDs, values and action controls rather than Geist/Geist Mono. The title also appears near body size instead of the specified 28px heading role. The approved contract requires Geist and four defined sizes (`252-UI-SPEC.md:24,85-95`).
-- Authored CSS defines the intended title and summary-value sizes, but those declarations depend on custom properties (`accrue_admin/assets/css/app.css:5703-5710,6401-6407`), while font tokens are scoped to `html.accrue-admin` (`accrue_admin/assets/css/theme.css:12-23`). The screenshot shows the values are not effective in the untouched sandbox.
+- **PASS:** The 1280px and 320px captures use Geist for UI text and Geist Mono for the subscription ID. The summary title has the specified 28px/600 role, values use the 14px scale, and labels use the restored 12px scale (`252-UI-SPEC.md:24,85-95`; `accrue_admin/assets/css/app.css:5703-5710,6391-6407`).
+- The previous Times-style fallback is resolved in the actual direct-route captures, not only in the E2E-adjusted DOM.
 
-### Pillar 5: Spacing (1/4)
+### Pillar 5: Spacing (3/4)
 
-- **BLOCKER:** The desktop preview compresses values and action links into a narrow third column, and the mobile summary title/status have almost no visible separation. This misses the declared 4px-based scale and the 320px wrap/spacing contract (`252-UI-SPEC.md:42,67-81`).
-- The component styles use spacing variables for the title row, fact rows, and 44px action controls (`accrue_admin/assets/css/app.css:5696-5700,6371-6383,6541-6544`). The direct screenshots show the authored rhythm is not being realized in the served story preview. The action targets’ measured test result is not treated as proof of perceived spacing or successful focus presentation.
+- **PASS:** At 320px, labels and values use a single-column rhythm and wrap long dates/caveats without horizontal overflow. The title and status badge have visible separation. The owner run measured the action targets at the required 44px height.
+- **WARNING:** The narrow centered action band and summary header remain much smaller than the full-width fact area at 1280px. The buttons fit, but their tight cluster does not carry the same visual weight as the surrounding rows. Relevant production rules use the spacing tokens and set the action minimum height (`accrue_admin/assets/css/app.css:5696-5700,6371-6383,6541-6548`).
+- The 320px screenshots are 1100px tall and show only the upper portion of each long story in one frame; the lower rows continue vertically. This is normal vertical scrolling, not evidence of clipping. The run measured the page geometry at its declared 900px viewport before restoring the capture height.
 
-### Pillar 6: Experience Design (2/4)
+### Pillar 6: Experience Design (3/4)
 
-- **WARNING:** The production renderer preserves useful semantics: a page-level heading, `dl` rows with `dt`/`dd`, a labelled copy button, and button/anchor action controls (`subscription_live.ex:260-320`, `detail.ex:73-112,125-137`, `id_badge.ex:35-49`). The visible active labels and facts follow the contract.
-- **WARNING:** This audit captured no focus, copy-feedback, menu-open, or action states because interaction capture is disabled. The static story explicitly does not establish mounted authorization or action success (`storybook/components/subscription_detail.story.exs:2-6`), so those behaviors remain outside this visual evidence. The screenshots still show native-looking, crowded actions, and the test helper’s root-class/theme mutations mean its computed-style checks do not substitute for the untouched route (`phase252-story-helpers.js:622-635`, `phase200-storybook-helpers.js:78-96`).
+- **PASS:** The current screenshots show all state-specific facts, named row actions, an explicit `More actions` trigger, and the active status label. Production markup keeps an `h1`, `h2`, `dl`/`dt`/`dd`, accessible copy button and button/anchor control semantics (`accrue_admin/lib/accrue_admin/live/subscription_live.ex:260-320`; `accrue_admin/lib/accrue_admin/components/detail.ex:73-112,125-137`; `id_badge.ex:35-49`). The owner run reports 16 executed browser tests with no skips or failures, including keyboard focus and full-ID copy predicates.
+- **WARNING:** The ID copy button appears as a passive monospace value without a visible copy icon or label. Its accessible name and clipboard behavior are verified, but visual discovery is weak in the screenshot.
+- **Evidence limit:** Interaction captures are off. The current screenshots show static presentation only; neither they nor the static story establish mounted authorization, action dispatch, provider completion or persistence. That matches the story’s declared proof lane (`storybook/components/subscription_detail.story.exs:2-6`) and does not reduce the UI score for behaviors outside this phase.
+
+## Prior Audit History — Resolved
+
+The initial audit on 2026-10-27 scored **10/24**: Copywriting 4, Visuals 1, Color 1, Typography 1, Spacing 1, Experience Design 2. Its primary finding was that the untouched Storybook sandbox did not resolve the production token scope, causing serif fallback typography, poor dark contrast and cramped preview content. The original report is preserved in commit `e773da57` (`docs(252): add UI review`).
+
+The follow-up changes in `252-REVIEW-FIX.md` addressed those findings: real `.psb-sandbox.accrue-admin` token scope, theme control through Storybook’s supported event, no helper-added document/sandbox classes, a one-column preview, and restored label typography. All 12 current canonical captures confirm those original blockers are resolved. The remaining light accent defect in this re-audit is narrower: the base Storybook sandbox still lacks the host `--ax-accent` value.
+
+## Capture and Evidence Paths
+
+The 12 current canonical screenshots were inspected directly:
+
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/active-1280-light.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/active-1280-dark.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/active-320-light.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/active-320-dark.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/scheduled_cancellation-1280-light.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/scheduled_cancellation-1280-dark.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/scheduled_cancellation-320-light.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/scheduled_cancellation-320-dark.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/incomplete_evidence-1280-light.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/incomplete_evidence-1280-dark.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/incomplete_evidence-320-light.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/screenshots/incomplete_evidence-320-dark.png`
+
+Four additional focused 320px captures were inspected for scheduled cancellation and incomplete evidence:
+
+- `accrue_admin/tmp/phase252/ci-results/25208-focus-20261027-34785/screenshots/scheduled_cancellation-320-light.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-focus-20261027-34785/screenshots/scheduled_cancellation-320-dark.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-focus-20261027-34785/screenshots/incomplete_evidence-320-light.png`
+- `accrue_admin/tmp/phase252/ci-results/25208-focus-20261027-34785/screenshots/incomplete_evidence-320-dark.png`
+
+The owner run result bundle is `accrue_admin/tmp/phase252/ci-results/25208-1793100141333-35541-feacb3440bfa/results.json`; its per-run render ledger is `accrue_admin/tmp/phase252/render-results-25208-1793100141333-35541-feacb3440bfa.json`. The previous fixed historical ledger and golden assets were not changed. `components.json` is absent and the UI spec declares no third-party registries, so registry safety audit was not applicable.
 
 ## Files Audited
 
 - `.planning/phases/252-production-backed-subscription-stories/252-UI-SPEC.md`
-- `.planning/phases/252-production-backed-subscription-stories/252-01-PLAN.md` and `252-01-SUMMARY.md` through `252-08-PLAN.md` and `252-08-SUMMARY.md`
+- `.planning/phases/252-production-backed-subscription-stories/252-06-SUMMARY.md`
+- `.planning/phases/252-production-backed-subscription-stories/252-REVIEW-FIX.md`
 - `.planning/phases/252-production-backed-subscription-stories/252-VALIDATION.md`, `252-UAT.md`, `252-SECURITY.md`
-- `CLAUDE.md`
 - `accrue_admin/lib/accrue_admin/live/subscription_live.ex`
 - `accrue_admin/lib/accrue_admin/components/detail.ex`, `status_badge.ex`, `id_badge.ex`
 - `storybook/components/subscription_detail.story.exs`
-- `accrue_admin/lib/accrue_admin/dev/storybook.ex`, `accrue_admin/lib/accrue_admin/router.ex`
+- `accrue_admin/lib/accrue_admin/dev/storybook.ex`, `accrue_admin/lib/accrue_admin/layouts.ex`
 - `accrue_admin/assets/css/theme.css`, `accrue_admin/assets/css/app.css`, `accrue_admin/priv/static/storybook.css`
 - `accrue_admin/e2e/phase252-story-helpers.js`, `accrue_admin/e2e/phase200-storybook-helpers.js`
-- `.planning/ui-reviews/252-20261027-0815/active-1280-light.png`, `active-1280-dark.png`, `active-320-light.png`, `scheduled-1280-light.png`, `incomplete-1280-light.png`, and `scheduled-verify.png`; scheduled/incomplete captures were inspected but not used to assert those states.
+- The 12 canonical and 4 focused screenshots listed above
