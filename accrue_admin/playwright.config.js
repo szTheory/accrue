@@ -5,6 +5,17 @@ const port = process.env.ACCRUE_ADMIN_E2E_PORT || "4017";
 const baseURL = `http://127.0.0.1:${port}`;
 const outputDir = process.env.PLAYWRIGHT_OUTPUT_DIR || "test-results";
 
+// Specs the default browser projects must never load: the Phase 211 visual gate runs only
+// under `visual-desktop`, and the Phase 252/253 lab specs run only under the launcher-owned
+// playwright.phase252.config.js (they need a disposable lab server identity and throw at
+// import time without it, which would otherwise crash the whole default listing).
+const LAUNCHER_OWNED_AND_VISUAL_SPECS = [
+  /admin-visual-regression-phase211\.spec\.js/,
+  /subscription-stories-phase252\.spec\.js/,
+  /subscription-compositions-phase253\.spec\.js/,
+  /phase252-review\.spec\.js/
+];
+
 module.exports = defineConfig({
   testDir: "./e2e",
   timeout: 30_000,
@@ -39,12 +50,12 @@ module.exports = defineConfig({
       // The dedicated visual-regression spec runs only under the `visual-desktop`
       // project (below) so it stays out of the default `npm run e2e` run — a
       // missing pixel baseline fails on CI, and the baselines are minted later.
-      testIgnore: [/admin-visual-regression-phase211\.spec\.js/, /subscription-stories-phase252\.spec\.js/],
+      testIgnore: LAUNCHER_OWNED_AND_VISUAL_SPECS,
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } }
     },
     {
       name: "chromium-mobile",
-      testIgnore: [/admin-visual-regression-phase211\.spec\.js/, /subscription-stories-phase252\.spec\.js/],
+      testIgnore: LAUNCHER_OWNED_AND_VISUAL_SPECS,
       use: { ...devices["Pixel 5"] }
     },
     {
