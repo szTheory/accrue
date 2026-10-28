@@ -1,7 +1,11 @@
-unless Code.ensure_loaded?(CadenceSubscriptionFacts) do
-  Code.require_file(
-    Path.expand("../../../dev_support/ui_scenarios/cadence_subscriptions.exs", __DIR__)
-  )
+case Code.ensure_loaded(CadenceSubscriptionFacts) do
+  {:module, _module} ->
+    :ok
+
+  {:error, _reason} ->
+    Code.require_file(
+      Path.expand("../../../dev_support/ui_scenarios/cadence_subscriptions.exs", __DIR__)
+    )
 end
 
 defmodule AccrueAdmin.Storybook.SubscriptionPageScenarios do
@@ -213,22 +217,17 @@ defmodule AccrueAdmin.Storybook.SubscriptionPageScenarios do
   end
 
   defp related_items(subscription, mount_path, scope, return_path) do
-    customer_items =
-      if subscription.customer do
-        customer = subscription.customer
-        label = customer.name || customer.email || customer.id
+    customer = subscription.customer
+    label = customer.name || customer.email || customer.id
 
-        [
-          %{
-            icon: :users,
-            label: "Customer",
-            value: label,
-            href: ScopedPath.build(mount_path, "/customers/#{subscription.customer_id}", scope)
-          }
-        ]
-      else
-        []
-      end
+    customer_items = [
+      %{
+        icon: :users,
+        label: "Customer",
+        value: label,
+        href: ScopedPath.build(mount_path, "/customers/#{subscription.customer_id}", scope)
+      }
+    ]
 
     invoice_scope =
       if scope.mode == :organization do

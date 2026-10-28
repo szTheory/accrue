@@ -2,5 +2,10 @@
 # produce spurious no_return / unused_fun / call warnings in MIX_ENV=test only.
 # This file is the default Dialyxir ignore list when :ignore_warnings is omitted.
 [
-  ~r{^test/support/e2e_fixtures\.ex}
+  ~r{^test/support/e2e_fixtures\.ex},
+  # Phase 252 whole-page scenario support (dev/test Storybook only): dialyzer attributes the
+  # compiler-generated boolean checks of the attribution `cond` to line 1 and reports a
+  # statically constant branch. The cond is the fail-closed input validation and is covered by
+  # the Phase 253 page-slice lane; it is not production code.
+  {"storybook/_support/subscription_page_scenarios.ex", :pattern_match, 1}
 ]

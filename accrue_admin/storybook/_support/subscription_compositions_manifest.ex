@@ -46,7 +46,7 @@ if Mix.env() != :prod do
 
               entries_for([{path, story}], @storybook_root)
 
-            {:error, reason} ->
+            reason ->
               raise ArgumentError,
                     "compiled collection story could not be loaded: #{inspect(reason)}"
           end
@@ -68,7 +68,7 @@ if Mix.env() != :prod do
             {:ok, story} ->
               collection_variation_entries_for([{path, story}], @storybook_root)
 
-            {:error, reason} ->
+            reason ->
               raise ArgumentError,
                     "compiled collection story could not be loaded: #{inspect(reason)}"
           end
@@ -140,7 +140,7 @@ if Mix.env() != :prod do
             {:ok, story} ->
               page_entries_for([{path, story}], @storybook_root)
 
-            {:error, reason} ->
+            reason ->
               raise ArgumentError,
                     "compiled whole-page story could not be loaded: #{inspect(reason)}"
           end

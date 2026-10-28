@@ -53,7 +53,7 @@ if Mix.env() != :prod do
             {:ok, story} ->
               entries_for([{path, story}], @storybook_root)
 
-            {:error, reason} ->
+            reason ->
               raise ArgumentError, "subscription story could not be loaded: #{inspect(reason)}"
           end
 
