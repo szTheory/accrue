@@ -168,3 +168,113 @@ test("an unknown lane name fails and the registry names the four existing lanes"
   assert.deepEqual(Object.keys(measure.LANES ?? {}).sort(), ["phase252-aggregate", "phase252-render", "phase253-aggregate", "phase253-manifest"]);
   assert.throws(() => measure.resolveLane?.("not-a-lane"), /unknown lane/);
 });
+
+// -- Task 254-01-02: freeze eligibility, warm lane identity, attribution, provisional budget ----
+
+test("freeze eligibility: a macOS fingerprint is rejected, an ubuntu clean fingerprint is accepted, and a smoke sample is rejected", () => {
+  const mac = fingerprintFixture({ os: "darwin 25.6.0", image_os: null, image_version: null, runner_os: null, cpu_model: "Apple M5 Pro" });
+  assert.equal(measure.isFreezeEligible?.(sampleFixture({ fingerprint: mac })), false);
+  assert.ok(measure.freezeBlockers?.(sampleFixture({ fingerprint: mac })).some((reason) => /image_os/.test(reason)));
+  assert.equal(measure.isFreezeEligible?.(sampleFixture({ fingerprint: fingerprintFixture({ image_os: "ubuntu24", dirty: false }) })), true);
+  assert.equal(measure.isFreezeEligible?.(sampleFixture({ smoke: true })), false);
+  assert.equal(measure.isFreezeEligible?.(sampleFixture({ fingerprint: fingerprintFixture({ image_os: "macos14" }) })), false);
+  assert.equal(measure.isFreezeEligible?.(sampleFixture({ fingerprint: fingerprintFixture({ dirty: true }) })), false);
+});
+
+test("warm mode refuses to report when the health identity lane is not admin-review", () => {
+  const launch = { lane: "admin-review", port: 4100, partition: "1234567890", database: "accrue_admin_test1234567890" };
+  const health = { ok: true, ready: true, port: 4100, partition: "1234567890", database: "accrue_admin_test1234567890" };
+  assert.deepEqual(measure.assertWarmHealthIdentity(health, launch), { lane: "admin-review" }, "positive control: a matching identity is accepted");
+  assert.throws(() => measure.assertWarmHealthIdentity({ ...health, lane: "admin-test" }, launch), /admin-review/);
+  assert.throws(() => measure.assertWarmHealthIdentity(health, { ...launch, lane: "admin-test" }), /admin-review/);
+  assert.throws(() => measure.assertWarmHealthIdentity({ ...health, ready: false }, launch), /not ready/);
+  assert.throws(() => measure.assertWarmHealthIdentity({ ...health, partition: "999" }, launch), /partition/);
+  assert.throws(() => measure.assertWarmHealthIdentity({ ...health, port: 1 }, launch), /port/);
+});
+
+test("attributeLaneCost groups Phase 252/253 lane durations into compile, database, boot and per-cell buckets", () => {
+  const bundles = [
+    { plan: "252-08", commands: [
+      { id: "manifest-current", lane: "db-free", duration_ms: 64_000 },
+      { id: "production-packages", lane: "isolated-build", duration_ms: 132_000 },
+      { id: "scenario-repo", lane: "admin-test", duration_ms: 2_500 },
+      { id: "subscription-render-browser", lane: "admin-review-browser", duration_ms: 10_000, execution_evidence: { test_count: 16 } },
+      { id: "lab-presentation", lane: "read-only", duration_ms: 60 },
+    ] },
+    { plan: "253-06", commands: [
+      { id: "phase253-compositions-browser", lane: "admin-review-browser", duration_ms: 40_000, execution_evidence: { test_count: 152 } },
+    ] },
+  ];
+  const result = measure.attributeLaneCost?.(bundles, { boot_ms: 5_000 });
+  assert.equal(result?.total_ms, 64_000 + 132_000 + 2_500 + 10_000 + 60 + 40_000);
+  assert.deepEqual(result?.buckets, { compile_ms: 196_000, database_ms: 2_500, boot_ms: 10_000, cell_ms: 40_000, other_ms: 60 });
+  assert.equal(result?.cells, 168);
+  assert.equal(result?.lanes[0].id, "production-packages", "lanes are ordered by cost");
+  assert.ok(result?.lanes.every((lane) => Number.isFinite(lane.duration_ms)));
+  assert.throws(() => measure.attributeLaneCost([{ commands: [{ id: "x", lane: "db-free" }] }]), /numeric duration_ms/);
+});
+
+function seedBundles(root) {
+  for (const [phase, plan, cases] of [["phase252", "252-08", 15], ["phase253", "253-06", 151]]) {
+    const runId = `${phase}-run`;
+    const renderPath = `accrue_admin/tmp/${phase}/render-results-${runId}.json`;
+    const bundlePath = path.join(root, "accrue_admin", "tmp", phase, "ci-results", runId, "results.json");
+    fs.mkdirSync(path.dirname(bundlePath), { recursive: true });
+    fs.writeFileSync(path.join(root, renderPath), JSON.stringify({ cases: Array.from({ length: cases }, (_unused, index) => ({ key: index })) }), { flag: "w" });
+    fs.writeFileSync(bundlePath, JSON.stringify({
+      plan, run_id: runId, status: "passed", run_completed_at: "2026-10-27T23:00:00.000Z", source_revision: "c".repeat(40),
+      browser_result_path: renderPath,
+      commands: [
+        { id: "manifest-current", lane: "db-free", duration_ms: 1000 },
+        { id: `${phase}-browser`, lane: "admin-review-browser", duration_ms: 2000, execution_evidence: { test_count: cases + 1 } },
+      ],
+    }));
+  }
+}
+
+function localSample(mode, overrides = {}) {
+  const protocol = measure.PROTOCOLS?.[mode] ?? { runs: 1, warmup: 0 };
+  return sampleFixture({
+    mode, lane: `${mode}-lane`, protocol, n: protocol.runs, warmup: protocol.warmup,
+    values_ms: Array.from({ length: protocol.runs }, (_unused, index) => index + 1),
+    phases: mode === "cold" ? { compile_ms: 10, database_ms: 2, boot_ms: 3 } : null,
+    informs_only: true, smoke: false, fingerprint: fingerprintFixture({ image_os: null, dirty: true }), ...overrides,
+  });
+}
+
+test("buildProvisionalBudget writes the pinned top-level keys, a single open DEV-254-01 and no frozen value", () => {
+  withScratchRepo((root) => {
+    fs.mkdirSync(path.join(root, "accrue_admin", "tmp", "phase252"), { recursive: true });
+    fs.mkdirSync(path.join(root, "accrue_admin", "tmp", "phase253"), { recursive: true });
+    seedBundles(root);
+    const samples = ["cold", "warm", "focused"].map((mode) => localSample(mode));
+    const budget = measure.buildProvisionalBudget?.({ samples, root });
+    assert.deepEqual(Object.keys(budget ?? {}), [
+      "schema_version", "source_revision", "manifest_sha256", "selection", "metrics", "provisional_targets", "target_evaluations",
+      "frozen", "allowances", "warn_at", "ceiling", "known_reds", "deviations", "widening_rule",
+    ]);
+    assert.equal(budget?.selection.total, 15 + 151);
+    assert.equal(budget?.selection.selected, budget?.selection.total);
+    assert.equal(budget?.frozen, null);
+    assert.equal(budget?.deviations.length, 1);
+    assert.equal(budget?.deviations[0].id, "DEV-254-01");
+    assert.equal(budget?.deviations[0].status, "open");
+    assert.deepEqual(budget?.deviations[0].before, { cells: 166, owners: 2 });
+    assert.ok(budget?.deviations[0].measurement.attribution.lanes.every((lane) => Number.isFinite(lane.duration_ms)));
+    assert.deepEqual(Object.keys(budget?.metrics ?? {}), ["local", "ci", "ci_reference", "freeze", "visual", "a11y", "final"]);
+    assert.deepEqual(budget?.provisional_targets, { warm_preview_s: 10, focused_check_s: 60, additional_warm_browser_s: 180, incremental_ci_critical_path_s: 300 });
+  });
+});
+
+test("buildProvisionalBudget refuses a smoke sample, a missing mode and a non-informs_only local sample", () => {
+  withScratchRepo((root) => {
+    fs.mkdirSync(path.join(root, "accrue_admin", "tmp", "phase252"), { recursive: true });
+    fs.mkdirSync(path.join(root, "accrue_admin", "tmp", "phase253"), { recursive: true });
+    seedBundles(root);
+    const complete = ["cold", "warm", "focused"].map((mode) => localSample(mode));
+    assert.doesNotThrow(() => measure.buildProvisionalBudget({ samples: complete, root }), "positive control: the complete set is accepted");
+    assert.throws(() => measure.buildProvisionalBudget({ samples: [complete[0], complete[1], { ...complete[2], smoke: true }], root }), /smoke/);
+    assert.throws(() => measure.buildProvisionalBudget({ samples: complete.slice(0, 2), root }), /needs a focused sample/);
+    assert.throws(() => measure.buildProvisionalBudget({ samples: [complete[0], complete[1], { ...complete[2], informs_only: false }], root }), /informs_only/);
+  });
+});

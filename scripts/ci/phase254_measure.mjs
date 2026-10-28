@@ -21,6 +21,8 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import { createRequire } from "node:module";
+import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
@@ -407,6 +409,312 @@ export function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+// -- lab server (warm and cold protocols) --------------------------------------------
+
+const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+function freePort() {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      const { port } = server.address();
+      server.close(() => resolve(port));
+    });
+  });
+}
+
+// The health payload does not carry the lane today (it drops :lane); a payload
+// that does report a lane must report admin-review, and a payload without one is
+// accepted only for the lane this harness itself launched. Port, partition and
+// database must always match the launch.
+export function assertWarmHealthIdentity(health, launch) {
+  if (!health || health.ok !== true || health.ready !== true) fail("health identity is not ready");
+  const lane = health.lane ?? launch.lane;
+  if (lane !== "admin-review") fail(`warm mode requires the admin-review lane, but the health identity reports ${JSON.stringify(lane)}`);
+  if (Number(health.port) !== launch.port) fail("health identity port does not match the launched lab server");
+  if (String(health.partition) !== launch.partition) fail("health identity partition does not match the launched lab server");
+  if (health.database !== launch.database) fail("health identity database does not match the launched lab server");
+  return { lane };
+}
+
+// Starts `phase252_lab.mjs serve --lane admin-review`, waits for its health
+// identity and returns the time from spawn to a ready identity.
+export async function bootLab({ mixBuildPath = null, timeoutMs = 300_000 } = {}) {
+  const partition = String(crypto.randomInt(1_000_000_000, 9_999_999_999));
+  const port = await freePort();
+  const launch = { lane: "admin-review", port, partition, database: `accrue_admin_test${partition}` };
+  const output = [];
+  const start = Date.now();
+  const child = spawn(process.execPath, [LAB, "serve", "--lane", launch.lane, "--partition", partition, "--port", String(port)], {
+    cwd: ROOT,
+    env: childEnv({ MIX_ENV: "test", ...(mixBuildPath ? { MIX_BUILD_PATH: mixBuildPath } : {}) }),
+    shell: false,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  for (const stream of [child.stdout, child.stderr]) stream.on("data", (chunk) => { output.push(String(chunk)); if (output.length > 200) output.shift(); });
+  let exitInfo = null;
+  const exited = new Promise((resolve) => child.once("exit", (code, signal) => { exitInfo = { code, signal }; resolve(exitInfo); }));
+  child.once("error", (error) => { exitInfo = { code: 127, signal: null, error }; });
+
+  const stop = async () => {
+    if (exitInfo) return;
+    child.kill("SIGTERM");
+    const timer = sleep(90_000).then(() => "timeout");
+    if ((await Promise.race([exited, timer])) === "timeout") {
+      child.kill("SIGKILL");
+      process.stderr.write(`Phase 254 measure: lab server on port ${port} did not stop within 90 s and was killed; check for an orphaned database ${launch.database}\n`);
+      await exited;
+    }
+  };
+
+  let health = null;
+  try {
+    while (health === null) {
+      if (exitInfo) fail(`lab serve exited before becoming healthy (code ${exitInfo.code}):\n${tail(output.join(""))}`);
+      if (Date.now() - start > timeoutMs) fail(`lab serve was not healthy within ${timeoutMs} ms:\n${tail(output.join(""))}`);
+      try {
+        const response = await fetch(`http://127.0.0.1:${port}/__e2e__/health`);
+        if (response.status === 200) {
+          const body = await response.json();
+          if (body.ready === true) health = body;
+        }
+      } catch {
+        // not listening yet
+      }
+      if (health === null) await sleep(100);
+    }
+    assertWarmHealthIdentity(health, launch);
+  } catch (error) {
+    await stop();
+    throw error;
+  }
+  return { ms: Date.now() - start, health, launch, baseURL: `http://127.0.0.1:${port}`, stop };
+}
+
+// -- cold protocol ------------------------------------------------------------------
+
+export async function runCold({ runs = PROTOCOLS.cold.runs, warmup = PROTOCOLS.cold.warmup, fingerprint }) {
+  const uid = typeof process.getuid === "function" ? process.getuid() : "local";
+  const totals = [];
+  const compile = [];
+  const database = [];
+  const boot = [];
+  for (let index = 0; index < warmup + runs; index += 1) {
+    const base = path.join(fs.realpathSync(os.tmpdir()), `accrue-phase254-${uid}`, crypto.randomBytes(8).toString("hex"));
+    const mixBuildPath = path.join(base, "mix-build", "accrue-admin");
+    try {
+      const compiled = await spawnTimed({ executable: "mix", args: ["compile"], cwd: ADMIN_ROOT, env: { MIX_ENV: "test", MIX_BUILD_PATH: mixBuildPath } });
+      if (compiled.exitCode !== 0) fail(`cold compile exited ${compiled.exitCode}:\n${tail(compiled.stderr || compiled.stdout)}`);
+      const created = await spawnTimed({ executable: process.execPath, args: [LAB, "exec", "--lane", "admin-review", "--", process.execPath, "-e", ""], cwd: ROOT, env: {} });
+      if (created.exitCode !== 0) fail(`cold database create/drop probe exited ${created.exitCode}:\n${tail(created.stderr || created.stdout)}`);
+      const lab = await bootLab({ mixBuildPath });
+      await lab.stop();
+      if (index >= warmup) {
+        totals.push(compiled.duration_ms + lab.ms);
+        compile.push(compiled.duration_ms);
+        database.push(created.duration_ms);
+        // boot-to-health includes the lab's own database create and the server's
+        // migrate/seed; the isolated create/drop probe is attributed separately.
+        boot.push(Math.max(0, lab.ms - created.duration_ms));
+      }
+    } finally {
+      fs.rmSync(base, { recursive: true, force: true });
+    }
+  }
+  return buildLocalSample({
+    mode: "cold",
+    lane: "cold-start",
+    runs,
+    warmup,
+    values_ms: totals,
+    phases: { compile_ms: round3(median(compile)), database_ms: round3(median(database)), boot_ms: round3(median(boot)) },
+    fingerprint,
+  });
+}
+
+// -- warm-preview protocol ------------------------------------------------------------
+
+export const WARM_STORIES = Object.freeze([
+  Object.freeze({ id: "collection", path: "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=one_row" }),
+  Object.freeze({ id: "page", path: "/billing/dev/storybook/pages/subscription?tab=active" }),
+  Object.freeze({ id: "detail", path: "/billing/dev/storybook/components/subscription_detail?variation_id=active" }),
+]);
+const READY_MARKER = ".psb-sandbox h1";
+
+export async function runWarm({ runs = PROTOCOLS.warm.runs, warmup = PROTOCOLS.warm.warmup, fingerprint }) {
+  const { chromium } = createRequire(path.join(ADMIN_ROOT, "package.json"))("playwright");
+  const lab = await bootLab();
+  let browser = null;
+  try {
+    browser = await chromium.launch();
+    const context = await browser.newContext({ baseURL: lab.baseURL, viewport: { width: 1280, height: 900 }, colorScheme: "light", reducedMotion: "reduce" });
+    const page = await context.newPage();
+    const ready = () => page.locator(READY_MARKER).first().waitFor({ state: "visible", timeout: 30_000 });
+    await page.goto(`/__e2e__/login?to=${encodeURIComponent(WARM_STORIES[0].path)}`);
+    await ready();
+    const perStory = Object.fromEntries(WARM_STORIES.map((story) => [story.id, []]));
+    for (let iteration = 0; iteration < warmup + runs; iteration += 1) {
+      for (const story of WARM_STORIES) {
+        const startedAt = performance.now();
+        await page.goto(story.path, { waitUntil: "load" });
+        await ready();
+        const elapsed = performance.now() - startedAt;
+        if (iteration >= warmup) perStory[story.id].push(round3(elapsed));
+      }
+    }
+    // One recorded value per iteration: the slowest of the representative
+    // stories, so the median/p90 are conservative against the warm-preview target.
+    const values_ms = Array.from({ length: runs }, (_unused, index) => Math.max(...WARM_STORIES.map((story) => perStory[story.id][index])));
+    return buildLocalSample({
+      mode: "warm",
+      lane: "warm-preview",
+      runs,
+      warmup,
+      values_ms,
+      cells: WARM_STORIES.length,
+      cell_samples: WARM_STORIES.flatMap((story) => perStory[story.id]),
+      durations: WARM_STORIES.map((story) => ({ identity: story.id, duration_ms: round3(median(perStory[story.id])) })),
+      fingerprint,
+    });
+  } finally {
+    if (browser) await browser.close();
+    await lab.stop();
+  }
+}
+
+// -- D-24 attribution -------------------------------------------------------------------
+
+const COMPILE_FIRST_IDS = new Set(["manifest-current", "phase253-manifest-contract"]);
+const DATABASE_LANES = new Set(["admin-test", "host-heldout", "self-owned-disposable-review-and-admin-test"]);
+
+export function classifyLane(command) {
+  if (command.lane === "isolated-build" || COMPILE_FIRST_IDS.has(command.id)) return "compile";
+  if (DATABASE_LANES.has(command.lane)) return "database";
+  if (command.lane === "admin-review-browser") return "browser";
+  return "other";
+}
+
+// Groups every lane duration_ms from the Phase 252/253 results bundles into the
+// D-24 buckets: compile, database, boot-to-health and per-cell. A browser lane's
+// duration is split into the measured boot-to-health estimate and the remaining
+// per-cell time.
+export function attributeLaneCost(bundles, { boot_ms = 0 } = {}) {
+  if (!Array.isArray(bundles) || bundles.length === 0) fail("attributeLaneCost needs at least one results bundle");
+  const buckets = { compile_ms: 0, database_ms: 0, boot_ms: 0, cell_ms: 0, other_ms: 0 };
+  const lanes = [];
+  let cells = 0;
+  for (const bundle of bundles) {
+    if (!Array.isArray(bundle.commands) || bundle.commands.length === 0) fail("results bundle has no commands");
+    for (const command of bundle.commands) {
+      if (typeof command.id !== "string" || !Number.isFinite(command.duration_ms)) fail(`results bundle command ${JSON.stringify(command.id)} has no numeric duration_ms`);
+      const bucket = classifyLane(command);
+      const tests = command.execution_evidence?.test_count ?? null;
+      if (bucket === "browser") {
+        const boot = Math.min(boot_ms, command.duration_ms);
+        buckets.boot_ms += boot;
+        buckets.cell_ms += command.duration_ms - boot;
+        cells += tests ?? 0;
+      } else if (bucket === "compile") buckets.compile_ms += command.duration_ms;
+      else if (bucket === "database") buckets.database_ms += command.duration_ms;
+      else buckets.other_ms += command.duration_ms;
+      lanes.push({ plan: bundle.plan ?? null, id: command.id, lane: command.lane ?? null, bucket, duration_ms: command.duration_ms, tests });
+    }
+  }
+  lanes.sort((left, right) => right.duration_ms - left.duration_ms);
+  return {
+    total_ms: Object.values(buckets).reduce((sum, value) => sum + value, 0),
+    buckets,
+    cells,
+    per_cell_ms: cells > 0 ? round3(buckets.cell_ms / cells) : null,
+    lanes,
+  };
+}
+
+export function latestResultsBundle(root, phase) {
+  const directory = path.join(root, "accrue_admin", "tmp", phase, "ci-results");
+  if (!fs.existsSync(directory)) fail(`no ${phase} results directory at accrue_admin/tmp/${phase}/ci-results`);
+  const candidates = [];
+  for (const entry of fs.readdirSync(directory)) {
+    const file = path.join(directory, entry, "results.json");
+    if (!fs.existsSync(file)) continue;
+    const bundle = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (bundle.status === "passed" && typeof bundle.run_completed_at === "string") candidates.push(bundle);
+  }
+  if (candidates.length === 0) fail(`no passed ${phase} results bundle found`);
+  candidates.sort((left, right) => Date.parse(right.run_completed_at) - Date.parse(left.run_completed_at));
+  return candidates[0];
+}
+
+export function renderedCaseCount(root, bundle) {
+  const file = path.join(root, bundle.browser_result_path);
+  if (!fs.existsSync(file)) fail(`browser result ${bundle.browser_result_path} is missing`);
+  const rendered = JSON.parse(fs.readFileSync(file, "utf8"));
+  if (!Array.isArray(rendered.cases) || rendered.cases.length === 0) fail(`browser result ${bundle.browser_result_path} has no rendered cases`);
+  return rendered.cases.length;
+}
+
+const WIDENING_RULE = "Budget values, allowances and the selection set are re-frozen only by an appended deviation record (D-23). CI never rewrites this file, a frozen value never widens silently, and local (informs_only) samples never populate a frozen value.";
+
+export function buildProvisionalBudget({ samples, root = ROOT }) {
+  if (!Array.isArray(samples) || samples.length === 0) fail("provisional budget needs at least one sample");
+  for (const mode of Object.keys(PROTOCOLS)) {
+    if (!samples.some((sample) => sample.mode === mode)) fail(`provisional budget needs a ${mode} sample`);
+  }
+  for (const sample of samples) {
+    if (sample.smoke !== false) fail(`${sample.mode} ${sample.lane} sample is smoke and cannot enter the budget record`);
+    if (sample.informs_only !== true) fail(`${sample.mode} ${sample.lane} sample is not informs_only; local samples must be informs_only`);
+  }
+  const phase252 = latestResultsBundle(root, "phase252");
+  const phase253 = latestResultsBundle(root, "phase253");
+  const cases252 = renderedCaseCount(root, phase252);
+  const cases253 = renderedCaseCount(root, phase253);
+  const total = cases252 + cases253;
+  const coldPhases = samples.find((sample) => sample.mode === "cold")?.phases;
+  const attribution = attributeLaneCost([phase252, phase253], { boot_ms: coldPhases?.boot_ms ?? 0 });
+  const reference = samples[0].fingerprint;
+  const owners = 2;
+  return {
+    schema_version: SCHEMA_VERSION,
+    source_revision: git(root, ["rev-parse", "HEAD"]).trim(),
+    manifest_sha256: sha256(fs.readFileSync(path.join(root, MANIFEST_PATH))),
+    selection: {
+      total,
+      selected: total,
+      basis: {
+        phase252: { run_id: phase252.run_id, rendered_cases: cases252, source_revision: phase252.source_revision },
+        phase253: { run_id: phase253.run_id, rendered_cases: cases253, source_revision: phase253.source_revision },
+      },
+    },
+    metrics: { local: samples, ci: [], ci_reference: null, freeze: null, visual: null, a11y: null, final: null },
+    provisional_targets: { warm_preview_s: 10, focused_check_s: 60, additional_warm_browser_s: 180, incremental_ci_critical_path_s: 300 },
+    target_evaluations: [],
+    frozen: null,
+    allowances: null,
+    warn_at: null,
+    ceiling: null,
+    known_reds: [],
+    deviations: [{
+      id: "DEV-254-01",
+      kind: "d24-local-attribution",
+      target: { name: "incremental_ci_critical_path_s", seconds: 300, source: "D-24 provisional CIQ-04 target" },
+      measurement: {
+        local_total_ms: attribution.total_ms,
+        local_total_s: round3(attribution.total_ms / 1000),
+        machine: { os: reference.os, cpu_model: reference.cpu_model, cores: reference.cores, informs_only: true },
+        results_revisions: { phase252: phase252.source_revision, phase253: phase253.source_revision },
+        cold_phases: coldPhases ?? null,
+        attribution,
+      },
+      decision: "attributed; resolution pending CI observation (254-03) and freeze (254-09)",
+      status: "open",
+      before: { cells: total, owners },
+      after: { cells: total, owners },
+    }],
+    widening_rule: WIDENING_RULE,
+  };
+}
+
 // -- self-test scenarios (also registered as node:test cases) -------------------------
 
 function withScratchRepo(fn) {
@@ -531,6 +839,26 @@ const verbs = {
     writeJson(out, sample);
     process.stdout.write(`Phase 254 focused ${lane}: median ${sample.median_ms} ms, p90 ${sample.p90_ms} ms, n=${sample.n}, smoke=${sample.smoke}, informs_only=${sample.informs_only} -> ${path.relative(ROOT, out)}\n`);
   },
+  async cold({ values }) {
+    const sample = await runCold({ runs: countOption(values, "runs", PROTOCOLS.cold.runs), warmup: countOption(values, "warmup", PROTOCOLS.cold.warmup), fingerprint: machineFingerprint() });
+    const out = outputPath(values, "cold", sample.lane);
+    writeJson(out, sample);
+    process.stdout.write(`Phase 254 cold: median ${sample.median_ms} ms (compile ${sample.phases.compile_ms}, database ${sample.phases.database_ms}, boot ${sample.phases.boot_ms}), n=${sample.n}, smoke=${sample.smoke} -> ${path.relative(ROOT, out)}\n`);
+  },
+  async warm({ values }) {
+    const sample = await runWarm({ runs: countOption(values, "runs", PROTOCOLS.warm.runs), warmup: countOption(values, "warmup", PROTOCOLS.warm.warmup), fingerprint: machineFingerprint() });
+    const out = outputPath(values, "warm", sample.lane);
+    writeJson(out, sample);
+    process.stdout.write(`Phase 254 warm: per-iteration slowest-story median ${sample.median_ms} ms, p90 ${sample.p90_ms} ms, per navigation median ${sample.per_cell.median_ms} ms / p90 ${sample.per_cell.p90_ms} ms, n=${sample.n}, smoke=${sample.smoke} -> ${path.relative(ROOT, out)}\n`);
+  },
+  async "provisional-budget"({ positional, values }) {
+    const files = positional.slice(1);
+    if (files.length === 0) fail("provisional-budget needs sample files");
+    if (!values.out) fail("provisional-budget requires --out");
+    const budget = buildProvisionalBudget({ samples: files.map((file) => JSON.parse(fs.readFileSync(path.resolve(file), "utf8"))) });
+    writeJson(path.resolve(values.out), budget);
+    process.stdout.write(`Phase 254 provisional budget written to ${path.relative(ROOT, path.resolve(values.out))} (${budget.metrics.local.length} local samples, ${budget.selection.total} cells)\n`);
+  },
 };
 
 async function main(argv) {
@@ -544,7 +872,7 @@ async function main(argv) {
   if (!verb || !Object.prototype.hasOwnProperty.call(verbs, verb)) {
     fail(`usage: phase254_measure.mjs <${Object.keys(verbs).join("|")}> [options] | --self-test`);
   }
-  await verbs[verb]({ values });
+  await verbs[verb]({ positional, values });
 }
 
 let invokedAsEntrypoint = false;

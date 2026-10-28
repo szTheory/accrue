@@ -1,0 +1,584 @@
+{
+  "schema_version": 1,
+  "source_revision": "428511d06b64317758a19561e028b7ab75382a52",
+  "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+  "selection": {
+    "total": 166,
+    "selected": 166,
+    "basis": {
+      "phase252": {
+        "run_id": "25208-1793142852503-81090-a9dacf28d367",
+        "rendered_cases": 15,
+        "source_revision": "285918126d8c887584fd7fa320af434dcb276266"
+      },
+      "phase253": {
+        "run_id": "862a8694378aec0695891213952c58dd",
+        "rendered_cases": 151,
+        "source_revision": "285918126d8c887584fd7fa320af434dcb276266"
+      }
+    }
+  },
+  "metrics": {
+    "local": [
+      {
+        "schema_version": 1,
+        "mode": "cold",
+        "lane": "cold-start",
+        "protocol": {
+          "runs": 3,
+          "warmup": 0
+        },
+        "n": 3,
+        "warmup": 0,
+        "values_ms": [
+          110033,
+          131031,
+          90835
+        ],
+        "median_ms": 110033,
+        "p90_ms": 131031,
+        "min_ms": 90835,
+        "max_ms": 131031,
+        "cells": null,
+        "per_cell": null,
+        "overhead_ms": null,
+        "durations": [],
+        "phases": {
+          "compile_ms": 107258,
+          "database_ms": 542,
+          "boot_ms": 2233
+        },
+        "fingerprint": {
+          "os": "darwin 25.6.0",
+          "arch": "arm64",
+          "cpu_model": "Apple M5 Pro",
+          "cores": 18,
+          "ram_bytes": 68719476736,
+          "image_os": null,
+          "image_version": null,
+          "runner_os": null,
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.14.0",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "428511d06b64317758a19561e028b7ab75382a52",
+          "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+          "dirty": true
+        },
+        "source_revision": "428511d06b64317758a19561e028b7ab75382a52",
+        "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+        "informs_only": true,
+        "smoke": false
+      },
+      {
+        "schema_version": 1,
+        "mode": "warm",
+        "lane": "warm-preview",
+        "protocol": {
+          "runs": 10,
+          "warmup": 1
+        },
+        "n": 10,
+        "warmup": 1,
+        "values_ms": [
+          31.937,
+          31.974,
+          28.996,
+          36.363,
+          29.895,
+          32.139,
+          30.884,
+          36.376,
+          30.959,
+          31.202
+        ],
+        "median_ms": 31.57,
+        "p90_ms": 36.363,
+        "min_ms": 28.996,
+        "max_ms": 36.376,
+        "cells": 3,
+        "per_cell": {
+          "median_ms": 24.898,
+          "p90_ms": 31.974
+        },
+        "overhead_ms": null,
+        "durations": [
+          {
+            "identity": "collection",
+            "duration_ms": 18.14
+          },
+          {
+            "identity": "page",
+            "duration_ms": 24.397
+          },
+          {
+            "identity": "detail",
+            "duration_ms": 30.427
+          }
+        ],
+        "phases": null,
+        "fingerprint": {
+          "os": "darwin 25.6.0",
+          "arch": "arm64",
+          "cpu_model": "Apple M5 Pro",
+          "cores": 18,
+          "ram_bytes": 68719476736,
+          "image_os": null,
+          "image_version": null,
+          "runner_os": null,
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.14.0",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "428511d06b64317758a19561e028b7ab75382a52",
+          "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+          "dirty": true
+        },
+        "source_revision": "428511d06b64317758a19561e028b7ab75382a52",
+        "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+        "informs_only": true,
+        "smoke": false
+      },
+      {
+        "schema_version": 1,
+        "mode": "focused",
+        "lane": "phase252-render",
+        "protocol": {
+          "runs": 5,
+          "warmup": 1
+        },
+        "n": 5,
+        "warmup": 1,
+        "values_ms": [
+          11309,
+          10747,
+          10567,
+          11410,
+          11488
+        ],
+        "median_ms": 11309,
+        "p90_ms": 11488,
+        "min_ms": 10567,
+        "max_ms": 11488,
+        "cells": 16,
+        "per_cell": {
+          "median_ms": 488.5,
+          "p90_ms": 645
+        },
+        "overhead_ms": 2595.258,
+        "durations": [
+          {
+            "identity": "active | 320px | light",
+            "duration_ms": 780
+          },
+          {
+            "identity": "active | 320px | dark",
+            "duration_ms": 586
+          },
+          {
+            "identity": "active | 1280px | light",
+            "duration_ms": 473
+          },
+          {
+            "identity": "active | 1280px | dark",
+            "duration_ms": 513
+          },
+          {
+            "identity": "scheduled_cancellation | 320px | light",
+            "duration_ms": 436
+          },
+          {
+            "identity": "scheduled_cancellation | 320px | dark",
+            "duration_ms": 505
+          },
+          {
+            "identity": "scheduled_cancellation | 1280px | light",
+            "duration_ms": 476
+          },
+          {
+            "identity": "scheduled_cancellation | 1280px | dark",
+            "duration_ms": 539
+          },
+          {
+            "identity": "incomplete_evidence | 320px | light",
+            "duration_ms": 463
+          },
+          {
+            "identity": "incomplete_evidence | 320px | dark",
+            "duration_ms": 487
+          },
+          {
+            "identity": "incomplete_evidence | 1280px | light",
+            "duration_ms": 468
+          },
+          {
+            "identity": "incomplete_evidence | 1280px | dark",
+            "duration_ms": 505
+          },
+          {
+            "identity": "braintree_pruned | compatibility | 1280px | light",
+            "duration_ms": 437
+          },
+          {
+            "identity": "dunning_active | compatibility | 1280px | light",
+            "duration_ms": 448
+          },
+          {
+            "identity": "populated | compatibility | 1280px | light",
+            "duration_ms": 454
+          },
+          {
+            "identity": "reconciles every declared direct render against the generated manifest",
+            "duration_ms": 7
+          }
+        ],
+        "phases": null,
+        "fingerprint": {
+          "os": "darwin 25.6.0",
+          "arch": "arm64",
+          "cpu_model": "Apple M5 Pro",
+          "cores": 18,
+          "ram_bytes": 68719476736,
+          "image_os": null,
+          "image_version": null,
+          "runner_os": null,
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.14.0",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "428511d06b64317758a19561e028b7ab75382a52",
+          "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+          "dirty": true
+        },
+        "source_revision": "428511d06b64317758a19561e028b7ab75382a52",
+        "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+        "informs_only": true,
+        "smoke": false
+      }
+    ],
+    "ci": [],
+    "ci_reference": null,
+    "freeze": null,
+    "visual": null,
+    "a11y": null,
+    "final": null
+  },
+  "provisional_targets": {
+    "warm_preview_s": 10,
+    "focused_check_s": 60,
+    "additional_warm_browser_s": 180,
+    "incremental_ci_critical_path_s": 300
+  },
+  "target_evaluations": [],
+  "frozen": null,
+  "allowances": null,
+  "warn_at": null,
+  "ceiling": null,
+  "known_reds": [],
+  "deviations": [
+    {
+      "id": "DEV-254-01",
+      "kind": "d24-local-attribution",
+      "target": {
+        "name": "incremental_ci_critical_path_s",
+        "seconds": 300,
+        "source": "D-24 provisional CIQ-04 target"
+      },
+      "measurement": {
+        "local_total_ms": 415346,
+        "local_total_s": 415.346,
+        "machine": {
+          "os": "darwin 25.6.0",
+          "cpu_model": "Apple M5 Pro",
+          "cores": 18,
+          "informs_only": true
+        },
+        "results_revisions": {
+          "phase252": "285918126d8c887584fd7fa320af434dcb276266",
+          "phase253": "285918126d8c887584fd7fa320af434dcb276266"
+        },
+        "cold_phases": {
+          "compile_ms": 107258,
+          "database_ms": 542,
+          "boot_ms": 2233
+        },
+        "attribution": {
+          "total_ms": 415346,
+          "buckets": {
+            "compile_ms": 262079,
+            "database_ms": 86454,
+            "boot_ms": 4466,
+            "cell_ms": 49596,
+            "other_ms": 12751
+          },
+          "cells": 168,
+          "per_cell_ms": 295.214,
+          "lanes": [
+            {
+              "plan": "252-08",
+              "id": "production-packages",
+              "lane": "isolated-build",
+              "bucket": "compile",
+              "duration_ms": 132611,
+              "tests": null
+            },
+            {
+              "plan": "253-06",
+              "id": "phase253-manifest-contract",
+              "lane": "db-free",
+              "bucket": "compile",
+              "duration_ms": 65360,
+              "tests": 7
+            },
+            {
+              "plan": "252-08",
+              "id": "manifest-current",
+              "lane": "db-free",
+              "bucket": "compile",
+              "duration_ms": 64084,
+              "tests": null
+            },
+            {
+              "plan": "252-08",
+              "id": "heldout-cleanup",
+              "lane": "host-heldout",
+              "bucket": "database",
+              "duration_ms": 58688,
+              "tests": 4
+            },
+            {
+              "plan": "253-06",
+              "id": "phase253-compositions-browser",
+              "lane": "admin-review-browser",
+              "bucket": "browser",
+              "duration_ms": 43243,
+              "tests": 152
+            },
+            {
+              "plan": "252-08",
+              "id": "isolation-reset",
+              "lane": "self-owned-disposable-review-and-admin-test",
+              "bucket": "database",
+              "duration_ms": 11459,
+              "tests": 4
+            },
+            {
+              "plan": "252-08",
+              "id": "subscription-render-browser",
+              "lane": "admin-review-browser",
+              "bucket": "browser",
+              "duration_ms": 10819,
+              "tests": 16
+            },
+            {
+              "plan": "252-08",
+              "id": "mounted-subscription-regressions",
+              "lane": "admin-test",
+              "bucket": "database",
+              "duration_ms": 3765,
+              "tests": 45
+            },
+            {
+              "plan": "253-06",
+              "id": "phase253-mounted-job-live",
+              "lane": "admin-test",
+              "bucket": "database",
+              "duration_ms": 3742,
+              "tests": 46
+            },
+            {
+              "plan": "252-08",
+              "id": "registry-kitchen-mount-scoped-path",
+              "lane": "admin-test",
+              "bucket": "database",
+              "duration_ms": 3194,
+              "tests": 44
+            },
+            {
+              "plan": "253-06",
+              "id": "phase253-collection-live",
+              "lane": "admin-test",
+              "bucket": "database",
+              "duration_ms": 3078,
+              "tests": 54
+            },
+            {
+              "plan": "252-08",
+              "id": "scenario-repo",
+              "lane": "admin-test",
+              "bucket": "database",
+              "duration_ms": 2528,
+              "tests": 4
+            },
+            {
+              "plan": "252-08",
+              "id": "production-boundary-db-free",
+              "lane": "db-free",
+              "bucket": "other",
+              "duration_ms": 1813,
+              "tests": 5
+            },
+            {
+              "plan": "252-08",
+              "id": "phase252-acceptance-contract",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 1590,
+              "tests": 25
+            },
+            {
+              "plan": "252-08",
+              "id": "manifest-contract",
+              "lane": "db-free",
+              "bucket": "other",
+              "duration_ms": 1303,
+              "tests": 12
+            },
+            {
+              "plan": "252-08",
+              "id": "scenario-domain",
+              "lane": "db-free",
+              "bucket": "other",
+              "duration_ms": 1143,
+              "tests": 12
+            },
+            {
+              "plan": "252-08",
+              "id": "subscription-area",
+              "lane": "db-free",
+              "bucket": "other",
+              "duration_ms": 1138,
+              "tests": 9
+            },
+            {
+              "plan": "253-06",
+              "id": "phase253-page-slice",
+              "lane": "db-free",
+              "bucket": "other",
+              "duration_ms": 1106,
+              "tests": 7
+            },
+            {
+              "plan": "252-08",
+              "id": "story-slice",
+              "lane": "db-free",
+              "bucket": "other",
+              "duration_ms": 995,
+              "tests": 5
+            },
+            {
+              "plan": "253-06",
+              "id": "phase253-story-slice",
+              "lane": "db-free",
+              "bucket": "other",
+              "duration_ms": 977,
+              "tests": 5
+            },
+            {
+              "plan": "252-08",
+              "id": "phase252-ci-contract",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 742,
+              "tests": 24
+            },
+            {
+              "plan": "253-06",
+              "id": "phase253-ci-contract",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 685,
+              "tests": 24
+            },
+            {
+              "plan": "252-08",
+              "id": "transparency-controls",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 414,
+              "tests": null
+            },
+            {
+              "plan": "253-06",
+              "id": "phase253-acceptance-contract",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 278,
+              "tests": 13
+            },
+            {
+              "plan": "253-06",
+              "id": "phase253-transparency-controls",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 264,
+              "tests": null
+            },
+            {
+              "plan": "252-08",
+              "id": "phase248-heldout-contract",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 63,
+              "tests": 6
+            },
+            {
+              "plan": "252-08",
+              "id": "phase252-lab-contract",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 61,
+              "tests": 10
+            },
+            {
+              "plan": "252-08",
+              "id": "lab-presentation",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 60,
+              "tests": 3
+            },
+            {
+              "plan": "253-06",
+              "id": "phase253-presentation-contract",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 60,
+              "tests": 3
+            },
+            {
+              "plan": "252-08",
+              "id": "heldout-attribution",
+              "lane": "read-only",
+              "bucket": "other",
+              "duration_ms": 59,
+              "tests": 3
+            },
+            {
+              "plan": "252-08",
+              "id": "production-boundary-controls",
+              "lane": "isolated-build",
+              "bucket": "compile",
+              "duration_ms": 24,
+              "tests": null
+            }
+          ]
+        }
+      },
+      "decision": "attributed; resolution pending CI observation (254-03) and freeze (254-09)",
+      "status": "open",
+      "before": {
+        "cells": 166,
+        "owners": 2
+      },
+      "after": {
+        "cells": 166,
+        "owners": 2
+      }
+    }
+  ],
+  "widening_rule": "Budget values, allowances and the selection set are re-frozen only by an appended deviation record (D-23). CI never rewrites this file, a frozen value never widens silently, and local (informs_only) samples never populate a frozen value."
+}
