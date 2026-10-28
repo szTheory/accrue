@@ -38,3 +38,25 @@ The owner's per-entry answers are recorded below when 254-03-03 is answered.
 - KR-254-03 (accrue_admin_browser.yml, browser-uat, e2e/admin-storybook-a11y-phase200.spec.js:17): **fix-in-phase**
 - KR-254-04 (accrue_admin_browser.yml, browser-uat, e2e/admin-interaction-overlay-phase199.spec.js:1010): **fix-in-phase**
 - Scope of the authorization: fix the named paths only, each as its own commit, observed as attempt 1 of a new commit. accept-known-red is not allowed for KR-254-04 (and for any owner-job red).
+
+## Execution after the owner answers (2026-10-28, same session)
+
+All four answers were fix-in-phase. Each fix is its own commit; every follow-up was observed as attempt 1 of a new commit (no rerun).
+
+| id | fix commits | first green observation |
+|----|-------------|-------------------------|
+| KR-254-01 | f274cf40f (WINDOWS.md rows 41 and 42 closed with executed test evidence, open_count 0) | SL-A passed in CI run 40763504835 |
+| KR-254-02 | 234c31f30 (settle the Storybook scan on the real color-mode join, page stories mirrored, group stories scanned through their preview routes), 4fed14b43 (dark shim no longer redefines --accrue-paper), 7a7db0031 (overlay popover is a dialog, not role=menu) | Storybook scan passed in CI run 40763504835 |
+| KR-254-03 | same commits | Run browser UAT passed in 40763504839; whole job green in 40772241229 and 40780561519 |
+| KR-254-04 | 95e5ff595 (dropdown measured without the in-flight transform; RED 4/8 at 8x CPU throttle, green 8/8 at 8x and 12x) | Run browser UAT passed in 40763504839; job green in 40772241229 and 40780561519 |
+
+Reds that these fixes unmasked (never reachable before because an earlier step failed), triaged here:
+
+| red | class | status |
+|-----|-------|--------|
+| Browser UAT, Phase 211 visual gate, subscriptions.png 913 to 932 px | in-scope (intentional Phase 253 identity wrap) | fixed 365338781 (baselines re-minted on the runner by dispatch run 40771021813), green in 40772241229 |
+| Admin Phase 200 guardrails, Phase 252 lane production-packages | in-scope (owned script; the triage verb mis-attributed the path) | fixed in three commits 30f4504e6, 721472f18, a0397c884; passed in 40780561652 |
+| Admin Phase 200 guardrails, Phase 252 lane scenario-repo | in-scope, needs owner decision | OPEN. The lab requires inet_server_addr() to be loopback; the job's postgres service container reports its bridge address, so phase252_lab refuses it. Relaxing it loosens a disposable-database safety guard. |
+| Docs and bash contracts, SL-G artifact fixed point | environmental / structural | OPEN. STATE.md current_phase is 254 and the phase has no committed VERIFICATION.md or UAT.md until 254-18. The Executable UAT contract step reds the same way (reproduced locally, not yet CI-observed). host-integration, playwright-e2e and host-docker-smoke stay skipped while this job is red. |
+
+Latest attempt-1 runs on head a0397c884: CI 40780561652 (2 red jobs above), Browser UAT 40780561519 (success).
