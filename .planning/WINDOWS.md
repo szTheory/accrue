@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 2
+open_count: 0
 waived_count: 12
-fixed_count: 28
+fixed_count: 30
 total_count: 42
-last_updated: 2026-10-27T18:50:44.929Z
+last_updated: 2026-10-28T19:31:59.142Z
 ---
 
 # Broken Windows Ledger
@@ -55,8 +55,8 @@ last_updated: 2026-10-27T18:50:44.929Z
 | 38 | 247 | deviation | accrue_admin/assets/js/hooks/time_display.js | 4 | Rejected impossible ISO date/time components before browser formatting to prevent normalized, invented instants. | fixed |  | 2026-10-11T21:25:35.951Z | 2026-10-25T01:38:42.306Z |
 | 39 | 252 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex |  | Replaced unsupported HEEx fragment syntax with valid sibling roots, preserving the current page layout and DOM order. | fixed |  | 2026-10-26T23:05:45.518Z | 2026-10-26T23:05:56.929Z |
 | 40 | 252 | deviation | accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs |  | Added a local TAP formatter to the self-starting DB-free ExUnit script so RED evidence could be classified without global test configuration changes. | fixed |  | 2026-10-26T23:05:45.601Z | 2026-10-26T23:05:57.006Z |
-| 41 | 252 | deviation | accrue_admin/test/accrue_admin/dev/subscription_scenarios_test.exs |  | Standalone DB-free tests start the installed Localize application and restore the Fake clock so Money.new/2 can run without Repo bootstrap. | open |  | 2026-10-26T23:26:11.679Z |  |
-| 42 | 253 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex | 2430 | Preserve authorized active organization scope on initial missing-detail denial. | open |  | 2026-10-27T18:50:44.929Z |  |
+| 41 | 252 | deviation | accrue_admin/test/accrue_admin/dev/subscription_scenarios_test.exs |  | Standalone DB-free tests start the installed Localize application and restore the Fake clock so Money.new/2 can run without Repo bootstrap. | fixed |  | 2026-10-26T23:26:11.679Z | 2026-10-28T19:31:59.030Z |
+| 42 | 253 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex | 2430 | Preserve authorized active organization scope on initial missing-detail denial. | fixed |  | 2026-10-27T18:50:44.929Z | 2026-10-28T19:31:59.142Z |
 
 ````json
 [
@@ -577,10 +577,10 @@ last_updated: 2026-10-27T18:50:44.929Z
     "file": "accrue_admin/test/accrue_admin/dev/subscription_scenarios_test.exs",
     "line": null,
     "description": "Standalone DB-free tests start the installed Localize application and restore the Fake clock so Money.new/2 can run without Repo bootstrap.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-26T23:26:11.679Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-28T19:31:59.030Z",
     "milestone": "v1.68"
   },
   {
@@ -590,10 +590,10 @@ last_updated: 2026-10-27T18:50:44.929Z
     "file": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
     "line": 2430,
     "description": "Preserve authorized active organization scope on initial missing-detail denial.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-27T18:50:44.929Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-28T19:31:59.142Z",
     "milestone": "v1.68"
   }
 ]
