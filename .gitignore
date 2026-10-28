@@ -37,6 +37,9 @@ accrue_admin/tmp/phase253/manifest.json
 accrue_admin/tmp/phase253/render-results-*.json
 accrue_admin/tmp/phase253/ci-results/
 
+# Phase 254 measurement samples, fingerprints, selection reports and Playwright output are regenerated per run.
+accrue_admin/tmp/phase254/
+
 # Editor / OS noise
 .DS_Store
 *~
