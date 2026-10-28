@@ -30,6 +30,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { isMainModule } from "./main_module.mjs";
 import { parsePlaywrightJson } from "./phase252_reporters.mjs";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const ADMIN_ROOT = path.join(ROOT, "accrue_admin");
@@ -875,6 +876,243 @@ export function ciCollect({ run, repo, artifacts }) {
   return collectCiSample(runJson, artifacts, jobLogs);
 }
 
+// -- red triage (254-03, mechanical in-scope test) -----------------------------------------
+
+// Steps this phase added to the CI workflows. A failure in one of them is in-scope by name
+// even when no path can be extracted from the log.
+export const PHASE254_STEP_NAMES = Object.freeze([
+  "Phase 254 machine fingerprint",
+  "Upload Phase 252 machine evidence",
+  "Upload Phase 253 machine evidence",
+  "Upload Phase 254 machine evidence",
+]);
+
+export const RED_CLASSES = Object.freeze(["in-scope", "pre-existing-on-main", "out-of-scope-branch-only", "environmental"]);
+
+const OWNED_PHASE_PREFIXES = Object.freeze(["252-", "253-", "254-"]);
+// Playwright and mix run from a package directory, so a log path may be package-relative.
+const PACKAGE_PREFIXES = Object.freeze(["", "accrue_admin/"]);
+
+function frontmatterList(planText, key) {
+  const match = String(planText).match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return [];
+  const lines = match[1].split(/\r?\n/);
+  const start = lines.findIndex((line) => new RegExp(`^${key}:`).test(line));
+  if (start === -1) return [];
+  const inline = lines[start].slice(key.length + 1).trim();
+  const clean = (value) => value.trim().replace(/^["']|["']$/g, "");
+  if (inline.startsWith("[")) return inline.replace(/^\[|\]$/g, "").split(",").map(clean).filter(Boolean);
+  const items = [];
+  for (const line of lines.slice(start + 1)) {
+    const item = line.match(/^\s+-\s+(.*)$/);
+    if (!item) break;
+    items.push(clean(item[1]));
+  }
+  return items.filter(Boolean);
+}
+
+function phaseDirectories(root) {
+  const found = new Map();
+  const consider = (base) => {
+    if (!fs.existsSync(base)) return;
+    for (const entry of fs.readdirSync(base, { withFileTypes: true })) {
+      if (entry.isDirectory() && OWNED_PHASE_PREFIXES.some((prefix) => entry.name.startsWith(prefix)) && !found.has(entry.name)) {
+        found.set(entry.name, path.join(base, entry.name));
+      }
+    }
+  };
+  consider(path.join(root, ".planning", "phases"));
+  const milestones = path.join(root, ".planning", "milestones");
+  if (fs.existsSync(milestones)) {
+    for (const entry of fs.readdirSync(milestones, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.endsWith("-phases")) consider(path.join(milestones, entry.name));
+    }
+  }
+  return found;
+}
+
+// Union of files_modified across every 252-*, 253-* and 254-* PLAN. A directory entry (a
+// trailing slash, an existing directory or a glob stem) is stored with a trailing slash and
+// matches as a prefix.
+export function ownedPaths({ root = ROOT } = {}) {
+  const owned = new Set();
+  for (const [slug, directory] of phaseDirectories(root)) {
+    for (const name of fs.readdirSync(directory).filter((file) => /-PLAN\.md$/.test(file))) {
+      const resolved = resolvePhaseEvidencePath(slug, name, { root });
+      for (const raw of frontmatterList(fs.readFileSync(resolved, "utf8"), "files_modified")) {
+        const entry = raw.replace(/\\/g, "/").replace(/^\.\//, "");
+        const star = entry.indexOf("*");
+        if (star !== -1) { owned.add(entry.slice(0, star).replace(/[^/]*$/, "")); continue; }
+        const isDirectory = entry.endsWith("/") || (fs.existsSync(path.join(root, entry)) && fs.statSync(path.join(root, entry)).isDirectory());
+        owned.add(isDirectory && !entry.endsWith("/") ? `${entry}/` : entry);
+      }
+    }
+  }
+  owned.delete("");
+  return owned;
+}
+
+// Returns the repo-relative path that matched the owned set, or null.
+function ownedMatch(candidate, owned) {
+  for (const prefix of PACKAGE_PREFIXES) {
+    const full = `${prefix}${candidate}`;
+    for (const entry of owned) {
+      if (entry.endsWith("/") ? full.startsWith(entry) : full === entry) return full;
+    }
+  }
+  return null;
+}
+
+const PATH_TOKEN = /(?:file:\/\/)?[\w@.~+/-]*[\w@-]\/[\w@.~+/-]*\.(?:mjs|cjs|js|jsx|ts|tsx|exs?|heex|eex|css|json|ya?ml|sh|md|toml)\b/g;
+const RUNNER_PREFIX = /^\/(?:home\/runner\/work|Users\/runner\/work)\/[^/]+\/[^/]+\//;
+
+// Failing source paths named in one failing-step log, repo-relative where the runner prefix
+// is recognised. Dependency trees, node internals and absolute paths outside the checkout
+// are not evidence of a failing path and are dropped.
+export function extractFailingPaths(logText) {
+  const paths = [];
+  for (const raw of String(logText ?? "").split(/\r?\n/)) {
+    for (const token of raw.match(PATH_TOKEN) ?? []) {
+      let candidate = token.replace(/^file:\/\//, "").replace(RUNNER_PREFIX, "");
+      if (candidate.startsWith("/")) continue;
+      candidate = candidate.replace(/^\.\//, "");
+      if (candidate.includes("node_modules/") || candidate.startsWith("node:") || candidate.startsWith("deps/") || /^https?:/.test(candidate)) continue;
+      if (!paths.includes(candidate)) paths.push(candidate);
+    }
+  }
+  return paths;
+}
+
+export function extractTestRef(logText) {
+  for (const raw of String(logText ?? "").split(/\r?\n/)) {
+    const line = raw.replace(TIMESTAMP_PREFIX, "");
+    const playwright = line.match(/^\s*\d+\)\s+(\[.+)$/);
+    if (playwright) return playwright[1].trim().slice(0, 300);
+    const tap = line.match(/^\s*not ok \d+\s*-\s*(.+)$/);
+    if (tap) return tap[1].trim().slice(0, 300);
+    const exunit = line.match(/^\s*\d+\)\s+test\s+(.+)$/);
+    if (exunit) return exunit[1].trim().slice(0, 300);
+  }
+  return null;
+}
+
+export function firstErrorLine(logText) {
+  for (const raw of String(logText ?? "").split(/\r?\n/)) {
+    const line = raw.replace(TIMESTAMP_PREFIX, "").trim();
+    if (line !== "" && /(##\[error\]|\bError\b|\bfail(?:ed|ure)?\b|not ok|✖|\*\* \()/i.test(line)) return line.slice(0, 300);
+  }
+  return null;
+}
+
+// The mechanical in-scope test. Order is fixed: a Phase 254 step or an owned failing path is
+// in-scope first; otherwise the same workflow/job/step failing on the recorded main run is
+// pre-existing; otherwise no extractable path is environmental; the rest is branch-only.
+export function classifyRed(item, { owned, mainFailures = [] }) {
+  const paths = item.paths ?? extractFailingPaths(item.log);
+  let ownedHit = null;
+  for (const candidate of paths) {
+    ownedHit = ownedMatch(candidate, owned);
+    if (ownedHit) break;
+  }
+  const base = { path: ownedHit ?? paths[0] ?? null };
+  if (PHASE254_STEP_NAMES.includes(item.step)) return { ...base, classification: "in-scope" };
+  if (ownedHit) return { ...base, classification: "in-scope" };
+  const onMain = mainFailures.some((main) => main.workflow_file === item.workflow_file && main.job === item.job && main.step === item.step);
+  if (onMain) return { ...base, classification: "pre-existing-on-main" };
+  if (paths.length === 0) return { ...base, classification: "environmental" };
+  return { ...base, classification: "out-of-scope-branch-only" };
+}
+
+const RED_JOB_CONCLUSIONS = new Set(["failure", "timed_out", "startup_failure", "cancelled"]);
+const RED_STEP_CONCLUSIONS = new Set(["failure", "timed_out", "cancelled"]);
+
+// runs: [{workflow_file, workflow, run_id, jobs:[{name, conclusion, steps:[{name, conclusion}],
+// failed_logs:{[stepName]: text}}]}]; mainRuns keyed by workflow file:
+// {run_id, failures:[{job, step}]}. Each failing job is compared only with the main run of
+// its own workflow.
+export function triageRuns({ runs, mainRuns, owned }) {
+  const entries = [];
+  for (const run of runs) {
+    const failingJobs = (run.jobs ?? []).filter((job) => RED_JOB_CONCLUSIONS.has(job.conclusion));
+    if (failingJobs.length === 0) continue;
+    const main = mainRuns?.[run.workflow_file];
+    if (!main) fail(`no --main-run for workflow ${run.workflow_file}; pass --main-run ${run.workflow_file}=<run_id>`);
+    const mainFailures = (main.failures ?? []).map((entry) => ({ workflow_file: run.workflow_file, job: entry.job, step: entry.step }));
+    for (const job of failingJobs) {
+      const failedSteps = (job.steps ?? []).filter((step) => RED_STEP_CONCLUSIONS.has(step.conclusion)).map((step) => step.name);
+      const stepNames = failedSteps.length > 0 ? failedSteps : [null];
+      for (const stepName of stepNames) {
+        const log = stepName === null ? "" : (job.failed_logs?.[stepName] ?? "");
+        const verdict = classifyRed({ workflow_file: run.workflow_file, job: job.name, step: stepName, log }, { owned, mainFailures });
+        entries.push({
+          workflow: run.workflow,
+          run_id: run.run_id,
+          job: job.name,
+          step: stepName,
+          test_ref: extractTestRef(log),
+          path: verdict.path,
+          classification: verdict.classification,
+          main_run_id: main.run_id,
+          first_error_line: firstErrorLine(log),
+        });
+      }
+    }
+  }
+  return entries;
+}
+
+export function parseMainRunOptions(pairs) {
+  const result = {};
+  for (const pair of pairs ?? []) {
+    const match = String(pair).match(/^([\w.-]+\.ya?ml)=(\d+)$/);
+    if (!match) fail(`--main-run must be workflow=run_id (a workflow file name and a numeric run id), got ${JSON.stringify(pair)}`);
+    result[match[1]] = Number(match[2]);
+  }
+  return result;
+}
+
+function parseLogByStep(logText) {
+  const byStep = {};
+  for (const raw of String(logText).split(/\r?\n/)) {
+    const match = raw.match(LOG_LINE);
+    if (!match) continue;
+    (byStep[match[2]] ??= []).push(match[3].replace(TIMESTAMP_PREFIX, ""));
+  }
+  return Object.fromEntries(Object.entries(byStep).map(([step, lines]) => [step, lines.join("\n")]));
+}
+
+function loadRunForTriage({ run, repo }) {
+  const runJson = JSON.parse(gh(["run", "view", String(run), "--repo", repo, "--json", "jobs,headSha,event,attempt,workflowName,workflowDatabaseId,databaseId,conclusion"]));
+  const workflowPath = JSON.parse(gh(["api", `repos/${repo}/actions/runs/${run}`, "--jq", "{path: .path}"])).path;
+  const jobs = runJson.jobs.map((job) => {
+    const failing = RED_JOB_CONCLUSIONS.has(job.conclusion);
+    let failed_logs = {};
+    if (failing) {
+      const result = spawnSync("gh", ["run", "view", String(run), "--repo", repo, "--job", String(job.databaseId), "--log-failed"], { encoding: "utf8", shell: false, maxBuffer: 128 * 1024 * 1024, timeout: 300_000 });
+      failed_logs = result.status === 0 ? parseLogByStep(result.stdout) : {};
+    }
+    return { name: job.name, conclusion: job.conclusion, steps: (job.steps ?? []).map((step) => ({ name: step.name, conclusion: step.conclusion })), failed_logs };
+  });
+  return { workflow_file: path.basename(workflowPath), workflow: runJson.workflowName, run_id: runJson.databaseId, attempt: runJson.attempt, jobs };
+}
+
+export function triageCollect({ run, repo, mainRuns, owned }) {
+  if (!/^\d+$/.test(String(run))) fail("--run must be a numeric workflow run id");
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) fail("--repo must be owner/name");
+  const target = loadRunForTriage({ run, repo });
+  const mains = {};
+  if (target.jobs.some((job) => RED_JOB_CONCLUSIONS.has(job.conclusion))) {
+    const runId = mainRuns[target.workflow_file];
+    if (runId === undefined) fail(`no --main-run for workflow ${target.workflow_file}; pass --main-run ${target.workflow_file}=<run_id>`);
+    const main = loadRunForTriage({ run: runId, repo });
+    mains[target.workflow_file] = {
+      run_id: main.run_id,
+      failures: main.jobs.flatMap((job) => job.steps.filter((step) => RED_STEP_CONCLUSIONS.has(step.conclusion)).map((step) => ({ job: job.name, step: step.name }))),
+    };
+  }
+  return triageRuns({ runs: [target], mainRuns: mains, owned });
+}
+
 // -- self-test scenarios (also registered as node:test cases) -------------------------
 
 function withScratchRepo(fn) {
@@ -947,7 +1185,8 @@ export function verifyFixtures() {
 
 // -- CLI --------------------------------------------------------------------------
 
-const VALUE_OPTIONS = new Set(["out", "lane", "runs", "warmup", "report", "run", "repo", "artifacts"]);
+const VALUE_OPTIONS = new Set(["out", "lane", "runs", "warmup", "report", "run", "repo", "artifacts", "main-run"]);
+const REPEATABLE_OPTIONS = new Set(["main-run"]);
 const BOOLEAN_OPTIONS = new Set(["self-test"]);
 
 function parseArgs(argv) {
@@ -961,7 +1200,8 @@ function parseArgs(argv) {
     if (BOOLEAN_OPTIONS.has(key)) { flags.add(key); continue; }
     if (!VALUE_OPTIONS.has(key)) fail(`unknown option --${key}`);
     if (index + 1 >= argv.length || argv[index + 1].startsWith("--")) fail(`--${key} requires a value`);
-    values[key] = argv[++index];
+    if (REPEATABLE_OPTIONS.has(key)) (values[key] ??= []).push(argv[++index]);
+    else values[key] = argv[++index];
   }
   return { positional, flags, values };
 }
@@ -1018,6 +1258,15 @@ const verbs = {
     const out = values.out ? path.resolve(values.out) : path.join(ROOT, MEASUREMENTS_DIR, `ci-${values.run}.json`);
     writeJson(out, samples);
     process.stdout.write(`Phase 254 ci-collect: run ${values.run} -> ${samples.length} sample(s) (${samples.map((sample) => `${sample.job}: ${sample.duration_s} s, cache hits ${sample.cache.hits}/misses ${sample.cache.misses}`).join("; ")}) -> ${path.relative(ROOT, out)}\n`);
+  },
+  async triage({ values }) {
+    if (!values.run) fail("triage requires --run <run_id>");
+    const mainRuns = parseMainRunOptions(values["main-run"]);
+    const entries = triageCollect({ run: values.run, repo: values.repo ?? "szTheory/accrue", mainRuns, owned: ownedPaths() });
+    const out = values.out ? path.resolve(values.out) : path.join(ROOT, MEASUREMENTS_DIR, `triage-${values.run}.json`);
+    writeJson(out, entries);
+    const counts = Object.fromEntries(RED_CLASSES.map((name) => [name, entries.filter((entry) => entry.classification === name).length]));
+    process.stdout.write(`Phase 254 triage: run ${values.run} -> ${entries.length} red entr${entries.length === 1 ? "y" : "ies"} ${JSON.stringify(counts)} -> ${path.relative(ROOT, out)}\n`);
   },
   async "provisional-budget"({ positional, values }) {
     const files = positional.slice(1);
