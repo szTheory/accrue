@@ -1270,10 +1270,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # OTP 28.1, not the 28.0 of the other jobs: Hex 2.4.2 cannot run `mix hex.build` on OTP 28.0
+      # (:re.import of its precompiled .DS_Store pattern raises), and the Phase 252
+      # production-boundary lane unpacks real Hex archives. publish-hex.yml pins the same line.
       - name: Set up BEAM
         uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
-          otp-version: '28.0'
+          otp-version: '28.1'
           elixir-version: '1.19.5'
 
       - name: Install Hex
