@@ -29,3 +29,12 @@ Evidence note written before any outward operation (D-25). The final 254-03-SUMM
 | KR-254-04 | accrue_admin_browser.yml | browser-uat (owner job) | Run browser UAT | e2e/admin-interaction-overlay-phase199.spec.js:1010 action menu stays adjacent and bounded at locked viewport edges (tablet-768) | out-of-scope-branch-only | 40361348536 |
 
 The owner's per-entry answers are recorded below when 254-03-03 is answered.
+
+## 254-03-03 Owner disposition of the open entries (2026-10-28)
+
+- Gate: blocking-human, never auto-answered. The owner answered per entry id.
+- KR-254-01 (ci.yml, docs-contracts-shift-left, PR claims contract SL-A): **fix-in-phase**
+- KR-254-02 (ci.yml, admin-phase200-guardrails, e2e/admin-storybook-a11y-phase200.spec.js:17): **fix-in-phase**
+- KR-254-03 (accrue_admin_browser.yml, browser-uat, e2e/admin-storybook-a11y-phase200.spec.js:17): **fix-in-phase**
+- KR-254-04 (accrue_admin_browser.yml, browser-uat, e2e/admin-interaction-overlay-phase199.spec.js:1010): **fix-in-phase**
+- Scope of the authorization: fix the named paths only, each as its own commit, observed as attempt 1 of a new commit. accept-known-red is not allowed for KR-254-04 (and for any owner-job red).
