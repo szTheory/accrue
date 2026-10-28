@@ -140,7 +140,10 @@ defmodule AccrueAdmin.Components.Overlay do
 
   defp normalize_presentation(_presentation), do: :modal
 
-  defp role_for(:popover), do: "menu"
+  # A popover shell hosts a heading, description, arbitrary body and a footer, none of which
+  # are permitted children of `role="menu"` (axe aria-required-children). Menus with menu
+  # items are rendered by `DropdownMenu`; this shell is a non-modal dialog.
+  defp role_for(:popover), do: "dialog"
   defp role_for(_presentation), do: "dialog"
 
   defp aria_modal_for(:popover), do: nil

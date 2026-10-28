@@ -94,7 +94,7 @@ defmodule AccrueAdmin.OverlayComponentsTest do
             close_label="Close actions"
             close_event="close_subscription_actions"
           >
-            <button type="button" role="menuitem">Pause collection</button>
+            <button type="button">Pause collection</button>
           </Overlay.overlay>
           """
         end)
@@ -103,7 +103,8 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert html =~ ~s(data-presentation="popover")
       assert html =~ ~s(data-ax-overlay-shell)
       assert html =~ ~s(data-ax-overlay-panel)
-      assert html =~ ~s(role="menu")
+      assert html =~ ~s(role="dialog")
+      refute html =~ ~s(role="menu")
       assert html =~ ~s(phx-hook="Overlay")
       refute html =~ ~s(aria-modal="true")
       refute html =~ ~s(data-scroll-lock)
