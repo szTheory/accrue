@@ -270,13 +270,18 @@ function createNodeFreeEnvironment(root, temporaryRoot) {
   const binDirectory = path.join(temporaryRoot, "node-free-bin");
   mkdirSync(binDirectory, { recursive: true });
 
+  // asdf pins the exact toolchain on a developer machine. Runners that install the BEAM
+  // another way (setup-beam on GitHub Actions) have no asdf, so fall back to the first
+  // executable of that name on PATH; the Node-free PATH below still links only these six
+  // tools plus the system directories that carry no Node executable.
+  const beamTool = (root, name) => (root && path.join(root, "bin", name)) || findExecutable(originalPathEntries, name);
   const required = [
-    ["mix", elixirRoot && path.join(elixirRoot, "bin", "mix")],
-    ["elixir", elixirRoot && path.join(elixirRoot, "bin", "elixir")],
-    ["elixirc", elixirRoot && path.join(elixirRoot, "bin", "elixirc")],
-    ["erl", erlangRoot && path.join(erlangRoot, "bin", "erl")],
-    ["erlc", erlangRoot && path.join(erlangRoot, "bin", "erlc")],
-    ["escript", erlangRoot && path.join(erlangRoot, "bin", "escript")],
+    ["mix", beamTool(elixirRoot, "mix")],
+    ["elixir", beamTool(elixirRoot, "elixir")],
+    ["elixirc", beamTool(elixirRoot, "elixirc")],
+    ["erl", beamTool(erlangRoot, "erl")],
+    ["erlc", beamTool(erlangRoot, "erlc")],
+    ["escript", beamTool(erlangRoot, "escript")],
   ];
   const missing = required.filter(([name, target]) => !linkExecutable(binDirectory, name, target)).map(([name]) => name);
   if (missing.length > 0) {
