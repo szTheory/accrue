@@ -232,9 +232,11 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
       assert manifest["transport"]["transport_kind"] == "live_component"
       assert length(manifest["page_entries"]) == 9
       assert Enum.any?(manifest["page_entries"], &(&1["variation_id"] == "result_pending"))
+
       assert Enum.all?(manifest["collection_variations"], fn entry ->
                is_map(entry["expected"]) and
-                 Enum.sort(Map.keys(entry["expected"])) == ~w(amount_state customer_email customer_name owner_slug plan_price_id plan_quantity processor_id status subscription_id) and
+                 Enum.sort(Map.keys(entry["expected"])) ==
+                   ~w(amount_state customer_email customer_name owner_slug plan_price_id plan_quantity processor_id status subscription_id) and
                  entry["expected"]["subscription_id"] == "c134aee0-b71a-44f5-a030-f6146577dba5" and
                  entry["expected"]["amount_state"] == "unavailable"
              end)
@@ -250,7 +252,11 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
              )
 
       assert Map.has_key?(manifest["source_digests"], "storybook/pages/subscription.story.exs")
-      assert Map.has_key?(manifest["source_digests"], "accrue_admin/lib/accrue_admin/live/subscription_live.ex")
+
+      assert Map.has_key?(
+               manifest["source_digests"],
+               "accrue_admin/lib/accrue_admin/live/subscription_live.ex"
+             )
 
       assert manifest["transport"]["direct_path"] ==
                "/billing" <>

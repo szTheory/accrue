@@ -89,7 +89,7 @@ Presentation-only evidence covers settled appearance; it does not establish moun
 - `accrue_admin/lib/accrue_admin/live/subscription_live.ex` — `cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02`
 - `accrue_admin/lib/accrue_admin/live/subscriptions_live.ex` — `a0dc862c9bce0e45f92a4f04da79999714d51a1f1d44ff6cf2167dbc09140b2b`
 - `accrue_admin/lib/accrue_admin/queries/subscriptions.ex` — `152c94ad8fd577c358f974bdf35c2e48fa8ca421ca9e3dda284e771e4b348807`
-- `accrue_admin/lib/accrue_admin/router.ex` — `eec387b5f32297121231fd5d4e0ffd90e516c0b19ebb8dfba9bc2b6def077b54`
+- `accrue_admin/lib/accrue_admin/router.ex` — `2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed`
 - `accrue_admin/storybook/_support/subscription_collection.ex` — `f57ecc7e52d9bd08dab74cd035375c3fcd993143fc5561514141b26c26fa3a9e`
 - `accrue_admin/storybook/_support/subscription_compositions_manifest.ex` — `84151ac85f0c4d5c92232adaa36acdae78b47707bcbdb38b61f3638cca2cdf78`
 - `accrue_admin/storybook/_support/subscription_manifest.ex` — `9f68218829f5fa863da9d31d482f826223f54d9f6427b15ea5392e12c2911c34`

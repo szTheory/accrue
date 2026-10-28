@@ -239,7 +239,9 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
     assert is_binary(next_cursor)
   end
 
-  test "page-boundary Storybook route renders one row and the real continuation control", %{conn: conn} do
+  test "page-boundary Storybook route renders one row and the real continuation control", %{
+    conn: conn
+  } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     component_path = story_component_path("page_boundary")
 

@@ -459,10 +459,17 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       guide = File.read!(guide_path)
 
       assert guide =~ "## Phase 253 compiled composition supplement"
-      assert guide =~ "Phase 252's six canonical component entries and coverage assertions remain unchanged."
-      assert guide =~ "Phase 253's compiled composition supplement below documents the Admin whole-page and collection stories. Mounted route and action-journey behavior is verified separately."
+
+      assert guide =~
+               "Phase 252's six canonical component entries and coverage assertions remain unchanged."
+
+      assert guide =~
+               "Phase 253's compiled composition supplement below documents the Admin whole-page and collection stories. Mounted route and action-journey behavior is verified separately."
+
       refute guide =~ "Admin whole-page/list/action-journey work remains in Phase 253."
-      assert guide =~ "Presentation-only evidence covers settled appearance; it does not establish mounted authority, persistence, dispatch, or provider completion."
+
+      assert guide =~
+               "Presentation-only evidence covers settled appearance; it does not establish mounted authority, persistence, dispatch, or provider completion."
 
       for entry <- collection_entries do
         assert guide =~ entry.direct_path

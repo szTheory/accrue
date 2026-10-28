@@ -139,8 +139,7 @@ defmodule AccrueAdmin.SubscriptionPageSliceTest do
         variation = Enum.find(canonical_variations, &(&1.id == id))
         assigns = SubscriptionPageScenarios.assigns!(variation.attributes)
 
-        {id, render_story(variation.attributes),
-         assigns.subscription}
+        {id, render_story(variation.attributes), assigns.subscription}
       end)
 
     assert Process.whereis(AccrueAdmin.TestRepo) == nil
