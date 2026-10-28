@@ -52,9 +52,9 @@ defmodule AccrueAdmin.SubscriptionAreaTest do
 
   alias Accrue.Processor.Fake
   alias AccrueAdmin.Components.Detail
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Live.SubscriptionLive
   alias AccrueAdmin.Storybook.SubscriptionScenarios
-  alias AccrueAdmin.Copy
 
   @fixed_now ~U[2026-10-25 12:00:00Z]
 

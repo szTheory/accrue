@@ -123,8 +123,8 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
     use ExUnit.Case, async: false
 
     alias AccrueAdmin.Dev.Storybook
-    alias AccrueAdmin.Storybook.SubscriptionManifest
     alias AccrueAdmin.Storybook.SubscriptionCompositionsManifest
+    alias AccrueAdmin.Storybook.SubscriptionManifest
     alias PhoenixStorybook.{NavigationHelpers, StoryEntry}
     alias PhoenixStorybook.Stories.{Variation, VariationGroup}
 

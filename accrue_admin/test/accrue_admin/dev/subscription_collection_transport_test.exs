@@ -4,8 +4,8 @@ defmodule AccrueAdmin.Dev.SubscriptionCollectionTransportTest do
   alias Accrue.Test.Factory
   alias AccrueAdmin.Dev.Storybook
   alias AccrueAdmin.OwnerScope
-  alias AccrueAdmin.Storybook.SubscriptionCollectionQuery
   alias AccrueAdmin.Storybook.Groups.SubscriptionsCollection
+  alias AccrueAdmin.Storybook.SubscriptionCollectionQuery
   alias PhoenixStorybook.NavigationHelpers
   alias PhoenixStorybook.StoryEntry
 

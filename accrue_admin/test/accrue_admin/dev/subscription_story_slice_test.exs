@@ -57,9 +57,9 @@ defmodule AccrueAdmin.SubscriptionStorySliceTest do
 
   import Phoenix.LiveViewTest
 
+  alias Accrue.Processor.Fake
   alias AccrueAdmin.Live.SubscriptionLive
   alias AccrueAdmin.Storybook.Components.SubscriptionDetail
-  alias Accrue.Processor.Fake
   alias PhoenixStorybook.Stories.Variation
 
   @fixed_now ~U[2026-10-25 12:00:00Z]

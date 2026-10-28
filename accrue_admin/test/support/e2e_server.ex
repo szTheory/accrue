@@ -63,9 +63,7 @@ defmodule AccrueAdmin.E2E.Server do
 
     present? = Enum.any?(Map.values(env), &(is_binary(&1) and &1 != ""))
 
-    if not present? do
-      nil
-    else
+    if present? do
       if Enum.any?(Map.values(env), &(not is_binary(&1) or &1 == "")) do
         Mix.raise("Phase 252 E2E identity is incomplete; refusing migration and endpoint startup")
       end
@@ -84,6 +82,8 @@ defmodule AccrueAdmin.E2E.Server do
 
       Map.update!(env, :port, &String.to_integer/1)
       |> Map.update!(:parent_pid, &String.to_integer/1)
+    else
+      nil
     end
   end
 
