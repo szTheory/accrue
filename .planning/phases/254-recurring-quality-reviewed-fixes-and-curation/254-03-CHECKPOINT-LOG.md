@@ -60,3 +60,9 @@ Reds that these fixes unmasked (never reachable before because an earlier step f
 | Docs and bash contracts, SL-G artifact fixed point | environmental / structural | OPEN. STATE.md current_phase is 254 and the phase has no committed VERIFICATION.md or UAT.md until 254-18. The Executable UAT contract step reds the same way (reproduced locally, not yet CI-observed). host-integration, playwright-e2e and host-docker-smoke stay skipped while this job is red. |
 
 Latest attempt-1 runs on head a0397c884: CI 40780561652 (2 red jobs above), Browser UAT 40780561519 (success).
+
+## 254-03-03 Owner disposition, round 2 (2026-10-28)
+
+- Gate: blocking-human, never auto-answered.
+- A (admin-phase200-guardrails, phase252_lab loopback identity check vs the Postgres service container bridge address), owner answer verbatim: "CI-only private-range (Rec.)". Disposition: **fix-in-phase**. Only when GITHUB_ACTIONS=true accept a private-range (RFC1918) server address; keep the database, role and fresh-partition checks; local stays strictly loopback. Tests for both halves: CI accepts private-range, non-CI still rejects non-loopback, a public address is rejected even in CI.
+- B (docs-contracts SL-G "phase 254: zero artifacts discovered" and Executable UAT contract "missing automated UAT artifact"), owner answer verbatim: "accept-known-red (Rec.)". Disposition: **accept-known-red** until 254-18 commits the real VERIFICATION and UAT artifacts. host-integration, playwright-e2e and host-docker-smoke stay unobserved until then. No premature artifacts are generated.
