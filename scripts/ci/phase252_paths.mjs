@@ -1,3 +1,7 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
+
 export const REQUIRED_OWNER = "admin-phase200-guardrails";
 
 export const REQUIRED_ROOT_IDS = Object.freeze([
@@ -246,4 +250,35 @@ export function assertCiContract({
     }
   }
   return true;
+}
+
+// Module-boundary guard (PATTERNS S1). This module is a library with no CLI:
+// the guard exists so that running it under `node --test` registers real,
+// named fixture tests instead of one vacuous implicit test.
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  test("classifyPath maps a representative path under every consumed root to the required owner", () => {
+    for (const rule of CONSUMED_ROOTS) {
+      const representative = rule.mode === "prefix" && rule.path.endsWith("/")
+        ? `${rule.path}representative`
+        : rule.path;
+      assert.equal(classifyPath(representative), REQUIRED_OWNER, rule.id);
+    }
+  });
+
+  test("classifyPath returns null for an unrelated path and for unsafe paths", () => {
+    assert.equal(classifyPath("docs/architecture/unrelated.md"), null);
+    assert.equal(classifyPath("../accrue_admin/lib/accrue_admin/copy.ex"), null);
+    assert.equal(classifyPath("/etc/passwd"), null);
+  });
+
+  test("assertOwnerMap accepts the shipped roots and rejects a map missing a required root", () => {
+    assert.doesNotThrow(() => assertOwnerMap(CONSUMED_ROOTS));
+    assert.throws(() => assertOwnerMap(CONSUMED_ROOTS.slice(1)));
+  });
 }

@@ -5,7 +5,10 @@ import { createHash, randomBytes, randomInt } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import assert from "node:assert/strict";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import { deriveExecutionEvidence, PHASE252_REPORTER_SPECS } from "./phase252_reporters.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
@@ -657,7 +660,55 @@ async function main() {
   process.stdout.write("Result bundle: " + path.relative(ROOT, resultPath).split(path.sep).join("/") + "\n");
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+// A bare `node --test <this file>` child has no CLI arguments and registers fixture
+// tests. A spawn that passes arguments (even from inside a node --test run, where
+// NODE_TEST_CONTEXT is inherited) is a real CLI invocation and keeps its behavior.
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT && process.argv.length <= 2) {
+  // Fixture tests only: they call the pure exports and never start the
+  // multi-command aggregate (which would compile and boot the lab).
+  test("assertRequiredCommandPlan accepts exactly the required lane inventory and rejects a dropped lane", () => {
+    const inventory = REQUIRED_COMMAND_IDS.map((id) => ({ id }));
+    assert.equal(assertRequiredCommandPlan(inventory), true);
+    assert.throws(() => assertRequiredCommandPlan(inventory.slice(1)), /does not exactly match/);
+    assert.throws(() => assertRequiredCommandPlan("not-an-array"), TypeError);
+  });
+
+  test("executeCommandSequence stops at the first failing command and persists the failed snapshot", async () => {
+    const persisted = [];
+    const calls = [];
+    const outcome = await executeCommandSequence(
+      [{ id: "one" }, { id: "two" }, { id: "three" }],
+      async (spec) => {
+        calls.push(spec.id);
+        return { exitCode: spec.id === "two" ? 1 : 0 };
+      },
+      async (snapshot) => { persisted.push(snapshot.status); },
+    );
+    assert.equal(outcome.status, "failed");
+    assert.deepEqual(calls, ["one", "two"]);
+    assert.equal(persisted.at(-1), "failed");
+  });
+
+  test("executeCommandSequence reports passed only when every command exits zero", async () => {
+    const outcome = await executeCommandSequence(
+      [{ id: "one" }, { id: "two" }],
+      async () => ({ exitCode: 0 }),
+      async () => {},
+    );
+    assert.equal(outcome.status, "passed");
+    assert.equal(outcome.commands.length, 2);
+  });
+
+  test("manifestFreshnessCode compares the checked-in phase252 manifest", () => {
+    assert.match(manifestFreshnessCode(), /storybook\/phase252-manifest\.json/);
+  });
+} else if (invokedAsEntrypoint) {
   main().catch((error) => {
     process.stderr.write("verify_phase252_stories: " + error.message + "\n");
     process.exitCode = 2;

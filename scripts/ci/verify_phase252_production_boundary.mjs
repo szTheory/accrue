@@ -16,7 +16,9 @@ import {
 } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "../..");
@@ -642,7 +644,29 @@ function main() {
   runProductionBoundary();
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+// A bare `node --test <this file>` child has no CLI arguments and registers fixture
+// tests. A spawn that passes arguments (even from inside a node --test run, where
+// NODE_TEST_CONTEXT is inherited) is a real CLI invocation and keeps its behavior.
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT && process.argv.length <= 2) {
+  test("production boundary self-test controls pass (clean fixture accepted, each leak fixture rejected)", () => {
+    const result = runSelfTest();
+    assert.ok(result.passed >= 8, `expected at least 8 controls, received ${result.passed}`);
+  });
+
+  test("a manifest leaked into the production package file list is rejected", () => {
+    const clean = verifyProductionBoundary(cleanAdminFixture());
+    assert.equal(clean.ok, true, clean.errors.join("\n"));
+    const leaked = cleanAdminFixture();
+    leaked.files = [...leaked.files, "storybook/phase252-manifest.json"];
+    assert.equal(verifyProductionBoundary(leaked).ok, false);
+  });
+} else if (invokedAsEntrypoint) {
   try {
     main();
   } catch (error) {

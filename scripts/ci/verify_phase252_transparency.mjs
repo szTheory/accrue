@@ -4,7 +4,10 @@ import fs from "node:fs";
 import crypto from "node:crypto";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import assert from "node:assert/strict";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const LAB_TEST = "scripts/ci/verify_phase252_lab_presentation.test.mjs";
@@ -734,7 +737,42 @@ function main() {
   else fail("expected --only lab, --only heldout, --only compositions, or the default both-target mode");
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+// A bare `node --test <this file>` child has no CLI arguments and registers fixture
+// tests. A spawn that passes arguments (even from inside a node --test run, where
+// NODE_TEST_CONTEXT is inherited) is a real CLI invocation and keeps its behavior.
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT && process.argv.length <= 2) {
+  // Fixture tests only: pure assertions over the committed clean/violation
+  // subjects. The nested `node --test` self-test controls stay CLI-only.
+  const readFixture = (relative) => parseSubjectJson(fs.readFileSync(path.join(ROOT, relative), "utf8"), relative);
+
+  test("parseSubjectJson accepts well-formed JSON and rejects malformed JSON", () => {
+    assert.deepEqual(parseSubjectJson('{"a":1}'), { a: 1 });
+    assert.throws(() => parseSubjectJson("{not json"), /malformed JSON/);
+  });
+
+  test("assertLabPresentation accepts the clean lab subject and rejects the violation subject", () => {
+    assert.equal(assertLabPresentation(readFixture(LAB_CLEAN)), true);
+    assert.throws(() => assertLabPresentation(readFixture(LAB_VIOLATION)), /contradictory public claim lab-production-console/);
+  });
+
+  test("assertHeldoutAttribution accepts the clean held-out subject and rejects the violation subject", () => {
+    assert.equal(assertHeldoutAttribution(readFixture(HELDOUT_CLEAN)), true);
+    assert.throws(() => assertHeldoutAttribution(readFixture(HELDOUT_VIOLATION)), /contradictory public claim representative-customer-behavior/);
+  });
+
+  test("assertPhase253Presentation rejects a non-object subject and the committed violation subjects", () => {
+    assert.throws(() => assertPhase253Presentation(null), /subject must be an object/);
+    assert.throws(() => assertPhase253Presentation(readFixture(PHASE253_PRESENTATION_VIOLATION)), /contradictory public claim phase253-static-effects/);
+    assert.throws(() => assertPhase253Presentation(readFixture(PHASE253_ATTRIBUTION_VIOLATION)), /contradictory public claim phase253-synthetic-attribution/);
+    assert.doesNotThrow(() => assertPhase253Presentation(readFixture(PHASE253_CLEAN)));
+  });
+} else if (invokedAsEntrypoint) {
   try {
     main();
   } catch (error) {
