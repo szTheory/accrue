@@ -190,12 +190,15 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert html =~ ~s(phx-target="#subscription-live")
       assert html =~ ~s(phx-value-action_type="swap_plan")
       assert html =~ ~s(<span>Change</span>)
-      assert html =~ ~s(<span class="ax-visually-hidden"> for subscription sub_123</span>)
+
+      assert html =~
+               ~s(<span class="ax-visually-hidden" aria-hidden="true"> for subscription sub_123</span>)
+
       assert html =~ ~s(href="#dunning-recovery")
       assert html =~ ~s(<span>View</span>)
 
       assert html =~
-               ~s(<span class="ax-visually-hidden"> dunning activity for subscription sub_123</span>)
+               ~s(<span class="ax-visually-hidden" aria-hidden="true"> dunning activity for subscription sub_123</span>)
     end
 
     test "renders summary-list row context from hidden_context and context aliases" do
@@ -225,10 +228,10 @@ defmodule AccrueAdmin.OverlayComponentsTest do
         end)
 
       assert html =~
-               ~s(<span class="ax-visually-hidden"> default payment method for customer cus_123</span>)
+               ~s(<span class="ax-visually-hidden" aria-hidden="true"> default payment method for customer cus_123</span>)
 
       assert html =~
-               ~s(<span class="ax-visually-hidden"> invoice INV-1024 for customer cus_123</span>)
+               ~s(<span class="ax-visually-hidden" aria-hidden="true"> invoice INV-1024 for customer cus_123</span>)
     end
 
     test "keeps detail_field_list available for read-only drill groups" do
