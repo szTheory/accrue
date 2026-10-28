@@ -91,6 +91,9 @@ jobs:
       - name: Install Chromium
         run: cd accrue_admin && npx playwright install --with-deps chromium
 
+      - name: Phase 254 machine fingerprint
+        run: node scripts/ci/phase254_measure.mjs fingerprint --out accrue_admin/tmp/phase254/fingerprint-browser-uat.json
+
       - name: Run browser UAT
         run: cd accrue_admin && npm run e2e
 
@@ -102,6 +105,14 @@ jobs:
 
       - name: Phase 211 visual regression gate
         run: cd accrue_admin && npm run e2e:visual-regression
+
+      - name: Upload Phase 254 machine evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase254-machine-evidence-browser-uat
+          path: accrue_admin/tmp/phase254/
+          if-no-files-found: ignore
 
       - name: Upload Playwright report
         if: failure()

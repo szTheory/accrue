@@ -278,3 +278,158 @@ test("buildProvisionalBudget refuses a smoke sample, a missing mode and a non-in
     assert.throws(() => measure.buildProvisionalBudget({ samples: [complete[0], complete[1], { ...complete[2], informs_only: false }], root }), /informs_only/);
   });
 });
+
+// -- Task 254-01-03: ci-collect and cache outcome parsing -------------------------------------
+
+const CI_SAMPLE_KEYS = [
+  "schema_version", "workflow", "run_id", "head_sha", "event", "attempt", "job", "conclusion", "started_at", "completed_at",
+  "duration_s", "steps", "lanes", "cache", "fingerprint", "informs_only",
+];
+
+function logLine(step, text, job = "Job") {
+  return `${job}\t${step}\t2026-10-28T12:00:00.0000000Z ${text}`;
+}
+
+function cacheStepLines(step, { action = "actions/cache@v5", key = null, outcome = null } = {}) {
+  return [
+    logLine(step, `Run ${action}`),
+    ...(key === null ? [] : [logLine(step, "with:"), logLine(step, `  key: ${key}`)]),
+    ...(outcome === null ? [] : [logLine(step, outcome)]),
+  ];
+}
+
+test("parseCacheOutcomes records a hit and a miss (positive control: one of each yields hits 1 and misses 1)", () => {
+  const log = [
+    ...cacheStepLines("Restore deps cache", { key: "Linux-deps-abc", outcome: "Cache restored from key: Linux-deps-abc" }),
+    ...cacheStepLines("Restore build cache", { action: "actions/cache/restore@v5", key: "Linux-build-def", outcome: "Cache not found for input keys: Linux-build-def, Linux-build-" }),
+    logLine("Compile admin package", "Run cd accrue_admin && mix compile"),
+  ].join("\n");
+  const result = measure.parseCacheOutcomes?.(log);
+  assert.equal(result?.hits, 1);
+  assert.equal(result?.misses, 1);
+  assert.equal(result?.partial, 0);
+  assert.deepEqual(result?.steps, [
+    { name: "Restore deps cache", outcome: "hit", key: "Linux-deps-abc" },
+    { name: "Restore build cache", outcome: "miss", key: "Linux-build-def" },
+  ]);
+});
+
+test("parseCacheOutcomes records partial when the restored key differs from the primary key", () => {
+  const log = cacheStepLines("Restore deps cache", { key: "Linux-deps-new", outcome: "Cache restored from key: Linux-deps-" }).join("\n");
+  const result = measure.parseCacheOutcomes?.(log);
+  assert.equal(result?.partial, 1);
+  assert.equal(result?.hits, 0);
+  assert.deepEqual(result?.steps, [{ name: "Restore deps cache", outcome: "partial", key: "Linux-deps-" }]);
+});
+
+test("parseCacheOutcomes reads setup-node cache hits and misses and ignores save and post steps", () => {
+  const log = [
+    logLine("Set up Node", "Run actions/setup-node@v6"), logLine("Set up Node", "with:"), logLine("Set up Node", "  cache: npm"),
+    logLine("Set up Node", "npm cache is not found"),
+    logLine("Set up Node 2", "Run actions/setup-node@v6"), logLine("Set up Node 2", "  cache: npm"),
+    logLine("Set up Node 2", "Cache restored from key: node-cache-Linux-x64-npm-abc"),
+    ...cacheStepLines("Save build cache", { action: "actions/cache/save@v5", key: "k" }),
+    ...cacheStepLines("Post Restore deps cache", { key: "k" }),
+    logLine("Set up Node 3", "Run actions/setup-node@v6"), logLine("Set up Node 3", "  node-version: 22"),
+  ].join("\n");
+  const result = measure.parseCacheOutcomes?.(log);
+  assert.equal(result?.misses, 1);
+  assert.equal(result?.hits, 1);
+  assert.deepEqual(result?.steps.map((step) => step.name), ["Set up Node", "Set up Node 2"]);
+});
+
+test("parseCacheOutcomes rejects a cache step with no recognised outcome line as unparsed instead of counting a miss", () => {
+  const log = cacheStepLines("Restore deps cache", { key: "Linux-deps-abc", outcome: "Something unexpected happened" }).join("\n");
+  assert.throws(() => measure.parseCacheOutcomes(log), /unparsed/);
+});
+
+function ciRunFixture(overrides = {}) {
+  return {
+    databaseId: 12345, workflowName: "CI", event: "pull_request", attempt: 1, headSha: "d".repeat(40),
+    jobs: [
+      {
+        databaseId: 101, name: "Admin Phase 200 deterministic guardrails", conclusion: "success",
+        startedAt: "2026-10-28T12:00:00Z", completedAt: "2026-10-28T12:10:30Z",
+        steps: [
+          { name: "Set up job", conclusion: "success", startedAt: "2026-10-28T12:00:00Z", completedAt: "2026-10-28T12:00:02Z" },
+          { name: "Run Phase 200 deterministic guardrails", conclusion: "success", startedAt: "2026-10-28T12:01:00Z", completedAt: "2026-10-28T12:09:00Z" },
+        ],
+      },
+      { databaseId: 102, name: "Browser UAT", conclusion: "success", startedAt: "2026-10-28T12:00:00Z", completedAt: "2026-10-28T12:20:00Z", steps: [] },
+      { databaseId: 103, name: "Some unrelated job", conclusion: "success", startedAt: "2026-10-28T12:00:00Z", completedAt: "2026-10-28T12:01:00Z", steps: [] },
+    ],
+    ...overrides,
+  };
+}
+
+function withArtifacts(fn, { guardrails = fingerprintFixture(), browser = fingerprintFixture({ image_os: "ubuntu24" }), skipGuardrails = false } = {}) {
+  const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase254-ci-artifacts-"));
+  try {
+    const put = (relative, value) => {
+      const file = path.join(dir, relative);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, JSON.stringify(value));
+    };
+    if (!skipGuardrails) put("phase254-machine-evidence-guardrails/fingerprint-guardrails.json", guardrails);
+    put("phase254-machine-evidence-browser-uat/fingerprint-browser-uat.json", browser);
+    put("phase252-machine-evidence/ci-results/run-a/results.json", { plan: "252-08", commands: [{ id: "scenario-repo", duration_ms: 2500 }, { id: "bad", duration_ms: "x" }] });
+    put("phase253-machine-evidence/ci-results/run-b/results.json", { plan: "253-06", commands: [{ id: "phase253-compositions-browser", duration_ms: 43000 }] });
+    return fn(dir);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const CI_LOGS = {
+  101: cacheStepLines("Restore accrue_admin deps cache", { key: "Linux-deps-1", outcome: "Cache restored from key: Linux-deps-1" }).join("\n"),
+  102: cacheStepLines("Set up Node", { action: "actions/setup-node@v6", outcome: "npm cache is not found" }).concat(logLine("Set up Node", "  cache: npm")).join("\n"),
+};
+
+test("collectCiSample turns one attempt-1 run into one pinned-schema CI sample per owner job, with lanes and cache hits", () => {
+  withArtifacts((dir) => {
+    const samples = measure.collectCiSample?.(ciRunFixture(), dir, CI_LOGS);
+    assert.equal(samples?.length, 2, "the unrelated job is not an owner and yields no sample");
+    const [guardrails, browser] = samples ?? [];
+    assert.deepEqual(Object.keys(guardrails ?? {}), CI_SAMPLE_KEYS);
+    assert.equal(guardrails?.job, "Admin Phase 200 deterministic guardrails");
+    assert.equal(guardrails?.attempt, 1);
+    assert.equal(guardrails?.conclusion, "success");
+    assert.equal(guardrails?.fingerprint.image_os, "ubuntu24");
+    assert.equal(guardrails?.duration_s, 630);
+    assert.deepEqual(guardrails?.steps.map((step) => step.duration_s), [2, 480]);
+    assert.deepEqual(guardrails?.lanes, [{ lane: "252-08:scenario-repo", duration_ms: 2500 }, { lane: "253-06:phase253-compositions-browser", duration_ms: 43000 }]);
+    assert.equal(guardrails?.cache.hits, 1);
+    assert.equal(guardrails?.informs_only, true);
+    assert.equal(browser?.job, "Browser UAT");
+    assert.deepEqual(browser?.lanes, []);
+    assert.equal(browser?.cache.misses, 1);
+  });
+});
+
+test("collectCiSample rejects an attempt-2 run", () => {
+  withArtifacts((dir) => {
+    assert.throws(() => measure.collectCiSample(ciRunFixture({ attempt: 2 }), dir, CI_LOGS), /attempt 2/);
+  });
+});
+
+test("collectCiSample rejects a missing fingerprint file and a fingerprint without image_os", () => {
+  withArtifacts((dir) => {
+    assert.throws(() => measure.collectCiSample(ciRunFixture(), dir, CI_LOGS), /missing fingerprint file/);
+  }, { skipGuardrails: true });
+  const noImage = fingerprintFixture();
+  delete noImage.image_os;
+  withArtifacts((dir) => {
+    assert.throws(() => measure.collectCiSample(ciRunFixture(), dir, CI_LOGS), /lacks image_os/);
+  }, { guardrails: noImage });
+  withArtifacts((dir) => {
+    assert.throws(() => measure.collectCiSample(ciRunFixture(), dir, CI_LOGS), /lacks image_os/);
+  }, { guardrails: fingerprintFixture({ image_os: null }) });
+});
+
+test("collectCiSample rejects a run with no owner job and an owner job without a log", () => {
+  withArtifacts((dir) => {
+    const noOwner = ciRunFixture({ jobs: [{ databaseId: 103, name: "Some unrelated job", conclusion: "success", steps: [] }] });
+    assert.throws(() => measure.collectCiSample(noOwner, dir, CI_LOGS), /none of the owner jobs/);
+    assert.throws(() => measure.collectCiSample(ciRunFixture(), dir, { 101: CI_LOGS[101] }), /no job log/);
+  });
+});

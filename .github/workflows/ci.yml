@@ -1312,6 +1312,9 @@ jobs:
       - name: Phase 200 local guardrail contract
         run: bash scripts/ci/verify_phase200_guardrail_contract.sh
 
+      - name: Phase 254 machine fingerprint
+        run: node scripts/ci/phase254_measure.mjs fingerprint --out accrue_admin/tmp/phase254/fingerprint-guardrails.json
+
       - name: Run Phase 200 deterministic guardrails
         run: bash scripts/ci/verify_phase200_admin_guardrails.sh
 
@@ -1333,6 +1336,14 @@ jobs:
           path: |
             accrue_admin/tmp/phase253/ci-results/*/results.json
             accrue_admin/tmp/phase253/render-results-*.json
+          if-no-files-found: ignore
+
+      - name: Upload Phase 254 machine evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase254-machine-evidence-guardrails
+          path: accrue_admin/tmp/phase254/
           if-no-files-found: ignore
 
       - name: Upload Phase 200 Playwright report

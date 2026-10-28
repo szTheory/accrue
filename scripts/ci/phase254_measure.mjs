@@ -715,6 +715,166 @@ export function buildProvisionalBudget({ samples, root = ROOT }) {
   };
 }
 
+// -- CI collection (ci-collect) ------------------------------------------------------------
+
+// The two owner jobs that upload a Phase 254 fingerprint. A job outside this map
+// has no fingerprint, so it never yields a sample (it is not an owner, D-21).
+export const CI_OWNER_JOBS = Object.freeze({
+  "Admin Phase 200 deterministic guardrails": Object.freeze({
+    artifact: "phase254-machine-evidence-guardrails",
+    fingerprint: "fingerprint-guardrails.json",
+    lane_artifacts: Object.freeze(["phase252-machine-evidence", "phase253-machine-evidence"]),
+  }),
+  "Browser UAT": Object.freeze({
+    artifact: "phase254-machine-evidence-browser-uat",
+    fingerprint: "fingerprint-browser-uat.json",
+    lane_artifacts: Object.freeze([]),
+  }),
+});
+
+const LOG_LINE = /^([^\t]*)\t([^\t]*)\t(.*)$/;
+const TIMESTAMP_PREFIX = /^﻿?\d{4}-\d{2}-\d{2}T[\d:.]+Z\s?/;
+
+// Reads the cache outcome of every cache-restoring step from one job log
+// (`gh run view --log`: job, step, timestamped line). A cache-configured step
+// without a recognised outcome line is rejected as unparsed, never counted as a
+// miss (a miss that was really a parse failure would flatter the cache story).
+export function parseCacheOutcomes(log) {
+  const byStep = new Map();
+  for (const raw of String(log).split(/\r?\n/)) {
+    const match = raw.match(LOG_LINE);
+    if (!match) continue;
+    const step = match[2];
+    if (!byStep.has(step)) byStep.set(step, []);
+    byStep.get(step).push(match[3].replace(TIMESTAMP_PREFIX, ""));
+  }
+  const steps = [];
+  for (const [name, lines] of byStep) {
+    if (/^Post /.test(name)) continue;
+    const header = lines.find((line) => /^Run actions\/(?:cache(?:\/restore)?|setup-node)@/.test(line.trim()));
+    if (!header) continue;
+    const restoring = /actions\/cache/.test(header) || lines.some((line) => /^\s*cache:\s*\S+/.test(line));
+    if (!restoring) continue;
+    const primary = lines.map((line) => line.match(/^\s*key:\s*(\S.*?)\s*$/)).find(Boolean)?.[1] ?? null;
+    const restored = lines.map((line) => line.match(/Cache restored from key:\s*(\S.*?)\s*$/)).find(Boolean)?.[1];
+    const notFound = lines.map((line) => line.match(/Cache not found for input keys:\s*(\S.*?)\s*$/)).find(Boolean)?.[1];
+    if (restored) {
+      steps.push({ name, outcome: primary !== null && primary !== restored ? "partial" : "hit", key: restored });
+    } else if (notFound || lines.some((line) => /npm cache is not found/i.test(line))) {
+      steps.push({ name, outcome: "miss", key: primary ?? notFound?.split(",")[0].trim() ?? null });
+    } else {
+      fail(`cache step ${JSON.stringify(name)} has no recognised cache outcome line (unparsed)`);
+    }
+  }
+  return {
+    steps,
+    hits: steps.filter((step) => step.outcome === "hit").length,
+    partial: steps.filter((step) => step.outcome === "partial").length,
+    misses: steps.filter((step) => step.outcome === "miss").length,
+  };
+}
+
+function readCiFingerprint(artifactDir, evidence) {
+  const candidates = [path.join(artifactDir, evidence.artifact, evidence.fingerprint), path.join(artifactDir, evidence.fingerprint)];
+  const file = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!file) fail(`missing fingerprint file ${evidence.artifact}/${evidence.fingerprint} in the downloaded artifacts`);
+  const fingerprint = JSON.parse(fs.readFileSync(file, "utf8"));
+  for (const key of FINGERPRINT_KEYS) {
+    if (!(key in fingerprint)) fail(`fingerprint ${evidence.fingerprint} lacks ${key}`);
+  }
+  if (typeof fingerprint.image_os !== "string" || fingerprint.image_os === "") fail(`fingerprint ${evidence.fingerprint} lacks image_os`);
+  return fingerprint;
+}
+
+function findResultFiles(directory) {
+  if (!fs.existsSync(directory)) return [];
+  const found = [];
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) found.push(...findResultFiles(full));
+    else if (entry.name === "results.json") found.push(full);
+  }
+  return found.sort();
+}
+
+function readLaneDurations(artifactDir, laneArtifacts) {
+  const lanes = [];
+  for (const artifact of laneArtifacts) {
+    for (const file of findResultFiles(path.join(artifactDir, artifact))) {
+      const bundle = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (!Array.isArray(bundle.commands)) continue;
+      for (const command of bundle.commands) {
+        if (typeof command.id === "string" && Number.isFinite(command.duration_ms)) {
+          lanes.push({ lane: `${bundle.plan ?? artifact}:${command.id}`, duration_ms: command.duration_ms });
+        }
+      }
+    }
+  }
+  return lanes;
+}
+
+const seconds = (start, end) => (start && end && Number.isFinite(Date.parse(start)) && Number.isFinite(Date.parse(end))
+  ? round3((Date.parse(end) - Date.parse(start)) / 1000)
+  : null);
+
+// Turns one attempt-1 run (`gh run view <id> --json jobs,headSha,event,attempt,
+// workflowName,databaseId`) plus its downloaded artifacts and job logs into one
+// CI sample per owner job. Queue time is excluded: duration_s runs from the job's
+// own startedAt. jobLogs is keyed by job databaseId (string) or job name.
+export function collectCiSample(runJson, artifactDir, jobLogs = {}) {
+  if (!runJson || !Array.isArray(runJson.jobs)) fail("run JSON has no jobs");
+  if (Number(runJson.attempt) !== 1) fail(`run ${runJson.databaseId} is attempt ${runJson.attempt}; only first-attempt runs are measured (no reruns)`);
+  if (typeof runJson.headSha !== "string" || !/^[0-9a-f]{40}$/.test(runJson.headSha)) fail("run JSON has no valid headSha");
+  const samples = [];
+  for (const job of runJson.jobs) {
+    const evidence = CI_OWNER_JOBS[job.name];
+    if (!evidence) continue;
+    const fingerprint = readCiFingerprint(artifactDir, evidence);
+    const log = jobLogs[String(job.databaseId)] ?? jobLogs[job.name];
+    if (typeof log !== "string") fail(`no job log was supplied for ${JSON.stringify(job.name)}`);
+    samples.push({
+      schema_version: SCHEMA_VERSION,
+      workflow: runJson.workflowName,
+      run_id: runJson.databaseId,
+      head_sha: runJson.headSha,
+      event: runJson.event,
+      attempt: 1,
+      job: job.name,
+      conclusion: job.conclusion,
+      started_at: job.startedAt ?? null,
+      completed_at: job.completedAt ?? null,
+      duration_s: seconds(job.startedAt, job.completedAt),
+      steps: (job.steps ?? []).map((step) => ({ name: step.name, conclusion: step.conclusion, duration_s: seconds(step.startedAt, step.completedAt) })),
+      lanes: readLaneDurations(artifactDir, evidence.lane_artifacts),
+      cache: parseCacheOutcomes(log),
+      fingerprint,
+      informs_only: true,
+    });
+  }
+  if (samples.length === 0) fail(`run ${runJson.databaseId} has none of the owner jobs (${Object.keys(CI_OWNER_JOBS).join(", ")})`);
+  return samples;
+}
+
+function gh(args) {
+  const result = spawnSync("gh", args, { encoding: "utf8", shell: false, maxBuffer: 128 * 1024 * 1024, timeout: 300_000 });
+  if (result.error || result.status !== 0) fail(`gh ${args.slice(0, 3).join(" ")} failed: ${(result.stderr || result.error?.message || "unknown error").trim().slice(0, 300)}`);
+  return result.stdout;
+}
+
+export function ciCollect({ run, repo, artifacts }) {
+  if (!/^\d+$/.test(String(run))) fail("--run must be a numeric workflow run id");
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) fail("--repo must be owner/name");
+  const runJson = JSON.parse(gh(["run", "view", String(run), "--repo", repo, "--json", "jobs,headSha,event,attempt,workflowName,databaseId"]));
+  if (Number(runJson.attempt) !== 1) fail(`run ${run} is attempt ${runJson.attempt}; only first-attempt runs are measured`);
+  fs.mkdirSync(artifacts, { recursive: true });
+  gh(["run", "download", String(run), "--repo", repo, "--dir", artifacts, "--pattern", "phase254-machine-evidence-*", "--pattern", "phase252-machine-evidence", "--pattern", "phase253-machine-evidence"]);
+  const jobLogs = {};
+  for (const job of runJson.jobs) {
+    if (CI_OWNER_JOBS[job.name]) jobLogs[String(job.databaseId)] = gh(["run", "view", String(run), "--repo", repo, "--job", String(job.databaseId), "--log"]);
+  }
+  return collectCiSample(runJson, artifacts, jobLogs);
+}
+
 // -- self-test scenarios (also registered as node:test cases) -------------------------
 
 function withScratchRepo(fn) {
@@ -850,6 +1010,14 @@ const verbs = {
     const out = outputPath(values, "warm", sample.lane);
     writeJson(out, sample);
     process.stdout.write(`Phase 254 warm: per-iteration slowest-story median ${sample.median_ms} ms, p90 ${sample.p90_ms} ms, per navigation median ${sample.per_cell.median_ms} ms / p90 ${sample.per_cell.p90_ms} ms, n=${sample.n}, smoke=${sample.smoke} -> ${path.relative(ROOT, out)}\n`);
+  },
+  async "ci-collect"({ values }) {
+    if (!values.run) fail("ci-collect requires --run <run_id>");
+    const artifacts = path.resolve(values.artifacts ?? path.join(ROOT, "accrue_admin/tmp/phase254/ci-artifacts", String(values.run)));
+    const samples = ciCollect({ run: values.run, repo: values.repo ?? "szTheory/accrue", artifacts });
+    const out = values.out ? path.resolve(values.out) : path.join(ROOT, MEASUREMENTS_DIR, `ci-${values.run}.json`);
+    writeJson(out, samples);
+    process.stdout.write(`Phase 254 ci-collect: run ${values.run} -> ${samples.length} sample(s) (${samples.map((sample) => `${sample.job}: ${sample.duration_s} s, cache hits ${sample.cache.hits}/misses ${sample.cache.misses}`).join("; ")}) -> ${path.relative(ROOT, out)}\n`);
   },
   async "provisional-budget"({ positional, values }) {
     const files = positional.slice(1);
