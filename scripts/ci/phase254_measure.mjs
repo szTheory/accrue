@@ -752,7 +752,8 @@ export function parseCacheOutcomes(log) {
   const steps = [];
   for (const [name, lines] of byStep) {
     if (/^Post /.test(name)) continue;
-    const header = lines.find((line) => /^Run actions\/(?:cache(?:\/restore)?|setup-node)@/.test(line.trim()));
+    // A real runner log opens each step with `##[group]Run <action>@<ref>`.
+    const header = lines.find((line) => /^(?:##\[group\])?Run actions\/(?:cache(?:\/restore)?|setup-node)@/.test(line.trim().replace(/^\ufeff/, "")));
     if (!header) continue;
     const restoring = /actions\/cache/.test(header) || lines.some((line) => /^\s*cache:\s*\S+/.test(line));
     if (!restoring) continue;
@@ -971,7 +972,7 @@ const RUNNER_PREFIX = /^\/(?:home\/runner\/work|Users\/runner\/work)\/[^/]+\/[^/
 const COMMAND_ECHO = /^(?:##\[group\]Run\b|(?:\u001b|\^\[)\[36;1m|shell:\s|env:\s*$|\s{2}[A-Z][A-Z0-9_]*:\s)/;
 // Primary failure markers and how many following lines belong to the same failure block.
 const PRIMARY_MARKERS = [
-  [/^\s*\d+\)\s/, 3],
+  [/^\s*\d+\)\s/, 60],
   [/^\s*not ok \d+\b/, 12],
   [/\bFAIL\b/, 3],
   [/##\[error\]/, 0],

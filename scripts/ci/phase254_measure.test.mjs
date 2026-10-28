@@ -607,3 +607,24 @@ test("triageRuns emits one entry per failing path and classification within a st
   assert.equal(out?.path, "e2e/unowned.spec.js");
   assert.equal(out?.test_count, 1);
 });
+
+test("parseCacheOutcomes reads the real runner log shape (##[group] header, tab-separated, BOM)", () => {
+  const tab = (step, text) => `Admin job\t${step}\t${text}`;
+  const log = [
+    tab("Set up Node", "﻿2026-10-28T16:36:03.2267629Z ##[group]Run actions/setup-node@v6"),
+    tab("Set up Node", "2026-10-28T16:36:03.2268022Z   cache: npm"),
+    tab("Set up Node", "2026-10-28T16:36:04.0547662Z Cache hit for: node-cache-Linux-x64-npm-3e31"),
+    tab("Set up Node", "2026-10-28T16:36:13.5339682Z Cache restored from key: node-cache-Linux-x64-npm-3e31"),
+    tab("Restore accrue_admin deps cache", "﻿2026-10-28T16:36:13.6239880Z ##[group]Run actions/cache@v5"),
+    tab("Restore accrue_admin deps cache", "2026-10-28T16:36:13.6239990Z   key: Linux-otp28-deps-57db"),
+    tab("Restore accrue_admin deps cache", "2026-10-28T16:36:16.6774664Z Cache restored from key: Linux-otp28-deps-57db"),
+    tab("Restore build cache", "﻿2026-10-28T16:36:20.0000000Z ##[group]Run actions/cache@v5"),
+    tab("Restore build cache", "2026-10-28T16:36:20.0000100Z   key: Linux-build-aaaa"),
+    tab("Restore build cache", "2026-10-28T16:36:21.0000000Z Cache not found for input keys: Linux-build-aaaa"),
+    tab("Run tests", "2026-10-28T16:36:30.0000000Z ##[group]Run mix test"),
+  ].join("\n");
+  const outcome = measure.parseCacheOutcomes(log);
+  assert.equal(outcome.hits, 2);
+  assert.equal(outcome.misses, 1);
+  assert.deepEqual(outcome.steps.map((step) => step.name), ["Set up Node", "Restore accrue_admin deps cache", "Restore build cache"]);
+});
