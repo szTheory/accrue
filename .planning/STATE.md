@@ -5,17 +5,17 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Completed 254-01-PLAN.md
-last_updated: "2026-10-28T15:02:44.557Z"
+stopped_at: Completed 254-02-PLAN.md
+last_updated: "2026-10-28T15:13:22.506Z"
 last_activity: 2026-10-28
 last_activity_desc: Phase 254 execution started
-state_head: a90b557a2f1f7ead62fff7dab644c3a6572f7d1a
+state_head: 7b03647d4e27a373b166d5e9d0bfd9a37331e988
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 34
-  completed_plans: 17
-  percent: 50
+  completed_plans: 18
+  percent: 53
 ---
 
 # Project State
@@ -27,13 +27,13 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 254 — Recurring Quality, Reviewed Fixes and Curation
-**Progress:** [█████░░░░░] 50%
+**Progress:** [█████░░░░░] 53%
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
-Plan: 2 of 18
+Plan: 3 of 18
 Status: Ready to execute
 Last activity: 2026-10-28 — Phase 254 execution started
 
@@ -240,6 +240,7 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 | Phase 253 P05 | 96min | 3 tasks | 20 files |
 | Phase 253 P06 | 1h 44m | 3 tasks | 17 files |
 | Phase 254 P01 | 26 min | 3 tasks | 8 files |
+| Phase 254 P02 | 14 min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -573,6 +574,8 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 - [Phase 253]: Keep presentation evidence separate from mounted dispatch, persistence, and provider-completion claims.
 - [Phase 254]: 254-01: missing Playwright durations parse as null so committed Phase 252/253 fixtures keep parsing; the measurement harness requires finite durations itself.
 - [Phase 254]: 254-01: local cold/warm/focused samples are informs_only; freeze eligibility requires an ubuntu image, a clean tree and the full D-21 protocol. DEV-254-01 (D-24 attribution, 415 s local vs 300 s target, compile 262 s) stays open until 254-09-03.
+- [Phase 254]: 254-02: guard test registration requires argv.length <= 2 so argument-bearing CLI spawns under node --test keep the CLI path
+- [Phase 254]: 254-02: default Playwright projects share one LAUNCHER_OWNED_AND_VISUAL_SPECS ignore list; spec ownership enforced by phase254_project_ownership.test.mjs
 
 ### Pending Todos
 
@@ -671,8 +674,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-28T15:02:44.219Z
-Stopped at: Completed 254-01-PLAN.md
+Last session: 2026-10-28T15:13:22.093Z
+Stopped at: Completed 254-02-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
