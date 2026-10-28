@@ -228,8 +228,6 @@ defmodule AccrueAdmin.E2E.Server do
     end
   end
 
-  defp loopback_address?(_), do: false
-
   # Mirrors scripts/dev/phase252_lab.mjs acceptedServerAddress/2: strict loopback everywhere,
   # plus the RFC 1918 IPv4 blocks only when GITHUB_ACTIONS=true (a hosted runner's PostgreSQL
   # service container reports its bridge address). Public addresses are never accepted.

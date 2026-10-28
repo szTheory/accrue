@@ -16,9 +16,20 @@ if not is_nil(phase252_nonce) do
 
   valid_port = is_binary(phase252_port) and Regex.match?(~r/^\d{1,5}$/, phase252_port)
 
+  # Strict loopback everywhere; the RFC 1918 IPv4 blocks only on a hosted CI runner, where the
+  # PostgreSQL service container reports its bridge address (mirrors phase252_lab.mjs
+  # acceptedServerAddress/2 and test/support/e2e_server.ex).
+  private_range_address =
+    is_binary(phase252_address) and
+      Regex.match?(
+        ~r/^(?:10(?:\.\d{1,3}){3}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}|192\.168(?:\.\d{1,3}){2})$/,
+        phase252_address
+      )
+
   valid_address =
     phase252_address == "::1" or
-      (is_binary(phase252_address) and Regex.match?(~r/^127(?:\.\d{1,3}){3}$/, phase252_address))
+      (is_binary(phase252_address) and Regex.match?(~r/^127(?:\.\d{1,3}){3}$/, phase252_address)) or
+      (System.get_env("GITHUB_ACTIONS") == "true" and private_range_address)
 
   valid_pg_host = phase252_pg_host in ["127.0.0.1", "localhost", "::1"]
 
