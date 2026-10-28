@@ -165,11 +165,11 @@ Plans:
 **Wave 2** *(blocked on Wave 1; owner-confirmed push, D-25)*
 - [ ] 254-03-PLAN.md — Owner push checkpoint, pre-push contracts, first CI-runner observations, mechanical red triage and escalation
 
-**Wave 3** *(W2 Shape the set; disjoint files)*
+**Wave 3** *(W2 Shape the set)*
 - [ ] 254-04-PLAN.md — Curation ledger, verifier, ledger-derived counts and retain/reclassify records
-- [ ] 254-05-PLAN.md — Review-lane reset refusal and per-case result ledger with dependent reconcile
 
-**Wave 4**
+**Wave 4** *(disjoint files; shared admin-test lab lane, run serially)*
+- [ ] 254-05-PLAN.md — Review-lane reset refusal and per-case result ledger with dependent reconcile
 - [ ] 254-06-PLAN.md — Retire populated, merge provider_pruned and correct stale gap rows
 
 **Wave 5**
