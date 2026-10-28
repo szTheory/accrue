@@ -3,7 +3,10 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import assert from "node:assert/strict";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { deriveExecutionEvidence, PHASE252_REPORTER_SPECS, requiredAssertionIds } from "./phase252_reporters.mjs";
 import { REQUIRED_COMMAND_IDS } from "./verify_phase252_stories.mjs";
@@ -779,7 +782,42 @@ function main() {
   process.stdout.write(JSON.stringify({ ...result.evidence, uat_written: result.uat_written, uat_path: result.uat_path }, null, 2) + "\n");
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+// A bare `node --test <this file>` child has no CLI arguments and registers fixture
+// tests. A spawn that passes arguments (even from inside a node --test run, where
+// NODE_TEST_CONTEXT is inherited) is a real CLI invocation and keeps its behavior.
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT && process.argv.length <= 2) {
+  const GUIDE_FIXTURE = [
+    "The final repository-root gate is: npm --prefix accrue_admin run phase252:check",
+    "That command is available after plan 252-08 adds its runner and package script.",
+    "Static rendering verifies story state. It does not prove mounted authorization, provider completion, dispatched action behavior, or persistence.",
+    "Automated UAT requires fresh assertion evidence, not persisted/isolation evidence.",
+    "The first bootstrap compiles and migrates an empty disposable database; startup time should be recorded separately from warm browser renders.",
+    "Cost budgets are provisional; Phase 254 owns frozen recurring selection and budgets.",
+  ].join("\n");
+
+  test("validateGuideContract accepts a guide that states every evidence limit", () => {
+    assert.equal(validateGuideContract(GUIDE_FIXTURE), "passed");
+  });
+
+  test("validateGuideContract rejects a guide missing the static-render limit and a non-string guide", () => {
+    const withoutLimit = GUIDE_FIXTURE.split("\n").filter((line) => !line.startsWith("Static rendering")).join("\n");
+    assert.throws(() => validateGuideContract(withoutLimit), /static-render evidence limits/);
+    assert.throws(() => validateGuideContract(undefined), /guide text is required/);
+  });
+
+  test("requirement, task and prohibition identity sets are unique and non-empty", () => {
+    for (const ids of [REQUIREMENT_IDS, TASK_IDS, PROHIBITION_IDS]) {
+      assert.ok(ids.length > 0);
+      assert.equal(new Set(ids).size, ids.length);
+    }
+  });
+} else if (invokedAsEntrypoint) {
   try { main(); } catch (error) {
     process.stderr.write(`generate_phase252_acceptance: ${error.message}\n`);
     process.exitCode = 2;

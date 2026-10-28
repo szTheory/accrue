@@ -6,7 +6,10 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import assert from "node:assert/strict";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import {
   expectedExUnitIdentities,
   expectedNodeTestIdentities,
@@ -1086,7 +1089,47 @@ async function main() {
 
 export { REQUIRED_COMMAND_IDS };
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+// A bare `node --test <this file>` child has no CLI arguments and registers fixture
+// tests. A spawn that passes arguments (even from inside a node --test run, where
+// NODE_TEST_CONTEXT is inherited) is a real CLI invocation and keeps its behavior.
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT && process.argv.length <= 2) {
+  // Fixture tests only: they never invoke the lab, compile, or the aggregate.
+  test("assertRequiredCommandPlan rejects a dropped lane and a non-array plan", () => {
+    const inventory = REQUIRED_COMMAND_IDS.map((id) => ({ id }));
+    assert.throws(() => assertRequiredCommandPlan(inventory.slice(1)), /does not exactly match the finite Phase 253 lane inventory/);
+    assert.throws(() => assertRequiredCommandPlan("not-an-array"), TypeError);
+  });
+
+  test("executeCommandSequence stops at the first failing lane and persists the failed snapshot", async () => {
+    const calls = [];
+    const persisted = [];
+    const outcome = await executeCommandSequence(
+      [{ id: "a" }, { id: "b" }, { id: "c" }],
+      async (spec) => { calls.push(spec.id); return { exitCode: spec.id === "b" ? 2 : 0 }; },
+      async (snapshot) => { persisted.push(snapshot.status); },
+    );
+    assert.equal(outcome.status, "failed");
+    assert.deepEqual(calls, ["a", "b"]);
+    assert.equal(persisted.at(-1), "failed");
+  });
+
+  test("executeCommandSequence turns a missing integer exit code into a failure", async () => {
+    const outcome = await executeCommandSequence([{ id: "a" }], async () => ({}), async () => {});
+    assert.equal(outcome.status, "failed");
+    assert.match(outcome.commands[0].error, /integer exit code/);
+  });
+
+  test("executeCommandSequence passes only when every lane exits zero", async () => {
+    const outcome = await executeCommandSequence([{ id: "a" }, { id: "b" }], async () => ({ exitCode: 0 }), async () => {});
+    assert.equal(outcome.status, "passed");
+  });
+} else if (invokedAsEntrypoint) {
   main().catch((error) => {
     process.stderr.write("verify_phase253_compositions: " + error.message + "\n");
     process.exitCode = 2;

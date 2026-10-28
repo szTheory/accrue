@@ -4,7 +4,10 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import assert from "node:assert/strict";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { UNCLASSIFIED_EDGE_IDS as PHASE252_UNCLASSIFIED_EDGE_IDS } from "./generate_phase252_acceptance.mjs";
 import {
@@ -760,7 +763,38 @@ function main() {
   process.stdout.write(JSON.stringify({ ...result.evidence, uat_written: result.uat_written, uat_path: result.uat_path, ...(result.uat_test_count ? { uat_test_count: result.uat_test_count } : {}) }, null, 2) + "\n");
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+// A bare `node --test <this file>` child has no CLI arguments and registers fixture
+// tests. A spawn that passes arguments (even from inside a node --test run, where
+// NODE_TEST_CONTEXT is inherited) is a real CLI invocation and keeps its behavior.
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT && process.argv.length <= 2) {
+  test("renderUat renders one passed automated item per coverage entry with a zero-issue summary", () => {
+    const uat = renderUat({
+      started: "2026-10-01",
+      updated: "2026-10-02",
+      coverage: [{ file: "253-01-SUMMARY.md", id: "D1", description: "Fixture deliverable", refs: ["node --test fixture"] }],
+    });
+    assert.match(uat, /source: automated/);
+    assert.match(uat, /result: \[pass\]/);
+    assert.match(uat, /total: 1\npassed: 1\nissues: 0/);
+  });
+
+  test("generatePhase253Acceptance refuses to run without exactly one results selector", () => {
+    assert.throws(() => generatePhase253Acceptance({ root: ROOT }), /usage: node generate_phase253_acceptance\.mjs/);
+  });
+
+  test("requirement, task and edge identity sets are unique and non-empty", () => {
+    for (const ids of [REQUIREMENT_IDS, TASK_IDS, EDGE_IDS]) {
+      assert.ok(ids.length > 0);
+      assert.equal(new Set(ids).size, ids.length);
+    }
+  });
+} else if (invokedAsEntrypoint) {
   try { main(); } catch (error) {
     process.stderr.write(`generate_phase253_acceptance: ${error.message}\n`);
     process.exitCode = 2;
