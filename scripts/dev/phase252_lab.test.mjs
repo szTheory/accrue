@@ -11,6 +11,7 @@ import {
   matchesStartingHealthIdentity,
   ownsProcess,
   prepareLaunch,
+  acceptedServerAddress,
 } from "./phase252_lab.mjs";
 
 test("requires a fresh explicit numeric test partition", () => {
@@ -81,7 +82,7 @@ test("checks server, database and port before creating the owned target", async 
         databaseExists: async () => observation.databaseExists,
         portAvailable: async () => observation.portAvailable,
         createDatabase: async () => { created = true; },
-      }),
+      }, {}),
     );
     assert.equal(created, false, "preflight failure must precede database creation");
   }
@@ -217,5 +218,54 @@ test("a stale lock owner cannot remove replacement namespace metadata", async ()
     assert.equal(JSON.parse(await readFile(lock.path, "utf8")).token, "replacement-owner");
   } finally {
     await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("a hosted CI runner accepts only an RFC 1918 server address; a developer machine and public addresses stay rejected", async () => {
+  const ci = { GITHUB_ACTIONS: "true" };
+  for (const address of ["10.1.2.3", "172.16.0.2", "172.18.0.2", "172.31.255.254", "192.168.1.9", "172.18.0.2/32"]) {
+    assert.equal(acceptedServerAddress(address, ci), address.split("/")[0], `${address} accepted in CI`);
+    assert.equal(acceptedServerAddress(address, {}), null, `${address} rejected outside CI`);
+    assert.equal(acceptedServerAddress(address, { GITHUB_ACTIONS: "false" }), null, `${address} rejected when GITHUB_ACTIONS is not true`);
+  }
+  for (const address of ["8.8.8.8", "172.15.0.1", "172.32.0.1", "192.169.0.1", "11.0.0.1", "0.0.0.0", "fd00::2", "10.0.0.1/24", "not-an-address", null, undefined]) {
+    assert.equal(acceptedServerAddress(address, ci), null, `${String(address)} rejected even in CI`);
+  }
+  for (const address of ["127.0.0.1", "127.0.0.1/32", "::1"]) {
+    assert.ok(acceptedServerAddress(address, {}), `${address} still accepted outside CI`);
+    assert.ok(acceptedServerAddress(address, ci), `${address} still accepted in CI`);
+  }
+
+  const config = buildLaunchConfig({ lane: "admin-review", partition: "925210051", port: 4325 });
+  const adapters = (server) => {
+    const state = { created: false };
+    return {
+      state,
+      readServerIdentity: async () => server,
+      databaseExists: async () => false,
+      portAvailable: async () => true,
+      createDatabase: async () => { state.created = true; },
+    };
+  };
+  const bridge = { database: "postgres", role: "postgres", address: "172.18.0.2" };
+
+  const accepted = adapters(bridge);
+  const result = await prepareLaunch(config, accepted, ci);
+  assert.equal(result.serverAddress, "172.18.0.2");
+  assert.equal(accepted.state.created, true);
+
+  const strict = adapters(bridge);
+  await assert.rejects(prepareLaunch(config, strict, {}), /identity does not match/);
+  assert.equal(strict.state.created, false);
+
+  const publicServer = adapters({ ...bridge, address: "8.8.8.8" });
+  await assert.rejects(prepareLaunch(config, publicServer, ci), /identity does not match/);
+  assert.equal(publicServer.state.created, false);
+
+  // The database and role checks are unchanged in CI mode.
+  for (const server of [{ ...bridge, database: "accrue_admin_dev" }, { ...bridge, role: "root" }]) {
+    const wrong = adapters(server);
+    await assert.rejects(prepareLaunch(config, wrong, ci), /identity does not match/);
+    assert.equal(wrong.state.created, false);
   }
 });

@@ -70,7 +70,7 @@ defmodule AccrueAdmin.E2E.Server do
 
       unless Regex.match?(~r/^\d{8,16}$/, env.partition) and
                env.database == "accrue_admin_test#{env.partition}" and
-               env.role == "postgres" and loopback_address?(env.address) and
+               env.role == "postgres" and server_address?(env.address) and
                env.pg_host in ["127.0.0.1", "localhost", "::1"] and
                env.lane in ["admin-test", "admin-review"] and
                String.match?(env.port, ~r/^\d{1,5}$/) and
@@ -229,6 +229,25 @@ defmodule AccrueAdmin.E2E.Server do
   end
 
   defp loopback_address?(_), do: false
+
+  # Mirrors scripts/dev/phase252_lab.mjs acceptedServerAddress/2: strict loopback everywhere,
+  # plus the RFC 1918 IPv4 blocks only when GITHUB_ACTIONS=true (a hosted runner's PostgreSQL
+  # service container reports its bridge address). Public addresses are never accepted.
+  defp server_address?(address) when is_binary(address) do
+    loopback_address?(address) or
+      (System.get_env("GITHUB_ACTIONS") == "true" and private_range_address?(address))
+  end
+
+  defp server_address?(_), do: false
+
+  defp private_range_address?(address) do
+    case :inet.parse_address(String.to_charlist(address)) do
+      {:ok, {10, _, _, _}} -> true
+      {:ok, {172, second, _, _}} when second in 16..31 -> true
+      {:ok, {192, 168, _, _}} -> true
+      _ -> false
+    end
+  end
 
   defp verify_database_identity!(identity) do
     repo = TestRepo.config()

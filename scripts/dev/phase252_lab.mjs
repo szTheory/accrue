@@ -36,6 +36,27 @@ function normalizedLoopbackAddress(address) {
   return address.split("/", 1)[0];
 }
 
+// A hosted CI runner reaches its PostgreSQL service container through a published port, and
+// the server then reports the container's bridge address (RFC 1918) from inet_server_addr()
+// instead of a loopback one. Only GITHUB_ACTIONS=true widens the accepted server address,
+// and only to the three RFC 1918 IPv4 blocks: public addresses are rejected there too, and
+// a developer machine keeps the strict loopback requirement. The database, role and
+// fresh-partition checks are unchanged in both modes.
+function privateRangeAddress(address) {
+  if (typeof address !== "string") return false;
+  const [host, mask, ...extra] = address.split("/");
+  if (extra.length > 0 || (mask != null && mask !== "32") || !isIPv4(host)) return false;
+  const [first, second] = host.split(".").map(Number);
+  return first === 10 || (first === 172 && second >= 16 && second <= 31) || (first === 192 && second === 168);
+}
+
+export function acceptedServerAddress(address, env = process.env) {
+  const loopback = normalizedLoopbackAddress(address);
+  if (loopback) return loopback;
+  if (env.GITHUB_ACTIONS === "true" && privateRangeAddress(address)) return address.split("/", 1)[0];
+  return null;
+}
+
 export function buildLaunchConfig(options = {}) {
   const lane = String(options.lane || "");
   if (!LANES.has(lane)) fail("lane must be admin-test, admin-review, or host-heldout");
@@ -82,9 +103,9 @@ export function buildLaunchConfig(options = {}) {
   };
 }
 
-export async function prepareLaunch(config, adapters) {
+export async function prepareLaunch(config, adapters, env = process.env) {
   const server = await adapters.readServerIdentity();
-  const serverAddress = normalizedLoopbackAddress(server.address);
+  const serverAddress = acceptedServerAddress(server.address, env);
   if (
     server.database !== config.controlDatabase ||
     server.role !== config.role ||
@@ -673,7 +694,7 @@ export async function openOwnedSession(options) {
 
       if (created && safeToDrop && manifest?.createdDatabase) {
         const server = await readServerIdentity(config);
-        if (server.database !== config.controlDatabase || server.role !== config.role || !loopbackAddress(server.address)) {
+        if (server.database !== config.controlDatabase || server.role !== config.role || !acceptedServerAddress(server.address)) {
           fail("PostgreSQL identity changed before owned database cleanup; preserving database");
         }
         await dropDatabase(config);
@@ -725,7 +746,7 @@ export async function openOwnedSession(options) {
     if (created) {
       try {
         const server = await readServerIdentity(config);
-        if (server.database === config.controlDatabase && server.role === config.role && loopbackAddress(server.address)) {
+        if (server.database === config.controlDatabase && server.role === config.role && acceptedServerAddress(server.address)) {
           await dropDatabase(config);
         }
       } catch {
