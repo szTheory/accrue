@@ -259,8 +259,2068 @@
         "smoke": false
       }
     ],
-    "ci": [],
-    "ci_reference": null,
+    "ci": [
+      {
+        "schema_version": 1,
+        "workflow": "CI",
+        "run_id": 40727439541,
+        "head_sha": "5a2b1aa3d28fd6a81de3a63044e091c7ba225943",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "admin-phase200-guardrails",
+        "job_name": "Admin Phase 200 deterministic guardrails",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T16:35:23Z",
+        "completed_at": "2026-10-28T16:39:55Z",
+        "duration_s": 272,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 23
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 8
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 6
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 10
+          },
+          {
+            "name": "Restore accrue_admin deps cache",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Install admin deps",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 150
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 4
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 54
+          },
+          {
+            "name": "Phase 200 CI contract",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Phase 200 local guardrail contract",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Run Phase 200 deterministic guardrails",
+            "conclusion": "failure",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Phase 252 machine evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 253 machine evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Phase 200 Playwright report",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 200 Playwright evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 200 generated evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Restore accrue_admin deps cache",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "outcome": "hit",
+              "key": "Linux-otp28-elixir119-phase200-admin-deps-57db832506c259159c8e9aa76b8340b5ccd66f4b0053ac1d3d80284affeaffce"
+            }
+          ],
+          "hits": 2,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "AMD EPYC 7763 64-Core Processor",
+          "cores": 4,
+          "ram_bytes": 16760344576,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "e3096e97fd43d4678ecc1abcb05c3904ff026fcc",
+          "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "AccrueAdmin Browser UAT",
+        "run_id": 40727439599,
+        "head_sha": "5a2b1aa3d28fd6a81de3a63044e091c7ba225943",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "browser-uat",
+        "job_name": "Browser UAT",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T16:35:22Z",
+        "completed_at": "2026-10-28T16:49:38Z",
+        "duration_s": 856,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 22
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 11
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 5
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install Elixir deps",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 99
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 16
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Run browser UAT",
+            "conclusion": "failure",
+            "duration_s": 683
+          },
+          {
+            "name": "Test Admin hooks and visual baseline set guard",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Require complete committed visual baseline set",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 211 visual regression gate",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Playwright report",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Upload Playwright traces",
+            "conclusion": "success",
+            "duration_s": 4
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            }
+          ],
+          "hits": 1,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+          "cores": 4,
+          "ram_bytes": 16760344576,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "e3096e97fd43d4678ecc1abcb05c3904ff026fcc",
+          "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "CI",
+        "run_id": 40732595137,
+        "head_sha": "03e8053e326925b7ca41d62bd403c41bc2d38c04",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "admin-phase200-guardrails",
+        "job_name": "Admin Phase 200 deterministic guardrails",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T17:07:05Z",
+        "completed_at": "2026-10-28T17:10:15Z",
+        "duration_s": 190,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 23
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 6
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 5
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Restore accrue_admin deps cache",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Install admin deps",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 99
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 17
+          },
+          {
+            "name": "Phase 200 CI contract",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 200 local guardrail contract",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Run Phase 200 deterministic guardrails",
+            "conclusion": "failure",
+            "duration_s": 18
+          },
+          {
+            "name": "Upload Phase 252 machine evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 253 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Phase 200 Playwright report",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Upload Phase 200 Playwright evidence",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Phase 200 generated evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Restore accrue_admin deps cache",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "outcome": "hit",
+              "key": "Linux-otp28-elixir119-phase200-admin-deps-57db832506c259159c8e9aa76b8340b5ccd66f4b0053ac1d3d80284affeaffce"
+            }
+          ],
+          "hits": 2,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+          "cores": 4,
+          "ram_bytes": 16760344576,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "2c729964727a9c13a352be3704ebbe511d6e7f2c",
+          "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "AccrueAdmin Browser UAT",
+        "run_id": 40732595360,
+        "head_sha": "03e8053e326925b7ca41d62bd403c41bc2d38c04",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "browser-uat",
+        "job_name": "Browser UAT",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T17:07:05Z",
+        "completed_at": "2026-10-28T17:26:43Z",
+        "duration_s": 1178,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 21
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 10
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 6
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Install Elixir deps",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 155
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 34
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Run browser UAT",
+            "conclusion": "failure",
+            "duration_s": 925
+          },
+          {
+            "name": "Test Admin hooks and visual baseline set guard",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Require complete committed visual baseline set",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 211 visual regression gate",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Playwright report",
+            "conclusion": "success",
+            "duration_s": 4
+          },
+          {
+            "name": "Upload Playwright traces",
+            "conclusion": "success",
+            "duration_s": 7
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            }
+          ],
+          "hits": 1,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "AMD EPYC 7763 64-Core Processor",
+          "cores": 4,
+          "ram_bytes": 16760344576,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "2c729964727a9c13a352be3704ebbe511d6e7f2c",
+          "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "CI",
+        "run_id": 40735861913,
+        "head_sha": "d7ef3edabffbefc8a491071a085a524dfd0bd32a",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "admin-phase200-guardrails",
+        "job_name": "Admin Phase 200 deterministic guardrails",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T17:27:25Z",
+        "completed_at": "2026-10-28T17:31:44Z",
+        "duration_s": 259,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 24
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 10
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 7
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 5
+          },
+          {
+            "name": "Restore accrue_admin deps cache",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install admin deps",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 137
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 31
+          },
+          {
+            "name": "Phase 200 CI contract",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 200 local guardrail contract",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Run Phase 200 deterministic guardrails",
+            "conclusion": "failure",
+            "duration_s": 24
+          },
+          {
+            "name": "Upload Phase 252 machine evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 253 machine evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Phase 200 Playwright report",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Upload Phase 200 Playwright evidence",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Phase 200 generated evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Restore accrue_admin deps cache",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "outcome": "hit",
+              "key": "Linux-otp28-elixir119-phase200-admin-deps-57db832506c259159c8e9aa76b8340b5ccd66f4b0053ac1d3d80284affeaffce"
+            }
+          ],
+          "hits": 2,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+          "cores": 4,
+          "ram_bytes": 16759300096,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "3315363bcb8a2ac013cb913d9a614919f76532bb",
+          "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "AccrueAdmin Browser UAT",
+        "run_id": 40735861909,
+        "head_sha": "d7ef3edabffbefc8a491071a085a524dfd0bd32a",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "browser-uat",
+        "job_name": "Browser UAT",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T17:27:25Z",
+        "completed_at": "2026-10-28T17:46:39Z",
+        "duration_s": 1154,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 22
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 26
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 6
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 7
+          },
+          {
+            "name": "Install Elixir deps",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 147
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 31
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Run browser UAT",
+            "conclusion": "failure",
+            "duration_s": 868
+          },
+          {
+            "name": "Test Admin hooks and visual baseline set guard",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Require complete committed visual baseline set",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 211 visual regression gate",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Upload Playwright report",
+            "conclusion": "success",
+            "duration_s": 11
+          },
+          {
+            "name": "Upload Playwright traces",
+            "conclusion": "success",
+            "duration_s": 17
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            }
+          ],
+          "hits": 1,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+          "cores": 4,
+          "ram_bytes": 16759308288,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "3315363bcb8a2ac013cb913d9a614919f76532bb",
+          "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "CI",
+        "run_id": 40742671473,
+        "head_sha": "26e500c37fe58588b399b40c3a34f9dd56629e89",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "admin-phase200-guardrails",
+        "job_name": "Admin Phase 200 deterministic guardrails",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T18:10:48Z",
+        "completed_at": "2026-10-28T18:14:04Z",
+        "duration_s": 196,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 21
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 11
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 5
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Restore accrue_admin deps cache",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install admin deps",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 108
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 15
+          },
+          {
+            "name": "Phase 200 CI contract",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 200 local guardrail contract",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Run Phase 200 deterministic guardrails",
+            "conclusion": "failure",
+            "duration_s": 18
+          },
+          {
+            "name": "Upload Phase 252 machine evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 253 machine evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Phase 200 Playwright report",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Phase 200 Playwright evidence",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Phase 200 generated evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Restore accrue_admin deps cache",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "outcome": "hit",
+              "key": "Linux-otp28-elixir119-phase200-admin-deps-57db832506c259159c8e9aa76b8340b5ccd66f4b0053ac1d3d80284affeaffce"
+            }
+          ],
+          "hits": 2,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+          "cores": 4,
+          "ram_bytes": 16760344576,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "de8d4b8a26a74d588d9f5301accb119118e9ef28",
+          "manifest_sha256": "cd994a55adf41dbb9ae77deaa1f855faff7412d42f2cf838556be62b70941f3f",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "AccrueAdmin Browser UAT",
+        "run_id": 40742671507,
+        "head_sha": "26e500c37fe58588b399b40c3a34f9dd56629e89",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "browser-uat",
+        "job_name": "Browser UAT",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T18:10:49Z",
+        "completed_at": "2026-10-28T18:28:29Z",
+        "duration_s": 1060,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 21
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 8
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 5
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Install Elixir deps",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 146
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 20
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Run browser UAT",
+            "conclusion": "failure",
+            "duration_s": 837
+          },
+          {
+            "name": "Test Admin hooks and visual baseline set guard",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Require complete committed visual baseline set",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 211 visual regression gate",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Playwright report",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Upload Playwright traces",
+            "conclusion": "success",
+            "duration_s": 5
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            }
+          ],
+          "hits": 1,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 6.17.0-1022-azure",
+          "arch": "x64",
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+          "cores": 4,
+          "ram_bytes": 16765374464,
+          "image_os": "ubuntu24",
+          "image_version": "20261023.334.3",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.3",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "de8d4b8a26a74d588d9f5301accb119118e9ef28",
+          "manifest_sha256": "cd994a55adf41dbb9ae77deaa1f855faff7412d42f2cf838556be62b70941f3f",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "CI",
+        "run_id": 40745556555,
+        "head_sha": "d4dc2877f5e551cb1719beadfd532844d0416e75",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "admin-phase200-guardrails",
+        "job_name": "Admin Phase 200 deterministic guardrails",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T18:29:14Z",
+        "completed_at": "2026-10-28T18:34:11Z",
+        "duration_s": 297,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 21
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 26
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 6
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Restore accrue_admin deps cache",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install admin deps",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 168
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 29
+          },
+          {
+            "name": "Phase 200 CI contract",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 200 local guardrail contract",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Run Phase 200 deterministic guardrails",
+            "conclusion": "failure",
+            "duration_s": 28
+          },
+          {
+            "name": "Upload Phase 252 machine evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 253 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Phase 200 Playwright report",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Phase 200 Playwright evidence",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Phase 200 generated evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Restore accrue_admin deps cache",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "outcome": "hit",
+              "key": "Linux-otp28-elixir119-phase200-admin-deps-57db832506c259159c8e9aa76b8340b5ccd66f4b0053ac1d3d80284affeaffce"
+            }
+          ],
+          "hits": 2,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "AMD EPYC 7763 64-Core Processor",
+          "cores": 4,
+          "ram_bytes": 16760344576,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "dc0b1ac89d44ee171fe0a330320e7cc363910e71",
+          "manifest_sha256": "cd994a55adf41dbb9ae77deaa1f855faff7412d42f2cf838556be62b70941f3f",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "AccrueAdmin Browser UAT",
+        "run_id": 40745556594,
+        "head_sha": "d4dc2877f5e551cb1719beadfd532844d0416e75",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "browser-uat",
+        "job_name": "Browser UAT",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T18:29:14Z",
+        "completed_at": "2026-10-28T18:45:21Z",
+        "duration_s": 967,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 23
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 10
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 5
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install Elixir deps",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 130
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 18
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Run browser UAT",
+            "conclusion": "failure",
+            "duration_s": 761
+          },
+          {
+            "name": "Test Admin hooks and visual baseline set guard",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Require complete committed visual baseline set",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 211 visual regression gate",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Playwright report",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Upload Playwright traces",
+            "conclusion": "success",
+            "duration_s": 5
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            }
+          ],
+          "hits": 1,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+          "cores": 4,
+          "ram_bytes": 16760344576,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "dc0b1ac89d44ee171fe0a330320e7cc363910e71",
+          "manifest_sha256": "cd994a55adf41dbb9ae77deaa1f855faff7412d42f2cf838556be62b70941f3f",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "CI",
+        "run_id": 40749794325,
+        "head_sha": "fb859cacdae6b91de66a28468e87156046008a55",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "admin-phase200-guardrails",
+        "job_name": "Admin Phase 200 deterministic guardrails",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T18:56:49Z",
+        "completed_at": "2026-10-28T19:01:44Z",
+        "duration_s": 295,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 20
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 13
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 6
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 7
+          },
+          {
+            "name": "Restore accrue_admin deps cache",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Install admin deps",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 165
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 4
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 37
+          },
+          {
+            "name": "Phase 200 CI contract",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 200 local guardrail contract",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Run Phase 200 deterministic guardrails",
+            "conclusion": "failure",
+            "duration_s": 28
+          },
+          {
+            "name": "Upload Phase 252 machine evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 253 machine evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Upload Phase 200 Playwright report",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Phase 200 Playwright evidence",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Phase 200 generated evidence",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Restore accrue_admin deps cache",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "outcome": "hit",
+              "key": "Linux-otp28-elixir119-phase200-admin-deps-57db832506c259159c8e9aa76b8340b5ccd66f4b0053ac1d3d80284affeaffce"
+            }
+          ],
+          "hits": 2,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "AMD EPYC 7763 64-Core Processor",
+          "cores": 4,
+          "ram_bytes": 16760336384,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "49a3c9838ad3499c6d4bc8e22ba18f3c74fde212",
+          "manifest_sha256": "cd994a55adf41dbb9ae77deaa1f855faff7412d42f2cf838556be62b70941f3f",
+          "dirty": false
+        },
+        "informs_only": true
+      },
+      {
+        "schema_version": 1,
+        "workflow": "AccrueAdmin Browser UAT",
+        "run_id": 40749794313,
+        "head_sha": "fb859cacdae6b91de66a28468e87156046008a55",
+        "event": "pull_request",
+        "attempt": 1,
+        "job": "browser-uat",
+        "job_name": "Browser UAT",
+        "conclusion": "failure",
+        "started_at": "2026-10-28T18:56:48Z",
+        "completed_at": "2026-10-28T19:14:29Z",
+        "duration_s": 1061,
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success",
+            "duration_s": 1
+          },
+          {
+            "name": "Initialize containers",
+            "conclusion": "success",
+            "duration_s": 24
+          },
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 6
+          },
+          {
+            "name": "Set up BEAM",
+            "conclusion": "success",
+            "duration_s": 6
+          },
+          {
+            "name": "Install Hex",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Set up Node",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Install Elixir deps",
+            "conclusion": "success",
+            "duration_s": 3
+          },
+          {
+            "name": "Compile admin package",
+            "conclusion": "success",
+            "duration_s": 143
+          },
+          {
+            "name": "Install browser deps",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Install Chromium",
+            "conclusion": "success",
+            "duration_s": 21
+          },
+          {
+            "name": "Phase 254 machine fingerprint",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Run browser UAT",
+            "conclusion": "failure",
+            "duration_s": 839
+          },
+          {
+            "name": "Test Admin hooks and visual baseline set guard",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Require complete committed visual baseline set",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Phase 211 visual regression gate",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Upload Phase 254 machine evidence",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Playwright report",
+            "conclusion": "success",
+            "duration_s": 2
+          },
+          {
+            "name": "Upload Playwright traces",
+            "conclusion": "success",
+            "duration_s": 6
+          },
+          {
+            "name": "Post Set up Node",
+            "conclusion": "skipped",
+            "duration_s": 0
+          },
+          {
+            "name": "Post Run actions/checkout@v6",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Stop containers",
+            "conclusion": "success",
+            "duration_s": 0
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success",
+            "duration_s": 0
+          }
+        ],
+        "lanes": [],
+        "cache": {
+          "steps": [
+            {
+              "name": "Set up Node",
+              "outcome": "hit",
+              "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+            }
+          ],
+          "hits": 1,
+          "partial": 0,
+          "misses": 0
+        },
+        "fingerprint": {
+          "os": "linux 7.0.0-1017-azure",
+          "arch": "x64",
+          "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+          "cores": 4,
+          "ram_bytes": 16759308288,
+          "image_os": "ubuntu24",
+          "image_version": "20261026.354.1",
+          "runner_os": "Linux",
+          "otp": "28",
+          "elixir": "1.19.5",
+          "node": "22.23.4",
+          "playwright": "1.59.1",
+          "workers": 1,
+          "revision": "49a3c9838ad3499c6d4bc8e22ba18f3c74fde212",
+          "manifest_sha256": "cd994a55adf41dbb9ae77deaa1f855faff7412d42f2cf838556be62b70941f3f",
+          "dirty": false
+        },
+        "informs_only": true
+      }
+    ],
+    "ci_reference": {
+      "workflow": "ci.yml",
+      "main_run_ids": [
+        40387584954,
+        40361348536
+      ],
+      "by_workflow": {
+        "ci.yml": 40387584954,
+        "accrue_admin_browser.yml": 40361348536
+      },
+      "critical_path_median_s": 1513,
+      "basis": "median workflow_duration_ms (queue included) of the 17 successful push-to-default-branch ci.yml runs in the 90-day window of scripts/ci/collect_ci_baseline.mjs --repo szTheory/accrue --workflow ci.yml; main_run_ids are the most recent successful push runs of each workflow on origin/main and the baseline for pre-existing-on-main triage",
+      "collected_at": "2026-10-28"
+    },
     "freeze": null,
     "visual": null,
     "a11y": null,
@@ -578,6 +2638,430 @@
         "cells": 166,
         "owners": 2
       }
+    },
+    {
+      "id": "DEV-254-02",
+      "kind": "ci-first-observation-triage",
+      "status": "open",
+      "before": {
+        "cells": 166,
+        "owners": 2
+      },
+      "entries": [
+        {
+          "workflow": "CI",
+          "run_id": 40727439541,
+          "job": "Admin Phase 200 deterministic guardrails",
+          "step": "Run Phase 200 deterministic guardrails",
+          "test_ref": null,
+          "path": "accrue_admin/assets/css/app.css",
+          "classification": "in-scope",
+          "main_run_id": 40387584954,
+          "first_error_line": "[verify_package_docs] package docs verification failed: /home/runner/work/accrue/accrue/accrue_admin/assets/css/app.css contains raw type declarations outside ax-type-exception allowlist (FND-01 raw type declarations): 58:  font-size: var(--ax-type-md);",
+          "test_count": 1,
+          "observed_in": [
+            40727439541
+          ],
+          "fixed_in_sha": "0c982c03d",
+          "followup_run_id": 40732595137,
+          "resolution": "app.css FND-01 ax-type-exception and theme.css selector heads (FND-05); the step passed past package docs in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40727439541,
+          "job": "Docs and bash contracts (shift-left)",
+          "step": "PR claims contract (SL-A)",
+          "test_ref": null,
+          "path": ".planning/WINDOWS.md",
+          "classification": "out-of-scope-branch-only",
+          "main_run_id": 40387584954,
+          "first_error_line": "pr claims: FAIL: claim C1 (fixed_string_count) asserts 1 but the measured value is 0",
+          "test_count": 1,
+          "observed_in": [
+            40727439541,
+            40732595137,
+            40735861913,
+            40742671473,
+            40745556555,
+            40749794325
+          ],
+          "resolution": "open: owner decision at 254-03-03"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40727439541,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=on opentelemetry=off) [advisory]",
+          "step": "Accrue test",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": null,
+          "test_count": 1,
+          "observed_in": [
+            40727439541,
+            40732595137
+          ],
+          "fixed_in_sha": "d7ef3edab",
+          "followup_run_id": 40735861913,
+          "resolution": "root cause was the in-scope app.css/theme.css defect (PackageDocsVerifierTest); the Accrue test step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40727439541,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=on)",
+          "step": "Accrue test",
+          "test_ref": "test package docs verifier rejects raw ms duration literal in app.css (Accrue.Docs.PackageDocsVerifierTest)",
+          "path": "test/accrue/docs/package_docs_verifier_test.exs",
+          "classification": "out-of-scope-branch-only",
+          "main_run_id": 40387584954,
+          "first_error_line": "##[error]     test/accrue/docs/package_docs_verifier_test.exs:328",
+          "test_count": 15,
+          "observed_in": [
+            40727439541,
+            40732595137
+          ],
+          "fixed_in_sha": "d7ef3edab",
+          "followup_run_id": 40735861913,
+          "resolution": "root cause was the in-scope app.css/theme.css defect (PackageDocsVerifierTest); the Accrue test step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40727439541,
+          "job": "Release gate (Floor; elixir=1.19.0 otp=28.0 sigra=off opentelemetry=off)",
+          "step": "Accrue test",
+          "test_ref": "test package docs verifier rejects 'transition: all' in app.css (Accrue.Docs.PackageDocsVerifierTest)",
+          "path": "test/accrue/docs/package_docs_verifier_test.exs",
+          "classification": "out-of-scope-branch-only",
+          "main_run_id": 40387584954,
+          "first_error_line": "##[error]     test/accrue/docs/package_docs_verifier_test.exs:270",
+          "test_count": 15,
+          "observed_in": [
+            40727439541,
+            40732595137
+          ],
+          "fixed_in_sha": "d7ef3edab",
+          "followup_run_id": 40735861913,
+          "resolution": "root cause was the in-scope app.css/theme.css defect (PackageDocsVerifierTest); the Accrue test step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40727439541,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off)",
+          "step": "Accrue test",
+          "test_ref": "test package docs verifier rejects missing semantic role tokens (Accrue.Docs.PackageDocsVerifierTest)",
+          "path": "test/accrue/docs/package_docs_verifier_test.exs",
+          "classification": "out-of-scope-branch-only",
+          "main_run_id": 40387584954,
+          "first_error_line": "##[error]     test/accrue/docs/package_docs_verifier_test.exs:525",
+          "test_count": 15,
+          "observed_in": [
+            40727439541,
+            40732595137
+          ],
+          "fixed_in_sha": "d7ef3edab",
+          "followup_run_id": 40735861913,
+          "resolution": "root cause was the in-scope app.css/theme.css defect (PackageDocsVerifierTest); the Accrue test step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40727439541,
+          "job": "Annotation sweep",
+          "step": "Sweep release-facing annotations",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": "##[error]Process completed with exit code 1.",
+          "test_count": 1,
+          "observed_in": [
+            40727439541,
+            40732595137,
+            40735861913,
+            40742671473,
+            40745556555
+          ],
+          "fixed_in_sha": "fb859cacd",
+          "followup_run_id": 40749794325,
+          "resolution": "downstream of the Release gate legs; green once they were"
+        },
+        {
+          "workflow": "AccrueAdmin Browser UAT",
+          "run_id": 40727439599,
+          "job": "Browser UAT",
+          "step": "Run browser UAT",
+          "test_ref": "[chromium-desktop] › e2e/admin-interaction-overlay-phase199.spec.js:1010:3 › Phase 199 interaction and overlay contract › @phase199 @affordance action menu stays adjacent and bounded at locked viewport edges",
+          "path": "e2e/admin-interaction-overlay-phase199.spec.js",
+          "classification": "out-of-scope-branch-only",
+          "main_run_id": 40361348536,
+          "first_error_line": "Error: tablet-768: action menu: geometry settles inside viewport",
+          "test_count": 1,
+          "observed_in": [
+            40727439599,
+            40732595360,
+            40745556594
+          ],
+          "resolution": "open: owner decision at 254-03-03 (owner job)"
+        },
+        {
+          "workflow": "AccrueAdmin Browser UAT",
+          "run_id": 40727439599,
+          "job": "Browser UAT",
+          "step": "Run browser UAT",
+          "test_ref": "[chromium-desktop] › e2e/admin-storybook-a11y-phase200.spec.js:17:3 › Phase 200 rendered Storybook accessibility › discovers mounted Storybook URLs from the DOM and scans settled light/dark modes",
+          "path": "e2e/admin-storybook-a11y-phase200.spec.js",
+          "classification": "out-of-scope-branch-only",
+          "main_run_id": 40361348536,
+          "first_error_line": "Error: PhoenixStorybook color mode settles to light",
+          "test_count": 1,
+          "observed_in": [
+            40727439599,
+            40732595360,
+            40735861909,
+            40742671507,
+            40745556594,
+            40749794313
+          ],
+          "resolution": "open: owner decision at 254-03-03 (owner job)"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40732595137,
+          "job": "Admin Phase 200 deterministic guardrails",
+          "step": "Run Phase 200 deterministic guardrails",
+          "test_ref": "[chromium-desktop] › e2e/admin-storybook-a11y-phase200.spec.js:17:3 › Phase 200 rendered Storybook accessibility › discovers mounted Storybook URLs from the DOM and scans settled light/dark modes",
+          "path": "e2e/admin-storybook-a11y-phase200.spec.js",
+          "classification": "out-of-scope-branch-only",
+          "main_run_id": 40387584954,
+          "first_error_line": "Error: PhoenixStorybook color mode settles to light",
+          "test_count": 1,
+          "observed_in": [
+            40732595137,
+            40735861913,
+            40742671473,
+            40745556555,
+            40749794325
+          ],
+          "resolution": "open: owner decision at 254-03-03 (owner job)"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40735861913,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=on)",
+          "step": "Accrue admin format",
+          "test_ref": null,
+          "path": "accrue_admin/test/accrue_admin/dev/subscription_compositions_manifest_test.exs",
+          "classification": "in-scope",
+          "main_run_id": 40387584954,
+          "first_error_line": "** (Mix) mix format failed due to --check-formatted.",
+          "test_count": 1,
+          "observed_in": [
+            40735861913
+          ],
+          "fixed_in_sha": "9fae369b0",
+          "followup_run_id": 40742671473,
+          "resolution": "mix format on five accrue_admin files; format step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40735861913,
+          "job": "Release gate (Floor; elixir=1.19.0 otp=28.0 sigra=off opentelemetry=off)",
+          "step": "Accrue admin format",
+          "test_ref": null,
+          "path": "accrue_admin/test/accrue_admin/dev/subscription_compositions_manifest_test.exs",
+          "classification": "in-scope",
+          "main_run_id": 40387584954,
+          "first_error_line": "** (Mix) mix format failed due to --check-formatted.",
+          "test_count": 1,
+          "observed_in": [
+            40735861913
+          ],
+          "fixed_in_sha": "9fae369b0",
+          "followup_run_id": 40742671473,
+          "resolution": "mix format on five accrue_admin files; format step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40735861913,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=on opentelemetry=off) [advisory]",
+          "step": "Accrue admin format",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": null,
+          "test_count": 1,
+          "observed_in": [
+            40735861913
+          ],
+          "fixed_in_sha": "9fae369b0",
+          "followup_run_id": 40742671473,
+          "resolution": "mix format on five accrue_admin files; format step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40735861913,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off)",
+          "step": "Accrue admin format",
+          "test_ref": null,
+          "path": "accrue_admin/test/accrue_admin/dev/subscription_compositions_manifest_test.exs",
+          "classification": "in-scope",
+          "main_run_id": 40387584954,
+          "first_error_line": "** (Mix) mix format failed due to --check-formatted.",
+          "test_count": 1,
+          "observed_in": [
+            40735861913
+          ],
+          "fixed_in_sha": "9fae369b0",
+          "followup_run_id": 40742671473,
+          "resolution": "mix format on five accrue_admin files; format step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40742671473,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off)",
+          "step": "Accrue admin test",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": "SELECT count(a0.\"id\") FROM \"billing\".\"accrue_webhook_events\" AS a0 WHERE (a0.\"status\" IN ('failed','dead')) []",
+          "test_count": 1,
+          "observed_in": [
+            40742671473
+          ],
+          "fixed_in_sha": "d4dc2877f",
+          "followup_run_id": 40745556555,
+          "resolution": "unused alias under --warnings-as-errors; the step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40742671473,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=on opentelemetry=off) [advisory]",
+          "step": "Accrue admin test",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": null,
+          "test_count": 1,
+          "observed_in": [
+            40742671473
+          ],
+          "fixed_in_sha": "d4dc2877f",
+          "followup_run_id": 40745556555,
+          "resolution": "unused alias under --warnings-as-errors; the step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40742671473,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=on)",
+          "step": "Accrue admin test",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": "SELECT count(a0.\"id\") FROM \"billing\".\"accrue_webhook_events\" AS a0 WHERE (a0.\"status\" IN ('failed','dead')) []",
+          "test_count": 1,
+          "observed_in": [
+            40742671473
+          ],
+          "fixed_in_sha": "d4dc2877f",
+          "followup_run_id": 40745556555,
+          "resolution": "unused alias under --warnings-as-errors; the step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40742671473,
+          "job": "Release gate (Floor; elixir=1.19.0 otp=28.0 sigra=off opentelemetry=off)",
+          "step": "Accrue admin test",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": "SELECT count(a0.\"id\") FROM \"billing\".\"accrue_webhook_events\" AS a0 WHERE (a0.\"status\" IN ('failed','dead')) []",
+          "test_count": 1,
+          "observed_in": [
+            40742671473
+          ],
+          "fixed_in_sha": "d4dc2877f",
+          "followup_run_id": 40745556555,
+          "resolution": "unused alias under --warnings-as-errors; the step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40745556555,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=on opentelemetry=off) [advisory]",
+          "step": "Accrue admin dialyzer",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": null,
+          "test_count": 1,
+          "observed_in": [
+            40745556555
+          ],
+          "fixed_in_sha": "fb859cacd",
+          "followup_run_id": 40749794325,
+          "resolution": "dialyzer ignore entry for the Storybook page render/1 return shape (MIX_ENV=test); the step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40745556555,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=on)",
+          "step": "Accrue admin dialyzer",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": "##[error]Process completed with exit code 2.",
+          "test_count": 1,
+          "observed_in": [
+            40745556555
+          ],
+          "fixed_in_sha": "fb859cacd",
+          "followup_run_id": 40749794325,
+          "resolution": "dialyzer ignore entry for the Storybook page render/1 return shape (MIX_ENV=test); the step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40745556555,
+          "job": "Release gate (Primary dev target; elixir=1.19.5 otp=28.0 sigra=off opentelemetry=off)",
+          "step": "Accrue admin dialyzer",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": "##[error]Process completed with exit code 2.",
+          "test_count": 1,
+          "observed_in": [
+            40745556555
+          ],
+          "fixed_in_sha": "fb859cacd",
+          "followup_run_id": 40749794325,
+          "resolution": "dialyzer ignore entry for the Storybook page render/1 return shape (MIX_ENV=test); the step passed in the follow-up run"
+        },
+        {
+          "workflow": "CI",
+          "run_id": 40745556555,
+          "job": "Release gate (Floor; elixir=1.19.0 otp=28.0 sigra=off opentelemetry=off)",
+          "step": "Accrue admin dialyzer",
+          "test_ref": null,
+          "path": null,
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": "##[error]Process completed with exit code 2.",
+          "test_count": 1,
+          "observed_in": [
+            40745556555
+          ],
+          "fixed_in_sha": "fb859cacd",
+          "followup_run_id": 40749794325,
+          "resolution": "dialyzer ignore entry for the Storybook page render/1 return shape (MIX_ENV=test); the step passed in the follow-up run"
+        }
+      ],
+      "note": "First runner observation of the unchanged lanes on PR #58 (draft, szTheory/accrue) and the in-scope follow-ups. Pushes: 5a2b1aa3d (first observation), 03e8053e3, d7ef3edab, 26e500c37, d4dc2877f, fb859cacd. Every run is attempt 1 of its own commit; none was rerun. Entries are grouped by workflow/job/step/path with observed_in listing every attempt-1 run that showed the red. Three reds remain open and go to checkpoint 254-03-03: the SL-A PR-claims contract (.planning/WINDOWS.md open_count), the Phase 200 Storybook a11y spec in both owner jobs, and the intermittent Phase 199 action-menu spec in browser-uat. The budget top-level manifest_sha256 still names the pre-254-03 storybook/phase252-manifest.json (router.ex and subscription_manifest.ex digests were refreshed in c2e5af2d3 and 9fae369b0); the 254-09-02 restamp re-points it."
     }
   ],
   "widening_rule": "Budget values, allowances and the selection set are re-frozen only by an appended deviation record (D-23). CI never rewrites this file, a frozen value never widens silently, and local (informs_only) samples never populate a frozen value."
