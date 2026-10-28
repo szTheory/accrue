@@ -1,7 +1,7 @@
 defmodule AccrueAdmin.SubscriptionJourneyTest do
   use AccrueAdmin.LiveCase, async: false
 
-  alias Accrue.Billing.{Subscription, SubscriptionItem, SubscriptionProjection}
+  alias Accrue.Billing.{Subscription, SubscriptionItem}
   alias Accrue.Events.Event
   alias Accrue.Processor.Fake
   alias Accrue.Test.Factory
