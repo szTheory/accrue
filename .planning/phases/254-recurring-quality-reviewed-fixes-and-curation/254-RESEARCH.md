@@ -415,28 +415,25 @@ if (match) return match.slice(1, 4).map(Number);   // alpha (group 4) is dropped
 | A7 | The accrue_admin_browser.yml workflow is treated by the owner as merge-blocking by convention; branch protection cannot be read from the API (comment in `collect_ci_baseline.mjs`: endpoints "return empty on this repository") | CIQ-03 | If it is not actually required, a red visual gate does not block merges — surface to owner |
 | A8 | WCAG success-criterion semantics cited in D-28 (2.5.8 spacing-circle exception, 2.4.11, 1.4.10/12, 2.3.3 AAA) are applied as described in CONTEXT; not re-fetched from w3.org this session | UXQ-02 | Probe thresholds mis-specified |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **D-06 "15/151 stay" vs D-40 "retire `populated`"**
+All five questions are resolved by the Phase 254 plans; each entry below records the decision the plans take. None remains open.
+
+1. **D-06 "15/151 stay" vs D-40 "retire `populated`"** — RESOLVED
    - Known: retiring removes 1 of the 3 compatibility cases ⇒ phase252 browser cases 15 → 14; collection/page 151 unaffected.
-   - Unclear: whether the owner intended 15 to remain as a *current* full-mode count.
-   - Recommendation: keep 15/151 as `frozen_baseline` in the ledger and as a fixture positive control; make current literals ledger-derived (14/151); implement as the first CURATE-01 task with the pinned-literal sites listed in D-39. This is a coherent doc/spec reconciliation (not a scope change); record it as a plan deviation note.
+   - Decision taken: D-39 already locks "pinned literals derived from the ledger as an explicit amendment". 15/151 stays as `frozen_baseline` in the curation ledger and as the fixture positive control; the live counts are ledger-derived (14/151 after the retirement). Implemented by 254-04 (ledger, derived count sites) and 254-06 (retirement), and recorded as amendment `AMD-254-01` in `accrue_admin/storybook/subscription-curation.json`, which the 254-18 acceptance generator requires.
 
-2. **Where do CIQ-03 visual captures run relative to the CIQ-01 required owner?**
-   - Known: `visual-desktop` lives in `accrue_admin_browser.yml` (path-filtered, own concurrency), while the CIQ-01 named required owner is `ci.yml` `admin-phase200-guardrails`.
-   - Unclear: whether the owner considers the browser workflow required (A7).
-   - Recommendation: keep D-15 (single baseline owner) and add the path filters (F3); record in the budget deviation log that this workflow is outside the 5 min critical path of `ci.yml` unless branch protection requires it.
+2. **Where do CIQ-03 visual captures run relative to the CIQ-01 required owner?** — RESOLVED
+   - Decision taken: D-15 holds — one baseline owner, the `visual-desktop` project in `accrue_admin_browser.yml`, with the F3 path filters (254-14). Selection, budget and record checks stay in `ci.yml` `admin-phase200-guardrails` (254-08, 254-09, 254-17). The browser workflow is budgeted as its own job: 254-09 freezes a measured `allowances.visual` against the browser-uat job and records in a budget deviation that this workflow sits outside the `ci.yml` 5 min critical path. Whether branch protection requires it (A7) stays a recorded assumption; it is not asserted.
 
-3. **Mounted vs story-route sources for the 4 focus/disclosure captures (D-33 says "from mounted routes")**
-   - Known: `review_cancel_now` is a story page variation (so review-open can be a story capture); pixel PNG hashes in the record only mean something if the PNGs are Linux-minted and committed.
-   - Unclear: whether any capture truly needs the mounted (seeded, reset-bearing) route.
-   - Recommendation: default all 16 to story routes + Linux baselines in the same manifest; mounted parity is already asserted by existing mounted tests. If a mounted capture is unavoidable it must also be a committed `toHaveScreenshot` baseline, never a tmp PNG (D-31 forbids tmp evidence). Planner confirm during the plan-check.
+3. **Mounted vs story-route sources for the 4 focus/disclosure captures** — RESOLVED
+   - Decision taken: D-33 (locked) wins over the story-only recommendation. Settled cells (collection populated → story `multiple_rows`, detail active → story page `active`) reuse CIQ-03 story captures; detail review-open (4) and disclosure-open + summary-focused (4) come from mounted routes. All 16 are committed, Linux-minted `toHaveScreenshot` baselines in the one identity manifest — never tmp PNGs. This adds 8 mounted keys to the D-16 matrix (24 story + 8 mounted = 32), recorded as amendment `AMD-254-02` in `accrue_admin/storybook/phase254-visual-cases.json`. The `populated` → `multiple_rows` collection substitution (the Phase 253 collection universe has no `populated` state) is recorded as `AMD-254-03` in the design review record (254-10).
 
-4. **Locally verifying pixel gates**
-   - macOS cannot produce valid baselines; per-task local verification of `toHaveScreenshot` is impossible.
-   - Recommendation: split each case into a shared `prepareDeterministicCase()` whose assertions are unit-exercised in the lab browser lane (runs anywhere) and the Linux-only screenshot assertion; optionally run the Docker pre-flight (A6). Do not add an env flag that disables the screenshot (a weakening path); if a flag is unavoidable, the CI contract test must assert it is unset in every workflow.
+4. **Locally verifying pixel gates** — RESOLVED
+   - Decision taken: each case runs its deterministic preparation and content assertions locally with `--update-snapshots=none`; the local gate accepts only Playwright's missing-snapshot error on the screenshot step and asserts the snapshot directory is unchanged (254-14-01). The Linux mint job is authoritative (254-15). No environment flag disables the screenshot assertion; the Docker pre-flight (A6) is optional and never a gate.
 
-5. **First push (D-25)** — outward-facing; needs explicit owner confirmation inside the plan (the one valid human interaction under the Executable Acceptance Policy). If declined, CIQ-03 mint and CIQ-04 CI numbers cannot complete; the plan must say so and stop at the last locally provable boundary rather than fabricate runner numbers.
+5. **First push (D-25)** — RESOLVED
+   - Decision taken: a `checkpoint:decision` (gate `blocking-human`) is the first task of 254-03. `push-approved` covers later pushes and workflow dispatches on this branch; `push-declined` halts exactly the push-dependent tasks (254-03-02, 254-09-03, 254-15-01, 254-18-01) at the last locally provable boundary without fabricated runner numbers. Out-of-scope CI reds observed after the push are triaged mechanically and escalated through `checkpoint:decision` tasks 254-03-03, 254-15-02 and 254-18-02.
 
 ## Environment Availability
 
