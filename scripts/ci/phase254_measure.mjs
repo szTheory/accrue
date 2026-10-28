@@ -967,6 +967,11 @@ function ownedMatch(candidate, owned) {
 const PATH_TOKEN = /(?:file:\/\/)?[\w@.~+/-]*[\w@-]\/[\w@.~+/-]*\.(?:mjs|cjs|js|jsx|ts|tsx|exs?|heex|eex|css|json|ya?ml|sh|md|toml)\b/g;
 const RUNNER_PREFIX = /^\/(?:home\/runner\/work|Users\/runner\/work)\/[^/]+\/[^/]+\//;
 
+// Colour escapes (ESC [ ... m) precede runner paths in formatter output; a bare `[31m` can
+// survive a copy that dropped the ESC byte, so both forms are removed.
+const ANSI = /(?:\u001b)?\[[0-9;]*m/g;
+const stripAnsi = (line) => line.replace(ANSI, "");
+
 // The step's own command echo (`##[group]Run <cmd>`, the ANSI-coloured copy, `shell:`/`env:`)
 // names the scripts the step RUNS, not the paths that FAILED, so it is never evidence.
 const COMMAND_ECHO = /^(?:##\[group\]Run\b|(?:\u001b|\^\[)\[36;1m|shell:\s|env:\s*$|\s{2}[A-Z][A-Z0-9_]*:\s)/;
@@ -1008,7 +1013,7 @@ function pathsInWindows(lines, markers) {
 // primary block exists. Dependency trees, node internals and absolute paths outside the
 // checkout are not evidence of a failing path and are dropped.
 export function extractFailingPaths(logText) {
-  const lines = String(logText ?? "").split(/\r?\n/).filter((line) => !COMMAND_ECHO.test(line));
+  const lines = String(logText ?? "").split(/\r?\n/).filter((line) => !COMMAND_ECHO.test(line)).map(stripAnsi);
   const primary = pathsInWindows(lines, PRIMARY_MARKERS);
   if (primary.length > 0) return primary;
   return pathsInWindows(lines, [[WIDE_MARKER, WIDE_WINDOW]]);

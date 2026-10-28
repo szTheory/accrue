@@ -628,3 +628,8 @@ test("parseCacheOutcomes reads the real runner log shape (##[group] header, tab-
   assert.equal(outcome.misses, 1);
   assert.deepEqual(outcome.steps.map((step) => step.name), ["Set up Node", "Restore accrue_admin deps cache", "Restore build cache"]);
 });
+
+test("extractFailingPaths strips ANSI colour sequences before reading a runner path", () => {
+  const log = "** (Mix) mix format failed due to --check-formatted.\n\u001b[1m\u001b[31m/home/runner/work/accrue/accrue/accrue_admin/lib/accrue_admin/router.ex\n\u001b[0m";
+  assert.deepEqual(measure.extractFailingPaths?.(log), ["accrue_admin/lib/accrue_admin/router.ex"]);
+});
