@@ -244,8 +244,8 @@ html.accrue-admin {
    below MUST stay a separate rule — CSS cannot list a media-gated selector here.
    Must contain the FULL dark token set — no subset. */
 html.accrue-admin[data-theme="dark"],
-html.accrue-admin [data-theme="dark"],
 .psb-sandbox.accrue-admin.ax-theme-dark-shim,
+html.accrue-admin [data-theme="dark"],
 .accrue-admin [data-theme="dark"] {
   --ax-base: #0f1318;
   --ax-elevated: #171d24;
