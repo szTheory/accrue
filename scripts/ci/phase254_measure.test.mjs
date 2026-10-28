@@ -433,3 +433,122 @@ test("collectCiSample rejects a run with no owner job and an owner job without a
     assert.throws(() => measure.collectCiSample(ciRunFixture(), dir, { 101: CI_LOGS[101] }), /no job log/);
   });
 });
+
+// -- 254-03 red triage (mechanical in-scope test) -------------------------------------------
+
+const OWNED_FIXTURE = new Set([
+  "scripts/ci/phase254_measure.mjs",
+  "accrue_admin/e2e/subscription-compositions-phase253.spec.js",
+  "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+  "storybook/components/",
+  ".github/workflows/ci.yml",
+]);
+
+function failure(overrides = {}) {
+  return {
+    workflow_file: "ci.yml",
+    job: "Browser UAT",
+    step: "Run Playwright",
+    log: "  1) [chromium-desktop] > e2e/subscription-compositions-phase253.spec.js:20:5 > composition renders\n    Error: expected visible",
+    ...overrides,
+  };
+}
+
+test("classifyRed: a failing Playwright path inside the owned set is in-scope", () => {
+  const result = measure.classifyRed?.(failure(), { owned: OWNED_FIXTURE, mainFailures: [] });
+  assert.equal(result?.classification, "in-scope");
+  assert.equal(result?.path, "accrue_admin/e2e/subscription-compositions-phase253.spec.js");
+});
+
+test("classifyRed: a failing step named in PHASE254_STEP_NAMES is in-scope even without a path", () => {
+  assert.ok(measure.PHASE254_STEP_NAMES?.includes("Phase 254 machine fingerprint"));
+  const result = measure.classifyRed?.(failure({ step: "Phase 254 machine fingerprint", log: "boom" }), { owned: OWNED_FIXTURE, mainFailures: [] });
+  assert.equal(result?.classification, "in-scope");
+});
+
+test("classifyRed: a path outside the owned set whose job and step also failed on main is pre-existing-on-main", () => {
+  const log = "  1) [chromium-desktop] > e2e/unowned-thing.spec.js:9:1 > something\n    Error: nope";
+  const main = [{ workflow_file: "ci.yml", job: "Browser UAT", step: "Run Playwright" }];
+  assert.equal(measure.classifyRed?.(failure({ log }), { owned: OWNED_FIXTURE, mainFailures: main })?.classification, "pre-existing-on-main");
+  assert.equal(measure.classifyRed?.(failure({ log }), { owned: OWNED_FIXTURE, mainFailures: [] })?.classification, "out-of-scope-branch-only");
+});
+
+test("classifyRed: a log with no extractable path is environmental", () => {
+  const result = measure.classifyRed?.(failure({ log: "The runner has received a shutdown signal." }), { owned: OWNED_FIXTURE, mainFailures: [] });
+  assert.equal(result?.classification, "environmental");
+  assert.equal(result?.path, null);
+});
+
+test("classifyRed: a failing accrue_admin/e2e spec absent from every 252-254 files_modified list is NOT in-scope (consumed root alone is insufficient)", () => {
+  const log = "  1) [chromium-desktop] > e2e/some-other-phase.spec.js:3:1 > x\n    Error: y";
+  assert.equal(measure.classifyRed?.(failure({ log }), { owned: OWNED_FIXTURE, mainFailures: [] })?.classification, "out-of-scope-branch-only");
+  const real = measure.ownedPaths?.({ root: path.resolve(HERE, "../..") });
+  assert.ok(real instanceof Set);
+  assert.equal(real.has("accrue_admin/e2e/some-other-phase.spec.js"), false);
+});
+
+test("classifyRed: a directory entry in the owned set acts as a prefix", () => {
+  const log = "Error at storybook/components/subscription_detail.story.exs:12";
+  assert.equal(measure.classifyRed?.(failure({ log }), { owned: OWNED_FIXTURE, mainFailures: [] })?.classification, "in-scope");
+});
+
+test("ownedPaths reads 252-254 plan frontmatter and contains scripts/ci/phase254_measure.mjs (positive control)", () => {
+  const owned = measure.ownedPaths?.({ root: path.resolve(HERE, "../..") });
+  assert.ok(owned instanceof Set && owned.size > 0, "owned set is non-empty");
+  assert.ok(owned.has("scripts/ci/phase254_measure.mjs"));
+  assert.ok(owned.has("accrue_admin/storybook/phase254-budget.json"));
+});
+
+test("ownedPaths on a root with no 252-254 plans returns an empty set (negative control)", () => {
+  const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase254-owned-"));
+  try {
+    fs.mkdirSync(path.join(dir, ".planning", "phases"), { recursive: true });
+    assert.equal(measure.ownedPaths?.({ root: dir }).size, 0);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("extractFailingPaths normalises runner prefixes, file URLs and drops node_modules and node internals", () => {
+  const log = [
+    "Error: failed at file:///home/runner/work/accrue/accrue/scripts/ci/verify_x.mjs:10:3",
+    "    at /home/runner/work/accrue/accrue/node_modules/playwright/lib/x.js:1:1",
+    "    at node:internal/modules/run_main:1:1",
+    "  1) [chromium-desktop] > e2e/a.spec.js:3:1 > t",
+    "  test/accrue_admin/live/foo_test.exs:44",
+  ].join("\n");
+  assert.deepEqual(measure.extractFailingPaths?.(log), ["scripts/ci/verify_x.mjs", "e2e/a.spec.js", "test/accrue_admin/live/foo_test.exs"]);
+  assert.deepEqual(measure.extractFailingPaths?.("nothing here"), []);
+});
+
+function jobFixture(name, steps) {
+  return { name, conclusion: steps.some((s) => s.conclusion === "failure") ? "failure" : "success", steps };
+}
+
+test("triageRuns keys the main reference per workflow: the same step failing only in the other workflow's main run is not pre-existing", () => {
+  const log = "  1) [chromium-desktop] > e2e/unowned.spec.js:1:1 > x\n    Error: z";
+  const runs = [
+    { workflow_file: "accrue_admin_browser.yml", workflow: "AccrueAdmin Browser UAT", run_id: 11, jobs: [{ ...jobFixture("Browser UAT", [{ name: "Run Playwright", conclusion: "failure" }]), failed_logs: { "Run Playwright": log } }] },
+  ];
+  const onB = { "accrue_admin_browser.yml": { run_id: 22, failures: [{ job: "Browser UAT", step: "Run Playwright" }] } };
+  const onlyA = { "accrue_admin_browser.yml": { run_id: 22, failures: [] }, "ci.yml": { run_id: 21, failures: [{ job: "Browser UAT", step: "Run Playwright" }] } };
+  const [pre] = measure.triageRuns?.({ runs, mainRuns: onB, owned: OWNED_FIXTURE }) ?? [];
+  assert.equal(pre?.classification, "pre-existing-on-main");
+  assert.equal(pre?.main_run_id, 22);
+  const [notPre] = measure.triageRuns?.({ runs, mainRuns: onlyA, owned: OWNED_FIXTURE }) ?? [];
+  assert.equal(notPre?.classification, "out-of-scope-branch-only");
+  assert.deepEqual(Object.keys(notPre ?? {}).sort(), ["classification", "first_error_line", "job", "main_run_id", "path", "run_id", "step", "test_ref", "workflow"]);
+});
+
+test("triageRuns rejects a failing run whose workflow has no main-run key with a named error, and a fully green run yields no entries", () => {
+  const failing = [{ workflow_file: "ci.yml", workflow: "CI", run_id: 1, jobs: [jobFixture("X", [{ name: "s", conclusion: "failure" }])] }];
+  assert.throws(() => measure.triageRuns?.({ runs: failing, mainRuns: { "accrue_admin_browser.yml": { run_id: 2, failures: [] } }, owned: OWNED_FIXTURE }), /no --main-run for workflow ci\.yml/);
+  const green = [{ workflow_file: "ci.yml", workflow: "CI", run_id: 1, jobs: [jobFixture("X", [{ name: "s", conclusion: "success" }])] }];
+  assert.deepEqual(measure.triageRuns?.({ runs: green, mainRuns: {}, owned: OWNED_FIXTURE }), []);
+});
+
+test("parseMainRunOptions parses repeatable workflow=run pairs and rejects malformed pairs", () => {
+  assert.deepEqual(measure.parseMainRunOptions?.(["ci.yml=5", "accrue_admin_browser.yml=7"]), { "ci.yml": 5, "accrue_admin_browser.yml": 7 });
+  assert.throws(() => measure.parseMainRunOptions?.(["ci.yml"]), /workflow=run_id/);
+  assert.throws(() => measure.parseMainRunOptions?.(["ci.yml=abc"]), /workflow=run_id/);
+});
