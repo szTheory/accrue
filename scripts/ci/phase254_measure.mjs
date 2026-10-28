@@ -719,14 +719,18 @@ export function buildProvisionalBudget({ samples, root = ROOT }) {
 // -- CI collection (ci-collect) ------------------------------------------------------------
 
 // The two owner jobs that upload a Phase 254 fingerprint. A job outside this map
-// has no fingerprint, so it never yields a sample (it is not an owner, D-21).
+// has no fingerprint, so it never yields a sample (it is not an owner, D-21). Keys are
+// the display names `gh run view` reports; `id` is the stable workflow job key that the
+// samples, the budget and the plans use (sample.job), the display name rides in job_name.
 export const CI_OWNER_JOBS = Object.freeze({
   "Admin Phase 200 deterministic guardrails": Object.freeze({
+    id: "admin-phase200-guardrails",
     artifact: "phase254-machine-evidence-guardrails",
     fingerprint: "fingerprint-guardrails.json",
     lane_artifacts: Object.freeze(["phase252-machine-evidence", "phase253-machine-evidence"]),
   }),
   "Browser UAT": Object.freeze({
+    id: "browser-uat",
     artifact: "phase254-machine-evidence-browser-uat",
     fingerprint: "fingerprint-browser-uat.json",
     lane_artifacts: Object.freeze([]),
@@ -841,7 +845,8 @@ export function collectCiSample(runJson, artifactDir, jobLogs = {}) {
       head_sha: runJson.headSha,
       event: runJson.event,
       attempt: 1,
-      job: job.name,
+      job: evidence.id,
+      job_name: job.name,
       conclusion: job.conclusion,
       started_at: job.startedAt ?? null,
       completed_at: job.completedAt ?? null,

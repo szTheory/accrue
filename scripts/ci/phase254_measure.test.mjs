@@ -282,7 +282,7 @@ test("buildProvisionalBudget refuses a smoke sample, a missing mode and a non-in
 // -- Task 254-01-03: ci-collect and cache outcome parsing -------------------------------------
 
 const CI_SAMPLE_KEYS = [
-  "schema_version", "workflow", "run_id", "head_sha", "event", "attempt", "job", "conclusion", "started_at", "completed_at",
+  "schema_version", "workflow", "run_id", "head_sha", "event", "attempt", "job", "job_name", "conclusion", "started_at", "completed_at",
   "duration_s", "steps", "lanes", "cache", "fingerprint", "informs_only",
 ];
 
@@ -391,7 +391,8 @@ test("collectCiSample turns one attempt-1 run into one pinned-schema CI sample p
     assert.equal(samples?.length, 2, "the unrelated job is not an owner and yields no sample");
     const [guardrails, browser] = samples ?? [];
     assert.deepEqual(Object.keys(guardrails ?? {}), CI_SAMPLE_KEYS);
-    assert.equal(guardrails?.job, "Admin Phase 200 deterministic guardrails");
+    assert.equal(guardrails?.job, "admin-phase200-guardrails");
+    assert.equal(guardrails?.job_name, "Admin Phase 200 deterministic guardrails");
     assert.equal(guardrails?.attempt, 1);
     assert.equal(guardrails?.conclusion, "success");
     assert.equal(guardrails?.fingerprint.image_os, "ubuntu24");
@@ -400,7 +401,8 @@ test("collectCiSample turns one attempt-1 run into one pinned-schema CI sample p
     assert.deepEqual(guardrails?.lanes, [{ lane: "252-08:scenario-repo", duration_ms: 2500 }, { lane: "253-06:phase253-compositions-browser", duration_ms: 43000 }]);
     assert.equal(guardrails?.cache.hits, 1);
     assert.equal(guardrails?.informs_only, true);
-    assert.equal(browser?.job, "Browser UAT");
+    assert.equal(browser?.job, "browser-uat");
+    assert.equal(browser?.job_name, "Browser UAT");
     assert.deepEqual(browser?.lanes, []);
     assert.equal(browser?.cache.misses, 1);
   });
