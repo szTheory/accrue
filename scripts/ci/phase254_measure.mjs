@@ -966,21 +966,51 @@ function ownedMatch(candidate, owned) {
 const PATH_TOKEN = /(?:file:\/\/)?[\w@.~+/-]*[\w@-]\/[\w@.~+/-]*\.(?:mjs|cjs|js|jsx|ts|tsx|exs?|heex|eex|css|json|ya?ml|sh|md|toml)\b/g;
 const RUNNER_PREFIX = /^\/(?:home\/runner\/work|Users\/runner\/work)\/[^/]+\/[^/]+\//;
 
-// Failing source paths named in one failing-step log, repo-relative where the runner prefix
-// is recognised. Dependency trees, node internals and absolute paths outside the checkout
-// are not evidence of a failing path and are dropped.
-export function extractFailingPaths(logText) {
+// The step's own command echo (`##[group]Run <cmd>`, the ANSI-coloured copy, `shell:`/`env:`)
+// names the scripts the step RUNS, not the paths that FAILED, so it is never evidence.
+const COMMAND_ECHO = /^(?:##\[group\]Run\b|(?:\u001b|\^\[)\[36;1m|shell:\s|env:\s*$|\s{2}[A-Z][A-Z0-9_]*:\s)/;
+// Primary failure markers and how many following lines belong to the same failure block.
+const PRIMARY_MARKERS = [
+  [/^\s*\d+\)\s/, 3],
+  [/^\s*not ok \d+\b/, 12],
+  [/\bFAIL\b/, 3],
+  [/##\[error\]/, 0],
+  [/verification failed/, 0],
+];
+const WIDE_MARKER = /\b(?:Error|failed|FAIL)\b|not ok|✖|\*\* \(/;
+const WIDE_WINDOW = 15;
+
+function pathsFromLine(raw, into) {
+  for (const token of raw.match(PATH_TOKEN) ?? []) {
+    let candidate = token.replace(/^file:\/\//, "").replace(RUNNER_PREFIX, "");
+    if (candidate.startsWith("/")) continue;
+    candidate = candidate.replace(/^\.\//, "");
+    if (candidate.includes("node_modules/") || candidate.startsWith("node:") || candidate.startsWith("deps/") || /^https?:/.test(candidate)) continue;
+    if (!into.includes(candidate)) into.push(candidate);
+  }
+}
+
+function pathsInWindows(lines, markers) {
   const paths = [];
-  for (const raw of String(logText ?? "").split(/\r?\n/)) {
-    for (const token of raw.match(PATH_TOKEN) ?? []) {
-      let candidate = token.replace(/^file:\/\//, "").replace(RUNNER_PREFIX, "");
-      if (candidate.startsWith("/")) continue;
-      candidate = candidate.replace(/^\.\//, "");
-      if (candidate.includes("node_modules/") || candidate.startsWith("node:") || candidate.startsWith("deps/") || /^https?:/.test(candidate)) continue;
-      if (!paths.includes(candidate)) paths.push(candidate);
-    }
+  let carry = 0;
+  for (const line of lines) {
+    const marked = markers.find(([pattern]) => pattern.test(line));
+    if (marked) carry = Math.max(carry, marked[1] + 1);
+    if (carry > 0) { pathsFromLine(line, paths); carry -= 1; }
   }
   return paths;
+}
+
+// Failing source paths named in one failing-step log, repo-relative where the runner prefix
+// is recognised. Only failure blocks are read (numbered failure headers, TAP `not ok`
+// blocks, FAIL lines, ##[error] lines); the wide error-window scan is the fallback when no
+// primary block exists. Dependency trees, node internals and absolute paths outside the
+// checkout are not evidence of a failing path and are dropped.
+export function extractFailingPaths(logText) {
+  const lines = String(logText ?? "").split(/\r?\n/).filter((line) => !COMMAND_ECHO.test(line));
+  const primary = pathsInWindows(lines, PRIMARY_MARKERS);
+  if (primary.length > 0) return primary;
+  return pathsInWindows(lines, [[WIDE_MARKER, WIDE_WINDOW]]);
 }
 
 export function extractTestRef(logText) {
@@ -996,10 +1026,14 @@ export function extractTestRef(logText) {
   return null;
 }
 
+const SUMMARY_COUNTER = /^#\s*(?:tests|suites|pass|fail|cancelled|skipped|todo|duration_ms)\b/;
+
 export function firstErrorLine(logText) {
   for (const raw of String(logText ?? "").split(/\r?\n/)) {
+    if (COMMAND_ECHO.test(raw)) continue;
     const line = raw.replace(TIMESTAMP_PREFIX, "").trim();
-    if (line !== "" && /(##\[error\]|\bError\b|\bfail(?:ed|ure)?\b|not ok|✖|\*\* \()/i.test(line)) return line.slice(0, 300);
+    if (line === "" || SUMMARY_COUNTER.test(line)) continue;
+    if (/(##\[error\]|\bError\b|\bFAIL\b|\bfailed\b|not ok|✖|\*\* \()/.test(line)) return line.slice(0, 300);
   }
   return null;
 }
@@ -1023,6 +1057,27 @@ export function classifyRed(item, { owned, mainFailures = [] }) {
   return { ...base, classification: "out-of-scope-branch-only" };
 }
 
+// Splits one failing-step log into per-failure blocks at numbered failure headers
+// (`  1) <title>`), deduplicating the repeated summary copy by title. A log with no
+// numbered header is one block.
+export function splitFailureBlocks(logText) {
+  const lines = String(logText ?? "").split(/\r?\n/);
+  const blocks = [];
+  let current = null;
+  for (const line of lines) {
+    const header = line.replace(TIMESTAMP_PREFIX, "").match(/^\s*\d+\)\s+(\S.*)$/);
+    if (header) {
+      current = { ref: header[1].trim().slice(0, 300), lines: [line] };
+      blocks.push(current);
+    } else if (current) {
+      current.lines.push(line);
+    }
+  }
+  if (blocks.length === 0) return [{ ref: null, text: String(logText ?? "") }];
+  const seen = new Set();
+  return blocks.filter((block) => !seen.has(block.ref) && seen.add(block.ref)).map((block) => ({ ref: block.ref, text: block.lines.join("\n") }));
+}
+
 const RED_JOB_CONCLUSIONS = new Set(["failure", "timed_out", "startup_failure", "cancelled"]);
 const RED_STEP_CONCLUSIONS = new Set(["failure", "timed_out", "cancelled"]);
 
@@ -1043,18 +1098,26 @@ export function triageRuns({ runs, mainRuns, owned }) {
       const stepNames = failedSteps.length > 0 ? failedSteps : [null];
       for (const stepName of stepNames) {
         const log = stepName === null ? "" : (job.failed_logs?.[stepName] ?? "");
-        const verdict = classifyRed({ workflow_file: run.workflow_file, job: job.name, step: stepName, log }, { owned, mainFailures });
-        entries.push({
-          workflow: run.workflow,
-          run_id: run.run_id,
-          job: job.name,
-          step: stepName,
-          test_ref: extractTestRef(log),
-          path: verdict.path,
-          classification: verdict.classification,
-          main_run_id: main.run_id,
-          first_error_line: firstErrorLine(log),
-        });
+        const grouped = new Map();
+        for (const block of splitFailureBlocks(log)) {
+          const verdict = classifyRed({ workflow_file: run.workflow_file, job: job.name, step: stepName, log: block.text }, { owned, mainFailures });
+          const key = `${verdict.classification}|${verdict.path}`;
+          const seen = grouped.get(key);
+          if (seen) { seen.test_count += 1; continue; }
+          grouped.set(key, {
+            workflow: run.workflow,
+            run_id: run.run_id,
+            job: job.name,
+            step: stepName,
+            test_ref: block.ref ?? extractTestRef(block.text),
+            path: verdict.path,
+            classification: verdict.classification,
+            main_run_id: main.run_id,
+            first_error_line: firstErrorLine(block.text),
+            test_count: 1,
+          });
+        }
+        entries.push(...grouped.values());
       }
     }
   }

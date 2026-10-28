@@ -511,7 +511,7 @@ test("ownedPaths on a root with no 252-254 plans returns an empty set (negative 
 
 test("extractFailingPaths normalises runner prefixes, file URLs and drops node_modules and node internals", () => {
   const log = [
-    "Error: failed at file:///home/runner/work/accrue/accrue/scripts/ci/verify_x.mjs:10:3",
+    "##[error]Error: failed at file:///home/runner/work/accrue/accrue/scripts/ci/verify_x.mjs:10:3",
     "    at /home/runner/work/accrue/accrue/node_modules/playwright/lib/x.js:1:1",
     "    at node:internal/modules/run_main:1:1",
     "  1) [chromium-desktop] > e2e/a.spec.js:3:1 > t",
@@ -537,7 +537,7 @@ test("triageRuns keys the main reference per workflow: the same step failing onl
   assert.equal(pre?.main_run_id, 22);
   const [notPre] = measure.triageRuns?.({ runs, mainRuns: onlyA, owned: OWNED_FIXTURE }) ?? [];
   assert.equal(notPre?.classification, "out-of-scope-branch-only");
-  assert.deepEqual(Object.keys(notPre ?? {}).sort(), ["classification", "first_error_line", "job", "main_run_id", "path", "run_id", "step", "test_ref", "workflow"]);
+  assert.deepEqual(Object.keys(notPre ?? {}).sort(), ["classification", "first_error_line", "job", "main_run_id", "path", "run_id", "step", "test_count", "test_ref", "workflow"]);
 });
 
 test("triageRuns rejects a failing run whose workflow has no main-run key with a named error, and a fully green run yields no entries", () => {
@@ -551,4 +551,59 @@ test("parseMainRunOptions parses repeatable workflow=run pairs and rejects malfo
   assert.deepEqual(measure.parseMainRunOptions?.(["ci.yml=5", "accrue_admin_browser.yml=7"]), { "ci.yml": 5, "accrue_admin_browser.yml": 7 });
   assert.throws(() => measure.parseMainRunOptions?.(["ci.yml"]), /workflow=run_id/);
   assert.throws(() => measure.parseMainRunOptions?.(["ci.yml=abc"]), /workflow=run_id/);
+});
+
+test("extractFailingPaths ignores the step command echo and reads the failure line", () => {
+  const log = [
+    "##[group]Run bash scripts/ci/verify_phase200_admin_guardrails.sh",
+    "\u001b[36;1mbash scripts/ci/verify_phase200_admin_guardrails.sh\u001b[0m",
+    "shell: /usr/bin/bash -e {0}",
+    "[verify_package_docs] package docs verification failed: /home/runner/work/accrue/accrue/accrue_admin/assets/css/app.css contains raw type declarations: 58:  font-size: var(--ax-type-md);",
+    "##[error]Process completed with exit code 1.",
+  ].join("\n");
+  assert.deepEqual(measure.extractFailingPaths?.(log), ["accrue_admin/assets/css/app.css"]);
+});
+
+test("extractFailingPaths prefers the numbered failure block over earlier noise", () => {
+  const log = [
+    "16:38:58.479 [error] Postgrex.Protocol failed to connect at test/fixtures/apple/server_evidence.exs:5",
+    "  1) test package docs verifier succeeds (Accrue.Docs.PackageDocsVerifierTest)",
+    "     test/accrue/docs/package_docs_verifier_test.exs:1107",
+    "     Assertion with == failed",
+  ].join("\n");
+  assert.deepEqual(measure.extractFailingPaths?.(log), ["test/accrue/docs/package_docs_verifier_test.exs"]);
+});
+
+test("extractFailingPaths reads a claim reproduce line and falls back to wide error windows when no primary marker exists", () => {
+  const claim = ["pr claims: FAIL: claim C1 (fixed_string_count) asserts 1 but the measured value is 0", "  reproduce: grep -c -F -- \"open_count: 0\" .planning/WINDOWS.md"].join("\n");
+  assert.deepEqual(measure.extractFailingPaths?.(claim), [".planning/WINDOWS.md"]);
+  assert.deepEqual(measure.extractFailingPaths?.("Error: something broke in lib/accrue_admin/foo.ex:3"), ["lib/accrue_admin/foo.ex"]);
+});
+
+test("firstErrorLine skips TAP summary counters and the command echo and returns the first real failure", () => {
+  const log = ["##[group]Run node --test x", "# fail 0", "# cancelled 0", "pr claims: FAIL: claim C1 asserts 1 but the measured value is 0"].join("\n");
+  assert.equal(measure.firstErrorLine?.(log), "pr claims: FAIL: claim C1 asserts 1 but the measured value is 0");
+  assert.equal(measure.firstErrorLine?.("all good"), null);
+});
+
+test("triageRuns emits one entry per failing path and classification within a step, deduplicating repeated failure blocks", () => {
+  const log = [
+    "  1) [chromium-desktop] > e2e/subscription-compositions-phase253.spec.js:20:5 > composition one",
+    "    Error: expected visible",
+    "  2) [chromium-desktop] > e2e/subscription-compositions-phase253.spec.js:44:5 > composition two",
+    "    Error: expected hidden",
+    "  3) [chromium-desktop] > e2e/unowned.spec.js:9:1 > other",
+    "    Error: nope",
+    "  1) [chromium-desktop] > e2e/subscription-compositions-phase253.spec.js:20:5 > composition one",
+    "    Error: expected visible",
+  ].join("\n");
+  const runs = [{ workflow_file: "ci.yml", workflow: "CI", run_id: 5, jobs: [{ ...jobFixture("Browser UAT", [{ name: "Run browser UAT", conclusion: "failure" }]), failed_logs: { "Run browser UAT": log } }] }];
+  const entries = measure.triageRuns?.({ runs, mainRuns: { "ci.yml": { run_id: 4, failures: [] } }, owned: OWNED_FIXTURE }) ?? [];
+  assert.equal(entries.length, 2);
+  const inScope = entries.find((entry) => entry.classification === "in-scope");
+  const out = entries.find((entry) => entry.classification === "out-of-scope-branch-only");
+  assert.equal(inScope?.test_count, 2);
+  assert.match(inScope?.test_ref ?? "", /composition one/);
+  assert.equal(out?.path, "e2e/unowned.spec.js");
+  assert.equal(out?.test_count, 1);
 });
