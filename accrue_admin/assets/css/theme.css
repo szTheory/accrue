@@ -17,8 +17,8 @@
    backend assigns `accrue-admin` to each sandbox and `ax-theme-dark-shim` through its
    supported color-mode option, so the production token set can serve that real scope
    without copying values into the Storybook bundle. */
-html.accrue-admin,
-.psb-sandbox.accrue-admin {
+.psb-sandbox.accrue-admin,
+html.accrue-admin {
   --ax-font-sans: "Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --ax-font-mono: "Geist Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
 
@@ -245,8 +245,8 @@ html.accrue-admin,
    Must contain the FULL dark token set — no subset. */
 html.accrue-admin[data-theme="dark"],
 html.accrue-admin [data-theme="dark"],
-.accrue-admin [data-theme="dark"],
-.psb-sandbox.accrue-admin.ax-theme-dark-shim {
+.psb-sandbox.accrue-admin.ax-theme-dark-shim,
+.accrue-admin [data-theme="dark"] {
   --ax-base: #0f1318;
   --ax-elevated: #171d24;
   --ax-sunken: #0b1015;

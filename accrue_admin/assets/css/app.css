@@ -55,7 +55,7 @@ html.accrue-admin,
   background-color: var(--ax-base);
   color: var(--ax-primary);
   font-family: var(--ax-font-sans);
-  font-size: var(--ax-type-md);
+  font-size: var(--ax-type-md); /* ax-type-exception: the Storybook sandbox root restates the admin layout body type so previews render with production sizing. */
   line-height: var(--ax-leading-normal);
 }
 
