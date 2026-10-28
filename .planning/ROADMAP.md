@@ -168,44 +168,46 @@ Plans:
 **Wave 3** *(W2 Shape the set)*
 - [ ] 254-04-PLAN.md — Curation ledger, verifier, ledger-derived counts and retain/reclassify records
 
-**Wave 4** *(disjoint files; shared admin-test lab lane, run serially)*
+**Wave 4** *(shared admin-test lab lane)*
 - [ ] 254-05-PLAN.md — Review-lane reset refusal and per-case result ledger with dependent reconcile
+
+**Wave 5** *(depends on 254-05: same admin-test lab lane)*
 - [ ] 254-06-PLAN.md — Retire populated, merge provider_pruned and correct stale gap rows
 
-**Wave 5**
+**Wave 6**
 - [ ] 254-07-PLAN.md — depends_on metadata, tracked case universe/sentinels and fail-closed selector
 
-**Wave 6**
+**Wave 7**
 - [ ] 254-08-PLAN.md — Selection-bound composition lane and CI selection on full history
 
-**Wave 7** *(W3 Freeze)*
+**Wave 8** *(W3 Freeze)*
 - [ ] 254-09-PLAN.md — Budget verifier, required-owner step, three-run CI freeze and D-24 resolution
 
-**Wave 8** *(W4 Assess + correct)*
+**Wave 9** *(W4 Assess + correct)*
 - [ ] 254-10-PLAN.md — Deterministic storybook.css recompose and the design review record (assessment)
 
-**Wave 9**
+**Wave 10**
 - [ ] 254-11-PLAN.md — All-severity axe, disposition register, deep probes and mounted keyboard journey
 
-**Wave 10**
+**Wave 11**
 - [ ] 254-12-PLAN.md — Correction batch part 1: red CSS tests, CSS/a11y fixes across all three artifacts, Typography contract amendments
 
-**Wave 11**
+**Wave 12**
 - [ ] 254-13-PLAN.md — Correction batch part 2: red copy tests, copy-tier owner functions, design review record at stage corrected
 
-**Wave 12** *(W5 Baselines + confirm)*
+**Wave 13** *(W5 Baselines + confirm)*
 - [ ] 254-14-PLAN.md — Deterministic visual cases in the Linux owner, identity manifest and mint hardening
 
-**Wave 13**
+**Wave 14**
 - [ ] 254-15-PLAN.md — Mint, attributable rebaseline commit, escalation of environmental drift, design review confirmation
 
-**Wave 14** *(W6 Close)*
+**Wave 15** *(W6 Close)*
 - [ ] 254-16-PLAN.md — Route-seeded gap map, five adopter briefs and next-job candidates
 
-**Wave 15**
+**Wave 16**
 - [ ] 254-17-PLAN.md — Required-owner record checks, consumed roots and proved transparency prohibitions
 
-**Wave 16**
+**Wave 17**
 - [ ] 254-18-PLAN.md — Final CI measurement with red escalation, deviation closure and automated acceptance
 
 ## Progress
