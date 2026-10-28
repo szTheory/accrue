@@ -1,6 +1,9 @@
+import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import test from "node:test";
+import { isMainModule } from "./main_module.mjs";
 
 const ADMIN = "accrue_admin/test/accrue_admin/";
 
@@ -283,7 +286,7 @@ export function parseTap13Report(output, { format }) {
   return { identities, count: records.length, skipped: 0, failed: 0 };
 }
 
-function parsePlaywrightJson(output) {
+export function parsePlaywrightJson(output) {
   let report;
   try {
     report = JSON.parse(output);
@@ -308,7 +311,7 @@ function parsePlaywrightJson(output) {
         if (test.expectedStatus !== "passed" || !Array.isArray(test.results) || test.results.length !== 1 || test.results[0]?.status !== "passed") {
           fail(`browser test is failed, skipped, retried, or missing a result: ${test.title || spec.title || "<unnamed>"}`);
         }
-        tests.push({ identity: test.title || spec.title, status: test.results[0].status });
+        tests.push({ identity: test.title || spec.title, status: test.results[0].status, duration_ms: test.results[0].duration });
       }
     }
     for (const nested of suite.suites || []) visit(nested);
@@ -319,7 +322,17 @@ function parsePlaywrightJson(output) {
     fail("Playwright report is empty or contains unnamed/duplicate test identities");
   }
   if (tests.length !== report.stats.expected) fail(`Playwright summary expected ${report.stats.expected} tests but reported ${tests.length} executed identities`);
-  return { identities, count: tests.length, skipped: 0, failed: 0 };
+  // Phase 254 (CIQ-04): per-test durations are retained as a NEW field so every
+  // deriveExecutionEvidence consumer keeps its prior return shape.
+  // A result without a finite duration is kept as null rather than rejected: the
+  // pass/skip/retry/flaky rejection above is the only gate, and committed fixtures
+  // that predate this field must keep parsing. Measurement consumers
+  // (phase254_measure.mjs) require finite durations themselves.
+  const durations = tests.map(({ identity, duration_ms }) => ({
+    identity,
+    duration_ms: Number.isFinite(duration_ms) && duration_ms >= 0 ? duration_ms : null,
+  }));
+  return { identities, count: tests.length, skipped: 0, failed: 0, durations };
 }
 
 function bindAssertionIds(commandId, assertionIds, identities) {
@@ -420,4 +433,46 @@ export function requiredAssertionIds(commandId) {
       : Object.keys(TEST_ASSERTION_BINDINGS[commandId] || {});
   if (ids.length === 0) fail(`required command ${commandId} has no named assertion contract`);
   return ids;
+}
+
+// -- module-boundary guard (PATTERNS P1/S1) ------------------------------------
+// This is a library module with no CLI. It still registers real tests when
+// invoked directly under `node --test`, so the merge-blocking script contract
+// (guard coverage + non-vacuity) sees a non-vacuous file. The reporter rejection
+// logic is exercised here on inline fixtures, never on the live tree.
+
+const SELF_TEST_SCENARIOS = (() => {
+  const spec = (title, results = [{ status: "passed", duration: 7 }], expectedStatus = "passed") => ({
+    title,
+    ok: results.at(-1).status === "passed",
+    tests: [{ title, expectedStatus, results }],
+  });
+  const report = (specs, stats = {}) => JSON.stringify({
+    suites: [{ title: "inline.spec.js", specs, suites: [] }],
+    stats: { expected: specs.length, unexpected: 0, skipped: 0, flaky: 0, ...stats },
+    errors: [],
+  });
+  return [
+    ["parsePlaywrightJson keeps per-test durations for a passing report", () => {
+      const parsed = parsePlaywrightJson(report([spec("a"), spec("b", [{ status: "passed", duration: 12 }])]));
+      assert.deepEqual(parsed.durations, [{ identity: "a", duration_ms: 7 }, { identity: "b", duration_ms: 12 }]);
+      assert.equal(parsed.count, 2);
+    }],
+    ["parsePlaywrightJson rejects skipped, retried, flaky and failed reports", () => {
+      assert.throws(() => parsePlaywrightJson(report([spec("a")], { expected: 0, skipped: 1 })), /skipped/);
+      assert.throws(() => parsePlaywrightJson(report([spec("a", [{ status: "failed", duration: 1 }, { status: "passed", duration: 2 }])])), /retried/);
+      assert.throws(() => parsePlaywrightJson(report([spec("a")], { flaky: 1 })), /flaky/);
+      assert.throws(() => parsePlaywrightJson(report([spec("a", [{ status: "failed", duration: 1 }])], { expected: 0, unexpected: 1 })), /failed/);
+    }],
+  ];
+})();
+
+let invokedAsEntrypoint = false;
+try {
+  invokedAsEntrypoint = isMainModule(import.meta.url);
+} catch {
+  invokedAsEntrypoint = false;
+}
+if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
+  for (const [name, scenario] of SELF_TEST_SCENARIOS) test(name, scenario);
 }

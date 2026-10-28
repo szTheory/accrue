@@ -80,3 +80,8 @@ test("parsePlaywrightJson positive control: the passing fixture is accepted, so 
   assert.doesNotThrow(() => parse(passing()));
   assert.equal(typeof reporters.parsePlaywrightJson, "function");
 });
+
+test("parsePlaywrightJson keeps a result without a duration as null so older fixtures still parse", () => {
+  const output = report({ specs: [spec("legacy", { results: [{ status: "passed" }] })] });
+  assert.deepEqual(parse(output)?.durations, [{ identity: "legacy", duration_ms: null }]);
+});
