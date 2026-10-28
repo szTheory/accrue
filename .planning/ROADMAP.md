@@ -153,8 +153,57 @@ Cross-cutting constraints: preserve production DataTable/LiveView authority, exi
   4. A maintainer can reproduce cold-start, warm-preview/focused-check and incremental CI measurements, including scenario counts, and use a frozen affordable selection/budget before widening coverage; first-slice measurements inform the freeze and deviations are explicitly resolved without weakening existing gates. Initial targets remain provisional: under 10s warm preview where feasible, under 60s focused checks, at most 3min additional warm browser work and 5min incremental CI critical path. (CIQ-04)
   5. A maintainer can inspect retirement/merge records naming reachability, reason and surviving owner/replacement for stale, impossible or duplicate stories while retaining meaningful legacy/API/negative regressions and kitchen proof, then choose the next existing UI job from a refreshed actor/job/composition gap map and distinct adopter briefs showing remaining Admin/Portal horizons, uncovered states, review triggers and maintenance cost. (CURATE-01, CURATE-02)
 
-**Plans**: TBD
+**Plans**: 17 plans
 **UI hint**: yes
+
+Plans:
+
+**Wave 1** *(W1 Measure)*
+- [ ] 254-01-PLAN.md — Fingerprinted measurement harness, per-test durations and local cold/warm/focused baseline
+- [ ] 254-02-PLAN.md — CI readiness: module-boundary guards, default Playwright projects, spec-ownership contract
+
+**Wave 2** *(blocked on Wave 1; owner-confirmed push, D-25)*
+- [ ] 254-03-PLAN.md — Pre-push contracts, owner push checkpoint and first CI-runner observations
+
+**Wave 3** *(W2 Shape the set; disjoint files)*
+- [ ] 254-04-PLAN.md — Curation ledger, verifier, ledger-derived counts and retain/reclassify records
+- [ ] 254-05-PLAN.md — Review-lane reset refusal and per-case result ledger with dependent reconcile
+
+**Wave 4**
+- [ ] 254-06-PLAN.md — Retire populated, merge provider_pruned and correct stale gap rows
+
+**Wave 5**
+- [ ] 254-07-PLAN.md — depends_on metadata, tracked case universe/sentinels and fail-closed selector
+
+**Wave 6**
+- [ ] 254-08-PLAN.md — Selection-bound composition lane and CI selection on full history
+
+**Wave 7** *(W3 Freeze)*
+- [ ] 254-09-PLAN.md — Budget verifier, required-owner step, three-run CI freeze and D-24 resolution
+
+**Wave 8** *(W4 Assess + correct)*
+- [ ] 254-10-PLAN.md — Deterministic storybook.css recompose and the design review record (assessment)
+
+**Wave 9**
+- [ ] 254-11-PLAN.md — All-severity axe, disposition register, deep probes and mounted keyboard journey
+
+**Wave 10**
+- [ ] 254-12-PLAN.md — Red tests, then the single CSS/copy/a11y correction batch
+
+**Wave 11** *(W5 Baselines + confirm)*
+- [ ] 254-13-PLAN.md — Deterministic visual cases in the Linux owner, identity manifest and mint hardening
+
+**Wave 12**
+- [ ] 254-14-PLAN.md — Mint once, attributable rebaseline commit and design review confirmation
+
+**Wave 13** *(W6 Close)*
+- [ ] 254-15-PLAN.md — Route-seeded gap map, five adopter briefs and next-job candidates
+
+**Wave 14**
+- [ ] 254-16-PLAN.md — Required-owner record checks, consumed roots and proved transparency prohibitions
+
+**Wave 15**
+- [ ] 254-17-PLAN.md — Final CI measurement, deviation closure and automated acceptance
 
 ## Progress
 
@@ -164,7 +213,7 @@ Cross-cutting constraints: preserve production DataTable/LiveView authority, exi
 |-------|----------------|--------|-----------|
 | 252. Production-backed Subscription Stories | 10/10 | Complete    | 2026-10-27 |
 | 253. Real Groups and a Whole Subscription Job | 6/6 | Complete    | 2026-10-27 |
-| 254. Recurring Quality, Reviewed Fixes and Curation | 0/TBD | Not started | - |
+| 254. Recurring Quality, Reviewed Fixes and Curation | 0/17 | Planned | - |
 
 ## Rolling Direction Beyond v1.68
 
