@@ -8,6 +8,8 @@ const {
   axeFailureDetails,
   discoverStorybookStoryUrls,
   setSettledThemeForScan,
+  openStorybookPreviewRoute,
+  storybookPreviewRoutes,
   writePhase200Evidence,
 } = require("./phase200-storybook-helpers.js");
 
@@ -38,19 +40,40 @@ test.describe("Phase 200 rendered Storybook accessibility", () => {
 
       for (const theme of ["light", "dark"]) {
         await setSettledThemeForScan(page, theme);
-        await expect(
-          page.locator(".psb-sandbox, [data-storybook-component-registry], [data-storybook-component-groups]").first(),
-          `${storyUrl} should render Storybook content before axe scan`
-        ).toBeVisible();
+        // Component and page stories carry their sandboxes in this document; group
+        // stories carry them in preview routes that are opened one by one.
+        const previewRoutes = await storybookPreviewRoutes(page);
+        const targets = [];
+        if ((await page.locator(".psb-sandbox").count()) > 0) {
+          await expect(
+            page.locator(".psb-sandbox").first(),
+            `${storyUrl} should render Storybook content before axe scan`
+          ).toBeVisible();
+          targets.push({ surface: storyUrl, scanPage: page, owned: false });
+        } else {
+          expect(previewRoutes.length, `${storyUrl} should expose a sandbox or preview routes to scan`).toBeGreaterThan(0);
+          for (const route of previewRoutes) {
+            targets.push({
+              surface: route,
+              scanPage: await openStorybookPreviewRoute(page.context(), route, theme),
+              owned: true,
+            });
+          }
+        }
 
-        const results = await new AxeBuilder({ page })
-          .include(".psb-sandbox")
-          .withTags(["wcag2a", "wcag2aa"])
-          .analyze();
-        const blocking = results.violations.filter((violation) =>
-          ["critical", "serious"].includes(violation.impact)
-        );
-
+        const blocking = [];
+        for (const target of targets) {
+          const results = await new AxeBuilder({ page: target.scanPage })
+            .include(".psb-sandbox")
+            .withTags(["wcag2a", "wcag2aa"])
+            .analyze();
+          for (const violation of results.violations) {
+            if (["critical", "serious"].includes(violation.impact)) {
+              blocking.push({ violation, surface: target.surface });
+            }
+          }
+          if (target.owned) await target.scanPage.close();
+        }
         evidenceRows.push({
           story_url: storyUrl,
           theme,
@@ -59,11 +82,13 @@ test.describe("Phase 200 rendered Storybook accessibility", () => {
             `playwright:admin-storybook-a11y-phase200:${testInfo.project.name}`,
             `storybook:${storyUrl}:${theme}`,
           ],
-          violations: blocking.map((violation) => axeFailureDetails(violation, { storyUrl, theme })),
+          violations: blocking.map(({ violation, surface }) =>
+            axeFailureDetails(violation, { storyUrl: surface, theme })
+          ),
         });
 
-        for (const violation of blocking) {
-          failures.push(axeFailureDetails(violation, { storyUrl, theme }));
+        for (const { violation, surface } of blocking) {
+          failures.push(axeFailureDetails(violation, { storyUrl: surface, theme }));
         }
       }
     }
