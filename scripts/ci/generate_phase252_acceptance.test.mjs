@@ -21,7 +21,7 @@ const REQUIREMENTS = ["CIQ-01", "SBK-01", "SBK-02", "SBK-03", "SCEN-01", "SCEN-0
 const TASK_IDS = ["252-08-01", "252-08-02", "252-08-03", "252-09-01", "252-09-02", "252-10-01", "252-10-02", "252-10-03"];
 const PROHIBITION_IDS = ["PROH-LAB-PRESENTATION", "PROH-HELDOUT-ATTRIBUTION"];
 const TRANSPARENCY_SOURCE_PATHS = [
-  "scripts/ci/phase_evidence_path.mjs", "scripts/ci/verify_phase252_transparency.mjs",
+  "scripts/ci/phase_evidence_path.mjs", "scripts/ci/main_module.mjs", "scripts/ci/verify_phase252_transparency.mjs",
   "scripts/ci/verify_phase252_lab_presentation.test.mjs", "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
   "scripts/ci/fixtures/phase252-transparency/lab-clean.json", "scripts/ci/fixtures/phase252-transparency/lab-violation.json",
   "scripts/ci/fixtures/phase252-transparency/heldout-clean.json", "scripts/ci/fixtures/phase252-transparency/heldout-violation.json",

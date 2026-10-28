@@ -288,11 +288,11 @@ test("required phase owner admits both transparency checks and their controls be
 test("new reporter lanes bind named target assertions and six independent control markers", () => {
   assert.deepEqual(PHASE252_REPORTER_SPECS["lab-presentation"], {
     kind: "node-tap",
-    testFiles: ["scripts/ci/verify_phase252_lab_presentation.test.mjs"],
+    testFiles: ["scripts/ci/verify_phase252_lab_presentation.test.mjs", "scripts/ci/main_module.mjs"],
   });
   assert.deepEqual(PHASE252_REPORTER_SPECS["heldout-attribution"], {
     kind: "node-tap",
-    testFiles: ["scripts/ci/verify_phase252_heldout_attribution.test.mjs"],
+    testFiles: ["scripts/ci/verify_phase252_heldout_attribution.test.mjs", "scripts/ci/main_module.mjs"],
   });
   assert.deepEqual(requiredAssertionIds("lab-presentation"), ["lab_static_limits", "lab_contradiction_controls"]);
   assert.deepEqual(requiredAssertionIds("heldout-attribution"), ["heldout_synthetic_attribution", "heldout_contradiction_controls"]);
@@ -320,6 +320,7 @@ test("all transparency and original descriptor inputs are fresh, owner-classifie
   const sourcePaths = [
     "scripts/ci/verify_phase252_transparency.mjs",
     "scripts/ci/phase_evidence_path.mjs",
+    "scripts/ci/main_module.mjs",
     "scripts/ci/verify_phase252_lab_presentation.test.mjs",
     "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
     "scripts/ci/fixtures/phase252-transparency/lab-clean.json",

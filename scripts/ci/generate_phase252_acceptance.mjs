@@ -124,6 +124,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const MANIFEST_PATH = "storybook/phase252-manifest.json";
 const TRANSPARENCY_SOURCE_PATHS = Object.freeze([
   "scripts/ci/phase_evidence_path.mjs",
+  "scripts/ci/main_module.mjs",
   "scripts/ci/verify_phase252_transparency.mjs",
   "scripts/ci/verify_phase252_lab_presentation.test.mjs",
   "scripts/ci/verify_phase252_heldout_attribution.test.mjs",

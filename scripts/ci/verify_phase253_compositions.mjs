@@ -436,7 +436,11 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
       "phase253-presentation-contract",
       "scripts/ci/verify_phase253_presentation.test.mjs",
       ASSERTION_BINDINGS["phase253-presentation-contract"],
-      ["scripts/ci/verify_phase252_transparency.mjs", "scripts/ci/phase_evidence_path.mjs"],
+      ["scripts/ci/verify_phase252_transparency.mjs", "scripts/ci/phase_evidence_path.mjs", "scripts/ci/main_module.mjs"],
+      // verify_phase252_transparency.mjs now imports the shared module-boundary guard, and
+      // main_module.mjs registers its own node:test cases in every importing process, so its
+      // identities are part of this lane's exact inventory (same shape as phase253-ci-contract).
+      ["scripts/ci/verify_phase253_presentation.test.mjs", "scripts/ci/main_module.mjs"],
     ),
     command(
       "phase253-transparency-controls",

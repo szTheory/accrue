@@ -50,6 +50,7 @@ const ACCEPTANCE_METADATA_PATHS = Object.freeze([
 ]);
 const TRANSPARENCY_SOURCE_PATHS = Object.freeze([
   "scripts/ci/phase_evidence_path.mjs",
+  "scripts/ci/main_module.mjs",
   "scripts/ci/verify_phase252_transparency.mjs",
   "scripts/ci/verify_phase252_lab_presentation.test.mjs",
   "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
