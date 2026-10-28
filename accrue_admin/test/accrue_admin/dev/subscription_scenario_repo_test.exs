@@ -31,7 +31,11 @@ defmodule AccrueAdmin.SubscriptionScenarioRepoTest do
     assert role == "postgres"
     assert role == System.get_env("PHASE252_E2E_ROLE")
     assert System.get_env("PHASE252_E2E_LANE") == "admin-test"
-    assert address in ["127.0.0.1", "::1"]
+    # The lab preflight already restricts the server address (loopback, or an RFC 1918 bridge
+    # address on a hosted runner) and exports it; the test pins the live connection to exactly
+    # that address instead of re-listing the loopback literals.
+    assert address == System.get_env("PHASE252_E2E_ADDRESS")
+    assert is_binary(address) and address != ""
 
     :ok
   end
