@@ -45,7 +45,6 @@ defmodule CadenceSubscriptionFacts do
     :growing_team,
     :scheduled_cancellation,
     :incomplete_evidence,
-    :populated,
     :braintree_pruned,
     :dunning_active
   ]
@@ -56,8 +55,6 @@ defmodule CadenceSubscriptionFacts do
   @doc "Returns deterministic, database-free facts for one retained subscription situation."
   def fetch!(:active),
     do: base_facts(:active, "stripe", :active, default_ids(), "Acme Research", 12)
-
-  def fetch!(:populated), do: fetch!(:active)
 
   def fetch!(:braintree_pruned),
     do: base_facts(:braintree_pruned, "braintree", :active, default_ids(), "Acme Research", 12)

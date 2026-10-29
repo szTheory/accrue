@@ -36,16 +36,18 @@
         "date": "2026-10-28",
         "status": "owner-accepted at plan time"
       },
-      "rationale": "D-39 locks that the pinned literals are derived from the ledger as an explicit amendment; keeping 15 as a literal would make the D-40 duplicate retirement impossible without weakening a gate, while deriving the count keeps every skip, retry and flaky rejection and the 12 canonical cells intact."
+      "rationale": "D-39 locks that the pinned literals are derived from the ledger as an explicit amendment; keeping 15 as a literal would make the D-40 duplicate retirement impossible without weakening a gate, while deriving the count keeps every skip, retry and flaky rejection and the 12 canonical cells intact.",
+      "record_ids": [
+        "CUR-254-06"
+      ]
     }
   ],
   "current": {
     "compatibility_ids": [
       "braintree_pruned",
-      "dunning_active",
-      "populated"
+      "dunning_active"
     ],
-    "entries": 6,
+    "entries": 5,
     "kitchen_test_digests": {
       "accrue_admin/e2e/kitchen-banner.spec.js": "571441982d7a944b40624923189fdcb6a04664adf2d4c3d91c7937f5b1502b64",
       "accrue_admin/test/accrue_admin/dev/component_group_registry_test.exs": "cc8902bf54c3c86f1988bf83d477778ca8e948da6c5a146b9aab09c2e552bd0a",
@@ -440,6 +442,166 @@
         "key": "/components/subscription_detail||dunning_active",
         "kind": "manifest_entry"
       }
+    },
+    {
+      "additional_survivors": [
+        {
+          "key": "/pages/subscription",
+          "kind": "story",
+          "variation_id": "active"
+        }
+      ],
+      "alias_evidence": {
+        "facts_path": "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "subject_scenario": "populated",
+        "survivor_scenario": "active"
+      },
+      "disposition": "retire",
+      "duplicate_evidence": {
+        "subject": {
+          "expected": {
+            "actions": {
+              "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+              "proof": "rendered by production eligibility; no action dispatch claim"
+            },
+            "facts": {
+              "amount_minor": 12500,
+              "currency": "usd",
+              "price_ids": [
+                "pro_monthly_2026"
+              ],
+              "quantities": [
+                12
+              ]
+            },
+            "identity": {
+              "actor": "vendor billing support operator",
+              "customer_id": "3a632d30-37d1-4c08-a5bf-2b14f2862520",
+              "customer_name": "Acme Research",
+              "customer_processor_id": "cus_cadence_active",
+              "owner_slug": "cadence-demo",
+              "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457",
+              "subscription_processor_id": "sub_cadence_active"
+            },
+            "lifecycle": {
+              "cancel_at_period_end": false,
+              "current_period_end": "2026-11-24T12:00:00Z",
+              "current_period_start": "2026-10-24T12:00:00Z",
+              "status": "active"
+            }
+          },
+          "fact": {
+            "actor": "vendor billing support operator",
+            "composition_tier": "component",
+            "input_source": "deterministic Cadence scenario facts",
+            "job": "understand subscription state and choose a supported next action",
+            "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+            "proof_lane": "static render"
+          }
+        },
+        "survivor": {
+          "expected": {
+            "actions": {
+              "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+              "proof": "rendered by production eligibility; no action dispatch claim"
+            },
+            "facts": {
+              "amount_minor": 12500,
+              "currency": "usd",
+              "price_ids": [
+                "pro_monthly_2026"
+              ],
+              "quantities": [
+                12
+              ]
+            },
+            "identity": {
+              "actor": "vendor billing support operator",
+              "customer_id": "3a632d30-37d1-4c08-a5bf-2b14f2862520",
+              "customer_name": "Acme Research",
+              "customer_processor_id": "cus_cadence_active",
+              "owner_slug": "cadence-demo",
+              "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457",
+              "subscription_processor_id": "sub_cadence_active"
+            },
+            "lifecycle": {
+              "cancel_at_period_end": false,
+              "current_period_end": "2026-11-24T12:00:00Z",
+              "current_period_start": "2026-10-24T12:00:00Z",
+              "status": "active"
+            }
+          },
+          "fact": {
+            "actor": "vendor billing support operator",
+            "composition_tier": "component",
+            "input_source": "deterministic Cadence scenario facts",
+            "job": "understand subscription state and choose a supported next action",
+            "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+            "proof_lane": "static render"
+          }
+        }
+      },
+      "id": "CUR-254-06",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "the active subscription_detail variation renders the production area from the same facts the alias used",
+          "test_ref": "accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs#the declared active variation renders the production area from real facts without Repo"
+        },
+        {
+          "protects": "the remaining compatibility ids stay story variations and the retired id stays absent",
+          "test_ref": "accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs#canonical lifecycle variation IDs sit beside preserved compatibility IDs"
+        },
+        {
+          "protects": "every remaining compatibility render case (braintree_pruned, dunning_active) still renders in the browser lane",
+          "test_ref": "accrue_admin/e2e/subscription-stories-phase252.spec.js#reconciles every declared direct render against the generated manifest"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-06-02",
+        "origin_commit": "9b40acc8e53ca4d2eeb9a984dbc744097f92bc98"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "def subscription_area(assigns) do",
+            "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex"
+          },
+          {
+            "marker": "@frozen_compatibility_ids [\"braintree_pruned\", \"dunning_active\", \"populated\"]",
+            "path": "accrue_admin/storybook/_support/subscription_manifest.ex"
+          }
+        ],
+        "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+        "state": "historic_supported"
+      },
+      "reason": "A pure alias: the fact source delegated fetch!(:populated) to fetch!(:active) and the generated expected block equals the active block, so the variation renders exactly what active renders. The survivors are the subscription_detail active variation and the page-tier active story.",
+      "reason_class": "duplicate",
+      "reason_evidence": {
+        "kind": "fact_expected_equality"
+      },
+      "reference_scan": {
+        "allowed_paths": [
+          "accrue_admin/storybook/_support/subscription_manifest.ex",
+          "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs"
+        ],
+        "contexts": [
+          ":populated\\b",
+          "\\|\\|populated\\b",
+          "variation_id=populated\\b",
+          "\\bvariation_id\\b.*[\"']populated[\"']",
+          "\\b(scenario_id|route_variation_id)[\"']?\\s*[:=]+\\s*[\"']populated[\"']"
+        ]
+      },
+      "subject": {
+        "scenario_id": "populated",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "populated"
+      },
+      "survivor": {
+        "key": "/components/subscription_detail||active",
+        "kind": "manifest_entry"
+      }
     }
   ],
   "schema_version": 1,
@@ -449,12 +611,12 @@
     "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
     "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "a0dc862c9bce0e45f92a4f04da79999714d51a1f1d44ff6cf2167dbc09140b2b",
     "accrue_admin/lib/accrue_admin/router.ex": "2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed",
-    "accrue_admin/storybook/_support/subscription_manifest.ex": "e5046aee7a24a788912ff63e8074353ca40ef9a88069f8b3295939740ec3b3fb",
+    "accrue_admin/storybook/_support/subscription_manifest.ex": "390625406b5200c0a1e9849a5bd8fb185d97f78df53618b8bcdf23ad564dc753",
     "accrue_admin/storybook/_support/subscription_scenarios.ex": "734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d",
     "accrue_portal/lib/accrue_portal/live/subscription_live.ex": "c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372",
     "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex": "5059ad186b7d393c41c538237a9b216e19ba587ca6bcaf80bfb5edfef0411bd2",
     "accrue_portal/lib/accrue_portal/router.ex": "1877e2be0cf5c1fbc6f88ac3b6865995c7121f9a11680a5223b1966d3ef5f039",
-    "dev_support/ui_scenarios/cadence_subscriptions.exs": "f25b9aa0014cb326e366622865e206451bf81c1f7ea0003a6c908b285c6e192a",
-    "storybook/components/subscription_detail.story.exs": "18747a0f88554c2a3a5939502c77ed4758562207b0835ea6c0f47dcb790b3ef8"
+    "dev_support/ui_scenarios/cadence_subscriptions.exs": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
+    "storybook/components/subscription_detail.story.exs": "4f66a42497af73af84b6f456354f0aa886bf3b51df79ed096623740d301d5f03"
   }
 }

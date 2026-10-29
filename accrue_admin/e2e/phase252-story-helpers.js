@@ -742,7 +742,7 @@ async function assertActionAvailability(story, entry) {
   const menuItems = await more.getByRole("menuitem").allInnerTexts();
   const itemStartsWith = (label) => menuItems.some((text) => normalizeText(text).startsWith(label));
 
-  if (["active", "incomplete_evidence", "populated"].includes(entry.variation_id)) {
+  if (["active", "incomplete_evidence"].includes(entry.variation_id)) {
     expect(primary).toContain("Change plan");
     expect(primary).toContain("Cancel renewal");
   }

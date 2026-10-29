@@ -351,6 +351,7 @@ if Mix.env() != :prod do
               marker: "generated guide preserves Phase 253 compiled routes"
             }
           ],
+          record_ids: ["CUR-254-06"],
           owner_ack: %{date: "2026-10-28", status: "owner-accepted at plan time"}
         }
       ]
@@ -450,8 +451,132 @@ if Mix.env() != :prod do
           }
         ),
         braintree_pruned_record(),
-        dunning_active_record()
+        dunning_active_record(),
+        populated_retire_record()
       ]
+    end
+
+    # D-40: the compatibility id `populated` was a pure alias. The fact source delegated
+    # `fetch!(:populated)` to `fetch!(:active)` and the generated expected block is identical, so
+    # the two story variations render the same thing. The blocks below are pinned literals taken
+    # from the manifest at the origin commit (never recomputed, the entry no longer exists);
+    # verify_phase254_curation.mjs re-derives both blocks and the alias from `git show` at
+    # provenance.origin_commit and fails on any difference.
+    @populated_origin_commit "9b40acc8e53ca4d2eeb9a984dbc744097f92bc98"
+    @active_blocks %{
+      fact: %{
+        actor: "vendor billing support operator",
+        job: "understand subscription state and choose a supported next action",
+        input_source: "deterministic Cadence scenario facts",
+        production_renderer: "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+        proof_lane: "static render",
+        composition_tier: "component"
+      },
+      expected: %{
+        identity: %{
+          actor: "vendor billing support operator",
+          owner_slug: "cadence-demo",
+          customer_id: "3a632d30-37d1-4c08-a5bf-2b14f2862520",
+          customer_processor_id: "cus_cadence_active",
+          customer_name: "Acme Research",
+          subscription_id: "ea26f232-b276-42bb-b862-d5c1b7d9d457",
+          subscription_processor_id: "sub_cadence_active"
+        },
+        facts: %{
+          currency: "usd",
+          amount_minor: 12_500,
+          price_ids: ["pro_monthly_2026"],
+          quantities: [12]
+        },
+        lifecycle: %{
+          status: "active",
+          cancel_at_period_end: false,
+          current_period_start: "2026-10-24T12:00:00Z",
+          current_period_end: "2026-11-24T12:00:00Z"
+        },
+        actions: %{
+          owner: "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          proof: "rendered by production eligibility; no action dispatch claim"
+        }
+      }
+    }
+
+    defp populated_retire_record do
+      %{
+        id: "CUR-254-06",
+        subject: %{
+          story_path: @subscription_story_path,
+          variation_id: "populated",
+          scenario_id: "populated"
+        },
+        disposition: "retire",
+        reason_class: "duplicate",
+        reachability: %{
+          state: "historic_supported",
+          owner: "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          evidence: [
+            %{
+              path: "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+              marker: "def subscription_area(assigns) do"
+            },
+            %{
+              path: "accrue_admin/storybook/_support/subscription_manifest.ex",
+              marker: "@frozen_compatibility_ids [\"braintree_pruned\", \"dunning_active\", \"populated\"]"
+            }
+          ]
+        },
+        reason:
+          "A pure alias: the fact source delegated fetch!(:populated) to fetch!(:active) and the generated expected block equals the active block, so the variation renders exactly what active renders. The survivors are the subscription_detail active variation and the page-tier active story.",
+        reason_evidence: %{kind: "fact_expected_equality"},
+        duplicate_evidence: %{subject: @active_blocks, survivor: @active_blocks},
+        alias_evidence: %{
+          facts_path: "dev_support/ui_scenarios/cadence_subscriptions.exs",
+          subject_scenario: "populated",
+          survivor_scenario: "active"
+        },
+        survivor: %{kind: "manifest_entry", key: "#{@subscription_story_path}||active"},
+        additional_survivors: [
+          %{kind: "story", key: "/pages/subscription", variation_id: "active"}
+        ],
+        preserved_regressions: [
+          %{
+            test_ref:
+              "accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs#the declared active variation renders the production area from real facts without Repo",
+            protects:
+              "the active subscription_detail variation renders the production area from the same facts the alias used"
+          },
+          %{
+            test_ref:
+              "accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs#canonical lifecycle variation IDs sit beside preserved compatibility IDs",
+            protects:
+              "the remaining compatibility ids stay story variations and the retired id stays absent"
+          },
+          %{
+            test_ref:
+              "accrue_admin/e2e/subscription-stories-phase252.spec.js#reconciles every declared direct render against the generated manifest",
+            protects:
+              "every remaining compatibility render case (braintree_pruned, dunning_active) still renders in the browser lane"
+          }
+        ],
+        reference_scan: %{
+          # The frozen baseline legitimately names the retired id, and the manifest test asserts it
+          # as a positive control. A context pattern keeps unrelated "populated" list-state markers
+          # (data-ax-state, test titles) from counting as references to this variation.
+          allowed_paths: [
+            "accrue_admin/storybook/_support/subscription_manifest.ex",
+            "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs"
+          ],
+          contexts: [
+            ":populated\\b",
+            "\\|\\|populated\\b",
+            "variation_id=populated\\b",
+            "\\bvariation_id\\b.*[\"']populated[\"']",
+            "\\b(scenario_id|route_variation_id)[\"']?\\s*[:=]+\\s*[\"']populated[\"']"
+          ]
+        },
+        kitchen_impact: "none",
+        provenance: %{origin_commit: @populated_origin_commit, decided_in: "254-06-02"}
+      }
     end
 
     # D-40: retained and reclassified; the provider-pruned action menu is a provider-boundary
@@ -628,6 +753,23 @@ if Mix.env() != :prod do
         raise ArgumentError, "curation record #{record.id} needs a survivor kind and key"
       end
 
+      for extra <- Map.get(record, :additional_survivors, []) do
+        unless Map.get(extra, :kind) in @curation_survivor_kinds and
+                 non_empty_string?(Map.get(extra, :key)) do
+          raise ArgumentError, "curation record #{record.id} has an invalid additional survivor"
+        end
+      end
+
+      if record.disposition in ["retire", "merge"] and reason_class == "duplicate" do
+        evidence = Map.get(record, :duplicate_evidence)
+
+        unless is_map(evidence) and is_map(Map.get(evidence, :subject)) and
+                 Map.get(evidence, :subject) == Map.get(evidence, :survivor) do
+          raise ArgumentError,
+                "curation record #{record.id} is a duplicate and needs equal subject and survivor evidence blocks"
+        end
+      end
+
       unless Map.get(record, :preserved_regressions, []) != [] do
         raise ArgumentError, "curation record #{record.id} needs a preserved regression"
       end
@@ -765,7 +907,7 @@ if Mix.env() != :prod do
       story_rows =
         Enum.map(entries, fn entry ->
           compatibility? =
-            entry.variation_id in ["populated", "braintree_pruned", "dunning_active"]
+            entry.variation_id in @frozen_compatibility_ids
 
           caller_row!(
             root,
@@ -1111,7 +1253,20 @@ if Mix.env() != :prod do
             |> Enum.map(&"`#{guide_cell(&1.test_ref)}`")
             |> Enum.join("<br>")
 
-          "| #{record.id} | #{subject} | #{record.disposition} | #{guide_cell(Map.get(record, :reason_class) || Map.get(record, :classification))} | #{record.reachability.state} (#{guide_cell(record.reachability.owner)}) | `#{guide_cell(record.survivor.key)}` | #{regressions} | #{guide_cell(record.reason)} |"
+          survivors =
+            [record.survivor | Map.get(record, :additional_survivors, [])]
+            |> Enum.map(fn survivor ->
+              key =
+                case Map.get(survivor, :variation_id) do
+                  nil -> survivor.key
+                  id -> "#{survivor.key}||#{id}"
+                end
+
+              "`#{guide_cell(key)}`"
+            end)
+            |> Enum.join("<br>")
+
+          "| #{record.id} | #{subject} | #{record.disposition} | #{guide_cell(Map.get(record, :reason_class) || Map.get(record, :classification))} | #{record.reachability.state} (#{guide_cell(record.reachability.owner)}) | #{survivors} | #{regressions} | #{guide_cell(record.reason)} |"
         end)
 
       amendment_rows =

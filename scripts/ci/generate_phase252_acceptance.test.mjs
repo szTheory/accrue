@@ -253,7 +253,10 @@ function createFixture() {
   write(root, ".github/workflows/ci.yml", "fixture workflow");
   write(root, "scripts/ci/phase252_reporters.mjs", fs.readFileSync(path.join(repositoryRoot, "scripts/ci/phase252_reporters.mjs")));
   // Phase 254 CURATE-01: the browser row counts derive from the curation ledger, so the fixture carries a copy.
-  write(root, LEDGER_PATH, fs.readFileSync(path.join(repositoryRoot, LEDGER_PATH)));
+  // The fixture renders the frozen 12 canonical + 3 compatibility rows, so it carries the committed
+  // ledger with its records cleared: the frozen-baseline positive control (15 rows). Tests that need
+  // a retirement add one explicitly (retireCompatibilityId).
+  write(root, LEDGER_PATH, JSON.stringify({ ...JSON.parse(fs.readFileSync(path.join(repositoryRoot, LEDGER_PATH), "utf8")), records: [] }, null, 2));
   for (const relativePath of TRANSPARENCY_SOURCE_PATHS.filter((relative) => !relative.startsWith(".planning/") && relative !== "storybook/phase252-manifest.json")) {
     write(root, relativePath, fs.readFileSync(path.join(repositoryRoot, relativePath)));
   }

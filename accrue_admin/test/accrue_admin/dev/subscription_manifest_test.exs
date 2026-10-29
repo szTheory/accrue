@@ -548,7 +548,14 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
         assert record.reachability.state in ["reachable", "historic_supported", "unreachable"]
         assert record.reachability.evidence != []
         assert record.preserved_regressions != []
-        assert record.provenance.origin_commit == baseline.source_commit
+
+        # Retains and reclassifications are decided against the frozen baseline commit; a removal
+        # record pins the commit its duplicate evidence is read from.
+        if record.disposition in ["retire", "merge"] do
+          assert record.provenance.origin_commit =~ ~r/\A[0-9a-f]{40}\z/
+        else
+          assert record.provenance.origin_commit == baseline.source_commit
+        end
 
         assert Enum.any?(baseline.subjects, fn subject ->
                  subject.story_path == record.subject.story_path and

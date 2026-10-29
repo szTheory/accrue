@@ -206,14 +206,19 @@ function escapeRegex(value) {
 
 // git grep -F finds candidates; the boundary filter then drops identifiers that merely end in
 // the token (UI-E2-populated, my_populated, populated_rows).
-export function referenceScan(variationId, { root = ROOT, paths = REFERENCE_SCAN_PATHS, excluded = REFERENCE_SCAN_EXCLUDED } = {}) {
+//
+// With `ref` the scan reads that commit's tree instead of the working tree, which is how a
+// context pattern is shown to find something before it is trusted to find nothing.
+export function referenceScan(variationId, { root = ROOT, paths = REFERENCE_SCAN_PATHS, excluded = REFERENCE_SCAN_EXCLUDED, ref = null } = {}) {
   if (!/^[a-z0-9_]+$/.test(variationId || "")) fail(`variation id ${JSON.stringify(variationId)} is not a plain identifier`);
-  const result = git(root, ["grep", "-n", "-I", "-F", "-e", variationId, "--", ...paths]);
+  if (ref !== null && !/^[0-9a-f]{40}$/.test(ref)) fail("a reference scan ref must be a full commit id");
+  const result = git(root, ["grep", "-n", "-I", "-F", "-e", variationId, ...(ref ? [ref] : []), "--", ...paths]);
   if (result.status === 1) return [];
   if (result.status !== 0) fail(`git grep failed: ${(result.stderr || "").trim().split("\n")[0]}`, "CURATION_SCAN_FAILED");
   const exact = new RegExp(`(?<![A-Za-z0-9_-])${escapeRegex(variationId)}(?![A-Za-z0-9_-])`);
   const hits = [];
-  for (const line of result.stdout.split("\n")) {
+  for (const rawLine of result.stdout.split("\n")) {
+    const line = ref && rawLine.startsWith(`${ref}:`) ? rawLine.slice(ref.length + 1) : rawLine;
     const match = /^([^:]+):(\d+):(.*)$/.exec(line);
     if (!match) continue;
     const [, file, lineNumber, text] = match;
@@ -282,6 +287,8 @@ function normalizeContext(input = {}) {
     results: input.results || null,
     scan: input.scan || ((variationId) => referenceScan(variationId, { root })),
     scanProbe: input.scanProbe || proveReferenceScan,
+    originEvidence: input.originEvidence || null,
+    contextProbe: input.contextProbe || null,
   };
 }
 
@@ -318,7 +325,7 @@ function validateBaseline(baseline) {
   if (baseline.subjects_sha256 !== subjectsSha256(baseline.subjects)) fail("frozen_baseline.subjects_sha256 does not match the enumerated subjects");
 }
 
-function validateAmendments(amendments, context) {
+function validateAmendments(amendments, context, records = [], baseline = null) {
   if (!Array.isArray(amendments)) fail("amendments must be a list");
   const amendment = amendments.find((candidate) => candidate?.id === REQUIRED_AMENDMENT);
   if (!amendment) fail(`ledger is missing amendment ${REQUIRED_AMENDMENT} (the D-06/D-14 literal 15 versus the D-40 retirement)`);
@@ -333,6 +340,16 @@ function validateAmendments(amendments, context) {
   }
   if (!Array.isArray(amendment.evidence) || amendment.evidence.length === 0) fail(`${REQUIRED_AMENDMENT} is missing evidence`);
   for (const item of amendment.evidence) assertMarker(item, `${REQUIRED_AMENDMENT} evidence`, context);
+  // A retired compatibility id is exactly what the amendment exists for: its record id must be
+  // linked as evidence, or the derived count has no recorded reason.
+  const compatibility = new Set(baseline?.compatibility_ids || []);
+  for (const record of records) {
+    if (REMOVING.includes(record?.disposition) && record.subject?.story_path === SUBSCRIPTION_STORY_PATH && compatibility.has(record.subject?.variation_id)) {
+      if (!Array.isArray(amendment.record_ids) || !amendment.record_ids.includes(record.id)) {
+        fail(`${REQUIRED_AMENDMENT} must link ${record.id} in record_ids, because that record retires compatibility id ${record.subject.variation_id}`);
+      }
+    }
+  }
 }
 
 function assertMarker(item, label, context) {
@@ -401,6 +418,78 @@ function validateDuplicateEvidence(record, context) {
       }
     }
   }
+  if (context.originEvidence) context.originEvidence(record);
+}
+
+// Commit-anchored duplicate evidence (D-39, 254-06). The subject and survivor blocks are re-derived
+// from the manifest as it was at provenance.origin_commit, compared with each other and with the
+// blocks the ledger carries, and the fact source must have delegated the subject scenario to the
+// survivor scenario at that same commit. A commit where the blocks differ therefore fails.
+export function duplicateEvidenceAtCommit(record, { root = ROOT } = {}) {
+  const commit = record?.provenance?.origin_commit;
+  assertCommitReachable(root, commit);
+  const duplicate = record.duplicate_evidence;
+  if (!isObject(duplicate) || !isObject(duplicate.subject) || !isObject(duplicate.survivor)) {
+    fail(`${record.id} needs duplicate_evidence {subject, survivor} to be checked at ${commit.slice(0, 12)}`);
+  }
+  if (record.survivor?.kind !== "manifest_entry" || !isNonEmptyString(record.subject?.variation_id)) {
+    fail(`${record.id} duplicate evidence at a commit needs a manifest subject and a manifest_entry survivor`);
+  }
+  const manifest = JSON.parse(showAt(root, commit, MANIFEST_PATH));
+  const byKey = new Map(manifest.entries.map((entry) => [entry.key, entry]));
+  const subjectEntry = byKey.get(`${record.subject.story_path}||${record.subject.variation_id}`);
+  const survivorEntry = byKey.get(record.survivor.key);
+  if (!subjectEntry || !survivorEntry) fail(`${record.id} duplicate evidence names an entry absent from the manifest at ${commit.slice(0, 12)}`);
+  const subjectBlocks = blocksFromEntry(subjectEntry);
+  const survivorBlocks = blocksFromEntry(survivorEntry);
+  for (const block of ["fact", "expected"]) {
+    if (stableStringify(subjectBlocks[block]) !== stableStringify(survivorBlocks[block])) {
+      fail(`${record.id} claims a duplicate but the ${block} blocks differ at ${commit.slice(0, 12)}: ${record.subject.variation_id} versus ${survivorEntry.variation_id}`);
+    }
+  }
+  for (const [side, blocks] of [["subject", subjectBlocks], ["survivor", survivorBlocks]]) {
+    if (stableStringify(duplicate[side]) !== stableStringify(blocks)) {
+      fail(`${record.id} duplicate_evidence.${side} does not match the manifest entry at ${commit.slice(0, 12)}`);
+    }
+  }
+  const alias = record.alias_evidence;
+  if (alias !== undefined) {
+    if (!isObject(alias) || ![alias.facts_path, alias.subject_scenario, alias.survivor_scenario].every(isNonEmptyString)) {
+      fail(`${record.id} alias_evidence needs facts_path, subject_scenario and survivor_scenario`);
+    }
+    if (![alias.subject_scenario, alias.survivor_scenario].every((name) => /^[a-z0-9_]+$/.test(name))) fail(`${record.id} alias_evidence scenarios must be plain identifiers`);
+    const facts = showAt(root, commit, alias.facts_path);
+    const delegation = new RegExp(`def\\s+fetch!\\(:${alias.subject_scenario}\\),\\s*do:\\s*fetch!\\(:${alias.survivor_scenario}\\)`);
+    if (!delegation.test(facts)) fail(`${record.id} fetch!(:${alias.subject_scenario}) did not delegate to fetch!(:${alias.survivor_scenario}) in ${alias.facts_path} at ${commit.slice(0, 12)}`);
+  }
+  return { commit, subject: subjectEntry.key, survivor: survivorEntry.key, alias: alias !== undefined };
+}
+
+function compileContexts(record) {
+  const contexts = record.reference_scan?.contexts;
+  if (contexts === undefined) return [];
+  if (!Array.isArray(contexts) || contexts.length === 0 || contexts.some((pattern) => !isNonEmptyString(pattern))) {
+    fail(`${record.id} reference_scan.contexts must be a non-empty list of patterns`);
+  }
+  return contexts.map((pattern) => {
+    try {
+      return { pattern, regex: new RegExp(pattern) };
+    } catch (error) {
+      return fail(`${record.id} reference_scan context ${JSON.stringify(pattern)} is not a valid pattern: ${error.message}`);
+    }
+  });
+}
+
+// A context pattern that matches nothing cannot be evidence of anything: each one must find at least
+// one reference in the tree as it was at origin_commit, before the removal.
+function proveContexts(record, contexts, context) {
+  for (const { pattern, regex } of contexts) {
+    const hits = context.contextProbe ? context.contextProbe(record.subject.variation_id, record.provenance.origin_commit) : null;
+    if (hits === null) return;
+    if (!hits.some((hit) => regex.test(hit.text))) {
+      fail(`${record.id} reference_scan context ${JSON.stringify(pattern)} matches no reference at origin commit ${record.provenance.origin_commit.slice(0, 12)}, so a zero result for it proves nothing`);
+    }
+  }
 }
 
 function validateTestRef(testRef, label, context) {
@@ -417,21 +506,33 @@ function validateTestRef(testRef, label, context) {
 }
 
 function survivorPresent(record, context) {
-  const survivor = record.survivor;
-  if (!isObject(survivor) || !SURVIVOR_KINDS.includes(survivor.kind) || !isNonEmptyString(survivor.key)) {
-    fail(`${record.id} needs a survivor {kind: ${SURVIVOR_KINDS.join("|")}, key}`);
-  }
-  if (survivor.kind === "manifest_entry") {
-    if (!context.manifest) fail(`${record.id} survivor cannot be checked without the current manifest`);
-    if (!context.manifest.entries.some((entry) => entry.key === survivor.key)) fail(`${record.id} survivor ${survivor.key} is absent from the current manifest`);
-    if (context.results) {
-      const rendered = renderedKeys(context.results);
-      if (!rendered.has(survivor.key)) fail(`${record.id} survivor ${survivor.key} is absent from the rendered results`);
+  const extras = record.additional_survivors;
+  if (extras !== undefined && !Array.isArray(extras)) fail(`${record.id} additional_survivors must be a list`);
+  const survivors = [record.survivor, ...(extras || [])];
+  survivors.forEach((survivor, index) => {
+    const label = index === 0 ? "survivor" : `additional survivor ${survivor?.key}`;
+    if (!isObject(survivor) || !SURVIVOR_KINDS.includes(survivor.kind) || !isNonEmptyString(survivor.key)) {
+      fail(`${record.id} needs a survivor {kind: ${SURVIVOR_KINDS.join("|")}, key}`);
     }
-  } else {
-    const storyFile = `storybook${survivor.key}.story.exs`;
-    if (context.readText(storyFile) === null) fail(`${record.id} survivor story ${survivor.key} is absent from the tree (${storyFile})`);
-  }
+    if (survivor.kind === "manifest_entry") {
+      if (!context.manifest) fail(`${record.id} survivor cannot be checked without the current manifest`);
+      if (!context.manifest.entries.some((entry) => entry.key === survivor.key)) fail(`${record.id} ${label} ${survivor.key} is absent from the current manifest`);
+      if (context.results) {
+        const rendered = renderedKeys(context.results);
+        if (!rendered.has(survivor.key)) fail(`${record.id} ${label} ${survivor.key} is absent from the rendered results`);
+      }
+    } else {
+      const storyFile = `storybook${survivor.key}.story.exs`;
+      const text = context.readText(storyFile);
+      if (text === null) fail(`${record.id} ${label} story ${survivor.key} is absent from the tree (${storyFile})`);
+      if (survivor.variation_id !== undefined) {
+        if (!/^[a-z0-9_]+$/.test(survivor.variation_id || "")) fail(`${record.id} ${label} variation_id must be a plain identifier`);
+        if (!new RegExp(`(?:\\bid:\\s*:|\\bvariation\\(\\s*:)${survivor.variation_id}\\b`).test(text)) {
+          fail(`${record.id} ${label} variation ${survivor.variation_id} is absent from ${storyFile}`);
+        }
+      }
+    }
+  });
 }
 
 export function renderedKeys(results) {
@@ -491,7 +592,10 @@ function validateRecord(record, baseline, context) {
   if (REMOVING.includes(record.disposition) && subject.variation_id !== null) {
     if (context.scanProbe().length === 0) fail("the reference scan did not find its seeded positive, so a zero result cannot be accepted");
     const allowed = new Set(record.reference_scan?.allowed_paths || []);
-    const hits = context.scan(subject.variation_id).filter((hit) => !allowed.has(hit.path));
+    const contexts = compileContexts(record);
+    proveContexts(record, contexts, context);
+    let hits = context.scan(subject.variation_id).filter((hit) => !allowed.has(hit.path));
+    if (contexts.length > 0) hits = hits.filter((hit) => contexts.some(({ regex }) => regex.test(hit.text)));
     if (hits.length > 0) {
       fail(`${record.id} ${record.disposition} subject ${subject.variation_id} is still referenced at ${hits.slice(0, 3).map((hit) => `${hit.path}:${hit.line}`).join(", ")}`);
     }
@@ -537,7 +641,8 @@ export function verifyLedger(ledger, context = {}) {
   if (!Array.isArray(ledger.records)) fail("records must be a list");
   if (!isObject(ledger.source_digests) || Object.keys(ledger.source_digests).length === 0) fail("ledger has no source_digests");
 
-  validateAmendments(ledger.amendments, ctx);
+  if (!Array.isArray(ledger.records)) fail("records must be a list");
+  validateAmendments(ledger.amendments, ctx, ledger.records, baseline);
 
   const ids = ledger.records.map((record) => record?.id);
   const sorted = [...ids].sort();
@@ -675,6 +780,8 @@ export function verifyCommitted({ root = ROOT, resultsPath = null } = {}) {
     frozenSubjects: frozenSubjectsAt(baseline.source_commit, baseline.subject_sources, { root }),
     frozenManifest: frozenManifestAt(baseline.source_commit, { root }),
     results: resultsPath ? loadRenderResults(resultsPath, root) : null,
+    originEvidence: (record) => duplicateEvidenceAtCommit(record, { root }),
+    contextProbe: (variationId, commit) => referenceScan(variationId, { root, ref: commit, excluded: [] }),
   };
   return verifyLedger(committed, context);
 }
@@ -788,6 +895,7 @@ function removalWorld() {
     preserved_regressions: [{ test_ref: "accrue_admin/test/dev/ledger_fixture_test.exs#removes populated alias", protects: "active renders the same facts" }],
   });
   world.ledger.records.push(removal);
+  world.ledger.amendments[0].record_ids = ["CUR-254-02"];
   world.ledger.current.entries = 3;
   world.ledger.current.compatibility_ids = ["braintree_pruned", "dunning_active"];
   world.context.manifest = { entries: world.entries.filter((entry) => entry.variation_id !== "populated") };
@@ -1092,6 +1200,125 @@ const SCENARIOS = [
       } finally {
         fs.rmSync(scratch, { recursive: true, force: true });
       }
+    },
+  ],
+  [
+    "commit-anchored duplicate evidence passes where the blocks and the alias held and fails where they differed, the alias was missing, the evidence was forged or the commit is unreachable",
+    () => {
+      const world = removalWorld();
+      const [active, populated] = [world.entries[0], world.entries[1]];
+      const aliasSource = "  def fetch!(:populated), do: fetch!(:active)\n";
+      const record = (commit, overrides = {}) => ({
+        id: "CUR-254-02",
+        subject: { story_path: SUBSCRIPTION_STORY_PATH, variation_id: "populated", scenario_id: "populated" },
+        survivor: { kind: "manifest_entry", key: `${SUBSCRIPTION_STORY_PATH}||active` },
+        duplicate_evidence: { subject: blocksFromEntry(populated), survivor: blocksFromEntry(active) },
+        alias_evidence: { facts_path: "dev_support/ui_scenarios/cadence_subscriptions.exs", subject_scenario: "populated", survivor_scenario: "active" },
+        provenance: { origin_commit: commit, decided_in: "254-06-02" },
+        ...overrides,
+      });
+      withScratchRepo((dir) => {
+        seed(dir, MANIFEST_PATH, JSON.stringify({ entries: world.entries }));
+        seed(dir, "dev_support/ui_scenarios/cadence_subscriptions.exs", aliasSource);
+        const equal = commitAll(dir, "blocks equal and alias present");
+        const result = duplicateEvidenceAtCommit(record(equal), { root: dir });
+        assert.equal(result.alias, true);
+        assert.equal(result.commit, equal);
+
+        const different = clone(world.entries);
+        different[1].expected.facts.amount_minor = 101;
+        seed(dir, MANIFEST_PATH, JSON.stringify({ entries: different }));
+        const differs = commitAll(dir, "populated block drifts from active");
+        assert.throws(() => duplicateEvidenceAtCommit(record(differs), { root: dir }), /blocks differ at/);
+
+        seed(dir, MANIFEST_PATH, JSON.stringify({ entries: world.entries }));
+        seed(dir, "dev_support/ui_scenarios/cadence_subscriptions.exs", "  def fetch!(:populated), do: base_facts(:populated)\n");
+        const noAlias = commitAll(dir, "alias no longer delegates");
+        assert.throws(() => duplicateEvidenceAtCommit(record(noAlias), { root: dir }), /did not delegate to fetch!\(:active\)/);
+
+        const forged = clone(blocksFromEntry(active));
+        forged.expected.facts.amount_minor = 7;
+        assert.throws(
+          () => duplicateEvidenceAtCommit(record(equal, { duplicate_evidence: { subject: forged, survivor: clone(forged) } }), { root: dir }),
+          /does not match the manifest entry/,
+        );
+        assert.throws(() => duplicateEvidenceAtCommit(record("b".repeat(40)), { root: dir }), (error) => error.code === "CURATION_SOURCE_COMMIT_UNREACHABLE");
+        assert.throws(() => duplicateEvidenceAtCommit(record(equal, { alias_evidence: { facts_path: "x" } }), { root: dir }), /alias_evidence needs/);
+      });
+      // The hook is applied by the ledger rules when supplied.
+      let called = 0;
+      world.context.originEvidence = () => { called += 1; };
+      verifyLedger(world.ledger, world.context);
+      assert.equal(called, 1, "a duplicate removal runs the commit-anchored check once");
+      world.context.originEvidence = () => fail("blocks differ at origin");
+      assert.throws(() => verifyLedger(world.ledger, world.context), /blocks differ at origin/);
+    },
+  ],
+  [
+    "a retired compatibility id must be linked from AMD-254-01 record_ids",
+    () => {
+      const world = removalWorld();
+      assert.doesNotThrow(() => verifyLedger(world.ledger, world.context));
+      expectRejected(world, (ledger) => { delete ledger.amendments[0].record_ids; }, /must link CUR-254-02 in record_ids/);
+      expectRejected(world, (ledger) => { ledger.amendments[0].record_ids = ["CUR-254-99"]; }, /must link CUR-254-02 in record_ids/);
+      // A retain never needs the link.
+      assert.doesNotThrow(() => verifyLedger(fixtureWorld().ledger, fixtureWorld().context));
+    },
+  ],
+  [
+    "reference-scan contexts ignore unrelated tokens, still catch a real reference, and must each find a reference at the origin commit",
+    () => {
+      const unrelated = { path: "accrue_admin/test/accrue_admin/live/charges_live_test.exs", line: 192, text: 'assert_list_state(populated_html, contract, "populated")' };
+      const real = { path: "storybook/components/leftover.story.exs", line: 9, text: "variation(:populated, :populated, \"x\")" };
+      const withContexts = (hits, probe = null) => {
+        const world = removalWorld();
+        world.ledger.records[1].reference_scan = { contexts: [":populated\\b"] };
+        world.context.scan = () => hits;
+        if (probe) world.context.contextProbe = probe;
+        return world;
+      };
+      const probeFinds = () => [{ path: "storybook/components/x.story.exs", line: 1, text: ":populated" }];
+      const probeBlind = () => [{ path: "storybook/components/x.story.exs", line: 1, text: "something else" }];
+
+      const noContextWorld = removalWorld();
+      noContextWorld.context.scan = () => [unrelated];
+      assert.throws(() => verifyLedger(noContextWorld.ledger, noContextWorld.context), /still referenced at/, "without contexts an unrelated token still counts");
+
+      const ignored = withContexts([unrelated], probeFinds);
+      assert.doesNotThrow(() => verifyLedger(ignored.ledger, ignored.context));
+      const caught = withContexts([unrelated, real], probeFinds);
+      assert.throws(() => verifyLedger(caught.ledger, caught.context), /still referenced at storybook\/components\/leftover\.story\.exs:9/);
+      const blind = withContexts([unrelated], probeBlind);
+      assert.throws(() => verifyLedger(blind.ledger, blind.context), /matches no reference at origin commit/);
+      const empty = removalWorld();
+      empty.ledger.records[1].reference_scan = { contexts: [] };
+      assert.throws(() => verifyLedger(empty.ledger, empty.context), /non-empty list of patterns/);
+      const badPattern = removalWorld();
+      badPattern.ledger.records[1].reference_scan = { contexts: ["("] };
+      assert.throws(() => verifyLedger(badPattern.ledger, badPattern.context), /not a valid pattern/);
+
+      withScratchRepo((dir) => {
+        seed(dir, "storybook/components/seeded.story.exs", "variation(:populated, :populated)\n");
+        seed(dir, "accrue_admin/test/lookalike_test.exs", 'assert_list_state(populated_html, contract, "populated")\n');
+        const origin = commitAll(dir, "before removal");
+        const hits = referenceScan("populated", { root: dir, ref: origin, excluded: [] });
+        assert.equal(hits.length, 2, "a scan at a commit finds both the real and the unrelated token");
+        assert.ok(hits.every((hit) => !hit.path.startsWith(origin)), "the ref prefix is stripped from hit paths");
+        assert.equal(hits.filter((hit) => /:populated\b/.test(hit.text)).length, 1);
+        assert.throws(() => referenceScan("populated", { root: dir, ref: "HEAD" }), /full commit id/);
+      });
+    },
+  ],
+  [
+    "additional survivors must exist: a story variation absent from the story, or a missing story, is rejected",
+    () => {
+      const world = removalWorld();
+      world.ledger.records[1].additional_survivors = [{ kind: "story", key: "/components/detail", variation_id: "read_only" }];
+      assert.doesNotThrow(() => verifyLedger(world.ledger, world.context));
+      expectRejected(world, (ledger) => { ledger.records[1].additional_survivors[0].variation_id = "nope"; }, /variation nope is absent from storybook\/components\/detail\.story\.exs/);
+      expectRejected(world, (ledger) => { ledger.records[1].additional_survivors[0].key = "/components/none"; }, /story \/components\/none is absent from the tree/);
+      expectRejected(world, (ledger) => { ledger.records[1].additional_survivors = "x"; }, /additional_survivors must be a list/);
+      expectRejected(world, (ledger) => { ledger.records[1].additional_survivors = [{ kind: "manifest_entry", key: `${SUBSCRIPTION_STORY_PATH}||gone` }]; }, /additional survivor .*gone is absent from the current manifest/);
     },
   ],
 ];

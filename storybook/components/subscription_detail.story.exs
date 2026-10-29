@@ -31,7 +31,6 @@ defmodule AccrueAdmin.Storybook.Components.SubscriptionDetail do
         :incomplete_evidence,
         "Active subscription with incomplete billing projections"
       ),
-      variation(:populated, :populated, "Populated compatibility ID"),
       variation(:braintree_pruned, :braintree_pruned, "Braintree action-pruned compatibility ID"),
       variation(:dunning_active, :dunning_active, "Dunning-active compatibility ID")
     ]
