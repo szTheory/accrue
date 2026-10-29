@@ -33,6 +33,10 @@ export const CAPTURE_STATES = ["settled", "focus-visible", "disclosure-open", "r
 export const CAPTURE_WIDTHS = [320, 1280];
 export const CAPTURE_THEMES = ["light", "dark"];
 export const VERDICTS = ["finding", "assessed-no-finding"];
+export const MANIFEST_PATH = "accrue_admin/e2e/__screenshots__/visual-desktop/manifest.json";
+export const ENV_ID = /^ENV-254-\d{2}$/;
+// A test status that proves the test is green now (red-then-green and green-before-and-after are green at the end).
+export const GREEN_TEST_STATUSES = ["green", "red-then-green", "green-before-and-after"];
 
 export const ASSET_PATHS = {
   app_css: "accrue_admin/assets/css/app.css",
@@ -46,7 +50,7 @@ export const ASSET_PATHS = {
 // records that the collection "populated" cell is the Phase 253 multiple_rows story).
 export const CAPTURE_CELLS = [
   { label: "collection populated", prefix: "phase254-collection-multiple_rows", sourcing: "story", state: "settled", route: "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows" },
-  { label: "detail active", prefix: "phase254-page-active", sourcing: "story", state: "settled", route: "/billing/dev/storybook/iframe/pages/subscription?tab=active" },
+  { label: "detail active", prefix: "phase254-page-active", sourcing: "story", state: "settled", route: "/billing/dev/storybook/pages/subscription?tab=active" },
   { label: "detail review-open", prefix: "phase254-mounted-review-open", sourcing: "mounted", state: "review-open", route: "/billing/subscriptions/:id" },
   { label: "detail disclosure open, summary focused", prefix: "phase254-mounted-disclosure-focus", sourcing: "mounted", state: "focus-visible", route: "/billing/subscriptions/:id" }
 ];
@@ -123,6 +127,16 @@ export function evidenceExistsReader(root = repositoryRoot) {
       return fs.existsSync(resolvePhaseEvidencePath(PHASE_SLUG, artifact, { root }));
     } catch {
       return false;
+    }
+  };
+}
+
+export function manifestReader(root = repositoryRoot) {
+  return () => {
+    try {
+      return JSON.parse(fs.readFileSync(path.join(root, MANIFEST_PATH), "utf8"));
+    } catch {
+      return null;
     }
   };
 }
@@ -652,8 +666,23 @@ function checkFindingForStage(finding, record, ctx) {
     if (finding.verdict !== null || (finding.confirmation_captures ?? []).length > 0) {
       throw fail(`${label}: verdict must be null and confirmation_captures empty at stage assessment`);
     }
-  } else if (record.stage === "confirmed" && !["confirmed", "not-confirmed"].includes(finding.verdict)) {
-    throw fail(`${label}: a confirmed record needs verdict confirmed or not-confirmed`);
+  } else if (record.stage === "confirmed") {
+    if (!["confirmed", "not-confirmed"].includes(finding.verdict)) throw fail(`${label}: a confirmed record needs verdict confirmed or not-confirmed`);
+    if (finding.verdict === "not-confirmed") {
+      if (!nonEmptyString(finding.verdict_reason)) throw fail(`${label}: a not-confirmed verdict needs a verdict_reason`);
+    } else {
+      if (finding.disposition === "deferred") throw fail(`${label}: a deferred finding was not corrected, so its verdict cannot be confirmed`);
+      const notGreen = finding.tests.filter((entry) => !GREEN_TEST_STATUSES.includes(entry.status));
+      if (notGreen.length > 0) throw fail(`${label}: verdict confirmed while a test is not green (${notGreen.map((entry) => `${entry.path} ${entry.status}`).join(", ")})`);
+      if (finding.disposition === "fixed" && finding.tests.length === 0) throw fail(`${label}: verdict confirmed with no test evidence`);
+      const capturesById = new Map(record.captures.map((capture) => [capture.id, capture]));
+      if ((finding.evidence_captures ?? []).length > 0 && (finding.confirmation_captures ?? []).length === 0) {
+        throw fail(`${label}: verdict confirmed but confirmation_captures is empty although the finding has evidence captures`);
+      }
+      for (const id of finding.confirmation_captures ?? []) {
+        if (capturesById.get(id)?.pass !== true) throw fail(`${label}: verdict confirmed while confirmation capture ${id} did not pass`);
+      }
+    }
   }
   if (finding.mechanical_check) checkMechanicalCheck(finding, record, ctx);
 }
@@ -743,9 +772,62 @@ function checkAmendments(record) {
 
 function checkBaselines(record, findingIds) {
   if (!Array.isArray(record.baselines_changed)) throw fail("baselines_changed must be a list");
+  const decided = new Set();
+  for (const decision of record.environmental_decisions ?? []) {
+    if (!isObject(decision) || !ENV_ID.test(decision.id ?? "") || !nonEmptyString(decision.owner_decision) || !nonEmptyString(decision.checkpoint)) {
+      throw fail("every environmental decision needs an ENV-254-NN id, the checkpoint and the owner's verbatim decision");
+    }
+    decided.add(decision.id);
+  }
   for (const entry of record.baselines_changed) {
     if (!isObject(entry) || !nonEmptyString(entry.key)) throw fail("every changed baseline needs a key");
-    if (!findingIds.has(entry.finding_id)) throw fail(`changed baseline ${entry.key} maps to no finding (finding_id "${entry.finding_id}")`);
+    if (!findingIds.has(entry.finding_id) && !decided.has(entry.finding_id)) {
+      throw fail(`changed baseline ${entry.key} maps to no finding or owner-decided environmental id (finding_id "${entry.finding_id}")`);
+    }
+  }
+  for (const entry of record.baselines_reattested ?? []) {
+    if (!isObject(entry) || !nonEmptyString(entry.key) || !HEX64.test(entry.sha256 ?? "") || !nonEmptyString(entry.reason)) {
+      throw fail("every re-attested baseline needs a key, the unchanged sha256 and a reason");
+    }
+  }
+}
+
+// D-33/D-36 (254-15-03): at stage confirmed every capture's png_sha256 is the committed, minted baseline's
+// sha256 of its key, every minted entry for a pre-existing (Phase 211) key is either a changed baseline mapped to
+// a finding (or an owner-decided ENV id) or a re-attested unchanged baseline with its sha256, and the entries are
+// served from the CSS the record's assets name, so the captures are the reviewed source and nothing else.
+export function confirmedCapturesMatchManifest(record, manifest) {
+  if (record.stage !== "confirmed") return;
+  const entries = manifest?.entries;
+  if (!isObject(entries)) throw fail(`${MANIFEST_PATH} is required at stage confirmed and must hold entries`);
+  const minted = (entry) => isObject(entry) && HEX64.test(entry.sha256 ?? "") && nonEmptyString(entry.mint_run_id);
+  for (const capture of record.captures) {
+    const entry = entries[capture.key];
+    if (!entry) throw fail(`${capture.id}: key ${capture.key} is absent from the identity manifest`);
+    if (!minted(entry)) throw fail(`${capture.id}: manifest entry ${capture.key} is not a minted baseline (no mint run id)`);
+    if (entry.sha256 !== capture.png_sha256) {
+      throw fail(`${capture.id}: png_sha256 ${capture.png_sha256} differs from the manifest sha256 ${entry.sha256} of ${capture.key}`);
+    }
+    const css = entry.served?.css_sha256;
+    const reviewed = capture.sourcing === "story" ? record.assets?.storybook_css?.sha256 : record.assets?.accrue_admin_css?.sha256;
+    if (css !== reviewed) {
+      throw fail(`${capture.id}: ${capture.key} was served ${css}, not the ${capture.sourcing === "story" ? "storybook.css" : "accrue_admin.css"} ${reviewed} the record reviewed`);
+    }
+  }
+  const listed = new Map();
+  for (const entry of record.baselines_changed) listed.set(entry.key, { ...entry, via: "baselines_changed" });
+  for (const entry of record.baselines_reattested ?? []) {
+    if (listed.has(entry.key)) throw fail(`baseline ${entry.key} is listed as both changed and re-attested`);
+    listed.set(entry.key, { ...entry, via: "baselines_reattested" });
+  }
+  for (const [key, listing] of listed) {
+    const entry = entries[key];
+    if (!minted(entry)) throw fail(`${listing.via} ${key}: no minted manifest entry`);
+    if (listing.sha256 !== undefined && listing.sha256 !== entry.sha256) throw fail(`${listing.via} ${key}: sha256 ${listing.sha256} differs from the manifest sha256 ${entry.sha256}`);
+  }
+  for (const [key, entry] of Object.entries(entries)) {
+    if (key.startsWith("phase254-") || !minted(entry)) continue;
+    if (!listed.has(key)) throw fail(`manifest entry ${key} was minted by run ${entry.mint_run_id} but is neither a changed baseline mapped to a finding nor a re-attested one`);
   }
 }
 
@@ -772,7 +854,7 @@ function checkDeferred(record, findingIds) {
   }
 }
 
-export function verifyDesignReview(record, { root = repositoryRoot, stage, read, readContract, evidenceExists, readEvidenceJson } = {}) {
+export function verifyDesignReview(record, { root = repositoryRoot, stage, read, readContract, evidenceExists, readEvidenceJson, readManifest } = {}) {
   if (!isObject(record)) throw fail("the record must be an object");
   assertNoScoreOrTmpEvidence(record);
   checkStage(record);
@@ -796,6 +878,7 @@ export function verifyDesignReview(record, { root = repositoryRoot, stage, read,
   }
   checkBaselines(record, findingIds);
   checkDeferred(record, findingIds);
+  if (record.stage === "confirmed") confirmedCapturesMatchManifest(record, (readManifest ?? manifestReader(root))());
   return {
     stage: record.stage,
     findings: record.findings.length,
@@ -869,7 +952,8 @@ export function renderDesignReview(record) {
     push(`- **Origin:** ${escapeCell(finding.origin)}`);
     push(`- **Owning tier:** ${escapeCell(finding.owning_tier)}`);
     push(`- **Disposition:** ${escapeCell(finding.disposition)}`);
-    push(`- **Verdict:** ${finding.verdict ? escapeCell(finding.verdict) : "pending"}`);
+    push(`- **Verdict:** ${finding.verdict ? escapeCell(finding.verdict) : "pending"}${finding.verdict_reason ? ` (${escapeCell(finding.verdict_reason)})` : ""}`);
+    if ((finding.confirmation_captures ?? []).length) push(`- **Confirmation captures:** ${finding.confirmation_captures.map((id) => escapeCell(id)).join(", ")}`);
     push(`- **Claim:** ${escapeCell(finding.claim)}`);
     push(`- **Rationale:** ${escapeCell(finding.rationale)}`);
     push(`- **Evidence:** ${(finding.source_refs ?? []).map((ref) => code(`${ref.path}:${ref.lines}`)).join(", ")}`);
@@ -893,7 +977,19 @@ export function renderDesignReview(record) {
   push("## Changed baselines");
   push();
   if ((record.baselines_changed ?? []).length === 0) push("None.");
-  for (const entry of record.baselines_changed ?? []) push(`- ${code(entry.key)} -> ${escapeCell(entry.finding_id)}`);
+  for (const entry of record.baselines_changed ?? []) push(`- ${code(entry.key)} -> ${escapeCell(entry.finding_id)}${entry.reason ? `: ${escapeCell(entry.reason)}` : ""}`);
+  if ((record.baselines_reattested ?? []).length) {
+    push();
+    push("## Re-attested baselines (bytes unchanged)");
+    push();
+    for (const entry of record.baselines_reattested) push(`- ${code(entry.key)} ${code(entry.sha256)}: ${escapeCell(entry.reason)}`);
+  }
+  if ((record.environmental_decisions ?? []).length) {
+    push();
+    push("## Owner-decided environmental drift");
+    push();
+    for (const entry of record.environmental_decisions) push(`- ${escapeCell(entry.id)} (${escapeCell(entry.checkpoint)}): ${escapeCell(entry.owner_decision)}`);
+  }
   push();
   push("## Deferred");
   push();
@@ -1096,6 +1192,34 @@ function toCorrected(record) {
   );
 }
 
+// A fixture at stage confirmed with its identity manifest: 16 captures minted by one run, the corrected
+// findings confirmed against passing captures and green tests, the deferred finding not confirmed.
+function confirmedFixture() {
+  const harness = fixtureHarness({ files: { [ASSET_PATHS.app_css]: FIXED_APP_CSS }, contract: CORRECTED_CONTRACT });
+  const record = clone(harness.record);
+  toCorrected(record);
+  record.stage = "confirmed";
+  const entries = {};
+  record.captures.forEach((capture, index) => {
+    capture.png_sha256 = sha256(`png ${index}`);
+    capture.pass = true;
+    entries[capture.key] = {
+      case_key: capture.key,
+      sha256: capture.png_sha256,
+      mint_run_id: "424242",
+      served: { css_sha256: capture.sourcing === "story" ? record.assets.storybook_css.sha256 : record.assets.accrue_admin_css.sha256 }
+    };
+  });
+  record.findings[0].verdict = "confirmed";
+  record.findings[0].confirmation_captures = ["CAP-254-05"];
+  record.findings[1].verdict = "confirmed";
+  record.findings[1].confirmation_captures = ["CAP-254-01"];
+  record.findings[2].verdict = "not-confirmed";
+  record.findings[2].verdict_reason = "deferred by D-36; no correction was made";
+  const manifest = { schema_version: 1, entries };
+  return { record, manifest, options: { ...harness.options, readManifest: () => manifest } };
+}
+
 const FIXED_APP_CSS = ".a{color:red}\n.ax-subscription-detail-page{gap:var(--ax-space-xs)}\n.b{margin:0}\n";
 const CORRECTED_CONTRACT = `${FIXTURE_CONTRACT}| Page heading | 24px below 768px, 28px from 768px |\n`;
 
@@ -1156,18 +1280,73 @@ export const SCENARIOS = [
   [
     "a stage confirmed record with a capture lacking png_sha256 is rejected",
     () => {
-      const confirm = (record) => {
-        toCorrected(record);
-        record.stage = "confirmed";
-        record.captures.forEach((capture, index) => { capture.png_sha256 = sha256(`png ${index}`); capture.pass = true; });
-        record.findings.forEach((finding) => { finding.verdict = "confirmed"; });
-      };
-      const harness = fixtureHarness({ files: { [ASSET_PATHS.app_css]: FIXED_APP_CSS }, contract: CORRECTED_CONTRACT });
-      const record = clone(harness.record);
-      confirm(record);
-      assert.doesNotThrow(() => verifyDesignReview(record, { ...harness.options, stage: "confirmed" }));
+      const { record, options } = confirmedFixture();
+      assert.doesNotThrow(() => verifyDesignReview(record, { ...options, stage: "confirmed" }), "positive control: the confirmed fixture passes");
       record.captures[4].png_sha256 = null;
-      assert.throws(() => verifyDesignReview(record, { ...harness.options, stage: "confirmed" }), /png_sha256/);
+      assert.throws(() => verifyDesignReview(record, { ...options, stage: "confirmed" }), /png_sha256/);
+    }
+  ],
+  [
+    "stage confirmed: every capture's png_sha256 must equal the minted manifest entry of its key, served from the reviewed CSS",
+    () => {
+      const reject = (mutate, pattern) => {
+        const { record, options, manifest } = confirmedFixture();
+        mutate(record, manifest);
+        assert.throws(() => verifyDesignReview(record, { ...options, readManifest: () => manifest, stage: "confirmed" }), pattern);
+      };
+      const key = (record) => record.captures[2].key;
+      reject((record) => { record.captures[2].png_sha256 = sha256("some other png"); }, /differs from the manifest sha256/);
+      reject((record, manifest) => { delete manifest.entries[key(record)]; }, /absent from the identity manifest/);
+      reject((record, manifest) => { manifest.entries[key(record)].mint_run_id = null; }, /not a minted baseline/);
+      reject((record, manifest) => { manifest.entries[key(record)].served.css_sha256 = "9".repeat(64); }, /the record reviewed/);
+      reject((record, manifest) => { manifest.entries[record.captures[9].key].served.css_sha256 = "9".repeat(64); }, /accrue_admin\.css/);
+      assert.throws(() => verifyDesignReview(confirmedFixture().record, { ...confirmedFixture().options, readManifest: () => null, stage: "confirmed" }), /is required at stage confirmed/);
+    }
+  ],
+  [
+    "stage confirmed: a minted Phase 211 key is a changed baseline mapped to a finding or an owner-decided ENV id, or a re-attested unchanged one",
+    () => {
+      const legacy = (sha = sha256("legacy bytes")) => ({ case_key: "subscription-detail", sha256: sha, mint_run_id: "424242", served: { css_sha256: "1".repeat(64) } });
+      const run = (mutate) => {
+        const { record, options, manifest } = confirmedFixture();
+        manifest.entries["subscription-detail"] = legacy();
+        mutate(record, manifest);
+        return () => verifyDesignReview(record, { ...options, readManifest: () => manifest, stage: "confirmed" });
+      };
+      assert.throws(run(() => {}), /subscription-detail was minted by run 424242 but is neither a changed baseline/);
+      assert.doesNotThrow(run((record) => { record.baselines_changed.push({ key: "subscription-detail", finding_id: "DR-254-01", sha256: sha256("legacy bytes"), reason: "gap rhythm" }); }));
+      assert.throws(run((record) => { record.baselines_changed.push({ key: "subscription-detail", finding_id: "DR-254-77" }); }), /maps to no finding or owner-decided environmental id/);
+      assert.throws(run((record) => { record.baselines_changed.push({ key: "subscription-detail", finding_id: "ENV-254-01" }); }), /maps to no finding or owner-decided environmental id/);
+      assert.doesNotThrow(run((record) => {
+        record.environmental_decisions = [{ id: "ENV-254-01", checkpoint: "254-15-02", owner_decision: "rebaseline-environmental" }];
+        record.baselines_changed.push({ key: "subscription-detail", finding_id: "ENV-254-01" });
+      }));
+      assert.throws(run((record) => { record.environmental_decisions = [{ id: "ENV-254-01", checkpoint: "254-15-02", owner_decision: "" }]; }), /environmental decision needs/);
+      assert.doesNotThrow(run((record) => { record.baselines_reattested = [{ key: "subscription-detail", sha256: sha256("legacy bytes"), reason: "bytes unchanged since 254-03" }]; }));
+      assert.throws(run((record) => { record.baselines_reattested = [{ key: "subscription-detail", sha256: sha256("other bytes"), reason: "x" }]; }), /differs from the manifest sha256/);
+      assert.throws(run((record) => {
+        record.baselines_changed.push({ key: "subscription-detail", finding_id: "DR-254-01" });
+        record.baselines_reattested = [{ key: "subscription-detail", sha256: sha256("legacy bytes"), reason: "x" }];
+      }), /both changed and re-attested/);
+      assert.throws(run((record) => { record.baselines_changed.push({ key: "invoice-detail", finding_id: "DR-254-01" }); record.baselines_reattested = [{ key: "subscription-detail", sha256: sha256("legacy bytes"), reason: "x" }]; }), /no minted manifest entry/);
+    }
+  ],
+  [
+    "stage confirmed: a confirmed verdict needs green tests, passing confirmation captures and a corrected finding; not-confirmed needs a reason",
+    () => {
+      const run = (mutate) => {
+        const { record, options } = confirmedFixture();
+        mutate(record);
+        return () => verifyDesignReview(record, { ...options, stage: "confirmed" });
+      };
+      assert.doesNotThrow(run(() => {}));
+      assert.throws(run((record) => { record.findings[0].tests[0].status = "red"; }), /verdict confirmed while a test is not green/);
+      assert.throws(run((record) => { record.findings[0].tests[0].status = "green"; record.findings[0].confirmation_captures = []; }), /confirmation_captures is empty/);
+      assert.throws(run((record) => { record.captures[4].pass = false; }), /did not pass/);
+      assert.throws(run((record) => { record.findings[2].verdict = "confirmed"; }), /deferred finding was not corrected/);
+      assert.throws(run((record) => { delete record.findings[2].verdict_reason; }), /needs a verdict_reason/);
+      assert.throws(run((record) => { record.findings[0].verdict = "pending"; }), /verdict confirmed or not-confirmed/);
+      assert.doesNotThrow(run((record) => { record.findings[0].verdict = "not-confirmed"; record.findings[0].verdict_reason = "the capture still shows the compressed rhythm"; }));
     }
   ],
   [

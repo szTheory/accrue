@@ -37,10 +37,10 @@
 | CAP-254-02 | `phase254-collection-multiple_rows-w320-dark` | story | settled | 320 | dark | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | pending | pending |
 | CAP-254-03 | `phase254-collection-multiple_rows-w1280-light` | story | settled | 1280 | light | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | pending | pending |
 | CAP-254-04 | `phase254-collection-multiple_rows-w1280-dark` | story | settled | 1280 | dark | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | pending | pending |
-| CAP-254-05 | `phase254-page-active-w320-light` | story | settled | 320 | light | `/billing/dev/storybook/iframe/pages/subscription?tab=active` | pending | pending |
-| CAP-254-06 | `phase254-page-active-w320-dark` | story | settled | 320 | dark | `/billing/dev/storybook/iframe/pages/subscription?tab=active` | pending | pending |
-| CAP-254-07 | `phase254-page-active-w1280-light` | story | settled | 1280 | light | `/billing/dev/storybook/iframe/pages/subscription?tab=active` | pending | pending |
-| CAP-254-08 | `phase254-page-active-w1280-dark` | story | settled | 1280 | dark | `/billing/dev/storybook/iframe/pages/subscription?tab=active` | pending | pending |
+| CAP-254-05 | `phase254-page-active-w320-light` | story | settled | 320 | light | `/billing/dev/storybook/pages/subscription?tab=active` | pending | pending |
+| CAP-254-06 | `phase254-page-active-w320-dark` | story | settled | 320 | dark | `/billing/dev/storybook/pages/subscription?tab=active` | pending | pending |
+| CAP-254-07 | `phase254-page-active-w1280-light` | story | settled | 1280 | light | `/billing/dev/storybook/pages/subscription?tab=active` | pending | pending |
+| CAP-254-08 | `phase254-page-active-w1280-dark` | story | settled | 1280 | dark | `/billing/dev/storybook/pages/subscription?tab=active` | pending | pending |
 | CAP-254-09 | `phase254-mounted-review-open-w320-light` | mounted | review-open | 320 | light | `/billing/subscriptions/:id` | pending | pending |
 | CAP-254-10 | `phase254-mounted-review-open-w320-dark` | mounted | review-open | 320 | dark | `/billing/subscriptions/:id` | pending | pending |
 | CAP-254-11 | `phase254-mounted-review-open-w1280-light` | mounted | review-open | 1280 | light | `/billing/subscriptions/:id` | pending | pending |
