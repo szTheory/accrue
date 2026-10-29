@@ -283,7 +283,7 @@ test("buildProvisionalBudget refuses a smoke sample, a missing mode and a non-in
 
 const CI_SAMPLE_KEYS = [
   "schema_version", "workflow", "run_id", "head_sha", "event", "attempt", "job", "job_name", "conclusion", "started_at", "completed_at",
-  "duration_s", "steps", "lanes", "cache", "fingerprint", "informs_only",
+  "run_started_at", "duration_s", "steps", "lanes", "browser_lanes", "cache", "fingerprint", "informs_only",
 ];
 
 function logLine(step, text, job = "Job") {
@@ -405,6 +405,24 @@ test("collectCiSample turns one attempt-1 run into one pinned-schema CI sample p
     assert.equal(browser?.job_name, "Browser UAT");
     assert.deepEqual(browser?.lanes, []);
     assert.equal(browser?.cache.misses, 1);
+  });
+});
+
+test("collectCiSample records the queue-excluded run start and keeps Playwright lane durations, stats duration and cell counts (CIQ-04 freeze inputs)", () => {
+  withArtifacts((dir) => {
+    const bundlePath = path.join(dir, "phase253-machine-evidence/ci-results/run-b/results.json");
+    fs.writeFileSync(bundlePath, JSON.stringify({ plan: "253-06", commands: [
+      { id: "phase253-compositions-browser", duration_ms: 43000, execution_evidence: { kind: "playwright-json", stats_duration_ms: 41000, durations: [{ identity: "cell a", duration_ms: 300 }, { identity: "cell b", duration_ms: 500 }, { identity: "reconciles every cell", duration_ms: 20 }] } },
+      { id: "phase253-collection-live", duration_ms: 7000, execution_evidence: { kind: "exunit-tap", test_count: 3 } },
+    ] }));
+    const [guardrails, browser] = measure.collectCiSample(ciRunFixture(), dir, CI_LOGS);
+    assert.equal(guardrails.run_started_at, "2026-10-28T12:00:00Z");
+    assert.equal(guardrails.browser_lanes.length, 1, "only Playwright lanes with durations are kept");
+    assert.deepEqual(guardrails.browser_lanes[0], {
+      id: "phase253-compositions-browser", lane: "253-06:phase253-compositions-browser", cells: 2, stats_duration_ms: 41000,
+      durations: [{ identity: "cell a", duration_ms: 300 }, { identity: "cell b", duration_ms: 500 }, { identity: "reconciles every cell", duration_ms: 20 }],
+    });
+    assert.deepEqual(browser.browser_lanes, []);
   });
 });
 

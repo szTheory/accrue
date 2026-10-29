@@ -819,6 +819,31 @@ function readLaneDurations(artifactDir, laneArtifacts) {
   return lanes;
 }
 
+// Playwright browser lanes keep their per-test durations and the report's stats.duration in the
+// results bundle (Phase 254, CIQ-04), so a budget freeze can compute per-cell cost from CI evidence.
+// A reconcile step is not a cell and is excluded from the cell count.
+function readBrowserLanes(artifactDir, laneArtifacts) {
+  const browserLanes = [];
+  for (const artifact of laneArtifacts) {
+    for (const file of findResultFiles(path.join(artifactDir, artifact))) {
+      const bundle = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (!Array.isArray(bundle.commands)) continue;
+      for (const command of bundle.commands) {
+        const evidence = command.execution_evidence;
+        if (evidence?.kind !== "playwright-json" || !Array.isArray(evidence.durations)) continue;
+        browserLanes.push({
+          id: command.id,
+          lane: `${bundle.plan ?? artifact}:${command.id}`,
+          cells: evidence.durations.filter((entry) => !/^reconciles /.test(entry.identity)).length,
+          stats_duration_ms: Number.isFinite(evidence.stats_duration_ms) ? evidence.stats_duration_ms : null,
+          durations: evidence.durations,
+        });
+      }
+    }
+  }
+  return browserLanes;
+}
+
 const seconds = (start, end) => (start && end && Number.isFinite(Date.parse(start)) && Number.isFinite(Date.parse(end))
   ? round3((Date.parse(end) - Date.parse(start)) / 1000)
   : null);
@@ -832,6 +857,9 @@ export function collectCiSample(runJson, artifactDir, jobLogs = {}) {
   if (Number(runJson.attempt) !== 1) fail(`run ${runJson.databaseId} is attempt ${runJson.attempt}; only first-attempt runs are measured (no reruns)`);
   if (typeof runJson.headSha !== "string" || !/^[0-9a-f]{40}$/.test(runJson.headSha)) fail("run JSON has no valid headSha");
   const samples = [];
+  // Queue time is excluded here too: the earliest job start in the run, not its creation time.
+  const startTimes = runJson.jobs.map((job) => Date.parse(job.startedAt)).filter(Number.isFinite);
+  const runStartedAt = startTimes.length > 0 ? new Date(Math.min(...startTimes)).toISOString().replace(/\.\d{3}Z$/, "Z") : null;
   for (const job of runJson.jobs) {
     const evidence = CI_OWNER_JOBS[job.name];
     if (!evidence) continue;
@@ -850,9 +878,11 @@ export function collectCiSample(runJson, artifactDir, jobLogs = {}) {
       conclusion: job.conclusion,
       started_at: job.startedAt ?? null,
       completed_at: job.completedAt ?? null,
+      run_started_at: runStartedAt,
       duration_s: seconds(job.startedAt, job.completedAt),
       steps: (job.steps ?? []).map((step) => ({ name: step.name, conclusion: step.conclusion, duration_s: seconds(step.startedAt, step.completedAt) })),
       lanes: readLaneDurations(artifactDir, evidence.lane_artifacts),
+      browser_lanes: readBrowserLanes(artifactDir, evidence.lane_artifacts),
       cache: parseCacheOutcomes(log),
       fingerprint,
       informs_only: true,
