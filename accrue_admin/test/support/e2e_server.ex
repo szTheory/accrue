@@ -215,7 +215,7 @@ defmodule AccrueAdmin.E2E.Server do
 
   defp health_identity(identity, ready?) do
     identity
-    |> Map.take([:nonce, :database, :role, :address, :port, :partition])
+    |> Map.take([:nonce, :database, :role, :address, :port, :partition, :lane])
     |> Map.put(:pid, String.to_integer(System.pid()))
     |> Map.put(:ready, ready?)
   end

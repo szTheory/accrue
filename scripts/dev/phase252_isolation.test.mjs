@@ -200,7 +200,7 @@ async function withSessions(callback) {
   }
 }
 
-test("ordinary reset deletes its marker and preserves review relationships byte-for-byte", async () => {
+test("ordinary reset deletes its marker and preserves review relationships byte-for-byte", async (t) => {
   await withSessions(async ({ review, normal }) => {
     assert.notEqual(review.config.database, normal.config.database);
     assert.notEqual(review.config.partition, normal.config.partition);
@@ -222,6 +222,31 @@ test("ordinary reset deletes its marker and preserves review relationships byte-
     const reset = await fetch(`http://127.0.0.1:${normal.config.port}/__e2e__/reset`, { method: "POST" });
     assert.equal(reset.status, 200, "the ordinary test server should accept its real reset route");
     assert.deepEqual(await reset.json(), { ok: true });
+
+    // Phase 254 D-13: the review lane refuses every reset/seed/phase240 mutator
+    // with 403, while the admin-test server above answered 200 in this same test.
+    const refusedRoutes = [
+      "/__e2e__/reset",
+      "/__e2e__/seed/edge-states",
+      "/__e2e__/seed/overflow",
+      "/__e2e__/seed/phase191-matrix",
+      "/__e2e__/seed/phase199-interactions",
+      "/__e2e__/seed/phase199-interaction-matrix",
+      "/__e2e__/seed/phase241-review-matrix",
+      "/__e2e__/seed/dashboard",
+      "/__e2e__/seed/operator-flows",
+      "/__e2e__/seed/advisory-entitlements",
+      "/__e2e__/phase240/hold-subscription-cancel",
+      "/__e2e__/phase240/release-action",
+    ];
+    await t.test("review lane refuses reset, seed and phase240 mutators with 403", async () => {
+      for (const route of refusedRoutes) {
+        const refused = await fetch(`http://127.0.0.1:${review.config.port}${route}`, { method: "POST" });
+        assert.equal(refused.status, 403,
+          `review-lane refusal: POST ${route} must return 403 on the admin-review server`);
+        assert.match(await refused.text(), /admin-review/, `review-lane refusal body for ${route} must name the lane`);
+      }
+    });
 
     assert.equal(JSON.parse(markerSnapshot(normal.config.database, normalMarker)).length, 0,
       "positive control: reset must remove the ordinary customer and cascading child relationships");

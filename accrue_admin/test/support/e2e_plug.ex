@@ -7,7 +7,16 @@ defmodule AccrueAdmin.E2E.Plug do
 
   alias AccrueAdmin.E2E.Fixtures
 
+  # Phase 254 D-13: one route-prefix list defines every mutator (reset, seed and
+  # phase240 hold/release). A review-lane server refuses POSTs to any of them so
+  # independent pure-story scheduling can never reset or reseed shared fixtures.
+  # The `/__e2e__` forward prefix is normalised away before matching, so the
+  # forwarded (`/reset`) and direct (`/__e2e__/reset`) spellings are one set.
+  @mutator_prefixes ["/reset", "/seed/", "/phase240/"]
+  @review_lane "admin-review"
+
   plug(:fetch_query_params)
+  plug(:refuse_in_review_lane)
   plug(:match)
   plug(:dispatch)
 
@@ -166,6 +175,46 @@ defmodule AccrueAdmin.E2E.Plug do
 
   match _ do
     json(conn, 404, %{error: "not_found"})
+  end
+
+  @doc false
+  def mutator_prefixes, do: @mutator_prefixes
+
+  @doc false
+  # A nil identity (the legacy port-4017 server) and every lane other than
+  # admin-review stay permissive; the admin-test lane owns its own database.
+  def refuse_in_review_lane(%Plug.Conn{method: "POST"} = conn, _opts) do
+    identity = Application.get_env(:accrue_admin, :phase252_e2e_identity)
+
+    if review_lane?(identity) and mutator_path?(conn.path_info) do
+      conn
+      |> put_resp_content_type("text/plain")
+      |> send_resp(403, "reset and seed are refused in the #{@review_lane} lane")
+      |> halt()
+    else
+      conn
+    end
+  end
+
+  def refuse_in_review_lane(conn, _opts), do: conn
+
+  defp review_lane?(%{lane: @review_lane}), do: true
+  defp review_lane?(_identity), do: false
+
+  defp mutator_path?(path_info) do
+    path =
+      case path_info do
+        ["__e2e__" | rest] -> "/" <> Enum.join(rest, "/")
+        segments -> "/" <> Enum.join(segments, "/")
+      end
+
+    Enum.any?(@mutator_prefixes, fn prefix ->
+      if String.ends_with?(prefix, "/") do
+        String.starts_with?(path, prefix)
+      else
+        path == prefix or String.starts_with?(path, prefix <> "/")
+      end
+    end)
   end
 
   defp json(conn, status, payload) do
