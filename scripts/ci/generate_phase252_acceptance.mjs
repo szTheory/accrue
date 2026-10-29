@@ -10,6 +10,7 @@ import { isMainModule } from "./main_module.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { deriveExecutionEvidence, PHASE252_REPORTER_SPECS, requiredAssertionIds } from "./phase252_reporters.mjs";
 import { REQUIRED_COMMAND_IDS } from "./verify_phase252_stories.mjs";
+import { expectedPhase252Cells, readCurationLedger } from "./verify_phase254_curation.mjs";
 
 export const PHASE_SLUG = "252-production-backed-subscription-stories";
 export const REQUIREMENT_IDS = Object.freeze(["CIQ-01", "SBK-01", "SBK-02", "SBK-03", "SCEN-01", "SCEN-02", "SCEN-03", "SCEN-04", "LAB-01", "LAB-02"]);
@@ -334,22 +335,33 @@ function mountedStoryPath(entry) {
   return `${pathname}${generated.search}`;
 }
 
+// Phase 254 CURATE-01 (AMD-254-01): the counts derive from the curation ledger (frozen baseline
+// minus retired); 15 rows stays the frozen-baseline fixture positive control, and a missing ledger
+// throws instead of defaulting to a smaller number.
+export function assertEvidenceRowCounts(rows, ledger) {
+  const expected = expectedPhase252Cells(ledger);
+  if (!Array.isArray(rows) || rows.length !== expected.total) fail(`browser evidence must contain exactly ${expected.total} rows: ${expected.canonical} canonical and ${expected.compatibility} compatibility cases`);
+  const canonical = rows.filter((row) => row.case_kind === "canonical");
+  const compatibility = rows.filter((row) => row.case_kind === "compatibility");
+  if (canonical.length !== expected.canonical || compatibility.length !== expected.compatibility) fail("browser evidence is pooled or omits canonical/compatibility rows");
+  return expected;
+}
+
 function validateBrowser(root, bundle, sourceDigests, manifest, manifestDigest, commands) {
   const browserPath = resolveRelative(root, bundle.browser_result_path);
   verifyDigest(root, bundle.browser_result_path, bundle.browser_results_sha256, "browser result");
   const browser = readJson(browserPath, "browser result");
   if (browser.run_id !== bundle.run_id) fail("browser result run ID does not match its required owner run");
   if (browser.human_judgment !== false || browser.manifest_sha256 !== manifestDigest) fail("browser result has unverified or stale manifest evidence");
-  if (!Array.isArray(browser.cases) || browser.cases.length !== 15) fail("browser evidence must contain exactly 15 rows: 12 canonical and 3 compatibility cases");
+  const phase252Cells = assertEvidenceRowCounts(browser.cases, readCurationLedger(root));
   const canonical = browser.cases.filter((row) => row.case_kind === "canonical");
   const compatibility = browser.cases.filter((row) => row.case_kind === "compatibility");
-  if (canonical.length !== 12 || compatibility.length !== 3) fail("browser evidence is pooled or omits canonical/compatibility rows");
   const expectedCanonical = STATES.flatMap((state) => WIDTHS.flatMap((width) => THEMES.map((theme) => `${state}::${width}::${theme}`)));
   exactSet(new Set(canonical.map((row) => `${row.state}::${row.width}::${row.theme}`)), expectedCanonical, "canonical state/width/theme cells");
-  if (new Set(canonical.map((row) => row.key)).size !== 12 || new Set(compatibility.map((row) => row.key)).size !== 3) fail("browser row identity is duplicated");
+  if (new Set(canonical.map((row) => row.key)).size !== phase252Cells.canonical || new Set(compatibility.map((row) => row.key)).size !== phase252Cells.compatibility) fail("browser row identity is duplicated");
   if (browser.cases.some((row) => row.status !== "passed" || row.manifest_sha256 !== manifestDigest || !/^[0-9a-f]{64}$/.test(row.actual_content?.text_sha256 || ""))) fail("browser row failed, is stale, or lacks actual DOM content evidence");
   const rowsByKey = new Map(browser.cases.map((row) => [row.key, row]));
-  if (rowsByKey.size !== 15) fail("browser result contains duplicate case keys");
+  if (rowsByKey.size !== phase252Cells.total) fail("browser result contains duplicate case keys");
   const screenshotDirectory = `${path.posix.dirname(bundle.results_path)}/screenshots`;
   const screenshotPaths = new Set();
 
@@ -388,7 +400,7 @@ function validateBrowser(root, bundle, sourceDigests, manifest, manifestDigest, 
     if (row.asset_identity?.storybook_css_sha256 !== sourceDigests["accrue_admin/priv/static/storybook.css"] ||
         row.asset_identity?.storybook_js_sha256 !== sourceDigests["accrue_admin/priv/static/storybook.js"]) fail(`served asset digest is stale or pooled: ${row.key}`);
   }
-  if (screenshotPaths.size !== 12) fail("browser evidence does not contain twelve unique canonical screenshots");
+  if (screenshotPaths.size !== phase252Cells.canonical) fail(`browser evidence does not contain ${phase252Cells.canonical} unique canonical screenshots`);
   for (const row of canonical) {
     for (const assertion of REQUIRED_RENDER_ASSERTIONS) if (row.assertions?.[assertion] !== true) fail(`canonical case lacks ${assertion}: ${row.key}`);
   }

@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { isMainModule } from "./main_module.mjs";
+import { expectedPhase252Cells, readCurationLedger } from "./verify_phase254_curation.mjs";
 
 const ADMIN = "accrue_admin/test/accrue_admin/";
 
@@ -350,9 +351,11 @@ function bindAssertionIds(commandId, assertionIds, identities) {
   return bindings;
 }
 
-function browserBindings(assertionIds, browserResult, identities) {
+function browserBindings(assertionIds, browserResult, identities, root) {
+  // Phase 254 CURATE-01 (AMD-254-01): the expected row count derives from the curation ledger.
+  const expectedCells = expectedPhase252Cells(readCurationLedger(root));
   const rows = browserResult?.cases;
-  if (!Array.isArray(rows) || rows.length !== 15) fail("browser reporter cannot bind assertions without all 15 rendered result rows");
+  if (!Array.isArray(rows) || rows.length !== expectedCells.total) fail(`browser reporter cannot bind assertions without all ${expectedCells.total} rendered result rows`);
   const expectedIdentities = [...rows.map((row) => row.test_id), "reconciles every declared direct render against the generated manifest"];
   exactSet(identities, expectedIdentities, "Playwright and result-ledger test identities");
   const byAssertion = {
@@ -403,7 +406,7 @@ export function deriveExecutionEvidence({ root, commandId, stdout, expectedAsser
     actualAssertions = expectedAssertions;
   } else if (spec.kind === "playwright-json") {
     parsed = parsePlaywrightJson(stdout);
-    assertionBindings = browserBindings(expectedAssertions, browserResult, parsed.identities);
+    assertionBindings = browserBindings(expectedAssertions, browserResult, parsed.identities, root);
     actualAssertions = expectedAssertions;
   } else {
     actualAssertions = processAssertions(commandId, stdout);

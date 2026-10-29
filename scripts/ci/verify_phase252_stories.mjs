@@ -11,6 +11,7 @@ import test from "node:test";
 import { isMainModule } from "./main_module.mjs";
 import { deriveExecutionEvidence, PHASE252_REPORTER_SPECS } from "./phase252_reporters.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
+import { expectedPhase252Cells, readCurationLedger } from "./verify_phase254_curation.mjs";
 
 export const REQUIRED_COMMAND_IDS = Object.freeze([
   "manifest-current",
@@ -431,16 +432,30 @@ function spawnCaptured(spec, root, logDirectory) {
   });
 }
 
+// Phase 254 CURATE-01 (AMD-254-01): the expected row counts derive from the curation ledger
+// (frozen baseline minus retired). 15 rows (12 canonical + 3 compatibility) stays the frozen-baseline
+// fixture positive control; a missing or unreadable ledger throws and never defaults to a smaller count.
+export function assertRenderRowCounts(rows, ledger) {
+  const expected = expectedPhase252Cells(ledger);
+  if (!Array.isArray(rows) || rows.length !== expected.total) {
+    throw new Error(`browser result must contain exactly ${expected.total} current rows: ${expected.canonical} canonical cells and ${expected.compatibility} compatibility cases`);
+  }
+  const canonical = rows.filter((row) => row.case_kind === "canonical");
+  const compatibility = rows.filter((row) => row.case_kind === "compatibility");
+  if (canonical.length !== expected.canonical || compatibility.length !== expected.compatibility) {
+    throw new Error("browser result is pooled or omits a canonical/compatibility cell");
+  }
+  return expected;
+}
+
 function validateRenderResults(resultPath, { id, manifestDigest }) {
   if (!fs.existsSync(resultPath)) throw new Error("browser result file is missing");
   const results = JSON.parse(fs.readFileSync(resultPath, "utf8"));
   if (results.run_id !== id) throw new Error("browser result run identity does not match the current launcher");
   if (results.human_judgment !== false) throw new Error("browser result does not declare human_judgment: false");
   if (results.manifest_sha256 !== manifestDigest) throw new Error("browser result manifest digest is stale");
-  if (!Array.isArray(results.cases) || results.cases.length !== 15) throw new Error("browser result must contain exactly 15 current rows: 12 canonical cells and 3 compatibility cases");
+  const expectedCells = assertRenderRowCounts(results.cases, readCurationLedger(ROOT));
   const canonical = results.cases.filter((row) => row.case_kind === "canonical");
-  const compatibility = results.cases.filter((row) => row.case_kind === "compatibility");
-  if (canonical.length !== 12 || compatibility.length !== 3) throw new Error("browser result is pooled or omits a canonical/compatibility cell");
   const canonicalKeys = new Set(canonical.map((row) => row.scenario_id + "::" + row.width + "::" + row.theme));
   for (const state of ["active", "scheduled_cancellation", "incomplete_evidence"]) {
     for (const width of [320, 1280]) {
@@ -466,7 +481,7 @@ function validateRenderResults(resultPath, { id, manifestDigest }) {
       throw new Error("browser result screenshot bytes are missing, empty, or stale: " + row.screenshot.path);
     }
   }
-  if (screenshotPaths.size !== 12) throw new Error("browser result must capture all 12 canonical state/width/theme screenshots");
+  if (screenshotPaths.size !== expectedCells.canonical) throw new Error(`browser result must capture all ${expectedCells.canonical} canonical state/width/theme screenshots`);
   if (results.negative_controls?.baseline_accepted !== true || ["invalid_route", "missing_variation", "metadata_only"].some((key) => results.negative_controls?.[key]?.rejected !== true)) {
     throw new Error("browser reconciliation negative controls are incomplete");
   }

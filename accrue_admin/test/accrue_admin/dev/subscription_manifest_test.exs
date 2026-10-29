@@ -451,7 +451,18 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
 
       assert length(collection_entries) == 10
       assert length(page_entries) == 9
-      assert length(entries) == 6
+      # AMD-254-01: the live entry count derives from the ledger (frozen baseline minus retired);
+      # the frozen 6 stays alive as the baseline fixture positive control.
+      ledger = SubscriptionManifest.curation_ledger()
+
+      retired =
+        Enum.count(ledger.records, fn record ->
+          record.disposition in ["retire", "merge"] and
+            record.subject.story_path == @story_path and record.subject.variation_id != nil
+        end)
+
+      assert ledger.frozen_baseline.entries == 6
+      assert length(entries) == ledger.frozen_baseline.entries - retired
 
       root = Path.expand("../../../../", __DIR__)
       guide_path = Path.join(root, "guides/subscription-story-coverage.md")

@@ -11,6 +11,7 @@ import { LEDGER_PATH, SUBSCRIPTION_STORY_PATH, expectedPhase252Cells } from "./v
 import { deriveExecutionEvidence, expectedExUnitIdentities, expectedNodeTestIdentities, parseTap13Report, PHASE252_REPORTER_SPECS, requiredAssertionIds } from "./phase252_reporters.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import {
+  assertEvidenceRowCounts,
   generatePhase252Acceptance,
   validateCurrentPhase252Metadata,
   validateGuideContract,
@@ -862,6 +863,22 @@ test("ExUnit source identities retain enclosing describe labels", () => {
   }
 });
 
+test("assertEvidenceRowCounts mutation fixtures: 15 rows fail a one-retirement ledger and 14 rows fail a frozen-only ledger", () => {
+  const baseline = { entries: 6, compatibility_ids: ["braintree_pruned", "dunning_active", "populated"] };
+  const frozenOnly = { frozen_baseline: baseline, records: [] };
+  const oneRetired = { frozen_baseline: baseline, records: [{ disposition: "retire", subject: { story_path: SUBSCRIPTION_STORY_PATH, variation_id: "populated" } }] };
+  const rows = (compatibility) => [
+    ...Array.from({ length: 12 }, () => ({ case_kind: "canonical" })),
+    ...Array.from({ length: compatibility }, () => ({ case_kind: "compatibility" })),
+  ];
+  assert.deepEqual(assertEvidenceRowCounts(rows(3), frozenOnly), { canonical: 12, compatibility: 3, total: 15 });
+  assert.throws(() => assertEvidenceRowCounts(rows(2), frozenOnly), /exactly 15 rows: 12 canonical and 3 compatibility/);
+  assert.deepEqual(assertEvidenceRowCounts(rows(2), oneRetired), { canonical: 12, compatibility: 2, total: 14 });
+  assert.throws(() => assertEvidenceRowCounts(rows(3), oneRetired), /exactly 14 rows: 12 canonical and 2 compatibility/);
+  assert.throws(() => assertEvidenceRowCounts([...rows(1), { case_kind: "canonical" }], oneRetired), /pooled or omits/);
+  assert.throws(() => assertEvidenceRowCounts(rows(3), null), /cannot derive Phase 252 cell counts/);
+});
+
 function retireCompatibilityId(root, id) {
   const ledgerPath = path.join(root, LEDGER_PATH);
   const ledger = JSON.parse(fs.readFileSync(ledgerPath, "utf8"));
@@ -877,7 +894,7 @@ test("Phase 252 browser row counts derive from the curation ledger at the eviden
     assert.equal(validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }).guide_contract, "passed");
     // One retired compatibility id makes the old 15 rows a mismatch.
     const ledgerPath = retireCompatibilityId(fixture.root, "populated");
-    assert.throws(() => validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }), /exactly 14 rows: 12 canonical and 2 compatibility/);
+    assert.throws(() => validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }), /all 14 rendered result rows|exactly 14 rows: 12 canonical and 2 compatibility/);
     // A missing ledger never defaults to a smaller number.
     fs.rmSync(ledgerPath);
     assert.throws(() => validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }), /curation ledger is missing or unreadable/);
