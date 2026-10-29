@@ -373,7 +373,10 @@ html.accrue-admin [data-theme="dark"],
 /* Reduced motion — tiered: remove travel + overshoot, keep opacity crossfades perceptible.
    This is more correct than blanket 0ms (the vestibular issue is movement, not opacity). */
 @media (prefers-reduced-motion: reduce) {
-  html.accrue-admin {
+  /* The Storybook sandbox carries `accrue-admin` on `.psb-sandbox` (not on <html>), so the reduce
+     block must name that scope too or the sandbox keeps its 180ms transitions under reduce. */
+  html.accrue-admin,
+  .psb-sandbox.accrue-admin {
     --ax-rise-sm: 0px;
     --ax-rise-md: 0px;
     --ax-press-scale: 1;

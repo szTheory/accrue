@@ -96,14 +96,17 @@ Exceptions: the existing dense-table micro-gap token remains with its current co
 
 ## Typography
 
-Use the existing Geist roles and only these four size steps / two weights for this phase.
+Use the existing Geist roles and only the size steps listed below (16px, 14px, 12px, 20px, and the responsive 24px / 28px page heading) with two weights (Regular 400, Semibold 600) for this phase.
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 16px | Regular 400 | 1.4 |
 | Label / dense table metadata | 12px | Semibold 600 | 1.4 |
 | Compact value | 14px | Regular 400 | 1.4 |
-| Page heading | 28px | Semibold 600 | 1.2 |
+| Page heading | Responsive: `--ax-type-xl` (24px) below 768px, `--ax-type-2xl` (28px) from 768px | Semibold 600 | 1.2 |
+| Section title | 20px (`--ax-type-lg`) | Semibold 600 | 1.2 |
+
+Phase 254 amendments: the Page heading row is responsive because the shared display rule already steps from 24px to 28px at 768px (DR-254-02); the Section title row records the 20px disclosure heading from the brandbook type scale (DR-254-04).
 
 ## Color
 
