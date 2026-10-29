@@ -279,6 +279,30 @@ test("the named required owner invokes both Phase 252 and Phase 253 checks", () 
   assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true, requirePhase253: true }));
 });
 
+test("the named required owner runs the Phase 254 recurring budget check after Phase 253, unconditionally", () => {
+  const contract = (runner) => assertCiContract({ workflow, ownerRunner: runner, manifest, requirePhase252: true, requirePhase253: true, requirePhase254Selection: true, requirePhase254Budget: true });
+  const budgetLine = 'run_step "Phase 254 recurring budget check" node scripts/ci/phase254_budget.mjs check';
+  assert.doesNotThrow(() => contract(ownerRunner), "positive control: the shipped runner satisfies the budget contract");
+
+  const removed = ownerRunner.replace(/^run_step "Phase 254 recurring budget check".*\n?/m, "");
+  assert.notEqual(removed, ownerRunner, "the mutation must change the runner");
+  assert.throws(() => contract(removed), /Phase 254 recurring budget check/);
+
+  const movedBefore = ownerRunner.replace(/^run_step "Phase 254 recurring budget check".*\n?/m, "").replace(
+    /^run_step "Phase 253 focused composition acceptance".*$/m,
+    `${budgetLine}\n$&`,
+  );
+  assert.notEqual(movedBefore, ownerRunner);
+  assert.throws(() => contract(movedBefore), /must run after the Phase 253 composition acceptance/);
+
+  const gated = ownerRunner.replace(budgetLine, `if [ "\${RUN_PHASE254:-false}" = true ]; then ${budgetLine}; fi`);
+  assert.notEqual(gated, ownerRunner);
+  assert.throws(() => contract(gated), /unconditional Phase 254 recurring budget check/);
+
+  const renamed = ownerRunner.replace('"Phase 254 recurring budget check"', '"Phase 254 budget"');
+  assert.throws(() => contract(renamed), /Phase 254 recurring budget check/);
+});
+
 test("the Phase 253 CI reporter requires every owner, path and unrelated-path assertion", () => {
   const command = phase253Runner.buildCommandPlan({
     id: "b".repeat(32),

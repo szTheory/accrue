@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source_revision": "428511d06b64317758a19561e028b7ab75382a52",
-  "manifest_sha256": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+  "manifest_sha256": "d0cc29a5f69a38fd731f71dc7c8e6c1ca6969551d362dda195076b7b0d0f73c8",
   "selection": {
     "total": 166,
     "selected": 166,
@@ -16,7 +16,10 @@
         "rendered_cases": 151,
         "source_revision": "285918126d8c887584fd7fa320af434dcb276266"
       }
-    }
+    },
+    "curation_record_ids": [
+      "CUR-254-06"
+    ]
   },
   "metrics": {
     "local": [
@@ -6894,6 +6897,31 @@
         "cells": 166,
         "owners": 2
       }
+    },
+    {
+      "id": "DEV-254-11",
+      "kind": "manifest-restamp",
+      "target": {
+        "name": "manifest_sha256",
+        "source": "B-1: the budget digest follows a regenerated manifest only through restamp-manifest"
+      },
+      "measurement": {
+        "manifest_path": "storybook/phase252-manifest.json"
+      },
+      "from": "bd02091c9213876dddbff78450c81bd18c83e918c89e4402c9784c31277f55d3",
+      "to": "d0cc29a5f69a38fd731f71dc7c8e6c1ca6969551d362dda195076b7b0d0f73c8",
+      "cause": "254-09-02",
+      "decision": "re-stamped to the committed manifest bytes after its owner regenerated them",
+      "status": "resolved",
+      "before": {
+        "cells": 166,
+        "owners": 2
+      },
+      "after": {
+        "cells": 166,
+        "owners": 2
+      },
+      "note": "The tracked manifest also dropped one Phase 252 render case after the 254-01 stamp (15 to 14, CUR-254-06 retires subscription_detail populated): selection.total stays at the 254-01 value 166 until the freeze, and selection.curation_record_ids names the record that explains the drop."
     }
   ],
   "widening_rule": "Budget values, allowances and the selection set are re-frozen only by an appended deviation record (D-23). CI never rewrites this file, a frozen value never widens silently, and local (informs_only) samples never populate a frozen value."

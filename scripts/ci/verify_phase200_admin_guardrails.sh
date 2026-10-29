@@ -3,6 +3,10 @@ set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
+# Phase 254 (CIQ-04): the budget check measures the runner's elapsed time, so the start is recorded
+# here and read by scripts/ci/phase254_budget.mjs. It is an input, never a switch.
+export PHASE254_RUNNER_STARTED_AT="$(date +%s)"
+
 run_step() {
   local label="$1"
   shift
@@ -22,3 +26,4 @@ run_step "Phase 200 scorecard final generator and verifier" bash -c "cd accrue_a
 run_step "Phase 200 sign-off verifier" bash -c "cd accrue_admin && npm run phase200:signoff"
 run_step "Phase 252 complete subscription story acceptance" npm --prefix accrue_admin run phase252:check
 run_step "Phase 253 focused composition acceptance" node scripts/ci/verify_phase253_compositions.mjs
+run_step "Phase 254 recurring budget check" node scripts/ci/phase254_budget.mjs check

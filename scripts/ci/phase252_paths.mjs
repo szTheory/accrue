@@ -218,6 +218,7 @@ export function assertCiContract({
   requirePhase252 = false,
   requirePhase253 = false,
   requirePhase254Selection = false,
+  requirePhase254Budget = false,
   roots = CONSUMED_ROOTS,
 }) {
   if (typeof workflow !== "string" || typeof ownerRunner !== "string") {
@@ -256,15 +257,23 @@ export function assertCiContract({
   }
   const phase252Step = /^run_step "Phase 252 complete subscription story acceptance" npm --prefix accrue_admin run phase252:check$/m;
   const phase253Step = /^run_step "Phase 253 focused composition acceptance" node scripts\/ci\/verify_phase253_compositions\.mjs$/m;
+  const phase254BudgetStep = /^run_step "Phase 254 recurring budget check" node scripts\/ci\/phase254_budget\.mjs check$/m;
   const phase252Match = phase252Step.exec(ownerRunner);
-  if ((requirePhase252 || requirePhase253) && !phase252Match) {
+  if ((requirePhase252 || requirePhase253 || requirePhase254Budget) && !phase252Match) {
     fail("required owner runner does not invoke npm --prefix accrue_admin run phase252:check");
   }
-  if (requirePhase253) {
+  if (requirePhase253 || requirePhase254Budget) {
     const phase253Match = phase253Step.exec(ownerRunner);
     if (!phase253Match) fail("required owner runner does not invoke node scripts/ci/verify_phase253_compositions.mjs");
     if (phase253Match.index < phase252Match.index) {
       fail("Phase 253 composition acceptance must run after the complete Phase 252 check");
+    }
+    // Phase 254 CIQ-04 (D-23): the budget check reads the Phase 252/253 results bundles, so it
+    // runs after both aggregates, unconditionally, as its own named step.
+    if (requirePhase254Budget) {
+      const budgetMatch = phase254BudgetStep.exec(ownerRunner);
+      if (!budgetMatch) fail("required owner runner does not invoke node scripts/ci/phase254_budget.mjs check as an unconditional Phase 254 recurring budget check step");
+      if (budgetMatch.index < phase253Match.index) fail("the Phase 254 recurring budget check must run after the Phase 253 composition acceptance");
     }
   }
   if (requirePhase254Selection) assertPhase254Selection(workflow, job);

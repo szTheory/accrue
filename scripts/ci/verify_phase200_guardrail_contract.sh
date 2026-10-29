@@ -114,6 +114,11 @@ phase253_step_line="$(grep -nFx 'run_step "Phase 253 focused composition accepta
 [[ "$phase253_step_line" -gt "$phase252_step_line" ]] ||
   fail "Phase 253 focused composition acceptance must run after the complete Phase 252 check"
 
+require_regex "$runner_file" '^run_step "Phase 254 recurring budget check" node scripts/ci/phase254_budget\.mjs check$'
+phase254_step_line="$(grep -nFx 'run_step "Phase 254 recurring budget check" node scripts/ci/phase254_budget.mjs check' "$runner_file" | cut -d: -f1)"
+[[ "$phase254_step_line" -gt "$phase253_step_line" ]] ||
+  fail "Phase 254 recurring budget check must run after the Phase 253 focused composition acceptance"
+
 storybook_script="$(package_script_value "phase200:storybook")"
 scorecard_script="$(package_script_value "phase200:scorecard")"
 signoff_script="$(package_script_value "phase200:signoff")"
