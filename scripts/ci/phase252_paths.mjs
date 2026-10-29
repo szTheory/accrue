@@ -111,7 +111,7 @@ function fail(message) {
   throw new Error(`Phase 252 CI contract: ${message}`);
 }
 
-function normalizeRepoPath(value) {
+export function normalizeRepoPath(value) {
   if (typeof value !== "string" || value.length === 0 || value.includes("\0")) return null;
   const normalized = value.replaceAll("\\", "/");
   if (normalized.startsWith("/") || /^[A-Za-z]:\//.test(normalized)) return null;
@@ -120,7 +120,7 @@ function normalizeRepoPath(value) {
   return segments.join("/");
 }
 
-function matchesRule(repoPath, rule) {
+export function matchesRule(repoPath, rule) {
   const isDirectoryPrefix = rule.path.endsWith("/");
   const root = rule.path.replace(/\/$/, "");
   if (rule.mode === "exact") return repoPath === root;

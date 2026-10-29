@@ -1,0 +1,3540 @@
+{
+  "schema_version": 1,
+  "manifest_sha256": "56a0a9e7a776f6d0ce58a28f9e68f9c50816101db0f5b50a8046955545d5a20d",
+  "source_digests": {
+    "accrue_admin/lib/accrue_admin/dev/storybook.ex": "2cea8b08edad6d18383220b23c020e0fbbf7ca7c2c8a884729270779ecfa983d",
+    "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+    "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "a0dc862c9bce0e45f92a4f04da79999714d51a1f1d44ff6cf2167dbc09140b2b",
+    "accrue_admin/lib/accrue_admin/queries/subscriptions.ex": "152c94ad8fd577c358f974bdf35c2e48fa8ca421ca9e3dda284e771e4b348807",
+    "accrue_admin/lib/accrue_admin/router.ex": "2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed",
+    "accrue_admin/storybook/_support/subscription_collection.ex": "f57ecc7e52d9bd08dab74cd035375c3fcd993143fc5561514141b26c26fa3a9e",
+    "accrue_admin/storybook/_support/subscription_compositions_manifest.ex": "0232fa384b746cbffd448fef634154a0527dd7f2a0d483bf91b43f9db6c69693",
+    "accrue_admin/storybook/_support/subscription_page_scenarios.ex": "6a0f7265940ba44c31c40435f389d2db5030024e08638467823a20eede0c8c24",
+    "dev_support/ui_scenarios/cadence_subscriptions.exs": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
+    "storybook/groups/subscriptions_collection.story.exs": "76c10b9c7985e9c8066d44da433c4c6d65128e3d42fcfeb9f952a4374eac9880",
+    "storybook/pages/subscription.story.exs": "c4728cc9ebb270813f2633263aa9392051df5b35f491ed321a3bb2d4eb0b7db2"
+  },
+  "phase252_manifest_sha256": "64600b623f9bb34d1e2f8ecc6dc3f26b0a403b1263d0ee27a22dea99a51f29ef",
+  "phase252_source_digests": {
+    "accrue_admin/lib/accrue_admin/dev/component_registry.ex": "a5a84b1f9e00e0742bb4e1eace7cc974c60f73426c1caa8000fca2105d9cc31c",
+    "accrue_admin/lib/accrue_admin/dev/storybook.ex": "2cea8b08edad6d18383220b23c020e0fbbf7ca7c2c8a884729270779ecfa983d",
+    "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+    "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "a0dc862c9bce0e45f92a4f04da79999714d51a1f1d44ff6cf2167dbc09140b2b",
+    "accrue_admin/lib/accrue_admin/router.ex": "2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed",
+    "accrue_admin/storybook/_support/subscription_manifest.ex": "2e189769ec4fb4ea8327ffbaa0747924ea0b12af9885e7a20e4c721d17c03e51",
+    "accrue_admin/storybook/_support/subscription_scenarios.ex": "734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d",
+    "accrue_portal/lib/accrue_portal/live/subscription_live.ex": "c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372",
+    "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex": "5059ad186b7d393c41c538237a9b216e19ba587ca6bcaf80bfb5edfef0411bd2",
+    "accrue_portal/lib/accrue_portal/router.ex": "1877e2be0cf5c1fbc6f88ac3b6865995c7121f9a11680a5223b1966d3ef5f039",
+    "dev_support/ui_scenarios/cadence_subscriptions.exs": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
+    "storybook/components/subscription_detail.story.exs": "4f66a42497af73af84b6f456354f0aa886bf3b51df79ed096623740d301d5f03"
+  },
+  "curation_ledger_sha256": "6076970e626b32c67571a21efd75401bdc53da42c47b55dc43be4bf480339b99",
+  "expected_case_count": 151,
+  "cases": [
+    {
+      "id": "filtered_empty::breakpoint::767::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "breakpoint",
+      "variation_id": "filtered_empty",
+      "page_role": null,
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "filtered_empty::breakpoint::767::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "breakpoint",
+      "variation_id": "filtered_empty",
+      "page_role": null,
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "filtered_empty::breakpoint::768::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "breakpoint",
+      "variation_id": "filtered_empty",
+      "page_role": null,
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "filtered_empty::breakpoint::768::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "breakpoint",
+      "variation_id": "filtered_empty",
+      "page_role": null,
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "filtered_empty::container::640::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "container",
+      "variation_id": "filtered_empty",
+      "page_role": null,
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "filtered_empty::container::640::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "container",
+      "variation_id": "filtered_empty",
+      "page_role": null,
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "filtered_empty::viewport::1280::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "filtered_empty",
+      "page_role": null,
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "filtered_empty::viewport::1280::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "filtered_empty",
+      "page_role": null,
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "filtered_empty::viewport::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "filtered_empty",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "filtered_empty::viewport::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "filtered_empty",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "geometry::negative-controls::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "geometry_negative_controls",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "incomplete_projection::viewport::1280::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "incomplete_projection",
+      "page_role": null,
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "incomplete_projection::viewport::1280::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "incomplete_projection",
+      "page_role": null,
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "incomplete_projection::viewport::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "incomplete_projection",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "incomplete_projection::viewport::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "incomplete_projection",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "loading::viewport::1280::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "loading",
+      "page_role": null,
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "loading::viewport::1280::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "loading",
+      "page_role": null,
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "loading::viewport::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "loading",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "loading::viewport::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "loading",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "multiple_rows::viewport::1280::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "multiple_rows",
+      "page_role": null,
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "multiple_rows::viewport::1280::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "multiple_rows",
+      "page_role": null,
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "multiple_rows::viewport::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "multiple_rows",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "multiple_rows::viewport::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "multiple_rows",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "new_host_empty::viewport::1280::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "new_host_empty",
+      "page_role": null,
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "new_host_empty::viewport::1280::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "new_host_empty",
+      "page_role": null,
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "new_host_empty::viewport::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "new_host_empty",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "new_host_empty::viewport::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "new_host_empty",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::breakpoint::767::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "breakpoint",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::breakpoint::767::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "breakpoint",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::breakpoint::768::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "breakpoint",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::breakpoint::768::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "breakpoint",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::container::640::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "container",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::container::640::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "container",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::synthetic-text::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "synthetic_text_stress",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::synthetic-text::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "synthetic_text_stress",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::viewport::1280::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::viewport::1280::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::viewport::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "one_row::viewport::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "one_row",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::breakpoint::767::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::breakpoint::767::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::breakpoint::768::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::breakpoint::768::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::container::640::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::container::640::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::synthetic-return::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_synthetic_text_stress",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::synthetic-return::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_synthetic_text_stress",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::viewport::1280::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::viewport::1280::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::viewport::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::active::viewport::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "active",
+      "page_role": "detail",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::breakpoint::767::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::breakpoint::767::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::breakpoint::768::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::breakpoint::768::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::container::640::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::container::640::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::synthetic-recovery::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_synthetic_text_stress",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::synthetic-recovery::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_synthetic_text_stress",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::viewport::1280::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::viewport::1280::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::viewport::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::awaiting_step_up::viewport::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "awaiting_step_up",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::dispatching::breakpoint::767::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "dispatching",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::dispatching::breakpoint::767::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "dispatching",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::dispatching::breakpoint::768::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "dispatching",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::dispatching::breakpoint::768::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "dispatching",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::dispatching::container::640::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "dispatching",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::dispatching::container::640::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "dispatching",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::dispatching::viewport::1280::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "dispatching",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::dispatching::viewport::1280::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "dispatching",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::dispatching::viewport::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "dispatching",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::dispatching::viewport::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "dispatching",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::incomplete_evidence::breakpoint::767::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "incomplete_evidence",
+      "page_role": "detail",
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::incomplete_evidence::breakpoint::767::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "incomplete_evidence",
+      "page_role": "detail",
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::incomplete_evidence::breakpoint::768::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "incomplete_evidence",
+      "page_role": "detail",
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::incomplete_evidence::breakpoint::768::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "incomplete_evidence",
+      "page_role": "detail",
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::incomplete_evidence::container::640::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "incomplete_evidence",
+      "page_role": "detail",
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::incomplete_evidence::container::640::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "incomplete_evidence",
+      "page_role": "detail",
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::incomplete_evidence::viewport::1280::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "incomplete_evidence",
+      "page_role": "detail",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::incomplete_evidence::viewport::1280::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "incomplete_evidence",
+      "page_role": "detail",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::incomplete_evidence::viewport::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "incomplete_evidence",
+      "page_role": "detail",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::incomplete_evidence::viewport::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "incomplete_evidence",
+      "page_role": "detail",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_confirmed::breakpoint::767::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_confirmed",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_confirmed::breakpoint::767::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_confirmed",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_confirmed::breakpoint::768::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_confirmed",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_confirmed::breakpoint::768::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_confirmed",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_confirmed::container::640::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_confirmed",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_confirmed::container::640::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_confirmed",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_confirmed::viewport::1280::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_confirmed",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_confirmed::viewport::1280::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_confirmed",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_confirmed::viewport::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_confirmed",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_confirmed::viewport::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_confirmed",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_failed::breakpoint::767::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_failed",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_failed::breakpoint::767::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_failed",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_failed::breakpoint::768::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_failed",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_failed::breakpoint::768::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_failed",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_failed::container::640::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_failed",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_failed::container::640::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_failed",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_failed::viewport::1280::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_failed",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_failed::viewport::1280::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_failed",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_failed::viewport::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_failed",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_failed::viewport::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_failed",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_pending::breakpoint::767::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_pending",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_pending::breakpoint::767::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_pending",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_pending::breakpoint::768::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_pending",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_pending::breakpoint::768::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_pending",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_pending::container::640::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_pending",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_pending::container::640::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_pending",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_pending::viewport::1280::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_pending",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_pending::viewport::1280::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_pending",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_pending::viewport::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_pending",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::result_pending::viewport::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "result_pending",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::breakpoint::767::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::breakpoint::767::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::breakpoint::768::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::breakpoint::768::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::container::640::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::container::640::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::synthetic-consequence::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_synthetic_text_stress",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::synthetic-consequence::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_synthetic_text_stress",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::viewport::1280::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::viewport::1280::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::viewport::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::review_cancel_now::viewport::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "review_cancel_now",
+      "page_role": "overlay_result",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::scheduled_cancellation::breakpoint::767::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "scheduled_cancellation",
+      "page_role": "detail",
+      "width": 767,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::scheduled_cancellation::breakpoint::767::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "scheduled_cancellation",
+      "page_role": "detail",
+      "width": 767,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::scheduled_cancellation::breakpoint::768::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "scheduled_cancellation",
+      "page_role": "detail",
+      "width": 768,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::scheduled_cancellation::breakpoint::768::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "scheduled_cancellation",
+      "page_role": "detail",
+      "width": 768,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::scheduled_cancellation::container::640::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "scheduled_cancellation",
+      "page_role": "detail",
+      "width": 640,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::scheduled_cancellation::container::640::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "scheduled_cancellation",
+      "page_role": "detail",
+      "width": 640,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::scheduled_cancellation::viewport::1280::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "scheduled_cancellation",
+      "page_role": "detail",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::scheduled_cancellation::viewport::1280::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "scheduled_cancellation",
+      "page_role": "detail",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::scheduled_cancellation::viewport::320::dark",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "scheduled_cancellation",
+      "page_role": "detail",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page::scheduled_cancellation::viewport::320::light",
+      "tier": "page",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "page_composition",
+      "variation_id": "scheduled_cancellation",
+      "page_role": "detail",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ]
+    },
+    {
+      "id": "page_boundary::viewport::1280::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "page_boundary",
+      "page_role": null,
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "page_boundary::viewport::1280::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "page_boundary",
+      "page_role": null,
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "page_boundary::viewport::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "page_boundary",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "page_boundary::viewport::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "page_boundary",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "partial_cursor_error::viewport::1280::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "partial_cursor_error",
+      "page_role": null,
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "partial_cursor_error::viewport::1280::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "partial_cursor_error",
+      "page_role": null,
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "partial_cursor_error::viewport::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "partial_cursor_error",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "partial_cursor_error::viewport::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "partial_cursor_error",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "queue_empty::viewport::1280::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "queue_empty",
+      "page_role": null,
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "queue_empty::viewport::1280::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "queue_empty",
+      "page_role": null,
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "queue_empty::viewport::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "queue_empty",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "queue_empty::viewport::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "queue_empty",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "unavailable::viewport::1280::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "unavailable",
+      "page_role": null,
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "unavailable::viewport::1280::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "unavailable",
+      "page_role": null,
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "unavailable::viewport::320::dark",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "unavailable",
+      "page_role": null,
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    },
+    {
+      "id": "unavailable::viewport::320::light",
+      "tier": "collection",
+      "fixture_class": "pure-story",
+      "schedule": "pr-selectable",
+      "case_kind": "viewport",
+      "variation_id": "unavailable",
+      "page_role": null,
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ]
+    }
+  ],
+  "always_run": [
+    {
+      "id": "/components/subscription_detail||active::1280::dark",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||active::1280::light",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||active::320::dark",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||active::320::light",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||braintree_pruned::compatibility::1280::light",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "compatibility",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||dunning_active::compatibility::1280::light",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "compatibility",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||incomplete_evidence::1280::dark",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||incomplete_evidence::1280::light",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||incomplete_evidence::320::dark",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||incomplete_evidence::320::light",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||scheduled_cancellation::1280::dark",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||scheduled_cancellation::1280::light",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||scheduled_cancellation::320::dark",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    },
+    {
+      "id": "/components/subscription_detail||scheduled_cancellation::320::light",
+      "owner": "phase252:check",
+      "tier": "detail",
+      "kind": "canonical",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/components/subscription_detail.story.exs"
+      ]
+    }
+  ],
+  "sentinels": [
+    "geometry::negative-controls::320::light",
+    "one_row::breakpoint::767::light",
+    "one_row::synthetic-text::320::dark",
+    "one_row::viewport::1280::light",
+    "page::active::breakpoint::768::dark",
+    "page::active::viewport::1280::light",
+    "page::review_cancel_now::viewport::320::dark",
+    "partial_cursor_error::viewport::320::dark"
+  ],
+  "sentinels_sha256": "30d80bffd87e109e01e2853e1a8fbe92270634a3a2a4f3403e8eccf721f6b862",
+  "global_roots": [
+    {
+      "id": "admin-css-source",
+      "path": "accrue_admin/assets/css/",
+      "mode": "prefix"
+    },
+    {
+      "id": "admin-built-static",
+      "path": "accrue_admin/priv/static/",
+      "mode": "prefix"
+    },
+    {
+      "id": "brandbook-tokens",
+      "path": "brandbook/tokens/",
+      "mode": "prefix"
+    },
+    {
+      "id": "storybook-backend",
+      "path": "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+      "mode": "exact"
+    },
+    {
+      "id": "admin-router",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "mode": "exact"
+    },
+    {
+      "id": "portal-router",
+      "path": "accrue_portal/lib/accrue_portal/router.ex",
+      "mode": "exact"
+    },
+    {
+      "id": "copy-owner",
+      "path": "accrue_admin/lib/accrue_admin/copy.ex",
+      "mode": "exact"
+    },
+    {
+      "id": "copy-owner-submodules",
+      "path": "accrue_admin/lib/accrue_admin/copy/",
+      "mode": "prefix"
+    },
+    {
+      "id": "ui-scenarios",
+      "path": "dev_support/ui_scenarios/",
+      "mode": "prefix"
+    },
+    {
+      "id": "playwright-config",
+      "path": "accrue_admin/playwright.config.js",
+      "mode": "exact"
+    },
+    {
+      "id": "playwright-lab-config",
+      "path": "accrue_admin/playwright.phase252.config.js",
+      "mode": "exact"
+    },
+    {
+      "id": "browser-specs-and-helpers",
+      "path": "accrue_admin/e2e/",
+      "mode": "prefix"
+    },
+    {
+      "id": "selector",
+      "path": "scripts/ci/phase254_selection.mjs",
+      "mode": "exact"
+    },
+    {
+      "id": "selection-projection",
+      "path": "accrue_admin/storybook/phase254-selection.json",
+      "mode": "exact"
+    },
+    {
+      "id": "required-ci-workflow",
+      "path": ".github/workflows/ci.yml",
+      "mode": "exact"
+    },
+    {
+      "id": "browser-workflow",
+      "path": ".github/workflows/accrue_admin_browser.yml",
+      "mode": "exact"
+    },
+    {
+      "id": "lab-runner",
+      "path": "scripts/dev/phase252_lab.mjs",
+      "mode": "exact"
+    },
+    {
+      "id": "mix-lockfile",
+      "path": "mix.lock",
+      "mode": "basename"
+    },
+    {
+      "id": "npm-lockfile",
+      "path": "package-lock.json",
+      "mode": "basename"
+    },
+    {
+      "id": "yarn-lockfile",
+      "path": "yarn.lock",
+      "mode": "basename"
+    },
+    {
+      "id": "pnpm-lockfile",
+      "path": "pnpm-lock.yaml",
+      "mode": "basename"
+    }
+  ],
+  "irrelevant_allowlist": [
+    {
+      "id": "docs",
+      "path": "docs/",
+      "mode": "prefix"
+    },
+    {
+      "id": "prompts",
+      "path": "prompts/",
+      "mode": "prefix"
+    },
+    {
+      "id": "planning-research",
+      "path": ".planning/research/",
+      "mode": "prefix"
+    }
+  ]
+}
