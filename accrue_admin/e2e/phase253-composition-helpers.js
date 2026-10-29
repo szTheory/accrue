@@ -567,6 +567,24 @@ async function runInjectedA11yControls(page, key) {
     },
   );
 
+  // A transition still running when the ring is read makes a correct ring look like it has no contrast
+  // (the wrapper's white background is mid-way to black). The probe must wait for it to settle.
+  controls.transition_in_flight = await withInjected(
+    page,
+    '<div data-phase254-control="settle-wrapper" data-phase254-style="background-color:#ffffff;padding:8px;transition:background-color 700ms linear">' +
+      '<button type="button" id="phase254-settle-control" data-phase254-control="settle" data-phase254-style="background:#808080;color:#000000;outline:2px solid #ffffff;outline-offset:2px;box-shadow:none">Settle control</button></div>',
+    async () => {
+      await page.evaluate(() => {
+        const wrapper = document.querySelector('[data-phase254-control="settle-wrapper"]');
+        void wrapper.offsetWidth;
+        wrapper.style.backgroundColor = "#000000";
+      });
+      const result = await a11yProbes.probeFocusVisible(page, { only: "#phase254-settle-control" });
+      const ratio = result.evaluated?.[0]?.ring_ratio ?? null;
+      return { detected: result.defects.length === 0 && ratio !== null && ratio >= 3, ring_ratio: ratio, problems: result.defects.flatMap((defect) => defect.problems) };
+    },
+  );
+
   const spacing = await a11yProbes.probeTextSpacing(page, { sabotage: true });
   controls.unapplied_spacing = { detected: spacing.applied === false, measured_letter_spacing_px: spacing.measured_letter_spacing_px };
 

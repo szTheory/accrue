@@ -404,6 +404,37 @@ async function presentRoots(page, candidates = DEFAULT_ROOTS) {
 }
 
 /**
+ * Waits, deterministically, until nothing the probes read can still change: web fonts are loaded and
+ * every finite CSS transition and animation has finished (a theme class, a focus ring or a drawer
+ * entering all start one), then lets one frame apply the settled values. There is no sleep and no
+ * timeout bump: it waits on document.getAnimations() and each animation's own finished promise, and
+ * a transition that never settles within the bound fails loudly instead of being measured mid-flight
+ * (a slower runner otherwise reads the start colour of a transition and reports a ring or a clipped
+ * panel that is not there).
+ */
+async function settlePage(page, { timeout = 5000 } = {}) {
+  const outcome = await page.evaluate(async (bound) => {
+    const deadline = performance.now() + bound;
+    const running = () => document.getAnimations().filter((animation) => animation.effect
+      && Number.isFinite(animation.effect.getComputedTiming().endTime)
+      && ["running", "pending"].includes(animation.playState));
+    for (;;) {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const pending = running();
+      if (pending.length === 0) return { settled: true, count: 0 };
+      const remaining = deadline - performance.now();
+      if (remaining <= 0) return { settled: false, count: pending.length };
+      let timer;
+      const bounded = new Promise((resolve) => { timer = setTimeout(resolve, remaining); });
+      await Promise.race([Promise.allSettled(pending.map((animation) => animation.finished)), bounded]);
+      clearTimeout(timer);
+    }
+  }, timeout);
+  if (!outcome.settled) throw new Error(`Phase 254 a11y: ${outcome.count} transition(s) or animation(s) did not settle within ${timeout} ms`);
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => resolve())));
+}
+
+/**
  * Runs axe over the story sandbox and any open overlay or drawer root. The scan is narrowed
  * only by include; nothing is excluded, no rule is switched off and no severity is ignored.
  * Incomplete contrast results are resolved by compositing the real background stack; anything
@@ -412,10 +443,8 @@ async function presentRoots(page, candidates = DEFAULT_ROOTS) {
 async function runAxeForCell(page, { roots } = {}) {
   const { AxeBuilder } = require("@axe-core/playwright");
   // Colours are read from the rendered page, so a theme or state transition still running would
-  // be measured mid-flight. Wait until no transition or animation is in progress.
-  await page.waitForFunction(() => document.getAnimations()
-    .filter((animation) => animation.effect && Number.isFinite(animation.effect.getComputedTiming().endTime))
-    .every((animation) => !["running", "pending"].includes(animation.playState)), null, { timeout: 5000 }).catch(() => undefined);
+  // be measured mid-flight: settle first.
+  await settlePage(page);
   const present = await presentRoots(page, roots || DEFAULT_ROOTS);
   if (present.length === 0) throw new Error("Phase 254 a11y: no axe root is present on the page");
   let builder = new AxeBuilder({ page }).withTags([...A11Y_TAGS]);
@@ -577,6 +606,7 @@ function evaluateTargetSize(targets) {
 }
 
 async function probeTargetSize(page, { roots } = {}) {
+  await settlePage(page);
   const present = await presentRoots(page, roots || DEFAULT_ROOTS);
   const targets = await collectInteractive(page, present);
   const result = evaluateTargetSize(targets);
@@ -672,12 +702,14 @@ async function probeFocusVisible(page, { roots, only, limit = 60 } = {}) {
     await page.keyboard.press("Tab");
     const locator = page.locator(only).first();
     await locator.focus();
+    await settlePage(page);
     const facts = await focusFacts(locator, true);
     const verdict = evaluateFocus(facts);
     checked.push({ selector: only, ...verdict });
     if (verdict.problems.length) defects.push({ selector: only, problems: verdict.problems });
     return { status: "checked", sc: "2.4.7/2.4.11/1.4.11", checked: checked.length, defects, evaluated: checked };
   }
+  await settlePage(page);
   const controls = await collectInteractive(page, present);
   const expected = new Set(controls.map((control) => control.selector));
   await page.evaluate(() => { if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); });
@@ -710,6 +742,8 @@ async function probeFocusVisible(page, { roots, only, limit = 60 } = {}) {
     });
     if (visited.has(selector)) break;
     visited.add(selector);
+    // The ring and the background are read after the focus change and any theme transition settled.
+    await settlePage(page);
     const facts = await focusFacts(locator, true);
     const verdict = evaluateFocus(facts);
     checked.push({ selector, ...verdict });
@@ -757,6 +791,7 @@ async function probeTextSpacing(page, { roots, sabotage = false, recheck } = {})
     }, TEXT_SPACING_CSS);
   }
   try {
+    await settlePage(page);
     const measured = await measureLetterSpacing(page, rootSelector);
     const applied = spacingMatches(measured.letter_spacing, measured.font_size);
     const defects = [];
@@ -838,6 +873,7 @@ async function probeTextScale(page, cdp, { roots, sabotage = false, recheck } = 
   const before = await sampleTextSizes(page, rootSelector);
   if (!sabotage) await cdp.send("Page.setFontSizes", { fontSizes: { standard: TEXT_SCALE_STANDARD_FONT, fixed: TEXT_SCALE_FIXED_FONT } });
   try {
+    await settlePage(page);
     const after = await sampleTextSizes(page, rootSelector);
     const probeScale = after.probe / before.probe;
     const defects = [];
@@ -1114,5 +1150,6 @@ module.exports = {
   rulesEvaluated,
   runAxeForCell,
   secondsList,
+  settlePage,
   spacingMatches,
 };
