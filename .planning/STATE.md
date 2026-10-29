@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Completed 254-07-PLAN.md
-last_updated: "2026-10-29T04:55:58.680Z"
+stopped_at: Completed 254-08-PLAN.md
+last_updated: "2026-10-29T05:18:07.794Z"
 last_activity: 2026-10-28
 last_activity_desc: Phase 254 execution started
-state_head: 29f7586008f2f9bd09ab2c37738fb7dd990014b6
+state_head: 3ed559b8408346769b4feb842cf1dde7c712b086
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 34
-  completed_plans: 23
+  completed_plans: 24
   percent: 67
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 ## Current Position
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
-Plan: 8 of 18
+Plan: 9 of 18
 Status: Ready to execute
 Last activity: 2026-10-28 — Phase 254 execution started
 
@@ -246,6 +246,7 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 | Phase 254 P05 | 4h | 3 tasks | 15 files |
 | Phase 254 P06 | 3h | 3 tasks | 13 files |
 | Phase 254 P07 | 3h | 3 tasks | 14 files |
+| Phase 254 P08 | 25min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -591,6 +592,8 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 - [Phase 254]: 254-06: provider_pruned merged (CUR-254-07) on a declared mechanical shape (story state, group labels, item kinds); item count and description text are not part of the shape
 - [Phase 254]: [254-07] Selection projection is built from the compositions module's public discovery functions, not write!/1, because write!/1 needs the gitignored run-time transport proof; depends_on precision stays group level (D-09), shared sources that are also global roots broaden to full
 - [Phase 254]: [254-07] Selector adds fail-closed rules beyond D-10: empty diff, invalid base/head and unreachable head broaden to full; the projection is hard-stale on any source_digests, Phase 252 manifest or curation ledger change, so those regenerations must end with project --write (R3)
+- [Phase 254]: 254-08: report invariants live in a CommonJS module (accrue_admin/e2e/phase254-selection-invariants.js) shared by the selector and the Playwright lane, because Playwright's loader cannot require() the ES-module selector
+- [Phase 254]: 254-08: in affected mode an assertion binding with no selected case kind is skipped; full mode is strict, and an affected result cannot be validated without its selection (acceptance evidence stays a full sweep)
 
 ### Pending Todos
 
@@ -689,8 +692,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-29T04:55:58.149Z
-Stopped at: Completed 254-07-PLAN.md
+Last session: 2026-10-29T05:18:07.179Z
+Stopped at: Completed 254-08-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
