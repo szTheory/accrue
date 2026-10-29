@@ -134,13 +134,29 @@ test("buildManifest rejects a mint without a run id or commit sha and identity f
   }
 });
 
-test("the committed legacy manifest equals a fresh seed-legacy build for the 12 unchanged PNGs", () => {
+test("every Phase 211 key is either an untouched legacy entry equal to a fresh seed-legacy build or a minted entry for the committed bytes", () => {
   const dir = path.join(ROOT, manifest.BASELINE_DIR);
   const committed = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"));
   const legacyKeys = guard.EXPECTED_BASELINES.map((name) => name.replace(/\.png$/, ""));
   const fresh = manifest.buildLegacyManifest({ dir, root: ROOT });
-  for (const key of legacyKeys) assert.deepEqual(committed.entries[key], fresh.entries[key], key);
-  assert.equal(Object.keys(committed.entries).filter((key) => committed.entries[key].provenance === "phase211-committed").length, 12);
+  const stillLegacy = [];
+  for (const key of legacyKeys) {
+    const entry = committed.entries[key];
+    assert.ok(entry, `${key} has a manifest entry`);
+    if (entry.provenance === "phase211-committed") {
+      // An untouched key: exactly what seed-legacy would write for it today.
+      assert.deepEqual(entry, fresh.entries[key], key);
+      stillLegacy.push(key);
+    } else {
+      // A rebaselined key: a minted entry (mint run id, reason, finding id) for the committed bytes.
+      assert.equal(entry.provenance, "phase254-mint", key);
+      assert.match(String(entry.mint_run_id), /^\d+$/, `${key}: mint run id`);
+      assert.ok(entry.reason && entry.finding_id, `${key}: reason and finding id`);
+      assert.equal(entry.sha256, manifest.sha256(fs.readFileSync(path.join(dir, entry.file))), `${key}: sha256 equals the committed PNG`);
+    }
+  }
+  assert.equal(Object.keys(committed.entries).filter((key) => committed.entries[key].provenance === "phase211-committed").length, stillLegacy.length, "no legacy entry outside the 12 legacy keys");
+  assert.ok(stillLegacy.length <= legacyKeys.length);
 });
 
 test("the CLI check passes on the real tree without a base and fails on an unreachable base", () => {
