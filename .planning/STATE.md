@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Completed 254-08-PLAN.md
-last_updated: "2026-10-29T05:18:07.794Z"
+stopped_at: Completed 254-09-PLAN.md
+last_updated: "2026-10-29T08:08:35.927Z"
 last_activity: 2026-10-28
 last_activity_desc: Phase 254 execution started
-state_head: 3ed559b8408346769b4feb842cf1dde7c712b086
+state_head: 374ed078a95941d900b894bf83cdb9e89b039599
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 34
-  completed_plans: 24
+  completed_plans: 25
   percent: 67
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 ## Current Position
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
-Plan: 9 of 18
+Plan: 10 of 18
 Status: Ready to execute
 Last activity: 2026-10-28 — Phase 254 execution started
 
@@ -247,6 +247,7 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 | Phase 254 P06 | 3h | 3 tasks | 13 files |
 | Phase 254 P07 | 3h | 3 tasks | 14 files |
 | Phase 254 P08 | 25min | 2 tasks | 11 files |
+| Phase 254 P09 | 3 h | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -594,6 +595,9 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 - [Phase 254]: [254-07] Selector adds fail-closed rules beyond D-10: empty diff, invalid base/head and unreachable head broaden to full; the projection is hard-stale on any source_digests, Phase 252 manifest or curation ledger change, so those regenerations must end with project --write (R3)
 - [Phase 254]: 254-08: report invariants live in a CommonJS module (accrue_admin/e2e/phase254-selection-invariants.js) shared by the selector and the Playwright lane, because Playwright's loader cannot require() the ES-module selector
 - [Phase 254]: 254-08: in affected mode an assertion binding with no selected case kind is skipped; full mode is strict, and an affected result cannot be validated without its selection (acceptance evidence stays a full sweep)
+- [Phase 254]: 254-09: critical-path delta is the owner job's end offset minus the main workflow wall (queue excluded); the owner job's own added time is frozen as owner_job_added_s
+- [Phase 254]: 254-09: D-24 shard rule tripped (serial per-cell p90 x cells 156.9 s vs 60 s, isolation green) so composition cells run on 3 bounded workers; remaining focused-check gap (84.4 s vs 60 s) accepted in DEV-254-07
+- [Phase 254]: 254-09: Phase 252 and 253 aggregates share one admin test build via PHASE254_SHARED_BUILD_ID (validated hex id); isolated production and host builds are not shared
 
 ### Pending Todos
 
@@ -692,8 +696,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-29T05:18:07.179Z
-Stopped at: Completed 254-08-PLAN.md
+Last session: 2026-10-29T08:08:35.472Z
+Stopped at: Completed 254-09-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
