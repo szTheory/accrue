@@ -780,11 +780,19 @@ function parseOptions(args) {
   return { options, command };
 }
 
+// ACCRUE_ADMIN_E2E_PORT names the admin lanes' endpoint (CI sets 4019 job-wide); the host-heldout
+// lane keeps its own fixed port and must not inherit the admin value.
+export async function lanePort(options, env = process.env, pickFreePort = chooseFreePort) {
+  if (options.port) return Number(options.port);
+  if (options.lane === "host-heldout") return HELDOUT_HOST_PORT;
+  return Number(env.ACCRUE_ADMIN_E2E_PORT || (await pickFreePort()));
+}
+
 async function runOwned(options, command, args, cwd, waitForHealth = false) {
   const config = {
     lane: options.lane || "admin-review",
     partition: options.partition || process.env.MIX_TEST_PARTITION || freshPartition(),
-    port: Number(options.port || process.env.ACCRUE_ADMIN_E2E_PORT || (options.lane === "host-heldout" ? HELDOUT_HOST_PORT : await chooseFreePort())),
+    port: await lanePort(options),
     pgHost: process.env.PGHOST || "127.0.0.1",
     pgRole: process.env.PGUSER || "postgres",
     controlDatabase: options.controlDatabase || "postgres",

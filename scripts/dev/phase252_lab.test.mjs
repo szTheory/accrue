@@ -12,6 +12,7 @@ import {
   ownsProcess,
   prepareLaunch,
   acceptedServerAddress,
+  lanePort,
 } from "./phase252_lab.mjs";
 
 test("requires a fresh explicit numeric test partition", () => {
@@ -268,4 +269,15 @@ test("a hosted CI runner accepts only an RFC 1918 server address; a developer ma
     await assert.rejects(prepareLaunch(config, wrong, ci), /identity does not match/);
     assert.equal(wrong.state.created, false);
   }
+});
+
+test("the host-heldout lane keeps its fixed port even when the admin endpoint port is exported job-wide", async () => {
+  const env = { ACCRUE_ADMIN_E2E_PORT: "4019" };
+  const never = async () => { throw new Error("no free port needed"); };
+  assert.equal(await lanePort({ lane: "host-heldout" }, env, never), 4102);
+  assert.equal(await lanePort({ lane: "admin-test" }, env, never), 4019);
+  assert.equal(await lanePort({ lane: "admin-review" }, {}, async () => 4555), 4555);
+  assert.equal(await lanePort({ lane: "host-heldout", port: "4102" }, env, never), 4102);
+  assert.equal(await lanePort({ lane: "admin-test", port: "4321" }, env, never), 4321);
+  assert.equal(buildLaunchConfig({ lane: "host-heldout", partition: "925210061", port: await lanePort({ lane: "host-heldout" }, env, never) }).port, 4102);
 });
