@@ -102,7 +102,12 @@ test("the runner has a finite serial lane inventory with unique disposable resou
     assert.ok(lane.args.at(-1).includes("cd accrue_admin &&"));
     assert.equal(lane.env.PHASE252_TAP_REPORT, "1");
   }
-  assert.equal(plan.find(({ id }) => id === "phase253-compositions-browser").args.at(-1), "e2e/subscription-compositions-phase253.spec.js");
+  const browserArgs = plan.find(({ id }) => id === "phase253-compositions-browser").args;
+  assert.deepEqual(
+    browserArgs.slice(-2),
+    ["e2e/subscription-compositions-phase253.spec.js", "e2e/subscription-compositions-reconcile-phase254.spec.js"],
+    "the cells spec runs with the dependent phase254-reconcile spec in the same browser lane",
+  );
   assert.ok(plan.find(({ id }) => id === "phase253-acceptance-contract").reporter.testFiles.includes("scripts/ci/generate_phase253_acceptance.test.mjs"));
   assert.throws(() => runner.assertRequiredCommandPlan(plan.slice(1)), /finite Phase 253 lane inventory/);
 });
@@ -174,7 +179,7 @@ test("TAP evidence rejects wrong-run and stale-source results", async () => {
   }), { root, expectedRunId: runId, expectedSourceDigests }), /source digest is missing or stale/);
 });
 
-function playwrightReport(identities) {
+function playwrightReport(identities, reconcileTitle = null) {
   return {
     status: "passed",
     stats: { expected: identities.length, unexpected: 0, skipped: 0, flaky: 0 },
@@ -183,7 +188,11 @@ function playwrightReport(identities) {
       specs: identities.map((title) => ({
         title,
         ok: true,
-        tests: [{ expectedStatus: "passed", results: [{ status: "passed", retry: 0 }] }],
+        tests: [{
+          projectName: title === reconcileTitle ? "phase254-reconcile" : "phase252-owned-review",
+          expectedStatus: "passed",
+          results: [{ status: "passed", retry: 0 }],
+        }],
       })),
     }],
   };
@@ -304,7 +313,7 @@ function browserFixture(runner, resultPath) {
     source_and_asset_sha256: { [css]: digests[css], [js]: digests[js] },
     cases,
   };
-  const report = playwrightReport([...cases.map(({ executed_test }) => executed_test), reconciliation]);
+  const report = playwrightReport([...cases.map(({ executed_test }) => executed_test), reconciliation], reconciliation);
   return { spec, result, report, digests, keys, cases, reconciliation };
 }
 
@@ -368,6 +377,17 @@ test("browser evidence accepts the complete cell control and rejects duplicates,
       assert.equal(browserHelpers.matchesExpectedBrowserCell(changed.cases[1], fixture.keys[1]), false, `${label} mutation changes the exact cell binding`);
       assert.throws(() => validateBrowser(changed), /kind|exact definition/, `${label} mutation must fail closed`);
     }
+
+    // Phase 254 D-13: the reconcile identity must execute in the dependent project.
+    const wrongReconcileProject = structuredClone(fixture.report);
+    wrongReconcileProject.suites[0].specs.at(-1).tests[0].projectName = "phase252-owned-review";
+    assert.throws(() => validateBrowser(fixture.result, JSON.stringify(wrongReconcileProject)), /did not execute in the phase254-reconcile project/);
+    const cellInReconcileProject = structuredClone(fixture.report);
+    cellInReconcileProject.suites[0].specs[0].tests[0].projectName = "phase254-reconcile";
+    assert.throws(() => validateBrowser(fixture.result, JSON.stringify(cellInReconcileProject)), /did not execute in the phase252-owned-review project/);
+    const unnamedProject = structuredClone(fixture.report);
+    delete unnamedProject.suites[0].specs.at(-1).tests[0].projectName;
+    assert.throws(() => validateBrowser(fixture.result, JSON.stringify(unnamedProject)), /did not execute in the phase254-reconcile project: undefined/);
 
     const missingIdentity = structuredClone(fixture.report);
     delete missingIdentity.suites[0].specs[0].title;

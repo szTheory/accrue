@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { isDeepStrictEqual } = require("node:util");
 const { expect } = require("@playwright/test");
+const { mergeCaseResults, writeCaseResult } = require("./phase254-result-ledger.js");
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const ADMIN_ROOT = path.join(REPO_ROOT, "accrue_admin");
@@ -67,6 +68,16 @@ function sha256(value) {
 
 function fileDigest(relativePath) {
   return sha256(fs.readFileSync(path.join(REPO_ROOT, relativePath)));
+}
+
+// Phase 254 D-13/D-14: the lab config now has a project that depends on the composition
+// cells, and Playwright loads a dependency project's spec files in every run of that
+// config (even runs filtered to other specs, which never execute them). An unowned load,
+// with no Phase 253 run identity or no compiled manifest, therefore registers no tests
+// instead of throwing at import. The aggregate stays fail-closed: its exact inventory of
+// 151 cell identities plus the reconcile identity cannot be met by a run with no tests.
+function isOwnedPhase253Run() {
+  return Boolean(RUN_ID) && /^[a-f0-9]{24,64}$/i.test(RUN_ID) && fs.existsSync(MANIFEST_PATH);
 }
 
 function readPhase253Manifest() {
@@ -349,6 +360,13 @@ function resultPath(runId) {
   return path.join(RESULT_ROOT, `render-results-${runId}.json`);
 }
 
+// Phase 254 D-13/D-14: every case writes its own file here; the dependent reconcile
+// project merges the directory into the results file above. Nothing reads and rewrites a
+// shared file per case any more.
+function caseResultsDirectory(runId) {
+  return path.join(RESULT_ROOT, `render-cases-${runId}`);
+}
+
 function currentSourceAndAssetDigests(manifest) {
   const digests = { ...manifest.source_digests };
   for (const relativePath of ASSET_PATHS) digests[relativePath] = fileDigest(relativePath);
@@ -387,16 +405,26 @@ function beginCollectionResults(runId, manifest, manifestDigest, expectedCaseKey
   return filePath;
 }
 
-function appendResult(filePath, runId, manifestDigest, row) {
+// Replaces the former read-modify-write appendResult: one atomic file per case.
+function recordCaseResult(identity, row) {
+  if (!fs.existsSync(identity.resultPath)) throw new Error("Phase 253 current-run result ledger was not initialized");
+  return writeCaseResult(caseResultsDirectory(identity.runId), row, identity);
+}
+
+/**
+ * Merges the per-case files into the results file the aggregate reads. The header written
+ * by beginCollectionResults supplies run identity and source digests; the expected key set
+ * is the full compiled universe, never a count read back from the files being checked.
+ */
+function mergeRunResults(identity) {
+  const filePath = resultPath(identity.runId);
   if (!fs.existsSync(filePath)) throw new Error("Phase 253 current-run result ledger was not initialized");
-  const results = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  if (results.run_id !== runId || results.manifest_sha256 !== manifestDigest) {
+  const header = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  if (header.run_id !== identity.runId || header.manifest_sha256 !== identity.manifestDigest) {
     throw new Error("Phase 253 result ledger identity differs from this browser run");
   }
-  const existing = results.cases.findIndex((candidate) => candidate.key === row.key);
-  if (existing === -1) results.cases.push(row);
-  else results.cases[existing] = row;
-  writeResults(filePath, results);
+  const cases = mergeCaseResults(caseResultsDirectory(identity.runId), identity);
+  return { filePath, results: { ...header, cases } };
 }
 
 function recordNegativeControls(filePath, runId, controls) {
@@ -786,7 +814,7 @@ async function runCollectionCase(page, testCase, identity, testInfo) {
   } finally {
     row.completed_at = new Date().toISOString();
     row.manifest_sha256 = identity.manifestDigest;
-    appendResult(identity.resultPath, identity.runId, identity.manifestDigest, row);
+    recordCaseResult(identity, row);
   }
 }
 
@@ -889,7 +917,7 @@ async function runSyntheticTextStress(page, entry, identity, theme, testInfo) {
   } finally {
     row.completed_at = new Date().toISOString();
     row.manifest_sha256 = identity.manifestDigest;
-    appendResult(identity.resultPath, identity.runId, identity.manifestDigest, row);
+    recordCaseResult(identity, row);
   }
 }
 
@@ -952,7 +980,7 @@ async function runGeometryNegativeControls(page, entry, identity, testInfo) {
   } finally {
     row.completed_at = new Date().toISOString();
     row.manifest_sha256 = identity.manifestDigest;
-    appendResult(identity.resultPath, identity.runId, identity.manifestDigest, row);
+    recordCaseResult(identity, row);
   }
 }
 
@@ -1285,7 +1313,7 @@ async function runPageCase(page, testCase, identity, testInfo) {
   } finally {
     row.completed_at = new Date().toISOString();
     row.manifest_sha256 = identity.manifestDigest;
-    appendResult(identity.resultPath, identity.runId, identity.manifestDigest, row);
+    recordCaseResult(identity, row);
   }
 }
 
@@ -1295,21 +1323,25 @@ module.exports = {
   BROWSER_RECONCILIATION_TITLE,
   THEMES,
   WIDTHS,
-  appendResult,
   beginCollectionResults,
+  caseResultsDirectory,
   createCollectionCases,
   createExpectedBrowserCellDefinitions,
   createPageCases,
   createPageStressCases,
   collectionSyntheticTitle,
   currentSourceAndAssetDigests,
+  isOwnedPhase253Run,
   matchesExpectedBrowserCell,
+  mergeRunResults,
   readPhase253Manifest,
   reconcileResults,
+  recordCaseResult,
   recordNegativeControls,
   resultPath,
   runCollectionCase,
   runGeometryNegativeControls,
   runPageCase,
   runSyntheticTextStress,
+  writeResults,
 };

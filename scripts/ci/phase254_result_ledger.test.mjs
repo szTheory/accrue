@@ -309,3 +309,95 @@ test("dependency control (positive): the same fixture passes the dependent test 
   assert.equal(statuses["dependent reconcile"], "passed");
   assert.equal(exitCode, 0);
 });
+
+// -- the real lab config declares the dependent reconcile project ----------------------------
+
+const LAB_CONFIG_ENV = Object.freeze({
+  PHASE252_E2E_NONCE: "0".repeat(24),
+  PHASE252_E2E_DATABASE: "accrue_admin_ledger_contract",
+  PHASE252_E2E_ROLE: "accrue_admin_ledger_contract",
+  PHASE252_E2E_ADDRESS: "127.0.0.1",
+  PHASE252_E2E_PORT: "45124",
+  PHASE252_E2E_PARTITION: "12345679",
+});
+
+function loadLabConfig() {
+  const configPath = path.join(ADMIN_ROOT, "playwright.phase252.config.js");
+  const resolved = require.resolve(configPath);
+  const saved = new Map(Object.keys(LAB_CONFIG_ENV).map((key) => [key, process.env[key]]));
+  Object.assign(process.env, LAB_CONFIG_ENV);
+  delete require.cache[resolved];
+  try {
+    return require(resolved);
+  } finally {
+    delete require.cache[resolved];
+    for (const [key, previous] of saved) {
+      if (previous === undefined) delete process.env[key];
+      else process.env[key] = previous;
+    }
+  }
+}
+
+function assertReconcileDependency(config) {
+  const projects = config.projects || [];
+  const cells = projects.find((project) => project.name === "phase252-owned-review");
+  const reconcile = projects.find((project) => project.name === "phase254-reconcile");
+  assert.ok(cells, "the cells project phase252-owned-review must exist");
+  assert.ok(reconcile, "the phase254-reconcile project must exist");
+  assert.deepEqual(reconcile.dependencies, ["phase252-owned-review"], "reconcile must depend on exactly the cells project");
+  return { cells, reconcile };
+}
+
+test("the real lab config declares phase254-reconcile depending on exactly phase252-owned-review", () => {
+  const config = loadLabConfig();
+  const { cells, reconcile } = assertReconcileDependency(config);
+  const reconcileSpec = path.join(ADMIN_ROOT, "e2e", "subscription-compositions-reconcile-phase254.spec.js");
+  const cellsSpec = path.join(ADMIN_ROOT, "e2e", "subscription-compositions-phase253.spec.js");
+  assert.equal(reconcile.testMatch.test(reconcileSpec), true);
+  assert.equal(reconcile.testMatch.test(cellsSpec), false, "the reconcile project must not also run the cells");
+  assert.equal(cells.testMatch.test(reconcileSpec), false, "the cells project must not also run the reconcile step");
+  assert.equal(config.testMatch.test(reconcileSpec), true, "the reconcile spec is part of the explicit lab testMatch");
+  // D-06 / D-13: a single worker on one owned server; no parallelism, shards or retries.
+  assert.equal(config.workers, 1);
+  assert.equal(config.fullyParallel, false);
+  assert.equal(config.webServer.reuseExistingServer, false);
+  assert.equal(config.retries ?? 0, 0);
+  assert.equal(config.shard ?? null, null);
+  assert.equal(cells.workers ?? 1, 1);
+});
+
+test("mutation: removing or altering the reconcile dependency fails the assertion", () => {
+  const config = loadLabConfig();
+  assert.doesNotThrow(() => assertReconcileDependency(config), "positive control: the real config passes");
+
+  const without = structuredClone(config);
+  delete without.projects.find((project) => project.name === "phase254-reconcile").dependencies;
+  assert.throws(() => assertReconcileDependency(without), /exactly the cells project/);
+
+  const emptied = structuredClone(config);
+  emptied.projects.find((project) => project.name === "phase254-reconcile").dependencies = [];
+  assert.throws(() => assertReconcileDependency(emptied), /exactly the cells project/);
+
+  const widened = structuredClone(config);
+  widened.projects.find((project) => project.name === "phase254-reconcile").dependencies = ["phase252-owned-review", "other"];
+  assert.throws(() => assertReconcileDependency(widened), /exactly the cells project/);
+
+  const dropped = structuredClone(config);
+  dropped.projects = dropped.projects.filter((project) => project.name !== "phase254-reconcile");
+  assert.throws(() => assertReconcileDependency(dropped), /phase254-reconcile project must exist/);
+});
+
+test("the project a reconcile step depends on holds only the composition cells, so file-filtered runs stay exact", () => {
+  const config = loadLabConfig();
+  const { cells } = assertReconcileDependency(config);
+  const specDir = path.join(ADMIN_ROOT, "e2e");
+  const owners = (file) => config.projects.filter((project) => project.testMatch.test(path.join(specDir, file))).map((project) => project.name);
+  // Playwright runs a dependency project in full regardless of file filters (observed in the
+  // Phase 253 aggregate: 169 tests instead of 152), so nothing but the cells may live there.
+  assert.deepEqual(owners("subscription-compositions-phase253.spec.js"), ["phase252-owned-review"]);
+  assert.deepEqual(owners("subscription-compositions-reconcile-phase254.spec.js"), ["phase254-reconcile"]);
+  assert.deepEqual(owners("subscription-stories-phase252.spec.js"), ["phase252-owned-stories"]);
+  assert.deepEqual(owners("phase252-review.spec.js"), ["phase252-owned-stories"]);
+  assert.equal(cells.testMatch.test(path.join(specDir, "subscription-stories-phase252.spec.js")), false);
+  assert.equal(cells.testMatch.test(path.join(specDir, "phase252-review.spec.js")), false);
+});

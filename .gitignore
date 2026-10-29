@@ -35,6 +35,7 @@ accrue_admin/tmp/phase252/render-results-*.json
 accrue_admin/tmp/phase253/transport.json
 accrue_admin/tmp/phase253/manifest.json
 accrue_admin/tmp/phase253/render-results-*.json
+accrue_admin/tmp/phase253/render-cases-*/
 accrue_admin/tmp/phase253/ci-results/
 
 # Phase 254 measurement samples, fingerprints, selection reports and Playwright output are regenerated per run.

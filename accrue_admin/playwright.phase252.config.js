@@ -25,7 +25,7 @@ const launcher = `node ../scripts/dev/phase252_lab.mjs serve --lane admin-review
 
 module.exports = defineConfig({
   testDir: "./e2e",
-  testMatch: /(?:phase252-review|subscription-stories-phase252|subscription-compositions-phase253)\.spec\.js/,
+  testMatch: /(?:phase252-review|subscription-stories-phase252|subscription-compositions-phase253|subscription-compositions-reconcile-phase254)\.spec\.js/,
   timeout: 30_000,
   fullyParallel: false,
   workers: 1,
@@ -44,6 +44,27 @@ module.exports = defineConfig({
     timeout: 120_000,
     gracefulShutdown: { signal: "SIGTERM", timeout: 30_000 },
   },
-  projects: [{ name: "phase252-owned-review", testMatch: /(?:phase252-review|subscription-stories-phase252|subscription-compositions-phase253)\.spec\.js/ }],
+  projects: [
+    // Playwright runs a dependency project in full even when file filters select other
+    // specs, so the project the reconcile step depends on holds only the composition
+    // cells. The story and review specs live in their own project and stay selectable by
+    // file filter without dragging 150+ cells (or the reconcile step) into their runs.
+    {
+      name: "phase252-owned-review",
+      testMatch: /subscription-compositions-phase253\.spec\.js/,
+    },
+    {
+      name: "phase252-owned-stories",
+      testMatch: /(?:phase252-review|subscription-stories-phase252)\.spec\.js/,
+    },
+    // Phase 254 D-13/D-14: merges the per-case composition result files. It depends on
+    // the cells project, so a failed or skipped cell leaves this project not passed. Same
+    // single worker and single server; it adds no parallelism, shards or retries.
+    {
+      name: "phase254-reconcile",
+      testMatch: /subscription-compositions-reconcile-phase254\.spec\.js/,
+      dependencies: ["phase252-owned-review"],
+    },
+  ],
   outputDir: process.env.PLAYWRIGHT_OUTPUT_DIR || "test-results/phase252-review",
 });

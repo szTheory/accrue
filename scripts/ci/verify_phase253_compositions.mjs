@@ -59,7 +59,9 @@ const COMMON_SOURCES = Object.freeze([
   "storybook/phase252-manifest.json",
   "accrue_admin/playwright.phase252.config.js",
   "accrue_admin/e2e/phase253-composition-helpers.js",
+  "accrue_admin/e2e/phase254-result-ledger.js",
   "accrue_admin/e2e/subscription-compositions-phase253.spec.js",
+  "accrue_admin/e2e/subscription-compositions-reconcile-phase254.spec.js",
   "accrue_admin/assets/css/app.css",
   "accrue_admin/priv/static/accrue_admin.css",
   "accrue_admin/priv/static/storybook.css",
@@ -313,7 +315,9 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
   const browserResultPath = path.join(BROWSER_RESULT_ROOT, "render-results-" + id.toLowerCase() + ".json").split(path.sep).join("/");
   const browserSources = [
     "accrue_admin/e2e/subscription-compositions-phase253.spec.js",
+    "accrue_admin/e2e/subscription-compositions-reconcile-phase254.spec.js",
     "accrue_admin/e2e/phase253-composition-helpers.js",
+    "accrue_admin/e2e/phase254-result-ledger.js",
     "accrue_admin/playwright.phase252.config.js",
     "accrue_admin/lib/accrue_admin/dev/storybook.ex",
     "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
@@ -382,7 +386,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
     ),
     command(
       "phase253-compositions-browser",
-      "node scripts/dev/phase252_lab.mjs browser -- --reporter=json e2e/subscription-compositions-phase253.spec.js",
+      "node scripts/dev/phase252_lab.mjs browser -- --reporter=json e2e/subscription-compositions-phase253.spec.js e2e/subscription-compositions-reconcile-phase254.spec.js",
       process.execPath,
       [
         "scripts/dev/phase252_lab.mjs",
@@ -392,6 +396,8 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
         "--",
         "--reporter=json",
         "e2e/subscription-compositions-phase253.spec.js",
+        // Phase 254 D-13: the dependent phase254-reconcile project merges the per-case files.
+        "e2e/subscription-compositions-reconcile-phase254.spec.js",
       ],
       {
         lane: "admin-review-browser",
@@ -635,6 +641,36 @@ function playrightTestIdentities(report) {
   return tests;
 }
 
+// Phase 254 D-13/D-14: the reconcile test must have run as its own dependent project, and
+// every cell must have run in the cells project. A reconcile title that ran anywhere else
+// (or a cell that ran in the reconcile project) is not the dependent step this lane claims.
+export const RECONCILE_PROJECT = "phase254-reconcile";
+export const CELLS_PROJECT = "phase252-owned-review";
+
+export function playwrightProjectsByTitle(report) {
+  const byTitle = new Map();
+  const visit = (suite) => {
+    for (const item of suite.specs || []) {
+      for (const entry of item.tests || []) byTitle.set(item.title, entry.projectName);
+    }
+    for (const nested of suite.suites || []) visit(nested);
+  };
+  for (const suite of report.suites || []) visit(suite);
+  return byTitle;
+}
+
+export function assertReconcileProjectExecuted(report, reconciliationTitle) {
+  const projects = playwrightProjectsByTitle(report);
+  if (projects.get(reconciliationTitle) !== RECONCILE_PROJECT) {
+    fail("the reconcile test did not execute in the " + RECONCILE_PROJECT + " project: " + String(projects.get(reconciliationTitle)));
+  }
+  for (const [title, project] of projects) {
+    if (title !== reconciliationTitle && project !== CELLS_PROJECT) {
+      fail("browser cell " + title + " did not execute in the " + CELLS_PROJECT + " project: " + String(project));
+    }
+  }
+}
+
 function assertExactStrings(actual, expected, label) {
   if (!Array.isArray(actual) || actual.some((item) => typeof item !== "string" || item.length === 0)) {
     fail(label + " is missing or malformed");
@@ -650,6 +686,7 @@ function validateBrowserEvidence(spec, execution, { root, expectedSourceDigests,
     fail("Playwright JSON reporter output is not one complete report");
   }
   const reportIdentities = playrightTestIdentities(report);
+  assertReconcileProjectExecuted(report, spec.browser_contract.reconciliation_title);
   if (!browserResult || typeof browserResult !== "object") fail("current-run browser cell bundle is missing");
   if (browserResult.run_id !== execution.run_id) fail("browser cell bundle has a different run ID");
   if (browserResult.manifest_sha256 !== expectedManifestDigest) fail("browser cell bundle has a stale manifest digest");

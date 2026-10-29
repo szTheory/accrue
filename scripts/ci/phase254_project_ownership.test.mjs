@@ -323,6 +323,7 @@ test("every real e2e spec is owned by exactly one owner group across both Playwr
   assert.deepEqual([...groups].sort(), ["default-browser", "lab", "visual"]);
   const byName = (name) => ownership.get(path.join(E2E_ROOT, name));
   assert.equal(byName("subscription-compositions-phase253.spec.js"), "lab");
+  assert.equal(byName("subscription-compositions-reconcile-phase254.spec.js"), "lab");
   assert.equal(byName("phase252-review.spec.js"), "lab");
   assert.equal(byName("subscription-stories-phase252.spec.js"), "lab");
   assert.equal(byName("admin-visual-regression-phase211.spec.js"), "visual");
@@ -340,7 +341,7 @@ test("real lab specs and their local imports are pure-story, and real mounted sp
   assert.equal(classifyReal("admin-a11y.spec.js"), "mounted");
   assert.equal(classifyReal("admin-interactions.spec.js"), "mounted");
   assert.equal(classifyReal("admin-visual-regression-phase211.spec.js"), "mounted");
-  for (const name of ["subscription-compositions-phase253.spec.js", "subscription-stories-phase252.spec.js", "phase252-review.spec.js"]) {
+  for (const name of ["subscription-compositions-phase253.spec.js", "subscription-compositions-reconcile-phase254.spec.js", "subscription-stories-phase252.spec.js", "phase252-review.spec.js"]) {
     assert.equal(classifyReal(name), "pure-story", name);
   }
 });
