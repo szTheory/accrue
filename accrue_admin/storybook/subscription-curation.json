@@ -348,6 +348,98 @@
         "key": "/components/page_header",
         "kind": "story"
       }
+    },
+    {
+      "classification": "provider-boundary negative",
+      "disposition": "reclassify",
+      "id": "CUR-254-04",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "a Braintree subscription renders only its supported danger-zone action group and omits empty provider-pruned groups",
+          "test_ref": "accrue_admin/test/accrue_admin/components/subscription_area_test.exs#provider-pruned empty action groups are omitted for a valid Braintree subscription"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-04-03",
+        "origin_commit": "986f68b71bae643ce24f0906c39d072fe5ea117b"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "braintree_processor?(@subscription)",
+            "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex"
+          },
+          {
+            "marker": "def fetch!(:braintree_pruned)",
+            "path": "dev_support/ui_scenarios/cadence_subscriptions.exs"
+          }
+        ],
+        "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+        "state": "reachable"
+      },
+      "reason": "A Braintree-backed subscription prunes unsupported provider actions and shows Braintree guidance instead. The variation is the only subscription_detail story that proves the provider boundary, so it is retained and reclassified as a provider-boundary negative rather than a lifecycle state.",
+      "reason_class": null,
+      "reason_evidence": {
+        "kind": "provider_boundary_negative"
+      },
+      "subject": {
+        "scenario_id": "braintree_pruned",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "braintree_pruned"
+      },
+      "survivor": {
+        "key": "/components/subscription_detail||braintree_pruned",
+        "kind": "manifest_entry"
+      }
+    },
+    {
+      "classification": "recovery-claim drift",
+      "disposition": "reclassify",
+      "gap": {
+        "entry_trigger": "retry/campaign-history integrity",
+        "state": "page-tier past-due and dunning recovery"
+      },
+      "id": "CUR-254-05",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "the Dunning row appears only for a subscription with a started dunning campaign",
+          "test_ref": "accrue_admin/test/accrue_admin/components/subscription_area_test.exs#optional seats and dunning rows follow real item and lifecycle evidence"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-04-03",
+        "origin_commit": "986f68b71bae643ce24f0906c39d072fe5ea117b"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "dunning-active default-open recovery drill",
+            "path": ".planning/milestones/v1.54-phases/195-exemplar-b-subscription-detail/195-UI-SPEC.md"
+          },
+          {
+            "marker": "summary_row(dunning, \"Dunning\") != nil",
+            "path": "accrue_admin/test/accrue_admin/components/subscription_area_test.exs"
+          }
+        ],
+        "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+        "state": "reachable"
+      },
+      "reason": "Claim drift: Phase 195 described this variation as a dunning-active default-open recovery drill (recovery drill open), but the story now renders the production subscription area, whose recovery evidence is a Dunning row only. The variation is retained for the optional Dunning row. The page-tier past-due and recovery state is uncovered and stays gated on retry/campaign-history integrity.",
+      "reason_class": null,
+      "reason_evidence": {
+        "kind": "claim_drift"
+      },
+      "subject": {
+        "scenario_id": "dunning_active",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "dunning_active"
+      },
+      "survivor": {
+        "key": "/components/subscription_detail||dunning_active",
+        "kind": "manifest_entry"
+      }
     }
   ],
   "schema_version": 1,
@@ -357,7 +449,7 @@
     "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
     "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "a0dc862c9bce0e45f92a4f04da79999714d51a1f1d44ff6cf2167dbc09140b2b",
     "accrue_admin/lib/accrue_admin/router.ex": "2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed",
-    "accrue_admin/storybook/_support/subscription_manifest.ex": "91e94047e23c3f701c3cafb0c10d92ea2d6e78d9f72e26a6ea34cb797f6caff5",
+    "accrue_admin/storybook/_support/subscription_manifest.ex": "e5046aee7a24a788912ff63e8074353ca40ef9a88069f8b3295939740ec3b3fb",
     "accrue_admin/storybook/_support/subscription_scenarios.ex": "734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d",
     "accrue_portal/lib/accrue_portal/live/subscription_live.ex": "c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372",
     "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex": "5059ad186b7d393c41c538237a9b216e19ba587ca6bcaf80bfb5edfef0411bd2",

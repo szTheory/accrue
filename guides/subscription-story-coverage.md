@@ -88,11 +88,13 @@ Generated from `SubscriptionManifest.curation_ledger/0` into `accrue_admin/story
 
 Frozen baseline at `986f68b71bae643ce24f0906c39d072fe5ea117b`: 6 canonical and compatibility entries (compatibility ids `braintree_pruned`, `dunning_active`, `populated`), 26 enumerated subjects, 30 registry families, 42 registry entries and 75 specimens. The kitchen at `/dev/components` is untouched (`kitchen_impact: none`).
 
-| Record | Subject | Disposition | Reason class | Reachability | Survivor | Preserved regressions | Reason |
+| Record | Subject | Disposition | Reason class or classification | Reachability | Survivor | Preserved regressions | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | CUR-254-01 | `/components/detail` (story) | retain | — | reachable (AccrueAdmin.Components.Detail.summary_list/1) | `/components/detail` | `accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders a semantic summary-list dl with read-only and long value rows` | Only Storybook coverage of the Detail.summary_list/1 primitive API (read-only, change/view action and long-label rows). The subscription story renders it only through the whole subscription area. |
 | CUR-254-02 | `/components/overlay` (story) | retain | — | reachable (AccrueAdmin.Components.Overlay.overlay/1) | `/components/overlay` | `accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders drawer presentation through the body-level overlay root` | Only Storybook coverage of the Overlay primitive API (desktop and mobile drawer, modal and popover shells, reduced motion). The subscription action drawer exercises one presentation of it. |
 | CUR-254-03 | `/components/page_header` (story) | retain | — | reachable (AccrueAdmin.Components.PageHeader.page_header/1) | `/components/page_header` | `accrue_admin/test/accrue_admin/components/page_header_test.exs#renders breadcrumbs, required title, semantic markers, and exactly one h1` | Only Storybook coverage of the PageHeader slot contract (actions, stat strip, filter toolbar, long content, combined controls) outside the subscription collection page. |
+| CUR-254-04 | `/components/subscription_detail||braintree_pruned` | reclassify | provider-boundary negative | reachable (AccrueAdmin.Live.SubscriptionLive.subscription_area/1) | `/components/subscription_detail\|\|braintree_pruned` | `accrue_admin/test/accrue_admin/components/subscription_area_test.exs#provider-pruned empty action groups are omitted for a valid Braintree subscription` | A Braintree-backed subscription prunes unsupported provider actions and shows Braintree guidance instead. The variation is the only subscription_detail story that proves the provider boundary, so it is retained and reclassified as a provider-boundary negative rather than a lifecycle state. |
+| CUR-254-05 | `/components/subscription_detail||dunning_active` | reclassify | recovery-claim drift | reachable (AccrueAdmin.Live.SubscriptionLive.subscription_area/1) | `/components/subscription_detail\|\|dunning_active` | `accrue_admin/test/accrue_admin/components/subscription_area_test.exs#optional seats and dunning rows follow real item and lifecycle evidence` | Claim drift: Phase 195 described this variation as a dunning-active default-open recovery drill (recovery drill open), but the story now renders the production subscription area, whose recovery evidence is a Dunning row only. The variation is retained for the optional Dunning row. The page-tier past-due and recovery state is uncovered and stays gated on retry/campaign-history integrity. |
 
 ### Amendments
 
@@ -108,7 +110,7 @@ Frozen baseline at `986f68b71bae643ce24f0906c39d072fe5ea117b`: 6 canonical and c
 - `accrue_admin/lib/accrue_admin/router.ex` — `2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed`
 - `accrue_admin/storybook/_support/subscription_collection.ex` — `f57ecc7e52d9bd08dab74cd035375c3fcd993143fc5561514141b26c26fa3a9e`
 - `accrue_admin/storybook/_support/subscription_compositions_manifest.ex` — `c549a9f23c16ab0168f5bee99c6f82c278a3ab6428091d918da8aaf5f1dd9741`
-- `accrue_admin/storybook/_support/subscription_manifest.ex` — `91e94047e23c3f701c3cafb0c10d92ea2d6e78d9f72e26a6ea34cb797f6caff5`
+- `accrue_admin/storybook/_support/subscription_manifest.ex` — `e5046aee7a24a788912ff63e8074353ca40ef9a88069f8b3295939740ec3b3fb`
 - `accrue_admin/storybook/_support/subscription_page_scenarios.ex` — `6a0f7265940ba44c31c40435f389d2db5030024e08638467823a20eede0c8c24`
 - `accrue_admin/storybook/_support/subscription_scenarios.ex` — `734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d`
 - `accrue_portal/lib/accrue_portal/live/subscription_live.ex` — `c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372`

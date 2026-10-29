@@ -44,7 +44,9 @@
       "story_path": "/components/subscription_detail",
       "variation_id": "active",
       "scenario_id": "active",
-      "route_variation_id": "active"
+      "route_variation_id": "active",
+      "curation_record": null,
+      "curation_classification": null
     },
     {
       "key": "/components/subscription_detail||braintree_pruned",
@@ -90,7 +92,9 @@
       "story_path": "/components/subscription_detail",
       "variation_id": "braintree_pruned",
       "scenario_id": "braintree_pruned",
-      "route_variation_id": "braintree_pruned"
+      "route_variation_id": "braintree_pruned",
+      "curation_record": "CUR-254-04",
+      "curation_classification": "provider-boundary negative"
     },
     {
       "key": "/components/subscription_detail||dunning_active",
@@ -136,7 +140,9 @@
       "story_path": "/components/subscription_detail",
       "variation_id": "dunning_active",
       "scenario_id": "dunning_active",
-      "route_variation_id": "dunning_active"
+      "route_variation_id": "dunning_active",
+      "curation_record": "CUR-254-05",
+      "curation_classification": "recovery-claim drift"
     },
     {
       "key": "/components/subscription_detail||incomplete_evidence",
@@ -182,7 +188,9 @@
       "story_path": "/components/subscription_detail",
       "variation_id": "incomplete_evidence",
       "scenario_id": "incomplete_evidence",
-      "route_variation_id": "incomplete_evidence"
+      "route_variation_id": "incomplete_evidence",
+      "curation_record": null,
+      "curation_classification": null
     },
     {
       "key": "/components/subscription_detail||populated",
@@ -228,7 +236,9 @@
       "story_path": "/components/subscription_detail",
       "variation_id": "populated",
       "scenario_id": "populated",
-      "route_variation_id": "populated"
+      "route_variation_id": "populated",
+      "curation_record": null,
+      "curation_classification": null
     },
     {
       "key": "/components/subscription_detail||scheduled_cancellation",
@@ -274,7 +284,9 @@
       "story_path": "/components/subscription_detail",
       "variation_id": "scheduled_cancellation",
       "scenario_id": "scheduled_cancellation",
-      "route_variation_id": "scheduled_cancellation"
+      "route_variation_id": "scheduled_cancellation",
+      "curation_record": null,
+      "curation_classification": null
     }
   ],
   "source_digests": {
@@ -283,7 +295,7 @@
     "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
     "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "a0dc862c9bce0e45f92a4f04da79999714d51a1f1d44ff6cf2167dbc09140b2b",
     "accrue_admin/lib/accrue_admin/router.ex": "2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed",
-    "accrue_admin/storybook/_support/subscription_manifest.ex": "91e94047e23c3f701c3cafb0c10d92ea2d6e78d9f72e26a6ea34cb797f6caff5",
+    "accrue_admin/storybook/_support/subscription_manifest.ex": "e5046aee7a24a788912ff63e8074353ca40ef9a88069f8b3295939740ec3b3fb",
     "accrue_admin/storybook/_support/subscription_scenarios.ex": "734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d",
     "accrue_portal/lib/accrue_portal/live/subscription_live.ex": "c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372",
     "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex": "5059ad186b7d393c41c538237a9b216e19ba587ca6bcaf80bfb5edfef0411bd2",

@@ -462,6 +462,8 @@ function validateRecord(record, baseline, context) {
     if (record.reason_class === "duplicate") fail(`${record.id} is a ${record.disposition}; reason_class duplicate is reserved for removals`);
   }
 
+  if (record.disposition === "reclassify" && !isNonEmptyString(record.classification)) fail(`${record.id} is a reclassify and needs a classification`);
+
   const reachability = record.reachability;
   if (!isObject(reachability) || !REACHABILITY_STATES.includes(reachability.state) || !isNonEmptyString(reachability.owner)) {
     fail(`${record.id} needs reachability {state: ${REACHABILITY_STATES.join("|")}, owner, evidence}`);
@@ -971,6 +973,15 @@ const SCENARIOS = [
       expectRejected(world, (ledger) => { ledger.records[0].kitchen_impact = "minor"; }, /kitchen_impact must be exactly "none"/);
       expectRejected(world, (ledger) => { ledger.records[0].reachability.evidence[0].marker = "def something_else"; }, /marker is not present/);
       expectRejected(world, (ledger) => { ledger.records[0].reachability.state = "maybe"; }, /reachability/);
+      // A reclassify record must say what it was reclassified to; the same record passes once it does.
+      expectRejected(world, (ledger) => { ledger.records[0].disposition = "reclassify"; }, /needs a classification/);
+      assert.doesNotThrow(() => {
+        const reclassified = fixtureWorld();
+        reclassified.ledger.records[0].disposition = "reclassify";
+        reclassified.ledger.records[0].classification = "provider-boundary negative";
+        reclassified.ledger.records[0].reason_evidence = { kind: "provider_boundary_negative" };
+        verifyLedger(reclassified.ledger, reclassified.context);
+      });
     },
   ],
   [

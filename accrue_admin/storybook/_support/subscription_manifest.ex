@@ -448,8 +448,112 @@ if Mix.env() != :prod do
             protects:
               "PageHeader keeps its breadcrumb, title, semantic marker and single h1 slot contract"
           }
-        )
+        ),
+        braintree_pruned_record(),
+        dunning_active_record()
       ]
+    end
+
+    # D-40: retained and reclassified; the provider-pruned action menu is a provider-boundary
+    # negative, not a canonical lifecycle state.
+    defp braintree_pruned_record do
+      %{
+        id: "CUR-254-04",
+        subject: %{
+          story_path: @subscription_story_path,
+          variation_id: "braintree_pruned",
+          scenario_id: "braintree_pruned"
+        },
+        disposition: "reclassify",
+        classification: "provider-boundary negative",
+        reason_class: nil,
+        reachability: %{
+          state: "reachable",
+          owner: "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          evidence: [
+            %{
+              path: "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+              marker: "braintree_processor?(@subscription)"
+            },
+            %{
+              path: "dev_support/ui_scenarios/cadence_subscriptions.exs",
+              marker: "def fetch!(:braintree_pruned)"
+            }
+          ]
+        },
+        reason:
+          "A Braintree-backed subscription prunes unsupported provider actions and shows Braintree guidance instead. The variation is the only subscription_detail story that proves the provider boundary, so it is retained and reclassified as a provider-boundary negative rather than a lifecycle state.",
+        reason_evidence: %{kind: "provider_boundary_negative"},
+        survivor: %{kind: "manifest_entry", key: "#{@subscription_story_path}||braintree_pruned"},
+        preserved_regressions: [
+          %{
+            test_ref:
+              "accrue_admin/test/accrue_admin/components/subscription_area_test.exs#provider-pruned empty action groups are omitted for a valid Braintree subscription",
+            protects:
+              "a Braintree subscription renders only its supported danger-zone action group and omits empty provider-pruned groups"
+          }
+        ],
+        kitchen_impact: "none",
+        provenance: %{origin_commit: @frozen_source_commit, decided_in: "254-04-03"}
+      }
+    end
+
+    # D-40: the Phase 195 spec promised a default-open recovery drill for this subscription; the
+    # compatibility story now renders the production area's Dunning row only.
+    defp dunning_active_record do
+      %{
+        id: "CUR-254-05",
+        subject: %{
+          story_path: @subscription_story_path,
+          variation_id: "dunning_active",
+          scenario_id: "dunning_active"
+        },
+        disposition: "reclassify",
+        classification: "recovery-claim drift",
+        reason_class: nil,
+        reachability: %{
+          state: "reachable",
+          owner: "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          evidence: [
+            %{
+              path:
+                ".planning/milestones/v1.54-phases/195-exemplar-b-subscription-detail/195-UI-SPEC.md",
+              marker: "dunning-active default-open recovery drill"
+            },
+            %{
+              path: "accrue_admin/test/accrue_admin/components/subscription_area_test.exs",
+              marker: "summary_row(dunning, \"Dunning\") != nil"
+            }
+          ]
+        },
+        reason:
+          "Claim drift: Phase 195 described this variation as a dunning-active default-open recovery drill (recovery drill open), but the story now renders the production subscription area, whose recovery evidence is a Dunning row only. The variation is retained for the optional Dunning row. The page-tier past-due and recovery state is uncovered and stays gated on retry/campaign-history integrity.",
+        reason_evidence: %{kind: "claim_drift"},
+        gap: %{
+          state: "page-tier past-due and dunning recovery",
+          entry_trigger: "retry/campaign-history integrity"
+        },
+        survivor: %{kind: "manifest_entry", key: "#{@subscription_story_path}||dunning_active"},
+        preserved_regressions: [
+          %{
+            test_ref:
+              "accrue_admin/test/accrue_admin/components/subscription_area_test.exs#optional seats and dunning rows follow real item and lifecycle evidence",
+            protects:
+              "the Dunning row appears only for a subscription with a started dunning campaign"
+          }
+        ],
+        kitchen_impact: "none",
+        provenance: %{origin_commit: @frozen_source_commit, decided_in: "254-04-03"}
+      }
+    end
+
+    defp reclassification_for(story_path, variation_id) do
+      Enum.find_value(curation_records(), {nil, nil}, fn record ->
+        if record.disposition == "reclassify" and record.subject.story_path == story_path and
+             record.subject.variation_id == variation_id do
+          {record.id, record.classification}
+        end
+      end)
     end
 
     defp primitive_retain_record(id, story_path, reachability, reason, regression) do
@@ -530,6 +634,10 @@ if Mix.env() != :prod do
 
       unless Map.get(record, :kitchen_impact) == "none" do
         raise ArgumentError, "curation record #{record.id} must have kitchen_impact none"
+      end
+
+      if record.disposition == "reclassify" and not non_empty_string?(Map.get(record, :classification)) do
+        raise ArgumentError, "curation record #{record.id} (reclassify) needs a classification"
       end
 
       record
@@ -1003,7 +1111,7 @@ if Mix.env() != :prod do
             |> Enum.map(&"`#{guide_cell(&1.test_ref)}`")
             |> Enum.join("<br>")
 
-          "| #{record.id} | #{subject} | #{record.disposition} | #{guide_cell(Map.get(record, :reason_class))} | #{record.reachability.state} (#{guide_cell(record.reachability.owner)}) | `#{guide_cell(record.survivor.key)}` | #{regressions} | #{guide_cell(record.reason)} |"
+          "| #{record.id} | #{subject} | #{record.disposition} | #{guide_cell(Map.get(record, :reason_class) || Map.get(record, :classification))} | #{record.reachability.state} (#{guide_cell(record.reachability.owner)}) | `#{guide_cell(record.survivor.key)}` | #{regressions} | #{guide_cell(record.reason)} |"
         end)
 
       amendment_rows =
@@ -1018,7 +1126,7 @@ if Mix.env() != :prod do
         "",
         "Frozen baseline at `#{baseline.source_commit}`: #{baseline.entries} canonical and compatibility entries (compatibility ids #{Enum.map_join(baseline.compatibility_ids, ", ", &"`#{&1}`")}), #{length(baseline.subjects)} enumerated subjects, #{baseline.registry.family_count} registry families, #{baseline.registry.entry_count} registry entries and #{baseline.registry.specimen_count} specimens. The kitchen at `/dev/components` is untouched (`kitchen_impact: none`).",
         "",
-        "| Record | Subject | Disposition | Reason class | Reachability | Survivor | Preserved regressions | Reason |",
+        "| Record | Subject | Disposition | Reason class or classification | Reachability | Survivor | Preserved regressions | Reason |",
         "| --- | --- | --- | --- | --- | --- | --- | --- |",
         record_rows,
         "",
@@ -1113,6 +1221,7 @@ if Mix.env() != :prod do
       facts = SubscriptionScenarios.validate!(attributes)
       route_variation_id = group_id || variation_id
       key = key(path, group_id, variation_id)
+      {curation_record, curation_classification} = reclassification_for(path, to_string(variation_id))
 
       %{
         key: key,
@@ -1129,6 +1238,8 @@ if Mix.env() != :prod do
         composition_tier: "component",
         proof_lane: Map.fetch!(metadata, :proof_lane),
         scenario_id: Atom.to_string(scenario),
+        curation_record: curation_record,
+        curation_classification: curation_classification,
         expected: expected_facts(facts, metadata)
       }
     end
