@@ -1301,10 +1301,11 @@ jobs:
         run: cd accrue_admin && mix deps.get
 
       # The Phase 252 production-boundary lane compiles and unpacks each of the three
-      # packages in its own right (MIX_ENV=prod, isolated build path), so accrue and
-      # accrue_portal need their own deps directories, not only the admin one above.
-      - name: Install accrue and accrue_portal deps (Phase 252 production-boundary lane)
-        run: cd accrue && mix deps.get && cd ../accrue_portal && mix deps.get
+      # packages in its own right (MIX_ENV=prod, isolated build path), and the held-out
+      # cleanup lane runs the accrue_host test suite, so accrue, accrue_portal and
+      # accrue_host need their own deps directories, not only the admin one above.
+      - name: Install accrue, accrue_portal and accrue_host deps (Phase 252 production-boundary and held-out lanes)
+        run: cd accrue && mix deps.get && cd ../accrue_portal && mix deps.get && cd ../examples/accrue_host && mix deps.get
 
       - name: Compile admin package
         run: cd accrue_admin && mix compile --warnings-as-errors
