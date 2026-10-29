@@ -309,7 +309,9 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
       assert length(collection) == 11 and length(pages) == 9
 
       for entry <- collection ++ pages do
-        assert is_list(entry.depends_on) and entry.depends_on != [], "#{entry.story_path} #{entry.variation_id}"
+        assert is_list(entry.depends_on) and entry.depends_on != [],
+               "#{entry.story_path} #{entry.variation_id}"
+
         assert entry.depends_on == Enum.sort(Enum.uniq(entry.depends_on))
         assert Enum.all?(entry.depends_on, &Map.has_key?(digests, &1))
         for shared <- @shared_sources, do: assert(shared in entry.depends_on, shared)
@@ -322,7 +324,9 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
 
       for entry <- pages do
         for only <- @page_only_sources, do: assert(only in entry.depends_on, only)
-        for collection_only <- @collection_only_sources, do: refute(collection_only in entry.depends_on, collection_only)
+
+        for collection_only <- @collection_only_sources,
+            do: refute(collection_only in entry.depends_on, collection_only)
       end
 
       assert Manifest.validate_depends_on!(collection ++ pages, digests) == :ok
@@ -346,8 +350,14 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
 
       for section <- ["entries", "collection_variations", "page_entries"] do
         [entry | remaining] = manifest[section]
-        tampered = Map.put(entry, "depends_on", Enum.sort(["accrue/lib/accrue.ex" | entry["depends_on"]]))
-        File.write!(@manifest_path, Jason.encode!(Map.put(manifest, section, [tampered | remaining])))
+
+        tampered =
+          Map.put(entry, "depends_on", Enum.sort(["accrue/lib/accrue.ex" | entry["depends_on"]]))
+
+        File.write!(
+          @manifest_path,
+          Jason.encode!(Map.put(manifest, section, [tampered | remaining]))
+        )
 
         assert_raise ArgumentError, ~r/depends_on.*outside source_digests/i, fn ->
           Manifest.verify!(@manifest_path)

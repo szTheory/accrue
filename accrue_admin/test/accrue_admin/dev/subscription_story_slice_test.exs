@@ -195,10 +195,13 @@ defmodule AccrueAdmin.SubscriptionStorySliceTest do
     {canonical, compatibility} = Enum.split(ids, 3)
 
     assert canonical == [:active, :scheduled_cancellation, :incomplete_evidence]
-    assert compatibility |> Enum.map(&Atom.to_string/1) |> Enum.sort() == Enum.sort(expected_compatibility)
+
+    assert compatibility |> Enum.map(&Atom.to_string/1) |> Enum.sort() ==
+             Enum.sort(expected_compatibility)
 
     for id <- retired do
-      refute id in Enum.map(ids, &Atom.to_string/1), "retired variation #{id} is still a story variation"
+      refute id in Enum.map(ids, &Atom.to_string/1),
+             "retired variation #{id} is still a story variation"
     end
   end
 

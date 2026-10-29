@@ -105,7 +105,9 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
              [:active, :launch, :growing_team, :scheduled_cancellation, :incomplete_evidence]
 
     listed_ids = Enum.map(listed, &Atom.to_string/1)
-    assert listed |> Enum.drop(5) |> Enum.map(&Atom.to_string/1) |> Enum.sort() == Enum.sort(present)
+
+    assert listed |> Enum.drop(5) |> Enum.map(&Atom.to_string/1) |> Enum.sort() ==
+             Enum.sort(present)
 
     for id <- absent do
       refute id in listed_ids, "retired compatibility id #{id} is still in the ordinary list"
@@ -302,7 +304,10 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
       records: []
     }
 
-    assert compatibility_expectations(ledger) == %{present: ["alpha", "beta", "gamma"], absent: []}
+    assert compatibility_expectations(ledger) == %{
+             present: ["alpha", "beta", "gamma"],
+             absent: []
+           }
 
     retired = %{
       disposition: "retire",

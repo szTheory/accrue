@@ -359,14 +359,19 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       end
 
       manifest_path =
-        Path.join(System.tmp_dir!(), "phase254-depends-#{System.unique_integer([:positive])}.json")
+        Path.join(
+          System.tmp_dir!(),
+          "phase254-depends-#{System.unique_integer([:positive])}.json"
+        )
 
       on_exit(fn -> File.rm(manifest_path) end)
       :ok = SubscriptionManifest.write!(manifest_path)
       manifest = manifest_path |> File.read!() |> Jason.decode!()
       [entry | remaining] = manifest["entries"]
 
-      tampered = Map.put(entry, "depends_on", Enum.sort(["accrue/lib/accrue.ex" | entry["depends_on"]]))
+      tampered =
+        Map.put(entry, "depends_on", Enum.sort(["accrue/lib/accrue.ex" | entry["depends_on"]]))
+
       File.write!(manifest_path, Jason.encode!(%{manifest | "entries" => [tampered | remaining]}))
 
       assert_raise ArgumentError, ~r/depends_on.*outside source_digests/i, fn ->
@@ -705,7 +710,10 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
 
     test "curation ledger regenerates byte-identically and an interrupted regeneration leaves the committed ledger intact" do
       path =
-        Path.join(System.tmp_dir!(), "phase254-curation-#{System.unique_integer([:positive])}.json")
+        Path.join(
+          System.tmp_dir!(),
+          "phase254-curation-#{System.unique_integer([:positive])}.json"
+        )
 
       on_exit(fn -> File.rm(path) end)
 
@@ -718,10 +726,20 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       decoded = Jason.decode!(first)
 
       assert Map.keys(decoded) |> Enum.sort() ==
-               ["amendments", "current", "frozen_baseline", "records", "schema_version", "source_digests"]
+               [
+                 "amendments",
+                 "current",
+                 "frozen_baseline",
+                 "records",
+                 "schema_version",
+                 "source_digests"
+               ]
 
       assert decoded["source_digests"] == SubscriptionManifest.source_digests()
-      assert decoded["records"] |> Enum.map(& &1["id"]) == decoded["records"] |> Enum.map(& &1["id"]) |> Enum.sort()
+
+      assert decoded["records"] |> Enum.map(& &1["id"]) ==
+               decoded["records"] |> Enum.map(& &1["id"]) |> Enum.sort()
+
       assert Enum.any?(decoded["amendments"], &(&1["id"] == "AMD-254-01"))
 
       interrupted = fn temp, json ->
@@ -736,11 +754,19 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert File.read!(path) == first
 
       leftovers =
-        path |> Path.dirname() |> File.ls!() |> Enum.filter(&String.starts_with?(&1, Path.basename(path) <> ".tmp-"))
+        path
+        |> Path.dirname()
+        |> File.ls!()
+        |> Enum.filter(&String.starts_with?(&1, Path.basename(path) <> ".tmp-"))
 
       assert leftovers == []
 
-      fresh_dir = Path.join(System.tmp_dir!(), "phase254-curation-new-#{System.unique_integer([:positive])}")
+      fresh_dir =
+        Path.join(
+          System.tmp_dir!(),
+          "phase254-curation-new-#{System.unique_integer([:positive])}"
+        )
+
       on_exit(fn -> File.rm_rf(fresh_dir) end)
       target = Path.join(fresh_dir, "ledger.json")
 
@@ -783,7 +809,11 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert braintree.disposition == "reclassify"
       assert braintree.classification == "provider-boundary negative"
       assert braintree.subject.variation_id == "braintree_pruned"
-      assert braintree.survivor == %{kind: "manifest_entry", key: "#{@story_path}||braintree_pruned"}
+
+      assert braintree.survivor == %{
+               kind: "manifest_entry",
+               key: "#{@story_path}||braintree_pruned"
+             }
 
       assert Enum.any?(
                braintree.preserved_regressions,
@@ -826,7 +856,15 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       records = Map.new(ledger.records, &{&1.id, &1})
 
       assert Enum.map(ledger.records, & &1.id) ==
-               ["CUR-254-01", "CUR-254-02", "CUR-254-03", "CUR-254-04", "CUR-254-05", "CUR-254-06", "CUR-254-07"]
+               [
+                 "CUR-254-01",
+                 "CUR-254-02",
+                 "CUR-254-03",
+                 "CUR-254-04",
+                 "CUR-254-05",
+                 "CUR-254-06",
+                 "CUR-254-07"
+               ]
 
       retire = records["CUR-254-06"]
       assert retire.disposition == "retire"
@@ -834,7 +872,9 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert retire.reason_evidence == %{kind: "fact_expected_equality"}
       assert retire.duplicate_evidence.subject == retire.duplicate_evidence.survivor
       assert retire.survivor == %{kind: "manifest_entry", key: "#{@story_path}||active"}
+
       assert %{kind: "story", key: "/pages/subscription", variation_id: "active"} in retire.additional_survivors
+
       assert retire.alias_evidence.survivor_scenario == "active"
       assert retire.provenance.origin_commit =~ ~r/\A[0-9a-f]{40}\z/
 
@@ -842,8 +882,17 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert merge.disposition == "merge"
       assert merge.reason_class == "duplicate"
       assert merge.subject.variation_id == "provider_pruned"
-      assert merge.survivor == %{kind: "story", key: "/components/action_menu", variation_id: "danger"}
-      assert merge.additional_survivors == [%{kind: "manifest_entry", key: "#{@story_path}||braintree_pruned"}]
+
+      assert merge.survivor == %{
+               kind: "story",
+               key: "/components/action_menu",
+               variation_id: "danger"
+             }
+
+      assert merge.additional_survivors == [
+               %{kind: "manifest_entry", key: "#{@story_path}||braintree_pruned"}
+             ]
+
       assert merge.reason =~ "story-local provider rule"
       assert length(merge.preserved_regressions) == 2
 
@@ -877,7 +926,15 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert guide == SubscriptionManifest.coverage_guide()
       assert guide =~ "does not prove a whole page"
 
-      for id <- ["CUR-254-01", "CUR-254-02", "CUR-254-03", "CUR-254-04", "CUR-254-05", "CUR-254-06", "CUR-254-07"] do
+      for id <- [
+            "CUR-254-01",
+            "CUR-254-02",
+            "CUR-254-03",
+            "CUR-254-04",
+            "CUR-254-05",
+            "CUR-254-06",
+            "CUR-254-07"
+          ] do
         assert guide =~ id
       end
 
