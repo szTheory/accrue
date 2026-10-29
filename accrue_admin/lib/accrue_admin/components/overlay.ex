@@ -48,6 +48,7 @@ defmodule AccrueAdmin.Components.Overlay do
       |> assign(:header_class, header_class(assigns.presentation))
       |> assign(:actions_class, actions_class(assigns.presentation))
       |> assign(:body_class, body_class(assigns.presentation))
+      |> assign(:body_scroll_attrs, body_scroll_attrs(assigns.presentation, assigns))
       |> assign(:footer_class, footer_class(assigns.presentation))
       |> assign(:show_backdrop, backdrop?(assigns.presentation))
 
@@ -111,7 +112,7 @@ defmodule AccrueAdmin.Components.Overlay do
             </div>
           </header>
 
-          <div class={@body_class}>
+          <div class={@body_class} {@body_scroll_attrs}>
             <%= render_slot(@inner_block) %>
           </div>
 
@@ -190,6 +191,18 @@ defmodule AccrueAdmin.Components.Overlay do
   defp body_class(:drawer), do: "ax-detail-drawer-body"
   defp body_class(:modal), do: "ax-step-up-modal-body"
   defp body_class(_presentation), do: "ax-overlay-popover-body"
+
+  # The drawer body scrolls on its own (overflow auto), so it must be reachable by keyboard
+  # (axe scrollable-region-focusable): a labelled, focusable region. Modal and popover bodies do
+  # not scroll independently and keep their plain markup.
+  defp body_scroll_attrs(:drawer, assigns),
+    do: %{
+      tabindex: "0",
+      role: "region",
+      "aria-labelledby": assigns.title_id || "#{assigns.id}-title"
+    }
+
+  defp body_scroll_attrs(_presentation, _assigns), do: %{}
 
   defp footer_class(:drawer), do: "ax-detail-drawer-footer"
   defp footer_class(:modal), do: "ax-step-up-modal-actions"

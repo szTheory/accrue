@@ -328,7 +328,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <:primary><.link href={@subscription_href} class="ax-link"><%= @customer_label %></.link></:primary>
       <:secondary>
         <IdBadge.id_badge id={@badge_id} id_value={to_string(@subscription_id)} label="Copy subscription ID" copy_label="subscription ID" variant="plain" />
-        <.link href={@customer_href} class="ax-label ax-muted">Customer details</.link>
+        <.link href={@customer_href} class="ax-label ax-muted" aria-label={"Customer details for #{@customer_label}"}>Customer details</.link>
       </:secondary>
     </DataTable.identity_cell>
     """

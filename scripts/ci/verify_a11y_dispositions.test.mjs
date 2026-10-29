@@ -543,11 +543,14 @@ test("a journey entry may not mix composition cells and must use a well formed c
   );
 });
 
-test("the committed register's journey entries name only the two focus-restore checkpoints", () => {
-  const journey = loadRegister(ROOT).entries.filter((item) => item.cell_ids.some((id) => id.startsWith("journey::")));
-  assert.deepEqual(journey.flatMap((item) => item.cell_ids).sort(), ["journey::D-29::back-restores-focus", "journey::D-29::escape-restores-focus"]);
-  for (const item of journey) {
-    assert.equal(item.rule_id, "probe-focus-restore");
-    assert.equal(item.exception_class, "routed-defect");
-  }
+test("after the 254-12 correction batch the committed register holds no routed defect and no journey entry, so the focus checkpoints assert strictly", () => {
+  const isJourney = (item) => item.cell_ids.some((id) => id.startsWith("journey::"));
+  const isRouted = (item) => item.exception_class === "routed-defect";
+  const entries = loadRegister(ROOT).entries;
+  assert.deepEqual(entries.filter(isRouted).map((item) => item.id), []);
+  assert.deepEqual(entries.filter(isJourney).map((item) => item.id), []);
+  // Positive control: the same filters find a routed journey entry when one is present.
+  const seeded = [{ id: "A11Y-SEED", exception_class: "routed-defect", cell_ids: ["journey::D-29::escape-restores-focus"] }];
+  assert.equal(seeded.filter(isRouted).length, 1);
+  assert.equal(seeded.filter(isJourney).length, 1);
 });

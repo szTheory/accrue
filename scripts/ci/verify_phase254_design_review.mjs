@@ -669,9 +669,12 @@ function checkContract(finding, record, ctx) {
   if (text === null || text === undefined) throw fail(`${label}: contract file ${contract.path} could not be read`);
   const rowPattern = new RegExp(`^\\|\\s*${contract.row.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\|`, "m");
   if (record.stage === "assessment") {
+    // The correction batch edits the contract (254-12) before the record moves to stage corrected
+    // (254-13), so an assessment record may meet a contract that already carries the amended row.
+    const applied = text.includes(contract.amended_text);
     const exists = rowPattern.test(text);
-    if (contract.action === "amend-row" && !exists) throw fail(`${label}: row "${contract.row}" to amend is absent from ${contract.path}`);
-    if (contract.action === "add-row" && exists) throw fail(`${label}: row "${contract.row}" to add already exists in ${contract.path}`);
+    if (!applied && contract.action === "amend-row" && !exists) throw fail(`${label}: row "${contract.row}" to amend is absent from ${contract.path}`);
+    if (!applied && contract.action === "add-row" && exists) throw fail(`${label}: row "${contract.row}" to add already exists in ${contract.path}`);
   } else if (!text.includes(contract.amended_text)) {
     throw fail(`${label}: amended_text for row "${contract.row}" was not found in ${contract.path}`);
   }
@@ -1262,6 +1265,15 @@ export const SCENARIOS = [
       rejects((record) => { record.findings[1].contract.action = "add-row"; }, /already exists/);
       rejects((record) => { record.findings[1].contract.action = "rewrite"; }, /amend-row or add-row/);
       rejects((record) => { record.findings[1].contract.path = path.posix.join(".planning", "phases", "253-fixture", "missing.md"); }, /could not be read/);
+      // The batch may have applied the amendment before the record moves to stage corrected: both
+      // an amended row and an added row are accepted at assessment when amended_text is already present.
+      const applied = fixtureHarness({ contract: CORRECTED_CONTRACT });
+      assert.doesNotThrow(() => verifyDesignReview(clone(applied.record), { ...applied.options, stage: "assessment" }));
+      const addApplied = fixtureHarness({ contract: `${CORRECTED_CONTRACT}| Section title | 20px |\n` });
+      const addRecord = clone(addApplied.record);
+      Object.assign(addRecord.findings[1].contract, { action: "add-row", row: "Section title", amended_text: "| Section title | 20px |" });
+      assert.doesNotThrow(() => verifyDesignReview(addRecord, { ...addApplied.options, stage: "assessment" }));
+      rejects((record) => { record.findings[1].contract.action = "add-row"; record.findings[1].contract.row = "Page heading"; }, /already exists/);
     }
   ],
   [

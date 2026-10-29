@@ -80,6 +80,39 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert html =~ ~s(data-focus-trap-fallback="#subscription-step-up-title")
     end
 
+    # Phase 254 A11Y-254-27: the drawer body scrolls on its own, so it is a labelled, keyboard
+    # focusable region (axe scrollable-region-focusable). The modal and popover bodies do not scroll
+    # independently and keep plain markup.
+    test "makes the independently scrolling drawer body a labelled focusable region" do
+      render = fn presentation ->
+        render_component(
+          fn assigns ->
+            assigns = assign(assigns, :presentation, presentation)
+
+            ~H"""
+            <Overlay.overlay id="body-probe" open presentation={@presentation} title="Probe">
+              <button type="button">Save change</button>
+            </Overlay.overlay>
+            """
+          end,
+          %{}
+        )
+      end
+
+      drawer = render.(:drawer)
+      assert drawer =~ ~r/<div class="ax-detail-drawer-body"[^>]*tabindex="0"/
+      assert drawer =~ ~r/<div class="ax-detail-drawer-body"[^>]*role="region"/
+
+      assert drawer =~
+               ~r/<div class="ax-detail-drawer-body"[^>]*aria-labelledby="body-probe-title"/
+
+      for presentation <- [:modal, :popover] do
+        html = render.(presentation)
+        refute html =~ ~s(tabindex="0")
+        refute html =~ ~s(role="region")
+      end
+    end
+
     test "renders popover presentation without modal semantics" do
       html =
         render_component(fn assigns ->

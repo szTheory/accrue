@@ -459,7 +459,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= next_action_summary(@subscription) %>
                 </p>
               <% else %>
-                <div class="ax-detail-dunning-summary" aria-label="Dunning funnel state for this subscription">
+                <div class="ax-detail-dunning-summary" role="group" aria-label="Dunning funnel state for this subscription">
                   <span><strong>Global dunning funnel</strong><em>No subscription-level campaign here; recovery analytics still shows at-risk accounts and funnel trends.</em></span>
                   <a
                     class="ax-link"
@@ -499,7 +499,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <div class="ax-card ax-activity-audit-strip">
             <p class="ax-label ax-activity-audit-title">Audit event table: Actor / Action / Timestamp</p>
             <% latest_audit = latest_audit_row(@timeline_events, @subscription) %>
-            <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
+            <div class="ax-audit-summary-row" role="group" aria-label="Latest audit event summary">
               <span><strong>Actor</strong><em><%= latest_audit.actor %></em></span>
               <span><strong>Action</strong><em><%= latest_audit.action %></em></span>
               <span><strong>Timestamp</strong><em><Timestamp.timestamp value={latest_audit.at} id="subscription-latest-audit-timestamp" /></em></span>
