@@ -169,28 +169,26 @@ async function verifyServedAssets(page, kind) {
     const css = links.stylesheets.find((href) => href.includes("storybook-css-"));
     const js = links.scripts.find((href) => href.includes("storybook-js-"));
     if (!css || !js) throw new Error(`the story route did not load the compiled Storybook CSS and JS: ${JSON.stringify(links)}`);
-    served.css = (await fetchSha(page, css)).sha256;
-    served.js = (await fetchSha(page, js)).sha256;
-    expect(served.css, "served storybook.css equals the committed file").toBe(sha256(readStatic("storybook.css")));
-    expect(served.js, "served storybook.js equals the committed file").toBe(sha256(readStatic("storybook.js")));
+    served.css_sha256 = (await fetchSha(page, css)).sha256;
+    served.js_sha256 = (await fetchSha(page, js)).sha256;
+    expect(served.css_sha256, "served storybook.css equals the committed file").toBe(sha256(readStatic("storybook.css")));
+    expect(served.js_sha256, "served storybook.js equals the committed file").toBe(sha256(readStatic("storybook.js")));
     // D-33: a story route is only a stand-in for the production page while it embeds the production CSS.
     expect(readStatic("storybook.css").includes(readStatic("accrue_admin.css")), "storybook.css contains the exact accrue_admin.css bytes").toBe(true);
   } else {
     const css = links.stylesheets.find((href) => /\/assets\/css-[0-9a-f]{32}$/.test(href));
     const js = links.scripts.find((href) => /\/assets\/js-[0-9a-f]{32}$/.test(href));
     if (!css || !js) throw new Error(`the mounted page did not load the admin CSS and JS: ${JSON.stringify(links)}`);
-    served.css = (await fetchSha(page, css)).sha256;
-    served.js = (await fetchSha(page, js)).sha256;
-    expect(served.css, "served accrue_admin.css equals the committed file").toBe(sha256(readStatic("accrue_admin.css")));
-    expect(served.js, "served accrue_admin.js equals the committed file").toBe(sha256(readStatic("accrue_admin.js")));
+    served.css_sha256 = (await fetchSha(page, css)).sha256;
+    served.js_sha256 = (await fetchSha(page, js)).sha256;
+    expect(served.css_sha256, "served accrue_admin.css equals the committed file").toBe(sha256(readStatic("accrue_admin.css")));
+    expect(served.js_sha256, "served accrue_admin.js equals the committed file").toBe(sha256(readStatic("accrue_admin.js")));
   }
   const fontUrls = await loadedFontUrls(page);
-  served.fonts = {
-    geist_sans: (await fetchSha(page, fontUrls.sans)).sha256,
-    geist_mono: (await fetchSha(page, fontUrls.mono)).sha256,
-  };
-  expect(served.fonts.geist_sans, "served Geist sans woff2 equals the committed font").toBe(sha256(readStatic("fonts/geist-sans-vf.woff2")));
-  expect(served.fonts.geist_mono, "served Geist Mono woff2 equals the committed font").toBe(sha256(readStatic("fonts/geist-mono-vf.woff2")));
+  served.geist_sans_sha256 = (await fetchSha(page, fontUrls.sans)).sha256;
+  served.geist_mono_sha256 = (await fetchSha(page, fontUrls.mono)).sha256;
+  expect(served.geist_sans_sha256, "served Geist sans woff2 equals the committed font").toBe(sha256(readStatic("fonts/geist-sans-vf.woff2")));
+  expect(served.geist_mono_sha256, "served Geist Mono woff2 equals the committed font").toBe(sha256(readStatic("fonts/geist-mono-vf.woff2")));
   return served;
 }
 
