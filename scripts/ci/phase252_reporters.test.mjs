@@ -46,7 +46,14 @@ test("parsePlaywrightJson keeps the prior identities/count/skipped/failed fields
   assert.equal(result?.count, 3);
   assert.equal(result?.skipped, 0);
   assert.equal(result?.failed, 0);
-  assert.deepEqual(Object.keys(result ?? {}).sort(), ["count", "durations", "failed", "identities", "skipped"]);
+  assert.deepEqual(Object.keys(result ?? {}).sort(), ["count", "durations", "failed", "identities", "skipped", "stats_duration_ms"]);
+});
+
+test("parsePlaywrightJson keeps the report's stats.duration (null when the report lacks it)", () => {
+  const withDuration = JSON.parse(passing());
+  withDuration.stats.duration = 4321.5;
+  assert.equal(parse(JSON.stringify(withDuration))?.stats_duration_ms, 4321.5);
+  assert.equal(parse(passing())?.stats_duration_ms, null);
 });
 
 test("parsePlaywrightJson rejects a skipped browser result", () => {

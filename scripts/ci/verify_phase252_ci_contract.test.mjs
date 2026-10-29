@@ -279,6 +279,18 @@ test("the named required owner invokes both Phase 252 and Phase 253 checks", () 
   assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true, requirePhase253: true }));
 });
 
+test("the shared admin build path is derived from a validated hex id, never from a path in the environment (D-24 dedupe)", async () => {
+  const { sharedAdminBuildPath } = await import("./phase252_paths.mjs");
+  const base = { tempRoot: "/tmp", userId: "501" };
+  assert.equal(sharedAdminBuildPath({ env: {}, ...base }), null, "unset means each aggregate keeps its own run-isolated build");
+  assert.equal(sharedAdminBuildPath({ env: { PHASE254_SHARED_BUILD_ID: "" }, ...base }), null);
+  assert.equal(sharedAdminBuildPath({ env: { PHASE254_SHARED_BUILD_ID: "0123456789abcdef" }, ...base }), "/tmp/accrue-phase254-501/0123456789abcdef/mix-build/accrue-admin");
+  for (const hostile of ["../escape", "/etc", "ABCDEF0123456789", "abc", "0123456789abcdef/../../x", "0123456789abcdef\n"]) {
+    assert.throws(() => sharedAdminBuildPath({ env: { PHASE254_SHARED_BUILD_ID: hostile }, ...base }), /PHASE254_SHARED_BUILD_ID/, hostile);
+  }
+  assert.match(fs.readFileSync(new URL("./verify_phase200_admin_guardrails.sh", import.meta.url), "utf8"), /^export PHASE254_SHARED_BUILD_ID$/m);
+});
+
 test("the named required owner runs the Phase 254 recurring budget check after Phase 253, unconditionally", () => {
   const contract = (runner) => assertCiContract({ workflow, ownerRunner: runner, manifest, requirePhase252: true, requirePhase253: true, requirePhase254Selection: true, requirePhase254Budget: true });
   const budgetLine = 'run_step "Phase 254 recurring budget check" node scripts/ci/phase254_budget.mjs check';

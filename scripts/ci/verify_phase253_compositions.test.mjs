@@ -183,16 +183,16 @@ test("TAP evidence rejects wrong-run and stale-source results", async () => {
 function playwrightReport(identities, reconcileTitle = null) {
   return {
     status: "passed",
-    stats: { expected: identities.length, unexpected: 0, skipped: 0, flaky: 0 },
+    stats: { expected: identities.length, unexpected: 0, skipped: 0, flaky: 0, duration: 1234.5 },
     errors: [],
     suites: [{
-      specs: identities.map((title) => ({
+      specs: identities.map((title, index) => ({
         title,
         ok: true,
         tests: [{
           projectName: title === reconcileTitle ? "phase254-reconcile" : "phase252-owned-review",
           expectedStatus: "passed",
-          results: [{ status: "passed", retry: 0 }],
+          results: [{ status: "passed", retry: 0, duration: 100 + index }],
         }],
       })),
     }],
@@ -343,6 +343,11 @@ test("browser evidence accepts the complete cell control and rejects duplicates,
     });
     assert.equal(accepted.test_count, 6);
     assert.equal(accepted.browser_cells.length, 5);
+    // Phase 254 (CIQ-04): the lane evidence keeps every test's duration and the report's stats.duration.
+    assert.equal(accepted.durations.length, 6);
+    assert.deepEqual(accepted.durations.map((entry) => entry.duration_ms), [100, 101, 102, 103, 104, 105]);
+    assert.deepEqual(accepted.durations.map((entry) => entry.identity), accepted.test_identities);
+    assert.equal(accepted.stats_duration_ms, 1234.5);
     assert.deepEqual(accepted.assertion_refs, ["breakpoint_controls", "geometry_negative_controls", "manifest_reconciliation", "rendered_cells"]);
 
     const validateBrowser = (browserResult, stdout = execution.stdout) => runner.validateLaneEvidence(fixture.spec, {

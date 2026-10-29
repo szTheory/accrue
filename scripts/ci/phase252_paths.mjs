@@ -328,6 +328,20 @@ export function assertPhase254Selection(workflow, job = requiredJob(workflow)) {
   return true;
 }
 
+// Phase 254 (D-24 step 2, remove duplicated work): the guardrail runner exports one run id so the
+// Phase 252 and Phase 253 aggregates compile the admin test build once and share it. Both
+// aggregates still run every lane and keep every assertion; only the build directory is shared.
+// The id is validated, never a path, so an environment value cannot name an arbitrary directory.
+export function sharedAdminBuildPath({ env = process.env, tempRoot, userId }) {
+  const id = env.PHASE254_SHARED_BUILD_ID;
+  if (id === undefined || id === "") return null;
+  if (!/^[0-9a-f]{8,64}$/.test(id)) fail("PHASE254_SHARED_BUILD_ID must be 8 to 64 lowercase hex characters");
+  if (typeof tempRoot !== "string" || !tempRoot.startsWith("/") || typeof userId !== "string" || userId === "") {
+    fail("sharedAdminBuildPath needs a canonical temp root and a user id");
+  }
+  return `${tempRoot.replace(/\/+$/, "")}/accrue-phase254-${userId}/${id}/mix-build/accrue-admin`;
+}
+
 // Module-boundary guard (PATTERNS S1). This module is a library with no CLI:
 // the guard exists so that running it under `node --test` registers real,
 // named fixture tests instead of one vacuous implicit test.

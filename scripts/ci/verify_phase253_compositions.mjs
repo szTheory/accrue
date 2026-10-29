@@ -11,6 +11,7 @@ import { isDeepStrictEqual } from "node:util";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { isMainModule } from "./main_module.mjs";
+import { sharedAdminBuildPath } from "./phase252_paths.mjs";
 import {
   expectedExUnitIdentities,
   expectedNodeTestIdentities,
@@ -250,6 +251,8 @@ function freshPartition(used) {
 
 function mixBuildPath(runId) {
   const userId = typeof process.getuid === "function" ? process.getuid() : "local";
+  const shared = sharedAdminBuildPath({ tempRoot: fs.realpathSync(os.tmpdir()), userId: String(userId) });
+  if (shared) return shared;
   return path.join(fs.realpathSync(os.tmpdir()), "accrue-phase253-" + userId, runId, "mix-build", "accrue-admin");
 }
 
@@ -646,6 +649,24 @@ function playrightTestIdentities(report) {
   return tests;
 }
 
+// Phase 254 (CIQ-04): per-test durations of the passing report, kept in the lane evidence so a
+// budget freeze can price one composition cell from CI evidence. Pure observation: the
+// identity, pass/skip/retry/flaky gates above are unchanged.
+function playwrightTestDurations(report) {
+  const durations = [];
+  const visit = (suite) => {
+    for (const item of suite.specs || []) {
+      for (const test of item.tests || []) {
+        const duration = test.results?.[0]?.duration;
+        durations.push({ identity: item.title, duration_ms: Number.isFinite(duration) && duration >= 0 ? duration : null });
+      }
+    }
+    for (const nested of suite.suites || []) visit(nested);
+  };
+  for (const suite of report.suites) visit(suite);
+  return durations;
+}
+
 // Phase 254 D-13/D-14: the reconcile test must have run as its own dependent project, and
 // every cell must have run in the cells project. A reconcile title that ran anywhere else
 // (or a cell that ran in the reconcile project) is not the dependent step this lane claims.
@@ -804,6 +825,8 @@ function validateBrowserEvidence(spec, execution, { root, expectedSourceDigests,
     skipped: report.stats.skipped,
     failed: report.stats.unexpected,
     test_identities: reportIdentities,
+    durations: playwrightTestDurations(report),
+    stats_duration_ms: Number.isFinite(report.stats.duration) ? report.stats.duration : null,
     assertion_refs: Object.keys(assertionBindings).sort(),
     assertion_bindings: assertionBindings,
     browser_result_path: spec.browser_contract.result_path,

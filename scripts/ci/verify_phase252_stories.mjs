@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { isMainModule } from "./main_module.mjs";
+import { sharedAdminBuildPath } from "./phase252_paths.mjs";
 import { deriveExecutionEvidence, PHASE252_REPORTER_SPECS } from "./phase252_reporters.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import { expectedPhase252Cells, readCurationLedger } from "./verify_phase254_curation.mjs";
@@ -168,6 +169,10 @@ function canonicalTempRoot() {
 
 function mixBuildPath(id, project) {
   const userId = typeof process.getuid === "function" ? process.getuid() : "local";
+  if (project === "accrue-admin") {
+    const shared = sharedAdminBuildPath({ tempRoot: canonicalTempRoot(), userId: String(userId) });
+    if (shared) return shared;
+  }
   return path.join(canonicalTempRoot(), "accrue-phase252-" + userId, id, "mix-build", project);
 }
 

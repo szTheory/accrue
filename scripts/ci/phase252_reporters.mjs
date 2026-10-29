@@ -333,7 +333,7 @@ export function parsePlaywrightJson(output) {
     identity,
     duration_ms: Number.isFinite(duration_ms) && duration_ms >= 0 ? duration_ms : null,
   }));
-  return { identities, count: tests.length, skipped: 0, failed: 0, durations };
+  return { identities, count: tests.length, skipped: 0, failed: 0, durations, stats_duration_ms: Number.isFinite(report.stats.duration) ? report.stats.duration : null };
 }
 
 function bindAssertionIds(commandId, assertionIds, identities) {
@@ -421,6 +421,9 @@ export function deriveExecutionEvidence({ root, commandId, stdout, expectedAsser
       skipped: parsed?.skipped ?? 0,
       failed: parsed?.failed ?? 0,
       test_identities: parsed?.identities ?? [],
+      // Phase 254 (CIQ-04): the Playwright lane keeps per-test durations and the report's
+      // stats.duration so a budget freeze can price the browser work from CI evidence.
+      ...(spec.kind === "playwright-json" ? { durations: parsed.durations, stats_duration_ms: parsed.stats_duration_ms } : {}),
       assertion_bindings: assertionBindings,
     },
   };

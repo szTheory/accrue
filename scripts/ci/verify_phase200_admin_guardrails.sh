@@ -7,6 +7,11 @@ root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # here and read by scripts/ci/phase254_budget.mjs. It is an input, never a switch.
 export PHASE254_RUNNER_STARTED_AT="$(date +%s)"
 
+# Phase 254 (D-24 step 2): the Phase 252 and Phase 253 aggregates compile the admin test build once
+# and share it, instead of each cold-compiling the same sources. Every lane and assertion still runs.
+PHASE254_SHARED_BUILD_ID="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(8).toString("hex"))')"
+export PHASE254_SHARED_BUILD_ID
+
 run_step() {
   local label="$1"
   shift
