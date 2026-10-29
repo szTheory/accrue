@@ -234,7 +234,7 @@ jobs:
         env:
           MINT_REASON: ${{ inputs.reason }}
           MINT_FINDING_ID: ${{ inputs.finding_id }}
-        run: node scripts/ci/phase254_visual_manifest.mjs build --run-id "${{ github.run_id }}" --sha "${{ github.sha }}" --reason "$MINT_REASON" --finding-id "$MINT_FINDING_ID"
+        run: node scripts/ci/phase254_visual_manifest.mjs build --run-id "${{ github.run_id }}" --sha "${{ github.sha }}" --base "$(git merge-base origin/main HEAD)" --reason "$MINT_REASON" --finding-id "$MINT_FINDING_ID"
 
       - name: Verify the minted set against the identity manifest
         run: node accrue_admin/e2e/visual-baseline-set.cjs accrue_admin/e2e/__screenshots__/visual-desktop

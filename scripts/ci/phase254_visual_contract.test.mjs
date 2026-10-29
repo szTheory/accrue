@@ -75,6 +75,7 @@ export function assertVisualContract({ workflow, config, newSpec, legacySpec, al
   // 4. Stability proof, identity manifest build and the manifest-backed set check run in the mint job.
   if (!/subscription-visual-phase254\.spec\.js[^\n]*--repeat-each=3/.test(mint)) throw new Error("the mint job must prove stability with --repeat-each=3 on the new spec");
   if (!/phase254_visual_manifest\.mjs build/.test(mint)) throw new Error("the mint job must build the identity manifest");
+  if (!/phase254_visual_manifest\.mjs build[^\n]*--base "\$\(git merge-base origin\/main HEAD\)"/.test(mint)) throw new Error("the manifest build must pass --base with the merge-base so a legacy PNG that moved is re-attested");
   if (!/fetch-depth:\s*0/.test(mint)) throw new Error("the mint job needs fetch-depth 0");
 
   // 5. The gate job checks the manifest, after the set guard and before the pixel gate, with full history.
@@ -168,6 +169,7 @@ test("an upload that is always() or has no success() condition is rejected", () 
 test("a mint job without the stability proof, the manifest build or full history is rejected", () => {
   assert.throws(() => assertVisualContract(mutate("workflow", (text) => text.replace("--repeat-each=3", "--repeat-each=1"))), /--repeat-each=3/);
   assert.throws(() => assertVisualContract(mutate("workflow", (text) => text.replace("phase254_visual_manifest.mjs build", "phase254_visual_manifest.mjs verify"))), /build the identity manifest/);
+  assert.throws(() => assertVisualContract(mutate("workflow", (text) => text.replace('--sha "${{ github.sha }}" --base "$(git merge-base origin/main HEAD)"', '--sha "${{ github.sha }}"'))), /manifest build must pass --base/);
   const mintStart = real().workflow.indexOf(`  ${MINT_JOB}:`);
   assert.throws(() => assertVisualContract(mutate("workflow", (text) => text.slice(0, mintStart) + text.slice(mintStart).replace("          fetch-depth: 0\n", ""))), /mint job needs fetch-depth 0/);
 });

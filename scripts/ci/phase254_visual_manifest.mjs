@@ -2,9 +2,12 @@
 // Phase 254 CIQ-03 (D-18): the identity manifest of the committed visual baselines.
 //
 //   build        --artifact-dir D --identity-dir D --run-id ID --sha SHA [--reasons FILE]
-//                [--reason TEXT --finding-id ID] [--previous FILE] [--out FILE]
+//                [--reason TEXT --finding-id ID] [--previous FILE] [--base SHA] [--out FILE]
 //       Build manifest.json for a freshly minted baseline directory. A PNG whose bytes differ from the
 //       previous entry (or that has none) is a changed key and must carry a reason and a finding id.
+//       With --base, a PNG that differs from the merge-base but still carries a phase211-committed entry
+//       (a runner re-mint made before the manifest existed) is also a changed key: the mint run re-attests
+//       it with its own run id, commit and asset digests, so check never has to excuse a legacy entry.
 //   check        [--dir D] [--base SHA]
 //       Gate: the Chromium and Playwright versions recorded in every minted entry equal the running
 //       ones, and every PNG changed since the merge-base is a minted entry whose served asset digests,
@@ -106,9 +109,10 @@ function commonVersions(identities) {
 
 // buildManifest: sorted entries for every PNG in artifactDir. reasons maps a key to {reason, finding_id};
 // the "*" key is the default for every changed key.
-export function buildManifest({ artifactDir, identityDir, reasons = {}, mint, previous = null, root = ROOT, caseKeys = null }) {
+export function buildManifest({ artifactDir, identityDir, reasons = {}, mint, previous = null, root = ROOT, caseKeys = null, base = null, changedPngs = null }) {
   if (!mint?.run_id || !/^[0-9a-f]{40}$/.test(mint.sha ?? "")) fail("build needs the mint run id and a 40-character commit sha");
   const keys = caseKeys ?? readCaseKeys(root);
+  const changedSinceBase = new Set(changedPngs ?? (base ? changedPngsSince(base, artifactDir, { root }) : []));
   const files = fs.readdirSync(artifactDir).filter((name) => name.endsWith(".png")).sort();
   if (files.length === 0) fail(`${artifactDir} holds no PNG`);
   const identities = new Map();
@@ -122,7 +126,9 @@ export function buildManifest({ artifactDir, identityDir, reasons = {}, mint, pr
     const key = caseKeyOfFile(file, keys);
     const bytes = sha256(fs.readFileSync(path.join(artifactDir, file)));
     const prior = previous?.entries?.[key];
-    if (prior && prior.sha256 === bytes) {
+    // A legacy entry survives only while its PNG is still the merge-base's: a PNG that moved since the
+    // merge-base is re-attested by this mint, whatever its bytes now are.
+    if (prior && prior.sha256 === bytes && !(prior.provenance === PROVENANCE_LEGACY && changedSinceBase.has(file))) {
       entries[key] = prior;
       continue;
     }
@@ -399,6 +405,43 @@ export const SCENARIOS = [
       }
     },
   ],
+  [
+    "buildManifest re-attests a legacy entry whose PNG moved since the merge-base and keeps one that did not",
+    () => {
+      const root = fixtureRoot();
+      const artifact = tmpDir("phase254-visual-art-");
+      const identities = tmpDir("phase254-visual-id-");
+      try {
+        const legacyEntry = (name, bytes) => ({
+          case_key: name, file: `${name}.png`, sha256: sha256(bytes), provenance: PROVENANCE_LEGACY, last_commit: "b".repeat(40),
+          mint_run_id: null, mint_sha: null, kind: null, served: null, scenario_file_sha256: null, playwright_version: null, browser_version: null,
+          reason: "Phase 211 committed baseline, unchanged by Phase 254", finding_id: null,
+        });
+        const key = "phase254-page-active-w320-light";
+        const current = currentAssetDigests("story", root);
+        fs.writeFileSync(path.join(identities, `${key}.json`), JSON.stringify({ key, kind: "story", snapshot: snapshotFileName(key), served: current.served, scenario_file_sha256: current.scenario_file_sha256, ...FIXTURE_VERSIONS }));
+        fs.writeFileSync(path.join(artifact, snapshotFileName(key)), "case bytes");
+        fs.writeFileSync(path.join(artifact, "subscriptions.png"), "moved but unchanged now");
+        fs.writeFileSync(path.join(artifact, "dashboard.png"), "never moved");
+        const previous = { schema_version: 1, entries: { subscriptions: legacyEntry("subscriptions", "moved but unchanged now"), dashboard: legacyEntry("dashboard", "never moved") } };
+        const mint = { run_id: "888", sha: "d".repeat(40) };
+        const reasons = { "*": { reason: "re-attested at mint", finding_id: "CIQ-03" } };
+        const build = (changedPngs, withReasons = reasons) => buildManifest({ artifactDir: artifact, identityDir: identities, reasons: withReasons, mint, previous, root, caseKeys: [key], changedPngs });
+        const moved = build(["subscriptions.png"]);
+        assert.equal(moved.entries.subscriptions.provenance, PROVENANCE_MINT, "the moved legacy PNG is re-attested");
+        assert.equal(moved.entries.subscriptions.mint_run_id, "888");
+        assert.equal(moved.entries.subscriptions.sha256, sha256("moved but unchanged now"), "its bytes are the committed bytes");
+        assert.deepEqual(validateEntry("subscriptions", moved.entries.subscriptions), []);
+        assert.equal(moved.entries.dashboard.provenance, PROVENANCE_LEGACY, "positive control: a legacy PNG that did not move keeps its entry");
+        assert.equal(build([]).entries.subscriptions.provenance, PROVENANCE_LEGACY, "positive control: with nothing moved the legacy entry is kept");
+        const onlyCase = { [key]: reasons["*"] };
+        assert.doesNotThrow(() => build([], onlyCase), "positive control: the case key alone needs the reason when nothing moved");
+        assert.throws(() => build(["subscriptions.png"], onlyCase), /subscriptions: a changed baseline needs a reason and a finding id/);
+      } finally {
+        for (const directory of [root, artifact, identities]) fs.rmSync(directory, { recursive: true, force: true });
+      }
+    },
+  ],
 ];
 
 export function verifyFixtures() {
@@ -451,7 +494,7 @@ function main(argv) {
     if (values.reason !== undefined || values["finding-id"] !== undefined) reasons["*"] = { reason: values.reason, finding_id: values["finding-id"] };
     const previousFile = path.resolve(ROOT, values.previous ?? path.join(path.relative(ROOT, artifactDir), MANIFEST_FILE));
     const previous = fs.existsSync(previousFile) ? readJson(previousFile) : null;
-    const manifest = buildManifest({ artifactDir, identityDir, reasons, mint: { run_id: values["run-id"], sha: values.sha }, previous });
+    const manifest = buildManifest({ artifactDir, identityDir, reasons, mint: { run_id: values["run-id"], sha: values.sha }, previous, base: values.base ?? null });
     const out = path.resolve(ROOT, values.out ?? path.join(path.relative(ROOT, artifactDir), MANIFEST_FILE));
     fs.writeFileSync(out, `${JSON.stringify(manifest, null, 2)}\n`);
     process.stdout.write(`Phase 254 visual manifest: wrote ${path.relative(ROOT, out)} (${Object.keys(manifest.entries).length} entries)\n`);
