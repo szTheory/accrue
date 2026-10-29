@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Completed 254-09-PLAN.md
-last_updated: "2026-10-29T08:08:35.927Z"
+stopped_at: Completed 254-10-PLAN.md
+last_updated: "2026-10-29T08:35:15.009Z"
 last_activity: 2026-10-28
 last_activity_desc: Phase 254 execution started
-state_head: 374ed078a95941d900b894bf83cdb9e89b039599
+state_head: caf2fa929166371f05c6d2f8d5e4fa2afae8e318
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 34
-  completed_plans: 25
+  completed_plans: 26
   percent: 67
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 ## Current Position
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
-Plan: 10 of 18
+Plan: 11 of 18
 Status: Ready to execute
 Last activity: 2026-10-28 — Phase 254 execution started
 
@@ -248,6 +248,7 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 | Phase 254 P07 | 3h | 3 tasks | 14 files |
 | Phase 254 P08 | 25min | 2 tasks | 11 files |
 | Phase 254 P09 | 3 h | 3 tasks | 15 files |
+| Phase 254 P10 | 2h | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -598,6 +599,7 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 - [Phase 254]: 254-09: critical-path delta is the owner job's end offset minus the main workflow wall (queue excluded); the owner job's own added time is frozen as owner_job_added_s
 - [Phase 254]: 254-09: D-24 shard rule tripped (serial per-cell p90 x cells 156.9 s vs 60 s, isolation green) so composition cells run on 3 bounded workers; remaining focused-check gap (84.4 s vs 60 s) accepted in DEV-254-07
 - [Phase 254]: 254-09: Phase 252 and 253 aggregates share one admin test build via PHASE254_SHARED_BUILD_ID (validated hex id); isolated production and host builds are not shared
+- [Phase 254]: 254-10: storybook.css is composed deterministically (header, PhoenixStorybook CSS, brand.css, accrue_admin.css bundle, byte-preserved dark shim tail) and CI fails when it drifts; the design review record opens at stage assessment with DR-254-01..09 (DR-254-06..09 deferred under D-36)
 
 ### Pending Todos
 
@@ -696,8 +698,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-29T08:08:35.472Z
-Stopped at: Completed 254-09-PLAN.md
+Last session: 2026-10-29T08:35:09.667Z
+Stopped at: Completed 254-10-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
