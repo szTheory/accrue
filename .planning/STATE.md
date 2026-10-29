@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Completed 254-12-PLAN.md
-last_updated: "2026-10-29T10:50:56.267Z"
+stopped_at: Completed 254-13-PLAN.md
+last_updated: "2026-10-29T11:14:17.284Z"
 last_activity: 2026-10-28
 last_activity_desc: Phase 254 execution started
-state_head: df17d29b0f3e3bce207b30128ba63a1a3e8b791b
+state_head: 09f37058c10b0e8a408bfc72108b7263452574ae
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 34
-  completed_plans: 28
+  completed_plans: 29
   percent: 67
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 ## Current Position
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
-Plan: 13 of 18
+Plan: 14 of 18
 Status: Ready to execute
 Last activity: 2026-10-28 — Phase 254 execution started
 
@@ -251,6 +251,7 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 | Phase 254 P10 | 2h | 2 tasks | 8 files |
 | Phase 254 P11 | 1h 20m | 3 tasks | 7 files |
 | Phase 254 P12 | 5h | 2 tasks | 21 files |
+| Phase 254 P13 | 30min | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -607,6 +608,8 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 - [Phase 254]: Red evidence is derived only from a parsed Playwright or ExUnit report (assertion errors with parsable Expected and Received values); --check-red re-parses the report and the spec sha256 binds the evidence to the spec (254-12)
 - [Phase 254]: Routed accessibility defects are fixed at their lowest owning tier (token scope, component markup, focus hook, page CSS) and their register entries deleted, so the zero-match rule and the strict D-29 journey prove each fix (254-12)
 - [Phase 254]: The delayed focus return in focus_trap.js runs only when focus is lost, and content of a closed details is never a focus target (254-12)
+- [Phase 254]: 254-13: the correction batch tests run in the Phase 253 aggregate as two appended lanes (phase254-action-copy db-free ExUnit, phase254-design-browser with a playwright-titles reporter and source-bound per-key counts), because the composition browser lane validates an exact cell universe and rejects any extra spec.
+- [Phase 254]: 254-13: design review record stands at stage corrected with fix_commit 88cd27cdc (last correction commit); DR-254-08 re-dispositioned and stays deferred because no accessibility defect was routed on summary.ax-detail-section-head.
 
 ### Pending Todos
 
@@ -705,8 +708,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-29T10:50:55.727Z
-Stopped at: Completed 254-12-PLAN.md
+Last session: 2026-10-29T11:14:04.211Z
+Stopped at: Completed 254-13-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
