@@ -9,6 +9,10 @@
 //   select --event E --base B --head H --out PATH [--summary] [--changed-paths-file F]
 //       Map a diff to a transparent, fail-closed selection report. Every ambiguity broadens to
 //       mode "full"; the selector never silently skips a case.
+//   project --write|--check also owns accrue_admin/storybook/phase254-visual-cases.json (CIQ-03, D-16,
+//       D-33): the expected case list of the subscription visual spec, derived from the same compiled
+//       manifest. The A4 sourcing outcome (story-routes or mounted-fallback) is the one recorded input;
+//       --write keeps the committed value unless --a4 and --probe-error replace it.
 //   --self-test
 //       Run every rejection scenario, each paired with a passing control.
 //
@@ -27,6 +31,7 @@ import { fileURLToPath } from "node:url";
 import { isMainModule } from "./main_module.mjs";
 import { CONSUMED_ROOTS, REQUIRED_OWNER, classifyPath, matchesRule, normalizeRepoPath } from "./phase252_paths.mjs";
 import { LEDGER_PATH, expectedPhase252Cells, readCurationLedger } from "./verify_phase254_curation.mjs";
+import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 
 const SELF_PATH = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(SELF_PATH), "../..");
@@ -337,6 +342,254 @@ export function verifyProjectionFresh(projection, { root = ROOT } = {}) {
   return true;
 }
 
+// --- visual cases (CIQ-03, D-16, D-17, D-33) ----------------------------------------------------------
+
+export const VISUAL_CASES_PATH = "accrue_admin/storybook/phase254-visual-cases.json";
+export const VISUAL_SCHEMA_VERSION = 1;
+export const PHASE_SLUG = "254-recurring-quality-reviewed-fixes-and-curation";
+export const DESIGN_REVIEW_ARTIFACT = "254-DESIGN-REVIEW.json";
+export const VISUAL_WIDTHS = Object.freeze([320, 1280]);
+export const VISUAL_THEMES = Object.freeze(["light", "dark"]);
+export const VISUAL_PAGE_VARIATIONS = Object.freeze(["active", "scheduled_cancellation", "incomplete_evidence", "review_cancel_now"]);
+export const VISUAL_COLLECTION_VARIATIONS = Object.freeze(["multiple_rows", "partial_cursor_error"]);
+export const VISUAL_MOUNTED_STATES = Object.freeze(["review-open", "disclosure-focus"]);
+export const A4_OUTCOMES = Object.freeze(["story-routes", "mounted-fallback"]);
+export const FIXED_CLOCK = "2026-10-25T12:00:00Z";
+export const SCENARIO_FILE = "dev_support/ui_scenarios/cadence_subscriptions.exs";
+
+// The seeded mounted fixture (accrue_admin/test/support/e2e_fixtures.ex seed_phase191_matrix!/0): fixed ids and
+// names, so the expectations are constants rather than values read back from the rendered page.
+export const MOUNTED_FIXTURE = Object.freeze({
+  seed: "phase191-matrix",
+  subscription_id: "19100000-0000-4000-8000-000000000002",
+  processor_id: "sub_e2e_phase191_active",
+  customer_name: "E2E Phase 191 株式会社 Café Boundary Customer",
+  status_label: "Active",
+  route_template: "/billing/subscriptions/:id",
+  // The dialog panel only: the drawer wrapper also holds a full-viewport backdrop that blurs the page behind it,
+  // and that page shows period dates stamped at seed time.
+  review_target: "#subscription-action-drawer aside[role=\"dialog\"]",
+  disclosure_target: "[data-ax-drill-section=\"dunning-recovery\"]",
+  disclosure_title: "Dunning & recovery",
+});
+
+// What each visible state must show before its pixels are compared. Money is never invented: every
+// Cadence story states its amount as unavailable, and the assertion names the exact caveat.
+// Accessible names of the primary actions carry the processor subscription id (the production aria-label).
+const PAGE_ACTIONS = Object.freeze({
+  active: (id) => [{ role: "button", name: `Change plan for subscription ${id}` }, { role: "button", name: `Cancel renewal for subscription ${id}` }],
+  // A scheduled cancellation replaces "Cancel renewal" with a menu-only "Resume subscription"; the
+  // always-visible change control of the renewal row states the scheduled state's action instead.
+  scheduled_cancellation: (id) => [{ role: "button", name: `Change plan for subscription ${id}` }, { role: "button", name: `Change renewal for subscription ${id}` }],
+  incomplete_evidence: (id) => [{ role: "button", name: `Change plan for subscription ${id}` }, { role: "button", name: `Cancel renewal for subscription ${id}` }],
+  review_cancel_now: () => [{ role: "button", name: "Confirm Cancel immediately" }, { role: "button", name: "Back to subscription" }],
+});
+const COLLECTION_ACTIONS = Object.freeze({
+  multiple_rows: [{ role: "textbox", name: "Search subscriptions" }],
+  partial_cursor_error: [{ role: "button", name: "Retry loading remaining rows" }],
+});
+
+export function visualCaseKey(tier, variation, width, theme) {
+  return `phase254-${tier}-${variation}-w${width}-${theme}`;
+}
+
+function storyAmount(variation) {
+  if (variation === "review_cancel_now") return { text: "Unavailable; no estimate is shown." };
+  if (VISUAL_PAGE_VARIATIONS.includes(variation)) return { text: "Charge amount unavailable" };
+  return { text: "Amount unavailable" };
+}
+
+const STATUS_ALSO = Object.freeze({
+  scheduled_cancellation: ["Scheduled for"],
+  incomplete_evidence: ["Renewal date unavailable", "Price unavailable"],
+});
+
+function storyStatus(entry, variation) {
+  return { text: entry.expected.status === "active" ? "Active" : String(entry.expected.status), also: [...(STATUS_ALSO[variation] ?? [])] };
+}
+
+export function buildVisualCases({ manifest, a4 = "story-routes", probeError = null }) {
+  if (!A4_OUTCOMES.includes(a4)) fail(`sourcing.a4 must be one of ${A4_OUTCOMES.join(", ")}`, "VISUAL_INVALID");
+  if (a4 === "mounted-fallback" && (typeof probeError !== "string" || probeError.length === 0)) {
+    fail("mounted-fallback sourcing records the probe's error", "VISUAL_INVALID");
+  }
+  if (a4 === "story-routes" && probeError !== null) fail("story-routes sourcing has no probe error", "VISUAL_INVALID");
+  const cases = [];
+  const kind = a4 === "story-routes" ? "story" : "mounted";
+  for (const variation of VISUAL_PAGE_VARIATIONS) {
+    const entry = manifest.page_entries.find((candidate) => candidate.variation_id === variation);
+    if (!entry) fail(`the compiled page manifest has no ${variation}`, "VISUAL_INVALID");
+    for (const width of VISUAL_WIDTHS) {
+      for (const theme of VISUAL_THEMES) {
+        cases.push({
+          key: visualCaseKey("page", variation, width, theme),
+          kind,
+          tier: "page",
+          variation_id: variation,
+          state: variation === "review_cancel_now" ? "review-open" : "settled",
+          route: entry.direct_path,
+          target: ".psb-sandbox",
+          width,
+          theme,
+          depends_on: [...entry.depends_on],
+          expected: {
+            scope: "target",
+            identity: { texts: [entry.expected.customer_name, entry.expected.processor_id], subscription_id: entry.expected.subscription_id },
+            amount: storyAmount(variation),
+            status: storyStatus(entry, variation),
+            actions: PAGE_ACTIONS[variation](entry.expected.processor_id),
+          },
+        });
+      }
+    }
+  }
+  for (const variation of VISUAL_COLLECTION_VARIATIONS) {
+    const entry = manifest.collection_variations.find((candidate) => candidate.variation_id === variation);
+    if (!entry) fail(`the compiled collection manifest has no ${variation}`, "VISUAL_INVALID");
+    for (const width of VISUAL_WIDTHS) {
+      for (const theme of VISUAL_THEMES) {
+        cases.push({
+          key: visualCaseKey("collection", variation, width, theme),
+          kind,
+          tier: "collection",
+          variation_id: variation,
+          state: "settled",
+          route: entry.iframe_path,
+          target: ".psb-sandbox",
+          width,
+          theme,
+          depends_on: [...entry.depends_on],
+          expected: {
+            scope: "target",
+            identity: { texts: [entry.expected.customer_name, entry.expected.processor_id], subscription_id: entry.expected.subscription_id },
+            amount: storyAmount(variation),
+            status: storyStatus(entry, variation),
+            actions: COLLECTION_ACTIONS[variation].map((item) => ({ ...item })),
+          },
+        });
+      }
+    }
+  }
+  for (const state of VISUAL_MOUNTED_STATES) {
+    const review = state === "review-open";
+    for (const width of VISUAL_WIDTHS) {
+      for (const theme of VISUAL_THEMES) {
+        cases.push({
+          key: visualCaseKey("mounted", state, width, theme),
+          kind: "mounted",
+          tier: "mounted",
+          variation_id: state,
+          state: review ? "review-open" : "focus-visible",
+          route: MOUNTED_FIXTURE.route_template,
+          // Element targets keep the capture free of the seed-time period dates the mounted detail page
+          // renders; a mask is not allowed for these cases (D-19), so the volatile text is not captured.
+          target: review ? MOUNTED_FIXTURE.review_target : MOUNTED_FIXTURE.disclosure_target,
+          width,
+          theme,
+          depends_on: [],
+          expected: {
+            scope: review ? "target" : "main",
+            identity: { texts: [MOUNTED_FIXTURE.customer_name, MOUNTED_FIXTURE.processor_id], subscription_id: MOUNTED_FIXTURE.subscription_id },
+            amount: { text: review ? "Unavailable; no estimate is shown." : "Charge amount unavailable" },
+            status: { text: MOUNTED_FIXTURE.status_label, also: [] },
+            actions: review
+              ? [{ role: "button", name: "Confirm Cancel immediately" }, { role: "button", name: "Back to subscription" }]
+              : [{ selector: MOUNTED_FIXTURE.disclosure_target + " > summary", text: MOUNTED_FIXTURE.disclosure_title }],
+          },
+        });
+      }
+    }
+  }
+  cases.sort((left, right) => byCodeUnit(left.key, right.key));
+  const keys = cases.map((item) => item.key);
+  if (new Set(keys).size !== keys.length) fail("the visual case matrix produced duplicate keys", "VISUAL_INVALID");
+  return { cases, a4, probeError };
+}
+
+export const AMENDMENT_AMD_254_02 = Object.freeze({
+  id: "AMD-254-02",
+  decisions: ["D-16", "D-33"],
+  original: "D-16 lists 24 new PNGs: the page variations active, scheduled_cancellation, incomplete_evidence and review_cancel_now plus the collection variations multiple_rows and partial_cursor_error, each at 320 and 1280 in both themes.",
+  amended: "The matrix is 24 story captures plus 8 mounted captures (review-open and disclosure-open with the summary focused, each at 320 and 1280 in both themes); the case count is derived from cases.length of this file and never written as a literal.",
+  rationale: "D-33 requires the review-open and focus/disclosure captures to come from mounted routes and to be committed baselines, which the D-16 count of 24 did not include (RESEARCH Open Question 3).",
+  evidence: "254-RESEARCH.md Open Question 3; 254-CONTEXT.md D-16 and D-33; the 16 design capture keys of 254-DESIGN-REVIEW.json are all keys of this file.",
+  owner_ack: { date: "2026-10-28", status: "owner-accepted at plan time" },
+});
+
+export function buildVisualCasesFile({ manifest, designReview, a4 = "story-routes", probeError = null }) {
+  const { cases } = buildVisualCases({ manifest, a4, probeError });
+  const keys = new Set(cases.map((item) => item.key));
+  const captureKeys = Array.isArray(designReview?.captures) ? designReview.captures.map((item) => item.key) : [];
+  if (captureKeys.length === 0) fail("the design review record has no capture keys to bind", "VISUAL_INVALID");
+  const missing = captureKeys.filter((key) => !keys.has(key));
+  if (missing.length > 0) fail(`design capture keys absent from the visual cases: ${missing.join(", ")}`, "VISUAL_INVALID");
+  return {
+    schema_version: VISUAL_SCHEMA_VERSION,
+    human_judgment: false,
+    determinism: { timezone: "UTC", locale: "en-US", reduced_motion: "reduce", fixed_clock: FIXED_CLOCK, scenario_file: SCENARIO_FILE },
+    sourcing: { a4, probe_error: probeError },
+    amendments: [{ ...AMENDMENT_AMD_254_02, owner_ack: { ...AMENDMENT_AMD_254_02.owner_ack } }],
+    manifest_sha256: sha256(stableStringify({
+      source_digests: manifest.source_digests,
+      collection_variations: manifest.collection_variations,
+      page_entries: manifest.page_entries,
+    })),
+    mounted_fixture: { ...MOUNTED_FIXTURE },
+    design_capture_keys: [...captureKeys].sort(byCodeUnit),
+    cases,
+  };
+}
+
+export function readDesignReview(root = ROOT) {
+  return JSON.parse(fs.readFileSync(resolvePhaseEvidencePath(PHASE_SLUG, DESIGN_REVIEW_ARTIFACT, { root }), "utf8"));
+}
+
+export function readVisualCases(root = ROOT) {
+  const file = path.join(root, VISUAL_CASES_PATH);
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch (error) {
+    fail(`${VISUAL_CASES_PATH} is missing or invalid (${error.code || error.message}); run project --write`, "VISUAL_MISSING");
+  }
+}
+
+// Structural checks every consumer relies on, independent of regeneration.
+export function assertVisualCasesShape(file) {
+  if (!isObject(file) || file.schema_version !== VISUAL_SCHEMA_VERSION || file.human_judgment !== false) fail("the visual cases file has an unsupported schema", "VISUAL_INVALID");
+  if (!isObject(file.sourcing) || !A4_OUTCOMES.includes(file.sourcing.a4)) fail("the visual cases file lacks sourcing.a4", "VISUAL_INVALID");
+  if (file.sourcing.a4 === "mounted-fallback") {
+    if (!file.sourcing.probe_error) fail("mounted-fallback sourcing must record the probe error", "VISUAL_INVALID");
+    if (!file.cases.every((item) => item.kind === "mounted")) fail("mounted-fallback sourcing requires every case to be kind mounted", "VISUAL_INVALID");
+  } else if (file.cases.some((item) => item.kind === "story") === false) {
+    fail("story-routes sourcing requires story cases", "VISUAL_INVALID");
+  }
+  const amendment = (file.amendments ?? []).find((item) => item.id === "AMD-254-02");
+  if (!amendment || amendment.owner_ack?.date !== "2026-10-28" || !/owner-accepted/.test(amendment.owner_ack?.status ?? "")) fail("AMD-254-02 with its owner_ack is required", "VISUAL_INVALID");
+  const keys = file.cases.map((item) => item.key);
+  if (new Set(keys).size !== keys.length || keys.length === 0) fail("the visual cases have duplicate or no keys", "VISUAL_INVALID");
+  for (const item of file.cases) {
+    if (item.kind === "mounted" && file.sourcing.a4 === "story-routes" && item.tier !== "mounted") fail(`case ${item.key} is mounted but not a D-33 mounted case`, "VISUAL_INVALID");
+    if (!/^phase254-[a-z]+-[a-z_-]+-w\d+-(light|dark)$/.test(item.key)) fail(`case key ${item.key} does not follow the key scheme`, "VISUAL_INVALID");
+    if (!isObject(item.expected) || !["target", "main"].includes(item.expected.scope) || !Array.isArray(item.expected.identity?.texts) || item.expected.identity.texts.length === 0 || !item.expected.amount?.text || !item.expected.status?.text || !Array.isArray(item.expected.actions) || item.expected.actions.length === 0) {
+      fail(`case ${item.key} lacks identity, amount, status or actions expectations`, "VISUAL_INVALID");
+    }
+  }
+  const known = new Set(keys);
+  const absent = (file.design_capture_keys ?? []).filter((key) => !known.has(key));
+  if (absent.length > 0 || !Array.isArray(file.design_capture_keys) || file.design_capture_keys.length === 0) fail(`design capture keys absent from the cases: ${absent.join(", ")}`, "VISUAL_INVALID");
+  return true;
+}
+
+export function assertVisualCasesCurrent(committed, regenerated) {
+  if (stableStringify(committed) !== stableStringify(regenerated)) {
+    fail(`${VISUAL_CASES_PATH} is stale; regenerate it with node scripts/ci/phase254_selection.mjs project --write`, "VISUAL_STALE");
+  }
+}
+
+export function serializeVisualCases(file) {
+  return `${JSON.stringify(file, null, 2)}\n`;
+}
+
 // --- path classification ------------------------------------------------------------------------
 
 function rootMatches(repoPath, rule) {
@@ -565,7 +818,7 @@ export function renderSelectionSummary(report) {
 // --- CLI -----------------------------------------------------------------------------------------------
 
 const BOOLEAN_OPTIONS = new Set(["write", "check", "summary", "self-test"]);
-const VALUE_OPTIONS = new Set(["event", "base", "head", "out", "changed-paths-file", "run-id", "workflow", "job"]);
+const VALUE_OPTIONS = new Set(["event", "base", "head", "out", "changed-paths-file", "run-id", "workflow", "job", "a4", "probe-error"]);
 
 function parseArgs(argv) {
   const positional = [];
@@ -587,19 +840,45 @@ function parseArgs(argv) {
   return { positional, flags, values };
 }
 
-function runProject(flags) {
+function committedSourcing() {
+  try {
+    const { sourcing } = JSON.parse(fs.readFileSync(path.join(ROOT, VISUAL_CASES_PATH), "utf8"));
+    if (sourcing && A4_OUTCOMES.includes(sourcing.a4)) return { a4: sourcing.a4, probeError: sourcing.probe_error ?? null };
+  } catch {
+    // first write: no committed sourcing yet
+  }
+  return { a4: "story-routes", probeError: null };
+}
+
+function runProject(flags, values = {}) {
   if (flags.has("write") === flags.has("check")) fail("project needs exactly one of --write or --check", "USAGE");
-  const regenerated = regenerateProjection(ROOT);
+  if ((values.a4 !== undefined || values["probe-error"] !== undefined) && !flags.has("write")) fail("--a4 and --probe-error are only valid with project --write", "USAGE");
+  const manifest = generateCompositionsManifest(ROOT);
+  const regenerated = buildProjection({
+    manifest,
+    phase252Manifest: JSON.parse(fs.readFileSync(path.join(ROOT, PHASE252_MANIFEST_PATH), "utf8")),
+    ledger: readCurationLedger(ROOT),
+  });
+  const designReview = readDesignReview(ROOT);
+  const recorded = committedSourcing();
+  const sourcing = flags.has("write") && values.a4 !== undefined
+    ? { a4: values.a4, probeError: values.a4 === "mounted-fallback" ? (values["probe-error"] ?? null) : null }
+    : recorded;
+  const visual = buildVisualCasesFile({ manifest, designReview, a4: sourcing.a4, probeError: sourcing.probeError });
   if (flags.has("write")) {
     fs.writeFileSync(path.join(ROOT, PROJECTION_PATH), serializeProjection(regenerated));
-    process.stdout.write(`Phase 254 selection: wrote ${PROJECTION_PATH} (${regenerated.cases.length} cases, ${regenerated.always_run.length} always-run Phase 252 cases, ${regenerated.sentinels.length} sentinels)\n`);
+    fs.writeFileSync(path.join(ROOT, VISUAL_CASES_PATH), serializeVisualCases(visual));
+    process.stdout.write(`Phase 254 selection: wrote ${PROJECTION_PATH} (${regenerated.cases.length} cases, ${regenerated.always_run.length} always-run Phase 252 cases, ${regenerated.sentinels.length} sentinels) and ${VISUAL_CASES_PATH} (${visual.cases.length} visual cases, sourcing.a4 ${visual.sourcing.a4})\n`);
     return;
   }
   const { projection } = readProjection(ROOT);
   assertProjectionCurrent(projection, regenerated);
   const defined = regenerated.expected_case_count;
   if (projection.cases.length !== defined) fail("the committed projection's case count differs from the shared cell universe", "PROJECTION_STALE");
-  process.stdout.write(`Phase 254 selection: project --check PASS (${projection.cases.length} cases equal the shared cell universe; ${projection.always_run.length} Phase 252 cases; ${projection.sentinels.length} sentinels; ${PROJECTION_PATH} is current)\n`);
+  const committedVisual = readVisualCases(ROOT);
+  assertVisualCasesShape(committedVisual);
+  assertVisualCasesCurrent(committedVisual, visual);
+  process.stdout.write(`Phase 254 selection: project --check PASS (${projection.cases.length} cases equal the shared cell universe; ${projection.always_run.length} Phase 252 cases; ${projection.sentinels.length} sentinels; ${PROJECTION_PATH} is current; ${committedVisual.cases.length} visual cases, sourcing.a4 ${committedVisual.sourcing.a4}, all ${committedVisual.design_capture_keys.length} design capture keys present; ${VISUAL_CASES_PATH} is current)\n`);
 }
 
 function runSelect(flags, values) {
@@ -867,9 +1146,9 @@ function main(argv) {
     return;
   }
   const [verb] = positional;
-  if (verb === "project") return runProject(flags);
+  if (verb === "project") return runProject(flags, values);
   if (verb === "select") return runSelect(flags, values);
-  fail("usage: phase254_selection.mjs project --write|--check | select --event E --base B --head H --out PATH [--summary] [--changed-paths-file F] | --self-test", "USAGE");
+  fail("usage: phase254_selection.mjs project --write|--check [--a4 story-routes|mounted-fallback --probe-error MSG] | select --event E --base B --head H --out PATH [--summary] [--changed-paths-file F] | --self-test", "USAGE");
 }
 
 let invokedAsEntrypoint = false;

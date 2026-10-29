@@ -11,6 +11,7 @@ const outputDir = process.env.PLAYWRIGHT_OUTPUT_DIR || "test-results";
 // import time without it, which would otherwise crash the whole default listing).
 const LAUNCHER_OWNED_AND_VISUAL_SPECS = [
   /admin-visual-regression-phase211\.spec\.js/,
+  /subscription-visual-phase254\.spec\.js/,
   /subscription-stories-phase252\.spec\.js/,
   /subscription-compositions-phase253\.spec\.js/,
   /subscription-compositions-reconcile-phase254\.spec\.js/,
@@ -61,11 +62,12 @@ module.exports = defineConfig({
       use: { ...devices["Pixel 5"] }
     },
     {
-      // Deterministic pixel-diff gate (Phase 211). Isolated in its own project so
+      // Deterministic pixel-diff gate (Phase 211, extended by the Phase 254 subscription visual
+      // cases: one owner, one snapshot folder, one mint job and one set guard). Isolated in its own project so
       // it is excluded from the default `playwright test` run and only invoked via
       // `npm run e2e:visual-regression` (baseline-guarded in CI) and the CI mint job.
       name: "visual-desktop",
-      testMatch: /admin-visual-regression-phase211\.spec\.js/,
+      testMatch: /(?:admin-visual-regression-phase211|subscription-visual-phase254)\.spec\.js/,
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } }
     }
   ],

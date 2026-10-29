@@ -8,12 +8,20 @@ on:
       - "accrue/**"
       - "accrue_admin/**"
       - ".github/workflows/accrue_admin_browser.yml"
+      - "storybook/**"
+      - "dev_support/ui_scenarios/**"
+      - "brandbook/tokens/**"
+      - "scripts/ci/phase254_*"
   push:
     branches: [main]
     paths:
       - "accrue/**"
       - "accrue_admin/**"
       - ".github/workflows/accrue_admin_browser.yml"
+      - "storybook/**"
+      - "dev_support/ui_scenarios/**"
+      - "brandbook/tokens/**"
+      - "scripts/ci/phase254_*"
   workflow_dispatch: {}
 
 # Quick task 261025-vdn (item 2): pull_request runs for the same ref cancel

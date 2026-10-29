@@ -1,0 +1,1500 @@
+{
+  "schema_version": 1,
+  "human_judgment": false,
+  "determinism": {
+    "timezone": "UTC",
+    "locale": "en-US",
+    "reduced_motion": "reduce",
+    "fixed_clock": "2026-10-25T12:00:00Z",
+    "scenario_file": "dev_support/ui_scenarios/cadence_subscriptions.exs"
+  },
+  "sourcing": {
+    "a4": "story-routes",
+    "probe_error": null
+  },
+  "amendments": [
+    {
+      "id": "AMD-254-02",
+      "decisions": [
+        "D-16",
+        "D-33"
+      ],
+      "original": "D-16 lists 24 new PNGs: the page variations active, scheduled_cancellation, incomplete_evidence and review_cancel_now plus the collection variations multiple_rows and partial_cursor_error, each at 320 and 1280 in both themes.",
+      "amended": "The matrix is 24 story captures plus 8 mounted captures (review-open and disclosure-open with the summary focused, each at 320 and 1280 in both themes); the case count is derived from cases.length of this file and never written as a literal.",
+      "rationale": "D-33 requires the review-open and focus/disclosure captures to come from mounted routes and to be committed baselines, which the D-16 count of 24 did not include (RESEARCH Open Question 3).",
+      "evidence": "254-RESEARCH.md Open Question 3; 254-CONTEXT.md D-16 and D-33; the 16 design capture keys of 254-DESIGN-REVIEW.json are all keys of this file.",
+      "owner_ack": {
+        "date": "2026-10-28",
+        "status": "owner-accepted at plan time"
+      }
+    }
+  ],
+  "manifest_sha256": "6fbbe908fc8600906701175946e1405317f224f1d9609126d2f21092d0a02831",
+  "mounted_fixture": {
+    "seed": "phase191-matrix",
+    "subscription_id": "19100000-0000-4000-8000-000000000002",
+    "processor_id": "sub_e2e_phase191_active",
+    "customer_name": "E2E Phase 191 株式会社 Café Boundary Customer",
+    "status_label": "Active",
+    "route_template": "/billing/subscriptions/:id",
+    "review_target": "#subscription-action-drawer aside[role=\"dialog\"]",
+    "disclosure_target": "[data-ax-drill-section=\"dunning-recovery\"]",
+    "disclosure_title": "Dunning & recovery"
+  },
+  "design_capture_keys": [
+    "phase254-collection-multiple_rows-w1280-dark",
+    "phase254-collection-multiple_rows-w1280-light",
+    "phase254-collection-multiple_rows-w320-dark",
+    "phase254-collection-multiple_rows-w320-light",
+    "phase254-mounted-disclosure-focus-w1280-dark",
+    "phase254-mounted-disclosure-focus-w1280-light",
+    "phase254-mounted-disclosure-focus-w320-dark",
+    "phase254-mounted-disclosure-focus-w320-light",
+    "phase254-mounted-review-open-w1280-dark",
+    "phase254-mounted-review-open-w1280-light",
+    "phase254-mounted-review-open-w320-dark",
+    "phase254-mounted-review-open-w320-light",
+    "phase254-page-active-w1280-dark",
+    "phase254-page-active-w1280-light",
+    "phase254-page-active-w320-dark",
+    "phase254-page-active-w320-light"
+  ],
+  "cases": [
+    {
+      "key": "phase254-collection-multiple_rows-w1280-dark",
+      "kind": "story",
+      "tier": "collection",
+      "variation_id": "multiple_rows",
+      "state": "settled",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Northstar Research",
+            "sub_cadence_launch"
+          ],
+          "subscription_id": "c134aee0-b71a-44f5-a030-f6146577dba5"
+        },
+        "amount": {
+          "text": "Amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "textbox",
+            "name": "Search subscriptions"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-collection-multiple_rows-w1280-light",
+      "kind": "story",
+      "tier": "collection",
+      "variation_id": "multiple_rows",
+      "state": "settled",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Northstar Research",
+            "sub_cadence_launch"
+          ],
+          "subscription_id": "c134aee0-b71a-44f5-a030-f6146577dba5"
+        },
+        "amount": {
+          "text": "Amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "textbox",
+            "name": "Search subscriptions"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-collection-multiple_rows-w320-dark",
+      "kind": "story",
+      "tier": "collection",
+      "variation_id": "multiple_rows",
+      "state": "settled",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Northstar Research",
+            "sub_cadence_launch"
+          ],
+          "subscription_id": "c134aee0-b71a-44f5-a030-f6146577dba5"
+        },
+        "amount": {
+          "text": "Amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "textbox",
+            "name": "Search subscriptions"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-collection-multiple_rows-w320-light",
+      "kind": "story",
+      "tier": "collection",
+      "variation_id": "multiple_rows",
+      "state": "settled",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Northstar Research",
+            "sub_cadence_launch"
+          ],
+          "subscription_id": "c134aee0-b71a-44f5-a030-f6146577dba5"
+        },
+        "amount": {
+          "text": "Amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "textbox",
+            "name": "Search subscriptions"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-collection-partial_cursor_error-w1280-dark",
+      "kind": "story",
+      "tier": "collection",
+      "variation_id": "partial_cursor_error",
+      "state": "settled",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=partial_cursor_error",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Northstar Research",
+            "sub_cadence_launch"
+          ],
+          "subscription_id": "c134aee0-b71a-44f5-a030-f6146577dba5"
+        },
+        "amount": {
+          "text": "Amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Retry loading remaining rows"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-collection-partial_cursor_error-w1280-light",
+      "kind": "story",
+      "tier": "collection",
+      "variation_id": "partial_cursor_error",
+      "state": "settled",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=partial_cursor_error",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Northstar Research",
+            "sub_cadence_launch"
+          ],
+          "subscription_id": "c134aee0-b71a-44f5-a030-f6146577dba5"
+        },
+        "amount": {
+          "text": "Amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Retry loading remaining rows"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-collection-partial_cursor_error-w320-dark",
+      "kind": "story",
+      "tier": "collection",
+      "variation_id": "partial_cursor_error",
+      "state": "settled",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=partial_cursor_error",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Northstar Research",
+            "sub_cadence_launch"
+          ],
+          "subscription_id": "c134aee0-b71a-44f5-a030-f6146577dba5"
+        },
+        "amount": {
+          "text": "Amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Retry loading remaining rows"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-collection-partial_cursor_error-w320-light",
+      "kind": "story",
+      "tier": "collection",
+      "variation_id": "partial_cursor_error",
+      "state": "settled",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=partial_cursor_error",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_collection.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/groups/subscriptions_collection.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Northstar Research",
+            "sub_cadence_launch"
+          ],
+          "subscription_id": "c134aee0-b71a-44f5-a030-f6146577dba5"
+        },
+        "amount": {
+          "text": "Amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Retry loading remaining rows"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-mounted-disclosure-focus-w1280-dark",
+      "kind": "mounted",
+      "tier": "mounted",
+      "variation_id": "disclosure-focus",
+      "state": "focus-visible",
+      "route": "/billing/subscriptions/:id",
+      "target": "[data-ax-drill-section=\"dunning-recovery\"]",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [],
+      "expected": {
+        "scope": "main",
+        "identity": {
+          "texts": [
+            "E2E Phase 191 株式会社 Café Boundary Customer",
+            "sub_e2e_phase191_active"
+          ],
+          "subscription_id": "19100000-0000-4000-8000-000000000002"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "selector": "[data-ax-drill-section=\"dunning-recovery\"] > summary",
+            "text": "Dunning & recovery"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-mounted-disclosure-focus-w1280-light",
+      "kind": "mounted",
+      "tier": "mounted",
+      "variation_id": "disclosure-focus",
+      "state": "focus-visible",
+      "route": "/billing/subscriptions/:id",
+      "target": "[data-ax-drill-section=\"dunning-recovery\"]",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [],
+      "expected": {
+        "scope": "main",
+        "identity": {
+          "texts": [
+            "E2E Phase 191 株式会社 Café Boundary Customer",
+            "sub_e2e_phase191_active"
+          ],
+          "subscription_id": "19100000-0000-4000-8000-000000000002"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "selector": "[data-ax-drill-section=\"dunning-recovery\"] > summary",
+            "text": "Dunning & recovery"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-mounted-disclosure-focus-w320-dark",
+      "kind": "mounted",
+      "tier": "mounted",
+      "variation_id": "disclosure-focus",
+      "state": "focus-visible",
+      "route": "/billing/subscriptions/:id",
+      "target": "[data-ax-drill-section=\"dunning-recovery\"]",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [],
+      "expected": {
+        "scope": "main",
+        "identity": {
+          "texts": [
+            "E2E Phase 191 株式会社 Café Boundary Customer",
+            "sub_e2e_phase191_active"
+          ],
+          "subscription_id": "19100000-0000-4000-8000-000000000002"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "selector": "[data-ax-drill-section=\"dunning-recovery\"] > summary",
+            "text": "Dunning & recovery"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-mounted-disclosure-focus-w320-light",
+      "kind": "mounted",
+      "tier": "mounted",
+      "variation_id": "disclosure-focus",
+      "state": "focus-visible",
+      "route": "/billing/subscriptions/:id",
+      "target": "[data-ax-drill-section=\"dunning-recovery\"]",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [],
+      "expected": {
+        "scope": "main",
+        "identity": {
+          "texts": [
+            "E2E Phase 191 株式会社 Café Boundary Customer",
+            "sub_e2e_phase191_active"
+          ],
+          "subscription_id": "19100000-0000-4000-8000-000000000002"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "selector": "[data-ax-drill-section=\"dunning-recovery\"] > summary",
+            "text": "Dunning & recovery"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-mounted-review-open-w1280-dark",
+      "kind": "mounted",
+      "tier": "mounted",
+      "variation_id": "review-open",
+      "state": "review-open",
+      "route": "/billing/subscriptions/:id",
+      "target": "#subscription-action-drawer aside[role=\"dialog\"]",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "E2E Phase 191 株式会社 Café Boundary Customer",
+            "sub_e2e_phase191_active"
+          ],
+          "subscription_id": "19100000-0000-4000-8000-000000000002"
+        },
+        "amount": {
+          "text": "Unavailable; no estimate is shown."
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Confirm Cancel immediately"
+          },
+          {
+            "role": "button",
+            "name": "Back to subscription"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-mounted-review-open-w1280-light",
+      "kind": "mounted",
+      "tier": "mounted",
+      "variation_id": "review-open",
+      "state": "review-open",
+      "route": "/billing/subscriptions/:id",
+      "target": "#subscription-action-drawer aside[role=\"dialog\"]",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "E2E Phase 191 株式会社 Café Boundary Customer",
+            "sub_e2e_phase191_active"
+          ],
+          "subscription_id": "19100000-0000-4000-8000-000000000002"
+        },
+        "amount": {
+          "text": "Unavailable; no estimate is shown."
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Confirm Cancel immediately"
+          },
+          {
+            "role": "button",
+            "name": "Back to subscription"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-mounted-review-open-w320-dark",
+      "kind": "mounted",
+      "tier": "mounted",
+      "variation_id": "review-open",
+      "state": "review-open",
+      "route": "/billing/subscriptions/:id",
+      "target": "#subscription-action-drawer aside[role=\"dialog\"]",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "E2E Phase 191 株式会社 Café Boundary Customer",
+            "sub_e2e_phase191_active"
+          ],
+          "subscription_id": "19100000-0000-4000-8000-000000000002"
+        },
+        "amount": {
+          "text": "Unavailable; no estimate is shown."
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Confirm Cancel immediately"
+          },
+          {
+            "role": "button",
+            "name": "Back to subscription"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-mounted-review-open-w320-light",
+      "kind": "mounted",
+      "tier": "mounted",
+      "variation_id": "review-open",
+      "state": "review-open",
+      "route": "/billing/subscriptions/:id",
+      "target": "#subscription-action-drawer aside[role=\"dialog\"]",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "E2E Phase 191 株式会社 Café Boundary Customer",
+            "sub_e2e_phase191_active"
+          ],
+          "subscription_id": "19100000-0000-4000-8000-000000000002"
+        },
+        "amount": {
+          "text": "Unavailable; no estimate is shown."
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Confirm Cancel immediately"
+          },
+          {
+            "role": "button",
+            "name": "Back to subscription"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-active-w1280-dark",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "active",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=active",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Cancel renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-active-w1280-light",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "active",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=active",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Cancel renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-active-w320-dark",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "active",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=active",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Cancel renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-active-w320-light",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "active",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=active",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Cancel renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-incomplete_evidence-w1280-dark",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "incomplete_evidence",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=incomplete_evidence",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": [
+            "Renewal date unavailable",
+            "Price unavailable"
+          ]
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Cancel renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-incomplete_evidence-w1280-light",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "incomplete_evidence",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=incomplete_evidence",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": [
+            "Renewal date unavailable",
+            "Price unavailable"
+          ]
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Cancel renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-incomplete_evidence-w320-dark",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "incomplete_evidence",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=incomplete_evidence",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": [
+            "Renewal date unavailable",
+            "Price unavailable"
+          ]
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Cancel renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-incomplete_evidence-w320-light",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "incomplete_evidence",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=incomplete_evidence",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": [
+            "Renewal date unavailable",
+            "Price unavailable"
+          ]
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Cancel renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-review_cancel_now-w1280-dark",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "review_cancel_now",
+      "state": "review-open",
+      "route": "/billing/dev/storybook/pages/subscription?tab=review_cancel_now",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Unavailable; no estimate is shown."
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Confirm Cancel immediately"
+          },
+          {
+            "role": "button",
+            "name": "Back to subscription"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-review_cancel_now-w1280-light",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "review_cancel_now",
+      "state": "review-open",
+      "route": "/billing/dev/storybook/pages/subscription?tab=review_cancel_now",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Unavailable; no estimate is shown."
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Confirm Cancel immediately"
+          },
+          {
+            "role": "button",
+            "name": "Back to subscription"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-review_cancel_now-w320-dark",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "review_cancel_now",
+      "state": "review-open",
+      "route": "/billing/dev/storybook/pages/subscription?tab=review_cancel_now",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Unavailable; no estimate is shown."
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Confirm Cancel immediately"
+          },
+          {
+            "role": "button",
+            "name": "Back to subscription"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-review_cancel_now-w320-light",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "review_cancel_now",
+      "state": "review-open",
+      "route": "/billing/dev/storybook/pages/subscription?tab=review_cancel_now",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Unavailable; no estimate is shown."
+        },
+        "status": {
+          "text": "Active",
+          "also": []
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Confirm Cancel immediately"
+          },
+          {
+            "role": "button",
+            "name": "Back to subscription"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-scheduled_cancellation-w1280-dark",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "scheduled_cancellation",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=scheduled_cancellation",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": [
+            "Scheduled for"
+          ]
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Change renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-scheduled_cancellation-w1280-light",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "scheduled_cancellation",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=scheduled_cancellation",
+      "target": ".psb-sandbox",
+      "width": 1280,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": [
+            "Scheduled for"
+          ]
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Change renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-scheduled_cancellation-w320-dark",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "scheduled_cancellation",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=scheduled_cancellation",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "dark",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": [
+            "Scheduled for"
+          ]
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Change renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    },
+    {
+      "key": "phase254-page-scheduled_cancellation-w320-light",
+      "kind": "story",
+      "tier": "page",
+      "variation_id": "scheduled_cancellation",
+      "state": "settled",
+      "route": "/billing/dev/storybook/pages/subscription?tab=scheduled_cancellation",
+      "target": ".psb-sandbox",
+      "width": 320,
+      "theme": "light",
+      "depends_on": [
+        "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+        "accrue_admin/lib/accrue_admin/router.ex",
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+        "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "storybook/pages/subscription.story.exs"
+      ],
+      "expected": {
+        "scope": "target",
+        "identity": {
+          "texts": [
+            "Acme Research",
+            "sub_cadence_active"
+          ],
+          "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457"
+        },
+        "amount": {
+          "text": "Charge amount unavailable"
+        },
+        "status": {
+          "text": "Active",
+          "also": [
+            "Scheduled for"
+          ]
+        },
+        "actions": [
+          {
+            "role": "button",
+            "name": "Change plan for subscription sub_cadence_active"
+          },
+          {
+            "role": "button",
+            "name": "Change renewal for subscription sub_cadence_active"
+          }
+        ]
+      }
+    }
+  ]
+}

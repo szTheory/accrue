@@ -546,3 +546,92 @@ test("the selector and the Playwright lane apply one shared set of report invari
   assert.throws(() => shared.assertSelectionInvariants(forged), (error) => error.code === "SELECTION_INVARIANT" && /Phase 254 selection:/.test(error.message));
   assert.throws(() => selection.assertSelectionInvariants(forged), (error) => error.code === "SELECTION_INVARIANT");
 });
+
+// --- Phase 254 CIQ-03: the visual case matrix (D-16, D-33, AMD-254-02) -------------------------------
+
+// The compiled manifest comes from mix (the same generator project --check uses), cached once per run,
+// so the test never depends on a gitignored local file.
+let cachedCompiledManifest = null;
+function compiledManifestFixture() {
+  cachedCompiledManifest ??= selection.generateCompositionsManifest(ROOT);
+  return cachedCompiledManifest;
+}
+
+function visualFile(overrides = {}) {
+  return selection.buildVisualCasesFile({
+    manifest: compiledManifestFixture(),
+    designReview: selection.readDesignReview(ROOT),
+    ...overrides,
+  });
+}
+
+test("the visual matrix is 24 story keys plus 8 mounted keys, derived from cases.length, with AMD-254-02 owner-accepted", () => {
+  const file = visualFile();
+  assert.equal(selection.assertVisualCasesShape(file), true);
+  assert.equal(file.cases.length, 32);
+  assert.equal(file.cases.filter((item) => item.kind === "story").length, 24);
+  assert.equal(file.cases.filter((item) => item.kind === "mounted").length, 8);
+  const amendment = file.amendments.find((item) => item.id === "AMD-254-02");
+  assert.deepEqual(amendment.decisions, ["D-16", "D-33"]);
+  assert.equal(amendment.owner_ack.date, "2026-10-28");
+  assert.match(amendment.owner_ack.status, /owner-accepted/);
+  assert.doesNotMatch(JSON.stringify(amendment.amended), /\b32\b/, "the amended text never writes the derived count as a literal");
+  assert.equal(file.sourcing.a4, "story-routes");
+  assert.equal(file.sourcing.probe_error, null);
+});
+
+test("every key of the design review's 16 captures is a visual case key, and a record key with no case is rejected", () => {
+  const designReview = selection.readDesignReview(ROOT);
+  assert.equal(designReview.captures.length, 16);
+  const file = visualFile();
+  const keys = new Set(file.cases.map((item) => item.key));
+  for (const capture of designReview.captures) assert.ok(keys.has(capture.key), capture.key);
+  const forged = structuredClone(designReview);
+  forged.captures.push({ ...forged.captures[0], key: "phase254-page-unknown-w320-light" });
+  assert.throws(() => selection.buildVisualCasesFile({ manifest: compiledManifestFixture(), designReview: forged }), /design capture keys absent from the visual cases: phase254-page-unknown-w320-light/);
+});
+
+test("the committed visual cases file equals the regenerated one and a drifted expectation is stale", () => {
+  const committed = selection.readVisualCases(ROOT);
+  assert.doesNotThrow(() => selection.assertVisualCasesCurrent(committed, visualFile()));
+  const drifted = structuredClone(committed);
+  drifted.cases[0].expected.identity.texts[0] = "Another Customer";
+  assert.throws(() => selection.assertVisualCasesCurrent(drifted, visualFile()), /is stale/);
+});
+
+test("mounted-fallback sourcing needs the probe error and turns every case into kind mounted", () => {
+  assert.throws(() => visualFile({ a4: "mounted-fallback" }), /records the probe's error/);
+  assert.throws(() => visualFile({ a4: "story-routes", probeError: "boom" }), /has no probe error/);
+  assert.throws(() => visualFile({ a4: "nonsense" }), /sourcing\.a4 must be one of/);
+  const fallback = visualFile({ a4: "mounted-fallback", probeError: "story route did not render" });
+  assert.equal(fallback.cases.length, 32);
+  assert.ok(fallback.cases.every((item) => item.kind === "mounted"));
+  assert.equal(selection.assertVisualCasesShape(fallback), true);
+  const mixed = structuredClone(fallback);
+  mixed.cases[0].kind = "story";
+  assert.throws(() => selection.assertVisualCasesShape(mixed), /requires every case to be kind mounted/);
+});
+
+test("every case states identity, amount, status and actions, and no case is expected to show an invented amount", () => {
+  const file = visualFile();
+  for (const item of file.cases) {
+    assert.ok(item.expected.identity.texts.length >= 2, item.key);
+    assert.match(item.expected.amount.text, /nav?ailable|Unavailable/i, `${item.key}: money is stated as unavailable, never invented`);
+    assert.ok(item.expected.status.text, item.key);
+    assert.ok(item.expected.actions.length >= 1, item.key);
+    assert.doesNotMatch(JSON.stringify(item.expected), /\$\s?\d/, item.key);
+  }
+  const broken = structuredClone(file);
+  delete broken.cases[3].expected.actions;
+  assert.throws(() => selection.assertVisualCasesShape(broken), /lacks identity, amount, status or actions expectations/);
+});
+
+test("project --check rejects a key scheme violation and a missing amendment", () => {
+  const file = visualFile();
+  const badKey = structuredClone(file);
+  badKey.cases[0].key = "page-active-320";
+  assert.throws(() => selection.assertVisualCasesShape(badKey), /does not follow the key scheme/);
+  const noAmendment = structuredClone(file);
+  noAmendment.amendments = [];
+  assert.throws(() => selection.assertVisualCasesShape(noAmendment), /AMD-254-02 with its owner_ack is required/);
+});

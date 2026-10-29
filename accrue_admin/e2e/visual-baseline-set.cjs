@@ -16,6 +16,14 @@ const EXPECTED_BASELINES = Object.freeze([
   "invoice-detail-dark.png"
 ]);
 
+// Playwright derives the snapshot file name from the toHaveScreenshot name with its own
+// sanitizeForFilePath: every run of control characters, punctuation and symbols (underscore
+// included) becomes one hyphen. A case key such as phase254-page-scheduled_cancellation-w320-light
+// is therefore stored as phase254-page-scheduled-cancellation-w320-light.png.
+function snapshotFileName(key) {
+  return `${key.replace(/[\x00-\x2C\x2E-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]+/g, "-")}.png`;
+}
+
 function checkBaselineSet(directory) {
   const missing = EXPECTED_BASELINES.filter((name) => {
     try {
@@ -45,4 +53,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { EXPECTED_BASELINES, checkBaselineSet };
+module.exports = { EXPECTED_BASELINES, checkBaselineSet, snapshotFileName };

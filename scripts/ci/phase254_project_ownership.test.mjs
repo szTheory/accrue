@@ -327,6 +327,7 @@ test("every real e2e spec is owned by exactly one owner group across both Playwr
   assert.equal(byName("phase252-review.spec.js"), "lab");
   assert.equal(byName("subscription-stories-phase252.spec.js"), "lab");
   assert.equal(byName("admin-visual-regression-phase211.spec.js"), "visual");
+  assert.equal(byName("subscription-visual-phase254.spec.js"), "visual", "CIQ-03 extends the one visual owner (D-15), never a second baseline owner");
   assert.equal(byName("admin-a11y.spec.js"), "default-browser");
 });
 
