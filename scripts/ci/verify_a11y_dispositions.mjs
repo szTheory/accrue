@@ -65,6 +65,13 @@ export function isBroadTarget(target) {
   return /^[a-z][a-z0-9-]*$/i.test(text);
 }
 
+// A journey cell is a checkpoint of the mounted keyboard journey in admin-interactions.spec.js.
+// That spec reads the register itself and decides the checkpoint, so these cells never appear in
+// a composition results bundle and are exempt from the "cell ran" rules below.
+export function isJourneyCell(cellId) {
+  return typeof cellId === "string" && cellId.startsWith("journey::");
+}
+
 function validDate(text) {
   return typeof text === "string" && /^\d{4}-\d{2}-\d{2}$/.test(text) && !Number.isNaN(Date.parse(`${text}T00:00:00Z`));
 }
@@ -92,6 +99,9 @@ export function validateEntries(register, { today }) {
     }
     if (entry.cell_ids.some((id) => /[*?]/.test(id))) throw fail(`${label}: cell_ids must not use a wildcard`);
     if (new Set(entry.cell_ids).size !== entry.cell_ids.length) throw fail(`${label}: cell_ids repeats a cell`);
+    const journey = entry.cell_ids.filter(isJourneyCell);
+    if (journey.length && journey.length !== entry.cell_ids.length) throw fail(`${label}: a journey entry must not also name composition cells`);
+    if (journey.some((id) => !/^journey::D-29::[a-z-]+$/.test(id))) throw fail(`${label}: a journey cell id must look like journey::D-29::<checkpoint>`);
     if (isBroadTarget(entry.target)) throw fail(`${label}: target ${JSON.stringify(entry.target)} is empty or too broad; name the exact node`);
     if (!Number.isInteger(entry.expected_node_count) || entry.expected_node_count < 1) throw fail(`${label}: expected_node_count must be an integer of at least 1`);
     if (typeof entry.sc !== "string" || !/^(\d\.\d\.\d+|best-practice)$/.test(entry.sc)) throw fail(`${label}: sc must be a success criterion number or best-practice`);
@@ -141,6 +151,7 @@ export function validateRegister(register, observations, { today, cells, allowUn
   }
 
   for (const entry of register.entries) {
+    if (entry.cell_ids.every(isJourneyCell)) continue;
     const ranCells = entry.cell_ids.filter((cellId) => ran.has(cellId));
     if (ranCells.length === 0) {
       if (allowUnrun) continue;

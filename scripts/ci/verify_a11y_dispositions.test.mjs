@@ -518,3 +518,36 @@ test("results: the geometry cell must report all seven injected controls as dete
     );
   }
 });
+
+// The D-29 keyboard journey checkpoints: entries for them are decided by admin-interactions.spec.js.
+const journeyEntry = (overrides = {}) => entry({
+  id: "A11Y-254-29", rule_id: "probe-focus-restore", target: "journey:escape-restores-focus", sc: "2.4.3",
+  cell_ids: ["journey::D-29::escape-restores-focus"], ...overrides
+});
+
+test("a journey entry is exempt from the cell-ran and zero-node rules but is still validated", () => {
+  const summary = validateRegister(registerOf(journeyEntry()), [], { today: TODAY, cells: [ranCell()] });
+  assert.equal(summary.entries, 1);
+  assert.throws(() => validateRegister(registerOf(journeyEntry({ rationale: "" })), [], { today: TODAY, cells: [ranCell()] }), /entry/);
+  assert.throws(() => validateRegister(registerOf(journeyEntry({ review_by: "2026-10-01" })), [], { today: TODAY, cells: [ranCell()] }), /expired/);
+});
+
+test("a journey entry may not mix composition cells and must use a well formed checkpoint id", () => {
+  assert.throws(
+    () => validateRegister(registerOf(journeyEntry({ cell_ids: ["journey::D-29::escape-restores-focus", CELL] })), [observation()], { today: TODAY, cells: [ranCell()] }),
+    /must not also name composition cells/
+  );
+  assert.throws(
+    () => validateRegister(registerOf(journeyEntry({ cell_ids: ["journey::D-29::Escape Restores"] })), [], { today: TODAY, cells: [ranCell()] }),
+    /journey cell id must look like/
+  );
+});
+
+test("the committed register's journey entries name only the two focus-restore checkpoints", () => {
+  const journey = loadRegister(ROOT).entries.filter((item) => item.cell_ids.some((id) => id.startsWith("journey::")));
+  assert.deepEqual(journey.flatMap((item) => item.cell_ids).sort(), ["journey::D-29::back-restores-focus", "journey::D-29::escape-restores-focus"]);
+  for (const item of journey) {
+    assert.equal(item.rule_id, "probe-focus-restore");
+    assert.equal(item.exception_class, "routed-defect");
+  }
+});

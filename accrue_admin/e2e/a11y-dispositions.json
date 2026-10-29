@@ -986,6 +986,38 @@
       "rationale": "axe target-size (WCAG 2.5.8) reports an undersized link whose 24px spacing circle meets another target, in the table and constrained-content layouts of one_row. Fix at the component tier (target padding or spacing).",
       "follow_up_assertion_id": "254-12-undersized-link-target",
       "review_by": "2026-12-31"
+    },
+    {
+      "id": "A11Y-254-29",
+      "rule_id": "probe-focus-restore",
+      "result_type": "violation",
+      "incomplete_reason": null,
+      "cell_ids": [
+        "journey::D-29::escape-restores-focus"
+      ],
+      "target": "journey:escape-restores-focus",
+      "expected_node_count": 1,
+      "sc": "2.4.3",
+      "exception_class": "routed-defect",
+      "rationale": "After Escape closes the guarded-action drawer, keyboard focus lands on main#main-content instead of the Cancel immediately trigger or the More actions button that owns it. Escape is handled twice: the drawer's focus trap dismisses it, and dropdown.js closes the open action menu and refocuses its button; the drawer's restore then runs two animation frames later, cannot restore the now-hidden item and falls back to the page. Fix at the component tier so one owner decides the return target (DetailDrawer does not forward the overlay's focus_return_to). This entry is evaluated by the D-29 keyboard journey in admin-interactions.spec.js, not by the composition cells; once the defect is fixed the journey fails until the entry is deleted.",
+      "follow_up_assertion_id": "254-12-journey-focus-restore-to-trigger",
+      "review_by": "2026-12-31"
+    },
+    {
+      "id": "A11Y-254-30",
+      "rule_id": "probe-focus-restore",
+      "result_type": "violation",
+      "incomplete_reason": null,
+      "cell_ids": [
+        "journey::D-29::back-restores-focus"
+      ],
+      "target": "journey:back-restores-focus",
+      "expected_node_count": 1,
+      "sc": "2.4.3",
+      "exception_class": "routed-defect",
+      "rationale": "After Back to subscription closes the guarded-action drawer, keyboard focus lands on main#main-content instead of the Cancel immediately trigger. Evidence from the mounted route: the trigger node is unchanged, still connected and the action menu still open when the drawer closes, so the Overlay hook did not hold it as the element to restore and fell back to the page. DetailDrawer does not forward the overlay's focus_return_to; fix at the component tier by giving the drawer a stable return target. This entry is evaluated by the D-29 keyboard journey in admin-interactions.spec.js, not by the composition cells; once the defect is fixed the journey fails until the entry is deleted.",
+      "follow_up_assertion_id": "254-12-journey-focus-restore-to-trigger",
+      "review_by": "2026-12-31"
     }
   ]
 }

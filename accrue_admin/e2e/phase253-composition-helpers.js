@@ -429,7 +429,9 @@ function firstLine(error) {
 }
 
 async function runCellA11y(page, { key, deep = false, recheck, expectations = [] }) {
+  const started = performance.now();
   const axe = await a11yProbes.runAxeForCell(page);
+  const axeMs = Math.round(performance.now() - started);
   const observations = [...axe.observations];
   const probes = {};
   if (deep) {
@@ -472,6 +474,9 @@ async function runCellA11y(page, { key, deep = false, recheck, expectations = []
     matched_dispositions: Object.entries(counts).map(([id, nodes]) => ({ id, nodes })),
     probes,
     aaa_project_targets: a11yProbes.AAA_PROJECT_TARGETS,
+    // Local cost of the accessibility layer in this cell, recorded so 254-15 and 254-18 can
+    // compare CI cost with allowances.a11y; it informs and is never a gate here.
+    timing_ms: { axe: axeMs, total: Math.round(performance.now() - started) },
   };
 }
 

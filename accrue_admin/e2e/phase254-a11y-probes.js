@@ -26,7 +26,7 @@ const DEFAULT_FIXED_FONT = 13;
 const TARGET_MINIMUM = 24;
 const MOTION_REDUCE_LIMIT_SECONDS = 0.001;
 const AAA_PROJECT_TARGETS = Object.freeze({
-  "2.3.3": "AAA project target (Animation from Interactions); not an AA conformance claim",
+  "2.3.3": "AAA project target (Animation from Interactions); not an AA criterion",
 });
 
 // The D-28 deep-probe subset: the named collection and page states, 320/1280 x light/dark.
@@ -976,7 +976,7 @@ async function probeMotion(page, mode, { roots, limit = 20 } = {}) {
     return {
       status: notApplicable ? "not_applicable" : "checked",
       not_applicable_reason: notApplicable,
-      sc: "2.3.3", conformance_note: AAA_PROJECT_TARGETS["2.3.3"],
+      sc: "2.3.3", criterion_note: AAA_PROJECT_TARGETS["2.3.3"],
       mode, panels: panels.length, drawers: facts.drawers.length, drawer_transition_s: Number(drawerTransition.toFixed(3)),
       focus_on_body: facts.focus_on_body,
       defects: defects.slice(0, limit),
