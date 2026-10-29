@@ -62,6 +62,7 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
 
   alias Accrue.Billing.Subscription
   alias Accrue.Processor.Fake
+  alias AccrueAdmin.Storybook.SubscriptionManifest
   alias AccrueAdmin.Storybook.SubscriptionScenarios
 
   @fixed_now ~U[2026-10-25 12:00:00Z]
@@ -93,16 +94,22 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
   test "launch and growing-team facts share a deterministic DB-free Cadence source" do
     assert function_exported?(CadenceSubscriptionFacts, :list, 0)
 
-    assert CadenceSubscriptionFacts.list() == [
-             :active,
-             :launch,
-             :growing_team,
-             :scheduled_cancellation,
-             :incomplete_evidence,
-             :populated,
-             :braintree_pruned,
-             :dunning_active
-           ]
+    # CURATE-01 / AMD-254-01: the compatibility members of the ordinary list follow the curation
+    # ledger (frozen baseline compatibility ids minus the retired ones) instead of a literal.
+    %{present: present, absent: absent} =
+      compatibility_expectations(SubscriptionManifest.curation_ledger())
+
+    listed = CadenceSubscriptionFacts.list()
+
+    assert Enum.take(listed, 5) ==
+             [:active, :launch, :growing_team, :scheduled_cancellation, :incomplete_evidence]
+
+    listed_ids = Enum.map(listed, &Atom.to_string/1)
+    assert listed |> Enum.drop(5) |> Enum.map(&Atom.to_string/1) |> Enum.sort() == Enum.sort(present)
+
+    for id <- absent do
+      refute id in listed_ids, "retired compatibility id #{id} is still in the ordinary list"
+    end
 
     launch = CadenceSubscriptionFacts.fetch!(:launch)
     team = CadenceSubscriptionFacts.fetch!(:growing_team)
@@ -164,7 +171,19 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
     assert Enum.map(first.subscription.items, & &1.id) ==
              Enum.map(second.subscription.items, & &1.id)
 
-    assert CadenceSubscriptionFacts.fetch!(:populated) == first
+    %{present: present, absent: absent} =
+      compatibility_expectations(SubscriptionManifest.curation_ledger())
+
+    # A kept compatibility id either has its own facts or aliases the active scenario.
+    for id <- present, atom = String.to_atom(id) do
+      assert CadenceSubscriptionFacts.fetch!(atom).scenario in [atom, :active]
+    end
+
+    # A retired compatibility id is no longer a supported scenario.
+    for id <- absent do
+      assert_raise ArgumentError, fn -> CadenceSubscriptionFacts.fetch!(String.to_atom(id)) end
+    end
+
     assert_raise ArgumentError, fn -> CadenceSubscriptionFacts.fetch!(:unrecognized) end
   end
 
@@ -275,5 +294,43 @@ defmodule AccrueAdmin.SubscriptionScenariosTest do
     assert_raise ArgumentError, fn -> SubscriptionScenarios.validate!(nil) end
     assert_raise ArgumentError, fn -> SubscriptionScenarios.assigns!(%{}) end
     assert_raise ArgumentError, fn -> SubscriptionScenarios.assigns!(%{scenario: :unknown}) end
+  end
+
+  test "compatibility expectations follow the ledger: a retired id must be absent, the rest present" do
+    ledger = %{
+      frozen_baseline: %{compatibility_ids: ["alpha", "beta", "gamma"]},
+      records: []
+    }
+
+    assert compatibility_expectations(ledger) == %{present: ["alpha", "beta", "gamma"], absent: []}
+
+    retired = %{
+      disposition: "retire",
+      subject: %{story_path: "/components/subscription_detail", variation_id: "beta"}
+    }
+
+    mutated = %{ledger | records: [retired]}
+    assert compatibility_expectations(mutated) == %{present: ["alpha", "gamma"], absent: ["beta"]}
+
+    # Only a removal of a subscription_detail variation changes the expectation.
+    for other <- [
+          %{retired | disposition: "retain"},
+          %{retired | subject: %{retired.subject | story_path: "/components/action_menu"}},
+          %{retired | subject: %{retired.subject | variation_id: nil}}
+        ] do
+      assert compatibility_expectations(%{ledger | records: [other]}).absent == []
+    end
+  end
+
+  defp compatibility_expectations(ledger) do
+    retired =
+      for record <- ledger.records,
+          record.disposition in ["retire", "merge"],
+          record.subject.story_path == "/components/subscription_detail",
+          is_binary(record.subject.variation_id),
+          do: record.subject.variation_id
+
+    compatibility = ledger.frozen_baseline.compatibility_ids
+    %{present: compatibility -- retired, absent: Enum.filter(compatibility, &(&1 in retired))}
   end
 end

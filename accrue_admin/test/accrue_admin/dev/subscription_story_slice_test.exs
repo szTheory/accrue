@@ -60,6 +60,7 @@ defmodule AccrueAdmin.SubscriptionStorySliceTest do
   alias Accrue.Processor.Fake
   alias AccrueAdmin.Live.SubscriptionLive
   alias AccrueAdmin.Storybook.Components.SubscriptionDetail
+  alias AccrueAdmin.Storybook.SubscriptionManifest
   alias PhoenixStorybook.Stories.Variation
 
   @fixed_now ~U[2026-10-25 12:00:00Z]
@@ -179,14 +180,26 @@ defmodule AccrueAdmin.SubscriptionStorySliceTest do
   test "canonical lifecycle variation IDs sit beside preserved compatibility IDs" do
     ids = Enum.map(SubscriptionDetail.variations(), & &1.id)
 
-    assert ids == [
-             :active,
-             :scheduled_cancellation,
-             :incomplete_evidence,
-             :populated,
-             :braintree_pruned,
-             :dunning_active
-           ]
+    # CURATE-01 / AMD-254-01: the preserved compatibility ids are the frozen baseline ids minus the
+    # ones the curation ledger retired; the canonical lifecycle ids stay literal.
+    ledger = SubscriptionManifest.curation_ledger()
+
+    retired =
+      for record <- ledger.records,
+          record.disposition in ["retire", "merge"],
+          record.subject.story_path == "/components/subscription_detail",
+          is_binary(record.subject.variation_id),
+          do: record.subject.variation_id
+
+    expected_compatibility = ledger.frozen_baseline.compatibility_ids -- retired
+    {canonical, compatibility} = Enum.split(ids, 3)
+
+    assert canonical == [:active, :scheduled_cancellation, :incomplete_evidence]
+    assert compatibility |> Enum.map(&Atom.to_string/1) |> Enum.sort() == Enum.sort(expected_compatibility)
+
+    for id <- retired do
+      refute id in Enum.map(ids, &Atom.to_string/1), "retired variation #{id} is still a story variation"
+    end
   end
 
   test "all canonical lifecycle variations delegate to the shared production area" do

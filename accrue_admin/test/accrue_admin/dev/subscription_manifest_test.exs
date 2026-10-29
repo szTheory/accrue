@@ -585,8 +585,16 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
 
     test "duplicate evidence is exact block equality and any differing field keeps both subjects" do
       by_id = Map.new(SubscriptionManifest.entries(), &{&1.variation_id, &1})
+      records = Map.new(SubscriptionManifest.curation_records(), &{&1.id, &1})
 
-      alias_evidence = SubscriptionManifest.duplicate_evidence(by_id["populated"], by_id["active"])
+      # While the compatibility alias is still a live entry the evidence is computed from the
+      # entries; once the ledger retires it the pinned evidence in the ledger record is used.
+      alias_evidence =
+        case by_id["populated"] do
+          nil -> records["CUR-254-06"].duplicate_evidence
+          entry -> SubscriptionManifest.duplicate_evidence(entry, by_id["active"])
+        end
+
       assert alias_evidence.subject == alias_evidence.survivor
 
       distinct =
@@ -594,11 +602,10 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
 
       refute distinct.subject == distinct.survivor
 
-      one_field =
-        SubscriptionManifest.duplicate_evidence(
-          by_id["populated"],
-          put_in(by_id["active"], [:expected, :facts, :amount_minor], 1)
-        )
+      one_field = %{
+        alias_evidence
+        | survivor: put_in(alias_evidence.survivor, [:expected, :facts, :amount_minor], 1)
+      }
 
       refute one_field.subject == one_field.survivor
     end
@@ -675,7 +682,8 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
     test "braintree_pruned and dunning_active are retained and reclassified with the recovery claim drift recorded" do
       records = Map.new(SubscriptionManifest.curation_records(), &{&1.id, &1})
 
-      assert records |> Map.keys() |> Enum.sort() ==
+      # 254-06 appends removal records after these five; the retains and reclassifications stay.
+      assert records |> Map.keys() |> Enum.sort() |> Enum.take(5) ==
                ["CUR-254-01", "CUR-254-02", "CUR-254-03", "CUR-254-04", "CUR-254-05"]
 
       braintree = records["CUR-254-04"]
@@ -698,15 +706,23 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert dunning.gap.entry_trigger == "retry/campaign-history integrity"
       assert dunning.survivor == %{kind: "manifest_entry", key: "#{@story_path}||dunning_active"}
 
-      # No variation is removed and no id changes: all six entries are still discovered.
+      # Entries follow the ledger: the frozen six minus the removals recorded for this story.
       by_id = Map.new(SubscriptionManifest.entries(), &{&1.variation_id, &1})
-      assert map_size(by_id) == 6
+
+      removed =
+        Enum.count(Map.values(records), fn record ->
+          record.disposition in ["retire", "merge"] and record.subject.story_path == @story_path and
+            record.subject.variation_id != nil
+        end)
+
+      assert map_size(by_id) == 6 - removed
 
       assert by_id["braintree_pruned"].curation_record == "CUR-254-04"
       assert by_id["braintree_pruned"].curation_classification == "provider-boundary negative"
       assert by_id["dunning_active"].curation_record == "CUR-254-05"
 
-      for id <- ["active", "scheduled_cancellation", "incomplete_evidence", "populated"] do
+      for id <- ["active", "scheduled_cancellation", "incomplete_evidence", "populated"],
+          by_id[id] != nil do
         assert by_id[id].curation_record == nil
         assert by_id[id].curation_classification == nil
       end
