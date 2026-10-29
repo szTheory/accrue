@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Completed 254-11-PLAN.md
-last_updated: "2026-10-29T09:51:39.949Z"
+stopped_at: Completed 254-12-PLAN.md
+last_updated: "2026-10-29T10:50:56.267Z"
 last_activity: 2026-10-28
 last_activity_desc: Phase 254 execution started
-state_head: eefee2a62958dbdefe426d5434ed133e91b3e8ec
+state_head: df17d29b0f3e3bce207b30128ba63a1a3e8b791b
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 34
-  completed_plans: 27
+  completed_plans: 28
   percent: 67
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 ## Current Position
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
-Plan: 12 of 18
+Plan: 13 of 18
 Status: Ready to execute
 Last activity: 2026-10-28 — Phase 254 execution started
 
@@ -250,6 +250,7 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 | Phase 254 P09 | 3 h | 3 tasks | 15 files |
 | Phase 254 P10 | 2h | 2 tasks | 8 files |
 | Phase 254 P11 | 1h 20m | 3 tasks | 7 files |
+| Phase 254 P12 | 5h | 2 tasks | 21 files |
 
 ## Accumulated Context
 
@@ -603,6 +604,9 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 - [Phase 254]: 254-10: storybook.css is composed deterministically (header, PhoenixStorybook CSS, brand.css, accrue_admin.css bundle, byte-preserved dark shim tail) and CI fails when it drifts; the design review record opens at stage assessment with DR-254-01..09 (DR-254-06..09 deferred under D-36)
 - [Phase 254]: 254-11: probe findings share the a11y register with axe findings (probe-<name> rule ids, exact stable targets); journey checkpoints use cell ids journey::D-29::<checkpoint> and are decided by admin-interactions.spec.js
 - [Phase 254]: 254-11: 30 routed-defect entries (axe, probes and the journey) are fixed and deleted by 254-12; 8 composition cells are inside the D-36 16-cell bound and 102 outside, journey entries inside
+- [Phase 254]: Red evidence is derived only from a parsed Playwright or ExUnit report (assertion errors with parsable Expected and Received values); --check-red re-parses the report and the spec sha256 binds the evidence to the spec (254-12)
+- [Phase 254]: Routed accessibility defects are fixed at their lowest owning tier (token scope, component markup, focus hook, page CSS) and their register entries deleted, so the zero-match rule and the strict D-29 journey prove each fix (254-12)
+- [Phase 254]: The delayed focus return in focus_trap.js runs only when focus is lost, and content of a closed details is never a focus target (254-12)
 
 ### Pending Todos
 
@@ -701,8 +705,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-29T09:51:39.470Z
-Stopped at: Completed 254-11-PLAN.md
+Last session: 2026-10-29T10:50:55.727Z
+Stopped at: Completed 254-12-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
