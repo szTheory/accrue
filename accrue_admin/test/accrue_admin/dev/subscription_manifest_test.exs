@@ -672,6 +672,67 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       end
     end
 
+    test "braintree_pruned and dunning_active are retained and reclassified with the recovery claim drift recorded" do
+      records = Map.new(SubscriptionManifest.curation_records(), &{&1.id, &1})
+
+      assert records |> Map.keys() |> Enum.sort() ==
+               ["CUR-254-01", "CUR-254-02", "CUR-254-03", "CUR-254-04", "CUR-254-05"]
+
+      braintree = records["CUR-254-04"]
+      assert braintree.disposition == "reclassify"
+      assert braintree.classification == "provider-boundary negative"
+      assert braintree.subject.variation_id == "braintree_pruned"
+      assert braintree.survivor == %{kind: "manifest_entry", key: "#{@story_path}||braintree_pruned"}
+
+      assert Enum.any?(
+               braintree.preserved_regressions,
+               &(&1.test_ref =~ "provider-pruned empty action groups are omitted")
+             )
+
+      dunning = records["CUR-254-05"]
+      assert dunning.disposition == "reclassify"
+      assert dunning.subject.variation_id == "dunning_active"
+      assert dunning.reason =~ "recovery drill open"
+      assert dunning.reason =~ "Dunning row"
+      assert dunning.reason =~ "retry/campaign-history integrity"
+      assert dunning.gap.entry_trigger == "retry/campaign-history integrity"
+      assert dunning.survivor == %{kind: "manifest_entry", key: "#{@story_path}||dunning_active"}
+
+      # No variation is removed and no id changes: all six entries are still discovered.
+      by_id = Map.new(SubscriptionManifest.entries(), &{&1.variation_id, &1})
+      assert map_size(by_id) == 6
+
+      assert by_id["braintree_pruned"].curation_record == "CUR-254-04"
+      assert by_id["braintree_pruned"].curation_classification == "provider-boundary negative"
+      assert by_id["dunning_active"].curation_record == "CUR-254-05"
+
+      for id <- ["active", "scheduled_cancellation", "incomplete_evidence", "populated"] do
+        assert by_id[id].curation_record == nil
+        assert by_id[id].curation_classification == nil
+      end
+    end
+
+    test "the regenerated guide lists every curation record, keeps the whole-page limit, and is deterministic" do
+      guide = SubscriptionManifest.coverage_guide()
+      assert guide == SubscriptionManifest.coverage_guide()
+      assert guide =~ "does not prove a whole page"
+
+      for id <- ["CUR-254-01", "CUR-254-02", "CUR-254-03", "CUR-254-04", "CUR-254-05"] do
+        assert guide =~ id
+      end
+
+      assert guide =~ "provider-boundary negative"
+      assert guide =~ "retry/campaign-history integrity"
+
+      dir = Path.join(System.tmp_dir!(), "phase254-guide-#{System.unique_integer([:positive])}")
+      on_exit(fn -> File.rm_rf(dir) end)
+      first = Path.join(dir, "first.md")
+      second = Path.join(dir, "second.md")
+      :ok = SubscriptionManifest.write_coverage_guide!(first)
+      :ok = SubscriptionManifest.write_coverage_guide!(second)
+      assert File.read!(first) == File.read!(second)
+    end
+
     defp caller_row(label, owner, path, tier, state) do
       %{
         label: label,
