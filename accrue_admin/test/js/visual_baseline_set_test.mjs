@@ -293,8 +293,12 @@ test("real directory: every legacy PNG's bytes equal its manifest sha256 and the
   for (const name of EXPECTED_BASELINES) {
     const key = name.replace(/\.png$/, "");
     assert.equal(sha256(readFileSync(path.join(REAL_DIRECTORY, name))), entries[key].sha256, `${name} bytes equal the manifest`);
-    assert.equal(entries[key].provenance, "phase211-committed");
-    assert.equal(entries[key].mint_run_id, null);
+    // An untouched key keeps its Phase 211 entry; a rebaselined key is a minted entry with a run id.
+    if (entries[key].provenance === "phase211-committed") assert.equal(entries[key].mint_run_id, null, `${key}: a legacy entry has no mint run id`);
+    else {
+      assert.equal(entries[key].provenance, "phase254-mint", `${key}: provenance`);
+      assert.match(String(entries[key].mint_run_id), /^\d+$/, `${key}: a minted entry has a mint run id`);
+    }
   }
   const pre = checkBaselineSet(REAL_DIRECTORY, { preMint: true });
   assert.deepEqual(pre.problems, []);
