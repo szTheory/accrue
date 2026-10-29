@@ -83,6 +83,51 @@ test("focused Phase 253 composition runner exposes its bounded serial acceptance
   assert.equal(typeof runner.executeCommandSequence, "function");
 });
 
+test("composition fan-out is bounded, explicit and off by default (CIQ-02 D-13, D-24 step 3)", async () => {
+  const runner = await loadRunner();
+  const plan = (browserWorkers) => runner.buildCommandPlan({
+    id: runId,
+    adminBuildPath: "/tmp/phase253-contract/mix-build",
+    outputDirectory: "/tmp/phase253-contract/output",
+    ...(browserWorkers === undefined ? {} : { browserWorkers }),
+  });
+  const browser = (rows) => rows.find(({ id }) => id === "phase253-compositions-browser");
+  // Default: the unchanged serial run, no worker flag, display string as before.
+  assert.ok(!browser(plan()).args.some((arg) => arg.startsWith("--workers")));
+  assert.ok(!browser(plan()).display.includes("--workers"));
+  assert.deepEqual(plan().map(({ id }) => id), runner.REQUIRED_COMMAND_IDS);
+  // Enabled: the flag sits after --reporter=json and before the specs, the inventory is unchanged.
+  const fanned = browser(plan(3));
+  const reporterAt = fanned.args.indexOf("--reporter=json");
+  assert.equal(fanned.args[reporterAt + 1], "--workers=3");
+  assert.ok(fanned.args.indexOf("e2e/subscription-compositions-phase253.spec.js") > reporterAt + 1);
+  assert.match(fanned.display, / --workers=3 e2e\/subscription-compositions-phase253\.spec\.js/);
+  assert.deepEqual(plan(3).map(({ id }) => id), runner.REQUIRED_COMMAND_IDS);
+  assert.doesNotThrow(() => runner.assertRequiredCommandPlan(plan(3)));
+  // Out-of-range and non-integer worker counts are refused.
+  for (const bad of [0, -1, 5, 2.5, "3", null]) assert.throws(() => plan(bad), /browser workers must be an integer/, String(bad));
+  // The environment knob: unset or empty is serial; 1 to MAX is accepted; anything else is refused.
+  assert.equal(runner.resolveCompositionWorkers({}), 1);
+  assert.equal(runner.resolveCompositionWorkers({ PHASE254_COMPOSITION_WORKERS: "" }), 1);
+  assert.equal(runner.resolveCompositionWorkers({ PHASE254_COMPOSITION_WORKERS: "3" }), 3);
+  assert.equal(runner.resolveCompositionWorkers({ PHASE254_COMPOSITION_WORKERS: String(runner.MAX_COMPOSITION_WORKERS) }), runner.MAX_COMPOSITION_WORKERS);
+  for (const bad of ["0", "01", "-2", "5", "3.5", "three", "3 --retries=2", "3;rm"]) {
+    assert.throws(() => runner.resolveCompositionWorkers({ PHASE254_COMPOSITION_WORKERS: bad }), /PHASE254_COMPOSITION_WORKERS/, bad);
+  }
+});
+
+test("only the composition cells project is fully parallel; every other run of the lab config stays serial", () => {
+  const config = fs.readFileSync(path.join(root, "accrue_admin/playwright.phase252.config.js"), "utf8");
+  assert.match(config, /^  workers: 1,$/m, "the top-level worker count stays 1");
+  assert.match(config, /^  fullyParallel: false,$/m);
+  const projectAt = (name) => config.slice(config.indexOf(`name: "${name}"`), config.indexOf(`name: "${name}"`) + 900).split(/\n    \},?\n/)[0];
+  assert.match(projectAt("phase252-owned-review"), /fullyParallel: true/);
+  assert.doesNotMatch(projectAt("phase252-owned-stories"), /fullyParallel/);
+  assert.doesNotMatch(projectAt("phase254-reconcile"), /fullyParallel/);
+  const runner = fs.readFileSync(path.join(root, "scripts/ci/verify_phase200_admin_guardrails.sh"), "utf8");
+  assert.match(runner, /^export PHASE254_COMPOSITION_WORKERS=3$/m);
+});
+
 test("the runner has a finite serial lane inventory with unique disposable resources", async () => {
   const runner = await loadRunner();
   const plan = runner.buildCommandPlan({

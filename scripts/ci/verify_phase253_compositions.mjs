@@ -278,7 +278,25 @@ function command(id, display, executable, args, options = {}) {
   };
 }
 
-export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
+// Phase 254 CIQ-02 (D-13, D-24 step 3): the composition cells are pure-story (the review lane
+// refuses reset and seed with 403 and every cell writes its own result file), so they may run on
+// bounded Playwright workers against the one lab server. 1 is the unchanged serial run; the
+// guardrail runner sets PHASE254_COMPOSITION_WORKERS. Reconciliation stays a dependent project.
+export const MAX_COMPOSITION_WORKERS = 4;
+
+export function resolveCompositionWorkers(env = process.env) {
+  const raw = env.PHASE254_COMPOSITION_WORKERS;
+  if (raw === undefined || raw === "") return 1;
+  if (!/^[1-9]\d*$/.test(raw) || Number(raw) > MAX_COMPOSITION_WORKERS) {
+    fail("PHASE254_COMPOSITION_WORKERS must be an integer from 1 to " + MAX_COMPOSITION_WORKERS);
+  }
+  return Number(raw);
+}
+
+export function buildCommandPlan({ id, adminBuildPath, outputDirectory, browserWorkers = 1 }) {
+  if (!Number.isInteger(browserWorkers) || browserWorkers < 1 || browserWorkers > MAX_COMPOSITION_WORKERS) {
+    fail("browser workers must be an integer from 1 to " + MAX_COMPOSITION_WORKERS);
+  }
   if (typeof id !== "string" || !/^[a-f0-9]{24,64}$/i.test(id)) fail("runner ID must be a fresh 24-64 character hexadecimal nonce");
   if (!adminBuildPath || !outputDirectory) fail("command plan requires run-specific build and output paths");
   const usedPartitions = new Set();
@@ -394,7 +412,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
     ),
     command(
       "phase253-compositions-browser",
-      "node scripts/dev/phase252_lab.mjs browser -- --reporter=json e2e/subscription-compositions-phase253.spec.js e2e/subscription-compositions-reconcile-phase254.spec.js",
+      "node scripts/dev/phase252_lab.mjs browser -- --reporter=json" + (browserWorkers > 1 ? " --workers=" + browserWorkers : "") + " e2e/subscription-compositions-phase253.spec.js e2e/subscription-compositions-reconcile-phase254.spec.js",
       process.execPath,
       [
         "scripts/dev/phase252_lab.mjs",
@@ -403,6 +421,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
         browserPartition,
         "--",
         "--reporter=json",
+        ...(browserWorkers > 1 ? ["--workers=" + browserWorkers] : []),
         "e2e/subscription-compositions-phase253.spec.js",
         // Phase 254 D-13: the dependent phase254-reconcile project merges the per-case files.
         "e2e/subscription-compositions-reconcile-phase254.spec.js",
@@ -1015,7 +1034,8 @@ async function main() {
   const logDirectory = path.join(outputDirectory, "logs");
   fs.mkdirSync(logDirectory, { recursive: true, mode: 0o700 });
   const adminBuildPath = mixBuildPath(runId);
-  const plan = buildCommandPlan({ id: runId, adminBuildPath, outputDirectory });
+  const browserWorkers = resolveCompositionWorkers();
+  const plan = buildCommandPlan({ id: runId, adminBuildPath, outputDirectory, browserWorkers });
   assertRequiredCommandPlan(plan);
 
   const resultPath = path.join(outputDirectory, "results.json");
@@ -1032,6 +1052,7 @@ async function main() {
     run_completed_at: null,
     results_path: path.relative(ROOT, resultPath).split(path.sep).join("/"),
     browser_result_path: plan.find((spec) => spec.id === "phase253-compositions-browser").browser_contract.result_path,
+    browser_workers: browserWorkers,
     tracked_phase252_manifest_sha256_before: trackedManifestDigestBefore,
     tracked_phase252_manifest_sha256_after: null,
     manifest_path: MANIFEST_PATH,

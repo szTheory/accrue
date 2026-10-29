@@ -12,6 +12,11 @@ export PHASE254_RUNNER_STARTED_AT="$(date +%s)"
 PHASE254_SHARED_BUILD_ID="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(8).toString("hex"))')"
 export PHASE254_SHARED_BUILD_ID
 
+# Phase 254 (D-24 step 3, CIQ-02): the 151 pure-story composition cells run on three bounded
+# Playwright workers against the one lab server; reconciliation still runs afterwards as the
+# dependent project, and every cell is still executed and asserted.
+export PHASE254_COMPOSITION_WORKERS=3
+
 run_step() {
   local label="$1"
   shift

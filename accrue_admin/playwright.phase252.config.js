@@ -52,6 +52,11 @@ module.exports = defineConfig({
     {
       name: "phase252-owned-review",
       testMatch: /subscription-compositions-phase253\.spec\.js/,
+      // Phase 254 CIQ-02 (D-13): these cells are pure-story. The review lane answers every reset
+      // and seed with 403 and each cell writes its own result file, so the cells may run on
+      // separate workers when the aggregate passes --workers. The top-level worker count stays 1,
+      // so every other run of this config is serial exactly as before.
+      fullyParallel: true,
     },
     {
       name: "phase252-owned-stories",
