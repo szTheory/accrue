@@ -5,6 +5,7 @@ const { isDeepStrictEqual } = require("node:util");
 const { expect } = require("@playwright/test");
 const { mergeCaseResults, writeCaseResult } = require("./phase254-result-ledger.js");
 const { assertSelectionInvariants } = require("./phase254-selection-invariants.js");
+const a11yProbes = require("./phase254-a11y-probes.js");
 const {
   COLLECTION_STATES,
   GEOMETRY_NEGATIVE_CONTROL_TITLE,
@@ -410,6 +411,193 @@ function assertGeometryClean(geometry, label) {
   }
 }
 
+// Phase 254 UXQ-02 (D-27..D-30): the accessibility layer of every composition cell. axe runs in
+// every cell in the cell's own theme, over the sandbox and any open overlay root, with every
+// severity and every incomplete result; the D-28 deep probes run in the named subset. Every
+// observation (an axe finding or a probe finding) must match an entry of the committed register
+// or the cell fails. An absent or unparsable register fails closed.
+const A11Y_REGISTER_PATH = path.join(REPO_ROOT, "accrue_admin", "e2e", "a11y-dispositions.json");
+let a11yRegisterCache = null;
+
+function a11yRegister() {
+  if (!a11yRegisterCache) a11yRegisterCache = a11yProbes.readRegister(A11Y_REGISTER_PATH);
+  return a11yRegisterCache;
+}
+
+function firstLine(error) {
+  return String(error?.message || error).split("\n")[0];
+}
+
+async function runCellA11y(page, { key, deep = false, recheck, expectations = [] }) {
+  const axe = await a11yProbes.runAxeForCell(page);
+  const observations = [...axe.observations];
+  const probes = {};
+  if (deep) {
+    probes.names = await a11yProbes.probeNames(page, { expectations });
+    probes.target_size = await a11yProbes.probeTargetSize(page);
+    probes.focus = await a11yProbes.probeFocusVisible(page);
+    // Spacing and scale change the page and restore it afterwards, so they run last.
+    probes.spacing = await a11yProbes.probeTextSpacing(page, { recheck });
+    const cdp = await page.context().newCDPSession(page);
+    try {
+      probes.scale = await a11yProbes.probeTextScale(page, cdp, { recheck });
+    } finally {
+      await cdp.detach().catch(() => undefined);
+    }
+    probes.motion = {
+      reduce: await a11yProbes.probeMotion(page, "reduce"),
+      no_preference: await a11yProbes.probeMotion(page, "no-preference"),
+    };
+    for (const [name, result] of [
+      ["names", probes.names],
+      ["target_size", probes.target_size],
+      ["focus", probes.focus],
+      ["spacing", probes.spacing],
+      ["scale", probes.scale],
+      ["motion_reduce", probes.motion.reduce],
+      ["motion_no_preference", probes.motion.no_preference],
+    ]) {
+      observations.push(...a11yProbes.probeObservations(name, result));
+    }
+  }
+  const match = a11yProbes.matchDispositions(observations, a11yRegister(), key);
+  const counts = match.counts;
+  return {
+    deep,
+    tags: axe.tags,
+    roots: axe.roots,
+    rules_evaluated: axe.rules_evaluated,
+    observations: observations.map(({ detail, ...rest }) => ({ ...rest, ...(detail ? { detail } : {}) })),
+    auto_resolved: axe.auto_resolved,
+    matched_dispositions: Object.entries(counts).map(([id, nodes]) => ({ id, nodes })),
+    probes,
+    aaa_project_targets: a11yProbes.AAA_PROJECT_TARGETS,
+  };
+}
+
+function assertA11yDispositioned(block, key) {
+  const match = a11yProbes.matchDispositions(block.observations, a11yRegister(), key);
+  if (match.unmatched.length) {
+    const first = match.unmatched[0];
+    throw new Error(`${key}: ${match.unmatched.length} undispositioned accessibility observation(s), first: ${a11yProbes.describeObservation(first)}${first.detail ? ` (${first.detail})` : ""}`);
+  }
+}
+
+function pageNameExpectations(variationId) {
+  if (["review_cancel_now", "awaiting_step_up", "dispatching"].includes(variationId)) {
+    return [{ role: "button", name: "Back to subscription", scope: "#subscription-action-drawer", min: 1 }];
+  }
+  if (variationId.startsWith("result_")) {
+    return [{ role: "link", name: "Open scoped subscription activity", scope: ".psb-sandbox" }];
+  }
+  return [{ role: "link", name: "Open Events audit log with subscription filter", scope: ".psb-sandbox" }];
+}
+
+async function collectionGeometryRecheck(story, key) {
+  const messages = [];
+  try {
+    assertGeometryClean(await readGeometry(story), key);
+  } catch (error) {
+    messages.push(firstLine(error));
+  }
+  return messages;
+}
+
+async function pageGeometryRecheck(page, key) {
+  const messages = [];
+  try {
+    assertPageGeometryClean(await readPageGeometry(page), key);
+  } catch (error) {
+    messages.push(firstLine(error));
+  }
+  return messages;
+}
+
+// Injected positive controls (D-30). Each one plants a known defect, runs the very checker the
+// cells use and records whether it was caught. Each injected node is removed afterwards.
+async function withInjected(page, html, action) {
+  await page.evaluate((markup) => {
+    const holder = document.createElement("div");
+    holder.setAttribute("data-phase254-holder", "true");
+    holder.innerHTML = markup;
+    // The admin CSP blocks inline style attributes, so a control states its style in a data
+    // attribute and it is applied through the CSSOM, which the policy does not restrict.
+    for (const node of holder.querySelectorAll("[data-phase254-style]")) node.style.cssText = node.getAttribute("data-phase254-style");
+    (document.querySelector(".psb-sandbox") || document.body).appendChild(holder);
+  }, html);
+  try {
+    return await action();
+  } finally {
+    await page.evaluate(() => document.querySelectorAll("[data-phase254-holder]").forEach((node) => node.remove()));
+  }
+}
+
+async function runInjectedA11yControls(page, key) {
+  const controls = {};
+  const register = a11yRegister();
+
+  controls.unnamed_button = await withInjected(page, '<button type="button" data-phase254-control="unnamed"></button>', async () => {
+    const result = await a11yProbes.runAxeForCell(page);
+    const match = a11yProbes.matchDispositions(result.observations, register, key);
+    return { detected: match.unmatched.some((item) => item.rule_id === "button-name" && item.result_type === "violation"), rule: "button-name" };
+  });
+
+  controls.undersized_overlapping_target = await withInjected(
+    page,
+    '<button type="button" aria-label="Control A" data-phase254-control="a" data-phase254-style="position:fixed;left:8px;top:8px;width:10px;height:10px;padding:0;min-width:0;min-height:0"></button>' +
+      '<button type="button" aria-label="Control B" data-phase254-control="b" data-phase254-style="position:fixed;left:14px;top:8px;width:10px;height:10px;padding:0;min-width:0;min-height:0"></button>',
+    async () => {
+      const result = await a11yProbes.probeTargetSize(page);
+      const caught = result.defects.filter((defect) => defect.control);
+      return { detected: caught.length >= 2, defects: caught.length };
+    },
+  );
+
+  controls.outline_none = await withInjected(
+    page,
+    '<button type="button" id="phase254-outline-control" data-phase254-control="outline" data-phase254-style="outline:none !important;box-shadow:none !important">Outline control</button>',
+    async () => {
+      const result = await a11yProbes.probeFocusVisible(page, { only: "#phase254-outline-control" });
+      return { detected: result.defects.some((defect) => defect.problems.includes("no-focus-indicator")), problems: result.defects.flatMap((defect) => defect.problems), evaluated: result.evaluated };
+    },
+  );
+
+  const spacing = await a11yProbes.probeTextSpacing(page, { sabotage: true });
+  controls.unapplied_spacing = { detected: spacing.applied === false, measured_letter_spacing_px: spacing.measured_letter_spacing_px };
+
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    const scale = await a11yProbes.probeTextScale(page, cdp, { sabotage: true });
+    controls.unapplied_scaling = { detected: scale.supported === false && scale.probe_scale < a11yProbes.REQUIRED_TEXT_SCALE, probe_scale: scale.probe_scale };
+  } finally {
+    await cdp.detach().catch(() => undefined);
+  }
+
+  controls.motion_under_reduce = await withInjected(
+    page,
+    '<div id="phase254-motion-control" data-phase254-control="motion" data-phase254-style="transition:transform 300ms !important;transform:translateX(1px)">motion</div>',
+    async () => {
+      const result = await a11yProbes.probeMotion(page, "reduce", { limit: 500 });
+      return { detected: result.defects.some((defect) => defect.selector.includes("phase254-motion-control")) };
+    },
+  );
+
+  controls.undispositioned_incomplete = await withInjected(
+    page,
+    '<p data-phase254-control="incomplete" data-phase254-style="background-image:url(&quot;data:image/svg+xml;utf8,&lt;svg xmlns=%27http://www.w3.org/2000/svg%27 width=%272%27 height=%272%27&gt;&lt;rect width=%272%27 height=%272%27 fill=%27%23888%27/&gt;&lt;/svg&gt;&quot;);color:#777777;margin:0;padding:8px">Contrast cannot be decided over an image</p>',
+    async () => {
+      const result = await a11yProbes.runAxeForCell(page);
+      const match = a11yProbes.matchDispositions(result.observations, register, key);
+      return { detected: match.unmatched.some((item) => item.result_type === "incomplete"), incomplete_rules: match.unmatched.filter((item) => item.result_type === "incomplete").map((item) => item.rule_id) };
+    },
+  );
+
+  for (const [name, control] of Object.entries(controls)) {
+    if (control.detected !== true) throw new Error(`injected accessibility control ${name} was not detected: ${JSON.stringify(control)}`);
+  }
+  return controls;
+}
+
 async function locateCollectionStory(page, entry) {
   const story = page.locator(".psb-sandbox").first();
   await expect(story, `compiled ${entry.variation_id} iframe route renders the connected production collection`).toBeVisible();
@@ -686,6 +874,13 @@ async function runCollectionCase(page, testCase, identity, testInfo) {
     }
 
     row.geometry = geometry;
+    row.a11y = await runCellA11y(page, {
+      key,
+      deep: a11yProbes.isDeepProbeKey(key),
+      recheck: () => collectionGeometryRecheck(story, key),
+      expectations: [{ role: "textbox", name: "Search subscriptions", scope: ".psb-sandbox" }],
+    });
+    assertA11yDispositioned(row.a11y, key);
     row.status = "passed";
   } catch (error) {
     row.error = String(error?.message || error).split("\n")[0];
@@ -725,6 +920,10 @@ async function runSyntheticTextStress(page, entry, identity, theme, testInfo) {
     await expect.poll(() => `${new URL(page.url()).pathname}${new URL(page.url()).search}`).toBe(entry.iframe_path);
     const { story } = await locateCollectionStory(page, entry);
     await setTheme(story, theme);
+
+    // The a11y scan reads the actual composition; the synthetic markup is injected afterwards.
+    row.a11y = await runCellA11y(page, { key: row.key });
+    assertA11yDispositioned(row.a11y, row.key);
 
     const dataTable = story.locator('[data-role="data-table"][data-ax-list="subscriptions"]');
     const tableVisible = await dataTable.locator(".ax-data-table-shell").isVisible();
@@ -852,6 +1051,11 @@ async function runGeometryNegativeControls(page, entry, identity, testInfo) {
     row.geometry = await readGeometry(story);
     assertGeometryClean(row.geometry, "restored actual layout");
     row.served_assets = await serveAndVerifyAssets(page, entry.iframe_path);
+    // The a11y scan of the restored actual layout comes first; the injected defects follow and
+    // are removed again, so they can never leak into the real observations.
+    row.a11y = await runCellA11y(page, { key: row.key });
+    assertA11yDispositioned(row.a11y, row.key);
+    row.a11y.injected_controls = await runInjectedA11yControls(page, row.key);
     row.status = "passed";
   } catch (error) {
     row.error = String(error?.message || error).split("\n")[0];
@@ -1177,6 +1381,14 @@ async function runPageCase(page, testCase, identity, testInfo) {
     row.served_assets = await serveAndVerifyAssets(page, entry.direct_path);
     row.content = await assertPageContent(page, story, entry);
     row.snapshot_content = await assertPageSnapshot(page, story, entry);
+    // The a11y scan reads the actual composition; any synthetic stress is injected afterwards.
+    row.a11y = await runCellA11y(page, {
+      key,
+      deep: a11yProbes.isDeepProbeKey(key),
+      recheck: () => pageGeometryRecheck(page, key),
+      expectations: pageNameExpectations(entry.variation_id),
+    });
+    assertA11yDispositioned(row.a11y, key);
     if (kind === "synthetic") {
       row.synthetic_stress = await addPageSyntheticStress(page, entry.variation_id);
       row.assertion_ids.push("long_source_preserving_synthetic_stress_is_visible_and_unclipped");
