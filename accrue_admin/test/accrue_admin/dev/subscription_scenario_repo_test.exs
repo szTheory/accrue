@@ -31,11 +31,14 @@ defmodule AccrueAdmin.SubscriptionScenarioRepoTest do
     assert role == "postgres"
     assert role == System.get_env("PHASE252_E2E_ROLE")
     assert System.get_env("PHASE252_E2E_LANE") == "admin-test"
-    # The lab preflight already restricts the server address (loopback, or an RFC 1918 bridge
-    # address on a hosted runner) and exports it; the test pins the live connection to exactly
-    # that address instead of re-listing the loopback literals.
-    assert address == System.get_env("PHASE252_E2E_ADDRESS")
-    assert is_binary(address) and address != ""
+    # Strict loopback everywhere; on a hosted CI runner the PostgreSQL service container reports
+    # its RFC 1918 bridge address instead (mirrors phase252_lab.mjs acceptedServerAddress/2).
+    private_range =
+      ~r/^(?:10(?:\.\d{1,3}){3}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}|192\.168(?:\.\d{1,3}){2})$/
+
+    assert address in ["127.0.0.1", "::1"] or
+             (System.get_env("GITHUB_ACTIONS") == "true" and
+                Regex.match?(private_range, address))
 
     :ok
   end
