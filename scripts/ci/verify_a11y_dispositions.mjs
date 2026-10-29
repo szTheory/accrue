@@ -37,8 +37,19 @@ export const OWNER_FILES = Object.freeze([
 ]);
 export const EXCEPTION_CLASSES = Object.freeze(["routed-defect", "unsupported-mechanism", "axe-limitation", "accepted-exception"]);
 export const RESULT_TYPES = Object.freeze(["violation", "incomplete"]);
-export const REQUIRED_CONTROLS = Object.freeze(["unnamed_button", "undispositioned_incomplete"]);
+export const REQUIRED_CONTROLS = Object.freeze([
+  "unnamed_button",
+  "undersized_overlapping_target",
+  "outline_none",
+  "unapplied_spacing",
+  "unapplied_scaling",
+  "motion_under_reduce",
+  "undispositioned_incomplete",
+]);
 export const GEOMETRY_CONTROL_KEY = "geometry::negative-controls::320::light";
+// A probe that has no target element in a given cell may report not_applicable for that probe
+// and cell only. The list is deliberately empty until a cell is shown to need it.
+export const ALLOWED_NOT_APPLICABLE = Object.freeze([]);
 
 const BROAD_TARGETS = new Set(["*", "html", "body", "#main-content", ".psb-sandbox", "main", "#ax-overlay-root"]);
 
@@ -221,10 +232,38 @@ export function latestResultsFile(root = repositoryRoot) {
   throw fail("no reconciled Phase 253 results bundle was found; run the composition lane first");
 }
 
+function requireProbe(row, name) {
+  const probe = row.a11y.probes?.[name];
+  if (!probe || typeof probe !== "object") throw fail(`deep-probe cell ${row.key} has no ${name} probe result`);
+  if (name === "motion") {
+    for (const mode of ["reduce", "no_preference"]) {
+      const part = probe[mode];
+      if (!part || !["checked", "not_applicable"].includes(part.status)) throw fail(`deep-probe cell ${row.key} has no motion result under ${mode}`);
+      checkApplicability(row.key, `motion.${mode}`, part);
+    }
+    return probe;
+  }
+  if (!["checked", "not_applicable"].includes(probe.status)) throw fail(`deep-probe cell ${row.key} has an unreadable ${name} probe status`);
+  checkApplicability(row.key, name, probe);
+  if (probe.status === "checked" && !Array.isArray(probe.defects)) throw fail(`deep-probe cell ${row.key} ${name} probe reports no defects list`);
+  return probe;
+}
+
+function checkApplicability(key, name, probe) {
+  if (probe.status !== "not_applicable") return;
+  const reason = probe.not_applicable_reason || probe.reason;
+  if (typeof reason !== "string" || reason.trim() === "") throw fail(`deep-probe cell ${key} marks ${name} not applicable without a reason`);
+  const allowed = ALLOWED_NOT_APPLICABLE.some((item) => item.cell_id === key && item.probe === name);
+  // Motion under no-preference legitimately has nothing to measure when no overlay is open.
+  const motionException = name === "motion.no_preference";
+  if (!allowed && !motionException) throw fail(`deep-probe cell ${key} reports ${name} not applicable, which is not an allowed pair`);
+}
+
 /**
  * Checks a reconciled results bundle against the register. Every row must carry an a11y block;
- * every observation must be matched; and the geometry cell must report each injected control as
- * detected.
+ * every observation must be matched; every deep-probe cell must report every probe; the
+ * geometry cell must report each injected control as detected; and a text scale the browser
+ * could not apply must be dispositioned as an unsupported mechanism, never as a defect to fix.
  */
 export function verifyResults(results, register, { today }) {
   if (!results || !Array.isArray(results.cases) || results.cases.length === 0) throw fail("the results bundle has no cases");
@@ -240,6 +279,10 @@ export function verifyResults(results, register, { today }) {
     }
     cells.push({ cell_id: row.key, rules_evaluated: row.a11y.rules_evaluated });
     for (const observation of row.a11y.observations) observations.push({ ...observation, cell_id: row.key });
+    if (probes.isDeepProbeKey(row.key)) {
+      if (row.a11y.deep !== true) throw fail(`cell ${row.key} belongs to the D-28 deep-probe subset but did not run the deep probes`);
+      for (const name of probes.DEEP_PROBES) requireProbe(row, name);
+    }
     if (row.key === GEOMETRY_CONTROL_KEY) {
       const controls = row.a11y.injected_controls || {};
       for (const name of REQUIRED_CONTROLS) {
@@ -250,7 +293,15 @@ export function verifyResults(results, register, { today }) {
   const allowUnrun = results.selection?.mode === "affected";
   const summary = validateRegister(register, observations, { today, cells, allowUnrun });
 
-  return { ...summary, deep_cells: 0 };
+  const byId = new Map(register.entries.map((entry) => [entry.id, entry]));
+  for (const row of results.cases) {
+    const scale = row.a11y.probes?.scale;
+    if (scale?.status === "checked" && scale.supported === false) {
+      const unsupported = row.a11y.matched_dispositions.some((item) => byId.get(item.id)?.exception_class === "unsupported-mechanism" && byId.get(item.id)?.rule_id === "probe-text-scale");
+      if (!unsupported) throw fail(`cell ${row.key}: the browser could not apply text scaling and no unsupported-mechanism disposition names it`);
+    }
+  }
+  return { ...summary, deep_cells: results.cases.filter((row) => probes.isDeepProbeKey(row.key)).length };
 }
 
 // ---------------------------------------------------------------------------------------
@@ -341,8 +392,8 @@ export const SCENARIOS = [
     const controls = Object.fromEntries(REQUIRED_CONTROLS.map((name) => [name, { detected: true }]));
     const geometry = { key: GEOMETRY_CONTROL_KEY, a11y: { rules_evaluated: 10, observations: [], matched_dispositions: [], probes: {}, injected_controls: controls } };
     assert.equal(verifyResults({ cases: [geometry] }, registerOf(), { today: TODAY }).cells, 1);
-    const missing = { ...geometry, a11y: { ...geometry.a11y, injected_controls: { ...controls, unnamed_button: { detected: false } } } };
-    assert.throws(() => verifyResults({ cases: [missing] }, registerOf(), { today: TODAY }), /unnamed_button was not detected/);
+    const missing = { ...geometry, a11y: { ...geometry.a11y, injected_controls: { ...controls, outline_none: { detected: false } } } };
+    assert.throws(() => verifyResults({ cases: [missing] }, registerOf(), { today: TODAY }), /outline_none was not detected/);
   }],
 ];
 

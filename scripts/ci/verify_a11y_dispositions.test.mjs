@@ -496,10 +496,10 @@ test("results: not_applicable needs a reason and is accepted only for an allowed
 });
 
 test("results: a text scale the browser could not apply needs an unsupported-mechanism disposition, not a routed defect", () => {
-  const scaleObservation = { cell_id: DEEP_KEY, rule_id: "probe-text-scale", result_type: "violation", incomplete_reason: null, target: "rem-probe" };
-  const unsupported = entry({ rule_id: "probe-text-scale", target: "rem-probe", cell_ids: [DEEP_KEY], sc: "1.4.4", exception_class: "unsupported-mechanism" });
+  const scaleObservation = { cell_id: DEEP_KEY, rule_id: "probe-text-scale", result_type: "violation", incomplete_reason: null, target: "mechanism:text-scale" };
+  const unsupported = entry({ rule_id: "probe-text-scale", target: "mechanism:text-scale", cell_ids: [DEEP_KEY], sc: "1.4.4", exception_class: "unsupported-mechanism" });
   const row = deepRow({ observations: [scaleObservation], matched_dispositions: [{ id: unsupported.id, nodes: 1 }] });
-  row.a11y.probes.scale = { status: "checked", supported: false, defects: [{ selector: "rem-probe" }] };
+  row.a11y.probes.scale = { status: "checked", supported: false, defects: [{ selector: "mechanism:text-scale" }] };
   assert.equal(verifyResults({ cases: [row] }, registerOf(unsupported), { today: TODAY }).observations, 1);
   const routed = { ...unsupported, exception_class: "routed-defect" };
   assert.throws(() => verifyResults({ cases: [row] }, registerOf(routed), { today: TODAY }), /unsupported-mechanism disposition/);

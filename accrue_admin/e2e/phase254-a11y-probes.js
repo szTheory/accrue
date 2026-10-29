@@ -842,7 +842,7 @@ async function probeTextScale(page, cdp, { roots, sabotage = false, recheck } = 
     const probeScale = after.probe / before.probe;
     const defects = [];
     const supported = probeScale >= REQUIRED_TEXT_SCALE;
-    if (!supported) defects.push({ selector: "rem-probe", problem: `rem text scaled ${probeScale.toFixed(2)}x, below ${REQUIRED_TEXT_SCALE}x` });
+    if (!supported) defects.push({ selector: "mechanism:text-scale", problem: `rem text scaled ${probeScale.toFixed(2)}x, below ${REQUIRED_TEXT_SCALE}x` });
     let minimum = null;
     if (supported) {
       before.samples.forEach((sample, index) => {
@@ -1069,8 +1069,8 @@ function probeObservations(name, result) {
   for (const defect of result.defects || []) {
     out.push({ rule_id: rule.rule_id, result_type: "violation", incomplete_reason: null, target: defect.selector, sc: rule.sc, detail: defect.problem || (defect.problems || []).join(", ") || null });
   }
-  if (name === "scale" && result.supported === false && !out.some((item) => item.target === "rem-probe")) {
-    out.push({ rule_id: rule.rule_id, result_type: "violation", incomplete_reason: null, target: "rem-probe", sc: rule.sc, detail: "the browser did not scale rem text" });
+  if (name === "scale" && result.supported === false && !out.some((item) => item.target === "mechanism:text-scale")) {
+    out.push({ rule_id: rule.rule_id, result_type: "violation", incomplete_reason: null, target: "mechanism:text-scale", sc: rule.sc, detail: "the browser did not scale rem text" });
   }
   return out;
 }
