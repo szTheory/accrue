@@ -25,7 +25,7 @@ const launcher = `node ../scripts/dev/phase252_lab.mjs serve --lane admin-review
 
 module.exports = defineConfig({
   testDir: "./e2e",
-  testMatch: /(?:phase252-review|subscription-stories-phase252|subscription-compositions-phase253|subscription-compositions-reconcile-phase254)\.spec\.js/,
+  testMatch: /(?:phase252-review|subscription-stories-phase252|subscription-compositions-phase253|subscription-compositions-reconcile-phase254|subscription-design-phase254)\.spec\.js/,
   timeout: 30_000,
   fullyParallel: false,
   workers: 1,
@@ -69,6 +69,12 @@ module.exports = defineConfig({
       name: "phase254-reconcile",
       testMatch: /subscription-compositions-reconcile-phase254\.spec\.js/,
       dependencies: ["phase252-owned-review"],
+    },
+    // Phase 254 D-35: computed-style and source tests for the reviewed design corrections. Pure
+    // story: it reads the Storybook routes and the served stylesheet and never resets or seeds.
+    {
+      name: "phase254-design",
+      testMatch: /subscription-design-phase254\.spec\.js/,
     },
   ],
   outputDir: process.env.PLAYWRIGHT_OUTPUT_DIR || "test-results/phase252-review",

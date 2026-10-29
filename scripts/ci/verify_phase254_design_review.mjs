@@ -5,6 +5,7 @@
 //   --check [--stage S]        Verify the record (S is assessment | corrected | confirmed and must equal
 //                              the record's stage) and that the Markdown view equals the renderer output.
 //   --self-test                Run every rejection scenario, each paired with a passing control.
+//   --record-red / --check-red Write / re-verify the pre-fix red evidence from a parsed Playwright JSON or ExUnit report (D-35).
 //
 // The JSON record is the single source (254-DESIGN-REVIEW.json); the Markdown view is generated and
 // diff-checked. No gsd-ui-review scoring is re-run and no aesthetic score may appear in the record
@@ -126,6 +127,16 @@ export function evidenceExistsReader(root = repositoryRoot) {
   };
 }
 
+export function evidenceJsonReader(root = repositoryRoot) {
+  return (artifact) => {
+    try {
+      return JSON.parse(fs.readFileSync(resolvePhaseEvidencePath(PHASE_SLUG, artifact, { root }), "utf8"));
+    } catch {
+      return null;
+    }
+  };
+}
+
 // ---------------------------------------------------------------------------------------------
 // Subscription detail spacing scan (D-34 spacing, D-35 scoped CSS guard).
 // ---------------------------------------------------------------------------------------------
@@ -161,6 +172,275 @@ export function scanSubscriptionDetailSpacing(css) {
     }
   }
   return findings;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Red evidence (D-35, T-254-37): a correction's tests are shown failing on the pre-fix commit from a
+// parsed report, never from a hand-authored list. A Playwright JSON report or ExUnit text is parsed
+// into per-test outcomes; only an assertion failure counts as red. A setup crash, a timeout, a skip,
+// a compile error or an expected key with no result is rejected.
+// ---------------------------------------------------------------------------------------------
+
+export const RED_EVIDENCE_ARTIFACT = "254-12-01-red-evidence.json";
+export const A11Y_REGISTER_PATH = "accrue_admin/e2e/a11y-dispositions.json";
+const RED_KEY = /^(DR-\d{3}-\d{2})(?::([a-z][a-z-]*))?$/;
+const ANSI = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+const stripAnsi = (text) => String(text ?? "").replace(ANSI, "");
+const PLAYWRIGHT_ASSERTION = /\bexpect\([^\n]*\)\.(?:not\.)?\w+\(/;
+const EXUNIT_ASSERTION = /Assertion with .* failed|match \(=\) failed|Expected truthy|Expected false or nil|Flunked|\*\* \(ExUnit\.AssertionError\)|Assertion failed/;
+const EXUNIT_OTHER_ERROR = /\*\* \((?!ExUnit\.)[A-Za-z.]+\)/;
+
+function redKeyOf(title) {
+  const token = String(title ?? "").split(" ")[0];
+  const match = RED_KEY.exec(token);
+  return match ? { key: token, finding_id: match[1], kind: match[2] ?? null } : null;
+}
+
+function unquote(text) {
+  const trimmed = String(text ?? "").trim();
+  return trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"') ? trimmed.slice(1, -1) : trimmed;
+}
+
+function playwrightValues(message) {
+  const text = stripAnsi(message);
+  const expected = /^\s*Expected(?: string| substring| pattern)?:\s*(.+)$/m.exec(text);
+  const actual = /^\s*Received(?: string)?:\s*(.+)$/m.exec(text);
+  return { expected: expected ? unquote(expected[1]) : null, actual: actual ? unquote(actual[1]) : null };
+}
+
+function collectPlaywrightSpecs(suites, sink, parentFile) {
+  for (const suite of suites ?? []) {
+    const file = suite.file ?? parentFile;
+    for (const spec of suite.specs ?? []) sink.push({ spec, file: spec.file ?? file });
+    collectPlaywrightSpecs(suite.suites, sink, file);
+  }
+}
+
+function parsePlaywrightReport(report) {
+  const problems = [];
+  const tests = [];
+  const files = new Set();
+  if (!isObject(report) || !Array.isArray(report.suites)) {
+    return { tests, problems: ["not a Playwright JSON report (no suites[])"], files: [] };
+  }
+  const specs = [];
+  collectPlaywrightSpecs(report.suites, specs, null);
+  for (const { spec, file } of specs) {
+    if (file) files.add(file);
+    const identity = redKeyOf(spec.title);
+    if (!identity) {
+      problems.push(`test "${spec.title}" has no DR-NNN-NN[:kind] key prefix`);
+      continue;
+    }
+    for (const entry of spec.tests ?? []) {
+      const results = entry.results ?? [];
+      const last = results[results.length - 1];
+      const base = { test: spec.title, ...identity, expected: null, actual: null, reason: null };
+      if (!last) {
+        tests.push({ ...base, status: "broken", reason: "no result recorded" });
+        continue;
+      }
+      if (last.status === "passed") tests.push({ ...base, status: "passed" });
+      else if (last.status === "skipped") tests.push({ ...base, status: "skipped", reason: "skipped" });
+      else if (last.status === "failed") {
+        const message = stripAnsi(last.error?.message ?? (last.errors ?? []).map((error) => error.message).join("\n"));
+        const values = playwrightValues(message);
+        if (PLAYWRIGHT_ASSERTION.test(message) && values.expected !== null && values.actual !== null) {
+          tests.push({ ...base, status: "red", ...values });
+        } else {
+          tests.push({ ...base, status: "broken", reason: message.split("\n")[0] || "failed without an assertion error" });
+        }
+      } else {
+        tests.push({ ...base, status: "broken", reason: `result status ${last.status}` });
+      }
+    }
+  }
+  return { tests, problems, files: [...files] };
+}
+
+function parseExunitReport(text) {
+  const output = stripAnsi(text);
+  const problems = [];
+  const tests = new Map();
+  const summary = /(\d+) tests?, (\d+) failures?/.exec(output);
+  if (!summary) problems.push("no ExUnit summary line (a compile error or a crash, not a test result)");
+  if (/\*\* \(CompileError\)|== Compilation error/.test(output)) problems.push("the test module did not compile");
+  for (const match of output.matchAll(/^\s*\* test (.+?) \(\d+(?:\.\d+)?ms\)(?: \[L#\d+\])?\s*$/gm)) {
+    const identity = redKeyOf(match[1]);
+    if (identity) tests.set(match[1], { test: match[1], ...identity, status: "passed", expected: null, actual: null, reason: null });
+  }
+  const failureHeader = /^\s+\d+\) test (.+?) \(([\w.]+)\)(?: \[L#\d+\])?\s*$/gm;
+  const headers = [...output.matchAll(failureHeader)];
+  headers.forEach((header, index) => {
+    const end = index + 1 < headers.length ? headers[index + 1].index : (output.indexOf("Finished in", header.index) >= 0 ? output.indexOf("Finished in", header.index) : output.length);
+    const block = output.slice(header.index, end);
+    const name = header[1].replace(/^test /, "");
+    const identity = redKeyOf(name);
+    if (!identity) {
+      problems.push(`test "${name}" has no DR-NNN-NN[:kind] key prefix`);
+      return;
+    }
+    const assertion = EXUNIT_ASSERTION.test(block) && !EXUNIT_OTHER_ERROR.test(block);
+    const left = /^\s*left:\s*(.+)$/m.exec(block);
+    const right = /^\s*right:\s*(.+)$/m.exec(block);
+    tests.set(name, assertion
+      ? { test: name, ...identity, status: "red", expected: right ? right[1].trim() : null, actual: left ? left[1].trim() : null, reason: null }
+      : { test: name, ...identity, status: "broken", expected: null, actual: null, reason: (block.split("\n").find((line) => /\*\*/.test(line)) ?? "failed without an assertion error").trim() });
+  });
+  if (summary) {
+    const failures = [...tests.values()].filter((entry) => entry.status !== "passed").length;
+    if (failures !== Number(summary[2])) problems.push(`the summary reports ${summary[2]} failures but ${failures} failing tests were parsed`);
+  }
+  return { tests: [...tests.values()], problems, files: [] };
+}
+
+/** Parse a Playwright JSON report (object) or ExUnit output (string) into per-test outcomes. */
+export function parseRedReport(report, { format = "playwright" } = {}) {
+  if (format === "exunit") return parseExunitReport(typeof report === "string" ? report : String(report ?? ""));
+  if (format !== "playwright") throw fail(`unknown report format "${format}" (playwright or exunit)`);
+  return parsePlaywrightReport(typeof report === "string" ? JSON.parse(report) : report);
+}
+
+const keyMatches = (expectKey, test) => (expectKey.includes(":") ? test.key === expectKey : test.finding_id === expectKey);
+
+/** Throws unless the parsed report is exactly the expected red set: see the rejection fixtures. */
+export function evaluateRedReport(parsed, { expectFail, expectPass = [] }) {
+  const problems = [...parsed.problems];
+  if (!Array.isArray(expectFail) || expectFail.length === 0) problems.push("--expect-fail names no key");
+  if (parsed.tests.length === 0) problems.push("the report contains no test result");
+  for (const test of parsed.tests) {
+    if (test.status === "broken") problems.push(`"${test.test}" did not run to an assertion (${test.reason}); a setup crash is not red`);
+    else if (test.status === "skipped") problems.push(`"${test.test}" was skipped, which is neither red nor passing`);
+  }
+  for (const key of expectFail ?? []) {
+    const matching = parsed.tests.filter((test) => keyMatches(key, test));
+    if (matching.length === 0) problems.push(`expected-red key ${key} has no result in the report`);
+    else if (!matching.some((test) => test.status === "red")) problems.push(`expected-red key ${key} did not fail`);
+  }
+  for (const key of expectPass) {
+    const matching = parsed.tests.filter((test) => keyMatches(key, test));
+    if (matching.length === 0) problems.push(`expected-passing key ${key} has no result in the report`);
+    for (const test of matching) if (test.status !== "passed") problems.push(`expected-passing "${test.test}" is ${test.status}`);
+  }
+  for (const test of parsed.tests) {
+    if (test.status === "red" && !(expectFail ?? []).some((key) => keyMatches(key, test))) {
+      problems.push(`unexpected failure "${test.test}" (${test.key}) is not named by --expect-fail`);
+    }
+  }
+  if (problems.length > 0) throw fail(`red evidence rejected: ${problems.join("; ")}`);
+  return {
+    failures: parsed.tests.filter((test) => test.status === "red").map((test) => ({ test: test.test, key: test.key, finding_id: test.finding_id, expected: test.expected, actual: test.actual })),
+    passed: parsed.tests.filter((test) => test.status === "passed").map((test) => ({ test: test.test, key: test.key }))
+  };
+}
+
+const splitKeys = (value) => String(value ?? "").split(",").map((entry) => entry.trim()).filter(Boolean);
+
+export function buildRedEvidence(parsed, { expectFail, expectPass = [], commit, specPath, specSha256, commands }) {
+  const { failures, passed } = evaluateRedReport(parsed, { expectFail, expectPass });
+  if (!HEX40.test(commit ?? "")) throw fail("red evidence needs the 40-hex HEAD commit it was run on");
+  if (!HEX64.test(specSha256 ?? "")) throw fail("red evidence needs the spec sha256");
+  if (!Array.isArray(commands) || commands.length === 0 || commands.some((entry) => !nonEmptyString(entry.command) || !Number.isInteger(entry.exit_code))) {
+    throw fail("red evidence needs the exact command and its integer exit code");
+  }
+  return { commit, spec_path: specPath, spec_sha256: specSha256, commands, expect_fail: [...expectFail], expect_pass: [...expectPass], failures, passed };
+}
+
+/** Re-parse the report and require it to reproduce the recorded evidence exactly. */
+export function checkRedEvidence(parsed, evidence, { specSha256 = null } = {}) {
+  if (!isObject(evidence) || !Array.isArray(evidence.failures) || !Array.isArray(evidence.passed)) throw fail("the red evidence file has no failures[] and passed[]");
+  if (!Array.isArray(evidence.expect_fail) || evidence.expect_fail.length === 0) throw fail("the red evidence file names no expect_fail keys");
+  const { failures, passed } = evaluateRedReport(parsed, { expectFail: evidence.expect_fail, expectPass: evidence.expect_pass ?? [] });
+  const canon = (rows, fields) => JSON.stringify(rows.map((row) => fields.map((field) => row[field] ?? null)).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))));
+  const failFields = ["test", "key", "finding_id", "expected", "actual"];
+  if (canon(failures, failFields) !== canon(evidence.failures, failFields)) throw fail("the parsed failures differ from failures[] in the red evidence file");
+  if (canon(passed, ["test", "key"]) !== canon(evidence.passed, ["test", "key"])) throw fail("the parsed passing tests differ from passed[] in the red evidence file");
+  if (specSha256 !== null && evidence.spec_sha256 !== specSha256) throw fail("the spec file changed since the red evidence was recorded (spec_sha256 differs)");
+  if (!HEX40.test(evidence.commit ?? "")) throw fail("the red evidence file has no 40-hex commit");
+  return { failures: failures.length, passed: passed.length };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Stage-corrected amendment rules (AMD-254-04 heading red, AMD-254-05 routed a11y cells).
+// ---------------------------------------------------------------------------------------------
+
+function findAmendment(record, id) {
+  return (record.amendments ?? []).find((amendment) => amendment.id === id);
+}
+
+function requireDecisions(amendment, decisions) {
+  for (const decision of decisions) {
+    if (!(amendment.decisions ?? []).includes(decision)) throw fail(`${amendment.id}: decisions must include ${decision}`);
+  }
+}
+
+function requireOwnerAck(amendment) {
+  const ack = amendment.owner_ack;
+  if (!isObject(ack) || !/^\d{4}-\d{2}-\d{2}$/.test(ack.date ?? "") || !nonEmptyString(ack.status)) throw fail(`${amendment.id}: owner_ack {date, status} is required`);
+}
+
+/** AMD-254-04: the heading amendment is red through DR-254-02:source; the 767/768 computed tests pass before and after. */
+export function requireHeadingRedAmendment(record, ctx) {
+  const amendment = findAmendment(record, "AMD-254-04");
+  if (!amendment) throw fail("stage corrected needs amendment AMD-254-04 (heading red carried by DR-254-02:source)");
+  requireDecisions(amendment, ["D-34", "D-35"]);
+  requireOwnerAck(amendment);
+  if (!(amendment.evidence ?? []).includes(RED_EVIDENCE_ARTIFACT)) throw fail(`AMD-254-04: evidence must cite ${RED_EVIDENCE_ARTIFACT}`);
+  const evidence = ctx.readEvidenceJson(RED_EVIDENCE_ARTIFACT);
+  if (!isObject(evidence)) throw fail(`AMD-254-04: red evidence ${RED_EVIDENCE_ARTIFACT} could not be read`);
+  const failing = (evidence.failures ?? []).filter((row) => row.key === "DR-254-02:source");
+  if (failing.length === 0) throw fail("AMD-254-04: the red evidence lacks a failing DR-254-02:source test");
+  const passing = (evidence.passed ?? []).filter((row) => row.key === "DR-254-02:computed");
+  for (const width of ["767", "768"]) {
+    if (!passing.some((row) => new RegExp(`(?<!\\d)${width}(?!\\d)`).test(row.test))) throw fail(`AMD-254-04: the red evidence lacks a passing DR-254-02:computed test at ${width}`);
+  }
+  if ((evidence.failures ?? []).some((row) => row.key === "DR-254-02:computed")) throw fail("AMD-254-04: a DR-254-02:computed test failed in the red evidence");
+}
+
+/** D-36 bound: a composition cell is inside the 16 captures when it is a story-sourced D-33 cell. */
+export function classifyRoutedCell(cellId) {
+  const parts = String(cellId).split("::");
+  if (parts[0] === "journey") return "inside";
+  const page = parts[0] === "page";
+  const [variation, kind, width] = page ? [parts[1], parts[2], parts[3]] : [parts[0], parts[1], parts[2]];
+  const storyVariation = page ? "active" : "multiple_rows";
+  return variation === storyVariation && kind === "viewport" && (width === "320" || width === "1280") ? "inside" : "outside";
+}
+
+/** The routed-defect cells of a register, split by the D-36 bound. */
+export function routedA11yCells(register) {
+  const cells = new Set();
+  for (const entry of register?.entries ?? []) {
+    if (entry.exception_class === "routed-defect") for (const id of entry.cell_ids ?? []) cells.add(id);
+  }
+  const all = [...cells].sort();
+  return { inside: all.filter((id) => classifyRoutedCell(id) === "inside"), outside: all.filter((id) => classifyRoutedCell(id) === "outside") };
+}
+
+/** AMD-254-05: affected_cells must equal the routed cells outside the 16, recomputed at register_commit. */
+export function requireRoutedA11yAmendment(record, ctx) {
+  const amendment = findAmendment(record, "AMD-254-05");
+  if (!amendment) throw fail("stage corrected needs amendment AMD-254-05 (routed a11y cells versus the 16-cell bound)");
+  requireDecisions(amendment, ["D-08", "D-36"]);
+  requireOwnerAck(amendment);
+  if (!HEX40.test(amendment.register_commit ?? "")) throw fail("AMD-254-05: register_commit must be a 40-hex commit sha");
+  if (!Array.isArray(amendment.affected_cells) || amendment.affected_cells.some((cell) => !nonEmptyString(cell))) throw fail("AMD-254-05: affected_cells must be a list of cell ids (possibly empty)");
+  const data = ctx.read(amendment.register_commit, A11Y_REGISTER_PATH);
+  if (data === null || data === undefined) throw fail(`AMD-254-05: cannot read ${A11Y_REGISTER_PATH} at register_commit ${amendment.register_commit}`);
+  let register;
+  try {
+    register = JSON.parse(toText(data));
+  } catch {
+    throw fail(`AMD-254-05: ${A11Y_REGISTER_PATH} at register_commit is not valid JSON`);
+  }
+  const { outside } = routedA11yCells(register);
+  const recorded = [...amendment.affected_cells].sort();
+  const missing = outside.filter((id) => !recorded.includes(id));
+  const extra = recorded.filter((id) => !outside.includes(id));
+  if (new Set(recorded).size !== recorded.length) throw fail("AMD-254-05: affected_cells has a duplicate cell");
+  if (missing.length > 0 || extra.length > 0) {
+    throw fail(`AMD-254-05: affected_cells differs from the routed cells outside the 16 at register_commit (missing ${missing.length}: ${missing.slice(0, 3).join(", ")}; extra ${extra.length}: ${extra.slice(0, 3).join(", ")})`);
+  }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -489,7 +769,7 @@ function checkDeferred(record, findingIds) {
   }
 }
 
-export function verifyDesignReview(record, { root = repositoryRoot, stage, read, readContract, evidenceExists } = {}) {
+export function verifyDesignReview(record, { root = repositoryRoot, stage, read, readContract, evidenceExists, readEvidenceJson } = {}) {
   if (!isObject(record)) throw fail("the record must be an object");
   assertNoScoreOrTmpEvidence(record);
   checkStage(record);
@@ -498,7 +778,8 @@ export function verifyDesignReview(record, { root = repositoryRoot, stage, read,
     record,
     read: read ?? gitReader(root),
     readContract: readContract ?? contractReader(root),
-    evidenceExists: evidenceExists ?? evidenceExistsReader(root)
+    evidenceExists: evidenceExists ?? evidenceExistsReader(root),
+    readEvidenceJson: readEvidenceJson ?? evidenceJsonReader(root)
   };
   checkAssets(record, ctx);
   checkRubric(record);
@@ -506,6 +787,10 @@ export function verifyDesignReview(record, { root = repositoryRoot, stage, read,
   const findingIds = checkFindings(record, ctx, captureIds);
   checkRubricVerdicts(record, ctx, captureIds, findingIds);
   checkAmendments(record);
+  if (record.stage !== "assessment") {
+    requireHeadingRedAmendment(record, ctx);
+    requireRoutedA11yAmendment(record, ctx);
+  }
   checkBaselines(record, findingIds);
   checkDeferred(record, findingIds);
   return {
@@ -623,6 +908,26 @@ export function renderDesignReview(record) {
 
 const FIXTURE_COMMIT = "a".repeat(40);
 const FIXTURE_FIX_COMMIT = "b".repeat(40);
+const FIXTURE_REGISTER_COMMIT = "c".repeat(40);
+// A tiny register: two routed cells inside the D-36 bound (a story-sourced D-33 viewport cell and a
+// journey cell) and three outside it (a synthetic cell, a breakpoint cell, another variation).
+const FIXTURE_REGISTER = {
+  schema_version: 1,
+  entries: [
+    { id: "A11Y-FIX-01", exception_class: "routed-defect", cell_ids: ["multiple_rows::viewport::320::light", "page::active::viewport::1280::dark", "page::active::synthetic-return::320::dark"] },
+    { id: "A11Y-FIX-02", exception_class: "routed-defect", cell_ids: ["one_row::viewport::320::light", "page::result_failed::breakpoint::768::light", "journey::D-29::escape-restores-focus"] },
+    { id: "A11Y-FIX-03", exception_class: "justified-exception", cell_ids: ["page::active::viewport::320::light"] }
+  ]
+};
+const FIXTURE_OUTSIDE_CELLS = ["one_row::viewport::320::light", "page::active::synthetic-return::320::dark", "page::result_failed::breakpoint::768::light"];
+const FIXTURE_RED_EVIDENCE = {
+  commit: FIXTURE_COMMIT,
+  failures: [{ test: "DR-254-02:source declared literals", key: "DR-254-02:source", finding_id: "DR-254-02", expected: "var(--ax-type-xl)", actual: "1.5rem" }],
+  passed: [
+    { test: "DR-254-02:computed heading at 767px", key: "DR-254-02:computed" },
+    { test: "DR-254-02:computed heading at 768px", key: "DR-254-02:computed" }
+  ]
+};
 const FIXTURE_CONTRACT_PATH = path.posix.join(".planning", "phases", "253-fixture", "253-UI-SPEC.md");
 const FIXTURE_CONTRACT = "## Typography\n\n| Role | Size |\n|------|------|\n| Page heading | 28px |\n";
 const FIXTURE_FILES = {
@@ -640,6 +945,7 @@ function fixtureRef(file, lines, needle, files = FIXTURE_FILES) {
 export function fixtureHarness(overrides = {}) {
   const files = { ...FIXTURE_FILES, ...(overrides.files ?? {}) };
   const readMap = (commit, relativePath) => {
+    if (commit === FIXTURE_REGISTER_COMMIT && relativePath === A11Y_REGISTER_PATH) return Buffer.from(JSON.stringify(overrides.register ?? FIXTURE_REGISTER));
     if (commit !== FIXTURE_COMMIT && commit !== FIXTURE_FIX_COMMIT) return null;
     return Object.hasOwn(files, relativePath) ? Buffer.from(files[relativePath]) : null;
   };
@@ -740,7 +1046,8 @@ export function fixtureHarness(overrides = {}) {
     options: {
       read: readMap,
       readContract: (contractPath) => (contractPath === FIXTURE_CONTRACT_PATH ? (overrides.contract ?? FIXTURE_CONTRACT) : null),
-      evidenceExists: (artifact) => (overrides.evidence ?? ["fixture-red-evidence.json"]).includes(artifact)
+      evidenceExists: (artifact) => (overrides.evidence ?? ["fixture-red-evidence.json"]).includes(artifact),
+      readEvidenceJson: (artifact) => (artifact === RED_EVIDENCE_ARTIFACT ? (overrides.redEvidence ?? FIXTURE_RED_EVIDENCE) : null)
     }
   };
   return harness;
@@ -762,6 +1069,28 @@ function toCorrected(record) {
   fixed.tests = [{ path: "accrue_admin/e2e/fixture.spec.js", kind: "computed", status: "red-then-green" }];
   fixed.red_evidence = ["fixture-red-evidence.json"];
   record.findings[0].mechanical_check = { id: "subscription-detail-spacing", path: ASSET_PATHS.app_css };
+  record.amendments.push(
+    {
+      id: "AMD-254-04",
+      decisions: ["D-34", "D-35"],
+      original: "767/768 assertions for the heading amendment shown red",
+      amended: "heading red carried by DR-254-02:source; DR-254-02:computed passes before and after by design",
+      rationale: "The heading rule is already responsive, so the computed values do not change.",
+      evidence: [RED_EVIDENCE_ARTIFACT],
+      owner_ack: { date: "2026-10-28", status: "owner-accepted at plan time" }
+    },
+    {
+      id: "AMD-254-05",
+      decisions: ["D-08", "D-36"],
+      original: "only fix within the 16 capture cells",
+      amended: "routed a11y defects are fixed in this batch wherever observed",
+      register_commit: FIXTURE_REGISTER_COMMIT,
+      affected_cells: [...FIXTURE_OUTSIDE_CELLS],
+      rationale: "An accessibility defect is fixed where it lives.",
+      evidence: [A11Y_REGISTER_PATH],
+      owner_ack: { date: "2026-10-28", status: "owner-accepted at plan time" }
+    }
+  );
 }
 
 const FIXED_APP_CSS = ".a{color:red}\n.ax-subscription-detail-page{gap:var(--ax-space-xs)}\n.b{margin:0}\n";
@@ -957,6 +1286,67 @@ export const SCENARIOS = [
     }
   ],
   [
+    "stage corrected: AMD-254-04 needs a failing DR-254-02:source and passing DR-254-02:computed at 767 and 768 in the cited red evidence",
+    () => {
+      const corrected = (mutate, pattern, overrides = {}) => {
+        const harness = fixtureHarness({ files: { [ASSET_PATHS.app_css]: FIXED_APP_CSS }, contract: CORRECTED_CONTRACT, ...overrides });
+        const record = clone(harness.record);
+        toCorrected(record);
+        mutate(record);
+        if (pattern) assert.throws(() => verifyDesignReview(record, { ...harness.options, stage: "corrected" }), pattern);
+        else assert.doesNotThrow(() => verifyDesignReview(record, { ...harness.options, stage: "corrected" }));
+      };
+      const evidence = (change) => {
+        const copy = clone(FIXTURE_RED_EVIDENCE);
+        change(copy);
+        return copy;
+      };
+      corrected(() => {}, null);
+      corrected((record) => { record.amendments = record.amendments.filter((entry) => entry.id !== "AMD-254-04"); }, /needs amendment AMD-254-04/);
+      corrected((record) => { record.amendments.find((entry) => entry.id === "AMD-254-04").decisions = ["D-34"]; }, /decisions must include D-35/);
+      corrected((record) => { delete record.amendments.find((entry) => entry.id === "AMD-254-04").owner_ack; }, /owner_ack/);
+      corrected((record) => { record.amendments.find((entry) => entry.id === "AMD-254-04").evidence = ["fixture-red-evidence.json"]; }, /must cite 254-12-01-red-evidence\.json/);
+      corrected(() => {}, /lacks a failing DR-254-02:source test/, { redEvidence: evidence((copy) => { copy.failures = []; }) });
+      corrected(() => {}, /lacks a passing DR-254-02:computed test at 767/, { redEvidence: evidence((copy) => { copy.passed = copy.passed.filter((row) => !row.test.includes("767")); }) });
+      corrected(() => {}, /lacks a passing DR-254-02:computed test at 768/, { redEvidence: evidence((copy) => { copy.passed = copy.passed.filter((row) => !row.test.includes("768")); }) });
+      corrected(() => {}, /a DR-254-02:computed test failed/, { redEvidence: evidence((copy) => { copy.failures.push({ test: "DR-254-02:computed at 768px", key: "DR-254-02:computed" }); }) });
+    }
+  ],
+  [
+    "stage corrected: AMD-254-05 affected_cells must equal the routed cells outside the 16, recomputed at register_commit",
+    () => {
+      const corrected = (mutate, pattern, overrides = {}) => {
+        const harness = fixtureHarness({ files: { [ASSET_PATHS.app_css]: FIXED_APP_CSS }, contract: CORRECTED_CONTRACT, ...overrides });
+        const record = clone(harness.record);
+        toCorrected(record);
+        mutate(record, record.amendments.find((entry) => entry.id === "AMD-254-05"));
+        if (pattern) assert.throws(() => verifyDesignReview(record, { ...harness.options, stage: "corrected" }), pattern);
+        else assert.doesNotThrow(() => verifyDesignReview(record, { ...harness.options, stage: "corrected" }));
+      };
+      corrected(() => {}, null);
+      corrected((record) => { record.amendments = record.amendments.filter((entry) => entry.id !== "AMD-254-05"); }, /needs amendment AMD-254-05/);
+      corrected((_record, amendment) => { amendment.affected_cells.push("page::active::viewport::320::dark"); }, /extra 1/);
+      corrected((_record, amendment) => { amendment.affected_cells.pop(); }, /missing 1/);
+      corrected((_record, amendment) => { amendment.affected_cells.push(amendment.affected_cells[0]); }, /duplicate cell|extra|missing/);
+      corrected((_record, amendment) => { amendment.register_commit = "d".repeat(40); }, /cannot read/);
+      corrected((_record, amendment) => { amendment.register_commit = "not-a-commit"; }, /40-hex/);
+      corrected((_record, amendment) => { amendment.decisions = ["D-08"]; }, /decisions must include D-36/);
+      corrected((_record, amendment) => { delete amendment.owner_ack; }, /owner_ack/);
+      corrected((_record, amendment) => { amendment.affected_cells = "none"; }, /list of cell ids/);
+      // An empty affected_cells passes when every routed cell is inside the bound.
+      const insideOnly = {
+        schema_version: 1,
+        entries: [{ id: "A11Y-FIX-01", exception_class: "routed-defect", cell_ids: ["multiple_rows::viewport::1280::dark", "page::active::viewport::320::light", "journey::D-29::back-restores-focus"] }]
+      };
+      corrected((_record, amendment) => { amendment.affected_cells = []; }, null, { register: insideOnly });
+      corrected((_record, amendment) => { amendment.affected_cells = ["page::active::viewport::320::light"]; }, /extra 1/, { register: insideOnly });
+      assert.deepEqual(classifyRoutedCell("page::active::viewport::320::light"), "inside");
+      assert.deepEqual(classifyRoutedCell("page::active::container::640::light"), "outside");
+      assert.deepEqual(classifyRoutedCell("multiple_rows::viewport::768::light"), "outside");
+      assert.deepEqual(classifyRoutedCell("multiple_rows::synthetic-text::320::light"), "outside");
+    }
+  ],
+  [
     "the spacing finding has a mechanical basis at assessment: a fixture without an override is rejected",
     () => {
       const clean = ".a{color:red}\n.ax-subscription-detail-page{gap:var(--ax-space-xs)}\n.b{margin:0}\n";
@@ -999,6 +1389,8 @@ function recordPaths(root) {
   return { recordPath, viewPath: path.join(path.dirname(recordPath), VIEW_ARTIFACT) };
 }
 
+const VALUE_OPTIONS = ["report", "expect-fail", "expect-pass", "out", "evidence", "format", "command", "exit-code", "spec"];
+
 function parseArgs(argv) {
   const flags = new Set();
   const values = {};
@@ -1006,25 +1398,94 @@ function parseArgs(argv) {
     const token = argv[index];
     if (!token.startsWith("--")) throw fail(`unexpected argument: ${token}`);
     const key = token.slice(2);
-    if (["render", "check", "self-test"].includes(key)) flags.add(key);
+    if (["render", "check", "self-test", "record-red", "check-red"].includes(key)) flags.add(key);
     else if (key === "stage") {
       if (index + 1 >= argv.length || argv[index + 1].startsWith("--")) throw fail("--stage requires a value");
       values.stage = argv[++index];
       if (!STAGES.includes(values.stage)) throw fail(`--stage must be one of ${STAGES.join(", ")}`);
+    } else if (VALUE_OPTIONS.includes(key)) {
+      if (index + 1 >= argv.length || argv[index + 1].startsWith("--")) throw fail(`--${key} requires a value`);
+      values[key] = argv[++index];
     } else throw fail(`unknown option: --${key}`);
   }
   return { flags, values };
 }
 
+function reportFormat(values) {
+  const format = values.format ?? "playwright";
+  if (!["playwright", "exunit"].includes(format)) throw fail("--format must be playwright or exunit");
+  return format;
+}
+
+function readReportFile(values, format) {
+  if (!values.report) throw fail("--report is required");
+  const text = fs.readFileSync(values.report, "utf8");
+  return format === "exunit" ? text : JSON.parse(text);
+}
+
+function resolveSpec(values, parsed, root) {
+  const candidates = [];
+  if (values.spec) candidates.push(values.spec);
+  else {
+    if (parsed.files.length !== 1) throw fail(`the report names ${parsed.files.length} spec files; pass --spec`);
+    candidates.push(path.join("accrue_admin", "e2e", parsed.files[0]), parsed.files[0]);
+  }
+  for (const candidate of candidates) {
+    const absolute = path.isAbsolute(candidate) ? candidate : path.join(root, candidate);
+    if (fs.existsSync(absolute) && fs.statSync(absolute).isFile()) {
+      return { specPath: path.relative(root, absolute).split(path.sep).join("/"), specSha256: sha256(fs.readFileSync(absolute)) };
+    }
+  }
+  throw fail(`cannot find the spec file for the report (${candidates.join(", ")})`);
+}
+
+function headCommit(root) {
+  const result = spawnSync("git", ["-C", root, "rev-parse", "HEAD"], { encoding: "utf8" });
+  if (result.status !== 0) throw fail("cannot read HEAD");
+  return result.stdout.trim();
+}
+
 function main(argv = process.argv.slice(2), root = repositoryRoot) {
   const { flags, values } = parseArgs(argv);
-  if (flags.size !== 1) throw fail("exactly one of --render, --check, --self-test is required");
+  if (flags.size !== 1) throw fail("exactly one of --render, --check, --self-test, --record-red, --check-red is required");
   if (flags.has("self-test")) {
     for (const [name, scenario] of SCENARIOS) {
       scenario();
       console.log(`ok - ${name}`);
     }
     console.log(`Phase 254 design review self-test: PASS (${SCENARIOS.length} scenarios, each with a passing control)`);
+    return;
+  }
+  if (flags.has("record-red")) {
+    const format = reportFormat(values);
+    const parsed = parseRedReport(readReportFile(values, format), { format });
+    if (!values.out) throw fail("--out is required");
+    if (!values.command || values["exit-code"] === undefined) throw fail("--command and --exit-code are required (the exact command and its exit code)");
+    const { specPath, specSha256 } = resolveSpec(values, parsed, root);
+    const evidence = buildRedEvidence(parsed, {
+      expectFail: splitKeys(values["expect-fail"]),
+      expectPass: splitKeys(values["expect-pass"]),
+      commit: headCommit(root),
+      specPath,
+      specSha256,
+      commands: [{ command: values.command, exit_code: Number(values["exit-code"]) }]
+    });
+    fs.writeFileSync(values.out, `${JSON.stringify(evidence, null, 2)}\n`);
+    console.log(`Phase 254 red evidence: recorded ${evidence.failures.length} failing and ${evidence.passed.length} passing tests to ${path.relative(root, path.resolve(values.out)).split(path.sep).join("/")}`);
+    return;
+  }
+  if (flags.has("check-red")) {
+    const format = reportFormat(values);
+    if (!values.evidence) throw fail("--evidence is required");
+    const parsed = parseRedReport(readReportFile(values, format), { format });
+    const evidence = JSON.parse(fs.readFileSync(values.evidence, "utf8"));
+    let specSha256 = null;
+    if (nonEmptyString(evidence.spec_path)) {
+      const absolute = path.join(root, evidence.spec_path);
+      if (fs.existsSync(absolute)) specSha256 = sha256(fs.readFileSync(absolute));
+    }
+    const summary = checkRedEvidence(parsed, evidence, { specSha256 });
+    console.log(`Phase 254 red evidence: PASS (${summary.failures} failing and ${summary.passed} passing tests reproduce the evidence; failing keys ${evidence.expect_fail.join(", ")})`);
     return;
   }
   const { recordPath, viewPath } = recordPaths(root);

@@ -14,6 +14,7 @@ const LAUNCHER_OWNED_AND_VISUAL_SPECS = [
   /subscription-stories-phase252\.spec\.js/,
   /subscription-compositions-phase253\.spec\.js/,
   /subscription-compositions-reconcile-phase254\.spec\.js/,
+  /subscription-design-phase254\.spec\.js/,
   /phase252-review\.spec\.js/
 ];
 
