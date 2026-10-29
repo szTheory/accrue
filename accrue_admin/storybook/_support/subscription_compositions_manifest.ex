@@ -32,6 +32,41 @@ if Mix.env() != :prod do
       "storybook/pages/subscription.story.exs"
     ]
 
+    # CIQ-02 (D-09): per-case dependency metadata. Precision is honestly group level. Every case
+    # depends on the shared sources; the collection tier adds the collection renderer, query and
+    # story; the page tier adds the whole-page renderer, scenario module and story. Both tiers list
+    # the shared query module because subscription_live.ex aliases it. Each list is a subset of
+    # @source_paths (so of source_digests/0), enforced at compile time here and in verify!/1.
+    @shared_depends_on [
+      "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+      "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+      "accrue_admin/lib/accrue_admin/router.ex",
+      "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+      "dev_support/ui_scenarios/cadence_subscriptions.exs"
+    ]
+    @collection_depends_on Enum.sort(
+                             @shared_depends_on ++
+                               [
+                                 "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+                                 "accrue_admin/storybook/_support/subscription_collection.ex",
+                                 "storybook/groups/subscriptions_collection.story.exs"
+                               ]
+                           )
+    @page_depends_on Enum.sort(
+                       @shared_depends_on ++
+                         [
+                           "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+                           "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+                           "storybook/pages/subscription.story.exs"
+                         ]
+                     )
+
+    for {tier, paths} <- [collection: @collection_depends_on, page: @page_depends_on],
+        path <- paths,
+        path not in @source_paths do
+      raise ArgumentError, "#{tier} depends_on path is not a source_digests input: #{path}"
+    end
+
     @doc "Discovers the collection composition from the compiled PhoenixStorybook tree."
     @spec entries() :: [map()]
     def entries do
@@ -334,6 +369,12 @@ if Mix.env() != :prod do
         raise ArgumentError, "collection manifest source digest is stale"
       end
 
+      # D-09: dependencies are checked against the digests recorded in the file under test before
+      # any entry equality comparison, so a forged path reports itself rather than a generic stale.
+      for section <- ["entries", "collection_variations", "page_entries"] do
+        validate_depends_on!(Map.get(manifest, section, []), manifest["source_digests"])
+      end
+
       current_entries = entries() |> Jason.encode!() |> Jason.decode!()
 
       unless manifest["entries"] == current_entries do
@@ -366,6 +407,38 @@ if Mix.env() != :prod do
       unless Enum.all?(manifest["page_entries"], &route_matches?(&1, Map.get(&1, "url"))) do
         raise ArgumentError, "whole-page manifest contains an invalid navigation-tab route"
       end
+
+      :ok
+    end
+
+    @doc """
+    Requires every entry to carry a non-empty, sorted, duplicate-free depends_on list whose paths
+    are all keys of the given source digests. Accepts atom-keyed (compiled) and string-keyed (JSON)
+    entries.
+    """
+    @spec validate_depends_on!([map()], map()) :: :ok
+    def validate_depends_on!(entries, digests) when is_list(entries) and is_map(digests) do
+      Enum.each(entries, fn entry ->
+        label = "#{Map.get(entry, :key) || Map.get(entry, "story_path")}/#{Map.get(entry, :variation_id) || Map.get(entry, "variation_id")}"
+        depends_on = Map.get(entry, :depends_on) || Map.get(entry, "depends_on")
+
+        unless is_list(depends_on) and depends_on != [] do
+          raise ArgumentError, "collection manifest entry #{label} has no depends_on"
+        end
+
+        unless depends_on == depends_on |> Enum.uniq() |> Enum.sort() do
+          raise ArgumentError, "collection manifest entry #{label} depends_on must be sorted and unique"
+        end
+
+        case Enum.reject(depends_on, &Map.has_key?(digests, &1)) do
+          [] ->
+            :ok
+
+          outside ->
+            raise ArgumentError,
+                  "collection manifest entry #{label} depends_on path outside source_digests: #{Enum.join(outside, ", ")}"
+        end
+      end)
 
       :ok
     end
@@ -460,6 +533,7 @@ if Mix.env() != :prod do
         query_module: @query_module,
         fact_source: "CadenceSubscriptionFacts.fetch!(:#{scenario})",
         proof_lane: "presentation-only",
+        depends_on: @collection_depends_on,
         expected: %{
           subscription_id: facts.subscription.id,
           processor_id: facts.subscription.processor_id,
@@ -533,6 +607,7 @@ if Mix.env() != :prod do
         production_renderer: @renderer,
         fact_source: "CadenceSubscriptionFacts.fetch!(:#{scenario})",
         proof_lane: "presentation-only",
+        depends_on: @collection_depends_on,
         expected: %{
           subscription_id: facts.subscription.id,
           processor_id: facts.subscription.processor_id,
@@ -606,6 +681,7 @@ if Mix.env() != :prod do
         fact_source: "CadenceSubscriptionFacts.fetch!(:#{scenario})",
         presentation_snapshot: Atom.to_string(snapshot),
         proof_lane: "presentation-only",
+        depends_on: @page_depends_on,
         expected: %{
           scenario: Atom.to_string(scenario),
           snapshot: Atom.to_string(snapshot),

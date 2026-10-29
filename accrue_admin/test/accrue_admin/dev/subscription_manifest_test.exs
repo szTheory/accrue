@@ -311,6 +311,69 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       refute SubscriptionManifest.route_matches?(hd(SubscriptionManifest.entries()), wrong_route)
     end
 
+    test "every entry declares a sorted depends_on that is a non-empty subset of source_digests" do
+      digests = SubscriptionManifest.source_digests()
+      entries = SubscriptionManifest.entries()
+      assert entries != []
+
+      for entry <- entries do
+        assert is_list(entry.depends_on) and entry.depends_on != [],
+               "#{entry.key} has no depends_on"
+
+        assert entry.depends_on == Enum.sort(entry.depends_on)
+        assert entry.depends_on == Enum.uniq(entry.depends_on)
+
+        assert Enum.all?(entry.depends_on, &Map.has_key?(digests, &1)),
+               "#{entry.key} depends on a path outside source_digests"
+
+        # Detail-tier precision is honestly group level: the story, the renderer, the scenario
+        # facts and the manifest builder, never the caller-map sources.
+        assert "storybook/components/subscription_detail.story.exs" in entry.depends_on
+        assert "accrue_admin/lib/accrue_admin/live/subscription_live.ex" in entry.depends_on
+        refute "accrue_portal/lib/accrue_portal/router.ex" in entry.depends_on
+      end
+
+      assert SubscriptionManifest.validate_depends_on!(entries, digests) == :ok
+    end
+
+    test "a depends_on path outside source_digests fails the validator and verify!/1" do
+      digests = SubscriptionManifest.source_digests()
+      [first | rest] = SubscriptionManifest.entries()
+
+      outside = %{first | depends_on: Enum.sort(["accrue/lib/accrue.ex" | first.depends_on])}
+
+      assert_raise ArgumentError, ~r/depends_on.*outside source_digests/i, fn ->
+        SubscriptionManifest.validate_depends_on!([outside | rest], digests)
+      end
+
+      empty = %{first | depends_on: []}
+
+      assert_raise ArgumentError, ~r/depends_on/i, fn ->
+        SubscriptionManifest.validate_depends_on!([empty | rest], digests)
+      end
+
+      unsorted = %{first | depends_on: Enum.reverse(first.depends_on)}
+
+      assert_raise ArgumentError, ~r/depends_on.*sorted/i, fn ->
+        SubscriptionManifest.validate_depends_on!([unsorted | rest], digests)
+      end
+
+      manifest_path =
+        Path.join(System.tmp_dir!(), "phase254-depends-#{System.unique_integer([:positive])}.json")
+
+      on_exit(fn -> File.rm(manifest_path) end)
+      :ok = SubscriptionManifest.write!(manifest_path)
+      manifest = manifest_path |> File.read!() |> Jason.decode!()
+      [entry | remaining] = manifest["entries"]
+
+      tampered = Map.put(entry, "depends_on", Enum.sort(["accrue/lib/accrue.ex" | entry["depends_on"]]))
+      File.write!(manifest_path, Jason.encode!(%{manifest | "entries" => [tampered | remaining]}))
+
+      assert_raise ArgumentError, ~r/depends_on.*outside source_digests/i, fn ->
+        SubscriptionManifest.verify!(manifest_path)
+      end
+    end
+
     test "zero, duplicate, missing-ID, and missing-attribution declarations fail closed while one reconciles" do
       assert_raise ArgumentError, fn -> SubscriptionManifest.entries_for([], @storybook_root) end
 

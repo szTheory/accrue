@@ -110,8 +110,8 @@ Frozen baseline at `986f68b71bae643ce24f0906c39d072fe5ea117b`: 6 canonical and c
 - `accrue_admin/lib/accrue_admin/queries/subscriptions.ex` — `152c94ad8fd577c358f974bdf35c2e48fa8ca421ca9e3dda284e771e4b348807`
 - `accrue_admin/lib/accrue_admin/router.ex` — `2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed`
 - `accrue_admin/storybook/_support/subscription_collection.ex` — `f57ecc7e52d9bd08dab74cd035375c3fcd993143fc5561514141b26c26fa3a9e`
-- `accrue_admin/storybook/_support/subscription_compositions_manifest.ex` — `c549a9f23c16ab0168f5bee99c6f82c278a3ab6428091d918da8aaf5f1dd9741`
-- `accrue_admin/storybook/_support/subscription_manifest.ex` — `32d6f531c956df6212b968f12db81247434e6bb7592aafef41117e84ef8afce3`
+- `accrue_admin/storybook/_support/subscription_compositions_manifest.ex` — `0232fa384b746cbffd448fef634154a0527dd7f2a0d483bf91b43f9db6c69693`
+- `accrue_admin/storybook/_support/subscription_manifest.ex` — `2e189769ec4fb4ea8327ffbaa0747924ea0b12af9885e7a20e4c721d17c03e51`
 - `accrue_admin/storybook/_support/subscription_page_scenarios.ex` — `6a0f7265940ba44c31c40435f389d2db5030024e08638467823a20eede0c8c24`
 - `accrue_admin/storybook/_support/subscription_scenarios.ex` — `734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d`
 - `accrue_portal/lib/accrue_portal/live/subscription_live.ex` — `c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372`

@@ -28,6 +28,12 @@ if Mix.env() != :prod do
       "storybook/components/subscription_detail.story.exs"
     ]
     @source_paths @manifest_source_paths ++ @caller_source_paths
+
+    # CIQ-02 (D-09): detail-tier cases depend on the story, the production renderer, the scenario
+    # facts and this builder (@manifest_source_paths), never on the caller-map sources, which only
+    # feed the caller map. A subset of @source_paths by construction; verify!/1 re-checks it
+    # against the digests recorded in the file under test.
+    @detail_depends_on Enum.sort(@manifest_source_paths)
     @phase253_guide_source_paths [
       "accrue_admin/lib/accrue_admin/dev/storybook.ex",
       "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
@@ -225,6 +231,9 @@ if Mix.env() != :prod do
         raise ArgumentError, "subscription manifest source digest is stale"
       end
 
+      # D-09: checked against the digests recorded in the file under test, before entry equality.
+      validate_depends_on!(manifest["entries"], manifest["source_digests"])
+
       current_entries = entries() |> Jason.encode!() |> Jason.decode!()
 
       unless manifest["entries"] == current_entries do
@@ -234,6 +243,39 @@ if Mix.env() != :prod do
       unless Enum.all?(manifest["entries"], &route_matches?(&1, Map.get(&1, "url"))) do
         raise ArgumentError, "subscription manifest contains an invalid direct route"
       end
+
+      :ok
+    end
+
+    @doc """
+    Requires every entry to carry a non-empty, sorted, duplicate-free depends_on list whose paths
+    are all keys of the given source digests. Accepts atom-keyed (compiled) and string-keyed (JSON)
+    entries.
+    """
+    @spec validate_depends_on!([map()], map()) :: :ok
+    def validate_depends_on!(entries, digests) when is_list(entries) and is_map(digests) do
+      Enum.each(entries, fn entry ->
+        label = Map.get(entry, :key) || Map.get(entry, "key")
+        depends_on = Map.get(entry, :depends_on) || Map.get(entry, "depends_on")
+
+        unless is_list(depends_on) and depends_on != [] do
+          raise ArgumentError, "subscription manifest entry #{label} has no depends_on"
+        end
+
+        unless depends_on == depends_on |> Enum.uniq() |> Enum.sort() do
+          raise ArgumentError,
+                "subscription manifest entry #{label} depends_on must be sorted and unique"
+        end
+
+        case Enum.reject(depends_on, &Map.has_key?(digests, &1)) do
+          [] ->
+            :ok
+
+          outside ->
+            raise ArgumentError,
+                  "subscription manifest entry #{label} depends_on path outside source_digests: #{Enum.join(outside, ", ")}"
+        end
+      end)
 
       :ok
     end
@@ -1491,6 +1533,7 @@ if Mix.env() != :prod do
         production_renderer: Map.fetch!(metadata, :production_renderer),
         composition_tier: "component",
         proof_lane: Map.fetch!(metadata, :proof_lane),
+        depends_on: @detail_depends_on,
         scenario_id: Atom.to_string(scenario),
         curation_record: curation_record,
         curation_classification: curation_classification,

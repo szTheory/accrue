@@ -284,6 +284,80 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionCompositionsManifest) d
       assert :ok = Manifest.verify!(@manifest_path)
     end
 
+    @page_only_sources [
+      "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+      "storybook/pages/subscription.story.exs"
+    ]
+    @collection_only_sources [
+      "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+      "accrue_admin/storybook/_support/subscription_collection.ex",
+      "storybook/groups/subscriptions_collection.story.exs"
+    ]
+    @shared_sources [
+      "accrue_admin/lib/accrue_admin/dev/storybook.ex",
+      "accrue_admin/lib/accrue_admin/queries/subscriptions.ex",
+      "accrue_admin/lib/accrue_admin/router.ex",
+      "accrue_admin/storybook/_support/subscription_compositions_manifest.ex",
+      "dev_support/ui_scenarios/cadence_subscriptions.exs"
+    ]
+
+    test "every entry has a sorted non-empty depends_on subset of source_digests, split by tier" do
+      digests = Manifest.source_digests()
+      collection = Manifest.entries() ++ Manifest.collection_variation_entries()
+      pages = Manifest.page_entries()
+      assert length(collection) == 11 and length(pages) == 9
+
+      for entry <- collection ++ pages do
+        assert is_list(entry.depends_on) and entry.depends_on != [], "#{entry.story_path} #{entry.variation_id}"
+        assert entry.depends_on == Enum.sort(Enum.uniq(entry.depends_on))
+        assert Enum.all?(entry.depends_on, &Map.has_key?(digests, &1))
+        for shared <- @shared_sources, do: assert(shared in entry.depends_on, shared)
+      end
+
+      for entry <- collection do
+        for only <- @collection_only_sources, do: assert(only in entry.depends_on, only)
+        for page_only <- @page_only_sources, do: refute(page_only in entry.depends_on, page_only)
+      end
+
+      for entry <- pages do
+        for only <- @page_only_sources, do: assert(only in entry.depends_on, only)
+        for collection_only <- @collection_only_sources, do: refute(collection_only in entry.depends_on, collection_only)
+      end
+
+      assert Manifest.validate_depends_on!(collection ++ pages, digests) == :ok
+    end
+
+    test "a depends_on path outside source_digests fails the validator and verify!/1" do
+      digests = Manifest.source_digests()
+      [first | rest] = Manifest.page_entries()
+      outside = %{first | depends_on: Enum.sort(["accrue/lib/accrue.ex" | first.depends_on])}
+
+      assert_raise ArgumentError, ~r/depends_on.*outside source_digests/i, fn ->
+        Manifest.validate_depends_on!([outside | rest], digests)
+      end
+
+      assert_raise ArgumentError, ~r/depends_on/i, fn ->
+        Manifest.validate_depends_on!([%{first | depends_on: []} | rest], digests)
+      end
+
+      :ok = Manifest.write!(@manifest_path)
+      manifest = @manifest_path |> File.read!() |> Jason.decode!()
+
+      for section <- ["entries", "collection_variations", "page_entries"] do
+        [entry | remaining] = manifest[section]
+        tampered = Map.put(entry, "depends_on", Enum.sort(["accrue/lib/accrue.ex" | entry["depends_on"]]))
+        File.write!(@manifest_path, Jason.encode!(Map.put(manifest, section, [tampered | remaining])))
+
+        assert_raise ArgumentError, ~r/depends_on.*outside source_digests/i, fn ->
+          Manifest.verify!(@manifest_path)
+        end
+      end
+
+      :ok = Manifest.write!(@manifest_path)
+      assert :ok = Manifest.verify!(@manifest_path)
+    end
+
     test "duplicate identity, missing one_row, and empty declarations fail closed" do
       assert_raise ArgumentError, ~r/duplicate collection path\/group\/variation identity/i, fn ->
         Manifest.entries_for(
