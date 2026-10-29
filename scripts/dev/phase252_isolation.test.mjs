@@ -200,7 +200,7 @@ async function withSessions(callback) {
   }
 }
 
-test("ordinary reset deletes its marker and preserves review relationships byte-for-byte", async (t) => {
+test("ordinary reset deletes its marker and preserves review relationships byte-for-byte", async () => {
   await withSessions(async ({ review, normal }) => {
     assert.notEqual(review.config.database, normal.config.database);
     assert.notEqual(review.config.partition, normal.config.partition);
@@ -239,14 +239,15 @@ test("ordinary reset deletes its marker and preserves review relationships byte-
       "/__e2e__/phase240/hold-subscription-cancel",
       "/__e2e__/phase240/release-action",
     ];
-    await t.test("review lane refuses reset, seed and phase240 mutators with 403", async () => {
-      for (const route of refusedRoutes) {
-        const refused = await fetch(`http://127.0.0.1:${review.config.port}${route}`, { method: "POST" });
-        assert.equal(refused.status, 403,
-          `review-lane refusal: POST ${route} must return 403 on the admin-review server`);
-        assert.match(await refused.text(), /admin-review/, `review-lane refusal body for ${route} must name the lane`);
-      }
-    });
+    // Asserted inline (not as a nested test): the Phase 252 aggregate pins this file's
+    // top-level test inventory, and the unchanged-snapshot comparison below is the
+    // review_data_unchanged_negative_control binding for these refusals.
+    for (const route of refusedRoutes) {
+      const refused = await fetch(`http://127.0.0.1:${review.config.port}${route}`, { method: "POST" });
+      assert.equal(refused.status, 403,
+        `review-lane refusal: POST ${route} must return 403 on the admin-review server`);
+      assert.match(await refused.text(), /admin-review/, `review-lane refusal body for ${route} must name the lane`);
+    }
 
     assert.equal(JSON.parse(markerSnapshot(normal.config.database, normalMarker)).length, 0,
       "positive control: reset must remove the ordinary customer and cascading child relationships");
