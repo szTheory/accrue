@@ -5,17 +5,17 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Completed 254-03-PLAN.md
-last_updated: "2026-10-29T02:54:45.435Z"
+stopped_at: Completed 254-04-PLAN.md
+last_updated: "2026-10-29T03:26:43.103Z"
 last_activity: 2026-10-28
 last_activity_desc: Phase 254 execution started
-state_head: b7c3a67cd48ce48bbbff080b6bd10cddef5416d5
+state_head: a431adf83643eca1fa54890cc93fa2aa84d8fa27
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 34
-  completed_plans: 19
-  percent: 56
+  completed_plans: 20
+  percent: 59
 ---
 
 # Project State
@@ -27,13 +27,13 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 254 — Recurring Quality, Reviewed Fixes and Curation
-**Progress:** [██████░░░░] 56%
+**Progress:** [██████░░░░] 59%
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
-Plan: 4 of 18
+Plan: 5 of 18
 Status: Ready to execute
 Last activity: 2026-10-28 — Phase 254 execution started
 
@@ -242,6 +242,7 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 | Phase 254 P01 | 26 min | 3 tasks | 8 files |
 | Phase 254 P02 | 14 min | 3 tasks | 9 files |
 | Phase 254 P03 | 9h | 3 tasks | 14 files |
+| Phase 254 P04 | 40min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -579,6 +580,8 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 - [Phase 254]: 254-02: default Playwright projects share one LAUNCHER_OWNED_AND_VISUAL_SPECS ignore list; spec ownership enforced by phase254_project_ownership.test.mjs
 - [Phase 254]: 254-03: owner chose fix-in-phase for KR-254-01..05 (incl. CI-only RFC 1918 lab server address) and accept-known-red for the SL-G/UAT-contract reds until 254-18
 - [Phase 254]: 254-03: overlay popover shell is role=dialog; Phase 200 guardrails job runs OTP 28.1; Phase 253 aggregate produces the transport proof before the manifest lane
+- [Phase 254]: 254-04: the ledger carries an additive current block so registry and kitchen rules are data-driven; AMD-254-01 derives the pinned Phase 252 counts from the ledger (15/12/3 stays the frozen-baseline positive control)
+- [Phase 254]: 254-04: duplicate evidence is the subject and survivor fact/expected blocks cross-checked against the frozen manifest at source_commit, not a boolean flag
 
 ### Pending Todos
 
@@ -677,8 +680,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-29T02:54:44.614Z
-Stopped at: Completed 254-03-PLAN.md
+Last session: 2026-10-29T03:26:42.482Z
+Stopped at: Completed 254-04-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
