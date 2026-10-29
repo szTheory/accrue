@@ -505,6 +505,11 @@ export function freezeBudget({ budget, samples, mainReference, selection = null,
         if (!Number.isInteger(phase252Cases)) fail("freeze with a selection report needs phase252Cases");
         return {
           ...budget.selection,
+          basis: {
+            phase252: { rendered_cases: phase252Cases },
+            phase253: { rendered_cases: selection.counts.total },
+            selection_report: { run_id: selection.run?.run_id ?? null, mode: selection.mode, event: selection.run?.event ?? null },
+          },
           total: selection.counts.total + phase252Cases,
           selected: selection.counts.selected + phase252Cases,
           sentinels: selection.sentinels.length,
@@ -879,6 +884,11 @@ export const SCENARIOS = [
     assert.ok(!("workers" in budget.frozen.composition_cell), "workers is recorded only when the caller names it");
     assert.equal(freezeBudget({ ...freezeFixture(), compositionWorkers: 3 }).budget.frozen.composition_cell.workers, 3);
     assert.equal(budget.allowances.visual.n, 1);
+    const withSelection = freezeBudget({ ...freezeFixture(), selection: fixtureSelection(), phase252Cases: 2, curationRecordIds: ["CUR-1"] }).budget.selection;
+    assert.equal(withSelection.total, 5);
+    assert.equal(withSelection.phase252_cases, 2);
+    assert.deepEqual(withSelection.curation_record_ids, ["CUR-1"]);
+    assert.equal(withSelection.basis.phase253.rendered_cases, 3);
     assert.equal(budget.allowances.visual.max_added_s, 180);
     assert.equal(budget.allowances.a11y.baseline_p90_s, budget.metrics.freeze.p90);
     assert.deepEqual(budget.target_evaluations.map((entry) => entry.target).sort(), [...TARGET_KEYS].sort());
