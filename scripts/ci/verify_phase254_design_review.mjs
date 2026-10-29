@@ -35,6 +35,7 @@ export const CAPTURE_THEMES = ["light", "dark"];
 export const VERDICTS = ["finding", "assessed-no-finding"];
 export const MANIFEST_PATH = "accrue_admin/e2e/__screenshots__/visual-desktop/manifest.json";
 export const ENV_ID = /^ENV-254-\d{2}$/;
+export const ROUTED_A11Y_ID = /^A11Y-254-\d{2}$/;
 // A test status that proves the test is green now (red-then-green and green-before-and-after are green at the end).
 export const GREEN_TEST_STATUSES = ["green", "red-then-green", "green-before-and-after"];
 
@@ -770,8 +771,24 @@ function checkAmendments(record) {
   }
 }
 
-function checkBaselines(record, findingIds) {
+/** The routed-defect ids of the register at AMD-254-05's register_commit: the only routed accessibility fixes a baseline may be attributed to. */
+export function routedA11yIdsInScope(record, ctx) {
+  const amendment = findAmendment(record, "AMD-254-05");
+  if (!amendment || !HEX40.test(amendment.register_commit ?? "")) return new Set();
+  const data = ctx.read(amendment.register_commit, A11Y_REGISTER_PATH);
+  if (data === null || data === undefined) return new Set();
+  let register;
+  try {
+    register = JSON.parse(toText(data));
+  } catch {
+    return new Set();
+  }
+  return new Set((register?.entries ?? []).filter((entry) => entry.exception_class === "routed-defect" && ROUTED_A11Y_ID.test(entry.id ?? "")).map((entry) => entry.id));
+}
+
+function checkBaselines(record, findingIds, ctx) {
   if (!Array.isArray(record.baselines_changed)) throw fail("baselines_changed must be a list");
+  const routedInScope = routedA11yIdsInScope(record, ctx);
   const decided = new Set();
   for (const decision of record.environmental_decisions ?? []) {
     if (!isObject(decision) || !ENV_ID.test(decision.id ?? "") || !nonEmptyString(decision.owner_decision) || !nonEmptyString(decision.checkpoint)) {
@@ -781,9 +798,14 @@ function checkBaselines(record, findingIds) {
   }
   for (const entry of record.baselines_changed) {
     if (!isObject(entry) || !nonEmptyString(entry.key)) throw fail("every changed baseline needs a key");
-    if (!findingIds.has(entry.finding_id) && !decided.has(entry.finding_id)) {
-      throw fail(`changed baseline ${entry.key} maps to no finding or owner-decided environmental id (finding_id "${entry.finding_id}")`);
+    if (findingIds.has(entry.finding_id) || decided.has(entry.finding_id)) continue;
+    if (ROUTED_A11Y_ID.test(entry.finding_id ?? "")) {
+      if (!routedInScope.has(entry.finding_id)) {
+        throw fail(`changed baseline ${entry.key} names routed accessibility id ${entry.finding_id}, which is not a routed-defect of the register at AMD-254-05's register_commit`);
+      }
+      continue;
     }
+    throw fail(`changed baseline ${entry.key} maps to no finding or owner-decided environmental id (finding_id "${entry.finding_id}")`);
   }
   for (const entry of record.baselines_reattested ?? []) {
     if (!isObject(entry) || !nonEmptyString(entry.key) || !HEX64.test(entry.sha256 ?? "") || !nonEmptyString(entry.reason)) {
@@ -876,7 +898,7 @@ export function verifyDesignReview(record, { root = repositoryRoot, stage, read,
     requireHeadingRedAmendment(record, ctx);
     requireRoutedA11yAmendment(record, ctx);
   }
-  checkBaselines(record, findingIds);
+  checkBaselines(record, findingIds, ctx);
   checkDeferred(record, findingIds);
   if (record.stage === "confirmed") confirmedCapturesMatchManifest(record, (readManifest ?? manifestReader(root))());
   return {
@@ -1013,9 +1035,9 @@ const FIXTURE_REGISTER_COMMIT = "c".repeat(40);
 const FIXTURE_REGISTER = {
   schema_version: 1,
   entries: [
-    { id: "A11Y-FIX-01", exception_class: "routed-defect", cell_ids: ["multiple_rows::viewport::320::light", "page::active::viewport::1280::dark", "page::active::synthetic-return::320::dark"] },
-    { id: "A11Y-FIX-02", exception_class: "routed-defect", cell_ids: ["one_row::viewport::320::light", "page::result_failed::breakpoint::768::light", "journey::D-29::escape-restores-focus"] },
-    { id: "A11Y-FIX-03", exception_class: "justified-exception", cell_ids: ["page::active::viewport::320::light"] }
+    { id: "A11Y-254-01", exception_class: "routed-defect", cell_ids: ["multiple_rows::viewport::320::light", "page::active::viewport::1280::dark", "page::active::synthetic-return::320::dark"] },
+    { id: "A11Y-254-02", exception_class: "routed-defect", cell_ids: ["one_row::viewport::320::light", "page::result_failed::breakpoint::768::light", "journey::D-29::escape-restores-focus"] },
+    { id: "A11Y-254-03", exception_class: "justified-exception", cell_ids: ["page::active::viewport::320::light"] }
   ]
 };
 const FIXTURE_OUTSIDE_CELLS = ["one_row::viewport::320::light", "page::active::synthetic-return::320::dark", "page::result_failed::breakpoint::768::light"];
@@ -1332,6 +1354,23 @@ export const SCENARIOS = [
     }
   ],
   [
+    "stage confirmed: a baseline may be attributed to a routed accessibility id only when it is a routed-defect inside AMD-254-05's scope",
+    () => {
+      const run = (key, mutate = () => {}) => {
+        const { record, options, manifest } = confirmedFixture();
+        manifest.entries["subscriptions"] = { case_key: "subscriptions", sha256: sha256("list bytes"), mint_run_id: "424242", served: { css_sha256: "1".repeat(64) } };
+        record.baselines_changed.push({ key: "subscriptions", finding_id: key, sha256: sha256("list bytes"), reason: "row gap" });
+        mutate(record);
+        return () => verifyDesignReview(record, { ...options, readManifest: () => manifest, stage: "confirmed" });
+      };
+      assert.doesNotThrow(run("A11Y-254-01"), "positive control: a routed defect of the register at register_commit maps");
+      assert.throws(run("A11Y-254-03"), /not a routed-defect of the register at AMD-254-05's register_commit/, "a justified exception is not a routed defect");
+      assert.throws(run("A11Y-254-77"), /not a routed-defect of the register/, "an id the register does not hold");
+      assert.throws(run("A11Y-FIX-77"), /maps to no finding or owner-decided environmental id/, "an unknown id shape");
+      assert.throws(run("A11Y-254-01", (record) => { record.amendments = record.amendments.filter((entry) => entry.id !== "AMD-254-05"); }), /AMD-254-05|not a routed-defect/, "without the amendment there is no scope");
+    }
+  ],
+  [
     "stage confirmed: a confirmed verdict needs green tests, passing confirmation captures and a corrected finding; not-confirmed needs a reason",
     () => {
       const run = (mutate) => {
@@ -1527,7 +1566,7 @@ export const SCENARIOS = [
       // An empty affected_cells passes when every routed cell is inside the bound.
       const insideOnly = {
         schema_version: 1,
-        entries: [{ id: "A11Y-FIX-01", exception_class: "routed-defect", cell_ids: ["multiple_rows::viewport::1280::dark", "page::active::viewport::320::light", "journey::D-29::back-restores-focus"] }]
+        entries: [{ id: "A11Y-254-01", exception_class: "routed-defect", cell_ids: ["multiple_rows::viewport::1280::dark", "page::active::viewport::320::light", "journey::D-29::back-restores-focus"] }]
       };
       corrected((_record, amendment) => { amendment.affected_cells = []; }, null, { register: insideOnly });
       corrected((_record, amendment) => { amendment.affected_cells = ["page::active::viewport::320::light"]; }, /extra 1/, { register: insideOnly });
