@@ -7,6 +7,7 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+import { isDeepStrictEqual } from "node:util";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { isMainModule } from "./main_module.mjs";
@@ -60,6 +61,8 @@ const COMMON_SOURCES = Object.freeze([
   "accrue_admin/playwright.phase252.config.js",
   "accrue_admin/e2e/phase253-composition-helpers.js",
   "accrue_admin/e2e/phase254-result-ledger.js",
+  "accrue_admin/e2e/phase253-cell-universe.js",
+  "accrue_admin/e2e/phase254-selection-invariants.js",
   "accrue_admin/e2e/subscription-compositions-phase253.spec.js",
   "accrue_admin/e2e/subscription-compositions-reconcile-phase254.spec.js",
   "accrue_admin/assets/css/app.css",
@@ -318,6 +321,8 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory }) {
     "accrue_admin/e2e/subscription-compositions-reconcile-phase254.spec.js",
     "accrue_admin/e2e/phase253-composition-helpers.js",
     "accrue_admin/e2e/phase254-result-ledger.js",
+    "accrue_admin/e2e/phase253-cell-universe.js",
+    "accrue_admin/e2e/phase254-selection-invariants.js",
     "accrue_admin/playwright.phase252.config.js",
     "accrue_admin/lib/accrue_admin/dev/storybook.ex",
     "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
@@ -678,7 +683,7 @@ function assertExactStrings(actual, expected, label) {
   exactSet(actual, expected, label);
 }
 
-function validateBrowserEvidence(spec, execution, { root, expectedSourceDigests, expectedManifestDigest, browserResult, expectedBrowserCells }) {
+function validateBrowserEvidence(spec, execution, { root, expectedSourceDigests, expectedManifestDigest, browserResult, expectedBrowserCells, selection }) {
   let report;
   try {
     report = JSON.parse(execution.stdout);
@@ -693,9 +698,29 @@ function validateBrowserEvidence(spec, execution, { root, expectedSourceDigests,
   if (browserResult.human_judgment !== false || browserResult.proof_lane !== "actual direct browser presentation; no mounted-effect claims") {
     fail("browser bundle has an unsupported proof or judgment classification");
   }
-  const definitions = expectedBrowserCells || spec.browser_contract.expected_cell_definitions(JSON.parse(fs.readFileSync(safeRepoPath(root, MANIFEST_PATH), "utf8")));
+  const universe = expectedBrowserCells || spec.browser_contract.expected_cell_definitions(JSON.parse(fs.readFileSync(safeRepoPath(root, MANIFEST_PATH), "utf8")));
+  const universeKeys = universe.map(({ key }) => key);
+  if (new Set(universeKeys).size !== universeKeys.length) fail("expected browser cell inventory contains duplicate keys");
+  // Phase 254 D-11/D-14: the expected set is exactly the selected set. With no selection the
+  // universe is expected in full, and a result that declares an affected selection is rejected
+  // (acceptance evidence is always a full sweep).
+  let definitions = universe;
+  if (selection) {
+    const known = new Set(universeKeys);
+    const unknown = selection.selected_keys.filter((key) => !known.has(key));
+    if (unknown.length > 0) fail("selection names a case outside the compiled cell universe: " + unknown[0]);
+    const selectedSet = new Set(selection.selected_keys);
+    const excludedSet = new Set(selection.excluded_keys || []);
+    const excludedRow = (browserResult.cases || []).find((row) => excludedSet.has(row?.key));
+    if (excludedRow) fail("browser result has a row for an excluded case: " + String(excludedRow.key));
+    if (!isDeepStrictEqual(browserResult.selection ?? null, selection.block)) {
+      fail("browser result selection block differs from the selection this run was started with");
+    }
+    definitions = universe.filter(({ key }) => selectedSet.has(key));
+  } else if (browserResult.selection && browserResult.selection.mode !== "full") {
+    fail("browser result declares an affected selection; this validation requires a full sweep");
+  }
   const expectedKeys = definitions.map(({ key }) => key);
-  if (new Set(expectedKeys).size !== expectedKeys.length) fail("expected browser cell inventory contains duplicate keys");
   assertExactStrings(browserResult.expected_case_keys, expectedKeys, "browser declared cell inventory");
   if (!Array.isArray(browserResult.cases) || browserResult.cases.length !== expectedKeys.length) {
     fail("browser result is incomplete, pooled, or contains extra cells");
@@ -760,7 +785,10 @@ function validateBrowserEvidence(spec, execution, { root, expectedSourceDigests,
     fail("browser geometry negative controls were not independently detected");
   }
   const assertionBindings = {};
+  const selectedKinds = new Set(definitions.map((definition) => definition.case_kind));
   for (const [assertion, kinds] of Object.entries(spec.assertion_bindings)) {
+    // An affected selection may legitimately contain no cell of a kind; full mode never skips.
+    if (selection?.mode === "affected" && !kinds.includes("__reconciliation__") && !kinds.some((kind) => selectedKinds.has(kind))) continue;
     const selected = kinds.includes("__reconciliation__")
       ? [reconciliation]
       : uniqueSorted(rows.filter((row) => kinds.includes(row.case_kind)).map((row) => row.executed_test));
@@ -820,6 +848,7 @@ export function validateLaneEvidence(spec, execution, options = {}) {
       expectedManifestDigest: options.expectedManifestDigest,
       browserResult: options.browserResult,
       expectedBrowserCells: options.expectedBrowserCells,
+      selection: options.selection || null,
     });
   }
   if (spec.reporter.kind === "process-markers") {
@@ -1057,6 +1086,26 @@ async function main() {
     return;
   }
 
+  // Phase 254 D-11: the selection (PHASE254_SELECTION, passed to every child unchanged through
+  // the inherited environment) is resolved and validated once, before the browser lane starts.
+  // Unset means the full universe. A report that fails its invariants, names another projection
+  // or another universe stops the run here.
+  let selection;
+  try {
+    selection = browserHelpers.resolveSelection(browserHelpers.createExpectedBrowserCellDefinitions(compiledManifest));
+  } catch (error) {
+    bundle.status = "failed";
+    bundle.validation_error = error.message;
+    bundle.run_completed_at = new Date().toISOString();
+    writeJson(resultPath, bundle);
+    process.stderr.write("Phase 253 aggregate selection validation failed: " + error.message + "\n");
+    process.exitCode = 1;
+    return;
+  }
+  bundle.selection = selection.block;
+  process.stdout.write("Phase 254 selection: mode " + selection.block.mode + ", " + selection.block.selected_count + " of " +
+    selection.block.total_count + " browser cells (" + selection.block.reason + ")\n");
+
   bundle.manifest_sha256 = compiledManifestDigest;
   bundle.source_fingerprint = initialSnapshot.fingerprint;
   bundle.source_digests = initialSnapshot.digests;
@@ -1091,6 +1140,7 @@ async function main() {
             expectedSourceDigests: initialSnapshot.digests,
             expectedManifestDigest: compiledManifestDigest,
             browserResult,
+            selection,
           });
           captured.assertion_refs = evidence.assertion_refs;
           captured.execution_evidence = evidence;

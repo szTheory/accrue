@@ -532,3 +532,17 @@ test("--self-test passes and names the hostile-path fixture", () => {
   assert.match(result.stdout, /hostile-path fixture/);
   assert.match(result.stdout, /Phase 254 selection self-test: PASS/);
 });
+
+test("the selector and the Playwright lane apply one shared set of report invariants", () => {
+  const shared = createRequire(import.meta.url)("../../accrue_admin/e2e/phase254-selection-invariants.js");
+  const helpers = createRequire(import.meta.url)("../../accrue_admin/e2e/phase253-composition-helpers.js");
+  assert.equal(selection.assertSelectionInvariants, shared.assertSelectionInvariants, "the selector re-exports the shared function, not a copy");
+  assert.equal(typeof helpers.resolveSelection, "function");
+  const { projection, projectionSha256 } = selection.readProjection(ROOT);
+  const report = selection.selectCases({ projection, run: { event: "local-fixture" }, changedPaths: [{ status: "M", path: "docs/x.md" }], projectionSha256 });
+  assert.equal(shared.assertSelectionInvariants(report), true, "positive control: a real report passes");
+  const forged = structuredClone(report);
+  forged.selected = forged.selected.filter((item) => item.id !== forged.sentinels[0]);
+  assert.throws(() => shared.assertSelectionInvariants(forged), (error) => error.code === "SELECTION_INVARIANT" && /Phase 254 selection:/.test(error.message));
+  assert.throws(() => selection.assertSelectionInvariants(forged), (error) => error.code === "SELECTION_INVARIANT");
+});

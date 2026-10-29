@@ -5,6 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { expectedNodeTestIdentities } from "./phase252_reporters.mjs";
+import { readChangedPathsFile, readProjection, selectCases } from "./phase254_selection.mjs";
 
 const root = path.resolve(process.env.PHASE253_REPO_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.."));
 const runnerPath = path.join(root, "scripts/ci/verify_phase253_compositions.mjs");
@@ -471,6 +472,197 @@ test("browser helper binds all 151 full cell keys to their exact test and source
   const wrongCollectionFacts = structuredClone(results);
   wrongCollectionFacts.cases[0].source_identity.expected_facts.customer_name = "Wrong Customer";
   assert.ok(browserHelpers.reconcileResults(wrongCollectionFacts, manifest, manifestDigest).some((error) => /exact definition/.test(error)));
+});
+
+// --- Phase 254 CIQ-02 (D-11/D-14): the lane executes exactly the reported selection ------------------------
+
+const selectionReportDirectory = path.join(root, "accrue_admin/tmp/phase254");
+
+function compiledDefinitions() {
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, "accrue_admin/tmp/phase253/manifest.json"), "utf8"));
+  return { manifest, definitions: browserHelpers.createExpectedBrowserCellDefinitions(manifest) };
+}
+
+// A real report from the committed projection and the collection-only fixture (the same
+// input the local verification and the wave-boundary gate use).
+function collectionOnlyReport() {
+  const { projection, projectionSha256 } = readProjection(root);
+  const read = readChangedPathsFile("scripts/ci/fixtures/phase254-selection/collection-only.txt", { root });
+  return selectCases({
+    projection,
+    run: read.run,
+    changedPaths: read.changedPaths,
+    fullReasons: read.fullReasons,
+    projectionSha256,
+    selectorSha256: null,
+    fixtureSource: read.fixtureSource,
+  });
+}
+
+function withReportFile(report, fn) {
+  fs.mkdirSync(selectionReportDirectory, { recursive: true });
+  const file = path.join(selectionReportDirectory, `selection-contract-${process.pid}-${Math.random().toString(16).slice(2)}.json`);
+  fs.writeFileSync(file, JSON.stringify(report));
+  try {
+    return fn(path.relative(root, file));
+  } finally {
+    fs.rmSync(file, { force: true });
+  }
+}
+
+test("with no selection file the lane expects every compiled cell in full mode", () => {
+  const { definitions } = compiledDefinitions();
+  assert.equal(definitions.length, 151);
+  for (const env of [{}, { PHASE254_SELECTION: "" }]) {
+    const selection = browserHelpers.resolveSelection(definitions, { env });
+    assert.equal(selection.mode, "full");
+    assert.equal(selection.selected_keys.length, 151);
+    assert.deepEqual(selection.excluded_keys, []);
+    assert.deepEqual(selection.block, { report_sha256: null, mode: "full", selected_count: 151, total_count: 151, reason: "no-selection-file" });
+  }
+});
+
+test("the lane registers exactly the selected case ids from a collection-only selection report", () => {
+  const { definitions } = compiledDefinitions();
+  const report = collectionOnlyReport();
+  assert.equal(report.mode, "affected", "positive control: the fixture selects a strict subset");
+  assert.ok(report.excluded.length > 0);
+  withReportFile(report, (reportPath) => {
+    const selection = browserHelpers.resolveSelection(definitions, { env: { PHASE254_SELECTION: reportPath } });
+    assert.equal(selection.mode, "affected");
+    assert.equal(selection.block.selected_count, report.selected.length);
+    assert.ok(selection.block.selected_count < 151);
+    assert.equal(selection.block.total_count, 151);
+    assert.match(selection.block.report_sha256, /^[a-f0-9]{64}$/);
+    assert.deepEqual([...selection.selected_keys].sort(), report.selected.map((item) => item.id).sort());
+    assert.deepEqual([...selection.excluded_keys].sort(), report.excluded.map((item) => item.id).sort());
+    assert.equal(selection.selected_keys.length + selection.excluded_keys.length, 151);
+    assert.ok(selection.excluded_keys.every((key) => !selection.selected_keys.includes(key)));
+  });
+});
+
+test("a selection report that is invalid, foreign or stale fails closed before any cell is registered", () => {
+  const { definitions } = compiledDefinitions();
+  const good = collectionOnlyReport();
+  const resolve = (report, env = {}) => withReportFile(report, (reportPath) =>
+    browserHelpers.resolveSelection(definitions, { env: { PHASE254_SELECTION: reportPath, ...env } }));
+  assert.doesNotThrow(() => resolve(good), "positive control: the untouched report resolves");
+
+  const otherProjection = structuredClone(good);
+  otherProjection.projection_sha256 = "e".repeat(64);
+  assert.throws(() => resolve(otherProjection), /projection digest differs from the committed projection/);
+
+  const missingDigest = structuredClone(good);
+  missingDigest.projection_sha256 = null;
+  assert.throws(() => resolve(missingDigest), /projection digest differs/);
+
+  const omitsSentinel = structuredClone(good);
+  const sentinel = omitsSentinel.sentinels[0];
+  omitsSentinel.excluded.push({ id: sentinel, reason: "forged" });
+  omitsSentinel.selected = omitsSentinel.selected.filter((item) => item.id !== sentinel);
+  assert.throws(() => resolve(omitsSentinel), /sentinels/);
+
+  const otherUniverse = structuredClone(good);
+  const dropped = otherUniverse.excluded.pop().id;
+  otherUniverse.total_ids = otherUniverse.total_ids.filter((id) => id !== dropped);
+  otherUniverse.counts = { total: otherUniverse.total_ids.length, selected: otherUniverse.selected.length, excluded: otherUniverse.excluded.length };
+  assert.throws(() => resolve(otherUniverse), /case universe differs from the compiled cell universe/);
+
+  assert.throws(() => browserHelpers.resolveSelection(definitions, { env: { PHASE254_SELECTION: "../outside.json" } }), /inside the repository/);
+  assert.throws(() => browserHelpers.resolveSelection(definitions, { env: { PHASE254_SELECTION: "accrue_admin/tmp/phase254/does-not-exist.json" } }), /unreadable/);
+});
+
+test("reconciliation expects exactly the selected set and rejects excluded and missing rows", () => {
+  const { manifest, definitions } = compiledDefinitions();
+  const report = collectionOnlyReport();
+  withReportFile(report, (reportPath) => {
+    const selection = browserHelpers.resolveSelection(definitions, { env: { PHASE254_SELECTION: reportPath } });
+    const selectedSet = new Set(selection.selected_keys);
+    const rowFor = (definition) => ({
+      ...definition,
+      run_id: runId,
+      manifest_sha256: manifestDigest,
+      status: "passed",
+      assertion_ids: ["contract-cell"],
+      served_assets: { verified: true },
+    });
+    const selectedRows = definitions.filter(({ key }) => selectedSet.has(key)).map(rowFor);
+    const results = { run_id: runId, expected_case_keys: [...selection.selected_keys], cases: selectedRows };
+    assert.deepEqual(browserHelpers.reconcileResults(results, manifest, manifestDigest, selection), [], "positive control: exactly the selected rows reconcile");
+
+    const excludedDefinition = definitions.find(({ key }) => !selectedSet.has(key));
+    const withExcluded = { ...results, cases: [...selectedRows, rowFor(excludedDefinition)] };
+    assert.ok(
+      browserHelpers.reconcileResults(withExcluded, manifest, manifestDigest, selection).some((error) => error === `result row for an excluded case: ${excludedDefinition.key}`),
+      "an extra row for an excluded id fails",
+    );
+
+    const missing = { ...results, cases: selectedRows.slice(1) };
+    assert.ok(
+      browserHelpers.reconcileResults(missing, manifest, manifestDigest, selection).some((error) => error === `missing browser cell: ${selectedRows[0].key} (selected)`),
+      "a missing selected row fails",
+    );
+
+    const widened = { ...results, expected_case_keys: definitions.map(({ key }) => key) };
+    assert.ok(
+      browserHelpers.reconcileResults(widened, manifest, manifestDigest, selection).some((error) => /declared browser cell keys differ from the selected set/.test(error)),
+      "a header that declares the full universe cannot widen a selection",
+    );
+  });
+});
+
+test("aggregate browser evidence accepts exactly the selection and rejects excluded rows, missing rows and a forged block", async () => {
+  const runner = await loadRunner();
+  const resultPath = "accrue_admin/tmp/phase253/ci-results/contract-selection-result.json";
+  const fixture = browserFixture(runner, resultPath);
+  const chosen = ["one_row::viewport::320::light", "geometry::negative-controls::320::light"];
+  const selection = {
+    mode: "affected",
+    selected_keys: chosen,
+    excluded_keys: fixture.keys.map(({ key }) => key).filter((key) => !chosen.includes(key)),
+    block: { report_sha256: "a".repeat(64), mode: "affected", selected_count: 2, total_count: 5, reason: "selection-report" },
+  };
+  const absoluteResultPath = path.join(root, resultPath);
+  fs.mkdirSync(path.dirname(absoluteResultPath), { recursive: true });
+  fs.writeFileSync(absoluteResultPath, JSON.stringify(fixture.result), { mode: 0o600 });
+  const rows = fixture.cases.filter(({ key }) => chosen.includes(key));
+  const result = { ...fixture.result, expected_case_keys: chosen, selection: selection.block, cases: rows };
+  const reportFor = (cases) => playwrightReport([...cases.map(({ executed_test }) => executed_test), fixture.reconciliation], fixture.reconciliation);
+  const execution = (cases) => ({
+    run_id: runId, exitCode: 0, stdout: JSON.stringify(reportFor(cases)), manifest_sha256: manifestDigest, source_digests: fixture.digests,
+  });
+  const validate = (browserResult, cases, overrides = {}) => runner.validateLaneEvidence(fixture.spec, execution(cases), {
+    root, expectedRunId: runId, expectedSourceDigests: fixture.digests, expectedManifestDigest: manifestDigest,
+    browserResult, expectedBrowserCells: fixture.keys, selection, ...overrides,
+  });
+
+  try {
+    const accepted = validate(result, rows);
+    assert.equal(accepted.browser_cells.length, 2);
+    assert.equal(accepted.test_count, 3);
+    assert.deepEqual(accepted.assertion_refs, ["geometry_negative_controls", "manifest_reconciliation", "rendered_cells"],
+      "an affected selection without a breakpoint cell binds no breakpoint assertion");
+
+    const extra = fixture.cases.find(({ key }) => key === "one_row::breakpoint::767::light");
+    const withExcluded = { ...result, cases: [...rows, extra] };
+    assert.throws(() => validate(withExcluded, [...rows, extra]), /row for an excluded case: one_row::breakpoint::767::light/);
+
+    const missingRows = rows.slice(0, 1);
+    assert.throws(() => validate({ ...result, cases: missingRows }, missingRows), /incomplete, pooled, or contains extra cells/);
+
+    assert.throws(() => validate({ ...result, selection: { ...selection.block, selected_count: 3 } }, rows), /selection block differs/);
+    assert.throws(() => validate({ ...result, selection: undefined }, rows), /selection block differs/);
+
+    assert.throws(() => validate(result, rows, { selection: { ...selection, selected_keys: [...chosen, "page::not-in-the-universe::viewport::320::light"] } }), /outside the compiled cell universe/);
+
+    // Acceptance evidence is a full sweep: an affected result cannot be validated without its selection.
+    assert.throws(() => validate(result, rows, { selection: null }), /requires a full sweep/);
+    // Positive control for the guard above: a full-mode block validates without a selection.
+    const full = { ...fixture.result, selection: { report_sha256: null, mode: "full", selected_count: 5, total_count: 5, reason: "no-selection-file" } };
+    assert.doesNotThrow(() => validate(full, fixture.cases, { selection: null }));
+  } finally {
+    fs.rmSync(absoluteResultPath, { force: true });
+  }
 });
 
 test("browser assertion inventories include breakpoint and page stress controls", async () => {

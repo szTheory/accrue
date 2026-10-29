@@ -4,6 +4,7 @@ const path = require("node:path");
 const { isDeepStrictEqual } = require("node:util");
 const { expect } = require("@playwright/test");
 const { mergeCaseResults, writeCaseResult } = require("./phase254-result-ledger.js");
+const { assertSelectionInvariants } = require("./phase254-selection-invariants.js");
 const {
   COLLECTION_STATES,
   GEOMETRY_NEGATIVE_CONTROL_TITLE,
@@ -134,6 +135,78 @@ function readPhase253Manifest() {
   return { manifest, manifestDigest: sha256(raw), runId: RUN_ID };
 }
 
+// Phase 254 CIQ-02 (D-11/D-14): the composition lane executes exactly the selection a
+// selection report names. PHASE254_SELECTION is a path to a report written by
+// scripts/ci/phase254_selection.mjs. Unset (or empty) is the fail-closed default: every
+// compiled cell, recorded as mode full with reason no-selection-file. A report is trusted
+// only after the selector's own invariants pass, its projection digest equals the digest of
+// the committed projection, and its universe equals the cell universe this run compiled.
+const SELECTION_ENV = "PHASE254_SELECTION";
+const SELECTION_PROJECTION_PATH = "accrue_admin/storybook/phase254-selection.json";
+
+function resolveSelection(definitions, { env = process.env, root = REPO_ROOT } = {}) {
+  const keys = definitions.map((definition) => definition.key);
+  if (new Set(keys).size !== keys.length) throw new Error("Phase 254 selection: the compiled cell universe has duplicate keys");
+  const raw = env[SELECTION_ENV];
+  if (raw === undefined || raw === "") {
+    return {
+      mode: "full",
+      selected_keys: [...keys],
+      excluded_keys: [],
+      block: { report_sha256: null, mode: "full", selected_count: keys.length, total_count: keys.length, reason: "no-selection-file" },
+    };
+  }
+
+  const reportPath = path.resolve(root, raw);
+  const relative = path.relative(root, reportPath);
+  if (relative === "" || relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error(`Phase 254 selection: ${SELECTION_ENV} must name a file inside the repository`);
+  }
+  let bytes;
+  try {
+    bytes = fs.readFileSync(reportPath);
+  } catch (error) {
+    throw new Error(`Phase 254 selection: ${SELECTION_ENV} report is unreadable (${error.code || error.message})`);
+  }
+  let report;
+  try {
+    report = JSON.parse(bytes.toString("utf8"));
+  } catch (error) {
+    throw new Error(`Phase 254 selection: report is not valid JSON (${error.message})`);
+  }
+  // The very invariants the selector applies when it writes a report (a CommonJS module the
+  // selector also loads, because Playwright's loader cannot require() the selector itself).
+  assertSelectionInvariants(report);
+
+  const projectionDigest = sha256(fs.readFileSync(path.join(root, SELECTION_PROJECTION_PATH)));
+  if (report.projection_sha256 !== projectionDigest) {
+    throw new Error("Phase 254 selection: the report's projection digest differs from the committed projection");
+  }
+  const reportTotal = [...report.total_ids].sort();
+  if (!isDeepStrictEqual(reportTotal, [...keys].sort())) {
+    throw new Error("Phase 254 selection: the report's case universe differs from the compiled cell universe");
+  }
+  const selectedKeys = report.selected.map((item) => item.id);
+  const selectedSet = new Set(selectedKeys);
+  return {
+    mode: report.mode,
+    // Keep the compiled universe order so registration order never depends on the report.
+    selected_keys: keys.filter((key) => selectedSet.has(key)),
+    excluded_keys: keys.filter((key) => !selectedSet.has(key)),
+    block: {
+      report_sha256: sha256(bytes),
+      mode: report.mode,
+      selected_count: selectedKeys.length,
+      total_count: report.total_ids.length,
+      reason: "selection-report",
+    },
+  };
+}
+
+function selectionFor(manifest, options) {
+  return resolveSelection(createExpectedBrowserCellDefinitions(manifest), options);
+}
+
 function matchesExpectedBrowserCell(row, definition) {
   if (!row || !definition || row.key !== definition.key || row.case_kind !== definition.case_kind) return false;
   return [
@@ -172,7 +245,7 @@ function writeResults(filePath, results) {
   fs.renameSync(temporaryPath, filePath);
 }
 
-function beginCollectionResults(runId, manifest, manifestDigest, expectedCaseKeys) {
+function beginCollectionResults(runId, manifest, manifestDigest, expectedCaseKeys, selectionBlock = null) {
   fs.mkdirSync(RESULT_ROOT, { recursive: true });
   const filePath = resultPath(runId);
   const expectedCases = [...expectedCaseKeys];
@@ -180,7 +253,8 @@ function beginCollectionResults(runId, manifest, manifestDigest, expectedCaseKey
   if (fs.existsSync(filePath)) {
     const prior = JSON.parse(fs.readFileSync(filePath, "utf8"));
     if (prior.run_id !== runId || prior.manifest_sha256 !== manifestDigest ||
-        JSON.stringify(prior.expected_case_keys) !== JSON.stringify(expectedCases)) {
+        JSON.stringify(prior.expected_case_keys) !== JSON.stringify(expectedCases) ||
+        !isDeepStrictEqual(prior.selection ?? null, selectionBlock)) {
       throw new Error("Phase 253 result path already belongs to a different run or contract");
     }
     return filePath;
@@ -193,6 +267,7 @@ function beginCollectionResults(runId, manifest, manifestDigest, expectedCaseKey
     human_judgment: false,
     proof_lane: "actual direct browser presentation; no mounted-effect claims",
     expected_case_keys: expectedCases,
+    selection: selectionBlock,
     cases: [],
   });
   return filePath;
@@ -227,16 +302,27 @@ function recordNegativeControls(filePath, runId, controls) {
   writeResults(filePath, results);
 }
 
-function reconcileResults(results, manifest, manifestDigest) {
+function reconcileResults(results, manifest, manifestDigest, selection = null) {
   const errors = [];
-  const expected = results.expected_case_keys || [];
+  // With a selection, the expected set is the selected set from the report, never a list
+  // read back from the results being checked (D-14).
+  const expected = selection ? selection.selected_keys : results.expected_case_keys || [];
   const actual = results.cases || [];
+  if (selection) {
+    if (!isDeepStrictEqual([...(results.expected_case_keys || [])].sort(), [...selection.selected_keys].sort())) {
+      errors.push("declared browser cell keys differ from the selected set");
+    }
+    const excluded = new Set(selection.excluded_keys);
+    for (const row of actual) {
+      if (excluded.has(row.key)) errors.push(`result row for an excluded case: ${row.key}`);
+    }
+  }
   const definitions = createExpectedBrowserCellDefinitions(manifest);
   const definitionsByKey = new Map(definitions.map((definition) => [definition.key, definition]));
   const counts = new Map();
   for (const row of actual) counts.set(row.key, (counts.get(row.key) || 0) + 1);
   for (const key of expected) {
-    if (!counts.has(key)) errors.push(`missing browser cell: ${key}`);
+    if (!counts.has(key)) errors.push(`missing browser cell: ${key}${selection ? " (selected)" : ""}`);
     if ((counts.get(key) || 0) > 1) errors.push(`duplicate browser cell: ${key}`);
   }
   for (const row of actual) {
@@ -1130,6 +1216,8 @@ module.exports = {
   readPhase253Manifest,
   reconcileResults,
   recordCaseResult,
+  resolveSelection,
+  selectionFor,
   recordNegativeControls,
   resultPath,
   runCollectionCase,

@@ -9,6 +9,7 @@ const {
   isOwnedPhase253Run,
   readPhase253Manifest,
   resultPath,
+  selectionFor,
   runCollectionCase,
   runGeometryNegativeControls,
   runPageCase,
@@ -19,16 +20,20 @@ const {
 // isOwnedPhase253Run in the helpers.
 if (isOwnedPhase253Run()) {
   const identity = readPhase253Manifest();
-  const cases = createCollectionCases(identity.manifest);
-  const pageCases = createPageCases(identity.manifest);
-  const pageStressCases = createPageStressCases(identity.manifest);
+  // Phase 254 D-11: only the selected case ids are registered. An unselected case is never
+  // registered and never test.skip'd; with no PHASE254_SELECTION the full universe runs.
+  const selection = selectionFor(identity.manifest);
+  const selected = new Set(selection.selected_keys);
+  const cases = createCollectionCases(identity.manifest).filter((testCase) => selected.has(testCase.key));
+  const pageCases = createPageCases(identity.manifest).filter((testCase) => selected.has(testCase.key));
+  const pageStressCases = createPageStressCases(identity.manifest).filter((testCase) => selected.has(testCase.key));
   const resultFile = resultPath(identity.runId);
   const oneRow = identity.manifest.collection_variations.find((entry) => entry.variation_id === "one_row");
   const extraKeys = [
     "one_row::synthetic-text::320::light",
     "one_row::synthetic-text::320::dark",
     "geometry::negative-controls::320::light",
-  ];
+  ].filter((key) => selected.has(key));
   if (!oneRow) throw new Error("Phase 253 compiled collection manifest is missing one_row");
 
   test.beforeAll(() => {
@@ -39,6 +44,7 @@ if (isOwnedPhase253Run()) {
       [...cases.map((testCase) => testCase.key), ...extraKeys,
         ...pageCases.map((testCase) => testCase.key),
         ...pageStressCases.map((testCase) => testCase.key)],
+      selection.block,
     );
   });
 
@@ -51,15 +57,17 @@ if (isOwnedPhase253Run()) {
       });
     }
 
-    for (const theme of ["light", "dark"]) {
+    for (const theme of ["light", "dark"].filter((candidate) => selected.has(`one_row::synthetic-text::320::${candidate}`))) {
       test(collectionSyntheticTitle(theme), async ({ page }, testInfo) => {
         await runSyntheticTextStress(page, oneRow, { ...identity, resultPath: resultFile }, theme, testInfo);
       });
     }
 
-    test(GEOMETRY_NEGATIVE_CONTROL_TITLE, async ({ page }, testInfo) => {
-      await runGeometryNegativeControls(page, oneRow, { ...identity, resultPath: resultFile }, testInfo);
-    });
+    if (selected.has("geometry::negative-controls::320::light")) {
+      test(GEOMETRY_NEGATIVE_CONTROL_TITLE, async ({ page }, testInfo) => {
+        await runGeometryNegativeControls(page, oneRow, { ...identity, resultPath: resultFile }, testInfo);
+      });
+    }
 
     for (const testCase of [...pageCases, ...pageStressCases]) {
       test(testCase.title, async ({ page }, testInfo) => {
