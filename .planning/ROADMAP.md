@@ -153,7 +153,7 @@ Cross-cutting constraints: preserve production DataTable/LiveView authority, exi
   4. A maintainer can reproduce cold-start, warm-preview/focused-check and incremental CI measurements, including scenario counts, and use a frozen affordable selection/budget before widening coverage; first-slice measurements inform the freeze and deviations are explicitly resolved without weakening existing gates. Initial targets remain provisional: under 10s warm preview where feasible, under 60s focused checks, at most 3min additional warm browser work and 5min incremental CI critical path. (CIQ-04)
   5. A maintainer can inspect retirement/merge records naming reachability, reason and surviving owner/replacement for stale, impossible or duplicate stories while retaining meaningful legacy/API/negative regressions and kitchen proof, then choose the next existing UI job from a refreshed actor/job/composition gap map and distinct adopter briefs showing remaining Admin/Portal horizons, uncovered states, review triggers and maintenance cost. (CURATE-01, CURATE-02)
 
-**Plans**: 10/18 plans executed
+**Plans**: 11/18 plans executed
 **UI hint**: yes
 
 Plans:
@@ -187,7 +187,7 @@ Plans:
 - [x] 254-10-PLAN.md — Deterministic storybook.css recompose and the design review record (assessment)
 
 **Wave 10**
-- [ ] 254-11-PLAN.md — All-severity axe, disposition register, deep probes and mounted keyboard journey
+- [x] 254-11-PLAN.md — All-severity axe, disposition register, deep probes and mounted keyboard journey
 
 **Wave 11**
 - [ ] 254-12-PLAN.md — Correction batch part 1: red CSS tests, CSS/a11y fixes across all three artifacts, Typography contract amendments
@@ -218,7 +218,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 252. Production-backed Subscription Stories | 10/10 | Complete    | 2026-10-27 |
 | 253. Real Groups and a Whole Subscription Job | 6/6 | Complete    | 2026-10-27 |
-| 254. Recurring Quality, Reviewed Fixes and Curation | 10/18 | In Progress | - |
+| 254. Recurring Quality, Reviewed Fixes and Curation | 11/18 | In Progress | - |
 
 ## Rolling Direction Beyond v1.68
 

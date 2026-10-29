@@ -5,16 +5,16 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Completed 254-10-PLAN.md
-last_updated: "2026-10-29T08:35:15.009Z"
+stopped_at: Completed 254-11-PLAN.md
+last_updated: "2026-10-29T09:51:39.949Z"
 last_activity: 2026-10-28
 last_activity_desc: Phase 254 execution started
-state_head: caf2fa929166371f05c6d2f8d5e4fa2afae8e318
+state_head: eefee2a62958dbdefe426d5434ed133e91b3e8ec
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 34
-  completed_plans: 26
+  completed_plans: 27
   percent: 67
 ---
 
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 ## Current Position
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
-Plan: 11 of 18
+Plan: 12 of 18
 Status: Ready to execute
 Last activity: 2026-10-28 — Phase 254 execution started
 
@@ -249,6 +249,7 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 | Phase 254 P08 | 25min | 2 tasks | 11 files |
 | Phase 254 P09 | 3 h | 3 tasks | 15 files |
 | Phase 254 P10 | 2h | 2 tasks | 8 files |
+| Phase 254 P11 | 1h 20m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -600,6 +601,8 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 - [Phase 254]: 254-09: D-24 shard rule tripped (serial per-cell p90 x cells 156.9 s vs 60 s, isolation green) so composition cells run on 3 bounded workers; remaining focused-check gap (84.4 s vs 60 s) accepted in DEV-254-07
 - [Phase 254]: 254-09: Phase 252 and 253 aggregates share one admin test build via PHASE254_SHARED_BUILD_ID (validated hex id); isolated production and host builds are not shared
 - [Phase 254]: 254-10: storybook.css is composed deterministically (header, PhoenixStorybook CSS, brand.css, accrue_admin.css bundle, byte-preserved dark shim tail) and CI fails when it drifts; the design review record opens at stage assessment with DR-254-01..09 (DR-254-06..09 deferred under D-36)
+- [Phase 254]: 254-11: probe findings share the a11y register with axe findings (probe-<name> rule ids, exact stable targets); journey checkpoints use cell ids journey::D-29::<checkpoint> and are decided by admin-interactions.spec.js
+- [Phase 254]: 254-11: 30 routed-defect entries (axe, probes and the journey) are fixed and deleted by 254-12; 8 composition cells are inside the D-36 16-cell bound and 102 outside, journey entries inside
 
 ### Pending Todos
 
@@ -698,8 +701,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-29T08:35:09.667Z
-Stopped at: Completed 254-10-PLAN.md
+Last session: 2026-10-29T09:51:39.470Z
+Stopped at: Completed 254-11-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
