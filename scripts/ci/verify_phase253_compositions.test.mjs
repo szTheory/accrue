@@ -812,3 +812,68 @@ test("CI and acceptance contracts include imported main-module test identities",
   ]);
   assert.ok(acceptanceContract.sources.includes("scripts/ci/main_module.mjs"));
 });
+
+// Phase 254 UXQ-04 (D-35): the correction batch's design spec and DR-254-05 copy test run as lanes of
+// this required owner. Each rejection below is paired with the accepted control built from the same fixture.
+function designReport(runner, { project = runner.DESIGN_PROJECT, mutate } = {}) {
+  const specs = [];
+  for (const [key, count] of Object.entries(runner.DESIGN_SPEC_TEST_COUNTS)) {
+    for (let index = 0; index < count; index += 1) {
+      specs.push({
+        title: key + " fixture title " + (index + 1),
+        ok: true,
+        tests: [{ projectName: project, expectedStatus: "passed", results: [{ status: "passed", retry: 0, duration: 5 }] }],
+      });
+    }
+  }
+  const report = {
+    suites: [{ specs, suites: [] }],
+    stats: { expected: specs.length, unexpected: 0, skipped: 0, flaky: 0, duration: 100 },
+    errors: [],
+  };
+  if (mutate) mutate(report);
+  return report;
+}
+
+test("the correction batch lanes are required, appended after the Phase 253 lanes, and bounded to their own sources", async () => {
+  const runner = await loadRunner();
+  const plan = runner.buildCommandPlan({ id: runId, adminBuildPath: "/tmp/phase254-contract/mix-build", outputDirectory: "/tmp/phase254-contract/output" });
+  assert.deepEqual(plan.slice(-2).map(({ id }) => id), ["phase254-action-copy", "phase254-design-browser"]);
+  assert.equal(plan.findIndex(({ id }) => id === "phase253-compositions-browser"), 5, "the compositions lane keeps its index");
+  const copy = plan.find(({ id }) => id === "phase254-action-copy");
+  assert.equal(copy.lane, "db-free");
+  assert.deepEqual(copy.reporter.testFiles, ["accrue_admin/test/accrue_admin/dev/subscription_action_copy_test.exs"]);
+  for (const owner of ["accrue_admin/lib/accrue_admin/copy.ex", "accrue_admin/lib/accrue_admin/live/subscription_live.ex", "accrue_admin/storybook/_support/subscription_page_scenarios.ex"]) {
+    assert.ok(copy.sources.includes(owner), owner);
+  }
+  const design = plan.find(({ id }) => id === "phase254-design-browser");
+  assert.equal(design.lane, "admin-review-browser");
+  assert.ok(design.args.includes("e2e/subscription-design-phase254.spec.js"));
+  assert.ok(!design.args.includes("e2e/subscription-compositions-phase253.spec.js"), "the design spec never joins the cell universe lane");
+  const mutable = plan.filter(({ lane }) => lane === "admin-test" || lane === "admin-review-browser");
+  assert.equal(new Set(mutable.map(({ partition }) => partition)).size, mutable.length, "the design lane has its own partition");
+  assert.ok(fs.existsSync(path.join(root, "accrue_admin/e2e/subscription-design-phase254.spec.js")));
+  // Dropping either lane is a mismatch of the finite inventory.
+  assert.throws(() => runner.assertRequiredCommandPlan(plan.slice(0, -1)), /finite Phase 253 lane inventory/);
+});
+
+test("the design lane accepts only a complete passing report whose per-key counts equal the source-bound inventory", async () => {
+  const runner = await loadRunner();
+  const plan = runner.buildCommandPlan({ id: runId, adminBuildPath: "/tmp/phase254-contract/mix-build", outputDirectory: "/tmp/phase254-contract/output" });
+  const spec = plan.find(({ id }) => id === "phase254-design-browser");
+  const execute = (report) => runner.validateLaneEvidence(spec, { run_id: runId, exitCode: 0, stdout: JSON.stringify(report) }, { root, expectedRunId: runId });
+  // Control: the accepted report binds every assertion to executed titles.
+  const accepted = execute(designReport(runner));
+  assert.equal(accepted.test_count, 13);
+  assert.deepEqual(accepted.assertion_refs, Object.keys(spec.assertion_bindings).sort());
+  // A test that ran in another project, a missing key, an extra test, an unkeyed title and a skip are each refused.
+  assert.throws(() => execute(designReport(runner, { project: "phase252-owned-review" })), /did not execute in the phase254-design project/);
+  assert.throws(() => execute(designReport(runner, { mutate: (report) => { report.suites[0].specs.pop(); report.stats.expected -= 1; } })), /per-key test counts differ/);
+  assert.throws(() => execute(designReport(runner, { mutate: (report) => {
+    report.suites[0].specs.push({ ...report.suites[0].specs[0], title: "DR-254-01:computed one more title" });
+    report.stats.expected += 1;
+  } })), /per-key test counts differ/);
+  assert.throws(() => execute(designReport(runner, { mutate: (report) => { report.suites[0].specs[0].title = "no key prefix here"; } })), /no DR-NNN-NN:kind key prefix/);
+  assert.throws(() => execute(designReport(runner, { mutate: (report) => { report.stats.skipped = 1; } })), /empty, failed, skipped, flaky/);
+  assert.throws(() => execute(designReport(runner, { mutate: (report) => { report.suites[0].specs[0].tests[0].results[0].status = "failed"; report.stats.unexpected = 1; report.stats.expected -= 1; } })), /empty, failed, skipped, flaky/);
+});

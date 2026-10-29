@@ -189,11 +189,12 @@ defmodule AccrueAdmin.Storybook.SubscriptionPageScenarios do
       kind: kind,
       message: AccrueAdmin.Live.SubscriptionLive.action_result_message(kind),
       href:
-        ScopedPath.build(page.admin_mount_path, "/events", scope, %{
-          "subject_type" => "Subscription",
-          "subject_id" => subscription.id
-        }),
-      link_label: "Open scoped subscription activity"
+        AccrueAdmin.Live.SubscriptionLive.action_activity_path(
+          page.admin_mount_path,
+          scope,
+          subscription.id
+        ),
+      link_label: Copy.subscription_action_activity_link_label()
     }
 
     Map.merge(page, %{

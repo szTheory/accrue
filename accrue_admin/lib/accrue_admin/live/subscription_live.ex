@@ -2092,7 +2092,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       kind: kind,
       message: message,
       href: href || action_activity_path(socket),
-      link_label: link_label || "Open scoped subscription activity"
+      link_label: link_label || Copy.subscription_action_activity_link_label()
     })
   end
 
@@ -2109,12 +2109,19 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp action_activity_path(socket) do
-    ScopedPath.build(
+    action_activity_path(
       socket.assigns.admin_mount_path,
-      "/events",
       socket.assigns.current_owner_scope,
-      %{"subject_type" => "Subscription", "subject_id" => socket.assigns.subscription.id}
+      socket.assigns.subscription.id
     )
+  end
+
+  @doc false
+  def action_activity_path(admin_mount_path, owner_scope, subscription_id) do
+    ScopedPath.build(admin_mount_path, "/events", owner_scope, %{
+      "subject_type" => "Subscription",
+      "subject_id" => subscription_id
+    })
   end
 
   @doc false

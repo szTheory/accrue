@@ -152,6 +152,21 @@ const ASSERTION_BINDINGS = Object.freeze({
     required_owner_execution: ["the named required owner invokes both Phase 252 and Phase 253 checks"],
     unrelated_path_negative_control: ["unrelated docs are not focused while unconditional required CI still admits them"],
   }),
+  // Phase 254 UXQ-04 (D-35): the reviewed correction batch runs in this required owner. The copy
+  // lane is the DR-254-05 owner test (db-free); the design lane is the computed/source design spec.
+  "phase254-action-copy": Object.freeze({
+    result_link_label_owner: ["DR-254-05 label owner"],
+    result_link_href_owner: ["DR-254-05 href owner"],
+    result_link_rendered_from_owners: ["DR-254-05 rendered result"],
+    production_and_story_call_owners: ["DR-254-05 production callers"],
+    label_literal_has_one_owner: ["DR-254-05 literal guard"],
+  }),
+  "phase254-design-browser": Object.freeze({
+    detail_spacing_uses_component_tokens: ["DR-254-01:computed"],
+    heading_contract_declared_literals: ["DR-254-02:source"],
+    heading_responsive_at_767_and_768: ["DR-254-02:computed"],
+    detail_field_labels_equal_summary_keys: ["DR-254-03:computed"],
+  }),
   "phase253-acceptance-contract": Object.freeze({
     complete_phase_mapping: ["acceptance requires all five requirements, fourteen tasks, ten edges, and twenty-six UI criteria"],
     unresolved_assumptions_preserved: ["current and historical unclassified assumptions remain unresolved"],
@@ -188,7 +203,19 @@ const REQUIRED_COMMAND_IDS = Object.freeze([
   "phase253-transparency-controls",
   "phase253-ci-contract",
   "phase253-acceptance-contract",
+  "phase254-action-copy",
+  "phase254-design-browser",
 ]);
+
+// Phase 254 UXQ-04: exact per-key test counts of the design spec (4 widths/themes per computed key,
+// one served-stylesheet source test). A key losing or gaining a test is a source-bound change.
+export const DESIGN_SPEC_TEST_COUNTS = Object.freeze({
+  "DR-254-01:computed": 4,
+  "DR-254-02:computed": 4,
+  "DR-254-02:source": 1,
+  "DR-254-03:computed": 4,
+});
+export const DESIGN_PROJECT = "phase254-design";
 
 function fail(message) {
   throw new Error("Phase 253 composition evidence: " + message);
@@ -301,7 +328,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory, browserW
   if (!adminBuildPath || !outputDirectory) fail("command plan requires run-specific build and output paths");
   const usedPartitions = new Set();
   const tapArgs = (testFile) => ["--test", "--test-reporter=tap", testFile];
-  const exunitNoStart = (testId, testFile, cwdFile, assertions) => command(
+  const exunitNoStart = (testId, testFile, cwdFile, assertions, extraSources = []) => command(
     testId,
     "MIX_ENV=test mix run --no-start",
     "mix",
@@ -309,7 +336,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory, browserW
     {
       cwd: "accrue_admin",
       lane: "db-free",
-      sources: [testFile, "accrue_admin/test/test_helper.exs", "dev_support/phase252_tap_formatter.ex"],
+      sources: [testFile, "accrue_admin/test/test_helper.exs", "dev_support/phase252_tap_formatter.ex", ...extraSources],
       reporter: { kind: "exunit-tap", testFiles: [testFile] },
       assertion_bindings: assertions,
       env: { MIX_ENV: "test", MIX_BUILD_PATH: adminBuildPath, PHASE252_TAP_REPORT: "1" },
@@ -336,6 +363,7 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory, browserW
   };
 
   const browserPartition = freshPartition(usedPartitions);
+  const designPartition = freshPartition(usedPartitions);
   const browserResultPath = path.join(BROWSER_RESULT_ROOT, "render-results-" + id.toLowerCase() + ".json").split(path.sep).join("/");
   const browserSources = [
     "accrue_admin/e2e/subscription-compositions-phase253.spec.js",
@@ -528,6 +556,53 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory, browserW
       ],
       ["scripts/ci/generate_phase253_acceptance.test.mjs", "scripts/ci/main_module.mjs"],
     ),
+    exunitNoStart(
+      "phase254-action-copy",
+      ADMIN + "dev/subscription_action_copy_test.exs",
+      "test/accrue_admin/dev/subscription_action_copy_test.exs",
+      ASSERTION_BINDINGS["phase254-action-copy"],
+      [
+        "accrue_admin/lib/accrue_admin/copy.ex",
+        "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+        "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+      ],
+    ),
+    command(
+      "phase254-design-browser",
+      "node scripts/dev/phase252_lab.mjs browser -- --reporter=json e2e/subscription-design-phase254.spec.js",
+      process.execPath,
+      [
+        "scripts/dev/phase252_lab.mjs",
+        "browser",
+        "--partition",
+        designPartition,
+        "--",
+        "--reporter=json",
+        "e2e/subscription-design-phase254.spec.js",
+      ],
+      {
+        lane: "admin-review-browser",
+        partition: designPartition,
+        sources: [
+          "accrue_admin/e2e/subscription-design-phase254.spec.js",
+          "accrue_admin/playwright.phase252.config.js",
+          "accrue_admin/assets/css/app.css",
+          "accrue_admin/assets/css/theme.css",
+          "accrue_admin/priv/static/accrue_admin.css",
+          "accrue_admin/priv/static/storybook.css",
+          "accrue_admin/priv/static/storybook.js",
+          "scripts/dev/phase252_lab.mjs",
+        ],
+        reporter: { kind: "playwright-titles", project: DESIGN_PROJECT, expected_counts: DESIGN_SPEC_TEST_COUNTS },
+        assertion_bindings: ASSERTION_BINDINGS["phase254-design-browser"],
+        env: {
+          MIX_ENV: "test",
+          MIX_BUILD_PATH: adminBuildPath,
+          MIX_TEST_PARTITION: designPartition,
+          PHASE252_E2E_NONCE: id.toLowerCase() + "-design",
+        },
+      },
+    ),
   ];
   assertRequiredCommandPlan(plan);
   return plan;
@@ -560,6 +635,11 @@ export function assertRequiredCommandPlan(commands) {
       if (!row.browser_contract || !Array.isArray(row.browser_contract.asset_paths) || row.browser_contract.asset_paths.length === 0) {
         fail("browser lane has no finite cell and served-asset contract");
       }
+    } else if (row.reporter?.kind === "playwright-titles") {
+      if (row.reporter.project !== DESIGN_PROJECT || !isDeepStrictEqual(row.reporter.expected_counts, DESIGN_SPEC_TEST_COUNTS)) {
+        fail("design browser lane has no exact project and per-key test count contract");
+      }
+      if (Object.keys(row.assertion_bindings || {}).length === 0) fail("design browser lane has no explicit assertion identity bindings: " + row.id);
     } else if (row.reporter?.kind !== "process-markers" || row.process_markers.length === 0) {
       fail("lane has no supported reporter contract: " + row.id);
     }
@@ -714,6 +794,44 @@ export function assertReconcileProjectExecuted(report, reconciliationTitle) {
       fail("browser cell " + title + " did not execute in the " + CELLS_PROJECT + " project: " + String(project));
     }
   }
+}
+
+// Phase 254 UXQ-04: the design spec lane. The report must be a complete passing Playwright report in
+// which every test ran in the phase254-design project, every title carries a DR-NNN-NN:kind key, and
+// the per-key test counts equal the finite inventory. It is a source-bound count, not a cell universe.
+export function validateDesignEvidence(spec, execution) {
+  let report;
+  try {
+    report = JSON.parse(execution.stdout);
+  } catch {
+    fail(spec.id + " Playwright JSON reporter output is not one complete report");
+  }
+  const identities = playrightTestIdentities(report);
+  for (const [title, project] of playwrightProjectsByTitle(report)) {
+    if (project !== spec.reporter.project) fail(spec.id + " test " + title + " did not execute in the " + spec.reporter.project + " project: " + String(project));
+  }
+  const counts = {};
+  for (const title of identities) {
+    const key = /^(DR-\d{3}-\d{2}:[a-z][a-z-]*)\s/.exec(title)?.[1];
+    if (!key) fail(spec.id + " test title has no DR-NNN-NN:kind key prefix: " + title);
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  if (!isDeepStrictEqual(Object.fromEntries(Object.entries(counts).sort()), Object.fromEntries(Object.entries(spec.reporter.expected_counts).sort()))) {
+    fail(spec.id + " executed per-key test counts differ from the source-bound inventory: " + JSON.stringify(counts));
+  }
+  const assertionBindings = matchAssertions(spec.assertion_bindings, identities, spec.id);
+  if (execution.assertion_refs != null) exactSet(execution.assertion_refs, Object.keys(assertionBindings), spec.id + " assertion references");
+  return {
+    kind: "playwright-titles",
+    test_count: identities.length,
+    skipped: report.stats.skipped,
+    failed: report.stats.unexpected,
+    test_identities: identities,
+    durations: playwrightTestDurations(report),
+    stats_duration_ms: Number.isFinite(report.stats.duration) ? report.stats.duration : null,
+    assertion_refs: Object.keys(assertionBindings).sort(),
+    assertion_bindings: assertionBindings,
+  };
 }
 
 function assertExactStrings(actual, expected, label) {
@@ -892,6 +1010,9 @@ export function validateLaneEvidence(spec, execution, options = {}) {
       expectedBrowserCells: options.expectedBrowserCells,
       selection: options.selection || null,
     });
+  }
+  if (spec.reporter.kind === "playwright-titles") {
+    return validateDesignEvidence(spec, execution);
   }
   if (spec.reporter.kind === "process-markers") {
     const lines = new Set(String(execution.stdout || "").split(/\r?\n/).map((line) => line.trim()));
