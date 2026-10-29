@@ -402,7 +402,7 @@ export function restampCheck({ budget, manifestBytes }) {
 }
 
 // mainReference: { run_id, owner_job_s, workflow_wall_s } (queue excluded).
-export function freezeBudget({ budget, samples, mainReference, selection = null, phase252Cases = null, curationRecordIds = null, deviationIds = {}, env = process.env }) {
+export function freezeBudget({ budget, samples, mainReference, selection = null, phase252Cases = null, curationRecordIds = null, deviationIds = {}, compositionWorkers = null, env = process.env }) {
   refuseInCi(env, "freeze");
   if (!isObject(budget)) fail("freeze needs the budget record");
   if (!Array.isArray(samples)) fail("freeze needs the CI samples");
@@ -478,6 +478,10 @@ export function freezeBudget({ budget, samples, mainReference, selection = null,
       per_cell_median_s: round3(perCell.median / 1000),
       per_cell_p90_s: round3(perCell.p90 / 1000),
       run_ids: owner.map((sample) => sample.run_id),
+      // The Playwright workers the cells ran on in the freeze runs (CIQ-02 fan-out); per-cell
+      // durations measured with more than one worker include contention, so consumers that
+      // price a cell (254-16) read this beside per_cell_p90_s.
+      ...(compositionWorkers === null ? {} : { workers: compositionWorkers }),
     },
   };
   const allowances = {
@@ -872,6 +876,8 @@ export const SCENARIOS = [
     assert.equal(budget.frozen.composition_cell.cells, 3);
     assert.equal(typeof budget.frozen.composition_cell.per_cell_p90_s, "number");
     assert.equal(budget.frozen.composition_cell.run_ids.length, 3);
+    assert.ok(!("workers" in budget.frozen.composition_cell), "workers is recorded only when the caller names it");
+    assert.equal(freezeBudget({ ...freezeFixture(), compositionWorkers: 3 }).budget.frozen.composition_cell.workers, 3);
     assert.equal(budget.allowances.visual.n, 1);
     assert.equal(budget.allowances.visual.max_added_s, 180);
     assert.equal(budget.allowances.a11y.baseline_p90_s, budget.metrics.freeze.p90);
@@ -986,7 +992,7 @@ export function verifyFixtures() {
 
 // -- CLI ------------------------------------------------------------------------------------------------
 
-const VALUE_OPTIONS = new Set(["budget", "manifest", "selection", "fingerprint", "summary", "evidence-latest", "elapsed-s", "samples", "main-reference", "cause", "block", "out", "run", "repo", "deviation-ids", "curation-ids", "phase252-cases", "ledger"]);
+const VALUE_OPTIONS = new Set(["budget", "manifest", "selection", "fingerprint", "summary", "evidence-latest", "elapsed-s", "samples", "main-reference", "cause", "block", "out", "run", "repo", "deviation-ids", "curation-ids", "phase252-cases", "ledger", "composition-workers"]);
 const BOOLEAN_OPTIONS = new Set(["self-test", "write", "check"]);
 
 function parseArgs(argv) {
@@ -1093,7 +1099,9 @@ const verbs = {
       budget, samples, mainReference: readJson(absolute(values["main-reference"])), selection,
       phase252Cases: values["phase252-cases"] === undefined ? null : Number(values["phase252-cases"]),
       curationRecordIds: values["curation-ids"] ? values["curation-ids"].split(",") : null,
-      deviationIds: parseDeviationIds(values["deviation-ids"]), env,
+      deviationIds: parseDeviationIds(values["deviation-ids"]),
+      compositionWorkers: values["composition-workers"] === undefined ? null : Number(values["composition-workers"]),
+      env,
     });
     if (!flags.has("write")) {
       process.stdout.write(`${JSON.stringify({ frozen: result.budget.frozen, warn_at: result.budget.warn_at, ceiling: result.budget.ceiling, target_evaluations: result.budget.target_evaluations, allowances: result.budget.allowances }, null, 2)}\n`);
