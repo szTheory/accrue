@@ -85,3 +85,25 @@ test("parsePlaywrightJson keeps a result without a duration as null so older fix
   const output = report({ specs: [spec("legacy", { results: [{ status: "passed" }] })] });
   assert.deepEqual(parse(output)?.durations, [{ identity: "legacy", duration_ms: null }]);
 });
+
+test("the browser reporter fails closed when the curation ledger is missing instead of defaulting to a count", async () => {
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase252-reporters-no-ledger-"));
+  try {
+    const browserResult = { cases: Array.from({ length: 15 }, (_, index) => ({ test_id: `case ${index}`, case_kind: index < 12 ? "canonical" : "compatibility" })) };
+    assert.throws(
+      () => reporters.deriveExecutionEvidence({
+        root,
+        commandId: "subscription-render-browser",
+        stdout: passing(),
+        expectedAssertions: reporters.requiredAssertionIds("subscription-render-browser"),
+        browserResult,
+      }),
+      /curation ledger is missing or unreadable/,
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});

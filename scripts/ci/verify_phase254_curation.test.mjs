@@ -19,6 +19,7 @@ import {
   verifyFixtures,
   verifyLedger,
 } from "./verify_phase254_curation.mjs";
+import { assertRenderRowCounts } from "./verify_phase252_stories.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const SCRIPT = path.join(ROOT, "scripts/ci/verify_phase254_curation.mjs");
@@ -106,4 +107,23 @@ test("expectedPhase252Cells on the committed ledger is the frozen 12/3/15 until 
 test("LEDGER_PATH names the tracked package path (D-04)", () => {
   assert.equal(LEDGER_PATH, "accrue_admin/storybook/subscription-curation.json");
   assert.ok(fs.existsSync(path.join(ROOT, LEDGER_PATH)));
+});
+
+const FROZEN_ONLY = { frozen_baseline: { entries: 6, compatibility_ids: ["braintree_pruned", "dunning_active", "populated"] }, records: [] };
+const ONE_RETIRED = { ...FROZEN_ONLY, records: [{ disposition: "retire", subject: { story_path: SUBSCRIPTION_STORY_PATH, variation_id: "populated" } }] };
+
+function browserRows(compatibilityIds) {
+  const canonical = ["active", "scheduled_cancellation", "incomplete_evidence"].flatMap((state) =>
+    [320, 1280].flatMap((width) => ["light", "dark"].map((theme) => ({ case_kind: "canonical", state, width, theme }))));
+  return [...canonical, ...compatibilityIds.map((id) => ({ case_kind: "compatibility", state: id }))];
+}
+
+test("verify_phase252_stories derives its browser row counts from the ledger (frozen 15 is the positive control)", () => {
+  const three = browserRows(["populated", "braintree_pruned", "dunning_active"]);
+  const two = browserRows(["braintree_pruned", "dunning_active"]);
+  assert.doesNotThrow(() => assertRenderRowCounts(three, FROZEN_ONLY));
+  assert.throws(() => assertRenderRowCounts(two, FROZEN_ONLY), /exactly 15 current rows: 12 canonical cells and 3 compatibility cases/);
+  assert.doesNotThrow(() => assertRenderRowCounts(two, ONE_RETIRED));
+  assert.throws(() => assertRenderRowCounts(three, ONE_RETIRED), /exactly 14 current rows: 12 canonical cells and 2 compatibility cases/);
+  assert.throws(() => assertRenderRowCounts(three, null), /cannot derive Phase 252 cell counts/);
 });

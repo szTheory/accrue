@@ -7,6 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { REQUIRED_COMMAND_IDS } from "./verify_phase252_stories.mjs";
+import { LEDGER_PATH, SUBSCRIPTION_STORY_PATH, expectedPhase252Cells } from "./verify_phase254_curation.mjs";
 import { deriveExecutionEvidence, expectedExUnitIdentities, expectedNodeTestIdentities, parseTap13Report, PHASE252_REPORTER_SPECS, requiredAssertionIds } from "./phase252_reporters.mjs";
 import { resolvePhaseEvidencePath } from "./phase_evidence_path.mjs";
 import {
@@ -250,6 +251,8 @@ function createFixture() {
   write(root, "scripts/ci/generate_phase252_acceptance.test.mjs", "fixture acceptance tests");
   write(root, ".github/workflows/ci.yml", "fixture workflow");
   write(root, "scripts/ci/phase252_reporters.mjs", fs.readFileSync(path.join(repositoryRoot, "scripts/ci/phase252_reporters.mjs")));
+  // Phase 254 CURATE-01: the browser row counts derive from the curation ledger, so the fixture carries a copy.
+  write(root, LEDGER_PATH, fs.readFileSync(path.join(repositoryRoot, LEDGER_PATH)));
   for (const relativePath of TRANSPARENCY_SOURCE_PATHS.filter((relative) => !relative.startsWith(".planning/") && relative !== "storybook/phase252-manifest.json")) {
     write(root, relativePath, fs.readFileSync(path.join(repositoryRoot, relativePath)));
   }
@@ -716,7 +719,9 @@ test("pooled cells and incomplete UI or edge predicates are rejected", () => {
     const bundle = JSON.parse(fs.readFileSync(fixture.resultsPath, "utf8"));
     bundle.browser_results_sha256 = digest(fs.readFileSync(renderPath));
     fs.writeFileSync(fixture.resultsPath, JSON.stringify(bundle, null, 2) + "\n");
-    assert.throws(() => validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }), /exactly 15|omitted canonical cell|all 15 rendered result rows/i);
+    // The expectation derives from the ledger (frozen 15 minus retired); 15 stays the frozen-baseline positive control.
+    const derivedTotal = expectedPhase252Cells(JSON.parse(fs.readFileSync(path.join(fixture.root, LEDGER_PATH), "utf8"))).total;
+    assert.throws(() => validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }), new RegExp(`exactly ${derivedTotal}|omitted canonical cell|all ${derivedTotal} rendered result rows`, "i"));
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
   }
@@ -854,6 +859,52 @@ test("ExUnit source identities retain enclosing describe labels", () => {
     ]);
   } finally {
     fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+function retireCompatibilityId(root, id) {
+  const ledgerPath = path.join(root, LEDGER_PATH);
+  const ledger = JSON.parse(fs.readFileSync(ledgerPath, "utf8"));
+  ledger.records.push({ id: "CUR-254-99", disposition: "retire", subject: { story_path: SUBSCRIPTION_STORY_PATH, variation_id: id, scenario_id: id } });
+  fs.writeFileSync(ledgerPath, JSON.stringify(ledger, null, 2));
+  return ledgerPath;
+}
+
+test("Phase 252 browser row counts derive from the curation ledger at the evidence validator", () => {
+  const fixture = createFixture();
+  try {
+    // Frozen-only ledger: today's gate still demands exactly 15 rows (12 canonical + 3 compatibility).
+    assert.equal(validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }).guide_contract, "passed");
+    // One retired compatibility id makes the old 15 rows a mismatch.
+    const ledgerPath = retireCompatibilityId(fixture.root, "populated");
+    assert.throws(() => validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }), /exactly 14 rows: 12 canonical and 2 compatibility/);
+    // A missing ledger never defaults to a smaller number.
+    fs.rmSync(ledgerPath);
+    assert.throws(() => validatePhase252Evidence({ root: fixture.root, resultsPath: fixture.resultsPath }), /curation ledger is missing or unreadable/);
+  } finally {
+    fs.rmSync(fixture.root, { recursive: true, force: true });
+  }
+});
+
+test("the browser reporter binds assertions against ledger-derived row counts and fails closed without a ledger", () => {
+  const fixture = createFixture();
+  try {
+    const browserResult = JSON.parse(fs.readFileSync(fixture.renderPath, "utf8"));
+    const stdout = fixtureReporterOutput(fixture.root, "subscription-render-browser", browserResult.cases);
+    const derive = () => deriveExecutionEvidence({
+      root: fixture.root,
+      commandId: "subscription-render-browser",
+      stdout,
+      expectedAssertions: requiredAssertionIds("subscription-render-browser"),
+      browserResult,
+    });
+    assert.equal(derive().execution_evidence.test_count, 16, "frozen-only ledger: 15 rows plus the reconciliation test");
+    const ledgerPath = retireCompatibilityId(fixture.root, "populated");
+    assert.throws(derive, /all 14 rendered result rows/);
+    fs.rmSync(ledgerPath);
+    assert.throws(derive, /curation ledger is missing or unreadable/);
+  } finally {
+    fs.rmSync(fixture.root, { recursive: true, force: true });
   }
 });
 
