@@ -66,18 +66,22 @@ test("unknown flags, a bad --stage and a missing mode fail closed", () => {
   assert.match(noMode.stderr, /exactly one of/);
 });
 
-test("the real record passes at stage assessment and the CLI agrees", () => {
-  const summary = verifyDesignReview(readRecord(), { root: ROOT, stage: "assessment" });
-  assert.deepEqual(summary, { stage: "assessment", findings: 9, captures: 16, verdicts: 7, deferred: 6 });
-  const result = run(["--check", "--stage", "assessment"]);
+test("the real record passes at stage corrected and the CLI agrees", () => {
+  const summary = verifyDesignReview(readRecord(), { root: ROOT, stage: "corrected" });
+  assert.deepEqual(summary, { stage: "corrected", findings: 9, captures: 16, verdicts: 7, deferred: 6 });
+  const result = run(["--check", "--stage", "corrected"]);
   assert.equal(result.status, 0, result.stderr + result.stdout);
-  assert.match(result.stdout, /PASS \(stage assessment/);
+  assert.match(result.stdout, /PASS \(stage corrected/);
 });
 
-test("the CLI rejects the assessment record when a later stage is demanded", () => {
-  const result = run(["--check", "--stage", "corrected"]);
-  assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /at stage assessment, not corrected/);
+test("the CLI rejects the corrected record when another stage is demanded (positive control: the demanded stage passes)", () => {
+  const assessment = run(["--check", "--stage", "assessment"]);
+  assert.notEqual(assessment.status, 0);
+  assert.match(assessment.stderr, /at stage corrected, not assessment/);
+  const confirmed = run(["--check", "--stage", "confirmed"]);
+  assert.notEqual(confirmed.status, 0);
+  assert.match(confirmed.stderr, /at stage corrected, not confirmed/);
+  assert.equal(run(["--check", "--stage", "corrected"]).status, 0);
 });
 
 test("the committed Markdown view is exactly the renderer output (and an edited view is rejected)", () => {
@@ -103,8 +107,18 @@ test("the real record carries the five locked D-34 dispositions with the lowest 
     assert.equal(finding.disposition, disposition, id);
     assert.equal(finding.owning_tier, tier, id);
     assert.equal(finding.origin, origin, id);
-    assert.ok(finding.tests.every((entry) => entry.status === "pending"), `${id}: tests are planned at assessment`);
+    assert.ok(finding.tests.every((entry) => entry.status !== "pending"), `${id}: no test is still pending at stage corrected`);
+    if (disposition === "fixed") {
+      assert.ok(finding.tests.length > 0 && finding.red_evidence.length > 0, `${id}: a fixed finding lists its tests and red evidence`);
+    }
   }
+  const redFiles = (id) => byId.get(id).red_evidence;
+  assert.deepEqual([redFiles("DR-254-01"), redFiles("DR-254-03"), redFiles("DR-254-05")], [["254-12-01-red-evidence.json"], ["254-12-01-red-evidence.json"], ["254-13-01-red-evidence.json"]]);
+  assert.deepEqual(byId.get("DR-254-02").tests.map((entry) => [entry.id, entry.status]), [["DR-254-02:source", "red-then-green"], ["DR-254-02:computed", "green-before-and-after"]]);
+  assert.deepEqual(byId.get("DR-254-04").tests, []);
+  assert.match(record.fix_commit, /^[0-9a-f]{40}$/);
+  assert.deepEqual(record.amendments.map((entry) => entry.id), ["AMD-254-03", "AMD-254-04", "AMD-254-05"]);
+  for (const id of ["DR-254-06", "DR-254-07", "DR-254-08", "DR-254-09"]) assert.equal(byId.get(id).disposition, "deferred", id);
   for (const id of ["DR-254-02", "DR-254-04"]) {
     const contract = byId.get(id).contract;
     assert.equal(contract.section, "Typography");
@@ -165,7 +179,7 @@ test("no score-like key or tmp-path evidence exists in the real record, and the 
 test("a stale source sha on the real record is rejected (positive control for the sha binding)", () => {
   const record = readRecord();
   record.findings[0].source_refs[0].sha = "f".repeat(64);
-  assert.throws(() => verifyDesignReview(record, { root: ROOT, stage: "assessment" }), /source_ref sha .* is stale/);
+  assert.throws(() => verifyDesignReview(record, { root: ROOT, stage: "corrected" }), /source_ref sha .* is stale/);
 });
 
 test("spacing scan positive control on the real app.css at source_commit: it finds the page-tier overrides the finding cites", () => {

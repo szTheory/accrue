@@ -2,20 +2,20 @@
 
 <!-- Generated from 254-DESIGN-REVIEW.json by scripts/ci/verify_phase254_design_review.mjs --render. Do not edit by hand. -->
 
-**Stage:** assessment
+**Stage:** corrected
 **Source commit:** `4a018ce9a2ed17a8d8d809b71fee6d34fc423ce2`
-**Fix commit:** none yet
+**Fix commit:** `88cd27cdcede5f00594896b6b752069be7ede0ac`
 **Scoring:** none. No aesthetic score is recorded (D-03, D-31); every cell is a source-bound claim or a mechanical result.
 
 ## Assets
 
 | Asset | Path | sha256 |
 |-------|------|--------|
-| app_css | `accrue_admin/assets/css/app.css` | `7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa` |
-| theme_css | `accrue_admin/assets/css/theme.css` | `165cca6107ddd75782bab339ec1f1612d33cf7cfac9d89132bef64601ec9f05a` |
-| accrue_admin_css | `accrue_admin/priv/static/accrue_admin.css` | `a519a7541d05b74c769dd938e493fc886149585def2ff5bfa00cc7a270f77699` |
-| storybook_css | `accrue_admin/priv/static/storybook.css` | `3263c1c07eba424ba9b30911353557fc417b4cfe6c2d59939d5fa40233ea7866` |
-| served_css_route | `css-732833a179d48ed7c62dfbc3b30c8652` | md5 of accrue_admin.css |
+| app_css | `accrue_admin/assets/css/app.css` | `25d18c954f3c95b4e0f22b01ecde4d0c8168b655e4800da149fb4283f897ee1a` |
+| theme_css | `accrue_admin/assets/css/theme.css` | `fbf78dee8fb3982b2157f1db8a4be9c16f6b6fe83ef5b6ce89bc7527db602bc7` |
+| accrue_admin_css | `accrue_admin/priv/static/accrue_admin.css` | `63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299` |
+| storybook_css | `accrue_admin/priv/static/storybook.css` | `4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe` |
+| served_css_route | `css-9568fe2780b1ac605777f571b8e278f5` | md5 of accrue_admin.css |
 
 ## Rubric verdicts
 
@@ -61,7 +61,8 @@
 - **Claim:** The subscription detail page overrides its normal group rhythm with page-tier gaps of 1px, 3px and 0 (and a raw 0 0.25rem field gap), so the summary, facts, resources and disclosure groups read as one compressed block instead of the title, lifecycle, facts hierarchy the contract specifies.
 - **Rationale:** D-34: delete the page-tier overrides so the component tokens apply and replace the raw field gap with --ax-space-xs. The page tier is the lowest tier that owns these selectors. The mechanical check scanSubscriptionDetailSpacing finds them at source_commit and must find none at fix_commit.
 - **Evidence:** `accrue_admin/assets/css/app.css:2988-2990`, `accrue_admin/assets/css/app.css:3050-3052`, `accrue_admin/assets/css/app.css:3060-3062`, `accrue_admin/assets/css/app.css:6709-6712`, `accrue_admin/assets/css/app.css:6720-6724`, `accrue_admin/assets/css/theme.css:35-37`
-- **Tests:** `accrue_admin/e2e/subscription-design-phase254.spec.js` (computed, pending, DR-254-01:computed); `scripts/ci/verify_phase254_design_review.test.mjs` (css-guard, pending, scanSubscriptionDetailSpacing)
+- **Tests:** `accrue_admin/e2e/subscription-design-phase254.spec.js` (computed, red-then-green, DR-254-01:computed); `scripts/ci/verify_phase254_design_review.test.mjs` (css-guard, green, scanSubscriptionDetailSpacing)
+- **Red evidence:** `254-12-01-red-evidence.json`
 
 ### DR-254-02 typography
 
@@ -72,7 +73,8 @@
 - **Claim:** The Phase 253 audit reported the collection heading at 24px against a 28px page-heading contract. The shared display rule is already responsive (1.5rem, 24px, below 768px; 1.75rem, 28px, from 768px), so the contract row, not the rule, is wrong; the two rem literals can move to --ax-type-xl and --ax-type-2xl with no visual change.
 - **Rationale:** D-34: amend the contract to a responsive heading and leave shared .ax-display semantics untouched. The heading red test is DR-254-02:source (the declared literals); DR-254-02:computed at 767 and 768 CSS px passes before and after by design.
 - **Evidence:** `accrue_admin/assets/css/app.css:777-781`, `accrue_admin/assets/css/app.css:2161-2165`, `accrue_admin/assets/css/theme.css:30-31`, `accrue_admin/lib/accrue_admin/components/page_header.ex:39`
-- **Tests:** `accrue_admin/e2e/subscription-design-phase254.spec.js` (source, pending, DR-254-02:source); `accrue_admin/e2e/subscription-design-phase254.spec.js` (computed, pending, DR-254-02:computed)
+- **Tests:** `accrue_admin/e2e/subscription-design-phase254.spec.js` (source, red-then-green, DR-254-02:source); `accrue_admin/e2e/subscription-design-phase254.spec.js` (computed, green-before-and-after, DR-254-02:computed)
+- **Red evidence:** `254-12-01-red-evidence.json`
 - **Contract:** `.planning/phases/253-real-groups-and-a-whole-subscription-job/253-UI-SPEC.md`, section Typography, amend-row row `Page heading`
 - **Amended text:** `&#124; Page heading &#124; Responsive: '--ax-type-xl' (24px) below 768px, '--ax-type-2xl' (28px) from 768px &#124; Semibold 600 &#124; 1.2 &#124;`
 
@@ -85,7 +87,8 @@
 - **Claim:** Detail field labels resolve to 14px semibold uppercase (the bare .ax-field-label rule) while the contract label role is 12px semibold, so detail labels are larger than the summary keys they sit beside.
 - **Rationale:** D-34: scope a font: var(--ax-type-label-sm-font) rule to .ax-field-list .ax-field-label so detail labels equal summary keys at --ax-type-xs. The bare .ax-field-label stays untouched (six form controls share it) and .ax-field-value keeps tabular-nums.
 - **Evidence:** `accrue_admin/lib/accrue_admin/components/detail.ex:49-52`, `accrue_admin/assets/css/app.css:6732-6740`, `accrue_admin/assets/css/theme.css:101`
-- **Tests:** `accrue_admin/e2e/subscription-design-phase254.spec.js` (computed, pending, DR-254-03:computed)
+- **Tests:** `accrue_admin/e2e/subscription-design-phase254.spec.js` (computed, red-then-green, DR-254-03:computed)
+- **Red evidence:** `254-12-01-red-evidence.json`
 
 ### DR-254-04 typography
 
@@ -108,7 +111,8 @@
 - **Claim:** The action-result link label and its scoped events path exist twice: SubscriptionLive owns the literal and the path builder privately, and the Storybook page scenario adapter repeats both, so the static result story can drift from the mounted page.
 - **Rationale:** D-34: add Copy.subscription_action_activity_link_label/0 and a public @doc false SubscriptionLive.action_activity_path/3, and have the LiveView and the story adapter call both, as the adapter already does for action_result_message/1. The result link appears after a dispatch, which none of the 16 captures reach, so the proof is an ExUnit owner test plus a literal-count guard.
 - **Evidence:** `accrue_admin/lib/accrue_admin/live/subscription_live.ex:2090-2096`, `accrue_admin/lib/accrue_admin/live/subscription_live.ex:2111-2118`, `accrue_admin/storybook/_support/subscription_page_scenarios.ex:188-197`, `accrue_admin/lib/accrue_admin/copy.ex:1001`
-- **Tests:** `accrue_admin/test/accrue_admin/dev/subscription_action_copy_test.exs` (exunit, pending, DR-254-05)
+- **Tests:** `accrue_admin/test/accrue_admin/dev/subscription_action_copy_test.exs` (exunit, red-then-green, DR-254-05)
+- **Red evidence:** `254-13-01-red-evidence.json`
 
 ### DR-254-06 typography (+ color)
 
@@ -137,7 +141,7 @@
 - **Disposition:** deferred
 - **Verdict:** pending
 - **Claim:** The subscription detail disclosures use &lt;summary class="ax-detail-section-head"&gt;, a flex row with a 22px minimum height, and do not use .ax-disclosure-summary, which gives the webhook detail disclosures a 44px target, a pointer cursor, a chevron and an explicit focus ring. Whether the default marker and focus ring render acceptably is a runtime question; this record asserts only the class difference.
-- **Rationale:** Target size and keyboard focus are measured by the UXQ-02 probes (254-11): if they route a defect on summary.ax-detail-section-head it is fixed in the correction batch as a routed accessibility defect; otherwise sharing .ax-disclosure-summary across detail views is a design decision that reaches several LiveViews and is deferred (D-36).
+- **Rationale:** Target size and keyboard focus are measured by the UXQ-02 probes (254-11): if they route a defect on summary.ax-detail-section-head it is fixed in the correction batch as a routed accessibility defect; otherwise sharing .ax-disclosure-summary across detail views is a design decision that reaches several LiveViews and is deferred (D-36). 254-13 re-disposition: none of the 30 routed accessibility entries (register at eefee2a62958dbdefe426d5434ed133e91b3e8ec) names summary.ax-detail-section-head (A11Y-254-22 names summary.ax-button, the menu button), and the 151 composition cells now report 0 observations, so no defect was routed and the finding stays deferred (D-36).
 - **Evidence:** `accrue_admin/lib/accrue_admin/live/subscription_live.ex:488`, `accrue_admin/assets/css/app.css:6480-6494`, `accrue_admin/lib/accrue_admin/live/webhook_live.ex:273`
 
 ### DR-254-09 redundancy
@@ -153,6 +157,8 @@
 ## Amendments
 
 - **AMD-254-03** (D-33): D-33 capture cell "collection populated" -> the Phase 253 multiple_rows collection story, key phase254-collection-multiple_rows-w&lt;width&gt;-&lt;theme&gt;. The Phase 253 collection universe has no populated state: the compiled collection states are new_host_empty, filtered_empty, queue_empty, one_row, multiple_rows, page_boundary, loading, unavailable, partial_cursor_error and incomplete_projection. multiple_rows is the populated collection. Owner acknowledgement: 2026-10-28 owner-accepted at plan time.
+- **AMD-254-04** (D-34, D-35): D-35 shows every correction red on the pre-fix commit, which for the heading amendment would be a computed assertion at 767 and 768 CSS px -> The heading amendment's red is carried by DR-254-02:source (the declared font-size literals 1.5rem and 1.75rem against var(--ax-type-xl) and var(--ax-type-2xl)); DR-254-02:computed at 767 and 768 CSS px passes before and after by design. The shared .ax-display rule was already responsive (24px below 768px, 28px from 768px), so the contract row was wrong and the rendered heading does not change; a computed assertion cannot be red for a contract-only amendment, while the token literals are a real source change that can. Owner acknowledgement: 2026-10-28 owner-accepted at plan time.
+- **AMD-254-05** (D-08, D-36): Design corrections are confined to the 16 D-33 capture cells (D-36) -> Routed accessibility defects are fixed wherever 254-11 observed them (D-08 W4): 10 routed cells fall inside the 16 captures and 102 composition cells fall outside them, and all are fixed in this batch with their register entries deleted. An accessibility defect is fixed at the lowest tier that owns it, not only on the cells that happen to be captured; the cells outside the 16 are listed here so the wider reach is a recorded, owner-accepted decision rather than silent scope growth. Owner acknowledgement: 2026-10-28 owner-accepted at plan time.
 
 ## Changed baselines
 
@@ -167,4 +173,4 @@ None.
 | DEF-254-03 | Duplicate detail section title selectors | component | The next cleanup of the detail section CSS. | DR-254-09 |
 | DEF-254-04 | Activity audit log heading weight 950 and accent colour | component | The type-system pass that retires the 209/210 type exceptions, or a contract row for emphasised section titles. | DR-254-06 |
 | DEF-254-05 | Audit strip caption in implementer language | copy | A UX writing pass over the audit strip, with an owner-approved caption. | DR-254-07 |
-| DEF-254-06 | Detail disclosure summaries lack the shared disclosure summary treatment | component | 254-11 target-size or focus probes route a defect on the summary, or a design decision to share .ax-disclosure-summary across detail views. | DR-254-08 |
+| DEF-254-06 | Detail disclosure summaries lack the shared disclosure summary treatment | component | A design decision to share .ax-disclosure-summary across detail views (the 254-11 probes routed no defect on the summary, so that trigger did not fire). | DR-254-08 |

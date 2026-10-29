@@ -1,26 +1,26 @@
 {
   "schema_version": 1,
-  "stage": "assessment",
+  "stage": "corrected",
   "source_commit": "4a018ce9a2ed17a8d8d809b71fee6d34fc423ce2",
-  "fix_commit": null,
+  "fix_commit": "88cd27cdcede5f00594896b6b752069be7ede0ac",
   "assets": {
     "app_css": {
       "path": "accrue_admin/assets/css/app.css",
-      "sha256": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa"
+      "sha256": "25d18c954f3c95b4e0f22b01ecde4d0c8168b655e4800da149fb4283f897ee1a"
     },
     "theme_css": {
       "path": "accrue_admin/assets/css/theme.css",
-      "sha256": "165cca6107ddd75782bab339ec1f1612d33cf7cfac9d89132bef64601ec9f05a"
+      "sha256": "fbf78dee8fb3982b2157f1db8a4be9c16f6b6fe83ef5b6ce89bc7527db602bc7"
     },
     "accrue_admin_css": {
       "path": "accrue_admin/priv/static/accrue_admin.css",
-      "sha256": "a519a7541d05b74c769dd938e493fc886149585def2ff5bfa00cc7a270f77699"
+      "sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299"
     },
     "storybook_css": {
       "path": "accrue_admin/priv/static/storybook.css",
-      "sha256": "3263c1c07eba424ba9b30911353557fc417b4cfe6c2d59939d5fa40233ea7866"
+      "sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe"
     },
-    "served_css_route": "css-732833a179d48ed7c62dfbc3b30c8652"
+    "served_css_route": "css-9568fe2780b1ac605777f571b8e278f5"
   },
   "rubric": [
     "typography",
@@ -361,13 +361,13 @@
         {
           "path": "accrue_admin/e2e/subscription-design-phase254.spec.js",
           "kind": "computed",
-          "status": "pending",
+          "status": "red-then-green",
           "id": "DR-254-01:computed"
         },
         {
           "path": "scripts/ci/verify_phase254_design_review.test.mjs",
           "kind": "css-guard",
-          "status": "pending",
+          "status": "green",
           "id": "scanSubscriptionDetailSpacing"
         }
       ],
@@ -376,7 +376,10 @@
         "path": "accrue_admin/assets/css/app.css"
       },
       "confirmation_captures": [],
-      "verdict": null
+      "verdict": null,
+      "red_evidence": [
+        "254-12-01-red-evidence.json"
+      ]
     },
     {
       "id": "DR-254-02",
@@ -422,13 +425,13 @@
         {
           "path": "accrue_admin/e2e/subscription-design-phase254.spec.js",
           "kind": "source",
-          "status": "pending",
+          "status": "red-then-green",
           "id": "DR-254-02:source"
         },
         {
           "path": "accrue_admin/e2e/subscription-design-phase254.spec.js",
           "kind": "computed",
-          "status": "pending",
+          "status": "green-before-and-after",
           "id": "DR-254-02:computed"
         }
       ],
@@ -441,7 +444,10 @@
         "note": "254-12 performs the edit and keeps the section's introductory sentence consistent with its rows."
       },
       "confirmation_captures": [],
-      "verdict": null
+      "verdict": null,
+      "red_evidence": [
+        "254-12-01-red-evidence.json"
+      ]
     },
     {
       "id": "DR-254-03",
@@ -481,12 +487,15 @@
         {
           "path": "accrue_admin/e2e/subscription-design-phase254.spec.js",
           "kind": "computed",
-          "status": "pending",
+          "status": "red-then-green",
           "id": "DR-254-03:computed"
         }
       ],
       "confirmation_captures": [],
-      "verdict": null
+      "verdict": null,
+      "red_evidence": [
+        "254-12-01-red-evidence.json"
+      ]
     },
     {
       "id": "DR-254-04",
@@ -573,12 +582,15 @@
         {
           "path": "accrue_admin/test/accrue_admin/dev/subscription_action_copy_test.exs",
           "kind": "exunit",
-          "status": "pending",
+          "status": "red-then-green",
           "id": "DR-254-05"
         }
       ],
       "confirmation_captures": [],
-      "verdict": null
+      "verdict": null,
+      "red_evidence": [
+        "254-13-01-red-evidence.json"
+      ]
     },
     {
       "id": "DR-254-06",
@@ -680,7 +692,7 @@
       ],
       "owning_tier": "component",
       "disposition": "deferred",
-      "rationale": "Target size and keyboard focus are measured by the UXQ-02 probes (254-11): if they route a defect on summary.ax-detail-section-head it is fixed in the correction batch as a routed accessibility defect; otherwise sharing .ax-disclosure-summary across detail views is a design decision that reaches several LiveViews and is deferred (D-36).",
+      "rationale": "Target size and keyboard focus are measured by the UXQ-02 probes (254-11): if they route a defect on summary.ax-detail-section-head it is fixed in the correction batch as a routed accessibility defect; otherwise sharing .ax-disclosure-summary across detail views is a design decision that reaches several LiveViews and is deferred (D-36). 254-13 re-disposition: none of the 30 routed accessibility entries (register at eefee2a62958dbdefe426d5434ed133e91b3e8ec) names summary.ax-detail-section-head (A11Y-254-22 names summary.ax-button, the menu button), and the 151 composition cells now report 0 observations, so no defect was routed and the finding stays deferred (D-36).",
       "tests": [],
       "confirmation_captures": [],
       "verdict": null
@@ -734,6 +746,146 @@
         "date": "2026-10-28",
         "status": "owner-accepted at plan time"
       }
+    },
+    {
+      "id": "AMD-254-04",
+      "decisions": [
+        "D-34",
+        "D-35"
+      ],
+      "original": "D-35 shows every correction red on the pre-fix commit, which for the heading amendment would be a computed assertion at 767 and 768 CSS px",
+      "amended": "The heading amendment's red is carried by DR-254-02:source (the declared font-size literals 1.5rem and 1.75rem against var(--ax-type-xl) and var(--ax-type-2xl)); DR-254-02:computed at 767 and 768 CSS px passes before and after by design",
+      "rationale": "The shared .ax-display rule was already responsive (24px below 768px, 28px from 768px), so the contract row was wrong and the rendered heading does not change; a computed assertion cannot be red for a contract-only amendment, while the token literals are a real source change that can.",
+      "evidence": [
+        "254-12-01-red-evidence.json"
+      ],
+      "owner_ack": {
+        "date": "2026-10-28",
+        "status": "owner-accepted at plan time"
+      }
+    },
+    {
+      "id": "AMD-254-05",
+      "decisions": [
+        "D-08",
+        "D-36"
+      ],
+      "original": "Design corrections are confined to the 16 D-33 capture cells (D-36)",
+      "amended": "Routed accessibility defects are fixed wherever 254-11 observed them (D-08 W4): 10 routed cells fall inside the 16 captures and 102 composition cells fall outside them, and all are fixed in this batch with their register entries deleted",
+      "rationale": "An accessibility defect is fixed at the lowest tier that owns it, not only on the cells that happen to be captured; the cells outside the 16 are listed here so the wider reach is a recorded, owner-accepted decision rather than silent scope growth.",
+      "register_commit": "eefee2a62958dbdefe426d5434ed133e91b3e8ec",
+      "affected_cells": [
+        "filtered_empty::viewport::1280::dark",
+        "filtered_empty::viewport::1280::light",
+        "filtered_empty::viewport::320::dark",
+        "filtered_empty::viewport::320::light",
+        "one_row::breakpoint::768::dark",
+        "one_row::breakpoint::768::light",
+        "one_row::container::640::dark",
+        "one_row::container::640::light",
+        "one_row::viewport::1280::dark",
+        "one_row::viewport::1280::light",
+        "one_row::viewport::320::dark",
+        "one_row::viewport::320::light",
+        "page::active::breakpoint::767::dark",
+        "page::active::breakpoint::767::light",
+        "page::active::breakpoint::768::dark",
+        "page::active::breakpoint::768::light",
+        "page::active::container::640::dark",
+        "page::active::container::640::light",
+        "page::active::synthetic-return::320::dark",
+        "page::active::synthetic-return::320::light",
+        "page::awaiting_step_up::breakpoint::767::dark",
+        "page::awaiting_step_up::breakpoint::767::light",
+        "page::awaiting_step_up::synthetic-recovery::320::dark",
+        "page::awaiting_step_up::synthetic-recovery::320::light",
+        "page::awaiting_step_up::viewport::1280::dark",
+        "page::awaiting_step_up::viewport::1280::light",
+        "page::awaiting_step_up::viewport::320::dark",
+        "page::awaiting_step_up::viewport::320::light",
+        "page::dispatching::breakpoint::767::dark",
+        "page::dispatching::breakpoint::767::light",
+        "page::dispatching::viewport::320::dark",
+        "page::dispatching::viewport::320::light",
+        "page::incomplete_evidence::breakpoint::767::dark",
+        "page::incomplete_evidence::breakpoint::767::light",
+        "page::incomplete_evidence::breakpoint::768::dark",
+        "page::incomplete_evidence::breakpoint::768::light",
+        "page::incomplete_evidence::container::640::dark",
+        "page::incomplete_evidence::container::640::light",
+        "page::incomplete_evidence::viewport::1280::dark",
+        "page::incomplete_evidence::viewport::1280::light",
+        "page::incomplete_evidence::viewport::320::dark",
+        "page::incomplete_evidence::viewport::320::light",
+        "page::result_confirmed::breakpoint::767::dark",
+        "page::result_confirmed::breakpoint::767::light",
+        "page::result_confirmed::breakpoint::768::dark",
+        "page::result_confirmed::breakpoint::768::light",
+        "page::result_confirmed::container::640::dark",
+        "page::result_confirmed::container::640::light",
+        "page::result_confirmed::viewport::1280::dark",
+        "page::result_confirmed::viewport::1280::light",
+        "page::result_confirmed::viewport::320::dark",
+        "page::result_confirmed::viewport::320::light",
+        "page::result_failed::breakpoint::767::dark",
+        "page::result_failed::breakpoint::767::light",
+        "page::result_failed::breakpoint::768::dark",
+        "page::result_failed::breakpoint::768::light",
+        "page::result_failed::container::640::dark",
+        "page::result_failed::container::640::light",
+        "page::result_failed::viewport::1280::dark",
+        "page::result_failed::viewport::1280::light",
+        "page::result_failed::viewport::320::dark",
+        "page::result_failed::viewport::320::light",
+        "page::result_pending::breakpoint::767::dark",
+        "page::result_pending::breakpoint::767::light",
+        "page::result_pending::breakpoint::768::dark",
+        "page::result_pending::breakpoint::768::light",
+        "page::result_pending::container::640::dark",
+        "page::result_pending::container::640::light",
+        "page::result_pending::viewport::1280::dark",
+        "page::result_pending::viewport::1280::light",
+        "page::result_pending::viewport::320::dark",
+        "page::result_pending::viewport::320::light",
+        "page::review_cancel_now::breakpoint::767::dark",
+        "page::review_cancel_now::breakpoint::767::light",
+        "page::review_cancel_now::synthetic-consequence::320::dark",
+        "page::review_cancel_now::synthetic-consequence::320::light",
+        "page::review_cancel_now::viewport::1280::dark",
+        "page::review_cancel_now::viewport::1280::light",
+        "page::review_cancel_now::viewport::320::dark",
+        "page::review_cancel_now::viewport::320::light",
+        "page::scheduled_cancellation::breakpoint::767::dark",
+        "page::scheduled_cancellation::breakpoint::767::light",
+        "page::scheduled_cancellation::breakpoint::768::dark",
+        "page::scheduled_cancellation::breakpoint::768::light",
+        "page::scheduled_cancellation::container::640::dark",
+        "page::scheduled_cancellation::container::640::light",
+        "page::scheduled_cancellation::viewport::1280::dark",
+        "page::scheduled_cancellation::viewport::1280::light",
+        "page::scheduled_cancellation::viewport::320::dark",
+        "page::scheduled_cancellation::viewport::320::light",
+        "page_boundary::viewport::1280::dark",
+        "page_boundary::viewport::1280::light",
+        "page_boundary::viewport::320::dark",
+        "page_boundary::viewport::320::light",
+        "partial_cursor_error::viewport::1280::dark",
+        "partial_cursor_error::viewport::1280::light",
+        "partial_cursor_error::viewport::320::dark",
+        "partial_cursor_error::viewport::320::light",
+        "unavailable::viewport::1280::dark",
+        "unavailable::viewport::1280::light",
+        "unavailable::viewport::320::dark",
+        "unavailable::viewport::320::light"
+      ],
+      "evidence": [
+        "accrue_admin/e2e/a11y-dispositions.json",
+        ".planning/phases/254-recurring-quality-reviewed-fixes-and-curation/254-12-SUMMARY.md"
+      ],
+      "owner_ack": {
+        "date": "2026-10-28",
+        "status": "owner-accepted at plan time"
+      }
     }
   ],
   "baselines_changed": [],
@@ -775,7 +927,7 @@
       "id": "DEF-254-06",
       "subject": "Detail disclosure summaries lack the shared disclosure summary treatment",
       "tier": "component",
-      "trigger": "254-11 target-size or focus probes route a defect on the summary, or a design decision to share .ax-disclosure-summary across detail views.",
+      "trigger": "A design decision to share .ax-disclosure-summary across detail views (the 254-11 probes routed no defect on the summary, so that trigger did not fire).",
       "finding_id": "DR-254-08"
     }
   ]
