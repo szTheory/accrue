@@ -993,8 +993,11 @@ jobs:
       - name: Rebuild package assets
         run: cd accrue_admin && mix accrue_admin.assets.build
 
+      - name: Ensure the Storybook bundle embeds the rebuilt admin bundle
+        run: node scripts/ci/recompose_storybook_css.mjs --check
+
       - name: Ensure committed bundle is fresh
-        run: git diff --exit-code -- accrue_admin/priv/static/accrue_admin.css accrue_admin/priv/static/accrue_admin.js
+        run: git diff --exit-code -- accrue_admin/priv/static/accrue_admin.css accrue_admin/priv/static/accrue_admin.js accrue_admin/priv/static/storybook.css accrue_admin/priv/static/storybook.js
 
       - name: Verify guide mentions mount path and asset task
         run: |

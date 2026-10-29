@@ -95,6 +95,19 @@ test("check passes on an exact composition and reports equal section and bundle 
   }
 });
 
+test("an admin bundle without a trailing newline (the minified real shape) composes, checks and is a fixed point", () => {
+  const minified = ".ax-a{color:blue}.ax-b{color:green}";
+  const out = compose({ adminCss: minified });
+  assert.ok(out.includes(`${BUNDLE_MARKER}\n${minified}\n\n${SHIM_MARKER}`));
+  assert.equal(compose({ adminCss: minified, previous: out }), out);
+  const root = fixtureRoot(out, minified);
+  try {
+    assert.equal(checkStorybookCss({ root }).embedded_sha256, checkStorybookCss({ root }).bundle_sha256);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("check also rejects a drifted PSB section, a drifted brand section and a missing shim tail", () => {
   const good = compose();
   const roots = [
