@@ -42,6 +42,61 @@ if Mix.env() != :prod do
       "storybook/pages/subscription.story.exs"
     ]
 
+    # CURATE-01 (D-37..D-40). The frozen baseline is computed once, at the HEAD before the first
+    # curation edit, and pinned here as literal data. frozen_baseline/0 never reads the current tree,
+    # so later retirements cannot change it; verify_phase254_curation.mjs re-derives it from
+    # `git show @frozen_source_commit:<path>` and fails on any drift.
+    @frozen_source_commit "986f68b71bae643ce24f0906c39d072fe5ea117b"
+    @frozen_subject_sources [
+      "storybook/components/action_menu.story.exs",
+      "storybook/components/detail.story.exs",
+      "storybook/components/overlay.story.exs",
+      "storybook/components/page_header.story.exs",
+      "storybook/phase252-manifest.json"
+    ]
+    # {source path, story path, %Variation{} ids}. Manifest entries come from the tracked manifest,
+    # every other source from the %Variation{ id: ... } struct literals of the story file.
+    @frozen_subject_groups [
+      {"storybook/components/action_menu.story.exs", "/components/action_menu",
+       ~w(danger default focus open provider_pruned)},
+      {"storybook/components/detail.story.exs", "/components/detail",
+       ~w(change_actions long_labels read_only view_actions)},
+      {"storybook/components/overlay.story.exs", "/components/overlay",
+       ~w(drawer_desktop drawer_mobile modal_shell popover_shell reduced_motion)},
+      {"storybook/components/page_header.story.exs", "/components/page_header",
+       ~w(actions combined_controls default filter_toolbar long_content stat_strip)},
+      {"storybook/phase252-manifest.json", "/components/subscription_detail",
+       ~w(active braintree_pruned dunning_active incomplete_evidence populated scheduled_cancellation)}
+    ]
+    @frozen_subjects_sha256 "1082c32dfd875980f87ca450f77bbe70c26c039d6c61c429a60aaa6ac2a80905"
+    @frozen_manifest_sha256 "e321f5210f3d2e1604eb4f14e52a67dc52362d35f400309ea5247ee61164adbf"
+    @frozen_kitchen_test_digests %{
+      "accrue_admin/e2e/kitchen-banner.spec.js" =>
+        "571441982d7a944b40624923189fdcb6a04664adf2d4c3d91c7937f5b1502b64",
+      "accrue_admin/test/accrue_admin/dev/component_group_registry_test.exs" =>
+        "cc8902bf54c3c86f1988bf83d477778ca8e948da6c5a146b9aab09c2e552bd0a",
+      "accrue_admin/test/accrue_admin/dev/component_kitchen_live_test.exs" =>
+        "dc838913beebdb0c3f5752d69f803b7ea0d07336368581a0ca667544045206af",
+      "accrue_admin/test/accrue_admin/dev/component_registry_test.exs" =>
+        "ece76a9f5cb66ae79eaa1ca0bdc0b5f0471e725a1c39f24149e1cac64b630797"
+    }
+    @frozen_compatibility_ids ["braintree_pruned", "dunning_active", "populated"]
+    @frozen_registry %{family_count: 30, entry_count: 42, specimen_count: 75}
+    @frozen_entry_count 6
+    @duplicate_fact_fields [
+      :actor,
+      :job,
+      :input_source,
+      :production_renderer,
+      :proof_lane,
+      :composition_tier
+    ]
+    @curation_dispositions ["retire", "merge", "retain", "reclassify"]
+    @curation_reason_classes ["stale", "impossible", "duplicate"]
+    @curation_reachability_states ["reachable", "historic_supported", "unreachable"]
+    @curation_survivor_kinds ["manifest_entry", "story"]
+    @curation_guide_path "accrue_admin/storybook/subscription-curation.json"
+
     @doc "Discovers retained subscription variations from the compiled PhoenixStorybook backend."
     @spec entries() :: [map()]
     def entries do
@@ -166,6 +221,371 @@ if Mix.env() != :prod do
 
       :ok
     end
+
+    @doc "The frozen curation baseline: pinned literal data, never recomputed from the current tree."
+    @spec frozen_baseline() :: map()
+    def frozen_baseline do
+      subjects =
+        for {source, story_path, ids} <- @frozen_subject_groups, id <- ids do
+          %{story_path: story_path, variation_id: id, source_path: source}
+        end
+        |> Enum.sort_by(&{&1.story_path, &1.variation_id})
+
+      %{
+        source_commit: @frozen_source_commit,
+        entries: @frozen_entry_count,
+        compatibility_ids: @frozen_compatibility_ids,
+        registry: @frozen_registry,
+        manifest_sha256: @frozen_manifest_sha256,
+        kitchen_test_digests: @frozen_kitchen_test_digests,
+        subject_sources: @frozen_subject_sources,
+        subjects: subjects,
+        subjects_sha256: @frozen_subjects_sha256
+      }
+    end
+
+    @doc """
+    Digest over the sorted subjects as a list-of-lists JSON form, so it cannot depend on map key order
+    (BEAM map key order is not alphabetical) and matches the Node verifier byte for byte.
+    """
+    @spec subjects_digest([map()]) :: String.t()
+    def subjects_digest(subjects) when is_list(subjects) do
+      subjects
+      |> Enum.map(&[&1.story_path, &1.variation_id, &1.source_path])
+      |> Jason.encode!()
+      |> then(&:crypto.hash(:sha256, &1))
+      |> Base.encode16(case: :lower)
+    end
+
+    @doc "Builds the fact and expected blocks that decide whether two entries are an exact duplicate."
+    @spec duplicate_evidence(map(), map()) :: map()
+    def duplicate_evidence(subject_entry, survivor_entry)
+        when is_map(subject_entry) and is_map(survivor_entry) do
+      %{subject: duplicate_blocks(subject_entry), survivor: duplicate_blocks(survivor_entry)}
+    end
+
+    defp duplicate_blocks(entry) do
+      %{fact: Map.take(entry, @duplicate_fact_fields), expected: Map.fetch!(entry, :expected)}
+    end
+
+    @doc "Returns the compiled curation ledger: frozen baseline, current counts, records, and amendments."
+    @spec curation_ledger() :: map()
+    def curation_ledger do
+      %{
+        schema_version: 1,
+        frozen_baseline: frozen_baseline(),
+        current: current_counts(),
+        records: curation_records(),
+        amendments: curation_amendments(),
+        source_digests: source_digests()
+      }
+    end
+
+    @doc "Counts observed in the current tree, checked against the frozen baseline by the verifier."
+    @spec current_counts() :: map()
+    def current_counts do
+      current_entries = entries()
+      registry = ComponentRegistry.entries()
+
+      %{
+        entries: length(current_entries),
+        compatibility_ids:
+          current_entries
+          |> Enum.map(& &1.variation_id)
+          |> Enum.filter(&(&1 in @frozen_compatibility_ids))
+          |> Enum.sort(),
+        registry: %{
+          family_count: registry |> Enum.map(& &1.family) |> Enum.uniq() |> length(),
+          entry_count: length(registry),
+          specimen_count: registry |> Enum.map(&length(Map.get(&1, :specimens) || [])) |> Enum.sum()
+        },
+        kitchen_test_digests: kitchen_test_digests()
+      }
+    end
+
+    defp kitchen_test_digests do
+      root = repository_root()
+
+      @frozen_kitchen_test_digests
+      |> Map.keys()
+      |> Map.new(fn relative_path ->
+        path = Path.join(root, relative_path)
+
+        unless File.regular?(path) do
+          raise ArgumentError, "kitchen test file is missing: #{relative_path}"
+        end
+
+        {relative_path, :crypto.hash(:sha256, File.read!(path)) |> Base.encode16(case: :lower)}
+      end)
+    end
+
+    @doc "Amendments to earlier decisions recorded with the owner acknowledgement."
+    @spec curation_amendments() :: [map()]
+    def curation_amendments do
+      [
+        %{
+          id: "AMD-254-01",
+          decisions: ["D-06", "D-14", "D-39", "D-40"],
+          original:
+            "D-06/D-14 pin the full-mode browser counts as the literals 15 Phase 252 cells (12 canonical, 3 compatibility) and 151 Phase 253 cells.",
+          amended:
+            "15 stays alive as the frozen_baseline fixture positive control; the live Phase 252 count is derived from the ledger (frozen baseline minus retired). After the D-40 retirement of subscription_detail||populated full mode is 14 Phase 252 cells and 151 Phase 253 cells.",
+          rationale:
+            "D-39 locks that the pinned literals are derived from the ledger as an explicit amendment; keeping 15 as a literal would make the D-40 duplicate retirement impossible without weakening a gate, while deriving the count keeps every skip, retry and flaky rejection and the 12 canonical cells intact.",
+          evidence: [
+            %{
+              path: "scripts/ci/verify_phase252_stories.mjs",
+              marker: "function validateRenderResults"
+            },
+            %{
+              path: "scripts/ci/generate_phase252_acceptance.mjs",
+              marker: "function validateBrowser"
+            },
+            %{path: "scripts/ci/phase252_reporters.mjs", marker: "function browserBindings"},
+            %{
+              path: "scripts/ci/generate_phase252_acceptance.test.mjs",
+              marker: "pooled cells and incomplete UI or edge predicates are rejected"
+            },
+            %{
+              path: "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs",
+              marker: "generated guide preserves Phase 253 compiled routes"
+            }
+          ],
+          owner_ack: %{date: "2026-10-28", status: "owner-accepted at plan time"}
+        }
+      ]
+    end
+
+    @doc "Returns the validated curation records, sorted by id."
+    @spec curation_records() :: [map()]
+    def curation_records do
+      curation_records_for(raw_curation_records())
+    end
+
+    @doc "Normalizes and validates curation records against the frozen baseline."
+    @spec curation_records_for([map()]) :: [map()]
+    def curation_records_for(records) when is_list(records) do
+      baseline = frozen_baseline()
+      normalized = Enum.map(records, &normalize_curation_record!(&1, baseline))
+
+      duplicate =
+        normalized
+        |> Enum.group_by(& &1.id)
+        |> Enum.find(fn {_id, same} -> length(same) > 1 end)
+
+      if duplicate do
+        {id, _same} = duplicate
+        raise ArgumentError, "duplicate curation record id: #{id}"
+      end
+
+      Enum.sort_by(normalized, & &1.id)
+    end
+
+    def curation_records_for(_records),
+      do: raise(ArgumentError, "curation records must be a list")
+
+    defp raw_curation_records do
+      [
+        primitive_retain_record(
+          "CUR-254-01",
+          "/components/detail",
+          %{
+            owner: "AccrueAdmin.Components.Detail.summary_list/1",
+            evidence: [
+              %{
+                path: "accrue_admin/lib/accrue_admin/components/detail.ex",
+                marker: "def summary_list(assigns) do"
+              },
+              %{path: "storybook/components/detail.story.exs", marker: "summary_list_story"}
+            ]
+          },
+          "Only Storybook coverage of the Detail.summary_list/1 primitive API (read-only, change/view action and long-label rows). The subscription story renders it only through the whole subscription area.",
+          %{
+            test_ref:
+              "accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders a semantic summary-list dl with read-only and long value rows",
+            protects:
+              "Detail.summary_list/1 keeps its semantic description-list rows for read-only and long values"
+          }
+        ),
+        primitive_retain_record(
+          "CUR-254-02",
+          "/components/overlay",
+          %{
+            owner: "AccrueAdmin.Components.Overlay.overlay/1",
+            evidence: [
+              %{
+                path: "accrue_admin/lib/accrue_admin/components/overlay.ex",
+                marker: "def overlay(assigns) do"
+              },
+              %{path: "storybook/components/overlay.story.exs", marker: "overlay_story"}
+            ]
+          },
+          "Only Storybook coverage of the Overlay primitive API (desktop and mobile drawer, modal and popover shells, reduced motion). The subscription action drawer exercises one presentation of it.",
+          %{
+            test_ref:
+              "accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders drawer presentation through the body-level overlay root",
+            protects:
+              "Overlay renders every presentation through the body-level overlay root with its focus contract"
+          }
+        ),
+        primitive_retain_record(
+          "CUR-254-03",
+          "/components/page_header",
+          %{
+            owner: "AccrueAdmin.Components.PageHeader.page_header/1",
+            evidence: [
+              %{
+                path: "accrue_admin/lib/accrue_admin/components/page_header.ex",
+                marker: "def page_header(assigns) do"
+              },
+              %{path: "storybook/components/page_header.story.exs", marker: "page_header_story"}
+            ]
+          },
+          "Only Storybook coverage of the PageHeader slot contract (actions, stat strip, filter toolbar, long content, combined controls) outside the subscription collection page.",
+          %{
+            test_ref:
+              "accrue_admin/test/accrue_admin/components/page_header_test.exs#renders breadcrumbs, required title, semantic markers, and exactly one h1",
+            protects:
+              "PageHeader keeps its breadcrumb, title, semantic marker and single h1 slot contract"
+          }
+        )
+      ]
+    end
+
+    defp primitive_retain_record(id, story_path, reachability, reason, regression) do
+      %{
+        id: id,
+        subject: %{story_path: story_path, variation_id: nil, scenario_id: nil},
+        disposition: "retain",
+        reason_class: nil,
+        reachability: Map.put(reachability, :state, "reachable"),
+        reason: reason,
+        reason_evidence: %{kind: "retained_primitive_regression"},
+        survivor: %{kind: "story", key: story_path},
+        preserved_regressions: [regression],
+        kitchen_impact: "none",
+        provenance: %{origin_commit: @frozen_source_commit, decided_in: "254-04-01"}
+      }
+    end
+
+    defp normalize_curation_record!(record, baseline) when is_map(record) do
+      for field <- [:id, :disposition, :reason] do
+        unless non_empty_string?(Map.get(record, field)) do
+          raise ArgumentError, "curation record is missing #{field}"
+        end
+      end
+
+      unless record.disposition in @curation_dispositions do
+        raise ArgumentError,
+              "curation record #{record.id} has unsupported disposition: #{inspect(record.disposition)}"
+      end
+
+      unless Regex.match?(~r/\ACUR-254-\d{2,}\z/, record.id) do
+        raise ArgumentError, "curation record id must look like CUR-254-NN: #{record.id}"
+      end
+
+      reason_class = Map.get(record, :reason_class)
+
+      if record.disposition in ["retire", "merge"] and reason_class not in @curation_reason_classes do
+        raise ArgumentError,
+              "curation record #{record.id} (#{record.disposition}) needs a reason class: #{inspect(reason_class)}"
+      end
+
+      if reason_class != nil and reason_class not in @curation_reason_classes do
+        raise ArgumentError,
+              "curation record #{record.id} has unsupported reason class: #{inspect(reason_class)}"
+      end
+
+      subject = Map.get(record, :subject, %{})
+
+      unless non_empty_string?(Map.get(subject, :story_path)) do
+        raise ArgumentError, "curation record #{record.id} is missing subject.story_path"
+      end
+
+      unless Enum.any?(baseline.subjects, fn frozen ->
+               frozen.story_path == subject.story_path and
+                 (subject.variation_id == nil or frozen.variation_id == subject.variation_id)
+             end) do
+        raise ArgumentError,
+              "curation record #{record.id} subject #{inspect(subject)} is absent from the frozen baseline"
+      end
+
+      reachability = Map.get(record, :reachability, %{})
+
+      unless Map.get(reachability, :state) in @curation_reachability_states and
+               non_empty_string?(Map.get(reachability, :owner)) and
+               Map.get(reachability, :evidence, []) != [] do
+        raise ArgumentError,
+              "curation record #{record.id} needs reachability state, owner, and evidence"
+      end
+
+      unless Map.get(record.survivor, :kind) in @curation_survivor_kinds and
+               non_empty_string?(Map.get(record.survivor, :key)) do
+        raise ArgumentError, "curation record #{record.id} needs a survivor kind and key"
+      end
+
+      unless Map.get(record, :preserved_regressions, []) != [] do
+        raise ArgumentError, "curation record #{record.id} needs a preserved regression"
+      end
+
+      unless Map.get(record, :kitchen_impact) == "none" do
+        raise ArgumentError, "curation record #{record.id} must have kitchen_impact none"
+      end
+
+      record
+    end
+
+    defp normalize_curation_record!(_record, _baseline),
+      do: raise(ArgumentError, "curation record must be a map")
+
+    @doc "Writes the curation ledger as deterministic JSON through a temp file and an atomic rename."
+    @spec write_curation!(Path.t(), keyword()) :: :ok
+    def write_curation!(path, opts \\ []) when is_binary(path) do
+      writer = Keyword.get(opts, :writer, &File.write!/2)
+
+      json =
+        curation_ledger()
+        |> ordered_json()
+        |> Jason.encode!(pretty: true)
+        |> Kernel.<>("\n")
+
+      path |> Path.dirname() |> File.mkdir_p!()
+      temp = "#{path}.tmp-#{System.unique_integer([:positive])}"
+
+      try do
+        writer.(temp, json)
+        File.rename!(temp, path)
+        :ok
+      after
+        File.rm(temp)
+      end
+    end
+
+    @doc "Rejects a committed curation ledger that differs from the one compiled from current source."
+    @spec verify_curation!(Path.t()) :: :ok
+    def verify_curation!(path) when is_binary(path) do
+      committed = path |> File.read!() |> Jason.decode!()
+      current = curation_ledger() |> Jason.encode!() |> Jason.decode!()
+
+      unless committed == current do
+        raise ArgumentError,
+              "curation ledger is stale; regenerate it with node scripts/ci/verify_phase254_curation.mjs --write"
+      end
+
+      :ok
+    end
+
+    # BEAM map key order is not alphabetical, so every map is rewritten as an ordered object to keep
+    # the generated bytes stable across builds.
+    defp ordered_json(%{} = map) when not is_struct(map) do
+      map
+      |> Enum.map(fn {key, value} -> {to_string(key), ordered_json(value)} end)
+      |> Enum.sort_by(&elem(&1, 0))
+      |> Jason.OrderedObject.new()
+    end
+
+    defp ordered_json(list) when is_list(list), do: Enum.map(list, &ordered_json/1)
+    defp ordered_json(other), do: other
 
     @doc "Checks that a direct URL still names the entry's compiled story and variation route."
     @spec route_matches?(map(), String.t()) :: boolean()
@@ -519,6 +939,7 @@ if Mix.env() != :prod do
         "",
         state_tables,
         phase253_composition_section(),
+        curation_section(),
         "## Source digests",
         "",
         digests,
@@ -562,6 +983,48 @@ if Mix.env() != :prod do
         page_rows,
         "",
         "Presentation-only evidence covers settled appearance; it does not establish mounted authority, persistence, dispatch, or provider completion. Use the mounted route and action-journey tests for those claims. The collection preview is backed by validated development/test facts; it does not claim provider price lookup or a persisted action.",
+        ""
+      ]
+    end
+
+    defp curation_section do
+      baseline = frozen_baseline()
+
+      record_rows =
+        Enum.map(curation_records(), fn record ->
+          subject =
+            case record.subject.variation_id do
+              nil -> "`#{guide_cell(record.subject.story_path)}` (story)"
+              id -> "`#{guide_cell(record.subject.story_path)}||#{guide_cell(id)}`"
+            end
+
+          regressions =
+            record.preserved_regressions
+            |> Enum.map(&"`#{guide_cell(&1.test_ref)}`")
+            |> Enum.join("<br>")
+
+          "| #{record.id} | #{subject} | #{record.disposition} | #{guide_cell(Map.get(record, :reason_class))} | #{record.reachability.state} (#{guide_cell(record.reachability.owner)}) | `#{guide_cell(record.survivor.key)}` | #{regressions} | #{guide_cell(record.reason)} |"
+        end)
+
+      amendment_rows =
+        Enum.map(curation_amendments(), fn amendment ->
+          "- **#{amendment.id}** (#{Enum.join(amendment.decisions, ", ")}): #{amendment.amended} Owner acknowledgement: #{amendment.owner_ack.status}, #{amendment.owner_ack.date}."
+        end)
+
+      [
+        "## Curation ledger",
+        "",
+        "Generated from `SubscriptionManifest.curation_ledger/0` into `#{@curation_guide_path}` and verified by `scripts/ci/verify_phase254_curation.mjs`. A story is retired or merged only with mechanical evidence (fact and expected-block equality, a replacing owner, or a failing fixture invariant), a surviving subject that still renders, and a preserved regression that runs in a required lane. Grep absence and screenshot similarity are never evidence.",
+        "",
+        "Frozen baseline at `#{baseline.source_commit}`: #{baseline.entries} canonical and compatibility entries (compatibility ids #{Enum.map_join(baseline.compatibility_ids, ", ", &"`#{&1}`")}), #{length(baseline.subjects)} enumerated subjects, #{baseline.registry.family_count} registry families, #{baseline.registry.entry_count} registry entries and #{baseline.registry.specimen_count} specimens. The kitchen at `/dev/components` is untouched (`kitchen_impact: none`).",
+        "",
+        "| Record | Subject | Disposition | Reason class | Reachability | Survivor | Preserved regressions | Reason |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+        record_rows,
+        "",
+        "### Amendments",
+        "",
+        amendment_rows,
         ""
       ]
     end

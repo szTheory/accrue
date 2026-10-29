@@ -82,6 +82,22 @@ Review the direct routes and their compiled renderers below. The collection also
 
 Presentation-only evidence covers settled appearance; it does not establish mounted authority, persistence, dispatch, or provider completion. Use the mounted route and action-journey tests for those claims. The collection preview is backed by validated development/test facts; it does not claim provider price lookup or a persisted action.
 
+## Curation ledger
+
+Generated from `SubscriptionManifest.curation_ledger/0` into `accrue_admin/storybook/subscription-curation.json` and verified by `scripts/ci/verify_phase254_curation.mjs`. A story is retired or merged only with mechanical evidence (fact and expected-block equality, a replacing owner, or a failing fixture invariant), a surviving subject that still renders, and a preserved regression that runs in a required lane. Grep absence and screenshot similarity are never evidence.
+
+Frozen baseline at `986f68b71bae643ce24f0906c39d072fe5ea117b`: 6 canonical and compatibility entries (compatibility ids `braintree_pruned`, `dunning_active`, `populated`), 26 enumerated subjects, 30 registry families, 42 registry entries and 75 specimens. The kitchen at `/dev/components` is untouched (`kitchen_impact: none`).
+
+| Record | Subject | Disposition | Reason class | Reachability | Survivor | Preserved regressions | Reason |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| CUR-254-01 | `/components/detail` (story) | retain | — | reachable (AccrueAdmin.Components.Detail.summary_list/1) | `/components/detail` | `accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders a semantic summary-list dl with read-only and long value rows` | Only Storybook coverage of the Detail.summary_list/1 primitive API (read-only, change/view action and long-label rows). The subscription story renders it only through the whole subscription area. |
+| CUR-254-02 | `/components/overlay` (story) | retain | — | reachable (AccrueAdmin.Components.Overlay.overlay/1) | `/components/overlay` | `accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders drawer presentation through the body-level overlay root` | Only Storybook coverage of the Overlay primitive API (desktop and mobile drawer, modal and popover shells, reduced motion). The subscription action drawer exercises one presentation of it. |
+| CUR-254-03 | `/components/page_header` (story) | retain | — | reachable (AccrueAdmin.Components.PageHeader.page_header/1) | `/components/page_header` | `accrue_admin/test/accrue_admin/components/page_header_test.exs#renders breadcrumbs, required title, semantic markers, and exactly one h1` | Only Storybook coverage of the PageHeader slot contract (actions, stat strip, filter toolbar, long content, combined controls) outside the subscription collection page. |
+
+### Amendments
+
+- **AMD-254-01** (D-06, D-14, D-39, D-40): 15 stays alive as the frozen_baseline fixture positive control; the live Phase 252 count is derived from the ledger (frozen baseline minus retired). After the D-40 retirement of subscription_detail||populated full mode is 14 Phase 252 cells and 151 Phase 253 cells. Owner acknowledgement: owner-accepted at plan time, 2026-10-28.
+
 ## Source digests
 
 - `accrue_admin/lib/accrue_admin/dev/component_registry.ex` — `a5a84b1f9e00e0742bb4e1eace7cc974c60f73426c1caa8000fca2105d9cc31c`
@@ -92,7 +108,7 @@ Presentation-only evidence covers settled appearance; it does not establish moun
 - `accrue_admin/lib/accrue_admin/router.ex` — `2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed`
 - `accrue_admin/storybook/_support/subscription_collection.ex` — `f57ecc7e52d9bd08dab74cd035375c3fcd993143fc5561514141b26c26fa3a9e`
 - `accrue_admin/storybook/_support/subscription_compositions_manifest.ex` — `c549a9f23c16ab0168f5bee99c6f82c278a3ab6428091d918da8aaf5f1dd9741`
-- `accrue_admin/storybook/_support/subscription_manifest.ex` — `8e9000c87232ca76b678d2a4c73a963619058df5ebf465b012a3395eab730cde`
+- `accrue_admin/storybook/_support/subscription_manifest.ex` — `91e94047e23c3f701c3cafb0c10d92ea2d6e78d9f72e26a6ea34cb797f6caff5`
 - `accrue_admin/storybook/_support/subscription_page_scenarios.ex` — `6a0f7265940ba44c31c40435f389d2db5030024e08638467823a20eede0c8c24`
 - `accrue_admin/storybook/_support/subscription_scenarios.ex` — `734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d`
 - `accrue_portal/lib/accrue_portal/live/subscription_live.ex` — `c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372`

@@ -488,6 +488,179 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       end
     end
 
+    test "curation ledger pins a frozen baseline whose subjects, digest and counts never read the current tree" do
+      baseline = SubscriptionManifest.frozen_baseline()
+
+      assert baseline.entries == 6
+      assert baseline.compatibility_ids == ["braintree_pruned", "dunning_active", "populated"]
+      assert baseline.source_commit =~ ~r/\A[0-9a-f]{40}\z/
+      assert baseline.manifest_sha256 =~ ~r/\A[0-9a-f]{64}\z/
+      assert map_size(baseline.kitchen_test_digests) > 0
+
+      assert Map.keys(baseline.registry) |> Enum.sort() ==
+               [:entry_count, :family_count, :specimen_count]
+
+      subjects = baseline.subjects
+      keys = Enum.map(subjects, &{&1.story_path, &1.variation_id})
+
+      assert keys == Enum.sort(keys)
+      assert Enum.uniq(keys) == keys
+      assert length(subjects) == 26
+      assert SubscriptionManifest.subjects_digest(subjects) == baseline.subjects_sha256
+
+      # Positive controls for the two subjects 254-06 later removes.
+      assert {"/components/subscription_detail", "populated"} in keys
+      assert {"/components/action_menu", "provider_pruned"} in keys
+
+      assert subjects |> Enum.count(&(&1.story_path == "/components/page_header")) == 6
+
+      assert subjects |> Enum.map(& &1.source_path) |> Enum.uniq() |> Enum.sort() ==
+               baseline.subject_sources
+
+      # Pinned data: two calls return the identical term and the digest of a tampered list differs.
+      assert SubscriptionManifest.frozen_baseline() == baseline
+      refute SubscriptionManifest.subjects_digest(tl(subjects)) == baseline.subjects_sha256
+    end
+
+    test "curation records are sorted, shaped, grounded in the frozen baseline and refuse invalid input" do
+      records = SubscriptionManifest.curation_records()
+      baseline = SubscriptionManifest.frozen_baseline()
+      ids = Enum.map(records, & &1.id)
+
+      assert ids == Enum.sort(ids)
+      assert Enum.uniq(ids) == ids
+      assert Enum.all?(ids, &(&1 =~ ~r/\ACUR-254-\d{2,}\z/))
+
+      for record <- records do
+        assert record.disposition in ["retire", "merge", "retain", "reclassify"]
+        assert record.kitchen_impact == "none"
+        assert record.reachability.state in ["reachable", "historic_supported", "unreachable"]
+        assert record.reachability.evidence != []
+        assert record.preserved_regressions != []
+        assert record.provenance.origin_commit == baseline.source_commit
+
+        assert Enum.any?(baseline.subjects, fn subject ->
+                 subject.story_path == record.subject.story_path and
+                   (record.subject.variation_id == nil or
+                      subject.variation_id == record.subject.variation_id)
+               end)
+      end
+
+      [first | _] = records
+      assert SubscriptionManifest.curation_records_for(Enum.reverse(records)) == records
+
+      assert_raise ArgumentError, ~r/absent from the frozen baseline/, fn ->
+        SubscriptionManifest.curation_records_for([
+          put_in(first, [:subject, :story_path], "/components/never_existed")
+        ])
+      end
+
+      assert_raise ArgumentError, ~r/unsupported disposition/, fn ->
+        SubscriptionManifest.curation_records_for([%{first | disposition: "delete"}])
+      end
+
+      assert_raise ArgumentError, ~r/kitchen_impact none/, fn ->
+        SubscriptionManifest.curation_records_for([%{first | kitchen_impact: "minor"}])
+      end
+
+      assert_raise ArgumentError, ~r/needs a reason class/, fn ->
+        SubscriptionManifest.curation_records_for([%{first | disposition: "retire"}])
+      end
+
+      assert_raise ArgumentError, ~r/duplicate curation record id/, fn ->
+        SubscriptionManifest.curation_records_for([first, first])
+      end
+    end
+
+    test "duplicate evidence is exact block equality and any differing field keeps both subjects" do
+      by_id = Map.new(SubscriptionManifest.entries(), &{&1.variation_id, &1})
+
+      alias_evidence = SubscriptionManifest.duplicate_evidence(by_id["populated"], by_id["active"])
+      assert alias_evidence.subject == alias_evidence.survivor
+
+      distinct =
+        SubscriptionManifest.duplicate_evidence(by_id["braintree_pruned"], by_id["active"])
+
+      refute distinct.subject == distinct.survivor
+
+      one_field =
+        SubscriptionManifest.duplicate_evidence(
+          by_id["populated"],
+          put_in(by_id["active"], [:expected, :facts, :amount_minor], 1)
+        )
+
+      refute one_field.subject == one_field.survivor
+    end
+
+    test "curation ledger regenerates byte-identically and an interrupted regeneration leaves the committed ledger intact" do
+      path =
+        Path.join(System.tmp_dir!(), "phase254-curation-#{System.unique_integer([:positive])}.json")
+
+      on_exit(fn -> File.rm(path) end)
+
+      :ok = SubscriptionManifest.write_curation!(path)
+      first = File.read!(path)
+      :ok = SubscriptionManifest.write_curation!(path)
+      assert File.read!(path) == first
+      assert :ok = SubscriptionManifest.verify_curation!(path)
+
+      decoded = Jason.decode!(first)
+
+      assert Map.keys(decoded) |> Enum.sort() ==
+               ["amendments", "current", "frozen_baseline", "records", "schema_version", "source_digests"]
+
+      assert decoded["source_digests"] == SubscriptionManifest.source_digests()
+      assert decoded["records"] |> Enum.map(& &1["id"]) == decoded["records"] |> Enum.map(& &1["id"]) |> Enum.sort()
+      assert Enum.any?(decoded["amendments"], &(&1["id"] == "AMD-254-01"))
+
+      interrupted = fn temp, json ->
+        File.write!(temp, json)
+        raise "writer interrupted after the temp write and before the rename"
+      end
+
+      assert_raise RuntimeError, ~r/interrupted/, fn ->
+        SubscriptionManifest.write_curation!(path, writer: interrupted)
+      end
+
+      assert File.read!(path) == first
+
+      leftovers =
+        path |> Path.dirname() |> File.ls!() |> Enum.filter(&String.starts_with?(&1, Path.basename(path) <> ".tmp-"))
+
+      assert leftovers == []
+
+      fresh_dir = Path.join(System.tmp_dir!(), "phase254-curation-new-#{System.unique_integer([:positive])}")
+      on_exit(fn -> File.rm_rf(fresh_dir) end)
+      target = Path.join(fresh_dir, "ledger.json")
+
+      assert_raise RuntimeError, ~r/interrupted/, fn ->
+        SubscriptionManifest.write_curation!(target, writer: interrupted)
+      end
+
+      refute File.exists?(target), "an interrupted first write must not leave a partial ledger"
+
+      File.write!(path, Jason.encode!(Map.put(decoded, "records", [])))
+
+      assert_raise ArgumentError, ~r/curation ledger is stale/, fn ->
+        SubscriptionManifest.verify_curation!(path)
+      end
+    end
+
+    test "committed curation ledger is current and the guide renders every record in a deterministic curation section" do
+      root = Path.expand("../../../../", __DIR__)
+      committed = Path.join(root, "accrue_admin/storybook/subscription-curation.json")
+      assert :ok = SubscriptionManifest.verify_curation!(committed)
+
+      guide = SubscriptionManifest.coverage_guide()
+      assert guide == SubscriptionManifest.coverage_guide()
+      assert guide =~ "## Curation ledger"
+      assert guide =~ "AMD-254-01"
+
+      for record <- SubscriptionManifest.curation_records() do
+        assert guide =~ record.id
+      end
+    end
+
     defp caller_row(label, owner, path, tier, state) do
       %{
         label: label,
