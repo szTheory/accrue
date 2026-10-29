@@ -1,46 +1,50 @@
 ---
 gsd_state_version: "1.0"
-milestone: v1.67
-milestone_name: Integration & CI Green
-status: Awaiting next milestone
-stopped_at: Completed 251-07-PLAN.md
-last_updated: "2026-10-26T18:11:25.197Z"
-last_activity: 2026-10-26
-last_activity_desc: Milestone v1.67 completed and archived
-state_head: dbd509e0f4d8d2e84a189ea6167fdcaade3c8ab6
+milestone: v1.68
+milestone_name: UI Storybook Stress Testing
+current_phase: 254
+current_phase_name: Recurring Quality, Reviewed Fixes and Curation
+status: executing
+stopped_at: Completed 254-14-PLAN.md
+last_updated: "2026-10-29T11:40:48.100Z"
+last_activity: 2026-10-28
+last_activity_desc: Phase 254 execution started
+state_head: b861a6da43a56c4e3d4046e9b13cbfd184b83f66
 progress:
   total_phases: 3
-  completed_phases: 3
-  total_plans: 32
-  completed_plans: 32
-current_phase: 251
-current_phase_name: 1.7.0 Release Alignment
+  completed_phases: 2
+  total_plans: 34
+  completed_plans: 30
+  percent: 67
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-12)
+See: .planning/PROJECT.md (updated 2026-10-27)
 
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
-**Current focus:** No active milestone. v1.67 is shipped and archived (1.7.0 released 2026-10-26); `current_phase: 251` is kept so archive-aware SL-G keeps checking the last phase. Next is `/gsd-new-milestone`, opened only on a concrete trigger.
-**Progress:** [██████████] 100% (3/3 phases)
-**Completed work:** v1.66 archived locally;16/16requirements,4phases,18plans,41task entries. Pre-archive verification and known limits are in milestones/v1.66-*.
+**Current focus:** Phase 254 — Recurring Quality, Reviewed Fixes and Curation
+**Progress:** [███████░░░] 67%
+**Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
-Phase: Milestone v1.67 complete
-Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-10-26 — Milestone v1.67 completed and archived
+Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
+Plan: 15 of 18
+Status: Ready to execute
+Last activity: 2026-10-28 — Phase 254 execution started
+
+Progress: [███████░░░] 67%
+Current milestone planning blockers: None. Phase 253 passed independent verification (56/56, behavior_unverified: 0), the fresh 10-lane aggregate (151 browser cells/152 tests), retained Phase252 gate (21/21), and executable UAT (24/24). CR-01/CR-02 and the guide-regeneration integration defect are fixed. Six current/historical unclassified assumptions, two nonblocking Phase253 summary reference-parser notices, source-only UI recommendations, and the explicit unavailable monetary-source limit remain recorded for Phase254.
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 130
+- Total plans completed: 146
 - Average duration: —
 - Total execution time: —
 
@@ -71,6 +75,8 @@ Last activity: 2026-10-26 — Milestone v1.67 completed and archived
 | 246 | 6 | - | - |
 | 247 | 8 | - | - |
 | 248 | 2 | - | - |
+| 252 | 10 | - | - |
+| 253 | 6 | - | - |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -217,6 +223,36 @@ Last activity: 2026-10-26 — Milestone v1.67 completed and archived
 | Phase 251 P04 | ~70min | 3 tasks | 4 files |
 | Phase 251 P05 | ~65min | 3 tasks | 11 files |
 | Phase 251 P06 | 50min | 3 tasks | 5 files |
+| Phase 252 P01 | 15min | 2 tasks | 9 files |
+| Phase 252 P2 | 16min | 2 tasks | 8 files |
+| Phase 252 P03 | 43min | 2 tasks | 14 files |
+| Phase 252 P04 | 25min | 2 tasks | 11 files |
+| Phase 252 P05 | 15min | 2 tasks | 8 files |
+| Phase 252 P06 | 80min | 2 tasks | 15 files |
+| Phase 252 P7 | 35min | 2 tasks | 7 files |
+| Phase 252 P08 | 82min | 3 tasks | 18 files |
+| Phase 252 P09 | 17min | 2 tasks | 10 files |
+| Phase 252 P10 | 56min | 3 tasks | 13 files |
+| Phase 253 P01 | 25min | 2 tasks | 10 files |
+| Phase 253 P02 | 33m | 2 tasks | 6 files |
+| Phase 253 P03 | 23m | 2 tasks | 8 files |
+| Phase 253 P04 | 22m | 2 tasks | 3 files |
+| Phase 253 P05 | 96min | 3 tasks | 20 files |
+| Phase 253 P06 | 1h 44m | 3 tasks | 17 files |
+| Phase 254 P01 | 26 min | 3 tasks | 8 files |
+| Phase 254 P02 | 14 min | 3 tasks | 9 files |
+| Phase 254 P03 | 9h | 3 tasks | 14 files |
+| Phase 254 P04 | 40min | 3 tasks | 12 files |
+| Phase 254 P05 | 4h | 3 tasks | 15 files |
+| Phase 254 P06 | 3h | 3 tasks | 13 files |
+| Phase 254 P07 | 3h | 3 tasks | 14 files |
+| Phase 254 P08 | 25min | 2 tasks | 11 files |
+| Phase 254 P09 | 3 h | 3 tasks | 15 files |
+| Phase 254 P10 | 2h | 2 tasks | 8 files |
+| Phase 254 P11 | 1h 20m | 3 tasks | 7 files |
+| Phase 254 P12 | 5h | 2 tasks | 21 files |
+| Phase 254 P13 | 30min | 3 tasks | 15 files |
+| Phase 254 P14 | 2h10m | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -504,6 +540,78 @@ Last activity: 2026-10-26 — Milestone v1.67 completed and archived
 - [Phase 251]: 1.7.0 merged via fail-closed gate (merge commit 20a3982c) and published to Hex for all three packages; classifier-skipped live Stripe jobs at M recorded, not claimed
 - [Phase 251]: v1.68 follow-up: 250-ci-head-status push mode should read the provider-proof classifier should_run=false
 - [Phase 251]: 251-07: RLS-01/02 Complete only at the close after the 251-06 publication evidence; VERIFICATION 3/3 re-minted over seven SUMMARYs; close bookkeeping squash-merged to main from docs/251-close; v1.67 milestone completion is a separate step (tags local, archive-invariant sweep immediately after)
+- [Phase 252]: The static Storybook variation delegates to the production-owned subscription area and makes no claims about mounted authorization, action dispatch, provider success, or persistence.
+- [Phase 252]: Contextual summary actions use Copy.action_hidden_context as the full aria-label and hide its duplicate span from the accessibility tree.
+- [Phase 252]: EDGE-SCEN-01-unclassified remains unresolved; this plan proves deterministic fetch, adapter consumption, and DB-free/package separation.
+- [Phase 252]: Incomplete historical projections remain valid where the domain permits them and render production-owned unavailable values and ordered caveats.
+- [Phase 252]: The launcher derives target databases from fresh numeric partitions and refuses existing targets or mismatched local resources before mutation.
+- [Phase 252]: Review and reset lanes stay on distinct databases, ports, and processes; Playwright never reuses an existing endpoint.
+- [Phase 252]: The host-heldout lane retains its fixed port and guard contract.
+- [Phase 252]: The host seed accepts only explicitly selected ordinary launch or growing-team facts after lane and disposable database checks.
+- [Phase 252]: Held-out facts use independent stable identities, and cleanup locks and verifies the fixture customer owner before deleting.
+- [Phase 252]: Build caller coverage from compiled declarations, checked production source markers, current routes, and ComponentRegistry contracts so missing links fail closed.
+- [Phase 252]: Keep static-render reachability separate from browser DOM proof and mounted Admin or Portal behavior; record broader gaps for their owning plans.
+- [Phase 252]: Reuse the application existing LiveView hook implementations in Storybook iframe.
+- [Phase 252]: Static story evidence establishes content and presentation only; it does not claim mounted authorization, provider completion, or persistence.
+- [Phase 252]: Left-align and border-box the action menu to keep it within the narrow Storybook preview.
+- [Phase 252]: Use the existing admin and portal Hex release switches only for actual package metadata generation.
+- [Phase 252]: Canonicalize the temporary root for isolated Mix builds on macOS.
+- [Phase 252]: Run the full owner serially with unique numeric partitions and isolated Mix build outputs so every mutable lane belongs to this run.
+- [Phase 252]: Treat static browser cells, mounted authorization, persisted state, and reset isolation as separate evidence claims.
+- [Phase 252]: Keep four unclassified assumptions and two descriptor-less prohibitions visibly unresolved while reporting their concrete behavior coverage separately.
+- [Phase 252]: Upload structured result bundles and per-run browser JSON; keep raw command logs out of CI artifacts.
+- [Phase 252]: Keep claims finite and lexical over enumerated public surfaces; do not represent the checker as universal semantic or customer research validation.
+- [Phase 252]: Use the same assertion functions for current repository subjects and injected fixtures; injection changes content only.
+- [Phase 252]: Keep the browser-generated held-out clone distinct from CadenceSubscriptionFacts.held_out!/1 and manifest fixtures.
+- [Phase 252]: Keep the original prohibition statements and historical reasons; modify only their authorized metadata and append remediation notes.
+- [Phase 252]: Require each resolved prohibition resolution to name its exact bounded target path.
+- [Phase 252]: Bound the transparency checks to finite public attribution and contradiction-control surfaces.
+- [Phase 253]: Keep production query, owner scope, filter patches, and route lifecycle in SubscriptionsLive; share only the rendered collection composition.
+- [Phase 253]: Use PhoenixStorybook 1.2's connected LiveComponent story transport to mount the actual DataTable and preserve its child event target.
+- [Phase 253]: Keep the existing truthful Amount unavailable display because the production list has a processor price ID but no numeric price source.
+- [Phase 253]: Keep production Amount unavailable wherever the source provides only a processor price ID and no numeric amount.
+- [Phase 253]: Isolate each Storybook variation in its own iframe to avoid duplicate LiveView-generated DOM IDs while retaining the connected production DataTable.
+- [Phase 253]: Leave SubscriptionsLive production code unchanged because mounted route assertions confirmed the existing scope and cursor behavior.
+- [Phase 253]: Keep route scope, authorization, event handlers, and lazy reads in SubscriptionLive while sharing only the page composition.
+- [Phase 253]: Use validated Cadence facts, production copy, and scoped links for static review/result snapshots without dispatch claims.
+- [Phase 253]: Keep collection transport evidence focused on its unique one-row component and validate page story entries separately.
+- [Phase 253]: Reused the real list/detail routes, existing Auth adapter seam, Processor.Fake, TestRepo and event ledger for execution evidence.
+- [Phase 253]: Only an authenticated, authorized active organization from session scope may be used to preserve the initial missing-detail denial path.
+- [Phase 253]: Keep the page-boundary fixture one-row limit in the deterministic story adapter and preserve Behaviour.paginate cursor generation.
+- [Phase 253]: Select whole-page Storybook scenarios through supported tabs and use only a story wrapper for nested LiveComponents and the overlay target.
+- [Phase 253]: Refresh Phase252 source digests through the existing manifest writer without changing its compiled cases.
+- [Phase 253]: Keep unavailable amounts truthful and retain presentation-only and synthetic-stress labels.
+- [Phase 253]: Keep both current and four historical unclassified assumptions unresolved; acceptance verifies their preservation instead of inferring runtime resolution.
+- [Phase 253]: Promote the two Phase 05 prohibition descriptors only after native projection proves current and clean passes and two independent content violations fail.
+- [Phase 253]: Keep presentation evidence separate from mounted dispatch, persistence, and provider-completion claims.
+- [Phase 254]: 254-01: missing Playwright durations parse as null so committed Phase 252/253 fixtures keep parsing; the measurement harness requires finite durations itself.
+- [Phase 254]: 254-01: local cold/warm/focused samples are informs_only; freeze eligibility requires an ubuntu image, a clean tree and the full D-21 protocol. DEV-254-01 (D-24 attribution, 415 s local vs 300 s target, compile 262 s) stays open until 254-09-03.
+- [Phase 254]: 254-02: guard test registration requires argv.length <= 2 so argument-bearing CLI spawns under node --test keep the CLI path
+- [Phase 254]: 254-02: default Playwright projects share one LAUNCHER_OWNED_AND_VISUAL_SPECS ignore list; spec ownership enforced by phase254_project_ownership.test.mjs
+- [Phase 254]: 254-03: owner chose fix-in-phase for KR-254-01..05 (incl. CI-only RFC 1918 lab server address) and accept-known-red for the SL-G/UAT-contract reds until 254-18
+- [Phase 254]: 254-03: overlay popover shell is role=dialog; Phase 200 guardrails job runs OTP 28.1; Phase 253 aggregate produces the transport proof before the manifest lane
+- [Phase 254]: 254-04: the ledger carries an additive current block so registry and kitchen rules are data-driven; AMD-254-01 derives the pinned Phase 252 counts from the ledger (15/12/3 stays the frozen-baseline positive control)
+- [Phase 254]: 254-04: duplicate evidence is the subject and survivor fact/expected blocks cross-checked against the frozen manifest at source_commit, not a boolean flag
+- [Phase 254]: 254-05: the project a reconcile step depends on holds only the composition cells because Playwright runs a dependency project in full; story and review specs live in phase252-owned-stories
+- [Phase 254]: 254-05: unowned loads of the composition specs register no tests; the aggregate's exact 151-cell-plus-reconcile inventory keeps real runs fail-closed
+- [Phase 254]: 254-06: populated retired (CUR-254-06) as a commit-anchored duplicate of active; reference scans use per-record contexts proven at the origin commit
+- [Phase 254]: 254-06: provider_pruned merged (CUR-254-07) on a declared mechanical shape (story state, group labels, item kinds); item count and description text are not part of the shape
+- [Phase 254]: [254-07] Selection projection is built from the compositions module's public discovery functions, not write!/1, because write!/1 needs the gitignored run-time transport proof; depends_on precision stays group level (D-09), shared sources that are also global roots broaden to full
+- [Phase 254]: [254-07] Selector adds fail-closed rules beyond D-10: empty diff, invalid base/head and unreachable head broaden to full; the projection is hard-stale on any source_digests, Phase 252 manifest or curation ledger change, so those regenerations must end with project --write (R3)
+- [Phase 254]: 254-08: report invariants live in a CommonJS module (accrue_admin/e2e/phase254-selection-invariants.js) shared by the selector and the Playwright lane, because Playwright's loader cannot require() the ES-module selector
+- [Phase 254]: 254-08: in affected mode an assertion binding with no selected case kind is skipped; full mode is strict, and an affected result cannot be validated without its selection (acceptance evidence stays a full sweep)
+- [Phase 254]: 254-09: critical-path delta is the owner job's end offset minus the main workflow wall (queue excluded); the owner job's own added time is frozen as owner_job_added_s
+- [Phase 254]: 254-09: D-24 shard rule tripped (serial per-cell p90 x cells 156.9 s vs 60 s, isolation green) so composition cells run on 3 bounded workers; remaining focused-check gap (84.4 s vs 60 s) accepted in DEV-254-07
+- [Phase 254]: 254-09: Phase 252 and 253 aggregates share one admin test build via PHASE254_SHARED_BUILD_ID (validated hex id); isolated production and host builds are not shared
+- [Phase 254]: 254-10: storybook.css is composed deterministically (header, PhoenixStorybook CSS, brand.css, accrue_admin.css bundle, byte-preserved dark shim tail) and CI fails when it drifts; the design review record opens at stage assessment with DR-254-01..09 (DR-254-06..09 deferred under D-36)
+- [Phase 254]: 254-11: probe findings share the a11y register with axe findings (probe-<name> rule ids, exact stable targets); journey checkpoints use cell ids journey::D-29::<checkpoint> and are decided by admin-interactions.spec.js
+- [Phase 254]: 254-11: 30 routed-defect entries (axe, probes and the journey) are fixed and deleted by 254-12; 8 composition cells are inside the D-36 16-cell bound and 102 outside, journey entries inside
+- [Phase 254]: Red evidence is derived only from a parsed Playwright or ExUnit report (assertion errors with parsable Expected and Received values); --check-red re-parses the report and the spec sha256 binds the evidence to the spec (254-12)
+- [Phase 254]: Routed accessibility defects are fixed at their lowest owning tier (token scope, component markup, focus hook, page CSS) and their register entries deleted, so the zero-match rule and the strict D-29 journey prove each fix (254-12)
+- [Phase 254]: The delayed focus return in focus_trap.js runs only when focus is lost, and content of a closed details is never a focus target (254-12)
+- [Phase 254]: 254-13: the correction batch tests run in the Phase 253 aggregate as two appended lanes (phase254-action-copy db-free ExUnit, phase254-design-browser with a playwright-titles reporter and source-bound per-key counts), because the composition browser lane validates an exact cell universe and rejects any extra spec.
+- [Phase 254]: 254-13: design review record stands at stage corrected with fix_commit 88cd27cdc (last correction commit); DR-254-08 re-dispositioned and stays deferred because no accessibility defect was routed on summary.ax-detail-section-head.
+- [Phase 254]: 254-14: A4 story routes render on the legacy server (sourcing.a4 story-routes); mounted cases capture elements (drawer panel, dunning disclosure) to keep seed-time dates out of the frame with an empty mask allowlist
 
 ### Pending Todos
 
@@ -602,8 +710,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-26T17:18:03.044Z
-Stopped at: Completed 251-07-PLAN.md
+Last session: 2026-10-29T11:40:47.315Z
+Stopped at: Completed 254-14-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
@@ -733,4 +841,6 @@ any published package. Closed -- no decision pending, no remediation warranted.
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Discuss Phase 254 with `$gsd-discuss-phase 254`. Phase 253 is complete: 6/6 plans, 56/56 verified must-haves, 10/10 focused lanes, 151 browser cells, and 24/24 automated UAT items. Retained Phase252 regression lanes passed 21/21; historical evidence remains preserved.
+- Carry Phase 252's actual narrow/light/dark render checks, reset-isolation negative control, production package boundaries and required CI path admission into acceptance. The [approved research](research/ui-quality-engine/RECOMMENDATIONS.md) is authoritative; broader horizons remain outside v1.68.
+- Measure first-slice cold/warm costs before freezing budgets. Keep the independent HIGH event-session-timezone correctness candidate visible; fixed story clocks do not resolve it.

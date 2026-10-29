@@ -80,26 +80,127 @@ async function setSettledThemeForScan(page, theme) {
     throw new Error(`Unsupported settled scan theme: ${theme}`);
   }
 
-  await page.evaluate((value) => {
-    const root = document.documentElement;
-    root.dataset.theme = value;
-    root.setAttribute("data-theme", value);
-    root.dataset.phase200SettledScanBypass = "true";
+  // PhoenixStorybook registers its `psb:set-color-mode` window listener in the
+  // ColorModeHook `mounted()` callback, i.e. only once the LiveView has joined. An
+  // event dispatched on the statically rendered page is dropped, and the join then
+  // re-renders the sandbox from the `psb_selected_color_mode` localStorage value left
+  // by the previous story, so a one-shot dispatch settles on the wrong mode. Wait for
+  // the join, then dispatch inside the poll: the event is idempotent (it stores the
+  // mode and pushes the same assign), so repeating it until the sandbox reports the
+  // requested mode is deterministic rather than a sleep.
+  await page.waitForFunction(() => document.querySelector(".phx-connected") !== null, undefined, {
+    timeout: 15_000,
+  });
 
-    for (const sandbox of document.querySelectorAll(".psb-sandbox, .accrue-admin")) {
-      sandbox.classList.add("accrue-admin");
+  const sandboxMode = () =>
+    page.evaluate(() => {
+      const sandboxes = [...document.querySelectorAll(".psb-sandbox.accrue-admin")].filter(
+        // A page story's sandbox is never driven by the color-mode event (see below).
+        (element) => element.closest(".psb-variation-block") || !element.closest("#psb-story-live")
+      );
+      if (sandboxes.length === 0) return "no-driven-sandbox";
+      const dark = sandboxes.filter((element) => element.classList.contains("ax-theme-dark-shim"));
+      if (dark.length === 0) return "light";
+      return dark.length === sandboxes.length ? "dark" : "mixed";
+    });
+
+  const hasDrivenSandbox = (await sandboxMode()) !== "no-driven-sandbox";
+
+  if (hasDrivenSandbox) {
+    // Component stories (variation blocks) and direct preview routes: PhoenixStorybook
+    // itself applies the backend's `color_mode_sandbox_dark_class` (`ax-theme-dark-shim`),
+    // so the production color-mode path is what must settle.
+    await expect
+      .poll(
+        async () => {
+          await page.evaluate((value) => {
+            window.dispatchEvent(new CustomEvent("psb:set-color-mode", { detail: { mode: value } }));
+          }, theme);
+          return sandboxMode();
+        },
+        {
+          message: `PhoenixStorybook color mode settles to ${theme}`,
+          intervals: [100, 250, 500, 1000],
+        }
+      )
+      .toBe(theme);
+  } else {
+    // Still run the production event so the page-level Storybook mode (html `psb:dark`,
+    // localStorage) matches the requested mode before the sandbox is mirrored.
+    await page.evaluate((value) => {
+      window.dispatchEvent(new CustomEvent("psb:set-color-mode", { detail: { mode: value } }));
+    }, theme);
+  }
+
+  // Page stories: StoryLive.render_content(:page) renders the sandbox without the
+  // color-mode class (upstream only passes `color_mode_class` to component/example
+  // tabs), so the production hook can never drive it. Mirror the requested mode onto
+  // that sandbox with the same class the backend applies everywhere else.
+  await page.evaluate((value) => {
+    for (const sandbox of document.querySelectorAll("#psb-story-live .psb-sandbox.accrue-admin")) {
+      if (sandbox.closest(".psb-variation-block")) continue;
       sandbox.classList.toggle("ax-theme-dark-shim", value === "dark");
-      sandbox.dataset.theme = value;
-      sandbox.setAttribute("data-theme", value);
-      sandbox.dataset.phase200SettledScanBypass = "true";
     }
   }, theme);
+}
 
-  await expect
-    .poll(() => page.locator("html").evaluate((element) => element.dataset.theme || ""), {
-      message: `settled scan theme ${theme}`,
+// Group stories (for example the subscription collection states) host every variation in
+// its own preview iframe, so the main document has no `.psb-sandbox` to scan. The iframe
+// `src` values PhoenixStorybook emits are rooted at `/dev/storybook` rather than at the
+// host mount, so they cannot be loaded as embedded frames under a mounted router. The
+// production preview route itself is served at the mounted path and takes the theme as
+// its `color_mode` query parameter, so the scan opens each preview route directly.
+async function storybookPreviewRoutes(page) {
+  const pathname = new URL(page.url()).pathname;
+  const mountedRoot = pathname.slice(0, pathname.indexOf(STORYBOOK_PATH_FRAGMENT) + STORYBOOK_PATH_FRAGMENT.length);
+  const sources = await page.locator("iframe[src]").evaluateAll((frames) => frames.map((frame) => frame.getAttribute("src")));
+
+  return sources
+    .map((source) => {
+      const url = new URL(source, page.url());
+      url.searchParams.delete("color_mode");
+      return `${mountedStorybookPath(url.pathname, mountedRoot)}${url.search}`;
     })
+    .filter((route) => route.includes("/iframe/"));
+}
+
+// Opens one preview route in its own page (same browser context, so the login carries
+// over) in the requested mode and waits until the production route reports that mode.
+async function openStorybookPreviewRoute(context, route, theme) {
+  const url = new URL(route, "http://phase200.local");
+  url.searchParams.set("color_mode", theme);
+
+  const previewPage = await context.newPage();
+  await previewPage.emulateMedia({ reducedMotion: "reduce" });
+  await previewPage.goto(`${url.pathname}${url.search}`);
+  // The production preview route applies the backend's dark class to the story container
+  // that sits inside the `.psb-sandbox` body, not to the sandbox itself, while the
+  // design-system tokens are keyed on `.psb-sandbox.accrue-admin.ax-theme-dark-shim`.
+  // Wait for the production route to report the mode, then mirror it onto the sandbox the
+  // same way the Phase 253 composition helpers do, and assert the sandbox carries it.
+  await expect
+    .poll(
+      () =>
+        previewPage.evaluate(() =>
+          document.querySelector(".psb-sandbox.accrue-admin") === null
+            ? "no-sandbox"
+            : document.querySelector(".ax-theme-dark-shim") !== null
+              ? "dark"
+              : "light"
+        ),
+      { message: `${route} preview route settles to ${theme}` }
+    )
     .toBe(theme);
+
+  await previewPage.evaluate((value) => {
+    for (const sandbox of document.querySelectorAll(".psb-sandbox.accrue-admin")) {
+      sandbox.classList.toggle("ax-theme-dark-shim", value === "dark");
+    }
+  }, theme);
+  await expect(previewPage.locator(".psb-sandbox.accrue-admin").first()).toHaveClass(
+    theme === "dark" ? /ax-theme-dark-shim/ : /^(?!.*ax-theme-dark-shim)/
+  );
+  return previewPage;
 }
 
 async function assertStorybookAssetsLoaded(page, storyUrl = page.url()) {
@@ -173,5 +274,7 @@ module.exports = {
   discoverStorybookStoryUrls,
   phase200EvidencePath,
   setSettledThemeForScan,
+  openStorybookPreviewRoute,
+  storybookPreviewRoutes,
   writePhase200Evidence,
 };

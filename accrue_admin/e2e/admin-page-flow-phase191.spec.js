@@ -676,6 +676,10 @@ test.describe("Phase 191 page-flow regression harness", () => {
     await expect(drawer).toBeVisible();
     await expect(drawer).toContainText("acct_e2e_phase191");
     await expect(drawer.getByRole("button", { name: "Close" })).toBeFocused();
+    // 254-12: the drawer body scrolls on its own, so it is a labelled focusable region (axe
+    // scrollable-region-focusable) and the next tab stop after Close; the first field follows it.
+    await page.keyboard.press("Tab");
+    await expect(drawer.getByRole("region")).toBeFocused();
     await page.keyboard.press("Tab");
     const percent = drawer.locator('input[name="override[percent]"]');
     await expect(percent).toBeFocused();

@@ -25,6 +25,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   alias AccrueAdmin.BillingPresentation
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.StepUp
@@ -48,9 +49,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         {:ok,
          socket
          |> put_flash(:error, Copy.Locked.owner_access_denied())
-         |> redirect(
-           to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/subscriptions")
-         )}
+         |> redirect(to: missing_subscription_path(admin, socket.assigns.current_owner_scope))}
 
       {:ok, subscription} ->
         mount_path = admin["mount_path"] || "/billing"
@@ -249,8 +248,117 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
+  attr(:subscription, :any, required: true)
+  attr(:customer, :any, required: true)
+  attr(:admin_mount_path, :string, required: true)
+  attr(:current_owner_scope, :any, default: nil)
+  attr(:flashes, :list, default: [])
+  attr(:action_result, :any, default: nil)
+  slot(:between_facts_and_actions)
+
+  def subscription_area(assigns) do
+    ~H"""
+      <Detail.summary_card title={subscription_title(@subscription, @customer)}>
+        <:status>
+          <StatusBadge.status_badge
+            status={@subscription.status}
+            label={lifecycle_health_label(@subscription)}
+            tone={lifecycle_tone(@subscription.status)}
+          />
+        </:status>
+        <:facts>
+          <IdBadge.id_badge
+            id="subscription-summary-id"
+            id_value={@subscription.processor_id || @subscription.id}
+            label="Copy subscription ID"
+            copy_label="subscription ID"
+            variant="plain"
+          />
+        </:facts>
+      </Detail.summary_card>
+
+      <Detail.summary_list
+        rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)}
+        class="ax-summary-list-compact"
+      />
+
+      <%= render_slot(@between_facts_and_actions) %>
+
+      <section class="ax-card ax-detail-action-band" data-ax-action-band>
+        <header class="ax-page-header">
+          <div>
+            <h2 class="ax-heading">Subscription actions</h2>
+          </div>
+          <div class="ax-page-actions">
+            <button
+              :if={action_available?(@subscription, "swap_plan")}
+              type="button"
+              class="ax-button ax-button-primary"
+              phx-click="open_action_drawer"
+              phx-value-action_type="swap_plan"
+              data-ax-primary-action
+              aria-label={action_aria_label("swap_plan", @subscription)}
+            >
+              <%= action_label("swap_plan") %>
+            </button>
+            <button
+              :if={action_available?(@subscription, "cancel_at_period_end")}
+              type="button"
+              class="ax-button ax-button-secondary"
+              phx-click="open_action_drawer"
+              phx-value-action_type="cancel_at_period_end"
+              data-ax-primary-action
+              aria-label={action_aria_label("cancel_at_period_end", @subscription)}
+            >
+              <%= action_label("cancel_at_period_end") %>
+            </button>
+            <DropdownMenu.action_menu
+              label="More actions"
+              groups={action_menu_groups(@subscription)}
+              id="subscription-action-menu"
+            />
+          </div>
+        </header>
+
+        <div :if={braintree_processor?(@subscription)} class="ax-stack-sm">
+          <p class="ax-body"><%= provider_action_guidance(@subscription) %></p>
+          <p class="ax-body"><%= Copy.subscription_action_braintree_swap_setup_guidance() %></p>
+          <p class="ax-body"><%= Copy.subscription_action_braintree_quantity_item_guidance() %></p>
+        </div>
+      </section>
+    """
+  end
+
   @impl true
-  def render(assigns) do
+  def render(assigns), do: subscription_page(assigns)
+
+  attr(:brand, :map, required: true)
+  attr(:current_path, :string, required: true)
+  attr(:admin_mount_path, :string, required: true)
+  attr(:page_title, :string, required: true)
+  attr(:theme, :string, default: "system")
+  attr(:active_organization_name, :string, default: nil)
+  attr(:subscription, :any, required: true)
+  attr(:customer, :any, required: true)
+  attr(:current_owner_scope, :any, default: nil)
+  attr(:return_path, :string, required: true)
+  attr(:return_label, :string, required: true)
+  attr(:related_items, :list, default: [])
+  attr(:flashes, :list, default: [])
+  attr(:action_result, :any, default: nil)
+  attr(:timeline_events, :list, default: [])
+  attr(:timeline_events_loaded?, :boolean, default: true)
+  attr(:raw_json_loaded?, :boolean, default: false)
+  attr(:proration_options, :list, default: [])
+  attr(:drawer_action_type, :string, default: nil)
+  attr(:pending_action, :map, default: nil)
+  attr(:dispatch_state, :atom, default: :idle)
+  attr(:step_up_pending, :boolean, default: false)
+  attr(:step_up_challenge, :map, default: nil)
+  attr(:step_up_error, :string, default: nil)
+  slot(:between_facts_and_actions)
+
+  def subscription_page(assigns) do
     ~H"""
     <AppShell.app_shell
       brand={@brand}
@@ -284,78 +392,30 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <a class="ax-link" href={@return_path}><%= @return_label %></a>
         </p>
 
-        <Detail.summary_card
-          title={subscription_title(@subscription, @customer)}
+        <.subscription_area
+          subscription={@subscription}
+          customer={@customer}
+          admin_mount_path={@admin_mount_path}
+          current_owner_scope={assigns[:current_owner_scope]}
+          flashes={@flashes}
+          action_result={@action_result}
         >
-          <:status>
-            <StatusBadge.status_badge status={@subscription.status} label={lifecycle_health_label(@subscription)} tone={lifecycle_tone(@subscription.status)} />
-          </:status>
-          <:facts>
-            <IdBadge.id_badge id="subscription-summary-id" id_value={@subscription.processor_id || @subscription.id} label="Copy subscription ID" copy_label="subscription ID" variant="plain" />
-          </:facts>
-        </Detail.summary_card>
-
-        <Detail.summary_list
-          rows={summary_rows(@subscription, @customer, @admin_mount_path, @current_owner_scope)}
-          class="ax-summary-list-compact"
-        />
-
-        <FlashGroup.flash_group flashes={@flashes} />
-        <section
-          :if={@action_result}
-          class="ax-card"
-          data-role="subscription-action-result"
-          role="status"
-          aria-live="polite"
-        >
-          <p class="ax-body"><%= @action_result.message %></p>
-          <a :if={@action_result.href} class="ax-link" href={@action_result.href}>
-            <%= @action_result.link_label %>
-          </a>
-        </section>
-
-        <section class="ax-card ax-detail-action-band" data-ax-action-band>
-          <header class="ax-page-header">
-            <div>
-              <h2 class="ax-heading">Subscription actions</h2>
-            </div>
-            <div class="ax-page-actions">
-              <button
-                :if={action_available?(@subscription, "swap_plan")}
-                type="button"
-                class="ax-button ax-button-primary"
-                phx-click="open_action_drawer"
-                phx-value-action_type="swap_plan"
-                data-ax-primary-action
-                aria-label={action_aria_label("swap_plan", @subscription)}
-              >
-                <%= action_label("swap_plan") %>
-              </button>
-              <button
-                :if={action_available?(@subscription, "cancel_at_period_end")}
-                type="button"
-                class="ax-button ax-button-secondary"
-                phx-click="open_action_drawer"
-                phx-value-action_type="cancel_at_period_end"
-                data-ax-primary-action
-                aria-label={action_aria_label("cancel_at_period_end", @subscription)}
-              >
-                <%= action_label("cancel_at_period_end") %>
-              </button>
-              <DropdownMenu.action_menu
-                label="More actions"
-                groups={action_menu_groups(@subscription)}
-                id="subscription-action-menu"
-              />
-            </div>
-          </header>
-
-          <div :if={braintree_processor?(@subscription)} class="ax-stack-sm">
-            <p class="ax-body"><%= provider_action_guidance(@subscription) %></p>
-            <p class="ax-body"><%= Copy.subscription_action_braintree_swap_setup_guidance() %></p>
-            <p class="ax-body"><%= Copy.subscription_action_braintree_quantity_item_guidance() %></p>
-          </div>
-        </section>
+          <:between_facts_and_actions>
+            <FlashGroup.flash_group flashes={@flashes} />
+            <section
+              :if={@action_result}
+              class="ax-card"
+              data-role="subscription-action-result"
+              role="status"
+              aria-live="polite"
+            >
+              <p class="ax-body"><%= @action_result.message %></p>
+              <a :if={@action_result.href} class="ax-link" href={@action_result.href}>
+                <%= @action_result.link_label %>
+              </a>
+            </section>
+          </:between_facts_and_actions>
+        </.subscription_area>
 
         <div data-ax-related-resources>
           <RelatedResources.related_resources items={@related_items} />
@@ -399,7 +459,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= next_action_summary(@subscription) %>
                 </p>
               <% else %>
-                <div class="ax-detail-dunning-summary" aria-label="Dunning funnel state for this subscription">
+                <div class="ax-detail-dunning-summary" role="group" aria-label="Dunning funnel state for this subscription">
                   <span><strong>Global dunning funnel</strong><em>No subscription-level campaign here; recovery analytics still shows at-risk accounts and funnel trends.</em></span>
                   <a
                     class="ax-link"
@@ -439,7 +499,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <div class="ax-card ax-activity-audit-strip">
             <p class="ax-label ax-activity-audit-title">Audit event table: Actor / Action / Timestamp</p>
             <% latest_audit = latest_audit_row(@timeline_events, @subscription) %>
-            <div class="ax-audit-summary-row" aria-label="Latest audit event summary">
+            <div class="ax-audit-summary-row" role="group" aria-label="Latest audit event summary">
               <span><strong>Actor</strong><em><%= latest_audit.actor %></em></span>
               <span><strong>Action</strong><em><%= latest_audit.action %></em></span>
               <span><strong>Timestamp</strong><em><Timestamp.timestamp value={latest_audit.at} id="subscription-latest-audit-timestamp" /></em></span>
@@ -1586,7 +1646,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           {:ok, refreshed} ->
             refreshed
             |> record_admin_audit(action, updated_subscription.id, updated_subscription.id)
-            |> put_action_result(:confirmed, Copy.subscription_action_recorded_info())
+            |> put_action_result(:confirmed, action_result_message(:confirmed))
             |> finish_action_submission(:submitted, true)
 
           :not_found ->
@@ -1604,7 +1664,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         socket
         |> put_action_result(
           :pending,
-          "The provider requires another action. A completed subscription change is not confirmed; check scoped activity before deciding what to do next."
+          action_result_message(:pending)
         )
         |> finish_action_submission(:submitted, true)
 
@@ -2032,7 +2092,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       kind: kind,
       message: message,
       href: href || action_activity_path(socket),
-      link_label: link_label || "Open scoped subscription activity"
+      link_label: link_label || Copy.subscription_action_activity_link_label()
     })
   end
 
@@ -2049,13 +2109,30 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp action_activity_path(socket) do
-    ScopedPath.build(
+    action_activity_path(
       socket.assigns.admin_mount_path,
-      "/events",
       socket.assigns.current_owner_scope,
-      %{"subject_type" => "Subscription", "subject_id" => socket.assigns.subscription.id}
+      socket.assigns.subscription.id
     )
   end
+
+  @doc false
+  def action_activity_path(admin_mount_path, owner_scope, subscription_id) do
+    ScopedPath.build(admin_mount_path, "/events", owner_scope, %{
+      "subject_type" => "Subscription",
+      "subject_id" => subscription_id
+    })
+  end
+
+  @doc false
+  def action_result_message(:confirmed), do: Copy.subscription_action_recorded_info()
+
+  def action_result_message(:pending),
+    do:
+      "The provider requires another action. A completed subscription change is not confirmed; check scoped activity before deciding what to do next."
+
+  def action_result_message(:failed),
+    do: "The provider rejected the action. No change was accepted."
 
   defp outcome_requires_reconciliation?(socket) do
     match?(%{kind: :unconfirmed}, socket.assigns[:action_result])
@@ -2087,7 +2164,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
       definitive_provider_rejection?(reason) ->
         socket
-        |> put_action_result(:failed, "The provider rejected the action. No change was accepted.")
+        |> put_action_result(:failed, action_result_message(:failed))
         |> finish_action_submission(:submitted, true)
 
       true ->
@@ -2356,6 +2433,33 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp scoped_admin_path(admin, _owner_scope, suffix), do: admin_path(admin, suffix)
+
+  defp missing_subscription_path(admin, %{mode: :organization} = owner_scope),
+    do: scoped_admin_path(admin, owner_scope, "/subscriptions")
+
+  defp missing_subscription_path(
+         admin,
+         %OwnerScope{
+           mode: :global,
+           active_organization_id: organization_id,
+           active_organization_slug: organization_slug,
+           platform_admin?: platform_admin?,
+           admin_org_ids: admin_org_ids
+         }
+       )
+       when is_binary(organization_id) and is_binary(organization_slug) do
+    if platform_admin? or organization_id in admin_org_ids do
+      scoped_admin_path(
+        admin,
+        %{mode: :organization, organization_slug: organization_slug},
+        "/subscriptions"
+      )
+    else
+      admin_path(admin, "/subscriptions")
+    end
+  end
+
+  defp missing_subscription_path(admin, _owner_scope), do: admin_path(admin, "/subscriptions")
 
   defp owner_scope_copy(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
     do: "organization #{slug}"

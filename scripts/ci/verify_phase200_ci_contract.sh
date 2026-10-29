@@ -116,7 +116,7 @@ for needle in \
   "PGHOST: localhost" \
   "ACCRUE_ADMIN_E2E_PORT: 4019" \
   "uses: actions/checkout@v6" \
-  "otp-version: '28.0'" \
+  "otp-version: '28.1'" \
   "elixir-version: '1.19.5'" \
   "mix local.hex 2.4.2 --force" \
   "uses: actions/setup-node@v6" \

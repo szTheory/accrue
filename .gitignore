@@ -27,6 +27,20 @@ node_modules/
 playwright-report/
 test-results/
 
+# Machine-readable Phase 252 CI results and per-run render captures are uploaded by CI.
+accrue_admin/tmp/phase252/ci-results/
+accrue_admin/tmp/phase252/render-results-*.json
+
+# Disposable Phase 253 transport and compiled-manifest proof outputs are regenerated per run.
+accrue_admin/tmp/phase253/transport.json
+accrue_admin/tmp/phase253/manifest.json
+accrue_admin/tmp/phase253/render-results-*.json
+accrue_admin/tmp/phase253/render-cases-*/
+accrue_admin/tmp/phase253/ci-results/
+
+# Phase 254 measurement samples, fingerprints, selection reports and Playwright output are regenerated per run.
+accrue_admin/tmp/phase254/
+
 # Editor / OS noise
 .DS_Store
 *~

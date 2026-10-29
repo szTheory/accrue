@@ -8,13 +8,30 @@ on:
       - "accrue/**"
       - "accrue_admin/**"
       - ".github/workflows/accrue_admin_browser.yml"
+      - "storybook/**"
+      - "dev_support/ui_scenarios/**"
+      - "brandbook/tokens/**"
+      - "scripts/ci/phase254_*"
   push:
     branches: [main]
     paths:
       - "accrue/**"
       - "accrue_admin/**"
       - ".github/workflows/accrue_admin_browser.yml"
-  workflow_dispatch: {}
+      - "storybook/**"
+      - "dev_support/ui_scenarios/**"
+      - "brandbook/tokens/**"
+      - "scripts/ci/phase254_*"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why the visual baselines are re-minted (recorded per changed key in the identity manifest)"
+        required: true
+        default: "CIQ-03 mint of the subscription visual baselines"
+      finding_id:
+        description: "Finding or requirement id the re-mint answers (recorded per changed key)"
+        required: true
+        default: "CIQ-03"
 
 # Quick task 261025-vdn (item 2): pull_request runs for the same ref cancel
 # each other; every other event (push to main, schedule, workflow_dispatch)
@@ -62,6 +79,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          # The identity manifest check needs the merge-base with the default branch.
+          fetch-depth: 0
 
       - name: Set up BEAM
         uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
@@ -91,7 +111,12 @@ jobs:
       - name: Install Chromium
         run: cd accrue_admin && npx playwright install --with-deps chromium
 
+      - name: Phase 254 machine fingerprint
+        run: node scripts/ci/phase254_measure.mjs fingerprint --out accrue_admin/tmp/phase254/fingerprint-browser-uat.json
+
       - name: Run browser UAT
+        env:
+          PHASE254_PLAYWRIGHT_JSON: tmp/phase254/playwright-e2e.json
         run: cd accrue_admin && npm run e2e
 
       - name: Test Admin hooks and visual baseline set guard
@@ -100,8 +125,21 @@ jobs:
       - name: Require complete committed visual baseline set
         run: node accrue_admin/e2e/visual-baseline-set.cjs accrue_admin/e2e/__screenshots__/visual-desktop
 
+      - name: Check visual baseline identity manifest
+        run: node scripts/ci/phase254_visual_manifest.mjs check --base "$(git merge-base origin/main HEAD)"
+
       - name: Phase 211 visual regression gate
+        env:
+          PHASE254_PLAYWRIGHT_JSON: tmp/phase254/playwright-visual-gate.json
         run: cd accrue_admin && npm run e2e:visual-regression
+
+      - name: Upload Phase 254 machine evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase254-machine-evidence-browser-uat
+          path: accrue_admin/tmp/phase254/
+          if-no-files-found: ignore
 
       - name: Upload Playwright report
         if: failure()
@@ -124,7 +162,10 @@ jobs:
   # 100%). Baselines are now committed, so this runs on demand only — dispatch it
   # manually (Actions → AccrueAdmin Browser UAT → Run workflow) whenever an
   # intentional UI change requires re-minting, then download artifact
-  # `phase211-visual-baselines` and commit the refreshed PNGs. Guarded to
+  # `phase211-visual-baselines` and commit the refreshed PNGs together with their
+  # identity manifest in one `test(visual): rebaseline <keys>` commit. The artifact is
+  # uploaded only when every step succeeded, including the repeat-each stability proof
+  # and the manifest-backed set check. Guarded to
   # workflow_dispatch so it no longer runs on every accrue_admin PR.
   visual-baselines-mint:
     name: Mint visual baselines
@@ -156,6 +197,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up BEAM
         uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
@@ -186,12 +229,26 @@ jobs:
         run: cd accrue_admin && npx playwright install --with-deps chromium
 
       - name: Mint visual baselines
-        run: cd accrue_admin && npm run e2e:visual-regression -- --update-snapshots
+        run: cd accrue_admin && npm run e2e:visual-regression -- --update-snapshots=changed
 
-      - name: Upload minted baselines
-        if: always()
+      - name: Prove the new visual cases are stable against the minted snapshots
+        run: cd accrue_admin && npx playwright test e2e/subscription-visual-phase254.spec.js --project=visual-desktop --workers=1 --repeat-each=3 --update-snapshots=none --grep "phase254-"
+
+      - name: Build visual baseline identity manifest
+        env:
+          MINT_REASON: ${{ inputs.reason }}
+          MINT_FINDING_ID: ${{ inputs.finding_id }}
+        run: node scripts/ci/phase254_visual_manifest.mjs build --run-id "${{ github.run_id }}" --sha "${{ github.sha }}" --base "$(git merge-base origin/main HEAD)" --reason "$MINT_REASON" --finding-id "$MINT_FINDING_ID"
+
+      - name: Verify the minted set against the identity manifest
+        run: node accrue_admin/e2e/visual-baseline-set.cjs accrue_admin/e2e/__screenshots__/visual-desktop
+
+      - name: Upload minted baselines, identity files and manifest
+        if: success()
         uses: actions/upload-artifact@v7
         with:
           name: phase211-visual-baselines
-          path: accrue_admin/e2e/__screenshots__
-          if-no-files-found: ignore
+          path: |
+            accrue_admin/e2e/__screenshots__
+            accrue_admin/tmp/phase254/visual-identity
+          if-no-files-found: error

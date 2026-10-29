@@ -1,0 +1,15 @@
+{
+  "command": "node --test --test-reporter=./tap-reporter.mjs phase252_lab.test.mjs",
+  "exitCode": 1,
+  "output": "TAP version 13\nok 1 - requires a fresh explicit numeric test partition\nok 2 - derives an isolated package database and local endpoint from explicit input\nok 3 - rejects non-disposable database names and nonlocal PostgreSQL hosts\nok 4 - keeps the host-heldout numeric database and fixed port contract\nok 5 - checks server, database and port before creating the owned target\nnot ok 6 - accepts loopback PostgreSQL inet addresses with a host mask\nok 7 - accepts cleanup only when pid, start identity, command, DB, port and nonce all match\nok 8 - health identity must match the owned database, loopback endpoint, partition, nonce and PID\nok 9 - namespace locks admit one owner and can be acquired again after exact release\nok 10 - a stale lock owner cannot remove replacement namespace metadata\n1..10\n",
+  "targetTest": "accepts loopback PostgreSQL inet addresses with a host mask",
+  "targetFile": "scripts/dev/phase252_lab.test.mjs",
+  "expected": "prepareLaunch accepts the PostgreSQL loopback address 127.0.0.1/32, creates only the derived disposable database, and returns canonical host address 127.0.0.1.",
+  "actual": "The target assertion failed because prepareLaunch rejected the PostgreSQL loopback address with its /32 host mask before database creation.",
+  "semanticAssessment": "The target test executed and failed on assert.doesNotReject because prepareLaunch rejected the actual PostgreSQL loopback inet address 127.0.0.1/32 before creating the derived disposable database. This is the intended assertion failure for accepting canonical loopback server identity, not a load, setup, or fixture failure.",
+  "executionRoot": "private temporary mirror",
+  "mirrorSha256": {
+    "scripts/dev/phase252_lab.mjs": "dbb5a4e1d36ca1bdf60f89dd7ab7cde1c3a8f0881b1432944d84ea86206a4927",
+    "scripts/dev/phase252_lab.test.mjs": "48bcc15c8a952f221dff1388def56937e4a6e76cbf2df21d39ddb56158418715"
+  }
+}

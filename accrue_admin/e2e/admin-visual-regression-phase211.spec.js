@@ -59,15 +59,12 @@ function timestampAnchors(page, name) {
           .locator(".ax-audit-list .ax-audit-row:not(.ax-audit-row-head) time")
           .filter({ hasText: TIMESTAMP_RE })
       ];
-    case "invoices":
-      // The selected invoice fixtures have no due/finalized boundary, so the
-      // Due date column renders its static unavailable copy rather than a date.
-      return [];
     case "component-kitchen":
     case "invoices":
     case "invoice-detail":
-      // Invoice fixtures have no due/finalized boundary, and invoice detail
-      // leaves its lazy activity section closed; no volatile value is shown.
+      // The selected invoice fixtures have no due/finalized boundary (the Due date column renders
+      // its static unavailable copy rather than a date), and invoice detail leaves its lazy
+      // activity section closed; no volatile value is shown.
       return [];
     default:
       return [];
@@ -128,26 +125,72 @@ async function maskLocators(page, name) {
   return await page.locator("[data-ax-visual-timestamp-mask]").all();
 }
 
-async function assertMaskExcludesProtectedFacts(name, masks) {
+// D-19: the protected facts (identity, amount, state, actions) are located by geometry, never by the
+// text of the masks. Each fact is a visible leaf element; a violation is any fact whose rectangle
+// overlaps a mask rectangle (the timestamp wrappers, plus any extra rectangle a control supplies).
+// The in-page function is a plain function so a negative control can run the very same code.
+function protectedFactViolationsInPage({ extraMaskRects }) {
+  // What remains of a control's text once its masked timestamp is removed (a time zone label at most).
+  const textOutsideMasks = (element) => {
+    const clone = element.cloneNode(true);
+    clone.querySelectorAll("[data-ax-visual-timestamp-mask]").forEach((mask) => mask.remove());
+    return (clone.textContent || "").replace(/\s+/g, " ").trim();
+  };
+  const timestampControl = (element) => element.querySelector("[data-ax-visual-timestamp-mask]") !== null && /^(?:[A-Z]{2,5}(?: [A-Z]{2,5})?)?$/.test(textOutsideMasks(element));
+  const visible = (element) => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0 && rect.width > 0 && rect.height > 0 && !element.closest("[hidden],[aria-hidden='true']");
+  };
+  const rectOf = (element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x + window.scrollX, y: rect.y + window.scrollY, width: rect.width, height: rect.height };
+  };
+  const leaves = (pattern) => [...document.querySelectorAll("body *")].filter((element) =>
+    element.children.length === 0 && pattern.test((element.textContent || "").trim()) && visible(element) && !element.closest("script,style,[data-ax-visual-timestamp-mask]"));
+  const bySelector = (selector) => [...document.querySelectorAll(selector)].filter(visible);
+  const categories = {
+    identity: bySelector("h1, [data-ax-page-title], #subscription-summary-id, a[href^='/billing/subscriptions/'], a[href^='/billing/invoices/'], a[href^='/billing/customers/']"),
+    amount: leaves(/^(?:[¥$€£]\s?[\d,.]+|\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d{2}|Amount unavailable|Unavailable)$/),
+    status: leaves(/^(?:Open|Active|Past due|Paid|Void|Canceled|Succeeded|Failed|Dead|Replayed|Pending|Draft)$/i),
+    // A control whose whole text is a masked timestamp is the time display's copy button: it is the masked
+    // value itself, not an action, so it is the one thing allowed to sit under a mask.
+    action: bySelector("button, [role='button'], [role='menuitem'], a.ax-button, [data-ax-primary-action]")
+      .filter((element) => !timestampControl(element)),
+  };
+  const masks = [...document.querySelectorAll("[data-ax-visual-timestamp-mask]")].filter(visible).map(rectOf).concat(extraMaskRects || []);
+  const overlaps = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+  const violations = [];
+  const counts = {};
+  const rects = {};
+  for (const [category, elements] of Object.entries(categories)) {
+    counts[category] = elements.length;
+    rects[category] = elements.slice(0, 3).map(rectOf);
+    for (const element of elements) {
+      const rect = rectOf(element);
+      if (masks.some((mask) => overlaps(rect, mask))) violations.push({ category, text: (element.textContent || "").trim().slice(0, 40) });
+    }
+  }
+  return { counts, rects, mask_count: masks.length, violations };
+}
+
+async function protectedFactGeometry(page, extraMaskRects = []) {
+  return page.evaluate(protectedFactViolationsInPage, { extraMaskRects });
+}
+
+async function assertMaskExcludesProtectedFacts(page, name, masks) {
   if (masks.length === 0) {
     expect(name, "surfaces without rendered volatile values have no timestamp anchors").toMatch(
       /^(component-kitchen|invoices|invoice-detail)$/
     );
-    return;
+  } else {
+    const text = (await Promise.all(masks.map((mask) => mask.innerText()))).join(" ");
+    expect(text, `${name}: timestamp masks match volatile date text`).toMatch(TIMESTAMP_RE);
   }
-  const text = (await Promise.all(masks.map((mask) => mask.innerText()))).join(" ");
-  expect(text, `${name}: timestamp masks match volatile date text`).toMatch(TIMESTAMP_RE);
-  const protectedFacts = [
-    ["identity", /customer|invoice|subscription|owner|plan/i],
-    ["money", /amount|balance|¥|\$|\bUSD\b|\bJPY\b/i],
-    ["state", /open|active|past due|succeeded|failed|dead|replayed/i],
-    ["action", /void|cancel|refund|replay|confirm|retry|queue/i],
-    ["error", /error|denied|unavailable|unknown/i],
-    ["label", /timestamp|renews|ends|issued|created|due date|current period|renewal/i]
-  ];
-  for (const [category, pattern] of protectedFacts) {
-    expect(text, `${name}: timestamp masks exclude ${category} copy`).not.toMatch(pattern);
-  }
+  const geometry = await protectedFactGeometry(page);
+  expect(geometry.counts.identity, `${name}: identity is visible`).toBeGreaterThan(0);
+  expect(geometry.mask_count, `${name}: the geometry check saw every mask rectangle`).toBe(masks.length);
+  expect(geometry.violations, `${name}: no mask rectangle intersects identity, amount, state or action elements`).toEqual([]);
 }
 
 test.describe("Phase 211 visual regression", () => {
@@ -224,7 +267,7 @@ test.describe("Phase 211 visual regression", () => {
         // Assert mounted values separately in both visual compositions. The
         // second pass recognizes existing wrappers without changing the DOM.
         const masks = await maskLocators(page, name);
-        await assertMaskExcludesProtectedFacts(name, masks);
+        await assertMaskExcludesProtectedFacts(page, name, masks);
         const file = theme === "dark" ? `${name}-dark.png` : `${name}.png`;
         if (name === "invoices") {
           const row = page.locator(`[data-row-id="${phase191.phase191_invoice_id}"]:visible`).first();
@@ -242,5 +285,21 @@ test.describe("Phase 211 visual regression", () => {
         });
       }
     }
+  });
+
+  test("geometry check negative control: a mask over the amount is detected and the real masks pass", async ({ page, request }) => {
+    test.setTimeout(60_000);
+    const phase191 = await seed(request, "phase191-matrix");
+    await login(page, `/billing/invoices/${phase191.phase191_invoice_id}`);
+    await expect(page.locator("#main-content")).toBeVisible();
+    const clean = await protectedFactGeometry(page);
+    expect(clean.counts.amount, "the invoice detail renders an amount fact").toBeGreaterThan(0);
+    expect(clean.counts.status, "the invoice detail renders a state fact").toBeGreaterThan(0);
+    expect(clean.counts.action, "the invoice detail renders an action").toBeGreaterThan(0);
+    expect(clean.violations, "positive control: with no mask nothing is violated").toEqual([]);
+    const hiddenAmount = await protectedFactGeometry(page, [clean.rects.amount[0]]);
+    expect(hiddenAmount.violations.map((item) => item.category), "a mask placed over the amount fails the check").toContain("amount");
+    const hiddenIdentity = await protectedFactGeometry(page, [clean.rects.identity[0]]);
+    expect(hiddenIdentity.violations.map((item) => item.category)).toContain("identity");
   });
 });

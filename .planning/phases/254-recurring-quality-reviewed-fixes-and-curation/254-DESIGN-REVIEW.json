@@ -1,0 +1,934 @@
+{
+  "schema_version": 1,
+  "stage": "corrected",
+  "source_commit": "4a018ce9a2ed17a8d8d809b71fee6d34fc423ce2",
+  "fix_commit": "88cd27cdcede5f00594896b6b752069be7ede0ac",
+  "assets": {
+    "app_css": {
+      "path": "accrue_admin/assets/css/app.css",
+      "sha256": "25d18c954f3c95b4e0f22b01ecde4d0c8168b655e4800da149fb4283f897ee1a"
+    },
+    "theme_css": {
+      "path": "accrue_admin/assets/css/theme.css",
+      "sha256": "fbf78dee8fb3982b2157f1db8a4be9c16f6b6fe83ef5b6ce89bc7527db602bc7"
+    },
+    "accrue_admin_css": {
+      "path": "accrue_admin/priv/static/accrue_admin.css",
+      "sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299"
+    },
+    "storybook_css": {
+      "path": "accrue_admin/priv/static/storybook.css",
+      "sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe"
+    },
+    "served_css_route": "css-9568fe2780b1ac605777f571b8e278f5"
+  },
+  "rubric": [
+    "typography",
+    "color",
+    "hierarchy",
+    "redundancy",
+    "affordances",
+    "microcopy",
+    "journey"
+  ],
+  "rubric_verdicts": [
+    {
+      "dimension": "typography",
+      "verdict": "finding",
+      "finding_ids": [
+        "DR-254-02",
+        "DR-254-03",
+        "DR-254-04",
+        "DR-254-06"
+      ]
+    },
+    {
+      "dimension": "color",
+      "verdict": "finding",
+      "finding_ids": [
+        "DR-254-06"
+      ]
+    },
+    {
+      "dimension": "hierarchy",
+      "verdict": "finding",
+      "finding_ids": [
+        "DR-254-01"
+      ]
+    },
+    {
+      "dimension": "redundancy",
+      "verdict": "finding",
+      "finding_ids": [
+        "DR-254-09"
+      ]
+    },
+    {
+      "dimension": "affordances",
+      "verdict": "finding",
+      "finding_ids": [
+        "DR-254-08"
+      ]
+    },
+    {
+      "dimension": "microcopy",
+      "verdict": "finding",
+      "finding_ids": [
+        "DR-254-05",
+        "DR-254-07"
+      ]
+    },
+    {
+      "dimension": "journey",
+      "verdict": "assessed-no-finding",
+      "capture_ids": [
+        "CAP-254-01",
+        "CAP-254-03",
+        "CAP-254-05",
+        "CAP-254-07",
+        "CAP-254-09",
+        "CAP-254-11",
+        "CAP-254-13",
+        "CAP-254-15"
+      ],
+      "source_refs": [
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+          "lines": "305-309",
+          "sha": "a0dc862c9bce0e45f92a4f04da79999714d51a1f1d44ff6cf2167dbc09140b2b",
+          "needle": "/subscriptions/#{row.id}"
+        },
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+          "lines": "328",
+          "sha": "a0dc862c9bce0e45f92a4f04da79999714d51a1f1d44ff6cf2167dbc09140b2b",
+          "needle": "@subscription_href"
+        },
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "lines": "287-298",
+          "sha": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+          "needle": "data-ax-action-band"
+        },
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "lines": "646",
+          "sha": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+          "needle": "step_up_submit"
+        },
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "lines": "406-414",
+          "sha": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+          "needle": "role=\"status\""
+        }
+      ],
+      "rationale": "Assessed from source across the capture cells, not from pixels: a collection row's identity link goes to the scoped detail route, the detail page leads with the action band whose buttons open the review drawer, the step-up form submits to one handler, and the result renders as a status region with a scoped activity link, so no dead end or unlabelled step was found on the list, detail, action, result path. Rendered keyboard order and focus return are measured by the UXQ-02 mounted journey, not by this record."
+    }
+  ],
+  "captures": [
+    {
+      "id": "CAP-254-01",
+      "key": "phase254-collection-multiple_rows-w320-light",
+      "sourcing": "story",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows",
+      "width": 320,
+      "theme": "light",
+      "state": "settled",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-02",
+      "key": "phase254-collection-multiple_rows-w320-dark",
+      "sourcing": "story",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows",
+      "width": 320,
+      "theme": "dark",
+      "state": "settled",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-03",
+      "key": "phase254-collection-multiple_rows-w1280-light",
+      "sourcing": "story",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows",
+      "width": 1280,
+      "theme": "light",
+      "state": "settled",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-04",
+      "key": "phase254-collection-multiple_rows-w1280-dark",
+      "sourcing": "story",
+      "route": "/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows",
+      "width": 1280,
+      "theme": "dark",
+      "state": "settled",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-05",
+      "key": "phase254-page-active-w320-light",
+      "sourcing": "story",
+      "route": "/billing/dev/storybook/pages/subscription?tab=active",
+      "width": 320,
+      "theme": "light",
+      "state": "settled",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-06",
+      "key": "phase254-page-active-w320-dark",
+      "sourcing": "story",
+      "route": "/billing/dev/storybook/pages/subscription?tab=active",
+      "width": 320,
+      "theme": "dark",
+      "state": "settled",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-07",
+      "key": "phase254-page-active-w1280-light",
+      "sourcing": "story",
+      "route": "/billing/dev/storybook/pages/subscription?tab=active",
+      "width": 1280,
+      "theme": "light",
+      "state": "settled",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-08",
+      "key": "phase254-page-active-w1280-dark",
+      "sourcing": "story",
+      "route": "/billing/dev/storybook/pages/subscription?tab=active",
+      "width": 1280,
+      "theme": "dark",
+      "state": "settled",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-09",
+      "key": "phase254-mounted-review-open-w320-light",
+      "sourcing": "mounted",
+      "route": "/billing/subscriptions/:id",
+      "width": 320,
+      "theme": "light",
+      "state": "review-open",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-10",
+      "key": "phase254-mounted-review-open-w320-dark",
+      "sourcing": "mounted",
+      "route": "/billing/subscriptions/:id",
+      "width": 320,
+      "theme": "dark",
+      "state": "review-open",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-11",
+      "key": "phase254-mounted-review-open-w1280-light",
+      "sourcing": "mounted",
+      "route": "/billing/subscriptions/:id",
+      "width": 1280,
+      "theme": "light",
+      "state": "review-open",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-12",
+      "key": "phase254-mounted-review-open-w1280-dark",
+      "sourcing": "mounted",
+      "route": "/billing/subscriptions/:id",
+      "width": 1280,
+      "theme": "dark",
+      "state": "review-open",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-13",
+      "key": "phase254-mounted-disclosure-focus-w320-light",
+      "sourcing": "mounted",
+      "route": "/billing/subscriptions/:id",
+      "width": 320,
+      "theme": "light",
+      "state": "focus-visible",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-14",
+      "key": "phase254-mounted-disclosure-focus-w320-dark",
+      "sourcing": "mounted",
+      "route": "/billing/subscriptions/:id",
+      "width": 320,
+      "theme": "dark",
+      "state": "focus-visible",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-15",
+      "key": "phase254-mounted-disclosure-focus-w1280-light",
+      "sourcing": "mounted",
+      "route": "/billing/subscriptions/:id",
+      "width": 1280,
+      "theme": "light",
+      "state": "focus-visible",
+      "png_sha256": null,
+      "pass": null
+    },
+    {
+      "id": "CAP-254-16",
+      "key": "phase254-mounted-disclosure-focus-w1280-dark",
+      "sourcing": "mounted",
+      "route": "/billing/subscriptions/:id",
+      "width": 1280,
+      "theme": "dark",
+      "state": "focus-visible",
+      "png_sha256": null,
+      "pass": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "DR-254-01",
+      "origin": "253#1",
+      "dimension": "hierarchy",
+      "claim": "The subscription detail page overrides its normal group rhythm with page-tier gaps of 1px, 3px and 0 (and a raw 0 0.25rem field gap), so the summary, facts, resources and disclosure groups read as one compressed block instead of the title, lifecycle, facts hierarchy the contract specifies.",
+      "source_refs": [
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "2988-2990",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "gap: 0.0625rem"
+        },
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "3050-3052",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "gap: 0.1875rem"
+        },
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "3060-3062",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "gap: 0.0625rem"
+        },
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "6709-6712",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "gap: 0;"
+        },
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "6720-6724",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "gap: 0 0.25rem"
+        },
+        {
+          "path": "accrue_admin/assets/css/theme.css",
+          "lines": "35-37",
+          "sha": "165cca6107ddd75782bab339ec1f1612d33cf7cfac9d89132bef64601ec9f05a",
+          "needle": "--ax-space-xs: 0.25rem"
+        }
+      ],
+      "evidence_captures": [
+        "CAP-254-05",
+        "CAP-254-06",
+        "CAP-254-07",
+        "CAP-254-08"
+      ],
+      "owning_tier": "page",
+      "disposition": "fixed",
+      "rationale": "D-34: delete the page-tier overrides so the component tokens apply and replace the raw field gap with --ax-space-xs. The page tier is the lowest tier that owns these selectors. The mechanical check scanSubscriptionDetailSpacing finds them at source_commit and must find none at fix_commit.",
+      "tests": [
+        {
+          "path": "accrue_admin/e2e/subscription-design-phase254.spec.js",
+          "kind": "computed",
+          "status": "red-then-green",
+          "id": "DR-254-01:computed"
+        },
+        {
+          "path": "scripts/ci/verify_phase254_design_review.test.mjs",
+          "kind": "css-guard",
+          "status": "green",
+          "id": "scanSubscriptionDetailSpacing"
+        }
+      ],
+      "mechanical_check": {
+        "id": "subscription-detail-spacing",
+        "path": "accrue_admin/assets/css/app.css"
+      },
+      "confirmation_captures": [],
+      "verdict": null,
+      "red_evidence": [
+        "254-12-01-red-evidence.json"
+      ]
+    },
+    {
+      "id": "DR-254-02",
+      "origin": "253#2",
+      "dimension": "typography",
+      "claim": "The Phase 253 audit reported the collection heading at 24px against a 28px page-heading contract. The shared display rule is already responsive (1.5rem, 24px, below 768px; 1.75rem, 28px, from 768px), so the contract row, not the rule, is wrong; the two rem literals can move to --ax-type-xl and --ax-type-2xl with no visual change.",
+      "source_refs": [
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "777-781",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "font-size: 1.5rem"
+        },
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "2161-2165",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "font-size: 1.75rem"
+        },
+        {
+          "path": "accrue_admin/assets/css/theme.css",
+          "lines": "30-31",
+          "sha": "165cca6107ddd75782bab339ec1f1612d33cf7cfac9d89132bef64601ec9f05a",
+          "needle": "--ax-type-xl: 1.5rem"
+        },
+        {
+          "path": "accrue_admin/lib/accrue_admin/components/page_header.ex",
+          "lines": "39",
+          "sha": "86fd14ff42b419229b7cd15d24e6a073e7adfb623d0c196ee8f83bae4d94d852",
+          "needle": "class=\"ax-display\""
+        }
+      ],
+      "evidence_captures": [
+        "CAP-254-01",
+        "CAP-254-02",
+        "CAP-254-03",
+        "CAP-254-04"
+      ],
+      "owning_tier": "contract",
+      "disposition": "contract-amended",
+      "rationale": "D-34: amend the contract to a responsive heading and leave shared .ax-display semantics untouched. The heading red test is DR-254-02:source (the declared literals); DR-254-02:computed at 767 and 768 CSS px passes before and after by design.",
+      "tests": [
+        {
+          "path": "accrue_admin/e2e/subscription-design-phase254.spec.js",
+          "kind": "source",
+          "status": "red-then-green",
+          "id": "DR-254-02:source"
+        },
+        {
+          "path": "accrue_admin/e2e/subscription-design-phase254.spec.js",
+          "kind": "computed",
+          "status": "green-before-and-after",
+          "id": "DR-254-02:computed"
+        }
+      ],
+      "contract": {
+        "path": ".planning/phases/253-real-groups-and-a-whole-subscription-job/253-UI-SPEC.md",
+        "section": "Typography",
+        "action": "amend-row",
+        "row": "Page heading",
+        "amended_text": "| Page heading | Responsive: `--ax-type-xl` (24px) below 768px, `--ax-type-2xl` (28px) from 768px | Semibold 600 | 1.2 |",
+        "note": "254-12 performs the edit and keeps the section's introductory sentence consistent with its rows."
+      },
+      "confirmation_captures": [],
+      "verdict": null,
+      "red_evidence": [
+        "254-12-01-red-evidence.json"
+      ]
+    },
+    {
+      "id": "DR-254-03",
+      "origin": "253#2",
+      "dimension": "typography",
+      "claim": "Detail field labels resolve to 14px semibold uppercase (the bare .ax-field-label rule) while the contract label role is 12px semibold, so detail labels are larger than the summary keys they sit beside.",
+      "source_refs": [
+        {
+          "path": "accrue_admin/lib/accrue_admin/components/detail.ex",
+          "lines": "49-52",
+          "sha": "3b1b08854d9174d515f6cc7ec49f110f9bdaa707502ac6e184aebbf12c927bfc",
+          "needle": "class=\"ax-field-label\""
+        },
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "6732-6740",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "font-size: var(--ax-type-sm)"
+        },
+        {
+          "path": "accrue_admin/assets/css/theme.css",
+          "lines": "101",
+          "sha": "165cca6107ddd75782bab339ec1f1612d33cf7cfac9d89132bef64601ec9f05a",
+          "needle": "--ax-type-label-sm-font: 600 var(--ax-type-xs)"
+        }
+      ],
+      "evidence_captures": [
+        "CAP-254-05",
+        "CAP-254-06",
+        "CAP-254-07",
+        "CAP-254-08"
+      ],
+      "owning_tier": "component",
+      "disposition": "fixed",
+      "rationale": "D-34: scope a font: var(--ax-type-label-sm-font) rule to .ax-field-list .ax-field-label so detail labels equal summary keys at --ax-type-xs. The bare .ax-field-label stays untouched (six form controls share it) and .ax-field-value keeps tabular-nums.",
+      "tests": [
+        {
+          "path": "accrue_admin/e2e/subscription-design-phase254.spec.js",
+          "kind": "computed",
+          "status": "red-then-green",
+          "id": "DR-254-03:computed"
+        }
+      ],
+      "confirmation_captures": [],
+      "verdict": null,
+      "red_evidence": [
+        "254-12-01-red-evidence.json"
+      ]
+    },
+    {
+      "id": "DR-254-04",
+      "origin": "253#2",
+      "dimension": "typography",
+      "claim": "Detail disclosure headings render at 20px (--ax-type-lg), which is outside the contract's declared size steps, although the brandbook's seven-step type scale in theme.css defines 20px as the title role.",
+      "source_refs": [
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "6523-6528",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "font-size: var(--ax-type-lg)"
+        },
+        {
+          "path": "accrue_admin/assets/css/theme.css",
+          "lines": "29",
+          "sha": "165cca6107ddd75782bab339ec1f1612d33cf7cfac9d89132bef64601ec9f05a",
+          "needle": "--ax-type-lg: 1.25rem"
+        },
+        {
+          "path": "accrue_admin/assets/css/theme.css",
+          "lines": "105",
+          "sha": "165cca6107ddd75782bab339ec1f1612d33cf7cfac9d89132bef64601ec9f05a",
+          "needle": "--ax-type-title-font: 600 var(--ax-type-lg)"
+        }
+      ],
+      "evidence_captures": [
+        "CAP-254-13",
+        "CAP-254-14",
+        "CAP-254-15",
+        "CAP-254-16"
+      ],
+      "owning_tier": "contract",
+      "disposition": "contract-amended",
+      "rationale": "D-34: the brandbook scale is authoritative, so the contract gains a Section title role; no CSS changes. The identical duplicate selector is a separate deferral (DR-254-09).",
+      "tests": [],
+      "contract": {
+        "path": ".planning/phases/253-real-groups-and-a-whole-subscription-job/253-UI-SPEC.md",
+        "section": "Typography",
+        "action": "add-row",
+        "row": "Section title",
+        "amended_text": "| Section title | 20px (`--ax-type-lg`) | Semibold 600 | 1.2 |",
+        "note": "254-12 performs the edit and keeps the section's introductory sentence consistent with its rows."
+      },
+      "confirmation_captures": [],
+      "verdict": null
+    },
+    {
+      "id": "DR-254-05",
+      "origin": "253#3",
+      "dimension": "microcopy",
+      "claim": "The action-result link label and its scoped events path exist twice: SubscriptionLive owns the literal and the path builder privately, and the Storybook page scenario adapter repeats both, so the static result story can drift from the mounted page.",
+      "source_refs": [
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "lines": "2090-2096",
+          "sha": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+          "needle": "Open scoped subscription activity"
+        },
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "lines": "2111-2118",
+          "sha": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+          "needle": "defp action_activity_path"
+        },
+        {
+          "path": "accrue_admin/storybook/_support/subscription_page_scenarios.ex",
+          "lines": "188-197",
+          "sha": "6a0f7265940ba44c31c40435f389d2db5030024e08638467823a20eede0c8c24",
+          "needle": "Open scoped subscription activity"
+        },
+        {
+          "path": "accrue_admin/lib/accrue_admin/copy.ex",
+          "lines": "1001",
+          "sha": "ff9cf1bc12b771255d10f8aa6cd4d71f1d08770b938e1a3244687f9e019edcab",
+          "needle": "subscription_action_recorded_info"
+        }
+      ],
+      "evidence_captures": [],
+      "owning_tier": "copy",
+      "disposition": "fixed",
+      "rationale": "D-34: add Copy.subscription_action_activity_link_label/0 and a public @doc false SubscriptionLive.action_activity_path/3, and have the LiveView and the story adapter call both, as the adapter already does for action_result_message/1. The result link appears after a dispatch, which none of the 16 captures reach, so the proof is an ExUnit owner test plus a literal-count guard.",
+      "tests": [
+        {
+          "path": "accrue_admin/test/accrue_admin/dev/subscription_action_copy_test.exs",
+          "kind": "exunit",
+          "status": "red-then-green",
+          "id": "DR-254-05"
+        }
+      ],
+      "confirmation_captures": [],
+      "verdict": null,
+      "red_evidence": [
+        "254-13-01-red-evidence.json"
+      ]
+    },
+    {
+      "id": "DR-254-06",
+      "origin": "assessment",
+      "dimension": "typography",
+      "also_dimensions": [
+        "color"
+      ],
+      "claim": "The Activity audit log heading is the only section title at font-weight 950 and the only one coloured with --ax-accent-readable. The Phase 253 contract allows two weights and reserves the accent for the eligible action, the selected view, text links and focus; 950 is a third weight and the accent here marks a heading.",
+      "source_refs": [
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "6530-6535",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "font-weight: 950"
+        },
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "lines": "497",
+          "sha": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+          "needle": "ax-detail-section-title-audit"
+        }
+      ],
+      "evidence_captures": [
+        "CAP-254-13",
+        "CAP-254-14",
+        "CAP-254-15",
+        "CAP-254-16"
+      ],
+      "owning_tier": "component",
+      "disposition": "deferred",
+      "rationale": "Whether the audit ledger heading should carry deliberate emphasis is a product and brand judgment the plan does not settle, it cannot be decided by a mechanical check, and the rule is already tagged for the type-system pass. D-36 defers anything that is not one of the five locked dispositions.",
+      "tests": [],
+      "confirmation_captures": [],
+      "verdict": null
+    },
+    {
+      "id": "DR-254-07",
+      "origin": "assessment",
+      "dimension": "microcopy",
+      "claim": "The audit strip is captioned \"Audit event table: Actor / Action / Timestamp\", which describes a table structure in implementer language, while the element below it is a three-item summary row labelled \"Latest audit event summary\" and no table.",
+      "source_refs": [
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "lines": "500",
+          "sha": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+          "needle": "Audit event table: Actor / Action / Timestamp"
+        },
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "lines": "502",
+          "sha": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+          "needle": "Latest audit event summary"
+        }
+      ],
+      "evidence_captures": [
+        "CAP-254-13",
+        "CAP-254-14",
+        "CAP-254-15",
+        "CAP-254-16"
+      ],
+      "owning_tier": "copy",
+      "disposition": "deferred",
+      "rationale": "A better caption needs a wording decision the plan does not make, two existing LiveView tests pin the current string, and a copy change would also regenerate the digested manifests. It is real but outside the locked correction batch, so it is deferred with the copy owner as the tier.",
+      "tests": [],
+      "confirmation_captures": [],
+      "verdict": null
+    },
+    {
+      "id": "DR-254-08",
+      "origin": "assessment",
+      "dimension": "affordances",
+      "claim": "The subscription detail disclosures use <summary class=\"ax-detail-section-head\">, a flex row with a 22px minimum height, and do not use .ax-disclosure-summary, which gives the webhook detail disclosures a 44px target, a pointer cursor, a chevron and an explicit focus ring. Whether the default marker and focus ring render acceptably is a runtime question; this record asserts only the class difference.",
+      "source_refs": [
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "lines": "488",
+          "sha": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
+          "needle": "<summary class=\"ax-detail-section-head\">"
+        },
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "6480-6494",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "min-height: 1.375rem"
+        },
+        {
+          "path": "accrue_admin/lib/accrue_admin/live/webhook_live.ex",
+          "lines": "273",
+          "sha": "0ca8f62a8be6fbc9481aad43b1916277c6e16edacfc1ee6c2f886b304a5e3a40",
+          "needle": "ax-disclosure-summary"
+        }
+      ],
+      "evidence_captures": [
+        "CAP-254-13",
+        "CAP-254-14",
+        "CAP-254-15",
+        "CAP-254-16"
+      ],
+      "owning_tier": "component",
+      "disposition": "deferred",
+      "rationale": "Target size and keyboard focus are measured by the UXQ-02 probes (254-11): if they route a defect on summary.ax-detail-section-head it is fixed in the correction batch as a routed accessibility defect; otherwise sharing .ax-disclosure-summary across detail views is a design decision that reaches several LiveViews and is deferred (D-36). 254-13 re-disposition: none of the 30 routed accessibility entries (register at eefee2a62958dbdefe426d5434ed133e91b3e8ec) names summary.ax-detail-section-head (A11Y-254-22 names summary.ax-button, the menu button), and the 151 composition cells now report 0 observations, so no defect was routed and the finding stays deferred (D-36).",
+      "tests": [],
+      "confirmation_captures": [],
+      "verdict": null
+    },
+    {
+      "id": "DR-254-09",
+      "origin": "assessment",
+      "dimension": "redundancy",
+      "claim": "The detail section title is declared twice with the same colour, size and weight: once globally and once scoped to .ax-subscription-detail-page.",
+      "source_refs": [
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "6515-6521",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "font-size: var(--ax-type-lg)"
+        },
+        {
+          "path": "accrue_admin/assets/css/app.css",
+          "lines": "6523-6528",
+          "sha": "7bd3fbdaad203eeaf50b28c24e6ef063e2aaf118dadb98b2c07d73cfeb22d0aa",
+          "needle": "font-size: var(--ax-type-lg)"
+        }
+      ],
+      "evidence_captures": [
+        "CAP-254-13",
+        "CAP-254-14",
+        "CAP-254-15",
+        "CAP-254-16"
+      ],
+      "owning_tier": "component",
+      "disposition": "deferred",
+      "rationale": "D-36 names the duplicate disclosure selectors as a known deferral: removing either rule is a cleanup with no visible effect and sits outside the correction batch.",
+      "tests": [],
+      "confirmation_captures": [],
+      "verdict": null
+    }
+  ],
+  "amendments": [
+    {
+      "id": "AMD-254-03",
+      "decisions": [
+        "D-33"
+      ],
+      "original": "D-33 capture cell \"collection populated\"",
+      "amended": "the Phase 253 multiple_rows collection story, key phase254-collection-multiple_rows-w<width>-<theme>",
+      "rationale": "The Phase 253 collection universe has no populated state: the compiled collection states are new_host_empty, filtered_empty, queue_empty, one_row, multiple_rows, page_boundary, loading, unavailable, partial_cursor_error and incomplete_projection. multiple_rows is the populated collection.",
+      "evidence": [
+        "accrue_admin/storybook/_support/subscription_compositions_manifest.ex"
+      ],
+      "owner_ack": {
+        "date": "2026-10-28",
+        "status": "owner-accepted at plan time"
+      }
+    },
+    {
+      "id": "AMD-254-04",
+      "decisions": [
+        "D-34",
+        "D-35"
+      ],
+      "original": "D-35 shows every correction red on the pre-fix commit, which for the heading amendment would be a computed assertion at 767 and 768 CSS px",
+      "amended": "The heading amendment's red is carried by DR-254-02:source (the declared font-size literals 1.5rem and 1.75rem against var(--ax-type-xl) and var(--ax-type-2xl)); DR-254-02:computed at 767 and 768 CSS px passes before and after by design",
+      "rationale": "The shared .ax-display rule was already responsive (24px below 768px, 28px from 768px), so the contract row was wrong and the rendered heading does not change; a computed assertion cannot be red for a contract-only amendment, while the token literals are a real source change that can.",
+      "evidence": [
+        "254-12-01-red-evidence.json"
+      ],
+      "owner_ack": {
+        "date": "2026-10-28",
+        "status": "owner-accepted at plan time"
+      }
+    },
+    {
+      "id": "AMD-254-05",
+      "decisions": [
+        "D-08",
+        "D-36"
+      ],
+      "original": "Design corrections are confined to the 16 D-33 capture cells (D-36)",
+      "amended": "Routed accessibility defects are fixed wherever 254-11 observed them (D-08 W4): 10 routed cells fall inside the 16 captures and 102 composition cells fall outside them, and all are fixed in this batch with their register entries deleted",
+      "rationale": "An accessibility defect is fixed at the lowest tier that owns it, not only on the cells that happen to be captured; the cells outside the 16 are listed here so the wider reach is a recorded, owner-accepted decision rather than silent scope growth.",
+      "register_commit": "eefee2a62958dbdefe426d5434ed133e91b3e8ec",
+      "affected_cells": [
+        "filtered_empty::viewport::1280::dark",
+        "filtered_empty::viewport::1280::light",
+        "filtered_empty::viewport::320::dark",
+        "filtered_empty::viewport::320::light",
+        "one_row::breakpoint::768::dark",
+        "one_row::breakpoint::768::light",
+        "one_row::container::640::dark",
+        "one_row::container::640::light",
+        "one_row::viewport::1280::dark",
+        "one_row::viewport::1280::light",
+        "one_row::viewport::320::dark",
+        "one_row::viewport::320::light",
+        "page::active::breakpoint::767::dark",
+        "page::active::breakpoint::767::light",
+        "page::active::breakpoint::768::dark",
+        "page::active::breakpoint::768::light",
+        "page::active::container::640::dark",
+        "page::active::container::640::light",
+        "page::active::synthetic-return::320::dark",
+        "page::active::synthetic-return::320::light",
+        "page::awaiting_step_up::breakpoint::767::dark",
+        "page::awaiting_step_up::breakpoint::767::light",
+        "page::awaiting_step_up::synthetic-recovery::320::dark",
+        "page::awaiting_step_up::synthetic-recovery::320::light",
+        "page::awaiting_step_up::viewport::1280::dark",
+        "page::awaiting_step_up::viewport::1280::light",
+        "page::awaiting_step_up::viewport::320::dark",
+        "page::awaiting_step_up::viewport::320::light",
+        "page::dispatching::breakpoint::767::dark",
+        "page::dispatching::breakpoint::767::light",
+        "page::dispatching::viewport::320::dark",
+        "page::dispatching::viewport::320::light",
+        "page::incomplete_evidence::breakpoint::767::dark",
+        "page::incomplete_evidence::breakpoint::767::light",
+        "page::incomplete_evidence::breakpoint::768::dark",
+        "page::incomplete_evidence::breakpoint::768::light",
+        "page::incomplete_evidence::container::640::dark",
+        "page::incomplete_evidence::container::640::light",
+        "page::incomplete_evidence::viewport::1280::dark",
+        "page::incomplete_evidence::viewport::1280::light",
+        "page::incomplete_evidence::viewport::320::dark",
+        "page::incomplete_evidence::viewport::320::light",
+        "page::result_confirmed::breakpoint::767::dark",
+        "page::result_confirmed::breakpoint::767::light",
+        "page::result_confirmed::breakpoint::768::dark",
+        "page::result_confirmed::breakpoint::768::light",
+        "page::result_confirmed::container::640::dark",
+        "page::result_confirmed::container::640::light",
+        "page::result_confirmed::viewport::1280::dark",
+        "page::result_confirmed::viewport::1280::light",
+        "page::result_confirmed::viewport::320::dark",
+        "page::result_confirmed::viewport::320::light",
+        "page::result_failed::breakpoint::767::dark",
+        "page::result_failed::breakpoint::767::light",
+        "page::result_failed::breakpoint::768::dark",
+        "page::result_failed::breakpoint::768::light",
+        "page::result_failed::container::640::dark",
+        "page::result_failed::container::640::light",
+        "page::result_failed::viewport::1280::dark",
+        "page::result_failed::viewport::1280::light",
+        "page::result_failed::viewport::320::dark",
+        "page::result_failed::viewport::320::light",
+        "page::result_pending::breakpoint::767::dark",
+        "page::result_pending::breakpoint::767::light",
+        "page::result_pending::breakpoint::768::dark",
+        "page::result_pending::breakpoint::768::light",
+        "page::result_pending::container::640::dark",
+        "page::result_pending::container::640::light",
+        "page::result_pending::viewport::1280::dark",
+        "page::result_pending::viewport::1280::light",
+        "page::result_pending::viewport::320::dark",
+        "page::result_pending::viewport::320::light",
+        "page::review_cancel_now::breakpoint::767::dark",
+        "page::review_cancel_now::breakpoint::767::light",
+        "page::review_cancel_now::synthetic-consequence::320::dark",
+        "page::review_cancel_now::synthetic-consequence::320::light",
+        "page::review_cancel_now::viewport::1280::dark",
+        "page::review_cancel_now::viewport::1280::light",
+        "page::review_cancel_now::viewport::320::dark",
+        "page::review_cancel_now::viewport::320::light",
+        "page::scheduled_cancellation::breakpoint::767::dark",
+        "page::scheduled_cancellation::breakpoint::767::light",
+        "page::scheduled_cancellation::breakpoint::768::dark",
+        "page::scheduled_cancellation::breakpoint::768::light",
+        "page::scheduled_cancellation::container::640::dark",
+        "page::scheduled_cancellation::container::640::light",
+        "page::scheduled_cancellation::viewport::1280::dark",
+        "page::scheduled_cancellation::viewport::1280::light",
+        "page::scheduled_cancellation::viewport::320::dark",
+        "page::scheduled_cancellation::viewport::320::light",
+        "page_boundary::viewport::1280::dark",
+        "page_boundary::viewport::1280::light",
+        "page_boundary::viewport::320::dark",
+        "page_boundary::viewport::320::light",
+        "partial_cursor_error::viewport::1280::dark",
+        "partial_cursor_error::viewport::1280::light",
+        "partial_cursor_error::viewport::320::dark",
+        "partial_cursor_error::viewport::320::light",
+        "unavailable::viewport::1280::dark",
+        "unavailable::viewport::1280::light",
+        "unavailable::viewport::320::dark",
+        "unavailable::viewport::320::light"
+      ],
+      "evidence": [
+        "accrue_admin/e2e/a11y-dispositions.json",
+        ".planning/phases/254-recurring-quality-reviewed-fixes-and-curation/254-12-SUMMARY.md"
+      ],
+      "owner_ack": {
+        "date": "2026-10-28",
+        "status": "owner-accepted at plan time"
+      }
+    }
+  ],
+  "baselines_changed": [],
+  "deferred": [
+    {
+      "id": "DEF-254-01",
+      "subject": "Global .ax-stack-sm resolves to the same gap as .ax-stack-md (both var(--ax-space-md)) and is widely used",
+      "tier": "component",
+      "trigger": "A spacing-scale pass that re-examines the .ax-stack-* rungs with its own baseline review."
+    },
+    {
+      "id": "DEF-254-02",
+      "subject": "Bare .ax-field-label uppercases and enlarges form control labels (checkbox, input, radio, select, textarea, toggle share it)",
+      "tier": "component",
+      "trigger": "A form label pass; D-34 forbids touching the bare rule in this batch."
+    },
+    {
+      "id": "DEF-254-03",
+      "subject": "Duplicate detail section title selectors",
+      "tier": "component",
+      "trigger": "The next cleanup of the detail section CSS.",
+      "finding_id": "DR-254-09"
+    },
+    {
+      "id": "DEF-254-04",
+      "subject": "Activity audit log heading weight 950 and accent colour",
+      "tier": "component",
+      "trigger": "The type-system pass that retires the 209/210 type exceptions, or a contract row for emphasised section titles.",
+      "finding_id": "DR-254-06"
+    },
+    {
+      "id": "DEF-254-05",
+      "subject": "Audit strip caption in implementer language",
+      "tier": "copy",
+      "trigger": "A UX writing pass over the audit strip, with an owner-approved caption.",
+      "finding_id": "DR-254-07"
+    },
+    {
+      "id": "DEF-254-06",
+      "subject": "Detail disclosure summaries lack the shared disclosure summary treatment",
+      "tier": "component",
+      "trigger": "A design decision to share .ax-disclosure-summary across detail views (the 254-11 probes routed no defect on the summary, so that trigger did not fire).",
+      "finding_id": "DR-254-08"
+    }
+  ]
+}

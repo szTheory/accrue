@@ -3,6 +3,20 @@ set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
+# Phase 254 (CIQ-04): the budget check measures the runner's elapsed time, so the start is recorded
+# here and read by scripts/ci/phase254_budget.mjs. It is an input, never a switch.
+export PHASE254_RUNNER_STARTED_AT="$(date +%s)"
+
+# Phase 254 (D-24 step 2): the Phase 252 and Phase 253 aggregates compile the admin test build once
+# and share it, instead of each cold-compiling the same sources. Every lane and assertion still runs.
+PHASE254_SHARED_BUILD_ID="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(8).toString("hex"))')"
+export PHASE254_SHARED_BUILD_ID
+
+# Phase 254 (D-24 step 3, CIQ-02): the 151 pure-story composition cells run on three bounded
+# Playwright workers against the one lab server; reconciliation still runs afterwards as the
+# dependent project, and every cell is still executed and asserted.
+export PHASE254_COMPOSITION_WORKERS=3
+
 run_step() {
   local label="$1"
   shift
@@ -20,3 +34,6 @@ run_step "Phase 199 interaction regression" bash -c "cd accrue_admin && npm run 
 run_step "Admin reduced-motion guardrail" bash -c "cd accrue_admin && env -u NO_COLOR npx playwright test e2e/reduced-motion.spec.js --timeout=60000 --workers=1"
 run_step "Phase 200 scorecard final generator and verifier" bash -c "cd accrue_admin && npm run phase200:scorecard"
 run_step "Phase 200 sign-off verifier" bash -c "cd accrue_admin && npm run phase200:signoff"
+run_step "Phase 252 complete subscription story acceptance" npm --prefix accrue_admin run phase252:check
+run_step "Phase 253 focused composition acceptance" node scripts/ci/verify_phase253_compositions.mjs
+run_step "Phase 254 recurring budget check" node scripts/ci/phase254_budget.mjs check

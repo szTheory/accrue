@@ -52,10 +52,18 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
   setup do
     prior = Application.get_env(:accrue, :auth_adapter)
+    prior_step_up_grace_seconds = Application.get_env(:accrue_admin, :step_up_grace_seconds)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
 
     on_exit(fn ->
       Application.put_env(:accrue, :auth_adapter, prior)
+
+      if is_nil(prior_step_up_grace_seconds) do
+        Application.delete_env(:accrue_admin, :step_up_grace_seconds)
+      else
+        Application.put_env(:accrue_admin, :step_up_grace_seconds, prior_step_up_grace_seconds)
+      end
+
       Application.delete_env(:accrue_admin, :expected_step_up_subject_id)
       Application.delete_env(:accrue_admin, :test_actor_id)
     end)
@@ -295,8 +303,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     conn: conn,
     subscription: subscription
   } do
-    long_subscription_id = "sub_" <> String.duplicate("long-identifier-", 12)
-    long_customer_name = String.duplicate("Northstar billing account ", 8)
+    long_subscription_id = "<script>sub_" <> String.duplicate("phase253-", 12) <> "</script>"
+    long_customer_name = "<img src=x>" <> String.duplicate("Northstar billing account ", 8)
 
     subscription
     |> Subscription.changeset(%{
@@ -316,11 +324,16 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    rendered_text = Floki.text(Floki.parse_document!(html))
 
     assert html =~ "Lifecycle"
     assert html =~ "Active"
-    assert html =~ long_subscription_id
-    assert html =~ long_customer_name
+    assert html =~ "&lt;script&gt;"
+    assert html =~ "&lt;img"
+    refute html =~ long_subscription_id
+    refute html =~ long_customer_name
+    assert rendered_text =~ long_subscription_id
+    assert rendered_text =~ long_customer_name
     assert html =~ "Price unavailable"
     assert html =~ "Current period unavailable"
     assert html =~ "Unavailable"
@@ -333,6 +346,18 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert has_element?(view, "[data-ax-action-band]")
     assert has_element?(view, "[data-ax-related-resources]")
     refute html =~ "0 open invoices"
+
+    review =
+      render_submit(view, "prepare_action", %{
+        "action_type" => "pause",
+        "pause_behavior" => "void"
+      })
+
+    review_text = Floki.text(Floki.parse_document!(review))
+    assert review =~ "&lt;script&gt;"
+    assert review =~ "&lt;img"
+    assert review_text =~ long_subscription_id
+    assert review_text =~ long_customer_name
 
     {invoice_rows, _cursor} =
       Invoices.list(
@@ -608,6 +633,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     path = "/billing/subscriptions/#{subscription.id}"
     {:ok, first_view, _html} = live(conn, path)
+    calls_before = Accrue.Processor.Fake.calls()
     render_click(element(first_view, "button[role='menuitem']", "Cancel immediately"))
 
     render_submit(
@@ -625,7 +651,14 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute html =~ "Step-up required"
     refute has_element?(reconnected_view, "[data-role='confirm-action']")
     assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    assert Accrue.Processor.Fake.calls() == calls_before
+    assert TestRepo.get!(Subscription, subscription.id).status == :active
     refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+
+    refute TestRepo.get_by(Event,
+             type: "admin.subscription.action.completed",
+             subject_id: subscription.id
+           )
   end
 
   test "staged subscription confirmation stays inert across detail, return, and reopen navigation",
@@ -636,6 +669,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     path = "/billing/subscriptions/#{subscription.id}"
     {:ok, first_view, _html} = live(conn, path)
+    calls_before = Accrue.Processor.Fake.calls()
 
     render_click(element(first_view, "button[role='menuitem']", "Cancel immediately"))
 
@@ -671,9 +705,18 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     render_click(returned_view, "cancel_pending_action", %{})
     render_click(first_view, "confirm_action", %{})
     assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    assert Accrue.Processor.Fake.calls() == calls_before
+    assert TestRepo.get!(Subscription, subscription.id).status == :active
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+
+    refute TestRepo.get_by(Event,
+             type: "admin.subscription.action.completed",
+             subject_id: subscription.id
+           )
 
     {:ok, _reopened_view, _html} = live(conn, path)
     assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    assert Accrue.Processor.Fake.calls() == calls_before
   end
 
   test "changing the staged action while step-up is open discards the old continuation", %{
@@ -682,6 +725,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    calls_before = Accrue.Processor.Fake.calls()
 
     render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
 
@@ -701,6 +745,13 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
     assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
     assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+    assert Accrue.Processor.Fake.calls() == calls_before
+    assert TestRepo.get!(Subscription, subscription.id).status == :active
+
+    refute TestRepo.get_by(Event,
+             type: "admin.subscription.action.completed",
+             subject_id: subscription.id
+           )
   end
 
   test "possibly submitted timeout stays uncertain and offers only scoped evidence", %{
@@ -767,6 +818,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    calls_before = Accrue.Processor.Fake.calls()
     render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
 
     render_submit(
@@ -785,6 +837,22 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute html =~ "Outcome not confirmed"
     refute has_element?(view, "[data-role='confirm-action']")
     refute html =~ "invalid request"
+
+    cancel_calls =
+      Accrue.Processor.Fake.calls()
+      |> Enum.filter(fn {operation, _args} -> operation == :cancel_subscription end)
+
+    refute Enum.any?(calls_before, fn {operation, _args} -> operation == :cancel_subscription end)
+    assert [{:cancel_subscription, [processor_id, _opts]}] = cancel_calls
+    assert processor_id == subscription.processor_id
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 1
+    assert TestRepo.get!(Subscription, subscription.id).status == :active
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+
+    refute TestRepo.get_by(Event,
+             type: "admin.subscription.action.completed",
+             subject_id: subscription.id
+           )
   end
 
   test "compensation result links only to the scoped replacement and keeps the original", %{
@@ -953,6 +1021,79 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute denied =~ "org_denied"
 
     assert redirect
+  end
+
+  test "missing subscription detail redirects to the safe list without disclosing the id", %{
+    conn: conn
+  } do
+    organization_id = "missing-detail-org-#{System.unique_integer([:positive])}"
+    organization_slug = "missing-detail-#{System.unique_integer([:positive])}"
+
+    Factory.active_subscription(%{
+      owner_type: "Organization",
+      owner_id: organization_id,
+      email: "missing-detail-#{organization_id}@example.test"
+    })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: organization_id,
+        active_organization_slug: organization_slug,
+        admin_organization_ids: [organization_id]
+      )
+
+    assert {:error, {:redirect, %{to: path, flash: %{"error" => denied}}}} =
+             live(conn, "/billing/subscriptions/#{Ecto.UUID.generate()}?org=#{organization_slug}")
+
+    assert path == "/billing/subscriptions?org=#{organization_slug}"
+    assert denied == Copy.Locked.owner_access_denied()
+  end
+
+  test "untrusted return origins preserve only allowed filters inside current organization scope",
+       %{conn: conn} do
+    organization_id = Ecto.UUID.generate()
+    organization_slug = "safe-return-#{System.unique_integer([:positive])}"
+
+    %{subscription: subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: organization_id,
+        email: "safe-return@example.test"
+      })
+
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: organization_id,
+        active_organization_slug: organization_slug,
+        admin_organization_ids: [organization_id]
+      )
+
+    fallback = %{"org" => organization_slug}
+
+    origins = [
+      {"https://foreign.example/billing/subscriptions?org=foreign&view=all", fallback},
+      {"//foreign.example/billing/subscriptions?org=foreign&view=all", fallback},
+      {"/other/subscriptions?view=all", fallback},
+      {"/billing/subscriptions?view=%ZZ", fallback},
+      {"/billing/subscriptions?org=foreign-org&view=all",
+       %{"org" => organization_slug, "view" => "all"}}
+    ]
+
+    for {origin, expected_params} <- origins do
+      route_query = URI.encode_query(%{"org" => organization_slug, "return_to" => origin})
+
+      assert {:ok, view, _html} =
+               live(conn, "/billing/subscriptions/#{subscription.id}?#{route_query}")
+
+      back_href = link_href(view, "Back to subscriptions")
+      parsed = URI.parse(back_href)
+
+      assert parsed.path == "/billing/subscriptions"
+      assert URI.decode_query(parsed.query) == expected_params
+      refute back_href =~ "foreign"
+    end
   end
 
   test "safe action selection opens drawer-hosted form and keeps confirm_action confirmation", %{
@@ -1400,6 +1541,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    calls_before = Accrue.Processor.Fake.calls()
 
     render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
 
@@ -1420,7 +1562,169 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert html =~ "Review the action again"
     refute html =~ "Step-up required"
+    assert Accrue.Processor.Fake.calls() == calls_before
+    assert TestRepo.get!(Subscription, subscription.id).status == :canceled
     refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+
+    refute TestRepo.get_by(Event,
+             type: "admin.subscription.action.completed",
+             subject_id: subscription.id
+           )
+  end
+
+  test "confirmation rejects a replaced processor target before asking for step-up", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_submit(view, "prepare_action", %{"action_type" => "cancel_now"})
+    calls_before = Accrue.Processor.Fake.calls()
+    replacement_processor_id = "sub_phase253_replaced_#{System.unique_integer([:positive])}"
+
+    TestRepo.get!(Subscription, subscription.id)
+    |> Subscription.changeset(%{processor_id: replacement_processor_id})
+    |> TestRepo.update!()
+
+    html = render_click(view, "confirm_action")
+
+    assert html =~ "Review the action again"
+    refute html =~ "Step-up required"
+    assert Accrue.Processor.Fake.calls() == calls_before
+    assert TestRepo.get!(Subscription, subscription.id).status == :active
+    assert TestRepo.get!(Subscription, subscription.id).processor_id == replacement_processor_id
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+
+    refute TestRepo.get_by(Event,
+             type: "admin.subscription.action.completed",
+             subject_id: subscription.id
+           )
+  end
+
+  test "invalid and wrong-subject step-up attempts never continue the staged cancellation", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, "another-subscription")
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    calls_before = Accrue.Processor.Fake.calls()
+
+    render_submit(view, "prepare_action", %{"action_type" => "cancel_now"})
+    assert render_click(view, "confirm_action") =~ "Step-up required"
+
+    invalid_code_html = render_submit(view, "step_up_submit", %{"code" => "000000"})
+    assert invalid_code_html =~ "Step-up verification failed: :invalid_code"
+
+    wrong_subject_html = render_submit(view, "step_up_submit", %{"code" => "123456"})
+    assert wrong_subject_html =~ "Step-up verification failed: :wrong_subject_id"
+    assert Accrue.Processor.Fake.calls() == calls_before
+    assert TestRepo.get!(Subscription, subscription.id).status == :active
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+
+    refute TestRepo.get_by(Event,
+             type: "admin.subscription.action.completed",
+             subject_id: subscription.id
+           )
+
+    denied_step_up_events =
+      TestRepo.all(
+        from(event in Event,
+          where: event.type == "admin.step_up.denied" and event.subject_id == "admin_1"
+        )
+      )
+
+    assert length(denied_step_up_events) == 2
+    assert Enum.all?(denied_step_up_events, &(&1.data["action_type"] == "cancel_now"))
+
+    render_click(view, "step_up_dismiss", %{})
+
+    assert length(TestRepo.all(from(event in Event, where: event.type == "admin.step_up.denied"))) ==
+             2
+
+    assert Accrue.Processor.Fake.calls() == calls_before
+  end
+
+  test "expired step-up freshness prompts again before a second destructive subscription action",
+       %{
+         conn: conn,
+         subscription: subscription
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, subscription.id)
+    Application.put_env(:accrue_admin, :step_up_grace_seconds, 300)
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    render_click(element(view, "button[role='menuitem']", "Comp this subscription"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "comp_subscription", "new_price_id" => "price_basic"}
+    )
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ "Step-up required"
+    compensation = render_submit(view, "step_up_submit", %{"code" => "123456"})
+    assert compensation =~ "Compensation created a replacement subscription."
+    assert TestRepo.get!(Subscription, subscription.id).status == :active
+    Application.put_env(:accrue_admin, :step_up_grace_seconds, 0)
+
+    calls_after_compensation = Accrue.Processor.Fake.calls()
+
+    completed_actions =
+      TestRepo.all(
+        from(event in Event,
+          where:
+            event.type == "admin.subscription.action.completed" and
+              event.subject_id == ^subscription.id
+        )
+      )
+
+    assert Enum.map(completed_actions, & &1.data["action_type"]) == ["comp_subscription"]
+
+    render_click(element(view, "button[role='menuitem']", "Cancel immediately"))
+
+    render_submit(
+      element(
+        view,
+        "[data-ax-overlay-panel][data-presentation='drawer'] form[phx-submit='prepare_action']"
+      ),
+      %{"action_type" => "cancel_now"}
+    )
+
+    assert render_click(element(view, "[data-role='confirm-action']")) =~ "Step-up required"
+    assert Accrue.Processor.Fake.call_count(:cancel_subscription) == 0
+    assert Accrue.Processor.Fake.calls() == calls_after_compensation
+    assert TestRepo.get!(Subscription, subscription.id).status == :active
+    refute TestRepo.get_by(Event, type: "subscription.canceled", subject_id: subscription.id)
+
+    current_completed_actions =
+      TestRepo.all(
+        from(event in Event,
+          where:
+            event.type == "admin.subscription.action.completed" and
+              event.subject_id == ^subscription.id
+        )
+      )
+
+    assert Enum.map(current_completed_actions, & &1.data["action_type"]) == ["comp_subscription"]
+    render_click(view, "step_up_dismiss", %{})
+
+    assert Enum.map(
+             TestRepo.all(
+               from(event in Event,
+                 where:
+                   event.type == "admin.subscription.action.completed" and
+                     event.subject_id == ^subscription.id
+               )
+             ),
+             & &1.data["action_type"]
+           ) == ["comp_subscription"]
+
+    assert Accrue.Processor.Fake.calls() == calls_after_compensation
   end
 
   test "confirmation rejects a changed actor and owner after review", %{conn: conn} do
@@ -1443,6 +1747,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     {:ok, actor_view, _html} =
       live(conn, "/billing/subscriptions/#{subscription.id}?org=stale-review-org")
 
+    calls_before_actor_change = Accrue.Processor.Fake.calls()
+
     render_submit(actor_view, "prepare_action", %{
       "action_type" => "pause",
       "pause_behavior" => "keep_as_draft"
@@ -1453,11 +1759,21 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert actor_html =~ "Review the action again"
     assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+    assert Accrue.Processor.Fake.calls() == calls_before_actor_change
+    assert TestRepo.get!(Subscription, subscription.id).status == :active
+    refute TestRepo.get_by(Event, type: "subscription.paused", subject_id: subscription.id)
+
+    refute TestRepo.get_by(Event,
+             type: "admin.subscription.action.completed",
+             subject_id: subscription.id
+           )
 
     Application.delete_env(:accrue_admin, :test_actor_id)
 
     {:ok, owner_view, _html} =
       live(conn, "/billing/subscriptions/#{subscription.id}?org=stale-review-org")
+
+    calls_before_owner_change = Accrue.Processor.Fake.calls()
 
     render_submit(owner_view, "prepare_action", %{
       "action_type" => "pause",
@@ -1472,6 +1788,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert owner_html =~ "Review the action again"
     assert Accrue.Processor.Fake.call_count(:update_subscription) == 0
+    assert Accrue.Processor.Fake.calls() == calls_before_owner_change
+    assert TestRepo.get!(Subscription, subscription.id).status == :active
     refute TestRepo.get_by(Event, type: "subscription.paused", subject_id: subscription.id)
   end
 

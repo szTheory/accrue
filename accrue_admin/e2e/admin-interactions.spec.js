@@ -1254,3 +1254,266 @@ test.describe("Admin live interaction baseline", () => {
     expect(parsedRows.length).toBeGreaterThan(20);
   });
 });
+
+// Phase 254 UXQ-02 (D-29): the mounted keyboard journey for the guarded subscription job.
+// Every focus wait is an expect.poll (never a fixed sleep) because the Overlay hook restores
+// focus after a LiveView patch, two animation frames later. The recorder rows the older probes
+// write for focus-escaped, escape-not-dismissed and keyboard-flow-incomplete are expectations
+// here, and the recorder report is still written for the journey.
+const { readRegister } = require("./phase254-a11y-probes.js");
+
+const JOURNEY_TRIGGER_TEXT = "Cancel immediately";
+const JOURNEY_MENU_BUTTON_TEXT = "More actions";
+const A11Y_REGISTER_PATH = path.join(__dirname, "a11y-dispositions.json");
+
+// A journey checkpoint that observes a real defect is routed to the 254-12 correction batch the
+// same way an axe finding is: an entry of a11y-dispositions.json names it by the cell id
+// journey::D-29::<checkpoint>. A routed checkpoint must still FAIL here (the entry matches a
+// real defect); once the defect is fixed the entry must be deleted, and the checkpoint is then
+// asserted for real. An absent or unparsable register fails closed.
+function routedJourneyEntry(checkpoint) {
+  const cellId = `journey::D-29::${checkpoint}`;
+  return readRegister(A11Y_REGISTER_PATH).entries.find((entry) => entry.cell_ids.includes(cellId)) || null;
+}
+const JOURNEY_DRAWER = "#ax-overlay-root [data-presentation='drawer']";
+
+async function activeLabel(page) {
+  return page.evaluate(() => {
+    const element = document.activeElement;
+    if (!element || element === document.body) return "body";
+    const name = element.getAttribute("aria-label") || (element.innerText || element.value || "").trim().replace(/\s+/g, " ").slice(0, 80);
+    return `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}|${name}`;
+  });
+}
+
+// Presses Tab (or Shift+Tab) until the focused element matches the selector and, optionally,
+// contains the text. A target that cannot be reached by keyboard is keyboard-flow-incomplete.
+async function tabUntilFocused(page, { selector, text, reverse = false, limit = 80, label }) {
+  const matches = () => page.evaluate(({ selector: css, text: needle }) => {
+    const element = document.activeElement;
+    return Boolean(element && element !== document.body && element.matches(css) && (!needle || (element.innerText || element.value || "").includes(needle)));
+  }, { selector, text });
+  for (let step = 0; step < limit; step += 1) {
+    if (await matches()) return step;
+    await page.keyboard.press(reverse ? "Shift+Tab" : "Tab");
+  }
+  throw new Error(`keyboard-flow-incomplete: ${label} was not reached by keyboard in ${limit} steps; focus is on ${await activeLabel(page)}`);
+}
+
+async function assertFocusInside(page, containerSelector, label, timeout = 5_000) {
+  await expect.poll(
+    () => page.evaluate((css) => {
+      const container = document.querySelector(css);
+      const active = document.activeElement;
+      return Boolean(container && active && active !== document.body && container.contains(active));
+    }, containerSelector),
+    { message: `focus-escaped: ${label} must keep focus inside ${containerSelector}`, timeout }
+  ).toBe(true);
+}
+
+async function assertFocusNotBody(page, label) {
+  await expect.poll(() => activeLabel(page), { message: `${label}: focus must not rest on body` }).not.toBe("body");
+}
+
+async function drawerFocusables(page) {
+  return page.evaluate((css) => {
+    const drawer = document.querySelector(css);
+    const candidates = [...drawer.querySelectorAll("a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])")];
+    return candidates.filter((element) => {
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0 && !element.closest("[hidden], [aria-hidden=true]");
+    }).length;
+  }, JOURNEY_DRAWER);
+}
+
+// Focus must come back to the invoking control after the drawer closes: the Cancel immediately
+// item while the action menu stays open, or the "More actions" button that owns it when the menu
+// closed (the WAI-ARIA menu-button pattern). Anything else, page or body, is a lost position.
+// Returns after the checkpoint has been decided against the register; a routed defect is
+// recorded and recovered from so the rest of the journey still runs.
+async function checkpointFocusRestored(page, recorder, checkpoint) {
+  const isTrigger = (label) => label.includes(JOURNEY_TRIGGER_TEXT) || label.includes(JOURNEY_MENU_BUTTON_TEXT);
+  let restored = true;
+  try {
+    await expect.poll(async () => isTrigger(await activeLabel(page)), { timeout: 5_000 }).toBe(true);
+  } catch (_error) {
+    restored = false;
+  }
+  const routed = routedJourneyEntry(checkpoint);
+  const actual = await activeLabel(page);
+  recorder.observe({
+    interaction_class: "focus-trap-restore",
+    surface: "subscription cancel drawer",
+    target_selector: JOURNEY_DRAWER,
+    expected: `Focus returns to the ${JOURNEY_TRIGGER_TEXT} trigger or its ${JOURNEY_MENU_BUTTON_TEXT} button (${checkpoint}).`,
+    actual: `active=${actual}; restored=${restored}; routed=${routed ? routed.id : "none"}`,
+    assertions: ["focus-restore", "expect.poll"],
+    overlay_tags: ["focus-restore"],
+    coverage_status: restored ? "covered" : "gap",
+    failure_kind: restored ? null : "focus-not-restored",
+  });
+  if (routed) {
+    expect(restored, `${checkpoint} is routed as ${routed.id} (${routed.follow_up_assertion_id}) but focus is restored; delete the routed entry`).toBe(false);
+    // Recover to the state a working restore leaves, so the journey continues from the trigger.
+    await page.locator("[data-ax-action-overflow-menu] summary").focus();
+    return false;
+  }
+  expect(restored, `${checkpoint}: focus must return to the ${JOURNEY_TRIGGER_TEXT} trigger or its ${JOURNEY_MENU_BUTTON_TEXT} button, but is on ${actual}`).toBe(true);
+  return true;
+}
+
+// Re-activates the trigger from wherever focus was restored (or recovered) to.
+async function reopenFromTrigger(page) {
+  const label = await activeLabel(page);
+  if (!label.includes(JOURNEY_TRIGGER_TEXT)) {
+    const open = await page.locator("[data-ax-action-overflow-menu]").evaluate((menu) => menu.hasAttribute("open"));
+    if (!open) await page.keyboard.press("Enter");
+    await tabUntilFocused(page, { selector: "[role=menuitem], a, button", text: JOURNEY_TRIGGER_TEXT, label: `the ${JOURNEY_TRIGGER_TEXT} trigger`, limit: 30 });
+  }
+  await page.keyboard.press("Enter");
+  await expect(page.locator(JOURNEY_DRAWER).first()).toBeVisible();
+}
+
+async function openCancelNowFromKeyboard(page) {
+  await tabUntilFocused(page, { selector: "[data-ax-action-overflow-menu] summary", label: "the action menu" });
+  await page.keyboard.press("Enter");
+  await tabUntilFocused(page, { selector: "[role=menuitem], a, button", text: JOURNEY_TRIGGER_TEXT, label: `the ${JOURNEY_TRIGGER_TEXT} trigger`, limit: 30 });
+  const trigger = await activeLabel(page);
+  await page.keyboard.press("Enter");
+  await expect(page.locator(JOURNEY_DRAWER).first()).toBeVisible();
+  return trigger;
+}
+
+test.describe("D-29 mounted keyboard journey", () => {
+  test.beforeEach(async ({ request }) => {
+    await reset(request);
+  });
+
+  test("D-29 keyboard journey: list to drawer to step-up and back", async ({ page, request }, testInfo) => {
+    test.setTimeout(180_000);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    const fixture = await seed(request, "phase191-matrix");
+    // The at-risk subscription is in the default work-queue lens and still allows Cancel immediately.
+    const subscriptionId = fixture.at_risk_sub_id;
+    const recorder = makeRecorder(testInfo.project.name);
+
+    // 1. List, filtered by keyboard: the filter must still be in force when the journey returns.
+    await login(page, "/billing/subscriptions");
+    await expect(page.locator("#main-content h1")).toBeVisible();
+    const rowLinkSelector = `a[href^="/billing/subscriptions/${subscriptionId}"]`;
+    const visibleRowLink = page.locator(`${rowLinkSelector}:visible`).first();
+    await expect(visibleRowLink).toBeVisible();
+    const customerName = (await visibleRowLink.innerText()).trim();
+    expect(customerName.length).toBeGreaterThan(0);
+    const search = page.getByLabel("Search subscriptions");
+    await search.focus();
+    await page.keyboard.type(customerName);
+    await page.keyboard.press("Enter");
+    await expect.poll(() => new URL(page.url()).searchParams.get("q"), { message: "the keyboard filter reaches the URL" }).toBe(customerName);
+    await expect(visibleRowLink).toBeVisible();
+    const filtered = new URL(page.url());
+
+    // 2. Row link by keyboard, then the detail heading.
+    await search.focus();
+    await tabUntilFocused(page, { selector: rowLinkSelector, label: "the row link" });
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(new RegExp(`/billing/subscriptions/${subscriptionId}`));
+    await expect(page.locator("#main-content h1")).toBeVisible();
+
+    // 3. Cancel now trigger and the drawer.
+    const trigger = await openCancelNowFromKeyboard(page);
+    expect(trigger).toContain(JOURNEY_TRIGGER_TEXT);
+    const drawer = page.locator(JOURNEY_DRAWER).first();
+    await assertFocusInside(page, JOURNEY_DRAWER, "drawer open");
+    await assertFocusNotBody(page, "drawer open");
+
+    // 4. Tab and Shift+Tab across N+1 stops, wrapping, never leaving the drawer.
+    const stops = await drawerFocusables(page);
+    expect(stops, "the drawer has keyboard stops").toBeGreaterThan(0);
+    const forward = [await activeLabel(page)];
+    for (let step = 0; step < stops + 1; step += 1) {
+      await page.keyboard.press("Tab");
+      await assertFocusInside(page, JOURNEY_DRAWER, `Tab ${step + 1} of ${stops + 1}`);
+      forward.push(await activeLabel(page));
+    }
+    expect(forward[stops], "Tab wraps from the last stop to the first").toBe(forward[0]);
+    const backward = [await activeLabel(page)];
+    for (let step = 0; step < stops + 1; step += 1) {
+      await page.keyboard.press("Shift+Tab");
+      await assertFocusInside(page, JOURNEY_DRAWER, `Shift+Tab ${step + 1} of ${stops + 1}`);
+      backward.push(await activeLabel(page));
+    }
+    expect(backward[stops], "Shift+Tab wraps from the first stop to the last").toBe(backward[0]);
+    recorder.observe({
+      interaction_class: "focus-trap-restore",
+      surface: "subscription cancel drawer",
+      target_selector: JOURNEY_DRAWER,
+      expected: "Tab and Shift+Tab wrap inside the drawer across N+1 stops.",
+      actual: `stops=${stops}; forward=${forward.join(" > ")}`,
+      assertions: ["focus-trap", "Tab", "Shift+Tab", "wrap"],
+      overlay_tags: ["focus-trap"],
+    });
+
+    // Positive control: with the trap's own focus listener held back, focus forced outside the
+    // drawer must make the same assertion fail, so a passing run above is not vacuous.
+    await page.evaluate(() => {
+      const outside = document.createElement("button");
+      outside.id = "phase254-outside-control";
+      outside.textContent = "outside the drawer";
+      document.body.appendChild(outside);
+      window.__phase254Hold = (event) => event.stopImmediatePropagation();
+      window.addEventListener("focusin", window.__phase254Hold, true);
+      outside.focus();
+    });
+    await expect(assertFocusInside(page, JOURNEY_DRAWER, "forced escape", 600)).rejects.toThrow(/focus-escaped/);
+    await page.evaluate(() => {
+      window.removeEventListener("focusin", window.__phase254Hold, true);
+      delete window.__phase254Hold;
+      document.getElementById("phase254-outside-control")?.remove();
+    });
+    await page.keyboard.press("Tab");
+    await assertFocusInside(page, JOURNEY_DRAWER, "trap recovers after the control");
+
+    // 5. Escape dismisses the drawer and restores focus to the trigger.
+    await page.keyboard.press("Escape");
+    await expect(drawer, "escape-not-dismissed").toBeHidden();
+    await checkpointFocusRestored(page, recorder, "escape-restores-focus");
+
+    // 6. Reopen from the restored trigger; Back to subscription dismisses and restores again.
+    await reopenFromTrigger(page);
+    await assertFocusInside(page, JOURNEY_DRAWER, "drawer reopened");
+    await tabUntilFocused(page, { selector: "button, a", text: "Back to subscription", label: "Back to subscription" });
+    await page.keyboard.press("Enter");
+    await expect(page.locator(JOURNEY_DRAWER).first()).toBeHidden();
+    await checkpointFocusRestored(page, recorder, "back-restores-focus");
+
+    // 7. Restage by keyboard and reach step-up with focus in the code field.
+    await reopenFromTrigger(page);
+    await tabUntilFocused(page, { selector: '[data-role="cancel-now-form"] button, [data-role="cancel-now-form"] [type=submit]', label: "the staging control" });
+    await page.keyboard.press("Enter");
+    await tabUntilFocused(page, { selector: '[data-role="confirm-action"]', label: "Confirm" });
+    await page.keyboard.press("Enter");
+    const stepUp = page.locator("#accrue-admin-step-up-dialog");
+    await expect(stepUp).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.activeElement?.id), { message: "focus lands in #step-up-code" }).toBe("step-up-code");
+    await assertFocusNotBody(page, "step-up open");
+
+    // 8. Enter submits; the result is announced in a role=status region.
+    await page.keyboard.type("123456");
+    await page.keyboard.press("Enter");
+    const result = page.locator('[data-role="subscription-action-result"]');
+    await expect(result).toBeVisible();
+    await expect(result).toHaveAttribute("role", "status");
+    await assertFocusNotBody(page, "after the action result");
+
+    // 9. Back to the list by keyboard: the filter is preserved.
+    await tabUntilFocused(page, { selector: ".ax-detail-back-link a", label: "the return link" });
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/billing\/subscriptions(\?|$)/);
+    await expect.poll(() => new URL(page.url()).searchParams.get("q"), { message: "the list filter is preserved on return" }).toBe(filtered.searchParams.get("q"));
+
+    const outputPath = recorder.write();
+    expect(fs.existsSync(outputPath)).toBe(true);
+  });
+});

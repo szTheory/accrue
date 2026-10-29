@@ -124,99 +124,125 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
-        <PageHeader.page_header
-          breadcrumb_group="Billing"
-          breadcrumbs={[
-            %{label: Copy.subscriptions_index_breadcrumb()}
-          ]}
-          title={Copy.subscriptions_index_breadcrumb()}
-        >
-          <:description>
-            <p class="ax-body"><%= Copy.subscriptions_route_line() %></p>
-          </:description>
-          <:stat_strip>
-            <StatStrip.stat_strip label={Copy.subscriptions_kpi_section_aria_label()}>
-              <:stat label="Subscriptions" value={to_string(@summary.total_count)} />
-              <:stat label="Past due" value={to_string(@summary.past_due_count)} tone={if @summary.past_due_count > 0, do: "amber"} />
-              <:stat label="Ending" value={to_string(@summary.canceling_count)} />
-            </StatStrip.stat_strip>
-          </:stat_strip>
-          <:filter_toolbar>
-            <DataTable.filter_toolbar
-              id="subscriptions"
-              filter_fields={subscription_filter_fields()}
-              filter_params={filter_params(@params)}
-              path={@table_path}
-              clear_href={@table_path}
-              clear_visible={reset_visible?(@params, @summary)}
-            />
-          </:filter_toolbar>
-        </PageHeader.page_header>
-
-        <FlashGroup.flash_group flashes={flash_messages(@flash)} />
-
-        <.live_component
-          module={DataTable}
-          row_label={Copy.subscriptions_list_result_label_pair()}
-          id="subscriptions"
-          query_module={Subscriptions}
+        <.subscriptions_collection
+          admin_mount_path={@admin_mount_path}
           current_owner_scope={@current_owner_scope}
-          path={@table_path}
+          table_path={@table_path}
           params={@params}
-          list_id="subscriptions"
-          list_state={list_state(@params, @summary)}
-          empty_reason={empty_reason(@params, @summary)}
-          loading_fixture={phase196_loading_fixture?(@params)}
-          loading_label={list_state_copy(:loading).heading}
-          render_filter_toolbar={false}
-          clear_href={@table_path}
-          columns={[
-            %{width: 34,
-              label: "Subscription",
-              render: &identity_cell(&1, @admin_mount_path, @current_owner_scope, @params, :table)
-            },
-            %{width: 14, label: "Status", render: &state_cell/1},
-            %{width: 18, label: "Plan", render: &plan_amount_cell/1},
-            %{width: 18, label: "Renews / ends", render: fn row -> time_cell(row, :table) end},
-            %{width: 16,
-              label: Copy.billing_owner_tax_label(),
-              render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
-            }
-          ]}
-          card_title={&identity_cell(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
-          card_fields={[
-            %{label: "Status", render: &state_cell/1},
-            %{label: "Plan", render: &plan_amount_cell/1},
-            %{label: "Renews / ends", render: fn row -> time_cell(row, :card) end},
-            %{
-              label: Copy.billing_owner_tax_label(),
-              render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
-            }
-          ]}
-          filter_fields={subscription_filter_fields()}
-          empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
-          empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.subscriptions_list_result_label_pair(), 1), else: "Reset filters"}
-          empty_title={empty_title(@params, @summary)}
-          empty_copy={empty_copy(@params, @summary)}
-          filtered_empty_title={empty_title(@params, @summary)}
-          filtered_empty_copy={empty_copy(@params, @summary)}
-        >
-          <:list_status :let={status}>
-            <DataTable.view_nav label="Subscription view" items={[
-              %{label: "Past due or ending", current: queue_active?(@params), href: view_href(@params, @table_path, default_queue_status())},
-              %{label: "All subscriptions", current: is_nil(@params["status"]), href: view_href(@params, @table_path, nil)}
-            ]} />
-            <FilterChipBar.filter_chip_bar
-              items={work_queue_chips(@params, @table_path, @summary)}
-              label="Work queue" compact={true}
-              result_count={status.visible_count}
-              result_label={Copy.subscriptions_list_result_label_pair()}
-              clear_all_label={Copy.data_table_clear_filters_label()}
-            />
-          </:list_status>
-        </.live_component>
+          summary={@summary}
+          flash={@flash}
+          query_module={Subscriptions}
+        />
       </section>
     </AppShell.app_shell>
+    """
+  end
+
+  attr(:admin_mount_path, :string, default: "/billing")
+  attr(:current_owner_scope, :map, required: true)
+  attr(:table_path, :string, required: true)
+  attr(:params, :map, default: %{})
+  attr(:summary, :map, required: true)
+  attr(:flash, :map, default: %{})
+  attr(:query_module, :atom, default: nil)
+  attr(:limit, :integer, default: nil)
+
+  def subscriptions_collection(assigns) do
+    assigns = assign(assigns, :query_module, assigns[:query_module] || Subscriptions)
+
+    ~H"""
+    <PageHeader.page_header
+      breadcrumb_group="Billing"
+      breadcrumbs={[
+        %{label: Copy.subscriptions_index_breadcrumb()}
+      ]}
+      title={Copy.subscriptions_index_breadcrumb()}
+    >
+      <:description>
+        <p class="ax-body"><%= Copy.subscriptions_route_line() %></p>
+      </:description>
+      <:stat_strip>
+        <StatStrip.stat_strip label={Copy.subscriptions_kpi_section_aria_label()}>
+          <:stat label="Subscriptions" value={to_string(@summary.total_count)} />
+          <:stat label="Past due" value={to_string(@summary.past_due_count)} tone={if @summary.past_due_count > 0, do: "amber"} />
+          <:stat label="Ending" value={to_string(@summary.canceling_count)} />
+        </StatStrip.stat_strip>
+      </:stat_strip>
+      <:filter_toolbar>
+        <DataTable.filter_toolbar
+          id="subscriptions"
+          filter_fields={subscription_filter_fields()}
+          filter_params={filter_params(@params)}
+          path={@table_path}
+          clear_href={@table_path}
+          clear_visible={reset_visible?(@params, @summary)}
+        />
+      </:filter_toolbar>
+    </PageHeader.page_header>
+
+    <FlashGroup.flash_group flashes={flash_messages(@flash)} />
+
+    <.live_component
+      module={DataTable}
+      row_label={Copy.subscriptions_list_result_label_pair()}
+      id="subscriptions"
+      query_module={@query_module}
+      current_owner_scope={@current_owner_scope}
+      path={@table_path}
+      params={@params}
+      list_id="subscriptions"
+      list_state={list_state(@params, @summary)}
+      empty_reason={empty_reason(@params, @summary)}
+      loading_fixture={phase196_loading_fixture?(@params)}
+      loading_label={list_state_copy(:loading).heading}
+      render_filter_toolbar={false}
+      clear_href={@table_path}
+      limit={@limit}
+      columns={[
+        %{width: 34,
+          label: "Subscription",
+          render: &identity_cell(&1, @admin_mount_path, @current_owner_scope, @params, :table)
+        },
+        %{width: 14, label: "Status", render: &state_cell/1},
+        %{width: 18, label: "Plan", render: &plan_amount_cell/1},
+        %{width: 18, label: "Renews / ends", render: fn row -> time_cell(row, :table) end},
+        %{width: 16,
+          label: Copy.billing_owner_tax_label(),
+          render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
+        }
+      ]}
+      card_title={&identity_cell(&1, @admin_mount_path, @current_owner_scope, @params, :card)}
+      card_fields={[
+        %{label: "Status", render: &state_cell/1},
+        %{label: "Plan", render: &plan_amount_cell/1},
+        %{label: "Renews / ends", render: fn row -> time_cell(row, :card) end},
+        %{
+          label: Copy.billing_owner_tax_label(),
+          render: &billing_signals_cell(&1, @admin_mount_path, @current_owner_scope)
+        }
+      ]}
+      filter_fields={subscription_filter_fields()}
+      empty_action_href={if empty_reason(@params, @summary) == "queue", do: clear_all_href(@params, @table_path), else: @table_path}
+      empty_action_label={if empty_reason(@params, @summary) == "queue", do: "View all " <> elem(Copy.subscriptions_list_result_label_pair(), 1), else: "Reset filters"}
+      empty_title={empty_title(@params, @summary)}
+      empty_copy={empty_copy(@params, @summary)}
+      filtered_empty_title={empty_title(@params, @summary)}
+      filtered_empty_copy={empty_copy(@params, @summary)}
+    >
+      <:list_status :let={status}>
+        <DataTable.view_nav label="Subscription view" items={[
+          %{label: "Past due or ending", current: queue_active?(@params), href: view_href(@params, @table_path, default_queue_status())},
+          %{label: "All subscriptions", current: is_nil(@params["status"]), href: view_href(@params, @table_path, nil)}
+        ]} />
+        <FilterChipBar.filter_chip_bar
+          items={work_queue_chips(@params, @table_path, @summary)}
+          label="Work queue" compact={true}
+          result_count={status.visible_count}
+          result_label={Copy.subscriptions_list_result_label_pair()}
+          clear_all_label={Copy.data_table_clear_filters_label()}
+        />
+      </:list_status>
+    </.live_component>
     """
   end
 
@@ -302,7 +328,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       <:primary><.link href={@subscription_href} class="ax-link"><%= @customer_label %></.link></:primary>
       <:secondary>
         <IdBadge.id_badge id={@badge_id} id_value={to_string(@subscription_id)} label="Copy subscription ID" copy_label="subscription ID" variant="plain" />
-        <.link href={@customer_href} class="ax-label ax-muted">Customer details</.link>
+        <.link href={@customer_href} class="ax-label ax-muted" aria-label={"Customer details for #{@customer_label}"}>Customer details</.link>
       </:secondary>
     </DataTable.identity_cell>
     """

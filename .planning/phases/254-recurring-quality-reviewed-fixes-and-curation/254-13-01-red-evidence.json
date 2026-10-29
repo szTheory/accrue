@@ -1,0 +1,53 @@
+{
+  "commit": "0f7b2b0145f08be2ec3ea69e4152cf9000e33343",
+  "spec_path": "accrue_admin/test/accrue_admin/dev/subscription_action_copy_test.exs",
+  "spec_sha256": "324db9960f6713671fa6ace3a4162942990e1272368916a91a212f67cb5dd93c",
+  "commands": [
+    {
+      "command": "node scripts/dev/phase252_lab.mjs exec --lane admin-test -- sh -c \"cd accrue_admin && MIX_ENV=test mix test test/accrue_admin/dev/subscription_action_copy_test.exs\"",
+      "exit_code": 2
+    }
+  ],
+  "expect_fail": [
+    "DR-254-05"
+  ],
+  "expect_pass": [],
+  "failures": [
+    {
+      "test": "DR-254-05 rendered result: the routed page renders the owner label and href in the result region",
+      "key": "DR-254-05",
+      "finding_id": "DR-254-05",
+      "expected": "true",
+      "actual": "false"
+    },
+    {
+      "test": "DR-254-05 literal guard: the label string exists in copy.ex only, and the scan is shown able to find a seeded copy",
+      "key": "DR-254-05",
+      "finding_id": "DR-254-05",
+      "expected": "[{\"accrue_admin/lib/accrue_admin/copy.ex\", 1}]",
+      "actual": "["
+    },
+    {
+      "test": "DR-254-05 label owner: Copy owns the result link label and the story result uses it",
+      "key": "DR-254-05",
+      "finding_id": "DR-254-05",
+      "expected": "true",
+      "actual": "false"
+    },
+    {
+      "test": "DR-254-05 href owner: SubscriptionLive owns the scoped activity path and the story result uses it",
+      "key": "DR-254-05",
+      "finding_id": "DR-254-05",
+      "expected": "true",
+      "actual": "false"
+    },
+    {
+      "test": "DR-254-05 production callers: the LiveView and the story adapter call both owners and keep no copy of either",
+      "key": "DR-254-05",
+      "finding_id": "DR-254-05",
+      "expected": "true",
+      "actual": "false"
+    }
+  ],
+  "passed": []
+}

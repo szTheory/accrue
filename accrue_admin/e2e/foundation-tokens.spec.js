@@ -1,4 +1,9 @@
 const { test, expect } = require("@playwright/test");
+// Phase 254 UXQ-02 (D-27): one alpha-correct colour implementation. The former local parseColor
+// dropped the alpha channel of rgba() and of color(srgb ... / a), so a translucent foreground
+// read as opaque and passed contrast it does not render with. contrastRatio composites a
+// translucent foreground over its background before measuring.
+const { contrastRatio, parseColor } = require("./phase254-a11y-probes.js");
 
 const statusSolidTokenExamples = [
   "--ax-status-success-on-solid",
@@ -10,32 +15,6 @@ const statusSolidTokenExamples = [
 
 async function login(page, target = "/billing") {
   await page.goto(`/__e2e__/login?to=${encodeURIComponent(target)}`);
-}
-
-function parseColor(value) {
-  const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([0-9.]+))?\)/);
-  if (match) return match.slice(1, 4).map(Number);
-  // Modern Chrome serializes color-mix()/relative-color results as
-  // `color(srgb r g b [/ a])` with 0–1 float channels. The reign adopted
-  // color-mix() for accent/focus tokens, so accept this form too.
-  const srgb = value.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/i);
-  if (srgb) return srgb.slice(1, 4).map((channel) => Math.round(Number(channel) * 255));
-  throw new Error(`Unsupported color: ${value}`);
-}
-
-function relativeLuminance(rgb) {
-  const [r, g, b] = rgb.map((channel) => {
-    const value = channel / 255;
-    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-function contrastRatio(foreground, background) {
-  const [lighter, darker] = [relativeLuminance(foreground), relativeLuminance(background)].sort(
-    (a, b) => b - a
-  );
-  return (lighter + 0.05) / (darker + 0.05);
 }
 
 function expectContrastAtLeast(foreground, background, min, label) {

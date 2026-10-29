@@ -1,0 +1,10 @@
+{
+  "command": "cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_manifest_test.exs",
+  "exitCode": 2,
+  "targetTest": "test compiled subscription story manifest API is available",
+  "targetFile": "subscription_manifest_test.exs",
+  "expected": "The compiled subscription Storybook backend exposes a production-backed manifest generator for its actual declared subscription variations.",
+  "actual": "The named target assertion failed because AccrueAdmin.Storybook.SubscriptionManifest is not available in the compiled dev/test support path.",
+  "output": "TAP version 13\nnot ok 1 - test compiled subscription story manifest API is available\n1..1\n",
+  "semanticAssessment": "Accepted as RED: the complete TAP report shows the named target executed and failed on its direct assertion that the required manifest owner is loadable. The test did not fail during setup, compilation, test discovery, or fixture loading; the missing module is the intended unimplemented behavior. The command used --no-start and the test assertion confirmed that no Repo process was running."
+}

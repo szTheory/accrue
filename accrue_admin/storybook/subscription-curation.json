@@ -1,0 +1,725 @@
+{
+  "amendments": [
+    {
+      "amended": "15 stays alive as the frozen_baseline fixture positive control; the live Phase 252 count is derived from the ledger (frozen baseline minus retired). After the D-40 retirement of subscription_detail||populated full mode is 14 Phase 252 cells and 151 Phase 253 cells.",
+      "decisions": [
+        "D-06",
+        "D-14",
+        "D-39",
+        "D-40"
+      ],
+      "evidence": [
+        {
+          "marker": "function validateRenderResults",
+          "path": "scripts/ci/verify_phase252_stories.mjs"
+        },
+        {
+          "marker": "function validateBrowser",
+          "path": "scripts/ci/generate_phase252_acceptance.mjs"
+        },
+        {
+          "marker": "function browserBindings",
+          "path": "scripts/ci/phase252_reporters.mjs"
+        },
+        {
+          "marker": "pooled cells and incomplete UI or edge predicates are rejected",
+          "path": "scripts/ci/generate_phase252_acceptance.test.mjs"
+        },
+        {
+          "marker": "generated guide preserves Phase 253 compiled routes",
+          "path": "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs"
+        }
+      ],
+      "id": "AMD-254-01",
+      "original": "D-06/D-14 pin the full-mode browser counts as the literals 15 Phase 252 cells (12 canonical, 3 compatibility) and 151 Phase 253 cells.",
+      "owner_ack": {
+        "date": "2026-10-28",
+        "status": "owner-accepted at plan time"
+      },
+      "rationale": "D-39 locks that the pinned literals are derived from the ledger as an explicit amendment; keeping 15 as a literal would make the D-40 duplicate retirement impossible without weakening a gate, while deriving the count keeps every skip, retry and flaky rejection and the 12 canonical cells intact.",
+      "record_ids": [
+        "CUR-254-06"
+      ]
+    }
+  ],
+  "current": {
+    "compatibility_ids": [
+      "braintree_pruned",
+      "dunning_active"
+    ],
+    "entries": 5,
+    "kitchen_test_digests": {
+      "accrue_admin/e2e/kitchen-banner.spec.js": "571441982d7a944b40624923189fdcb6a04664adf2d4c3d91c7937f5b1502b64",
+      "accrue_admin/test/accrue_admin/dev/component_group_registry_test.exs": "cc8902bf54c3c86f1988bf83d477778ca8e948da6c5a146b9aab09c2e552bd0a",
+      "accrue_admin/test/accrue_admin/dev/component_kitchen_live_test.exs": "dc838913beebdb0c3f5752d69f803b7ea0d07336368581a0ca667544045206af",
+      "accrue_admin/test/accrue_admin/dev/component_registry_test.exs": "ece76a9f5cb66ae79eaa1ca0bdc0b5f0471e725a1c39f24149e1cac64b630797"
+    },
+    "registry": {
+      "entry_count": 42,
+      "family_count": 30,
+      "specimen_count": 75
+    }
+  },
+  "frozen_baseline": {
+    "compatibility_ids": [
+      "braintree_pruned",
+      "dunning_active",
+      "populated"
+    ],
+    "entries": 6,
+    "kitchen_test_digests": {
+      "accrue_admin/e2e/kitchen-banner.spec.js": "571441982d7a944b40624923189fdcb6a04664adf2d4c3d91c7937f5b1502b64",
+      "accrue_admin/test/accrue_admin/dev/component_group_registry_test.exs": "cc8902bf54c3c86f1988bf83d477778ca8e948da6c5a146b9aab09c2e552bd0a",
+      "accrue_admin/test/accrue_admin/dev/component_kitchen_live_test.exs": "dc838913beebdb0c3f5752d69f803b7ea0d07336368581a0ca667544045206af",
+      "accrue_admin/test/accrue_admin/dev/component_registry_test.exs": "ece76a9f5cb66ae79eaa1ca0bdc0b5f0471e725a1c39f24149e1cac64b630797"
+    },
+    "manifest_sha256": "e321f5210f3d2e1604eb4f14e52a67dc52362d35f400309ea5247ee61164adbf",
+    "registry": {
+      "entry_count": 42,
+      "family_count": 30,
+      "specimen_count": 75
+    },
+    "source_commit": "986f68b71bae643ce24f0906c39d072fe5ea117b",
+    "subject_sources": [
+      "storybook/components/action_menu.story.exs",
+      "storybook/components/detail.story.exs",
+      "storybook/components/overlay.story.exs",
+      "storybook/components/page_header.story.exs",
+      "storybook/phase252-manifest.json"
+    ],
+    "subjects": [
+      {
+        "source_path": "storybook/components/action_menu.story.exs",
+        "story_path": "/components/action_menu",
+        "variation_id": "danger"
+      },
+      {
+        "source_path": "storybook/components/action_menu.story.exs",
+        "story_path": "/components/action_menu",
+        "variation_id": "default"
+      },
+      {
+        "source_path": "storybook/components/action_menu.story.exs",
+        "story_path": "/components/action_menu",
+        "variation_id": "focus"
+      },
+      {
+        "source_path": "storybook/components/action_menu.story.exs",
+        "story_path": "/components/action_menu",
+        "variation_id": "open"
+      },
+      {
+        "source_path": "storybook/components/action_menu.story.exs",
+        "story_path": "/components/action_menu",
+        "variation_id": "provider_pruned"
+      },
+      {
+        "source_path": "storybook/components/detail.story.exs",
+        "story_path": "/components/detail",
+        "variation_id": "change_actions"
+      },
+      {
+        "source_path": "storybook/components/detail.story.exs",
+        "story_path": "/components/detail",
+        "variation_id": "long_labels"
+      },
+      {
+        "source_path": "storybook/components/detail.story.exs",
+        "story_path": "/components/detail",
+        "variation_id": "read_only"
+      },
+      {
+        "source_path": "storybook/components/detail.story.exs",
+        "story_path": "/components/detail",
+        "variation_id": "view_actions"
+      },
+      {
+        "source_path": "storybook/components/overlay.story.exs",
+        "story_path": "/components/overlay",
+        "variation_id": "drawer_desktop"
+      },
+      {
+        "source_path": "storybook/components/overlay.story.exs",
+        "story_path": "/components/overlay",
+        "variation_id": "drawer_mobile"
+      },
+      {
+        "source_path": "storybook/components/overlay.story.exs",
+        "story_path": "/components/overlay",
+        "variation_id": "modal_shell"
+      },
+      {
+        "source_path": "storybook/components/overlay.story.exs",
+        "story_path": "/components/overlay",
+        "variation_id": "popover_shell"
+      },
+      {
+        "source_path": "storybook/components/overlay.story.exs",
+        "story_path": "/components/overlay",
+        "variation_id": "reduced_motion"
+      },
+      {
+        "source_path": "storybook/components/page_header.story.exs",
+        "story_path": "/components/page_header",
+        "variation_id": "actions"
+      },
+      {
+        "source_path": "storybook/components/page_header.story.exs",
+        "story_path": "/components/page_header",
+        "variation_id": "combined_controls"
+      },
+      {
+        "source_path": "storybook/components/page_header.story.exs",
+        "story_path": "/components/page_header",
+        "variation_id": "default"
+      },
+      {
+        "source_path": "storybook/components/page_header.story.exs",
+        "story_path": "/components/page_header",
+        "variation_id": "filter_toolbar"
+      },
+      {
+        "source_path": "storybook/components/page_header.story.exs",
+        "story_path": "/components/page_header",
+        "variation_id": "long_content"
+      },
+      {
+        "source_path": "storybook/components/page_header.story.exs",
+        "story_path": "/components/page_header",
+        "variation_id": "stat_strip"
+      },
+      {
+        "source_path": "storybook/phase252-manifest.json",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "active"
+      },
+      {
+        "source_path": "storybook/phase252-manifest.json",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "braintree_pruned"
+      },
+      {
+        "source_path": "storybook/phase252-manifest.json",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "dunning_active"
+      },
+      {
+        "source_path": "storybook/phase252-manifest.json",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "incomplete_evidence"
+      },
+      {
+        "source_path": "storybook/phase252-manifest.json",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "populated"
+      },
+      {
+        "source_path": "storybook/phase252-manifest.json",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "scheduled_cancellation"
+      }
+    ],
+    "subjects_sha256": "1082c32dfd875980f87ca450f77bbe70c26c039d6c61c429a60aaa6ac2a80905"
+  },
+  "records": [
+    {
+      "disposition": "retain",
+      "id": "CUR-254-01",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "Detail.summary_list/1 keeps its semantic description-list rows for read-only and long values",
+          "test_ref": "accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders a semantic summary-list dl with read-only and long value rows"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-04-01",
+        "origin_commit": "986f68b71bae643ce24f0906c39d072fe5ea117b"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "def summary_list(assigns) do",
+            "path": "accrue_admin/lib/accrue_admin/components/detail.ex"
+          },
+          {
+            "marker": "summary_list_story",
+            "path": "storybook/components/detail.story.exs"
+          }
+        ],
+        "owner": "AccrueAdmin.Components.Detail.summary_list/1",
+        "state": "reachable"
+      },
+      "reason": "Only Storybook coverage of the Detail.summary_list/1 primitive API (read-only, change/view action and long-label rows). The subscription story renders it only through the whole subscription area.",
+      "reason_class": null,
+      "reason_evidence": {
+        "kind": "retained_primitive_regression"
+      },
+      "subject": {
+        "scenario_id": null,
+        "story_path": "/components/detail",
+        "variation_id": null
+      },
+      "survivor": {
+        "key": "/components/detail",
+        "kind": "story"
+      }
+    },
+    {
+      "disposition": "retain",
+      "id": "CUR-254-02",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "Overlay renders every presentation through the body-level overlay root with its focus contract",
+          "test_ref": "accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders drawer presentation through the body-level overlay root"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-04-01",
+        "origin_commit": "986f68b71bae643ce24f0906c39d072fe5ea117b"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "def overlay(assigns) do",
+            "path": "accrue_admin/lib/accrue_admin/components/overlay.ex"
+          },
+          {
+            "marker": "overlay_story",
+            "path": "storybook/components/overlay.story.exs"
+          }
+        ],
+        "owner": "AccrueAdmin.Components.Overlay.overlay/1",
+        "state": "reachable"
+      },
+      "reason": "Only Storybook coverage of the Overlay primitive API (desktop and mobile drawer, modal and popover shells, reduced motion). The subscription action drawer exercises one presentation of it.",
+      "reason_class": null,
+      "reason_evidence": {
+        "kind": "retained_primitive_regression"
+      },
+      "subject": {
+        "scenario_id": null,
+        "story_path": "/components/overlay",
+        "variation_id": null
+      },
+      "survivor": {
+        "key": "/components/overlay",
+        "kind": "story"
+      }
+    },
+    {
+      "disposition": "retain",
+      "id": "CUR-254-03",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "PageHeader keeps its breadcrumb, title, semantic marker and single h1 slot contract",
+          "test_ref": "accrue_admin/test/accrue_admin/components/page_header_test.exs#renders breadcrumbs, required title, semantic markers, and exactly one h1"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-04-01",
+        "origin_commit": "986f68b71bae643ce24f0906c39d072fe5ea117b"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "def page_header(assigns) do",
+            "path": "accrue_admin/lib/accrue_admin/components/page_header.ex"
+          },
+          {
+            "marker": "page_header_story",
+            "path": "storybook/components/page_header.story.exs"
+          }
+        ],
+        "owner": "AccrueAdmin.Components.PageHeader.page_header/1",
+        "state": "reachable"
+      },
+      "reason": "Only Storybook coverage of the PageHeader slot contract (actions, stat strip, filter toolbar, long content, combined controls) outside the subscription collection page.",
+      "reason_class": null,
+      "reason_evidence": {
+        "kind": "retained_primitive_regression"
+      },
+      "subject": {
+        "scenario_id": null,
+        "story_path": "/components/page_header",
+        "variation_id": null
+      },
+      "survivor": {
+        "key": "/components/page_header",
+        "kind": "story"
+      }
+    },
+    {
+      "classification": "provider-boundary negative",
+      "disposition": "reclassify",
+      "id": "CUR-254-04",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "a Braintree subscription renders only its supported danger-zone action group and omits empty provider-pruned groups",
+          "test_ref": "accrue_admin/test/accrue_admin/components/subscription_area_test.exs#provider-pruned empty action groups are omitted for a valid Braintree subscription"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-04-03",
+        "origin_commit": "986f68b71bae643ce24f0906c39d072fe5ea117b"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "braintree_processor?(@subscription)",
+            "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex"
+          },
+          {
+            "marker": "def fetch!(:braintree_pruned)",
+            "path": "dev_support/ui_scenarios/cadence_subscriptions.exs"
+          }
+        ],
+        "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+        "state": "reachable"
+      },
+      "reason": "A Braintree-backed subscription prunes unsupported provider actions and shows Braintree guidance instead. The variation is the only subscription_detail story that proves the provider boundary, so it is retained and reclassified as a provider-boundary negative rather than a lifecycle state.",
+      "reason_class": null,
+      "reason_evidence": {
+        "kind": "provider_boundary_negative"
+      },
+      "subject": {
+        "scenario_id": "braintree_pruned",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "braintree_pruned"
+      },
+      "survivor": {
+        "key": "/components/subscription_detail||braintree_pruned",
+        "kind": "manifest_entry"
+      }
+    },
+    {
+      "classification": "recovery-claim drift",
+      "disposition": "reclassify",
+      "gap": {
+        "entry_trigger": "retry/campaign-history integrity",
+        "state": "page-tier past-due and dunning recovery"
+      },
+      "id": "CUR-254-05",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "the Dunning row appears only for a subscription with a started dunning campaign",
+          "test_ref": "accrue_admin/test/accrue_admin/components/subscription_area_test.exs#optional seats and dunning rows follow real item and lifecycle evidence"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-04-03",
+        "origin_commit": "986f68b71bae643ce24f0906c39d072fe5ea117b"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "dunning-active default-open recovery drill",
+            "path": ".planning/milestones/v1.54-phases/195-exemplar-b-subscription-detail/195-UI-SPEC.md"
+          },
+          {
+            "marker": "summary_row(dunning, \"Dunning\") != nil",
+            "path": "accrue_admin/test/accrue_admin/components/subscription_area_test.exs"
+          }
+        ],
+        "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+        "state": "reachable"
+      },
+      "reason": "Claim drift: Phase 195 described this variation as a dunning-active default-open recovery drill (recovery drill open), but the story now renders the production subscription area, whose recovery evidence is a Dunning row only. The variation is retained for the optional Dunning row. The page-tier past-due and recovery state is uncovered and stays gated on retry/campaign-history integrity.",
+      "reason_class": null,
+      "reason_evidence": {
+        "kind": "claim_drift"
+      },
+      "subject": {
+        "scenario_id": "dunning_active",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "dunning_active"
+      },
+      "survivor": {
+        "key": "/components/subscription_detail||dunning_active",
+        "kind": "manifest_entry"
+      }
+    },
+    {
+      "additional_survivors": [
+        {
+          "key": "/pages/subscription",
+          "kind": "story",
+          "variation_id": "active"
+        }
+      ],
+      "alias_evidence": {
+        "facts_path": "dev_support/ui_scenarios/cadence_subscriptions.exs",
+        "subject_scenario": "populated",
+        "survivor_scenario": "active"
+      },
+      "disposition": "retire",
+      "duplicate_evidence": {
+        "subject": {
+          "expected": {
+            "actions": {
+              "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+              "proof": "rendered by production eligibility; no action dispatch claim"
+            },
+            "facts": {
+              "amount_minor": 12500,
+              "currency": "usd",
+              "price_ids": [
+                "pro_monthly_2026"
+              ],
+              "quantities": [
+                12
+              ]
+            },
+            "identity": {
+              "actor": "vendor billing support operator",
+              "customer_id": "3a632d30-37d1-4c08-a5bf-2b14f2862520",
+              "customer_name": "Acme Research",
+              "customer_processor_id": "cus_cadence_active",
+              "owner_slug": "cadence-demo",
+              "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457",
+              "subscription_processor_id": "sub_cadence_active"
+            },
+            "lifecycle": {
+              "cancel_at_period_end": false,
+              "current_period_end": "2026-11-24T12:00:00Z",
+              "current_period_start": "2026-10-24T12:00:00Z",
+              "status": "active"
+            }
+          },
+          "fact": {
+            "actor": "vendor billing support operator",
+            "composition_tier": "component",
+            "input_source": "deterministic Cadence scenario facts",
+            "job": "understand subscription state and choose a supported next action",
+            "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+            "proof_lane": "static render"
+          }
+        },
+        "survivor": {
+          "expected": {
+            "actions": {
+              "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+              "proof": "rendered by production eligibility; no action dispatch claim"
+            },
+            "facts": {
+              "amount_minor": 12500,
+              "currency": "usd",
+              "price_ids": [
+                "pro_monthly_2026"
+              ],
+              "quantities": [
+                12
+              ]
+            },
+            "identity": {
+              "actor": "vendor billing support operator",
+              "customer_id": "3a632d30-37d1-4c08-a5bf-2b14f2862520",
+              "customer_name": "Acme Research",
+              "customer_processor_id": "cus_cadence_active",
+              "owner_slug": "cadence-demo",
+              "subscription_id": "ea26f232-b276-42bb-b862-d5c1b7d9d457",
+              "subscription_processor_id": "sub_cadence_active"
+            },
+            "lifecycle": {
+              "cancel_at_period_end": false,
+              "current_period_end": "2026-11-24T12:00:00Z",
+              "current_period_start": "2026-10-24T12:00:00Z",
+              "status": "active"
+            }
+          },
+          "fact": {
+            "actor": "vendor billing support operator",
+            "composition_tier": "component",
+            "input_source": "deterministic Cadence scenario facts",
+            "job": "understand subscription state and choose a supported next action",
+            "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+            "proof_lane": "static render"
+          }
+        }
+      },
+      "id": "CUR-254-06",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "the active subscription_detail variation renders the production area from the same facts the alias used",
+          "test_ref": "accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs#the declared active variation renders the production area from real facts without Repo"
+        },
+        {
+          "protects": "the remaining compatibility ids stay story variations and the retired id stays absent",
+          "test_ref": "accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs#canonical lifecycle variation IDs sit beside preserved compatibility IDs"
+        },
+        {
+          "protects": "every remaining compatibility render case (braintree_pruned, dunning_active) still renders in the browser lane",
+          "test_ref": "accrue_admin/e2e/subscription-stories-phase252.spec.js#reconciles every declared direct render against the generated manifest"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-06-02",
+        "origin_commit": "9b40acc8e53ca4d2eeb9a984dbc744097f92bc98"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "def subscription_area(assigns) do",
+            "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex"
+          },
+          {
+            "marker": "@frozen_compatibility_ids [\"braintree_pruned\", \"dunning_active\", \"populated\"]",
+            "path": "accrue_admin/storybook/_support/subscription_manifest.ex"
+          }
+        ],
+        "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+        "state": "historic_supported"
+      },
+      "reason": "A pure alias: the fact source delegated fetch!(:populated) to fetch!(:active) and the generated expected block equals the active block, so the variation renders exactly what active renders. The survivors are the subscription_detail active variation and the page-tier active story.",
+      "reason_class": "duplicate",
+      "reason_evidence": {
+        "kind": "fact_expected_equality"
+      },
+      "reference_scan": {
+        "allowed_paths": [
+          "accrue_admin/storybook/_support/subscription_manifest.ex",
+          "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs"
+        ],
+        "contexts": [
+          ":populated\\b",
+          "\\|\\|populated\\b",
+          "variation_id=populated\\b",
+          "\\bvariation_id\\b.*[\"']populated[\"']",
+          "\\b(scenario_id|route_variation_id)[\"']?\\s*[:=]+\\s*[\"']populated[\"']"
+        ]
+      },
+      "subject": {
+        "scenario_id": "populated",
+        "story_path": "/components/subscription_detail",
+        "variation_id": "populated"
+      },
+      "survivor": {
+        "key": "/components/subscription_detail||active",
+        "kind": "manifest_entry"
+      }
+    },
+    {
+      "additional_survivors": [
+        {
+          "key": "/components/subscription_detail||braintree_pruned",
+          "kind": "manifest_entry"
+        }
+      ],
+      "disposition": "merge",
+      "duplicate_evidence": {
+        "subject": {
+          "expected": {
+            "group_shape": [
+              {
+                "item_kinds": [
+                  "danger"
+                ],
+                "label": "Danger zone"
+              }
+            ]
+          },
+          "fact": {
+            "story_state": "open"
+          }
+        },
+        "survivor": {
+          "expected": {
+            "group_shape": [
+              {
+                "item_kinds": [
+                  "danger"
+                ],
+                "label": "Danger zone"
+              }
+            ]
+          },
+          "fact": {
+            "story_state": "open"
+          }
+        }
+      },
+      "id": "CUR-254-07",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "the action menu keeps its Danger zone group last with danger-styled menu items (the shape danger and provider_pruned shared)",
+          "test_ref": "accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders a non-modal disclosure menu with button menuitems"
+        },
+        {
+          "protects": "a Braintree subscription renders only its supported Danger zone group through the production owner (the real provider claim)",
+          "test_ref": "accrue_admin/test/accrue_admin/components/subscription_area_test.exs#provider-pruned empty action groups are omitted for a valid Braintree subscription"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-06-03",
+        "origin_commit": "fdcd6c4ebf57543b9ba7df5a40e5b8271fb79bf1"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "braintree_processor?(@subscription)",
+            "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex"
+          },
+          {
+            "marker": "def action_menu(assigns) do",
+            "path": "accrue_admin/lib/accrue_admin/components/dropdown_menu.ex"
+          }
+        ],
+        "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+        "state": "reachable"
+      },
+      "reason": "Duplicate menu shape plus a stale story-local provider rule. provider_pruned renders one open Danger zone group of danger items, the same shape the danger variation renders (story state, group label sequence and item kinds; item count and description text are not part of the shape). Its provider claim was a hand-written Stripe-only description on one item that production eligibility never used; the real Braintree pruning is rendered by SubscriptionLive.subscription_area/1 through the braintree_pruned subscription_detail variation and pinned by the provider-pruned regression.",
+      "reason_class": "duplicate",
+      "reason_evidence": {
+        "kind": "fact_expected_equality"
+      },
+      "reference_scan": {
+        "allowed_paths": [
+          "accrue_admin/storybook/_support/subscription_manifest.ex",
+          "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs"
+        ]
+      },
+      "shape_evidence": {
+        "path": "storybook/components/action_menu.story.exs",
+        "subject": {
+          "groups": "provider_pruned_groups",
+          "variation_id": "provider_pruned"
+        },
+        "survivor": {
+          "groups": "danger_groups",
+          "variation_id": "danger"
+        }
+      },
+      "subject": {
+        "scenario_id": null,
+        "story_path": "/components/action_menu",
+        "variation_id": "provider_pruned"
+      },
+      "survivor": {
+        "key": "/components/action_menu",
+        "kind": "story",
+        "variation_id": "danger"
+      }
+    }
+  ],
+  "schema_version": 1,
+  "source_digests": {
+    "accrue_admin/lib/accrue_admin/dev/component_registry.ex": "a5a84b1f9e00e0742bb4e1eace7cc974c60f73426c1caa8000fca2105d9cc31c",
+    "accrue_admin/lib/accrue_admin/dev/storybook.ex": "2cea8b08edad6d18383220b23c020e0fbbf7ca7c2c8a884729270779ecfa983d",
+    "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "15b4640e79ca5ca5958978a54b1680abf7f64f8395dd5e3c9667069cfb47e09a",
+    "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "15035a6b232e3c4d4b5d4ea251064d0f739cd0a63a08a081f59b20d9f2fa0efb",
+    "accrue_admin/lib/accrue_admin/router.ex": "2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed",
+    "accrue_admin/storybook/_support/subscription_manifest.ex": "2e189769ec4fb4ea8327ffbaa0747924ea0b12af9885e7a20e4c721d17c03e51",
+    "accrue_admin/storybook/_support/subscription_scenarios.ex": "734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d",
+    "accrue_portal/lib/accrue_portal/live/subscription_live.ex": "c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372",
+    "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex": "5059ad186b7d393c41c538237a9b216e19ba587ca6bcaf80bfb5edfef0411bd2",
+    "accrue_portal/lib/accrue_portal/router.ex": "1877e2be0cf5c1fbc6f88ac3b6865995c7121f9a11680a5223b1966d3ef5f039",
+    "dev_support/ui_scenarios/cadence_subscriptions.exs": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
+    "storybook/components/subscription_detail.story.exs": "4f66a42497af73af84b6f456354f0aa886bf3b51df79ed096623740d301d5f03"
+  }
+}

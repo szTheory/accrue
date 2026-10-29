@@ -993,8 +993,11 @@ jobs:
       - name: Rebuild package assets
         run: cd accrue_admin && mix accrue_admin.assets.build
 
+      - name: Ensure the Storybook bundle embeds the rebuilt admin bundle
+        run: node scripts/ci/recompose_storybook_css.mjs --check
+
       - name: Ensure committed bundle is fresh
-        run: git diff --exit-code -- accrue_admin/priv/static/accrue_admin.css accrue_admin/priv/static/accrue_admin.js
+        run: git diff --exit-code -- accrue_admin/priv/static/accrue_admin.css accrue_admin/priv/static/accrue_admin.js accrue_admin/priv/static/storybook.css accrue_admin/priv/static/storybook.js
 
       - name: Verify guide mentions mount path and asset task
         run: |
@@ -1268,12 +1271,20 @@ jobs:
       ACCRUE_ADMIN_E2E_PORT: 4019
 
     steps:
+      # Phase 254 CIQ-02 (D-10, FC-3): the selection diffs the PR base against the head, so the
+      # checkout needs full history. A shallow clone would read as an empty diff; the selector
+      # also treats a shallow clone, a missing base and any non-pull_request event as mode full.
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
+      # OTP 28.1, not the 28.0 of the other jobs: Hex 2.4.2 cannot run `mix hex.build` on OTP 28.0
+      # (:re.import of its precompiled .DS_Store pattern raises), and the Phase 252
+      # production-boundary lane unpacks real Hex archives. publish-hex.yml pins the same line.
       - name: Set up BEAM
         uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
-          otp-version: '28.0'
+          otp-version: '28.1'
           elixir-version: '1.19.5'
 
       - name: Install Hex
@@ -1297,6 +1308,13 @@ jobs:
       - name: Install admin deps
         run: cd accrue_admin && mix deps.get
 
+      # The Phase 252 production-boundary lane compiles and unpacks each of the three
+      # packages in its own right (MIX_ENV=prod, isolated build path), and the held-out
+      # cleanup lane runs the accrue_host test suite, so accrue, accrue_portal and
+      # accrue_host need their own deps directories, not only the admin one above.
+      - name: Install accrue, accrue_portal and accrue_host deps (Phase 252 production-boundary and held-out lanes)
+        run: cd accrue && mix deps.get && cd ../accrue_portal && mix deps.get && cd ../examples/accrue_host && mix deps.get
+
       - name: Compile admin package
         run: cd accrue_admin && mix compile --warnings-as-errors
 
@@ -1312,8 +1330,58 @@ jobs:
       - name: Phase 200 local guardrail contract
         run: bash scripts/ci/verify_phase200_guardrail_contract.sh
 
+      - name: Phase 254 machine fingerprint
+        run: node scripts/ci/phase254_measure.mjs fingerprint --out accrue_admin/tmp/phase254/fingerprint-guardrails.json
+
+      # Phase 254 CIQ-02 (D-10/D-11/D-14): computed before the guardrail runner, from full history,
+      # and exported so the Phase 253 composition lane runs exactly the reported selection. The
+      # report is written to accrue_admin/tmp/phase254/ (uploaded below) and rendered to the step
+      # summary. A push to the default branch or a workflow_dispatch has no pull-request base and
+      # always yields mode full. Event values arrive through env, never interpolated into the
+      # script text, and the local-only --changed-paths-file option is deliberately absent here.
+      - name: Phase 254 selection
+        env:
+          PHASE254_EVENT: ${{ github.event_name }}
+          PHASE254_BASE: ${{ github.event.pull_request.base.sha }}
+          PHASE254_HEAD: ${{ github.sha }}
+          PHASE254_RUN_ID: ${{ github.run_id }}
+        run: |
+          report="accrue_admin/tmp/phase254/selection-${PHASE254_RUN_ID}.json"
+          node scripts/ci/phase254_selection.mjs select \
+            --event "$PHASE254_EVENT" --base "$PHASE254_BASE" --head "$PHASE254_HEAD" \
+            --out "$report" --summary
+          echo "PHASE254_SELECTION=$report" >> "$GITHUB_ENV"
+
       - name: Run Phase 200 deterministic guardrails
         run: bash scripts/ci/verify_phase200_admin_guardrails.sh
+
+      - name: Upload Phase 252 machine evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase252-machine-evidence
+          path: |
+            accrue_admin/tmp/phase252/ci-results/*/results.json
+            accrue_admin/tmp/phase252/render-results-*.json
+          if-no-files-found: ignore
+
+      - name: Upload Phase 253 machine evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase253-machine-evidence
+          path: |
+            accrue_admin/tmp/phase253/ci-results/*/results.json
+            accrue_admin/tmp/phase253/render-results-*.json
+          if-no-files-found: ignore
+
+      - name: Upload Phase 254 machine evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase254-machine-evidence-guardrails
+          path: accrue_admin/tmp/phase254/
+          if-no-files-found: ignore
 
       - name: Upload Phase 200 Playwright report
         if: always()
