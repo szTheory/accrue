@@ -954,6 +954,27 @@ async function main() {
   writeJson(resultPath, bundle);
   process.stdout.write("Phase 253 focused aggregate: run_id=" + runId + " lanes=" + plan.length + " result=" + bundle.results_path + "\n");
 
+  // The manifest lane (first) reads accrue_admin/tmp/phase253/transport.json, the gitignored
+  // current-run proof that subscription_collection_transport_test.exs (phase253-collection-live)
+  // ran. That lane is also a required later lane, so it is executed once ahead of the manifest
+  // lane purely to produce the proof: a clean checkout (CI) has no leftover file, and a stale one
+  // from an earlier run must never satisfy the check, so it is removed first.
+  const transportProof = path.join(ROOT, "accrue_admin/tmp/phase253/transport.json");
+  fs.rmSync(transportProof, { force: true });
+  const proofLane = plan.find((spec) => spec.id === "phase253-collection-live");
+  process.stdout.write("==> " + proofLane.id + " [transport proof for the manifest lane]\n");
+  const proofCaptured = await spawnCaptured(proofLane, ROOT, logDirectory);
+  bundle.transport_proof = { id: proofLane.id, exitCode: proofCaptured.exitCode, duration_ms: proofCaptured.duration_ms };
+  if (proofCaptured.exitCode !== 0 || !fs.existsSync(transportProof)) {
+    bundle.status = "failed";
+    bundle.validation_error = "the transport proof lane did not pass and write transport.json";
+    bundle.run_completed_at = new Date().toISOString();
+    writeJson(resultPath, bundle);
+    process.stderr.write("Phase 253 aggregate failed at the transport proof (" + proofLane.id + ")\n");
+    process.exitCode = 1;
+    return;
+  }
+
   const first = plan[0];
   process.stdout.write("==> " + first.id + " [" + first.lane + "]\n");
   const firstCaptured = await spawnCaptured(first, ROOT, logDirectory);
