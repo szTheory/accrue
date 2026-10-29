@@ -1268,7 +1268,12 @@ jobs:
       ACCRUE_ADMIN_E2E_PORT: 4019
 
     steps:
+      # Phase 254 CIQ-02 (D-10, FC-3): the selection diffs the PR base against the head, so the
+      # checkout needs full history. A shallow clone would read as an empty diff; the selector
+      # also treats a shallow clone, a missing base and any non-pull_request event as mode full.
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       # OTP 28.1, not the 28.0 of the other jobs: Hex 2.4.2 cannot run `mix hex.build` on OTP 28.0
       # (:re.import of its precompiled .DS_Store pattern raises), and the Phase 252
@@ -1324,6 +1329,25 @@ jobs:
 
       - name: Phase 254 machine fingerprint
         run: node scripts/ci/phase254_measure.mjs fingerprint --out accrue_admin/tmp/phase254/fingerprint-guardrails.json
+
+      # Phase 254 CIQ-02 (D-10/D-11/D-14): computed before the guardrail runner, from full history,
+      # and exported so the Phase 253 composition lane runs exactly the reported selection. The
+      # report is written to accrue_admin/tmp/phase254/ (uploaded below) and rendered to the step
+      # summary. A push to the default branch or a workflow_dispatch has no pull-request base and
+      # always yields mode full. Event values arrive through env, never interpolated into the
+      # script text, and the local-only --changed-paths-file option is deliberately absent here.
+      - name: Phase 254 selection
+        env:
+          PHASE254_EVENT: ${{ github.event_name }}
+          PHASE254_BASE: ${{ github.event.pull_request.base.sha }}
+          PHASE254_HEAD: ${{ github.sha }}
+          PHASE254_RUN_ID: ${{ github.run_id }}
+        run: |
+          report="accrue_admin/tmp/phase254/selection-${PHASE254_RUN_ID}.json"
+          node scripts/ci/phase254_selection.mjs select \
+            --event "$PHASE254_EVENT" --base "$PHASE254_BASE" --head "$PHASE254_HEAD" \
+            --out "$report" --summary
+          echo "PHASE254_SELECTION=$report" >> "$GITHUB_ENV"
 
       - name: Run Phase 200 deterministic guardrails
         run: bash scripts/ci/verify_phase200_admin_guardrails.sh

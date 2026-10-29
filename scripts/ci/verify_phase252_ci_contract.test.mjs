@@ -114,6 +114,7 @@ test("a phase252 invocation fixture is required when the focused leaf is enabled
 test("the real required owner invokes the complete phase252 leaf", () => {
   assert.equal(ownerRunner.includes("npm --prefix accrue_admin run phase252:check"), true);
   assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true }));
+  assert.doesNotThrow(() => assertCiContract({ workflow, ownerRunner, manifest, requirePhase252: true, requirePhase253: true, requirePhase254Selection: true }));
   const packageJson = JSON.parse(fs.readFileSync(path.join(root, "accrue_admin/package.json"), "utf8"));
   assert.equal(packageJson.scripts["phase252:check"], "node ../scripts/ci/verify_phase252_stories.mjs");
 });
@@ -152,6 +153,99 @@ test("every newly consumed Phase 253 source class maps to the named required CI 
     assert.equal(classifyPath(sourcePath, { roots: withoutRule, manifest: manifestWithoutSource }), null, `${sourcePath} must become unowned when ${id} is removed`);
   }
   assert.equal(classifyPath("docs/architecture/unrelated-phase253.md", { manifest }), null);
+});
+
+test("every new Phase 254 CI-read path maps to the named required owner and fails when its root is removed", () => {
+  const phase254Roots = [
+    ["phase254-ci-scripts", "scripts/ci/phase254_selection.mjs"],
+    ["phase254-ci-scripts", "scripts/ci/phase254_selection.test.mjs"],
+    ["phase254-verifiers", "scripts/ci/verify_phase254_curation.mjs"],
+    ["phase254-verifiers", "scripts/ci/verify_phase254_curation.test.mjs"],
+    ["phase254-budget", "accrue_admin/storybook/phase254-budget.json"],
+    ["phase254-selection-projection", "accrue_admin/storybook/phase254-selection.json"],
+    ["subscription-curation-ledger", "accrue_admin/storybook/subscription-curation.json"],
+    ["phase254-selection-fixtures", "scripts/ci/fixtures/phase254-selection/collection-only.txt"],
+    ["playwright-default-config", "accrue_admin/playwright.config.js"],
+  ];
+  assertOwnerMap(CONSUMED_ROOTS, manifest);
+  for (const [id, sourcePath] of phase254Roots) {
+    assert.equal(CONSUMED_ROOTS.some((row) => row.id === id), true, `${id} must be required`);
+    assert.equal(classifyPath(sourcePath, { manifest }), REQUIRED_OWNER, `${sourcePath} must be admitted`);
+    const withoutRule = CONSUMED_ROOTS.filter((row) => row.id !== id);
+    assert.throws(() => assertOwnerMap(withoutRule, manifest), new RegExp(id), `${id} removal must fail the owner contract`);
+    assert.equal(classifyPath(sourcePath, { roots: withoutRule, manifest }), null, `${sourcePath} must become unowned when ${id} is removed`);
+  }
+  // The new e2e and admin test files are already covered by the existing prefixes.
+  for (const sourcePath of [
+    "accrue_admin/e2e/phase254-result-ledger.js",
+    "accrue_admin/e2e/phase254-selection-invariants.js",
+    "accrue_admin/e2e/phase253-cell-universe.js",
+    "accrue_admin/test/accrue_admin/e2e_plug_isolation_test.exs",
+  ]) {
+    assert.equal(classifyPath(sourcePath, { manifest }), REQUIRED_OWNER, `${sourcePath} is admitted by an existing prefix`);
+  }
+  // The three storybook JSON roots are exact: no accrue_admin/storybook/ prefix exists.
+  assert.equal(classifyPath("accrue_admin/storybook/unrelated.json", { manifest }), null);
+  assert.equal(classifyPath("docs/architecture/unrelated.md", { manifest }), null);
+  assert.equal(CONSUMED_ROOTS.some((row) => row.path === "accrue_admin/storybook/"), false);
+});
+
+function guardrailJob(source) {
+  const start = source.indexOf("  admin-phase200-guardrails:\n");
+  const next = source.slice(start + 10).search(/^  [A-Za-z0-9_-]+:\s*$/m);
+  const end = next < 0 ? source.length : start + 10 + next;
+  return { start, end, text: source.slice(start, end) };
+}
+
+function mutateGuardrailJob(mutate) {
+  const job = guardrailJob(workflow);
+  const mutated = mutate(job.text);
+  assert.notEqual(mutated, job.text, "the mutation must change the required job");
+  return workflow.slice(0, job.start) + mutated + workflow.slice(job.end);
+}
+
+test("the required job computes the Phase 254 selection from full history before the guardrail runner", () => {
+  const contract = (candidate) => assertCiContract({ workflow: candidate, ownerRunner, manifest, requirePhase252: true, requirePhase253: true, requirePhase254Selection: true });
+  assert.doesNotThrow(() => contract(workflow), "positive control: the shipped workflow satisfies the selection contract");
+
+  const stepPattern = /      - name: Phase 254 selection\n[\s\S]*?(?=      - name: Run Phase 200 deterministic guardrails\n)/;
+  const noFullHistory = mutateGuardrailJob((job) => job.replace("      - uses: actions/checkout@v6\n        with:\n          fetch-depth: 0\n", "      - uses: actions/checkout@v6\n"));
+  assert.throws(() => contract(noFullHistory), /fetch-depth: 0/);
+
+  const afterRunner = mutateGuardrailJob((job) => {
+    const step = job.match(stepPattern)[0];
+    const withoutStep = job.replace(stepPattern, "");
+    return withoutStep.replace("      - name: Upload Phase 252 machine evidence\n", `${step}      - name: Upload Phase 252 machine evidence\n`);
+  });
+  assert.throws(() => contract(afterRunner), /before the guardrail runner/);
+
+  const missing = mutateGuardrailJob((job) => job.replace(stepPattern, ""));
+  assert.throws(() => contract(missing), /no Phase 254 selection step/);
+
+  const localOnlyFlag = mutateGuardrailJob((job) => job.replace('--out "$report" --summary', '--out "$report" --summary --changed-paths-file scripts/ci/fixtures/phase254-selection/collection-only.txt'));
+  assert.throws(() => contract(localOnlyFlag), /changed-paths-file is local-only/);
+  // The same flag in any other job of the workflow is rejected too.
+  assert.throws(() => contract(`${workflow}\n      - run: node scripts/ci/phase254_selection.mjs select --changed-paths-file x\n`), /changed-paths-file is local-only/);
+  // A comment that names the flag is not a use of it.
+  assert.doesNotThrow(() => contract(mutateGuardrailJob((job) => job.replace("      - name: Phase 254 selection\n", "      # never pass --changed-paths-file here\n      - name: Phase 254 selection\n"))));
+
+  const noSummary = mutateGuardrailJob((job) => job.replace('--out "$report" --summary', '--out "$report"'));
+  assert.throws(() => contract(noSummary), /--summary/);
+
+  const interpolated = mutateGuardrailJob((job) => job.replace('--event "$PHASE254_EVENT"', '--event "${{ github.event_name }}"'));
+  assert.throws(() => contract(interpolated), /through env, not interpolate/);
+
+  const noExport = mutateGuardrailJob((job) => job.replace('          echo "PHASE254_SELECTION=$report" >> "$GITHUB_ENV"\n', ""));
+  assert.throws(() => contract(noExport), /GITHUB_ENV/);
+
+  const wrongReport = mutateGuardrailJob((job) => job.replace('report="accrue_admin/tmp/phase254/selection-${PHASE254_RUN_ID}.json"', 'report="selection.json"'));
+  assert.throws(() => contract(wrongReport), /selection-<run_id>\.json/);
+
+  const missingBaseEnv = mutateGuardrailJob((job) => job.replace("          PHASE254_BASE: ${{ github.event.pull_request.base.sha }}\n", ""));
+  assert.throws(() => contract(missingBaseEnv), /PHASE254_BASE/);
+
+  const shallowByDefault = mutateGuardrailJob((job) => job.replace("        with:\n          fetch-depth: 0\n", "        with:\n          fetch-depth: 1\n"));
+  assert.throws(() => contract(shallowByDefault), /fetch-depth: 0/);
 });
 
 test("the named required owner invokes both Phase 252 and Phase 253 checks", () => {

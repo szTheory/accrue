@@ -52,6 +52,13 @@ export const REQUIRED_ROOT_IDS = Object.freeze([
   "phase253-admin-tests",
   "phase253-browser-spec",
   "phase253-browser-helper",
+  "phase254-ci-scripts",
+  "phase254-verifiers",
+  "phase254-budget",
+  "phase254-selection-projection",
+  "subscription-curation-ledger",
+  "phase254-selection-fixtures",
+  "playwright-default-config",
 ]);
 
 export const CONSUMED_ROOTS = Object.freeze([
@@ -105,6 +112,16 @@ export const CONSUMED_ROOTS = Object.freeze([
   { id: "phase253-admin-tests", path: "accrue_admin/test/accrue_admin/dev/subscription_collection_transport_test.exs", mode: "exact", owner: REQUIRED_OWNER },
   { id: "phase253-browser-spec", path: "accrue_admin/e2e/subscription-compositions-phase253.spec.js", mode: "exact", owner: REQUIRED_OWNER },
   { id: "phase253-browser-helper", path: "accrue_admin/e2e/phase253-composition-helpers.js", mode: "exact", owner: REQUIRED_OWNER },
+  // Phase 254: every path the required owner reads for recurring quality and selection. The
+  // three storybook JSON files are exact roots on purpose: there is no accrue_admin/storybook/
+  // prefix, so an unrelated JSON file there stays unmapped (and the selector broadens, FC-1).
+  { id: "phase254-ci-scripts", path: "scripts/ci/phase254_", mode: "prefix", owner: REQUIRED_OWNER },
+  { id: "phase254-verifiers", path: "scripts/ci/verify_phase254_", mode: "prefix", owner: REQUIRED_OWNER },
+  { id: "phase254-budget", path: "accrue_admin/storybook/phase254-budget.json", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase254-selection-projection", path: "accrue_admin/storybook/phase254-selection.json", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "subscription-curation-ledger", path: "accrue_admin/storybook/subscription-curation.json", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase254-selection-fixtures", path: "scripts/ci/fixtures/phase254-selection/", mode: "prefix", owner: REQUIRED_OWNER },
+  { id: "playwright-default-config", path: "accrue_admin/playwright.config.js", mode: "exact", owner: REQUIRED_OWNER },
 ]);
 
 function fail(message) {
@@ -200,6 +217,7 @@ export function assertCiContract({
   manifest,
   requirePhase252 = false,
   requirePhase253 = false,
+  requirePhase254Selection = false,
   roots = CONSUMED_ROOTS,
 }) {
   if (typeof workflow !== "string" || typeof ownerRunner !== "string") {
@@ -249,6 +267,55 @@ export function assertCiContract({
       fail("Phase 253 composition acceptance must run after the complete Phase 252 check");
     }
   }
+  if (requirePhase254Selection) assertPhase254Selection(workflow, job);
+  return true;
+}
+
+// Phase 254 CIQ-02 (D-10, FC-3, T-254-16, T-254-17): the required job computes the selection from
+// full history before the guardrail runner, never takes its inputs from interpolated script text,
+// and never uses the local-only --changed-paths-file option.
+function stepBlock(job, name) {
+  const header = `      - name: ${name}\n`;
+  const start = job.indexOf(header);
+  if (start < 0) return null;
+  const rest = job.slice(start + header.length);
+  const end = rest.search(/^      - /m);
+  return { start, text: end < 0 ? rest : rest.slice(0, end) };
+}
+
+function withoutComments(text) {
+  return text.split("\n").map((line) => line.replace(/^\s*#.*$/, "").replace(/\s+#.*$/, "")).join("\n");
+}
+
+export function assertPhase254Selection(workflow, job = requiredJob(workflow)) {
+  if (!job) fail(`workflow is missing required job ${REQUIRED_OWNER}`);
+  const uncommentedJob = withoutComments(job);
+  if (!/^      - uses: actions\/checkout@[^\n]*\n        with:\n(?:          [^\n]*\n)*?          fetch-depth:\s*0\s*$/m.test(uncommentedJob)) {
+    fail("the required CI owner checkout must use fetch-depth: 0 so the selection diff has full history");
+  }
+  const step = stepBlock(uncommentedJob, "Phase 254 selection");
+  if (!step) fail("the required CI owner has no Phase 254 selection step");
+  const runnerAt = uncommentedJob.indexOf("bash scripts/ci/verify_phase200_admin_guardrails.sh");
+  if (runnerAt < 0 || step.start > runnerAt) fail("the Phase 254 selection step must run before the guardrail runner");
+  const runBody = step.text.split(/^        run: \|\n/m)[1] ?? "";
+  if (!/node scripts\/ci\/phase254_selection\.mjs select\b/.test(runBody)) fail("the Phase 254 selection step does not invoke the selector select verb");
+  if (!/--summary\b/.test(runBody)) fail("the Phase 254 selection step must render the report with --summary");
+  if (!/--out "\$report"/.test(runBody) || !/accrue_admin\/tmp\/phase254\/selection-\$\{PHASE254_RUN_ID\}\.json/.test(runBody)) {
+    fail("the Phase 254 selection report must be written to accrue_admin/tmp/phase254/selection-<run_id>.json");
+  }
+  if (!/echo "PHASE254_SELECTION=\$report" >> "\$GITHUB_ENV"/.test(runBody)) fail("the Phase 254 selection step must export PHASE254_SELECTION through GITHUB_ENV");
+  for (const [name, expression] of [
+    ["PHASE254_EVENT", "github.event_name"],
+    ["PHASE254_BASE", "github.event.pull_request.base.sha"],
+    ["PHASE254_HEAD", "github.sha"],
+    ["PHASE254_RUN_ID", "github.run_id"],
+  ]) {
+    if (!new RegExp(`^          ${name}: \\$\\{\\{ ${expression.replaceAll(".", "\\.")} \\}\\}\\s*$`, "m").test(step.text)) {
+      fail(`the Phase 254 selection step must pass ${expression} through env ${name}`);
+    }
+  }
+  if (runBody.includes("${{")) fail("the Phase 254 selection step must pass event values through env, not interpolate them into the script");
+  if (/--changed-paths-file/.test(withoutComments(workflow))) fail("--changed-paths-file is local-only and must not appear in any workflow");
   return true;
 }
 
