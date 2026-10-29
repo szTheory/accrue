@@ -432,6 +432,7 @@ export function duplicateEvidenceAtCommit(record, { root = ROOT } = {}) {
   if (!isObject(duplicate) || !isObject(duplicate.subject) || !isObject(duplicate.survivor)) {
     fail(`${record.id} needs duplicate_evidence {subject, survivor} to be checked at ${commit.slice(0, 12)}`);
   }
+  if (record.shape_evidence !== undefined) return shapeEvidenceAtCommit(record, commit, root);
   if (record.survivor?.kind !== "manifest_entry" || !isNonEmptyString(record.subject?.variation_id)) {
     fail(`${record.id} duplicate evidence at a commit needs a manifest subject and a manifest_entry survivor`);
   }
@@ -463,6 +464,81 @@ export function duplicateEvidenceAtCommit(record, { root = ROOT } = {}) {
     if (!delegation.test(facts)) fail(`${record.id} fetch!(:${alias.subject_scenario}) did not delegate to fetch!(:${alias.survivor_scenario}) in ${alias.facts_path} at ${commit.slice(0, 12)}`);
   }
   return { commit, subject: subjectEntry.key, survivor: survivorEntry.key, alias: alias !== undefined };
+}
+
+// --- action-menu group shape (story-source duplicates) -------------------------------------------
+
+// The shape of an action-menu story variation is mechanical: its story state, then for each group in
+// the groups function it renders the group label and the sorted unique kinds of its items (danger
+// or standard). Item count, descriptions and values are deliberately not part of the shape.
+export function actionMenuShape(source, variationId, groupsFunction) {
+  if (!/^[a-z0-9_]+$/.test(variationId || "") || !/^[a-z0-9_]+$/.test(groupsFunction || "")) fail("action-menu shape needs plain identifiers");
+  const start = source.search(new RegExp(`\\bid:\\s*:${variationId}\\b`));
+  if (start === -1) return null;
+  const rest = source.slice(start);
+  const next = rest.slice(1).search(/%Variation\{/);
+  const block = next === -1 ? rest : rest.slice(0, next + 1);
+  const state = /\bstate:\s*:([a-z0-9_]+)/.exec(block);
+  const groupsCall = new RegExp(`\\bgroups:\\s*${groupsFunction}\\(\\)`).test(block);
+  if (!state || !groupsCall) fail(`variation ${variationId} does not declare a state and groups: ${groupsFunction}()`);
+  const body = functionBody(source, groupsFunction);
+  if (body === null) fail(`groups function ${groupsFunction} is absent from the story source`);
+  const groups = body.split(/%\{\s*label:\s*/).slice(1).map((segment) => {
+    const label = /^"([^"]*)"/.exec(segment);
+    if (!label) fail(`a group in ${groupsFunction} has no literal label`);
+    const items = segment.split(/\baction_item\(/).slice(1);
+    if (items.length === 0) fail(`group ${label[1]} in ${groupsFunction} has no items`);
+    const kinds = [...new Set(items.map((item) => (/danger\?:\s*true/.test(item.split(/\baction_item\(/)[0]) ? "danger" : "standard")))].sort();
+    return { label: label[1], item_kinds: kinds };
+  });
+  if (groups.length === 0) fail(`${groupsFunction} declares no groups`);
+  return { fact: { story_state: state[1] }, expected: { group_shape: groups } };
+}
+
+function functionBody(source, name) {
+  const start = source.search(new RegExp(`\\n\\s*defp?\\s+${name}\\b`));
+  if (start === -1) return null;
+  const rest = source.slice(start + 1);
+  const next = rest.slice(1).search(/\n  defp? /);
+  return next === -1 ? rest : rest.slice(0, next + 1);
+}
+
+function shapeEvidenceAtCommit(record, commit, root) {
+  const evidence = record.shape_evidence;
+  const duplicate = record.duplicate_evidence;
+  if (!isObject(evidence) || !isNonEmptyString(evidence.path) || !isObject(evidence.subject) || !isObject(evidence.survivor)) {
+    fail(`${record.id} shape_evidence needs path, subject and survivor {variation_id, groups}`);
+  }
+  for (const side of ["subject", "survivor"]) {
+    if (![evidence[side].variation_id, evidence[side].groups].every(isNonEmptyString)) fail(`${record.id} shape_evidence.${side} needs variation_id and groups`);
+  }
+  if (record.subject?.variation_id !== evidence.subject.variation_id) fail(`${record.id} shape_evidence.subject names a different variation than the record subject`);
+  if (record.survivor?.kind !== "story" || record.survivor.variation_id !== evidence.survivor.variation_id) fail(`${record.id} shape_evidence.survivor must name the story survivor variation`);
+  const original = showAt(root, commit, evidence.path);
+  const subjectShape = actionMenuShape(original, evidence.subject.variation_id, evidence.subject.groups);
+  const survivorShape = actionMenuShape(original, evidence.survivor.variation_id, evidence.survivor.groups);
+  if (!subjectShape) fail(`${record.id} subject variation ${evidence.subject.variation_id} is absent from ${evidence.path} at ${commit.slice(0, 12)}`);
+  if (!survivorShape) fail(`${record.id} survivor variation ${evidence.survivor.variation_id} is absent from ${evidence.path} at ${commit.slice(0, 12)}`);
+  for (const block of ["fact", "expected"]) {
+    if (stableStringify(subjectShape[block]) !== stableStringify(survivorShape[block])) {
+      fail(`${record.id} claims a duplicate but the ${block} shape differs at ${commit.slice(0, 12)}: ${stableStringify(subjectShape[block])} versus ${stableStringify(survivorShape[block])}`);
+    }
+  }
+  for (const [side, shape] of [["subject", subjectShape], ["survivor", survivorShape]]) {
+    if (stableStringify(duplicate[side]) !== stableStringify(shape)) fail(`${record.id} duplicate_evidence.${side} does not match the story shape at ${commit.slice(0, 12)}`);
+  }
+  // The survivor must still render that shape now, and the subject must be gone from the story.
+  const currentPath = path.join(root, evidence.path);
+  if (!fs.existsSync(currentPath)) fail(`${record.id} story source ${evidence.path} is missing from the tree`);
+  const current = fs.readFileSync(currentPath, "utf8");
+  const currentSurvivor = actionMenuShape(current, evidence.survivor.variation_id, evidence.survivor.groups);
+  if (!currentSurvivor || stableStringify(currentSurvivor) !== stableStringify(duplicate.survivor)) {
+    fail(`${record.id} survivor ${evidence.survivor.variation_id} no longer has the pinned shape in the current ${evidence.path}`);
+  }
+  if (actionMenuShape(current, evidence.subject.variation_id, evidence.subject.groups) !== null || functionBody(current, evidence.subject.groups) !== null) {
+    fail(`${record.id} subject ${evidence.subject.variation_id} or its ${evidence.subject.groups} helper is still in the current ${evidence.path}`);
+  }
+  return { commit, subject: evidence.subject.variation_id, survivor: evidence.survivor.variation_id, shape: true };
 }
 
 function compileContexts(record) {
@@ -1319,6 +1395,85 @@ const SCENARIOS = [
       expectRejected(world, (ledger) => { ledger.records[1].additional_survivors[0].key = "/components/none"; }, /story \/components\/none is absent from the tree/);
       expectRejected(world, (ledger) => { ledger.records[1].additional_survivors = "x"; }, /additional_survivors must be a list/);
       expectRejected(world, (ledger) => { ledger.records[1].additional_survivors = [{ kind: "manifest_entry", key: `${SUBSCRIPTION_STORY_PATH}||gone` }]; }, /additional survivor .*gone is absent from the current manifest/);
+    },
+  ],
+  [
+    "action-menu shape evidence: equal shapes at the origin commit pass, differing item kinds, a stale subject, a changed survivor and forged blocks fail, and the parser tells different shapes apart",
+    () => {
+      const menu = (provider, extra = "") => [
+        "defmodule Menu do",
+        "  def variations do",
+        "    [",
+        '      %Variation{ id: :danger, attributes: %{story_id: "danger", state: :open, groups: danger_groups()} },',
+        provider ? '      %Variation{ id: :provider_pruned, attributes: %{story_id: "p", state: :open, groups: provider_pruned_groups()} },' : "",
+        '      %Variation{ id: :open, attributes: %{story_id: "open", state: :open, groups: full_groups()} }',
+        "    ]",
+        "  end",
+        "",
+        "  defp full_groups do",
+        '    [%{label: "Edit billing", items: [action_item("Edit", "edit", "x")]}, %{label: "Danger zone", items: [action_item("Cancel", "cancel_now", "y", danger?: true)]}]',
+        "  end",
+        "",
+        "  defp danger_groups do",
+        '    [%{label: "Danger zone", items: [action_item("Cancel", "cancel_now", "y", danger?: true), action_item("Comp", "comp", "z", danger?: true)]}]',
+        "  end",
+        provider ? `\n  defp provider_pruned_groups do\n    ${provider}\n  end` : "",
+        extra,
+        "end",
+        "",
+      ].join("\n");
+      const equal = '[%{label: "Danger zone", items: [action_item("Cancel", "cancel_now", "Stripe only", danger?: true)]}]';
+      const mixed = '[%{label: "Danger zone", items: [action_item("Cancel", "cancel_now", "Stripe only", danger?: true), action_item("Pause", "pause", "p")]}]';
+      const blocks = { fact: { story_state: "open" }, expected: { group_shape: [{ label: "Danger zone", item_kinds: ["danger"] }] } };
+      const record = (commit) => ({
+        id: "CUR-254-07",
+        subject: { story_path: "/components/action_menu", variation_id: "provider_pruned", scenario_id: null },
+        survivor: { kind: "story", key: "/components/action_menu", variation_id: "danger" },
+        duplicate_evidence: { subject: clone(blocks), survivor: clone(blocks) },
+        shape_evidence: {
+          path: "storybook/components/action_menu.story.exs",
+          subject: { variation_id: "provider_pruned", groups: "provider_pruned_groups" },
+          survivor: { variation_id: "danger", groups: "danger_groups" },
+        },
+        provenance: { origin_commit: commit, decided_in: "254-06-03" },
+      });
+      const storyPath = "storybook/components/action_menu.story.exs";
+      assert.deepEqual(actionMenuShape(menu(equal), "provider_pruned", "provider_pruned_groups"), blocks);
+      assert.deepEqual(actionMenuShape(menu(equal), "danger", "danger_groups"), blocks);
+      assert.notDeepEqual(actionMenuShape(menu(equal), "open", "full_groups"), blocks, "the parser must distinguish a different shape");
+      assert.equal(actionMenuShape(menu(null), "provider_pruned", "provider_pruned_groups"), null);
+
+      withScratchRepo((dir) => {
+        seed(dir, storyPath, menu(equal));
+        const equalCommit = commitAll(dir, "equal shapes");
+        seed(dir, storyPath, menu(mixed));
+        const mixedCommit = commitAll(dir, "provider variation gains a standard item");
+
+        // The current tree is the merged state: provider_pruned is gone.
+        seed(dir, storyPath, menu(null));
+        commitAll(dir, "merged");
+        const ok = duplicateEvidenceAtCommit(record(equalCommit), { root: dir });
+        assert.equal(ok.shape, true);
+        assert.throws(() => duplicateEvidenceAtCommit(record(mixedCommit), { root: dir }), /expected shape differs at/);
+
+        const forged = record(equalCommit);
+        forged.duplicate_evidence = { subject: { ...clone(blocks), fact: { story_state: "closed" } }, survivor: { ...clone(blocks), fact: { story_state: "closed" } } };
+        assert.throws(() => duplicateEvidenceAtCommit(forged, { root: dir }), /does not match the story shape/);
+
+        // A subject that is still in the current story is not merged.
+        seed(dir, storyPath, menu(equal));
+        commitAll(dir, "subject restored");
+        assert.throws(() => duplicateEvidenceAtCommit(record(equalCommit), { root: dir }), /is still in the current/);
+
+        // A survivor whose shape changed after the merge no longer backs it.
+        seed(dir, storyPath, menu(null).replace('items: [action_item("Cancel", "cancel_now", "y", danger?: true), action_item("Comp", "comp", "z", danger?: true)]', 'items: [action_item("Cancel", "cancel_now", "y")]'));
+        commitAll(dir, "survivor shape drifts");
+        assert.throws(() => duplicateEvidenceAtCommit(record(equalCommit), { root: dir }), /no longer has the pinned shape/);
+
+        const misnamed = record(equalCommit);
+        misnamed.shape_evidence.subject.variation_id = "other";
+        assert.throws(() => duplicateEvidenceAtCommit(misnamed, { root: dir }), /names a different variation/);
+      });
     },
   ],
 ];

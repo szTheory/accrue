@@ -602,6 +602,109 @@
         "key": "/components/subscription_detail||active",
         "kind": "manifest_entry"
       }
+    },
+    {
+      "additional_survivors": [
+        {
+          "key": "/components/subscription_detail||braintree_pruned",
+          "kind": "manifest_entry"
+        }
+      ],
+      "disposition": "merge",
+      "duplicate_evidence": {
+        "subject": {
+          "expected": {
+            "group_shape": [
+              {
+                "item_kinds": [
+                  "danger"
+                ],
+                "label": "Danger zone"
+              }
+            ]
+          },
+          "fact": {
+            "story_state": "open"
+          }
+        },
+        "survivor": {
+          "expected": {
+            "group_shape": [
+              {
+                "item_kinds": [
+                  "danger"
+                ],
+                "label": "Danger zone"
+              }
+            ]
+          },
+          "fact": {
+            "story_state": "open"
+          }
+        }
+      },
+      "id": "CUR-254-07",
+      "kitchen_impact": "none",
+      "preserved_regressions": [
+        {
+          "protects": "the action menu keeps its Danger zone group last with danger-styled menu items (the shape danger and provider_pruned shared)",
+          "test_ref": "accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders a non-modal disclosure menu with button menuitems"
+        },
+        {
+          "protects": "a Braintree subscription renders only its supported Danger zone group through the production owner (the real provider claim)",
+          "test_ref": "accrue_admin/test/accrue_admin/components/subscription_area_test.exs#provider-pruned empty action groups are omitted for a valid Braintree subscription"
+        }
+      ],
+      "provenance": {
+        "decided_in": "254-06-03",
+        "origin_commit": "fdcd6c4ebf57543b9ba7df5a40e5b8271fb79bf1"
+      },
+      "reachability": {
+        "evidence": [
+          {
+            "marker": "braintree_processor?(@subscription)",
+            "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex"
+          },
+          {
+            "marker": "def action_menu(assigns) do",
+            "path": "accrue_admin/lib/accrue_admin/components/dropdown_menu.ex"
+          }
+        ],
+        "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+        "state": "reachable"
+      },
+      "reason": "Duplicate menu shape plus a stale story-local provider rule. provider_pruned renders one open Danger zone group of danger items, the same shape the danger variation renders (story state, group label sequence and item kinds; item count and description text are not part of the shape). Its provider claim was a hand-written Stripe-only description on one item that production eligibility never used; the real Braintree pruning is rendered by SubscriptionLive.subscription_area/1 through the braintree_pruned subscription_detail variation and pinned by the provider-pruned regression.",
+      "reason_class": "duplicate",
+      "reason_evidence": {
+        "kind": "fact_expected_equality"
+      },
+      "reference_scan": {
+        "allowed_paths": [
+          "accrue_admin/storybook/_support/subscription_manifest.ex",
+          "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs"
+        ]
+      },
+      "shape_evidence": {
+        "path": "storybook/components/action_menu.story.exs",
+        "subject": {
+          "groups": "provider_pruned_groups",
+          "variation_id": "provider_pruned"
+        },
+        "survivor": {
+          "groups": "danger_groups",
+          "variation_id": "danger"
+        }
+      },
+      "subject": {
+        "scenario_id": null,
+        "story_path": "/components/action_menu",
+        "variation_id": "provider_pruned"
+      },
+      "survivor": {
+        "key": "/components/action_menu",
+        "kind": "story",
+        "variation_id": "danger"
+      }
     }
   ],
   "schema_version": 1,
@@ -611,7 +714,7 @@
     "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "cec536b44e93936a0f42aa2694c7401d02fc228a953ca4f87383d558aef1ec02",
     "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "a0dc862c9bce0e45f92a4f04da79999714d51a1f1d44ff6cf2167dbc09140b2b",
     "accrue_admin/lib/accrue_admin/router.ex": "2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed",
-    "accrue_admin/storybook/_support/subscription_manifest.ex": "390625406b5200c0a1e9849a5bd8fb185d97f78df53618b8bcdf23ad564dc753",
+    "accrue_admin/storybook/_support/subscription_manifest.ex": "32d6f531c956df6212b968f12db81247434e6bb7592aafef41117e84ef8afce3",
     "accrue_admin/storybook/_support/subscription_scenarios.ex": "734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d",
     "accrue_portal/lib/accrue_portal/live/subscription_live.ex": "c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372",
     "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex": "5059ad186b7d393c41c538237a9b216e19ba587ca6bcaf80bfb5edfef0411bd2",

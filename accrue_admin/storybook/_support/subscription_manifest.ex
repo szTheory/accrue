@@ -81,6 +81,22 @@ if Mix.env() != :prod do
         "ece76a9f5cb66ae79eaa1ca0bdc0b5f0471e725a1c39f24149e1cac64b630797"
     }
     @frozen_compatibility_ids ["braintree_pruned", "dunning_active", "populated"]
+
+    # Phase 253 compiled composition keys (`<story path>||<variation>`) the corrected gap rows cite;
+    # subscription_manifest_test asserts every key exists in the compiled Phase 253 manifest.
+    @phase253_page_keys Enum.map(
+                          ~w(active awaiting_step_up dispatching incomplete_evidence result_confirmed result_failed result_pending review_cancel_now scheduled_cancellation),
+                          &"/pages/subscription||#{&1}"
+                        )
+    @phase253_journey_page_keys Enum.map(
+                                  ~w(awaiting_step_up dispatching result_confirmed result_failed result_pending review_cancel_now),
+                                  &"/pages/subscription||#{&1}"
+                                )
+    @phase253_collection_keys Enum.map(
+                                ~w(filtered_empty incomplete_projection loading multiple_rows new_host_empty one_row page_boundary partial_cursor_error queue_empty unavailable),
+                                &"/groups/subscriptions_collection||#{&1}"
+                              )
+    @sbk06_journey_test "accrue_admin/test/accrue_admin/live/subscription_journey_test.exs"
     @frozen_registry %{family_count: 30, entry_count: 42, specimen_count: 75}
     @frozen_entry_count 6
     @duplicate_fact_fields [
@@ -452,7 +468,8 @@ if Mix.env() != :prod do
         ),
         braintree_pruned_record(),
         dunning_active_record(),
-        populated_retire_record()
+        populated_retire_record(),
+        provider_pruned_merge_record()
       ]
     end
 
@@ -669,6 +686,80 @@ if Mix.env() != :prod do
         ],
         kitchen_impact: "none",
         provenance: %{origin_commit: @frozen_source_commit, decided_in: "254-04-03"}
+      }
+    end
+
+    # D-40: action_menu/provider_pruned is merged into two survivors. Its menu shape duplicates the
+    # `danger` variation (one open Danger zone group of danger items); its provider claim was a
+    # story-local rule, so the real provider-boundary claim lives in subscription_detail
+    # braintree_pruned. The shape blocks are pinned literals taken from the story source at the
+    # origin commit; verify_phase254_curation.mjs re-parses both variations there and fails on any
+    # difference, and re-parses the surviving `danger` variation in the current tree.
+    @provider_pruned_origin_commit "fdcd6c4ebf57543b9ba7df5a40e5b8271fb79bf1"
+    @danger_zone_shape %{
+      fact: %{story_state: "open"},
+      expected: %{group_shape: [%{label: "Danger zone", item_kinds: ["danger"]}]}
+    }
+
+    defp provider_pruned_merge_record do
+      %{
+        id: "CUR-254-07",
+        subject: %{
+          story_path: "/components/action_menu",
+          variation_id: "provider_pruned",
+          scenario_id: nil
+        },
+        disposition: "merge",
+        reason_class: "duplicate",
+        reachability: %{
+          state: "reachable",
+          owner: "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+          evidence: [
+            %{
+              path: "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+              marker: "braintree_processor?(@subscription)"
+            },
+            %{
+              path: "accrue_admin/lib/accrue_admin/components/dropdown_menu.ex",
+              marker: "def action_menu(assigns) do"
+            }
+          ]
+        },
+        reason:
+          "Duplicate menu shape plus a stale story-local provider rule. provider_pruned renders one open Danger zone group of danger items, the same shape the danger variation renders (story state, group label sequence and item kinds; item count and description text are not part of the shape). Its provider claim was a hand-written Stripe-only description on one item that production eligibility never used; the real Braintree pruning is rendered by SubscriptionLive.subscription_area/1 through the braintree_pruned subscription_detail variation and pinned by the provider-pruned regression.",
+        reason_evidence: %{kind: "fact_expected_equality"},
+        duplicate_evidence: %{subject: @danger_zone_shape, survivor: @danger_zone_shape},
+        shape_evidence: %{
+          path: "storybook/components/action_menu.story.exs",
+          subject: %{variation_id: "provider_pruned", groups: "provider_pruned_groups"},
+          survivor: %{variation_id: "danger", groups: "danger_groups"}
+        },
+        survivor: %{kind: "story", key: "/components/action_menu", variation_id: "danger"},
+        additional_survivors: [
+          %{kind: "manifest_entry", key: "#{@subscription_story_path}||braintree_pruned"}
+        ],
+        preserved_regressions: [
+          %{
+            test_ref:
+              "accrue_admin/test/accrue_admin/components/overlay_components_test.exs#renders a non-modal disclosure menu with button menuitems",
+            protects:
+              "the action menu keeps its Danger zone group last with danger-styled menu items (the shape danger and provider_pruned shared)"
+          },
+          %{
+            test_ref:
+              "accrue_admin/test/accrue_admin/components/subscription_area_test.exs#provider-pruned empty action groups are omitted for a valid Braintree subscription",
+            protects:
+              "a Braintree subscription renders only its supported Danger zone group through the production owner (the real provider claim)"
+          }
+        ],
+        reference_scan: %{
+          allowed_paths: [
+            "accrue_admin/storybook/_support/subscription_manifest.ex",
+            "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs"
+          ]
+        },
+        kitchen_impact: "none",
+        provenance: %{origin_commit: @provider_pruned_origin_commit, decided_in: "254-06-03"}
       }
     end
 
@@ -984,9 +1075,11 @@ if Mix.env() != :prod do
           "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
           "<.subscription_area",
           "page",
-          "uncovered",
+          "reachable",
           reason:
-            "The legacy detail Storybook route renders subscription_area/1 only. It does not prove the whole-page shell, breadcrumb, related resources, drill sections, or full-page route.",
+            "The legacy detail Storybook route renders subscription_area/1 only. It does not prove the whole-page shell, breadcrumb, related resources, drill sections, or full-page route; the whole page is covered by the Phase 253 page stories listed here (presentation only).",
+          manifest_keys: @phase253_page_keys,
+          story_path: "/pages/subscription",
           route_path: "/subscriptions/:id",
           route_evidence:
             source_evidence!(
@@ -1002,8 +1095,11 @@ if Mix.env() != :prod do
           "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
           "def render(assigns) do",
           "job",
-          "uncovered",
-          reason: "The subscription list has no selected subscription Storybook composition.",
+          "reachable",
+          reason:
+            "Covered by the Phase 253 collection stories listed here (presentation only: the actual toolbar, result, table and pagination composition for each declared state); mounted list behavior is proven by the mounted tests.",
+          manifest_keys: @phase253_collection_keys,
+          story_path: "/groups/subscriptions_collection",
           route_path: "/subscriptions",
           route_evidence:
             source_evidence!(
@@ -1019,9 +1115,12 @@ if Mix.env() != :prod do
           "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
           "def handle_event(\"open_action_drawer\"",
           "job",
-          "uncovered",
+          "reachable",
           reason:
-            "Static stories do not exercise mount authorization, step-up, preview, confirmation, provider results, or persistence; Phase 253 owns the mounted Admin journey.",
+            "Covered by SBK-06: the mounted journey test accrue_admin/test/accrue_admin/live/subscription_journey_test.exs follows list, detail, action review, step-up, result and context-preserving return, and the Phase 253 page stories listed here show the review and result states as presentation only. Static stories alone still do not exercise mount authorization, step-up, preview, confirmation, provider results, or persistence.",
+          manifest_keys: @phase253_journey_page_keys,
+          story_path: "/pages/subscription",
+          extra: %{covering_requirement: "SBK-06", covering_test: @sbk06_journey_test},
           route_path: "/subscriptions/:id",
           route_evidence:
             source_evidence!(

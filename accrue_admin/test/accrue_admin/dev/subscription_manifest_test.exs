@@ -415,8 +415,31 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert action_band.state == "reachable"
       assert area.manifest_keys == keys
       assert action_band.manifest_keys == keys
-      assert page.state == "uncovered"
+      # Phase 253 (page and collection stories) and SBK-06 (mounted journey) cover these jobs now.
+      # The true claim stays: the legacy detail route alone does not prove a whole page.
+      assert page.state == "reachable"
       assert page.reason =~ "whole-page"
+      assert page.reason =~ "Phase 253 page stories"
+
+      phase253_page_keys =
+        SubscriptionCompositionsManifest.page_entries() |> Enum.map(& &1.key) |> Enum.sort()
+
+      phase253_collection_keys =
+        SubscriptionCompositionsManifest.collection_variation_entries()
+        |> Enum.map(&"#{&1.story_path}||#{&1.variation_id}")
+        |> Enum.sort()
+
+      list = by_owner[{"AccrueAdmin.Live.SubscriptionsLive.render/1", "job"}]
+      journey = by_owner[{"AccrueAdmin.Live.SubscriptionLive.handle_event/3", "job"}]
+
+      assert page.manifest_keys == phase253_page_keys
+      assert list.state == "reachable"
+      assert list.manifest_keys == phase253_collection_keys
+      assert journey.state == "reachable"
+      assert journey.covering_requirement == "SBK-06"
+      assert journey.manifest_keys != []
+      assert journey.manifest_keys -- phase253_page_keys == []
+      assert File.regular?(Path.expand("../../../../#{journey.covering_test}", __DIR__))
 
       contract =
         AccrueAdmin.Dev.ComponentRegistry.group_contract_by_slug(group.contract)
@@ -735,12 +758,63 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       end
     end
 
+    test "populated is retired and provider_pruned merged with survivors, evidence and unchanged registry and kitchen counts" do
+      ledger = SubscriptionManifest.curation_ledger()
+      records = Map.new(ledger.records, &{&1.id, &1})
+
+      assert Enum.map(ledger.records, & &1.id) ==
+               ["CUR-254-01", "CUR-254-02", "CUR-254-03", "CUR-254-04", "CUR-254-05", "CUR-254-06", "CUR-254-07"]
+
+      retire = records["CUR-254-06"]
+      assert retire.disposition == "retire"
+      assert retire.reason_class == "duplicate"
+      assert retire.reason_evidence == %{kind: "fact_expected_equality"}
+      assert retire.duplicate_evidence.subject == retire.duplicate_evidence.survivor
+      assert retire.survivor == %{kind: "manifest_entry", key: "#{@story_path}||active"}
+      assert %{kind: "story", key: "/pages/subscription", variation_id: "active"} in retire.additional_survivors
+      assert retire.alias_evidence.survivor_scenario == "active"
+      assert retire.provenance.origin_commit =~ ~r/\A[0-9a-f]{40}\z/
+
+      merge = records["CUR-254-07"]
+      assert merge.disposition == "merge"
+      assert merge.reason_class == "duplicate"
+      assert merge.subject.variation_id == "provider_pruned"
+      assert merge.survivor == %{kind: "story", key: "/components/action_menu", variation_id: "danger"}
+      assert merge.additional_survivors == [%{kind: "manifest_entry", key: "#{@story_path}||braintree_pruned"}]
+      assert merge.reason =~ "story-local provider rule"
+      assert length(merge.preserved_regressions) == 2
+
+      amendment = Enum.find(ledger.amendments, &(&1.id == "AMD-254-01"))
+      assert "CUR-254-06" in amendment.record_ids
+
+      # The retired id is absent from discovery; the survivors are present.
+      keys = Enum.map(SubscriptionManifest.entries(), & &1.key)
+      refute "#{@story_path}||populated" in keys
+      assert "#{@story_path}||active" in keys
+      assert "#{@story_path}||braintree_pruned" in keys
+      assert ledger.current.compatibility_ids == ["braintree_pruned", "dunning_active"]
+
+      root = Path.expand("../../../../", __DIR__)
+      action_menu = File.read!(Path.join(root, "storybook/components/action_menu.story.exs"))
+      refute action_menu =~ "provider_pruned"
+      assert action_menu =~ "id: :danger"
+
+      # D-06: registry counts and kitchen test digests equal the frozen baseline.
+      assert ledger.current.registry == ledger.frozen_baseline.registry
+      assert ledger.current.kitchen_test_digests == ledger.frozen_baseline.kitchen_test_digests
+
+      # The retired and merged subjects are still checkable against the frozen subjects.
+      frozen = Enum.map(ledger.frozen_baseline.subjects, &{&1.story_path, &1.variation_id})
+      assert {@story_path, "populated"} in frozen
+      assert {"/components/action_menu", "provider_pruned"} in frozen
+    end
+
     test "the regenerated guide lists every curation record, keeps the whole-page limit, and is deterministic" do
       guide = SubscriptionManifest.coverage_guide()
       assert guide == SubscriptionManifest.coverage_guide()
       assert guide =~ "does not prove a whole page"
 
-      for id <- ["CUR-254-01", "CUR-254-02", "CUR-254-03", "CUR-254-04", "CUR-254-05"] do
+      for id <- ["CUR-254-01", "CUR-254-02", "CUR-254-03", "CUR-254-04", "CUR-254-05", "CUR-254-06", "CUR-254-07"] do
         assert guide =~ id
       end
 
