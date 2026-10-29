@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "stage": "corrected",
+  "stage": "confirmed",
   "source_commit": "4a018ce9a2ed17a8d8d809b71fee6d34fc423ce2",
   "fix_commit": "88cd27cdcede5f00594896b6b752069be7ede0ac",
   "assets": {
@@ -135,8 +135,8 @@
       "width": 320,
       "theme": "light",
       "state": "settled",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "1dc7c510e4831cc0d749f18de93907713834f6766d92fcd9590212b017965f09",
+      "pass": true
     },
     {
       "id": "CAP-254-02",
@@ -146,8 +146,8 @@
       "width": 320,
       "theme": "dark",
       "state": "settled",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "959c164a0a77a7767f7058ccfc7b73946dd056a4865cfecdf9d5a89d8864170f",
+      "pass": true
     },
     {
       "id": "CAP-254-03",
@@ -157,8 +157,8 @@
       "width": 1280,
       "theme": "light",
       "state": "settled",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "bccdcb53b1f0408c20609636a6a26a5f1dc6150f5d6ee41e4c8a32e3a66254ff",
+      "pass": true
     },
     {
       "id": "CAP-254-04",
@@ -168,8 +168,8 @@
       "width": 1280,
       "theme": "dark",
       "state": "settled",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "ed0a85427395613238a3b9dc16408ea0def34b867fdddd23c40040e46e9c8bb0",
+      "pass": true
     },
     {
       "id": "CAP-254-05",
@@ -179,8 +179,8 @@
       "width": 320,
       "theme": "light",
       "state": "settled",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "bb64d8aaf7d165d12d42682e0719efff01cfc9c43f47768dd132125c35ba34ff",
+      "pass": true
     },
     {
       "id": "CAP-254-06",
@@ -190,8 +190,8 @@
       "width": 320,
       "theme": "dark",
       "state": "settled",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "57a47636d607788d98c54f883fafed9ef3b7e6e9232ac4f192d19b79b621a445",
+      "pass": true
     },
     {
       "id": "CAP-254-07",
@@ -201,8 +201,8 @@
       "width": 1280,
       "theme": "light",
       "state": "settled",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "8c31ac518c486e49f1e7946692d043b37d6fa60a5644691487132475b1bec418",
+      "pass": true
     },
     {
       "id": "CAP-254-08",
@@ -212,8 +212,8 @@
       "width": 1280,
       "theme": "dark",
       "state": "settled",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "694e8d5664ce499cf8a371dbeba69eb72b508c4c43b27db524eb90dfc7fb7f56",
+      "pass": true
     },
     {
       "id": "CAP-254-09",
@@ -223,8 +223,8 @@
       "width": 320,
       "theme": "light",
       "state": "review-open",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "e90e9a7f56f48abfab87ab581ab7d1f441ab74076610d25a1eb15cf555192df2",
+      "pass": true
     },
     {
       "id": "CAP-254-10",
@@ -234,8 +234,8 @@
       "width": 320,
       "theme": "dark",
       "state": "review-open",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "28c778114e4de499abea273233ab62bd1676489d461508a975f6c3fc3db4e421",
+      "pass": true
     },
     {
       "id": "CAP-254-11",
@@ -245,8 +245,8 @@
       "width": 1280,
       "theme": "light",
       "state": "review-open",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "601b0a57b97ebda9d2db753c35ee2186d898d38c0c244aa9b21f77e0271d8ac9",
+      "pass": true
     },
     {
       "id": "CAP-254-12",
@@ -256,8 +256,8 @@
       "width": 1280,
       "theme": "dark",
       "state": "review-open",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "61fd336dc7e5fa9deceed729e77e882e86a200918f74b7faa1e54ea22ffa0235",
+      "pass": true
     },
     {
       "id": "CAP-254-13",
@@ -267,8 +267,8 @@
       "width": 320,
       "theme": "light",
       "state": "focus-visible",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "1b68d58850d37af29d1a790f9d4f07804eefe9079865fd6690038e808b616d53",
+      "pass": true
     },
     {
       "id": "CAP-254-14",
@@ -278,8 +278,8 @@
       "width": 320,
       "theme": "dark",
       "state": "focus-visible",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "14f6f7f82e33ce2661b38a9fdc9b5669c2aa63862f472077a97749d5f23d4690",
+      "pass": true
     },
     {
       "id": "CAP-254-15",
@@ -289,8 +289,8 @@
       "width": 1280,
       "theme": "light",
       "state": "focus-visible",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "41af91cc27cefdc856149d6b47b78d858e3d8f0d85ea2b40994b1af7bb7593d1",
+      "pass": true
     },
     {
       "id": "CAP-254-16",
@@ -300,8 +300,8 @@
       "width": 1280,
       "theme": "dark",
       "state": "focus-visible",
-      "png_sha256": null,
-      "pass": null
+      "png_sha256": "78ad5be83ad333b21b542e440addbb091988ad275334c406499e0b9347b92c1d",
+      "pass": true
     }
   ],
   "findings": [
@@ -375,8 +375,13 @@
         "id": "subscription-detail-spacing",
         "path": "accrue_admin/assets/css/app.css"
       },
-      "confirmation_captures": [],
-      "verdict": null,
+      "confirmation_captures": [
+        "CAP-254-05",
+        "CAP-254-06",
+        "CAP-254-07",
+        "CAP-254-08"
+      ],
+      "verdict": "confirmed",
       "red_evidence": [
         "254-12-01-red-evidence.json"
       ]
@@ -443,8 +448,13 @@
         "amended_text": "| Page heading | Responsive: `--ax-type-xl` (24px) below 768px, `--ax-type-2xl` (28px) from 768px | Semibold 600 | 1.2 |",
         "note": "254-12 performs the edit and keeps the section's introductory sentence consistent with its rows."
       },
-      "confirmation_captures": [],
-      "verdict": null,
+      "confirmation_captures": [
+        "CAP-254-01",
+        "CAP-254-02",
+        "CAP-254-03",
+        "CAP-254-04"
+      ],
+      "verdict": "confirmed",
       "red_evidence": [
         "254-12-01-red-evidence.json"
       ]
@@ -491,8 +501,13 @@
           "id": "DR-254-03:computed"
         }
       ],
-      "confirmation_captures": [],
-      "verdict": null,
+      "confirmation_captures": [
+        "CAP-254-05",
+        "CAP-254-06",
+        "CAP-254-07",
+        "CAP-254-08"
+      ],
+      "verdict": "confirmed",
       "red_evidence": [
         "254-12-01-red-evidence.json"
       ]
@@ -540,8 +555,13 @@
         "amended_text": "| Section title | 20px (`--ax-type-lg`) | Semibold 600 | 1.2 |",
         "note": "254-12 performs the edit and keeps the section's introductory sentence consistent with its rows."
       },
-      "confirmation_captures": [],
-      "verdict": null
+      "confirmation_captures": [
+        "CAP-254-13",
+        "CAP-254-14",
+        "CAP-254-15",
+        "CAP-254-16"
+      ],
+      "verdict": "confirmed"
     },
     {
       "id": "DR-254-05",
@@ -587,7 +607,7 @@
         }
       ],
       "confirmation_captures": [],
-      "verdict": null,
+      "verdict": "confirmed",
       "red_evidence": [
         "254-13-01-red-evidence.json"
       ]
@@ -625,7 +645,8 @@
       "rationale": "Whether the audit ledger heading should carry deliberate emphasis is a product and brand judgment the plan does not settle, it cannot be decided by a mechanical check, and the rule is already tagged for the type-system pass. D-36 defers anything that is not one of the five locked dispositions.",
       "tests": [],
       "confirmation_captures": [],
-      "verdict": null
+      "verdict": "not-confirmed",
+      "verdict_reason": "deferred by D-36: no correction was made, so there is nothing to confirm; the condition remains and is tracked as DEF-254-04"
     },
     {
       "id": "DR-254-07",
@@ -657,7 +678,8 @@
       "rationale": "A better caption needs a wording decision the plan does not make, two existing LiveView tests pin the current string, and a copy change would also regenerate the digested manifests. It is real but outside the locked correction batch, so it is deferred with the copy owner as the tier.",
       "tests": [],
       "confirmation_captures": [],
-      "verdict": null
+      "verdict": "not-confirmed",
+      "verdict_reason": "deferred by D-36: no correction was made, so there is nothing to confirm; the condition remains and is tracked as DEF-254-05"
     },
     {
       "id": "DR-254-08",
@@ -695,7 +717,8 @@
       "rationale": "Target size and keyboard focus are measured by the UXQ-02 probes (254-11): if they route a defect on summary.ax-detail-section-head it is fixed in the correction batch as a routed accessibility defect; otherwise sharing .ax-disclosure-summary across detail views is a design decision that reaches several LiveViews and is deferred (D-36). 254-13 re-disposition: none of the 30 routed accessibility entries (register at eefee2a62958dbdefe426d5434ed133e91b3e8ec) names summary.ax-detail-section-head (A11Y-254-22 names summary.ax-button, the menu button), and the 151 composition cells now report 0 observations, so no defect was routed and the finding stays deferred (D-36).",
       "tests": [],
       "confirmation_captures": [],
-      "verdict": null
+      "verdict": "not-confirmed",
+      "verdict_reason": "deferred by D-36: no correction was made, so there is nothing to confirm; the condition remains and is tracked as DEF-254-06"
     },
     {
       "id": "DR-254-09",
@@ -727,7 +750,8 @@
       "rationale": "D-36 names the duplicate disclosure selectors as a known deferral: removing either rule is a cleanup with no visible effect and sits outside the correction batch.",
       "tests": [],
       "confirmation_captures": [],
-      "verdict": null
+      "verdict": "not-confirmed",
+      "verdict_reason": "deferred by D-36: no correction was made, so there is nothing to confirm; the condition remains and is tracked as DEF-254-03"
     }
   ],
   "amendments": [
@@ -888,7 +912,56 @@
       }
     }
   ],
-  "baselines_changed": [],
+  "baselines_changed": [
+    {
+      "key": "subscription-detail",
+      "finding_id": "DR-254-03",
+      "sha256": "baf35c20cb295fb39660045b96ed8ed331e22282b8c02b093987248d9fc33b17",
+      "reason": "Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px"
+    },
+    {
+      "key": "subscription-detail-dark",
+      "finding_id": "DR-254-03",
+      "sha256": "af31a6715fe4a81cb8be7f60dcc05c7410b5554891456d6f06157e827b2e283d",
+      "reason": "Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px (dark)"
+    },
+    {
+      "key": "invoice-detail",
+      "finding_id": "DR-254-03",
+      "sha256": "ca5da6e20564e58fcba061cb3cb0c233ae6be4e561138e1c7eaa82f5339dc994",
+      "reason": "Invoice detail: field-list labels take the 12px label role (DR-254-03); page 1643 to 1637 px"
+    },
+    {
+      "key": "invoice-detail-dark",
+      "finding_id": "DR-254-03",
+      "sha256": "b7f52e990d231446b7f5ef5e4bd72f13ea3761d9bcb0d4b1db39577d2d886ff3",
+      "reason": "Invoice detail: field-list labels take the 12px label role (DR-254-03); page 1643 to 1637 px (dark)"
+    },
+    {
+      "key": "subscriptions",
+      "finding_id": "A11Y-254-28",
+      "sha256": "93cf9b1eede09b5c8cfdd35c2d2e35c9eaca08b45db120548fabaf1c7165ebad",
+      "reason": "Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02)"
+    },
+    {
+      "key": "subscriptions-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "fc4763e081337dad0dc05285832921c301d906d245a34d344371f376c12ca53d",
+      "reason": "Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02) (dark)"
+    },
+    {
+      "key": "invoices",
+      "finding_id": "A11Y-254-28",
+      "sha256": "caa18b0493f1a1065f669b8fdf4fb4f0ea6ee94e4b3baba52d88f12e13babf85",
+      "reason": "Invoices list: same shared identity secondary row gap (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 1032 to 1044 px; owner decision accept-attributable (254-15-02)"
+    },
+    {
+      "key": "invoices-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "c6e888db27471c29698b9423a25f7778774ca150f56cddcdc757b19cc681605c",
+      "reason": "Invoices list: same shared identity secondary row gap (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 1032 to 1044 px; owner decision accept-attributable (254-15-02) (dark)"
+    }
+  ],
   "deferred": [
     {
       "id": "DEF-254-01",
@@ -930,5 +1003,14 @@
       "trigger": "A design decision to share .ax-disclosure-summary across detail views (the 254-11 probes routed no defect on the summary, so that trigger did not fire).",
       "finding_id": "DR-254-08"
     }
-  ]
+  ],
+  "baselines_reattested": [],
+  "confirmation_evidence": {
+    "mint_run_id": "40876347666",
+    "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+    "observation_run_id": "40890395793",
+    "observation_head_sha": "a9204d3b3e9ea2de07554c49a43e5025c501b95c",
+    "owner_decision_a": "accept-attributable (Rec.)",
+    "note": "subscriptions.png no longer carries the H1 token swap zero-visual-change proof; DR-254-02:computed (767 and 768 CSS px) carries it"
+  }
 }

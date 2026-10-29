@@ -66,22 +66,22 @@ test("unknown flags, a bad --stage and a missing mode fail closed", () => {
   assert.match(noMode.stderr, /exactly one of/);
 });
 
-test("the real record passes at stage corrected and the CLI agrees", () => {
-  const summary = verifyDesignReview(readRecord(), { root: ROOT, stage: "corrected" });
-  assert.deepEqual(summary, { stage: "corrected", findings: 9, captures: 16, verdicts: 7, deferred: 6 });
-  const result = run(["--check", "--stage", "corrected"]);
+test("the real record passes at stage confirmed and the CLI agrees", () => {
+  const summary = verifyDesignReview(readRecord(), { root: ROOT, stage: "confirmed" });
+  assert.deepEqual(summary, { stage: "confirmed", findings: 9, captures: 16, verdicts: 7, deferred: 6 });
+  const result = run(["--check", "--stage", "confirmed"]);
   assert.equal(result.status, 0, result.stderr + result.stdout);
-  assert.match(result.stdout, /PASS \(stage corrected/);
+  assert.match(result.stdout, /PASS \(stage confirmed/);
 });
 
-test("the CLI rejects the corrected record when another stage is demanded (positive control: the demanded stage passes)", () => {
+test("the CLI rejects the confirmed record when another stage is demanded (positive control: the demanded stage passes)", () => {
   const assessment = run(["--check", "--stage", "assessment"]);
   assert.notEqual(assessment.status, 0);
-  assert.match(assessment.stderr, /at stage corrected, not assessment/);
-  const confirmed = run(["--check", "--stage", "confirmed"]);
-  assert.notEqual(confirmed.status, 0);
-  assert.match(confirmed.stderr, /at stage corrected, not confirmed/);
-  assert.equal(run(["--check", "--stage", "corrected"]).status, 0);
+  assert.match(assessment.stderr, /at stage confirmed, not assessment/);
+  const corrected = run(["--check", "--stage", "corrected"]);
+  assert.notEqual(corrected.status, 0);
+  assert.match(corrected.stderr, /at stage confirmed, not corrected/);
+  assert.equal(run(["--check", "--stage", "confirmed"]).status, 0);
 });
 
 test("the committed Markdown view is exactly the renderer output (and an edited view is rejected)", () => {
@@ -107,7 +107,7 @@ test("the real record carries the five locked D-34 dispositions with the lowest 
     assert.equal(finding.disposition, disposition, id);
     assert.equal(finding.owning_tier, tier, id);
     assert.equal(finding.origin, origin, id);
-    assert.ok(finding.tests.every((entry) => entry.status !== "pending"), `${id}: no test is still pending at stage corrected`);
+    assert.ok(finding.tests.every((entry) => entry.status !== "pending"), `${id}: no test is still pending at stage confirmed`);
     if (disposition === "fixed") {
       assert.ok(finding.tests.length > 0 && finding.red_evidence.length > 0, `${id}: a fixed finding lists its tests and red evidence`);
     }
@@ -158,7 +158,7 @@ test("the real record carries 16 captures keyed by the four D-33 patterns and AM
   for (const capture of record.captures.filter((entry) => entry.state === "review-open" || entry.state === "focus-visible")) {
     assert.equal(capture.sourcing, "mounted");
   }
-  assert.ok(record.captures.every((capture) => capture.png_sha256 === null && capture.pass === null));
+  assert.ok(record.captures.every((capture) => /^[0-9a-f]{64}$/.test(capture.png_sha256) && capture.pass === true), "every confirmed capture carries its committed PNG sha256 and a passing gate");
   const amendment = record.amendments.find((entry) => entry.id === "AMD-254-03");
   assert.deepEqual(amendment.owner_ack, { date: "2026-10-28", status: "owner-accepted at plan time" });
   assert.deepEqual(amendment.decisions, ["D-33"]);
@@ -179,7 +179,7 @@ test("no score-like key or tmp-path evidence exists in the real record, and the 
 test("a stale source sha on the real record is rejected (positive control for the sha binding)", () => {
   const record = readRecord();
   record.findings[0].source_refs[0].sha = "f".repeat(64);
-  assert.throws(() => verifyDesignReview(record, { root: ROOT, stage: "corrected" }), /source_ref sha .* is stale/);
+  assert.throws(() => verifyDesignReview(record, { root: ROOT, stage: "confirmed" }), /source_ref sha .* is stale/);
 });
 
 test("spacing scan positive control on the real app.css at source_commit: it finds the page-tier overrides the finding cites", () => {
@@ -377,4 +377,28 @@ test("the real routed-defect register: the D-36 bound classifies 8 inside and 10
   assert.equal(outside.length, 102);
   assert.equal(classifyRoutedCell("page::active::viewport::1280::dark"), "inside");
   assert.equal(classifyRoutedCell("page::active::breakpoint::768::dark"), "outside");
+});
+
+test("the real confirmed record maps every changed Phase 211 baseline to a finding or a routed accessibility id, and a tampered capture is rejected", () => {
+  const record = readRecord();
+  const changed = new Map(record.baselines_changed.map((entry) => [entry.key, entry.finding_id]));
+  assert.deepEqual([...changed.keys()].sort(), [
+    "invoice-detail", "invoice-detail-dark", "invoices", "invoices-dark",
+    "subscription-detail", "subscription-detail-dark", "subscriptions", "subscriptions-dark"
+  ]);
+  for (const key of ["subscription-detail", "subscription-detail-dark", "invoice-detail", "invoice-detail-dark"]) assert.equal(changed.get(key), "DR-254-03", key);
+  for (const key of ["subscriptions", "subscriptions-dark", "invoices", "invoices-dark"]) assert.equal(changed.get(key), "A11Y-254-28", key);
+  assert.deepEqual(record.findings.filter((finding) => finding.verdict === "confirmed").map((finding) => finding.id), ["DR-254-01", "DR-254-02", "DR-254-03", "DR-254-04", "DR-254-05"]);
+  assert.ok(record.findings.filter((finding) => finding.verdict === "not-confirmed").every((finding) => finding.disposition === "deferred" && finding.verdict_reason));
+  const options = { root: ROOT, stage: "confirmed" };
+  assert.doesNotThrow(() => verifyDesignReview(structuredClone(record), options), "positive control: the committed record passes");
+  const tampered = structuredClone(record);
+  tampered.captures[0].png_sha256 = "0".repeat(64);
+  assert.throws(() => verifyDesignReview(tampered, options), /differs from the manifest sha256/);
+  const outside = structuredClone(record);
+  outside.baselines_changed[4].finding_id = "A11Y-254-77";
+  assert.throws(() => verifyDesignReview(outside, options), /not a routed-defect of the register at AMD-254-05's register_commit/);
+  const unmapped = structuredClone(record);
+  unmapped.baselines_changed.pop();
+  assert.throws(() => verifyDesignReview(unmapped, options), /neither a changed baseline mapped to a finding nor a re-attested one/);
 });

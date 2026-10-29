@@ -2,7 +2,7 @@
 
 <!-- Generated from 254-DESIGN-REVIEW.json by scripts/ci/verify_phase254_design_review.mjs --render. Do not edit by hand. -->
 
-**Stage:** corrected
+**Stage:** confirmed
 **Source commit:** `4a018ce9a2ed17a8d8d809b71fee6d34fc423ce2`
 **Fix commit:** `88cd27cdcede5f00594896b6b752069be7ede0ac`
 **Scoring:** none. No aesthetic score is recorded (D-03, D-31); every cell is a source-bound claim or a mechanical result.
@@ -33,22 +33,22 @@
 
 | Id | Key | Sourcing | State | Width | Theme | Route | png sha256 | Pass |
 |----|-----|----------|-------|-------|-------|-------|------------|------|
-| CAP-254-01 | `phase254-collection-multiple_rows-w320-light` | story | settled | 320 | light | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | pending | pending |
-| CAP-254-02 | `phase254-collection-multiple_rows-w320-dark` | story | settled | 320 | dark | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | pending | pending |
-| CAP-254-03 | `phase254-collection-multiple_rows-w1280-light` | story | settled | 1280 | light | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | pending | pending |
-| CAP-254-04 | `phase254-collection-multiple_rows-w1280-dark` | story | settled | 1280 | dark | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | pending | pending |
-| CAP-254-05 | `phase254-page-active-w320-light` | story | settled | 320 | light | `/billing/dev/storybook/pages/subscription?tab=active` | pending | pending |
-| CAP-254-06 | `phase254-page-active-w320-dark` | story | settled | 320 | dark | `/billing/dev/storybook/pages/subscription?tab=active` | pending | pending |
-| CAP-254-07 | `phase254-page-active-w1280-light` | story | settled | 1280 | light | `/billing/dev/storybook/pages/subscription?tab=active` | pending | pending |
-| CAP-254-08 | `phase254-page-active-w1280-dark` | story | settled | 1280 | dark | `/billing/dev/storybook/pages/subscription?tab=active` | pending | pending |
-| CAP-254-09 | `phase254-mounted-review-open-w320-light` | mounted | review-open | 320 | light | `/billing/subscriptions/:id` | pending | pending |
-| CAP-254-10 | `phase254-mounted-review-open-w320-dark` | mounted | review-open | 320 | dark | `/billing/subscriptions/:id` | pending | pending |
-| CAP-254-11 | `phase254-mounted-review-open-w1280-light` | mounted | review-open | 1280 | light | `/billing/subscriptions/:id` | pending | pending |
-| CAP-254-12 | `phase254-mounted-review-open-w1280-dark` | mounted | review-open | 1280 | dark | `/billing/subscriptions/:id` | pending | pending |
-| CAP-254-13 | `phase254-mounted-disclosure-focus-w320-light` | mounted | focus-visible | 320 | light | `/billing/subscriptions/:id` | pending | pending |
-| CAP-254-14 | `phase254-mounted-disclosure-focus-w320-dark` | mounted | focus-visible | 320 | dark | `/billing/subscriptions/:id` | pending | pending |
-| CAP-254-15 | `phase254-mounted-disclosure-focus-w1280-light` | mounted | focus-visible | 1280 | light | `/billing/subscriptions/:id` | pending | pending |
-| CAP-254-16 | `phase254-mounted-disclosure-focus-w1280-dark` | mounted | focus-visible | 1280 | dark | `/billing/subscriptions/:id` | pending | pending |
+| CAP-254-01 | `phase254-collection-multiple_rows-w320-light` | story | settled | 320 | light | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | `1dc7c510e4831cc0d749f18de93907713834f6766d92fcd9590212b017965f09` | true |
+| CAP-254-02 | `phase254-collection-multiple_rows-w320-dark` | story | settled | 320 | dark | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | `959c164a0a77a7767f7058ccfc7b73946dd056a4865cfecdf9d5a89d8864170f` | true |
+| CAP-254-03 | `phase254-collection-multiple_rows-w1280-light` | story | settled | 1280 | light | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | `bccdcb53b1f0408c20609636a6a26a5f1dc6150f5d6ee41e4c8a32e3a66254ff` | true |
+| CAP-254-04 | `phase254-collection-multiple_rows-w1280-dark` | story | settled | 1280 | dark | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | `ed0a85427395613238a3b9dc16408ea0def34b867fdddd23c40040e46e9c8bb0` | true |
+| CAP-254-05 | `phase254-page-active-w320-light` | story | settled | 320 | light | `/billing/dev/storybook/pages/subscription?tab=active` | `bb64d8aaf7d165d12d42682e0719efff01cfc9c43f47768dd132125c35ba34ff` | true |
+| CAP-254-06 | `phase254-page-active-w320-dark` | story | settled | 320 | dark | `/billing/dev/storybook/pages/subscription?tab=active` | `57a47636d607788d98c54f883fafed9ef3b7e6e9232ac4f192d19b79b621a445` | true |
+| CAP-254-07 | `phase254-page-active-w1280-light` | story | settled | 1280 | light | `/billing/dev/storybook/pages/subscription?tab=active` | `8c31ac518c486e49f1e7946692d043b37d6fa60a5644691487132475b1bec418` | true |
+| CAP-254-08 | `phase254-page-active-w1280-dark` | story | settled | 1280 | dark | `/billing/dev/storybook/pages/subscription?tab=active` | `694e8d5664ce499cf8a371dbeba69eb72b508c4c43b27db524eb90dfc7fb7f56` | true |
+| CAP-254-09 | `phase254-mounted-review-open-w320-light` | mounted | review-open | 320 | light | `/billing/subscriptions/:id` | `e90e9a7f56f48abfab87ab581ab7d1f441ab74076610d25a1eb15cf555192df2` | true |
+| CAP-254-10 | `phase254-mounted-review-open-w320-dark` | mounted | review-open | 320 | dark | `/billing/subscriptions/:id` | `28c778114e4de499abea273233ab62bd1676489d461508a975f6c3fc3db4e421` | true |
+| CAP-254-11 | `phase254-mounted-review-open-w1280-light` | mounted | review-open | 1280 | light | `/billing/subscriptions/:id` | `601b0a57b97ebda9d2db753c35ee2186d898d38c0c244aa9b21f77e0271d8ac9` | true |
+| CAP-254-12 | `phase254-mounted-review-open-w1280-dark` | mounted | review-open | 1280 | dark | `/billing/subscriptions/:id` | `61fd336dc7e5fa9deceed729e77e882e86a200918f74b7faa1e54ea22ffa0235` | true |
+| CAP-254-13 | `phase254-mounted-disclosure-focus-w320-light` | mounted | focus-visible | 320 | light | `/billing/subscriptions/:id` | `1b68d58850d37af29d1a790f9d4f07804eefe9079865fd6690038e808b616d53` | true |
+| CAP-254-14 | `phase254-mounted-disclosure-focus-w320-dark` | mounted | focus-visible | 320 | dark | `/billing/subscriptions/:id` | `14f6f7f82e33ce2661b38a9fdc9b5669c2aa63862f472077a97749d5f23d4690` | true |
+| CAP-254-15 | `phase254-mounted-disclosure-focus-w1280-light` | mounted | focus-visible | 1280 | light | `/billing/subscriptions/:id` | `41af91cc27cefdc856149d6b47b78d858e3d8f0d85ea2b40994b1af7bb7593d1` | true |
+| CAP-254-16 | `phase254-mounted-disclosure-focus-w1280-dark` | mounted | focus-visible | 1280 | dark | `/billing/subscriptions/:id` | `78ad5be83ad333b21b542e440addbb091988ad275334c406499e0b9347b92c1d` | true |
 
 ## Findings
 
@@ -57,7 +57,8 @@
 - **Origin:** 253#1
 - **Owning tier:** page
 - **Disposition:** fixed
-- **Verdict:** pending
+- **Verdict:** confirmed
+- **Confirmation captures:** CAP-254-05, CAP-254-06, CAP-254-07, CAP-254-08
 - **Claim:** The subscription detail page overrides its normal group rhythm with page-tier gaps of 1px, 3px and 0 (and a raw 0 0.25rem field gap), so the summary, facts, resources and disclosure groups read as one compressed block instead of the title, lifecycle, facts hierarchy the contract specifies.
 - **Rationale:** D-34: delete the page-tier overrides so the component tokens apply and replace the raw field gap with --ax-space-xs. The page tier is the lowest tier that owns these selectors. The mechanical check scanSubscriptionDetailSpacing finds them at source_commit and must find none at fix_commit.
 - **Evidence:** `accrue_admin/assets/css/app.css:2988-2990`, `accrue_admin/assets/css/app.css:3050-3052`, `accrue_admin/assets/css/app.css:3060-3062`, `accrue_admin/assets/css/app.css:6709-6712`, `accrue_admin/assets/css/app.css:6720-6724`, `accrue_admin/assets/css/theme.css:35-37`
@@ -69,7 +70,8 @@
 - **Origin:** 253#2
 - **Owning tier:** contract
 - **Disposition:** contract-amended
-- **Verdict:** pending
+- **Verdict:** confirmed
+- **Confirmation captures:** CAP-254-01, CAP-254-02, CAP-254-03, CAP-254-04
 - **Claim:** The Phase 253 audit reported the collection heading at 24px against a 28px page-heading contract. The shared display rule is already responsive (1.5rem, 24px, below 768px; 1.75rem, 28px, from 768px), so the contract row, not the rule, is wrong; the two rem literals can move to --ax-type-xl and --ax-type-2xl with no visual change.
 - **Rationale:** D-34: amend the contract to a responsive heading and leave shared .ax-display semantics untouched. The heading red test is DR-254-02:source (the declared literals); DR-254-02:computed at 767 and 768 CSS px passes before and after by design.
 - **Evidence:** `accrue_admin/assets/css/app.css:777-781`, `accrue_admin/assets/css/app.css:2161-2165`, `accrue_admin/assets/css/theme.css:30-31`, `accrue_admin/lib/accrue_admin/components/page_header.ex:39`
@@ -83,7 +85,8 @@
 - **Origin:** 253#2
 - **Owning tier:** component
 - **Disposition:** fixed
-- **Verdict:** pending
+- **Verdict:** confirmed
+- **Confirmation captures:** CAP-254-05, CAP-254-06, CAP-254-07, CAP-254-08
 - **Claim:** Detail field labels resolve to 14px semibold uppercase (the bare .ax-field-label rule) while the contract label role is 12px semibold, so detail labels are larger than the summary keys they sit beside.
 - **Rationale:** D-34: scope a font: var(--ax-type-label-sm-font) rule to .ax-field-list .ax-field-label so detail labels equal summary keys at --ax-type-xs. The bare .ax-field-label stays untouched (six form controls share it) and .ax-field-value keeps tabular-nums.
 - **Evidence:** `accrue_admin/lib/accrue_admin/components/detail.ex:49-52`, `accrue_admin/assets/css/app.css:6732-6740`, `accrue_admin/assets/css/theme.css:101`
@@ -95,7 +98,8 @@
 - **Origin:** 253#2
 - **Owning tier:** contract
 - **Disposition:** contract-amended
-- **Verdict:** pending
+- **Verdict:** confirmed
+- **Confirmation captures:** CAP-254-13, CAP-254-14, CAP-254-15, CAP-254-16
 - **Claim:** Detail disclosure headings render at 20px (--ax-type-lg), which is outside the contract's declared size steps, although the brandbook's seven-step type scale in theme.css defines 20px as the title role.
 - **Rationale:** D-34: the brandbook scale is authoritative, so the contract gains a Section title role; no CSS changes. The identical duplicate selector is a separate deferral (DR-254-09).
 - **Evidence:** `accrue_admin/assets/css/app.css:6523-6528`, `accrue_admin/assets/css/theme.css:29`, `accrue_admin/assets/css/theme.css:105`
@@ -107,7 +111,7 @@
 - **Origin:** 253#3
 - **Owning tier:** copy
 - **Disposition:** fixed
-- **Verdict:** pending
+- **Verdict:** confirmed
 - **Claim:** The action-result link label and its scoped events path exist twice: SubscriptionLive owns the literal and the path builder privately, and the Storybook page scenario adapter repeats both, so the static result story can drift from the mounted page.
 - **Rationale:** D-34: add Copy.subscription_action_activity_link_label/0 and a public @doc false SubscriptionLive.action_activity_path/3, and have the LiveView and the story adapter call both, as the adapter already does for action_result_message/1. The result link appears after a dispatch, which none of the 16 captures reach, so the proof is an ExUnit owner test plus a literal-count guard.
 - **Evidence:** `accrue_admin/lib/accrue_admin/live/subscription_live.ex:2090-2096`, `accrue_admin/lib/accrue_admin/live/subscription_live.ex:2111-2118`, `accrue_admin/storybook/_support/subscription_page_scenarios.ex:188-197`, `accrue_admin/lib/accrue_admin/copy.ex:1001`
@@ -119,7 +123,7 @@
 - **Origin:** assessment
 - **Owning tier:** component
 - **Disposition:** deferred
-- **Verdict:** pending
+- **Verdict:** not-confirmed (deferred by D-36: no correction was made, so there is nothing to confirm; the condition remains and is tracked as DEF-254-04)
 - **Claim:** The Activity audit log heading is the only section title at font-weight 950 and the only one coloured with --ax-accent-readable. The Phase 253 contract allows two weights and reserves the accent for the eligible action, the selected view, text links and focus; 950 is a third weight and the accent here marks a heading.
 - **Rationale:** Whether the audit ledger heading should carry deliberate emphasis is a product and brand judgment the plan does not settle, it cannot be decided by a mechanical check, and the rule is already tagged for the type-system pass. D-36 defers anything that is not one of the five locked dispositions.
 - **Evidence:** `accrue_admin/assets/css/app.css:6530-6535`, `accrue_admin/lib/accrue_admin/live/subscription_live.ex:497`
@@ -129,7 +133,7 @@
 - **Origin:** assessment
 - **Owning tier:** copy
 - **Disposition:** deferred
-- **Verdict:** pending
+- **Verdict:** not-confirmed (deferred by D-36: no correction was made, so there is nothing to confirm; the condition remains and is tracked as DEF-254-05)
 - **Claim:** The audit strip is captioned "Audit event table: Actor / Action / Timestamp", which describes a table structure in implementer language, while the element below it is a three-item summary row labelled "Latest audit event summary" and no table.
 - **Rationale:** A better caption needs a wording decision the plan does not make, two existing LiveView tests pin the current string, and a copy change would also regenerate the digested manifests. It is real but outside the locked correction batch, so it is deferred with the copy owner as the tier.
 - **Evidence:** `accrue_admin/lib/accrue_admin/live/subscription_live.ex:500`, `accrue_admin/lib/accrue_admin/live/subscription_live.ex:502`
@@ -139,7 +143,7 @@
 - **Origin:** assessment
 - **Owning tier:** component
 - **Disposition:** deferred
-- **Verdict:** pending
+- **Verdict:** not-confirmed (deferred by D-36: no correction was made, so there is nothing to confirm; the condition remains and is tracked as DEF-254-06)
 - **Claim:** The subscription detail disclosures use &lt;summary class="ax-detail-section-head"&gt;, a flex row with a 22px minimum height, and do not use .ax-disclosure-summary, which gives the webhook detail disclosures a 44px target, a pointer cursor, a chevron and an explicit focus ring. Whether the default marker and focus ring render acceptably is a runtime question; this record asserts only the class difference.
 - **Rationale:** Target size and keyboard focus are measured by the UXQ-02 probes (254-11): if they route a defect on summary.ax-detail-section-head it is fixed in the correction batch as a routed accessibility defect; otherwise sharing .ax-disclosure-summary across detail views is a design decision that reaches several LiveViews and is deferred (D-36). 254-13 re-disposition: none of the 30 routed accessibility entries (register at eefee2a62958dbdefe426d5434ed133e91b3e8ec) names summary.ax-detail-section-head (A11Y-254-22 names summary.ax-button, the menu button), and the 151 composition cells now report 0 observations, so no defect was routed and the finding stays deferred (D-36).
 - **Evidence:** `accrue_admin/lib/accrue_admin/live/subscription_live.ex:488`, `accrue_admin/assets/css/app.css:6480-6494`, `accrue_admin/lib/accrue_admin/live/webhook_live.ex:273`
@@ -149,7 +153,7 @@
 - **Origin:** assessment
 - **Owning tier:** component
 - **Disposition:** deferred
-- **Verdict:** pending
+- **Verdict:** not-confirmed (deferred by D-36: no correction was made, so there is nothing to confirm; the condition remains and is tracked as DEF-254-03)
 - **Claim:** The detail section title is declared twice with the same colour, size and weight: once globally and once scoped to .ax-subscription-detail-page.
 - **Rationale:** D-36 names the duplicate disclosure selectors as a known deferral: removing either rule is a cleanup with no visible effect and sits outside the correction batch.
 - **Evidence:** `accrue_admin/assets/css/app.css:6515-6521`, `accrue_admin/assets/css/app.css:6523-6528`
@@ -162,7 +166,14 @@
 
 ## Changed baselines
 
-None.
+- `subscription-detail` -> DR-254-03: Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px
+- `subscription-detail-dark` -> DR-254-03: Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px (dark)
+- `invoice-detail` -> DR-254-03: Invoice detail: field-list labels take the 12px label role (DR-254-03); page 1643 to 1637 px
+- `invoice-detail-dark` -> DR-254-03: Invoice detail: field-list labels take the 12px label role (DR-254-03); page 1643 to 1637 px (dark)
+- `subscriptions` -> A11Y-254-28: Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02)
+- `subscriptions-dark` -> A11Y-254-28: Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02) (dark)
+- `invoices` -> A11Y-254-28: Invoices list: same shared identity secondary row gap (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 1032 to 1044 px; owner decision accept-attributable (254-15-02)
+- `invoices-dark` -> A11Y-254-28: Invoices list: same shared identity secondary row gap (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 1032 to 1044 px; owner decision accept-attributable (254-15-02) (dark)
 
 ## Deferred
 

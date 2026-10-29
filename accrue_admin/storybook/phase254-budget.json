@@ -13224,7 +13224,33 @@
         "os": "linux 7.0.0-1017-azure"
       }
     },
-    "visual": null,
+    "visual": {
+      "job": "browser-uat",
+      "run_id": 40890395793,
+      "attempt": 1,
+      "head_sha": "a9204d3b3e9ea2de07554c49a43e5025c501b95c",
+      "conclusion": "success",
+      "duration_s": 1241,
+      "baseline_p90_s": 1144,
+      "added_s": 97,
+      "max_added_s": 180,
+      "within_allowance": true,
+      "per_cell": {
+        "cells": 32,
+        "median_ms": 828,
+        "p90_ms": 1234,
+        "max_ms": 1691,
+        "sum_ms": 28434,
+        "source": "playwright-visual-gate.json of the phase254-machine-evidence-browser-uat artifact (PHASE254_PLAYWRIGHT_JSON), cases of subscription-visual-phase254.spec.js"
+      },
+      "machine": {
+        "cpu_model": "AMD EPYC 7763 64-Core Processor",
+        "cores": 4,
+        "image_os": "ubuntu24",
+        "image_version": "20261026.354.1"
+      },
+      "note": "added_s is the whole job against the DEV-254-09 baseline (n = 1, a different runner pool can move it); the 32 cells themselves cost 28.4 s and the visual gate step 45 s. scheduled_cancellation stays: no visual-allowance-drop."
+    },
     "a11y": null,
     "final": null
   },
@@ -13496,7 +13522,7 @@
       "workflow": "CI",
       "job": "Admin Phase 200 deterministic guardrails",
       "step": "Run Phase 200 deterministic guardrails",
-      "test_ref": "[chromium-desktop] › e2e/admin-storybook-a11y-phase200.spec.js:17:3 › Phase 200 rendered Storybook accessibility › discovers mounted Storybook URLs from the DOM and scans settled light/dark modes",
+      "test_ref": "[chromium-desktop] \u203a e2e/admin-storybook-a11y-phase200.spec.js:17:3 \u203a Phase 200 rendered Storybook accessibility \u203a discovers mounted Storybook URLs from the DOM and scans settled light/dark modes",
       "classification": "out-of-scope-branch-only",
       "main_run_id": 40387584954,
       "decision": "fix-in-phase",
@@ -13514,7 +13540,7 @@
       "workflow": "AccrueAdmin Browser UAT",
       "job": "Browser UAT",
       "step": "Run browser UAT",
-      "test_ref": "[chromium-desktop] › e2e/admin-storybook-a11y-phase200.spec.js:17:3 › Phase 200 rendered Storybook accessibility › discovers mounted Storybook URLs from the DOM and scans settled light/dark modes",
+      "test_ref": "[chromium-desktop] \u203a e2e/admin-storybook-a11y-phase200.spec.js:17:3 \u203a Phase 200 rendered Storybook accessibility \u203a discovers mounted Storybook URLs from the DOM and scans settled light/dark modes",
       "classification": "out-of-scope-branch-only",
       "main_run_id": 40361348536,
       "decision": "fix-in-phase",
@@ -13532,7 +13558,7 @@
       "workflow": "AccrueAdmin Browser UAT",
       "job": "Browser UAT",
       "step": "Run browser UAT",
-      "test_ref": "[chromium-desktop] › e2e/admin-interaction-overlay-phase199.spec.js:1010:3 › Phase 199 interaction and overlay contract › @phase199 @affordance action menu stays adjacent and bounded at locked viewport edges",
+      "test_ref": "[chromium-desktop] \u203a e2e/admin-interaction-overlay-phase199.spec.js:1010:3 \u203a Phase 199 interaction and overlay contract \u203a @phase199 @affordance action menu stays adjacent and bounded at locked viewport edges",
       "classification": "out-of-scope-branch-only",
       "main_run_id": 40361348536,
       "decision": "fix-in-phase",
@@ -13578,6 +13604,27 @@
       "decided_at": "254-03-03",
       "owner_answer": "accept-known-red (Rec.)",
       "until": "254-18"
+    },
+    {
+      "id": "KR-254-07",
+      "workflow": "CI",
+      "job": "Admin Phase 200 deterministic guardrails",
+      "job_id": "admin-phase200-guardrails",
+      "step": "Run Phase 200 deterministic guardrails",
+      "test_ref": "Phase 253 lane phase253-compositions-browser: 22 of 151 cells (20 dark probe-focus-visible ring-contrast-1.02/1.12, 2 light 320px probe-text-spacing on aside.ax-overlay-panel)",
+      "classification": "in-scope",
+      "main_run_id": 40387584954,
+      "decision": "fix-in-phase",
+      "decided_at": "254-15-02",
+      "owner_answer": "fix-in-phase (Rec.)",
+      "observed_runs": [
+        40876348250,
+        40890395756
+      ],
+      "fixed_in_sha": [
+        "79d4c8532"
+      ],
+      "status": "open: the settle fix did not change the result; the same 22 cells fail with the same ratios on CI (run 40890395756) and none fails locally (4x, 6x, 8x throttling, 3 workers, CI=true GITHUB_ACTIONS=true)"
     }
   ],
   "deviations": [
@@ -14059,7 +14106,7 @@
           "run_id": 40727439599,
           "job": "Browser UAT",
           "step": "Run browser UAT",
-          "test_ref": "[chromium-desktop] › e2e/admin-interaction-overlay-phase199.spec.js:1010:3 › Phase 199 interaction and overlay contract › @phase199 @affordance action menu stays adjacent and bounded at locked viewport edges",
+          "test_ref": "[chromium-desktop] \u203a e2e/admin-interaction-overlay-phase199.spec.js:1010:3 \u203a Phase 199 interaction and overlay contract \u203a @phase199 @affordance action menu stays adjacent and bounded at locked viewport edges",
           "path": "e2e/admin-interaction-overlay-phase199.spec.js",
           "classification": "out-of-scope-branch-only",
           "main_run_id": 40361348536,
@@ -14079,7 +14126,7 @@
           "run_id": 40727439599,
           "job": "Browser UAT",
           "step": "Run browser UAT",
-          "test_ref": "[chromium-desktop] › e2e/admin-storybook-a11y-phase200.spec.js:17:3 › Phase 200 rendered Storybook accessibility › discovers mounted Storybook URLs from the DOM and scans settled light/dark modes",
+          "test_ref": "[chromium-desktop] \u203a e2e/admin-storybook-a11y-phase200.spec.js:17:3 \u203a Phase 200 rendered Storybook accessibility \u203a discovers mounted Storybook URLs from the DOM and scans settled light/dark modes",
           "path": "e2e/admin-storybook-a11y-phase200.spec.js",
           "classification": "out-of-scope-branch-only",
           "main_run_id": 40361348536,
@@ -14102,7 +14149,7 @@
           "run_id": 40732595137,
           "job": "Admin Phase 200 deterministic guardrails",
           "step": "Run Phase 200 deterministic guardrails",
-          "test_ref": "[chromium-desktop] › e2e/admin-storybook-a11y-phase200.spec.js:17:3 › Phase 200 rendered Storybook accessibility › discovers mounted Storybook URLs from the DOM and scans settled light/dark modes",
+          "test_ref": "[chromium-desktop] \u203a e2e/admin-storybook-a11y-phase200.spec.js:17:3 \u203a Phase 200 rendered Storybook accessibility \u203a discovers mounted Storybook URLs from the DOM and scans settled light/dark modes",
           "path": "e2e/admin-storybook-a11y-phase200.spec.js",
           "classification": "out-of-scope-branch-only",
           "main_run_id": 40387584954,
@@ -14340,7 +14387,7 @@
           "run_id": 40763504839,
           "job": "Browser UAT",
           "step": "Phase 211 visual regression gate",
-          "test_ref": "[visual-desktop] › e2e/admin-visual-regression-phase211.spec.js:164:3 › matches committed baselines for the selected admin surfaces",
+          "test_ref": "[visual-desktop] \u203a e2e/admin-visual-regression-phase211.spec.js:164:3 \u203a matches committed baselines for the selected admin surfaces",
           "path": "accrue_admin/e2e/admin-visual-regression-phase211.spec.js",
           "classification": "in-scope",
           "main_run_id": 40361348536,
@@ -15056,6 +15103,138 @@
       "cause": "254-13-02",
       "decision": "re-stamped to the committed manifest bytes after its owner regenerated them",
       "status": "resolved",
+      "before": {
+        "cells": 165,
+        "owners": 2
+      },
+      "after": {
+        "cells": 165,
+        "owners": 2
+      }
+    },
+    {
+      "id": "DEV-254-30",
+      "kind": "visual-escalation",
+      "target": {
+        "name": "254-15-02 owner disposition of four unexplained Phase 211 baseline keys",
+        "seconds": null,
+        "source": "254-15-01 mint run 40876347666"
+      },
+      "measurement": {
+        "mint_run_id": 40876347666,
+        "keys": [
+          "subscriptions",
+          "subscriptions-dark",
+          "invoices",
+          "invoices-dark"
+        ],
+        "cause": "A11Y-254-28 (.ax-data-table-identity-secondary row gap, 254-12)",
+        "height_change_px": {
+          "subscriptions": 8,
+          "invoices": 12
+        },
+        "main_visual_gate_run_id": 40361348536,
+        "environmental": false,
+        "expected_but_unchanged": [
+          "component-kitchen",
+          "component-kitchen-dark"
+        ]
+      },
+      "decision": "accept-attributable: commit exactly mint 40876347666, map the four keys to A11Y-254-28, no second mint, no AMD-254-06",
+      "owner_decision": "accept-attributable (Rec.)",
+      "decided_at": "254-15-02",
+      "rationale": "The plan invariant (subscriptions*.png equal their merge-base blobs) could never hold: 254-03 re-minted both on the runner (365338781); the real invariant is equality with the baselines at c017aeede and they differ by the routed accessibility fix. subscriptions.png no longer carries the H1 zero-visual-change proof; DR-254-02:computed (767 and 768 CSS px) carries it. The rebaseline also adopts the invoices theme toggle moving from System to Light that the gate tolerance had hidden.",
+      "status": "accepted",
+      "before": {
+        "cells": 165,
+        "owners": 2
+      },
+      "after": {
+        "cells": 165,
+        "owners": 2
+      }
+    },
+    {
+      "id": "DEV-254-31",
+      "kind": "browser-uat-triage",
+      "target": {
+        "name": "browser-uat owner job",
+        "seconds": null,
+        "source": "254-15-01 observation runs"
+      },
+      "measurement": {
+        "final_run_id": 40890395793,
+        "final_attempt": 1,
+        "final_conclusion": "success",
+        "head_sha": "a9204d3b3e9ea2de07554c49a43e5025c501b95c"
+      },
+      "entries": [
+        {
+          "run_id": 40876348154,
+          "head_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+          "step": "Require complete committed visual baseline set",
+          "classification": "in-scope",
+          "decision": "expected: the 32 case baselines were not committed before the mint",
+          "fixed_in_sha": "b117662f9",
+          "followup_run_id": 40890395793
+        },
+        {
+          "run_id": null,
+          "head_sha": "374ed078a95941d900b894bf83cdb9e89b039599",
+          "step": "Run browser UAT",
+          "test_ref": "e2e/admin-page-flow-phase191.spec.js:646 @phase242 coupon, promotion-code and Connect routes",
+          "classification": "in-scope",
+          "decision": "fixed: 254-12 made the drawer body a labelled focusable region (axe scrollable-region-focusable), a new tab stop after Close; found by the local pre-push e2e run (3 of 3 red, 3 of 3 green after)",
+          "fixed_in_sha": "b77de3baf",
+          "followup_run_id": 40890395793
+        },
+        {
+          "run_id": null,
+          "head_sha": "a9204d3b3e9ea2de07554c49a43e5025c501b95c",
+          "step": "Run browser UAT",
+          "test_ref": "e2e/admin-interaction-overlay-phase199.spec.js:802 and :858",
+          "classification": "in-scope",
+          "decision": "fixed: the specs now wait for a closed action menu before toggling it and expect focus on the owning menu button (A11Y-254-29); found by the local pre-push runner under load average 25 to 38",
+          "fixed_in_sha": "a9204d3b3",
+          "followup_run_id": 40890395793
+        }
+      ],
+      "decision": "every browser-uat red was fixed in scope as a new commit and observed as attempt 1; none needed an owner decision beyond 254-15-02 Item A",
+      "status": "accepted",
+      "before": {
+        "cells": 165,
+        "owners": 2
+      },
+      "after": {
+        "cells": 165,
+        "owners": 2
+      }
+    },
+    {
+      "id": "DEV-254-32",
+      "kind": "visual-cell-budget-freeze",
+      "target": {
+        "name": "visual cells per-cell budget",
+        "seconds": null,
+        "source": "D-22"
+      },
+      "measurement": {
+        "run_id": 40890395793,
+        "cells": 32,
+        "median_ms": 828,
+        "p90_ms": 1234
+      },
+      "frozen": {
+        "per_cell_p90_ms": 1234,
+        "warn_at_ms": 1542.5,
+        "ceiling_ms": 3085.0,
+        "multipliers": {
+          "warn_at": 1.25,
+          "ceiling": 2.5
+        }
+      },
+      "decision": "the visual cells are budgeted from their own measured per-cell cost: p90 1234 ms, warn_at 1542.5 ms, ceiling 3085 ms; one attempt-1 run (n = 1), so the freeze is provisional until 254-18 observes another run",
+      "status": "accepted",
       "before": {
         "cells": 165,
         "owners": 2
