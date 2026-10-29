@@ -35,7 +35,11 @@ module.exports = defineConfig({
   snapshotPathTemplate: "e2e/__screenshots__/{projectName}/{arg}{ext}",
   fullyParallel: false,
   workers: 1,
-  reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : [["list"]],
+  // Phase 254 (CIQ-04, D-22): the CI json report carries each test's measured duration, so the visual
+  // cells' per-cell cost can be read from the uploaded machine evidence instead of guessed.
+  reporter: process.env.CI
+    ? [["github"], ["html", { open: "never" }], ["json", { outputFile: process.env.PHASE254_PLAYWRIGHT_JSON || "tmp/phase254/playwright-results.json" }]]
+    : [["list"]],
   use: {
     baseURL,
     trace: "retain-on-failure",

@@ -115,6 +115,8 @@ jobs:
         run: node scripts/ci/phase254_measure.mjs fingerprint --out accrue_admin/tmp/phase254/fingerprint-browser-uat.json
 
       - name: Run browser UAT
+        env:
+          PHASE254_PLAYWRIGHT_JSON: tmp/phase254/playwright-e2e.json
         run: cd accrue_admin && npm run e2e
 
       - name: Test Admin hooks and visual baseline set guard
@@ -127,6 +129,8 @@ jobs:
         run: node scripts/ci/phase254_visual_manifest.mjs check --base "$(git merge-base origin/main HEAD)"
 
       - name: Phase 211 visual regression gate
+        env:
+          PHASE254_PLAYWRIGHT_JSON: tmp/phase254/playwright-visual-gate.json
         run: cd accrue_admin && npm run e2e:visual-regression
 
       - name: Upload Phase 254 machine evidence
