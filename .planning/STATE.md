@@ -5,17 +5,17 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Completed 254-05-PLAN.md
-last_updated: "2026-10-29T04:07:24.512Z"
+stopped_at: Completed 254-06-PLAN.md
+last_updated: "2026-10-29T04:34:50.271Z"
 last_activity: 2026-10-28
 last_activity_desc: Phase 254 execution started
-state_head: bedead76b83271e8c0cdde646a557b52897763b7
+state_head: ee6eace3173789f2d1217a54389255e89d2cb91c
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 34
-  completed_plans: 21
-  percent: 62
+  completed_plans: 22
+  percent: 65
 ---
 
 # Project State
@@ -27,13 +27,13 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 **Core value:** A Phoenix developer can install Accrue and its companion admin UI and launch a real SaaS with subscription billing on day one, without avoidable integration or release risk.
 
 **Current focus:** Phase 254 — Recurring Quality, Reviewed Fixes and Curation
-**Progress:** [██████░░░░] 62%
+**Progress:** [███████░░░] 65%
 **Completed work:** v1.67 shipped and archived: 12/12 requirements, 3 phases, 32 plans, with 1.7.0 published. v1.66's earlier local archive and evidence limits remain in milestones/v1.66-*; historical metrics below are retained.
 
 ## Current Position
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
-Plan: 6 of 18
+Plan: 7 of 18
 Status: Ready to execute
 Last activity: 2026-10-28 — Phase 254 execution started
 
@@ -244,6 +244,7 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 | Phase 254 P03 | 9h | 3 tasks | 14 files |
 | Phase 254 P04 | 40min | 3 tasks | 12 files |
 | Phase 254 P05 | 4h | 3 tasks | 15 files |
+| Phase 254 P06 | 3h | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -585,6 +586,8 @@ Current milestone planning blockers: None. Phase 253 passed independent verifica
 - [Phase 254]: 254-04: duplicate evidence is the subject and survivor fact/expected blocks cross-checked against the frozen manifest at source_commit, not a boolean flag
 - [Phase 254]: 254-05: the project a reconcile step depends on holds only the composition cells because Playwright runs a dependency project in full; story and review specs live in phase252-owned-stories
 - [Phase 254]: 254-05: unowned loads of the composition specs register no tests; the aggregate's exact 151-cell-plus-reconcile inventory keeps real runs fail-closed
+- [Phase 254]: 254-06: populated retired (CUR-254-06) as a commit-anchored duplicate of active; reference scans use per-record contexts proven at the origin commit
+- [Phase 254]: 254-06: provider_pruned merged (CUR-254-07) on a declared mechanical shape (story state, group labels, item kinds); item count and description text are not part of the shape
 
 ### Pending Todos
 
@@ -683,8 +686,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-10-29T04:07:23.661Z
-Stopped at: Completed 254-05-PLAN.md
+Last session: 2026-10-29T04:34:49.539Z
+Stopped at: Completed 254-06-PLAN.md
 Resume file: None
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
