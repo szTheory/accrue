@@ -7,6 +7,7 @@ root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 package_file="$root_dir/accrue_admin/package.json"
 runner_file="$root_dir/scripts/ci/verify_phase200_admin_guardrails.sh"
 phase253_runner_file="$root_dir/scripts/ci/verify_phase253_compositions.mjs"
+phase254_quality_file="$root_dir/scripts/ci/verify_phase254_quality.mjs"
 package_docs_file="$root_dir/scripts/ci/verify_package_docs.sh"
 storybook_spec="$root_dir/accrue_admin/e2e/admin-storybook-a11y-phase200.spec.js"
 page_flow_spec="$root_dir/accrue_admin/e2e/admin-page-flow-phase200.spec.js"
@@ -80,6 +81,7 @@ for file in \
   "$package_file" \
   "$runner_file" \
   "$phase253_runner_file" \
+  "$phase254_quality_file" \
   "$package_docs_file" \
   "$storybook_spec" \
   "$page_flow_spec" \
@@ -118,6 +120,16 @@ require_regex "$runner_file" '^run_step "Phase 254 recurring budget check" node 
 phase254_step_line="$(grep -nFx 'run_step "Phase 254 recurring budget check" node scripts/ci/phase254_budget.mjs check' "$runner_file" | cut -d: -f1)"
 [[ "$phase254_step_line" -gt "$phase253_step_line" ]] ||
   fail "Phase 254 recurring budget check must run after the Phase 253 focused composition acceptance"
+
+require_regex "$runner_file" '^run_step "Phase 254 quality records" node scripts/ci/verify_phase254_quality\.mjs$'
+require_fixed "$phase254_quality_file" 'scripts/ci/phase254_selection.mjs'
+require_fixed "$phase254_quality_file" 'scripts/ci/verify_phase254_curation.mjs'
+require_fixed "$phase254_quality_file" 'scripts/ci/verify_a11y_dispositions.mjs'
+require_fixed "$phase254_quality_file" 'scripts/ci/verify_phase254_design_review.mjs'
+require_fixed "$phase254_quality_file" 'scripts/ci/recompose_storybook_css.mjs'
+phase254_quality_line="$(grep -nFx 'run_step "Phase 254 quality records" node scripts/ci/verify_phase254_quality.mjs' "$runner_file" | cut -d: -f1)"
+[[ "$phase254_quality_line" -gt "$phase254_step_line" ]] ||
+  fail "Phase 254 quality records must run after the recurring budget check"
 
 storybook_script="$(package_script_value "phase200:storybook")"
 scorecard_script="$(package_script_value "phase200:scorecard")"

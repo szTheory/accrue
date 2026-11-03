@@ -54,8 +54,15 @@ export const REQUIRED_ROOT_IDS = Object.freeze([
   "phase253-browser-helper",
   "phase254-ci-scripts",
   "phase254-verifiers",
+  "phase254-generators",
   "phase254-budget",
   "phase254-selection-projection",
+  "storybook-css-recompose",
+  "a11y-dispositions-validator",
+  "visual-desktop-baselines",
+  "phase254-visual-cases",
+  "subscription-coverage-guide",
+  "phase254-fixtures",
   "subscription-curation-ledger",
   "phase254-selection-fixtures",
   "playwright-default-config",
@@ -117,8 +124,15 @@ export const CONSUMED_ROOTS = Object.freeze([
   // prefix, so an unrelated JSON file there stays unmapped (and the selector broadens, FC-1).
   { id: "phase254-ci-scripts", path: "scripts/ci/phase254_", mode: "prefix", owner: REQUIRED_OWNER },
   { id: "phase254-verifiers", path: "scripts/ci/verify_phase254_", mode: "prefix", owner: REQUIRED_OWNER },
+  { id: "phase254-generators", path: "scripts/ci/generate_phase254_", mode: "prefix", owner: REQUIRED_OWNER },
   { id: "phase254-budget", path: "accrue_admin/storybook/phase254-budget.json", mode: "exact", owner: REQUIRED_OWNER },
   { id: "phase254-selection-projection", path: "accrue_admin/storybook/phase254-selection.json", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "storybook-css-recompose", path: "scripts/ci/recompose_storybook_css.mjs", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "a11y-dispositions-validator", path: "scripts/ci/verify_a11y_dispositions.mjs", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "visual-desktop-baselines", path: "accrue_admin/e2e/__screenshots__/", mode: "prefix", owner: REQUIRED_OWNER },
+  { id: "phase254-visual-cases", path: "accrue_admin/storybook/phase254-visual-cases.json", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "subscription-coverage-guide", path: "guides/subscription-story-coverage.md", mode: "exact", owner: REQUIRED_OWNER },
+  { id: "phase254-fixtures", path: "scripts/ci/fixtures/phase254-", mode: "prefix", owner: REQUIRED_OWNER },
   { id: "subscription-curation-ledger", path: "accrue_admin/storybook/subscription-curation.json", mode: "exact", owner: REQUIRED_OWNER },
   { id: "phase254-selection-fixtures", path: "scripts/ci/fixtures/phase254-selection/", mode: "prefix", owner: REQUIRED_OWNER },
   { id: "playwright-default-config", path: "accrue_admin/playwright.config.js", mode: "exact", owner: REQUIRED_OWNER },
@@ -219,6 +233,7 @@ export function assertCiContract({
   requirePhase253 = false,
   requirePhase254Selection = false,
   requirePhase254Budget = false,
+  requirePhase254Quality = false,
   roots = CONSUMED_ROOTS,
 }) {
   if (typeof workflow !== "string" || typeof ownerRunner !== "string") {
@@ -259,10 +274,10 @@ export function assertCiContract({
   const phase253Step = /^run_step "Phase 253 focused composition acceptance" node scripts\/ci\/verify_phase253_compositions\.mjs$/m;
   const phase254BudgetStep = /^run_step "Phase 254 recurring budget check" node scripts\/ci\/phase254_budget\.mjs check$/m;
   const phase252Match = phase252Step.exec(ownerRunner);
-  if ((requirePhase252 || requirePhase253 || requirePhase254Budget) && !phase252Match) {
+  if ((requirePhase252 || requirePhase253 || requirePhase254Budget || requirePhase254Quality) && !phase252Match) {
     fail("required owner runner does not invoke npm --prefix accrue_admin run phase252:check");
   }
-  if (requirePhase253 || requirePhase254Budget) {
+  if (requirePhase253 || requirePhase254Budget || requirePhase254Quality) {
     const phase253Match = phase253Step.exec(ownerRunner);
     if (!phase253Match) fail("required owner runner does not invoke node scripts/ci/verify_phase253_compositions.mjs");
     if (phase253Match.index < phase252Match.index) {
@@ -270,10 +285,17 @@ export function assertCiContract({
     }
     // Phase 254 CIQ-04 (D-23): the budget check reads the Phase 252/253 results bundles, so it
     // runs after both aggregates, unconditionally, as its own named step.
-    if (requirePhase254Budget) {
+    if (requirePhase254Budget || requirePhase254Quality) {
       const budgetMatch = phase254BudgetStep.exec(ownerRunner);
       if (!budgetMatch) fail("required owner runner does not invoke node scripts/ci/phase254_budget.mjs check as an unconditional Phase 254 recurring budget check step");
       if (budgetMatch.index < phase253Match.index) fail("the Phase 254 recurring budget check must run after the Phase 253 composition acceptance");
+
+      if (requirePhase254Quality) {
+        const qualityStep = /^run_step "Phase 254 quality records" node scripts\/ci\/verify_phase254_quality\.mjs$/m;
+        const qualityMatch = qualityStep.exec(ownerRunner);
+        if (!qualityMatch) fail("required owner runner does not invoke node scripts/ci/verify_phase254_quality.mjs as an unconditional Phase 254 quality records step");
+        if (qualityMatch.index < budgetMatch.index) fail("Phase 254 quality records must run after the recurring budget check");
+      }
     }
   }
   if (requirePhase254Selection) assertPhase254Selection(workflow, job);

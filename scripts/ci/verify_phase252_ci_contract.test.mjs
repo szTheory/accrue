@@ -12,6 +12,7 @@ import {
   assertOwnerMap,
   classifyPath,
   CONSUMED_ROOTS,
+  matchesRule,
   REQUIRED_OWNER,
 } from "./phase252_paths.mjs";
 import * as phase253Runner from "./verify_phase253_compositions.mjs";
@@ -163,6 +164,14 @@ test("every new Phase 254 CI-read path maps to the named required owner and fail
     ["phase254-verifiers", "scripts/ci/verify_phase254_curation.test.mjs"],
     ["phase254-budget", "accrue_admin/storybook/phase254-budget.json"],
     ["phase254-selection-projection", "accrue_admin/storybook/phase254-selection.json"],
+    ["phase254-verifiers", "scripts/ci/verify_phase254_quality.mjs"],
+    ["phase254-generators", "scripts/ci/generate_phase254_next_record.mjs"],
+    ["storybook-css-recompose", "scripts/ci/recompose_storybook_css.mjs"],
+    ["a11y-dispositions-validator", "scripts/ci/verify_a11y_dispositions.mjs"],
+    ["visual-desktop-baselines", "accrue_admin/e2e/__screenshots__/phase254/representative.png"],
+    ["phase254-visual-cases", "accrue_admin/storybook/phase254-visual-cases.json"],
+    ["subscription-coverage-guide", "guides/subscription-story-coverage.md"],
+    ["phase254-fixtures", "scripts/ci/fixtures/phase254-transparency/clean.json"],
     ["subscription-curation-ledger", "accrue_admin/storybook/subscription-curation.json"],
     ["phase254-selection-fixtures", "scripts/ci/fixtures/phase254-selection/collection-only.txt"],
     ["playwright-default-config", "accrue_admin/playwright.config.js"],
@@ -173,7 +182,17 @@ test("every new Phase 254 CI-read path maps to the named required owner and fail
     assert.equal(classifyPath(sourcePath, { manifest }), REQUIRED_OWNER, `${sourcePath} must be admitted`);
     const withoutRule = CONSUMED_ROOTS.filter((row) => row.id !== id);
     assert.throws(() => assertOwnerMap(withoutRule, manifest), new RegExp(id), `${id} removal must fail the owner contract`);
-    assert.equal(classifyPath(sourcePath, { roots: withoutRule, manifest }), null, `${sourcePath} must become unowned when ${id} is removed`);
+    const declaredRoot = CONSUMED_ROOTS.find((row) => row.id === id);
+    assert.equal(matchesRule(sourcePath, declaredRoot), true, `${sourcePath} must positively exercise ${id}`);
+    // Desktop baselines and Phase 254 fixtures are also covered by broader roots. Remove those
+    // overlapping rules for the classifier negative control; omission of the required new id is
+    // tested independently by assertOwnerMap above.
+    const overlappingRoots = {
+      "visual-desktop-baselines": ["browser-specs"],
+      "phase254-selection-fixtures": ["phase254-fixtures"],
+    }[id] ?? [];
+    const classifierWithoutRule = withoutRule.filter((row) => !overlappingRoots.includes(row.id));
+    assert.equal(classifyPath(sourcePath, { roots: classifierWithoutRule, manifest }), null, `${sourcePath} must become unowned when ${id} is removed`);
   }
   // The new e2e and admin test files are already covered by the existing prefixes.
   for (const sourcePath of [
@@ -313,6 +332,28 @@ test("the named required owner runs the Phase 254 recurring budget check after P
 
   const renamed = ownerRunner.replace('"Phase 254 recurring budget check"', '"Phase 254 budget"');
   assert.throws(() => contract(renamed), /Phase 254 recurring budget check/);
+});
+
+test("the named required owner runs Phase 254 quality records after budget, unconditionally", () => {
+  const contract = (runner) => assertCiContract({ workflow, ownerRunner: runner, manifest, requirePhase254Quality: true });
+  const qualityLine = 'run_step "Phase 254 quality records" node scripts/ci/verify_phase254_quality.mjs';
+  const budgetLine = 'run_step "Phase 254 recurring budget check" node scripts/ci/phase254_budget.mjs check';
+  assert.doesNotThrow(() => contract(ownerRunner), "positive control: the shipped runner satisfies the quality contract");
+
+  const removed = ownerRunner.replace(/^run_step "Phase 254 quality records".*\n?/m, "");
+  assert.notEqual(removed, ownerRunner, "the mutation must change the runner");
+  assert.throws(() => contract(removed), /Phase 254 quality records/);
+
+  const gated = ownerRunner.replace(qualityLine, `if [ "\${RUN_PHASE254_QUALITY:-false}" = true ]; then ${qualityLine}; fi`);
+  assert.notEqual(gated, ownerRunner);
+  assert.throws(() => contract(gated), /Phase 254 quality records/);
+
+  const renamed = ownerRunner.replace('"Phase 254 quality records"', '"Phase 254 records"');
+  assert.throws(() => contract(renamed), /Phase 254 quality records/);
+
+  const beforeBudget = ownerRunner.replace(`${budgetLine}\n${qualityLine}`, `${qualityLine}\n${budgetLine}`);
+  assert.notEqual(beforeBudget, ownerRunner);
+  assert.throws(() => contract(beforeBudget), /must run after the recurring budget check/);
 });
 
 test("the Phase 253 CI reporter requires every owner, path and unrelated-path assertion", () => {
