@@ -5,10 +5,10 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Executing 254-15 KR-254-07 fix after owner selected the recommended round-3 option
-last_updated: "2026-11-03T14:59:21Z"
+stopped_at: Executing the owner-approved additional Linux visual mint/rebaseline and Plan 15 continuation
+last_updated: "2026-11-03T17:17:43Z"
 last_activity: 2026-11-03
-last_activity_desc: Six focused Linux cells pass; fixed a clock-dependent baseline fixture exposed by the pre-push gate
+last_activity_desc: Owner selected fix-in-phase for the CSS identity mismatch; one additional mint is authorized
 state_head: b861a6da43a56c4e3d4046e9b13cbfd184b83f66
 progress:
   total_phases: 3
@@ -34,8 +34,8 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
 Plan: 15 of 18
-Status: Executing KR-254-07 verification and pre-push gate under the owner's round-3 option-1 decision
-Last activity: 2026-11-03 — Six Linux cells pass; deterministic CI baseline fixture correction is green
+Status: Executing the owner-approved 254-15-02 `fix-in-phase` disposition
+Last activity: 2026-11-03 — One additional Linux mint/rebaseline is authorized after the CSS asset change
 
 Progress: [███████░░░] 67%
 Current milestone planning blockers: None. Phase 253 passed independent verification (56/56, behavior_unverified: 0), the fresh 10-lane aggregate (151 browser cells/152 tests), retained Phase252 gate (21/21), and executable UAT (24/24). CR-01/CR-02 and the guide-regeneration integration defect are fixed. Six current/historical unclassified assumptions, two nonblocking Phase253 summary reference-parser notices, source-only UI recommendations, and the explicit unavailable monetary-source limit remain recorded for Phase254.

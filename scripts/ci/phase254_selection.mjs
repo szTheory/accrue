@@ -516,7 +516,25 @@ export const AMENDMENT_AMD_254_02 = Object.freeze({
   owner_ack: { date: "2026-10-28", status: "owner-accepted at plan time" },
 });
 
-export function buildVisualCasesFile({ manifest, designReview, a4 = "story-routes", probeError = null }) {
+function assertAdditionalVisualAmendments(amendments) {
+  if (!Array.isArray(amendments)) fail("visual amendments must be an array", "VISUAL_INVALID");
+  const ids = amendments.map((item) => item?.id);
+  if (new Set(ids).size !== ids.length) fail("visual amendments contain duplicate ids", "VISUAL_INVALID");
+  for (const amendment of amendments) {
+    if (!isObject(amendment) || amendment.id !== "AMD-254-06") fail(`unsupported additional visual amendment ${JSON.stringify(amendment?.id)}`, "VISUAL_INVALID");
+    if (JSON.stringify(amendment.decisions) !== JSON.stringify(["D-08", "D-20"])) fail("AMD-254-06 must bind D-08 and D-20", "VISUAL_INVALID");
+    if (amendment.original !== "mint once, after corrections") fail("AMD-254-06 must preserve the original one-mint decision", "VISUAL_INVALID");
+    if (!Array.isArray(amendment.amended) || amendment.amended.length < 2 || amendment.amended.some((runId) => typeof runId !== "string" || !/^\d+$/.test(runId)) || new Set(amendment.amended).size !== amendment.amended.length) {
+      fail("AMD-254-06 amended must list every distinct committed mint run id", "VISUAL_INVALID");
+    }
+    if (typeof amendment.owner_decision !== "string" || amendment.owner_decision.trim() === "") fail("AMD-254-06 needs the verbatim owner_decision", "VISUAL_INVALID");
+    if (typeof amendment.rationale !== "string" || amendment.rationale.trim() === "") fail("AMD-254-06 needs a rationale", "VISUAL_INVALID");
+    if (amendment.owner_ack?.date !== "2026-10-28" || !/owner-accepted/.test(amendment.owner_ack?.status ?? "")) fail("AMD-254-06 with its owner_ack is required", "VISUAL_INVALID");
+  }
+}
+
+export function buildVisualCasesFile({ manifest, designReview, a4 = "story-routes", probeError = null, amendments = [] }) {
+  assertAdditionalVisualAmendments(amendments);
   const { cases } = buildVisualCases({ manifest, a4, probeError });
   const keys = new Set(cases.map((item) => item.key));
   const captureKeys = Array.isArray(designReview?.captures) ? designReview.captures.map((item) => item.key) : [];
@@ -528,7 +546,10 @@ export function buildVisualCasesFile({ manifest, designReview, a4 = "story-route
     human_judgment: false,
     determinism: { timezone: "UTC", locale: "en-US", reduced_motion: "reduce", fixed_clock: FIXED_CLOCK, scenario_file: SCENARIO_FILE },
     sourcing: { a4, probe_error: probeError },
-    amendments: [{ ...AMENDMENT_AMD_254_02, owner_ack: { ...AMENDMENT_AMD_254_02.owner_ack } }],
+    amendments: [
+      { ...AMENDMENT_AMD_254_02, decisions: [...AMENDMENT_AMD_254_02.decisions], owner_ack: { ...AMENDMENT_AMD_254_02.owner_ack } },
+      ...amendments.map((item) => structuredClone(item)),
+    ],
     manifest_sha256: sha256(stableStringify({
       source_digests: manifest.source_digests,
       collection_variations: manifest.collection_variations,
@@ -565,6 +586,7 @@ export function assertVisualCasesShape(file) {
   }
   const amendment = (file.amendments ?? []).find((item) => item.id === "AMD-254-02");
   if (!amendment || amendment.owner_ack?.date !== "2026-10-28" || !/owner-accepted/.test(amendment.owner_ack?.status ?? "")) fail("AMD-254-02 with its owner_ack is required", "VISUAL_INVALID");
+  assertAdditionalVisualAmendments((file.amendments ?? []).filter((item) => item.id !== "AMD-254-02"));
   const keys = file.cases.map((item) => item.key);
   if (new Set(keys).size !== keys.length || keys.length === 0) fail("the visual cases have duplicate or no keys", "VISUAL_INVALID");
   for (const item of file.cases) {
@@ -850,6 +872,12 @@ function committedSourcing() {
   return { a4: "story-routes", probeError: null };
 }
 
+function committedOwnerAmendments() {
+  const file = path.join(ROOT, VISUAL_CASES_PATH);
+  if (!fs.existsSync(file)) return [];
+  return (readVisualCases(ROOT).amendments ?? []).filter((item) => item.id !== "AMD-254-02");
+}
+
 function runProject(flags, values = {}) {
   if (flags.has("write") === flags.has("check")) fail("project needs exactly one of --write or --check", "USAGE");
   if ((values.a4 !== undefined || values["probe-error"] !== undefined) && !flags.has("write")) fail("--a4 and --probe-error are only valid with project --write", "USAGE");
@@ -864,7 +892,7 @@ function runProject(flags, values = {}) {
   const sourcing = flags.has("write") && values.a4 !== undefined
     ? { a4: values.a4, probeError: values.a4 === "mounted-fallback" ? (values["probe-error"] ?? null) : null }
     : recorded;
-  const visual = buildVisualCasesFile({ manifest, designReview, a4: sourcing.a4, probeError: sourcing.probeError });
+  const visual = buildVisualCasesFile({ manifest, designReview, a4: sourcing.a4, probeError: sourcing.probeError, amendments: committedOwnerAmendments() });
   if (flags.has("write")) {
     fs.writeFileSync(path.join(ROOT, PROJECTION_PATH), serializeProjection(regenerated));
     fs.writeFileSync(path.join(ROOT, VISUAL_CASES_PATH), serializeVisualCases(visual));

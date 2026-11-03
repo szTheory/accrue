@@ -126,23 +126,35 @@ export function buildManifest({ artifactDir, identityDir, reasons = {}, mint, pr
     const key = caseKeyOfFile(file, keys);
     const bytes = sha256(fs.readFileSync(path.join(artifactDir, file)));
     const prior = previous?.entries?.[key];
+    const identity = identities.get(key);
+    const kind = identity?.kind ?? prior?.kind ?? "mounted";
+    const current = currentAssetDigests(kind, root);
+    const servedAssetsChanged = prior?.provenance === PROVENANCE_MINT && (
+      prior.kind !== kind ||
+      Object.entries(current.served).some(([field, value]) => prior.served?.[field] !== value) ||
+      prior.scenario_file_sha256 !== current.scenario_file_sha256 ||
+      prior.playwright_version !== (identity?.playwright_version ?? versions?.playwright_version) ||
+      prior.browser_version !== (identity?.browser_version ?? versions?.browser_version)
+    );
     // A legacy entry survives only while its PNG is still the merge-base's: a PNG that moved since the
     // merge-base is re-attested by this mint, whatever its bytes now are.
-    if (prior && prior.sha256 === bytes && !(prior.provenance === PROVENANCE_LEGACY && changedSinceBase.has(file))) {
+    // A minted entry also needs re-attestation when the served asset or scenario identity changes, even
+    // if Playwright produced identical PNG bytes. Otherwise the manifest gate remains stale after a
+    // source-only CSS or fixture change and the visual regression step cannot run.
+    if (prior && prior.sha256 === bytes && !servedAssetsChanged && !(prior.provenance === PROVENANCE_LEGACY && changedSinceBase.has(file))) {
       entries[key] = prior;
       continue;
     }
-    const why = reasons[key] ?? reasons["*"];
+    const why = prior?.provenance === PROVENANCE_MINT && prior.sha256 === bytes
+      ? { reason: prior.reason, finding_id: prior.finding_id }
+      : reasons[key] ?? reasons["*"];
     if (!why || typeof why.reason !== "string" || why.reason.trim() === "" || typeof why.finding_id !== "string" || why.finding_id === "") {
       fail(`${key}: a changed baseline needs a reason and a finding id`);
     }
-    const identity = identities.get(key);
     const legacyKey = EXPECTED_BASELINES.includes(file);
     if (!identity && !legacyKey) fail(`${key}: no identity file in ${identityDir}`);
     if (identity && identity.snapshot !== file) fail(`${key}: the identity file names ${identity.snapshot}, not ${file}`);
     if (!identity && !versions) fail(`${key}: a rebaselined legacy key needs identity files from the same run for the browser version`);
-    const kind = identity?.kind === "story" ? "story" : "mounted";
-    const current = currentAssetDigests(kind, root);
     entries[key] = {
       case_key: key,
       file,
@@ -400,6 +412,48 @@ export const SCENARIOS = [
         assert.deepEqual(rebuilt, built, "unchanged keys keep their entries and need no reason");
         fs.writeFileSync(path.join(artifact, snapshotFileName(keys[1])), "different bytes");
         assert.throws(() => buildManifest({ artifactDir: artifact, identityDir: identities, reasons: {}, mint, previous: built, root, caseKeys: keys }), /a changed baseline needs a reason/);
+      } finally {
+        for (const directory of [root, artifact, identities]) fs.rmSync(directory, { recursive: true, force: true });
+      }
+    },
+  ],
+  [
+    "buildManifest re-attests identical PNG bytes when the served asset identity changes",
+    () => {
+      const root = fixtureRoot();
+      const artifact = tmpDir("phase254-visual-art-");
+      const identities = tmpDir("phase254-visual-id-");
+      try {
+        const key = "phase254-page-active-w320-light";
+        const snapshot = snapshotFileName(key);
+        const bytes = "same pixels before and after the CSS edit";
+        const snapshotPath = path.join(artifact, snapshot);
+        const identityPath = path.join(identities, `${key}.json`);
+        fs.writeFileSync(snapshotPath, bytes);
+        const originalIdentity = {
+          key,
+          kind: "story",
+          snapshot,
+          served: currentAssetDigests("story", root).served,
+          scenario_file_sha256: currentAssetDigests("story", root).scenario_file_sha256,
+          ...FIXTURE_VERSIONS,
+        };
+        fs.writeFileSync(identityPath, JSON.stringify(originalIdentity));
+        const originalMint = { run_id: "777", sha: "c".repeat(40) };
+        const reason = { "*": { reason: "Owner-approved CSS identity refresh", finding_id: "A11Y-254-28" } };
+        const previous = buildManifest({ artifactDir: artifact, identityDir: identities, reasons: reason, mint: originalMint, root, caseKeys: [key] });
+
+        fs.writeFileSync(path.join(root, "accrue_admin/priv/static/storybook.css"), "updated served css\n");
+        const refreshedDigests = currentAssetDigests("story", root);
+        fs.writeFileSync(identityPath, JSON.stringify({ ...originalIdentity, served: refreshedDigests.served, scenario_file_sha256: refreshedDigests.scenario_file_sha256 }));
+        const nextMint = { run_id: "888", sha: "d".repeat(40) };
+        const refreshed = buildManifest({ artifactDir: artifact, identityDir: identities, reasons: {}, mint: nextMint, previous, root, caseKeys: [key] });
+        assert.equal(refreshed.entries[key].sha256, previous.entries[key].sha256, "the screenshot bytes remain unchanged");
+        assert.equal(refreshed.entries[key].mint_run_id, nextMint.run_id, "the manifest identity is re-attested by the current mint");
+        assert.deepEqual(refreshed.entries[key].served, refreshedDigests.served);
+        assert.equal(refreshed.entries[key].reason, previous.entries[key].reason, "the original pixel-change reason remains attached to identical PNG bytes");
+        assert.equal(refreshed.entries[key].finding_id, previous.entries[key].finding_id);
+        assert.deepEqual(checkManifest({ dir: artifact, manifest: refreshed, versions: FIXTURE_VERSIONS, changedPngs: [snapshot], root, caseKeys: [key] }), []);
       } finally {
         for (const directory of [root, artifact, identities]) fs.rmSync(directory, { recursive: true, force: true });
       }

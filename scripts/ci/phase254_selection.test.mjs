@@ -580,6 +580,33 @@ test("the visual matrix is 24 story keys plus 8 mounted keys, derived from cases
   assert.equal(file.sourcing.probe_error, null);
 });
 
+test("the visual matrix preserves a valid owner-approved AMD-254-06 extra-mint record", () => {
+  const amendment = {
+    id: "AMD-254-06",
+    decisions: ["D-08", "D-20"],
+    original: "mint once, after corrections",
+    amended: ["40876347666", "41690000001"],
+    owner_decision: "yeah, you can go ahead and do it",
+    rationale: "Re-attest the committed Linux baseline identities after the approved CSS correction.",
+    owner_ack: { date: "2026-10-28", status: "owner-accepted at plan time" },
+  };
+  const file = visualFile({ amendments: [amendment] });
+  assert.equal(selection.assertVisualCasesShape(file), true);
+  assert.deepEqual(file.amendments.find((item) => item.id === "AMD-254-06"), amendment);
+  assert.doesNotThrow(() => selection.assertVisualCasesCurrent(file, visualFile({ amendments: [amendment] })));
+
+  for (const [mutate, message] of [
+    [(item) => { item.decisions = ["D-20"]; }, /must bind D-08 and D-20/],
+    [(item) => { item.amended = ["40876347666", "40876347666"]; }, /every distinct committed mint run id/],
+    [(item) => { item.owner_decision = ""; }, /verbatim owner_decision/],
+    [(item) => { item.owner_ack.date = "2026-11-03"; }, /with its owner_ack/],
+  ]) {
+    const invalid = structuredClone(amendment);
+    mutate(invalid);
+    assert.throws(() => selection.assertVisualCasesShape(visualFile({ amendments: [invalid] })), message);
+  }
+});
+
 test("every key of the design review's 16 captures is a visual case key, and a record key with no case is rejected", () => {
   const designReview = selection.readDesignReview(ROOT);
   assert.equal(designReview.captures.length, 16);
