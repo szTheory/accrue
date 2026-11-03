@@ -71,10 +71,10 @@
       "sha256": "ca5da6e20564e58fcba061cb3cb0c233ae6be4e561138e1c7eaa82f5339dc994",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -91,10 +91,10 @@
       "sha256": "b7f52e990d231446b7f5ef5e4bd72f13ea3761d9bcb0d4b1db39577d2d886ff3",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -111,10 +111,10 @@
       "sha256": "caa18b0493f1a1065f669b8fdf4fb4f0ea6ee94e4b3baba52d88f12e13babf85",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -131,10 +131,10 @@
       "sha256": "c6e888db27471c29698b9423a25f7778774ca150f56cddcdc757b19cc681605c",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -151,10 +151,10 @@
       "sha256": "ed0a85427395613238a3b9dc16408ea0def34b867fdddd23c40040e46e9c8bb0",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -171,10 +171,10 @@
       "sha256": "bccdcb53b1f0408c20609636a6a26a5f1dc6150f5d6ee41e4c8a32e3a66254ff",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -191,10 +191,10 @@
       "sha256": "959c164a0a77a7767f7058ccfc7b73946dd056a4865cfecdf9d5a89d8864170f",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -211,10 +211,10 @@
       "sha256": "1dc7c510e4831cc0d749f18de93907713834f6766d92fcd9590212b017965f09",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -231,10 +231,10 @@
       "sha256": "cc773c12a55a9c8ca19d9afc2bda9912c362ae8f1f8dc35b4688e553fde8cb70",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -251,10 +251,10 @@
       "sha256": "6b49408d04430a710d768386e9fd9a75de1a34dcaa9044a1ab711cbd8ad2d28f",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -271,10 +271,10 @@
       "sha256": "dfb6f0626c225b9e8e86d382fac31537fa10eaba3d5da917fce4f964dbd33f64",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -291,10 +291,10 @@
       "sha256": "0d9d15456895de358ce37a34c0d307417a064d0c687ca222d04e38b69031b970",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -308,13 +308,13 @@
     "phase254-mounted-disclosure-focus-w1280-dark": {
       "case_key": "phase254-mounted-disclosure-focus-w1280-dark",
       "file": "phase254-mounted-disclosure-focus-w1280-dark.png",
-      "sha256": "78ad5be83ad333b21b542e440addbb091988ad275334c406499e0b9347b92c1d",
+      "sha256": "c08b85b9a6018afa9cbd6ebab6b7e35cbe7965aaeb1f34917fb1fc8c296fd518",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -322,19 +322,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-mounted-disclosure-focus-w1280-dark (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-mounted-disclosure-focus-w1280-light": {
       "case_key": "phase254-mounted-disclosure-focus-w1280-light",
       "file": "phase254-mounted-disclosure-focus-w1280-light.png",
-      "sha256": "41af91cc27cefdc856149d6b47b78d858e3d8f0d85ea2b40994b1af7bb7593d1",
+      "sha256": "da306e236a81382c7e2dfbd698983ceaeeeb103c7afb050c6d357c382dc542e8",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -342,19 +342,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-mounted-disclosure-focus-w1280-light (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-mounted-disclosure-focus-w320-dark": {
       "case_key": "phase254-mounted-disclosure-focus-w320-dark",
       "file": "phase254-mounted-disclosure-focus-w320-dark.png",
-      "sha256": "14f6f7f82e33ce2661b38a9fdc9b5669c2aa63862f472077a97749d5f23d4690",
+      "sha256": "7addaffb6615f6d8d0b81c74b8abfc032842a974c7dd6105df6bfbda06a03265",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -362,19 +362,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-mounted-disclosure-focus-w320-dark (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-mounted-disclosure-focus-w320-light": {
       "case_key": "phase254-mounted-disclosure-focus-w320-light",
       "file": "phase254-mounted-disclosure-focus-w320-light.png",
-      "sha256": "1b68d58850d37af29d1a790f9d4f07804eefe9079865fd6690038e808b616d53",
+      "sha256": "4019a344cc23c77c5a59d16f5fc2a1d10a004d8f2b55639d1fa0dd7dc7c6352f",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -382,8 +382,8 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-mounted-disclosure-focus-w320-light (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-mounted-review-open-w1280-dark": {
       "case_key": "phase254-mounted-review-open-w1280-dark",
@@ -391,10 +391,10 @@
       "sha256": "61fd336dc7e5fa9deceed729e77e882e86a200918f74b7faa1e54ea22ffa0235",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -411,10 +411,10 @@
       "sha256": "601b0a57b97ebda9d2db753c35ee2186d898d38c0c244aa9b21f77e0271d8ac9",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -428,13 +428,13 @@
     "phase254-mounted-review-open-w320-dark": {
       "case_key": "phase254-mounted-review-open-w320-dark",
       "file": "phase254-mounted-review-open-w320-dark.png",
-      "sha256": "28c778114e4de499abea273233ab62bd1676489d461508a975f6c3fc3db4e421",
+      "sha256": "ab8f098afda0b11847bbc396d0a2fe9c674182624bc0781c4b931f42d8d9cfa8",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -442,19 +442,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-mounted-review-open-w320-dark (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-mounted-review-open-w320-light": {
       "case_key": "phase254-mounted-review-open-w320-light",
       "file": "phase254-mounted-review-open-w320-light.png",
-      "sha256": "e90e9a7f56f48abfab87ab581ab7d1f441ab74076610d25a1eb15cf555192df2",
+      "sha256": "86de6e9a60a08bc3bcb43ab575eb89b9d0db4d39913988f4e3d32a3bb24f3ffa",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -462,19 +462,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-mounted-review-open-w320-light (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-active-w1280-dark": {
       "case_key": "phase254-page-active-w1280-dark",
       "file": "phase254-page-active-w1280-dark.png",
-      "sha256": "694e8d5664ce499cf8a371dbeba69eb72b508c4c43b27db524eb90dfc7fb7f56",
+      "sha256": "8925ec1dc64a9c7840d0ecb25fc45a2f0487e66c1eb149dc8f70e08c5a01ac5c",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -482,19 +482,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-active-w1280-dark (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-active-w1280-light": {
       "case_key": "phase254-page-active-w1280-light",
       "file": "phase254-page-active-w1280-light.png",
-      "sha256": "8c31ac518c486e49f1e7946692d043b37d6fa60a5644691487132475b1bec418",
+      "sha256": "641c453a220ee66d970e0b4b02e953381396e813bf5b1c22466e9c1351369b5c",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -502,19 +502,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-active-w1280-light (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-active-w320-dark": {
       "case_key": "phase254-page-active-w320-dark",
       "file": "phase254-page-active-w320-dark.png",
-      "sha256": "57a47636d607788d98c54f883fafed9ef3b7e6e9232ac4f192d19b79b621a445",
+      "sha256": "15e94e320e0530d63ab07b17470b983c71f77b744998ddf98d615b8abfa093dc",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -522,19 +522,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-active-w320-dark (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-active-w320-light": {
       "case_key": "phase254-page-active-w320-light",
       "file": "phase254-page-active-w320-light.png",
-      "sha256": "bb64d8aaf7d165d12d42682e0719efff01cfc9c43f47768dd132125c35ba34ff",
+      "sha256": "35e2bedfe21fdf19eb8c0eb882372dcd97ad5de65864bb226cc452127315a671",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -542,19 +542,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-active-w320-light (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-incomplete_evidence-w1280-dark": {
       "case_key": "phase254-page-incomplete_evidence-w1280-dark",
       "file": "phase254-page-incomplete-evidence-w1280-dark.png",
-      "sha256": "9b5ff807bd29f6973b5d8b56d339d72881dc5f1ad0a6df850a4f22eec1dc3d71",
+      "sha256": "550caf6c0505c45aa57d4a8cc2a49799e4cd9ad74d3df86a2795728418f0f529",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -562,19 +562,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-incomplete_evidence-w1280-dark (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-incomplete_evidence-w1280-light": {
       "case_key": "phase254-page-incomplete_evidence-w1280-light",
       "file": "phase254-page-incomplete-evidence-w1280-light.png",
-      "sha256": "5b8eae22ba5213040f4e15e3222cf3b402e84a4a1d3a47e8ff8335d037da2efc",
+      "sha256": "d3b17e5a581bf8be88572ca8dc8aa07f2ac7e2efd406fe91256e0aada3330f31",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -582,19 +582,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-incomplete_evidence-w1280-light (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-incomplete_evidence-w320-dark": {
       "case_key": "phase254-page-incomplete_evidence-w320-dark",
       "file": "phase254-page-incomplete-evidence-w320-dark.png",
-      "sha256": "773a0d2fec222dd55e908773302d380453a14fe3b88fc2571d8d862f87576c41",
+      "sha256": "5962ff75db6c4c5b2d786d25b0c6cea774e609417719629a227c29c7c7884022",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -602,19 +602,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-incomplete_evidence-w320-dark (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-incomplete_evidence-w320-light": {
       "case_key": "phase254-page-incomplete_evidence-w320-light",
       "file": "phase254-page-incomplete-evidence-w320-light.png",
-      "sha256": "19f4ecb96e03db95e23244dbe21ef3930a48c28b405f65d351499c0cb82bf41c",
+      "sha256": "125e6a74a2271035833dd9f1c5e294dbe0a19f41a071ff1537f0d017229f9ef1",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -622,8 +622,8 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-incomplete_evidence-w320-light (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-review_cancel_now-w1280-dark": {
       "case_key": "phase254-page-review_cancel_now-w1280-dark",
@@ -631,10 +631,10 @@
       "sha256": "7b12fede79628bc415fd394bb90841cb2e7479c3034819c3c25ea2c66659a1bc",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -651,10 +651,10 @@
       "sha256": "dc108434d6690a5fe70c33041b3e60347656de9fec7af97a1a9686a68122fbd5",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -668,13 +668,13 @@
     "phase254-page-review_cancel_now-w320-dark": {
       "case_key": "phase254-page-review_cancel_now-w320-dark",
       "file": "phase254-page-review-cancel-now-w320-dark.png",
-      "sha256": "11609b0cac106237059d1552bdb618bdbddc82f9d3cb60f05b8d2f7f750bdee3",
+      "sha256": "2bdae6b081113dcac0e585ae78c7fb41f41cc6bc9d4dbd5f492b74e220b48046",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -682,19 +682,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-review_cancel_now-w320-dark (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-review_cancel_now-w320-light": {
       "case_key": "phase254-page-review_cancel_now-w320-light",
       "file": "phase254-page-review-cancel-now-w320-light.png",
-      "sha256": "9f0a34dd1e5c0cbf36a0349a70510fc1ba2f3fff8e36f55dbacfeddeba547e0f",
+      "sha256": "fa0361fdafa03460aa08b6421d09aaa9b7155ab8e3d80031350716f737b4e2de",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -702,19 +702,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-review_cancel_now-w320-light (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-scheduled_cancellation-w1280-dark": {
       "case_key": "phase254-page-scheduled_cancellation-w1280-dark",
       "file": "phase254-page-scheduled-cancellation-w1280-dark.png",
-      "sha256": "3415291051f0349ac1c5d0d624f7fa0b18a6d080acd3c4d717482626c5c7ec31",
+      "sha256": "142aab9c79659e5e003fb19e84d0bc6254e917916e5b702e0f1c5567e416b5e3",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -722,19 +722,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-scheduled_cancellation-w1280-dark (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-scheduled_cancellation-w1280-light": {
       "case_key": "phase254-page-scheduled_cancellation-w1280-light",
       "file": "phase254-page-scheduled-cancellation-w1280-light.png",
-      "sha256": "c6439c09ae105d4afc5f24b14210752458d82797fd095bc65e28d3ace40728da",
+      "sha256": "21569a37825c2a4e6600e8e4e881f8c300a65a94b9190b22c143d82445bba61a",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -742,19 +742,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-scheduled_cancellation-w1280-light (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-scheduled_cancellation-w320-dark": {
       "case_key": "phase254-page-scheduled_cancellation-w320-dark",
       "file": "phase254-page-scheduled-cancellation-w320-dark.png",
-      "sha256": "57a47636d607788d98c54f883fafed9ef3b7e6e9232ac4f192d19b79b621a445",
+      "sha256": "15e94e320e0530d63ab07b17470b983c71f77b744998ddf98d615b8abfa093dc",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -762,19 +762,19 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-scheduled_cancellation-w320-dark (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "phase254-page-scheduled_cancellation-w320-light": {
       "case_key": "phase254-page-scheduled_cancellation-w320-light",
       "file": "phase254-page-scheduled-cancellation-w320-light.png",
-      "sha256": "bb64d8aaf7d165d12d42682e0719efff01cfc9c43f47768dd132125c35ba34ff",
+      "sha256": "35e2bedfe21fdf19eb8c0eb882372dcd97ad5de65864bb226cc452127315a671",
       "provenance": "phase254-mint",
       "kind": "story",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe",
+        "css_sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b",
         "js_sha256": "eb77e7d5f986b97bc18198fd3f7e2bd87ae579e0fa53c524d3ebe5a5c789b7d1",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -782,8 +782,8 @@
       "scenario_file_sha256": "12c5709b01d5781a73c693c8a3f6f932ce0042c4531c623ef6657623fcbcc7ad",
       "playwright_version": "1.59.1",
       "browser_version": "147.0.7727.15",
-      "reason": "CIQ-03 new subscription visual case phase254-page-scheduled_cancellation-w320-light (D-16/D-33 addition) minted after the 254-12/13 correction batch",
-      "finding_id": "CIQ-03"
+      "reason": "Owner-approved AMD-254-06 identity refresh after the CSS focus and overflow correction",
+      "finding_id": "A11Y-254-28"
     },
     "subscription-detail": {
       "case_key": "subscription-detail",
@@ -791,10 +791,10 @@
       "sha256": "baf35c20cb295fb39660045b96ed8ed331e22282b8c02b093987248d9fc33b17",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -811,10 +811,10 @@
       "sha256": "af31a6715fe4a81cb8be7f60dcc05c7410b5554891456d6f06157e827b2e283d",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -831,10 +831,10 @@
       "sha256": "93cf9b1eede09b5c8cfdd35c2d2e35c9eaca08b45db120548fabaf1c7165ebad",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"
@@ -851,10 +851,10 @@
       "sha256": "fc4763e081337dad0dc05285832921c301d906d245a34d344371f376c12ca53d",
       "provenance": "phase254-mint",
       "kind": "mounted",
-      "mint_run_id": "40876347666",
-      "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
+      "mint_run_id": "41682891880",
+      "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
       "served": {
-        "css_sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299",
+        "css_sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529",
         "js_sha256": "0269482276a113f54be76d8ba7b17f023d1d391a03aae916ab086515392bb300",
         "geist_sans_sha256": "28258d0621216948416a859d32487ab6ad1c9effa0d08795698e70be3c917630",
         "geist_mono_sha256": "5bc6413e82be410dc057feccee55160495b999d0fe212b7b6c6499b29b8b1e4a"

@@ -27,6 +27,23 @@
         "date": "2026-10-28",
         "status": "owner-accepted at plan time"
       }
+    },
+    {
+      "id": "AMD-254-06",
+      "decisions": [
+        "D-08",
+        "D-20"
+      ],
+      "original": "mint once, after corrections",
+      "amended": [
+        "41682891880"
+      ],
+      "owner_decision": "Why do I have to authorize all these little freaking things? Unless it's particularly controversial or there's big implications in terms of, yeah, you can go ahead and do it. And please remember this going forward. Don't waste my time.",
+      "rationale": "The owner-approved additional Linux mint re-attests the existing visual identities after the approved CSS focus and overflow corrections. The stability proof passed; 20 Phase 254 case PNGs changed under A11Y-254-28, no Phase 211 PNG changed, and the subscriptions list PNGs stayed byte-identical.",
+      "owner_ack": {
+        "date": "2026-10-28",
+        "status": "owner-accepted at plan time"
+      }
     }
   ],
   "manifest_sha256": "6fbbe908fc8600906701175946e1405317f224f1d9609126d2f21092d0a02831",

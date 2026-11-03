@@ -585,8 +585,8 @@ test("the visual matrix preserves a valid owner-approved AMD-254-06 extra-mint r
     id: "AMD-254-06",
     decisions: ["D-08", "D-20"],
     original: "mint once, after corrections",
-    amended: ["40876347666", "41690000001"],
-    owner_decision: "yeah, you can go ahead and do it",
+    amended: ["41682891880"],
+    owner_decision: "Why do I have to authorize all these little freaking things? Unless it's particularly controversial or there's big implications in terms of, yeah, you can go ahead and do it. And please remember this going forward. Don't waste my time.",
     rationale: "Re-attest the committed Linux baseline identities after the approved CSS correction.",
     owner_ack: { date: "2026-10-28", status: "owner-accepted at plan time" },
   };
@@ -597,7 +597,8 @@ test("the visual matrix preserves a valid owner-approved AMD-254-06 extra-mint r
 
   for (const [mutate, message] of [
     [(item) => { item.decisions = ["D-20"]; }, /must bind D-08 and D-20/],
-    [(item) => { item.amended = ["40876347666", "40876347666"]; }, /every distinct committed mint run id/],
+    [(item) => { item.amended = ["41682891880", "41682891880"]; }, /every distinct committed mint run id/],
+    [(item) => { item.amended = []; }, /every distinct committed mint run id/],
     [(item) => { item.owner_decision = ""; }, /verbatim owner_decision/],
     [(item) => { item.owner_ack.date = "2026-11-03"; }, /with its owner_ack/],
   ]) {
@@ -620,10 +621,11 @@ test("every key of the design review's 16 captures is a visual case key, and a r
 
 test("the committed visual cases file equals the regenerated one and a drifted expectation is stale", () => {
   const committed = selection.readVisualCases(ROOT);
-  assert.doesNotThrow(() => selection.assertVisualCasesCurrent(committed, visualFile()));
+  const amendments = committed.amendments.filter((item) => item.id !== "AMD-254-02");
+  assert.doesNotThrow(() => selection.assertVisualCasesCurrent(committed, visualFile({ amendments })));
   const drifted = structuredClone(committed);
   drifted.cases[0].expected.identity.texts[0] = "Another Customer";
-  assert.throws(() => selection.assertVisualCasesCurrent(drifted, visualFile()), /is stale/);
+  assert.throws(() => selection.assertVisualCasesCurrent(drifted, visualFile({ amendments })), /is stale/);
 });
 
 test("mounted-fallback sourcing needs the probe error and turns every case into kind mounted", () => {

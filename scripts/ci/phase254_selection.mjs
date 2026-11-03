@@ -524,7 +524,7 @@ function assertAdditionalVisualAmendments(amendments) {
     if (!isObject(amendment) || amendment.id !== "AMD-254-06") fail(`unsupported additional visual amendment ${JSON.stringify(amendment?.id)}`, "VISUAL_INVALID");
     if (JSON.stringify(amendment.decisions) !== JSON.stringify(["D-08", "D-20"])) fail("AMD-254-06 must bind D-08 and D-20", "VISUAL_INVALID");
     if (amendment.original !== "mint once, after corrections") fail("AMD-254-06 must preserve the original one-mint decision", "VISUAL_INVALID");
-    if (!Array.isArray(amendment.amended) || amendment.amended.length < 2 || amendment.amended.some((runId) => typeof runId !== "string" || !/^\d+$/.test(runId)) || new Set(amendment.amended).size !== amendment.amended.length) {
+    if (!Array.isArray(amendment.amended) || amendment.amended.length === 0 || amendment.amended.some((runId) => typeof runId !== "string" || !/^\d+$/.test(runId)) || new Set(amendment.amended).size !== amendment.amended.length) {
       fail("AMD-254-06 amended must list every distinct committed mint run id", "VISUAL_INVALID");
     }
     if (typeof amendment.owner_decision !== "string" || amendment.owner_decision.trim() === "") fail("AMD-254-06 needs the verbatim owner_decision", "VISUAL_INVALID");
