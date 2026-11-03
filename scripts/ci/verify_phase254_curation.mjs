@@ -31,6 +31,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 
 export const LEDGER_PATH = "accrue_admin/storybook/subscription-curation.json";
 export const MANIFEST_PATH = "storybook/phase252-manifest.json";
+export const BUDGET_PATH = "accrue_admin/storybook/phase254-budget.json";
 export const SUBSCRIPTION_STORY_PATH = "/components/subscription_detail";
 export const RESULT_ROOT_RELATIVE = "accrue_admin/tmp/phase252/ci-results";
 
@@ -707,6 +708,118 @@ function validateCounts(ledger, baseline, context) {
   }
 }
 
+const ADOPTER_BRIEF_IDS = Object.freeze(["launch", "team", "learner", "operations", "self_hosted"]);
+const ADOPTER_LIMITS = Object.freeze({
+  launch: "No fabricated invoices or invented onboarding capability",
+  team: "Reuse current host and catalog",
+  learner: "No claim of translated UI, full RTL layout, mobile-store integration, or locale-driven currency conversion",
+  operations: "Do not invent accounting, reconciliation, exports, or provider actions not present in the UI",
+  self_hosted: "Self-hosting is a host deployment profile; it does not imply offline money movement, new licensing, or a new billing rail",
+});
+
+function sortedUnique(values) {
+  return [...new Set(values)].sort();
+}
+
+function maintenanceLevel(facts, cells, mounted, share) {
+  if (facts <= 2 && cells <= 8 && mounted <= 2 && share <= 0.02) return "low";
+  if (facts <= 6 && cells <= 24 && mounted <= 4 && share <= 0.05) return "medium";
+  return "high";
+}
+
+function expectedMaintenanceCost(rows, budget) {
+  const frozen = budget?.frozen;
+  const p90 = frozen?.composition_cell?.per_cell_p90_s;
+  const budgetValue = frozen?.value;
+  if (!isObject(frozen) || typeof p90 !== "number" || !Number.isFinite(p90) || typeof budgetValue !== "number" || !Number.isFinite(budgetValue) || budgetValue <= 0) {
+    fail("brief maintenance cost requires frozen.composition_cell.per_cell_p90_s and positive frozen.value");
+  }
+
+  const uncoveredFacts = new Set();
+  for (const row of rows) {
+    if (!isObject(row) || !["uncovered", "gated"].includes(row.state)) continue;
+    for (const state of row.uncovered_states || []) uncoveredFacts.add(JSON.stringify([row.surface, row.job, state]));
+  }
+  const newFacts = uncoveredFacts.size;
+  const browserCells = newFacts * 4;
+  const browserCost = Number((browserCells * p90).toFixed(3));
+  const budgetShare = Number((browserCost / budgetValue).toFixed(6));
+  const mounted = new Set(rows
+    .filter((row) => ["job", "page"].includes(row.tier) && ["uncovered", "gated"].includes(row.state) && typeof row.route_path === "string")
+    .map((row) => JSON.stringify([row.surface, row.job]))).size;
+  return {
+    new_facts_fixtures: newFacts,
+    browser_cells: browserCells,
+    browser_cost_s: browserCost,
+    budget_share: budgetShare,
+    mounted_fixtures: mounted,
+    level: maintenanceLevel(newFacts, browserCells, mounted, budgetShare),
+  };
+}
+
+export function verifyAdopterBriefs(ledger, budget) {
+  if (!isObject(ledger) || !Array.isArray(ledger.briefs)) fail("briefs must be a list");
+  if (!Array.isArray(ledger.caller_map) || ledger.caller_map.length === 0) fail("caller_map must be a non-empty list for adopter briefs");
+  if (!/^[0-9a-f]{64}$/.test(ledger.gap_map_digest || "")) fail("gap_map_digest must be a sha256");
+  if (sha256(stableStringify(ledger.caller_map)) !== ledger.gap_map_digest) fail("gap_map_digest does not match caller_map");
+
+  const briefs = ledger.briefs;
+  if (briefs.length !== ADOPTER_BRIEF_IDS.length) fail(`expected exactly ${ADOPTER_BRIEF_IDS.length} adopter briefs`);
+  const ids = briefs.map((brief) => brief?.id);
+  if (JSON.stringify(ids) !== JSON.stringify(ADOPTER_BRIEF_IDS)) fail(`adopter briefs must be ordered ${ADOPTER_BRIEF_IDS.join(", ")}`);
+
+  const classOwners = new Map();
+  for (const brief of briefs) {
+    if (!isObject(brief) || brief.synthetic !== true) fail(`${brief?.id || "brief"} must be labelled synthetic`);
+    if (!Array.isArray(brief.equivalence_classes) || brief.equivalence_classes.length === 0 || brief.equivalence_classes.some((value) => !isNonEmptyString(value))) {
+      fail(`${brief.id} needs at least one equivalence class`);
+    }
+    for (const equivalenceClass of brief.equivalence_classes) {
+      classOwners.set(equivalenceClass, [...(classOwners.get(equivalenceClass) || []), brief.id]);
+    }
+    if (!Array.isArray(brief.jobs) || brief.jobs.length === 0 || brief.jobs.some((job) => !isObject(job) || !isNonEmptyString(job.surface) || !isNonEmptyString(job.job))) {
+      fail(`${brief.id} needs caller-map job references`);
+    }
+    const jobKeys = brief.jobs.map((job) => JSON.stringify([job.surface, job.job]));
+    if (new Set(jobKeys).size !== jobKeys.length) fail(`${brief.id} has duplicate caller-map job references`);
+
+    const selectedRows = [];
+    for (const job of brief.jobs) {
+      const matches = ledger.caller_map.filter((row) => row.surface === job.surface && row.job === job.job);
+      if (matches.length === 0) fail(`${brief.id} job ${job.surface}/${job.job} is absent from caller_map`);
+      selectedRows.push(...matches);
+    }
+
+    const expectedStates = sortedUnique(selectedRows.flatMap((row) => row.uncovered_states || []));
+    if (!Array.isArray(brief.uncovered_states) || stableStringify(sortedUnique(brief.uncovered_states)) !== stableStringify(expectedStates)) {
+      fail(`${brief.id} uncovered_states do not match its caller-map jobs`);
+    }
+    const expectedTriggers = sortedUnique(selectedRows.map((row) => row.review_trigger).filter(isNonEmptyString));
+    if (!Array.isArray(brief.review_triggers) || stableStringify(sortedUnique(brief.review_triggers)) !== stableStringify(expectedTriggers)) {
+      fail(`${brief.id} review_triggers do not match its caller-map jobs`);
+    }
+    for (const field of ["product", "hosting_billing_shape", "volume_and_script_mix", "failure_profile_and_people_jobs", "limits"]) {
+      if (!isNonEmptyString(brief[field])) fail(`${brief.id} needs ${field}`);
+    }
+    if (brief.limits !== ADOPTER_LIMITS[brief.id]) fail(`${brief.id} limits differ from the proposed adopter profile table`);
+    if (brief.id === "team" && brief.implemented !== true) fail("team must be marked implemented");
+    if (brief.id === "self_hosted" && (brief.profile_kind !== "synthetic deployment profile" || stableStringify(brief.seeds) !== "[]" || stableStringify(brief.stories) !== "[]")) {
+      fail("self_hosted must be a synthetic deployment profile with no seeds or stories");
+    }
+
+    const expectedCost = expectedMaintenanceCost(selectedRows, budget);
+    if (!isObject(brief.maintenance_cost) || stableStringify(brief.maintenance_cost) !== stableStringify(expectedCost)) {
+      fail(`${brief.id} maintenance_cost does not match caller-map rows and frozen budget`);
+    }
+  }
+
+  for (const id of ADOPTER_BRIEF_IDS) {
+    const hasExclusiveClass = [...classOwners.values()].some((owners) => owners.length === 1 && owners[0] === id);
+    if (!hasExclusiveClass) fail(`${id} has no equivalence class unique to that brief`);
+  }
+  return { briefs: briefs.length };
+}
+
 export function verifyLedger(ledger, context = {}) {
   const ctx = normalizeContext(context);
   if (!isObject(ledger)) fail("ledger must be a JSON object");
@@ -734,6 +847,15 @@ export function verifyLedger(ledger, context = {}) {
       fail(`frozen subjects drifted from source_commit ${baseline.source_commit.slice(0, 12)}: added [${drift.added.join(", ")}], missing [${drift.missing.join(", ")}]`);
     }
     if (subjectsSha256(ctx.frozenSubjects) !== baseline.subjects_sha256) fail("frozen_baseline.subjects_sha256 differs from the digest derived at source_commit");
+  }
+  if (ledger.briefs !== undefined || ledger.caller_map !== undefined || ledger.gap_map_digest !== undefined) {
+    let budget;
+    try {
+      budget = JSON.parse(fs.readFileSync(path.join(ctx.root, BUDGET_PATH), "utf8"));
+    } catch (error) {
+      fail(`cannot read frozen Phase 254 budget at ${BUDGET_PATH}: ${error.message}`);
+    }
+    verifyAdopterBriefs(ledger, budget);
   }
   return { records: ledger.records.length, removed: ledger.records.filter((record) => REMOVING.includes(record.disposition)).length };
 }
@@ -985,7 +1107,103 @@ function manifestFixtureJson(ids) {
   });
 }
 
+function adopterBriefFixtureWorld() {
+  const caller_map = [
+    { surface: "admin", job: "launch job", state: "uncovered", tier: "job", route_path: "/launch", uncovered_states: ["first-run-empty"], review_trigger: "launch contract changes" },
+    { surface: "admin", job: "team job", state: "reachable", tier: "job", route_path: "/team", uncovered_states: [], review_trigger: "team contract changes" },
+    { surface: "portal", job: "learner job", state: "gated", tier: "job", route_path: "/learner", uncovered_states: ["personal-owner"], review_trigger: "learner contract changes" },
+    { surface: "admin", job: "operations job", state: "uncovered", tier: "job", route_path: "/operations", uncovered_states: ["queue-boundary", "partial-observation"], review_trigger: "operations evidence changes" },
+    { surface: "admin", job: "self-hosted job", state: "uncovered", tier: "job", route_path: "/self-hosted", uncovered_states: ["configured-host-reconnect"], review_trigger: "host or reconnect contract changes" },
+  ];
+  const definitions = [
+    ["launch", "launch job", "admin", ["first-run-empty"]],
+    ["team", "team job", "admin", ["owner-actor"]],
+    ["learner", "learner job", "portal", ["personal-owner"]],
+    ["operations", "operations job", "admin", ["currency-qualified-queue"]],
+    ["self_hosted", "self-hosted job", "admin", ["configured-host-boundary"]],
+  ];
+  const briefs = definitions.map(([id, job, surface, equivalence_classes]) => {
+    const selectedRows = caller_map.filter((row) => row.surface === surface && row.job === job);
+    const uncovered_states = sortedUnique(selectedRows.flatMap((row) => row.uncovered_states));
+    const review_triggers = sortedUnique(selectedRows.map((row) => row.review_trigger));
+    return {
+      id,
+      synthetic: true,
+      equivalence_classes,
+      jobs: [{ surface, job }],
+      uncovered_states,
+      review_triggers,
+      product: `Synthetic ${id}`,
+      hosting_billing_shape: "Synthetic host shape",
+      volume_and_script_mix: "Synthetic volume and scripts",
+      failure_profile_and_people_jobs: "Synthetic jobs and failures",
+      limits: ADOPTER_LIMITS[id],
+      ...(id === "team" ? { implemented: true } : {}),
+      ...(id === "self_hosted" ? { profile_kind: "synthetic deployment profile", seeds: [], stories: [] } : {}),
+      maintenance_cost: expectedMaintenanceCost(selectedRows, { frozen: { value: 100, composition_cell: { per_cell_p90_s: 1.794 } } }),
+    };
+  });
+  return {
+    ledger: { caller_map, gap_map_digest: sha256(stableStringify(caller_map)), briefs },
+    budget: { frozen: { value: 100, composition_cell: { per_cell_p90_s: 1.794 } } },
+  };
+}
+
 const SCENARIOS = [
+  [
+    "adopter briefs reject a sixth profile",
+    () => {
+      const world = adopterBriefFixtureWorld();
+      assert.deepEqual(verifyAdopterBriefs(world.ledger, world.budget), { briefs: 5 });
+      world.ledger.briefs.push(clone(world.ledger.briefs[0]));
+      assert.throws(() => verifyAdopterBriefs(world.ledger, world.budget), /exactly 5 adopter briefs/);
+    },
+  ],
+  [
+    "adopter briefs reject a missing profile",
+    () => {
+      const world = adopterBriefFixtureWorld();
+      assert.doesNotThrow(() => verifyAdopterBriefs(world.ledger, world.budget));
+      world.ledger.briefs.splice(1, 1);
+      assert.throws(() => verifyAdopterBriefs(world.ledger, world.budget), /exactly 5 adopter briefs/);
+    },
+  ],
+  [
+    "adopter briefs reject profiles that share their only unique class",
+    () => {
+      const world = adopterBriefFixtureWorld();
+      assert.doesNotThrow(() => verifyAdopterBriefs(world.ledger, world.budget));
+      world.ledger.briefs[1].equivalence_classes = world.ledger.briefs[0].equivalence_classes;
+      assert.throws(() => verifyAdopterBriefs(world.ledger, world.budget), /has no equivalence class unique/);
+    },
+  ],
+  [
+    "adopter briefs reject a missing synthetic label",
+    () => {
+      const world = adopterBriefFixtureWorld();
+      assert.doesNotThrow(() => verifyAdopterBriefs(world.ledger, world.budget));
+      delete world.ledger.briefs[0].synthetic;
+      assert.throws(() => verifyAdopterBriefs(world.ledger, world.budget), /must be labelled synthetic/);
+    },
+  ],
+  [
+    "adopter briefs reject a missing maintenance cost",
+    () => {
+      const world = adopterBriefFixtureWorld();
+      assert.doesNotThrow(() => verifyAdopterBriefs(world.ledger, world.budget));
+      delete world.ledger.briefs[0].maintenance_cost;
+      assert.throws(() => verifyAdopterBriefs(world.ledger, world.budget), /maintenance_cost does not match/);
+    },
+  ],
+  [
+    "adopter briefs reject a mismatched maintenance-cost field",
+    () => {
+      const world = adopterBriefFixtureWorld();
+      assert.doesNotThrow(() => verifyAdopterBriefs(world.ledger, world.budget));
+      world.ledger.briefs[0].maintenance_cost.browser_cells += 1;
+      assert.throws(() => verifyAdopterBriefs(world.ledger, world.budget), /maintenance_cost does not match/);
+    },
+  ],
   [
     "a well-formed ledger with only retain records passes (positive control for every rejection below)",
     () => {

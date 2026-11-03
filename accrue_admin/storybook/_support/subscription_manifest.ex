@@ -118,6 +118,7 @@ if Mix.env() != :prod do
     @curation_reachability_states ["reachable", "historic_supported", "unreachable"]
     @curation_survivor_kinds ["manifest_entry", "story"]
     @curation_guide_path "accrue_admin/storybook/subscription-curation.json"
+    @phase254_budget_path "accrue_admin/storybook/phase254-budget.json"
 
     @doc "Discovers retained subscription variations from the compiled PhoenixStorybook backend."
     @spec entries() :: [map()]
@@ -329,14 +330,229 @@ if Mix.env() != :prod do
     @doc "Returns the compiled curation ledger: frozen baseline, current counts, records, and amendments."
     @spec curation_ledger() :: map()
     def curation_ledger do
+      caller_rows = caller_map()
+
       %{
         schema_version: 1,
         frozen_baseline: frozen_baseline(),
         current: current_counts(),
         records: curation_records(),
         amendments: curation_amendments(),
-        source_digests: source_digests()
+        source_digests: source_digests(),
+        caller_map: caller_rows,
+        gap_map_digest: gap_map_digest(caller_rows),
+        briefs: adopter_briefs_for(caller_rows)
       }
+    end
+
+    @doc "Returns the five synthetic adopter profiles linked to current caller-map gaps."
+    @spec adopter_briefs() :: [map()]
+    def adopter_briefs do
+      adopter_briefs_for(caller_map())
+    end
+
+    @doc "Computes a deterministic cost from caller-map rows and the frozen Phase 254 budget."
+    @spec maintenance_cost([map()], map()) :: map()
+    def maintenance_cost(rows, budget) when is_list(rows) and is_map(budget) do
+      frozen = Map.get(budget, "frozen")
+
+      unless is_map(frozen) do
+        raise ArgumentError, "maintenance cost requires a non-null frozen budget"
+      end
+
+      composition = Map.get(frozen, "composition_cell")
+      per_cell_p90_s = if is_map(composition), do: Map.get(composition, "per_cell_p90_s")
+      budget_value = Map.get(frozen, "value")
+
+      unless is_number(per_cell_p90_s) and is_number(budget_value) and budget_value > 0 do
+        raise ArgumentError,
+              "maintenance cost requires numeric frozen.composition_cell.per_cell_p90_s and positive frozen.value"
+      end
+
+      uncovered_facts =
+        rows
+        |> Enum.filter(&(&1.state in ["uncovered", "gated"]))
+        |> Enum.flat_map(fn row ->
+          Enum.map(row.uncovered_states, &{row.surface, row.job, &1})
+        end)
+        |> Enum.uniq()
+
+      new_facts_fixtures = length(uncovered_facts)
+      browser_cells = new_facts_fixtures * 4
+      browser_cost_s = Float.round(browser_cells * per_cell_p90_s, 3)
+      budget_share = Float.round(browser_cost_s / budget_value, 6)
+
+      mounted_fixtures =
+        rows
+        |> Enum.filter(fn row ->
+          row.tier in ["job", "page"] and row.state in ["uncovered", "gated"] and
+            is_binary(row.route_path)
+        end)
+        |> Enum.map(&{&1.surface, &1.job})
+        |> Enum.uniq()
+        |> length()
+
+      level = maintenance_level(new_facts_fixtures, browser_cells, mounted_fixtures, budget_share)
+
+      %{
+        new_facts_fixtures: new_facts_fixtures,
+        browser_cells: browser_cells,
+        browser_cost_s: browser_cost_s,
+        budget_share: budget_share,
+        mounted_fixtures: mounted_fixtures,
+        level: level
+      }
+    end
+
+    def maintenance_cost(_rows, _budget),
+      do: raise(ArgumentError, "maintenance cost requires caller-map rows and a budget object")
+
+    defp maintenance_level(facts, cells, mounted, share)
+         when facts <= 2 and cells <= 8 and mounted <= 2 and share <= 0.02,
+         do: "low"
+
+    defp maintenance_level(facts, cells, mounted, share)
+         when facts <= 6 and cells <= 24 and mounted <= 4 and share <= 0.05,
+         do: "medium"
+
+    defp maintenance_level(_facts, _cells, _mounted, _share), do: "high"
+
+    defp adopter_briefs_for(rows) do
+      budget =
+        repository_root()
+        |> Path.join(@phase254_budget_path)
+        |> File.read!()
+        |> Jason.decode!()
+
+      Enum.map(adopter_brief_definitions(), fn definition ->
+        selected_rows = rows_for_jobs(rows, definition.jobs)
+
+        uncovered_states =
+          selected_rows |> Enum.flat_map(& &1.uncovered_states) |> Enum.uniq() |> Enum.sort()
+
+        review_triggers =
+          selected_rows |> Enum.map(& &1.review_trigger) |> Enum.uniq() |> Enum.sort()
+
+        definition
+        |> Map.put(:synthetic, true)
+        |> Map.put(:uncovered_states, uncovered_states)
+        |> Map.put(:review_triggers, review_triggers)
+        |> Map.put(:maintenance_cost, maintenance_cost(selected_rows, budget))
+      end)
+    end
+
+    defp rows_for_jobs(rows, jobs) do
+      wanted = MapSet.new(jobs, &{&1.surface, &1.job})
+      Enum.filter(rows, &MapSet.member?(wanted, {&1.surface, &1.job}))
+    end
+
+    defp gap_map_digest(rows) do
+      rows
+      |> ordered_json()
+      |> Jason.encode!()
+      |> then(&:crypto.hash(:sha256, &1))
+      |> Base.encode16(case: :lower)
+    end
+
+    defp adopter_brief_definitions do
+      [
+        %{
+          id: "launch",
+          product: "new Cadence team workspace",
+          hosting_billing_shape: "Hosted B2B; organization-owned billable",
+          volume_and_script_mix:
+            "Zero customers/subscriptions initially; one first workspace; short English labels",
+          failure_profile_and_people_jobs:
+            "Founder/operator checks whether anything needs attention; customer owner starts supported billing setup",
+          jobs: [
+            %{surface: "admin", job: "dashboard list"},
+            %{surface: "admin", job: "customers list"},
+            %{surface: "admin", job: "subscription worklist"}
+          ],
+          equivalence_classes: ["first-run-empty-vs-filtered-empty"],
+          limits: "No fabricated invoices or invented onboarding capability",
+          implemented: false
+        },
+        %{
+          id: "team",
+          product: "Cadence collaboration service",
+          hosting_billing_shape:
+            "Hosted multi-tenant B2B; organization billable, individual human actors",
+          volume_and_script_mix:
+            "100-account representative demo scale; 1/25/26 result boundaries; plausible long company names and accented names",
+          failure_profile_and_people_jobs:
+            "Support finds one customer, inspects subscription, reviews cancel-renewal consequence; organization manager manages only its own billing",
+          jobs: [
+            %{surface: "admin", job: "subscription worklist"},
+            %{surface: "admin", job: "inspect subscription detail and review an action"},
+            %{surface: "admin", job: "review and confirm subscription actions"}
+          ],
+          equivalence_classes: ["organization-owner-vs-human-actor"],
+          limits: "Reuse current host and catalog",
+          implemented: true
+        },
+        %{
+          id: "learner",
+          product: "personal language-study subscription",
+          hosting_billing_shape: "Hosted B2C; user billable",
+          volume_and_script_mix:
+            "One subscription per selected learner; short/long personal names; Japanese and Arabic names embedded in current English UI; USD and JPY as separate real records",
+          failure_profile_and_people_jobs:
+            "Customer finds invoices and supported payment-management path; support investigates one failed renewal",
+          jobs: [
+            %{surface: "portal", job: "invoices list"},
+            %{surface: "portal", job: "payment methods list"},
+            %{surface: "portal", job: "Portal subscription worklist"},
+            %{surface: "portal", job: "Portal subscription detail and plan-change preview"}
+          ],
+          equivalence_classes: ["personal-owner-zero-decimal-mixed-script-identity"],
+          limits:
+            "No claim of translated UI, full RTL layout, mobile-store integration, or locale-driven currency conversion",
+          implemented: false
+        },
+        %{
+          id: "operations",
+          product: "finance/reconciliation SaaS",
+          hosting_billing_shape: "Hosted B2B; organization billable",
+          volume_and_script_mix:
+            "Power-user work queue with many records and a bounded large count; mixed USD/JPY invoice sets, exact long identifiers",
+          failure_profile_and_people_jobs:
+            "Finance operator clears an invoice queue; engineer follows webhook → event → customer; periodic partial failure or stale observation",
+          jobs: [
+            %{surface: "admin", job: "invoices list"},
+            %{surface: "admin", job: "webhooks list"},
+            %{surface: "admin", job: "webhook view"},
+            %{surface: "admin", job: "events list"},
+            %{surface: "admin", job: "event view"}
+          ],
+          equivalence_classes: ["currency-qualified-queue-and-evidence-chain"],
+          limits:
+            "Do not invent accounting, reconciliation, exports, or provider actions not present in the UI",
+          implemented: false
+        },
+        %{
+          id: "self_hosted",
+          product: "privately deployed team knowledge tool",
+          hosting_billing_shape:
+            "Single-tenant Phoenix deployment; one organization billable, separately authorized operator",
+          volume_and_script_mix:
+            "One customer/org, few plans, long deployment/org name; ordinary English plus Unicode user identity",
+          failure_profile_and_people_jobs:
+            "Maintainer investigates missing/stale webhook evidence or browser disconnect; billing manager views local evidence",
+          jobs: [
+            %{surface: "admin", job: "webhooks list"},
+            %{surface: "admin", job: "webhook view"},
+            %{surface: "portal", job: "Portal subscription worklist"}
+          ],
+          equivalence_classes: ["configured-single-tenant-host-reconnect-boundary"],
+          limits:
+            "Self-hosting is a host deployment profile; it does not imply offline money movement, new licensing, or a new billing rail",
+          implemented: false,
+          profile_kind: "synthetic deployment profile",
+          seeds: [],
+          stories: []
+        }
+      ]
     end
 
     @doc "Counts observed in the current tree, checked against the frozen baseline by the verifier."
@@ -1595,6 +1811,7 @@ if Mix.env() != :prod do
         "Phase 253's compiled composition supplement below documents the Admin whole-page and collection stories. Mounted route and action-journey behavior is verified separately. Portal subscription list/detail and mounted cancellation/plan-change jobs remain visible below for later coverage planning; this guide does not implement those jobs.",
         "",
         state_tables,
+        adopter_brief_section(),
         phase253_composition_section(),
         curation_section(),
         "## Source digests",
@@ -1604,6 +1821,65 @@ if Mix.env() != :prod do
       ]
       |> List.flatten()
       |> Enum.join("\n")
+    end
+
+    defp adopter_brief_section do
+      rows = adopter_briefs()
+
+      brief_rows =
+        Enum.map(rows, fn brief ->
+          cost = brief.maintenance_cost
+          jobs = Enum.map_join(brief.jobs, "<br>", &"`#{&1.surface}: #{&1.job}`")
+          classes = Enum.map_join(brief.equivalence_classes, "<br>", &"`#{&1}`")
+          uncovered = Enum.map_join(brief.uncovered_states, "<br>", &"`#{&1}`")
+          triggers = Enum.map_join(brief.review_triggers, "<br>", &guide_cell/1)
+          implementation = if brief.implemented, do: "implemented", else: "synthetic target"
+
+          profile_note =
+            if brief.id == "self_hosted",
+              do: "#{brief.profile_kind}; no seeds or stories",
+              else: "#{implementation}"
+
+          cost_summary =
+            "#{cost.level}: #{cost.new_facts_fixtures} facts/fixtures, #{cost.browser_cells} browser cells, #{cost.browser_cost_s}s (#{Float.round(cost.budget_share * 100, 2)}% of frozen budget), #{cost.mounted_fixtures} mounted fixtures"
+
+          profile =
+            [
+              brief.hosting_billing_shape,
+              brief.volume_and_script_mix,
+              brief.failure_profile_and_people_jobs
+            ]
+            |> Enum.map_join("<br>", &guide_cell/1)
+
+          "| `#{brief.id}` | #{guide_cell(brief.product)} | #{guide_cell(profile_note)} | #{profile} | #{jobs} | #{uncovered} | #{triggers} | #{classes} | #{guide_cell(cost_summary)} | #{guide_cell(brief.limits)} |"
+        end)
+
+      [
+        "## Synthetic adopter briefs",
+        "",
+        "These five profiles are synthetic design assumptions, not adopter research or usage evidence. Jobs, uncovered states, and review triggers link to the caller map above. Cost counts distinct uncovered `{surface, job, state}` facts/fixtures; each adds four composition browser cells (two widths × two themes), priced at the frozen composition-cell p90 of #{budget_composition_cell_p90()}s against the frozen #{budget_value()}s CIQ-04 budget. Levels are low at ≤2 facts, ≤8 cells, ≤2 mounted fixtures, and ≤2% of budget; medium at ≤6 facts, ≤24 cells, ≤4 mounted fixtures, and ≤5%; all larger estimates are high.",
+        "",
+        "| Profile | Fictional product | Status | Synthetic profile: hosting/billing, volume/script mix, people/failure profile | Caller-map jobs | Caller-map uncovered states | Review triggers | Distinct equivalence classes | Maintenance cost | Limits copied from the profile table |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        brief_rows,
+        ""
+      ]
+    end
+
+    defp budget_composition_cell_p90 do
+      budget = phase254_budget()
+      budget["frozen"]["composition_cell"]["per_cell_p90_s"]
+    end
+
+    defp budget_value do
+      phase254_budget()["frozen"]["value"]
+    end
+
+    defp phase254_budget do
+      repository_root()
+      |> Path.join(@phase254_budget_path)
+      |> File.read!()
+      |> Jason.decode!()
     end
 
     defp phase253_composition_section do

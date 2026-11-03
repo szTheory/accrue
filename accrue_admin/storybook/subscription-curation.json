@@ -42,6 +42,1754 @@
       ]
     }
   ],
+  "briefs": [
+    {
+      "equivalence_classes": [
+        "first-run-empty-vs-filtered-empty"
+      ],
+      "failure_profile_and_people_jobs": "Founder/operator checks whether anything needs attention; customer owner starts supported billing setup",
+      "hosting_billing_shape": "Hosted B2B; organization-owned billable",
+      "id": "launch",
+      "implemented": false,
+      "jobs": [
+        {
+          "job": "dashboard list",
+          "surface": "admin"
+        },
+        {
+          "job": "customers list",
+          "surface": "admin"
+        },
+        {
+          "job": "subscription worklist",
+          "surface": "admin"
+        }
+      ],
+      "limits": "No fabricated invoices or invented onboarding capability",
+      "maintenance_cost": {
+        "browser_cells": 8,
+        "browser_cost_s": 14.352,
+        "budget_share": 0.014966,
+        "level": "low",
+        "mounted_fixtures": 2,
+        "new_facts_fixtures": 2
+      },
+      "product": "new Cadence team workspace",
+      "review_triggers": [
+        "A router or LiveView contract changes.",
+        "The route, production owner, or coverage contract changes."
+      ],
+      "synthetic": true,
+      "uncovered_states": [
+        "unmapped route job"
+      ],
+      "volume_and_script_mix": "Zero customers/subscriptions initially; one first workspace; short English labels"
+    },
+    {
+      "equivalence_classes": [
+        "organization-owner-vs-human-actor"
+      ],
+      "failure_profile_and_people_jobs": "Support finds one customer, inspects subscription, reviews cancel-renewal consequence; organization manager manages only its own billing",
+      "hosting_billing_shape": "Hosted multi-tenant B2B; organization billable, individual human actors",
+      "id": "team",
+      "implemented": true,
+      "jobs": [
+        {
+          "job": "subscription worklist",
+          "surface": "admin"
+        },
+        {
+          "job": "inspect subscription detail and review an action",
+          "surface": "admin"
+        },
+        {
+          "job": "review and confirm subscription actions",
+          "surface": "admin"
+        }
+      ],
+      "limits": "Reuse current host and catalog",
+      "maintenance_cost": {
+        "browser_cells": 0,
+        "browser_cost_s": 0.0,
+        "budget_share": 0.0,
+        "level": "low",
+        "mounted_fixtures": 0,
+        "new_facts_fixtures": 0
+      },
+      "product": "Cadence collaboration service",
+      "review_triggers": [
+        "The route, production owner, or coverage contract changes."
+      ],
+      "synthetic": true,
+      "uncovered_states": [],
+      "volume_and_script_mix": "100-account representative demo scale; 1/25/26 result boundaries; plausible long company names and accented names"
+    },
+    {
+      "equivalence_classes": [
+        "personal-owner-zero-decimal-mixed-script-identity"
+      ],
+      "failure_profile_and_people_jobs": "Customer finds invoices and supported payment-management path; support investigates one failed renewal",
+      "hosting_billing_shape": "Hosted B2C; user billable",
+      "id": "learner",
+      "implemented": false,
+      "jobs": [
+        {
+          "job": "invoices list",
+          "surface": "portal"
+        },
+        {
+          "job": "payment methods list",
+          "surface": "portal"
+        },
+        {
+          "job": "Portal subscription worklist",
+          "surface": "portal"
+        },
+        {
+          "job": "Portal subscription detail and plan-change preview",
+          "surface": "portal"
+        }
+      ],
+      "limits": "No claim of translated UI, full RTL layout, mobile-store integration, or locale-driven currency conversion",
+      "maintenance_cost": {
+        "browser_cells": 28,
+        "browser_cost_s": 50.232,
+        "budget_share": 0.05238,
+        "level": "high",
+        "mounted_fixtures": 4,
+        "new_facts_fixtures": 7
+      },
+      "product": "personal language-study subscription",
+      "review_triggers": [
+        "A router or LiveView contract changes.",
+        "Portal subscription contract or dev/test harness becomes available."
+      ],
+      "synthetic": true,
+      "uncovered_states": [
+        "cancellation controls",
+        "plan-change preview",
+        "recovery messaging",
+        "subscription detail",
+        "subscription list",
+        "unmapped route job"
+      ],
+      "volume_and_script_mix": "One subscription per selected learner; short/long personal names; Japanese and Arabic names embedded in current English UI; USD and JPY as separate real records"
+    },
+    {
+      "equivalence_classes": [
+        "currency-qualified-queue-and-evidence-chain"
+      ],
+      "failure_profile_and_people_jobs": "Finance operator clears an invoice queue; engineer follows webhook → event → customer; periodic partial failure or stale observation",
+      "hosting_billing_shape": "Hosted B2B; organization billable",
+      "id": "operations",
+      "implemented": false,
+      "jobs": [
+        {
+          "job": "invoices list",
+          "surface": "admin"
+        },
+        {
+          "job": "webhooks list",
+          "surface": "admin"
+        },
+        {
+          "job": "webhook view",
+          "surface": "admin"
+        },
+        {
+          "job": "events list",
+          "surface": "admin"
+        },
+        {
+          "job": "event view",
+          "surface": "admin"
+        }
+      ],
+      "limits": "Do not invent accounting, reconciliation, exports, or provider actions not present in the UI",
+      "maintenance_cost": {
+        "browser_cells": 20,
+        "browser_cost_s": 35.88,
+        "budget_share": 0.037414,
+        "level": "high",
+        "mounted_fixtures": 5,
+        "new_facts_fixtures": 5
+      },
+      "product": "finance/reconciliation SaaS",
+      "review_triggers": [
+        "A router or LiveView contract changes."
+      ],
+      "synthetic": true,
+      "uncovered_states": [
+        "unmapped route job"
+      ],
+      "volume_and_script_mix": "Power-user work queue with many records and a bounded large count; mixed USD/JPY invoice sets, exact long identifiers"
+    },
+    {
+      "equivalence_classes": [
+        "configured-single-tenant-host-reconnect-boundary"
+      ],
+      "failure_profile_and_people_jobs": "Maintainer investigates missing/stale webhook evidence or browser disconnect; billing manager views local evidence",
+      "hosting_billing_shape": "Single-tenant Phoenix deployment; one organization billable, separately authorized operator",
+      "id": "self_hosted",
+      "implemented": false,
+      "jobs": [
+        {
+          "job": "webhooks list",
+          "surface": "admin"
+        },
+        {
+          "job": "webhook view",
+          "surface": "admin"
+        },
+        {
+          "job": "Portal subscription worklist",
+          "surface": "portal"
+        }
+      ],
+      "limits": "Self-hosting is a host deployment profile; it does not imply offline money movement, new licensing, or a new billing rail",
+      "maintenance_cost": {
+        "browser_cells": 16,
+        "browser_cost_s": 28.704,
+        "budget_share": 0.029931,
+        "level": "medium",
+        "mounted_fixtures": 3,
+        "new_facts_fixtures": 4
+      },
+      "product": "privately deployed team knowledge tool",
+      "profile_kind": "synthetic deployment profile",
+      "review_triggers": [
+        "A router or LiveView contract changes.",
+        "Portal subscription contract or dev/test harness becomes available."
+      ],
+      "seeds": [],
+      "stories": [],
+      "synthetic": true,
+      "uncovered_states": [
+        "cancellation controls",
+        "subscription list",
+        "unmapped route job"
+      ],
+      "volume_and_script_mix": "One customer/org, few plans, long deployment/org name; ordinary English plus Unicode user identity"
+    }
+  ],
+  "caller_map": [
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:98: live(\"/dev/clock\", AccrueAdmin.Dev.ClockLive, :index)",
+      "job": "clock list",
+      "key": "AccrueAdmin.Dev.ClockLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|clock%20list%20route",
+      "label": "clock list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Dev.ClockLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:98: live(\"/dev/clock\", AccrueAdmin.Dev.ClockLive, :index)",
+      "route_path": "/dev/clock",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:101: live(\"/dev/components\", AccrueAdmin.Dev.ComponentKitchenLive, :index)",
+      "job": "component kitchen list",
+      "key": "AccrueAdmin.Dev.ComponentKitchenLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|component%20kitchen%20list%20route",
+      "label": "component kitchen list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Dev.ComponentKitchenLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:101: live(\"/dev/components\", AccrueAdmin.Dev.ComponentKitchenLive, :index)",
+      "route_path": "/dev/components",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": null,
+      "contract": "detail-header-metadata-actions",
+      "covering_keys": [],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/dev/component_registry.ex:169: proof_id: \"grp190-detail-header-metadata-actions\",",
+      "job": "detail-header/metadata/actions",
+      "key": "AccrueAdmin.Dev.ComponentRegistry.group_contracts/0|accrue_admin/lib/accrue_admin/dev/component_registry.ex|group|uncovered|detail-header/metadata/actions",
+      "label": "detail-header/metadata/actions",
+      "manifest_keys": [],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Dev.ComponentRegistry.group_contracts/0",
+      "path": "accrue_admin/lib/accrue_admin/dev/component_registry.ex",
+      "reason": "The selected subscription story reaches the shared area and action band, but does not render the full registered detail-header group contract.",
+      "registry_components": [
+        "Detail",
+        "RelatedResources",
+        "StatusBadge",
+        "InlineId",
+        "Button"
+      ],
+      "registry_proof_id": "grp190-detail-header-metadata-actions",
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "uncovered",
+      "story_path": null,
+      "surface": "admin",
+      "tier": "group",
+      "uncovered_states": [
+        "detail-header/metadata/actions"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:99: live(\"/dev/email-preview\", AccrueAdmin.Dev.EmailPreviewLive, :index)",
+      "job": "email preview list",
+      "key": "AccrueAdmin.Dev.EmailPreviewLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|email%20preview%20list%20route",
+      "label": "email preview list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Dev.EmailPreviewLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:99: live(\"/dev/email-preview\", AccrueAdmin.Dev.EmailPreviewLive, :index)",
+      "route_path": "/dev/email-preview",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:102: live(\"/dev/fake-inspect\", AccrueAdmin.Dev.FakeInspectLive, :index)",
+      "job": "fake inspect list",
+      "key": "AccrueAdmin.Dev.FakeInspectLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|fake%20inspect%20list%20route",
+      "label": "fake inspect list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Dev.FakeInspectLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:102: live(\"/dev/fake-inspect\", AccrueAdmin.Dev.FakeInspectLive, :index)",
+      "route_path": "/dev/fake-inspect",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:100: live(\"/dev/webhook-fixtures\", AccrueAdmin.Dev.WebhookFixtureLive, :index)",
+      "job": "webhook fixture list",
+      "key": "AccrueAdmin.Dev.WebhookFixtureLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|webhook%20fixture%20list%20route",
+      "label": "webhook fixture list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Dev.WebhookFixtureLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:100: live(\"/dev/webhook-fixtures\", AccrueAdmin.Dev.WebhookFixtureLive, :index)",
+      "route_path": "/dev/webhook-fixtures",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:94: live(\"/recovery/subscriptions/:id\", CampaignLive, :show)",
+      "job": "campaign view",
+      "key": "AccrueAdmin.Live.Analytics.CampaignLive.show/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|campaign%20view%20route",
+      "label": "campaign view route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.Analytics.CampaignLive.show/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:94: live(\"/recovery/subscriptions/:id\", CampaignLive, :show)",
+      "route_path": "/analytics/recovery/subscriptions/:id",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:93: live(\"/recovery\", RecoveryLive, :index)",
+      "job": "recovery list",
+      "key": "AccrueAdmin.Live.Analytics.RecoveryLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|recovery%20list%20route",
+      "label": "recovery list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.Analytics.RecoveryLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:93: live(\"/recovery\", RecoveryLive, :index)",
+      "route_path": "/analytics/recovery",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:80: live(\"/payments/:id\", AccrueAdmin.Live.ChargeLive, :show)",
+      "job": "charge view",
+      "key": "AccrueAdmin.Live.ChargeLive.show/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|charge%20view%20route",
+      "label": "charge view route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.ChargeLive.show/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:80: live(\"/payments/:id\", AccrueAdmin.Live.ChargeLive, :show)",
+      "route_path": "/payments/:id",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:79: live(\"/payments\", AccrueAdmin.Live.ChargesLive, :index)",
+      "job": "charges list",
+      "key": "AccrueAdmin.Live.ChargesLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|charges%20list%20route",
+      "label": "charges list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.ChargesLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:79: live(\"/payments\", AccrueAdmin.Live.ChargesLive, :index)",
+      "route_path": "/payments",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:86: live(\"/connect/:id\", AccrueAdmin.Live.ConnectAccountLive, :show)",
+      "job": "connect account view",
+      "key": "AccrueAdmin.Live.ConnectAccountLive.show/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|connect%20account%20view%20route",
+      "label": "connect account view route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.ConnectAccountLive.show/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:86: live(\"/connect/:id\", AccrueAdmin.Live.ConnectAccountLive, :show)",
+      "route_path": "/connect/:id",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:85: live(\"/connect\", AccrueAdmin.Live.ConnectAccountsLive, :index)",
+      "job": "connect accounts list",
+      "key": "AccrueAdmin.Live.ConnectAccountsLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|connect%20accounts%20list%20route",
+      "label": "connect accounts list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.ConnectAccountsLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:85: live(\"/connect\", AccrueAdmin.Live.ConnectAccountsLive, :index)",
+      "route_path": "/connect",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:82: live(\"/coupons/:id\", AccrueAdmin.Live.CouponLive, :show)",
+      "job": "coupon view",
+      "key": "AccrueAdmin.Live.CouponLive.show/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|coupon%20view%20route",
+      "label": "coupon view route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.CouponLive.show/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:82: live(\"/coupons/:id\", AccrueAdmin.Live.CouponLive, :show)",
+      "route_path": "/coupons/:id",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:81: live(\"/coupons\", AccrueAdmin.Live.CouponsLive, :index)",
+      "job": "coupons list",
+      "key": "AccrueAdmin.Live.CouponsLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|coupons%20list%20route",
+      "label": "coupons list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.CouponsLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:81: live(\"/coupons\", AccrueAdmin.Live.CouponsLive, :index)",
+      "route_path": "/coupons",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:74: live(\"/customers/:id\", AccrueAdmin.Live.CustomerLive, :show)",
+      "job": "customer view",
+      "key": "AccrueAdmin.Live.CustomerLive.show/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|customer%20view%20route",
+      "label": "customer view route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.CustomerLive.show/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:74: live(\"/customers/:id\", AccrueAdmin.Live.CustomerLive, :show)",
+      "route_path": "/customers/:id",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:73: live(\"/customers\", AccrueAdmin.Live.CustomersLive, :index)",
+      "job": "customers list",
+      "key": "AccrueAdmin.Live.CustomersLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|customers%20list%20route",
+      "label": "customers list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.CustomersLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:73: live(\"/customers\", AccrueAdmin.Live.CustomersLive, :index)",
+      "route_path": "/customers",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:72: live(\"/\", AccrueAdmin.Live.DashboardLive, :index)",
+      "job": "dashboard list",
+      "key": "AccrueAdmin.Live.DashboardLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|dashboard%20list%20route",
+      "label": "dashboard list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.DashboardLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:72: live(\"/\", AccrueAdmin.Live.DashboardLive, :index)",
+      "route_path": "/",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:88: live(\"/events/:id\", AccrueAdmin.Live.EventLive, :show)",
+      "job": "event view",
+      "key": "AccrueAdmin.Live.EventLive.show/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|event%20view%20route",
+      "label": "event view route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.EventLive.show/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:88: live(\"/events/:id\", AccrueAdmin.Live.EventLive, :show)",
+      "route_path": "/events/:id",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:87: live(\"/events\", AccrueAdmin.Live.EventsLive, :index)",
+      "job": "events list",
+      "key": "AccrueAdmin.Live.EventsLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|events%20list%20route",
+      "label": "events list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.EventsLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:87: live(\"/events\", AccrueAdmin.Live.EventsLive, :index)",
+      "route_path": "/events",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:78: live(\"/invoices/:id\", AccrueAdmin.Live.InvoiceLive, :show)",
+      "job": "invoice view",
+      "key": "AccrueAdmin.Live.InvoiceLive.show/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|invoice%20view%20route",
+      "label": "invoice view route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.InvoiceLive.show/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:78: live(\"/invoices/:id\", AccrueAdmin.Live.InvoiceLive, :show)",
+      "route_path": "/invoices/:id",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:77: live(\"/invoices\", AccrueAdmin.Live.InvoicesLive, :index)",
+      "job": "invoices list",
+      "key": "AccrueAdmin.Live.InvoicesLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|invoices%20list%20route",
+      "label": "invoices list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.InvoicesLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:77: live(\"/invoices\", AccrueAdmin.Live.InvoicesLive, :index)",
+      "route_path": "/invoices",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:84: live(\"/promotion-codes/:id\", AccrueAdmin.Live.PromotionCodeLive, :show)",
+      "job": "promotion code view",
+      "key": "AccrueAdmin.Live.PromotionCodeLive.show/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|promotion%20code%20view%20route",
+      "label": "promotion code view route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.PromotionCodeLive.show/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:84: live(\"/promotion-codes/:id\", AccrueAdmin.Live.PromotionCodeLive, :show)",
+      "route_path": "/promotion-codes/:id",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:83: live(\"/promotion-codes\", AccrueAdmin.Live.PromotionCodesLive, :index)",
+      "job": "promotion codes list",
+      "key": "AccrueAdmin.Live.PromotionCodesLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|promotion%20codes%20list%20route",
+      "label": "promotion codes list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.PromotionCodesLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:83: live(\"/promotion-codes\", AccrueAdmin.Live.PromotionCodesLive, :index)",
+      "route_path": "/promotion-codes",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "support operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/pages/subscription||awaiting_step_up",
+        "/pages/subscription||dispatching",
+        "/pages/subscription||result_confirmed",
+        "/pages/subscription||result_failed",
+        "/pages/subscription||result_pending",
+        "/pages/subscription||review_cancel_now"
+      ],
+      "covering_requirement": "SBK-06",
+      "covering_test": "accrue_admin/test/accrue_admin/live/subscription_journey_test.exs",
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:109: def handle_event(\"open_action_drawer\", %{\"action_type\" => action_type}, socket)",
+      "job": "review and confirm subscription actions",
+      "key": "AccrueAdmin.Live.SubscriptionLive.handle_event/3|accrue_admin/lib/accrue_admin/live/subscription_live.ex|job|reachable|Admin%20mounted%20subscription%20action%20journey",
+      "label": "Admin mounted subscription action journey",
+      "manifest_keys": [
+        "/pages/subscription||awaiting_step_up",
+        "/pages/subscription||dispatching",
+        "/pages/subscription||result_confirmed",
+        "/pages/subscription||result_failed",
+        "/pages/subscription||result_pending",
+        "/pages/subscription||review_cancel_now"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.handle_event/3",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": "Covered by SBK-06: the mounted journey test accrue_admin/test/accrue_admin/live/subscription_journey_test.exs follows list, detail, action review, step-up, result and context-preserving return, and the Phase 253 page stories listed here show the review and result states as presentation only. Static stories alone still do not exercise mount authorization, step-up, preview, confirmation, provider results, or persistence.",
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:76: live(\"/subscriptions/:id\", AccrueAdmin.Live.SubscriptionLive, :show)",
+      "route_path": "/subscriptions/:id",
+      "state": "reachable",
+      "story_path": "/pages/subscription",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": []
+    },
+    {
+      "actor": "support operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [],
+      "entry_trigger": "retry/campaign-history integrity",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:395: <.subscription_area",
+      "job": "inspect past-due subscription recovery",
+      "key": "AccrueAdmin.Live.SubscriptionLive.render/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|page|gated|Admin%20subscription%20page%20past-due%20recovery%20state",
+      "label": "Admin subscription page past-due recovery state",
+      "manifest_keys": [],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.render/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": "Past-due recovery remains gated until retry and campaign-history integrity are available.",
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "Retry and campaign-history integrity is verified.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:76: live(\"/subscriptions/:id\", AccrueAdmin.Live.SubscriptionLive, :show)",
+      "route_path": "/subscriptions/:id",
+      "state": "gated",
+      "story_path": null,
+      "surface": "admin",
+      "tier": "page",
+      "uncovered_states": [
+        "past_due"
+      ]
+    },
+    {
+      "actor": "support operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/pages/subscription||active",
+        "/pages/subscription||awaiting_step_up",
+        "/pages/subscription||dispatching",
+        "/pages/subscription||incomplete_evidence",
+        "/pages/subscription||result_confirmed",
+        "/pages/subscription||result_failed",
+        "/pages/subscription||result_pending",
+        "/pages/subscription||review_cancel_now",
+        "/pages/subscription||scheduled_cancellation"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:395: <.subscription_area",
+      "job": "inspect subscription detail and review an action",
+      "key": "AccrueAdmin.Live.SubscriptionLive.render/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|page|reachable|Admin%20subscription%20detail%20page",
+      "label": "Admin subscription detail page",
+      "manifest_keys": [
+        "/pages/subscription||active",
+        "/pages/subscription||awaiting_step_up",
+        "/pages/subscription||dispatching",
+        "/pages/subscription||incomplete_evidence",
+        "/pages/subscription||result_confirmed",
+        "/pages/subscription||result_failed",
+        "/pages/subscription||result_pending",
+        "/pages/subscription||review_cancel_now",
+        "/pages/subscription||scheduled_cancellation"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.render/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": "The legacy detail Storybook route renders subscription_area/1 only. It does not prove the whole-page shell, breadcrumb, related resources, drill sections, or full-page route; the whole page is covered by the Phase 253 page stories listed here (presentation only).",
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:76: live(\"/subscriptions/:id\", AccrueAdmin.Live.SubscriptionLive, :show)",
+      "route_path": "/subscriptions/:id",
+      "state": "reachable",
+      "story_path": "/pages/subscription",
+      "surface": "admin",
+      "tier": "page",
+      "uncovered_states": []
+    },
+    {
+      "actor": "support operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [],
+      "entry_trigger": "A supported trialing or canceled state is selected for page coverage.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:395: <.subscription_area",
+      "job": "inspect subscription lifecycle states",
+      "key": "AccrueAdmin.Live.SubscriptionLive.render/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|page|uncovered|Admin%20subscription%20page%20trialing%20and%20canceled%20states",
+      "label": "Admin subscription page trialing and canceled states",
+      "manifest_keys": [],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.render/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": "The selected page stories do not include the trialing or canceled subscription states.",
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "Subscription lifecycle rendering changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:76: live(\"/subscriptions/:id\", AccrueAdmin.Live.SubscriptionLive, :show)",
+      "route_path": "/subscriptions/:id",
+      "state": "uncovered",
+      "story_path": null,
+      "surface": "admin",
+      "tier": "page",
+      "uncovered_states": [
+        "canceled",
+        "trialing"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:259: def subscription_area(assigns) do",
+      "job": "Subscription summary, facts, and eligible actions",
+      "key": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|area|reachable|Subscription%20summary,%20facts,%20and%20eligible%20actions",
+      "label": "Subscription summary, facts, and eligible actions",
+      "manifest_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": null,
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "area",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:296: class=\"ax-button ax-button-primary\"",
+      "job": "Action band buttons",
+      "key": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|component|reachable|Action%20band%20buttons",
+      "label": "Action band buttons",
+      "manifest_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": null,
+      "registry_components": null,
+      "registry_family": "button",
+      "registry_proof_id": null,
+      "registry_variants": [
+        "primary",
+        "secondary",
+        "ghost",
+        "danger"
+      ],
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:261: <Detail.summary_card title={subscription_title(@subscription, @customer)}>",
+      "job": "Detail.summary_card/1",
+      "key": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|component|reachable|Detail.summary_card/1",
+      "label": "Detail.summary_card/1",
+      "manifest_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": null,
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:280: <Detail.summary_list",
+      "job": "Detail.summary_list/1",
+      "key": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|component|reachable|Detail.summary_list/1",
+      "label": "Detail.summary_list/1",
+      "manifest_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": null,
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:315: <DropdownMenu.action_menu",
+      "job": "DropdownMenu.action_menu/1",
+      "key": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|component|reachable|DropdownMenu.action_menu/1",
+      "label": "DropdownMenu.action_menu/1",
+      "manifest_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": null,
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:270: <IdBadge.id_badge",
+      "job": "IdBadge.id_badge/1",
+      "key": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|component|reachable|IdBadge.id_badge/1",
+      "label": "IdBadge.id_badge/1",
+      "manifest_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": null,
+      "registry_components": null,
+      "registry_family": "id-badge",
+      "registry_proof_id": null,
+      "registry_variants": [
+        "default"
+      ],
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:263: <StatusBadge.status_badge",
+      "job": "StatusBadge.status_badge/1",
+      "key": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|component|reachable|StatusBadge.status_badge/1",
+      "label": "StatusBadge.status_badge/1",
+      "manifest_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": null,
+      "registry_components": null,
+      "registry_family": "status",
+      "registry_proof_id": null,
+      "registry_variants": [
+        "moss",
+        "cobalt",
+        "amber",
+        "slate",
+        "ink"
+      ],
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscription_live.ex:287: <section class=\"ax-card ax-detail-action-band\" data-ax-action-band>",
+      "job": "Subscription actions section",
+      "key": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1|accrue_admin/lib/accrue_admin/live/subscription_live.ex|section|reachable|Subscription%20actions%20section",
+      "label": "Subscription actions section",
+      "manifest_keys": [
+        "/components/subscription_detail||active",
+        "/components/subscription_detail||braintree_pruned",
+        "/components/subscription_detail||dunning_active",
+        "/components/subscription_detail||incomplete_evidence",
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "reason": null,
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "section",
+      "uncovered_states": []
+    },
+    {
+      "actor": "support operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [
+        "/groups/subscriptions_collection||filtered_empty",
+        "/groups/subscriptions_collection||incomplete_projection",
+        "/groups/subscriptions_collection||loading",
+        "/groups/subscriptions_collection||multiple_rows",
+        "/groups/subscriptions_collection||new_host_empty",
+        "/groups/subscriptions_collection||one_row",
+        "/groups/subscriptions_collection||page_boundary",
+        "/groups/subscriptions_collection||partial_cursor_error",
+        "/groups/subscriptions_collection||queue_empty",
+        "/groups/subscriptions_collection||unavailable"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex:115: def render(assigns) do",
+      "job": "subscription worklist",
+      "key": "AccrueAdmin.Live.SubscriptionsLive.render/1|accrue_admin/lib/accrue_admin/live/subscriptions_live.ex|job|reachable|Admin%20subscription%20list",
+      "label": "Admin subscription list",
+      "manifest_keys": [
+        "/groups/subscriptions_collection||filtered_empty",
+        "/groups/subscriptions_collection||incomplete_projection",
+        "/groups/subscriptions_collection||loading",
+        "/groups/subscriptions_collection||multiple_rows",
+        "/groups/subscriptions_collection||new_host_empty",
+        "/groups/subscriptions_collection||one_row",
+        "/groups/subscriptions_collection||page_boundary",
+        "/groups/subscriptions_collection||partial_cursor_error",
+        "/groups/subscriptions_collection||queue_empty",
+        "/groups/subscriptions_collection||unavailable"
+      ],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Live.SubscriptionsLive.render/1",
+      "path": "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+      "reason": "Covered by the Phase 253 collection stories listed here (presentation only: the actual toolbar, result, table and pagination composition for each declared state); mounted list behavior is proven by the mounted tests.",
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:75: live(\"/subscriptions\", AccrueAdmin.Live.SubscriptionsLive, :index)",
+      "route_path": "/subscriptions",
+      "state": "reachable",
+      "story_path": "/groups/subscriptions_collection",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:90: live(\"/webhooks/:id\", AccrueAdmin.Live.WebhookLive, :show)",
+      "job": "webhook view",
+      "key": "AccrueAdmin.Live.WebhookLive.show/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|webhook%20view%20route",
+      "label": "webhook view route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.WebhookLive.show/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:90: live(\"/webhooks/:id\", AccrueAdmin.Live.WebhookLive, :show)",
+      "route_path": "/webhooks/:id",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_admin/lib/accrue_admin/router.ex:89: live(\"/webhooks\", AccrueAdmin.Live.WebhooksLive, :index)",
+      "job": "webhooks list",
+      "key": "AccrueAdmin.Live.WebhooksLive.index/1|accrue_admin/lib/accrue_admin/router.ex|job|uncovered|webhooks%20list%20route",
+      "label": "webhooks list route",
+      "manifest_keys": [],
+      "owner": "AccrueAdmin.Live.WebhooksLive.index/1",
+      "path": "accrue_admin/lib/accrue_admin/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_admin/lib/accrue_admin/router.ex:89: live(\"/webhooks\", AccrueAdmin.Live.WebhooksLive, :index)",
+      "route_path": "/webhooks",
+      "state": "uncovered",
+      "surface": "admin",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Admin operator",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "storybook/components/subscription_detail.story.exs:5: Every variation is a static render of deterministic scenario facts. It does not",
+      "job": "Mounted authority, provider completion, and persistence",
+      "key": "AccrueAdmin.Storybook.Components.SubscriptionDetail.subscription_detail_story/1|storybook/components/subscription_detail.story.exs|proof-lane|not_applicable|Mounted%20authority,%20provider%20completion,%20and%20persistence",
+      "label": "Mounted authority, provider completion, and persistence",
+      "manifest_keys": [],
+      "manifest_urls": [],
+      "owner": "AccrueAdmin.Storybook.Components.SubscriptionDetail.subscription_detail_story/1",
+      "path": "storybook/components/subscription_detail.story.exs",
+      "reason": "These effects are not observable in the static render proof lane; the story delegates presentation and does not execute mounted or provider workflows.",
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "not_applicable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "proof-lane",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "selected subscription state",
+      "contract": "active",
+      "covering_keys": [
+        "/components/subscription_detail||active"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "storybook/components/subscription_detail.story.exs:23: variation(:active, :active, \"Active Cadence subscription\"),",
+      "job": "active story variation",
+      "key": "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0|storybook/components/subscription_detail.story.exs|component|reachable|active%20story%20variation",
+      "label": "active story variation",
+      "manifest_keys": [
+        "/components/subscription_detail||active"
+      ],
+      "manifest_urls": [
+        "/dev/storybook/components/subscription_detail?variation_id=active"
+      ],
+      "owner": "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0",
+      "path": "storybook/components/subscription_detail.story.exs",
+      "reason": null,
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "source-supported compatibility declaration",
+      "contract": "braintree_pruned",
+      "covering_keys": [
+        "/components/subscription_detail||braintree_pruned"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "storybook/components/subscription_detail.story.exs:34: variation(:braintree_pruned, :braintree_pruned, \"Braintree action-pruned compatibility ID\"),",
+      "job": "braintree_pruned story variation",
+      "key": "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0|storybook/components/subscription_detail.story.exs|component|reachable|braintree_pruned%20story%20variation",
+      "label": "braintree_pruned story variation",
+      "manifest_keys": [
+        "/components/subscription_detail||braintree_pruned"
+      ],
+      "manifest_urls": [
+        "/dev/storybook/components/subscription_detail?variation_id=braintree_pruned"
+      ],
+      "owner": "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0",
+      "path": "storybook/components/subscription_detail.story.exs",
+      "reason": null,
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "source-supported compatibility declaration",
+      "contract": "dunning_active",
+      "covering_keys": [
+        "/components/subscription_detail||dunning_active"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "storybook/components/subscription_detail.story.exs:35: variation(:dunning_active, :dunning_active, \"Dunning-active compatibility ID\")",
+      "job": "dunning_active story variation",
+      "key": "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0|storybook/components/subscription_detail.story.exs|component|reachable|dunning_active%20story%20variation",
+      "label": "dunning_active story variation",
+      "manifest_keys": [
+        "/components/subscription_detail||dunning_active"
+      ],
+      "manifest_urls": [
+        "/dev/storybook/components/subscription_detail?variation_id=dunning_active"
+      ],
+      "owner": "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0",
+      "path": "storybook/components/subscription_detail.story.exs",
+      "reason": null,
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "selected subscription state",
+      "contract": "incomplete_evidence",
+      "covering_keys": [
+        "/components/subscription_detail||incomplete_evidence"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "storybook/components/subscription_detail.story.exs:30: :incomplete_evidence,",
+      "job": "incomplete_evidence story variation",
+      "key": "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0|storybook/components/subscription_detail.story.exs|component|reachable|incomplete_evidence%20story%20variation",
+      "label": "incomplete_evidence story variation",
+      "manifest_keys": [
+        "/components/subscription_detail||incomplete_evidence"
+      ],
+      "manifest_urls": [
+        "/dev/storybook/components/subscription_detail?variation_id=incomplete_evidence"
+      ],
+      "owner": "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0",
+      "path": "storybook/components/subscription_detail.story.exs",
+      "reason": null,
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Admin operator",
+      "classification": "selected subscription state",
+      "contract": "scheduled_cancellation",
+      "covering_keys": [
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "entry_trigger": "Select the mapped route or Storybook case.",
+      "evidence": "storybook/components/subscription_detail.story.exs:25: :scheduled_cancellation,",
+      "job": "scheduled_cancellation story variation",
+      "key": "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0|storybook/components/subscription_detail.story.exs|component|reachable|scheduled_cancellation%20story%20variation",
+      "label": "scheduled_cancellation story variation",
+      "manifest_keys": [
+        "/components/subscription_detail||scheduled_cancellation"
+      ],
+      "manifest_urls": [
+        "/dev/storybook/components/subscription_detail?variation_id=scheduled_cancellation"
+      ],
+      "owner": "AccrueAdmin.Storybook.Components.SubscriptionDetail.variations/0",
+      "path": "storybook/components/subscription_detail.story.exs",
+      "reason": null,
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "The route, production owner, or coverage contract changes.",
+      "route_evidence": null,
+      "route_path": null,
+      "state": "reachable",
+      "story_path": "/components/subscription_detail",
+      "surface": "admin",
+      "tier": "component",
+      "uncovered_states": []
+    },
+    {
+      "actor": "Portal customer",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_portal/lib/accrue_portal/router.ex:132: live(\"/payment-methods/new\", AccruePortal.Live.AddPaymentMethodLive, :new)",
+      "job": "add payment method create",
+      "key": "AccruePortal.Live.AddPaymentMethodLive.new/1|accrue_portal/lib/accrue_portal/router.ex|job|uncovered|add%20payment%20method%20create%20route",
+      "label": "add payment method create route",
+      "manifest_keys": [],
+      "owner": "AccruePortal.Live.AddPaymentMethodLive.new/1",
+      "path": "accrue_portal/lib/accrue_portal/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_portal/lib/accrue_portal/router.ex:132: live(\"/payment-methods/new\", AccruePortal.Live.AddPaymentMethodLive, :new)",
+      "route_path": "/payment-methods/new",
+      "state": "uncovered",
+      "surface": "portal",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Portal customer",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_portal/lib/accrue_portal/router.ex:143: live(\"/blocked\", AccruePortal.Live.BlockedLive, :index)",
+      "job": "blocked list",
+      "key": "AccruePortal.Live.BlockedLive.index/1|accrue_portal/lib/accrue_portal/router.ex|job|uncovered|blocked%20list%20route",
+      "label": "blocked list route",
+      "manifest_keys": [],
+      "owner": "AccruePortal.Live.BlockedLive.index/1",
+      "path": "accrue_portal/lib/accrue_portal/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_portal/lib/accrue_portal/router.ex:143: live(\"/blocked\", AccruePortal.Live.BlockedLive, :index)",
+      "route_path": "/blocked",
+      "state": "uncovered",
+      "surface": "portal",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Portal customer",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_portal/lib/accrue_portal/router.ex:134: live(\"/checkout/:token\", AccruePortal.Live.CheckoutLive, :show)",
+      "job": "checkout view",
+      "key": "AccruePortal.Live.CheckoutLive.show/1|accrue_portal/lib/accrue_portal/router.ex|job|uncovered|checkout%20view%20route",
+      "label": "checkout view route",
+      "manifest_keys": [],
+      "owner": "AccruePortal.Live.CheckoutLive.show/1",
+      "path": "accrue_portal/lib/accrue_portal/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_portal/lib/accrue_portal/router.ex:134: live(\"/checkout/:token\", AccruePortal.Live.CheckoutLive, :show)",
+      "route_path": "/checkout/:token",
+      "state": "uncovered",
+      "surface": "portal",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Portal customer",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_portal/lib/accrue_portal/router.ex:128: live(\"/\", AccruePortal.Live.HomeLive, :index)",
+      "job": "home list",
+      "key": "AccruePortal.Live.HomeLive.index/1|accrue_portal/lib/accrue_portal/router.ex|job|uncovered|home%20list%20route",
+      "label": "home list route",
+      "manifest_keys": [],
+      "owner": "AccruePortal.Live.HomeLive.index/1",
+      "path": "accrue_portal/lib/accrue_portal/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_portal/lib/accrue_portal/router.ex:128: live(\"/\", AccruePortal.Live.HomeLive, :index)",
+      "route_path": "/",
+      "state": "uncovered",
+      "surface": "portal",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Portal customer",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_portal/lib/accrue_portal/router.ex:133: live(\"/invoices\", AccruePortal.Live.InvoicesLive, :index)",
+      "job": "invoices list",
+      "key": "AccruePortal.Live.InvoicesLive.index/1|accrue_portal/lib/accrue_portal/router.ex|job|uncovered|invoices%20list%20route",
+      "label": "invoices list route",
+      "manifest_keys": [],
+      "owner": "AccruePortal.Live.InvoicesLive.index/1",
+      "path": "accrue_portal/lib/accrue_portal/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_portal/lib/accrue_portal/router.ex:133: live(\"/invoices\", AccruePortal.Live.InvoicesLive, :index)",
+      "route_path": "/invoices",
+      "state": "uncovered",
+      "surface": "portal",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "Portal customer",
+      "classification": "router-seeded uncovered route",
+      "covering_keys": [],
+      "entry_trigger": "Route exists without a curated coverage assessment.",
+      "evidence": "accrue_portal/lib/accrue_portal/router.ex:131: live(\"/payment-methods\", AccruePortal.Live.PaymentMethodsLive, :index)",
+      "job": "payment methods list",
+      "key": "AccruePortal.Live.PaymentMethodsLive.index/1|accrue_portal/lib/accrue_portal/router.ex|job|uncovered|payment%20methods%20list%20route",
+      "label": "payment methods list route",
+      "manifest_keys": [],
+      "owner": "AccruePortal.Live.PaymentMethodsLive.index/1",
+      "path": "accrue_portal/lib/accrue_portal/router.ex",
+      "reason": "This live route has not yet been assessed for curated job and state coverage.",
+      "review_trigger": "A router or LiveView contract changes.",
+      "route_evidence": "accrue_portal/lib/accrue_portal/router.ex:131: live(\"/payment-methods\", AccruePortal.Live.PaymentMethodsLive, :index)",
+      "route_path": "/payment-methods",
+      "state": "uncovered",
+      "surface": "portal",
+      "tier": "job",
+      "uncovered_states": [
+        "unmapped route job"
+      ]
+    },
+    {
+      "actor": "billing customer",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [],
+      "entry_trigger": "contract verification plus dev/test harness",
+      "evidence": "accrue_portal/lib/accrue_portal/live/subscription_live.ex:125: \"confirm_plan_change\",",
+      "job": "Portal cancellation and plan-change journey",
+      "key": "AccruePortal.Live.SubscriptionLive.handle_event/3|accrue_portal/lib/accrue_portal/live/subscription_live.ex|job|gated|Portal%20mounted%20cancellation%20and%20plan-change%20journey",
+      "label": "Portal mounted cancellation and plan-change journey",
+      "manifest_keys": [],
+      "manifest_urls": [],
+      "owner": "AccruePortal.Live.SubscriptionLive.handle_event/3",
+      "path": "accrue_portal/lib/accrue_portal/live/subscription_live.ex",
+      "reason": "Static stories do not exercise Portal authorization, plan-change preview/commit, cancellation, provider results, or persisted effects.",
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "Portal subscription contract or dev/test harness becomes available.",
+      "route_evidence": "accrue_portal/lib/accrue_portal/router.ex:130: live(\"/subscriptions/:id\", AccruePortal.Live.SubscriptionLive, :show)",
+      "route_path": "/subscriptions/:id",
+      "state": "gated",
+      "story_path": null,
+      "surface": "portal",
+      "tier": "job",
+      "uncovered_states": [
+        "authorization",
+        "cancellation",
+        "persisted result",
+        "plan-change preview"
+      ]
+    },
+    {
+      "actor": "billing customer",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [],
+      "entry_trigger": "contract verification plus dev/test harness",
+      "evidence": "accrue_portal/lib/accrue_portal/live/subscription_live.ex:307: def render(assigns) do",
+      "job": "Portal subscription detail and plan-change preview",
+      "key": "AccruePortal.Live.SubscriptionLive.render/1|accrue_portal/lib/accrue_portal/live/subscription_live.ex|job|gated|Portal%20subscription%20detail%20page",
+      "label": "Portal subscription detail page",
+      "manifest_keys": [],
+      "manifest_urls": [],
+      "owner": "AccruePortal.Live.SubscriptionLive.render/1",
+      "path": "accrue_portal/lib/accrue_portal/live/subscription_live.ex",
+      "reason": "Portal subscription detail, recovery messaging, and plan-change preview have no selected Storybook composition.",
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "Portal subscription contract or dev/test harness becomes available.",
+      "route_evidence": "accrue_portal/lib/accrue_portal/router.ex:130: live(\"/subscriptions/:id\", AccruePortal.Live.SubscriptionLive, :show)",
+      "route_path": "/subscriptions/:id",
+      "state": "gated",
+      "story_path": null,
+      "surface": "portal",
+      "tier": "job",
+      "uncovered_states": [
+        "plan-change preview",
+        "recovery messaging",
+        "subscription detail"
+      ]
+    },
+    {
+      "actor": "billing customer",
+      "classification": null,
+      "contract": null,
+      "covering_keys": [],
+      "entry_trigger": "contract verification plus dev/test harness",
+      "evidence": "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex:110: def render(assigns) do",
+      "job": "Portal subscription worklist",
+      "key": "AccruePortal.Live.SubscriptionsLive.render/1|accrue_portal/lib/accrue_portal/live/subscriptions_live.ex|job|gated|Portal%20subscription%20list",
+      "label": "Portal subscription list",
+      "manifest_keys": [],
+      "manifest_urls": [],
+      "owner": "AccruePortal.Live.SubscriptionsLive.render/1",
+      "path": "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex",
+      "reason": "The customer-facing subscription list and its cancellation controls have no selected Portal Storybook composition.",
+      "registry_components": null,
+      "registry_proof_id": null,
+      "review_trigger": "Portal subscription contract or dev/test harness becomes available.",
+      "route_evidence": "accrue_portal/lib/accrue_portal/router.ex:129: live(\"/subscriptions\", AccruePortal.Live.SubscriptionsLive, :index)",
+      "route_path": "/subscriptions",
+      "state": "gated",
+      "story_path": null,
+      "surface": "portal",
+      "tier": "job",
+      "uncovered_states": [
+        "cancellation controls",
+        "subscription list"
+      ]
+    }
+  ],
   "current": {
     "compatibility_ids": [
       "braintree_pruned",
@@ -221,6 +1969,7 @@
     ],
     "subjects_sha256": "1082c32dfd875980f87ca450f77bbe70c26c039d6c61c429a60aaa6ac2a80905"
   },
+  "gap_map_digest": "f88cb88e25eb639ecb5ed2078f7f5178af2cfc11087e849986cb720e313b3b58",
   "records": [
     {
       "disposition": "retain",
@@ -714,7 +2463,7 @@
     "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "15b4640e79ca5ca5958978a54b1680abf7f64f8395dd5e3c9667069cfb47e09a",
     "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "15035a6b232e3c4d4b5d4ea251064d0f739cd0a63a08a081f59b20d9f2fa0efb",
     "accrue_admin/lib/accrue_admin/router.ex": "2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed",
-    "accrue_admin/storybook/_support/subscription_manifest.ex": "516a5e9bcc5fd8efe59c774e0a310d49c843fedea72da726275186f0287cbf7f",
+    "accrue_admin/storybook/_support/subscription_manifest.ex": "b48d9147de728edecde5edd214f59c4bed03f009bbfab7fbcec3432fef90e025",
     "accrue_admin/storybook/_support/subscription_scenarios.ex": "734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d",
     "accrue_portal/lib/accrue_portal/live/subscription_live.ex": "c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372",
     "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex": "5059ad186b7d393c41c538237a9b216e19ba587ca6bcaf80bfb5edfef0411bd2",

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
   LEDGER_PATH,
   MANIFEST_PATH,
+  BUDGET_PATH,
   SUBSCRIPTION_STORY_PATH,
   expectedPhase252Cells,
   extractVariationIds,
@@ -17,6 +18,7 @@ import {
   scenarios,
   subjectsSha256,
   verifyFixtures,
+  verifyAdopterBriefs,
   verifyLedger,
 } from "./verify_phase254_curation.mjs";
 import { assertRenderRowCounts } from "./verify_phase252_stories.mjs";
@@ -61,6 +63,14 @@ test("the committed ledger satisfies every rule against the tree and the frozen 
     frozenManifest: frozenManifestAt(baseline.source_commit, { root: ROOT }),
   });
   assert.ok(summary.records >= 3);
+});
+
+test("the committed synthetic adopter briefs link to the caller map and frozen cost inputs", () => {
+  const ledger = readCurationLedger(ROOT);
+  const budget = readJson(BUDGET_PATH);
+  assert.deepEqual(verifyAdopterBriefs(ledger, budget), { briefs: 5 });
+  assert.deepEqual(ledger.briefs.map((brief) => brief.id), ["launch", "team", "learner", "operations", "self_hosted"]);
+  assert.ok(ledger.briefs.every((brief) => brief.synthetic === true && typeof brief.maintenance_cost.browser_cost_s === "number"));
 });
 
 test("the committed ledger counts equal the tracked manifest and subject coverage holds", () => {

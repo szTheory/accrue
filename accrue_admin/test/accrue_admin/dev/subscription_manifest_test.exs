@@ -715,6 +715,95 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       end
     end
 
+    test "five adopter briefs are synthetic, ordered, distinct, and linked to caller-map evidence" do
+      rows = SubscriptionManifest.caller_map()
+      briefs = SubscriptionManifest.adopter_briefs()
+
+      assert Enum.map(briefs, & &1.id) == [
+               "launch",
+               "team",
+               "learner",
+               "operations",
+               "self_hosted"
+             ]
+
+      assert Enum.all?(briefs, &(&1.synthetic and &1.equivalence_classes != []))
+
+      classes = Enum.flat_map(briefs, & &1.equivalence_classes)
+      assert length(classes) == length(Enum.uniq(classes))
+
+      team = Enum.find(briefs, &(&1.id == "team"))
+      assert team.implemented
+      assert team.maintenance_cost.level == "low"
+
+      self_hosted = Enum.find(briefs, &(&1.id == "self_hosted"))
+      assert self_hosted.profile_kind == "synthetic deployment profile"
+      assert self_hosted.seeds == []
+      assert self_hosted.stories == []
+
+      budget_path =
+        Path.expand("../../../../accrue_admin/storybook/phase254-budget.json", __DIR__)
+
+      budget = budget_path |> File.read!() |> Jason.decode!()
+
+      for brief <- briefs do
+        selected =
+          Enum.filter(rows, fn row ->
+            Enum.any?(brief.jobs, &(&1.surface == row.surface and &1.job == row.job))
+          end)
+
+        assert selected != []
+
+        assert brief.uncovered_states ==
+                 selected |> Enum.flat_map(& &1.uncovered_states) |> Enum.uniq() |> Enum.sort()
+
+        assert brief.review_triggers ==
+                 selected |> Enum.map(& &1.review_trigger) |> Enum.uniq() |> Enum.sort()
+
+        assert brief.maintenance_cost == SubscriptionManifest.maintenance_cost(selected, budget)
+      end
+
+      ledger = SubscriptionManifest.curation_ledger()
+      assert ledger.caller_map == rows
+      assert ledger.gap_map_digest =~ ~r/\A[0-9a-f]{64}\z/
+      assert ledger.briefs == briefs
+    end
+
+    test "maintenance cost uses only frozen composition p90 and value, and rejects missing frozen inputs" do
+      root = Path.expand("../../../../", __DIR__)
+
+      budget =
+        root
+        |> Path.join("accrue_admin/storybook/phase254-budget.json")
+        |> File.read!()
+        |> Jason.decode!()
+
+      rows =
+        Enum.filter(SubscriptionManifest.caller_map(), fn row ->
+          row.surface == "portal" and row.job == "Portal subscription worklist"
+        end)
+
+      cost = SubscriptionManifest.maintenance_cost(rows, budget)
+      assert cost == SubscriptionManifest.maintenance_cost(rows, budget)
+      assert cost.new_facts_fixtures == 2
+      assert cost.browser_cells == 8
+      assert cost.browser_cost_s == 14.352
+      assert cost.budget_share == Float.round(14.352 / 959, 6)
+      assert cost.mounted_fixtures == 1
+      assert cost.level == "low"
+
+      assert_raise ArgumentError, ~r/non-null frozen budget/, fn ->
+        SubscriptionManifest.maintenance_cost(rows, Map.put(budget, "frozen", nil))
+      end
+
+      missing_p90 =
+        put_in(budget, ["frozen", "composition_cell", "per_cell_p90_s"], "unknown")
+
+      assert_raise ArgumentError, ~r/per_cell_p90_s/, fn ->
+        SubscriptionManifest.maintenance_cost(rows, missing_p90)
+      end
+    end
+
     test "curation ledger pins a frozen baseline whose subjects, digest and counts never read the current tree" do
       baseline = SubscriptionManifest.frozen_baseline()
 
@@ -853,8 +942,11 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert Map.keys(decoded) |> Enum.sort() ==
                [
                  "amendments",
+                 "briefs",
+                 "caller_map",
                  "current",
                  "frozen_baseline",
+                 "gap_map_digest",
                  "records",
                  "schema_version",
                  "source_digests"
