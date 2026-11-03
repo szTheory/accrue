@@ -33,8 +33,9 @@
 //
 //   - third-party `_build` cache (item 1): release-gate caches
 //     accrue/_build/test, accrue_admin/_build/test and accrue_portal/_build/test,
-//     and each playwright-e2e shard caches its fixed MIX_BUILD_PATH tree.
-//     Every restore is split from its save (actions/cache/restore +
+//     each playwright-e2e shard caches its fixed MIX_BUILD_PATH tree, and
+//     Browser UAT restores the exact compatible release-gate Admin cache.
+//     Locally owned restores are split from their save (actions/cache/restore +
 //     actions/cache/save, never the combined action); the step right after a
 //     restore prunes the first-party app dirs from the same env dir; the save
 //     comes directly after a `mix compile --warnings-as-errors` step, is
@@ -44,6 +45,8 @@
 //     The key names runner.os, the job's OTP and Elixir versions, MIX_ENV, a
 //     mix.lock hashFiles and a config/**/*.exs hashFiles (plus the
 //     sigra/otel matrix in release-gate and the shard in playwright-e2e).
+//     Browser UAT is a shared-cache reader; its key is derived from the matching
+//     release-gate matrix cell and it never writes a duplicate cache.
 //
 // Scope: .github/workflows/ci.yml and .github/workflows/accrue_admin_browser.yml
 // for concurrency, partition count and timeouts; ci.yml for the docs keep-set
@@ -321,6 +324,63 @@ export function checkBuildCache(file, workflow, { job: jobId, envDirs, matrixKey
   return seen.size;
 }
 
+const SHARED_ADMIN_BUILD_DIR = "accrue_admin/_build/test";
+const SHARED_ADMIN_CACHE_CELL = Object.freeze({ otp: "28.0", elixir: "1.19.5", sigra: "off", opentelemetry: "off" });
+const specializeMatrixCacheKey = (value) => value
+  .replaceAll("${{ matrix.otp }}", SHARED_ADMIN_CACHE_CELL.otp)
+  .replaceAll("${{ matrix.elixir }}", SHARED_ADMIN_CACHE_CELL.elixir)
+  .replaceAll("${{ matrix.sigra }}", SHARED_ADMIN_CACHE_CELL.sigra)
+  .replaceAll("${{ matrix.opentelemetry }}", SHARED_ADMIN_CACHE_CELL.opentelemetry);
+
+// Browser UAT reads the already-owned release-gate cache. Keeping one writer
+// avoids duplicate cache storage and races; a miss remains a normal cold compile.
+export function checkSharedAdminBuildCache(ciFile, ciWorkflow, browserFile, browserWorkflow) {
+  const ciLines = ciWorkflow.lines.join("\n");
+  const matrixCell = "          - elixir: '1.19.5'\n            otp: '28.0'\n            sigra: 'off'\n            opentelemetry: 'off'";
+  if (!ciLines.includes(matrixCell)) fail(`${ciFile}: release-gate no longer has the Browser UAT cache's matching OTP/Elixir/options cell`);
+
+  const writerSteps = jobSteps(ciWorkflow, "release-gate");
+  const writer = writerSteps.find((step) => step.id === "accrue_admin_build_cache");
+  if (!writer || !/^actions\/cache\/restore@/.test(writer.uses || "")) {
+    fail(`${ciFile}: release-gate has no Admin third-party build-cache writer`);
+  }
+
+  const browserSteps = jobSteps(browserWorkflow, "browser-uat");
+  const beam = browserSteps.find((step) => /^erlef\/setup-beam@/.test(step.uses || ""));
+  if (!beam) fail(`${browserFile}: Browser UAT has no setup-beam step for its shared cache`);
+  if (beam.with.get("otp-version") !== SHARED_ADMIN_CACHE_CELL.otp || beam.with.get("elixir-version") !== SHARED_ADMIN_CACHE_CELL.elixir) {
+    fail(`${browserFile}: Browser UAT BEAM versions no longer match the shared Admin cache cell`);
+  }
+
+  const caches = browserSteps.filter((step) => {
+    const action = CACHE_ACTION.exec(step.uses || "");
+    return action && pathLines(step)[0] === SHARED_ADMIN_BUILD_DIR;
+  });
+  if (caches.length !== 1) fail(`${browserFile}: Browser UAT must have exactly one shared Admin cache restore and no duplicate writer`);
+  const restore = caches[0];
+  const action = CACHE_ACTION.exec(restore.uses || "");
+  if (action[1] !== "restore") fail(`${browserFile}:${restore.line + 1}: Browser UAT must restore the shared cache without writing a duplicate`);
+  if (!restore.id) fail(`${browserFile}:${restore.line + 1}: shared Admin cache restore needs an id`);
+
+  const expectedKey = specializeMatrixCacheKey(writer.with.get("key") || "");
+  const expectedRestoreKeys = specializeMatrixCacheKey(writer.with.get("restore-keys") || "");
+  if ((restore.with.get("key") || "") !== expectedKey) {
+    fail(`${browserFile}:${restore.line + 1}: Browser UAT cache key must exactly match the release-gate Admin writer's OTP/Elixir/config/lock identity`);
+  }
+  if ((restore.with.get("restore-keys") || "") !== expectedRestoreKeys) {
+    fail(`${browserFile}:${restore.line + 1}: Browser UAT restore prefixes must match the release-gate Admin cache`);
+  }
+  if (JSON.stringify(pathLines(restore)) !== JSON.stringify(pathLines(writer))) {
+    fail(`${browserFile}:${restore.line + 1}: Browser UAT cache paths must exactly match the release-gate Admin cache paths`);
+  }
+
+  const prune = browserSteps[browserSteps.indexOf(restore) + 1];
+  if (!prune || (prune.run || "").trim() !== `bash scripts/ci/prune_first_party_build.sh ${SHARED_ADMIN_BUILD_DIR}`) {
+    fail(`${browserFile}:${restore.line + 1}: shared Admin cache must be followed immediately by pruning first-party build outputs`);
+  }
+  return 1;
+}
+
 export function allWorkflowFiles(repo) {
   const dir = path.join(repo, ".github", "workflows");
   return fs.readdirSync(dir).filter((name) => /\.ya?ml$/.test(name)).sort().map((name) => `.github/workflows/${name}`);
@@ -346,6 +406,9 @@ export function verifyRepo(repo) {
   const ciWorkflow = parseWorkflow(fs.readFileSync(path.join(repo, ".github/workflows/ci.yml"), "utf8"));
   results.docsSteps = checkDocsKeepSet(".github/workflows/ci.yml", ciWorkflow);
   results.buildCaches = BUILD_CACHE_EXPECTATIONS.reduce((sum, expectation) => sum + checkBuildCache(".github/workflows/ci.yml", ciWorkflow, expectation), 0);
+  const browserFile = ".github/workflows/accrue_admin_browser.yml";
+  const browserWorkflow = parseWorkflow(fs.readFileSync(path.join(repo, browserFile), "utf8"));
+  results.sharedBuildCaches = checkSharedAdminBuildCache(".github/workflows/ci.yml", ciWorkflow, browserFile, browserWorkflow);
   let pins = 0;
   const workflowFiles = allWorkflowFiles(repo);
   for (const file of workflowFiles) pins += checkThirdPartyPins(file, fs.readFileSync(path.join(repo, file), "utf8"));
@@ -625,12 +688,36 @@ const SCENARIOS = [
   ["a job missing an expected _build restore fails", () => {
     assert.throws(() => checkBuildCache("fixture.yml", parseWorkflow(BUILD_CACHE), { ...ONE_DIR, envDirs: ["accrue/_build/test", "accrue_admin/_build/test"] }), /no `_build` restore for accrue_admin\/_build\/test/);
   }],
+  ["Browser UAT restores the matching release-gate cache and prunes checked-out apps", () => {
+    const ciFile = ".github/workflows/ci.yml";
+    const browserFile = ".github/workflows/accrue_admin_browser.yml";
+    const ciSource = fs.readFileSync(path.join(process.cwd(), ciFile), "utf8");
+    const browserSource = fs.readFileSync(path.join(process.cwd(), browserFile), "utf8");
+    const ciWorkflow = parseWorkflow(ciSource);
+    assert.equal(checkSharedAdminBuildCache(ciFile, ciWorkflow, browserFile, parseWorkflow(browserSource)), 1);
+
+    const wrongKey = browserSource.replace("release-gate-otp28.0-elixir1.19.5", "release-gate-otp28.1-elixir1.19.5");
+    assert.notEqual(wrongKey, browserSource);
+    assert.throws(() => checkSharedAdminBuildCache(ciFile, ciWorkflow, browserFile, parseWorkflow(wrongKey)), /must exactly match the release-gate Admin writer/);
+
+    const wrongPrune = browserSource.replace("prune_first_party_build.sh accrue_admin\/_build\/test", "prune_first_party_build.sh accrue_admin/_build/dev");
+    assert.notEqual(wrongPrune, browserSource);
+    assert.throws(() => checkSharedAdminBuildCache(ciFile, ciWorkflow, browserFile, parseWorkflow(wrongPrune)), /followed immediately by pruning first-party build outputs/);
+
+    const duplicateWriter = browserSource.replace(
+      "      - name: Install Elixir deps",
+      "      - name: Duplicate Admin build cache writer\n        uses: actions/cache/save@v5\n        with:\n          path: accrue_admin/_build/test\n          key: duplicate\n\n      - name: Install Elixir deps"
+    );
+    assert.notEqual(duplicateWriter, browserSource);
+    assert.throws(() => checkSharedAdminBuildCache(ciFile, ciWorkflow, browserFile, parseWorkflow(duplicateWriter)), /exactly one shared Admin cache restore and no duplicate writer/);
+  }],
   ["the live scoped workflows pass", () => {
     const results = verifyRepo(process.cwd());
     assert.equal(results.length, SCOPED_WORKFLOWS.length);
     assert.ok(results.pins > 0, "the live pin scan must inspect at least one third-party action");
     assert.ok(results.docsSteps >= 3, "the live release-gate must expose its docs steps to the keep-set check");
     assert.equal(results.buildCaches, 4, "release-gate (3 projects) and playwright-e2e (1 shard tree) must each carry a pruned _build cache");
+    assert.equal(results.sharedBuildCaches, 1, "Browser UAT must reuse the release-gate Admin build cache");
     for (const result of results) assert.ok(result.jobs > 0, `${result.file} must declare jobs`);
   }]
 ];
@@ -662,7 +749,7 @@ function main() {
     return;
   }
   const results = verifyRepo(parsed.values.repo || process.cwd());
-  console.log(`ci efficiency contract: PASS (verified: ${results.map((r) => `${r.file} ${r.jobs} jobs`).join(", ")}; ${results.docsSteps} release-gate docs steps on the keep-set; ${results.buildCaches} pruned _build caches; ${results.pins} third-party uses pinned across ${results.workflowFiles} workflow files)`);
+  console.log(`ci efficiency contract: PASS (verified: ${results.map((r) => `${r.file} ${r.jobs} jobs`).join(", ")}; ${results.docsSteps} release-gate docs steps on the keep-set; ${results.buildCaches} locally written pruned _build caches; ${results.sharedBuildCaches} shared Admin build cache readers; ${results.pins} third-party uses pinned across ${results.workflowFiles} workflow files)`);
 }
 
 let invokedAsEntrypoint = false;

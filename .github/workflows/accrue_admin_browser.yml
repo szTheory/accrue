@@ -99,6 +99,28 @@ jobs:
           cache: npm
           cache-dependency-path: accrue_admin/package-lock.json
 
+      # Reuse the same third-party test build saved by CI's release-gate
+      # OTP 28.0 / Elixir 1.19.5 / sigra=off / otel=off cell. First-party
+      # apps are pruned immediately, so this run still compiles checked-out code.
+      - name: Restore shared Admin third-party build cache
+        id: admin_build_cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            accrue_admin/_build/test
+            !accrue_admin/_build/test/lib/accrue
+            !accrue_admin/_build/test/lib/accrue_admin
+            !accrue_admin/_build/test/lib/accrue_portal
+            !accrue_admin/_build/test/lib/accrue_host
+            !accrue_admin/_build/test/lib/sigra
+            !accrue_admin/_build/test/**/*.plt*
+          key: ${{ runner.os }}-release-gate-otp28.0-elixir1.19.5-sigra-off-otel-off-accrue-admin-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('accrue_admin/config/**/*.exs') }}-lock${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-release-gate-otp28.0-elixir1.19.5-sigra-off-otel-off-accrue-admin-build-${{ env.MIX_ENV }}-cfg${{ hashFiles('accrue_admin/config/**/*.exs') }}-lock
+
+      - name: Prune first-party apps from the restored Admin build
+        run: bash scripts/ci/prune_first_party_build.sh accrue_admin/_build/test
+
       - name: Install Elixir deps
         run: cd accrue_admin && mix deps.get
 
