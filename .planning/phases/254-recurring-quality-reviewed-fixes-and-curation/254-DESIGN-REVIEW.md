@@ -4,18 +4,18 @@
 
 **Stage:** confirmed
 **Source commit:** `4a018ce9a2ed17a8d8d809b71fee6d34fc423ce2`
-**Fix commit:** `88cd27cdcede5f00594896b6b752069be7ede0ac`
+**Fix commit:** `b6964b53598c8bda81c009f9267fec1b3fdf9e26`
 **Scoring:** none. No aesthetic score is recorded (D-03, D-31); every cell is a source-bound claim or a mechanical result.
 
 ## Assets
 
 | Asset | Path | sha256 |
 |-------|------|--------|
-| app_css | `accrue_admin/assets/css/app.css` | `25d18c954f3c95b4e0f22b01ecde4d0c8168b655e4800da149fb4283f897ee1a` |
+| app_css | `accrue_admin/assets/css/app.css` | `54c90f1385b1194b632deee3a3b6a04ef3627de1ce67be6554af4267b4c82f50` |
 | theme_css | `accrue_admin/assets/css/theme.css` | `fbf78dee8fb3982b2157f1db8a4be9c16f6b6fe83ef5b6ce89bc7527db602bc7` |
-| accrue_admin_css | `accrue_admin/priv/static/accrue_admin.css` | `63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299` |
-| storybook_css | `accrue_admin/priv/static/storybook.css` | `4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe` |
-| served_css_route | `css-9568fe2780b1ac605777f571b8e278f5` | md5 of accrue_admin.css |
+| accrue_admin_css | `accrue_admin/priv/static/accrue_admin.css` | `224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529` |
+| storybook_css | `accrue_admin/priv/static/storybook.css` | `1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b` |
+| served_css_route | `css-75e87982ade1fb03aed56b2c03d5c478` | md5 of accrue_admin.css |
 
 ## Rubric verdicts
 
@@ -37,18 +37,18 @@
 | CAP-254-02 | `phase254-collection-multiple_rows-w320-dark` | story | settled | 320 | dark | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | `959c164a0a77a7767f7058ccfc7b73946dd056a4865cfecdf9d5a89d8864170f` | true |
 | CAP-254-03 | `phase254-collection-multiple_rows-w1280-light` | story | settled | 1280 | light | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | `bccdcb53b1f0408c20609636a6a26a5f1dc6150f5d6ee41e4c8a32e3a66254ff` | true |
 | CAP-254-04 | `phase254-collection-multiple_rows-w1280-dark` | story | settled | 1280 | dark | `/billing/dev/storybook/iframe/groups/subscriptions_collection?variation_id=multiple_rows` | `ed0a85427395613238a3b9dc16408ea0def34b867fdddd23c40040e46e9c8bb0` | true |
-| CAP-254-05 | `phase254-page-active-w320-light` | story | settled | 320 | light | `/billing/dev/storybook/pages/subscription?tab=active` | `bb64d8aaf7d165d12d42682e0719efff01cfc9c43f47768dd132125c35ba34ff` | true |
-| CAP-254-06 | `phase254-page-active-w320-dark` | story | settled | 320 | dark | `/billing/dev/storybook/pages/subscription?tab=active` | `57a47636d607788d98c54f883fafed9ef3b7e6e9232ac4f192d19b79b621a445` | true |
-| CAP-254-07 | `phase254-page-active-w1280-light` | story | settled | 1280 | light | `/billing/dev/storybook/pages/subscription?tab=active` | `8c31ac518c486e49f1e7946692d043b37d6fa60a5644691487132475b1bec418` | true |
-| CAP-254-08 | `phase254-page-active-w1280-dark` | story | settled | 1280 | dark | `/billing/dev/storybook/pages/subscription?tab=active` | `694e8d5664ce499cf8a371dbeba69eb72b508c4c43b27db524eb90dfc7fb7f56` | true |
-| CAP-254-09 | `phase254-mounted-review-open-w320-light` | mounted | review-open | 320 | light | `/billing/subscriptions/:id` | `e90e9a7f56f48abfab87ab581ab7d1f441ab74076610d25a1eb15cf555192df2` | true |
-| CAP-254-10 | `phase254-mounted-review-open-w320-dark` | mounted | review-open | 320 | dark | `/billing/subscriptions/:id` | `28c778114e4de499abea273233ab62bd1676489d461508a975f6c3fc3db4e421` | true |
+| CAP-254-05 | `phase254-page-active-w320-light` | story | settled | 320 | light | `/billing/dev/storybook/pages/subscription?tab=active` | `35e2bedfe21fdf19eb8c0eb882372dcd97ad5de65864bb226cc452127315a671` | true |
+| CAP-254-06 | `phase254-page-active-w320-dark` | story | settled | 320 | dark | `/billing/dev/storybook/pages/subscription?tab=active` | `15e94e320e0530d63ab07b17470b983c71f77b744998ddf98d615b8abfa093dc` | true |
+| CAP-254-07 | `phase254-page-active-w1280-light` | story | settled | 1280 | light | `/billing/dev/storybook/pages/subscription?tab=active` | `641c453a220ee66d970e0b4b02e953381396e813bf5b1c22466e9c1351369b5c` | true |
+| CAP-254-08 | `phase254-page-active-w1280-dark` | story | settled | 1280 | dark | `/billing/dev/storybook/pages/subscription?tab=active` | `8925ec1dc64a9c7840d0ecb25fc45a2f0487e66c1eb149dc8f70e08c5a01ac5c` | true |
+| CAP-254-09 | `phase254-mounted-review-open-w320-light` | mounted | review-open | 320 | light | `/billing/subscriptions/:id` | `86de6e9a60a08bc3bcb43ab575eb89b9d0db4d39913988f4e3d32a3bb24f3ffa` | true |
+| CAP-254-10 | `phase254-mounted-review-open-w320-dark` | mounted | review-open | 320 | dark | `/billing/subscriptions/:id` | `ab8f098afda0b11847bbc396d0a2fe9c674182624bc0781c4b931f42d8d9cfa8` | true |
 | CAP-254-11 | `phase254-mounted-review-open-w1280-light` | mounted | review-open | 1280 | light | `/billing/subscriptions/:id` | `601b0a57b97ebda9d2db753c35ee2186d898d38c0c244aa9b21f77e0271d8ac9` | true |
 | CAP-254-12 | `phase254-mounted-review-open-w1280-dark` | mounted | review-open | 1280 | dark | `/billing/subscriptions/:id` | `61fd336dc7e5fa9deceed729e77e882e86a200918f74b7faa1e54ea22ffa0235` | true |
-| CAP-254-13 | `phase254-mounted-disclosure-focus-w320-light` | mounted | focus-visible | 320 | light | `/billing/subscriptions/:id` | `1b68d58850d37af29d1a790f9d4f07804eefe9079865fd6690038e808b616d53` | true |
-| CAP-254-14 | `phase254-mounted-disclosure-focus-w320-dark` | mounted | focus-visible | 320 | dark | `/billing/subscriptions/:id` | `14f6f7f82e33ce2661b38a9fdc9b5669c2aa63862f472077a97749d5f23d4690` | true |
-| CAP-254-15 | `phase254-mounted-disclosure-focus-w1280-light` | mounted | focus-visible | 1280 | light | `/billing/subscriptions/:id` | `41af91cc27cefdc856149d6b47b78d858e3d8f0d85ea2b40994b1af7bb7593d1` | true |
-| CAP-254-16 | `phase254-mounted-disclosure-focus-w1280-dark` | mounted | focus-visible | 1280 | dark | `/billing/subscriptions/:id` | `78ad5be83ad333b21b542e440addbb091988ad275334c406499e0b9347b92c1d` | true |
+| CAP-254-13 | `phase254-mounted-disclosure-focus-w320-light` | mounted | focus-visible | 320 | light | `/billing/subscriptions/:id` | `4019a344cc23c77c5a59d16f5fc2a1d10a004d8f2b55639d1fa0dd7dc7c6352f` | true |
+| CAP-254-14 | `phase254-mounted-disclosure-focus-w320-dark` | mounted | focus-visible | 320 | dark | `/billing/subscriptions/:id` | `7addaffb6615f6d8d0b81c74b8abfc032842a974c7dd6105df6bfbda06a03265` | true |
+| CAP-254-15 | `phase254-mounted-disclosure-focus-w1280-light` | mounted | focus-visible | 1280 | light | `/billing/subscriptions/:id` | `da306e236a81382c7e2dfbd698983ceaeeeb103c7afb050c6d357c382dc542e8` | true |
+| CAP-254-16 | `phase254-mounted-disclosure-focus-w1280-dark` | mounted | focus-visible | 1280 | dark | `/billing/subscriptions/:id` | `c08b85b9a6018afa9cbd6ebab6b7e35cbe7965aaeb1f34917fb1fc8c296fd518` | true |
 
 ## Findings
 
@@ -166,14 +166,34 @@
 
 ## Changed baselines
 
-- `subscription-detail` -> DR-254-03: Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px
-- `subscription-detail-dark` -> DR-254-03: Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px (dark)
 - `invoice-detail` -> DR-254-03: Invoice detail: field-list labels take the 12px label role (DR-254-03); page 1643 to 1637 px
 - `invoice-detail-dark` -> DR-254-03: Invoice detail: field-list labels take the 12px label role (DR-254-03); page 1643 to 1637 px (dark)
-- `subscriptions` -> A11Y-254-28: Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02)
-- `subscriptions-dark` -> A11Y-254-28: Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02) (dark)
 - `invoices` -> A11Y-254-28: Invoices list: same shared identity secondary row gap (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 1032 to 1044 px; owner decision accept-attributable (254-15-02)
 - `invoices-dark` -> A11Y-254-28: Invoices list: same shared identity secondary row gap (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 1032 to 1044 px; owner decision accept-attributable (254-15-02) (dark)
+- `phase254-mounted-disclosure-focus-w1280-dark` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-mounted-disclosure-focus-w1280-light` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-mounted-disclosure-focus-w320-dark` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-mounted-disclosure-focus-w320-light` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-mounted-review-open-w320-dark` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-mounted-review-open-w320-light` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-active-w1280-dark` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-active-w1280-light` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-active-w320-dark` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-active-w320-light` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-incomplete_evidence-w1280-dark` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-incomplete_evidence-w1280-light` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-incomplete_evidence-w320-dark` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-incomplete_evidence-w320-light` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-review_cancel_now-w320-dark` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-review_cancel_now-w320-light` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-scheduled_cancellation-w1280-dark` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-scheduled_cancellation-w1280-light` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-scheduled_cancellation-w320-dark` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `phase254-page-scheduled_cancellation-w320-light` -> A11Y-254-28: Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28.
+- `subscription-detail` -> DR-254-03: Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px
+- `subscription-detail-dark` -> DR-254-03: Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px (dark)
+- `subscriptions` -> A11Y-254-28: Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02)
+- `subscriptions-dark` -> A11Y-254-28: Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02) (dark)
 
 ## Deferred
 

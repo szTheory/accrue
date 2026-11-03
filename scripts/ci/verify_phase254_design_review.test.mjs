@@ -379,13 +379,38 @@ test("the real routed-defect register: the D-36 bound classifies 8 inside and 10
   assert.equal(classifyRoutedCell("page::active::breakpoint::768::dark"), "outside");
 });
 
-test("the real confirmed record maps every changed Phase 211 baseline to a finding or a routed accessibility id, and a tampered capture is rejected", () => {
+test("the real confirmed record maps every changed Phase 211 and Phase 254 baseline, and a tampered capture is rejected", () => {
   const record = readRecord();
   const changed = new Map(record.baselines_changed.map((entry) => [entry.key, entry.finding_id]));
-  assert.deepEqual([...changed.keys()].sort(), [
+  const changedLegacy = [...changed.keys()].filter((key) => !key.startsWith("phase254-")).sort();
+  assert.deepEqual(changedLegacy, [
     "invoice-detail", "invoice-detail-dark", "invoices", "invoices-dark",
     "subscription-detail", "subscription-detail-dark", "subscriptions", "subscriptions-dark"
   ]);
+  const changedCases = [...changed.keys()].filter((key) => key.startsWith("phase254-")).sort();
+  assert.deepEqual(changedCases, [
+    "phase254-mounted-disclosure-focus-w1280-dark",
+    "phase254-mounted-disclosure-focus-w1280-light",
+    "phase254-mounted-disclosure-focus-w320-dark",
+    "phase254-mounted-disclosure-focus-w320-light",
+    "phase254-mounted-review-open-w320-dark",
+    "phase254-mounted-review-open-w320-light",
+    "phase254-page-active-w1280-dark",
+    "phase254-page-active-w1280-light",
+    "phase254-page-active-w320-dark",
+    "phase254-page-active-w320-light",
+    "phase254-page-incomplete_evidence-w1280-dark",
+    "phase254-page-incomplete_evidence-w1280-light",
+    "phase254-page-incomplete_evidence-w320-dark",
+    "phase254-page-incomplete_evidence-w320-light",
+    "phase254-page-review_cancel_now-w320-dark",
+    "phase254-page-review_cancel_now-w320-light",
+    "phase254-page-scheduled_cancellation-w1280-dark",
+    "phase254-page-scheduled_cancellation-w1280-light",
+    "phase254-page-scheduled_cancellation-w320-dark",
+    "phase254-page-scheduled_cancellation-w320-light"
+  ]);
+  for (const key of changedCases) assert.equal(changed.get(key), "A11Y-254-28", key);
   for (const key of ["subscription-detail", "subscription-detail-dark", "invoice-detail", "invoice-detail-dark"]) assert.equal(changed.get(key), "DR-254-03", key);
   for (const key of ["subscriptions", "subscriptions-dark", "invoices", "invoices-dark"]) assert.equal(changed.get(key), "A11Y-254-28", key);
   assert.deepEqual(record.findings.filter((finding) => finding.verdict === "confirmed").map((finding) => finding.id), ["DR-254-01", "DR-254-02", "DR-254-03", "DR-254-04", "DR-254-05"]);

@@ -2,11 +2,11 @@
   "schema_version": 1,
   "stage": "confirmed",
   "source_commit": "4a018ce9a2ed17a8d8d809b71fee6d34fc423ce2",
-  "fix_commit": "88cd27cdcede5f00594896b6b752069be7ede0ac",
+  "fix_commit": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
   "assets": {
     "app_css": {
       "path": "accrue_admin/assets/css/app.css",
-      "sha256": "25d18c954f3c95b4e0f22b01ecde4d0c8168b655e4800da149fb4283f897ee1a"
+      "sha256": "54c90f1385b1194b632deee3a3b6a04ef3627de1ce67be6554af4267b4c82f50"
     },
     "theme_css": {
       "path": "accrue_admin/assets/css/theme.css",
@@ -14,13 +14,13 @@
     },
     "accrue_admin_css": {
       "path": "accrue_admin/priv/static/accrue_admin.css",
-      "sha256": "63fbca439ae348fbd4ac14b40dbc7fe8ddb48e1d4a6dc3564c0e7eb7d227f299"
+      "sha256": "224310589c921584f186eca9603bca582aa9e03669dcff2fb1094f2baec1b529"
     },
     "storybook_css": {
       "path": "accrue_admin/priv/static/storybook.css",
-      "sha256": "4253796170bc68e8bf398b12b3a1e9df0321798f511c5ff1bb5962f2bad84fbe"
+      "sha256": "1304d7446f3b3c0da37c8dcd4e9a0066bc892de584568815211bac889a04ed0b"
     },
-    "served_css_route": "css-9568fe2780b1ac605777f571b8e278f5"
+    "served_css_route": "css-75e87982ade1fb03aed56b2c03d5c478"
   },
   "rubric": [
     "typography",
@@ -179,7 +179,7 @@
       "width": 320,
       "theme": "light",
       "state": "settled",
-      "png_sha256": "bb64d8aaf7d165d12d42682e0719efff01cfc9c43f47768dd132125c35ba34ff",
+      "png_sha256": "35e2bedfe21fdf19eb8c0eb882372dcd97ad5de65864bb226cc452127315a671",
       "pass": true
     },
     {
@@ -190,7 +190,7 @@
       "width": 320,
       "theme": "dark",
       "state": "settled",
-      "png_sha256": "57a47636d607788d98c54f883fafed9ef3b7e6e9232ac4f192d19b79b621a445",
+      "png_sha256": "15e94e320e0530d63ab07b17470b983c71f77b744998ddf98d615b8abfa093dc",
       "pass": true
     },
     {
@@ -201,7 +201,7 @@
       "width": 1280,
       "theme": "light",
       "state": "settled",
-      "png_sha256": "8c31ac518c486e49f1e7946692d043b37d6fa60a5644691487132475b1bec418",
+      "png_sha256": "641c453a220ee66d970e0b4b02e953381396e813bf5b1c22466e9c1351369b5c",
       "pass": true
     },
     {
@@ -212,7 +212,7 @@
       "width": 1280,
       "theme": "dark",
       "state": "settled",
-      "png_sha256": "694e8d5664ce499cf8a371dbeba69eb72b508c4c43b27db524eb90dfc7fb7f56",
+      "png_sha256": "8925ec1dc64a9c7840d0ecb25fc45a2f0487e66c1eb149dc8f70e08c5a01ac5c",
       "pass": true
     },
     {
@@ -223,7 +223,7 @@
       "width": 320,
       "theme": "light",
       "state": "review-open",
-      "png_sha256": "e90e9a7f56f48abfab87ab581ab7d1f441ab74076610d25a1eb15cf555192df2",
+      "png_sha256": "86de6e9a60a08bc3bcb43ab575eb89b9d0db4d39913988f4e3d32a3bb24f3ffa",
       "pass": true
     },
     {
@@ -234,7 +234,7 @@
       "width": 320,
       "theme": "dark",
       "state": "review-open",
-      "png_sha256": "28c778114e4de499abea273233ab62bd1676489d461508a975f6c3fc3db4e421",
+      "png_sha256": "ab8f098afda0b11847bbc396d0a2fe9c674182624bc0781c4b931f42d8d9cfa8",
       "pass": true
     },
     {
@@ -267,7 +267,7 @@
       "width": 320,
       "theme": "light",
       "state": "focus-visible",
-      "png_sha256": "1b68d58850d37af29d1a790f9d4f07804eefe9079865fd6690038e808b616d53",
+      "png_sha256": "4019a344cc23c77c5a59d16f5fc2a1d10a004d8f2b55639d1fa0dd7dc7c6352f",
       "pass": true
     },
     {
@@ -278,7 +278,7 @@
       "width": 320,
       "theme": "dark",
       "state": "focus-visible",
-      "png_sha256": "14f6f7f82e33ce2661b38a9fdc9b5669c2aa63862f472077a97749d5f23d4690",
+      "png_sha256": "7addaffb6615f6d8d0b81c74b8abfc032842a974c7dd6105df6bfbda06a03265",
       "pass": true
     },
     {
@@ -289,7 +289,7 @@
       "width": 1280,
       "theme": "light",
       "state": "focus-visible",
-      "png_sha256": "41af91cc27cefdc856149d6b47b78d858e3d8f0d85ea2b40994b1af7bb7593d1",
+      "png_sha256": "da306e236a81382c7e2dfbd698983ceaeeeb103c7afb050c6d357c382dc542e8",
       "pass": true
     },
     {
@@ -300,7 +300,7 @@
       "width": 1280,
       "theme": "dark",
       "state": "focus-visible",
-      "png_sha256": "78ad5be83ad333b21b542e440addbb091988ad275334c406499e0b9347b92c1d",
+      "png_sha256": "c08b85b9a6018afa9cbd6ebab6b7e35cbe7965aaeb1f34917fb1fc8c296fd518",
       "pass": true
     }
   ],
@@ -914,18 +914,6 @@
   ],
   "baselines_changed": [
     {
-      "key": "subscription-detail",
-      "finding_id": "DR-254-03",
-      "sha256": "baf35c20cb295fb39660045b96ed8ed331e22282b8c02b093987248d9fc33b17",
-      "reason": "Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px"
-    },
-    {
-      "key": "subscription-detail-dark",
-      "finding_id": "DR-254-03",
-      "sha256": "af31a6715fe4a81cb8be7f60dcc05c7410b5554891456d6f06157e827b2e283d",
-      "reason": "Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px (dark)"
-    },
-    {
       "key": "invoice-detail",
       "finding_id": "DR-254-03",
       "sha256": "ca5da6e20564e58fcba061cb3cb0c233ae6be4e561138e1c7eaa82f5339dc994",
@@ -938,18 +926,6 @@
       "reason": "Invoice detail: field-list labels take the 12px label role (DR-254-03); page 1643 to 1637 px (dark)"
     },
     {
-      "key": "subscriptions",
-      "finding_id": "A11Y-254-28",
-      "sha256": "93cf9b1eede09b5c8cfdd35c2d2e35c9eaca08b45db120548fabaf1c7165ebad",
-      "reason": "Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02)"
-    },
-    {
-      "key": "subscriptions-dark",
-      "finding_id": "A11Y-254-28",
-      "sha256": "fc4763e081337dad0dc05285832921c301d906d245a34d344371f376c12ca53d",
-      "reason": "Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02) (dark)"
-    },
-    {
       "key": "invoices",
       "finding_id": "A11Y-254-28",
       "sha256": "caa18b0493f1a1065f669b8fdf4fb4f0ea6ee94e4b3baba52d88f12e13babf85",
@@ -960,6 +936,150 @@
       "finding_id": "A11Y-254-28",
       "sha256": "c6e888db27471c29698b9423a25f7778774ca150f56cddcdc757b19cc681605c",
       "reason": "Invoices list: same shared identity secondary row gap (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 1032 to 1044 px; owner decision accept-attributable (254-15-02) (dark)"
+    },
+    {
+      "key": "phase254-mounted-disclosure-focus-w1280-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "c08b85b9a6018afa9cbd6ebab6b7e35cbe7965aaeb1f34917fb1fc8c296fd518",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-mounted-disclosure-focus-w1280-light",
+      "finding_id": "A11Y-254-28",
+      "sha256": "da306e236a81382c7e2dfbd698983ceaeeeb103c7afb050c6d357c382dc542e8",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-mounted-disclosure-focus-w320-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "7addaffb6615f6d8d0b81c74b8abfc032842a974c7dd6105df6bfbda06a03265",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-mounted-disclosure-focus-w320-light",
+      "finding_id": "A11Y-254-28",
+      "sha256": "4019a344cc23c77c5a59d16f5fc2a1d10a004d8f2b55639d1fa0dd7dc7c6352f",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-mounted-review-open-w320-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "ab8f098afda0b11847bbc396d0a2fe9c674182624bc0781c4b931f42d8d9cfa8",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-mounted-review-open-w320-light",
+      "finding_id": "A11Y-254-28",
+      "sha256": "86de6e9a60a08bc3bcb43ab575eb89b9d0db4d39913988f4e3d32a3bb24f3ffa",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-active-w1280-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "8925ec1dc64a9c7840d0ecb25fc45a2f0487e66c1eb149dc8f70e08c5a01ac5c",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-active-w1280-light",
+      "finding_id": "A11Y-254-28",
+      "sha256": "641c453a220ee66d970e0b4b02e953381396e813bf5b1c22466e9c1351369b5c",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-active-w320-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "15e94e320e0530d63ab07b17470b983c71f77b744998ddf98d615b8abfa093dc",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-active-w320-light",
+      "finding_id": "A11Y-254-28",
+      "sha256": "35e2bedfe21fdf19eb8c0eb882372dcd97ad5de65864bb226cc452127315a671",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-incomplete_evidence-w1280-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "550caf6c0505c45aa57d4a8cc2a49799e4cd9ad74d3df86a2795728418f0f529",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-incomplete_evidence-w1280-light",
+      "finding_id": "A11Y-254-28",
+      "sha256": "d3b17e5a581bf8be88572ca8dc8aa07f2ac7e2efd406fe91256e0aada3330f31",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-incomplete_evidence-w320-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "5962ff75db6c4c5b2d786d25b0c6cea774e609417719629a227c29c7c7884022",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-incomplete_evidence-w320-light",
+      "finding_id": "A11Y-254-28",
+      "sha256": "125e6a74a2271035833dd9f1c5e294dbe0a19f41a071ff1537f0d017229f9ef1",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-review_cancel_now-w320-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "2bdae6b081113dcac0e585ae78c7fb41f41cc6bc9d4dbd5f492b74e220b48046",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-review_cancel_now-w320-light",
+      "finding_id": "A11Y-254-28",
+      "sha256": "fa0361fdafa03460aa08b6421d09aaa9b7155ab8e3d80031350716f737b4e2de",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-scheduled_cancellation-w1280-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "142aab9c79659e5e003fb19e84d0bc6254e917916e5b702e0f1c5567e416b5e3",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-scheduled_cancellation-w1280-light",
+      "finding_id": "A11Y-254-28",
+      "sha256": "21569a37825c2a4e6600e8e4e881f8c300a65a94b9190b22c143d82445bba61a",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-scheduled_cancellation-w320-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "15e94e320e0530d63ab07b17470b983c71f77b744998ddf98d615b8abfa093dc",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "phase254-page-scheduled_cancellation-w320-light",
+      "finding_id": "A11Y-254-28",
+      "sha256": "35e2bedfe21fdf19eb8c0eb882372dcd97ad5de65864bb226cc452127315a671",
+      "reason": "Owner-approved AMD-254-06 Linux baseline refresh after the CSS focus and overflow corrections; pixel change maps to A11Y-254-28."
+    },
+    {
+      "key": "subscription-detail",
+      "finding_id": "DR-254-03",
+      "sha256": "baf35c20cb295fb39660045b96ed8ed331e22282b8c02b093987248d9fc33b17",
+      "reason": "Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px"
+    },
+    {
+      "key": "subscription-detail-dark",
+      "finding_id": "DR-254-03",
+      "sha256": "af31a6715fe4a81cb8be7f60dcc05c7410b5554891456d6f06157e827b2e283d",
+      "reason": "Subscription detail: field labels take the 12px label role (DR-254-03), the page-tier gap overrides are removed (DR-254-01) and the 254-12 reflow rules apply; page grows 1859 to 1879 px (dark)"
+    },
+    {
+      "key": "subscriptions",
+      "finding_id": "A11Y-254-28",
+      "sha256": "93cf9b1eede09b5c8cfdd35c2d2e35c9eaca08b45db120548fabaf1c7165ebad",
+      "reason": "Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02)"
+    },
+    {
+      "key": "subscriptions-dark",
+      "finding_id": "A11Y-254-28",
+      "sha256": "fc4763e081337dad0dc05285832921c301d906d245a34d344371f376c12ca53d",
+      "reason": "Subscriptions list: the wrapped identity secondary row gets a var(--ax-space-xs) row gap so each Customer details link keeps its 24px target spacing (A11Y-254-28, routed accessibility fix inside AMD-254-05); page 932 to 940 px; owner decision accept-attributable (254-15-02) (dark)"
     }
   ],
   "deferred": [
@@ -1006,11 +1126,11 @@
   ],
   "baselines_reattested": [],
   "confirmation_evidence": {
-    "mint_run_id": "40876347666",
-    "mint_sha": "27c6444d2c2de8f07eea3e3ed604e3d1a4bdd742",
-    "observation_run_id": "40890395793",
-    "observation_head_sha": "a9204d3b3e9ea2de07554c49a43e5025c501b95c",
+    "mint_run_id": 41682891880,
+    "mint_sha": "b6964b53598c8bda81c009f9267fec1b3fdf9e26",
+    "observation_run_id": "41695128833",
+    "observation_head_sha": "7e8d0cda49a59bbf1e893ad26a27a93b513bc59f",
     "owner_decision_a": "accept-attributable (Rec.)",
-    "note": "subscriptions.png no longer carries the H1 token swap zero-visual-change proof; DR-254-02:computed (767 and 768 CSS px) carries it"
+    "note": "The attempt-1 pull_request Browser UAT run 41695128833 on head 7e8d0cda49a59bbf1e893ad26a27a93b513bc59f passed browser tests, strict baseline set, identity manifest and Phase 211 visual regression gate; captures point to the committed Linux mint run 41682891880."
   }
 }
