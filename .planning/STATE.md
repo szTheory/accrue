@@ -5,11 +5,11 @@ milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
 status: executing
-stopped_at: Completing owner-approved reporter capture fix and local gates before separate commits and the authorized push
-last_updated: "2026-11-03T17:55:40Z"
+stopped_at: Pushing separate reporter fix and Linux rebaseline commits; awaiting new attempt-1 CI and Browser UAT
+last_updated: "2026-11-03T17:58:37Z"
 last_activity: 2026-11-03
-last_activity_desc: Owner authorized fixing the Phase 252 reporter capture; dedicated-file implementation and focused contracts pass, preparing separate commits
-state_head: b6964b53598c8bda81c009f9267fec1b3fdf9e26
+last_activity_desc: Reporter fix d17710e07 and dedicated Linux rebaseline b6a5ec363 are committed locally; all pre-push plan checks pass
+state_head: b6a5ec363
 progress:
   total_phases: 3
   completed_phases: 2
@@ -34,8 +34,8 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
 Plan: 15 of 18
-Status: Executing the owner-approved reporter capture fix; mint passed and the baseline refresh remains prepared for its dedicated commit
-Last activity: 2026-11-03 — owner authorized fixing reporter capture; focused contracts, strict baseline set, selection projection and budget checks pass
+Status: Reporter fix and dedicated Linux rebaseline are committed locally; pushing under existing authorization and waiting for new attempt-1 CI/Browser UAT
+Last activity: 2026-11-03 — reporter fix d17710e07 and baseline commit b6a5ec363 created; all pre-push plan checks pass
 
 Progress: [███████░░░] 67%
 Current milestone planning blockers: None. Phase 253 passed independent verification (56/56, behavior_unverified: 0), the fresh 10-lane aggregate (151 browser cells/152 tests), retained Phase252 gate (21/21), and executable UAT (24/24). CR-01/CR-02 and the guide-regeneration integration defect are fixed. Six current/historical unclassified assumptions, two nonblocking Phase253 summary reference-parser notices, source-only UI recommendations, and the explicit unavailable monetary-source limit remain recorded for Phase254.
@@ -710,8 +710,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-11-03T17:55:40Z
-Stopped at: Reporter capture fix is authorized and implemented; finish the remaining pre-push gates, separate commits, push and observe attempt-1 CI without reruns
+Last session: 2026-11-03T17:58:37Z
+Stopped at: Reporter fix and baseline commits are ready to push; observe the new attempt-1 CI and Browser UAT without reruns
 Resume file: .planning/phases/254-recurring-quality-reviewed-fixes-and-curation/.continue-here.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
