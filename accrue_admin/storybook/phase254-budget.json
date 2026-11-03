@@ -13226,33 +13226,1328 @@
     },
     "visual": {
       "job": "browser-uat",
-      "run_id": 41695128833,
+      "run_id": 41732449985,
       "attempt": 1,
-      "head_sha": "7e8d0cda49a59bbf1e893ad26a27a93b513bc59f",
+      "head_sha": "a5f0b077382327cc2c3df9f9559c83ee11f43f69",
       "conclusion": "success",
-      "duration_s": 1203,
+      "duration_s": 1056,
       "baseline_p90_s": 1144,
-      "added_s": 59,
+      "added_s": -88,
       "max_added_s": 180,
       "within_allowance": true,
       "per_cell": {
         "cells": 32,
-        "median_ms": 794,
-        "p90_ms": 1195,
-        "max_ms": 1577,
-        "sum_ms": 27153,
-        "source": "playwright-visual-gate.json from Phase 254 machine evidence, filtered by phase254-visual-cases.json keys"
+        "median_ms": 672,
+        "p90_ms": 1026,
+        "max_ms": 1407,
+        "sum_ms": 23276,
+        "source": "playwright-visual-gate.json durations filtered by phase254-visual-cases.json keys"
       },
       "machine": {
-        "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+        "cpu_model": "AMD EPYC 9V74 80-Core Processor",
         "cores": 4,
         "image_os": "ubuntu24",
-        "image_version": "20261026.354.1"
+        "image_version": "20261101.360.1"
       },
-      "note": "added_s is the whole job against the DEV-254-09 baseline (n = 1, a different runner pool can move it); the 32 cells themselves cost 27.2 s and the visual gate step 51 s. scheduled_cancellation stays: no visual-allowance-drop."
+      "cache": {
+        "steps": [
+          {
+            "name": "Set up Node",
+            "outcome": "hit",
+            "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+          },
+          {
+            "name": "Restore shared Admin third-party build cache",
+            "outcome": "hit",
+            "key": "Linux-release-gate-otp28.0-elixir1.19.5-sigra-off-otel-off-accrue-admin-build-test-cfgf39359bf5bd50e1daf89e275ab779bed044c245393b92d97e82a714d9ab5b924-lock57db832506c259159c8e9aa76b8340b5ccd66f4b0053ac1d3d80284affeaffce"
+          }
+        ],
+        "hits": 2,
+        "partial": 0,
+        "misses": 0
+      },
+      "note": "Final attempt-1 Browser UAT run 41732449985. The shared third-party cache hit; compile took 135 s and restore took 2 s, versus the prior uncached compile at 156 s, an estimated 19 s net compile-step reduction. The whole-job duration change is not attributed to the cache because browser-suite and runner variation also affect it. Per-cell p90 is below the existing 1195 ms visual freeze."
     },
-    "a11y": null,
-    "final": null
+    "a11y": {
+      "job": "admin-phase200-guardrails",
+      "run_id": 41732449684,
+      "attempt": 1,
+      "head_sha": "a5f0b077382327cc2c3df9f9559c83ee11f43f69",
+      "conclusion": "success",
+      "owner_job_added_s": 1060.062,
+      "baseline_p90_s": 977,
+      "added_s": 83.062,
+      "max_added_s": 180,
+      "warn_at_s": 1221.25,
+      "ceiling_s": 2397.5,
+      "within_allowance": true,
+      "per_cell": {
+        "cells": 151,
+        "median_ms": 1480,
+        "p90_ms": 3066,
+        "max_ms": 8990,
+        "sum_ms": 300274,
+        "source": "phase253-machine-evidence render-results*.json cases[].a11y.timing_ms.total"
+      },
+      "machine": {
+        "os": "linux 7.0.0-1017-azure",
+        "arch": "x64",
+        "cpu_model": "AMD EPYC 7763 64-Core Processor",
+        "cores": 4,
+        "ram_bytes": 16760344576,
+        "image_os": "ubuntu24",
+        "image_version": "20261026.354.1",
+        "runner_os": "Linux",
+        "otp": "28",
+        "elixir": "1.19.5",
+        "node": "22.23.4",
+        "playwright": "1.59.1",
+        "workers": 1,
+        "revision": "b484ab1b2a7bdc8284f5d74857f1c25707bf20f2",
+        "manifest_sha256": "8f6e9ed5c8c7c35a4a87a6abeb0fb34995ada25c082a10661691772706cf28fa",
+        "dirty": false
+      },
+      "note": "The required owner job printed owner job added time 1060.062 s; against the frozen 977 s p90 baseline this is +83.062 s, within the 180 s allowance. Per-cell timing uses all 151 selected cases; none was dropped."
+    },
+    "final": {
+      "head_sha": "a5f0b077382327cc2c3df9f9559c83ee11f43f69",
+      "runs": [
+        {
+          "schema_version": 1,
+          "workflow": "CI",
+          "run_id": 41732449684,
+          "head_sha": "a5f0b077382327cc2c3df9f9559c83ee11f43f69",
+          "event": "pull_request",
+          "attempt": 1,
+          "job": "admin-phase200-guardrails",
+          "job_name": "Admin Phase 200 deterministic guardrails",
+          "conclusion": "success",
+          "started_at": "2026-11-03T22:37:47Z",
+          "completed_at": "2026-11-03T23:04:48Z",
+          "run_started_at": "2026-11-03T22:37:46Z",
+          "duration_s": 1621,
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "duration_s": 20
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "duration_s": 6
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "duration_s": 6
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "duration_s": 1
+            },
+            {
+              "name": "Set up Node",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Install admin deps",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Install accrue, accrue_portal and accrue_host deps (Phase 252 production-boundary and held-out lanes)",
+              "conclusion": "success",
+              "duration_s": 13
+            },
+            {
+              "name": "Compile admin package",
+              "conclusion": "success",
+              "duration_s": 155
+            },
+            {
+              "name": "Install browser deps",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Install Chromium",
+              "conclusion": "success",
+              "duration_s": 21
+            },
+            {
+              "name": "Phase 200 CI contract",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Phase 200 local guardrail contract",
+              "conclusion": "success",
+              "duration_s": 1
+            },
+            {
+              "name": "Phase 254 machine fingerprint",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Phase 254 selection",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Run Phase 200 deterministic guardrails",
+              "conclusion": "success",
+              "duration_s": 1375
+            },
+            {
+              "name": "Upload Phase 252 machine evidence",
+              "conclusion": "success",
+              "duration_s": 1
+            },
+            {
+              "name": "Upload Phase 253 machine evidence",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Upload Phase 254 machine evidence",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Upload Phase 200 Playwright report",
+              "conclusion": "success",
+              "duration_s": 1
+            },
+            {
+              "name": "Upload Phase 200 Playwright evidence",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Upload Phase 200 generated evidence",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Post Restore accrue_admin deps cache",
+              "conclusion": "success",
+              "duration_s": 1
+            },
+            {
+              "name": "Post Set up Node",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "duration_s": 0
+            }
+          ],
+          "lanes": [
+            {
+              "lane": "252-08:manifest-current",
+              "duration_ms": 151916
+            },
+            {
+              "lane": "252-08:phase252-lab-contract",
+              "duration_ms": 128
+            },
+            {
+              "lane": "252-08:scenario-domain",
+              "duration_ms": 5929
+            },
+            {
+              "lane": "252-08:subscription-area",
+              "duration_ms": 1822
+            },
+            {
+              "lane": "252-08:story-slice",
+              "duration_ms": 1784
+            },
+            {
+              "lane": "252-08:manifest-contract",
+              "duration_ms": 4070
+            },
+            {
+              "lane": "252-08:production-boundary-db-free",
+              "duration_ms": 3206
+            },
+            {
+              "lane": "252-08:phase248-heldout-contract",
+              "duration_ms": 105
+            },
+            {
+              "lane": "252-08:phase252-ci-contract",
+              "duration_ms": 2542
+            },
+            {
+              "lane": "252-08:production-boundary-controls",
+              "duration_ms": 44
+            },
+            {
+              "lane": "252-08:production-packages",
+              "duration_ms": 350508
+            },
+            {
+              "lane": "252-08:scenario-repo",
+              "duration_ms": 3995
+            },
+            {
+              "lane": "252-08:registry-kitchen-mount-scoped-path",
+              "duration_ms": 6505
+            },
+            {
+              "lane": "252-08:mounted-subscription-regressions",
+              "duration_ms": 7423
+            },
+            {
+              "lane": "252-08:heldout-cleanup",
+              "duration_ms": 150513
+            },
+            {
+              "lane": "252-08:isolation-reset",
+              "duration_ms": 18609
+            },
+            {
+              "lane": "252-08:subscription-render-browser",
+              "duration_ms": 25858
+            },
+            {
+              "lane": "252-08:lab-presentation",
+              "duration_ms": 270
+            },
+            {
+              "lane": "252-08:heldout-attribution",
+              "duration_ms": 271
+            },
+            {
+              "lane": "252-08:transparency-controls",
+              "duration_ms": 1721
+            },
+            {
+              "lane": "252-08:phase252-acceptance-contract",
+              "duration_ms": 2652
+            },
+            {
+              "lane": "253-06:phase253-manifest-contract",
+              "duration_ms": 1932
+            },
+            {
+              "lane": "253-06:phase253-page-slice",
+              "duration_ms": 2012
+            },
+            {
+              "lane": "253-06:phase253-story-slice",
+              "duration_ms": 1809
+            },
+            {
+              "lane": "253-06:phase253-collection-live",
+              "duration_ms": 6508
+            },
+            {
+              "lane": "253-06:phase253-mounted-job-live",
+              "duration_ms": 7631
+            },
+            {
+              "lane": "253-06:phase253-compositions-browser",
+              "duration_ms": 184995
+            },
+            {
+              "lane": "253-06:phase253-presentation-contract",
+              "duration_ms": 274
+            },
+            {
+              "lane": "253-06:phase253-transparency-controls",
+              "duration_ms": 1131
+            },
+            {
+              "lane": "253-06:phase253-ci-contract",
+              "duration_ms": 2552
+            },
+            {
+              "lane": "253-06:phase253-acceptance-contract",
+              "duration_ms": 618
+            },
+            {
+              "lane": "253-06:phase254-action-copy",
+              "duration_ms": 1796
+            },
+            {
+              "lane": "253-06:phase254-design-browser",
+              "duration_ms": 12724
+            }
+          ],
+          "browser_lanes": [
+            {
+              "id": "subscription-render-browser",
+              "lane": "252-08:subscription-render-browser",
+              "cells": 14,
+              "stats_duration_ms": 25030.017,
+              "durations": [
+                {
+                  "identity": "active | 320px | light",
+                  "duration_ms": 1916
+                },
+                {
+                  "identity": "active | 320px | dark",
+                  "duration_ms": 1470
+                },
+                {
+                  "identity": "active | 1280px | light",
+                  "duration_ms": 1359
+                },
+                {
+                  "identity": "active | 1280px | dark",
+                  "duration_ms": 1338
+                },
+                {
+                  "identity": "scheduled_cancellation | 320px | light",
+                  "duration_ms": 1225
+                },
+                {
+                  "identity": "scheduled_cancellation | 320px | dark",
+                  "duration_ms": 1254
+                },
+                {
+                  "identity": "scheduled_cancellation | 1280px | light",
+                  "duration_ms": 1369
+                },
+                {
+                  "identity": "scheduled_cancellation | 1280px | dark",
+                  "duration_ms": 1375
+                },
+                {
+                  "identity": "incomplete_evidence | 320px | light",
+                  "duration_ms": 1244
+                },
+                {
+                  "identity": "incomplete_evidence | 320px | dark",
+                  "duration_ms": 1222
+                },
+                {
+                  "identity": "incomplete_evidence | 1280px | light",
+                  "duration_ms": 1327
+                },
+                {
+                  "identity": "incomplete_evidence | 1280px | dark",
+                  "duration_ms": 1347
+                },
+                {
+                  "identity": "braintree_pruned | compatibility | 1280px | light",
+                  "duration_ms": 1118
+                },
+                {
+                  "identity": "dunning_active | compatibility | 1280px | light",
+                  "duration_ms": 1079
+                },
+                {
+                  "identity": "reconciles every declared direct render against the generated manifest",
+                  "duration_ms": 21
+                }
+              ]
+            },
+            {
+              "id": "phase253-compositions-browser",
+              "lane": "253-06:phase253-compositions-browser",
+              "cells": 151,
+              "stats_duration_ms": 184188.285,
+              "durations": [
+                {
+                  "identity": "filtered_empty | viewport | 320px | light",
+                  "duration_ms": 4123
+                },
+                {
+                  "identity": "filtered_empty | viewport | 320px | dark",
+                  "duration_ms": 3263
+                },
+                {
+                  "identity": "filtered_empty | viewport | 1280px | light",
+                  "duration_ms": 3281
+                },
+                {
+                  "identity": "filtered_empty | viewport | 1280px | dark",
+                  "duration_ms": 3185
+                },
+                {
+                  "identity": "incomplete_projection | viewport | 320px | light",
+                  "duration_ms": 2243
+                },
+                {
+                  "identity": "incomplete_projection | viewport | 320px | dark",
+                  "duration_ms": 2257
+                },
+                {
+                  "identity": "incomplete_projection | viewport | 1280px | light",
+                  "duration_ms": 2039
+                },
+                {
+                  "identity": "incomplete_projection | viewport | 1280px | dark",
+                  "duration_ms": 2094
+                },
+                {
+                  "identity": "loading | viewport | 320px | light",
+                  "duration_ms": 1917
+                },
+                {
+                  "identity": "loading | viewport | 320px | dark",
+                  "duration_ms": 1800
+                },
+                {
+                  "identity": "loading | viewport | 1280px | light",
+                  "duration_ms": 1980
+                },
+                {
+                  "identity": "loading | viewport | 1280px | dark",
+                  "duration_ms": 1948
+                },
+                {
+                  "identity": "multiple_rows | viewport | 320px | light",
+                  "duration_ms": 4226
+                },
+                {
+                  "identity": "multiple_rows | viewport | 320px | dark",
+                  "duration_ms": 4244
+                },
+                {
+                  "identity": "multiple_rows | viewport | 1280px | light",
+                  "duration_ms": 4163
+                },
+                {
+                  "identity": "multiple_rows | viewport | 1280px | dark",
+                  "duration_ms": 4227
+                },
+                {
+                  "identity": "new_host_empty | viewport | 320px | light",
+                  "duration_ms": 1854
+                },
+                {
+                  "identity": "new_host_empty | viewport | 320px | dark",
+                  "duration_ms": 1864
+                },
+                {
+                  "identity": "new_host_empty | viewport | 1280px | light",
+                  "duration_ms": 1788
+                },
+                {
+                  "identity": "new_host_empty | viewport | 1280px | dark",
+                  "duration_ms": 1893
+                },
+                {
+                  "identity": "one_row | viewport | 320px | light",
+                  "duration_ms": 3493
+                },
+                {
+                  "identity": "one_row | viewport | 320px | dark",
+                  "duration_ms": 3528
+                },
+                {
+                  "identity": "one_row | viewport | 1280px | light",
+                  "duration_ms": 3629
+                },
+                {
+                  "identity": "one_row | viewport | 1280px | dark",
+                  "duration_ms": 3578
+                },
+                {
+                  "identity": "page_boundary | viewport | 320px | light",
+                  "duration_ms": 3789
+                },
+                {
+                  "identity": "page_boundary | viewport | 320px | dark",
+                  "duration_ms": 3760
+                },
+                {
+                  "identity": "page_boundary | viewport | 1280px | light",
+                  "duration_ms": 3849
+                },
+                {
+                  "identity": "page_boundary | viewport | 1280px | dark",
+                  "duration_ms": 3863
+                },
+                {
+                  "identity": "partial_cursor_error | viewport | 320px | light",
+                  "duration_ms": 3582
+                },
+                {
+                  "identity": "partial_cursor_error | viewport | 320px | dark",
+                  "duration_ms": 3470
+                },
+                {
+                  "identity": "partial_cursor_error | viewport | 1280px | light",
+                  "duration_ms": 3912
+                },
+                {
+                  "identity": "partial_cursor_error | viewport | 1280px | dark",
+                  "duration_ms": 3754
+                },
+                {
+                  "identity": "queue_empty | viewport | 320px | light",
+                  "duration_ms": 1696
+                },
+                {
+                  "identity": "queue_empty | viewport | 320px | dark",
+                  "duration_ms": 1754
+                },
+                {
+                  "identity": "queue_empty | viewport | 1280px | light",
+                  "duration_ms": 1904
+                },
+                {
+                  "identity": "queue_empty | viewport | 1280px | dark",
+                  "duration_ms": 1695
+                },
+                {
+                  "identity": "unavailable | viewport | 320px | light",
+                  "duration_ms": 2446
+                },
+                {
+                  "identity": "unavailable | viewport | 320px | dark",
+                  "duration_ms": 2385
+                },
+                {
+                  "identity": "unavailable | viewport | 1280px | light",
+                  "duration_ms": 2593
+                },
+                {
+                  "identity": "unavailable | viewport | 1280px | dark",
+                  "duration_ms": 2543
+                },
+                {
+                  "identity": "one_row | breakpoint edge | 767px | light",
+                  "duration_ms": 2156
+                },
+                {
+                  "identity": "one_row | breakpoint edge | 767px | dark",
+                  "duration_ms": 2173
+                },
+                {
+                  "identity": "one_row | breakpoint edge | 768px | light",
+                  "duration_ms": 2197
+                },
+                {
+                  "identity": "one_row | breakpoint edge | 768px | dark",
+                  "duration_ms": 2109
+                },
+                {
+                  "identity": "one_row | constrained 640px content | light",
+                  "duration_ms": 2184
+                },
+                {
+                  "identity": "one_row | constrained 640px content | dark",
+                  "duration_ms": 2318
+                },
+                {
+                  "identity": "filtered_empty | breakpoint edge | 767px | light",
+                  "duration_ms": 1867
+                },
+                {
+                  "identity": "filtered_empty | breakpoint edge | 767px | dark",
+                  "duration_ms": 1802
+                },
+                {
+                  "identity": "filtered_empty | breakpoint edge | 768px | light",
+                  "duration_ms": 1910
+                },
+                {
+                  "identity": "filtered_empty | breakpoint edge | 768px | dark",
+                  "duration_ms": 1950
+                },
+                {
+                  "identity": "filtered_empty | constrained 640px content | light",
+                  "duration_ms": 2120
+                },
+                {
+                  "identity": "filtered_empty | constrained 640px content | dark",
+                  "duration_ms": 2989
+                },
+                {
+                  "identity": "synthetic long text and markup-like filter remain safe at 320px | light",
+                  "duration_ms": 2387
+                },
+                {
+                  "identity": "synthetic long text and markup-like filter remain safe at 320px | dark",
+                  "duration_ms": 2420
+                },
+                {
+                  "identity": "geometry controls detect hidden essential content and page overflow",
+                  "duration_ms": 6233
+                },
+                {
+                  "identity": "active | viewport | 320px | light",
+                  "duration_ms": 9126
+                },
+                {
+                  "identity": "active | viewport | 320px | dark",
+                  "duration_ms": 8901
+                },
+                {
+                  "identity": "active | viewport | 1280px | light",
+                  "duration_ms": 10336
+                },
+                {
+                  "identity": "active | viewport | 1280px | dark",
+                  "duration_ms": 10223
+                },
+                {
+                  "identity": "active | breakpoint | 767px | light",
+                  "duration_ms": 2859
+                },
+                {
+                  "identity": "active | breakpoint | 767px | dark",
+                  "duration_ms": 2838
+                },
+                {
+                  "identity": "active | breakpoint | 768px | light",
+                  "duration_ms": 2745
+                },
+                {
+                  "identity": "active | breakpoint | 768px | dark",
+                  "duration_ms": 2825
+                },
+                {
+                  "identity": "active | container | 640px | light",
+                  "duration_ms": 2988
+                },
+                {
+                  "identity": "active | container | 640px | dark",
+                  "duration_ms": 3000
+                },
+                {
+                  "identity": "scheduled_cancellation | viewport | 320px | light",
+                  "duration_ms": 2659
+                },
+                {
+                  "identity": "scheduled_cancellation | viewport | 320px | dark",
+                  "duration_ms": 2781
+                },
+                {
+                  "identity": "scheduled_cancellation | viewport | 1280px | light",
+                  "duration_ms": 2783
+                },
+                {
+                  "identity": "scheduled_cancellation | viewport | 1280px | dark",
+                  "duration_ms": 2919
+                },
+                {
+                  "identity": "scheduled_cancellation | breakpoint | 767px | light",
+                  "duration_ms": 2856
+                },
+                {
+                  "identity": "scheduled_cancellation | breakpoint | 767px | dark",
+                  "duration_ms": 2804
+                },
+                {
+                  "identity": "scheduled_cancellation | breakpoint | 768px | light",
+                  "duration_ms": 2777
+                },
+                {
+                  "identity": "scheduled_cancellation | breakpoint | 768px | dark",
+                  "duration_ms": 2833
+                },
+                {
+                  "identity": "scheduled_cancellation | container | 640px | light",
+                  "duration_ms": 2944
+                },
+                {
+                  "identity": "scheduled_cancellation | container | 640px | dark",
+                  "duration_ms": 2953
+                },
+                {
+                  "identity": "incomplete_evidence | viewport | 320px | light",
+                  "duration_ms": 2621
+                },
+                {
+                  "identity": "incomplete_evidence | viewport | 320px | dark",
+                  "duration_ms": 2532
+                },
+                {
+                  "identity": "incomplete_evidence | viewport | 1280px | light",
+                  "duration_ms": 2605
+                },
+                {
+                  "identity": "incomplete_evidence | viewport | 1280px | dark",
+                  "duration_ms": 2517
+                },
+                {
+                  "identity": "incomplete_evidence | breakpoint | 767px | light",
+                  "duration_ms": 2566
+                },
+                {
+                  "identity": "incomplete_evidence | breakpoint | 767px | dark",
+                  "duration_ms": 2661
+                },
+                {
+                  "identity": "incomplete_evidence | breakpoint | 768px | light",
+                  "duration_ms": 2437
+                },
+                {
+                  "identity": "incomplete_evidence | breakpoint | 768px | dark",
+                  "duration_ms": 2449
+                },
+                {
+                  "identity": "incomplete_evidence | container | 640px | light",
+                  "duration_ms": 2688
+                },
+                {
+                  "identity": "incomplete_evidence | container | 640px | dark",
+                  "duration_ms": 2698
+                },
+                {
+                  "identity": "review_cancel_now | viewport | 320px | light",
+                  "duration_ms": 4372
+                },
+                {
+                  "identity": "review_cancel_now | viewport | 320px | dark",
+                  "duration_ms": 4482
+                },
+                {
+                  "identity": "review_cancel_now | viewport | 1280px | light",
+                  "duration_ms": 5111
+                },
+                {
+                  "identity": "review_cancel_now | viewport | 1280px | dark",
+                  "duration_ms": 4167
+                },
+                {
+                  "identity": "review_cancel_now | breakpoint | 767px | light",
+                  "duration_ms": 2081
+                },
+                {
+                  "identity": "review_cancel_now | breakpoint | 767px | dark",
+                  "duration_ms": 2128
+                },
+                {
+                  "identity": "review_cancel_now | breakpoint | 768px | light",
+                  "duration_ms": 2134
+                },
+                {
+                  "identity": "review_cancel_now | breakpoint | 768px | dark",
+                  "duration_ms": 2200
+                },
+                {
+                  "identity": "review_cancel_now | container | 640px | light",
+                  "duration_ms": 2268
+                },
+                {
+                  "identity": "review_cancel_now | container | 640px | dark",
+                  "duration_ms": 2250
+                },
+                {
+                  "identity": "awaiting_step_up | viewport | 320px | light",
+                  "duration_ms": 3449
+                },
+                {
+                  "identity": "awaiting_step_up | viewport | 320px | dark",
+                  "duration_ms": 3568
+                },
+                {
+                  "identity": "awaiting_step_up | viewport | 1280px | light",
+                  "duration_ms": 4639
+                },
+                {
+                  "identity": "awaiting_step_up | viewport | 1280px | dark",
+                  "duration_ms": 4156
+                },
+                {
+                  "identity": "awaiting_step_up | breakpoint | 767px | light",
+                  "duration_ms": 1872
+                },
+                {
+                  "identity": "awaiting_step_up | breakpoint | 767px | dark",
+                  "duration_ms": 1915
+                },
+                {
+                  "identity": "awaiting_step_up | breakpoint | 768px | light",
+                  "duration_ms": 1831
+                },
+                {
+                  "identity": "awaiting_step_up | breakpoint | 768px | dark",
+                  "duration_ms": 4333
+                },
+                {
+                  "identity": "awaiting_step_up | container | 640px | light",
+                  "duration_ms": 3991
+                },
+                {
+                  "identity": "awaiting_step_up | container | 640px | dark",
+                  "duration_ms": 3639
+                },
+                {
+                  "identity": "dispatching | viewport | 320px | light",
+                  "duration_ms": 2646
+                },
+                {
+                  "identity": "dispatching | viewport | 320px | dark",
+                  "duration_ms": 2514
+                },
+                {
+                  "identity": "dispatching | viewport | 1280px | light",
+                  "duration_ms": 3072
+                },
+                {
+                  "identity": "dispatching | viewport | 1280px | dark",
+                  "duration_ms": 3021
+                },
+                {
+                  "identity": "dispatching | breakpoint | 767px | light",
+                  "duration_ms": 2914
+                },
+                {
+                  "identity": "dispatching | breakpoint | 767px | dark",
+                  "duration_ms": 2821
+                },
+                {
+                  "identity": "dispatching | breakpoint | 768px | light",
+                  "duration_ms": 2752
+                },
+                {
+                  "identity": "dispatching | breakpoint | 768px | dark",
+                  "duration_ms": 2867
+                },
+                {
+                  "identity": "dispatching | container | 640px | light",
+                  "duration_ms": 2965
+                },
+                {
+                  "identity": "dispatching | container | 640px | dark",
+                  "duration_ms": 3281
+                },
+                {
+                  "identity": "result_confirmed | viewport | 320px | light",
+                  "duration_ms": 3100
+                },
+                {
+                  "identity": "result_confirmed | viewport | 320px | dark",
+                  "duration_ms": 2956
+                },
+                {
+                  "identity": "result_confirmed | viewport | 1280px | light",
+                  "duration_ms": 3147
+                },
+                {
+                  "identity": "result_confirmed | viewport | 1280px | dark",
+                  "duration_ms": 3280
+                },
+                {
+                  "identity": "result_confirmed | breakpoint | 767px | light",
+                  "duration_ms": 2998
+                },
+                {
+                  "identity": "result_confirmed | breakpoint | 767px | dark",
+                  "duration_ms": 3062
+                },
+                {
+                  "identity": "result_confirmed | breakpoint | 768px | light",
+                  "duration_ms": 2921
+                },
+                {
+                  "identity": "result_confirmed | breakpoint | 768px | dark",
+                  "duration_ms": 3115
+                },
+                {
+                  "identity": "result_confirmed | container | 640px | light",
+                  "duration_ms": 3170
+                },
+                {
+                  "identity": "result_confirmed | container | 640px | dark",
+                  "duration_ms": 3081
+                },
+                {
+                  "identity": "result_pending | viewport | 320px | light",
+                  "duration_ms": 2853
+                },
+                {
+                  "identity": "result_pending | viewport | 320px | dark",
+                  "duration_ms": 3013
+                },
+                {
+                  "identity": "result_pending | viewport | 1280px | light",
+                  "duration_ms": 3013
+                },
+                {
+                  "identity": "result_pending | viewport | 1280px | dark",
+                  "duration_ms": 3061
+                },
+                {
+                  "identity": "result_pending | breakpoint | 767px | light",
+                  "duration_ms": 3027
+                },
+                {
+                  "identity": "result_pending | breakpoint | 767px | dark",
+                  "duration_ms": 2946
+                },
+                {
+                  "identity": "result_pending | breakpoint | 768px | light",
+                  "duration_ms": 2951
+                },
+                {
+                  "identity": "result_pending | breakpoint | 768px | dark",
+                  "duration_ms": 3138
+                },
+                {
+                  "identity": "result_pending | container | 640px | light",
+                  "duration_ms": 3109
+                },
+                {
+                  "identity": "result_pending | container | 640px | dark",
+                  "duration_ms": 2966
+                },
+                {
+                  "identity": "result_failed | viewport | 320px | light",
+                  "duration_ms": 8865
+                },
+                {
+                  "identity": "result_failed | viewport | 320px | dark",
+                  "duration_ms": 9065
+                },
+                {
+                  "identity": "result_failed | viewport | 1280px | light",
+                  "duration_ms": 10407
+                },
+                {
+                  "identity": "result_failed | viewport | 1280px | dark",
+                  "duration_ms": 10241
+                },
+                {
+                  "identity": "result_failed | breakpoint | 767px | light",
+                  "duration_ms": 2550
+                },
+                {
+                  "identity": "result_failed | breakpoint | 767px | dark",
+                  "duration_ms": 2359
+                },
+                {
+                  "identity": "result_failed | breakpoint | 768px | light",
+                  "duration_ms": 2276
+                },
+                {
+                  "identity": "result_failed | breakpoint | 768px | dark",
+                  "duration_ms": 2289
+                },
+                {
+                  "identity": "result_failed | container | 640px | light",
+                  "duration_ms": 2436
+                },
+                {
+                  "identity": "result_failed | container | 640px | dark",
+                  "duration_ms": 2494
+                },
+                {
+                  "identity": "active | synthetic return text stress | 320px | light",
+                  "duration_ms": 2154
+                },
+                {
+                  "identity": "active | synthetic return text stress | 320px | dark",
+                  "duration_ms": 2267
+                },
+                {
+                  "identity": "review_cancel_now | synthetic consequence text stress | 320px | light",
+                  "duration_ms": 1985
+                },
+                {
+                  "identity": "review_cancel_now | synthetic consequence text stress | 320px | dark",
+                  "duration_ms": 2352
+                },
+                {
+                  "identity": "awaiting_step_up | synthetic recovery text stress | 320px | light",
+                  "duration_ms": 2509
+                },
+                {
+                  "identity": "awaiting_step_up | synthetic recovery text stress | 320px | dark",
+                  "duration_ms": 2597
+                },
+                {
+                  "identity": "reconciles every compiled collection and whole-page cell against this run and served assets",
+                  "duration_ms": 57
+                }
+              ]
+            }
+          ],
+          "cache": {
+            "steps": [
+              {
+                "name": "Set up Node",
+                "outcome": "hit",
+                "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+              },
+              {
+                "name": "Restore accrue_admin deps cache",
+                "outcome": "hit",
+                "key": "Linux-otp28-elixir119-phase200-admin-deps-57db832506c259159c8e9aa76b8340b5ccd66f4b0053ac1d3d80284affeaffce"
+              }
+            ],
+            "hits": 2,
+            "partial": 0,
+            "misses": 0
+          },
+          "fingerprint": {
+            "os": "linux 7.0.0-1017-azure",
+            "arch": "x64",
+            "cpu_model": "AMD EPYC 7763 64-Core Processor",
+            "cores": 4,
+            "ram_bytes": 16760344576,
+            "image_os": "ubuntu24",
+            "image_version": "20261026.354.1",
+            "runner_os": "Linux",
+            "otp": "28",
+            "elixir": "1.19.5",
+            "node": "22.23.4",
+            "playwright": "1.59.1",
+            "workers": 1,
+            "revision": "b484ab1b2a7bdc8284f5d74857f1c25707bf20f2",
+            "manifest_sha256": "8f6e9ed5c8c7c35a4a87a6abeb0fb34995ada25c082a10661691772706cf28fa",
+            "dirty": false
+          },
+          "informs_only": true,
+          "phase_owned_ok": true
+        },
+        {
+          "schema_version": 1,
+          "workflow": "AccrueAdmin Browser UAT",
+          "run_id": 41732449985,
+          "head_sha": "a5f0b077382327cc2c3df9f9559c83ee11f43f69",
+          "event": "pull_request",
+          "attempt": 1,
+          "job": "browser-uat",
+          "job_name": "Browser UAT",
+          "conclusion": "success",
+          "started_at": "2026-11-03T22:37:47Z",
+          "completed_at": "2026-11-03T22:55:23Z",
+          "run_started_at": "2026-11-03T22:37:46Z",
+          "duration_s": 1056,
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success",
+              "duration_s": 23
+            },
+            {
+              "name": "Run actions/checkout@v6",
+              "conclusion": "success",
+              "duration_s": 7
+            },
+            {
+              "name": "Set up BEAM",
+              "conclusion": "success",
+              "duration_s": 5
+            },
+            {
+              "name": "Install Hex",
+              "conclusion": "success",
+              "duration_s": 1
+            },
+            {
+              "name": "Set up Node",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Restore shared Admin third-party build cache",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Prune first-party apps from the restored Admin build",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Install Elixir deps",
+              "conclusion": "success",
+              "duration_s": 4
+            },
+            {
+              "name": "Compile admin package",
+              "conclusion": "success",
+              "duration_s": 135
+            },
+            {
+              "name": "Install browser deps",
+              "conclusion": "success",
+              "duration_s": 1
+            },
+            {
+              "name": "Install Chromium",
+              "conclusion": "success",
+              "duration_s": 21
+            },
+            {
+              "name": "Phase 254 machine fingerprint",
+              "conclusion": "success",
+              "duration_s": 1
+            },
+            {
+              "name": "Run browser UAT",
+              "conclusion": "success",
+              "duration_s": 808
+            },
+            {
+              "name": "Test Admin hooks and visual baseline set guard",
+              "conclusion": "success",
+              "duration_s": 1
+            },
+            {
+              "name": "Require complete committed visual baseline set",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Check visual baseline identity manifest",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Phase 211 visual regression gate",
+              "conclusion": "success",
+              "duration_s": 36
+            },
+            {
+              "name": "Upload Phase 254 machine evidence",
+              "conclusion": "success",
+              "duration_s": 2
+            },
+            {
+              "name": "Upload Playwright report",
+              "conclusion": "skipped",
+              "duration_s": 0
+            },
+            {
+              "name": "Upload Playwright traces",
+              "conclusion": "skipped",
+              "duration_s": 0
+            },
+            {
+              "name": "Post Set up Node",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Post Run actions/checkout@v6",
+              "conclusion": "success",
+              "duration_s": 0
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success",
+              "duration_s": 1
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success",
+              "duration_s": 0
+            }
+          ],
+          "lanes": [],
+          "browser_lanes": [],
+          "cache": {
+            "steps": [
+              {
+                "name": "Set up Node",
+                "outcome": "hit",
+                "key": "node-cache-Linux-x64-npm-3e311f912c1545119da6a33609ceda367ccb223c139e6dc5b0ca1d5054b4c352"
+              },
+              {
+                "name": "Restore shared Admin third-party build cache",
+                "outcome": "hit",
+                "key": "Linux-release-gate-otp28.0-elixir1.19.5-sigra-off-otel-off-accrue-admin-build-test-cfgf39359bf5bd50e1daf89e275ab779bed044c245393b92d97e82a714d9ab5b924-lock57db832506c259159c8e9aa76b8340b5ccd66f4b0053ac1d3d80284affeaffce"
+              }
+            ],
+            "hits": 2,
+            "partial": 0,
+            "misses": 0
+          },
+          "fingerprint": {
+            "os": "linux 7.0.0-1017-azure",
+            "arch": "x64",
+            "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+            "cores": 4,
+            "ram_bytes": 16760348672,
+            "image_os": "ubuntu24",
+            "image_version": "20261101.360.1",
+            "runner_os": "Linux",
+            "otp": "28",
+            "elixir": "1.19.5",
+            "node": "22.23.4",
+            "playwright": "1.59.1",
+            "workers": 1,
+            "revision": "b484ab1b2a7bdc8284f5d74857f1c25707bf20f2",
+            "manifest_sha256": "8f6e9ed5c8c7c35a4a87a6abeb0fb34995ada25c082a10661691772706cf28fa",
+            "dirty": false
+          },
+          "informs_only": true,
+          "phase_owned_ok": true
+        },
+        {
+          "workflow": "CI",
+          "run_id": 41732449684,
+          "head_sha": "a5f0b077382327cc2c3df9f9559c83ee11f43f69",
+          "event": "pull_request",
+          "attempt": 1,
+          "job": "Docs and bash contracts (shift-left)",
+          "job_name": "Docs and bash contracts (shift-left)",
+          "conclusion": "failure",
+          "phase_owned_ok": false,
+          "classification": "environmental",
+          "step": "Artifact fixed-point and derivation-cycle guard (SL-G)",
+          "main_run_id": 40387584954,
+          "known_red_id": "KR-254-06",
+          "decision": "accept-known-red",
+          "first_error_line": "artifact fixed point: FAIL: phase 254: zero artifacts discovered -- refusing to report a pass over zero inspected artifacts",
+          "test_count": 1
+        },
+        {
+          "workflow": "CI",
+          "run_id": 41732449684,
+          "head_sha": "a5f0b077382327cc2c3df9f9559c83ee11f43f69",
+          "event": "pull_request",
+          "attempt": 1,
+          "job": "Admin UI ratchet guardrails [parked]",
+          "job_name": "Admin UI ratchet guardrails [parked]",
+          "conclusion": "failure",
+          "phase_owned_ok": false,
+          "classification": "pre-existing-on-main",
+          "step": "Verify frozen ratchet evidence",
+          "main_run_id": 40387584954,
+          "decision": "pre-existing-on-main",
+          "first_error_line": "verify_ratchet_ledger.mjs: independent recompute failed.",
+          "test_count": 1
+        }
+      ],
+      "escalation_required": false,
+      "escalation_count": 0,
+      "triage_count": 2,
+      "source": "phase254_measure.mjs ci-collect and triage; final pull_request attempt-1 observations"
+    }
   },
   "provisional_targets": {
     "warm_preview_s": 10,
@@ -13624,7 +14919,11 @@
       "fixed_in_sha": [
         "79d4c8532"
       ],
-      "status": "open: the settle fix did not change the result; the same 22 cells fail with the same ratios on CI (run 40890395756) and none fails locally (4x, 6x, 8x throttling, 3 workers, CI=true GITHUB_ACTIONS=true)"
+      "status": "resolved",
+      "resolved_at": "254-18-01",
+      "resolved_by_run_id": 41732449684,
+      "resolved_by_head_sha": "a5f0b077382327cc2c3df9f9559c83ee11f43f69",
+      "resolution": "The final attempt-1 Admin Phase 200 deterministic guardrails owner job passed on the measured head; the previously observed 22-cell red did not recur."
     }
   ],
   "deviations": [
@@ -15451,6 +16750,119 @@
       "cause": "254-16-03",
       "decision": "re-stamped to the committed manifest bytes after its owner regenerated them",
       "status": "resolved",
+      "before": {
+        "cells": 165,
+        "owners": 2
+      },
+      "after": {
+        "cells": 165,
+        "owners": 2
+      }
+    },
+    {
+      "id": "DEV-254-50",
+      "kind": "final-triage",
+      "target": {
+        "name": "final pull_request CI reds",
+        "seconds": null,
+        "source": "254-18-01 attempt-1 run triage"
+      },
+      "measurement": {
+        "runs": [
+          41732449684,
+          41732449985
+        ],
+        "head_sha": "a5f0b077382327cc2c3df9f9559c83ee11f43f69",
+        "entries": [
+          {
+            "run_id": 41732449684,
+            "job": "Docs and bash contracts (shift-left)",
+            "step": "Artifact fixed-point and derivation-cycle guard (SL-G)",
+            "classification": "environmental",
+            "main_run_id": 40387584954,
+            "first_error_line": "artifact fixed point: FAIL: phase 254: zero artifacts discovered -- refusing to report a pass over zero inspected artifacts",
+            "test_count": 1,
+            "known_red_id": "KR-254-06",
+            "decision": "accept-known-red"
+          },
+          {
+            "run_id": 41732449684,
+            "job": "Admin UI ratchet guardrails [parked]",
+            "step": "Verify frozen ratchet evidence",
+            "classification": "pre-existing-on-main",
+            "main_run_id": 40387584954,
+            "first_error_line": "verify_ratchet_ledger.mjs: independent recompute failed.",
+            "test_count": 1,
+            "decision": "pre-existing-on-main"
+          }
+        ],
+        "triage_count": 2,
+        "escalation_required": false
+      },
+      "decision": "the only two reds match the accepted KR-254-06 SL-G environmental red and the parked ratchet failure pre-existing on main run 40387584954; no unmatched or owner-job red remained, so the 254-18-02 escalation was not required",
+      "status": "accepted",
+      "before": {
+        "cells": 165,
+        "owners": 2
+      },
+      "after": {
+        "cells": 165,
+        "owners": 2
+      },
+      "entries": [
+        {
+          "run_id": 41732449684,
+          "job": "Docs and bash contracts (shift-left)",
+          "step": "Artifact fixed-point and derivation-cycle guard (SL-G)",
+          "classification": "environmental",
+          "main_run_id": 40387584954,
+          "first_error_line": "artifact fixed point: FAIL: phase 254: zero artifacts discovered -- refusing to report a pass over zero inspected artifacts",
+          "test_count": 1,
+          "known_red_id": "KR-254-06",
+          "decision": "accept-known-red"
+        },
+        {
+          "run_id": 41732449684,
+          "job": "Admin UI ratchet guardrails [parked]",
+          "step": "Verify frozen ratchet evidence",
+          "classification": "pre-existing-on-main",
+          "main_run_id": 40387584954,
+          "first_error_line": "verify_ratchet_ledger.mjs: independent recompute failed.",
+          "test_count": 1,
+          "decision": "pre-existing-on-main"
+        }
+      ]
+    },
+    {
+      "id": "DEV-254-51",
+      "kind": "a11y-cell-budget-freeze",
+      "target": {
+        "name": "a11y step per-cell budget",
+        "seconds": null,
+        "source": "D-22"
+      },
+      "measurement": {
+        "run_id": 41732449684,
+        "head_sha": "a5f0b077382327cc2c3df9f9559c83ee11f43f69",
+        "cells": 151,
+        "median_ms": 1480,
+        "p90_ms": 3066,
+        "max_ms": 8990,
+        "sum_ms": 300274,
+        "owner_job_added_s": 1060.062,
+        "added_s": 83.062
+      },
+      "frozen": {
+        "per_cell_p90_ms": 3066,
+        "warn_at_ms": 3832.5,
+        "ceiling_ms": 7665,
+        "multipliers": {
+          "warn_at": 1.25,
+          "ceiling": 2.5
+        }
+      },
+      "decision": "one final attempt-1 run establishes the provisional a11y cell budget at p90 3066 ms, warn_at 3832.5 ms and ceiling 7665 ms; the owner-job incremental time is 83.062 s against a 180 s allowance, with all 151 cases retained",
+      "status": "accepted",
       "before": {
         "cells": 165,
         "owners": 2
