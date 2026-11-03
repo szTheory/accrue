@@ -124,10 +124,14 @@ function object(value, label) {
   if (!value || typeof value !== "object" || Array.isArray(value)) fail(`${label} must be an object`);
   return value;
 }
-function safePath(root, relative, label = "evidence path") {
+export function normalizeRepositoryRelativePath(relative, label = "evidence path") {
   if (typeof relative !== "string" || relative.length === 0 || path.isAbsolute(relative)) fail(`${label} must be repository-relative`);
-  const normalized = relative.replaceAll("\\", "/");
+  const normalized = relative.replaceAll("\\", "/").replace(/\/+$/, "");
   if (normalized.split("/").some((part) => !part || part === "." || part === "..")) fail(`${label} contains an unsafe path`);
+  return normalized;
+}
+function safePath(root, relative, label = "evidence path") {
+  const normalized = normalizeRepositoryRelativePath(relative, label);
   const absolute = path.resolve(root, normalized);
   const rel = path.relative(root, absolute);
   if (rel === ".." || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel)) fail(`${label} escapes the repository`);

@@ -128,6 +128,12 @@ test("metadata is parsed from all eighteen plans and binds seven requirements an
   assert.deepEqual(metadata.unclassified, [...generator.UNRESOLVED_ASSUMPTION_IDS]);
 });
 
+test("repository-relative directory paths may end with a slash without weakening traversal checks", () => {
+  assert.equal(generator.normalizeRepositoryRelativePath("accrue_admin/e2e/__screenshots__/visual-desktop/"), "accrue_admin/e2e/__screenshots__/visual-desktop");
+  assert.throws(() => generator.normalizeRepositoryRelativePath("scripts//ci/file.mjs"), /unsafe path/);
+  assert.throws(() => generator.normalizeRepositoryRelativePath("../outside/file.mjs"), /unsafe path/);
+});
+
 test("a complete evidence fixture validates all requirements, tasks, edges, amendments and current identities", () => {
   assert.equal(generator.validatePhase254Evidence(fixtureEvidence()).status, "passed");
 });
