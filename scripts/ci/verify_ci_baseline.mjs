@@ -22,11 +22,14 @@ const fixtureValidationContext = (runs = []) => {
   const match = runs[0]?.html_url?.match(/^https:\/\/github\.com\/([^/]+\/[^/]+)\/actions\/runs\//);
   return createRepositoryValidationContext({ expectedRepository: match?.[1] || "acme/accrue" });
 };
+// Keep the 90-day cohort window stable for fixtures with fixed August 2026 timestamps.
+const FIXTURE_COHORT_NOW = Date.parse("2026-09-01T00:00:00Z");
 // Existing regression helpers model the fixed acme/accrue fixture.  The exported
 // production APIs remain context-required; these adapters keep historical tests
 // concise while every CLI path receives caller-supplied context.
 const collectBaseline = (runs, validationContext = fixtureValidationContext(runs)) => collectBaselineWithContext(runs, validationContext);
-const summarizeCohorts = (runs, validationContext = fixtureValidationContext(runs), options = {}) => summarizeCohortsWithContext(runs, validationContext, options);
+const summarizeCohorts = (runs, validationContext = fixtureValidationContext(runs), options = {}) =>
+  summarizeCohortsWithContext(runs, validationContext, { ...options, now: options.now ?? FIXTURE_COHORT_NOW });
 const derive = (records, validationContext = fixtureValidationContext()) => deriveStagedPathPercentiles(records, validationContext);
 const render = (records, validationContext = fixtureValidationContext()) => renderBaseline(records, validationContext);
 
