@@ -42,23 +42,25 @@ export function runQualityChecks({
   return completed;
 }
 
-test("the required Phase 254 quality checks run serially in their declared order", () => {
-  const calls = [];
-  const completed = runQualityChecks({ runCommand: (check) => { calls.push(check.name); return { status: 0 }; } });
-  assert.deepEqual(calls, QUALITY_CHECKS.map(({ name }) => name));
-  assert.deepEqual(completed, calls);
-});
+function registerTests() {
+  test("the required Phase 254 quality checks run serially in their declared order", () => {
+    const calls = [];
+    const completed = runQualityChecks({ runCommand: (check) => { calls.push(check.name); return { status: 0 }; } });
+    assert.deepEqual(calls, QUALITY_CHECKS.map(({ name }) => name));
+    assert.deepEqual(completed, calls);
+  });
 
-test("a failing quality check names the command and prevents later checks", () => {
-  const calls = [];
-  assert.throws(() => runQualityChecks({
-    runCommand: (check) => {
-      calls.push(check.name);
-      return check === QUALITY_CHECKS[2] ? { status: 1, stderr: "fixture failure" } : { status: 0 };
-    },
-  }), /a11y dispositions against latest results failed[\s\S]*fixture failure/);
-  assert.deepEqual(calls, QUALITY_CHECKS.slice(0, 3).map(({ name }) => name));
-});
+  test("a failing quality check names the command and prevents later checks", () => {
+    const calls = [];
+    assert.throws(() => runQualityChecks({
+      runCommand: (check) => {
+        calls.push(check.name);
+        return check === QUALITY_CHECKS[2] ? { status: 1, stderr: "fixture failure" } : { status: 0 };
+      },
+    }), /a11y dispositions against latest results failed[\s\S]*fixture failure/);
+    assert.deepEqual(calls, QUALITY_CHECKS.slice(0, 3).map(({ name }) => name));
+  });
+}
 
 let invokedAsEntrypoint = false;
 try {
@@ -67,7 +69,8 @@ try {
   invokedAsEntrypoint = false;
 }
 if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT && process.argv.length <= 2) {
-  // node --test imports this module, registers the non-vacuous tests above, and does not run CI.
+  // node --test imports this module, registers the non-vacuous tests, and does not run CI.
+  registerTests();
 } else if (invokedAsEntrypoint) {
   try {
     const completed = runQualityChecks({ onStep: ({ name }) => process.stdout.write(`==> ${name}\n`) });
