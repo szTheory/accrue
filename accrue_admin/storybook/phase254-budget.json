@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source_revision": "428511d06b64317758a19561e028b7ab75382a52",
-  "manifest_sha256": "759e84fa82b9ffe3ad41b5afbcc7cde79d74880306a7112a6b2c70ed95dfa164",
+  "manifest_sha256": "8f6e9ed5c8c7c35a4a87a6abeb0fb34995ada25c082a10661691772706cf28fa",
   "selection": {
     "total": 165,
     "selected": 165,
@@ -15425,6 +15425,30 @@
       "from": "301e9b35551dba4e0c934cd4e84617b76326ee60c9deb6d42deeb36aa4399866",
       "to": "759e84fa82b9ffe3ad41b5afbcc7cde79d74880306a7112a6b2c70ed95dfa164",
       "cause": "254-16-02",
+      "decision": "re-stamped to the committed manifest bytes after its owner regenerated them",
+      "status": "resolved",
+      "before": {
+        "cells": 165,
+        "owners": 2
+      },
+      "after": {
+        "cells": 165,
+        "owners": 2
+      }
+    },
+    {
+      "id": "DEV-254-25",
+      "kind": "manifest-restamp",
+      "target": {
+        "name": "manifest_sha256",
+        "source": "B-1: the budget digest follows a regenerated manifest only through restamp-manifest"
+      },
+      "measurement": {
+        "manifest_path": "storybook/phase252-manifest.json"
+      },
+      "from": "759e84fa82b9ffe3ad41b5afbcc7cde79d74880306a7112a6b2c70ed95dfa164",
+      "to": "8f6e9ed5c8c7c35a4a87a6abeb0fb34995ada25c082a10661691772706cf28fa",
+      "cause": "254-16-03",
       "decision": "re-stamped to the committed manifest bytes after its owner regenerated them",
       "status": "resolved",
       "before": {

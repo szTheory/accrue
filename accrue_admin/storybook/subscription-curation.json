@@ -1970,6 +1970,365 @@
     "subjects_sha256": "1082c32dfd875980f87ca450f77bbe70c26c039d6c61c429a60aaa6ac2a80905"
   },
   "gap_map_digest": "f88cb88e25eb639ecb5ed2078f7f5178af2cfc11087e849986cb720e313b3b58",
+  "next_job": {
+    "candidates": [
+      {
+        "filters": {
+          "entry_trigger_met": true,
+          "gated": false,
+          "reasons": []
+        },
+        "horizon_order": 1,
+        "id": "admin_customer_investigation",
+        "jobs": [
+          {
+            "job": "customers list",
+            "surface": "admin"
+          },
+          {
+            "job": "customer view",
+            "surface": "admin"
+          }
+        ],
+        "label": "Admin customer investigation",
+        "maintenance_cost": {
+          "browser_cells": 8,
+          "browser_cost_s": 14.352,
+          "budget_share": 0.014966,
+          "level": "low",
+          "mounted_fixtures": 2,
+          "new_facts_fixtures": 2
+        },
+        "rank": "high",
+        "review_triggers": [
+          "A router or LiveView contract changes."
+        ],
+        "score": {
+          "cost_penalty": 0,
+          "frequency": 3,
+          "frequency_weight": 1,
+          "net_value": 9,
+          "safety": 3,
+          "safety_weight": 2,
+          "weighted_value": 9
+        },
+        "shared_owner_reuse": 0,
+        "tie_break": {
+          "rolling_horizon_order": 1,
+          "shared_owner_reuse": 0
+        },
+        "uncovered_state_count": 2,
+        "uncovered_states": [
+          "unmapped route job"
+        ]
+      },
+      {
+        "filters": {
+          "entry_trigger_met": true,
+          "gated": false,
+          "reasons": []
+        },
+        "horizon_order": 2,
+        "id": "admin_invoice_payment",
+        "jobs": [
+          {
+            "job": "invoices list",
+            "surface": "admin"
+          },
+          {
+            "job": "invoice view",
+            "surface": "admin"
+          },
+          {
+            "job": "charges list",
+            "surface": "admin"
+          },
+          {
+            "job": "charge view",
+            "surface": "admin"
+          }
+        ],
+        "label": "Admin invoice and payment jobs",
+        "maintenance_cost": {
+          "browser_cells": 16,
+          "browser_cost_s": 28.704,
+          "budget_share": 0.029931,
+          "level": "medium",
+          "mounted_fixtures": 4,
+          "new_facts_fixtures": 4
+        },
+        "rank": "medium",
+        "review_triggers": [
+          "A router or LiveView contract changes."
+        ],
+        "score": {
+          "cost_penalty": 2,
+          "frequency": 2,
+          "frequency_weight": 1,
+          "net_value": 6,
+          "safety": 3,
+          "safety_weight": 2,
+          "weighted_value": 8
+        },
+        "shared_owner_reuse": 0,
+        "tie_break": {
+          "rolling_horizon_order": 2,
+          "shared_owner_reuse": 0
+        },
+        "uncovered_state_count": 4,
+        "uncovered_states": [
+          "unmapped route job"
+        ]
+      },
+      {
+        "filters": {
+          "entry_trigger_met": true,
+          "gated": false,
+          "reasons": []
+        },
+        "horizon_order": 4,
+        "id": "admin_webhook_investigation",
+        "jobs": [
+          {
+            "job": "webhooks list",
+            "surface": "admin"
+          },
+          {
+            "job": "webhook view",
+            "surface": "admin"
+          },
+          {
+            "job": "events list",
+            "surface": "admin"
+          },
+          {
+            "job": "event view",
+            "surface": "admin"
+          }
+        ],
+        "label": "Admin webhook and event investigation",
+        "maintenance_cost": {
+          "browser_cells": 16,
+          "browser_cost_s": 28.704,
+          "budget_share": 0.029931,
+          "level": "medium",
+          "mounted_fixtures": 4,
+          "new_facts_fixtures": 4
+        },
+        "rank": "medium",
+        "review_triggers": [
+          "A router or LiveView contract changes."
+        ],
+        "score": {
+          "cost_penalty": 2,
+          "frequency": 2,
+          "frequency_weight": 1,
+          "net_value": 6,
+          "safety": 3,
+          "safety_weight": 2,
+          "weighted_value": 8
+        },
+        "shared_owner_reuse": 0,
+        "tie_break": {
+          "rolling_horizon_order": 4,
+          "shared_owner_reuse": 0
+        },
+        "uncovered_state_count": 4,
+        "uncovered_states": [
+          "unmapped route job"
+        ]
+      },
+      {
+        "filters": {
+          "entry_trigger_met": true,
+          "gated": false,
+          "reasons": []
+        },
+        "horizon_order": 5,
+        "id": "admin_catalog_connect",
+        "jobs": [
+          {
+            "job": "coupons list",
+            "surface": "admin"
+          },
+          {
+            "job": "coupon view",
+            "surface": "admin"
+          },
+          {
+            "job": "promotion codes list",
+            "surface": "admin"
+          },
+          {
+            "job": "promotion code view",
+            "surface": "admin"
+          },
+          {
+            "job": "connect accounts list",
+            "surface": "admin"
+          },
+          {
+            "job": "connect account view",
+            "surface": "admin"
+          }
+        ],
+        "label": "Admin catalog and Connect investigation",
+        "maintenance_cost": {
+          "browser_cells": 24,
+          "browser_cost_s": 43.056,
+          "budget_share": 0.044897,
+          "level": "high",
+          "mounted_fixtures": 6,
+          "new_facts_fixtures": 6
+        },
+        "rank": "low",
+        "review_triggers": [
+          "A router or LiveView contract changes."
+        ],
+        "score": {
+          "cost_penalty": 4,
+          "frequency": 1,
+          "frequency_weight": 1,
+          "net_value": 1,
+          "safety": 2,
+          "safety_weight": 2,
+          "weighted_value": 5
+        },
+        "shared_owner_reuse": 0,
+        "tie_break": {
+          "rolling_horizon_order": 5,
+          "shared_owner_reuse": 0
+        },
+        "uncovered_state_count": 6,
+        "uncovered_states": [
+          "unmapped route job"
+        ]
+      },
+      {
+        "filters": {
+          "entry_trigger_met": false,
+          "gated": true,
+          "reasons": [
+            "retry/campaign-history integrity"
+          ]
+        },
+        "horizon_order": 3,
+        "id": "admin_recovery",
+        "jobs": [
+          {
+            "job": "recovery list",
+            "surface": "admin"
+          },
+          {
+            "job": "campaign view",
+            "surface": "admin"
+          },
+          {
+            "job": "inspect past-due subscription recovery",
+            "surface": "admin"
+          }
+        ],
+        "label": "Admin recovery investigation",
+        "maintenance_cost": {
+          "browser_cells": 12,
+          "browser_cost_s": 21.528,
+          "budget_share": 0.022448,
+          "level": "medium",
+          "mounted_fixtures": 3,
+          "new_facts_fixtures": 3
+        },
+        "rank": "filtered",
+        "review_triggers": [
+          "A router or LiveView contract changes.",
+          "Retry and campaign-history integrity is verified."
+        ],
+        "score": {
+          "cost_penalty": 2,
+          "frequency": 2,
+          "frequency_weight": 1,
+          "net_value": 6,
+          "safety": 3,
+          "safety_weight": 2,
+          "weighted_value": 8
+        },
+        "shared_owner_reuse": 0,
+        "tie_break": {
+          "rolling_horizon_order": 3,
+          "shared_owner_reuse": 0
+        },
+        "uncovered_state_count": 2,
+        "uncovered_states": [
+          "past_due",
+          "unmapped route job"
+        ]
+      },
+      {
+        "filters": {
+          "entry_trigger_met": false,
+          "gated": true,
+          "reasons": [
+            "contract verification plus dev/test harness"
+          ]
+        },
+        "horizon_order": 6,
+        "id": "portal_subscription_completion",
+        "jobs": [
+          {
+            "job": "Portal subscription worklist",
+            "surface": "portal"
+          },
+          {
+            "job": "Portal subscription detail and plan-change preview",
+            "surface": "portal"
+          },
+          {
+            "job": "Portal cancellation and plan-change journey",
+            "surface": "portal"
+          }
+        ],
+        "label": "Finish subscriptions in Portal",
+        "maintenance_cost": {
+          "browser_cells": 36,
+          "browser_cost_s": 64.584,
+          "budget_share": 0.067345,
+          "level": "high",
+          "mounted_fixtures": 3,
+          "new_facts_fixtures": 9
+        },
+        "rank": "filtered",
+        "review_triggers": [
+          "Portal subscription contract or dev/test harness becomes available."
+        ],
+        "score": {
+          "cost_penalty": 4,
+          "frequency": 3,
+          "frequency_weight": 1,
+          "net_value": 5,
+          "safety": 3,
+          "safety_weight": 2,
+          "weighted_value": 9
+        },
+        "shared_owner_reuse": 0,
+        "tie_break": {
+          "rolling_horizon_order": 6,
+          "shared_owner_reuse": 0
+        },
+        "uncovered_state_count": 0,
+        "uncovered_states": [
+          "authorization",
+          "cancellation",
+          "cancellation controls",
+          "persisted result",
+          "plan-change preview",
+          "recovery messaging",
+          "subscription detail",
+          "subscription list"
+        ]
+      }
+    ],
+    "recommendation": "admin_customer_investigation",
+    "status": "recommendation-input"
+  },
   "records": [
     {
       "disposition": "retain",
@@ -2463,7 +2822,7 @@
     "accrue_admin/lib/accrue_admin/live/subscription_live.ex": "15b4640e79ca5ca5958978a54b1680abf7f64f8395dd5e3c9667069cfb47e09a",
     "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex": "15035a6b232e3c4d4b5d4ea251064d0f739cd0a63a08a081f59b20d9f2fa0efb",
     "accrue_admin/lib/accrue_admin/router.ex": "2e6a2046288f9d7d95eeae9e207ecc4d8977a539ed34674ef13a1f71f0e061ed",
-    "accrue_admin/storybook/_support/subscription_manifest.ex": "b48d9147de728edecde5edd214f59c4bed03f009bbfab7fbcec3432fef90e025",
+    "accrue_admin/storybook/_support/subscription_manifest.ex": "234b60e852144b5b09804cc397fae8fdc8c6e7d7c4ec6b3c7070c112ebb3cf58",
     "accrue_admin/storybook/_support/subscription_scenarios.ex": "734a73ecd2a0c2c0da7586adb76161f5377bbb675de015a55ff0dc3cb2c7a71d",
     "accrue_portal/lib/accrue_portal/live/subscription_live.ex": "c10edb8274d0bade561f8fa6db716c22c7ee6919992194d7701e39535adee372",
     "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex": "5059ad186b7d393c41c538237a9b216e19ba587ca6bcaf80bfb5edfef0411bd2",

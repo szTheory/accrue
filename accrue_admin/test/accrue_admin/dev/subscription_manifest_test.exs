@@ -804,6 +804,118 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       end
     end
 
+    test "next-job candidates apply hard gates and rank without story counts" do
+      root = Path.expand("../../../../", __DIR__)
+
+      budget =
+        root
+        |> Path.join("accrue_admin/storybook/phase254-budget.json")
+        |> File.read!()
+        |> Jason.decode!()
+
+      rows = SubscriptionManifest.caller_map()
+      candidates = SubscriptionManifest.next_job_candidates(rows, budget)
+
+      assert candidates == SubscriptionManifest.next_job_candidates(rows, budget)
+
+      assert Enum.map(candidates, & &1.rank) |> Enum.take(4) == [
+               "high",
+               "medium",
+               "medium",
+               "low"
+             ]
+
+      assert Enum.map(candidates, & &1.id) |> Enum.take(3) == [
+               "admin_customer_investigation",
+               "admin_invoice_payment",
+               "admin_webhook_investigation"
+             ]
+
+      customer = Enum.find(candidates, &(&1.id == "admin_customer_investigation"))
+      recovery = Enum.find(candidates, &(&1.id == "admin_recovery"))
+      portal = Enum.find(candidates, &(&1.id == "portal_subscription_completion"))
+
+      assert customer.rank == "high"
+      assert customer.filters.entry_trigger_met
+      refute customer.filters.gated
+      assert recovery.rank == "filtered"
+      refute recovery.filters.entry_trigger_met
+      assert recovery.filters.reasons == ["retry/campaign-history integrity"]
+      assert portal.rank == "filtered"
+      assert portal.filters.gated
+      assert portal.filters.reasons == ["contract verification plus dev/test harness"]
+      assert candidates |> Enum.map(& &1.id) |> Enum.find_index(&(&1 == customer.id)) == 0
+
+      with_story_counts = Enum.map(rows, &Map.put(&1, :story_count, 1_000_000))
+      assert candidates == SubscriptionManifest.next_job_candidates(with_story_counts, budget)
+
+      recovery_after_gate =
+        Enum.map(rows, fn row ->
+          if row.job == "inspect past-due subscription recovery" do
+            Map.put(row, :state, "uncovered")
+          else
+            row
+          end
+        end)
+
+      reopened =
+        SubscriptionManifest.next_job_candidates(recovery_after_gate, budget)
+        |> Enum.find(&(&1.id == "admin_recovery"))
+
+      assert reopened.rank != "filtered"
+      assert reopened.filters.entry_trigger_met
+      refute reopened.filters.gated
+    end
+
+    test "next-job ties prefer shared-owner reuse, then the rolling-horizon order" do
+      root = Path.expand("../../../../", __DIR__)
+
+      budget =
+        root
+        |> Path.join("accrue_admin/storybook/phase254-budget.json")
+        |> File.read!()
+        |> Jason.decode!()
+
+      rows = SubscriptionManifest.caller_map()
+      baseline = SubscriptionManifest.next_job_candidates(rows, budget)
+      invoice_index = Enum.find_index(baseline, &(&1.id == "admin_invoice_payment"))
+      webhook_index = Enum.find_index(baseline, &(&1.id == "admin_webhook_investigation"))
+      invoice = Enum.find(baseline, &(&1.id == "admin_invoice_payment"))
+      webhook = Enum.find(baseline, &(&1.id == "admin_webhook_investigation"))
+
+      assert invoice.rank == webhook.rank
+      assert invoice.shared_owner_reuse == webhook.shared_owner_reuse
+      assert invoice.horizon_order < webhook.horizon_order
+      assert invoice_index < webhook_index
+
+      customer_list_owner = Enum.find(rows, &(&1.job == "customers list")).owner
+
+      reused_rows =
+        Enum.map(rows, fn row ->
+          if row.job == "webhooks list", do: Map.put(row, :owner, customer_list_owner), else: row
+        end)
+
+      reused = SubscriptionManifest.next_job_candidates(reused_rows, budget)
+      reused_invoice = Enum.find_index(reused, &(&1.id == "admin_invoice_payment"))
+      reused_webhook = Enum.find_index(reused, &(&1.id == "admin_webhook_investigation"))
+
+      assert Enum.find(reused, &(&1.id == "admin_webhook_investigation")).shared_owner_reuse > 0
+      assert reused_webhook < reused_invoice
+    end
+
+    test "curation ledger recommendation remains a recommendation input and cannot select gated work" do
+      next_job = SubscriptionManifest.curation_ledger().next_job
+      assert next_job.status == "recommendation-input"
+      assert next_job.recommendation == "admin_customer_investigation"
+      assert hd(next_job.candidates).id == next_job.recommendation
+      refute hd(next_job.candidates).filters.gated
+
+      assert Enum.any?(
+               next_job.candidates,
+               &(&1.id == "portal_subscription_completion" and &1.rank == "filtered")
+             )
+    end
+
     test "curation ledger pins a frozen baseline whose subjects, digest and counts never read the current tree" do
       baseline = SubscriptionManifest.frozen_baseline()
 
@@ -947,6 +1059,7 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
                  "current",
                  "frozen_baseline",
                  "gap_map_digest",
+                 "next_job",
                  "records",
                  "schema_version",
                  "source_digests"

@@ -820,6 +820,23 @@ export function verifyAdopterBriefs(ledger, budget) {
   return { briefs: briefs.length };
 }
 
+export function verifyNextJob(ledger) {
+  const nextJob = ledger?.next_job;
+  if (!isObject(nextJob) || nextJob.status !== "recommendation-input" || !Array.isArray(nextJob.candidates) || nextJob.candidates.length === 0) {
+    fail("next_job must contain candidates and status recommendation-input");
+  }
+  const first = nextJob.candidates[0];
+  if (first?.filters?.gated === true) fail("gatedCannotWin: a gated candidate cannot rank first");
+  if (!isNonEmptyString(nextJob.recommendation)) fail("next_job recommendation is missing");
+  const recommended = nextJob.candidates.find((candidate) => candidate?.id === nextJob.recommendation);
+  if (!recommended) fail(`next_job recommendation ${nextJob.recommendation} is absent from candidates`);
+  if (recommended.filters?.gated === true) fail("gatedCannotWin: a gated candidate cannot be recommended");
+  if (recommended.filters?.entry_trigger_met !== true) fail("next_job recommendation has an unmet entry trigger");
+  const topEligible = nextJob.candidates.find((candidate) => candidate?.filters?.gated !== true && candidate?.filters?.entry_trigger_met === true);
+  if (!topEligible || topEligible.id !== nextJob.recommendation) fail("next_job recommendation must be the first eligible candidate");
+  return { candidates: nextJob.candidates.length, recommendation: nextJob.recommendation };
+}
+
 export function verifyLedger(ledger, context = {}) {
   const ctx = normalizeContext(context);
   if (!isObject(ledger)) fail("ledger must be a JSON object");
@@ -856,6 +873,7 @@ export function verifyLedger(ledger, context = {}) {
       fail(`cannot read frozen Phase 254 budget at ${BUDGET_PATH}: ${error.message}`);
     }
     verifyAdopterBriefs(ledger, budget);
+    if (ledger.next_job !== undefined) verifyNextJob(ledger);
   }
   return { records: ledger.records.length, removed: ledger.records.filter((record) => REMOVING.includes(record.disposition)).length };
 }
@@ -1149,6 +1167,22 @@ function adopterBriefFixtureWorld() {
   };
 }
 
+function nextJobFixtureWorld() {
+  const eligible = { id: "admin_customer_investigation", rank: "high", filters: { entry_trigger_met: true, gated: false, reasons: [] } };
+  const portal = { id: "portal_subscription_completion", rank: "filtered", filters: { entry_trigger_met: false, gated: true, reasons: ["contract verification plus dev/test harness"] } };
+  return {
+    eligible,
+    portal,
+    ledger: {
+      next_job: {
+        status: "recommendation-input",
+        candidates: [eligible, portal],
+        recommendation: eligible.id,
+      },
+    },
+  };
+}
+
 const SCENARIOS = [
   [
     "adopter briefs reject a sixth profile",
@@ -1202,6 +1236,35 @@ const SCENARIOS = [
       assert.doesNotThrow(() => verifyAdopterBriefs(world.ledger, world.budget));
       world.ledger.briefs[0].maintenance_cost.browser_cells += 1;
       assert.throws(() => verifyAdopterBriefs(world.ledger, world.budget), /maintenance_cost does not match/);
+    },
+  ],
+  [
+    "gatedCannotWin rejects a Portal candidate ranked first despite its hard filter",
+    () => {
+      const world = nextJobFixtureWorld();
+      assert.doesNotThrow(() => verifyNextJob(world.ledger));
+      world.ledger.next_job.candidates = [
+        { ...world.portal, rank: "high" },
+        world.eligible,
+      ];
+      world.ledger.next_job.recommendation = world.portal.id;
+      assert.throws(() => verifyNextJob(world.ledger), /gatedCannotWin/);
+    },
+  ],
+  [
+    "gatedCannotWin rejects a Portal candidate recommended below the top eligible candidate",
+    () => {
+      const world = nextJobFixtureWorld();
+      assert.doesNotThrow(() => verifyNextJob(world.ledger));
+      world.ledger.next_job.recommendation = world.portal.id;
+      assert.throws(() => verifyNextJob(world.ledger), /gatedCannotWin/);
+    },
+  ],
+  [
+    "gatedCannotWin permits a filtered Portal candidate below the eligible recommendation",
+    () => {
+      const world = nextJobFixtureWorld();
+      assert.deepEqual(verifyNextJob(world.ledger), { candidates: 2, recommendation: world.eligible.id });
     },
   ],
   [

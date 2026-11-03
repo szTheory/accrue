@@ -341,7 +341,8 @@ if Mix.env() != :prod do
         source_digests: source_digests(),
         caller_map: caller_rows,
         gap_map_digest: gap_map_digest(caller_rows),
-        briefs: adopter_briefs_for(caller_rows)
+        briefs: adopter_briefs_for(caller_rows),
+        next_job: next_job_input(caller_rows)
       }
     end
 
@@ -406,6 +407,133 @@ if Mix.env() != :prod do
 
     def maintenance_cost(_rows, _budget),
       do: raise(ArgumentError, "maintenance cost requires caller-map rows and a budget object")
+
+    @doc "Ranks existing uncovered UI jobs after hard trigger filters, without using story counts."
+    @spec next_job_candidates([map()], map()) :: [map()]
+    def next_job_candidates(rows, budget) when is_list(rows) and is_map(budget) do
+      candidates =
+        Enum.map(candidate_definitions(), fn definition ->
+          selected_rows = rows_for_jobs(rows, definition.jobs)
+
+          if selected_rows == [] do
+            raise ArgumentError, "next-job candidate has no caller-map rows: #{definition.id}"
+          end
+
+          gated_rows = Enum.filter(selected_rows, &(&1.state == "gated"))
+          uncovered_rows = Enum.filter(selected_rows, &(&1.state == "uncovered"))
+          gated? = gated_rows != []
+          entry_trigger_met? = not gated? and uncovered_rows != []
+          reasons = gated_rows |> Enum.map(& &1.entry_trigger) |> Enum.uniq() |> Enum.sort()
+          maintenance = maintenance_cost(selected_rows, budget)
+          cost_penalty = maintenance_cost_penalty(maintenance.level)
+
+          weighted_value =
+            definition.safety_weight * definition.safety +
+              definition.frequency_weight * definition.frequency
+
+          net_value = weighted_value - cost_penalty
+          eligible? = entry_trigger_met? and not gated?
+
+          uncovered_states =
+            uncovered_rows
+            |> Enum.flat_map(fn row ->
+              Enum.map(row.uncovered_states, &{row.surface, row.job, &1})
+            end)
+            |> Enum.uniq()
+
+          %{
+            id: definition.id,
+            label: definition.label,
+            horizon_order: definition.horizon_order,
+            jobs: definition.jobs,
+            uncovered_states:
+              selected_rows |> Enum.flat_map(& &1.uncovered_states) |> Enum.uniq() |> Enum.sort(),
+            uncovered_state_count: length(uncovered_states),
+            review_triggers:
+              selected_rows |> Enum.map(& &1.review_trigger) |> Enum.uniq() |> Enum.sort(),
+            filters: %{
+              entry_trigger_met: entry_trigger_met?,
+              gated: gated?,
+              reasons: reasons
+            },
+            rank: if(eligible?, do: candidate_rank(net_value), else: "filtered"),
+            score: %{
+              safety: definition.safety,
+              safety_weight: definition.safety_weight,
+              frequency: definition.frequency,
+              frequency_weight: definition.frequency_weight,
+              weighted_value: weighted_value,
+              cost_penalty: cost_penalty,
+              net_value: net_value
+            },
+            maintenance_cost: maintenance,
+            shared_owner_reuse: 0,
+            tie_break: %{
+              shared_owner_reuse: 0,
+              rolling_horizon_order: definition.horizon_order
+            }
+          }
+        end)
+
+      owner_frequency =
+        candidates
+        |> Enum.flat_map(fn candidate ->
+          selected_rows = rows_for_jobs(rows, candidate.jobs)
+          selected_rows |> Enum.map(& &1.owner) |> Enum.uniq()
+        end)
+        |> Enum.frequencies()
+
+      candidates =
+        Enum.map(candidates, fn candidate ->
+          selected_owners =
+            rows
+            |> rows_for_jobs(candidate.jobs)
+            |> Enum.map(& &1.owner)
+            |> Enum.uniq()
+
+          reuse = Enum.count(selected_owners, &(Map.get(owner_frequency, &1, 0) > 1))
+
+          candidate
+          |> Map.put(:shared_owner_reuse, reuse)
+          |> Map.put(:tie_break, %{
+            shared_owner_reuse: reuse,
+            rolling_horizon_order: candidate.horizon_order
+          })
+        end)
+
+      rank_order = %{"high" => 0, "medium" => 1, "low" => 2, "filtered" => 3}
+
+      Enum.sort_by(candidates, fn candidate ->
+        {Map.fetch!(rank_order, candidate.rank), -candidate.shared_owner_reuse,
+         candidate.horizon_order}
+      end)
+    end
+
+    def next_job_candidates(_rows, _budget),
+      do: raise(ArgumentError, "next-job candidates require caller-map rows and a budget object")
+
+    defp next_job_input(rows) do
+      candidates = next_job_candidates(rows, phase254_budget())
+      recommendation = Enum.find(candidates, &(&1.rank != "filtered"))
+
+      unless recommendation do
+        raise ArgumentError, "next-job candidate set has no eligible recommendation input"
+      end
+
+      %{
+        candidates: candidates,
+        recommendation: recommendation.id,
+        status: "recommendation-input"
+      }
+    end
+
+    defp maintenance_cost_penalty("low"), do: 0
+    defp maintenance_cost_penalty("medium"), do: 2
+    defp maintenance_cost_penalty("high"), do: 4
+
+    defp candidate_rank(net_value) when net_value >= 7, do: "high"
+    defp candidate_rank(net_value) when net_value >= 4, do: "medium"
+    defp candidate_rank(_net_value), do: "low"
 
     defp maintenance_level(facts, cells, mounted, share)
          when facts <= 2 and cells <= 8 and mounted <= 2 and share <= 0.02,
@@ -551,6 +679,99 @@ if Mix.env() != :prod do
           profile_kind: "synthetic deployment profile",
           seeds: [],
           stories: []
+        }
+      ]
+    end
+
+    defp candidate_definitions do
+      [
+        %{
+          id: "admin_customer_investigation",
+          label: "Admin customer investigation",
+          horizon_order: 1,
+          safety: 3,
+          safety_weight: 2,
+          frequency: 3,
+          frequency_weight: 1,
+          jobs: [
+            %{surface: "admin", job: "customers list"},
+            %{surface: "admin", job: "customer view"}
+          ]
+        },
+        %{
+          id: "admin_invoice_payment",
+          label: "Admin invoice and payment jobs",
+          horizon_order: 2,
+          safety: 3,
+          safety_weight: 2,
+          frequency: 2,
+          frequency_weight: 1,
+          jobs: [
+            %{surface: "admin", job: "invoices list"},
+            %{surface: "admin", job: "invoice view"},
+            %{surface: "admin", job: "charges list"},
+            %{surface: "admin", job: "charge view"}
+          ]
+        },
+        %{
+          id: "admin_recovery",
+          label: "Admin recovery investigation",
+          horizon_order: 3,
+          safety: 3,
+          safety_weight: 2,
+          frequency: 2,
+          frequency_weight: 1,
+          jobs: [
+            %{surface: "admin", job: "recovery list"},
+            %{surface: "admin", job: "campaign view"},
+            %{surface: "admin", job: "inspect past-due subscription recovery"}
+          ]
+        },
+        %{
+          id: "admin_webhook_investigation",
+          label: "Admin webhook and event investigation",
+          horizon_order: 4,
+          safety: 3,
+          safety_weight: 2,
+          frequency: 2,
+          frequency_weight: 1,
+          jobs: [
+            %{surface: "admin", job: "webhooks list"},
+            %{surface: "admin", job: "webhook view"},
+            %{surface: "admin", job: "events list"},
+            %{surface: "admin", job: "event view"}
+          ]
+        },
+        %{
+          id: "admin_catalog_connect",
+          label: "Admin catalog and Connect investigation",
+          horizon_order: 5,
+          safety: 2,
+          safety_weight: 2,
+          frequency: 1,
+          frequency_weight: 1,
+          jobs: [
+            %{surface: "admin", job: "coupons list"},
+            %{surface: "admin", job: "coupon view"},
+            %{surface: "admin", job: "promotion codes list"},
+            %{surface: "admin", job: "promotion code view"},
+            %{surface: "admin", job: "connect accounts list"},
+            %{surface: "admin", job: "connect account view"}
+          ]
+        },
+        %{
+          id: "portal_subscription_completion",
+          label: "Finish subscriptions in Portal",
+          horizon_order: 6,
+          safety: 3,
+          safety_weight: 2,
+          frequency: 3,
+          frequency_weight: 1,
+          jobs: [
+            %{surface: "portal", job: "Portal subscription worklist"},
+            %{surface: "portal", job: "Portal subscription detail and plan-change preview"},
+            %{surface: "portal", job: "Portal cancellation and plan-change journey"}
+          ]
         }
       ]
     end
@@ -1812,6 +2033,7 @@ if Mix.env() != :prod do
         "",
         state_tables,
         adopter_brief_section(),
+        next_job_candidate_section(),
         phase253_composition_section(),
         curation_section(),
         "## Source digests",
@@ -1880,6 +2102,54 @@ if Mix.env() != :prod do
       |> Path.join(@phase254_budget_path)
       |> File.read!()
       |> Jason.decode!()
+    end
+
+    defp next_job_candidate_section do
+      ledger = curation_ledger()
+      next_job = ledger.next_job
+
+      candidate_rows =
+        Enum.map(next_job.candidates, fn candidate ->
+          jobs = Enum.map_join(candidate.jobs, "<br>", &"`#{&1.surface}: #{&1.job}`")
+          states = Enum.map_join(candidate.uncovered_states, "<br>", &"`#{&1}`")
+
+          filter =
+            if candidate.filters.gated,
+              do: "filtered: #{Enum.map_join(candidate.filters.reasons, "; ", &guide_cell/1)}",
+              else:
+                if(candidate.filters.entry_trigger_met,
+                  do: "eligible",
+                  else: "entry trigger unmet"
+                )
+
+          score =
+            "2×#{candidate.score.safety} safety + #{candidate.score.frequency} frequency − #{candidate.score.cost_penalty} cost = #{candidate.score.net_value}"
+
+          cost = candidate.maintenance_cost
+
+          maintenance =
+            "#{cost.level}: #{cost.new_facts_fixtures} facts/fixtures, #{cost.browser_cells} cells, #{cost.browser_cost_s}s, #{cost.mounted_fixtures} mounted"
+
+          tie_break =
+            "#{candidate.tie_break.shared_owner_reuse} shared-owner reuse; horizon #{candidate.horizon_order}"
+
+          "| #{candidate.horizon_order} | `#{candidate.id}` | #{guide_cell(candidate.label)} | #{jobs} | #{states} | #{guide_cell(filter)} | #{candidate.rank} | #{guide_cell(score)} | #{guide_cell(maintenance)} | #{candidate.shared_owner_reuse} | #{guide_cell(tie_break)} |"
+        end)
+
+      [
+        "## Next-job candidates",
+        "",
+        "The recommendation is an input for a later choice, not a milestone or implementation commitment. Hard filters run before ranking: an existing uncovered caller-map job is required; any candidate containing a gated row is filtered. Recovery stays gated until retry/campaign-history integrity; Portal subscription work stays gated until contract verification plus a dev/test harness.",
+        "",
+        "Scoring is a qualitative curation assumption, not adopter research or usage evidence. Safety uses a 1–3 ordinal score at weight 2; frequency uses a 1–3 ordinal score at weight 1. Net value = weighted value − maintenance penalty (low 0, medium 2, high 4); high is ≥7, medium ≥4, otherwise low. The shared-owner reuse count breaks ties before the rolling-horizon order. Story counts do not enter the score.",
+        "",
+        "Status: `#{next_job.status}`. Recommendation input: `#{next_job.recommendation}`.",
+        "",
+        "| Horizon | Candidate | Existing UI job | Caller-map jobs | Uncovered states | Hard filter | Rank | Ordinal score | Maintenance cost | Shared-owner reuse | Tie-break |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        candidate_rows,
+        ""
+      ]
     end
 
     defp phase253_composition_section do
