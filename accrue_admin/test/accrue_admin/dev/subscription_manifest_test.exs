@@ -131,8 +131,24 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
     @storybook_root "/dev/storybook"
     @story_path "/components/subscription_detail"
 
+    def handle_subscription_story_repo_query(event, _measurements, _metadata, owner) do
+      if self() == owner, do: send(owner, {:subscription_story_repo_query, event})
+    end
+
     test "compiled subscription story discovers each real retained variation with stable routes and source digests" do
-      assert Process.whereis(AccrueAdmin.TestRepo) == nil
+      test_process = self()
+      telemetry_id = {__MODULE__, test_process, make_ref()}
+      query_event = AccrueAdmin.TestRepo.config()[:telemetry_prefix] ++ [:query]
+
+      :ok =
+        :telemetry.attach(
+          telemetry_id,
+          query_event,
+          &__MODULE__.handle_subscription_story_repo_query/4,
+          test_process
+        )
+
+      on_exit(fn -> :telemetry.detach(telemetry_id) end)
 
       story_entry = Enum.find(Storybook.leaves(), &(&1.path == @story_path))
       assert %StoryEntry{} = story_entry
@@ -240,6 +256,8 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
                  :crypto.hash(:sha256, File.read!(source_path))
                  |> Base.encode16(case: :lower)
       end
+
+      refute_receive {:subscription_story_repo_query, _event}, 0
     end
 
     test "grouped and same-ID declarations keep path and group identity in stable keys and routes" do
@@ -441,6 +459,12 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert Enum.map(rows, & &1.label) == ["Subscription detail", "Subscription detail"]
       assert length(Enum.uniq(Enum.map(rows, & &1.key))) == 2
 
+      assert Enum.all?(rows, fn row ->
+               is_binary(row.surface) and is_binary(row.actor) and is_binary(row.job) and
+                 is_list(row.covering_keys) and is_list(row.uncovered_states) and
+                 is_binary(row.entry_trigger) and is_binary(row.review_trigger)
+             end)
+
       assert Enum.map(rows, &{&1.owner, &1.path, &1.tier, &1.state}) == [
                {"Owner A", "lib/a.ex", "area", "uncovered"},
                {"Owner B", "lib/b.ex", "page", "uncovered"}
@@ -457,8 +481,79 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       by_owner = Map.new(rows, &{{&1.owner, &1.tier}, &1})
 
       assert rows == SubscriptionManifest.caller_map_for(rows)
-      assert Enum.all?(rows, &(&1.state in ["reachable", "uncovered", "not_applicable"]))
+      assert Enum.all?(rows, &(&1.state in ["reachable", "uncovered", "not_applicable", "gated"]))
       assert Enum.all?(rows, &(&1.evidence != "" and is_binary(&1.path)))
+
+      assert Enum.all?(rows, fn row ->
+               is_binary(row.surface) and is_binary(row.actor) and is_binary(row.job) and
+                 is_list(row.covering_keys) and is_list(row.uncovered_states) and
+                 is_binary(row.entry_trigger) and is_binary(row.review_trigger)
+             end)
+
+      root = Path.expand("../../../../", __DIR__)
+
+      route_rows =
+        [
+          {"admin", "accrue_admin/lib/accrue_admin/router.ex"},
+          {"portal", "accrue_portal/lib/accrue_portal/router.ex"}
+        ]
+        |> Enum.flat_map(fn {surface, relative_path} ->
+          source = File.read!(Path.join(root, relative_path))
+
+          SubscriptionManifest.route_seeded_jobs(source)
+          |> Enum.map(&{surface, &1.route_path})
+        end)
+
+      caller_routes =
+        rows
+        |> Enum.filter(&is_binary(&1.route_path))
+        |> Enum.map(&{&1.surface, &1.route_path})
+        |> Enum.uniq()
+
+      assert Enum.sort(Enum.uniq(route_rows)) == Enum.sort(caller_routes)
+
+      seeded =
+        SubscriptionManifest.route_seeded_jobs("""
+        defmodule AccrueAdmin.Router do
+          scope "/billing", AccrueAdmin.Live do
+            live("/customers", CustomersLive, :index)
+            live("/subscriptions", AccrueAdmin.Live.SubscriptionsLive, :index)
+          end
+        end
+        """)
+
+      assert length(seeded) == 2
+      assert Enum.map(seeded, & &1.route_path) == ["/billing/customers", "/billing/subscriptions"]
+      assert Enum.all?(seeded, &(&1.state == "uncovered" and &1.covering_keys == []))
+
+      extra =
+        SubscriptionManifest.route_seeded_jobs("""
+        defmodule AccrueAdmin.Router do
+          live("/customers", AccrueAdmin.Live.CustomersLive, :index)
+          live("/subscriptions", AccrueAdmin.Live.SubscriptionsLive, :index)
+          live("/reports", AccrueAdmin.Live.ReportsLive, :index)
+        end
+        """)
+
+      without_extra =
+        SubscriptionManifest.route_seeded_jobs("""
+        defmodule AccrueAdmin.Router do
+          live("/customers", AccrueAdmin.Live.CustomersLive, :index)
+          live("/subscriptions", AccrueAdmin.Live.SubscriptionsLive, :index)
+        end
+        """)
+
+      assert length(extra) == length(without_extra) + 1
+      assert Enum.any?(extra, &(&1.route_path == "/reports" and &1.owner =~ "ReportsLive"))
+
+      assert_raise ArgumentError, ~r/maps a live route more than once/, fn ->
+        SubscriptionManifest.route_seeded_jobs("""
+        defmodule AccrueAdmin.Router do
+          live("/reports", AccrueAdmin.Live.ReportsLive, :index)
+          live("/reports", AccrueAdmin.Live.LegacyReportsLive, :index)
+        end
+        """)
+      end
 
       for row <- rows, row.state != "reachable" do
         assert is_binary(row.reason) and row.reason != ""
@@ -476,7 +571,13 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
 
       area = by_owner[{"AccrueAdmin.Live.SubscriptionLive.subscription_area/1", "area"}]
       action_band = by_owner[{"AccrueAdmin.Live.SubscriptionLive.subscription_area/1", "section"}]
-      page = by_owner[{"AccrueAdmin.Live.SubscriptionLive.render/1", "page"}]
+
+      page =
+        Enum.find(rows, fn row ->
+          row.owner == "AccrueAdmin.Live.SubscriptionLive.render/1" and row.tier == "page" and
+            row.state == "reachable"
+        end)
+
       group = Enum.find(rows, &(&1.tier == "group"))
 
       assert area.state == "reachable"
@@ -509,6 +610,29 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert journey.manifest_keys -- phase253_page_keys == []
       assert File.regular?(Path.expand("../../../../#{journey.covering_test}", __DIR__))
 
+      trialing_canceled =
+        Enum.find(rows, &(&1.label == "Admin subscription page trialing and canceled states"))
+
+      past_due = Enum.find(rows, &(&1.label == "Admin subscription page past-due recovery state"))
+      assert trialing_canceled.state == "uncovered"
+      assert trialing_canceled.uncovered_states == ["canceled", "trialing"]
+      assert past_due.state == "gated"
+      assert past_due.uncovered_states == ["past_due"]
+      assert past_due.entry_trigger == "retry/campaign-history integrity"
+
+      portal_list = by_owner[{"AccruePortal.Live.SubscriptionsLive.render/1", "job"}]
+      portal_detail = by_owner[{"AccruePortal.Live.SubscriptionLive.render/1", "job"}]
+
+      portal_journey =
+        Enum.find(rows, &(&1.owner == "AccruePortal.Live.SubscriptionLive.handle_event/3"))
+
+      for portal_row <- [portal_list, portal_detail, portal_journey] do
+        assert portal_row.state == "gated"
+        assert portal_row.covering_keys == []
+        assert portal_row.uncovered_states != []
+        assert portal_row.entry_trigger == "contract verification plus dev/test harness"
+      end
+
       contract =
         AccrueAdmin.Dev.ComponentRegistry.group_contract_by_slug(group.contract)
 
@@ -531,6 +655,7 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
       assert guide =~ "Not applicable"
       assert guide =~ "AccruePortal.Live.SubscriptionsLive.render/1"
       assert guide =~ "does not prove a whole page"
+      assert guide =~ "contract verification plus dev/test harness"
     end
 
     test "generated guide preserves Phase 253 compiled routes and their presentation proof limits" do
@@ -951,15 +1076,24 @@ if Code.ensure_loaded?(AccrueAdmin.Storybook.SubscriptionManifest) do
     end
 
     defp caller_row(label, owner, path, tier, state) do
+      surface = if String.starts_with?(path, "accrue_portal/"), do: "portal", else: "admin"
+
       %{
         label: label,
         owner: owner,
         path: path,
         tier: tier,
         state: state,
+        surface: surface,
+        actor: if(surface == "portal", do: "Portal customer", else: "Admin operator"),
+        job: label,
         evidence: "#{path}:1",
         reason: if(state == "uncovered", do: "The current story does not render this caller."),
-        manifest_keys: []
+        manifest_keys: [],
+        covering_keys: [],
+        uncovered_states: if(state == "uncovered", do: [label], else: []),
+        entry_trigger: "Select the mapped route or Storybook case.",
+        review_trigger: "The route, production owner, or coverage contract changes."
       }
     end
 

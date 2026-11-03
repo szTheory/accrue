@@ -355,7 +355,8 @@ if Mix.env() != :prod do
         registry: %{
           family_count: registry |> Enum.map(& &1.family) |> Enum.uniq() |> length(),
           entry_count: length(registry),
-          specimen_count: registry |> Enum.map(&length(Map.get(&1, :specimens) || [])) |> Enum.sum()
+          specimen_count:
+            registry |> Enum.map(&length(Map.get(&1, :specimens) || [])) |> Enum.sum()
         },
         kitchen_test_digests: kitchen_test_digests()
       }
@@ -580,7 +581,8 @@ if Mix.env() != :prod do
             },
             %{
               path: "accrue_admin/storybook/_support/subscription_manifest.ex",
-              marker: "@frozen_compatibility_ids [\"braintree_pruned\", \"dunning_active\", \"populated\"]"
+              marker:
+                "@frozen_compatibility_ids [\"braintree_pruned\", \"dunning_active\", \"populated\"]"
             }
           ]
         },
@@ -848,7 +850,8 @@ if Mix.env() != :prod do
 
       reason_class = Map.get(record, :reason_class)
 
-      if record.disposition in ["retire", "merge"] and reason_class not in @curation_reason_classes do
+      if record.disposition in ["retire", "merge"] and
+           reason_class not in @curation_reason_classes do
         raise ArgumentError,
               "curation record #{record.id} (#{record.disposition}) needs a reason class: #{inspect(reason_class)}"
       end
@@ -911,7 +914,8 @@ if Mix.env() != :prod do
         raise ArgumentError, "curation record #{record.id} must have kitchen_impact none"
       end
 
-      if record.disposition == "reclassify" and not non_empty_string?(Map.get(record, :classification)) do
+      if record.disposition == "reclassify" and
+           not non_empty_string?(Map.get(record, :classification)) do
         raise ArgumentError, "curation record #{record.id} (reclassify) needs a classification"
       end
 
@@ -991,6 +995,165 @@ if Mix.env() != :prod do
     end
 
     def route_matches?(_entry, _url), do: false
+
+    @doc "Seeds one uncovered caller job for each live route in the Admin and Portal routers."
+    @spec route_seeded_jobs() :: [map()]
+    def route_seeded_jobs do
+      root = repository_root()
+
+      [
+        {"admin", "accrue_admin/lib/accrue_admin/router.ex"},
+        {"portal", "accrue_portal/lib/accrue_portal/router.ex"}
+      ]
+      |> Enum.flat_map(fn {surface, relative_path} ->
+        source = File.read!(Path.join(root, relative_path))
+        route_seeded_jobs_from(source, surface, relative_path)
+      end)
+      |> caller_map_for()
+    end
+
+    @doc "Parses a router source string into deterministic uncovered route rows (fixture-friendly)."
+    @spec route_seeded_jobs(String.t()) :: [map()]
+    def route_seeded_jobs(source) when is_binary(source) do
+      surface = if String.contains?(source, "AccruePortal"), do: "portal", else: "admin"
+
+      source_path =
+        if surface == "portal",
+          do: "accrue_portal/lib/accrue_portal/router.ex",
+          else: "router_fixture.ex"
+
+      source
+      |> route_seeded_jobs_from(surface, source_path)
+      |> caller_map_for()
+    end
+
+    defp route_seeded_jobs_from(source, surface, source_path) do
+      source
+      |> String.split("\n")
+      |> Enum.with_index(1)
+      |> Enum.reduce({[], []}, fn {line, line_number}, {scopes, rows} ->
+        indentation = String.length(line) - String.length(String.trim_leading(line))
+        trimmed = String.trim_leading(line)
+
+        cond do
+          String.starts_with?(trimmed, "end") ->
+            {Enum.reject(scopes, &(&1.indentation >= indentation)), rows}
+
+          String.starts_with?(trimmed, "scope ") and Regex.match?(~r/\bdo\s*$/, trimmed) ->
+            captures =
+              Regex.run(
+                ~r/^scope\s+(?:"([^"]+)"|([^,\s]+))(?:,\s*([A-Z][A-Za-z0-9_.]*))?.*\bdo\s*$/,
+                trimmed
+              ) || []
+
+            scope = %{
+              indentation: indentation,
+              path: Enum.at(captures, 1),
+              module: Enum.at(captures, 3)
+            }
+
+            {[scope | scopes], rows}
+
+          true ->
+            case Regex.run(
+                   ~r/^\s*live\(\s*"([^"]+)"\s*,\s*([A-Za-z0-9_.]+)\s*,\s*:([A-Za-z0-9_]+)\s*\)/,
+                   line
+                 ) do
+              [_, route, module_alias, action] ->
+                active_scopes =
+                  scopes
+                  |> Enum.filter(&(&1.indentation < indentation))
+                  |> Enum.sort_by(& &1.indentation)
+
+                route_path =
+                  Enum.reduce(active_scopes, route, fn scope, current ->
+                    if is_binary(scope.path) and String.starts_with?(scope.path, "/") do
+                      Path.join(
+                        String.trim_trailing(scope.path, "/"),
+                        String.trim_leading(current, "/")
+                      )
+                    else
+                      current
+                    end
+                  end)
+
+                module_prefix = active_scopes |> Enum.reverse() |> Enum.find_value(& &1.module)
+
+                module =
+                  cond do
+                    String.contains?(module_alias, ".") -> module_alias
+                    is_binary(module_prefix) -> "#{module_prefix}.#{module_alias}"
+                    true -> module_alias
+                  end
+
+                job = route_job(module, action)
+                evidence = "#{source_path}:#{line_number}: #{String.trim(line)}"
+
+                row = %{
+                  label: "#{job} route",
+                  owner: "#{module}.#{action}/1",
+                  path: source_path,
+                  tier: "job",
+                  state: "uncovered",
+                  evidence: evidence,
+                  reason:
+                    "This live route has not yet been assessed for curated job and state coverage.",
+                  surface: surface,
+                  actor: route_actor(surface),
+                  job: job,
+                  covering_keys: [],
+                  uncovered_states: ["unmapped route job"],
+                  entry_trigger: "Route exists without a curated coverage assessment.",
+                  review_trigger: "A router or LiveView contract changes.",
+                  manifest_keys: [],
+                  route_path: route_path,
+                  route_evidence: evidence,
+                  classification: "router-seeded uncovered route"
+                }
+
+                {scopes, [row | rows]}
+
+              _ ->
+                {scopes, rows}
+            end
+        end
+      end)
+      |> elem(1)
+      |> Enum.reverse()
+      |> case do
+        [] ->
+          raise ArgumentError, "router source contains no live routes"
+
+        rows ->
+          duplicate_route =
+            rows
+            |> Enum.group_by(& &1.route_path)
+            |> Enum.find(fn {_route_path, matching_rows} -> length(matching_rows) > 1 end)
+
+          if duplicate_route do
+            {route_path, _matching_rows} = duplicate_route
+            raise ArgumentError, "router source maps a live route more than once: #{route_path}"
+          end
+
+          rows
+      end
+    end
+
+    defp route_actor("portal"), do: "Portal customer"
+    defp route_actor(_surface), do: "Admin operator"
+
+    defp route_job(module, action) do
+      module_name =
+        module
+        |> String.split(".")
+        |> List.last()
+        |> String.replace_suffix("Live", "")
+        |> Macro.underscore()
+        |> String.replace("_", " ")
+
+      action_name = %{"index" => "list", "show" => "view", "new" => "create", "edit" => "edit"}
+      "#{module_name} #{Map.get(action_name, action, action)}"
+    end
 
     @doc "Returns stable production call-site rows linked to compiled story declarations and registry contracts."
     @spec caller_map() :: [map()]
@@ -1120,8 +1283,12 @@ if Mix.env() != :prod do
           "reachable",
           reason:
             "The legacy detail Storybook route renders subscription_area/1 only. It does not prove the whole-page shell, breadcrumb, related resources, drill sections, or full-page route; the whole page is covered by the Phase 253 page stories listed here (presentation only).",
+          surface: "admin",
+          actor: "support operator",
+          job: "inspect subscription detail and review an action",
           manifest_keys: @phase253_page_keys,
           story_path: "/pages/subscription",
+          uncovered_states: [],
           route_path: "/subscriptions/:id",
           route_evidence:
             source_evidence!(
@@ -1140,8 +1307,12 @@ if Mix.env() != :prod do
           "reachable",
           reason:
             "Covered by the Phase 253 collection stories listed here (presentation only: the actual toolbar, result, table and pagination composition for each declared state); mounted list behavior is proven by the mounted tests.",
+          surface: "admin",
+          actor: "support operator",
+          job: "subscription worklist",
           manifest_keys: @phase253_collection_keys,
           story_path: "/groups/subscriptions_collection",
+          uncovered_states: [],
           route_path: "/subscriptions",
           route_evidence:
             source_evidence!(
@@ -1160,6 +1331,9 @@ if Mix.env() != :prod do
           "reachable",
           reason:
             "Covered by SBK-06: the mounted journey test accrue_admin/test/accrue_admin/live/subscription_journey_test.exs follows list, detail, action review, step-up, result and context-preserving return, and the Phase 253 page stories listed here show the review and result states as presentation only. Static stories alone still do not exercise mount authorization, step-up, preview, confirmation, provider results, or persistence.",
+          surface: "admin",
+          actor: "support operator",
+          job: "review and confirm subscription actions",
           manifest_keys: @phase253_journey_page_keys,
           story_path: "/pages/subscription",
           extra: %{covering_requirement: "SBK-06", covering_test: @sbk06_journey_test},
@@ -1181,9 +1355,15 @@ if Mix.env() != :prod do
           "accrue_portal/lib/accrue_portal/live/subscriptions_live.ex",
           "def render(assigns) do",
           "job",
-          "uncovered",
+          "gated",
           reason:
             "The customer-facing subscription list and its cancellation controls have no selected Portal Storybook composition.",
+          surface: "portal",
+          actor: "billing customer",
+          job: "Portal subscription worklist",
+          uncovered_states: ["subscription list", "cancellation controls"],
+          entry_trigger: "contract verification plus dev/test harness",
+          review_trigger: "Portal subscription contract or dev/test harness becomes available.",
           route_path: "/subscriptions",
           route_evidence:
             source_evidence!(
@@ -1199,9 +1379,15 @@ if Mix.env() != :prod do
           "accrue_portal/lib/accrue_portal/live/subscription_live.ex",
           "def render(assigns) do",
           "job",
-          "uncovered",
+          "gated",
           reason:
             "Portal subscription detail, recovery messaging, and plan-change preview have no selected Storybook composition.",
+          surface: "portal",
+          actor: "billing customer",
+          job: "Portal subscription detail and plan-change preview",
+          uncovered_states: ["subscription detail", "recovery messaging", "plan-change preview"],
+          entry_trigger: "contract verification plus dev/test harness",
+          review_trigger: "Portal subscription contract or dev/test harness becomes available.",
           route_path: "/subscriptions/:id",
           route_evidence:
             source_evidence!(
@@ -1217,9 +1403,20 @@ if Mix.env() != :prod do
           "accrue_portal/lib/accrue_portal/live/subscription_live.ex",
           "\"confirm_plan_change\"",
           "job",
-          "uncovered",
+          "gated",
           reason:
             "Static stories do not exercise Portal authorization, plan-change preview/commit, cancellation, provider results, or persisted effects.",
+          surface: "portal",
+          actor: "billing customer",
+          job: "Portal cancellation and plan-change journey",
+          uncovered_states: [
+            "authorization",
+            "plan-change preview",
+            "cancellation",
+            "persisted result"
+          ],
+          entry_trigger: "contract verification plus dev/test harness",
+          review_trigger: "Portal subscription contract or dev/test harness becomes available.",
           route_path: "/subscriptions/:id",
           route_evidence:
             source_evidence!(
@@ -1242,8 +1439,74 @@ if Mix.env() != :prod do
         )
       ]
 
+      lifecycle_gap_rows = [
+        caller_row!(
+          root,
+          "Admin subscription page trialing and canceled states",
+          "AccrueAdmin.Live.SubscriptionLive.render/1",
+          "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "<.subscription_area",
+          "page",
+          "uncovered",
+          reason:
+            "The selected page stories do not include the trialing or canceled subscription states.",
+          surface: "admin",
+          actor: "support operator",
+          job: "inspect subscription lifecycle states",
+          uncovered_states: ["trialing", "canceled"],
+          entry_trigger: "A supported trialing or canceled state is selected for page coverage.",
+          review_trigger: "Subscription lifecycle rendering changes.",
+          route_path: "/subscriptions/:id",
+          route_evidence:
+            source_evidence!(
+              root,
+              "accrue_admin/lib/accrue_admin/router.ex",
+              "live(\"/subscriptions/:id\", AccrueAdmin.Live.SubscriptionLive"
+            )
+        ),
+        caller_row!(
+          root,
+          "Admin subscription page past-due recovery state",
+          "AccrueAdmin.Live.SubscriptionLive.render/1",
+          "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+          "<.subscription_area",
+          "page",
+          "gated",
+          reason:
+            "Past-due recovery remains gated until retry and campaign-history integrity are available.",
+          surface: "admin",
+          actor: "support operator",
+          job: "inspect past-due subscription recovery",
+          uncovered_states: ["past_due"],
+          entry_trigger: "retry/campaign-history integrity",
+          review_trigger: "Retry and campaign-history integrity is verified.",
+          route_path: "/subscriptions/:id",
+          route_evidence:
+            source_evidence!(
+              root,
+              "accrue_admin/lib/accrue_admin/router.ex",
+              "live(\"/subscriptions/:id\", AccrueAdmin.Live.SubscriptionLive"
+            )
+        )
+      ]
+
+      curated_route_keys =
+        (admin_rows ++ portal_rows ++ lifecycle_gap_rows)
+        |> Enum.map(&{Map.get(&1, :surface), Map.get(&1, :route_path)})
+        |> Enum.reject(fn {_surface, route_path} -> is_nil(route_path) end)
+        |> MapSet.new()
+
+      seeded_route_rows =
+        route_seeded_jobs()
+        |> Enum.reject(&MapSet.member?(curated_route_keys, {&1.surface, &1.route_path}))
+
       ([group_row, area_row, section_row] ++
-         component_rows ++ story_rows ++ admin_rows ++ portal_rows)
+         component_rows ++
+         story_rows ++
+         admin_rows ++
+         portal_rows ++
+         lifecycle_gap_rows ++
+         seeded_route_rows)
       |> caller_map_for()
     end
 
@@ -1287,19 +1550,22 @@ if Mix.env() != :prod do
 
       sections = [
         {"Reachable", "reachable"},
-        {"Uncovered", "uncovered"},
+        {"Uncovered", ["uncovered", "gated"]},
         {"Not applicable", "not_applicable"}
       ]
 
       state_tables =
         Enum.map(sections, fn {title, state} ->
-          state_rows = Enum.filter(rows, &(&1.state == state))
+          state_rows =
+            Enum.filter(rows, fn row ->
+              if is_list(state), do: row.state in state, else: row.state == state
+            end)
 
           [
             "## #{title}",
             "",
-            "| Tier | Caller | Production owner | Source evidence | Route / story links | Contract or reason |",
-            "| --- | --- | --- | --- | --- | --- |",
+            "| Surface | Actor | Job | State | Tier | Caller | Production owner | Covering keys | Uncovered states | Entry trigger | Review trigger | Source evidence | Route / story links | Contract or reason |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
             Enum.map(state_rows, &guide_row/1),
             ""
           ]
@@ -1517,7 +1783,9 @@ if Mix.env() != :prod do
       facts = SubscriptionScenarios.validate!(attributes)
       route_variation_id = group_id || variation_id
       key = key(path, group_id, variation_id)
-      {curation_record, curation_classification} = reclassification_for(path, to_string(variation_id))
+
+      {curation_record, curation_classification} =
+        reclassification_for(path, to_string(variation_id))
 
       %{
         key: key,
@@ -1617,6 +1885,21 @@ if Mix.env() != :prod do
         path: path,
         tier: tier,
         state: state,
+        surface:
+          Map.get(
+            options,
+            :surface,
+            if(String.starts_with?(path, "accrue_portal/"), do: "portal", else: "admin")
+          ),
+        actor:
+          Map.get(
+            options,
+            :actor,
+            route_actor(
+              if(String.starts_with?(path, "accrue_portal/"), do: "portal", else: "admin")
+            )
+          ),
+        job: Map.get(options, :job, label),
         evidence: evidence,
         reason: Map.get(options, :reason),
         contract: Map.get(options, :contract),
@@ -1627,6 +1910,28 @@ if Mix.env() != :prod do
         manifest_urls: Map.get(options, :manifest_urls, []),
         route_path: Map.get(options, :route_path),
         route_evidence: route_evidence,
+        covering_keys: Map.get(options, :covering_keys, Map.get(options, :manifest_keys, [])),
+        uncovered_states:
+          Map.get(
+            options,
+            :uncovered_states,
+            if(state in ["uncovered", "gated"], do: [label], else: [])
+          ),
+        entry_trigger:
+          Map.get(
+            options,
+            :entry_trigger,
+            if(state == "gated",
+              do: "Coverage is gated pending its entry condition.",
+              else: "Select the mapped route or Storybook case."
+            )
+          ),
+        review_trigger:
+          Map.get(
+            options,
+            :review_trigger,
+            "The route, production owner, or coverage contract changes."
+          ),
         classification: Map.get(options, :classification)
       }
 
@@ -1660,7 +1965,19 @@ if Mix.env() != :prod do
     end
 
     defp normalize_caller_row!(row) when is_map(row) do
-      fields = [:label, :owner, :path, :tier, :state, :evidence]
+      fields = [
+        :label,
+        :owner,
+        :path,
+        :tier,
+        :state,
+        :evidence,
+        :surface,
+        :actor,
+        :job,
+        :entry_trigger,
+        :review_trigger
+      ]
 
       Enum.each(fields, fn field ->
         value = Map.get(row, field)
@@ -1670,7 +1987,7 @@ if Mix.env() != :prod do
         end
       end)
 
-      unless row.state in ["reachable", "uncovered", "not_applicable"] do
+      unless row.state in ["reachable", "uncovered", "not_applicable", "gated"] do
         raise ArgumentError, "production caller row has unsupported state: #{inspect(row.state)}"
       end
 
@@ -1684,12 +2001,25 @@ if Mix.env() != :prod do
         raise ArgumentError, "production caller row has invalid manifest keys"
       end
 
+      covering_keys = Map.get(row, :covering_keys, manifest_keys)
+      uncovered_states = Map.get(row, :uncovered_states, [])
+
+      unless is_list(covering_keys) and Enum.all?(covering_keys, &non_empty_string?/1) do
+        raise ArgumentError, "production caller row has invalid covering keys"
+      end
+
+      unless is_list(uncovered_states) and Enum.all?(uncovered_states, &non_empty_string?/1) do
+        raise ArgumentError, "production caller row has invalid uncovered states"
+      end
+
       identity = [row.owner, row.path, row.tier, row.state, row.label]
       key = Enum.map_join(identity, "|", &URI.encode/1)
 
       row
       |> Map.put(:key, key)
       |> Map.put(:manifest_keys, Enum.sort(Enum.uniq(manifest_keys)))
+      |> Map.put(:covering_keys, Enum.sort(Enum.uniq(covering_keys)))
+      |> Map.put(:uncovered_states, Enum.sort(Enum.uniq(uncovered_states)))
     end
 
     defp normalize_caller_row!(_row),
@@ -1713,7 +2043,10 @@ if Mix.env() != :prod do
       contract_or_reason =
         Map.get(row, :reason) || Map.get(row, :contract) || Map.get(row, :classification) || "—"
 
-      "| #{guide_cell(row.tier)} | #{guide_cell(row.label)} | #{guide_cell(row.owner)} | `#{guide_cell(source_evidence)}` | #{guide_cell(links)} | #{guide_cell(contract_or_reason)} |"
+      covering_keys = Enum.join(row.covering_keys, "<br>")
+      uncovered_states = Enum.join(row.uncovered_states, "<br>")
+
+      "| #{guide_cell(row.surface)} | #{guide_cell(row.actor)} | #{guide_cell(row.job)} | #{guide_cell(row.state)} | #{guide_cell(row.tier)} | #{guide_cell(row.label)} | #{guide_cell(row.owner)} | #{guide_cell(covering_keys)} | #{guide_cell(uncovered_states)} | #{guide_cell(row.entry_trigger)} | #{guide_cell(row.review_trigger)} | `#{guide_cell(source_evidence)}` | #{guide_cell(links)} | #{guide_cell(contract_or_reason)} |"
     end
 
     defp guide_cell(nil), do: "—"

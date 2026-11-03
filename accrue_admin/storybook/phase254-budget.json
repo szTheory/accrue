@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source_revision": "428511d06b64317758a19561e028b7ab75382a52",
-  "manifest_sha256": "f16cf209eada41ba23cc674cc6fa965a76fe15e351c5779e5c50085bf02c3028",
+  "manifest_sha256": "301e9b35551dba4e0c934cd4e84617b76326ee60c9deb6d42deeb36aa4399866",
   "selection": {
     "total": 165,
     "selected": 165,
@@ -15355,6 +15355,54 @@
       },
       "decision": "the visual cells are budgeted from their measured per-cell cost: p90 1195 ms, warn_at 1493.75 ms, ceiling 2987.5 ms; the attempt-1 browser-uat run on the reporter-artifact-fix head provides one sample",
       "status": "accepted",
+      "before": {
+        "cells": 165,
+        "owners": 2
+      },
+      "after": {
+        "cells": 165,
+        "owners": 2
+      }
+    },
+    {
+      "id": "DEV-254-22",
+      "kind": "manifest-restamp",
+      "target": {
+        "name": "manifest_sha256",
+        "source": "B-1: the budget digest follows a regenerated manifest only through restamp-manifest"
+      },
+      "measurement": {
+        "manifest_path": "storybook/phase252-manifest.json"
+      },
+      "from": "f16cf209eada41ba23cc674cc6fa965a76fe15e351c5779e5c50085bf02c3028",
+      "to": "eb65520104bf4092f547259db706aedd0652a3eee7ec47fc2302b14d2558d7a3",
+      "cause": "254-16-01",
+      "decision": "re-stamped to the committed manifest bytes after its owner regenerated them",
+      "status": "resolved",
+      "before": {
+        "cells": 165,
+        "owners": 2
+      },
+      "after": {
+        "cells": 165,
+        "owners": 2
+      }
+    },
+    {
+      "id": "DEV-254-23",
+      "kind": "manifest-restamp",
+      "target": {
+        "name": "manifest_sha256",
+        "source": "B-1: the budget digest follows a regenerated manifest only through restamp-manifest"
+      },
+      "measurement": {
+        "manifest_path": "storybook/phase252-manifest.json"
+      },
+      "from": "eb65520104bf4092f547259db706aedd0652a3eee7ec47fc2302b14d2558d7a3",
+      "to": "301e9b35551dba4e0c934cd4e84617b76326ee60c9deb6d42deeb36aa4399866",
+      "cause": "254-16-01",
+      "decision": "re-stamped to the committed manifest bytes after its owner regenerated them",
+      "status": "resolved",
       "before": {
         "cells": 165,
         "owners": 2
