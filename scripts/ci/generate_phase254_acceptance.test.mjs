@@ -200,11 +200,28 @@ test("the recorded 254-03-03 disposition is grounded in its summary, and 254-18-
   assert.equal(beforeSummary["254-03-03"], "fix-in-phase; accept-known-red for KR-254-06");
   assert.equal(beforeSummary["254-18-02"], "");
 
+  const triageRecorded = {
+    metrics: { final: {
+      escalation_required: false,
+      escalation_count: 0,
+      runs: [
+        { job: "admin-phase200-guardrails", attempt: 1, conclusion: "success", phase_owned_ok: true },
+        { job: "browser-uat", attempt: 1, conclusion: "success", phase_owned_ok: true },
+      ],
+    } },
+    deviations: [], known_reds: [],
+  };
+  assert.equal(generator.checkpointAnswers(root, triageRecorded, summaries)["254-18-02"], "not required");
+  assert.equal(generator.checkpointAnswers(root, {
+    ...triageRecorded,
+    metrics: { final: { ...triageRecorded.metrics.final, runs: [] } },
+  }, summaries)["254-18-02"], "");
+
   const recordedSummary = { ...summaries[0], name: "254-18-SUMMARY.md", source: "254-18-02 escalation not required (0 unmatched reds)" };
   assert.equal(generator.checkpointAnswers(root, noEscalation, [...summaries, recordedSummary])["254-18-02"], "not required");
 
   const unresolved = {
-    ...noEscalation,
+    ...triageRecorded,
     deviations: [{ kind: "final-triage", entries: [{ job: "other", step: "step", run_id: 5, classification: "environmental" }] }],
   };
   const needsOwner = generator.checkpointAnswers(root, unresolved, summaries);

@@ -430,9 +430,14 @@ export function checkpointAnswers(root, budget, summaries) {
     (["out-of-scope-branch-only", "environmental"].includes(entry.classification) || entry.owner_job_out_of_scope === true) && !alreadyAccepted(entry));
   const needsEscalation = unresolvedEscalations.length > 0;
   const summary18 = summaries.find(({ name }) => name === "254-18-SUMMARY.md")?.source ?? "";
+  const finalRuns = budget.metrics?.final?.runs ?? [];
+  const ownerRunsRecorded = ["admin-phase200-guardrails", "browser-uat"].every((job) =>
+    finalRuns.some((run) => run.job === job && run.attempt === 1 && run.conclusion === "success" && run.phase_owned_ok === true));
+  const noEscalationRecorded = budget.metrics?.final?.escalation_required === false &&
+    budget.metrics?.final?.escalation_count === 0 && ownerRunsRecorded && !needsEscalation;
   const answer18 = needsEscalation
     ? (summary18.match(/254-18-02[\s\S]{0,500}?\b(fix-in-phase|accept-known-red|halt)\b/)?.[1] ?? "")
-    : (summary18 && /escalation not required/i.test(summary18) ? "not required" : "");
+    : (noEscalationRecorded || (summary18 && /escalation not required/i.test(summary18)) ? "not required" : "");
   return {
     "254-03-01": /push-approved/.test(prior) && /push-approved/.test(checkpoint03) ? "push-approved" : "",
     "254-03-03": /254-03-03 round 2/.test(prior) && /A[^\n]*fix-in-phase[^\n]*KR-254-05/.test(prior) && /B[^\n]*accept-known-red[^\n]*KR-254-06/.test(prior) ? "fix-in-phase; accept-known-red for KR-254-06" : "",
