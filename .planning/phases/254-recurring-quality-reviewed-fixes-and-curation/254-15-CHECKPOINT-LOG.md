@@ -62,3 +62,25 @@ See the checkpoint report: the four list keys (A11Y-254-28 attribution) and the 
 - CI **40890395756: red in `admin-phase200-guardrails` again**, lane `phase253-compositions-browser`, the same 22 cells as run 40876348250 with the same ratios (20 dark `probe-focus-visible` ring-contrast-1.02, 1.12 on `#step-up-code`; 2 light 320px `probe-text-spacing` on `aside.ax-overlay-panel`). The settle fix did not change the CI result, so the cause is not a transition in flight. Docs and bash contracts red only at SL-G (KR-254-06).
 - The reds are deterministic on the runner and absent locally under: unthrottled, CDP CPU throttling at 4x, 6x and 8x, 3 workers, repeat-each 2, `CI=true GITHUB_ACTIONS=true`. Stopping per the owner's instruction (reds persist on CI).
 - Local-only commit `32c00d2c2` (design review at confirmed, budget metrics and deviations, KR-254-07 open) is not pushed.
+
+## KR-254-07 owner decision, round 2 (2026-11-03)
+
+- Owner response, verbatim: **"1"** (option 1: fix-in-phase with Linux-side diagnosis).
+- Scope: diagnose the repeated CI-only failures on Linux before another code change. Any fix must be a new commit followed by a new attempt-1 observation; do not rerun a CI job to obtain green.
+
+## KR-254-07 owner checkpoint, round 3 (2026-11-03)
+
+- Trigger: the Linux diagnosis isolated the original failures to missing focus styles and drawer-footer overflow. The candidate CSS fixes clear five of the six focused reproductions; one active dark page cell still has ten `probe-focus-visible` observations classified `obscured`.
+- Linux evidence: Playwright 1.59.1 Noble, amd64, viewport 1280×1000. For each affected app sidebar link, the target center is inside the Storybook host sidebar: target x=128–303, host `#psb-sidebar` x=0–240. The sandbox starts at x=96. The hit test runs in the main HTML document and returns the host sidebar. The saved failure screenshot appears to show the app navigation separately; the coordinate/hit-test discrepancy needs an owner-approved disposition before changing scope.
+- Candidate fixes retained locally: a low-specificity `:focus-visible` ring fallback clears dark ring contrast (measured 6.81–8.05:1 across sampled controls); wrapping `.ax-detail-drawer-footer` clears both 320px light text-spacing findings. Clean Linux run: five focused cells pass; `active | viewport | 1280px | dark` remains red with ten obscured-link observations.
+- No CI job was rerun, no commit or push was made, and temporary probe instrumentation was reverted. Current source and generated CSS changes remain uncommitted. `.planning/config.json` remains untouched and must not be staged.
+- Owner decision required before proceeding: **1. Extend fix-in-phase** to resolve the measured Storybook/app overlap while retaining the unobscured-focus assertion (recommended); or **2. Halt Phase 254 here** and defer the remaining owner-job red. The prior round-2 answer authorized the initial Linux diagnosis and CSS fixes; the plan requires a new checkpoint when a red persists.
+
+## KR-254-07 owner decision, round 3 (2026-11-03)
+
+- Owner response, verbatim: **"follow ur recs"**.
+- Mapped to recommended option 1: extend the Phase 254 fix to resolve the remaining measured Storybook/app overlap and retain the focus-obscuration assertion.
+- Continue Linux diagnosis and implementation under the existing constraint: prove the selected Linux cells green before the full pre-push gate; then create a new commit, push under the existing authorization, and observe a new attempt-1 CI run. Never rerun CI to obtain green; never stage `.planning/config.json`.
+- Linux follow-up resolved the screenshot/geometry discrepancy. Before keyboard traversal, `#psb-live-container` had `scrollWidth=1232`, `clientWidth=1040`, `scrollLeft=0`, the app sidebar link began at x=320, and the app shell began at x=288. Focusing the overflowing Storybook page-tab row moved the whole canvas to `scrollLeft=192`; the same app link then began at x=128 underneath `#psb-sidebar` (x=0–240). The failure screenshot showed the restored initial frame, while the probe sampled the transient shifted frame.
+- Fix: make the Storybook page-tab row an internal horizontal scroller and allow its flex ancestors to shrink. After the fix the live container stayed at `scrollWidth=clientWidth=1040` through keyboard traversal and `scrollLeft=0`; the app links remained at x=320. The original active dark cell and five related cells all passed in a clean Linux run; the focus-obscuration assertion remains enabled. No CI job was rerun.
+- Verification evidence: `mcr.microsoft.com/playwright:v1.59.1-noble`, linux/amd64, owned disposable `admin-review` lab, partition `2026110314470013`: 6/6 focused Phase 253 cells passed (active dark 1280, filtered-empty dark 1280, review-cancel-now dark 1280 and light 320, awaiting-step-up dark 1280 and light 320). `node scripts/ci/recompose_storybook_css.mjs --check` and `git diff --check` passed. The full pre-push gate and push remain pending.

@@ -1713,6 +1713,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-detail-drawer-footer {
+  flex-wrap: wrap;
   margin-top: var(--ax-space-xl);
   padding-top: var(--ax-space-md);
   border-top: 1px solid var(--ax-border);
@@ -6827,6 +6828,23 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover,
   background: var(--ax-scrollbar-thumb-hover);
 }
 
+/* Keep Phoenix Storybook's overflowing page-tab row inside the tabs viewport.
+   Otherwise focusing a tab beyond the row scrolls the entire live canvas left,
+   placing the app sidebar underneath Storybook's fixed navigation. */
+.psb #psb-story-live > div:first-child > div:first-child {
+  min-width: 0;
+}
+
+.psb #psb-story-live > div:first-child > div:first-child > div:last-child {
+  min-width: 0;
+}
+
+.psb .psb-story-tabs {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
 .ax-button:focus-visible,
 .ax-sidebar-link:focus-visible,
 .ax-theme-picker-option:focus-visible,
@@ -6848,6 +6866,13 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover,
 .ax-layer:focus-visible,
 [data-ax-force~="focus"] {
   border-color: var(--ax-focus-ring);
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+  box-shadow: var(--ax-focus-shadow);
+  transition: none;
+}
+
+:where(a[href], button, input:not([type="hidden"]), select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--ax-focus-ring);
   outline-offset: 2px;
   box-shadow: var(--ax-focus-shadow);
