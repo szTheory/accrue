@@ -153,7 +153,7 @@ Cross-cutting constraints: preserve production DataTable/LiveView authority, exi
   4. A maintainer can reproduce cold-start, warm-preview/focused-check and incremental CI measurements, including scenario counts, and use a frozen affordable selection/budget before widening coverage; first-slice measurements inform the freeze and deviations are explicitly resolved without weakening existing gates. Initial targets remain provisional: under 10s warm preview where feasible, under 60s focused checks, at most 3min additional warm browser work and 5min incremental CI critical path. (CIQ-04)
   5. A maintainer can inspect retirement/merge records naming reachability, reason and surviving owner/replacement for stale, impossible or duplicate stories while retaining meaningful legacy/API/negative regressions and kitchen proof, then choose the next existing UI job from a refreshed actor/job/composition gap map and distinct adopter briefs showing remaining Admin/Portal horizons, uncovered states, review triggers and maintenance cost. (CURATE-01, CURATE-02)
 
-**Plans**: 16/18 plans executed
+**Plans**: 17/18 plans executed
 **UI hint**: yes
 
 Plans:
@@ -205,7 +205,7 @@ Plans:
 - [x] 254-16-PLAN.md — Route-seeded gap map, five adopter briefs and next-job candidates
 
 **Wave 16**
-- [ ] 254-17-PLAN.md — Required-owner record checks, consumed roots and proved transparency prohibitions
+- [x] 254-17-PLAN.md — Required-owner record checks, consumed roots and proved transparency prohibitions
 
 **Wave 17**
 - [ ] 254-18-PLAN.md — Final CI measurement with red escalation, deviation closure and automated acceptance

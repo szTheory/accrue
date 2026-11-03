@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "phase": "254",
+  "executed_at": "2026-11-03T19:42:58.811Z",
+  "projection_owner": "gsd-core/bin/lib/probe-core.cjs#projectProhibitions",
+  "enforcement_owner": "gsd-tools.cjs check prohibition-enforcement",
+  "checks": [
+    {
+      "projection": {
+        "statement": "MUST NOT present an affected or sentinel-only selection run, or a run inside the timing budget, as equivalent to full-sweep coverage; every report states mode, selected/total counts and the excluded case ids.",
+        "status": "resolved",
+        "verification": "test",
+        "check_kind": "node-test",
+        "check_target": "scripts/ci/verify_phase254_transparency.test.mjs",
+        "check_violation_fixture": "scripts/ci/fixtures/phase254-transparency/selection-violation.json",
+        "check_clean_fixture": "scripts/ci/fixtures/phase254-transparency/clean.json"
+      },
+      "request": {
+        "prohibition": {
+          "statement": "MUST NOT present an affected or sentinel-only selection run, or a run inside the timing budget, as equivalent to full-sweep coverage; every report states mode, selected/total counts and the excluded case ids.",
+          "status": "resolved",
+          "verification": "test",
+          "check_kind": "node-test",
+          "check_target": "scripts/ci/verify_phase254_transparency.test.mjs",
+          "check_violation_fixture": "scripts/ci/fixtures/phase254-transparency/selection-violation.json",
+          "check_clean_fixture": "scripts/ci/fixtures/phase254-transparency/clean.json"
+        },
+        "check": {
+          "kind": "node-test",
+          "target": "scripts/ci/verify_phase254_transparency.test.mjs",
+          "violationFixture": "scripts/ci/fixtures/phase254-transparency/selection-violation.json",
+          "cleanFixture": "scripts/ci/fixtures/phase254-transparency/clean.json"
+        },
+        "mode": "interactive"
+      },
+      "result": {
+        "status": "green",
+        "flagged": false,
+        "tier": "test",
+        "reason": "test-tier prohibition has wired enforcement evidence",
+        "located": true,
+        "kind": "node-test",
+        "evidence": [
+          {
+            "kind": "node-test",
+            "target": "scripts/ci/verify_phase254_transparency.test.mjs",
+            "failFirst": true,
+            "passed": true,
+            "failFirstProof": "violation-fixture"
+          }
+        ],
+        "mode": "interactive"
+      }
+    },
+    {
+      "projection": {
+        "statement": "MUST NOT describe automated axe/probe results or the bounded design review as WCAG 2.2 AA conformance, complete accessibility, usability research or aesthetic quality of the Admin beyond the enumerated cells and criteria.",
+        "status": "resolved",
+        "verification": "test",
+        "check_kind": "node-test",
+        "check_target": "scripts/ci/verify_phase254_transparency.test.mjs",
+        "check_violation_fixture": "scripts/ci/fixtures/phase254-transparency/a11y-claim-violation.json",
+        "check_clean_fixture": "scripts/ci/fixtures/phase254-transparency/clean.json"
+      },
+      "request": {
+        "prohibition": {
+          "statement": "MUST NOT describe automated axe/probe results or the bounded design review as WCAG 2.2 AA conformance, complete accessibility, usability research or aesthetic quality of the Admin beyond the enumerated cells and criteria.",
+          "status": "resolved",
+          "verification": "test",
+          "check_kind": "node-test",
+          "check_target": "scripts/ci/verify_phase254_transparency.test.mjs",
+          "check_violation_fixture": "scripts/ci/fixtures/phase254-transparency/a11y-claim-violation.json",
+          "check_clean_fixture": "scripts/ci/fixtures/phase254-transparency/clean.json"
+        },
+        "check": {
+          "kind": "node-test",
+          "target": "scripts/ci/verify_phase254_transparency.test.mjs",
+          "violationFixture": "scripts/ci/fixtures/phase254-transparency/a11y-claim-violation.json",
+          "cleanFixture": "scripts/ci/fixtures/phase254-transparency/clean.json"
+        },
+        "mode": "interactive"
+      },
+      "result": {
+        "status": "green",
+        "flagged": false,
+        "tier": "test",
+        "reason": "test-tier prohibition has wired enforcement evidence",
+        "located": true,
+        "kind": "node-test",
+        "evidence": [
+          {
+            "kind": "node-test",
+            "target": "scripts/ci/verify_phase254_transparency.test.mjs",
+            "failFirst": true,
+            "passed": true,
+            "failFirstProof": "violation-fixture"
+          }
+        ],
+        "mode": "interactive"
+      }
+    },
+    {
+      "projection": {
+        "statement": "MUST NOT present the synthetic adopter briefs or the next-job ranking as real adopter demand, customer research or usage evidence, or as an opened milestone or commitment.",
+        "status": "resolved",
+        "verification": "test",
+        "check_kind": "node-test",
+        "check_target": "scripts/ci/verify_phase254_transparency.test.mjs",
+        "check_violation_fixture": "scripts/ci/fixtures/phase254-transparency/brief-violation.json",
+        "check_clean_fixture": "scripts/ci/fixtures/phase254-transparency/clean.json"
+      },
+      "request": {
+        "prohibition": {
+          "statement": "MUST NOT present the synthetic adopter briefs or the next-job ranking as real adopter demand, customer research or usage evidence, or as an opened milestone or commitment.",
+          "status": "resolved",
+          "verification": "test",
+          "check_kind": "node-test",
+          "check_target": "scripts/ci/verify_phase254_transparency.test.mjs",
+          "check_violation_fixture": "scripts/ci/fixtures/phase254-transparency/brief-violation.json",
+          "check_clean_fixture": "scripts/ci/fixtures/phase254-transparency/clean.json"
+        },
+        "check": {
+          "kind": "node-test",
+          "target": "scripts/ci/verify_phase254_transparency.test.mjs",
+          "violationFixture": "scripts/ci/fixtures/phase254-transparency/brief-violation.json",
+          "cleanFixture": "scripts/ci/fixtures/phase254-transparency/clean.json"
+        },
+        "mode": "interactive"
+      },
+      "result": {
+        "status": "green",
+        "flagged": false,
+        "tier": "test",
+        "reason": "test-tier prohibition has wired enforcement evidence",
+        "located": true,
+        "kind": "node-test",
+        "evidence": [
+          {
+            "kind": "node-test",
+            "target": "scripts/ci/verify_phase254_transparency.test.mjs",
+            "failFirst": true,
+            "passed": true,
+            "failFirstProof": "violation-fixture"
+          }
+        ],
+        "mode": "interactive"
+      }
+    }
+  ]
+}
