@@ -13,7 +13,53 @@ import {
   prepareLaunch,
   acceptedServerAddress,
   lanePort,
+  capturePlaywrightJsonReporterOutput,
 } from "./phase252_lab.mjs";
+
+test("forwards the dedicated JSON report instead of unrelated child stdout", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "phase252-json-output-"));
+  try {
+    const reportPath = join(directory, "report.json");
+    const report = JSON.stringify({ status: "passed", suites: [{ title: "fixture" }] });
+    const childStdout = `REPORTER_HARNESS_NOISE\n${report}`;
+    await writeFile(reportPath, report);
+
+    const captured = await capturePlaywrightJsonReporterOutput({ reportPath, processStdout: childStdout, exitCode: 0 });
+    assert.equal(captured.report, report);
+    assert.equal(captured.diagnostic, childStdout);
+    assert.deepEqual(JSON.parse(captured.report), { status: "passed", suites: [{ title: "fixture" }] });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("refuses a successful JSON reporter process with no report file", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "phase252-json-output-missing-"));
+  try {
+    await assert.rejects(
+      capturePlaywrightJsonReporterOutput({ reportPath: join(directory, "missing.json"), processStdout: "Running tests", exitCode: 0 }),
+      /JSON reporter output file is missing or unreadable/,
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("preserves an available JSON report when Playwright exits with test failures", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "phase252-json-output-failed-"));
+  try {
+    const reportPath = join(directory, "report.json");
+    const report = JSON.stringify({ status: "failed", suites: [{ title: "fixture" }] });
+    await writeFile(reportPath, report);
+
+    const captured = await capturePlaywrightJsonReporterOutput({ reportPath, processStdout: "diagnostic", exitCode: 1 });
+    assert.equal(captured.exitCode, 1);
+    assert.equal(captured.report, report);
+    assert.equal(captured.diagnostic, "diagnostic");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
 
 test("requires a fresh explicit numeric test partition", () => {
   assert.throws(

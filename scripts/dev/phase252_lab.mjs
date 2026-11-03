@@ -57,6 +57,28 @@ export function acceptedServerAddress(address, env = process.env) {
   return null;
 }
 
+export async function capturePlaywrightJsonReporterOutput({ reportPath, processStdout = "", exitCode }) {
+  if (!Number.isInteger(exitCode)) fail("Playwright JSON reporter child did not report an integer exit code");
+  if (typeof reportPath !== "string" || reportPath.length === 0) {
+    if (exitCode !== 0) return { exitCode, report: null, diagnostic: processStdout };
+    fail("successful Playwright JSON reporter child has no isolated output file");
+  }
+
+  let report;
+  try {
+    report = await readFile(reportPath, "utf8");
+  } catch (error) {
+    if (exitCode !== 0 && error.code === "ENOENT") return { exitCode, report: null, diagnostic: processStdout };
+    fail(`Playwright JSON reporter output file is missing or unreadable (${error.code || "read error"})`);
+  }
+  try {
+    JSON.parse(report);
+  } catch {
+    fail("Playwright JSON reporter output file is not one complete JSON report");
+  }
+  return { exitCode, report, diagnostic: processStdout };
+}
+
 export function buildLaunchConfig(options = {}) {
   const lane = String(options.lane || "");
   if (!LANES.has(lane)) fail("lane must be admin-test, admin-review, or host-heldout");
@@ -850,18 +872,52 @@ async function browser(options, args) {
     PHASE252_E2E_PARTITION: config.partition,
     PHASE252_E2E_LANE: config.lane,
   };
+  const jsonReporter = args.some((argument) => argument === "--reporter=json");
+  let reporterOutputPath = null;
+  if (jsonReporter) {
+    const configuredOutputDir = env.PLAYWRIGHT_OUTPUT_DIR;
+    const outputDir = configuredOutputDir
+      ? path.resolve(ADMIN_ROOT, configuredOutputDir)
+      : path.join(ADMIN_ROOT, "tmp", "phase252", "playwright-output", identityNonce);
+    reporterOutputPath = env.PLAYWRIGHT_JSON_OUTPUT_FILE
+      ? path.resolve(ADMIN_ROOT, env.PLAYWRIGHT_JSON_OUTPUT_FILE)
+      : path.join(outputDir, "playwright-report.json");
+    env.PLAYWRIGHT_OUTPUT_DIR = outputDir;
+    env.PLAYWRIGHT_JSON_OUTPUT_FILE = reporterOutputPath;
+    await mkdir(path.dirname(reporterOutputPath), { recursive: true, mode: 0o700 });
+    await unlink(reporterOutputPath).catch((error) => {
+      if (error.code !== "ENOENT") throw error;
+    });
+  }
   const playwright = path.join(ADMIN_ROOT, "node_modules", "@playwright", "test", "cli.js");
   const child = spawn(process.execPath, [playwright, "test", "--config", "playwright.phase252.config.js", ...args], {
     cwd: ADMIN_ROOT,
     env,
     shell: false,
-    stdio: "inherit",
+    stdio: ["ignore", jsonReporter ? "pipe" : "inherit", "inherit"],
   });
+  const stdoutChunks = [];
+  if (jsonReporter) child.stdout.on("data", (chunk) => stdoutChunks.push(Buffer.from(chunk)));
   const code = await new Promise((resolve, reject) => {
     child.once("error", reject);
-    child.once("exit", (exitCode, signal) => resolve(signal ? 1 : exitCode ?? 1));
+    child.once("close", (exitCode, signal) => resolve(signal ? 1 : exitCode ?? 1));
   });
-  process.exitCode = code;
+  if (!jsonReporter) {
+    process.exitCode = code;
+    return;
+  }
+
+  const processStdout = Buffer.concat(stdoutChunks).toString("utf8");
+  try {
+    const captured = await capturePlaywrightJsonReporterOutput({ reportPath: reporterOutputPath, processStdout, exitCode: code });
+    if (captured.diagnostic) process.stderr.write(captured.diagnostic);
+    if (captured.report) process.stdout.write(captured.report);
+    process.exitCode = captured.exitCode;
+  } catch (error) {
+    if (processStdout) process.stderr.write(processStdout);
+    process.stderr.write(`Phase 252 JSON reporter capture failed: ${error.message}\n`);
+    process.exitCode = 1;
+  }
 }
 
 async function main(argv) {

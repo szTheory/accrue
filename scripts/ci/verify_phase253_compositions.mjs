@@ -490,6 +490,8 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory, browserW
           MIX_BUILD_PATH: adminBuildPath,
           MIX_TEST_PARTITION: browserPartition,
           PHASE252_E2E_NONCE: id.toLowerCase(),
+          PLAYWRIGHT_OUTPUT_DIR: path.join(outputDirectory, "playwright-output"),
+          PLAYWRIGHT_JSON_OUTPUT_FILE: path.join(outputDirectory, "playwright-output", "phase253-compositions.json"),
         },
       },
     ),
@@ -600,6 +602,8 @@ export function buildCommandPlan({ id, adminBuildPath, outputDirectory, browserW
           MIX_BUILD_PATH: adminBuildPath,
           MIX_TEST_PARTITION: designPartition,
           PHASE252_E2E_NONCE: id.toLowerCase() + "-design",
+          PLAYWRIGHT_OUTPUT_DIR: path.join(outputDirectory, "playwright-output"),
+          PLAYWRIGHT_JSON_OUTPUT_FILE: path.join(outputDirectory, "playwright-output", "phase254-design.json"),
         },
       },
     ),
@@ -1285,6 +1289,11 @@ async function main() {
     async (spec) => {
       process.stdout.write("==> " + spec.id + " [" + spec.lane + (spec.partition ? "/" + spec.partition : "") + "]\n");
       const captured = await spawnCaptured(spec, ROOT, logDirectory);
+      if (spec.args.includes("--reporter=json") && spec.env.PLAYWRIGHT_JSON_OUTPUT_FILE) {
+        const reportPath = path.resolve(path.join(ROOT, "accrue_admin"), spec.env.PLAYWRIGHT_JSON_OUTPUT_FILE);
+        captured.playwright_report_path = path.relative(ROOT, reportPath).split(path.sep).join("/");
+        if (fs.existsSync(reportPath)) captured.playwright_report_sha256 = sha256(fs.readFileSync(reportPath));
+      }
       captured.run_id = runId;
       captured.manifest_sha256 = compiledManifestDigest;
       captured.source_digests = Object.fromEntries(spec.sources.map((source) => [source, initialSnapshot.digests[source]]));

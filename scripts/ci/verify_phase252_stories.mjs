@@ -297,6 +297,7 @@ export function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDire
         PHASE252_E2E_NONCE: id,
         PHASE252_RESULT_ID: resultId,
         PLAYWRIGHT_OUTPUT_DIR: outputDir,
+        PLAYWRIGHT_JSON_OUTPUT_FILE: path.join(outputDir, "playwright-report.json"),
         PHASE252_SCREENSHOT_DIR: path.join(outputDirectory, "screenshots"),
       },
     },
@@ -574,6 +575,11 @@ async function main() {
     async (spec) => {
       process.stdout.write("==> " + spec.id + " [" + spec.lane + "/" + spec.warmth + "]\n");
       const result = await spawnCaptured(spec, ROOT, logDirectory);
+      if (spec.reporter?.kind === "playwright-json" && spec.env.PLAYWRIGHT_JSON_OUTPUT_FILE) {
+        const reportPath = path.resolve(path.join(ROOT, "accrue_admin"), spec.env.PLAYWRIGHT_JSON_OUTPUT_FILE);
+        result.playwright_report_path = path.relative(ROOT, reportPath).split(path.sep).join("/");
+        if (fs.existsSync(reportPath)) result.playwright_report_sha256 = sha256(fs.readFileSync(reportPath));
+      }
       if (result.exitCode === 0 && spec.id === "subscription-render-browser") {
         try {
           validateRenderResults(browserResultPath, { id, manifestDigest });
