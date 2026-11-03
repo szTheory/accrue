@@ -93,10 +93,14 @@ test("composition fan-out is bounded, explicit and off by default (CIQ-02 D-13, 
   });
   const browser = (rows) => rows.find(({ id }) => id === "phase253-compositions-browser");
   const defaultPlan = plan();
-  const compositionReport = browser(defaultPlan).env.PLAYWRIGHT_JSON_OUTPUT_FILE;
+  const browserSpec = browser(defaultPlan);
+  const compositionReport = browserSpec.env.PLAYWRIGHT_JSON_OUTPUT_FILE;
   const designReport = defaultPlan.find(({ id }) => id === "phase254-design-browser").env.PLAYWRIGHT_JSON_OUTPUT_FILE;
-  assert.equal(compositionReport, path.join("/tmp/phase253-contract/output", "playwright-output", "phase253-compositions.json"));
-  assert.equal(designReport, path.join("/tmp/phase253-contract/output", "playwright-output", "phase254-design.json"));
+  assert.equal(browserSpec.env.PLAYWRIGHT_OUTPUT_DIR, path.join("/tmp/phase253-contract/output", "playwright-output"));
+  assert.equal(compositionReport, path.join("/tmp/phase253-contract/output", "playwright-reports", "phase253-compositions.json"));
+  assert.equal(designReport, path.join("/tmp/phase253-contract/output", "playwright-reports", "phase254-design.json"));
+  assert.ok(!compositionReport.startsWith(`${browserSpec.env.PLAYWRIGHT_OUTPUT_DIR}${path.sep}`));
+  assert.ok(!designReport.startsWith(`${browserSpec.env.PLAYWRIGHT_OUTPUT_DIR}${path.sep}`));
   assert.notEqual(compositionReport, designReport);
   // Default: the unchanged serial run, no worker flag, display string as before.
   assert.ok(!browser(plan()).args.some((arg) => arg.startsWith("--workers")));

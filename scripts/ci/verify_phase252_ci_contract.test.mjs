@@ -542,6 +542,13 @@ test("Phase 252 CI reporter includes imported module-boundary tests", () => {
   });
   assert.ok(plan.find(({ id }) => id === "phase252-ci-contract").sources.includes("scripts/ci/phase252_reporters.mjs"));
   const browser = plan.find(({ id }) => id === "subscription-render-browser");
-  assert.equal(browser.env.PLAYWRIGHT_JSON_OUTPUT_FILE, path.join(browser.env.PLAYWRIGHT_OUTPUT_DIR, "playwright-report.json"));
+  assert.equal(browser.env.PLAYWRIGHT_JSON_OUTPUT_FILE, path.join(browser.env.PLAYWRIGHT_OUTPUT_DIR, "..", "playwright-reports", "playwright-report.json"));
+  assert.ok(!browser.env.PLAYWRIGHT_JSON_OUTPUT_FILE.startsWith(`${browser.env.PLAYWRIGHT_OUTPUT_DIR}${path.sep}`));
   assert.ok(browser.env.PLAYWRIGHT_JSON_OUTPUT_FILE.startsWith("/tmp/phase252-reporter/output/"));
+});
+
+test("Phase 252 and Phase 253 JSON reports upload from directories outside Playwright output cleanup", () => {
+  assert.match(workflow, /accrue_admin\/tmp\/phase252\/ci-results\/\*\/playwright-reports\/playwright-report\.json/);
+  assert.match(workflow, /accrue_admin\/tmp\/phase253\/ci-results\/\*\/playwright-reports\/\*\.json/);
+  assert.doesNotMatch(workflow, /accrue_admin\/tmp\/phase253\/ci-results\/\*\/playwright-output\/\*\.json/);
 });

@@ -297,7 +297,7 @@ export function buildCommandPlan({ id, adminBuildPath, hostBuildPath, outputDire
         PHASE252_E2E_NONCE: id,
         PHASE252_RESULT_ID: resultId,
         PLAYWRIGHT_OUTPUT_DIR: outputDir,
-        PLAYWRIGHT_JSON_OUTPUT_FILE: path.join(outputDir, "playwright-report.json"),
+        PLAYWRIGHT_JSON_OUTPUT_FILE: path.join(outputDirectory, "playwright-reports", "playwright-report.json"),
         PHASE252_SCREENSHOT_DIR: path.join(outputDirectory, "screenshots"),
       },
     },

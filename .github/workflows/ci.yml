@@ -1362,7 +1362,7 @@ jobs:
           name: phase252-machine-evidence
           path: |
             accrue_admin/tmp/phase252/ci-results/*/results.json
-            accrue_admin/tmp/phase252/ci-results/*/playwright-output/playwright-report.json
+            accrue_admin/tmp/phase252/ci-results/*/playwright-reports/playwright-report.json
             accrue_admin/tmp/phase252/render-results-*.json
           if-no-files-found: ignore
 
@@ -1373,7 +1373,7 @@ jobs:
           name: phase253-machine-evidence
           path: |
             accrue_admin/tmp/phase253/ci-results/*/results.json
-            accrue_admin/tmp/phase253/ci-results/*/playwright-output/*.json
+            accrue_admin/tmp/phase253/ci-results/*/playwright-reports/*.json
             accrue_admin/tmp/phase253/render-results-*.json
           if-no-files-found: ignore
 
